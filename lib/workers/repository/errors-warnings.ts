@@ -1,4 +1,6 @@
 // TODO #22198
+import is from '@sindresorhus/is';
+import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
@@ -6,6 +8,7 @@ import { coerceArray } from '../../util/array';
 import { emojify } from '../../util/emoji';
 import { regEx } from '../../util/regex';
 import type { DepWarnings } from '../types';
+import { extractRepoProblems } from './common';
 
 export function getWarnings(config: RenovateConfig): string {
   if (!config.warnings?.length) {
@@ -83,6 +86,52 @@ export function getDepWarningsOnboardingPR(
     '> \n> Files affected: ' +
     warningFiles.map((f) => '`' + f + '`').join(', ') +
     '\n\n';
+  return warningText;
+}
+
+export function getPrWarnings(
+  config: RenovateConfig,
+  packageFiles?: Record<string, PackageFile[]>,
+  dependencyDashboard?: boolean,
+): string {
+  const warningLines = [];
+  if (packageFiles) {
+    const { warnings } = getDepWarnings(packageFiles);
+    if (
+      !config.suppressNotifications?.includes('dependencyLookupWarnings') &&
+      warnings.length
+    ) {
+      const msg = 'Some dependencies could not be looked up. ';
+      if (dependencyDashboard) {
+        warningLines.push(
+          msg + 'Check the Dependency Dashboard for more information.',
+        );
+      } else {
+        warningLines.push(msg + 'Check the warning logs for more information.');
+      }
+    }
+  }
+
+  const encryptedWarning = GlobalConfig.get('encryptedWarning');
+  if (encryptedWarning) {
+    const repoProblems = extractRepoProblems(config.repository);
+    for (const entry of repoProblems) {
+      if (entry.startsWith('WARN: Found encrypted config')) {
+        warningLines.push(
+          'Warnings were raised. Check the logs or Dashboard for more information.',
+        );
+        break;
+      }
+    }
+  }
+
+  let warningText = '';
+  if (is.nonEmptyArray(warningLines)) {
+    warningText = emojify(`\n---\n\n> :warning: **Warning**\n> \n > `);
+    warningText += warningLines.join('\n');
+    warningText += '\n';
+  }
+
   return warningText;
 }
 

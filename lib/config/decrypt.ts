@@ -137,7 +137,7 @@ export async function decryptConfig(
 
       const encryptedWarning = GlobalConfig.get('encryptedWarning');
       if (is.string(encryptedWarning)) {
-        logger.once.warn(encryptedWarning);
+        logger.once.warn(`Found encrypted config, ${encryptedWarning}`);
       }
 
       if (privateKey) {

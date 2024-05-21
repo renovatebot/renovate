@@ -630,14 +630,14 @@ const options: RenovateOptions[] = [
   {
     name: 'encryptedWarning',
     description:
-      'Display warnings about the usage of encrypted token in config',
+      'Renovate will print this string to the logs, and show it on your Dependency Dashboard, if it finds encrypted tokens in your Renovate configuration.',
     type: 'string',
     globalOnly: true,
   },
   {
     name: 'inheritConfig',
     description:
-      'If `true`, Renovate will inherit configuration from the `inheritConfigFileName` file in `inheritConfigRepoName',
+      'If `true`, Renovate will inherit configuration from the `inheritConfigFileName` file in `inheritConfigRepoName`',
     type: 'boolean',
     default: false,
     globalOnly: true,
