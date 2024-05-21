@@ -93,17 +93,19 @@ function validateNumber(
   subKey?: string,
 ): ValidationMessage[] {
   const errors: ValidationMessage[] = [];
+  const path = `${currentPath}${subKey ? '.' + subKey : ''}`;
+  // prPriority can have negative value
   if (is.number(val)) {
-    if (val < 0) {
+    if (val < 0 && !path.includes('prPriority')) {
       errors.push({
         topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}${subKey ? '.' + subKey : ''}\` should be a positive integer. Found negative value instead.`,
+        message: `Configuration option \`${path}\` should be a positive integer. Found negative value instead.`,
       });
     }
   } else {
     errors.push({
       topic: 'Configuration Error',
-      message: `Configuration option \`${currentPath}${subKey ? '.' + subKey : ''}\` should be an integer. Found: ${JSON.stringify(
+      message: `Configuration option \`${path}\` should be an integer. Found: ${JSON.stringify(
         val,
       )} (${typeof val}).`,
     });

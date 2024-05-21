@@ -1277,6 +1277,34 @@ describe('config/validation', () => {
         },
       ]);
     });
+
+    it('validates prPriority', async () => {
+      const config = {
+        prPriority: -2,
+        packageRules: [
+          {
+            matchDepNames: ['somedep'],
+            prPriority: -2,
+          },
+          {
+            matchDepNames: ['some-other-dep'],
+            prPriority: 2,
+          },
+        ],
+        minor: {
+          prPriority: -2,
+        },
+        major: {
+          prPriority: 2,
+        },
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
   });
 
   describe('validateConfig() -> globaOnly options', () => {
