@@ -4,7 +4,8 @@ describe('config/migrations/custom/platform-commit-migration', () => {
   it('should migrate platformCommit=true to platformCommit=enabled', () => {
     expect(PlatformCommitMigration).toMigrate(
       {
-        platformCommit: true as any,
+        // @ts-expect-error: old type
+        platformCommit: true,
       },
       {
         platformCommit: 'enabled',
@@ -15,7 +16,8 @@ describe('config/migrations/custom/platform-commit-migration', () => {
   it('should migrate platformCommit=false to platformCommit=disabled', () => {
     expect(PlatformCommitMigration).toMigrate(
       {
-        platformCommit: false as any,
+        // @ts-expect-error: old type
+        platformCommit: false,
       },
       {
         platformCommit: 'disabled',
