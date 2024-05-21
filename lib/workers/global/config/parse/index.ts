@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import * as defaultsParser from '../../../../config/defaults';
 import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
