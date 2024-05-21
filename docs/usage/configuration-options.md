@@ -2749,14 +2749,15 @@ Use this field to restrict rules to a particular datasource. e.g.
 
 This option is matched against the `currentValue` field of a dependency.
 
-`matchCurrentValue` supports Regular Expressions and glob patterns. For example, the following enforces that only `1.*` versions will be used:
+`matchCurrentValue` supports Regular Expressions and glob patterns. For example, the following enforces that updates from `1.*` versions will be merged automatically:
 
 ```json
 {
   "packageRules": [
     {
       "matchPackagePatterns": ["io.github.resilience4j"],
-      "matchCurrentValue": "1.*"
+      "matchCurrentValue": "1.*",
+      "automerge": true
     }
   ]
 }
@@ -2903,14 +2904,15 @@ This field behaves the same as `matchPackageNames` except it matches against `de
 
 This option is matched against the `newValue` field of a dependency.
 
-`matchNewValue` supports Regular Expressions and glob patterns. For example, the following enforces that only `1.*` versions will be used:
+`matchNewValue` supports Regular Expressions and glob patterns. For example, the following enforces that updates to `1.*` versions will be merged automatically:
 
 ```json
 {
   "packageRules": [
     {
       "matchPackagePatterns": ["io.github.resilience4j"],
-      "matchNewValue": "1.*"
+      "matchNewValue": "1.*",
+      "automerge": true
     }
   ]
 }
