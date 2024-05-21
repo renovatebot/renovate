@@ -1,4 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
+import { GlobalConfig } from '../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
@@ -17,6 +18,15 @@ import {
 describe('util/merge-confidence/index', () => {
   const apiBaseUrl = 'https://www.baseurl.com/';
   const defaultApiBaseUrl = 'https://developer.mend.io/';
+  const supportedDatasources = [
+    'go',
+    'maven',
+    'npm',
+    'nuget',
+    'packagist',
+    'pypi',
+    'rubygems',
+  ];
 
   describe('isActiveConfidenceLevel()', () => {
     it('returns false if null', () => {
@@ -57,10 +67,10 @@ describe('util/merge-confidence/index', () => {
     };
 
     beforeEach(() => {
-      process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL = apiBaseUrl;
       hostRules.add(hostRule);
       initConfig();
       memCache.reset();
+      GlobalConfig.set({ mergeConfidenceEndpoint: apiBaseUrl });
     });
 
     afterEach(() => {
@@ -302,16 +312,13 @@ describe('util/merge-confidence/index', () => {
       });
 
       it('using default base url if none is set', async () => {
-        delete process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL;
+        GlobalConfig.reset();
         httpMock
           .scope(defaultApiBaseUrl)
           .get(`/api/mc/availability`)
           .reply(200);
 
         await expect(initMergeConfidence()).toResolve();
-        expect(logger.trace).toHaveBeenCalledWith(
-          'using default merge confidence API base URL',
-        );
         expect(logger.debug).toHaveBeenCalledWith(
           {
             supportedDatasources: [
@@ -329,8 +336,7 @@ describe('util/merge-confidence/index', () => {
       });
 
       it('warns and then resolves if base url is invalid', async () => {
-        process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL =
-          'invalid-url.com';
+        GlobalConfig.set({ mergeConfidenceEndpoint: 'invalid-url.com' });
         httpMock
           .scope(defaultApiBaseUrl)
           .get(`/api/mc/availability`)
@@ -349,7 +355,7 @@ describe('util/merge-confidence/index', () => {
 
       it('uses a custom base url containing path', async () => {
         const renovateApi = 'https://domain.com/proxy/renovate-api';
-        process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL = renovateApi;
+        GlobalConfig.set({ mergeConfidenceEndpoint: renovateApi });
         httpMock.scope(renovateApi).get(`/api/mc/availability`).reply(200);
 
         await expect(initMergeConfidence()).toResolve();
@@ -423,54 +429,42 @@ describe('util/merge-confidence/index', () => {
       });
 
       describe('parseSupportedDatasourceList()', () => {
-        type ParseSupportedDatasourceTestCase = {
-          name: string;
-          datasourceListString: string | undefined;
-          expected: string[] | undefined;
-        };
-
         afterEach(() => {
-          delete process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES;
+          GlobalConfig.reset();
         });
 
         it.each([
           {
-            name: 'it should do nothing when the input is undefined',
-            datasourceListString: undefined,
-            expected: undefined,
+            name: 'it should do return default value when the input is undefined',
+            datasources: undefined,
+            expected: supportedDatasources,
           },
           {
             name: 'it should successfully parse the given datasource list',
-            datasourceListString: `["go","npm"]`,
+            datasources: ['go', 'npm'],
             expected: ['go', 'npm'],
           },
           {
-            name: 'it should gracefully handle invalid json',
-            datasourceListString: `{`,
-            expected: undefined,
+            name: 'it should gracefully handle invalid JSON',
+            datasources: `{`,
+            expected: supportedDatasources,
           },
           {
             name: 'it should discard non-array JSON input',
-            datasourceListString: `{}`,
-            expected: undefined,
+            datasources: `{}`,
+            expected: supportedDatasources,
           },
           {
             name: 'it should discard non-string array JSON input',
-            datasourceListString: `[1,2]`,
-            expected: undefined,
+            datasources: `[1,2]`,
+            expected: supportedDatasources,
           },
-        ])(
-          `$name`,
-          ({
-            datasourceListString,
-            expected,
-          }: ParseSupportedDatasourceTestCase) => {
-            process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES =
-              datasourceListString;
-
-            expect(parseSupportedDatasourceString()).toStrictEqual(expected);
-          },
-        );
+        ])(`$name`, ({ datasources, expected }) => {
+          GlobalConfig.set({
+            mergeConfidenceDatasources: datasources,
+          });
+          expect(parseSupportedDatasourceString()).toStrictEqual(expected);
+        });
       });
     });
   });
