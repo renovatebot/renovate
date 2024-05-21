@@ -505,7 +505,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'erlang/rebar3',
-      extractVersion: '^(?<version>\\S+)',
     },
   },
   ruby: {

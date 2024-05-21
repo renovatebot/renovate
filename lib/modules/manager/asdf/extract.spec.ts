@@ -490,7 +490,6 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'erlang/rebar3',
             depName: 'rebar',
-            extractVersion: '^(?<version>\\S+)',
           },
           {
             currentValue: '3.1.2',
