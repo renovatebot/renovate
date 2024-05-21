@@ -505,7 +505,7 @@ Read the [Docker Docs, configure runtime resource constraints](https://docs.dock
 
 By default, Renovate will fetch a maximum of 20 pages when looking up Docker tags on Docker registries.
 
-If set to an integer, Renovate will use this value as the maximum page number.
+If set to an positive integer, Renovate will use this value as the maximum page number.
 Setting a different limit is useful for registries that ignore the `n` parameter in Renovate's query string and thus only return 50 tags per page.
 
 ## dockerSidecarImage

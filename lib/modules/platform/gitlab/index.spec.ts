@@ -155,7 +155,7 @@ describe('modules/platform/gitlab/index', () => {
       );
     });
 
-    it('should skip api call to fetch version when platform version is set in environment', async () => {
+    it('should skip the API call to fetch the version when platform version is set in environment', async () => {
       await expect(
         gitlab.initPlatform({
           token: 'some-token',
