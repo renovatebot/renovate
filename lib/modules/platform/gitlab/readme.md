@@ -13,6 +13,8 @@ If you are using a Group access token, the token must have Developer role or hig
 The token must have Maintainer permissions in order to perform Automerge.
 To keep using the same GitLab-generated bot user you must [rotate/refresh the Group Access Token](https://docs.gitlab.com/ee/api/group_access_tokens.html#rotate-a-group-access-token) _before_ the token's expiry date.
 
+We refer to personal access tokens and group access tokens as _access tokens_ in the instructions that follow.
+
 For real runs, give the access token these scopes:
 
 - `api`
@@ -36,8 +38,8 @@ Remember to set `platform=gitlab` somewhere in your Renovate config file.
 If you're using a private [GitLab container registry](https://docs.gitlab.com/ee/user/packages/container_registry/), you must:
 
 - Set the `RENOVATE_HOST_RULES` CI variable to `[{"matchHost": "${CI_REGISTRY}","username": "${GITLAB_USER_NAME}","password": "${RENOVATE_TOKEN}", "hostType": "docker"}]`.
-- Make sure the user that owns the `RENOVATE_TOKEN` PAT is a member of the corresponding GitLab projects/groups with the right permissions.
-- Make sure the `RENOVATE_TOKEN` PAT has the `read_registry` scope.
+- Make sure the user that owns the access token is a member of the corresponding GitLab projects/groups with the right permissions.
+- Make sure the access token has the `read_registry` scope.
 
 You may want to set `FORCE_COLOR: 3` or `TERM: ansi` to the job, in order to get colored output.
 [GitLab Runner runs the container’s shell in non-interactive mode, so the shell’s `TERM` environment variable is set to `dumb`.](https://docs.gitlab.com/ee/ci/yaml/script.html#job-log-output-is-not-formatted-as-expected-or-contains-unexpected-characters)
