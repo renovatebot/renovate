@@ -2,7 +2,12 @@
 
 ## Authentication
 
-First, [create a Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account, or use a [Group Access Token](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html#bot-users-for-groups).
+You can authenticate Renovate to GitLab, with a Personal Access Token, or Group Access Token.
+
+To start, create either:
+
+- a [Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account
+- or a [Group Access Token](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html#bot-users-for-groups) for the bot account
 
 If you are using a Group access token, the token must have Developer role or higher permissions in order to create issues and merge requests.
 The token must have Maintainer permissions in order to perform Automerge.
