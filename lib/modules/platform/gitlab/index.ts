@@ -1042,7 +1042,7 @@ export async function setBranchStatus({
   }
 
   try {
-    // give gitlab some time to create pipelines for the sha
+    // give GitLab some time to create pipelines for the SHA
     await setTimeout(config.gitlabBranchStatusDelay ?? 1000);
 
     await gitlabApi.postJson(url, { body: options });
