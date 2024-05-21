@@ -17,7 +17,7 @@ import { PdmLockfileSchema, type PyProject } from '../schema';
 import { depTypes, parseDependencyGroupRecord } from '../utils';
 import type { PyProjectProcessor } from './types';
 
-const pdmUpdateCMD = 'pdm update --no-sync';
+const pdmUpdateCMD = 'pdm update --no-sync --update-eager';
 
 export class PdmProcessor implements PyProjectProcessor {
   process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
