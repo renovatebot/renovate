@@ -1,5 +1,6 @@
 import type { ReleaseType } from 'semver';
 import type {
+  CopierOptions,
   MatchStringsStrategy,
   UpdateType,
   UserEnv,
@@ -41,6 +42,8 @@ export interface UpdateArtifactsConfig {
   registryAliases?: Record<string, string>;
   lockFiles?: string[];
   env?: UserEnv;
+  copierOptions?: CopierOptions;
+  copierTrust?: boolean;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {

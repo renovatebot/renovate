@@ -3088,6 +3088,78 @@ const options: RenovateOptions[] = [
     default: 90,
     globalOnly: true,
   },
+  {
+    name: 'copierOptions',
+    description:
+      'Configure how Copier is invoked. Unsafe features (--trust) can only be enabled in the self-hosted configuration.',
+    type: 'object',
+    default: {
+      recopy: false,
+      skipTasks: false,
+      data: {},
+      dataFile: '',
+      skip: [],
+      exclude: [],
+    },
+  },
+  {
+    name: 'recopy',
+    description:
+      'Request Copier to recopy a template instead of using the smart update algorithm.',
+    parents: ['copierOptions'],
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'skipTasks',
+    description: 'Skip Copier template tasks execution.',
+    parents: ['copierOptions'],
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'data',
+    description: 'Pass arbitrary Copier template variables with their values.',
+    parents: ['copierOptions'],
+    type: 'object',
+    freeChoice: true,
+    mergeable: true,
+    default: {},
+  },
+  {
+    name: 'dataFile',
+    description:
+      'An optional relative path of a YAML file to load Copier template variables from.',
+    parents: ['copierOptions'],
+    type: 'string',
+    default: '',
+  },
+  {
+    name: 'skip',
+    description:
+      'An array of paths/globs to skip during Copier template rendering if they exist already.',
+    parents: ['copierOptions'],
+    type: 'array',
+    subType: 'string',
+    default: [],
+  },
+  {
+    name: 'exclude',
+    description:
+      'An array of paths/globs that should never be copied during Copier template rendering.',
+    parents: ['copierOptions'],
+    type: 'array',
+    subType: 'string',
+    default: [],
+  },
+  {
+    name: 'copierTrust',
+    description:
+      'Allow templates with unsafe features (Jinja extensions, migrations, tasks).',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

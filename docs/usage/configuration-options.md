@@ -667,6 +667,40 @@ When using with `npm`, we recommend you:
 - Use `constraintsFiltering` on `dependencies`, not `devDependencies` (usually you do not need to be strict about development dependencies)
 - Do _not_ enable `rollbackPrs` at the same time (otherwise your _current_ version may be rolled back if it's incompatible)
 
+## copierOptions
+
+Configure how the `copier` manager invokes the CLI tool.
+
+The `copierOptions` configuration consists of six fields:
+
+### recopy
+
+By default, the manager uses `copier update --skip-answered --defaults` to update a templated project.
+Merge conflicts are warned about, but still result in a PR.
+This switch instructs the manager to use `copier recopy --skip-answered --defaults --overwrite` instead, which disables the smart update algorithm and overwrites any customizations.
+
+### skipTasks
+
+Instruct Copier to skip template tasks execution.
+Mind that they are only executed if the admin has enabled `copierTrust` in the self-hosted configuration.
+
+### data
+
+A mapping of arbitrary template variable names to their (string) values to pass to Copier.
+
+### dataFile
+
+The relative path of a YAML file to load Copier template variables from.
+Must be part of the repository.
+
+### skip
+
+An array of paths (globs) to skip updates from the Copier template on if they exist already in the respository.
+
+### exclude
+
+An array of paths (globs) that should not be copied from the Copier template.
+
 ## customDatasources
 
 Use `customDatasources` to fetch releases from APIs or statically hosted sites and Renovate has no own datasource.

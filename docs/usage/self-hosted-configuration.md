@@ -355,6 +355,10 @@ This directory is used to cache downloads when `binarySource=docker` or `binaryS
 
 Use this option if you need such downloads to be stored outside of Renovate's regular cache directory (`cacheDir`).
 
+## copierTrust
+
+When using the `copier` manager, whether to instruct it to allow templates with unsafe features (Jinja extensions, migrations, tasks).
+
 ## customEnvVariables
 
 This configuration will be applied after all other environment variables so you can use it to override defaults.

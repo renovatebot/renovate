@@ -141,6 +141,7 @@ export interface RepoGlobalConfig {
   cacheHardTtlMinutes?: number;
   cacheTtlOverride?: Record<string, number>;
   containerbaseDir?: string;
+  copierTrust?: boolean;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerCliOptions?: string;
@@ -266,6 +267,7 @@ export interface RenovateConfig
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
   forkModeDisallowMaintainerEdits?: boolean;
+  copierOptions?: CopierOptions;
 
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
@@ -401,7 +403,8 @@ export type AllowedParents =
   | 'hostRules'
   | 'postUpgradeTasks'
   | 'packageRules'
-  | 'logLevelRemap';
+  | 'logLevelRemap'
+  | 'copierOptions';
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.
@@ -576,4 +579,13 @@ export interface ManagerConfig extends RenovateConfig {
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+}
+
+export interface CopierOptions extends Record<string, any> {
+  recopy?: boolean;
+  skipTasks?: boolean;
+  data?: Record<string, string>;
+  dataFile?: string;
+  skip?: string[];
+  exclude?: string[];
 }
