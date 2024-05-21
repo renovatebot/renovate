@@ -97,7 +97,7 @@ function validateNumber(
     if (val < 0) {
       errors.push({
         topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}${subKey ? '.' + subKey : ''}\` should be an positive integer. Found negative value instead.`,
+        message: `Configuration option \`${currentPath}${subKey ? '.' + subKey : ''}\` should be a positive integer. Found negative value instead.`,
       });
     }
   } else {
@@ -986,9 +986,7 @@ async function validateGlobalConfig(
         });
       }
     } else if (type === 'integer') {
-      if (!is.number(val)) {
-        warnings.push(...validateNumber(val, currentPath));
-      }
+      warnings.push(...validateNumber(val, currentPath));
     } else if (type === 'boolean') {
       if (val !== true && val !== false) {
         warnings.push({
