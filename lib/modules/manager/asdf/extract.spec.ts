@@ -98,6 +98,7 @@ poetry 1.3.2
 pre-commit 3.3.1
 pulumi 3.57.1
 python 3.11.0
+rebar 3.23.0
 ruby 3.1.2
 rust 1.64.0
 sbt 1.9.7
@@ -483,6 +484,13 @@ dummy 1.2.3
             packageName: 'python/cpython',
             depName: 'python',
             extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '3.23.0',
+            datasource: 'github-tags',
+            packageName: 'erlang/rebar3',
+            depName: 'rebar',
+            extractVersion: '^(?<version>\\S+)',
           },
           {
             currentValue: '3.1.2',

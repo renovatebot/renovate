@@ -500,6 +500,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  rebar: {
+    asdfPluginUrl: 'https://github.com/Stratus3D/asdf-rebar.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'erlang/rebar3',
+      extractVersion: '^(?<version>\\S+)',
+    },
+  },
   ruby: {
     asdfPluginUrl: 'https://github.com/asdf-vm/asdf-ruby',
     config: {
