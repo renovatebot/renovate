@@ -32,6 +32,14 @@ export class PackagistDatasource extends Datasource {
 
   override readonly registryStrategy = 'hunt';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `time` field in the results.';
+  // Note: this can be changed to 'release', as the source is present in each release but we remove it while processing
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from `source` field in the results.';
+
   // We calculate auth at this datasource layer so that we can know whether it's safe to cache or not
   private static getHostOpts(url: string): HttpOptions {
     const { username, password } = hostRules.find({
