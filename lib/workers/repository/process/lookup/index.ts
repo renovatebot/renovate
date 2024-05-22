@@ -538,7 +538,6 @@ export async function lookupUpdates(
             ...config,
             registryUrl: update.registryUrl ?? res.registryUrl,
             lookupName: res.lookupName,
-            currentDigest: config.currentDigest,
           };
 
           // #20304 only pass it for replacement updates, otherwise we get wrong or invalid digest
