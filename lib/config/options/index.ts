@@ -2040,6 +2040,7 @@ const options: RenovateOptions[] = [
       'Set sorting priority for PR creation. PRs with higher priority are created first, negative priority last.',
     type: 'integer',
     default: 0,
+    parents: ['packageRules'],
     cli: false,
     env: false,
   },

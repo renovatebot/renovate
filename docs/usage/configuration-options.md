@@ -3215,6 +3215,39 @@ For example to replace the npm package `jade` with version `2.0.0` of the packag
 }
 ```
 
+### prPriority
+
+Sometimes Renovate needs to rate limit its creation of PRs, e.g. hourly or concurrent PR limits.
+By default, Renovate sorts/prioritizes based on the update type, going from smallest update to biggest update.
+Renovate creates update PRs in this order:
+
+1. `pinDigest`
+1. `pin`
+1. `digest`
+1. `patch`
+1. `minor`
+1. `major`
+
+If you have dependencies that are more or less important than others then you can use the `prPriority` field for PR sorting.
+The default value is 0, so setting a negative value will make dependencies sort last, while higher values sort first.
+
+Here's an example of how you would define PR priority so that `devDependencies` are raised last and `react` is raised first:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "prPriority": -1
+    },
+    {
+      "matchPackageNames": ["react"],
+      "prPriority": 5
+    }
+  ]
+}
+```
+
 ## patch
 
 Add to this object if you wish to define rules that apply only to patch updates.
@@ -3498,39 +3531,6 @@ This is why we configured an upper limit for how long we wait until creating a P
 <!-- prettier-ignore -->
 !!! note
     If the option `minimumReleaseAge` is non-zero then Renovate disables the `prNotPendingHours` functionality.
-
-## prPriority
-
-Sometimes Renovate needs to rate limit its creation of PRs, e.g. hourly or concurrent PR limits.
-By default, Renovate sorts/prioritizes based on the update type, going from smallest update to biggest update.
-Renovate creates update PRs in this order:
-
-1. `pinDigest`
-1. `pin`
-1. `digest`
-1. `patch`
-1. `minor`
-1. `major`
-
-If you have dependencies that are more or less important than others then you can use the `prPriority` field for PR sorting.
-The default value is 0, so setting a negative value will make dependencies sort last, while higher values sort first.
-
-Here's an example of how you would define PR priority so that `devDependencies` are raised last and `react` is raised first:
-
-```json
-{
-  "packageRules": [
-    {
-      "matchDepTypes": ["devDependencies"],
-      "prPriority": -1
-    },
-    {
-      "matchPackageNames": ["react"],
-      "prPriority": 5
-    }
-  ]
-}
-```
 
 ## prTitle
 
