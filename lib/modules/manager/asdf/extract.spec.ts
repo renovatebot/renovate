@@ -413,7 +413,7 @@ dummy 1.2.3
             extractVersion: '^mimir-(?<version>\\S+)',
           },
           {
-            currentValue: 'v1.33.1',
+            currentValue: '1.33.1',
             datasource: 'github-releases',
             packageName: 'kubernetes/minikube',
             depName: 'minikube',
