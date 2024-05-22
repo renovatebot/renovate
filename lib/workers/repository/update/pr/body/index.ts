@@ -82,10 +82,10 @@ export function getPrBody(
   let warnings = '';
   warnings += getWarnings(branchConfig);
   warnings += getPrWarnings(
-      config,
-      branchConfig.packageFiles,
-      branchConfig.dependencyDashboard,
-    );
+    config,
+    branchConfig.packageFiles,
+    branchConfig.dependencyDashboard,
+  );
   const content = {
     header: getPrHeader(branchConfig),
     table: getPrUpdatesTable(branchConfig),

@@ -1,14 +1,13 @@
-import { RenovateConfig, partial } from '../../../test/util';
+import { mockDeep } from 'jest-mock-extended';
+import { RenovateConfig, logger, partial } from '../../../test/util';
 import type { PackageFile } from '../../modules/manager/types';
 import {
   getDepWarningsDashboard,
   getDepWarningsOnboardingPR,
-  getPrWarnings,
   getErrors,
+  getPrWarnings,
   getWarnings,
 } from './errors-warnings';
-import {mockDeep} from "jest-mock-extended";
-import { logger } from '../../../test/util';
 
 jest.mock('../../logger', () => mockDeep());
 
@@ -163,7 +162,7 @@ describe('workers/repository/errors-warnings', () => {
   });
 
   it(`shows PR warning if there's a warning in logs`, () => {
-    const config: RenovateConfig = {repository: 'org/repo'};
+    const config: RenovateConfig = { repository: 'org/repo' };
     logger.getProblems.mockReturnValue([
       {
         repository: 'myOrg/myRepo',

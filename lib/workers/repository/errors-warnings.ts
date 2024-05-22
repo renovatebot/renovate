@@ -1,4 +1,5 @@
 // TODO #22198
+import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
@@ -6,8 +7,7 @@ import { coerceArray } from '../../util/array';
 import { emojify } from '../../util/emoji';
 import { regEx } from '../../util/regex';
 import type { DepWarnings } from '../types';
-import {extractRepoProblems} from "./common";
-import is from "@sindresorhus/is";
+import { extractRepoProblems } from './common';
 
 export function getWarnings(config: RenovateConfig): string {
   if (!config.warnings?.length) {
