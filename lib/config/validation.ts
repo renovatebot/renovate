@@ -24,6 +24,7 @@ import { GlobalConfig } from './global';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
+import { supportedDatasources } from './presets/internal/merge-confidence';
 import {
   AllowedParents,
   type RenovateConfig,
@@ -298,7 +299,12 @@ export async function validateConfig(
           });
         }
       } else if (
-        ['allowedVersions', 'matchCurrentVersion'].includes(key) &&
+        [
+          'allowedVersions',
+          'matchCurrentVersion',
+          'matchCurrentValue',
+          'matchNewValue',
+        ].includes(key) &&
         isRegexMatch(val)
       ) {
         if (!getRegexPredicate(val)) {
@@ -307,24 +313,6 @@ export async function validateConfig(
             message: `Invalid regExp for ${currentPath}: \`${val}\``,
           });
         }
-      } else if (
-        key === 'matchCurrentValue' &&
-        is.string(val) &&
-        !getRegexPredicate(val)
-      ) {
-        errors.push({
-          topic: 'Configuration Error',
-          message: `Invalid regExp for ${currentPath}: \`${val}\``,
-        });
-      } else if (
-        key === 'matchNewValue' &&
-        is.string(val) &&
-        !getRegexPredicate(val)
-      ) {
-        errors.push({
-          topic: 'Configuration Error',
-          message: `Invalid regExp for ${currentPath}: \`${val}\``,
-        });
       } else if (key === 'timezone' && val !== null) {
         const [validTimezone, errorMessage] = hasValidTimezone(val as string);
         if (!validTimezone) {
@@ -1002,6 +990,17 @@ async function validateGlobalConfig(
               warnings.push({
                 topic: 'Configuration Error',
                 message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
+              });
+            }
+          }
+        }
+        if (key === 'mergeConfidenceDatasources') {
+          const allowedValues = supportedDatasources;
+          for (const value of val as string[]) {
+            if (!allowedValues.includes(value)) {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `Invalid value \`${value}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
               });
             }
           }

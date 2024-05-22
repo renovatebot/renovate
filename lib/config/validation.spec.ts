@@ -163,10 +163,15 @@ describe('config/validation', () => {
             matchCurrentValue: '/^2/i',
             enabled: true,
           },
+          {
+            matchPackageNames: ['bad'],
+            matchNewValue: '/^2(/',
+            enabled: true,
+          },
         ],
       };
       const { errors } = await configValidation.validateConfig('repo', config);
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(1);
     });
 
     it('catches invalid matchNewValue', async () => {
@@ -192,10 +197,15 @@ describe('config/validation', () => {
             matchNewValue: '/^2/i',
             enabled: true,
           },
+          {
+            matchPackageNames: ['bad'],
+            matchNewValue: '/^2(/',
+            enabled: true,
+          },
         ],
       };
       const { errors } = await configValidation.validateConfig('repo', config);
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(1);
     });
 
     it('catches invalid matchCurrentVersion regex', async () => {
@@ -1590,6 +1600,7 @@ describe('config/validation', () => {
         allowedPostUpgradeCommands: ['cmd'],
         checkedBranches: 'invalid-type',
         gitNoVerify: ['invalid'],
+        mergeConfidenceDatasources: [1],
       };
       const { warnings } = await configValidation.validateConfig(
         'global',
@@ -1601,6 +1612,11 @@ describe('config/validation', () => {
           message:
             'Configuration option `checkedBranches` should be a list (Array).',
           topic: 'Configuration Error',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid value `1` for `mergeConfidenceDatasources`. The allowed values are go, maven, npm, nuget, packagist, pypi, rubygems.',
         },
         {
           message:
