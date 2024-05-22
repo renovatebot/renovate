@@ -4275,7 +4275,7 @@ describe('workers/repository/process/lookup/index', () => {
         lookupName: 'openjdk',
       });
       getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
-      getDockerDigest.mockResolvedValueOnce(null);
+      getDockerDigest.mockResolvedValueOnce('sha256:fedcba0987654321');
       getDockerDigest.mockResolvedValueOnce('sha256:pin0987654321');
 
       const { updates } = await Result.wrap(
@@ -4291,6 +4291,13 @@ describe('workers/repository/process/lookup/index', () => {
           newValue: '17.0.1',
           newVersion: '17.0.1',
           updateType: 'patch',
+        },
+        {
+          newDigest: 'sha256:fedcba0987654321',
+          newName: 'eclipse-temurin',
+          newValue: '19.0.0',
+          newVersion: undefined,
+          updateType: 'replacement',
         },
         {
           newDigest: 'sha256:pin0987654321',
