@@ -6,8 +6,7 @@ exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() che
 
 ---
 
-> ⚠️ **Warning**
->
+> [!WARNING]
 > Renovate failed to look up the following dependencies: \`dependency-2\`.
 >
 > Files affected: \`package.json\`
