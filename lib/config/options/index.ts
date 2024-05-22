@@ -630,7 +630,7 @@ const options: RenovateOptions[] = [
   {
     name: 'encryptedWarning',
     description:
-      'Renovate will print this string to the logs, and show it on your Dependency Dashboard, if it finds encrypted tokens in your Renovate configuration.',
+      'Warning text to use if encrypted config is found.',
     type: 'string',
     globalOnly: true,
   },

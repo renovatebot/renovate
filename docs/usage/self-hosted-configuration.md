@@ -555,12 +555,11 @@ Information provided mainly in debug log level.
 
 ## encryptedWarning
 
-By default, Renovate does _not_ warn you if it finds an encrypted secret in your config.
-But if you set an `encryptedWarning` text, then Renovate will:
-
-- print the `encryptedWarning` text in the logs
-- show the `encryptedWarning` text on your Dependency Dashboard
-- raise a warning in every pull request description
+Use this if you want to stop supporting `encrypted` configuration capabilities but want to warn users first to migrate.
+If set to a string value, Renovate will:
+- log warnings with the `encryptedWarning` text
+- show the `encryptedWarning` text on the Dependency Dashboard of any repo using `encrypted` config
+- include the text as a warning in every pull request
 
 ## endpoint
 
