@@ -27,7 +27,7 @@ describe('workers/repository/errors-warnings', () => {
         },
       ];
       const res = getWarnings(config);
-      expect(res).toMatchInlineSnapshot(`
+      expect(res).toMatchSnapshot(`
         "
         # Warnings (1)
 
@@ -84,7 +84,7 @@ describe('workers/repository/errors-warnings', () => {
       };
 
       const res = getPrWarnings(config, packageFiles, dependencyDashboard);
-      expect(res).toMatchInlineSnapshot(`
+      expect(res).toMatchSnapshot(`
         "
         ---
 
@@ -132,7 +132,7 @@ describe('workers/repository/errors-warnings', () => {
       };
 
       const res = getPrWarnings(config, packageFiles, dependencyDashboard);
-      expect(res).toMatchInlineSnapshot(`
+      expect(res).toMatchSnapshot(`
         "
         ---
 
@@ -214,7 +214,7 @@ describe('workers/repository/errors-warnings', () => {
         ],
       };
       const res = getDepWarningsDashboard(packageFiles, config);
-      expect(res).toMatchInlineSnapshot(`
+      expect(res).toMatchSnapshot(`
         "
         ---
 
@@ -262,7 +262,7 @@ describe('workers/repository/errors-warnings', () => {
         },
       ];
       const res = getErrors(config);
-      expect(res).toMatchInlineSnapshot(`
+      expect(res).toMatchSnapshot(`
         "
         # Errors (1)
 
@@ -322,7 +322,7 @@ describe('workers/repository/errors-warnings', () => {
         ],
       };
       const res = getDepWarningsOnboardingPR(packageFiles, config);
-      expect(res).toMatchInlineSnapshot(`
+      expect(res).toMatchSnapshot(`
         "
         ---
         >
