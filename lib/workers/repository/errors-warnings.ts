@@ -6,6 +6,8 @@ import { coerceArray } from '../../util/array';
 import { emojify } from '../../util/emoji';
 import { regEx } from '../../util/regex';
 import type { DepWarnings } from '../types';
+import {extractRepoProblems} from "./common";
+import is from "@sindresorhus/is";
 
 export function getWarnings(config: RenovateConfig): string {
   if (!config.warnings?.length) {
@@ -86,26 +88,48 @@ export function getDepWarningsOnboardingPR(
   return warningText;
 }
 
-export function getDepWarningsPR(
-  packageFiles: Record<string, PackageFile[]>,
+export function getPrWarnings(
   config: RenovateConfig,
+  packageFiles?: Record<string, PackageFile[]>,
   dependencyDashboard?: boolean,
 ): string {
-  const { warnings } = getDepWarnings(packageFiles);
-  if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
-    return '';
+  const warningLines = [];
+  if (packageFiles) {
+    const { warnings } = getDepWarnings(packageFiles);
+    if (
+      !config.suppressNotifications?.includes('dependencyLookupWarnings') &&
+      warnings.length
+    ) {
+      const msg = '> Some dependencies could not be looked up. ';
+      if (dependencyDashboard) {
+        warningLines.push(
+          msg + 'Check the Dependency Dashboard for more information.',
+        );
+      } else {
+        warningLines.push(msg + 'Check the warning logs for more information.');
+      }
+    }
   }
+
+  if (config.repository) {
+    const repoProblems = extractRepoProblems(config.repository);
+    for (const entry of repoProblems) {
+      if (entry.startsWith('WARN:')) {
+        warningLines.push(
+          '> Warnings were raised. Check the logs or Dashboard for more information.',
+        );
+        break;
+      }
+    }
+  }
+
   let warningText = '';
-  if (!warnings.length) {
-    return '';
+  if (is.nonEmptyArray(warningLines)) {
+    warningText = emojify(`\n---\n\n> :warning: **Warning**\n>\n`);
+    warningText += warningLines.join('\n');
+    warningText += '\n\n';
   }
-  warningText = emojify(`\n---\n\n> :warning: **Warning**\n> \n`);
-  warningText += '> Some dependencies could not be looked up. ';
-  if (dependencyDashboard) {
-    warningText += `Check the Dependency Dashboard for more information.\n\n`;
-  } else {
-    warningText += `Check the warning logs for more information.\n\n`;
-  }
+
   return warningText;
 }
 

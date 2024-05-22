@@ -3,10 +3,14 @@ import type { PackageFile } from '../../modules/manager/types';
 import {
   getDepWarningsDashboard,
   getDepWarningsOnboardingPR,
-  getDepWarningsPR,
+  getPrWarnings,
   getErrors,
   getWarnings,
 } from './errors-warnings';
+import {mockDeep} from "jest-mock-extended";
+import { logger } from '../../../test/util';
+
+jest.mock('../../logger', () => mockDeep());
 
 describe('workers/repository/errors-warnings', () => {
   describe('getWarnings()', () => {
@@ -44,7 +48,7 @@ describe('workers/repository/errors-warnings', () => {
     });
   });
 
-  describe('getDepWarningsPR()', () => {
+  describe('getPrWarnings()', () => {
     it('returns 2 pr warnings text dependencyDashboard true', () => {
       const config: RenovateConfig = {};
       const dependencyDashboard = true;
@@ -80,13 +84,13 @@ describe('workers/repository/errors-warnings', () => {
         ],
       };
 
-      const res = getDepWarningsPR(packageFiles, config, dependencyDashboard);
+      const res = getPrWarnings(config, packageFiles, dependencyDashboard);
       expect(res).toMatchInlineSnapshot(`
         "
         ---
 
         > ⚠️ **Warning**
-        > 
+        >
         > Some dependencies could not be looked up. Check the Dependency Dashboard for more information.
 
         "
@@ -128,13 +132,13 @@ describe('workers/repository/errors-warnings', () => {
         ],
       };
 
-      const res = getDepWarningsPR(packageFiles, config, dependencyDashboard);
+      const res = getPrWarnings(config, packageFiles, dependencyDashboard);
       expect(res).toMatchInlineSnapshot(`
         "
         ---
 
         > ⚠️ **Warning**
-        > 
+        >
         > Some dependencies could not be looked up. Check the warning logs for more information.
 
         "
@@ -144,7 +148,7 @@ describe('workers/repository/errors-warnings', () => {
     it('PR warning returns empty string', () => {
       const config: RenovateConfig = {};
       const packageFiles: Record<string, PackageFile[]> = {};
-      const res = getDepWarningsPR(packageFiles, config);
+      const res = getPrWarnings(config, packageFiles);
       expect(res).toBe('');
     });
 
@@ -153,9 +157,27 @@ describe('workers/repository/errors-warnings', () => {
         suppressNotifications: ['dependencyLookupWarnings'],
       };
       const packageFiles: Record<string, PackageFile[]> = {};
-      const res = getDepWarningsPR(packageFiles, config);
+      const res = getPrWarnings(config, packageFiles);
       expect(res).toBe('');
     });
+  });
+
+  it(`shows PR warning if there's a warning in logs`, () => {
+    const config: RenovateConfig = {repository: 'org/repo'};
+    logger.getProblems.mockReturnValue([
+      {
+        repository: 'myOrg/myRepo',
+        level: 20,
+        msg: 'WARN: something',
+      },
+      {
+        level: 30,
+        msg: 'a root problem',
+      },
+    ]);
+    const packageFiles: Record<string, PackageFile[]> = {};
+    const res = getPrWarnings(config, packageFiles);
+    expect(res).toBe('');
   });
 
   describe('getDepWarningsDashboard()', () => {
@@ -198,9 +220,9 @@ describe('workers/repository/errors-warnings', () => {
         ---
 
         > ⚠️ **Warning**
-        > 
+        >
         > Renovate failed to look up the following dependencies: \`dependency-1\`, \`dependency-2\`.
-        > 
+        >
         > Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
 
         ---
@@ -304,14 +326,14 @@ describe('workers/repository/errors-warnings', () => {
       expect(res).toMatchInlineSnapshot(`
         "
         ---
-        > 
+        >
         > ⚠️ **Warning**
-        > 
+        >
         > Please correct - or verify that you can safely ignore - these dependency lookup failures before you merge this PR.
-        > 
+        >
         > -   \`Warning 1\`
         > -   \`Warning 2\`
-        > 
+        >
         > Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
 
         "
