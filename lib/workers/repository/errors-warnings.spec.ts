@@ -168,7 +168,7 @@ describe('workers/repository/errors-warnings', () => {
         repository: 'org/repo',
         level: 40,
         msg: 'something',
-      }
+      },
     ]);
     const packageFiles: Record<string, PackageFile[]> = {};
     const res = getPrWarnings(config, packageFiles);
