@@ -4292,13 +4292,6 @@ describe('workers/repository/process/lookup/index', () => {
           newVersion: '17.0.1',
           updateType: 'patch',
         },
-        //{
-        //  newDigest: null,
-        //  newName: 'eclipse-temurin',
-        //  newValue: '19.0.0',
-        //  newVersion: undefined,
-        //  updateType: 'replacement',
-        //},
         {
           newDigest: 'sha256:pin0987654321',
           newValue: '17.0.0',
