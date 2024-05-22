@@ -237,6 +237,7 @@ export async function updateArtifacts({
         throw new Error('Invalid goGetDirs');
       }
     }
+
     let args = `get -d -t ${goGetDirs ?? './...'}`;
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
@@ -276,7 +277,6 @@ export async function updateArtifacts({
         config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
         config.postUpdateOptions?.includes('gomodTidyE') === true ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
-
     if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;
       logger.debug('go mod tidy command included');
@@ -290,7 +290,7 @@ export async function updateArtifacts({
       const goWorkEnv = await exec(`${cmd} env GOWORK`, execOptions);
       const goWorkFile = goWorkEnv?.stdout?.trim() || '';
       const useGoWork = goWorkFile.length && ((await readLocalFile(goWorkFile)) !== null);
-      if (useGoWork) {
+      if (!useGoWork) {
         logger.debug('No go.work found');
       }
 
@@ -308,6 +308,7 @@ export async function updateArtifacts({
         execCommands.push(`${cmd} ${args}`);
       }
     }
+
     // We tidy one more time as a solution for #6795
     if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;
