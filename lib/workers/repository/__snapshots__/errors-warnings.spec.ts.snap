@@ -141,3 +141,25 @@ Please correct - or verify that you can safely ignore - these warnings before yo
 ---
 "
 `;
+
+exports[`workers/repository/errors-warnings shows PR warning if there's a warning in logs: 
+        "
+        ---
+
+        > ⚠️ **Warning**
+        >
+        > Warnings were raised. Check the logs or Dashboard for more information.
+
+        ---
+
+        "
+       1`] = `
+"
+---
+
+> ⚠️ **Warning**
+> 
+> Warnings were raised. Check the logs or Dashboard for more information.
+
+"
+`;
