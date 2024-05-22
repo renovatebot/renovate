@@ -127,6 +127,7 @@ export function getPrWarnings(
   if (is.nonEmptyArray(warningLines)) {
     warningText += emojify(`\n---\n\n> :warning: **Warning**\n> \n`);
     warningText += warningLines.join('\n> \n');
+    warningText += '\n\n';
   }
   return warningText;
 }
