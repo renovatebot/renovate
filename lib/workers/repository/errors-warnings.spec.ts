@@ -165,18 +165,25 @@ describe('workers/repository/errors-warnings', () => {
     const config: RenovateConfig = { repository: 'org/repo' };
     logger.getProblems.mockReturnValue([
       {
-        repository: 'myOrg/myRepo',
-        level: 20,
-        msg: 'WARN: something',
-      },
-      {
-        level: 30,
-        msg: 'a root problem',
-      },
+        repository: 'org/repo',
+        level: 40,
+        msg: 'something',
+      }
     ]);
     const packageFiles: Record<string, PackageFile[]> = {};
     const res = getPrWarnings(config, packageFiles);
-    expect(res).toBe('');
+    expect(res).toMatchSnapshot(`
+        "
+        ---
+
+        > ⚠️ **Warning**
+        >
+        > Warnings were raised. Check the logs or Dashboard for more information.
+
+        ---
+
+        "
+      `);
   });
 
   describe('getDepWarningsDashboard()', () => {
