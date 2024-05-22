@@ -32,10 +32,10 @@ export const presets: Record<string, Preset> = {
         matchCurrentValue:
           '/^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?$/',
         matchDatasources: ['docker'],
-        matchPackagePrefixes: [
-          'bitnami/',
-          'docker.io/bitnami/',
-          'gcr.io/bitnami-containers/',
+        matchPackageNames: [
+          'bitnami/**',
+          'docker.io/bitnami/**',
+          'gcr.io/bitnami-containers/**',
         ],
         versioning:
           'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?(:?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?)?$',
