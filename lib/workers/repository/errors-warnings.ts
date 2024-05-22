@@ -76,13 +76,13 @@ export function getDepWarningsOnboardingPR(
   if (!warnings.length) {
     return '';
   }
-  warningText = emojify(`\n---\n>\n> :warning: **Warning**\n>\n`);
-  warningText += `> Please correct - or verify that you can safely ignore - these dependency lookup failures before you merge this PR.\n>\n`;
+  warningText = emojify(`\n---\n> \n> :warning: **Warning**\n> \n`);
+  warningText += `> Please correct - or verify that you can safely ignore - these dependency lookup failures before you merge this PR.\n> \n`;
   for (const w of warnings) {
     warningText += `> -   \`${w}\`\n`;
   }
   warningText +=
-    '>\n> Files affected: ' +
+    '> \n> Files affected: ' +
     warningFiles.map((f) => '`' + f + '`').join(', ') +
     '\n\n';
   return warningText;
