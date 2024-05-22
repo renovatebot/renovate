@@ -249,7 +249,7 @@ export async function initPlatform({
 
 async function fetchRepositories(): Promise<GhRestRepo[]> {
   try {
-    if (platformConfig.isGHApp) {
+    if (isGHApp()) {
       const res = await githubApi.getJson<{
         repositories: GhRestRepo[];
       }>(`installation/repositories?per_page=100`, {
