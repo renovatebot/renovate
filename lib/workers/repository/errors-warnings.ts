@@ -125,11 +125,10 @@ export function getPrWarnings(
 
   let warningText = '';
   if (is.nonEmptyArray(warningLines)) {
-    warningText = emojify(`\n---\n\n> :warning: **Warning**\n>\n`);
-    warningText += warningLines.join('\n');
-    warningText += '\n\n';
+    warningText += emojify(`\n---\n\n> :warning: **Warning**\n>\n`);
+    warningText += warningLines.join('\n\n');
+    warningText += '\n';
   }
-
   return warningText;
 }
 
@@ -153,10 +152,10 @@ export function getDepWarningsDashboard(
     .join(', ');
 
   let warningText = emojify(
-    `\n---\n\n> :warning: **Warning**\n>\n> Renovate failed to look up the following dependencies: `,
+    `\n---\n\n> :warning: **Warning**\n> \n> Renovate failed to look up the following dependencies: `,
   );
   warningText += depWarnings;
-  warningText += '.\n>\n> Files affected: ';
+  warningText += '.\n> \n> Files affected: ';
   warningText += warningFiles.map((f) => '`' + f + '`').join(', ');
   warningText += '\n\n---\n\n';
   return warningText;
