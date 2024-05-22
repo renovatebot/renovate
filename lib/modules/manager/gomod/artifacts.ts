@@ -289,7 +289,8 @@ export async function updateArtifacts({
       // it does, then use go workspace vendoring.
       const goWorkEnv = await exec(`${cmd} env GOWORK`, execOptions);
       const goWorkFile = goWorkEnv?.stdout?.trim() || '';
-      const useGoWork = goWorkFile.length && ((await readLocalFile(goWorkFile)) !== null);
+      const useGoWork =
+        goWorkFile.length && (await readLocalFile(goWorkFile)) !== null;
       if (!useGoWork) {
         logger.debug('No go.work found');
       }

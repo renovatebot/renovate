@@ -1,7 +1,11 @@
 import { codeBlock } from 'common-tags';
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import { envMock, mockExecAll, mockExecSequence } from '../../../../test/exec-util';
+import {
+  envMock,
+  mockExecAll,
+  mockExecSequence,
+} from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -285,13 +289,13 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.work'); // go.work
     const execSnapshots = mockExecSequence([
       // Set the output returned by go env GOWORK
-      {stdout: '/tmp/github/some/repo/go.work', stderr: ''},
+      { stdout: '/tmp/github/some/repo/go.work', stderr: '' },
       // Remaining output does not matter
-      {stdout: '', stderr: ''},
-      {stdout: '', stderr: ''},
-      {stdout: '', stderr: ''},
-      {stdout: '', stderr: ''},
-      {stdout: '', stderr: ''},
+      { stdout: '', stderr: '' },
+      { stdout: '', stderr: '' },
+      { stdout: '', stderr: '' },
+      { stdout: '', stderr: '' },
+      { stdout: '', stderr: '' },
     ]);
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
