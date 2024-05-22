@@ -2,6 +2,7 @@ import { getManagers } from '../../modules/manager';
 import { getCustomManagers } from '../../modules/manager/custom';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
+import { supportedDatasources } from '../presets/internal/merge-confidence';
 import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
@@ -66,6 +67,25 @@ const options: RenovateOptions[] = [
       'If `true`, Renovate tries to detect host rules from environment variables.',
     type: 'boolean',
     default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'mergeConfidenceEndpoint',
+    description:
+      'If set, Renovate will query this API for Merge Confidence data.',
+    type: 'string',
+    default: 'https://developer.mend.io/',
+    advancedUse: true,
+    globalOnly: true,
+  },
+  {
+    name: 'mergeConfidenceDatasources',
+    description:
+      'If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.',
+    allowedValues: supportedDatasources,
+    default: supportedDatasources,
+    type: 'array',
+    subType: 'string',
     globalOnly: true,
   },
   {
@@ -492,7 +512,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.6.10',
+    default: 'ghcr.io/containerbase/sidecar:10.6.14',
     globalOnly: true,
   },
   {
@@ -1503,7 +1523,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchCurrentValue',
     description:
-      'A regex to match against the raw `currentValue` string of a dependency. Valid only within a `packageRules` object.',
+      'A regex or glob pattern to match against the raw `currentValue` string of a dependency. Valid only within a `packageRules` object.',
     type: 'string',
     stage: 'package',
     parents: ['packageRules'],
@@ -1525,7 +1545,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchNewValue',
     description:
-      'A regex to match against the raw `newValue` string of a dependency. Valid only within a `packageRules` object.',
+      'A regex or glob pattern to match against the raw `newValue` string of a dependency. Valid only within a `packageRules` object.',
     type: 'string',
     stage: 'package',
     parents: ['packageRules'],

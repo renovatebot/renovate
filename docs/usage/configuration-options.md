@@ -2749,8 +2749,21 @@ Use this field to restrict rules to a particular datasource. e.g.
 
 This option is matched against the `currentValue` field of a dependency.
 
-`matchCurrentValue` supports Regular Expressions which must begin and end with `/`.
-For example, the following enforces that only `1.*` versions will be used:
+`matchCurrentValue` supports Regular Expressions and glob patterns. For example, the following enforces that updates from `1.*` versions will be merged automatically:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchCurrentValue": "1.*",
+      "automerge": true
+    }
+  ]
+}
+```
+
+Regular Expressions must begin and end with `/`.
 
 ```json
 {
@@ -2891,8 +2904,21 @@ This field behaves the same as `matchPackageNames` except it matches against `de
 
 This option is matched against the `newValue` field of a dependency.
 
-`matchNewValue` supports Regular Expressions which must begin and end with `/`.
-For example, the following enforces that only `1.*` versions will be used:
+`matchNewValue` supports Regular Expressions and glob patterns. For example, the following enforces that updates to `1.*` versions will be merged automatically:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchNewValue": "1.*",
+      "automerge": true
+    }
+  ]
+}
+```
+
+Regular Expressions must begin and end with `/`.
 
 ```json
 {
@@ -3736,6 +3762,12 @@ on friday and saturday
 every 3 months on the first day of the month
 * 0 2 * *
 ```
+
+<!-- prettier-ignore -->
+!!! warning
+    You _must_ keep the number and the `am`/`pm` part _together_!
+    Correct: `before 5am`, or `before 5:00am`.
+    Wrong: `before 5 am`, or `before 5:00 am`.
 
 <!-- prettier-ignore -->
 !!! warning

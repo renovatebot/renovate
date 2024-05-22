@@ -24,6 +24,10 @@ export class SbtPackageDatasource extends MavenDatasource {
 
   override readonly registryStrategy = 'hunt';
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `scm` tags in the results.';
+
   constructor(id = SbtPackageDatasource.id) {
     super(id);
     this.http = new Http('sbt');

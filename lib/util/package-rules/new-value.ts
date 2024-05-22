@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { logger } from '../../logger';
-import { getRegexPredicate } from '../string-match';
+import { getRegexOrGlobPredicate } from '../string-match';
 import { Matcher } from './base';
 
 export class NewValueMatcher extends Matcher {
@@ -12,15 +11,7 @@ export class NewValueMatcher extends Matcher {
     if (is.undefined(matchNewValue)) {
       return null;
     }
-    const matchNewValuePred = getRegexPredicate(matchNewValue);
-
-    if (!matchNewValuePred) {
-      logger.debug(
-        { matchNewValue },
-        'matchNewValue should be a regex, starting and ending with `/`',
-      );
-      return false;
-    }
+    const matchNewValuePred = getRegexOrGlobPredicate(matchNewValue);
 
     if (!newValue) {
       return false;
