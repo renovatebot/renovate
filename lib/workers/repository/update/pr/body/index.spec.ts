@@ -39,7 +39,7 @@ describe('workers/repository/update/pr/body/index', () => {
   describe('getPrBody', () => {
     beforeEach(() => {
       changelogs.getChangelogs.mockReturnValueOnce('getChangelogs');
-      configDescription.getPrConfigDescription.mockReturnValueOnce(
+      configDescription.getPrConfigDescription.mockResolvedValueOnce(
         'getPrConfigDescription',
       );
       controls.getControls.mockReturnValueOnce('getControls');
@@ -50,8 +50,8 @@ describe('workers/repository/update/pr/body/index', () => {
       table.getPrUpdatesTable.mockReturnValueOnce('getPrUpdatesTable');
     });
 
-    it('handles empty template', () => {
-      const res = getPrBody(
+    it('handles empty template', async () => {
+      const res = await getPrBody(
         {
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -70,7 +70,7 @@ describe('workers/repository/update/pr/body/index', () => {
       expect(res).toBeEmptyString();
     });
 
-    it('massages upgrades', () => {
+    it('massages upgrades', async () => {
       const upgrade = {
         manager: 'some-manager',
         branchName: 'some-branch',
@@ -89,7 +89,7 @@ describe('workers/repository/update/pr/body/index', () => {
         homepage: 'https://example.com',
       };
 
-      getPrBody(
+      await getPrBody(
         {
           manager: 'some-manager',
           baseBranch: 'base',
@@ -130,14 +130,14 @@ describe('workers/repository/update/pr/body/index', () => {
       });
     });
 
-    it('uses dependencyUrl as primary link', () => {
+    it('uses dependencyUrl as primary link', async () => {
       const upgrade = {
         manager: 'some-manager',
         branchName: 'some-branch',
         dependencyUrl: 'https://github.com/foo/bar',
       };
 
-      getPrBody(
+      await getPrBody(
         {
           manager: 'some-manager',
           baseBranch: 'base',
@@ -162,10 +162,10 @@ describe('workers/repository/update/pr/body/index', () => {
       });
     });
 
-    it('compiles template', () => {
+    it('compiles template', async () => {
       platform.massageMarkdown.mockImplementation((x) => x);
       template.compile.mockImplementation((x) => x);
-      const res = getPrBody(
+      const res = await getPrBody(
         {
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -186,10 +186,10 @@ describe('workers/repository/update/pr/body/index', () => {
       expect(res).toContain(`<!--renovate-debug`);
     });
 
-    it('supports custom rebasing message', () => {
+    it('supports custom rebasing message', async () => {
       platform.massageMarkdown.mockImplementation((x) => x);
       template.compile.mockImplementation((x) => x);
-      const res = getPrBody(
+      const res = await getPrBody(
         {
           manager: 'some-manager',
           baseBranch: 'base',
@@ -210,10 +210,10 @@ describe('workers/repository/update/pr/body/index', () => {
       expect(res).toContain(['aaa', '**Rebasing**: BAR', 'bbb'].join('\n'));
     });
 
-    it('updates PR due to body change without pr data', () => {
+    it('updates PR due to body change without pr data', async () => {
       platform.massageMarkdown.mockImplementation((x) => x);
       template.compile.mockImplementation((x) => x);
-      const res = getPrBody(
+      const res = await getPrBody(
         {
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -235,7 +235,7 @@ describe('workers/repository/update/pr/body/index', () => {
       expect(match?.groups?.payload).toBeString();
     });
 
-    it('pr body warning', () => {
+    it('pr body warning', async () => {
       const massagedMarkDown =
         '---\n\n### ⚠ Dependency Lookup Warnings ⚠\n\n' +
         'Warnings were logged while processing this repo. ' +
@@ -262,7 +262,7 @@ describe('workers/repository/update/pr/body/index', () => {
         ],
       };
 
-      const res = getPrBody(
+      const res = await getPrBody(
         {
           manager: 'some-manager',
           branchName: 'some-branch',

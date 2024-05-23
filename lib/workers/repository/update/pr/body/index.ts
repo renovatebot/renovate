@@ -73,11 +73,11 @@ interface PrBodyConfig {
 
 const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 
-export function getPrBody(
+export async function getPrBody(
   branchConfig: BranchConfig,
   prBodyConfig: PrBodyConfig,
   config: RenovateConfig,
-): string {
+): Promise<string> {
   massageUpdateMetadata(branchConfig);
   let warnings = '';
   warnings += getWarnings(branchConfig);
@@ -94,7 +94,7 @@ export function getPrBody(
     warnings,
     notes: getPrNotes(branchConfig) + getPrExtraNotes(branchConfig),
     changelogs: getChangelogs(branchConfig),
-    configDescription: getPrConfigDescription(branchConfig),
+    configDescription: await getPrConfigDescription(branchConfig),
     controls: getControls(),
     footer: getPrFooter(branchConfig),
   };

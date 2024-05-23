@@ -326,7 +326,7 @@ export async function ensurePr(
     }
   }
 
-  const prBody = getPrBody(
+  const prBody = await getPrBody(
     config,
     {
       debugData: updatePrDebugData(
