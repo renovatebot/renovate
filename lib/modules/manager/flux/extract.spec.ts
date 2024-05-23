@@ -502,6 +502,9 @@ describe('modules/manager/flux/extract', () => {
       expect(result).toEqual({
         deps: [
           {
+            currentDigest: undefined,
+            currentValue: undefined,
+            datasource: 'docker',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             skipReason: 'unversioned-reference',
           },
@@ -523,6 +526,11 @@ describe('modules/manager/flux/extract', () => {
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
         'test.yaml',
+        {
+          registryAliases: {
+            'ghcr.io': 'ghcr.proxy.test/some/path',
+          },
+        },
       );
       expect(result).toEqual({
         deps: [
@@ -531,7 +539,7 @@ describe('modules/manager/flux/extract', () => {
               '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentValue: 'v1.8.2',
             currentDigest: undefined,
-            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            depName: 'ghcr.proxy.test/some/path/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
             replaceString: 'v1.8.2',
           },
@@ -723,10 +731,16 @@ describe('modules/manager/flux/extract', () => {
     });
 
     it('should handle HelmRepository with type OCI', async () => {
-      const result = await extractAllPackageFiles(config, [
-        'lib/modules/manager/flux/__fixtures__/helmOCISource.yaml',
-        'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
-      ]);
+      const result = await extractAllPackageFiles(
+        {
+          ...config,
+          registryAliases: { 'ghcr.io': 'ghcr.proxy.test/some/path' },
+        },
+        [
+          'lib/modules/manager/flux/__fixtures__/helmOCISource.yaml',
+          'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
+        ],
+      );
       expect(result).toEqual([
         {
           deps: [
@@ -735,7 +749,7 @@ describe('modules/manager/flux/extract', () => {
               datasource: DockerDatasource.id,
               depName: 'actions-runner-controller-charts/gha-runner-scale-set',
               packageName:
-                'ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set',
+                'ghcr.proxy.test/some/path/actions/actions-runner-controller-charts/gha-runner-scale-set',
             },
           ],
           packageFile:
