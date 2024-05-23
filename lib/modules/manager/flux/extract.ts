@@ -27,6 +27,8 @@ import type {
   ResourceFluxManifest,
   SystemFluxManifest,
 } from './types';
+import { extractImage } from '../kustomize/extract';
+import { coerceArray } from '../../../util/array';
 
 function readManifest(
   content: string,
@@ -225,6 +227,15 @@ function resolveResourceManifest(
         }
         deps.push(dep);
         break;
+      }
+
+      case 'Kustomization': {
+        for (const image of coerceArray(resource.spec.images)) {
+          const dep = extractImage(image, registryAliases);
+          if (dep) {
+            deps.push(dep);
+          }
+        }
       }
     }
   }
