@@ -8,7 +8,7 @@ const gitHubApiUrl = 'https://api.github.com/search/issues?';
 const githubApi = new GithubHttp();
 
 if (process.env.GITHUB_TOKEN) {
-  logger.debug('Using GITHUB_TOKEN from env');
+  logger.info('Using GITHUB_TOKEN from env');
   hostRules.add({
     matchHost: 'api.github.com',
     token: process.env.GITHUB_TOKEN,
