@@ -451,6 +451,11 @@ export interface RenovateOptionBase {
    * For internal use only: add it to any config option that supports regex or glob matching
    */
   patternMatch?: boolean;
+
+  /**
+   * For internal use only: add it to any config option of type integer that supports negative integers values
+   */
+  allowNegative?: boolean;
 }
 
 export interface RenovateArrayOption<

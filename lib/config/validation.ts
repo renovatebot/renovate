@@ -44,6 +44,7 @@ let optionParents: Record<string, AllowedParents[]>;
 let optionGlobals: Set<string>;
 let optionInherits: Set<string>;
 let optionRegexOrGlob: Set<string>;
+let optionAllowsNegativeIntegers: Set<string>;
 
 const managerList = getManagerList();
 
@@ -88,6 +89,7 @@ function validatePlainObject(val: Record<string, unknown>): true | string {
 }
 
 function validateNumber(
+  key: string,
   val: unknown,
   currentPath?: string,
   subKey?: string,
@@ -96,7 +98,7 @@ function validateNumber(
   const path = `${currentPath}${subKey ? '.' + subKey : ''}`;
   // prPriority can have negative value
   if (is.number(val)) {
-    if (val < 0 && !path.includes('prPriority')) {
+    if (val < 0 && !optionAllowsNegativeIntegers.has(key)) {
       errors.push({
         topic: 'Configuration Error',
         message: `Configuration option \`${path}\` should be a positive integer. Found negative value instead.`,
@@ -151,6 +153,7 @@ function initOptions(): void {
   optionTypes = {};
   optionRegexOrGlob = new Set();
   optionGlobals = new Set();
+  optionAllowsNegativeIntegers = new Set();
 
   for (const option of options) {
     optionTypes[option.name] = option.type;
@@ -169,6 +172,10 @@ function initOptions(): void {
 
     if (option.globalOnly) {
       optionGlobals.add(option.name);
+    }
+
+    if (option.allowNegative) {
+      optionAllowsNegativeIntegers.add(option.name);
     }
   }
 
@@ -372,7 +379,7 @@ export async function validateConfig(
             });
           }
         } else if (type === 'integer') {
-          errors.push(...validateNumber(val, currentPath));
+          errors.push(...validateNumber(key, val, currentPath));
         } else if (type === 'array' && val) {
           if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
@@ -988,7 +995,7 @@ async function validateGlobalConfig(
         });
       }
     } else if (type === 'integer') {
-      warnings.push(...validateNumber(val, currentPath));
+      warnings.push(...validateNumber(key, val, currentPath));
     } else if (type === 'boolean') {
       if (val !== true && val !== false) {
         warnings.push({
@@ -1043,7 +1050,9 @@ async function validateGlobalConfig(
           }
         } else if (key === 'cacheTtlOverride') {
           for (const [subKey, subValue] of Object.entries(val)) {
-            warnings.push(...validateNumber(subValue, currentPath, subKey));
+            warnings.push(
+              ...validateNumber(key, subValue, currentPath, subKey),
+            );
           }
         } else {
           const res = validatePlainObject(val);
