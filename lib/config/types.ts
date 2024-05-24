@@ -453,7 +453,7 @@ export interface RenovateOptionBase {
   patternMatch?: boolean;
 
   /**
-   * For internal use only: add it to any config option of type integer that supports negative integers values
+   * For internal use only: add it to any config option of type integer that supports negative integers
    */
   allowNegative?: boolean;
 }

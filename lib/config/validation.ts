@@ -96,7 +96,6 @@ function validateNumber(
 ): ValidationMessage[] {
   const errors: ValidationMessage[] = [];
   const path = `${currentPath}${subKey ? '.' + subKey : ''}`;
-  // prPriority can have negative value
   if (is.number(val)) {
     if (val < 0 && !optionAllowsNegativeIntegers.has(key)) {
       errors.push({
