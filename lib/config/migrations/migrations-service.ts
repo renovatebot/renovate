@@ -38,6 +38,7 @@ import { PackageRulesMigration } from './custom/package-rules-migration';
 import { PackagesMigration } from './custom/packages-migration';
 import { PathRulesMigration } from './custom/path-rules-migration';
 import { PinVersionsMigration } from './custom/pin-versions-migration';
+import { PlatformCommitMigration } from './custom/platform-commit-migration';
 import { PostUpdateOptionsMigration } from './custom/post-update-options-migration';
 import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
@@ -157,6 +158,7 @@ export class MigrationsService {
     FetchReleaseNotesMigration,
     MatchManagersMigration,
     CustomManagersMigration,
+    PlatformCommitMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {
