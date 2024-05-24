@@ -42,6 +42,6 @@ export async function createConfigMigrationBranch(
       },
     ],
     message: commitMessage.toString(),
-    platformCommit: !!config.platformCommit,
+    platformCommit: config.platformCommit,
   });
 }

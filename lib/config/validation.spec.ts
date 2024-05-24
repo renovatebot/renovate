@@ -101,6 +101,25 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
     });
 
+    it('does not warn for valid platformConfig', async () => {
+      const config = {
+        platformConfig: 'auto',
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('warns for invalid platformConfig', async () => {
+      const config = {
+        platformConfig: 'invalid',
+      };
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toHaveLength(1);
+    });
+
     it('catches invalid templates', async () => {
       const config = {
         commitMessage: '{{{something}}',
