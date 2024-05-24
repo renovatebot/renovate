@@ -59,6 +59,6 @@ export function commitFilesToBranch(
     files: updatedFiles,
     message: config.commitMessage!,
     force: !!config.forceCommit,
-    platformCommit: !!config.platformCommit,
+    platformCommit: config.platformCommit,
   });
 }
