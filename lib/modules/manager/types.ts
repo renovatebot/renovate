@@ -22,6 +22,7 @@ export interface ExtractConfig extends CustomExtractConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean | null;
+  repository?: string;
 }
 
 export interface UpdateArtifactsConfig {
@@ -100,6 +101,10 @@ export interface LookupUpdate {
   registryUrl?: string;
 }
 
+/**
+ * @property {string} depName - Display name of the package. See #16012
+ * @property {string} packageName - The name of the package, used in comparisons. depName is used as fallback if this is not set. See #16012
+ */
 export interface PackageDependency<T = Record<string, any>>
   extends ManagerData<T> {
   currentValue?: string | null;
@@ -177,15 +182,27 @@ export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   replaceString?: string;
 }
 
+export interface ArtifactNotice {
+  file: string;
+  message: string;
+}
+
 export interface ArtifactError {
   lockFile?: string;
   stderr?: string;
 }
 
-export interface UpdateArtifactsResult {
-  artifactError?: ArtifactError;
-  file?: FileChange;
-}
+export type UpdateArtifactsResult =
+  | {
+      file?: FileChange;
+      notice?: ArtifactNotice;
+      artifactError?: undefined;
+    }
+  | {
+      file?: undefined;
+      notice?: undefined;
+      artifactError?: ArtifactError;
+    };
 
 export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;

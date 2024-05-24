@@ -4,6 +4,7 @@ import type { ValidationMessage } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import {
+  GetDigestInputConfig,
   Release,
   ReleaseResult,
   applyDatasourceFilters,
@@ -35,6 +36,17 @@ import {
   isReplacementRulesConfigured,
 } from './utils';
 
+function getTimestamp(
+  versions: Release[],
+  version: string,
+  versioning: allVersioning.VersioningApi,
+): string | null | undefined {
+  return versions.find(
+    (v) =>
+      versioning.isValid(v.version) && versioning.equals(v.version, version),
+  )?.releaseTimestamp;
+}
+
 export async function lookupUpdates(
   inconfig: LookupUpdateConfig,
 ): Promise<Result<UpdateResult, Error>> {
@@ -61,6 +73,12 @@ export async function lookupUpdates(
       'lookupUpdates',
     );
     if (config.currentValue && !is.string(config.currentValue)) {
+      // If currentValue is not a string, then it's invalid
+      if (config.currentValue) {
+        logger.debug(
+          `Invalid currentValue for ${config.packageName}: ${JSON.stringify(config.currentValue)} (${typeof config.currentValue})`,
+        );
+      }
       res.skipReason = 'invalid-value';
       return Result.ok(res);
     }
@@ -157,6 +175,8 @@ export async function lookupUpdates(
         'homepage',
         'changelogUrl',
         'dependencyUrl',
+        'lookupName',
+        'packageScope',
       ]);
 
       const latestVersion = dependency.tags?.latest;
@@ -269,27 +289,31 @@ export async function lookupUpdates(
 
       if (!currentVersion) {
         if (!config.lockedVersion) {
+          logger.debug(
+            `No currentVersion or lockedVersion found for ${config.packageName}`,
+          );
           res.skipReason = 'invalid-value';
         }
         return Result.ok(res);
       }
 
       res.currentVersion = currentVersion!;
-      const currentVersionTimestamp = allVersions.find(
-        (v) =>
-          versioning.isValid(v.version) &&
-          versioning.equals(v.version, currentVersion),
-      )?.releaseTimestamp;
+      const currentVersionTimestamp = getTimestamp(
+        allVersions,
+        currentVersion,
+        versioning,
+      );
 
-      if (
-        is.nonEmptyString(currentVersionTimestamp) &&
-        config.packageRules?.some((rules) =>
-          is.nonEmptyString(rules.matchCurrentAge),
-        )
-      ) {
+      if (is.nonEmptyString(currentVersionTimestamp)) {
         res.currentVersionTimestamp = currentVersionTimestamp;
-        // Reapply package rules to check matches for matchCurrentAge
-        config = applyPackageRules({ ...config, currentVersionTimestamp });
+        if (
+          config.packageRules?.some((rules) =>
+            is.nonEmptyString(rules.matchCurrentAge),
+          )
+        ) {
+          // Reapply package rules to check matches for matchCurrentAge
+          config = applyPackageRules({ ...config, currentVersionTimestamp });
+        }
       }
 
       if (
@@ -385,6 +409,17 @@ export async function lookupUpdates(
           bucket,
           release,
         );
+
+        // #29034
+        if (
+          config.manager === 'gomod' &&
+          compareValue?.startsWith('v0.0.0-') &&
+          update.newValue?.startsWith('v0.0.0-') &&
+          config.currentDigest !== update.newDigest
+        ) {
+          update.updateType = 'digest';
+        }
+
         if (pendingChecks) {
           update.pendingChecks = pendingChecks;
         }
@@ -423,6 +458,9 @@ export async function lookupUpdates(
       );
 
       if (!config.pinDigests && !config.currentDigest) {
+        logger.debug(
+          `Skipping ${config.packageName} because no currentDigest or pinDigests`,
+        );
         res.skipReason = 'invalid-value';
       } else {
         delete res.skipReason;
@@ -496,10 +534,31 @@ export async function lookupUpdates(
       // update digest for all
       for (const update of res.updates) {
         if (config.pinDigests === true || config.currentDigest) {
+          const getDigestConfig: GetDigestInputConfig = {
+            ...config,
+            registryUrl: update.registryUrl ?? res.registryUrl,
+            lookupName: res.lookupName,
+          };
+
+          // #20304 only pass it for replacement updates, otherwise we get wrong or invalid digest
+          if (update.updateType !== 'replacement') {
+            delete getDigestConfig.replacementName;
+          }
+
+          // #20304 don't use lookupName and currentDigest when we replace image name
+          if (
+            update.updateType === 'replacement' &&
+            update.newName !== config.packageName
+          ) {
+            delete getDigestConfig.lookupName;
+            delete getDigestConfig.currentDigest;
+          }
+
           // TODO #22198
           update.newDigest ??=
             dependency?.releases.find((r) => r.version === update.newValue)
-              ?.newDigest ?? (await getDigest(config, update.newValue))!;
+              ?.newDigest ??
+            (await getDigest(getDigestConfig, update.newValue))!;
 
           // If the digest could not be determined, report this as otherwise the
           // update will be omitted later on without notice.

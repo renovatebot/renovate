@@ -32,6 +32,12 @@ export class GlobalConfig {
     'gitTimeout',
     'platform',
     'endpoint',
+    'httpCacheTtlDays',
+    'autodiscoverRepoSort',
+    'autodiscoverRepoOrder',
+    'mergeConfidenceEndpoint',
+    'mergeConfidenceDatasources',
+    'userAgent',
   ];
 
   private static config: RepoGlobalConfig = {};

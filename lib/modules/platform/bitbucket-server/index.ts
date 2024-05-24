@@ -1,4 +1,5 @@
 import { setTimeout } from 'timers/promises';
+import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
 import {
   REPOSITORY_CHANGED,
@@ -48,6 +49,7 @@ import type {
   BbsRestUserRef,
 } from './types';
 import * as utils from './utils';
+import { getExtraCloneOpts } from './utils';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -68,8 +70,10 @@ const bitbucketServerHttp = new BitbucketServerHttp();
 const defaults: {
   endpoint?: string;
   hostType: string;
+  version: string;
 } = {
   hostType: 'bitbucket-server',
+  version: '0.0.0',
 };
 
 /* istanbul ignore next */
@@ -79,17 +83,22 @@ function updatePrVersion(pr: number, version: number): number {
   return res;
 }
 
-export function initPlatform({
+export async function initPlatform({
   endpoint,
+  token,
   username,
   password,
 }: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
   }
-  if (!(username && password)) {
+  if (!(username && password) && !token) {
     throw new Error(
-      'Init: You must configure a Bitbucket Server username/password',
+      'Init: You must either configure a Bitbucket Server username/password or a HTTP access token',
+    );
+  } else if (password && token) {
+    throw new Error(
+      'Init: You must either configure a Bitbucket Server password or a HTTP access token',
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
@@ -98,7 +107,32 @@ export function initPlatform({
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
-  return Promise.resolve(platformConfig);
+  try {
+    let bitbucketServerVersion: string;
+    // istanbul ignore if: experimental feature
+    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
+      bitbucketServerVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
+    } else {
+      const { version } = (
+        await bitbucketServerHttp.getJson<{ version: string }>(
+          `./rest/api/1.0/application-properties`,
+        )
+      ).body;
+      bitbucketServerVersion = version;
+      logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
+    }
+
+    if (semver.valid(bitbucketServerVersion)) {
+      defaults.version = bitbucketServerVersion;
+    }
+  } catch (err) {
+    logger.debug(
+      { err },
+      'Error authenticating with Bitbucket. Check that your token includes "api" permissions',
+    );
+  }
+
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
@@ -203,8 +237,9 @@ export async function initRepo({
     await git.initRepo({
       ...config,
       url,
+      extraCloneOpts: getExtraCloneOpts(opts),
       cloneSubmodules,
-      fullClone: true,
+      fullClone: semver.lte(defaults.version, '8.0.0'),
     });
 
     config.mergeMethod = 'merge';
@@ -300,7 +335,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
     const searchParams: Record<string, string> = {
       state: 'ALL',
     };
-    if (!config.ignorePrAuthor) {
+    if (!config.ignorePrAuthor && config.username !== undefined) {
       searchParams['role.1'] = 'AUTHOR';
       searchParams['username.1'] = config.username;
     }

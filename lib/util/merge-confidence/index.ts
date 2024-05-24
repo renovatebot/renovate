@@ -1,12 +1,13 @@
 import is from '@sindresorhus/is';
+import { GlobalConfig } from '../../config/global';
 import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence';
 import type { UpdateType } from '../../config/types';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../cache/package';
-import { parseJson } from '../common';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
+import { regEx } from '../regex';
 import { ensureTrailingSlash, joinUrlParts } from '../url';
 import { MERGE_CONFIDENCE } from './common';
 import type { MergeConfidence } from './types';
@@ -27,41 +28,28 @@ export const confidenceLevels: Record<MergeConfidence, number> = {
 export function initConfig(): void {
   apiBaseUrl = getApiBaseUrl();
   token = getApiToken();
-  supportedDatasources =
-    parseSupportedDatasourceString() ?? presetSupportedDatasources;
+  supportedDatasources = parseSupportedDatasourceString();
 
   if (!is.nullOrUndefined(token)) {
     logger.debug(`Merge confidence token found for ${apiBaseUrl}`);
   }
 }
 
-export function parseSupportedDatasourceString(): string[] | undefined {
-  const supportedDatasourceString =
-    process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES;
+export function parseSupportedDatasourceString(): string[] {
+  const supportedDatasources = GlobalConfig.get(
+    'mergeConfidenceDatasources',
+    presetSupportedDatasources,
+  );
 
-  if (!is.string(supportedDatasourceString)) {
-    return undefined;
-  }
-
-  let parsedDatasourceList: unknown;
-  try {
-    parsedDatasourceList = parseJson(supportedDatasourceString, '.json5');
-  } catch (err) {
-    logger.error(
-      { supportedDatasourceString, err },
-      'Failed to parse supported datasources list; Invalid JSON format',
-    );
-  }
-
-  if (!is.array<string>(parsedDatasourceList, is.string)) {
+  if (!is.array(supportedDatasources, is.string)) {
     logger.warn(
-      { parsedDatasourceList },
-      `Expected a string array but got ${typeof parsedDatasourceList}`,
+      { supportedDatasources },
+      `Expected a string array but got ${typeof supportedDatasources} - using default value instead`,
     );
-    return undefined;
+    return presetSupportedDatasources;
   }
 
-  return parsedDatasourceList;
+  return supportedDatasources;
 }
 
 export function resetConfig(): void {
@@ -164,7 +152,7 @@ async function queryApi(
     return 'neutral';
   }
 
-  const escapedPackageName = packageName.replace('/', '%2f');
+  const escapedPackageName = packageName.replace(regEx(/\//g), '%2f');
   const url = joinUrlParts(
     apiBaseUrl,
     'api/mc/json',
@@ -241,12 +229,10 @@ export async function initMergeConfidence(): Promise<void> {
 
 function getApiBaseUrl(): string {
   const defaultBaseUrl = 'https://developer.mend.io/';
-  const baseFromEnv = process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL;
-
-  if (is.nullOrUndefined(baseFromEnv)) {
-    logger.trace('using default merge confidence API base URL');
-    return defaultBaseUrl;
-  }
+  const baseFromEnv = GlobalConfig.get(
+    'mergeConfidenceEndpoint',
+    defaultBaseUrl,
+  );
 
   try {
     const parsedBaseUrl = new URL(baseFromEnv).toString();

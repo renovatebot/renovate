@@ -118,6 +118,22 @@ describe('modules/platform/gerrit/client', () => {
           prTitle: 'fix(deps): update dependency react-router-dom to v6.21.2',
         },
       ],
+      [
+        'message:"fix(deps): update dependency react-router-dom to ~> v6.21.2"',
+        {
+          branchName: 'dependency-xyz',
+          prTitle:
+            'fix(deps): update dependency react-router-dom to ~> "v6.21.2"',
+        },
+      ],
+      [
+        'message:"fix(deps): update dependency react-router-dom to ~> v6.21.2"',
+        {
+          branchName: 'dependency-xyz',
+          prTitle:
+            'fix(deps): "update dependency react-router-dom to ~> "v6.21.2""',
+        },
+      ],
     ])(
       'query contains %p',
       async (expectedQueryPart: string, config: GerritFindPRConfig) => {
@@ -144,7 +160,7 @@ describe('modules/platform/gerrit/client', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get(
-          '/a/changes/123456?o=SUBMITTABLE&o=CHECK&o=MESSAGES&o=DETAILED_ACCOUNTS&o=LABELS&o=CURRENT_ACTIONS&o=CURRENT_REVISION',
+          '/a/changes/123456?o=SUBMITTABLE&o=CHECK&o=MESSAGES&o=DETAILED_ACCOUNTS&o=LABELS&o=CURRENT_ACTIONS&o=CURRENT_REVISION&o=CURRENT_COMMIT',
         )
         .reply(200, gerritRestResponse(change), jsonResultHeader);
       await expect(client.getChange(123456)).resolves.toEqual(change);
@@ -199,17 +215,24 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 
-  describe('updateCommitMessage', () => {
-    it('updateCommitMessage - success', async () => {
+  describe('updateChangeSubject', () => {
+    it('updateChangeSubject - success', async () => {
       const change = partial<GerritChange>({});
+      const newSubject = 'new subject';
+      const previousSubject = 'some subject';
+      const previousBody = `some body\n\nChange-Id: some-change-id\n`;
       httpMock
         .scope(gerritEndpointUrl)
         .put('/a/changes/123456/message', {
-          message: `new message\n\nChange-Id: changeID\n`,
+          message: `${newSubject}\n\n${previousBody}`,
         })
         .reply(200, gerritRestResponse(change), jsonResultHeader);
       await expect(
-        client.updateCommitMessage(123456, 'changeID', 'new message'),
+        client.updateChangeSubject(
+          123456,
+          `${previousSubject}\n\n${previousBody}`,
+          'new subject',
+        ),
       ).toResolve();
     });
   });

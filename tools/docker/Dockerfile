@@ -3,12 +3,12 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:1.26.0@sha256:0a7ac38631a6ac43cfdf338a3d3ea6c9fe5ed2e531cd30754684a08875ff8359 AS slim-base
+FROM ghcr.io/renovatebot/base-image:2.12.7@sha256:12a8af69f113f56aae18f04b8798545976f2602097e834b8e2e2985f320bf68d AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:1.26.0-full@sha256:89af456ca951561cb7abcd014b57879e6312702e7492d2e7f0390b262818fcd4 AS full-base
+FROM ghcr.io/renovatebot/base-image:2.12.7-full@sha256:504c415723b2dbef28fd12aa90a4261e3590a117e3bb2ee618b1c9b4157fe253 AS full-base
 
 # --------------------------------------
 # build image
@@ -18,19 +18,17 @@ FROM slim-base as build
 WORKDIR /usr/local/renovate
 
 ENV CI=1 npm_config_modules_cache_max_age=0
-ENV RE2_DOWNLOAD_MIRROR=https://github.com/containerbase/node-re2-prebuild/releases/download RE2_DOWNLOAD_SKIP_PATH=1
 
 COPY pnpm-lock.yaml ./
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
-RUN pnpm fetch --prod
+RUN corepack pnpm fetch --prod
 
 COPY . ./
 
 # install
 RUN set -ex; \
-  pnpm install --prod --offline --ignore-scripts; \
-  npm explore re2 -- npm run install; \
+  corepack pnpm install --prod --offline --ignore-scripts; \
   true
 
 # test

@@ -32,6 +32,14 @@ export class HatchProcessor implements PyProjectProcessor {
     return deps;
   }
 
+  extractLockedVersions(
+    project: PyProject,
+    deps: PackageDependency[],
+    packageFile: string,
+  ): Promise<PackageDependency[]> {
+    return Promise.resolve(deps);
+  }
+
   updateArtifacts(
     updateArtifact: UpdateArtifact,
     project: PyProject,

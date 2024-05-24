@@ -616,4 +616,4 @@ For instructions on this, see the above section on encrypting secrets for the Me
 
 ### hostRules configuration using environment variables
 
-Self-hosted users can enable the option [`detectHostRulesFromEnv`](../self-hosted-configuration.md#detectHostRulesFromEnv) to configure the most common types of `hostRules` via environment variables.
+Self-hosted users can enable the option [`detectHostRulesFromEnv`](../self-hosted-configuration.md#detecthostrulesfromenv) to configure the most common types of `hostRules` via environment variables.

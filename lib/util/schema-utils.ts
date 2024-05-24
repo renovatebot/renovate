@@ -1,4 +1,5 @@
 import JSON5 from 'json5';
+import * as JSONC from 'jsonc-parser';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
 import { z } from 'zod';
@@ -215,6 +216,16 @@ export const Json5 = z.string().transform((str, ctx): JsonValue => {
   }
 });
 
+export const Jsonc = z.string().transform((str, ctx): JsonValue => {
+  const errors: JSONC.ParseError[] = [];
+  const value = JSONC.parse(str, errors);
+  if (errors.length === 0) {
+    return value;
+  }
+  ctx.addIssue({ code: 'custom', message: 'Invalid JSONC' });
+  return z.NEVER;
+});
+
 export const UtcDate = z
   .string({ description: 'ISO 8601 string' })
   .transform((str, ctx): DateTime => {
@@ -228,7 +239,7 @@ export const UtcDate = z
 
 export const Yaml = z.string().transform((str, ctx): JsonValue => {
   try {
-    return parseSingleYaml(str, { json: true }) as JsonValue;
+    return parseSingleYaml(str, { json: true });
   } catch (e) {
     ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
     return z.NEVER;

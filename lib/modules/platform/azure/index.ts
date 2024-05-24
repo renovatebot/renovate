@@ -383,6 +383,7 @@ const azureToRenovateStatusMapping: Record<GitStatusState, BranchStatus> = {
   [GitStatusState.NotApplicable]: 'green',
   [GitStatusState.NotSet]: 'yellow',
   [GitStatusState.Pending]: 'yellow',
+  [GitStatusState.PartiallySucceeded]: 'yellow',
   [GitStatusState.Error]: 'red',
   [GitStatusState.Failed]: 'red',
 };
@@ -854,7 +855,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const validReviewers = new Set<string>();
 
   // TODO #22198
-  const teams = await azureApiCore.getTeams(repo.project!.id!);
+  const teams = await azureHelper.getAllProjectTeams(repo.project!.id!);
   const members = await Promise.all(
     teams.map(
       async (t) =>

@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
@@ -11,6 +12,7 @@ import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
+import { parseGoproxy } from './goproxy-parser';
 import { GoDirectDatasource } from './releases-direct';
 import { GoProxyDatasource } from './releases-goproxy';
 
@@ -28,6 +30,13 @@ export class GoDatasource extends Datasource {
   };
 
   override readonly customRegistrySupport = false;
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'If the release timestamp is not returned from the respective datasoure used to fetch the releases, then Renovate uses the `Time` field in the results instead.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `packageName` and `registryUrl`.';
 
   readonly goproxy = new GoProxyDatasource();
   readonly direct = new GoDirectDatasource();
@@ -49,7 +58,7 @@ export class GoDatasource extends Datasource {
    * go.getDigest
    *
    * This datasource resolves a go module URL into its source repository
-   *  and then fetches the digest it if it is on GitHub.
+   *  and then fetches the digest if it is on GitHub.
    *
    * This function will:
    *  - Determine the source URL for the module
@@ -63,6 +72,13 @@ export class GoDatasource extends Datasource {
     { packageName }: DigestConfig,
     value?: string | null,
   ): Promise<string | null> {
+    if (parseGoproxy().some(({ url }) => url === 'off')) {
+      logger.debug(
+        `Skip digest fetch for ${packageName} with GOPROXY containing "off"`,
+      );
+      return null;
+    }
+
     const source = await BaseGoDatasource.getDatasource(packageName);
     if (!source) {
       return null;

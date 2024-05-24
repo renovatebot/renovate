@@ -15,14 +15,14 @@ You need the following dependencies for local development:
 - pnpm `^8.6.11` (use corepack)
 - C++ compiler
 
-We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule).
+We recommend you use the version of Node.js defined in the repository's `.nvmrc`.
 
 #### Linux
 
 You can use the following commands on Ubuntu.
 
 ```sh
-curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get update
 sudo apt-get install -y git build-essential nodejs
 corepack enable

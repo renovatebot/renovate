@@ -60,8 +60,11 @@ export function getPoetryRequirement(
   const firstLine = existingLockFileContent.split('\n')[0];
   const poetryVersionMatch = firstLine.match(/by Poetry ([\d\\.]+)/);
   if (poetryVersionMatch?.[1]) {
-    logger.debug('Using poetry version from poetry.lock header');
-    return poetryVersionMatch[1];
+    const poetryVersion = poetryVersionMatch[1];
+    logger.debug(
+      `Using poetry version ${poetryVersion} from poetry.lock header`,
+    );
+    return poetryVersion;
   }
 
   const { val: lockfilePoetryConstraint } = Result.parse(
@@ -69,7 +72,9 @@ export function getPoetryRequirement(
     Lockfile.transform(({ poetryConstraint }) => poetryConstraint),
   ).unwrap();
   if (lockfilePoetryConstraint) {
-    logger.debug('Using poetry version from poetry.lock metadata');
+    logger.debug(
+      `Using poetry version ${lockfilePoetryConstraint} from poetry.lock metadata`,
+    );
     return lockfilePoetryConstraint;
   }
 
@@ -78,7 +83,9 @@ export function getPoetryRequirement(
     PoetrySchemaToml.transform(({ poetryRequirement }) => poetryRequirement),
   ).unwrap();
   if (pyprojectPoetryConstraint) {
-    logger.debug('Using poetry version from pyproject.toml');
+    logger.debug(
+      `Using poetry version ${pyprojectPoetryConstraint} from pyproject.toml`,
+    );
     return pyprojectPoetryConstraint;
   }
 

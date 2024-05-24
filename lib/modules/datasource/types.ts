@@ -9,6 +9,8 @@ export interface GetDigestInputConfig {
   packageName: string;
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
+  registryUrl?: string;
+  lookupName?: string;
   additionalRegistryUrls?: string[];
   currentValue?: string;
   currentDigest?: string;
@@ -17,6 +19,7 @@ export interface GetDigestInputConfig {
 
 export interface DigestConfig {
   packageName: string;
+  lookupName?: string;
   registryUrl?: string;
   currentValue?: string;
   currentDigest?: string;
@@ -83,10 +86,12 @@ export interface ReleaseResult {
   registryUrl?: string;
   replacementName?: string;
   replacementVersion?: string;
+  lookupName?: string;
+  packageScope?: string;
 }
 
 export type RegistryStrategy = 'first' | 'hunt' | 'merge';
-
+export type SourceUrlSupport = 'package' | 'release' | 'none';
 export interface DatasourceApi extends ModuleApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
@@ -107,6 +112,24 @@ export interface DatasourceApi extends ModuleApi {
    * Whether custom registryUrls are allowed.
    */
   customRegistrySupport: boolean;
+
+  /**
+   * Whether release timestamp can be returned.
+   */
+  releaseTimestampSupport: boolean;
+  /**
+   * Notes on how release timestamp is determined.
+   */
+  releaseTimestampNote?: string;
+
+  /**
+   * Whether sourceURL can be returned.
+   */
+  sourceUrlSupport: SourceUrlSupport;
+  /**
+   * Notes on how sourceURL is determined.
+   */
+  sourceUrlNote?: string;
 
   /**
    * Whether to perform caching in the datasource index/wrapper or not.

@@ -12,6 +12,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -124,6 +125,7 @@ function resolveSystemManifest(
 function resolveResourceManifest(
   manifest: ResourceFluxManifest,
   helmRepositories: HelmRepository[],
+  registryAliases: Record<string, string> | undefined,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
   for (const resource of manifest.resources) {
@@ -146,16 +148,17 @@ function resolveResourceManifest(
         if (matchingRepositories.length) {
           dep.registryUrls = matchingRepositories
             .map((repo) => {
-              if (
-                repo.spec.type === 'oci' ||
-                repo.spec.url.startsWith('oci://')
-              ) {
+              if (repo.spec.type === 'oci' || isOCIRegistry(repo.spec.url)) {
                 // Change datasource to Docker
                 dep.datasource = DockerDatasource.id;
                 // Ensure the URL is a valid OCI path
-                dep.packageName = `${repo.spec.url.replace('oci://', '')}/${
-                  resource.spec.chart.spec.chart
-                }`;
+                dep.packageName = getDep(
+                  `${removeOCIPrefix(repo.spec.url)}/${
+                    resource.spec.chart.spec.chart
+                  }`,
+                  false,
+                  registryAliases,
+                ).depName;
                 return null;
               } else {
                 return repo.spec.url;
@@ -197,17 +200,23 @@ function resolveResourceManifest(
         break;
       }
       case 'OCIRepository': {
-        const container = resource.spec.url?.replace('oci://', '');
-        let dep: PackageDependency = {
-          depName: container,
-        };
+        const container = removeOCIPrefix(resource.spec.url);
+        let dep = getDep(container, false, registryAliases);
         if (resource.spec.ref?.digest) {
-          dep = getDep(`${container}@${resource.spec.ref.digest}`, false);
+          dep = getDep(
+            `${container}@${resource.spec.ref.digest}`,
+            false,
+            registryAliases,
+          );
           if (resource.spec.ref?.tag) {
             logger.debug('A digest and tag was found, ignoring tag');
           }
         } else if (resource.spec.ref?.tag) {
-          dep = getDep(`${container}:${resource.spec.ref.tag}`, false);
+          dep = getDep(
+            `${container}:${resource.spec.ref.tag}`,
+            false,
+            registryAliases,
+          );
           dep.autoReplaceStringTemplate =
             '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
           dep.replaceString = resource.spec.ref.tag;
@@ -225,6 +234,7 @@ function resolveResourceManifest(
 export function extractPackageFile(
   content: string,
   packageFile: string,
+  config?: ExtractConfig,
 ): PackageFileContent<FluxManagerData> | null {
   const manifest = readManifest(content, packageFile);
   if (!manifest) {
@@ -244,7 +254,11 @@ export function extractPackageFile(
       deps = resolveSystemManifest(manifest);
       break;
     case 'resource': {
-      deps = resolveResourceManifest(manifest, helmRepositories);
+      deps = resolveResourceManifest(
+        manifest,
+        helmRepositories,
+        config?.registryAliases,
+      );
       break;
     }
   }
@@ -252,7 +266,7 @@ export function extractPackageFile(
 }
 
 export async function extractAllPackageFiles(
-  _config: ExtractConfig,
+  config: ExtractConfig,
   packageFiles: string[],
 ): Promise<PackageFile<FluxManagerData>[] | null> {
   const manifests: FluxManifest[] = [];
@@ -285,7 +299,11 @@ export async function extractAllPackageFiles(
         deps = resolveSystemManifest(manifest);
         break;
       case 'resource': {
-        deps = resolveResourceManifest(manifest, helmRepositories);
+        deps = resolveResourceManifest(
+          manifest,
+          helmRepositories,
+          config.registryAliases,
+        );
         break;
       }
     }

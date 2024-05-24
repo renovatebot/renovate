@@ -2,10 +2,15 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { ensureLocalPath } from '../../../util/fs/util';
-import { normalizeDepName } from '../../datasource/pypi/common';
+import { normalizePythonDepName } from '../../datasource/pypi/common';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
-import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../types';
 import { extractHeaderCommand } from './common';
 import type {
   DependencyBetweenFiles,
@@ -70,6 +75,7 @@ export async function extractAllPackageFiles(
   const lockFileArgs = new Map<string, PipCompileArgs>();
   const depsBetweenFiles: DependencyBetweenFiles[] = [];
   const packageFiles = new Map<string, PackageFile>();
+  const lockFileSources = new Map<string, PackageFile[]>();
   for (const fileMatch of fileMatches) {
     const fileContent = await readLocalFile(fileMatch, 'utf8');
     if (!fileContent) {
@@ -132,7 +138,12 @@ export async function extractAllPackageFiles(
         logger.debug(
           `pip-compile: ${packageFile} used in multiple output files`,
         );
-        packageFiles.get(packageFile)!.lockFiles!.push(fileMatch);
+        const existingPackageFile = packageFiles.get(packageFile)!;
+        existingPackageFile.lockFiles!.push(fileMatch);
+        extendWithIndirectDeps(existingPackageFile, lockedDeps);
+        const source = lockFileSources.get(fileMatch) ?? [];
+        source.push(existingPackageFile);
+        lockFileSources.set(fileMatch, source);
         continue;
       }
       const content = await readLocalFile(packageFile, 'utf8');
@@ -168,8 +179,8 @@ export async function extractAllPackageFiles(
         for (const dep of packageFileContent.deps) {
           const lockedVersion = lockedDeps?.find(
             (lockedDep) =>
-              normalizeDepName(lockedDep.depName!) ===
-              normalizeDepName(dep.depName!),
+              normalizePythonDepName(lockedDep.depName!) ===
+              normalizePythonDepName(dep.depName!),
           )?.currentVersion;
           if (lockedVersion) {
             dep.lockedVersion = lockedVersion;
@@ -180,11 +191,16 @@ export async function extractAllPackageFiles(
             );
           }
         }
-        packageFiles.set(packageFile, {
+        extendWithIndirectDeps(packageFileContent, lockedDeps);
+        const newPackageFile: PackageFile = {
           ...packageFileContent,
           lockFiles: [fileMatch],
           packageFile,
-        });
+        };
+        packageFiles.set(packageFile, newPackageFile);
+        const source = lockFileSources.get(fileMatch) ?? [];
+        source.push(newPackageFile);
+        lockFileSources.set(fileMatch, source);
       } else {
         logger.warn(
           { packageFile },
@@ -200,9 +216,82 @@ export async function extractAllPackageFiles(
     depsBetweenFiles,
     packageFiles,
   );
+
+  // This needs to go in reverse order to handle transitive dependencies
+  for (const packageFile of [...result].reverse()) {
+    for (const reqFile of packageFile.managerData?.requirementsFiles ?? []) {
+      let sourceFiles: PackageFile[] | undefined = undefined;
+      if (fileMatches.includes(reqFile)) {
+        sourceFiles = lockFileSources.get(reqFile);
+      } else if (packageFiles.has(reqFile)) {
+        sourceFiles = [packageFiles.get(reqFile)!];
+      }
+      if (!sourceFiles) {
+        logger.warn(
+          `pip-compile: ${packageFile.packageFile} references ${reqFile} which does not appear to be a requirements file managed by pip-compile`,
+        );
+        continue;
+      }
+      // These get reversed before merging so that we keep the last instance of any common
+      // lock files, since a file that -r includes multiple lock files needs to be updated after
+      // all of the lock files it includes
+      const files = new Set([...packageFile.lockFiles!].reverse());
+      for (const sourceFile of sourceFiles) {
+        const merged = new Set(files);
+        for (const lockFile of [...sourceFile.lockFiles!].reverse()) {
+          merged.add(lockFile);
+        }
+        sourceFile.lockFiles = Array.from(merged).reverse();
+      }
+    }
+  }
   logger.debug(
     'pip-compile: dependency graph:\n' +
       generateMermaidGraph(depsBetweenFiles, lockFileArgs),
   );
+  return result;
+}
+
+function extendWithIndirectDeps(
+  packageFileContent: PackageFileContent,
+  lockedDeps: PackageDependency[],
+): void {
+  for (const lockedDep of lockedDeps) {
+    if (
+      !packageFileContent.deps.find(
+        (dep) =>
+          normalizePythonDepName(lockedDep.depName!) ===
+          normalizePythonDepName(dep.depName!),
+      )
+    ) {
+      packageFileContent.deps.push(indirectDep(lockedDep));
+    }
+  }
+}
+
+/**
+ * As indirect dependecies don't exist in the package file, we need to
+ * create them from the lock file.
+ *
+ * By removing currentValue and currentVersion, we ensure that they
+ * are handled like unconstrained dependencies with locked version.
+ * Such packages are updated when their update strategy
+ * is set to 'update-lockfile',
+ * see: lib/workers/repository/process/lookup/index.ts.
+ *
+ * By disabling them by default, we won't create noise by updating them.
+ * Unless they have vulnerability alert, then they are forced to be updated.
+ * @param dep dependency extracted from lock file (requirements.txt)
+ * @returns unconstrained dependency with locked version
+ */
+function indirectDep(dep: PackageDependency): PackageDependency {
+  const result = {
+    ...dep,
+    lockedVersion: dep.currentVersion,
+    depType: 'indirect',
+    enabled: false,
+  };
+  delete result.currentValue;
+  delete result.currentVersion;
   return result;
 }

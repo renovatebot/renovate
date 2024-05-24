@@ -11,15 +11,6 @@ Read the [Key concepts, presets](./key-concepts/presets.md) page to learn more a
 Shareable config presets must use the JSON or JSON5 formats, other formats are not supported.
 
 <!-- prettier-ignore -->
-!!! warning
-    Only use `default.json` for your presets.
-
-<!-- prettier-ignore -->
-!!! warning
-    We have deprecated using a `renovate.json` file for presets, as this causes issues if the repository configuration _also_ uses a `renovate.json` file.
-    If you are using a `renovate.json` file to share your presets, rename it to `default.json`.
-
-<!-- prettier-ignore -->
 !!! tip
     Describe what your preset does in the `"description"` field.
     This way your configuration is self-documenting.
@@ -41,6 +32,17 @@ Alternatively, Renovate can fetch preset files from an HTTP server.
     We plan to drop the npm-based presets feature in a future major release of Renovate.
 
 You can set a Git tag (like a SemVer) to use a specific release of your shared config.
+
+### Preset File Naming
+
+Presets are repo-hosted, and you can have one or more presets hosted per repository.
+If you omit a file name from your preset (e.g. `github>abc/foo`) then Renovate will look for a `default.json` file in the repo.
+If you wish to have an alternative file name, you need to specify it (e.g. `github>abc/foo//alternative-name.json5`).
+
+<!-- prettier-ignore -->
+!!! warning
+    We've deprecated using a `renovate.json` file for the default _preset_ file name in a repository.
+    If you're using a `renovate.json` file to share your presets, rename it to `default.json`.
 
 ### GitHub
 
@@ -165,7 +167,7 @@ Here is how you would use these in your Renovate config:
 In short, the number of `{{argx}}` parameters in the definition is how many parameters you need to provide.
 Parameters must be strings, non-quoted, and separated by commas if there are more than one.
 
-If you find that you are repeating config a lot, you might consider publishing one of these types of parameterised presets yourself.
+If you find that you are repeating config a lot, you might consider publishing one of these types of parameterized presets yourself.
 Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository, see [Contributing to presets](#contributing-to-presets).
 
 ## GitHub-hosted Presets
@@ -230,6 +232,40 @@ Parameters are supported similar to other methods:
     "http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain(param)"
   ]
 }
+```
+
+## Templating presets
+
+You can use [Handlebars](https://handlebarsjs.com/) templates to be flexible with your presets.
+This can be handy when you want to include presets conditionally.
+
+<!-- prettier-ignore -->
+!!! note
+    The template only supports a small subset of options, but you can extend them via `customEnvVariables`.
+
+Read the [templates](./templates.md) section to learn more.
+
+### Example use-case
+
+The following example shows a self-hosted Renovate preset located in a GitLab repository called `renovate/presets`.
+
+```json
+{
+  "extends": ["local>renovate/presets"]
+}
+```
+
+Usually you want to validate the preset before you put it in your Renovate configuration
+Here is an example of how you can use templating to validate and load the preset on a branch level:
+
+```javascript
+// config.js
+module.exports = {
+  customEnvVariables: {
+    GITLAB_REF: process.env.CI_COMMIT_REF_NAME || 'main',
+  },
+  extends: ['local>renovate/presets#{{ env.GITLAB_REF }}'],
+};
 ```
 
 ## Contributing to presets

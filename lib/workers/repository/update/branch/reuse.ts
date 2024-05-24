@@ -10,6 +10,28 @@ type ParentBranch = {
   isConflicted?: boolean;
 };
 
+async function shouldKeepUpdated(
+  config: BranchConfig,
+  baseBranch: string,
+  branchName: string,
+): Promise<boolean> {
+  const keepUpdatedLabel = config.keepUpdatedLabel;
+  if (!keepUpdatedLabel) {
+    return false;
+  }
+
+  const branchPr = await platform.getBranchPr(
+    config.branchName,
+    config.baseBranch,
+  );
+
+  if (branchPr?.labels?.includes(keepUpdatedLabel)) {
+    return true;
+  }
+
+  return false;
+}
+
 export async function shouldReuseExistingBranch(
   config: BranchConfig,
 ): Promise<ParentBranch> {
@@ -23,6 +45,7 @@ export async function shouldReuseExistingBranch(
   logger.debug(`Branch already exists`);
   if (
     config.rebaseWhen === 'behind-base-branch' ||
+    (await shouldKeepUpdated(config, baseBranch, branchName)) ||
     (config.rebaseWhen === 'auto' &&
       (config.automerge === true ||
         (await platform.getBranchForceRebase?.(config.baseBranch))))
@@ -53,7 +76,10 @@ export async function shouldReuseExistingBranch(
 
     if ((await scm.isBranchModified(branchName)) === false) {
       logger.debug(`Branch is not mergeable and needs rebasing`);
-      if (config.rebaseWhen === 'never') {
+      if (
+        config.rebaseWhen === 'never' &&
+        !(await shouldKeepUpdated(config, baseBranch, branchName))
+      ) {
         logger.debug('Rebasing disabled by config');
         result.reuseExistingBranch = true;
         result.isModified = false;

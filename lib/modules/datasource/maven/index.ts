@@ -69,6 +69,13 @@ export class MavenDatasource extends Datasource {
 
   override readonly registryStrategy: RegistryStrategy = 'merge';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `Last-Modified` header or the `lastModified` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `scm` tags in the results.';
+
   constructor(id = MavenDatasource.id) {
     super(id);
   }
@@ -114,6 +121,10 @@ export class MavenDatasource extends Datasource {
     dependency: MavenDependency,
     repoUrl: string,
   ): Promise<ReleaseMap> {
+    if (!repoUrl.startsWith(MAVEN_REPO)) {
+      return inputReleaseMap;
+    }
+
     const cacheNs = 'datasource-maven:index-html-releases';
     const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
     let workingReleaseMap = await packageCache.get<ReleaseMap>(
@@ -124,27 +135,21 @@ export class MavenDatasource extends Datasource {
       workingReleaseMap = {};
       let retryEarlier = false;
       try {
-        if (repoUrl.startsWith(MAVEN_REPO)) {
-          const indexUrl = getMavenUrl(dependency, repoUrl, 'index.html');
-          const res = await downloadHttpProtocol(this.http, indexUrl);
-          const { body = '' } = res;
-          for (const line of body.split(newlineRegex)) {
-            const match = line.trim().match(mavenCentralHtmlVersionRegex);
-            if (match) {
-              const { version, releaseTimestamp: timestamp } =
-                match?.groups ?? /* istanbul ignore next: hard to test */ {};
-              if (version && timestamp) {
-                const date = DateTime.fromFormat(
-                  timestamp,
-                  'yyyy-MM-dd HH:mm',
-                  {
-                    zone: 'UTC',
-                  },
-                );
-                if (date.isValid) {
-                  const releaseTimestamp = date.toISO();
-                  workingReleaseMap[version] = { version, releaseTimestamp };
-                }
+        const indexUrl = getMavenUrl(dependency, repoUrl, 'index.html');
+        const res = await downloadHttpProtocol(this.http, indexUrl);
+        const { body = '' } = res;
+        for (const line of body.split(newlineRegex)) {
+          const match = line.trim().match(mavenCentralHtmlVersionRegex);
+          if (match) {
+            const { version, releaseTimestamp: timestamp } =
+              match?.groups ?? /* istanbul ignore next: hard to test */ {};
+            if (version && timestamp) {
+              const date = DateTime.fromFormat(timestamp, 'yyyy-MM-dd HH:mm', {
+                zone: 'UTC',
+              });
+              if (date.isValid) {
+                const releaseTimestamp = date.toISO();
+                workingReleaseMap[version] = { version, releaseTimestamp };
               }
             }
           }

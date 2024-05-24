@@ -128,4 +128,13 @@ spec:
       helm:
         valueFiles:
           - $foo/values.yaml
-
+---
+{{- if .Values.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  source:
+    chart: somechart
+    repoURL: https://git.example.com/foo/bar.git
+    targetRevision: 3.2.1
+{{- end }}

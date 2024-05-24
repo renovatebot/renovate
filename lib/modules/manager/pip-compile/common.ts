@@ -11,7 +11,7 @@ import { regEx } from '../../../util/regex';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types';
 import type { PipCompileArgs } from './types';
 
-export function getPythonConstraint(
+export function getPythonVersionConstraint(
   config: UpdateArtifactsConfig,
 ): string | undefined | null {
   const { constraints = {} } = config;
@@ -24,8 +24,9 @@ export function getPythonConstraint(
 
   return undefined;
 }
-// TODO(not7cd): rename to getPipToolsVersionConstraint, as constraints have their meaning in pip
-export function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
+export function getPipToolsVersionConstraint(
+  config: UpdateArtifactsConfig,
+): string {
   const { constraints = {} } = config;
   const { pipTools } = constraints;
 
@@ -41,8 +42,8 @@ export async function getExecOptions(
   cwd: string,
   extraEnv: ExtraEnv<string>,
 ): Promise<ExecOptions> {
-  const constraint = getPythonConstraint(config);
-  const pipToolsConstraint = getPipToolsConstraint(config);
+  const constraint = getPythonVersionConstraint(config);
+  const pipToolsConstraint = getPipToolsVersionConstraint(config);
   const execOptions: ExecOptions = {
     cwd: ensureLocalPath(cwd),
     docker: {},
@@ -84,6 +85,7 @@ export const optionsWithArguments = [
 ];
 export const allowedPipOptions = [
   '-v',
+  '--all-extras',
   '--allow-unsafe',
   '--generate-hashes',
   '--no-emit-index-url',
@@ -159,7 +161,7 @@ export function extractHeaderCommand(
         result.indexUrl = value;
         // TODO: add to secrets? next PR
       } else {
-        logger.warn(`pip-compile: option ${arg} not handled`);
+        logger.debug({ option }, `pip-compile: option not handled`);
       }
       continue;
     }
@@ -171,8 +173,12 @@ export function extractHeaderCommand(
       result.emitIndexUrl = true;
       continue;
     }
+    if (arg === '--all-extras') {
+      result.allExtras = true;
+      continue;
+    }
 
-    logger.warn(`pip-compile: option ${arg} not handled`);
+    logger.debug({ option: arg }, `pip-compile: option not handled`);
   }
   logger.trace(
     {

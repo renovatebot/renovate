@@ -24,6 +24,7 @@ import { GlobalConfig } from './global';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
+import { supportedDatasources } from './presets/internal/merge-confidence';
 import {
   AllowedParents,
   type RenovateConfig,
@@ -34,12 +35,16 @@ import {
   allowedStatusCheckStrings,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
+import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
 
 const options = getOptions();
 
+let optionsInitialized = false;
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, AllowedParents[]>;
 let optionGlobals: Set<string>;
+let optionInherits: Set<string>;
+let optionRegexOrGlob: Set<string>;
 
 const managerList = getManagerList();
 
@@ -98,16 +103,50 @@ function getDeprecationMessage(option: string): string | undefined {
   return deprecatedOptions[option];
 }
 
+function isInhertConfigOption(key: string): boolean {
+  return optionInherits.has(key);
+}
+
+function isRegexOrGlobOption(key: string): boolean {
+  return optionRegexOrGlob.has(key);
+}
+
 function isGlobalOption(key: string): boolean {
-  if (!optionGlobals) {
-    optionGlobals = new Set();
-    for (const option of options) {
-      if (option.globalOnly) {
-        optionGlobals.add(option.name);
-      }
+  return optionGlobals.has(key);
+}
+
+function initOptions(): void {
+  if (optionsInitialized) {
+    return;
+  }
+
+  optionParents = {};
+  optionInherits = new Set();
+  optionTypes = {};
+  optionRegexOrGlob = new Set();
+  optionGlobals = new Set();
+
+  for (const option of options) {
+    optionTypes[option.name] = option.type;
+
+    if (option.parents) {
+      optionParents[option.name] = option.parents;
+    }
+
+    if (option.inheritConfigSupport) {
+      optionInherits.add(option.name);
+    }
+
+    if (option.patternMatch) {
+      optionRegexOrGlob.add(option.name);
+    }
+
+    if (option.globalOnly) {
+      optionGlobals.add(option.name);
     }
   }
-  return optionGlobals.has(key);
+
+  optionsInitialized = true;
 }
 
 export function getParentName(parentPath: string | undefined): string {
@@ -121,25 +160,13 @@ export function getParentName(parentPath: string | undefined): string {
 }
 
 export async function validateConfig(
-  isGlobalConfig: boolean,
+  configType: 'global' | 'inherit' | 'repo',
   config: RenovateConfig,
   isPreset?: boolean,
   parentPath?: string,
 ): Promise<ValidationResult> {
-  if (!optionTypes) {
-    optionTypes = {};
-    options.forEach((option) => {
-      optionTypes[option.name] = option.type;
-    });
-  }
-  if (!optionParents) {
-    optionParents = {};
-    options.forEach((option) => {
-      if (option.parents) {
-        optionParents[option.name] = option.parents;
-      }
-    });
-  }
+  initOptions();
+
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
@@ -164,20 +191,25 @@ export async function validateConfig(
       });
     }
 
-    if (isGlobalConfig && isGlobalOption(key)) {
-      await validateGlobalConfig(
-        key,
-        val,
-        optionTypes[key],
-        warnings,
-        currentPath,
-      );
-      continue;
-    } else {
-      if (isGlobalOption(key) && !isFalseGlobal(key, parentPath)) {
+    if (isGlobalOption(key)) {
+      if (configType === 'global') {
+        await validateGlobalConfig(
+          key,
+          val,
+          optionTypes[key],
+          warnings,
+          errors,
+          currentPath,
+          config,
+        );
+        continue;
+      } else if (
+        !isFalseGlobal(key, parentPath) &&
+        !(configType === 'inherit' && isInhertConfigOption(key))
+      ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         });
         continue;
       }
@@ -267,7 +299,12 @@ export async function validateConfig(
           });
         }
       } else if (
-        ['allowedVersions', 'matchCurrentVersion'].includes(key) &&
+        [
+          'allowedVersions',
+          'matchCurrentVersion',
+          'matchCurrentValue',
+          'matchNewValue',
+        ].includes(key) &&
         isRegexMatch(val)
       ) {
         if (!getRegexPredicate(val)) {
@@ -276,24 +313,6 @@ export async function validateConfig(
             message: `Invalid regExp for ${currentPath}: \`${val}\``,
           });
         }
-      } else if (
-        key === 'matchCurrentValue' &&
-        is.string(val) &&
-        !getRegexPredicate(val)
-      ) {
-        errors.push({
-          topic: 'Configuration Error',
-          message: `Invalid regExp for ${currentPath}: \`${val}\``,
-        });
-      } else if (
-        key === 'matchNewValue' &&
-        is.string(val) &&
-        !getRegexPredicate(val)
-      ) {
-        errors.push({
-          topic: 'Configuration Error',
-          message: `Invalid regExp for ${currentPath}: \`${val}\``,
-        });
       } else if (key === 'timezone' && val !== null) {
         const [validTimezone, errorMessage] = hasValidTimezone(val as string);
         if (!validTimezone) {
@@ -327,7 +346,7 @@ export async function validateConfig(
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
                 const subValidation = await validateConfig(
-                  isGlobalConfig,
+                  configType,
                   subval as RenovateConfig,
                   isPreset,
                   `${currentPath}[${subIndex}]`,
@@ -335,6 +354,14 @@ export async function validateConfig(
                 warnings = warnings.concat(subValidation.warnings);
                 errors = errors.concat(subValidation.errors);
               }
+            }
+            if (isRegexOrGlobOption(key)) {
+              errors.push(
+                ...regexOrGlobValidator.check({
+                  val,
+                  currentPath,
+                }),
+              );
             }
             if (key === 'extends') {
               for (const subval of val) {
@@ -378,11 +405,13 @@ export async function validateConfig(
               'matchDepTypes',
               'matchDepNames',
               'matchDepPatterns',
+              'matchDepPrefixes',
               'matchPackageNames',
               'matchPackagePatterns',
               'matchPackagePrefixes',
               'excludeDepNames',
               'excludeDepPatterns',
+              'excludeDepPrefixes',
               'excludePackageNames',
               'excludePackagePatterns',
               'excludePackagePrefixes',
@@ -446,6 +475,7 @@ export async function validateConfig(
                     'separateMajorMinor',
                     'separateMinorPatch',
                     'separateMultipleMajor',
+                    'separateMultipleMinor',
                     'versioning',
                   ];
                   if (is.nonEmptyArray(resolvedRule.matchUpdateTypes)) {
@@ -627,9 +657,10 @@ export async function validateConfig(
                 });
               }
             } else if (key === 'env') {
-              const allowedEnvVars = isGlobalConfig
-                ? (config.allowedEnv as string[]) ?? []
-                : GlobalConfig.get('allowedEnv', []);
+              const allowedEnvVars =
+                configType === 'global'
+                  ? (config.allowedEnv as string[]) ?? []
+                  : GlobalConfig.get('allowedEnv', []);
               for (const [envVarName, envVarValue] of Object.entries(val)) {
                 if (!is.string(envVarValue)) {
                   errors.push({
@@ -692,19 +723,28 @@ export async function validateConfig(
                   if (!allowedKeys.includes(subKey)) {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: key is not allowed`,
+                      message: `Invalid \`${currentPath}.${subKey}\` configuration: key is not allowed`,
                     });
                   } else if (subKey === 'transformTemplates') {
                     if (!is.array(subValue, is.string)) {
                       errors.push({
                         topic: 'Configuration Error',
-                        message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is not an array of string`,
+                        message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of string`,
+                      });
+                    }
+                  } else if (subKey === 'description') {
+                    if (
+                      !(is.string(subValue) || is.array(subValue, is.string))
+                    ) {
+                      errors.push({
+                        topic: 'Configuration Error',
+                        message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of strings`,
                       });
                     }
                   } else if (!is.string(subValue)) {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is a string`,
+                      message: `Invalid \`${currentPath}.${subKey}\` configuration: is a string`,
                     });
                   }
                 }
@@ -715,7 +755,7 @@ export async function validateConfig(
                 .map((option) => option.name);
               if (!ignoredObjects.includes(key)) {
                 const subValidation = await validateConfig(
-                  isGlobalConfig,
+                  configType,
                   val,
                   isPreset,
                   currentPath,
@@ -735,9 +775,10 @@ export async function validateConfig(
     }
 
     if (key === 'hostRules' && is.array(val)) {
-      const allowedHeaders = isGlobalConfig
-        ? (config.allowedHeaders as string[]) ?? []
-        : GlobalConfig.get('allowedHeaders', []);
+      const allowedHeaders =
+        configType === 'global'
+          ? (config.allowedHeaders as string[]) ?? []
+          : GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
         if (!rule.headers) {
           continue;
@@ -774,6 +815,19 @@ export async function validateConfig(
   return { errors, warnings };
 }
 
+function hasField(
+  customManager: Partial<RegexManagerConfig>,
+  field: string,
+): boolean {
+  const templateField = `${field}Template` as keyof RegexManagerTemplates;
+  return !!(
+    customManager[templateField] ??
+    customManager.matchStrings?.some((matchString) =>
+      matchString.includes(`(?<${field}>`),
+    )
+  );
+}
+
 function validateRegexManagerFields(
   customManager: Partial<RegexManagerConfig>,
   currentPath: string,
@@ -801,20 +855,22 @@ function validateRegexManagerFields(
     });
   }
 
-  const mandatoryFields = ['depName', 'currentValue', 'datasource'];
+  const mandatoryFields = ['currentValue', 'datasource'];
   for (const field of mandatoryFields) {
-    const templateField = `${field}Template` as keyof RegexManagerTemplates;
-    if (
-      !customManager[templateField] &&
-      !customManager.matchStrings?.some((matchString) =>
-        matchString.includes(`(?<${field}>`),
-      )
-    ) {
+    if (!hasField(customManager, field)) {
       errors.push({
         topic: 'Configuration Error',
         message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
       });
     }
+  }
+
+  const nameFields = ['depName', 'packageName'];
+  if (!nameFields.some((field) => hasField(customManager, field))) {
+    errors.push({
+      topic: 'Configuration Error',
+      message: `Regex Managers must contain depName or packageName regex groups or templates`,
+    });
   }
 }
 
@@ -826,7 +882,9 @@ async function validateGlobalConfig(
   val: unknown,
   type: string,
   warnings: ValidationMessage[],
+  errors: ValidationMessage[],
   currentPath: string | undefined,
+  config: RenovateConfig,
 ): Promise<void> {
   if (val !== null) {
     if (type === 'string') {
@@ -880,6 +938,17 @@ async function validateGlobalConfig(
             message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}.`,
           });
         }
+
+        if (
+          key === 'reportType' &&
+          ['s3', 'file'].includes(val) &&
+          !is.string(config.reportPath)
+        ) {
+          errors.push({
+            topic: 'Configuration Error',
+            message: `reportType '${val}' requires a configured reportPath`,
+          });
+        }
       } else {
         warnings.push({
           topic: 'Configuration Error',
@@ -906,6 +975,14 @@ async function validateGlobalConfig(
       }
     } else if (type === 'array') {
       if (is.array(val)) {
+        if (isRegexOrGlobOption(key)) {
+          warnings.push(
+            ...regexOrGlobValidator.check({
+              val,
+              currentPath: currentPath!,
+            }),
+          );
+        }
         if (key === 'gitNoVerify') {
           const allowedValues = ['commit', 'push'];
           for (const value of val as string[]) {
@@ -913,6 +990,17 @@ async function validateGlobalConfig(
               warnings.push({
                 topic: 'Configuration Error',
                 message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
+              });
+            }
+          }
+        }
+        if (key === 'mergeConfidenceDatasources') {
+          const allowedValues = supportedDatasources;
+          for (const value of val as string[]) {
+            if (!allowedValues.includes(value)) {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `Invalid value \`${value}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
               });
             }
           }
@@ -926,14 +1014,14 @@ async function validateGlobalConfig(
     } else if (type === 'object') {
       if (is.plainObject(val)) {
         if (key === 'onboardingConfig') {
-          const subValidation = await validateConfig(false, val);
+          const subValidation = await validateConfig('repo', val);
           for (const warning of subValidation.warnings.concat(
             subValidation.errors,
           )) {
             warnings.push(warning);
           }
         } else if (key === 'force') {
-          const subValidation = await validateConfig(true, val);
+          const subValidation = await validateConfig('global', val);
           for (const warning of subValidation.warnings.concat(
             subValidation.errors,
           )) {

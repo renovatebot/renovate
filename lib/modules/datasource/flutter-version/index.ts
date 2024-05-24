@@ -21,6 +21,13 @@ export class FlutterVersionDatasource extends Datasource {
 
   override readonly defaultVersioning = semverId;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `release_date` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'We use the URL: https://github.com/flutter/flutter.';
+
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
