@@ -634,6 +634,68 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
+    it('extracts Kustomization', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: kustomize.toolkit.fluxcd.io/v1
+        kind: Kustomization
+        metadata:
+          name: podinfo
+          namespace: flux-system
+        spec:
+          images:
+          - name: podinfo
+            newName: my-registry/podinfo
+            newTag: v1
+          - name: podinfo
+            newTag: 1.8.0
+          - name: podinfo
+            newName: my-podinfo
+          - name: podinfo
+            digest: sha256:24a0c4b4a4c0eb97a1aabb8e29f18e917d05abfe1b7a7c07857230879ce7d3d3
+      `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1',
+            datasource: 'docker',
+            depName: 'my-registry/podinfo',
+            replaceString: 'v1',
+          },
+          {
+            autoReplaceStringTemplate:
+              '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '1.8.0',
+            datasource: 'docker',
+            depName: 'podinfo',
+            replaceString: '1.8.0',
+          },
+          {
+            currentDigest: undefined,
+            currentValue: undefined,
+            datasource: 'docker',
+            depName: 'my-podinfo',
+            replaceString: 'my-podinfo',
+          },
+          {
+            currentDigest:
+              'sha256:24a0c4b4a4c0eb97a1aabb8e29f18e917d05abfe1b7a7c07857230879ce7d3d3',
+            currentValue: undefined,
+            datasource: 'docker',
+            depName: 'podinfo',
+            replaceString:
+              'sha256:24a0c4b4a4c0eb97a1aabb8e29f18e917d05abfe1b7a7c07857230879ce7d3d3',
+          },
+        ],
+      });
+    });
+
     it('ignores resources of an unknown kind', () => {
       const result = extractPackageFile(
         codeBlock`

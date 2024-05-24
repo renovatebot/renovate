@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { parseYaml } from '../../../util/yaml';
@@ -13,6 +14,7 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
 import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
+import { extractImage } from '../kustomize/extract';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -225,6 +227,15 @@ function resolveResourceManifest(
         }
         deps.push(dep);
         break;
+      }
+
+      case 'Kustomization': {
+        for (const image of coerceArray(resource.spec.images)) {
+          const dep = extractImage(image, registryAliases);
+          if (dep) {
+            deps.push(dep);
+          }
+        }
       }
     }
   }
