@@ -1280,7 +1280,6 @@ describe('config/validation', () => {
 
     it('validates prPriority', async () => {
       const config = {
-        prPriority: -2,
         packageRules: [
           {
             matchDepNames: ['somedep'],
@@ -1291,12 +1290,6 @@ describe('config/validation', () => {
             prPriority: 2,
           },
         ],
-        minor: {
-          prPriority: -2,
-        },
-        major: {
-          prPriority: 2,
-        },
       };
       const { errors, warnings } = await configValidation.validateConfig(
         'repo',
