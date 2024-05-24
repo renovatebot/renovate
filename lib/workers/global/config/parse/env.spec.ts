@@ -395,5 +395,21 @@ describe('workers/global/config/parse/env', () => {
       const config = await env.getConfig(envParam);
       expect(config.requireConfig).toBe('optional');
     });
+
+    it('platformCommit boolean true', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_PLATFORM_COMMIT: 'true',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.platformCommit).toBe('enabled');
+    });
+
+    it('platformCommit boolean false', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_PLATFORM_COMMIT: 'false',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.platformCommit).toBe('disabled');
+    });
   });
 });
