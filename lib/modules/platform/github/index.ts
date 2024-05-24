@@ -112,6 +112,10 @@ function escapeHash(input: string): string {
   return input?.replace(regEx(/#/g), '%23');
 }
 
+export function isGHApp(): boolean {
+  return !!platformConfig.isGHApp;
+}
+
 export async function detectGhe(token: string): Promise<void> {
   platformConfig.isGhe =
     URL.parse(platformConfig.endpoint).host !== 'api.github.com';
@@ -245,7 +249,7 @@ export async function initPlatform({
 
 async function fetchRepositories(): Promise<GhRestRepo[]> {
   try {
-    if (platformConfig.isGHApp) {
+    if (isGHApp()) {
       const res = await githubApi.getJson<{
         repositories: GhRestRepo[];
       }>(`installation/repositories?per_page=100`, {
