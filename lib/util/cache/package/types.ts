@@ -78,6 +78,8 @@ export type PackageCacheNamespace =
   | 'datasource-hex'
   | 'datasource-hexpm-bob'
   | 'datasource-java-version'
+  | 'datasource-julia-pkg-server-registries'
+  | 'datasource-julia-pkg-server-releases'
   | 'datasource-maven:head-requests-timeout'
   | 'datasource-maven:head-requests'
   | 'datasource-maven:index-html-releases'
