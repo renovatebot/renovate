@@ -8,7 +8,7 @@ const gitHubApiUrl = 'https://api.github.com/search/issues?';
 const githubApi = new GithubHttp();
 
 if (process.env.GITHUB_TOKEN) {
-  logger.debug('Using GITHUB_TOKEN from env');
+  logger.info('Using GITHUB_TOKEN from env');
   hostRules.add({
     matchHost: 'api.github.com',
     token: process.env.GITHUB_TOKEN,
@@ -47,6 +47,18 @@ export interface Items {
 }
 
 export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
+  const result: RenovateOpenItems = {
+    managers: {},
+    platforms: {},
+    datasources: {},
+    versionings: {},
+  };
+
+  if (process.env.SKIP_GITHUB_ISSUES) {
+    logger.warn('Skipping GitHub issues');
+    return result;
+  }
+
   const q = `repo:renovatebot/renovate type:issue is:open`;
   const per_page = 100;
   try {
@@ -60,20 +72,18 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
     );
     const rawItems = res.body?.items ?? [];
 
-    const renovateOpenItems: RenovateOpenItems = {
-      managers: extractIssues(rawItems, 'manager:'),
-      platforms: extractIssues(rawItems, 'platform:'),
-      datasources: extractIssues(rawItems, 'datasource:'),
-      versionings: extractIssues(rawItems, 'versioning:'),
-    };
+    result.managers = extractIssues(rawItems, 'manager:');
+    result.platforms = extractIssues(rawItems, 'platform:');
+    result.datasources = extractIssues(rawItems, 'datasource:');
+    result.versionings = extractIssues(rawItems, 'versioning:');
 
-    return renovateOpenItems;
+    return result;
   } catch (err) {
     logger.error({ err }, 'Error getting query results');
     if (process.env.CI) {
       throw err;
     }
-    return { managers: {}, platforms: {}, datasources: {}, versionings: {} };
+    return result;
   }
 }
 

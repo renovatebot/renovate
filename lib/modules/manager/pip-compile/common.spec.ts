@@ -4,6 +4,7 @@ import { logger } from '../../../logger';
 import {
   allowedPipOptions,
   extractHeaderCommand,
+  extractPythonVersion,
   getRegistryCredVarsFromPackageFile,
 } from './common';
 import { inferCommandExecDir } from './utils';
@@ -168,6 +169,21 @@ describe('modules/manager/pip-compile/common', () => {
         expect(inferCommandExecDir(path, arg)).toEqual(result);
       },
     );
+  });
+
+  describe('extractPythonVersion()', () => {
+    it('extracts Python version from valid header', () => {
+      expect(
+        extractPythonVersion(
+          getCommandInHeader('pip-compile reqs.in'),
+          'reqs.txt',
+        ),
+      ).toBe('3.11');
+    });
+
+    it('returns undefined if version cannot be extracted', () => {
+      expect(extractPythonVersion('', 'reqs.txt')).toBeUndefined();
+    });
   });
 
   describe('getCredentialVarsFromPackageFile()', () => {

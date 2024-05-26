@@ -507,7 +507,7 @@ jobs:
   build:
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
