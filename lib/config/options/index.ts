@@ -629,8 +629,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'encryptedWarning',
-    description:
-      'Warning text to use if encrypted config is found.',
+    description: 'Warning text to use if encrypted config is found.',
     type: 'string',
     globalOnly: true,
   },
