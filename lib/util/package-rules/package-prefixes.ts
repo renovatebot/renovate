@@ -25,7 +25,7 @@ export class PackagePrefixesMatcher extends Matcher {
     if (matchPackagePrefixes.some((prefix) => depName.startsWith(prefix))) {
       logger.once.warn(
         { packageName, depName },
-        'Use matchDepPatterns instead of matchPackagePrefixes',
+        'Use matchDepPrefixes instead of matchPackagePrefixes',
       );
       return true;
     }
@@ -54,7 +54,7 @@ export class PackagePrefixesMatcher extends Matcher {
     if (excludePackagePrefixes.some((prefix) => depName.startsWith(prefix))) {
       logger.once.warn(
         { packageName, depName },
-        'Use excludeDepPatterns instead of excludePackagePrefixes',
+        'Use excludeDepPrefixes instead of excludePackagePrefixes',
       );
       return true;
     }
