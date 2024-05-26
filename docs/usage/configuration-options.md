@@ -2390,17 +2390,17 @@ The order of rules matters, because later rules may override configuration optio
 
 The matching process for a package rule:
 
- * Each package rule can include `match...` matchers to identify dependencies and `exclude...` matchers to filter them out.
- * If no match/exclude matchers are defined, everything matches.
- * If an aspect is both `match`ed and `exclude`d, the exclusion wins.
- * Multiple values within a single matcher will be evaluated independently (they're OR-ed togeher).
- * Combining multiple matchers will restrict the resulting matches (they're AND-ed together):  
-   `matchCurrentVersion`, `matchCurrentValue`, `matchNewValue`, `matchConfidence`, `matchCurrentAge`,
-   `matchManagers`, `matchDatasources`, `matchCategories`, `matchDepTypes`, `matchUpdateTypes`,
-   `matchRepositories`/`excludeRepositories`, `matchBaseBranches`, `matchFileNames`
- * Two special groups of matchers provide alternatives (they're OR-ed within their respective groups, and AND-ed with others):
-   * Source URL: `matchSourceUrls`, `matchSourceUrlPrefixes`
-   * Package/Dep identifiers: `matchDepNames`/`excludeDepNames`, `matchDepPatterns`/`excludeDepPatterns`, `matchDepPrefixes`/`excludeDepPrefixes`, `matchPackageNames`/`excludePackageNames`, `matchPackagePatterns`/`excludePackagePatterns`, `matchPackagePrefixes`/`excludePackagePrefixes`
+- Each package rule can include `match...` matchers to identify dependencies and `exclude...` matchers to filter them out.
+- If no match/exclude matchers are defined, everything matches.
+- If an aspect is both `match`ed and `exclude`d, the exclusion wins.
+- Multiple values within a single matcher will be evaluated independently (they're OR-ed together).
+- Combining multiple matchers will restrict the resulting matches (they're AND-ed together):  
+  `matchCurrentVersion`, `matchCurrentValue`, `matchNewValue`, `matchConfidence`, `matchCurrentAge`,
+  `matchManagers`, `matchDatasources`, `matchCategories`, `matchDepTypes`, `matchUpdateTypes`,
+  `matchRepositories`/`excludeRepositories`, `matchBaseBranches`, `matchFileNames`
+- Two special groups of matchers provide alternatives (they're OR-ed within their respective groups, and AND-ed with others):
+  - Source URL: `matchSourceUrls`, `matchSourceUrlPrefixes`
+  - Package/Dep identifiers: `matchDepNames`/`excludeDepNames`, `matchDepPatterns`/`excludeDepPatterns`, `matchDepPrefixes`/`excludeDepPrefixes`, `matchPackageNames`/`excludePackageNames`, `matchPackagePatterns`/`excludePackagePatterns`, `matchPackagePrefixes`/`excludePackagePrefixes`
 
 Here is an example if you want to group together all packages starting with `eslint` into a single branch/PR:
 
