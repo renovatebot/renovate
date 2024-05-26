@@ -2384,6 +2384,21 @@ Renovate only queries the OSV database for dependencies that use one of these da
 
 `packageRules` is a powerful feature that lets you apply rules to individual packages or to groups of packages using regex pattern matching.
 
+Each rule in the array allows you to optionally `match...` packages, while optionally `exclude...`-ing matches, then applying some configuration on the matches.
+The matching process for each package rule follows these directives:
+
+ * There must be at least one `match...` or `exclude...` (they can be combined as well), otherwise everything matches.
+ * `match...` matchers are positive so that they add to the resulting matches.
+ * `exclude...` matchers are negative so that they remove from the resulting matches.
+ * Multiple values in each matcher will be evaluated independently (they're OR-ed together).
+ * Combining multiple matchers will restrict the resulting matches (they're AND-ed together):  
+   `matchCurrentVersion`, `matchCurrentValue`, `matchNewValue`, `matchConfidence`, `matchCurrentAge`,
+   `matchManagers`, `matchDatasources`, `matchCategories`, `matchDepTypes`, `matchUpdateTypes`,
+   `matchRepositories`/`excludeRepositories`, `matchBaseBranches`, `matchFileNames`
+ * except for the following two groups of matchers (they're OR-ed together in their groups, and AND-ed together with others):
+   * `matchSourceUrls`, `matchSourceUrlPrefixes`
+   * `matchDepNames`/`excludeDepNames`, `matchDepPatterns`/`excludeDepPatterns`, `matchDepPrefixes`/`excludeDepPrefixes`, `matchPackageNames`/`excludePackageNames`, `matchPackagePatterns`/`excludePackagePatterns`, `matchPackagePrefixes`/`excludePackagePrefixes`.
+
 Here is an example if you want to group together all packages starting with `eslint` into a single branch/PR:
 
 ```json
