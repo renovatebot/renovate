@@ -557,6 +557,7 @@ Information provided mainly in debug log level.
 
 Use this if you want to stop supporting `encrypted` configuration capabilities but want to warn users first to migrate.
 If set to a string value, Renovate will:
+
 - log warnings with the `encryptedWarning` text
 - show the `encryptedWarning` text on the Dependency Dashboard of any repo using `encrypted` config
 - include the text as a warning in every pull request

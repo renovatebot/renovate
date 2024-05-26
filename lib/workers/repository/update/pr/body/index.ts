@@ -5,7 +5,7 @@ import { toBase64 } from '../../../../../util/string';
 import * as template from '../../../../../util/template';
 import { joinUrlParts } from '../../../../../util/url';
 import type { BranchConfig } from '../../../../types';
-import { getPrWarnings, getWarnings } from '../../../errors-warnings';
+import { getDepWarningsPR, getWarnings } from '../../../errors-warnings';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
 import { getControls } from './controls';
@@ -81,11 +81,13 @@ export function getPrBody(
   massageUpdateMetadata(branchConfig);
   let warnings = '';
   warnings += getWarnings(branchConfig);
-  warnings += getPrWarnings(
-    config,
-    branchConfig.packageFiles,
-    branchConfig.dependencyDashboard,
-  );
+  if (branchConfig.packageFiles) {
+    warnings += getDepWarningsPR(
+      branchConfig.packageFiles,
+      config,
+      branchConfig.dependencyDashboard,
+    );
+  }
 
   const content = {
     header: getPrHeader(branchConfig),
