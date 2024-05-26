@@ -3111,13 +3111,6 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'skipTasks',
-    description: 'Skip Copier template tasks execution.',
-    parents: ['copierOptions'],
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'data',
     description: 'Pass arbitrary Copier template variables with their values.',
     parents: ['copierOptions'],
@@ -3125,14 +3118,6 @@ const options: RenovateOptions[] = [
     freeChoice: true,
     mergeable: true,
     default: {},
-  },
-  {
-    name: 'dataFile',
-    description:
-      'An optional relative path of a YAML file to load Copier template variables from.',
-    parents: ['copierOptions'],
-    type: 'string',
-    default: '',
   },
   {
     name: 'skip',

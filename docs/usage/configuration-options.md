@@ -679,19 +679,9 @@ By default, the manager uses `copier update --skip-answered --defaults` to updat
 Merge conflicts are warned about, but still result in a PR.
 This switch instructs the manager to use `copier recopy --skip-answered --defaults --overwrite` instead, which disables the smart update algorithm and overwrites any customizations.
 
-### skipTasks
-
-Instruct Copier to skip template tasks execution.
-Mind that they are only executed if the admin has enabled `allowScripts` in the self-hosted configuration.
-
 ### data
 
 A mapping of arbitrary template variable names to their (string) values to pass to Copier.
-
-### dataFile
-
-The relative path of a YAML file to load Copier template variables from.
-Must be part of the repository.
 
 ### skip
 

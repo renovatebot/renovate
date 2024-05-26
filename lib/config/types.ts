@@ -581,10 +581,8 @@ export interface ValidationResult {
 }
 
 export interface CopierOptions extends Record<string, any> {
-  recopy?: boolean;
-  skipTasks?: boolean;
   data?: Record<string, string>;
-  dataFile?: string;
-  skip?: string[];
   exclude?: string[];
+  recopy?: boolean;
+  skip?: string[];
 }

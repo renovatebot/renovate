@@ -13,12 +13,10 @@ jest.mock('../../../util/fs');
 
 const config: UpdateArtifactsConfig = {
   copierOptions: {
-    recopy: false,
-    skipTasks: false,
     data: {},
-    dataFile: '',
-    skip: [],
     exclude: [],
+    recopy: false,
+    skip: [],
   },
   allowScripts: false,
 };
@@ -154,7 +152,6 @@ describe('modules/manager/copier/artifacts', () => {
             variable1: 'value1',
             variable2: 'value2',
           },
-          dataFile: 'foo/bar.yaml',
           skip: ['file1.txt', 'file2.txt'],
           exclude: ['*.tmp', 'backup/*'],
         },
@@ -169,61 +166,9 @@ describe('modules/manager/copier/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         {
-          cmd: "copier update --skip-answered --defaults --data-file foo/bar.yaml --data variable1=value1 --data variable2=value2 --skip file1.txt --skip file2.txt --exclude '*.tmp' --exclude 'backup/*' --answers-file .copier-answers.yml --vcs-ref 1.1.0",
+          cmd: "copier update --skip-answered --defaults --data variable1=value1 --data variable2=value2 --skip file1.txt --skip file2.txt --exclude '*.tmp' --exclude 'backup/*' --answers-file .copier-answers.yml --vcs-ref 1.1.0",
         },
       ]);
-    });
-
-    it('handles boolean options correctly', async () => {
-      const execSnapshots = mockExecAll();
-
-      const optionsConfig = {
-        ...config,
-        copierOptions: {
-          skipTasks: true,
-        },
-      };
-
-      await updateArtifacts({
-        packageFileName: '.copier-answers.yml',
-        updatedDeps: upgrades,
-        newPackageFileContent: '',
-        config: optionsConfig,
-      });
-
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'copier update --skip-answered --defaults --skip-tasks --answers-file .copier-answers.yml --vcs-ref 1.1.0',
-        },
-      ]);
-    });
-
-    it('does not allow a dataFile from outside the repository', async () => {
-      const execSnapshots = mockExecAll();
-
-      const optionsConfig = {
-        ...config,
-        copierOptions: {
-          dataFile: '/foo/bar.yml',
-        },
-      };
-
-      const result = await updateArtifacts({
-        packageFileName: '.copier-answers.yml',
-        updatedDeps: upgrades,
-        newPackageFileContent: '',
-        config: optionsConfig,
-      });
-
-      expect(result).toEqual([
-        {
-          artifactError: {
-            lockFile: '.copier-answers.yml',
-            stderr: 'copierOptions.dataFile is not part of the repository',
-          },
-        },
-      ]);
-      expect(execSnapshots).toMatchObject([]);
     });
 
     it('supports recopy instead of update', async () => {

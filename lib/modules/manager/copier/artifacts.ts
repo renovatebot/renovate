@@ -1,10 +1,8 @@
 import { quote } from 'shlex';
-import { FILE_ACCESS_VIOLATION_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
 import { readLocalFile } from '../../../util/fs';
-import { ensureLocalPath } from '../../../util/fs/util';
 import { getRepoStatus } from '../../../util/git';
 import type {
   UpdateArtifact,
@@ -12,12 +10,7 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
-type CopierBoolOpt = 'skipTasks';
 type CopierListOpt = 'skip' | 'exclude';
-
-const boolOpts: Record<CopierBoolOpt, string> = {
-  skipTasks: '--skip-tasks',
-};
 
 const listOpts: Record<CopierListOpt, string> = {
   skip: '--skip',
@@ -39,26 +32,6 @@ function buildCommand(
   }
   if (config?.allowScripts) {
     command.push('--trust');
-  }
-  for (const [opt, param] of Object.entries(boolOpts)) {
-    if (config.copierOptions?.[opt]) {
-      command.push(param);
-    }
-  }
-  if (config.copierOptions?.dataFile) {
-    try {
-      ensureLocalPath(config.copierOptions.dataFile);
-    } catch (err) {
-      if (err.message === FILE_ACCESS_VIOLATION_ERROR) {
-        throw new Error(
-          'copierOptions.dataFile is not part of the repository',
-          { cause: err },
-        );
-      }
-      // istanbul ignore next
-      throw err;
-    }
-    command.push('--data-file', quote(config.copierOptions.dataFile));
   }
   for (const [key, value] of Object.entries(config.copierOptions?.data ?? {})) {
     command.push('--data', quote(`${key}=${value}`));
