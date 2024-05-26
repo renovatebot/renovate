@@ -2388,21 +2388,19 @@ Renovate only queries the OSV database for dependencies that use one of these da
 If multiple rules match a dependency, configurations from matching rules will be merged together.
 The order of rules matters, because later rules may override configuration options from earlier ones, if they both specify the same option.
 
-Each rule in the array allows you to optionally match dependencies, while optionally excluding matches, then applying some configuration for the matched dependencies.
-The matching process for each package rule follows these directives:
+The matching process for a package rule:
 
- * There must be at least one `match...` or `exclude...` matcher (they can be combined as well), otherwise everything matches.
- * `match...` matchers are inclusive, so they add to the resulting matches.
- * `exclude...` matchers are exclusive, so they remove from the resulting matches.
+ * Each package rule can include `match...` matchers to identify dependencies and `exclude...` matchers to filter them out.
+ * If no match/exclude matchers are defined, everything matches.
  * If an aspect is both `match`ed and `exclude`d, the exclusion wins.
- * Multiple values in each matcher will be evaluated independently (they're OR-ed together).
+ * Multiple values within a single matcher will be evaluated independently (they're OR-ed togeher).
  * Combining multiple matchers will restrict the resulting matches (they're AND-ed together):  
    `matchCurrentVersion`, `matchCurrentValue`, `matchNewValue`, `matchConfidence`, `matchCurrentAge`,
    `matchManagers`, `matchDatasources`, `matchCategories`, `matchDepTypes`, `matchUpdateTypes`,
    `matchRepositories`/`excludeRepositories`, `matchBaseBranches`, `matchFileNames`
- * except for the following two groups of matchers (they're OR-ed together in their groups, and AND-ed together with others):
-   * `matchSourceUrls`, `matchSourceUrlPrefixes`
-   * `matchDepNames`/`excludeDepNames`, `matchDepPatterns`/`excludeDepPatterns`, `matchDepPrefixes`/`excludeDepPrefixes`, `matchPackageNames`/`excludePackageNames`, `matchPackagePatterns`/`excludePackagePatterns`, `matchPackagePrefixes`/`excludePackagePrefixes`.
+ * Two special groups of matchers provide alternatives (they're OR-ed within their respective groups, and AND-ed with others):
+   * Source URL: `matchSourceUrls`, `matchSourceUrlPrefixes`
+   * Package/Dep identifiers: `matchDepNames`/`excludeDepNames`, `matchDepPatterns`/`excludeDepPatterns`, `matchDepPrefixes`/`excludeDepPrefixes`, `matchPackageNames`/`excludePackageNames`, `matchPackagePatterns`/`excludePackagePatterns`, `matchPackagePrefixes`/`excludePackagePrefixes`
 
 Here is an example if you want to group together all packages starting with `eslint` into a single branch/PR:
 
