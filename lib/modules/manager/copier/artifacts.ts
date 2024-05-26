@@ -85,14 +85,7 @@ export async function updateArtifacts({
     );
   }
 
-  let command: string;
-  try {
-    command = buildCommand(config, packageFileName, newVersion);
-  } catch (err) {
-    logger.error({ err }, `Failed to build copier command: ${err.message}`);
-    return artifactError(packageFileName, err.message);
-  }
-
+  const command = buildCommand(config, packageFileName, newVersion);
   try {
     await exec(command);
   } catch (err) {
