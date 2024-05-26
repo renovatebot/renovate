@@ -2384,17 +2384,17 @@ Renovate only queries the OSV database for dependencies that use one of these da
 
 `packageRules` is a powerful feature that lets you apply rules to individual packages or to groups of packages using regex pattern matching.
 
-`packageRules` is meant to contain multiple rules.
-These rules will **all** be evaluated, and any matching rules will apply configuration to the matching dependencies.
-The configuration options from matching rules will be merged together.
-The order of the rules is therefore important, as later matching rules may override configuration options from earlier matching rules, if they both specify the same option.
+`packageRules` is a collection of rules, that are **all** evaluated.
+If multiple rules match a dependency, configurations from matching rules will be merged together.
+The order of rules matters, because later rules may override configuration options from earlier ones, if they both specify the same option.
 
-Each rule in the array allows you to optionally `match...` packages, while optionally `exclude...`-ing matches, then applying some configuration on the matches.
+Each rule in the array allows you to optionally match dependencies, while optionally excluding matches, then applying some configuration for the matched dependencies.
 The matching process for each package rule follows these directives:
 
- * There must be at least one `match...` or `exclude...` (they can be combined as well), otherwise everything matches.
- * `match...` matchers are positive so that they add to the resulting matches.
- * `exclude...` matchers are negative so that they remove from the resulting matches.
+ * There must be at least one `match...` or `exclude...` matcher (they can be combined as well), otherwise everything matches.
+ * `match...` matchers are inclusive, so they add to the resulting matches.
+ * `exclude...` matchers are exclusive, so they remove from the resulting matches.
+ * If an aspect is both `match`ed and `exclude`d, the exclusion wins.
  * Multiple values in each matcher will be evaluated independently (they're OR-ed together).
  * Combining multiple matchers will restrict the resulting matches (they're AND-ed together):  
    `matchCurrentVersion`, `matchCurrentValue`, `matchNewValue`, `matchConfidence`, `matchCurrentAge`,
