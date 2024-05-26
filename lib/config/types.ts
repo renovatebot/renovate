@@ -141,7 +141,6 @@ export interface RepoGlobalConfig {
   cacheHardTtlMinutes?: number;
   cacheTtlOverride?: Record<string, number>;
   containerbaseDir?: string;
-  copierTrust?: boolean;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerCliOptions?: string;

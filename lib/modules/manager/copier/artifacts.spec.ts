@@ -20,7 +20,7 @@ const config: UpdateArtifactsConfig = {
     skip: [],
     exclude: [],
   },
-  copierTrust: false,
+  allowScripts: false,
 };
 
 const upgrades: Upgrade[] = [
@@ -121,12 +121,12 @@ describe('modules/manager/copier/artifacts', () => {
       ]);
     });
 
-    it('includes --trust when copierTrust is true', async () => {
+    it('includes --trust when allowScripts is true', async () => {
       const execSnapshots = mockExecAll();
 
       const trustConfig = {
         ...config,
-        copierTrust: true,
+        allowScripts: true,
       };
 
       await updateArtifacts({

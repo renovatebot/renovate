@@ -43,7 +43,7 @@ export interface UpdateArtifactsConfig {
   lockFiles?: string[];
   env?: UserEnv;
   copierOptions?: CopierOptions;
-  copierTrust?: boolean;
+  allowScripts?: boolean;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {

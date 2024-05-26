@@ -3152,14 +3152,6 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: [],
   },
-  {
-    name: 'copierTrust',
-    description:
-      'Allow templates with unsafe features (Jinja extensions, migrations, tasks).',
-    type: 'boolean',
-    default: false,
-    globalOnly: true,
-  },
 ];
 
 export function getOptions(): RenovateOptions[] {

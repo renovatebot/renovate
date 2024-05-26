@@ -37,7 +37,7 @@ function buildCommand(
   } else {
     command.push('update', ...DEFAULT_COMMAND_OPTIONS);
   }
-  if (config?.copierTrust) {
+  if (config?.allowScripts) {
     command.push('--trust');
   }
   for (const [opt, param] of Object.entries(boolOpts)) {

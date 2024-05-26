@@ -682,7 +682,7 @@ This switch instructs the manager to use `copier recopy --skip-answered --defaul
 ### skipTasks
 
 Instruct Copier to skip template tasks execution.
-Mind that they are only executed if the admin has enabled `copierTrust` in the self-hosted configuration.
+Mind that they are only executed if the admin has enabled `allowScripts` in the self-hosted configuration.
 
 ### data
 
