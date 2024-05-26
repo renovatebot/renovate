@@ -88,7 +88,6 @@ export function getPrBody(
       branchConfig.dependencyDashboard,
     );
   }
-
   const content = {
     header: getPrHeader(branchConfig),
     table: getPrUpdatesTable(branchConfig),
