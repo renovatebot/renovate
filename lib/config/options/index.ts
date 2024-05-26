@@ -3095,9 +3095,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       recopy: false,
-      skipTasks: false,
       data: {},
-      dataFile: '',
       skip: [],
       exclude: [],
     },
