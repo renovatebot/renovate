@@ -1,6 +1,7 @@
 import { decryptConfig } from './decrypt';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
+import { logger } from '../../test/util';
 
 const repository = 'abc/def';
 
@@ -21,7 +22,13 @@ describe('config/decrypt', () => {
 
     it('warns if no privateKey found', async () => {
       config.encrypted = { a: '1' };
+      GlobalConfig.set({encryptedWarning: 'text'});
+
       const res = await decryptConfig(config, repository);
+
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        'text',
+      );
       expect(res.encrypted).toBeUndefined();
       expect(res.a).toBeUndefined();
     });
