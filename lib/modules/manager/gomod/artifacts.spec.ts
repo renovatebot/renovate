@@ -10,6 +10,7 @@ import type { StatusResult } from '../../../util/git/types';
 import * as _hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
+import * as _artifactsExtra from './artifacts-extra';
 import * as gomod from '.';
 
 type FS = typeof import('../../../util/fs');
@@ -28,11 +29,13 @@ jest.mock('../../../util/fs', () => {
   };
 });
 jest.mock('../../datasource', () => mockDeep());
+jest.mock('./artifacts-extra', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
 const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
+const artifactsExtra = mocked(_artifactsExtra);
 
 const gomod1 = codeBlock`
   module github.com/renovate-tests/gomod1
@@ -1864,6 +1867,47 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ];
     expect(execSnapshots).toMatchObject(expectedResult);
+  });
+
+  it('returns artifact notices', async () => {
+    artifactsExtra.getExtraDepsNotice.mockReturnValue('some extra notice');
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('someText\n\ngo 1.17\n\n');
+    mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum', 'main.go'],
+      }),
+    );
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New main.go')
+      .mockResolvedValueOnce('New go.mod');
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [
+        { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
+      ],
+      newPackageFileContent: gomod1,
+      config: {
+        updateType: 'major',
+        postUpdateOptions: ['gomodUpdateImportPaths'],
+      },
+    });
+
+    expect(res).toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
+      {
+        file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' },
+        notice: { file: 'go.mod', message: 'some extra notice' },
+      },
+    ]);
   });
 
   it('config contains go version', async () => {

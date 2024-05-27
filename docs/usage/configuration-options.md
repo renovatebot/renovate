@@ -2749,8 +2749,21 @@ Use this field to restrict rules to a particular datasource. e.g.
 
 This option is matched against the `currentValue` field of a dependency.
 
-`matchCurrentValue` supports Regular Expressions which must begin and end with `/`.
-For example, the following enforces that only `1.*` versions will be used:
+`matchCurrentValue` supports Regular Expressions and glob patterns. For example, the following enforces that updates from `1.*` versions will be merged automatically:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchCurrentValue": "1.*",
+      "automerge": true
+    }
+  ]
+}
+```
+
+Regular Expressions must begin and end with `/`.
 
 ```json
 {
@@ -2891,8 +2904,21 @@ This field behaves the same as `matchPackageNames` except it matches against `de
 
 This option is matched against the `newValue` field of a dependency.
 
-`matchNewValue` supports Regular Expressions which must begin and end with `/`.
-For example, the following enforces that only `1.*` versions will be used:
+`matchNewValue` supports Regular Expressions and glob patterns. For example, the following enforces that updates to `1.*` versions will be merged automatically:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchNewValue": "1.*",
+      "automerge": true
+    }
+  ]
+}
+```
+
+Regular Expressions must begin and end with `/`.
 
 ```json
 {
@@ -3189,6 +3215,39 @@ For example to replace the npm package `jade` with version `2.0.0` of the packag
 }
 ```
 
+### prPriority
+
+Sometimes Renovate needs to rate limit its creation of PRs, e.g. hourly or concurrent PR limits.
+By default, Renovate sorts/prioritizes based on the update type, going from smallest update to biggest update.
+Renovate creates update PRs in this order:
+
+1. `pinDigest`
+1. `pin`
+1. `digest`
+1. `patch`
+1. `minor`
+1. `major`
+
+If you have dependencies that are more or less important than others then you can use the `prPriority` field for PR sorting.
+The default value is 0, so setting a negative value will make dependencies sort last, while higher values sort first.
+
+Here's an example of how you would define PR priority so that `devDependencies` are raised last and `react` is raised first:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "prPriority": -1
+    },
+    {
+      "matchPackageNames": ["react"],
+      "prPriority": 5
+    }
+  ]
+}
+```
+
 ## patch
 
 Add to this object if you wish to define rules that apply only to patch updates.
@@ -3473,39 +3532,6 @@ This is why we configured an upper limit for how long we wait until creating a P
 !!! note
     If the option `minimumReleaseAge` is non-zero then Renovate disables the `prNotPendingHours` functionality.
 
-## prPriority
-
-Sometimes Renovate needs to rate limit its creation of PRs, e.g. hourly or concurrent PR limits.
-By default, Renovate sorts/prioritizes based on the update type, going from smallest update to biggest update.
-Renovate creates update PRs in this order:
-
-1. `pinDigest`
-1. `pin`
-1. `digest`
-1. `patch`
-1. `minor`
-1. `major`
-
-If you have dependencies that are more or less important than others then you can use the `prPriority` field for PR sorting.
-The default value is 0, so setting a negative value will make dependencies sort last, while higher values sort first.
-
-Here's an example of how you would define PR priority so that `devDependencies` are raised last and `react` is raised first:
-
-```json
-{
-  "packageRules": [
-    {
-      "matchDepTypes": ["devDependencies"],
-      "prPriority": -1
-    },
-    {
-      "matchPackageNames": ["react"],
-      "prPriority": 5
-    }
-  ]
-}
-```
-
 ## prTitle
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
@@ -3621,6 +3647,7 @@ This feature works with the following managers:
 - [`docker-compose`](modules/manager/docker-compose/index.md)
 - [`dockerfile`](modules/manager/dockerfile/index.md)
 - [`droneci`](modules/manager/droneci/index.md)
+- [`flux`](modules/manager/flux/index.md)
 - [`gitlabci`](modules/manager/gitlabci/index.md)
 - [`helm-requirements`](modules/manager/helm-requirements/index.md)
 - [`helm-values`](modules/manager/helm-values/index.md)

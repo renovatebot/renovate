@@ -269,6 +269,8 @@ describe('workers/global/config/parse/env', () => {
 
     it('massages converted experimental env vars', async () => {
       const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL: 'some-url', // converted
+        RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES: '["docker"]', // converted
         RENOVATE_X_AUTODISCOVER_REPO_SORT: 'alpha',
         RENOVATE_X_DOCKER_MAX_PAGES: '10',
         RENOVATE_AUTODISCOVER_REPO_ORDER: 'desc',
@@ -278,13 +280,17 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_PLATFORM_VERSION: '8.0.0',
       };
       const config = await env.getConfig(envParam);
-      expect(config.autodiscoverRepoSort).toBe('alpha');
-      expect(config.autodiscoverRepoOrder).toBe('desc');
-      expect(config.dockerMaxPages).toBe(10);
-      expect(config.gitlabAutoMergeableCheckAttempts).toBe(10);
-      expect(config.gitlabBranchStatusDelay).toBe(10);
-      expect(config.gitlabMergeRequestDelay).toBe(10);
-      expect(config.platformVersion).toBe('8.0.0');
+      expect(config).toMatchObject({
+        mergeConfidenceEndpoint: 'some-url',
+        mergeConfidenceDatasources: ['docker'],
+        autodiscoverRepoSort: 'alpha',
+        autodiscoverRepoOrder: 'desc',
+        dockerMaxPages: 10,
+        gitlabAutoMergeableCheckAttempts: 10,
+        gitlabBranchStatusDelay: 10,
+        gitlabMergeRequestDelay: 10,
+        platformVersion: '8.0.0'
+      });
     });
 
     describe('RENOVATE_CONFIG tests', () => {

@@ -40,6 +40,8 @@ const renameKeys = {
   azureAutoComplete: 'platformAutomerge', // migrate: azureAutoComplete
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
   gitlabAutoMergeableCheckAttemps: 'gitlabAutoMergeableCheckAttempts', // accounting for typo in RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS
+  mergeConfidenceApiBaseUrl: 'mergeConfidenceEndpoint',
+  mergeConfidenceSupportedDatasources: 'mergeConfidenceDatasources',
 };
 
 function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
@@ -93,6 +95,8 @@ const convertedExperimentalEnvVars = [
   'RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY',
   'RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY',
   'RENOVATE_X_PLATFORM_VERSION',
+  'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
+  'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',
 ];
 
 /**
