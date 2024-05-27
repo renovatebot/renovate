@@ -632,6 +632,7 @@ const options: RenovateOptions[] = [
     description: 'Warning text to use if encrypted config is found.',
     type: 'string',
     globalOnly: true,
+    advancedUse: true,
   },
   {
     name: 'inheritConfig',
