@@ -13,7 +13,5 @@ export interface CheckMatcherArgs {
 export interface CheckBaseBranchesArgs {
   resolvedRule: PackageRule;
   currentPath: string;
-  index: number;
-  defaultBranch: string;
   baseBranches?: string[];
 }

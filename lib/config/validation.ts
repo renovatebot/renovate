@@ -441,21 +441,13 @@ export async function validateConfig(
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath }),
                   );
-
-                  const matchBaseBranchesRes = matchBaseBranchesValidator.check(
-                    {
+                  warnings.push(
+                    ...matchBaseBranchesValidator.check({
                       resolvedRule,
-                      currentPath,
-                      index: subIndex,
-                      // not a config option but it will always be present in the config passed to validateConfig fn
-                      // because we validate config after initRepo and during initRepo we initialize the defaultBranch and pass it into config
-                      defaultBranch: config.defaultBranch!,
+                      currentPath: `${currentPath}[${subIndex}]`,
                       baseBranches: config.baseBranches!,
-                    },
+                    }),
                   );
-                  errors.push(...matchBaseBranchesRes.errors);
-                  warnings.push(...matchBaseBranchesRes.warnings);
-
                   const selectorLength = Object.keys(resolvedRule).filter(
                     (ruleKey) => selectors.includes(ruleKey),
                   ).length;
