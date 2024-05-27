@@ -21,6 +21,7 @@ export class GlobalConfig {
     'dockerSidecarImage',
     'dockerUser',
     'dryRun',
+    'encryptedWarning',
     'exposeAllEnv',
     'executionTimeout',
     'githubTokenWarn',
