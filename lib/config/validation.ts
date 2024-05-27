@@ -35,6 +35,7 @@ import {
   allowedStatusCheckStrings,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
+import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches';
 import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
 
 const options = getOptions();
@@ -440,6 +441,21 @@ export async function validateConfig(
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath }),
                   );
+
+                  const matchBaseBranchesRes = matchBaseBranchesValidator.check(
+                    {
+                      resolvedRule,
+                      currentPath,
+                      index: subIndex,
+                      // not a config option but it will always be present in the config passed to validateConfig fn
+                      // because we validate config after initRepo and during initRepo we initialize the defaultBranch and pass it into config
+                      defaultBranch: config.defaultBranch!,
+                      baseBranches: config.baseBranches!,
+                    },
+                  );
+                  errors.push(...matchBaseBranchesRes.errors);
+                  warnings.push(...matchBaseBranchesRes.warnings);
+
                   const selectorLength = Object.keys(resolvedRule).filter(
                     (ruleKey) => selectors.includes(ruleKey),
                   ).length;

@@ -208,6 +208,54 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
     });
 
+    it('validates matchBaseBranches', async () => {
+      const config = {
+        defaultBranch: 'main', // invalid config option, only using it for testing
+        baseBranches: ['foo'],
+        packageRules: [
+          {
+            matchBaseBranches: ['foo'],
+            addLabels: ['foo'],
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toHaveLength(1);
+    });
+
+    it('catches invalid matchBaseBranches when baseBranches is not defined', async () => {
+      const config = {
+        defaultBranch: 'main', // invalid config option, only using it for testing
+        packageRules: [
+          {
+            matchBaseBranches: ['foo'],
+            addLabels: ['foo'],
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toHaveLength(2);
+    });
+
+    it('warns when matchBaseBranches is the default branch', async () => {
+      const config = {
+        defaultBranch: 'main', // invalid config option, only using it for testing
+        baseBranches: ['main'],
+        packageRules: [
+          {
+            matchBaseBranches: ['main'],
+            addLabels: ['foo'],
+          },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(1);
+      expect(warnings).toHaveLength(1);
+    });
+
     it('catches invalid matchCurrentVersion regex', async () => {
       const config = {
         packageRules: [
