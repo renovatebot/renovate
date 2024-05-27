@@ -637,7 +637,7 @@ const options: RenovateOptions[] = [
   {
     name: 'inheritConfig',
     description:
-      'If `true`, Renovate will inherit configuration from the `inheritConfigFileName` file in `inheritConfigRepoName`',
+      'If `true`, Renovate will inherit configuration from the `inheritConfigFileName` file in `inheritConfigRepoName`.',
     type: 'boolean',
     default: false,
     globalOnly: true,
