@@ -377,7 +377,9 @@ describe('util/merge-confidence/index', () => {
       it('resolves when token is valid', async () => {
         httpMock.scope(apiBaseUrl).get(`/api/mc/availability`).reply(200);
 
-        await expect(initMergeConfidence({})).toResolve();
+        await expect(
+          initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
+        ).toResolve();
         expect(logger.debug).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API - successfully authenticated',
@@ -387,9 +389,9 @@ describe('util/merge-confidence/index', () => {
       it('throws on 403-Forbidden from mc API', async () => {
         httpMock.scope(apiBaseUrl).get(`/api/mc/availability`).reply(403);
 
-        await expect(initMergeConfidence({})).rejects.toThrow(
-          EXTERNAL_HOST_ERROR,
-        );
+        await expect(
+          initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API token rejected - aborting run',
@@ -399,9 +401,9 @@ describe('util/merge-confidence/index', () => {
       it('throws on 5xx host errors from mc API', async () => {
         httpMock.scope(apiBaseUrl).get(`/api/mc/availability`).reply(503);
 
-        await expect(initMergeConfidence({})).rejects.toThrow(
-          EXTERNAL_HOST_ERROR,
-        );
+        await expect(
+          initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API failure: 5xx - aborting run',
@@ -414,9 +416,9 @@ describe('util/merge-confidence/index', () => {
           .get(`/api/mc/availability`)
           .replyWithError({ code: 'ECONNRESET' });
 
-        await expect(initMergeConfidence({})).rejects.toThrow(
-          EXTERNAL_HOST_ERROR,
-        );
+        await expect(
+          initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API request failed - aborting run',
