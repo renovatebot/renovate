@@ -36,8 +36,6 @@ export class GlobalConfig {
     'httpCacheTtlDays',
     'autodiscoverRepoSort',
     'autodiscoverRepoOrder',
-    'mergeConfidenceEndpoint',
-    'mergeConfidenceDatasources',
     'userAgent',
   ];
 

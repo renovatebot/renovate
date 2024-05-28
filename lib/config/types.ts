@@ -116,6 +116,8 @@ export interface GlobalOnlyConfig {
   globalExtends?: string[];
   logFile?: string;
   logFileLevel?: LogLevel;
+  mergeConfidenceDatasources?: string[];
+  mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
   prCommitsPerRunLimit?: number;
   privateKeyPath?: string;
@@ -155,8 +157,6 @@ export interface RepoGlobalConfig {
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
   localDir?: string;
-  mergeConfidenceEndpoint?: string;
-  mergeConfidenceDatasources?: string[];
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   presetCachePersistence?: boolean;
