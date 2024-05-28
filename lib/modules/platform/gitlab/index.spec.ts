@@ -1312,8 +1312,7 @@ describe('modules/platform/gitlab/index', () => {
       ).toResolve();
     });
 
-    // eslint-disable-next-line
-    it.only('should swallow error', async () => {
+    it('should swallow error', async () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/users?username=someuser')
