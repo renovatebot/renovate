@@ -73,6 +73,7 @@ const options: RenovateOptions[] = [
     name: 'mergeConfidenceEndpoint',
     description:
       'If set, Renovate will query this API for Merge Confidence data.',
+    stage: 'global',
     type: 'string',
     default: 'https://developer.mend.io/',
     advancedUse: true,
@@ -82,6 +83,7 @@ const options: RenovateOptions[] = [
     name: 'mergeConfidenceDatasources',
     description:
       'If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.',
+    stage: 'global',
     allowedValues: supportedDatasources,
     default: supportedDatasources,
     type: 'array',

@@ -88,7 +88,7 @@ export async function globalInitialize(
   setEmojiConfig(config);
   setGlobalHostRules(config);
   configureThirdPartyLibraries(config);
-  await initMergeConfidence();
+  await initMergeConfidence(config);
   return config;
 }
 

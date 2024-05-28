@@ -4,6 +4,8 @@ import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
 import { partial } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
+import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence';
+import type { AllConfig } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { CustomDatasource } from '../../../../modules/datasource/custom';
 import { DockerDatasource } from '../../../../modules/datasource/docker';
@@ -4545,6 +4547,10 @@ describe('workers/repository/process/lookup/index', () => {
 
     describe('handles merge confidence', () => {
       const defaultApiBaseUrl = 'https://developer.mend.io/';
+      const mcConfig: AllConfig = {
+        mergeConfidenceEndpoint: defaultApiBaseUrl,
+        mergeConfidenceDatasources: presetSupportedDatasources,
+      };
       const getMergeConfidenceSpy = jest.spyOn(
         McApi,
         'getMergeConfidenceLevel',
@@ -4556,7 +4562,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       beforeEach(() => {
         hostRules.add(hostRule);
-        initConfig();
+        initConfig(mcConfig);
         memCache.reset();
       });
 
@@ -4637,7 +4643,7 @@ describe('workers/repository/process/lookup/index', () => {
         config.packageName = 'webpack';
         config.datasource = datasource;
         hostRules.clear(); // reset merge confidence
-        initConfig();
+        initConfig(mcConfig);
         httpMock
           .scope('https://registry.npmjs.org')
           .get('/webpack')
