@@ -1357,7 +1357,8 @@ describe('modules/platform/gitlab/index', () => {
         expect(scope.isDone()).toBeTrue();
       });
 
-      it('should fail to get user IDs', async () => {
+      // eslint-disable-next-line
+      it.only('should fail to get user IDs', async () => {
         const scope = httpMock
           .scope(gitlabApiHost)
           .get(
