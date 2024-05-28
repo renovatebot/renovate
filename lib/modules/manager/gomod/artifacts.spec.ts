@@ -257,10 +257,6 @@ describe('modules/manager/gomod/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go env GOWORK',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
         cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
@@ -286,17 +282,8 @@ describe('modules/manager/gomod/artifacts', () => {
 
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce('modules.txt content'); // vendor modules filename
-    fs.readLocalFile.mockResolvedValueOnce('Current go.work'); // go.work
-    const execSnapshots = mockExecSequence([
-      // Set the output returned by go env GOWORK
-      { stdout: '/tmp/github/some/repo/go.work', stderr: '' },
-      // Remaining output does not matter
-      { stdout: '', stderr: '' },
-      { stdout: '', stderr: '' },
-      { stdout: '', stderr: '' },
-      { stdout: '', stderr: '' },
-      { stdout: '', stderr: '' },
-    ]);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('go.work');
+    const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum', 'go.work.sum', foo],
@@ -363,10 +350,6 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
 
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go env GOWORK',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
       {
         cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
