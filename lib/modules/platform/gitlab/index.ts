@@ -1217,7 +1217,10 @@ export async function addAssignees(
     logger.debug(`Adding assignees '${assignees.join(', ')}' to #${iid}`);
     const assigneeIds: number[] = [];
     for (const assignee of assignees) {
-      assigneeIds.push(await getUserID(assignee));
+      const userId = await getUserID(assignee);
+      if (is.number(userId)) {
+        assigneeIds.push(userId);
+      }
     }
     const url = `projects/${
       config.repository
@@ -1274,7 +1277,9 @@ export async function addReviewers(
           }
         }),
       )
-    ).flat();
+    )
+      .flat()
+      .filter(is.number);
   } catch (err) {
     logger.warn({ err }, 'Failed to get IDs of the new reviewers');
     return;
