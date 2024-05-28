@@ -1220,6 +1220,11 @@ export async function addAssignees(
       const userId = await getUserID(assignee);
       if (is.number(userId)) {
         assigneeIds.push(userId);
+      } else {
+        logger.warn(
+          { username: assignee },
+          'Could not retreive user ID for the username.',
+        );
       }
     }
     const url = `projects/${

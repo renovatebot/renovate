@@ -5,17 +5,9 @@ import type { GitLabUser, GitlabUserStatus } from './types';
 export const gitlabApi = new GitlabHttp();
 
 export async function getUserID(username: string): Promise<number | undefined> {
-  let userId: number | undefined;
-
-  try {
-    userId = (
-      await gitlabApi.getJson<{ id: number }[]>(`users?username=${username}`)
-    ).body[0]?.id;
-  } catch (err) {
-    logger.warn({ username }, 'Could not retreive user ID for the username.');
-  }
-
-  return userId;
+  return (
+    await gitlabApi.getJson<{ id: number }[]>(`users?username=${username}`)
+  ).body[0]?.id;
 }
 
 async function getMembers(group: string): Promise<GitLabUser[]> {
