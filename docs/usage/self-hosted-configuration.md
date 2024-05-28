@@ -553,6 +553,12 @@ You can choose from the following behaviors for the `dryRun` config option:
 
 Information provided mainly in debug log level.
 
+## encryptedWarning
+
+Use this if you want to stop supporting `encrypted` configuration capabilities but want to warn users first to migrate.
+
+If set to a string value, Renovate will log warnings with the `encryptedWarning` text, meaning the message will be visible to users such as on the Dependency Dashboard.
+
 ## endpoint
 
 ## executionTimeout
