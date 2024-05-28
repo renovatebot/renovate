@@ -289,7 +289,7 @@ describe('workers/global/config/parse/env', () => {
         gitlabAutoMergeableCheckAttempts: 10,
         gitlabBranchStatusDelay: 10,
         gitlabMergeRequestDelay: 10,
-        platformVersion: '8.0.0'
+        platformVersion: '8.0.0',
       });
     });
 
