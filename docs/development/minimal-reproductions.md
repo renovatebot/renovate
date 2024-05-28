@@ -58,7 +58,7 @@ General steps:
 1. Set the repository visibility to `public`
 1. Give us the link to the repository
 
-### Why we won't use your production repository to debug
+### Why we do not use your production repository to debug
 
 You may think:
 
@@ -107,4 +107,4 @@ Then set a high `minimumReleaseAge` for that dependency, for example:
 }
 ```
 
-You'll get a lot of pending updates, which you can see on the Dependency Dashboard.
+You will get a lot of pending updates, which you can see on the Dependency Dashboard.

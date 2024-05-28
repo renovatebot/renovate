@@ -55,7 +55,7 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 | GitHub default with a tag                   | `github>abc/foo#1.2.3`           | `default` | `https://github.com/abc/foo` | `default.json`  | `1.2.3`        |
 | GitHub with preset name with a tag          | `github>abc/foo:xyz#1.2.3`       | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 | GitHub with preset name and path with a tag | `github>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://github.com/abc/foo` | `path/xyz.json` | `1.2.3`        |
-| GitHub with subpreset name and tag          | `github>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://github.com/abc/foo` | `xyz.json`      | `1.2.3`        |
+| GitHub with sub-preset name and tag         | `github>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://github.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 
 ### GitLab
 
@@ -67,7 +67,7 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 | GitLab default with a tag                   | `gitlab>abc/foo#1.2.3`           | `default` | `https://gitlab.com/abc/foo` | `default.json`  | `1.2.3`        |
 | GitLab with preset name with a tag          | `gitlab>abc/foo:xyz#1.2.3`       | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 | GitLab with preset name and path with a tag | `gitlab>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://gitlab.com/abc/foo` | `path/xyz.json` | `1.2.3`        |
-| GitLab with subpreset name and tag          | `gitlab>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://gitlab.com/abc/foo` | `xyz.json`      | `1.2.3`        |
+| GitLab with sub-preset name and tag         | `gitlab>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://gitlab.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 
 ### Gitea
 
@@ -79,7 +79,7 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 | Gitea default with a tag                   | `gitea>abc/foo#1.2.3`           | `default` | `https://gitea.com/abc/foo` | `default.json`  | `1.2.3`        |
 | Gitea with preset name with a tag          | `gitea>abc/foo:xyz#1.2.3`       | `xyz`     | `https://gitea.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 | Gitea with preset name and path with a tag | `gitea>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://gitea.com/abc/foo` | `path/xyz.json` | `1.2.3`        |
-| Gitea with subpreset name and tag          | `gitea>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://gitea.com/abc/foo` | `xyz.json`      | `1.2.3`        |
+| Gitea with sub-preset name and tag         | `gitea>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://gitea.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 
 ### Self-hosted Git
 
@@ -92,11 +92,11 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 | Local default with a tag                   | `local>abc/foo#1.2.3`           | `default` | `https://github.company.com/abc/foo` | `default.json`  | `1.2.3`        |
 | Local with preset name with a tag          | `local>abc/foo:xyz#1.2.3`       | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 | Local with preset name and path with a tag | `local>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.2.3`        |
-| Local with subpreset name and tag          | `local>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.2.3`        |
+| Local with sub-preset name and tag         | `local>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 
 <!-- prettier-ignore -->
 !!! tip
-    You can't combine the path and sub-preset syntaxes.
+    You can not combine the path and sub-preset syntaxes.
     This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.
     One workaround is to use distinct files instead of sub-presets.
 
@@ -116,7 +116,7 @@ It mostly uses Renovate config defaults but adds a few smart customizations such
 ## How to Use Preset Configs
 
 By default, Renovate App's onboarding PR suggests the `["config:recommended]"` preset.
-If you're self hosting, and want to use the `config:recommended` preset, then you must add `"onboardingConfig": { "extends": ["config:recommended"] }` to your bot's config.
+If you are self-hosting, and want to use the `config:recommended` preset, then you must add `"onboardingConfig": { "extends": ["config:recommended"] }` to your bot's config.
 
 Read the [Full Config Presets](./presets-config.md) page to learn more about our `config:` presets.
 
@@ -128,8 +128,8 @@ A typical onboarding `renovate.json` looks like this:
 }
 ```
 
-Here's an example of using presets to change Renovate's behavior.
-You're happy with the `config:recommended` preset, but want Renovate to create PRs when you're not at the office.
+Here is an example of using presets to change Renovate's behavior.
+You are happy with the `config:recommended` preset, but want Renovate to create PRs when you are not at the office.
 You look at our `schedule:` presets, and find the `schedule:nonOfficeHours` preset.
 You put `schedule:nonOfficeHours` in the `extends` array of your `renovate.json` file, like this:
 
@@ -174,9 +174,9 @@ Or if you think your preset would be valuable for others, please contribute a PR
 
 To host your preset config on GitHub:
 
-- Create a new repository. Normally you'd call it `renovate-config` but it can be named anything
+- Create a new repository. Normally you would call it `renovate-config` but it can be named anything
 - Add configuration files to this new repo for any presets you want to share. For the default preset, `default.json` will be checked. For named presets, `<preset-name>.json` will be loaded. For example, loading preset `library` would load `library.json`. No other files are necessary.
-- In other repos, reference it in an extends array like "github>owner/name", for example:
+- In other repos, reference it in an extends array like `github>owner/name`, for example:
 
   ```json
   {
@@ -193,7 +193,7 @@ For a private GitLab repository Renovate requires at least `Reporter` level acce
 
 To host your preset config on GitLab:
 
-- Create a new repository on GitLab. Normally you'd call it `renovate-config` but it can be named anything
+- Create a new repository on GitLab. Normally you would call it `renovate-config` but it can be named anything
 - Add a `default.json` to this new repo containing the preset config. No other files are necessary
 - In other repos, reference it in an extends array like "gitlab>owner/name", e.g. "gitlab>rarkins/renovate-config"
 
@@ -201,7 +201,7 @@ To host your preset config on GitLab:
 
 To host your preset config on Gitea:
 
-- Create a new repository on Gitea. Normally you'd call it `renovate-config` but you can use any name you want
+- Create a new repository on Gitea. Normally you would call it `renovate-config` but you can use any name you want
 - Add a `default.json` to this new repository containing the preset config. No other files are necessary
 - In other repositories, reference it in an extends array like `"gitea>owner/name"`, e.g. `"gitea>rarkins/renovate-config"`
 
@@ -279,7 +279,7 @@ If you are proposing a "monorepo" preset addition then it's OK to raise a PR dir
 
 ## Group/Organization level presets
 
-Whenever repository onboarding happens, Renovate checks for a a default config to extend.
+Whenever repository onboarding happens, Renovate checks for a default config to extend.
 Renovate will check for a repository called `renovate-config` with a `default.json` file in the parent user/group/org of the repository.
 On platforms that support nested groups (e.g. GitLab), Renovate will check for this repository at each level of grouping, from nearest to furthest, and use the first one it finds.
 On all platforms, it will then look for a repository named like `.{{platform}}` (e.g. `.github`) with a `renovate-config.json`, under the same top-level user/group/org.

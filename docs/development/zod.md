@@ -66,7 +66,7 @@ Avoid names like `ComplexNumberSchema`.
 
 ### Inferred types
 
-Create inferred types after schemas if they're needed somewhere in the code.
+Create inferred types after schemas if they are needed somewhere in the code.
 Place such inferred types just after the schema definition using the same name.
 
 While IDEs may confuse schema and type name sometimes, it's obvious which is which from the syntactic context.
@@ -99,7 +99,7 @@ const Box = z.object({
     red: z.number(),
     green: z.number(),
     blue: z.number(),
-  })
+  }),
   weight: z.number(),
 });
 
@@ -108,7 +108,7 @@ const volume = width * height * length;
 ```
 
 The code above refers to the `color` and `weight` fields, which Renovate does _not_ need to do its job.
-Here's the **correct** code:
+Here is the **correct** code:
 
 ```ts
 const Box = z.object({

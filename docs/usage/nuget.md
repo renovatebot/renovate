@@ -18,7 +18,7 @@ By default, this includes:
 
 - .NET Core 1.0 and above
 - .NET Standard class libraries
-- `.csproj`, `.fsproj` or `.vbproj` files that use the SDK-style syntax
+- `.csproj`, `.fsproj` or `.vbproj` files that use SDK-style syntaxes
 
 To convert your .NET Framework `.csproj`, `.fsproj` or `.vbproj` files into an SDK-style project, follow the steps in this [guide](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/).
 
@@ -39,7 +39,7 @@ Find out here how to [migrate from `packages.config` to `PackageReference`](http
 
 ## Alternate feeds
 
-By default Renovate performs all lookups on `https://api.nuget.org/v3/index.json`, but you can set alternative NuGet feeds.
+By default, Renovate performs all lookups on `https://api.nuget.org/v3/index.json`, but you can set alternative NuGet feeds.
 You can set alternative feeds:
 
 - in a [`NuGet.config` file](https://docs.microsoft.com/en-us/nuget/reference/nuget-config-file#package-source-sections) within your repository (Renovate will not search outside the repository), or
@@ -57,7 +57,7 @@ You can set alternative feeds:
 }
 ```
 
-In the example above we've set three NuGet feeds.
+In the example above we have set three NuGet feeds.
 The package resolving process uses the `merge` strategy to handle the three feeds.
 All feeds are checked for dependency updates, and duplicate updates are merged into a single dependency update.
 
@@ -118,7 +118,7 @@ Credentials for authenticated/private feeds can be given via host rules in the c
 }
 ```
 
-If you're using Azure DevOps, you can set `matchHost` to `pkgs.dev.azure.com`.
+If you are using Azure DevOps, you can set `matchHost` to `pkgs.dev.azure.com`.
 
 <!-- prettier-ignore -->
 !!! note
