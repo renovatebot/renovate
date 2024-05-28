@@ -258,7 +258,7 @@ describe('modules/manager/sbt/extract', () => {
           {
             packageName: 'org.example:bar_3',
             currentValue: '0.0.5',
-          }
+          },
         ],
       });
     });
