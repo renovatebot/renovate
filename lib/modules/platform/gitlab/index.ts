@@ -1217,8 +1217,7 @@ export async function addAssignees(
     logger.debug(`Adding assignees '${assignees.join(', ')}' to #${iid}`);
     const assigneeIds: number[] = [];
     for (const assignee of assignees) {
-      const userId = await getUserID(assignee);
-      assigneeIds.push(userId);
+      assigneeIds.push(await getUserID(assignee));
     }
     const url = `projects/${
       config.repository

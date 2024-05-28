@@ -9,9 +9,10 @@ export async function getUserID(username: string): Promise<number> {
     await gitlabApi.getJson<{ id: number }[]>(`users?username=${username}`)
   ).body;
 
-  // incase user id is not found an emprty array is returned
+  // when user ID is not found an empty array is returned
+  // this could happen if the user does not exist anymore
   if (userInfo.length === 0) {
-    logger.debug(`User ID for the username: ${username} not found.`);
+    logger.debug(`User ID for the username: ${username} could not be found.`);
     throw new Error();
   }
 

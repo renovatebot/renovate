@@ -1320,9 +1320,8 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.addAssignees(42, ['someuser', 'someotheruser']),
       ).toResolve();
-      expect(logger.warn).toHaveBeenCalledWith(
-        { username: 'someuser' },
-        'Could not retreive user ID for the username.',
+      expect(logger.debug).toHaveBeenCalledWith(
+        'User ID for the username: someuser could not be found.',
       );
     });
   });
