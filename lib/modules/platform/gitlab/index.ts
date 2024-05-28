@@ -1274,12 +1274,12 @@ export async function addReviewers(
     newReviewerIDs = (
       await p.all(
         newReviewers.map((r) => async () => {
-          try {
-            return [await getUserID(r)];
-          } catch (err) {
+          const id = [await getUserID(r)];
+          if (is.undefined(id)) {
             // Unable to fetch userId, try resolve as a group
             return getMemberUserIDs(r);
           }
+          return id;
         }),
       )
     )
