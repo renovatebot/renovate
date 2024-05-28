@@ -208,6 +208,41 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
     });
 
+    it('validates matchBaseBranches', async () => {
+      const config = {
+        baseBranches: ['foo'],
+        packageRules: [
+          {
+            matchBaseBranches: ['foo'],
+            addLabels: ['foo'],
+          },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('catches invalid matchBaseBranches when baseBranches is not defined', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchBaseBranches: ['foo'],
+            addLabels: ['foo'],
+          },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
+    });
+
     it('catches invalid matchCurrentVersion regex', async () => {
       const config = {
         packageRules: [
