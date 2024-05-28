@@ -1,7 +1,7 @@
 // TODO fix mocks
 import type * as _timers from 'timers/promises';
 import { mockDeep } from 'jest-mock-extended';
-import type { GitlabPlatformParams, Platform, RepoParams } from '..';
+import type { Platform, RepoParams } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
 import {
@@ -24,6 +24,16 @@ jest.mock('../../../util/git');
 jest.mock('timers/promises');
 
 const gitlabApiHost = 'https://gitlab.com';
+interface GitlabPlatformParams {
+  gitlabAutoMergeableCheckAttempts?: number;
+  gitlabBranchStatusDelay?: number;
+  gitlabMergeRequestDelay?: number;
+}
+const defaultGitlabPlatformParams = {
+  gitlabAutoMergeableCheckAttempts: 5,
+  gitlabBranchStatusDelay: 1000,
+  gitlabMergeRequestDelay: 250,
+};
 
 describe('modules/platform/gitlab/index', () => {
   let gitlab: Platform;
@@ -69,9 +79,10 @@ describe('modules/platform/gitlab/index', () => {
       });
 
     await gitlab.initPlatform({
-      ...(gitlabPlatformParams && { gitlabPlatformParams }),
       token: 'some-token',
       endpoint: undefined,
+      ...defaultGitlabPlatformParams,
+      ...(gitlabPlatformParams && { ...gitlabPlatformParams }),
     });
   }
 
@@ -949,6 +960,7 @@ describe('modules/platform/gitlab/index', () => {
     const states: BranchStatus[] = ['green', 'yellow', 'red'];
 
     it.each(states)('sets branch status %s', async (state) => {
+      await initFakePlatform('13.3.6-ee');
       const scope = await initRepo();
       scope
         .post(
@@ -976,6 +988,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('waits for 1000ms by default', async () => {
+      await initFakePlatform('13.3.6-ee');
       const scope = await initRepo();
       scope
         .post(
@@ -1004,6 +1017,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('set branch status with pipeline_id', async () => {
+      await initFakePlatform('13.3.6-ee');
       const scope = await initRepo();
       scope
         .post(
@@ -1767,9 +1781,10 @@ describe('modules/platform/gitlab/index', () => {
         version: gitlabVersion,
       });
     await gitlab.initPlatform({
-      ...(gitlabPlatformParams && { gitlabPlatformParams }),
       token: 'some-token',
       endpoint: undefined,
+      ...defaultGitlabPlatformParams,
+      ...(gitlabPlatformParams && { ...gitlabPlatformParams }),
     });
   }
 

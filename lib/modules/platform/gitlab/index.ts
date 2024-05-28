@@ -105,7 +105,9 @@ export async function initPlatform({
   token,
   gitAuthor,
   platformVersion,
-  gitlabPlatformParams,
+  gitlabAutoMergeableCheckAttempts,
+  gitlabMergeRequestDelay,
+  gitlabBranchStatusDelay,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
@@ -158,7 +160,11 @@ export async function initPlatform({
     : DRAFT_PREFIX;
 
   config = {
-    ...(gitlabPlatformParams && { ...gitlabPlatformParams }),
+    ...(gitlabAutoMergeableCheckAttempts && {
+      gitlabAutoMergeableCheckAttempts,
+    }),
+    ...(gitlabMergeRequestDelay && { gitlabMergeRequestDelay }),
+    ...(gitlabBranchStatusDelay && { gitlabBranchStatusDelay }),
   } as any;
 
   return platformConfig;
@@ -673,9 +679,9 @@ async function tryPrAutomerge(
       ];
       const desiredStatus = 'can_be_merged';
       // The default value of 5 attempts results in max. 13.75 seconds timeout if no pipeline created.
-      const retryTimes = config.gitlabAutoMergeableCheckAttempts ?? 5;
+      const retryTimes = config.gitlabAutoMergeableCheckAttempts!;
 
-      const mergeDelay = config.gitlabMergeRequestDelay ?? 250;
+      const mergeDelay = config.gitlabMergeRequestDelay!;
 
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
@@ -1043,7 +1049,7 @@ export async function setBranchStatus({
 
   try {
     // give GitLab some time to create pipelines for the SHA
-    await setTimeout(config.gitlabBranchStatusDelay ?? 1000);
+    await setTimeout(config.gitlabBranchStatusDelay);
 
     await gitlabApi.postJson(url, { body: options });
 
