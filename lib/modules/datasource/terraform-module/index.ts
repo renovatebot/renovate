@@ -25,6 +25,13 @@ export class TerraformModuleDatasource extends TerraformDatasource {
 
   override readonly defaultVersioning = hashicorpVersioning.id;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is only supported for the latest version, and is determined from the `published_at` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the the `source` field in the results.';
+
   readonly extendedApiRegistryUrls = [
     'https://registry.terraform.io',
     'https://app.terraform.io',
@@ -32,7 +39,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
 
   /**
    * This function will fetch a package from the specified Terraform registry and return all semver versions.
-   *  - `sourceUrl` is supported of "source" field is set
+   *  - `sourceUrl` is supported if "source" field is set
    *  - `homepage` is set to the Terraform registry's page if it's on the official main registry
    */
   @cache({

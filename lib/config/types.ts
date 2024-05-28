@@ -147,6 +147,7 @@ export interface RepoGlobalConfig {
   dockerSidecarImage?: string;
   dockerUser?: string;
   dryRun?: DryRunConfig;
+  encryptedWarning?: string;
   endpoint?: string;
   executionTimeout?: number;
   exposeAllEnv?: boolean;
@@ -154,6 +155,8 @@ export interface RepoGlobalConfig {
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
   localDir?: string;
+  mergeConfidenceEndpoint?: string;
+  mergeConfidenceDatasources?: string[];
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   presetCachePersistence?: boolean;

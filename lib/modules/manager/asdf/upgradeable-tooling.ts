@@ -415,6 +415,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^mimir-(?<version>\\S+)',
     },
   },
+  minikube: {
+    asdfPluginUrl: 'https://github.com/alvarobp/asdf-minikube.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'kubernetes/minikube',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   nim: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-nim',
     config: {
@@ -498,6 +506,13 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubTagsDatasource.id,
       packageName: 'python/cpython',
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  rebar: {
+    asdfPluginUrl: 'https://github.com/Stratus3D/asdf-rebar.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'erlang/rebar3',
     },
   },
   ruby: {
