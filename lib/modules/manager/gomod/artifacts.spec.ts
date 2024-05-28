@@ -4,7 +4,6 @@ import { join } from 'upath';
 import {
   envMock,
   mockExecAll,
-  mockExecSequence,
 } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
