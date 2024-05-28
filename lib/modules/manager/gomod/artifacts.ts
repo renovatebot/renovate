@@ -13,6 +13,7 @@ import {
   isValidLocalPath,
   readLocalFile,
   writeLocalFile,
+  findLocalSiblingOrParent,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
@@ -287,15 +288,15 @@ export async function updateArtifacts({
     if (useVendor) {
       // If go env GOWORK returns a non-empty path, check that it exists and if
       // it does, then use go workspace vendoring.
-      const goWorkEnv = await exec(`${cmd} env GOWORK`, execOptions);
-      const goWorkFile = goWorkEnv?.stdout?.trim() || '';
-      const useGoWork =
-        goWorkFile.length && (await readLocalFile(goWorkFile)) !== null;
-      if (!useGoWork) {
+      const goWorkFile = await findLocalSiblingOrParent(
+        goModFileName,
+        'go.work',
+      );
+      if (!goWorkFile) {
         logger.debug('No go.work found');
       }
 
-      if (useGoWork) {
+      if (goWorkFile) {
         args = 'work vendor';
         logger.debug('using go work vendor');
         execCommands.push(`${cmd} ${args}`);
