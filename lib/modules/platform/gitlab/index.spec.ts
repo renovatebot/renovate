@@ -1320,8 +1320,23 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.addAssignees(42, ['someuser', 'someotheruser']),
       ).toResolve();
+    });
+
+    it('logs a proper error message when user ID not found', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/users?username=someuser')
+        .reply(304, []);
+      await expect(
+        gitlab.addAssignees(42, ['someuser', 'someotheruser']),
+      ).toResolve();
       expect(logger.debug).toHaveBeenCalledWith(
-        'User ID for the username: someuser could not be found.',
+        {
+          err: new Error(
+            'User ID for the username: someuser could not be found.',
+          ),
+        },
+        'addAssignees error',
       );
     });
   });

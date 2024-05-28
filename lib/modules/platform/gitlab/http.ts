@@ -12,8 +12,9 @@ export async function getUserID(username: string): Promise<number> {
   // when user ID is not found an empty array is returned
   // this could happen if the user does not exist anymore
   if (userInfo.length === 0) {
-    logger.debug(`User ID for the username: ${username} could not be found.`);
-    throw new Error();
+    throw new Error(
+      `User ID for the username: ${username} could not be found.`,
+    );
   }
 
   return userInfo[0].id;
