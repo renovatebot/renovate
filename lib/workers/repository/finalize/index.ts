@@ -31,7 +31,7 @@ export async function finalizeRepo(
         pr.state === 'merged' &&
         pr.title !== 'Configure Renovate' &&
         pr.title !== config.onboardingPrTitle &&
-        pr.sourceBranch !== config.onboardingBranch
+        pr.sourceBranch !== config.onboardingBranch,
     )
   ) {
     logger.debug('Repo is activated');
