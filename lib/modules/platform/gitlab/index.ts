@@ -48,6 +48,7 @@ import type {
   PlatformPrOptions,
   PlatformResult,
   Pr,
+  ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -266,7 +267,7 @@ function getRepoUrl(
     res.body.http_url_to_repo === null
   ) {
     if (res.body.http_url_to_repo === null) {
-      logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
+      logger.debug('no http_url_to_repo found. Falling back to old behavior.');
     }
     if (process.env.GITLAB_IGNORE_REPO_URL) {
       logger.warn(
@@ -608,7 +609,10 @@ async function ignoreApprovals(pr: number): Promise<void> {
     );
     const existingRegularApproverRules = rules?.filter(
       ({ rule_type, name }) =>
-        rule_type !== 'any_approver' && name !== ruleName,
+        rule_type !== 'any_approver' &&
+        name !== ruleName &&
+        rule_type !== 'report_approver' &&
+        rule_type !== 'code_owner',
     );
 
     if (existingRegularApproverRules?.length) {
@@ -814,6 +818,8 @@ export async function updatePr({
   number: iid,
   prTitle,
   prBody: description,
+  addLabels,
+  removeLabels,
   state,
   platformOptions,
   targetBranch,
@@ -837,6 +843,14 @@ export async function updatePr({
     body.target_branch = targetBranch;
   }
 
+  if (addLabels) {
+    body.add_labels = addLabels;
+  }
+
+  if (removeLabels) {
+    body.remove_labels = removeLabels;
+  }
+
   await gitlabApi.putJson(
     `projects/${config.repository}/merge_requests/${iid}`,
     { body },
@@ -845,8 +859,15 @@ export async function updatePr({
   if (platformOptions?.autoApprove) {
     await approvePr(iid);
   }
+}
 
+export async function reattemptPlatformAutomerge({
+  number: iid,
+  platformOptions,
+}: ReattemptPlatformAutomergeConfig): Promise<void> {
   await tryPrAutomerge(iid, platformOptions);
+
+  logger.debug(`PR platform automerge re-attempted...prNo: ${iid}`);
 }
 
 export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
@@ -1048,11 +1069,14 @@ export async function setBranchStatus({
 
 export async function getIssueList(): Promise<GitlabIssue[]> {
   if (!config.issueList) {
-    const query = getQueryString({
+    const searchParams: Record<string, string> = {
       per_page: '100',
-      scope: 'created_by_me',
       state: 'opened',
-    });
+    };
+    if (!config.ignorePrAuthor) {
+      searchParams.scope = 'created_by_me';
+    }
+    const query = getQueryString(searchParams);
     const res = await gitlabApi.getJson<
       { iid: number; title: string; labels: string[] }[]
     >(`projects/${config.repository}/issues?${query}`, {

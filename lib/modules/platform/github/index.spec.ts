@@ -19,7 +19,12 @@ import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/github';
 import { toBase64 } from '../../../util/string';
 import { hashBody } from '../pr-body';
-import type { CreatePRConfig, RepoParams, UpdatePrConfig } from '../types';
+import type {
+  CreatePRConfig,
+  ReattemptPlatformAutomergeConfig,
+  RepoParams,
+  UpdatePrConfig,
+} from '../types';
 import * as branch from './branch';
 import type { ApiPageCache, GhRestPr } from './types';
 import * as github from '.';
@@ -1740,7 +1745,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .post('/repos/some/repo/issues')
-        .reply(200);
+        .reply(200, {
+          number: 3,
+          state: 'open',
+          title: 'new-title',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'new-title',
         body: 'new-content',
@@ -1855,7 +1866,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .post('/repos/some/repo/issues')
-        .reply(200);
+        .reply(200, {
+          number: 3,
+          state: 'open',
+          title: 'new-title',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'new-title',
         body: 'new-content',
@@ -1961,7 +1978,13 @@ describe('modules/platform/github/index', () => {
           updated_at: '2023-01-01T00:00:00Z',
         })
         .patch('/repos/some/repo/issues/2')
-        .reply(200);
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'newer-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'title-3',
         reuseTitle: 'title-2',
@@ -2014,7 +2037,13 @@ describe('modules/platform/github/index', () => {
           updated_at: '2023-01-01T00:00:00Z',
         })
         .patch('/repos/some/repo/issues/2')
-        .reply(200);
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'newer-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'title-3',
         reuseTitle: 'title-2',
@@ -2103,14 +2132,6 @@ describe('modules/platform/github/index', () => {
             },
           },
         })
-        .get('/repos/some/repo/issues/2')
-        .reply(200, {
-          number: 2,
-          state: 'open',
-          title: 'title-1',
-          body: 'newer-content',
-          updated_at: '2021-01-01T00:00:00Z',
-        })
         .patch('/repos/some/repo/issues/1')
         .reply(200);
       const res = await github.ensureIssue({
@@ -2157,7 +2178,13 @@ describe('modules/platform/github/index', () => {
           updated_at: '2023-01-01T00:00:00Z',
         })
         .post('/repos/some/repo/issues')
-        .reply(200);
+        .reply(200, {
+          number: 3,
+          state: 'open',
+          title: 'title-2',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'title-2',
         body: 'new-content',
@@ -2248,7 +2275,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .patch('/repos/undefined/issues/2')
-        .reply(200);
+        .reply(200, {
+          number: 2,
+          state: 'closed',
+          title: 'title-2',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       await expect(github.ensureIssueClosing('title-2')).toResolve();
     });
   });
@@ -2267,7 +2300,13 @@ describe('modules/platform/github/index', () => {
     it('should add the given assignees to the issue', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.post('/repos/some/repo/issues/42/assignees').reply(200);
+      scope.post('/repos/some/repo/issues/42/assignees').reply(200, {
+        number: 42,
+        state: 'open',
+        title: 'title-42',
+        body: 'body-42',
+        updated_at: '2023-01-01T00:00:00Z',
+      });
       await github.initRepo({ repository: 'some/repo' });
       await expect(
         github.addAssignees(42, ['someuser', 'someotheruser']),
@@ -3001,7 +3040,13 @@ describe('modules/platform/github/index', () => {
           });
         scope
           .patch('/repos/some/repo/issues/123', (body) => body.milestone === 1)
-          .reply(200, {});
+          .reply(200, {
+            number: 123,
+            state: 'open',
+            title: 'bump someDep to v2',
+            body: 'many informations about someDep',
+            updated_at: '2023-01-01T00:00:00Z',
+          });
         await github.initRepo({ repository: 'some/repo' });
         const pr = await github.createPr({
           targetBranch: 'main',
@@ -3327,6 +3372,165 @@ describe('modules/platform/github/index', () => {
       scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
 
       await expect(github.updatePr(pr)).toResolve();
+    });
+
+    it('should add and remove labels', async () => {
+      const pr: UpdatePrConfig = {
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+        state: 'closed',
+        targetBranch: 'new_base',
+        addLabels: ['new_label'],
+        removeLabels: ['old_label'],
+      };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
+        .patch('/repos/some/repo/pulls/1234')
+        .reply(200, {
+          number: 91,
+          base: { sha: '1234' },
+          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+          state: 'open',
+          title: 'old title',
+          updated_at: '01-09-2022',
+        })
+        .post('/repos/some/repo/issues/1234/labels')
+        .reply(200, pr)
+        .delete('/repos/some/repo/issues/1234/labels/old_label')
+        .reply(200, pr);
+
+      await expect(github.updatePr(pr)).toResolve();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        `Adding labels 'new_label' to #1234`,
+      );
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        `Deleting label old_label from #1234`,
+      );
+    });
+  });
+
+  describe('reattemptPlatformAutomerge(number, platformOptions)', () => {
+    const getPrListResp = [
+      {
+        number: 1234,
+        base: { sha: '1234' },
+        head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+        state: 'open',
+        title: 'Some PR',
+      },
+    ];
+    const getPrResp = {
+      number: 123,
+      node_id: 'abcd',
+      head: { repo: { full_name: 'some/repo' } },
+    };
+
+    const graphqlAutomergeResp = {
+      data: {
+        enablePullRequestAutoMerge: {
+          pullRequest: {
+            number: 123,
+          },
+        },
+      },
+    };
+
+    const pr: ReattemptPlatformAutomergeConfig = {
+      number: 123,
+      platformOptions: { usePlatformAutomerge: true },
+    };
+
+    const mockScope = async (repoOpts: any = {}): Promise<httpMock.Scope> => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo', repoOpts);
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, getPrListResp);
+      scope.get('/repos/some/repo/pulls/123').reply(200, getPrResp);
+      await github.initRepo({ repository: 'some/repo' });
+      return scope;
+    };
+
+    const graphqlGetRepo = {
+      method: 'POST',
+      url: 'https://api.github.com/graphql',
+      graphql: { query: { repository: {} } },
+    };
+
+    const restGetPrList = {
+      method: 'GET',
+      url: 'https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+    };
+
+    const restGetPr = {
+      method: 'GET',
+      url: 'https://api.github.com/repos/some/repo/pulls/123',
+    };
+
+    const graphqlAutomerge = {
+      method: 'POST',
+      url: 'https://api.github.com/graphql',
+      graphql: {
+        mutation: {
+          __vars: {
+            $pullRequestId: 'ID!',
+            $mergeMethod: 'PullRequestMergeMethod!',
+          },
+          enablePullRequestAutoMerge: {
+            __args: {
+              input: {
+                pullRequestId: '$pullRequestId',
+                mergeMethod: '$mergeMethod',
+              },
+            },
+          },
+        },
+        variables: {
+          pullRequestId: 'abcd',
+          mergeMethod: 'REBASE',
+        },
+      },
+    };
+
+    it('should set automatic merge', async () => {
+      const scope = await mockScope();
+      scope.post('/graphql').reply(200, graphqlAutomergeResp);
+
+      await expect(github.reattemptPlatformAutomerge(pr)).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenLastCalledWith(
+        'PR platform automerge re-attempted...prNo: 123',
+      );
+
+      expect(httpMock.getTrace()).toMatchObject([
+        graphqlGetRepo,
+        restGetPrList,
+        restGetPr,
+        graphqlAutomerge,
+      ]);
+    });
+
+    it('handles unknown error', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .replyWithError('unknown error');
+
+      await expect(github.reattemptPlatformAutomerge(pr)).toResolve();
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { err: new Error('external-host-error') },
+        'Error re-attempting PR platform automerge',
+      );
     });
   });
 

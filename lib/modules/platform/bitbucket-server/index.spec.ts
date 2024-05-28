@@ -1,11 +1,13 @@
 import is from '@sindresorhus/is';
 import { mockDeep } from 'jest-mock-extended';
 import * as httpMock from '../../../../test/http-mock';
+import { mocked } from '../../../../test/util';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
+import type { logger as _logger } from '../../../logger';
 import type * as _git from '../../../util/git';
 import type { LongCommitSha } from '../../../util/git/types';
 import type { Platform } from '../types';
@@ -185,6 +187,7 @@ describe('modules/platform/bitbucket-server/index', () => {
 
       let hostRules: jest.Mocked<HostRules>;
       let git: jest.Mocked<typeof _git>;
+      let logger: jest.Mocked<typeof _logger>;
       const username = 'abc';
       const password = '123';
 
@@ -211,6 +214,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         // reset module
         jest.resetModules();
         bitbucket = await import('.');
+        logger = mocked(await import('../../../logger')).logger;
         hostRules = jest.requireMock('../../../util/host-rules');
         git = jest.requireMock('../../../util/git');
         git.branchExists.mockReturnValue(true);
@@ -226,6 +230,10 @@ describe('modules/platform/bitbucket-server/index', () => {
           username,
           password,
         });
+        httpMock
+          .scope(urlHost)
+          .get(`${urlPath}/rest/api/1.0/application-properties`)
+          .reply(200, { version: '8.0.0' });
         await bitbucket.initPlatform({
           endpoint,
           username,
@@ -234,19 +242,85 @@ describe('modules/platform/bitbucket-server/index', () => {
       });
 
       describe('initPlatform()', () => {
-        it('should throw if no endpoint', () => {
+        it('should throw if no endpoint', async () => {
           expect.assertions(1);
-          expect(() => bitbucket.initPlatform({})).toThrow();
+          await expect(bitbucket.initPlatform({})).rejects.toThrow();
         });
 
-        it('should throw if no username/password', () => {
+        it('should throw if no username/password/token', async () => {
           expect.assertions(1);
-          expect(() =>
+          await expect(
             bitbucket.initPlatform({ endpoint: 'endpoint' }),
-          ).toThrow();
+          ).rejects.toThrow();
+        });
+
+        it('should throw if password and token is set', async () => {
+          expect.assertions(1);
+          await expect(
+            bitbucket.initPlatform({
+              endpoint: 'endpoint',
+              username: 'abc',
+              password: '123',
+              token: 'abc',
+            }),
+          ).rejects.toThrow();
+        });
+
+        it('should not throw if username/password', async () => {
+          expect.assertions(1);
+          await expect(
+            bitbucket.initPlatform({
+              endpoint: 'endpoint',
+              username: 'abc',
+              password: '123',
+            }),
+          ).resolves.not.toThrow();
+        });
+
+        it('should not throw if token', async () => {
+          expect.assertions(1);
+          await expect(
+            bitbucket.initPlatform({
+              endpoint: 'endpoint',
+              token: 'abc',
+            }),
+          ).resolves.not.toThrow();
+        });
+
+        it('should throw if version could not be fetched', async () => {
+          httpMock
+            .scope('https://stash.renovatebot.com')
+            .get('/rest/api/1.0/application-properties')
+            .reply(403);
+
+          await bitbucket.initPlatform({
+            endpoint: 'https://stash.renovatebot.com',
+            username: 'abc',
+            password: '123',
+          });
+          expect(logger.debug).toHaveBeenCalledWith(
+            expect.any(Object),
+            'Error authenticating with Bitbucket. Check that your token includes "api" permissions',
+          );
+        });
+
+        it('should skip api call to fetch version when platform version is set in environment', async () => {
+          process.env.RENOVATE_X_PLATFORM_VERSION = '8.0.0';
+          await expect(
+            bitbucket.initPlatform({
+              endpoint: 'https://stash.renovatebot.com',
+              username: 'abc',
+              password: '123',
+            }),
+          ).toResolve();
+          delete process.env.RENOVATE_X_PLATFORM_VERSION;
         });
 
         it('should init', async () => {
+          httpMock
+            .scope('https://stash.renovatebot.com')
+            .get('/rest/api/1.0/application-properties')
+            .reply(200, { version: '8.0.0' });
           expect(
             await bitbucket.initPlatform({
               endpoint: 'https://stash.renovatebot.com',

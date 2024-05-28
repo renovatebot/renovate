@@ -7,6 +7,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -140,9 +141,26 @@ export function extractImage(
 
 export function extractHelmChart(
   helmChart: HelmChart,
+  aliases?: Record<string, string> | undefined,
 ): PackageDependency | null {
   if (!helmChart.name) {
     return null;
+  }
+
+  if (isOCIRegistry(helmChart.repo)) {
+    const dep = getDep(
+      `${removeOCIPrefix(helmChart.repo)}/${helmChart.name}:${helmChart.version}`,
+      false,
+      aliases,
+    );
+    return {
+      ...dep,
+      depName: helmChart.name,
+      packageName: dep.depName,
+      // https://github.com/helm/helm/issues/10312
+      // https://github.com/helm/helm/issues/10678
+      pinDigests: false,
+    };
   }
 
   return {
@@ -238,7 +256,7 @@ export function extractPackageFile(
 
   // grab the helm charts
   for (const helmChart of coerceArray(pkg.helmCharts)) {
-    const dep = extractHelmChart(helmChart);
+    const dep = extractHelmChart(helmChart, config.registryAliases);
     if (dep) {
       deps.push({
         ...dep,

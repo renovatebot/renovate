@@ -177,7 +177,7 @@ export async function extractPackageFile(
     for (const dep of res.deps) {
       if (dep.depName) {
         const registryUrlFromYarnConfig = resolveRegistryUrl(
-          dep.depName,
+          dep.packageName ?? dep.depName,
           yarnConfig,
         );
         if (registryUrlFromYarnConfig && dep.datasource === NpmDatasource.id) {

@@ -48,6 +48,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     delete process.env.BUILDPACK;
     delete process.env.HTTP_PROXY;
     delete process.env.HTTPS_PROXY;
+    delete process.env.RENOVATE_X_YARN_PROXY;
     Fixtures.reset();
     GlobalConfig.set({ localDir: '.', cacheDir: '/tmp/cache' });
     removeDockerContainer.mockResolvedValue();
@@ -152,6 +153,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   it('sets http proxy', async () => {
     process.env.HTTP_PROXY = 'http://proxy';
     process.env.HTTPS_PROXY = 'http://proxy';
+    process.env.RENOVATE_X_YARN_PROXY = 'true';
     GlobalConfig.set({
       localDir: '.',
       allowScripts: true,
@@ -175,7 +177,9 @@ describe('modules/manager/npm/post-update/yarn', () => {
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(fixSnapshots(execSnapshots)).toMatchObject([
+      { cmd: 'yarn config unset --home httpProxy' },
       { cmd: 'yarn config set --home httpProxy http://proxy' },
+      { cmd: 'yarn config unset --home httpsProxy' },
       { cmd: 'yarn config set --home httpsProxy http://proxy' },
       {},
     ]);

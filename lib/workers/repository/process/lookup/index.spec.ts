@@ -4,11 +4,15 @@ import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
 import { partial } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
+import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence';
+import type { AllConfig } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
+import { CustomDatasource } from '../../../../modules/datasource/custom';
 import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags';
+import { GoDatasource } from '../../../../modules/datasource/go';
 import { MavenDatasource } from '../../../../modules/datasource/maven';
 import { NpmDatasource } from '../../../../modules/datasource/npm';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist';
@@ -61,6 +65,11 @@ describe('workers/repository/process/lookup/index', () => {
   );
 
   const getMavenReleases = jest.spyOn(MavenDatasource.prototype, 'getReleases');
+
+  const getCustomDatasourceReleases = jest.spyOn(
+    CustomDatasource.prototype,
+    'getReleases',
+  );
 
   const getDockerDigest = jest.spyOn(DockerDatasource.prototype, 'getDigest');
 
@@ -2785,6 +2794,21 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('should upgrade to 16 minors', async () => {
+      config.currentValue = '1.0.0';
+      config.separateMultipleMinor = true;
+      config.packageName = 'webpack';
+      config.datasource = NpmDatasource.id;
+      httpMock
+        .scope('https://registry.npmjs.org')
+        .get('/webpack')
+        .reply(200, webpackJson);
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+      expect(updates).toHaveLength(16);
+    });
+
     it('does not jump  major unstable', async () => {
       config.currentValue = '^4.4.0-canary.3';
       config.rangeStrategy = 'replace';
@@ -2970,7 +2994,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('rejects non-fully specified in-range updates', async () => {
-      config.rangeStrategy = 'bump';
+      config.rangeStrategy = 'update-lockfile';
       config.currentValue = '1.x';
       config.packageName = 'q';
       config.datasource = NpmDatasource.id;
@@ -3134,6 +3158,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect(res).toEqual({
         currentVersion: '1.3.0',
+        currentVersionTimestamp: '2015-04-26T16:42:11.311Z',
         fixedVersion: '1.3.0',
         isSingleVersion: true,
         registryUrl: 'https://registry.npmjs.org',
@@ -3154,13 +3179,16 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
-    it('ignores deprecated', async () => {
+    it('ignores deprecated when it is not the latest', async () => {
       config.currentValue = '1.3.0';
       config.packageName = 'q2';
       config.datasource = NpmDatasource.id;
       const returnJson = JSON.parse(JSON.stringify(qJson));
       returnJson.name = 'q2';
+      // mark latest minor as deprecated
       returnJson.versions['1.4.1'].deprecated = 'true';
+      // make sure latest release isn't the one deprecated as otherwise every release is deprecated
+      returnJson['dist-tags'].latest = '2.0.3';
       httpMock
         .scope('https://registry.npmjs.org')
         .get('/q2')
@@ -3169,16 +3197,9 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await Result.wrap(
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
-
       expect(res).toEqual({
         currentVersion: '1.3.0',
-        deprecationMessage: codeBlock`
-          On registry \`https://registry.npmjs.org\`, the "latest" version of dependency \`q2\` has the following deprecation notice:
-
-          \`true\`
-
-          Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.
-        `,
+        currentVersionTimestamp: '2015-04-26T16:42:11.311Z',
         fixedVersion: '1.3.0',
         isSingleVersion: true,
         registryUrl: 'https://registry.npmjs.org',
@@ -3193,13 +3214,22 @@ describe('workers/repository/process/lookup/index', () => {
             releaseTimestamp: expect.any(String),
             updateType: 'minor',
           },
+          {
+            bucket: 'major',
+            newMajor: 2,
+            newMinor: 0,
+            newValue: '2.0.3',
+            newVersion: '2.0.3',
+            releaseTimestamp: expect.any(String),
+            updateType: 'major',
+          },
         ],
         versioning: 'npm',
         warnings: [],
       });
     });
 
-    it('is deprecated', async () => {
+    it('treats all versions as deprecated if latest is deprecated', async () => {
       config.currentValue = '1.3.0';
       config.packageName = 'q3';
       config.datasource = NpmDatasource.id;
@@ -3209,6 +3239,7 @@ describe('workers/repository/process/lookup/index', () => {
         deprecated: true,
         repository: { url: null, directory: 'test' },
       };
+      returnJson.versions['1.4.1'].deprecated = 'true';
 
       httpMock
         .scope('https://registry.npmjs.org')
@@ -3221,6 +3252,14 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect(res).toEqual({
         currentVersion: '1.3.0',
+        currentVersionTimestamp: '2015-04-26T16:42:11.311Z',
+        deprecationMessage: codeBlock`
+        On registry \`https://registry.npmjs.org\`, the "latest" version of dependency \`q3\` has the following deprecation notice:
+
+        \`true\`
+
+        Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.
+      `,
         fixedVersion: '1.3.0',
         isSingleVersion: true,
         registryUrl: 'https://registry.npmjs.org',
@@ -3822,6 +3861,33 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('handles digest update for custom datasource', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'my-package';
+      config.datasource = CustomDatasource.id;
+      config.currentDigest = 'zzzzzzzzzzzzzzz';
+      getCustomDatasourceReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '1.0.0',
+            newDigest: '0123456789abcdef',
+          },
+        ],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          newDigest: '0123456789abcdef',
+          newValue: '1.0.0',
+          updateType: 'digest',
+        },
+      ]);
+    });
+
     it('handles digest update for non-version', async () => {
       config.currentValue = 'alpine';
       config.packageName = 'node';
@@ -3979,14 +4045,15 @@ describe('workers/repository/process/lookup/index', () => {
           allowedVersions: '< 19.0.0',
         },
       ];
+      const releaseTimestamp = new Date(
+        Date.now() - 25 * 60 * 60 * 1000,
+      ).toISOString();
       getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '17.0.0',
             // a day old release
-            releaseTimestamp: new Date(
-              Date.now() - 25 * 60 * 60 * 1000,
-            ).toISOString(),
+            releaseTimestamp,
           },
           {
             version: '18.0.0',
@@ -4003,6 +4070,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect(res).toEqual({
         currentVersion: '17.0.0',
+        currentVersionTimestamp: releaseTimestamp,
         fixedVersion: '17.0.0',
         isSingleVersion: true,
         registryUrl: 'https://index.docker.io',
@@ -4018,7 +4086,6 @@ describe('workers/repository/process/lookup/index', () => {
         ],
         versioning: 'docker',
         warnings: [],
-        currentVersionTimestamp: undefined,
       });
     });
 
@@ -4186,6 +4253,95 @@ describe('workers/repository/process/lookup/index', () => {
           newValue: undefined,
         },
       ]);
+    });
+
+    it('handles replacements - Digest configured and validating getDigest funtion call', async () => {
+      config.packageName = 'openjdk';
+      config.currentDigest = 'sha256:fedcba0987654321';
+      config.currentValue = '17.0.0';
+      //config.pinDigests = true;
+      config.datasource = DockerDatasource.id;
+      config.versioning = dockerVersioningId;
+      // This config is normally set when packageRules are applied
+      config.replacementName = 'eclipse-temurin';
+      config.replacementVersion = '19.0.0';
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+          {
+            version: '17.0.1',
+          },
+        ],
+        lookupName: 'openjdk',
+      });
+      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      getDockerDigest.mockResolvedValueOnce('sha256:fedcba0987654321');
+      getDockerDigest.mockResolvedValueOnce('sha256:pin0987654321');
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newDigest: 'sha256:abcdef1234567890',
+          newMajor: 17,
+          newMinor: 0,
+          newValue: '17.0.1',
+          newVersion: '17.0.1',
+          updateType: 'patch',
+        },
+        {
+          newDigest: 'sha256:fedcba0987654321',
+          newName: 'eclipse-temurin',
+          newValue: '19.0.0',
+          newVersion: undefined,
+          updateType: 'replacement',
+        },
+        {
+          newDigest: 'sha256:pin0987654321',
+          newValue: '17.0.0',
+          newVersion: undefined,
+          updateType: 'digest',
+        },
+      ]);
+
+      expect(getDockerDigest).toHaveBeenNthCalledWith(
+        1,
+        {
+          currentDigest: 'sha256:fedcba0987654321',
+          currentValue: '17.0.0',
+          lookupName: 'openjdk',
+          packageName: 'openjdk',
+          registryUrl: 'https://index.docker.io',
+        },
+        '17.0.1',
+      );
+      expect(getDockerDigest).toHaveBeenNthCalledWith(
+        2,
+        {
+          currentDigest: undefined,
+          currentValue: '17.0.0',
+          lookupName: undefined,
+          packageName: 'eclipse-temurin',
+          registryUrl: 'https://index.docker.io',
+        },
+        '19.0.0',
+      );
+      expect(getDockerDigest).toHaveBeenNthCalledWith(
+        3,
+        {
+          currentDigest: 'sha256:fedcba0987654321',
+          currentValue: '17.0.0',
+          lookupName: 'openjdk',
+          packageName: 'openjdk',
+          registryUrl: 'https://index.docker.io',
+        },
+        '17.0.0',
+      );
     });
 
     it('handles replacements - skips if package and replacement names match', async () => {
@@ -4391,6 +4547,10 @@ describe('workers/repository/process/lookup/index', () => {
 
     describe('handles merge confidence', () => {
       const defaultApiBaseUrl = 'https://developer.mend.io/';
+      const mcConfig: AllConfig = {
+        mergeConfidenceEndpoint: defaultApiBaseUrl,
+        mergeConfidenceDatasources: presetSupportedDatasources,
+      };
       const getMergeConfidenceSpy = jest.spyOn(
         McApi,
         'getMergeConfidenceLevel',
@@ -4402,7 +4562,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       beforeEach(() => {
         hostRules.add(hostRule);
-        initConfig();
+        initConfig(mcConfig);
         memCache.reset();
       });
 
@@ -4483,7 +4643,7 @@ describe('workers/repository/process/lookup/index', () => {
         config.packageName = 'webpack';
         config.datasource = datasource;
         hostRules.clear(); // reset merge confidence
-        initConfig();
+        initConfig(mcConfig);
         httpMock
           .scope('https://registry.npmjs.org')
           .get('/webpack')
@@ -4495,6 +4655,43 @@ describe('workers/repository/process/lookup/index', () => {
 
         expect(updates).toBeEmptyArray();
       });
+    });
+
+    it('detects gomod updates and uses updateType=digest when appropriate', async () => {
+      config.manager = 'gomod';
+      config.datasource = GoDatasource.id;
+      config.currentValue = 'v0.0.0-20240506185236-b8a5c65736ae';
+      config.currentDigest = 'b8a5c65736ae';
+      config.packageName = 'google.golang.org/genproto/googleapis/rpc';
+      config.digestOneAndOnly = true;
+
+      httpMock
+        .scope(
+          'https://proxy.golang.org/google.golang.org/genproto/googleapis/rpc',
+        )
+        .get('/@v/list')
+        .reply(200, '')
+        .get('/v2/@v/list')
+        .reply(404)
+        .get('/@latest')
+        .reply(200, { Version: 'v0.0.0-20240509183442-62759503f434' });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newDigest: '62759503f434',
+          newMajor: 0,
+          newMinor: 0,
+          newValue: 'v0.0.0-20240509183442-62759503f434',
+          newVersion: 'v0.0.0-20240509183442-62759503f434',
+          releaseTimestamp: '2024-05-09T18:34:42.000Z',
+          updateType: 'digest',
+        },
+      ]);
     });
   });
 });

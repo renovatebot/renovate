@@ -2,12 +2,14 @@ import type { LogLevel } from 'bunyan';
 import type { PlatformId } from '../constants';
 import type { LogLevelRemap } from '../logger/types';
 import type { CustomManager } from '../modules/manager/custom/types';
-import type { HostRule } from '../types';
+import type { RepoSortMethod, SortMethod } from '../modules/platform/types';
+import type { HostRule, SkipReason } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
 
 export type RenovateConfigStage =
   | 'global'
+  | 'inherit'
   | 'repository'
   | 'package'
   | 'branch'
@@ -100,6 +102,7 @@ export interface GlobalOnlyConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string[] | string;
   autodiscoverNamespaces?: string[];
+  autodiscoverProjects?: string[];
   autodiscoverTopics?: string[];
   baseDir?: string;
   cacheDir?: string;
@@ -113,6 +116,8 @@ export interface GlobalOnlyConfig {
   globalExtends?: string[];
   logFile?: string;
   logFileLevel?: LogLevel;
+  mergeConfidenceDatasources?: string[];
+  mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
   prCommitsPerRunLimit?: number;
   privateKeyPath?: string;
@@ -144,6 +149,7 @@ export interface RepoGlobalConfig {
   dockerSidecarImage?: string;
   dockerUser?: string;
   dryRun?: DryRunConfig;
+  encryptedWarning?: string;
   endpoint?: string;
   executionTimeout?: number;
   exposeAllEnv?: boolean;
@@ -156,6 +162,10 @@ export interface RepoGlobalConfig {
   presetCachePersistence?: boolean;
   privateKey?: string;
   privateKeyOld?: string;
+  httpCacheTtlDays?: number;
+  autodiscoverRepoSort?: RepoSortMethod;
+  autodiscoverRepoOrder?: SortMethod;
+  userAgent?: string;
 }
 
 export interface LegacyAdminConfig {
@@ -214,6 +224,8 @@ export interface RenovateConfig
     AssigneesAndReviewersConfig,
     ConfigMigration,
     Record<string, unknown> {
+  reportPath?: string;
+  reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
   baseBranches?: string[];
   commitBody?: string;
@@ -228,6 +240,11 @@ export interface RenovateConfig
   gitAuthor?: string;
 
   hostRules?: HostRule[];
+
+  inheritConfig?: boolean;
+  inheritConfigFileName?: string;
+  inheritConfigRepoName?: string;
+  inheritConfigStrict?: boolean;
 
   ignorePresets?: string[];
   forkProcessing?: 'auto' | 'enabled' | 'disabled';
@@ -343,6 +360,7 @@ export interface PackageRule
   description?: string | string[];
   excludeDepNames?: string[];
   excludeDepPatterns?: string[];
+  excludeDepPrefixes?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
@@ -357,6 +375,7 @@ export interface PackageRule
   matchDatasources?: string[];
   matchDepNames?: string[];
   matchDepPatterns?: string[];
+  matchDepPrefixes?: string[];
   matchDepTypes?: string[];
   matchFileNames?: string[];
   matchManagers?: string[];
@@ -391,6 +410,8 @@ export interface RenovateOptionBase {
    */
   globalOnly?: boolean;
 
+  inheritConfigSupport?: boolean;
+
   allowedValues?: string[];
 
   allowString?: boolean;
@@ -423,6 +444,16 @@ export interface RenovateOptionBase {
   experimentalIssues?: number[];
 
   advancedUse?: boolean;
+
+  /**
+   * This is used to add depreciation message in the docs
+   */
+  deprecationMsg?: string;
+
+  /**
+   * For internal use only: add it to any config option that supports regex or glob matching
+   */
+  patternMatch?: boolean;
 }
 
 export interface RenovateArrayOption<
@@ -516,6 +547,8 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   releaseTimestamp?: string | null;
   repository?: string;
   currentVersionTimestamp?: string;
+  enabled?: boolean;
+  skipReason?: SkipReason;
 }
 
 export interface ConfigMigration {

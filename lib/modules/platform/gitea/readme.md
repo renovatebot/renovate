@@ -38,8 +38,15 @@ If you use Gitea packages, add the `read:packages` scope.
 
 - none
 
-## Repo autodiscover sorting
+## Repo autodiscover
+
+Renovate can discover repositories on Gitea using the `autodiscover` feature.
+Repositories are ignored when one of the following conditions is met:
+
+- The repository is a `mirror`
+- We do not have push or pull permissions to that repository
+- Pull requests are disabled for that repository
 
 You can change the default server-side sort method and order for autodiscover API.
-Set those via [`RENOVATE_X_AUTODISCOVER_REPO_SORT`](../../../self-hosted-experimental.md#renovate_x_autodiscover_repo_sort) and [`RENOVATE_X_AUTODISCOVER_REPO_ORDER`](../../../self-hosted-experimental.md#renovate_x_autodiscover_repo_order).
+Set those via [`autodiscoverRepoSort`](../../../self-hosted-configuration.md#autodiscoverreposort) and [`autodiscoverRepoOrder`](../../../self-hosted-configuration.md#autodiscoverrepoorder).
 Read the [Gitea swagger docs](https://try.gitea.io/api/swagger#/repository/repoSearch) for more details.

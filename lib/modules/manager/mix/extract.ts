@@ -68,34 +68,36 @@ export async function extractPackageFile(
         }
 
         deps.set(app, dep);
-        logger.info(`setting ${app} to ${JSON.stringify(dep)}`);
+        logger.trace({ dep }, `setting ${app}`);
         depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
       }
     }
   }
   const lockFileName =
     (await findLocalSiblingOrParent(packageFile, 'mix.lock')) ?? 'mix.lock';
-  const lockFileContent = await readLocalFile(lockFileName);
+  const lockFileContent = await readLocalFile(lockFileName, 'utf8');
 
   if (lockFileContent) {
-    const lockedVersions = lockFileContent
-      .toString()
-      .split(newlineRegex)
-      .slice(1, -1)
-      .reduce<Map<string, string>>((lockedVersions, line) => {
-        const groups = lockedVersionRegExp.exec(line)?.groups;
-        if (groups?.app && groups?.lockedVersion) {
-          lockedVersions.set(groups.app, groups.lockedVersion);
+    const lockFileLines = lockFileContent.split(newlineRegex).slice(1, -1);
+
+    for (const line of lockFileLines) {
+      const groups = lockedVersionRegExp.exec(line)?.groups;
+      if (groups?.app && groups?.lockedVersion) {
+        const dep = deps.get(groups.app);
+        if (!dep) {
+          continue;
         }
-        return lockedVersions;
-      }, new Map());
-    for (const [app, dep] of deps.entries()) {
-      dep.lockedVersion = lockedVersions.get(app);
-      logger.debug(`Found ${dep.lockedVersion} for ${app}`);
+        dep.lockedVersion = groups.lockedVersion;
+        logger.trace(`Found ${groups.lockedVersion} for ${groups.app}`);
+      }
     }
   }
+  const depsArray = Array.from(deps.values());
+  if (depsArray.length === 0) {
+    return null;
+  }
   return {
-    deps: Array.from(deps.values()),
+    deps: depsArray,
     lockFiles: lockFileContent ? [lockFileName] : undefined,
   };
 }

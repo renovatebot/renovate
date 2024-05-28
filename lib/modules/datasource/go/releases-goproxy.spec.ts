@@ -550,7 +550,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       expect(res).toBeNull();
     });
 
-    it('returns latest even if package has no releases', async () => {
+    it('uses latest if package has no releases', async () => {
       process.env.GOPROXY = baseUrl;
 
       httpMock
@@ -567,7 +567,13 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
 
       expect(res).toEqual({
-        releases: [],
+        releases: [
+          {
+            newDigest: '921286631fa9',
+            releaseTimestamp: '2023-09-05T20:02:55Z',
+            version: 'v0.0.0-20230905200255-921286631fa9',
+          },
+        ],
         sourceUrl: 'https://github.com/google/btree',
         tags: { latest: 'v0.0.0-20230905200255-921286631fa9' },
       });

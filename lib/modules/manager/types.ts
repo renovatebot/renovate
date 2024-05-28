@@ -182,15 +182,27 @@ export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   replaceString?: string;
 }
 
+export interface ArtifactNotice {
+  file: string;
+  message: string;
+}
+
 export interface ArtifactError {
   lockFile?: string;
   stderr?: string;
 }
 
-export interface UpdateArtifactsResult {
-  artifactError?: ArtifactError;
-  file?: FileChange;
-}
+export type UpdateArtifactsResult =
+  | {
+      file?: FileChange;
+      notice?: ArtifactNotice;
+      artifactError?: undefined;
+    }
+  | {
+      file?: undefined;
+      notice?: undefined;
+      artifactError?: ArtifactError;
+    };
 
 export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;
