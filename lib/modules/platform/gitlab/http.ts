@@ -4,10 +4,18 @@ import type { GitLabUser, GitlabUserStatus } from './types';
 
 export const gitlabApi = new GitlabHttp();
 
-export async function getUserID(username: string): Promise<number | undefined> {
-  return (
+export async function getUserID(username: string): Promise<number> {
+  const userInfo = (
     await gitlabApi.getJson<{ id: number }[]>(`users?username=${username}`)
-  ).body?.[0]?.id;
+  ).body;
+
+  // incase user id is not found an emprty array is returned
+  if (userInfo.length === 0) {
+    logger.debug(`User ID for the username: ${username} not found.`);
+    throw new Error();
+  }
+
+  return userInfo[0].id;
 }
 
 async function getMembers(group: string): Promise<GitLabUser[]> {

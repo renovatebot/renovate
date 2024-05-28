@@ -1218,14 +1218,7 @@ export async function addAssignees(
     const assigneeIds: number[] = [];
     for (const assignee of assignees) {
       const userId = await getUserID(assignee);
-      if (is.number(userId)) {
-        assigneeIds.push(userId);
-      } else {
-        logger.warn(
-          { username: assignee },
-          'Could not retreive user ID for the username.',
-        );
-      }
+      assigneeIds.push(userId);
     }
     const url = `projects/${
       config.repository
@@ -1274,17 +1267,15 @@ export async function addReviewers(
     newReviewerIDs = (
       await p.all(
         newReviewers.map((r) => async () => {
-          const id = [await getUserID(r)];
-          if (is.undefined(id)) {
+          try {
+            return [await getUserID(r)];
+          } catch (err) {
             // Unable to fetch userId, try resolve as a group
             return getMemberUserIDs(r);
           }
-          return id;
         }),
       )
-    )
-      .flat()
-      .filter(is.number);
+    ).flat();
   } catch (err) {
     logger.warn({ err }, 'Failed to get IDs of the new reviewers');
     return;

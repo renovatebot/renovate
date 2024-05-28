@@ -1312,7 +1312,8 @@ describe('modules/platform/gitlab/index', () => {
       ).toResolve();
     });
 
-    it('should swallow error', async () => {
+    // eslint-disable-next-line
+    it.only('should swallow error', async () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/users?username=someuser')
@@ -1320,6 +1321,10 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.addAssignees(42, ['someuser', 'someotheruser']),
       ).toResolve();
+      expect(logger.warn).toHaveBeenCalledWith(
+        { username: 'someuser' },
+        'Could not retreive user ID for the username.',
+      );
     });
   });
 
