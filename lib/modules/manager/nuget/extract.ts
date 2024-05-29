@@ -170,10 +170,7 @@ export async function extractPackageFile(
     return null;
   }
 
-  const res: PackageFileContent = {
-    deps,
-    packageFileVersion,
-  };
+  const res: PackageFileContent = { deps, packageFileVersion };
   const lockFileName = getSiblingFileName(packageFile, 'packages.lock.json');
   // istanbul ignore if
   if (await localPathExists(lockFileName)) {
