@@ -83,7 +83,7 @@ describe('modules/manager/nuget/extract', () => {
       expect(res?.deps).toHaveLength(1);
     });
 
-    it('extracts msbuild sdk from the Sdk attr of Project element if version is missing', async () => {
+    it('does not extract msbuild sdk from the Sdk attr of Project element if version is missing', async () => {
       const packageFile = 'sample.csproj';
       const sample = `
       <Project Sdk="Microsoft.Build.NoTargets">
