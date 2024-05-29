@@ -10,6 +10,7 @@ export const presets: Record<string, Preset> = {
   all: {
     description: 'Apply crowd-sourced package replacement rules.',
     extends: [
+      'replacements:airbnb-prop-types-to-prop-types-tools',
       'replacements:apollo-server-to-scoped',
       'replacements:babel-eslint-to-eslint-parser',
       'replacements:containerbase',
@@ -50,6 +51,18 @@ export const presets: Record<string, Preset> = {
       'replacements:zap',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
+  },
+  'airbnb-prop-types-to-prop-types-tools': {
+    description: '`airbnb-prop-types` was given to a new maintainer and renamed to `prop-types-tools`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^2',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['airbnb-prop-types'],
+        replacementName: 'prop-types-tools',
+        replacementVersion: '2.17.0',
+      },
+    ],
   },
   'apollo-server-to-scoped': {
     description: '`apollo-server` packages became scoped.',
