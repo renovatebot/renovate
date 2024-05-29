@@ -1,7 +1,5 @@
 import { logger } from '../../../logger';
-// import { parseYaml } from '../../../util/yaml';
 import type { PackageFileContent } from '../types';
-// import type { RpmLockfile } from './types';
 
 export async function extractPackageFile(
   content: string,
@@ -9,13 +7,13 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   logger.debug(`rpm.extractPackageFile(${packageFile})`);
 
-  // let yaml = parseYaml<RpmLockfile>(content, null, {
-  //   json: true,
-  // });
+  let extension = packageFile.split('.').pop();
+  let lockFile = `rpms.lock.${extension}`;
 
-  // TODO: Handle yml/yaml here
+  logger.debug(`RPM lock file: ${lockFile}`);
+
   return {
-    lockFiles: ['rpms.lock.yaml'],
+    lockFiles: [lockFile],
     deps: [],
   };
 }

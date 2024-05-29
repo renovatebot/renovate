@@ -19,7 +19,11 @@ export async function updateArtifacts({
     return null;
   }
 
-  let lockFileName = "rpms.lock.yaml";
+  let extension = packageFileName.split('.').pop();
+  let lockFileName = `rpms.lock.${extension}`;
+
+  logger.debug(`RPM lock file: ${lockFileName}`);
+
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
 
   logger.debug(`Updating ${lockFileName}`);
@@ -30,7 +34,7 @@ export async function updateArtifacts({
     await deleteLocalFile(lockFileName);
 
     // TODO: Doesn't have to be Dockerfile only
-    cmd.push('rpm-lockfile-prototype -f Dockerfile rpms.in.yaml');
+    cmd.push(`rpm-lockfile-prototype -f Dockerfile ${packageFileName}`);
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
