@@ -36,7 +36,7 @@ We have multiple kinds of `group:` presets, with different rules.
 1. Replacements should update the user to the first recommended version of the new dependency and not include any new changes - whether breaking or not - if they can be avoided, in short: pin the new version
 
 If possible, replacement presets should give the user a replacement version that is _functionally identical_ to the _last version_ under the _old_ name.
-We only want a user's tests to fail because of _broken references_ to the old package name, and not because the new maintainer changed the _behavior_ of the package.
+We only want a user's tests to fail because of _broken references_ to the old package name, and not because the maintainer(s) changed the _behavior_ of the package.
 
 #### Rules for monorepo presets
 
