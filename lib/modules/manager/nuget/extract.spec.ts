@@ -64,12 +64,12 @@ describe('modules/manager/nuget/extract', () => {
       const packageFile = 'sample.csproj';
       const sample = `
       <Project Sdk="Microsoft.Build.NoTargets/3.4.0">
-    <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework> <!-- this is a dummy value -->
-        <NuspecFile>$(MSBuildThisFileDirectory)\tdlib.native.nuspec</NuspecFile>
-        <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
-    </PropertyGroup>
-</Project>
+        <PropertyGroup>
+          <TargetFramework>net7.0</TargetFramework> <!-- this is a dummy value -->
+          <NuspecFile>$(MSBuildThisFileDirectory)\tdlib.native.nuspec</NuspecFile>
+          <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
+        </PropertyGroup>
+      </Project>
       `;
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res?.deps).toEqual([
@@ -87,12 +87,12 @@ describe('modules/manager/nuget/extract', () => {
       const packageFile = 'sample.csproj';
       const sample = `
       <Project Sdk="Microsoft.Build.NoTargets">
-    <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework> <!-- this is a dummy value -->
-        <NuspecFile>$(MSBuildThisFileDirectory)\tdlib.native.nuspec</NuspecFile>
-        <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
-    </PropertyGroup>
-</Project>
+        <PropertyGroup>
+          <TargetFramework>net7.0</TargetFramework> <!-- this is a dummy value -->
+          <NuspecFile>$(MSBuildThisFileDirectory)\tdlib.native.nuspec</NuspecFile>
+          <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
+        </PropertyGroup>
+      </Project>
       `;
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res).toBeNull();
@@ -102,13 +102,13 @@ describe('modules/manager/nuget/extract', () => {
       const packageFile = 'sample.csproj';
       const sample = `
       <Project>
-      <Sdk Name="Microsoft.Build.NoTargets" Version="3.4.0" />
-    <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework> <!-- this is a dummy value -->
-        <NuspecFile>$(MSBuildThisFileDirectory)\tdlib.native.nuspec</NuspecFile>
-        <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
-    </PropertyGroup>
-</Project>
+        <Sdk Name="Microsoft.Build.NoTargets" Version="3.4.0" />
+        <PropertyGroup>
+          <TargetFramework>net7.0</TargetFramework> <!-- this is a dummy value -->
+          <NuspecFile>$(MSBuildThisFileDirectory)\tdlib.native.nuspec</NuspecFile>
+          <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
+        </PropertyGroup>
+      </Project>
       `;
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res?.deps).toEqual([
@@ -126,13 +126,13 @@ describe('modules/manager/nuget/extract', () => {
       const packageFile = 'sample.csproj';
       const sample = `
       <Project>
-      <Sdk Name="Microsoft.Build.NoTargets" />
-    <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework> <!-- this is a dummy value -->
-        <NuspecFile>$(MSBuildThisFileDirectory)\tdlib.native.nuspec</NuspecFile>
-        <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
-    </PropertyGroup>
-</Project>
+        <Sdk Name="Microsoft.Build.NoTargets" />
+        <PropertyGroup>
+          <TargetFramework>net7.0</TargetFramework> <!-- this is a dummy value -->
+          <NuspecFile>$(MSBuildThisFileDirectory)\tdlib.native.nuspec</NuspecFile>
+          <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
+        </PropertyGroup>
+      </Project>
       `;
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res).toBeNull();
