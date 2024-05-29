@@ -22,7 +22,7 @@ Let Renovate use your app password by doing _one_ of the following:
 
 Remember to:
 
-- Set the `username` for the bot account
+- Set the `username` for the bot account (which is _not_ your email address). You can find your username through "Personal Bitbucket settings" on the "Account settings" page for your account.
 - Set `platform=bitbucket` somewhere in your Renovate config file
 
 ## Unsupported platform features/concepts
