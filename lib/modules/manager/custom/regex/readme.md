@@ -1,4 +1,4 @@
-With the `regex` manager you can configure Renovate so it finds dependencies that are not detected by its other built-in package managers.
+With `customManagers` using `regex` you can configure Renovate so it finds dependencies that are not detected by its other built-in package managers.
 
 Renovate supports the `ECMAScript (JavaScript)` flavor of regex.
 

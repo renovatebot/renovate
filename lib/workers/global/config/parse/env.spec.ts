@@ -269,6 +269,8 @@ describe('workers/global/config/parse/env', () => {
 
     it('massages converted experimental env vars', async () => {
       const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL: 'some-url', // converted
+        RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES: '["docker"]', // converted
         RENOVATE_X_AUTODISCOVER_REPO_SORT: 'alpha',
         RENOVATE_X_DOCKER_MAX_PAGES: '10',
         RENOVATE_AUTODISCOVER_REPO_ORDER: 'desc',
@@ -279,14 +281,18 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_S3_PATH_STYLE: 'true',
       };
       const config = await env.getConfig(envParam);
-      expect(config.autodiscoverRepoSort).toBe('alpha');
-      expect(config.autodiscoverRepoOrder).toBe('desc');
       expect(config.dockerMaxPages).toBeUndefined();
-      expect(config.deleteConfigFile).toBeTrue();
-      expect(config.eagerGlobalExtends).toBeTrue();
-      expect(config.ignoreNodeWarn).toBeTrue();
-      expect(config.s3Endpoint).toBe('endpoint');
-      expect(config.s3PathStyle).toBeTrue();
+      expect(config).toMatchObject({
+        mergeConfidenceEndpoint: 'some-url',
+        mergeConfidenceDatasources: ['docker'],
+        autodiscoverRepoSort: 'alpha',
+        autodiscoverRepoOrder: 'desc',
+        deleteConfigFile: true,
+        eagerGlobalExtends: true,
+        ignoreNodeWarn: true,
+        s3Endpoint: 'endpoint',
+        s3PathStyle: true,
+      });
     });
 
     describe('RENOVATE_CONFIG tests', () => {

@@ -31,6 +31,12 @@ export class PypiDatasource extends Datasource {
 
   override readonly registryStrategy = 'merge';
 
+  override readonly releaseTimestampNote =
+    'The relase timestamp is determined from the `upload_time` field in the results.';
+  override readonly sourceUrlSupport = 'release';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `homepage` field if it is a github repository, else we use the `project_urls` field.';
+
   async getReleases({
     packageName,
     registryUrl,

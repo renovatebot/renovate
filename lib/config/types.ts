@@ -116,6 +116,8 @@ export interface GlobalOnlyConfig {
   globalExtends?: string[];
   logFile?: string;
   logFileLevel?: LogLevel;
+  mergeConfidenceDatasources?: string[];
+  mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
   prCommitsPerRunLimit?: number;
   privateKeyPath?: string;
@@ -147,6 +149,7 @@ export interface RepoGlobalConfig {
   dockerSidecarImage?: string;
   dockerUser?: string;
   dryRun?: DryRunConfig;
+  encryptedWarning?: string;
   endpoint?: string;
   executionTimeout?: number;
   exposeAllEnv?: boolean;

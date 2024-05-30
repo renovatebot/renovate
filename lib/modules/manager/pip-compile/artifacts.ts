@@ -12,6 +12,7 @@ import * as pipRequirements from '../pip_requirements';
 import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
 import {
   extractHeaderCommand,
+  extractPythonVersion,
   getExecOptions,
   getRegistryCredVarsFromPackageFile,
 } from './common';
@@ -106,6 +107,10 @@ export async function updateArtifacts({
         await deleteLocalFile(outputFileName);
       }
       const compileArgs = extractHeaderCommand(existingOutput, outputFileName);
+      const pythonVersion = extractPythonVersion(
+        existingOutput,
+        outputFileName,
+      );
       const cwd = inferCommandExecDir(outputFileName, compileArgs.outputFile);
       const upgradePackages = updatedDeps.filter((dep) => dep.isLockfileUpdate);
       const packageFile = pipRequirements.extractPackageFile(newInputContent);
@@ -114,6 +119,7 @@ export async function updateArtifacts({
         config,
         cwd,
         getRegistryCredVarsFromPackageFile(packageFile),
+        pythonVersion,
       );
       logger.trace({ cwd, cmd }, 'pip-compile command');
       logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
