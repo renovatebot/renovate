@@ -3,6 +3,7 @@ import { getS3Client, parseS3Url } from './s3';
 describe('util/s3', () => {
   afterEach(() => {
     delete process.env.RENOVATE_X_S3_ENDPOINT;
+    delete process.env.RENOVATE_X_S3_PATH_STYLE;
     jest.resetModules();
   });
 

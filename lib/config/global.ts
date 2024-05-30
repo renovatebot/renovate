@@ -72,12 +72,14 @@ export class GlobalConfig {
   static getExperimentalFlag(key: string): boolean {
     const experimentalFlags = GlobalConfig.get('experimentalFlags');
 
-    if (!experimentalFlags) {
+    if (!experimentalFlags?.length) {
       return false;
     }
 
     if (!GlobalConfig.parsedExperimentalFlags.size) {
-      GlobalConfig.parsedExperimentalFlags = new Set(experimentalFlags);
+      for (const flag of experimentalFlags) {
+        GlobalConfig.parsedExperimentalFlags.add(flag);
+      }
     }
 
     return GlobalConfig.parsedExperimentalFlags.has(key);
