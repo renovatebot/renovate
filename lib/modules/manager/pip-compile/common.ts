@@ -9,7 +9,7 @@ import { ensureLocalPath } from '../../../util/fs/util';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types';
-import type { PipCompileArgs } from './types';
+import type { PipCompileArgs, SupportedManagers } from './types';
 
 export function getPythonVersionConstraint(
   config: UpdateArtifactsConfig,
@@ -303,4 +303,21 @@ export function getRegistryCredVarsFromPackageFile(
   }
 
   return allCreds;
+}
+
+export function matchManager(filename: string): SupportedManagers | 'unknown' {
+  if (filename.endsWith('setup.py')) {
+    return 'pip_setup';
+  }
+  if (filename.endsWith('setup.cfg')) {
+    return 'setup-cfg';
+  }
+  if (filename.endsWith('pyproject.toml')) {
+    return 'pep621';
+  }
+  // naive, could be improved, maybe use pip_requirements.fileMatch
+  if (filename.endsWith('.in')) {
+    return 'pip_requirements';
+  }
+  return 'unknown';
 }

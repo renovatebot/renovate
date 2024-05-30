@@ -5,7 +5,7 @@ import {
   allowedPipOptions,
   extractHeaderCommand,
   extractPythonVersion,
-  getRegistryCredVarsFromPackageFile,
+  getRegistryCredVarsFromPackageFile, matchManager,
 } from './common';
 import { inferCommandExecDir } from './utils';
 
@@ -281,6 +281,25 @@ describe('modules/manager/pip-compile/common', () => {
           additionalRegistryUrls: ['invalid-url'],
         }),
       ).toEqual({});
+    });
+  });
+
+  describe('matchManager()', () => {
+    it('matches pip_setup setup.py', () => {
+      expect(matchManager('setup.py')).toBe('pip_setup');
+    });
+
+    it('matches setup-cfg setup.cfg', () => {
+      expect(matchManager('setup.cfg')).toBe('setup-cfg');
+    });
+
+    it('matches pep621 pyproject.toml', () => {
+      expect(matchManager('pyproject.toml')).toBe('pep621');
+    });
+
+    it('matches pip_requirements any .in file', () => {
+      expect(matchManager('file.in')).toBe('pip_requirements');
+      expect(matchManager('another_file.in')).toBe('pip_requirements');
     });
   });
 });
