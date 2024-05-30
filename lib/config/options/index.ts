@@ -3102,6 +3102,7 @@ const options: RenovateOptions[] = [
     description:
       'If set to `true`, Renovate tries to delete the self-hosted config file after reading it.',
     type: 'boolean',
+    default: false,
     globalOnly: true,
   },
   {
@@ -3109,6 +3110,7 @@ const options: RenovateOptions[] = [
     description:
       'If set to `true`, Renovate resolves and merges `globalExtends` presets _before_ other global config, instead of _after_.',
     type: 'boolean',
+    default: false,
     globalOnly: true,
   },
   {
@@ -3116,6 +3118,7 @@ const options: RenovateOptions[] = [
     description:
       'When set to `true`, suppresses the default warning when a deprecated version of Node.js is used to run Renovate.',
     type: 'boolean',
+    default: false,
     globalOnly: true,
   },
   {
@@ -3130,6 +3133,7 @@ const options: RenovateOptions[] = [
     description:
       'If set, Renovate will enable `forcePathStyle` when creating the AWS S3 client instance.',
     type: 'boolean',
+    default: false,
     globalOnly: true,
   },
 ];

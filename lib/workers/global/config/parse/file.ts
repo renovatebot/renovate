@@ -79,8 +79,6 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     logger.debug('No config file found on disk - skipping');
   }
 
-  await deleteNonDefaultConfig(env, !!config.deleteConfigFile); // Try deletion only if RENOVATE_CONFIG_FILE is specified
-
   return migrateAndValidateConfig(config, configFile);
 }
 
