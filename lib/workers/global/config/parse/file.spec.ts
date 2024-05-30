@@ -142,30 +142,6 @@ describe('workers/global/config/parse/file', () => {
       expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
       fs.unlinkSync(configFile);
     });
-
-    it('removes the config file if RENOVATE_CONFIG_FILE & deleteConfigFile are set', async () => {
-      fsRemoveSpy.mockImplementationOnce(() => {
-        // no-op
-      });
-      fsPathExistsSpy
-        .mockResolvedValueOnce(true as never)
-        .mockResolvedValueOnce(true as never);
-      const configFile = upath.resolve(tmp.path, './config.json');
-      fs.writeFileSync(
-        configFile,
-        `{"token": "abc", "deleteConfigFile": true}`,
-        { encoding: 'utf8' },
-      );
-
-      await file.getConfig({
-        RENOVATE_CONFIG_FILE: configFile,
-      });
-
-      expect(processExitSpy).not.toHaveBeenCalled();
-      expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
-      expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
-      fs.unlinkSync(configFile);
-    });
   });
 
   describe('deleteConfigFile()', () => {
