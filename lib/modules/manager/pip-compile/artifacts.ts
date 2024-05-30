@@ -125,16 +125,15 @@ export async function updateArtifacts({
       logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
       await exec(cmd, execOptions);
       const status = await getRepoStatus();
-      if (!status?.modified.includes(outputFileName)) {
-        return null;
+      if (status?.modified.includes(outputFileName)) {
+        result.push({
+          file: {
+            type: 'addition',
+            path: outputFileName,
+            contents: await readLocalFile(outputFileName, 'utf8'),
+          },
+        });
       }
-      result.push({
-        file: {
-          type: 'addition',
-          path: outputFileName,
-          contents: await readLocalFile(outputFileName, 'utf8'),
-        },
-      });
     } catch (err) {
       // istanbul ignore if
       if (err.message === TEMPORARY_ERROR) {
