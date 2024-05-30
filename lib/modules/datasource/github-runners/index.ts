@@ -5,6 +5,10 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 export class GithubRunnersDatasource extends Datasource {
   static readonly id = 'github-runners';
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'We use the URL: https://github.com/actions/runner-images.';
+
   /**
    * Only add stable runners to the datasource. See datasource readme for details.
    */

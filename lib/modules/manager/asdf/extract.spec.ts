@@ -87,6 +87,7 @@ kustomize 4.5.7
 lua 5.4.4
 maven 3.9.6
 mimirtool 2.11.0
+minikube 1.33.1
 nim 1.6.8
 nodejs 18.12.0
 ocaml 4.14.0
@@ -98,6 +99,7 @@ poetry 1.3.2
 pre-commit 3.3.1
 pulumi 3.57.1
 python 3.11.0
+rebar 3.23.0
 ruby 3.1.2
 rust 1.64.0
 sbt 1.9.7
@@ -412,6 +414,13 @@ dummy 1.2.3
             extractVersion: '^mimir-(?<version>\\S+)',
           },
           {
+            currentValue: '1.33.1',
+            datasource: 'github-releases',
+            packageName: 'kubernetes/minikube',
+            depName: 'minikube',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.6.8',
             datasource: 'github-tags',
             packageName: 'nim-lang/Nim',
@@ -483,6 +492,12 @@ dummy 1.2.3
             packageName: 'python/cpython',
             depName: 'python',
             extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '3.23.0',
+            datasource: 'github-tags',
+            packageName: 'erlang/rebar3',
+            depName: 'rebar',
           },
           {
             currentValue: '3.1.2',

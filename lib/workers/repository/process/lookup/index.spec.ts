@@ -4,6 +4,8 @@ import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
 import { partial } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
+import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence';
+import type { AllConfig } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { CustomDatasource } from '../../../../modules/datasource/custom';
 import { DockerDatasource } from '../../../../modules/datasource/docker';
@@ -4253,6 +4255,95 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('handles replacements - Digest configured and validating getDigest funtion call', async () => {
+      config.packageName = 'openjdk';
+      config.currentDigest = 'sha256:fedcba0987654321';
+      config.currentValue = '17.0.0';
+      //config.pinDigests = true;
+      config.datasource = DockerDatasource.id;
+      config.versioning = dockerVersioningId;
+      // This config is normally set when packageRules are applied
+      config.replacementName = 'eclipse-temurin';
+      config.replacementVersion = '19.0.0';
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+          {
+            version: '17.0.1',
+          },
+        ],
+        lookupName: 'openjdk',
+      });
+      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      getDockerDigest.mockResolvedValueOnce('sha256:fedcba0987654321');
+      getDockerDigest.mockResolvedValueOnce('sha256:pin0987654321');
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newDigest: 'sha256:abcdef1234567890',
+          newMajor: 17,
+          newMinor: 0,
+          newValue: '17.0.1',
+          newVersion: '17.0.1',
+          updateType: 'patch',
+        },
+        {
+          newDigest: 'sha256:fedcba0987654321',
+          newName: 'eclipse-temurin',
+          newValue: '19.0.0',
+          newVersion: undefined,
+          updateType: 'replacement',
+        },
+        {
+          newDigest: 'sha256:pin0987654321',
+          newValue: '17.0.0',
+          newVersion: undefined,
+          updateType: 'digest',
+        },
+      ]);
+
+      expect(getDockerDigest).toHaveBeenNthCalledWith(
+        1,
+        {
+          currentDigest: 'sha256:fedcba0987654321',
+          currentValue: '17.0.0',
+          lookupName: 'openjdk',
+          packageName: 'openjdk',
+          registryUrl: 'https://index.docker.io',
+        },
+        '17.0.1',
+      );
+      expect(getDockerDigest).toHaveBeenNthCalledWith(
+        2,
+        {
+          currentDigest: undefined,
+          currentValue: '17.0.0',
+          lookupName: undefined,
+          packageName: 'eclipse-temurin',
+          registryUrl: 'https://index.docker.io',
+        },
+        '19.0.0',
+      );
+      expect(getDockerDigest).toHaveBeenNthCalledWith(
+        3,
+        {
+          currentDigest: 'sha256:fedcba0987654321',
+          currentValue: '17.0.0',
+          lookupName: 'openjdk',
+          packageName: 'openjdk',
+          registryUrl: 'https://index.docker.io',
+        },
+        '17.0.0',
+      );
+    });
+
     it('handles replacements - skips if package and replacement names match', async () => {
       config.packageName = 'openjdk';
       config.currentValue = undefined;
@@ -4456,6 +4547,10 @@ describe('workers/repository/process/lookup/index', () => {
 
     describe('handles merge confidence', () => {
       const defaultApiBaseUrl = 'https://developer.mend.io/';
+      const mcConfig: AllConfig = {
+        mergeConfidenceEndpoint: defaultApiBaseUrl,
+        mergeConfidenceDatasources: presetSupportedDatasources,
+      };
       const getMergeConfidenceSpy = jest.spyOn(
         McApi,
         'getMergeConfidenceLevel',
@@ -4467,7 +4562,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       beforeEach(() => {
         hostRules.add(hostRule);
-        initConfig();
+        initConfig(mcConfig);
         memCache.reset();
       });
 
@@ -4548,7 +4643,7 @@ describe('workers/repository/process/lookup/index', () => {
         config.packageName = 'webpack';
         config.datasource = datasource;
         hostRules.clear(); // reset merge confidence
-        initConfig();
+        initConfig(mcConfig);
         httpMock
           .scope('https://registry.npmjs.org')
           .get('/webpack')
