@@ -271,5 +271,6 @@ export function getRegistryCredVarsFromPackageFiles(
       ...hostCreds,
     };
   }
+
   return allCreds;
 }
