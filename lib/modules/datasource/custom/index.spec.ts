@@ -697,4 +697,13 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
   });
+
+  describe('getDigest', () => {
+    it('returns null as digest should be provided in releases', async () => {
+      const digest = await new CustomDatasource().getDigest({
+        packageName: 'my-package',
+      });
+      expect(digest).toBeNull();
+    });
+  });
 });

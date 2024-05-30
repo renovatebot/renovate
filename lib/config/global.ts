@@ -21,6 +21,7 @@ export class GlobalConfig {
     'dockerSidecarImage',
     'dockerUser',
     'dryRun',
+    'encryptedWarning',
     'exposeAllEnv',
     'executionTimeout',
     'githubTokenWarn',
@@ -33,6 +34,9 @@ export class GlobalConfig {
     'platform',
     'endpoint',
     'httpCacheTtlDays',
+    'autodiscoverRepoSort',
+    'autodiscoverRepoOrder',
+    'userAgent',
   ];
 
   private static config: RepoGlobalConfig = {};

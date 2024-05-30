@@ -14,7 +14,7 @@
       "versioning": "node"
     },
     {
-      "matchDepTypes": ["dependencies"],
+      "matchDepTypes": ["dependencies", "optionalDependencies"],
       "semanticCommitType": "build"
     },
     {

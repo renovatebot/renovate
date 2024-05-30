@@ -49,6 +49,14 @@ describe('util/git/url', () => {
       expect(getHttpUrl('http://foo.bar/')).toBe('http://foo.bar/');
     });
 
+    it('returns http url for ssh url with port', () => {
+      expect(
+        getHttpUrl(
+          'ssh://git@gitlab.example.com:22222/typo3-extensions/poll-pro.git',
+        ),
+      ).toBe('https://gitlab.example.com/typo3-extensions/poll-pro.git');
+    });
+
     it('returns gitlab url with token', () => {
       expect(getHttpUrl('http://gitlab.com/', 'token')).toBe(
         'http://gitlab-ci-token:token@gitlab.com/',

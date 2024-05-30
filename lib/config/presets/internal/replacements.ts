@@ -15,6 +15,7 @@ export const presets: Record<string, Preset> = {
       'replacements:containerbase',
       'replacements:cpx-to-maintenance-fork',
       'replacements:cucumber-to-scoped',
+      'replacements:eslint-config-standard-with-typescript-to-eslint-config-love',
       'replacements:eslint-plugin-node-to-maintained-fork',
       'replacements:fakerjs-to-scoped',
       'replacements:fastify-to-scoped',
@@ -42,9 +43,11 @@ export const presets: Record<string, Preset> = {
       'replacements:rome-to-biome',
       'replacements:semantic-release-replace-plugin-to-unscoped',
       'replacements:spectre-cli-to-spectre-console-cli',
+      'replacements:standard-version-to-commit-and-tag',
       'replacements:vso-task-lib-to-azure-pipelines-task-lib',
       'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
+      'replacements:zap',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
@@ -195,6 +198,19 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['cucumber'],
         replacementName: '@cucumber/cucumber',
         replacementVersion: '7.0.0',
+      },
+    ],
+  },
+  'eslint-config-standard-with-typescript-to-eslint-config-love': {
+    description:
+      '`eslint-config-standard-with-typescript` was renamed to `eslint-config-love`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^43.0.1',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['eslint-config-standard-with-typescript'],
+        replacementName: 'eslint-config-love',
+        replacementVersion: '43.1.0',
       },
     ],
   },
@@ -887,6 +903,19 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'standard-version-to-commit-and-tag': {
+    description:
+      '`standard-version` is now maintained as `commit-and-tag-version`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^9.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['standard-version'],
+        replacementName: 'commit-and-tag-version',
+        replacementVersion: '9.5.0',
+      },
+    ],
+  },
   'vso-task-lib-to-azure-pipelines-task-lib': {
     description:
       'The `vso-task-lib` package is now published as `azure-pipelines-task-lib`.',
@@ -919,6 +948,35 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['xmldom', 'xmldom-alpha'],
         replacementName: '@xmldom/xmldom',
         replacementVersion: '0.7.5',
+      },
+    ],
+  },
+  zap: {
+    description: 'Replace ZAP dependencies.',
+    packageRules: [
+      {
+        description:
+          'The `zap-stable` image has moved to the `zaproxy` organization.',
+        matchCurrentVersion: '>=2.0.0 <2.14.0',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?owasp/zap2docker-stable$',
+          '^(?:docker\\.io/)?softwaresecurityproject/zap-stable$',
+        ],
+        replacementName: 'zaproxy/zap-stable',
+        replacementVersion: '2.14.0',
+      },
+      {
+        description:
+          'The `zap-bare` image has moved to the `zaproxy` organization.',
+        matchCurrentVersion: '>=2.0.0 <2.14.0',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?owasp/zap2docker-bare$',
+          '^(?:docker\\.io/)?softwaresecurityproject/zap-bare$',
+        ],
+        replacementName: 'zaproxy/zap-bare',
+        replacementVersion: '2.14.0',
       },
     ],
   },

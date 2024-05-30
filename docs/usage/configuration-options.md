@@ -689,7 +689,7 @@ The `regex` manager which is based on using Regular Expression named capture gro
 You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
 
 - `datasource`
-- `depName`
+- `depName` and / or `packageName`
 - `currentValue`
 
 Use named capture group matching _or_ set a corresponding template.
@@ -703,7 +703,7 @@ For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars
 
 <!-- prettier-ignore -->
 !!! tip
-    Look at our [Regex Manager Presets](./presets-regexManagers.md), they may have what you need.
+    Look at our [Custom Manager Presets](./presets-customManagers.md), they may have what you need.
 
 ### customType
 
@@ -770,7 +770,7 @@ As example the following configuration will update all three lines in the Docker
 ```
 
 ```dockerfile title="Dockerfile"
-FROM amd64/ubuntu:18.04
+FROM amd64/ubuntu:24.04
 ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
 ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
 ```
@@ -1251,7 +1251,7 @@ It is valid only as a top-level configuration option and not, for example, withi
 
 <!-- prettier-ignore -->
 !!! warning
-    The bot administrator must configure a list of allowed environment names in the [`allowedEnv`](./self-hosted-configuration.md#allowedEnv) config option, before users can use those allowed names in the `env` option.
+    The bot administrator must configure a list of allowed environment names in the [`allowedEnv`](./self-hosted-configuration.md#allowedenv) config option, before users can use those allowed names in the `env` option.
 
 Behavior:
 
@@ -1355,7 +1355,7 @@ Renovate can fetch changelogs when they are hosted on one of these platforms:
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
-If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-release-notes) to allow Renovate to fetch changelogs notes from `github.com`.
+If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-changelogs) to allow Renovate to fetch changelogs notes from `github.com`.
 
 <!-- prettier-ignore -->
 !!! note
@@ -1848,7 +1848,7 @@ Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#ht
 You can provide a `headers` object that includes fields to be forwarded to the HTTP request headers.
 By default, all headers starting with "X-" are allowed.
 
-A bot administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedHeaders) to configure more permitted headers.
+A bot administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedheaders) to configure more permitted headers.
 
 `headers` value(s) configured in the bot admin `hostRules` (for example in a `config.js` file) are _not_ validated, so it may contain any header regardless of `allowedHeaders`.
 
@@ -1950,6 +1950,27 @@ registry=https://gitlab.myorg.com/api/v4/packages/npm/
 !!! note
     Values containing a URL path but missing a scheme will be prepended with 'https://' (e.g. `domain.com/path` -> `https://domain.com/path`)
 
+### readOnly
+
+If the `readOnly` field is being set to `true` inside the host rule, it will match only against the requests that are known to be read operations.
+Examples are `GET` requests or `HEAD` requests, but also it could be certain types of GraphQL queries.
+
+This option could be used to avoid rate limits for certain platforms like GitHub or Bitbucket, by offloading the read operations to a different user.
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "readOnly": true,
+      "token": "********"
+    }
+  ]
+}
+```
+
+If more than one token matches for a read-only request then the `readOnly` token will be given preference.
+
 ### timeout
 
 Use this figure to adjust the timeout for queries.
@@ -2039,9 +2060,12 @@ Applicable for Composer only for now.
 ## ignorePrAuthor
 
 This is usually needed if someone needs to migrate bot accounts, including from the Mend Renovate App to self-hosted.
+An additional use case is for GitLab users of project or group access tokens who need to rotate them.
+
 If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
 You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
-It's recommended to revert this setting once that transition period is over and all old PRs are resolved.
+
+Setting this field to `true` in GitLab will also mean that all Issues will be fetched instead of only those by the bot itself.
 
 ## ignorePresets
 
@@ -2302,6 +2326,24 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 
 Add to this object if you wish to define rules that apply only to minor updates.
 
+## mode
+
+This configuration option was created primarily for use with Mend's hosted app, but can also be useful for some self-hosted use cases.
+
+It enables a new `silent` mode to allow repos to be scanned for updates _and_ for users to be able to request such updates be opened in PRs _on demand_ through the Mend UI, without needing the Dependency Dashboard issue in the repo.
+
+Although similar, the options `mode=silent` and `dryRun` can be used together.
+When both are configured, `dryRun` takes precedence, so for example PRs won't be created.
+
+Configuring `silent` mode is quite similar to `dryRun=lookup` except:
+
+- It will bypass onboarding checks (unlike when performing a dry run on a non-onboarded repo) similar to `requireConfig=optional`
+- It can create branches/PRs if `checkedBranches` is set
+- It will keep any existing branches up-to-date (e.g. ones created previously using `checkedBranches`)
+
+When in `silent` mode, Renovate does not create issues (such as Dependency Dashboard, or due to config errors) or Config Migration PRs, even if enabled.
+It also does not prune/close any which already exist.
+
 ## npmToken
 
 See [Private npm module support](./getting-started/private-packages.md) for details on how this is used.
@@ -2341,6 +2383,24 @@ Renovate only queries the OSV database for dependencies that use one of these da
 ## packageRules
 
 `packageRules` is a powerful feature that lets you apply rules to individual packages or to groups of packages using regex pattern matching.
+
+`packageRules` is a collection of rules, that are **all** evaluated.
+If multiple rules match a dependency, configurations from matching rules will be merged together.
+The order of rules matters, because later rules may override configuration options from earlier ones, if they both specify the same option.
+
+The matching process for a package rule:
+
+- Each package rule can include `match...` matchers to identify dependencies and `exclude...` matchers to filter them out.
+- If no match/exclude matchers are defined, everything matches.
+- If an aspect is both `match`ed and `exclude`d, the exclusion wins.
+- Multiple values within a single matcher will be evaluated independently (they're OR-ed together).
+- Combining multiple matchers will restrict the resulting matches (they're AND-ed together):  
+  `matchCurrentVersion`, `matchCurrentValue`, `matchNewValue`, `matchConfidence`, `matchCurrentAge`,
+  `matchManagers`, `matchDatasources`, `matchCategories`, `matchDepTypes`, `matchUpdateTypes`,
+  `matchRepositories`/`excludeRepositories`, `matchBaseBranches`, `matchFileNames`
+- Two special groups of matchers provide alternatives (they're OR-ed within their respective groups, and AND-ed with others):
+  - Source URL: `matchSourceUrls`, `matchSourceUrlPrefixes`
+  - Package/Dep identifiers: `matchDepNames`/`excludeDepNames`, `matchDepPatterns`/`excludeDepPatterns`, `matchDepPrefixes`/`excludeDepPrefixes`, `matchPackageNames`/`excludePackageNames`, `matchPackagePatterns`/`excludePackagePatterns`, `matchPackagePrefixes`/`excludePackagePrefixes`
 
 Here is an example if you want to group together all packages starting with `eslint` into a single branch/PR:
 
@@ -2421,7 +2481,6 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 
 <!-- prettier-ignore -->
 !!! tip
-    Renovate evaluates all `packageRules` and does not stop after the first match.
     Order your `packageRules` so the least important rules are at the _top_, and the most important rules at the _bottom_.
     This way important rules override settings from earlier rules if needed.
 
@@ -2431,8 +2490,9 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 
 ### allowedVersions
 
-Use this - usually within a packageRule - to limit how far to upgrade a dependency.
-For example, if you wish to upgrade to Angular v1.5 but not to `angular` v1.6 or higher, you could define this to be `<= 1.5` or `< 1.6.0`:
+You can use `allowedVersions` - usually within a `packageRules` entry - to limit how far to upgrade a dependency.
+
+For example, if you want to upgrade to Angular v1.5 but _not_ to `angular` v1.6 or higher, you could set `allowedVersions` to `<= 1.5` or `< 1.6.0`:
 
 ```json
 {
@@ -2445,10 +2505,14 @@ For example, if you wish to upgrade to Angular v1.5 but not to `angular` v1.6 or
 }
 ```
 
-The valid syntax for this will be calculated at runtime because it depends on the versioning scheme, which is itself dynamic.
+Renovate calculates the valid syntax for this at runtime, because it depends on the dynamic versioning scheme.
 
-This field also supports Regular Expressions if they begin and end with `/`.
-For example, the following will enforce that only 3 or 4-part versions are supported, without any prefixes:
+#### Using regular expressions
+
+You can use Regular Expressions in the `allowedVersion` config.
+You must _begin_ and _end_ your Regular Expression with the `/` character!
+
+For example, this config only allows 3 or 4-part versions, without any prefixes in the version:
 
 ```json
 {
@@ -2461,8 +2525,12 @@ For example, the following will enforce that only 3 or 4-part versions are suppo
 }
 ```
 
-This field also supports a special negated regex syntax for ignoring certain versions.
-Use the syntax `!/ /` like the following:
+Again: note how the Regular Expression _begins_ and _ends_ with the `/` character.
+
+#### Ignore versions with negated regex syntax
+
+You can use a special negated regex syntax to ignore certain versions.
+You must use the `!/ /` syntax, like this:
 
 ```json
 {
@@ -2509,6 +2577,8 @@ Invalid if used outside of a `packageRule`.
 ### excludeDepNames
 
 ### excludeDepPatterns
+
+### excludeDepPrefixes
 
 ### excludePackageNames
 
@@ -2696,8 +2766,21 @@ Use this field to restrict rules to a particular datasource. e.g.
 
 This option is matched against the `currentValue` field of a dependency.
 
-`matchCurrentValue` supports Regular Expressions which must begin and end with `/`.
-For example, the following enforces that only `1.*` versions will be used:
+`matchCurrentValue` supports Regular Expressions and glob patterns. For example, the following enforces that updates from `1.*` versions will be merged automatically:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchCurrentValue": "1.*",
+      "automerge": true
+    }
+  ]
+}
+```
+
+Regular Expressions must begin and end with `/`.
 
 ```json
 {
@@ -2828,14 +2911,31 @@ It is recommended that you avoid using "negative" globs, like `**/!(package.json
 
 ### matchDepNames
 
+This field behaves the same as `matchPackageNames` except it matches against `depName` instead of `packageName`.
+
 ### matchDepPatterns
+
+### matchDepPrefixes
 
 ### matchNewValue
 
 This option is matched against the `newValue` field of a dependency.
 
-`matchNewValue` supports Regular Expressions which must begin and end with `/`.
-For example, the following enforces that only `1.*` versions will be used:
+`matchNewValue` supports Regular Expressions and glob patterns. For example, the following enforces that updates to `1.*` versions will be merged automatically:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchNewValue": "1.*",
+      "automerge": true
+    }
+  ]
+}
+```
+
+Regular Expressions must begin and end with `/`.
 
 ```json
 {
@@ -2882,6 +2982,12 @@ See also `excludePackageNames`.
 
 The above will configure `rangeStrategy` to `pin` only for the package `angular`.
 
+<!-- prettier-ignore -->
+!!! note
+    `matchPackageNames` will try matching `packageName` first and then fall back to matching `depName`.
+    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
+    Use `matchDepNames` instead.
+
 ### matchPackagePatterns
 
 Use this field if you want to have one or more package names patterns in your package rule.
@@ -2899,6 +3005,12 @@ See also `excludePackagePatterns`.
 ```
 
 The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
+
+<!-- prettier-ignore -->
+!!! note
+    `matchPackagePatterns` will try matching `packageName` first and then fall back to matching `depName`.
+    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
+    Use `matchDepPatterns` instead.
 
 ### matchPackagePrefixes
 
@@ -2918,8 +3030,11 @@ See also `excludePackagePrefixes`.
 
 Like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
-`matchPackagePrefixes` will match against `packageName` first, and then `depName`, however `depName` matching is deprecated and will be removed in a future major release.
-If matching against `depName`, use `matchDepPatterns` instead.
+<!-- prettier-ignore -->
+!!! note
+    `matchPackagePrefixes` will try matching `packageName` first and then fall back to matching `depName`.
+    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
+    Use `matchDepPatterns` instead.
 
 ### matchSourceUrlPrefixes
 
@@ -3112,6 +3227,39 @@ For example to replace the npm package `jade` with version `2.0.0` of the packag
       "matchPackageNames": ["jade"],
       "replacementName": "pug",
       "replacementVersion": "2.0.0"
+    }
+  ]
+}
+```
+
+### prPriority
+
+Sometimes Renovate needs to rate limit its creation of PRs, e.g. hourly or concurrent PR limits.
+By default, Renovate sorts/prioritizes based on the update type, going from smallest update to biggest update.
+Renovate creates update PRs in this order:
+
+1. `pinDigest`
+1. `pin`
+1. `digest`
+1. `patch`
+1. `minor`
+1. `major`
+
+If you have dependencies that are more or less important than others then you can use the `prPriority` field for PR sorting.
+The default value is 0, so setting a negative value will make dependencies sort last, while higher values sort first.
+
+Here's an example of how you would define PR priority so that `devDependencies` are raised last and `react` is raised first:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "prPriority": -1
+    },
+    {
+      "matchPackageNames": ["react"],
+      "prPriority": 5
     }
   ]
 }
@@ -3401,39 +3549,6 @@ This is why we configured an upper limit for how long we wait until creating a P
 !!! note
     If the option `minimumReleaseAge` is non-zero then Renovate disables the `prNotPendingHours` functionality.
 
-## prPriority
-
-Sometimes Renovate needs to rate limit its creation of PRs, e.g. hourly or concurrent PR limits.
-By default, Renovate sorts/prioritizes based on the update type, going from smallest update to biggest update.
-Renovate creates update PRs in this order:
-
-1. `pinDigest`
-1. `pin`
-1. `digest`
-1. `patch`
-1. `minor`
-1. `major`
-
-If you have dependencies that are more or less important than others then you can use the `prPriority` field for PR sorting.
-The default value is 0, so setting a negative value will make dependencies sort last, while higher values sort first.
-
-Here's an example of how you would define PR priority so that `devDependencies` are raised last and `react` is raised first:
-
-```json
-{
-  "packageRules": [
-    {
-      "matchDepTypes": ["devDependencies"],
-      "prPriority": -1
-    },
-    {
-      "matchPackageNames": ["react"],
-      "prPriority": 5
-    }
-  ]
-}
-```
-
 ## prTitle
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
@@ -3549,8 +3664,10 @@ This feature works with the following managers:
 - [`docker-compose`](modules/manager/docker-compose/index.md)
 - [`dockerfile`](modules/manager/dockerfile/index.md)
 - [`droneci`](modules/manager/droneci/index.md)
+- [`flux`](modules/manager/flux/index.md)
 - [`gitlabci`](modules/manager/gitlabci/index.md)
 - [`helm-requirements`](modules/manager/helm-requirements/index.md)
+- [`helm-values`](modules/manager/helm-values/index.md)
 - [`helmfile`](modules/manager/helmfile/index.md)
 - [`helmv3`](modules/manager/helmv3/index.md)
 - [`kubernetes`](modules/manager/kubernetes/index.md)
@@ -3663,6 +3780,12 @@ on friday and saturday
 every 3 months on the first day of the month
 * 0 2 * *
 ```
+
+<!-- prettier-ignore -->
+!!! warning
+    You _must_ keep the number and the `am`/`pm` part _together_!
+    Correct: `before 5am`, or `before 5:00am`.
+    Wrong: `before 5 am`, or `before 5:00 am`.
 
 <!-- prettier-ignore -->
 !!! warning

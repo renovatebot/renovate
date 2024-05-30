@@ -1,6 +1,4 @@
 import is from '@sindresorhus/is';
-import merge from 'deepmerge';
-import type { SetRequired } from 'type-fest';
 import { logger } from '../logger';
 import type { CombinedHostRule, HostRule } from '../types';
 import { clone } from './clone';
@@ -75,36 +73,7 @@ export function add(params: HostRule): void {
 export interface HostRuleSearch {
   hostType?: string;
   url?: string;
-}
-
-function isEmpty(
-  rule: HostRule,
-): rule is Omit<HostRule, 'hostType' | 'matchHost' | 'resolvedHost'> {
-  return !rule.hostType && !rule.resolvedHost;
-}
-
-function isComplete(
-  rule: HostRule,
-): rule is SetRequired<HostRule, 'hostType' | 'matchHost' | 'resolvedHost'> {
-  return !!rule.hostType && !!rule.resolvedHost;
-}
-
-function isOnlyHostType(
-  rule: HostRule,
-): rule is Omit<
-  SetRequired<HostRule, 'hostType'>,
-  'matchHost' | 'resolvedHost'
-> {
-  return !!rule.hostType && !rule.resolvedHost;
-}
-
-function isOnlyMatchHost(
-  rule: HostRule,
-): rule is Omit<
-  SetRequired<HostRule, 'matchHost' | 'resolvedHost'>,
-  'hostType'
-> {
-  return !rule.hostType && !!rule.matchHost;
+  readOnly?: boolean;
 }
 
 function matchesHost(url: string, matchHost: string): boolean {
@@ -132,59 +101,83 @@ function matchesHost(url: string, matchHost: string): boolean {
   return hostname.endsWith(topLevelSuffix);
 }
 
-function prioritizeLongestMatchHost(rule1: HostRule, rule2: HostRule): number {
-  // istanbul ignore if: won't happen in practice
-  if (!rule1.matchHost || !rule2.matchHost) {
+function fromShorterToLongerMatchHost(a: HostRule, b: HostRule): number {
+  if (!a.matchHost || !b.matchHost) {
     return 0;
   }
-  return rule1.matchHost.length - rule2.matchHost.length;
+  return a.matchHost.length - b.matchHost.length;
+}
+
+function hostRuleRank({ hostType, matchHost, readOnly }: HostRule): number {
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  if ((hostType || readOnly) && matchHost) {
+    return 3;
+  }
+
+  if (matchHost) {
+    return 2;
+  }
+
+  if (hostType) {
+    return 1;
+  }
+
+  return 0;
+}
+
+function fromLowerToHigherRank(a: HostRule, b: HostRule): number {
+  return hostRuleRank(a) - hostRuleRank(b);
 }
 
 export function find(search: HostRuleSearch): CombinedHostRule {
-  if (!(!!search.hostType || search.url)) {
+  if ([search.hostType, search.url].every(is.falsy)) {
     logger.warn({ search }, 'Invalid hostRules search');
     return {};
   }
-  let res: HostRule = {};
-  // First, apply empty rule matches
-  hostRules
-    .filter((rule) => isEmpty(rule))
-    .forEach((rule) => {
-      res = merge(res, rule);
-    });
-  // Next, find hostType-only matches
-  hostRules
-    .filter((rule) => isOnlyHostType(rule) && rule.hostType === search.hostType)
-    .forEach((rule) => {
-      res = merge(res, rule);
-    });
-  hostRules
-    .filter(
-      (rule) =>
-        isOnlyMatchHost(rule) &&
-        search.url &&
-        matchesHost(search.url, rule.matchHost),
-    )
-    .sort(prioritizeLongestMatchHost)
-    .forEach((rule) => {
-      res = merge(res, rule);
-    });
-  // Finally, find combination matches
-  hostRules
-    .filter(
-      (rule) =>
-        isComplete(rule) &&
-        rule.hostType === search.hostType &&
-        search.url &&
-        matchesHost(search.url, rule.matchHost),
-    )
-    .sort(prioritizeLongestMatchHost)
-    .forEach((rule) => {
-      res = merge(res, rule);
-    });
+
+  // Sort primarily by rank, and secondarily by matchHost length
+  const sortedRules = hostRules
+    .sort(fromShorterToLongerMatchHost)
+    .sort(fromLowerToHigherRank);
+
+  const matchedRules: HostRule[] = [];
+  for (const rule of sortedRules) {
+    let hostTypeMatch = true;
+    let hostMatch = true;
+    let readOnlyMatch = true;
+
+    if (rule.hostType) {
+      hostTypeMatch = false;
+      if (search.hostType === rule.hostType) {
+        hostTypeMatch = true;
+      }
+    }
+
+    if (rule.matchHost && rule.resolvedHost) {
+      hostMatch = false;
+      if (search.url) {
+        hostMatch = matchesHost(search.url, rule.matchHost);
+      }
+    }
+
+    if (!is.undefined(rule.readOnly)) {
+      readOnlyMatch = false;
+      if (search.readOnly === rule.readOnly) {
+        readOnlyMatch = true;
+        hostTypeMatch = true; // When we match `readOnly`, we don't care about `hostType`
+      }
+    }
+
+    if (hostTypeMatch && readOnlyMatch && hostMatch) {
+      matchedRules.push(clone(rule));
+    }
+  }
+
+  const res: HostRule = Object.assign({}, ...matchedRules);
   delete res.hostType;
   delete res.resolvedHost;
   delete res.matchHost;
+  delete res.readOnly;
   return res;
 }
 
@@ -199,7 +192,7 @@ export function hostType({ url }: { url: string }): string | null {
   return (
     hostRules
       .filter((rule) => rule.matchHost && matchesHost(url, rule.matchHost))
-      .sort(prioritizeLongestMatchHost)
+      .sort(fromShorterToLongerMatchHost)
       .map((rule) => rule.hostType)
       .filter(is.truthy)
       .pop() ?? null

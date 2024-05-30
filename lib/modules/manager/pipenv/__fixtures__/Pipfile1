@@ -17,8 +17,15 @@ some-other-package = "==1.0.0"
 invalid-version = "==0 0"
 pytest-benchmark = {version = "==1.0.0", extras = ["histogram"]}
 
+[container]
+container-specific-package = "==1.2.3"
+
+[function]
+function-specific-package = "==2.3.4"
+
 [dev-packages]
 dev-package = "==0.1.0"
 
 [requires]
 python_version = "3.6"
+python_full_version = "3.6.2"
