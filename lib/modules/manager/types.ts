@@ -86,6 +86,7 @@ export interface LookupUpdate {
   newDigest?: string;
   newMajor?: number;
   newMinor?: number;
+  newPatch?: number;
   newName?: string;
   newValue?: string;
   semanticCommitType?: string;
