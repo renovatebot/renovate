@@ -3,7 +3,7 @@ import type { PlatformId } from '../constants';
 import type { LogLevelRemap } from '../logger/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { RepoSortMethod, SortMethod } from '../modules/platform/types';
-import type { HostRule } from '../types';
+import type { HostRule, SkipReason } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
 
@@ -116,6 +116,8 @@ export interface GlobalOnlyConfig {
   globalExtends?: string[];
   logFile?: string;
   logFileLevel?: LogLevel;
+  mergeConfidenceDatasources?: string[];
+  mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
   prCommitsPerRunLimit?: number;
   privateKeyPath?: string;
@@ -147,6 +149,7 @@ export interface RepoGlobalConfig {
   dockerSidecarImage?: string;
   dockerUser?: string;
   dryRun?: DryRunConfig;
+  encryptedWarning?: string;
   endpoint?: string;
   executionTimeout?: number;
   exposeAllEnv?: boolean;
@@ -544,6 +547,8 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   releaseTimestamp?: string | null;
   repository?: string;
   currentVersionTimestamp?: string;
+  enabled?: boolean;
+  skipReason?: SkipReason;
 }
 
 export interface ConfigMigration {
