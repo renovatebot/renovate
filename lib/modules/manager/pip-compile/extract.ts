@@ -12,10 +12,7 @@ import type {
   PackageFileContent,
 } from '../types';
 import { extractHeaderCommand, matchManager } from './common';
-import type {
-  DependencyBetweenFiles,
-  PipCompileArgs,
-} from './types';
+import type { DependencyBetweenFiles, PipCompileArgs } from './types';
 import {
   generateMermaidGraph,
   inferCommandExecDir,

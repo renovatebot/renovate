@@ -5,7 +5,8 @@ import {
   allowedPipOptions,
   extractHeaderCommand,
   extractPythonVersion,
-  getRegistryCredVarsFromPackageFile, matchManager,
+  getRegistryCredVarsFromPackageFile,
+  matchManager,
 } from './common';
 import { inferCommandExecDir } from './utils';
 
