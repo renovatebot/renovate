@@ -45,9 +45,9 @@ export async function generateVersioning(
     # ${displayName} Versioning
     `;
     md += '\n\n';
-    md += `**Identifier**: \`${id}\`\n\n`;
+    md += `## Identifier\n\n \`${id}\` \n\n`;
     md += formatUrls(urls);
-    md += `**Ranges/Constraints:**\n\n`;
+    md += `## Ranges/Constraints\n\n`;
     if (supportsRanges) {
       md += `✅ Ranges are supported.\n\nValid \`rangeStrategy\` values are: ${(
         supportedRangeStrategies ?? []

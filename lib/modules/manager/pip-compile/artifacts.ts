@@ -18,10 +18,11 @@ import type {
 } from '../types';
 import {
   extractHeaderCommand,
+  extractPythonVersion,
   getExecOptions,
   getRegistryCredVarsFromPackageFiles,
+  matchManager,
 } from './common';
-import { matchManager } from './extract';
 import type { PipCompileArgs } from './types';
 import { inferCommandExecDir } from './utils';
 
@@ -113,6 +114,10 @@ export async function updateArtifacts({
         await deleteLocalFile(outputFileName);
       }
       const compileArgs = extractHeaderCommand(existingOutput, outputFileName);
+      const pythonVersion = extractPythonVersion(
+        existingOutput,
+        outputFileName,
+      );
       const cwd = inferCommandExecDir(outputFileName, compileArgs.outputFile);
       const upgradePackages = updatedDeps.filter((dep) => dep.isLockfileUpdate);
       const packageFiles: PackageFileContent[] = [];
@@ -134,6 +139,7 @@ export async function updateArtifacts({
         config,
         cwd,
         getRegistryCredVarsFromPackageFiles(packageFiles),
+        pythonVersion,
       );
       logger.trace({ cwd, cmd }, 'pip-compile command');
       logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');

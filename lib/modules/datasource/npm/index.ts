@@ -14,6 +14,13 @@ export class NpmDatasource extends Datasource {
 
   override readonly defaultVersioning = npmVersioning.id;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `time` field in the results.';
+  override readonly sourceUrlSupport = 'release';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `repository` field in the results.';
+
   constructor() {
     super(NpmDatasource.id);
   }

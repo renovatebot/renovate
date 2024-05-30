@@ -243,6 +243,26 @@ describe('modules/manager/sbt/extract', () => {
       });
     });
 
+    it('extracts deps correctly when dealing with scala 3', () => {
+      const content = `
+        scalaVersion := "3.3.4"
+        libraryDependencies += "org.example" %% "bar" % "0.0.5"
+      `;
+
+      expect(extractPackageFile(content)).toMatchObject({
+        deps: [
+          {
+            packageName: 'org.scala-lang:scala3-library_3',
+            currentValue: '3.3.4',
+          },
+          {
+            packageName: 'org.example:bar_3',
+            currentValue: '0.0.5',
+          },
+        ],
+      });
+    });
+
     it('extracts deps when scala version is defined in a variable with ThisBuild scope', () => {
       const content = `
         val ScalaVersion = "2.12.10"

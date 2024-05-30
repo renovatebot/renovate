@@ -19,6 +19,13 @@ export class BitbucketTagsDatasource extends Datasource {
 
   static readonly defaultRegistryUrls = ['https://bitbucket.org'];
 
+  static readonly releaseTimestampSupport = true;
+  static readonly releaseTimestampNote =
+    'The release timestamp is determined from the `date` field in the results.';
+  static readonly sourceUrlSupport = 'package';
+  static readonly sourceUrlNote =
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
+
   static readonly cacheNamespace: PackageCacheNamespace = `datasource-${BitbucketTagsDatasource.id}`;
 
   constructor() {

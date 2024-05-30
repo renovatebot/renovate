@@ -539,6 +539,21 @@ export async function lookupUpdates(
             registryUrl: update.registryUrl ?? res.registryUrl,
             lookupName: res.lookupName,
           };
+
+          // #20304 only pass it for replacement updates, otherwise we get wrong or invalid digest
+          if (update.updateType !== 'replacement') {
+            delete getDigestConfig.replacementName;
+          }
+
+          // #20304 don't use lookupName and currentDigest when we replace image name
+          if (
+            update.updateType === 'replacement' &&
+            update.newName !== config.packageName
+          ) {
+            delete getDigestConfig.lookupName;
+            delete getDigestConfig.currentDigest;
+          }
+
           // TODO #22198
           update.newDigest ??=
             dependency?.releases.find((r) => r.version === update.newValue)
