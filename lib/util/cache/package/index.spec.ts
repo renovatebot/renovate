@@ -1,4 +1,3 @@
-import { GlobalConfig } from '../../../config/global';
 import { cleanup, get, init, set } from '.';
 
 jest.mock('./file');
@@ -7,7 +6,7 @@ jest.mock('./sqlite');
 
 describe('util/cache/package/index', () => {
   beforeEach(() => {
-    GlobalConfig.reset();
+    delete process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE;
   });
 
   it('returns undefined if not initialized', async () => {
@@ -38,7 +37,7 @@ describe('util/cache/package/index', () => {
   });
 
   it('sets and gets sqlite', async () => {
-    GlobalConfig.set({ experimentalFlags: ['sqlitePackageCache'] });
+    process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE = 'true';
     await init({ cacheDir: 'some-dir' });
     expect(
       await set('_test-namespace', 'some-key', 'some-value', 1),

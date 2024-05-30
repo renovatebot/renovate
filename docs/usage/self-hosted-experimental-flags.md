@@ -90,17 +90,6 @@ Example usage:
 experimentalFlags: ['repoCacheForceLocal'];
 ```
 
-## `sqlitePackageCache`
-
-If added to the `experimentalFlags` list, Renovate will use SQLite as the backend for the package cache.
-Do not combine with `redisUrl`, as Renovate would then prefer Redis over SQlite.
-
-Example usage:
-
-```js
-experimentalFlags: ['sqlitePackageCache'];
-```
-
 ## `suppressPreCommitWarning`
 
 Suppress the pre-commit support warning in PR bodies.

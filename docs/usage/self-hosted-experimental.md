@@ -120,3 +120,8 @@ If set, Renovate will enable `forcePathStyle` when instantiating the AWS S3 clie
 > Whether to force path style URLs for S3 objects (e.g., `https://s3.amazonaws.com//` instead of `https://.s3.amazonaws.com/`)
 
 Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html)
+
+## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
+
+If set, Renovate will use SQLite as the backend for the package cache.
+Don't combine with `redisUrl`, Redis would be preferred over SQlite.
