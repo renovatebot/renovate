@@ -3100,21 +3100,21 @@ const options: RenovateOptions[] = [
   {
     name: 'deleteConfigFile',
     description:
-      'If set to true, Renovate tries to delete the self-hosted config file atfer reading it.',
+      'If set to `true`, Renovate tries to delete the self-hosted config file after reading it.',
     type: 'boolean',
     globalOnly: true,
   },
   {
     name: 'eagerGlobalExtends',
     description:
-      'If set to true, Renovate resolves and merges `globalExtends` presets before other global config, instead of after.',
+      'If set to `true`, Renovate resolves and merges `globalExtends` presets _before_ other global config, instead of _after_.',
     type: 'boolean',
     globalOnly: true,
   },
   {
     name: 'ignoreNodeWarn',
     description:
-      'If set to true, you can suppress the default warning when a deprecated version of Node.js is used to run Renovate.',
+      'When set to `true`, suppresses the default warning when a deprecated version of Node.js is used to run Renovate.',
     type: 'boolean',
     globalOnly: true,
   },

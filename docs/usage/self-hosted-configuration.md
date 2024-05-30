@@ -387,9 +387,12 @@ The above configuration approach will mean the values are redacted in logs like 
 ## deleteConfigFile
 
 If set to `true` Renovate tries to delete the self-hosted config file after reading it.
-You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE` environment variable.
 
 The process that runs Renovate must have the correct permissions to delete the config file.
+
+<!-- prettier-ignore -->
+!!! tip
+    You can tell Renovate where to find your config file with the `RENOVATE_CONFIG_FILE` environment variable.
 
 ## detectGlobalManagerConfig
 
@@ -709,7 +712,7 @@ Value of `0` means no caching.
 
 Using this option, you can suppress the default warning when a deprecated version of Node.js is used to run Renovate.
 
-By default, Renovate logs a WARN debug message if this option is set to true, Renovate will log an INFO debug message instead.
+By default, Renovate logs a `WARN` debug message if this option is set to true, Renovate will log an `INFO` debug message instead.
 
 ## includeMirrors
 
@@ -1157,7 +1160,7 @@ If set, Renovate will use this string as the `endpoint` when instantiating the A
 
 If set, Renovate will enable `forcePathStyle` when instantiating the AWS S3 client.
 
-> Whether to force path style URLs for S3 objects (e.g., `https://s3.amazonaws.com//` instead of `https://.s3.amazonaws.com/`)
+> Whether to force path-style URLs for S3 objects (e.g., `https://s3.amazonaws.com//` instead of `https://.s3.amazonaws.com/`)
 
 Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html)
 
