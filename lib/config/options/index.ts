@@ -3121,14 +3121,14 @@ const options: RenovateOptions[] = [
   {
     name: 's3Endpoint',
     description:
-      'If set, Renovate will use this string as the `endpoint` when instantiating the AWS S3 client.',
+      'If set, Renovate will use this string as the `endpoint` when creating the AWS S3 client instance.',
     type: 'string',
     globalOnly: true,
   },
   {
     name: 's3PathStyle',
     description:
-      'If set, Renovate will enable `forcePathStyle` when instantiating the AWS S3 client.',
+      'If set, Renovate will enable `forcePathStyle` when creating the AWS S3 client instance.',
     type: 'boolean',
     globalOnly: true,
   },

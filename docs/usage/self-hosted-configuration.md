@@ -565,7 +565,9 @@ Information provided mainly in debug log level.
 
 ## eagerGlobalExtends
 
-Resolve and merge `globalExtends` presets before other global config, instead of after.
+By default, Renovate resolves and merges `globalExtends` presets _after_ other global config.
+
+But if you set `eagerGlobalExtends` to `true`, then Renovate will resolve and merge `globalExtends` presets _before_ the global config.
 
 ## encryptedWarning
 
@@ -1154,11 +1156,11 @@ The combinations of `requireConfig` and `onboarding` are:
 
 ## s3Endpoint
 
-If set, Renovate will use this string as the `endpoint` when instantiating the AWS S3 client.
+If set, Renovate will use this string as the `endpoint` when creating the AWS S3 client instance.
 
 ## s3PathStyle
 
-If set, Renovate will enable `forcePathStyle` when instantiating the AWS S3 client.
+If set, Renovate will enable `forcePathStyle` when creating the AWS S3 client instance.
 
 > Whether to force path-style URLs for S3 objects (e.g., `https://s3.amazonaws.com//` instead of `https://.s3.amazonaws.com/`)
 
