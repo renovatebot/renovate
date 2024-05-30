@@ -149,5 +149,5 @@ export async function updateArtifacts({
     }
   }
   logger.debug('pip-compile: Returning updated output file(s)');
-  return result;
+  return result.length === 0 ? null : result;
 }

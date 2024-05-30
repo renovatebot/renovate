@@ -84,7 +84,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     expect(execSnapshots).toEqual([]);
   });
 
-  it('returns null if unchanged', async () => {
+  it('returns null if all unchanged', async () => {
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('new lock');
