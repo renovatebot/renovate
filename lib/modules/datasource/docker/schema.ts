@@ -19,7 +19,7 @@ export const ManifestObject = z.object({
 export const Descriptor = z.object({
   mediaType: z.string(),
   digest: z.string(),
-  size: z.number().int().gt(0).nullish(),
+  size: z.number().int().gte(0).nullish(),
 });
 /**
  * OCI platform properties
@@ -67,6 +67,7 @@ export const OciImageManifest = ManifestObject.extend({
     mediaType: z.enum([
       'application/vnd.oci.image.config.v1+json',
       'application/vnd.cncf.helm.config.v1+json',
+      'application/vnd.devcontainers',
     ]),
   }),
   annotations: z.record(z.string()).nullish(),

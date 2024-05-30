@@ -39,6 +39,8 @@ const renameKeys = {
   aliases: 'registryAliases',
   azureAutoComplete: 'platformAutomerge', // migrate: azureAutoComplete
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
+  mergeConfidenceApiBaseUrl: 'mergeConfidenceEndpoint',
+  mergeConfidenceSupportedDatasources: 'mergeConfidenceDatasources',
 };
 
 function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
@@ -83,11 +85,38 @@ function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return result;
 }
 
+const convertedExperimentalEnvVars = [
+  'RENOVATE_X_AUTODISCOVER_REPO_SORT',
+  'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
+  'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
+  'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',
+];
+
+/**
+ * Massages the experimental env vars which have been converted to config options
+ *
+ * e.g. RENOVATE_X_AUTODISCOVER_REPO_SORT -> RENOVATE_AUTODISCOVER_REPO_SORT
+ */
+function massageConvertedExperimentalVars(
+  env: NodeJS.ProcessEnv,
+): NodeJS.ProcessEnv {
+  const result = { ...env };
+  for (const key of convertedExperimentalEnvVars) {
+    if (env[key] !== undefined) {
+      const newKey = key.replace('RENOVATE_X_', 'RENOVATE_');
+      result[newKey] = env[key];
+      delete result[key];
+    }
+  }
+  return result;
+}
+
 export async function getConfig(
   inputEnv: NodeJS.ProcessEnv,
 ): Promise<AllConfig> {
   let env = inputEnv;
   env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
+  env = massageConvertedExperimentalVars(env);
   env = renameEnvKeys(env);
   // massage the values of migrated configuration keys
   env = massageEnvKeyValues(env);

@@ -9,3 +9,9 @@ export interface CheckMatcherArgs {
   val: unknown;
   currentPath: string;
 }
+
+export interface CheckBaseBranchesArgs {
+  resolvedRule: PackageRule;
+  currentPath: string;
+  baseBranches?: string[];
+}

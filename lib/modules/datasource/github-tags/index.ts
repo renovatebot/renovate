@@ -20,6 +20,14 @@ export class GithubTagsDatasource extends Datasource {
 
   override readonly registryStrategy = 'hunt';
 
+  override readonly releaseTimestampSupport = true;
+  // Note: not sure
+  override readonly releaseTimestampNote =
+    'The get release timestamp is determined from the `releaseTimestamp` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
+
   override http: GithubHttp;
 
   constructor() {

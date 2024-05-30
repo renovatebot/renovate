@@ -2,9 +2,17 @@ import { getManagers } from '../../modules/manager';
 import { getCustomManagers } from '../../modules/manager/custom';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
+import { supportedDatasources } from '../presets/internal/merge-confidence';
 import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
+  {
+    name: 'mode',
+    description: 'Mode of operation.',
+    type: 'string',
+    default: 'full',
+    allowedValues: ['full', 'silent'],
+  },
   {
     name: 'allowedHeaders',
     description:
@@ -14,6 +22,26 @@ const options: RenovateOptions[] = [
     subType: 'string',
     globalOnly: true,
     patternMatch: true,
+  },
+  {
+    name: 'autodiscoverRepoOrder',
+    description:
+      'The order method for autodiscover server side repository search.',
+    type: 'string',
+    default: null,
+    globalOnly: true,
+    allowedValues: ['asc', 'desc'],
+    supportedPlatforms: ['gitea'],
+  },
+  {
+    name: 'autodiscoverRepoSort',
+    description:
+      'The sort method for autodiscover server side repository search.',
+    type: 'string',
+    default: null,
+    globalOnly: true,
+    allowedValues: ['alpha', 'created', 'updated', 'size', 'id'],
+    supportedPlatforms: ['gitea'],
   },
   {
     name: 'allowedEnv',
@@ -39,6 +67,27 @@ const options: RenovateOptions[] = [
       'If `true`, Renovate tries to detect host rules from environment variables.',
     type: 'boolean',
     default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'mergeConfidenceEndpoint',
+    description:
+      'If set, Renovate will query this API for Merge Confidence data.',
+    stage: 'global',
+    type: 'string',
+    default: 'https://developer.mend.io/',
+    advancedUse: true,
+    globalOnly: true,
+  },
+  {
+    name: 'mergeConfidenceDatasources',
+    description:
+      'If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.',
+    stage: 'global',
+    allowedValues: supportedDatasources,
+    default: supportedDatasources,
+    type: 'array',
+    subType: 'string',
     globalOnly: true,
   },
   {
@@ -465,7 +514,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.6.3',
+    default: 'ghcr.io/containerbase/sidecar:10.6.17',
     globalOnly: true,
   },
   {
@@ -601,9 +650,16 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'encryptedWarning',
+    description: 'Warning text to use if encrypted config is found.',
+    type: 'string',
+    globalOnly: true,
+    advancedUse: true,
+  },
+  {
     name: 'inheritConfig',
     description:
-      'If `true`, Renovate will inherit configuration from the `inheritConfigFileName` file in `inheritConfigRepoName',
+      'If `true`, Renovate will inherit configuration from the `inheritConfigFileName` file in `inheritConfigRepoName`.',
     type: 'boolean',
     default: false,
     globalOnly: true,
@@ -627,7 +683,7 @@ const options: RenovateOptions[] = [
   {
     name: 'inheritConfigStrict',
     description:
-      'If `true`, any `inheritedConfig` fetch errror will result in an aborted run.',
+      'If `true`, any `inheritedConfig` fetch error will result in an aborted run.',
     type: 'boolean',
     default: false,
     globalOnly: true,
@@ -1476,7 +1532,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchCurrentValue',
     description:
-      'A regex to match against the raw `currentValue` string of a dependency. Valid only within a `packageRules` object.',
+      'A regex or glob pattern to match against the raw `currentValue` string of a dependency. Valid only within a `packageRules` object.',
     type: 'string',
     stage: 'package',
     parents: ['packageRules'],
@@ -1498,7 +1554,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchNewValue',
     description:
-      'A regex to match against the raw `newValue` string of a dependency. Valid only within a `packageRules` object.',
+      'A regex or glob pattern to match against the raw `newValue` string of a dependency. Valid only within a `packageRules` object.',
     type: 'string',
     stage: 'package',
     parents: ['packageRules'],
@@ -1993,6 +2049,7 @@ const options: RenovateOptions[] = [
       'Set sorting priority for PR creation. PRs with higher priority are created first, negative priority last.',
     type: 'integer',
     default: 0,
+    parents: ['packageRules'],
     cli: false,
     env: false,
   },
