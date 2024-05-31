@@ -4,7 +4,9 @@ import { logger } from '../../../logger';
 import {
   allowedPipOptions,
   extractHeaderCommand,
+  extractPythonVersion,
   getRegistryCredVarsFromPackageFile,
+  matchManager,
 } from './common';
 import { inferCommandExecDir } from './utils';
 
@@ -170,6 +172,21 @@ describe('modules/manager/pip-compile/common', () => {
     );
   });
 
+  describe('extractPythonVersion()', () => {
+    it('extracts Python version from valid header', () => {
+      expect(
+        extractPythonVersion(
+          getCommandInHeader('pip-compile reqs.in'),
+          'reqs.txt',
+        ),
+      ).toBe('3.11');
+    });
+
+    it('returns undefined if version cannot be extracted', () => {
+      expect(extractPythonVersion('', 'reqs.txt')).toBeUndefined();
+    });
+  });
+
   describe('getCredentialVarsFromPackageFile()', () => {
     it('handles both registryUrls and additionalRegistryUrls', () => {
       hostRules.find.mockReturnValueOnce({
@@ -265,6 +282,25 @@ describe('modules/manager/pip-compile/common', () => {
           additionalRegistryUrls: ['invalid-url'],
         }),
       ).toEqual({});
+    });
+  });
+
+  describe('matchManager()', () => {
+    it('matches pip_setup setup.py', () => {
+      expect(matchManager('setup.py')).toBe('pip_setup');
+    });
+
+    it('matches setup-cfg setup.cfg', () => {
+      expect(matchManager('setup.cfg')).toBe('setup-cfg');
+    });
+
+    it('matches pep621 pyproject.toml', () => {
+      expect(matchManager('pyproject.toml')).toBe('pep621');
+    });
+
+    it('matches pip_requirements any .in file', () => {
+      expect(matchManager('file.in')).toBe('pip_requirements');
+      expect(matchManager('another_file.in')).toBe('pip_requirements');
     });
   });
 });

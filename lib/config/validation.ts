@@ -24,6 +24,7 @@ import { GlobalConfig } from './global';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
+import { supportedDatasources } from './presets/internal/merge-confidence';
 import {
   AllowedParents,
   type RenovateConfig,
@@ -34,6 +35,7 @@ import {
   allowedStatusCheckStrings,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
+import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches';
 import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
 
 const options = getOptions();
@@ -298,7 +300,12 @@ export async function validateConfig(
           });
         }
       } else if (
-        ['allowedVersions', 'matchCurrentVersion'].includes(key) &&
+        [
+          'allowedVersions',
+          'matchCurrentVersion',
+          'matchCurrentValue',
+          'matchNewValue',
+        ].includes(key) &&
         isRegexMatch(val)
       ) {
         if (!getRegexPredicate(val)) {
@@ -307,24 +314,6 @@ export async function validateConfig(
             message: `Invalid regExp for ${currentPath}: \`${val}\``,
           });
         }
-      } else if (
-        key === 'matchCurrentValue' &&
-        is.string(val) &&
-        !getRegexPredicate(val)
-      ) {
-        errors.push({
-          topic: 'Configuration Error',
-          message: `Invalid regExp for ${currentPath}: \`${val}\``,
-        });
-      } else if (
-        key === 'matchNewValue' &&
-        is.string(val) &&
-        !getRegexPredicate(val)
-      ) {
-        errors.push({
-          topic: 'Configuration Error',
-          message: `Invalid regExp for ${currentPath}: \`${val}\``,
-        });
       } else if (key === 'timezone' && val !== null) {
         const [validTimezone, errorMessage] = hasValidTimezone(val as string);
         if (!validTimezone) {
@@ -439,6 +428,13 @@ export async function validateConfig(
                   }).migratedConfig.packageRules![0];
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath }),
+                  );
+                  warnings.push(
+                    ...matchBaseBranchesValidator.check({
+                      resolvedRule,
+                      currentPath: `${currentPath}[${subIndex}]`,
+                      baseBranches: config.baseBranches!,
+                    }),
                   );
                   const selectorLength = Object.keys(resolvedRule).filter(
                     (ruleKey) => selectors.includes(ruleKey),
@@ -1004,6 +1000,17 @@ async function validateGlobalConfig(
               warnings.push({
                 topic: 'Configuration Error',
                 message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
+              });
+            }
+          }
+        }
+        if (key === 'mergeConfidenceDatasources') {
+          const allowedValues = supportedDatasources;
+          for (const value of val as string[]) {
+            if (!allowedValues.includes(value)) {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `Invalid value \`${value}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
               });
             }
           }

@@ -23,6 +23,10 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
 
   override readonly defaultVersioning = ivyVersioning.id;
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `scm` tags in the results.';
+
   constructor() {
     super(SbtPluginDatasource.id);
     this.http = new Http('sbt');

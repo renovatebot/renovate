@@ -157,8 +157,9 @@ export async function start(): Promise<number> {
       // initialize all submodules
       config = await globalInitialize(config);
 
-      // Set platform and endpoint in case local presets are used
+      // Set platform, endpoint and allowedHeaders in case local presets are used
       GlobalConfig.set({
+        allowedHeaders: config.allowedHeaders,
         platform: config.platform,
         endpoint: config.endpoint,
       });

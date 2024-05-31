@@ -339,6 +339,7 @@ const repoGroups = {
   'json-smart-v2': 'https://github.com/netplex/json-smart-v2',
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
+  kernelmemory: 'https://github.com/microsoft/kernel-memory',
   kotlin: 'https://github.com/JetBrains/kotlin',
   kroki: 'https://github.com/yuzutech/kroki',
   ktor: 'https://github.com/ktorio/ktor',
