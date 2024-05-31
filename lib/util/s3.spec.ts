@@ -26,7 +26,7 @@ describe('util/s3', () => {
     expect(client1).toBe(client2);
   });
 
-  it('is uses experimental env', async () => {
+  it('uses user configured s3 values', async () => {
     const s3 = await import('./s3');
     const globalConfig = await import('../config/global');
     globalConfig.GlobalConfig.set({
@@ -35,6 +35,21 @@ describe('util/s3', () => {
     });
     const client1 = s3.getS3Client();
     const client2 = getS3Client();
+    expect(client1).not.toBe(client2);
+    expect(await client1.config.endpoint?.()).toStrictEqual({
+      hostname: 'minio.domain.test',
+      path: '/',
+      port: undefined,
+      protocol: 'https:',
+      query: undefined,
+    });
+    expect(client1.config.forcePathStyle).toBeTrue();
+  });
+
+  it('uses s3 values from globalConfig instead of GlobalConfig class', async () => {
+    const s3 = await import('./s3');
+    const client1 = s3.getS3Client('https://minio.domain.test', true);
+    const client2 = getS3Client('https://minio.domain.test', true);
     expect(client1).not.toBe(client2);
     expect(await client1.config.endpoint?.()).toStrictEqual({
       hostname: 'minio.domain.test',
