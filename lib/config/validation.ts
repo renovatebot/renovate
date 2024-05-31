@@ -878,7 +878,7 @@ async function validateGlobalConfig(
   currentPath: string | undefined,
   config: RenovateConfig,
 ): Promise<void> {
-  // istanbul ingore if
+  // istanbul ignore if
   if (getDeprecationMessage(key)) {
     warnings.push({
       topic: 'Deprecation Warning',
