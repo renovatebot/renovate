@@ -73,6 +73,7 @@ const options: RenovateOptions[] = [
     name: 'mergeConfidenceEndpoint',
     description:
       'If set, Renovate will query this API for Merge Confidence data.',
+    stage: 'global',
     type: 'string',
     default: 'https://developer.mend.io/',
     advancedUse: true,
@@ -82,6 +83,7 @@ const options: RenovateOptions[] = [
     name: 'mergeConfidenceDatasources',
     description:
       'If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.',
+    stage: 'global',
     allowedValues: supportedDatasources,
     default: supportedDatasources,
     type: 'array',
@@ -512,7 +514,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.6.16',
+    default: 'ghcr.io/containerbase/sidecar:10.7.0',
     globalOnly: true,
   },
   {

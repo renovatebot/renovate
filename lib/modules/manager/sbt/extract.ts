@@ -19,7 +19,7 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types';
-import { normalizeScalaVersion } from './util';
+import { normalizeScalaVersion, sortPackageFiles } from './util';
 
 type Vars = Record<string, string>;
 
@@ -201,12 +201,16 @@ function depHandler(ctx: Ctx): Ctx {
   delete ctx.variableName;
 
   const depName = `${groupId!}:${artifactId!}`;
+  const isScala3 = scalaVersion?.[0] === '3';
+  const scalaVersionForPackageName = isScala3 ? '3' : scalaVersion;
 
   const dep: PackageDependency = {
     datasource: SbtPackageDatasource.id,
     depName,
     packageName:
-      scalaVersion && useScalaVersion ? `${depName}_${scalaVersion}` : depName,
+      scalaVersionForPackageName && useScalaVersion
+        ? `${depName}_${scalaVersionForPackageName}`
+        : depName,
     currentValue,
   };
 
@@ -318,6 +322,14 @@ export function extractPackageFile(
   content: string,
   packageFile: string,
 ): PackageFileContent | null {
+  return extractPackageFileInternal(content, packageFile);
+}
+
+function extractPackageFileInternal(
+  content: string,
+  packageFile: string,
+  ctxScalaVersion?: string,
+): PackageFileContent | null {
   if (
     packageFile === 'project/build.properties' ||
     packageFile.endsWith('/project/build.properties')
@@ -352,6 +364,7 @@ export function extractPackageFile(
       vars: {},
       deps: [],
       registryUrls: [],
+      scalaVersion: ctxScalaVersion,
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, packageFile }, 'Sbt parsing error');
@@ -361,13 +374,13 @@ export function extractPackageFile(
     return null;
   }
 
-  const { deps, packageFileVersion } = parsedResult;
+  const { deps, scalaVersion, packageFileVersion } = parsedResult;
 
   if (!deps.length) {
     return null;
   }
 
-  return { deps, packageFileVersion };
+  return { deps, packageFileVersion, managerData: { scalaVersion } };
 }
 
 export async function extractAllPackageFiles(
@@ -376,8 +389,11 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
   const proxyUrls: string[] = [];
+  let ctxScalaVersion: string | undefined;
 
-  for (const packageFile of packageFiles) {
+  const sortedPackageFiles = sortPackageFiles(packageFiles);
+
+  for (const packageFile of sortedPackageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (!content) {
       logger.debug({ packageFile }, 'packageFile has no content');
@@ -387,9 +403,16 @@ export async function extractAllPackageFiles(
       const urls = extractProxyUrls(content, packageFile);
       proxyUrls.push(...urls);
     } else {
-      const pkg = extractPackageFile(content, packageFile);
+      const pkg = extractPackageFileInternal(
+        content,
+        packageFile,
+        ctxScalaVersion,
+      );
       if (pkg) {
         packages.push({ deps: pkg.deps, packageFile });
+        if (pkg.managerData?.scalaVersion) {
+          ctxScalaVersion = pkg.managerData.scalaVersion;
+        }
       }
     }
   }
