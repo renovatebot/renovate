@@ -14,6 +14,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
   'pin',
   'replace',
+  'update-lockfile',
 ];
 
 const isVersion = (input: string): boolean => npm.isVersion(input);
@@ -105,6 +106,9 @@ function getNewValue({
     }
     res += newVersion;
     return res;
+  }
+  if (rangeStrategy === 'update-lockfile' && isVersion(currentValue)) {
+    return newVersion;
   }
   const newSemver = npm.getNewValue({
     currentValue: cargo2npm(currentValue),
