@@ -22,12 +22,6 @@ function massageVersion(input: string): string {
   return `>=${input} <${major + 1}`;
 }
 
-function isGreaterThan(version: string, other: string): boolean {
-  const major = semverCoerced.getMajor(other)!;
-
-  return semverCoerced.isGreaterThan(version, `${major + 1}.0.0`);
-}
-
 function matches(version: string, range: string): boolean {
   return semverCoerced.matches(version, massageVersion(range));
 }
@@ -56,6 +50,5 @@ export const api: VersioningApi = {
   getSatisfyingVersion,
   minSatisfyingVersion,
   isLessThanRange,
-  isGreaterThan,
 };
 export default api;
