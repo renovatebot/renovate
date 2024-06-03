@@ -127,6 +127,7 @@ describe('instrumentation/reporting', () => {
   it('send report to an S3 bucket if reportType is s3', async () => {
     const mockClient = mockDeep<S3Client>();
     s3.parseS3Url.mockReturnValue({ Bucket: 'bucket-name', Key: 'key-name' });
+    // @ts-expect-error TS2589
     s3.getS3Client.mockReturnValue(mockClient);
 
     const config: RenovateConfig = {
