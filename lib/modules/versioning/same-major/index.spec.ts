@@ -46,12 +46,12 @@ describe('modules/versioning/same-major/index', () => {
 
   describe('.isLessThanRange(version, range)', () => {
     it('should return true', () => {
-      expect(sameMajor.isLessThanRange('2.0.2', '3.0.0')).toBeTrue();
+      expect(sameMajor.isLessThanRange?.('2.0.2', '3.0.0')).toBeTrue();
     });
 
     it('should return false', () => {
-      expect(sameMajor.isLessThanRange('4.0.0', '3.0.0')).toBeFalse();
-      expect(sameMajor.isLessThanRange('3.1.0', '3.0.0')).toBeFalse();
+      expect(sameMajor.isLessThanRange?.('4.0.0', '3.0.0')).toBeFalse();
+      expect(sameMajor.isLessThanRange?.('3.1.0', '3.0.0')).toBeFalse();
     });
   });
 });
