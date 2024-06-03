@@ -4,7 +4,6 @@ import type { VersioningApi } from '../types';
 export const id = 'same-major';
 export const displayName = 'Same Major Versioning';
 export const urls = [];
-export const supportsRanges = false;
 
 /**
  *
@@ -20,6 +19,13 @@ function massageVersion(input: string): string {
   // we are sure to get a major because of the isSingleVersion check
   const major = semverCoerced.getMajor(input)!;
   return `>=${input} <${major + 1}`;
+}
+
+function isGreaterThan(version: string, other: string): boolean {
+  const versionMajor = semverCoerced.getMajor(version)!;
+  const otherMajor = semverCoerced.getMajor(other)!;
+
+  return versionMajor > otherMajor;
 }
 
 function matches(version: string, range: string): boolean {
@@ -50,5 +56,6 @@ export const api: VersioningApi = {
   getSatisfyingVersion,
   minSatisfyingVersion,
   isLessThanRange,
+  isGreaterThan,
 };
 export default api;
