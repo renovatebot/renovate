@@ -1,6 +1,18 @@
 import sameMajor from '.';
 
 describe('modules/versioning/same-major/index', () => {
+  describe('.isGreaterThan(version, other)', () => {
+    it('should return true', () => {
+      expect(sameMajor.isGreaterThan('4.0.0', '3.0.0')).toBeTrue(); // greater
+    });
+
+    it('should return false', () => {
+      expect(sameMajor.isGreaterThan('2.0.2', '3.1.0')).toBeFalse(); // less
+      expect(sameMajor.isGreaterThan('3.1.0', '3.0.0')).toBeFalse(); // same major -> equal
+      expect(sameMajor.isGreaterThan('3.0.0', '3.0.0')).toBeFalse(); // equal
+    });
+  });
+
   describe('.matches(version, range)', () => {
     it('should return true when version has same major', () => {
       expect(sameMajor.matches('1.0.1', '1.0.0')).toBeTrue();

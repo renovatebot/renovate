@@ -22,6 +22,7 @@ function massageVersion(input: string): string {
   return `>=${input} <${major + 1}`;
 }
 
+// for same major versioning one version is greater than the other if its major is greater
 function isGreaterThan(version: string, other: string): boolean {
   const versionMajor = semverCoerced.getMajor(version)!;
   const otherMajor = semverCoerced.getMajor(other)!;
