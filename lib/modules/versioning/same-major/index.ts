@@ -4,6 +4,7 @@ import type { VersioningApi } from '../types';
 export const id = 'same-major';
 export const displayName = 'Same Major Versioning';
 export const urls = [];
+export const supportsRanges = false;
 
 /**
  *
