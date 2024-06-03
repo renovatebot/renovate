@@ -1,9 +1,20 @@
+import { setTimeout } from 'timers/promises';
+import fs from 'fs-extra';
+import _simpleGit, { SimpleGit } from 'simple-git';
+import { DirectoryResult, dir } from 'tmp-promise';
+import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
+import { GlobalConfig } from '../../../config/global';
+import type { RepoGlobalConfig } from '../../../config/types';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
+import * as memCache from '../../../util/cache/memory';
 import * as hostRules from '../../../util/host-rules';
 import * as rubyVersioning from '../../versioning/ruby';
 import { PodDatasource } from '.';
+
+jest.mock('simple-git');
+const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
 
 const config = {
   versioning: rubyVersioning.id,
@@ -16,11 +27,51 @@ const githubApiHost = 'https://api.github.com';
 const githubEntApiHost = 'https://github.foo.com';
 const githubEntApiHost2 = 'https://ghe.foo.com';
 const cocoapodsHost = 'https://cdn.cocoapods.org';
+const privateRepositoryURL =
+  'https://myorg.visualstudio.com/myproject/_git/podspecs';
+
+function setupGitMocks(delayMs?: number): { mockClone: jest.Mock<any, any> } {
+  const mockClone = jest
+    .fn()
+    .mockName('clone')
+    .mockImplementation(
+      async (_registryUrl: string, clonePath: string, _opts) => {
+        if (delayMs && delayMs > 0) {
+          await setTimeout(delayMs);
+        }
+
+        const path = `${clonePath}/foo/1.2.3/foo.podspec.json`;
+        fs.mkdirSync(dirname(path), { recursive: true });
+        fs.writeFileSync(path, '', { encoding: 'utf8' });
+      },
+    );
+
+  simpleGit.mockReturnValue({
+    clone: mockClone,
+  });
+
+  return { mockClone };
+}
 
 describe('modules/datasource/pod/index', () => {
+  let tmpDir: DirectoryResult | null;
+  let adminConfig: RepoGlobalConfig;
+
   describe('getReleases', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       hostRules.clear();
+      delete process.env.COCOAPODS_GIT_REPOSITORIES;
+
+      tmpDir = await dir({ unsafeCleanup: true });
+
+      adminConfig = {
+        localDir: join(tmpDir.path, 'local'),
+        cacheDir: join(tmpDir.path, 'cache'),
+      };
+      GlobalConfig.set(adminConfig);
+
+      simpleGit.mockReset();
+      memCache.init();
     });
 
     it('returns null for invalid inputs', async () => {
@@ -340,6 +391,24 @@ describe('modules/datasource/pod/index', () => {
           },
         ],
       });
+    });
+
+    it('processes data from a private git https cocoapods specs repository', async () => {
+      process.env.COCOAPODS_GIT_REPOSITORIES = privateRepositoryURL;
+      const { mockClone } = setupGitMocks();
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: [privateRepositoryURL],
+      });
+      expect(res).toEqual({
+        registryUrl: privateRepositoryURL,
+        releases: [
+          {
+            version: '1.2.3',
+          },
+        ],
+      });
+      expect(mockClone).toHaveBeenCalled();
     });
   });
 });
