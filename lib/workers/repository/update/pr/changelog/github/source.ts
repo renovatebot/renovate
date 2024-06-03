@@ -53,6 +53,7 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     const { token } = hostRules.find({
       hostType: 'github',
       url,
+      readOnly: true,
     });
     // istanbul ignore if
     if (host && !token) {

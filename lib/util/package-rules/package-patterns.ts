@@ -39,7 +39,7 @@ export class PackagePatternsMatcher extends Matcher {
       return true;
     }
     if (matchPatternsAgainstName(matchPackagePatterns, depName)) {
-      logger.once.info(
+      logger.once.warn(
         { packageRule, packageName, depName },
         'Use matchDepPatterns instead of matchPackagePatterns',
       );
@@ -70,7 +70,7 @@ export class PackagePatternsMatcher extends Matcher {
     }
 
     if (matchPatternsAgainstName(excludePackagePatterns, depName)) {
-      logger.once.info(
+      logger.once.warn(
         { packageRule, packageName, depName },
         'Use excludeDepPatterns instead of excludePackagePatterns',
       );

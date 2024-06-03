@@ -38,6 +38,7 @@ const repoGroups = {
   'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
   'aspnet-health-checks':
     'https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks',
+  astro: 'https://github.com/withastro/astro',
   'automapper-dotnet': [
     'https://github.com/AutoMapper/AutoMapper',
     'https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection',
@@ -71,6 +72,8 @@ const repoGroups = {
   capacitor: 'https://github.com/ionic-team/capacitor',
   'chakra-ui': 'https://github.com/chakra-ui/chakra-ui',
   chromely: 'https://github.com/chromelyapps/Chromely',
+  'citation-js': 'https://github.com/citation-js/citation-js',
+  ckeditor: 'https://github.com/ckeditor/ckeditor5',
   clarity: 'https://github.com/vmware/clarity',
   clearscript: [
     'https://github.com/microsoft/ClearScript',
@@ -274,8 +277,10 @@ const repoGroups = {
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
+  eslint: 'https://github.com/eslint/eslint',
   'eslint-config-globex':
     'https://github.com/GlobexDesignsInc/eslint-config-globex',
+  'eslint-stylistic': 'https://github.com/eslint-stylistic/eslint-stylistic',
   expo: 'https://github.com/expo/expo',
   'fabric-chaincode-node':
     'https://github.com/hyperledger/fabric-chaincode-node',
@@ -334,8 +339,10 @@ const repoGroups = {
   'json-smart-v2': 'https://github.com/netplex/json-smart-v2',
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
+  kernelmemory: 'https://github.com/microsoft/kernel-memory',
   kotlin: 'https://github.com/JetBrains/kotlin',
   kroki: 'https://github.com/yuzutech/kroki',
+  ktor: 'https://github.com/ktorio/ktor',
   lamar: 'https://github.com/JasperFx/lamar',
   lerna: 'https://github.com/lerna/lerna',
   lexical: 'https://github.com/facebook/lexical',
@@ -469,6 +476,7 @@ const repoGroups = {
   storybook: 'https://github.com/storybookjs/storybook',
   'storybook-react-native': 'https://github.com/storybookjs/react-native',
   strapi: 'https://github.com/strapi/strapi',
+  strum: 'https://github.com/Peternator7/strum',
   'stryker-js': 'https://github.com/stryker-mutator/stryker-js',
   surveyjs: 'https://github.com/surveyjs/surveyjs',
   'swashbuckle-aspnetcore':
@@ -492,6 +500,9 @@ const repoGroups = {
   'theme-ui': 'https://github.com/system-ui/theme-ui',
   tika: 'https://github.com/apache/tika',
   tiptap: 'https://github.com/ueberdosis/tiptap',
+  'tokio-prost': 'https://github.com/tokio-rs/prost',
+  'tokio-tracing': 'https://github.com/tokio-rs/tracing',
+  tonic: 'https://github.com/hyperium/tonic',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
   'trust-dns': 'https://github.com/bluejekyll/trust-dns',
@@ -511,6 +522,7 @@ const repoGroups = {
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   vuepress: 'https://github.com/vuejs/vuepress',
+  weasel: 'https://github.com/JasperFx/weasel',
   'web3-react': 'https://github.com/Uniswap/web3-react',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   wolverine: 'https://github.com/jasperfx/wolverine',
@@ -560,6 +572,7 @@ const patternGroups = {
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
   'syncfusion-dotnet': '^Syncfusion\\.',
+  'testing-library': '^@testing-library/',
   wordpress: '^@wordpress/',
 };
 

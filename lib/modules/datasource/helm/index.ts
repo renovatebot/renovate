@@ -25,6 +25,13 @@ export class HelmDatasource extends Datasource {
 
   override readonly defaultVersioning = helmVersioning.id;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timstamp is determined from the `created` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `home` field or the `sources` field in the results.';
+
   @cache({
     namespace: `datasource-${HelmDatasource.id}`,
     key: (helmRepository: string) => helmRepository,

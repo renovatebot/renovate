@@ -143,6 +143,9 @@ describe('modules/manager/sbt/extract', () => {
             variableName: 'sbtReleaseVersion',
           },
         ],
+        managerData: {
+          scalaVersion: undefined,
+        },
         packageFileVersion: '1.0.1',
       });
     });
@@ -238,6 +241,26 @@ describe('modules/manager/sbt/extract', () => {
           {
             packageName: 'org.scala-lang:scala3-library_3',
             currentValue: '3.1.1',
+          },
+        ],
+      });
+    });
+
+    it('extracts deps correctly when dealing with scala 3', () => {
+      const content = `
+        scalaVersion := "3.3.4"
+        libraryDependencies += "org.example" %% "bar" % "0.0.5"
+      `;
+
+      expect(extractPackageFile(content)).toMatchObject({
+        deps: [
+          {
+            packageName: 'org.scala-lang:scala3-library_3',
+            currentValue: '3.3.4',
+          },
+          {
+            packageName: 'org.example:bar_3',
+            currentValue: '0.0.5',
           },
         ],
       });
@@ -452,8 +475,8 @@ describe('modules/manager/sbt/extract', () => {
       maven-central
     `;
       fs.readLocalFile
-        .mockResolvedValueOnce(repositoryContent)
-        .mockResolvedValueOnce(sbtDependencyFile);
+        .mockResolvedValueOnce(sbtDependencyFile)
+        .mockResolvedValueOnce(repositoryContent);
       const packages = await extractAllPackageFiles({}, [
         'repositories',
         'build.sbt',

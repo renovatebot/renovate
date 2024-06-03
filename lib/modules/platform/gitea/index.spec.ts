@@ -22,6 +22,7 @@ import type {
   Label,
   PR,
   Repo,
+  RepoPermission,
   User,
 } from './types';
 
@@ -39,6 +40,14 @@ describe('modules/platform/gitea/index', () => {
   let hostRules: typeof import('../../../util/host-rules');
   let memCache: typeof import('../../../util/cache/memory');
 
+  function mockedRepo(opts: Partial<Repo>): Repo {
+    return partial<Repo>({
+      permissions: partial<RepoPermission>({ push: true, pull: true }),
+      has_pull_requests: true,
+      ...opts,
+    });
+  }
+
   const mockCommitHash =
     '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha;
 
@@ -49,33 +58,28 @@ describe('modules/platform/gitea/index', () => {
     email: 'renovate@example.com',
   };
 
-  const mockRepo = partial<Repo>({
+  const mockRepo = mockedRepo({
     allow_rebase: true,
     clone_url: 'https://gitea.renovatebot.com/some/repo.git',
     ssh_url: 'git@gitea.renovatebot.com/some/repo.git',
     default_branch: 'master',
     full_name: 'some/repo',
-    permissions: {
-      pull: true,
-      push: true,
-      admin: false,
-    },
   });
 
   type MockPr = PR & Required<Pick<PR, 'head' | 'base'>>;
 
   const mockRepos: Repo[] = [
-    partial<Repo>({ full_name: 'a/b' }),
-    partial<Repo>({ full_name: 'c/d' }),
-    partial<Repo>({ full_name: 'e/f', mirror: true }),
+    mockedRepo({ full_name: 'a/b' }),
+    mockedRepo({ full_name: 'c/d' }),
+    mockedRepo({ full_name: 'e/f', mirror: true }),
   ];
 
-  const mockTopicRepos: Repo[] = [partial<Repo>({ full_name: 'a/b' })];
+  const mockTopicRepos: Repo[] = [mockedRepo({ full_name: 'a/b' })];
 
   const mockNamespaceRepos: Repo[] = [
-    partial<Repo>({ full_name: 'org1/repo' }),
-    partial<Repo>({ full_name: 'org2/repo' }),
-    partial<Repo>({ full_name: 'org2/repo2', archived: true }),
+    mockedRepo({ full_name: 'org1/repo' }),
+    mockedRepo({ full_name: 'org2/repo' }),
+    mockedRepo({ full_name: 'org2/repo2', archived: true }),
   ];
 
   const mockPRs: MockPr[] = [
@@ -220,9 +224,6 @@ describe('modules/platform/gitea/index', () => {
     hostRules.clear();
 
     setBaseUrl('https://gitea.renovatebot.com/');
-
-    delete process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT;
-    delete process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER;
   });
 
   async function initFakePlatform(
@@ -417,8 +418,6 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('Sorts repos', async () => {
-      process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT = 'updated';
-      process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER = 'desc';
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/search')
@@ -434,7 +433,10 @@ describe('modules/platform/gitea/index', () => {
         });
       await initFakePlatform(scope);
 
-      const repos = await gitea.getRepos();
+      const repos = await gitea.getRepos({
+        sort: 'updated',
+        order: 'desc',
+      });
       expect(repos).toEqual(['a/b', 'c/d']);
     });
   });
@@ -510,6 +512,20 @@ describe('modules/platform/gitea/index', () => {
       await initFakePlatform(scope);
       await expect(gitea.initRepo(initRepoCfg)).rejects.toThrow(
         REPOSITORY_ACCESS_FORBIDDEN,
+      );
+    });
+
+    it('should abort when repo has pulls disabled', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get(`/repos/${initRepoCfg.repository}`)
+        .reply(200, {
+          ...mockRepo,
+          has_pull_requests: false,
+        });
+      await initFakePlatform(scope);
+      await expect(gitea.initRepo(initRepoCfg)).rejects.toThrow(
+        REPOSITORY_BLOCKED,
       );
     });
 
@@ -1593,6 +1609,8 @@ describe('modules/platform/gitea/index', () => {
 
     it('should use platform automerge', async () => {
       memCache.set('gitea-pr-cache-synced', true);
+      const helper = await import('./gitea-helper');
+      const mergePR = jest.spyOn(helper, 'mergePR');
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
@@ -1614,6 +1632,63 @@ describe('modules/platform/gitea/index', () => {
         number: 42,
         title: 'pr-title',
       });
+      expect(mergePR).toHaveBeenCalled();
+    });
+
+    it('should use platform automerge on forgejo v7', async () => {
+      memCache.set('gitea-pr-cache-synced', true);
+      const helper = await import('./gitea-helper');
+      const mergePR = jest.spyOn(helper, 'mergePR');
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .post('/repos/some/repo/pulls')
+        .reply(200, mockNewPR)
+        .post('/repos/some/repo/pulls/42/merge')
+        .reply(200);
+      await initFakePlatform(scope, '7.0.0-dev-2136-f075579c95+gitea-1.22.0');
+      await initFakeRepo(scope);
+
+      const res = await gitea.createPr({
+        sourceBranch: mockNewPR.head.label,
+        targetBranch: 'master',
+        prTitle: mockNewPR.title,
+        prBody: mockNewPR.body,
+        platformOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(res).toMatchObject({
+        number: 42,
+        title: 'pr-title',
+      });
+      expect(mergePR).toHaveBeenCalled();
+    });
+
+    it('should use platform automerge on forgejo v7 LTS', async () => {
+      memCache.set('gitea-pr-cache-synced', true);
+      const helper = await import('./gitea-helper');
+      const mergePR = jest.spyOn(helper, 'mergePR');
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .post('/repos/some/repo/pulls')
+        .reply(200, mockNewPR)
+        .post('/repos/some/repo/pulls/42/merge')
+        .reply(200);
+      await initFakePlatform(scope, '7.0.0+LTS-gitea-1.22.0');
+      await initFakeRepo(scope);
+
+      const res = await gitea.createPr({
+        sourceBranch: mockNewPR.head.label,
+        targetBranch: 'master',
+        prTitle: mockNewPR.title,
+        prBody: mockNewPR.body,
+        platformOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(res).toMatchObject({
+        number: 42,
+        title: 'pr-title',
+      });
+      expect(mergePR).toHaveBeenCalled();
     });
 
     it('continues on platform automerge error', async () => {

@@ -32,51 +32,6 @@ Skipping the check will speed things up, but may result in versions being return
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
-## `RENOVATE_REUSE_PACKAGE_LOCK`
-
-If set to "false" (string), Renovate will remove any existing `package-lock.json` before trying to update it.
-
-## `RENOVATE_USER_AGENT`
-
-If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
-
-## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
-
-<!-- prettier-ignore -->
-!!! note
-    For the Forgejo and Gitea platform only.
-
-The order method for autodiscover server side repository search.
-
-> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
-
-Allowed values:
-
-- `asc`
-- `desc`
-
-Default value: `asc`.
-
-## `RENOVATE_X_AUTODISCOVER_REPO_SORT`
-
-<!-- prettier-ignore -->
-!!! note
-    For the Forgejo and Gitea platform only.
-
-The sort method for autodiscover server side repository search.
-
-> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
-
-Allowed values:
-
-- `alpha`
-- `created`
-- `updated`
-- `size`
-- `id`
-
-Default value: `alpha`.
-
 ## `RENOVATE_X_DELETE_CONFIG_FILE`
 
 If `true` Renovate tries to delete the self-hosted config file after reading it.
@@ -135,15 +90,9 @@ Suppress the default warning when a deprecated version of Node.js is used to run
 
 Skip initializing `RE2` for regular expressions and instead use Node-native `RegExp` instead.
 
-## `RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL`
+## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
 
-If set, Renovate will query this API for Merge Confidence data.
-This feature is in private beta.
-
-## `RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES`
-
-If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
-The expected value for this environment variable is a JSON array of strings.
+If set to any value, Renovate will download `nupkg` files for determining package metadata.
 
 ## `RENOVATE_X_PLATFORM_VERSION`
 
@@ -159,6 +108,10 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 <!-- prettier-ignore -->
 !!! note
     For the GitHub Enterprise Server platform only.
+
+## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
+
+If set, Renovate will persist repository cache locally after uploading to S3.
 
 ## `RENOVATE_X_S3_ENDPOINT`
 
@@ -180,6 +133,10 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
 Suppress the pre-commit support warning in PR bodies.
+
+## `RENOVATE_X_USE_OPENPGP`
+
+Use `openpgp` instead of `kbpgp` for `PGP` decryption.
 
 ## `RENOVATE_X_YARN_PROXY`
 

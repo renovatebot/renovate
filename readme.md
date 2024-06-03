@@ -8,7 +8,7 @@ Multi-platform and multi-language.
 [![License: AGPL-3.0-only](https://img.shields.io/badge/license-%20%09AGPL--3.0--only-blue.svg)](https://raw.githubusercontent.com/renovatebot/renovate/main/license)
 [![codecov](https://codecov.io/gh/renovatebot/renovate/branch/main/graph/badge.svg)](https://codecov.io/gh/renovatebot/renovate)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
-[![Build](https://github.com/renovatebot/renovate/actions/workflows/build.yml/badge.svg)](https://github.com/renovatebot/renovate/actions/workflows/build.yml)
+[![Build status](https://github.com/renovatebot/renovate/actions/workflows/build.yml/badge.svg)](https://github.com/renovatebot/renovate/actions/workflows/build.yml)
 ![Docker Pulls](https://img.shields.io/docker/pulls/renovate/renovate?color=turquoise)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/renovatebot/renovate/badge)](https://securityscorecards.dev/viewer/?uri=github.com/renovatebot/renovate)
 
@@ -45,7 +45,33 @@ Renovate works on these platforms:
 
 Renovate is widely used in the developer community:
 
-![Renovate Matrix](https://app.renovatebot.com/images/matrix.png)
+![Logos of companies and projects that use Renovate](./docs/usage/assets/images/matrix.png)
+
+<details>
+<summary>List of companies and projects that use Renovate</summary>
+
+- Prisma
+- Netlify
+- Envoy
+- Condé Nast
+- Microsoft
+- Atlassian
+- Sourcegraph
+- Mozilla
+- Deloitte
+- Telus
+- Yarn
+- HashiCorp
+- Automattic
+- Algolia
+- eBay
+- Cypress
+- Red Hat
+- Financial Times
+- Uber
+- Buildkite
+
+</details>
 
 ## Renovate OSS Insights
 

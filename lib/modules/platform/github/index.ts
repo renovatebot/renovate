@@ -73,7 +73,7 @@ import {
   repoInfoQuery,
   vulnerabilityAlertsQuery,
 } from './graphql';
-import { GithubIssue as Issue } from './issue';
+import { GithubIssueCache, GithubIssue as Issue } from './issue';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
 import type {
@@ -461,6 +461,7 @@ export async function initRepo({
   const opts = hostRules.find({
     hostType: 'github',
     url: platformConfig.endpoint,
+    readOnly: true,
   });
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
@@ -497,7 +498,9 @@ export async function initRepo({
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
+        user: renovateUsername,
       },
+      readOnly: true,
     });
 
     if (res?.errors) {
@@ -557,6 +560,11 @@ export async function initRepo({
     config.autoMergeAllowed = repo.autoMergeAllowed;
     config.hasIssuesEnabled = repo.hasIssuesEnabled;
     config.hasVulnerabilityAlertsEnabled = repo.hasVulnerabilityAlertsEnabled;
+
+    const recentIssues = Issue.array()
+      .catch([])
+      .parse(res?.data?.repository?.issues?.nodes);
+    GithubIssueCache.addIssuesToReconcile(recentIssues);
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (
@@ -591,7 +599,6 @@ export async function initRepo({
     throw err;
   }
   // This shouldn't be necessary, but occasional strange errors happened until it was added
-  config.issueList = null;
   config.prList = null;
 
   if (forkToken) {
@@ -842,11 +849,11 @@ export async function findPr({
   if (includeOtherAuthors) {
     const repo = config.parentRepo ?? config.repository;
     // PR might have been created by anyone, so don't use the cached Renovate PR list
-    const response = await githubApi.getJson<GhRestPr[]>(
+    const { body: prList } = await githubApi.getJson<GhRestPr[]>(
       `repos/${repo}/pulls?head=${repo}:${branchName}&state=open`,
+      { cacheProvider: repoCacheProvider },
     );
 
-    const { body: prList } = response;
     if (!prList.length) {
       logger.debug(`No PR found for branch ${branchName}`);
       return null;
@@ -994,15 +1001,15 @@ async function getStatus(
   branchName: string,
   useCache = true,
 ): Promise<CombinedBranchStatus> {
-  const commitStatusUrl = `repos/${config.repository}/commits/${escapeHash(
-    branchName,
-  )}/status`;
+  const branch = escapeHash(branchName);
+  const url = `repos/${config.repository}/commits/${branch}/status`;
 
-  return (
-    await githubApi.getJson<CombinedBranchStatus>(commitStatusUrl, {
-      memCache: useCache,
-    })
-  ).body;
+  const { body: status } = await githubApi.getJson<CombinedBranchStatus>(url, {
+    memCache: useCache,
+    cacheProvider: repoCacheProvider,
+  });
+
+  return status;
 }
 
 // Returns the combined status for a branch.
@@ -1209,6 +1216,7 @@ async function getIssues(): Promise<Issue[]> {
         name: config.repositoryName,
         user: config.renovateUsername,
       },
+      readOnly: true,
     },
   );
 
@@ -1221,17 +1229,16 @@ export async function getIssueList(): Promise<Issue[]> {
   if (config.hasIssuesEnabled === false) {
     return [];
   }
-  if (!config.issueList) {
+  let issueList = GithubIssueCache.getIssues();
+  if (!issueList) {
     logger.debug('Retrieving issueList');
-    config.issueList = await getIssues();
+    issueList = await getIssues();
+    GithubIssueCache.setIssues(issueList);
   }
-  return config.issueList;
+  return issueList;
 }
 
-export async function getIssue(
-  number: number,
-  useCache = true,
-): Promise<Issue | null> {
+export async function getIssue(number: number): Promise<Issue | null> {
   // istanbul ignore if
   if (config.hasIssuesEnabled === false) {
     return null;
@@ -1241,11 +1248,11 @@ export async function getIssue(
     const { body: issue } = await githubApi.getJson(
       `repos/${repo}/issues/${number}`,
       {
-        memCache: useCache,
         cacheProvider: repoCacheProvider,
       },
       Issue,
     );
+    GithubIssueCache.updateIssue(issue);
     return issue;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, number }, 'Error getting issue');
@@ -1267,12 +1274,13 @@ export async function findIssue(title: string): Promise<Issue | null> {
 
 async function closeIssue(issueNumber: number): Promise<void> {
   logger.debug(`closeIssue(${issueNumber})`);
-  await githubApi.patchJson(
-    `repos/${config.parentRepo ?? config.repository}/issues/${issueNumber}`,
-    {
-      body: { state: 'closed' },
-    },
+  const repo = config.parentRepo ?? config.repository;
+  const { body: closedIssue } = await githubApi.patchJson(
+    `repos/${repo}/issues/${issueNumber}`,
+    { body: { state: 'closed' } },
+    Issue,
   );
+  GithubIssueCache.updateIssue(closedIssue);
 }
 
 export async function ensureIssue({
@@ -1319,17 +1327,18 @@ export async function ensureIssue({
           await closeIssue(i.number);
         }
       }
+
       const repo = config.parentRepo ?? config.repository;
-      const {
-        body: { body: issueBody },
-      } = await githubApi.getJson(
+      const { body: serverIssue } = await githubApi.getJson(
         `repos/${repo}/issues/${issue.number}`,
         { cacheProvider: repoCacheProvider },
         Issue,
       );
+      GithubIssueCache.updateIssue(serverIssue);
+
       if (
         issue.title === title &&
-        issueBody === body &&
+        serverIssue.body === body &&
         issue.state === 'open'
       ) {
         logger.debug('Issue is open and up to date - nothing to do');
@@ -1341,19 +1350,18 @@ export async function ensureIssue({
         if (labels) {
           data.labels = labels;
         }
-        await githubApi.patchJson(
-          `repos/${config.parentRepo ?? config.repository}/issues/${
-            issue.number
-          }`,
-          {
-            body: data,
-          },
+        const repo = config.parentRepo ?? config.repository;
+        const { body: updatedIssue } = await githubApi.patchJson(
+          `repos/${repo}/issues/${issue.number}`,
+          { body: data },
+          Issue,
         );
+        GithubIssueCache.updateIssue(updatedIssue);
         logger.debug('Issue updated');
         return 'updated';
       }
     }
-    await githubApi.postJson(
+    const { body: createdIssue } = await githubApi.postJson(
       `repos/${config.parentRepo ?? config.repository}/issues`,
       {
         body: {
@@ -1362,10 +1370,11 @@ export async function ensureIssue({
           labels: labels ?? [],
         },
       },
+      Issue,
     );
     logger.info('Issue created');
     // reset issueList so that it will be fetched again as-needed
-    config.issueList = null;
+    GithubIssueCache.updateIssue(createdIssue);
     return 'created';
   } catch (err) /* istanbul ignore next */ {
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
@@ -1410,13 +1419,14 @@ async function tryAddMilestone(
     },
     'Adding milestone to PR',
   );
-  const repository = config.parentRepo ?? config.repository;
   try {
-    await githubApi.patchJson(`repos/${repository}/issues/${issueNo}`, {
-      body: {
-        milestone: milestoneNo,
-      },
-    });
+    const repo = config.parentRepo ?? config.repository;
+    const { body: updatedIssue } = await githubApi.patchJson(
+      `repos/${repo}/issues/${issueNo}`,
+      { body: { milestone: milestoneNo } },
+      Issue,
+    );
+    GithubIssueCache.updateIssue(updatedIssue);
   } catch (err) {
     const actualError = err.response?.body || /* istanbul ignore next */ err;
     logger.warn(
@@ -1436,11 +1446,12 @@ export async function addAssignees(
 ): Promise<void> {
   logger.debug(`Adding assignees '${assignees.join(', ')}' to #${issueNo}`);
   const repository = config.parentRepo ?? config.repository;
-  await githubApi.postJson(`repos/${repository}/issues/${issueNo}/assignees`, {
-    body: {
-      assignees,
-    },
-  });
+  const { body: updatedIssue } = await githubApi.postJson(
+    `repos/${repository}/issues/${issueNo}/assignees`,
+    { body: { assignees } },
+    Issue,
+  );
+  GithubIssueCache.updateIssue(updatedIssue);
 }
 
 export async function addReviewers(
@@ -1534,15 +1545,13 @@ async function deleteComment(commentId: number): Promise<void> {
 async function getComments(issueNo: number): Promise<Comment[]> {
   // GET /repos/:owner/:repo/issues/:number/comments
   logger.debug(`Getting comments for #${issueNo}`);
-  const url = `repos/${
-    config.parentRepo ?? config.repository
-  }/issues/${issueNo}/comments?per_page=100`;
+  const repo = config.parentRepo ?? config.repository;
+  const url = `repos/${repo}/issues/${issueNo}/comments?per_page=100`;
   try {
-    const comments = (
-      await githubApi.getJson<Comment[]>(url, {
-        paginate: true,
-      })
-    ).body;
+    const { body: comments } = await githubApi.getJson<Comment[]>(url, {
+      paginate: true,
+      cacheProvider: repoCacheProvider,
+    });
     logger.debug(`Found ${comments.length} comments`);
     return comments;
   } catch (err) /* istanbul ignore next */ {
@@ -1941,6 +1950,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/]: https:\/\/github\.com\//g), ']: https://togithub.com/')
     .replace('> ℹ **Note**\n> \n', '> [!NOTE]\n')
     .replace('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
+    .replace('> ⚠️ **Warning**\n> \n', '> [!WARNING]\n')
     .replace('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
   return smartTruncate(massagedInput, GitHubMaxPrBodyLen);
 }
@@ -1969,6 +1979,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       variables: { owner: config.repositoryOwner, name: config.repositoryName },
       paginate: false,
       acceptHeader: 'application/vnd.github.vixen-preview+json',
+      readOnly: true,
     });
   } catch (err) {
     logger.debug({ err }, 'Error retrieving vulnerability alerts');

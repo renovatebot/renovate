@@ -28,6 +28,10 @@ Renovate can update `git` references from `GitRepository` resources.
 
 The `flux` manager only updates `GitRepository` fields that have a `tag` or `commit` key.
 
+### Kustomization support
+
+Renovate can update `image`[^1] references from `Kustomization` resources.
+
 ### OCIRepository support
 
 Renovate can update `oci` references from `OCIRepository` resources.
@@ -80,4 +84,6 @@ If instead you have all your Flux manifests inside a `flux/` directory, you woul
 
 ### Versioning
 
-If you need to change the versioning format, read the [versioning](../../versioning.md) documentation to learn more.
+If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.
+
+[^1]: <https://fluxcd.io/flux/components/kustomize/kustomizations/#images>
