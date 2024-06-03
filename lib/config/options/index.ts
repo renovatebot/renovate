@@ -514,7 +514,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.6.19',
+    default: 'ghcr.io/containerbase/sidecar:10.7.0',
     globalOnly: true,
   },
   {
@@ -1559,6 +1559,23 @@ const options: RenovateOptions[] = [
     stage: 'package',
     parents: ['packageRules'],
     mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'sourceUrl',
+    description: 'The source URL of the package.',
+    type: 'string',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'sourceDirectory',
+    description:
+      'The source directory in which the package is present at its source.',
+    type: 'string',
+    parents: ['packageRules'],
     cli: false,
     env: false,
   },

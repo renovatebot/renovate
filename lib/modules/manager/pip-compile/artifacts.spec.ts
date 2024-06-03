@@ -1,7 +1,11 @@
 import { codeBlock } from 'common-tags';
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
+import {
+  envMock,
+  mockExecAll,
+  mockExecSequence,
+} from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -80,7 +84,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     expect(execSnapshots).toEqual([]);
   });
 
-  it('returns null if unchanged', async () => {
+  it('returns null if all unchanged', async () => {
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
     fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     const execSnapshots = mockExecAll();
@@ -623,6 +627,33 @@ describe('modules/manager/pip-compile/artifacts', () => {
       ).toBe(
         'pip-compile --output-file=requirements.txt requirements.in --upgrade-package=foo==1.0.2 --upgrade-package=bar==2.0.0',
       );
+    });
+
+    it('reports errors when a lock file is unchanged', async () => {
+      fs.readLocalFile.mockResolvedValue(simpleHeader);
+      mockExecSequence([
+        new Error('Oh noes!'),
+        { stdout: 'This one worked', stderr: '' },
+      ]);
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: [],
+        }),
+      );
+      const results = await updateArtifacts({
+        packageFileName: 'requirements.in',
+        updatedDeps: [],
+        newPackageFileContent: 'some new content',
+        config: {
+          ...config,
+          lockFiles: ['requirements1.txt', 'requirements2.txt'],
+        },
+      });
+      expect(results).toMatchObject([
+        {
+          artifactError: { lockFile: 'requirements1.txt', stderr: 'Oh noes!' },
+        },
+      ]);
     });
   });
 });

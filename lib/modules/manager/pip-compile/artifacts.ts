@@ -9,7 +9,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
-import { extractPackageFileFlags as extractRequirementsFileFlags } from '../pip_requirements';
+import { extractPackageFileFlags as extractRequirementsFileFlags } from '../pip_requirements/common';
 import type {
   PackageFileContent,
   UpdateArtifact,
@@ -145,16 +145,15 @@ export async function updateArtifacts({
       logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
       await exec(cmd, execOptions);
       const status = await getRepoStatus();
-      if (!status?.modified.includes(outputFileName)) {
-        return null;
+      if (status?.modified.includes(outputFileName)) {
+        result.push({
+          file: {
+            type: 'addition',
+            path: outputFileName,
+            contents: await readLocalFile(outputFileName, 'utf8'),
+          },
+        });
       }
-      result.push({
-        file: {
-          type: 'addition',
-          path: outputFileName,
-          contents: await readLocalFile(outputFileName, 'utf8'),
-        },
-      });
     } catch (err) {
       // istanbul ignore if
       if (err.message === TEMPORARY_ERROR) {
@@ -170,5 +169,5 @@ export async function updateArtifacts({
     }
   }
   logger.debug('pip-compile: Returning updated output file(s)');
-  return result;
+  return result.length === 0 ? null : result;
 }

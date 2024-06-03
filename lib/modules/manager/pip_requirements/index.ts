@@ -3,7 +3,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 
 export { updateArtifacts } from './artifacts';
-export { extractPackageFile, extractPackageFileFlags } from './extract';
+export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)[\\w-]*requirements([-.]\\w+)?\\.(txt|pip)$'],
