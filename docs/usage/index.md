@@ -80,28 +80,28 @@ Renovate is used by:
 
 <details>
 <summary>List of companies and projects that use Renovate</summary>
-
-- Prisma
-- Netlify
-- Envoy
-- Condé Nast
-- Microsoft
-- Atlassian
-- Sourcegraph
-- Mozilla
-- Deloitte
-- Telus
-- Yarn
-- HashiCorp
-- Automattic
-- Algolia
-- eBay
-- Cypress
-- Red Hat
-- Financial Times
-- Uber
-- Buildkite
-
+<ul>
+  <li>Prisma</li>
+  <li>Netlify</li>
+  <li>Envoy</li>
+  <li>Condé Nast</li>
+  <li>Microsoft</li>
+  <li>Atlassian</li>
+  <li>Sourcegraph</li>
+  <li>Mozilla</li>
+  <li>Deloitte</li>
+  <li>Telus</li>
+  <li>Yarn</li>
+  <li>HashiCorp</li>
+  <li>Automattic</li>
+  <li>Algolia</li>
+  <li>eBay</li>
+  <li>Cypress</li>
+  <li>Red Hat</li>
+  <li>Financial Times</li>
+  <li>Uber</li>
+  <li>Buildkite</li>
+</ul>
 </details>
 
 ## Ways to run Renovate

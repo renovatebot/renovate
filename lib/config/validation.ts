@@ -46,6 +46,7 @@ let optionParents: Record<string, AllowedParents[]>;
 let optionGlobals: Set<string>;
 let optionInherits: Set<string>;
 let optionRegexOrGlob: Set<string>;
+let optionAllowsNegativeIntegers: Set<string>;
 
 const managerList = getManagerList();
 
@@ -89,6 +90,33 @@ function validatePlainObject(val: Record<string, unknown>): true | string {
   return true;
 }
 
+function validateNumber(
+  key: string,
+  val: unknown,
+  currentPath?: string,
+  subKey?: string,
+): ValidationMessage[] {
+  const errors: ValidationMessage[] = [];
+  const path = `${currentPath}${subKey ? '.' + subKey : ''}`;
+  if (is.number(val)) {
+    if (val < 0 && !optionAllowsNegativeIntegers.has(key)) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `Configuration option \`${path}\` should be a positive integer. Found negative value instead.`,
+      });
+    }
+  } else {
+    errors.push({
+      topic: 'Configuration Error',
+      message: `Configuration option \`${path}\` should be an integer. Found: ${JSON.stringify(
+        val,
+      )} (${typeof val}).`,
+    });
+  }
+
+  return errors;
+}
+
 function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
   return enabledManagers.filter(
     (manager) => !allManagersList.includes(manager.replace('custom.', '')),
@@ -126,6 +154,7 @@ function initOptions(): void {
   optionTypes = {};
   optionRegexOrGlob = new Set();
   optionGlobals = new Set();
+  optionAllowsNegativeIntegers = new Set();
 
   for (const option of options) {
     optionTypes[option.name] = option.type;
@@ -144,6 +173,10 @@ function initOptions(): void {
 
     if (option.globalOnly) {
       optionGlobals.add(option.name);
+    }
+
+    if (option.allowNegative) {
+      optionAllowsNegativeIntegers.add(option.name);
     }
   }
 
@@ -334,14 +367,7 @@ export async function validateConfig(
             });
           }
         } else if (type === 'integer') {
-          if (!is.number(val)) {
-            errors.push({
-              topic: 'Configuration Error',
-              message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
-                val,
-              )} (${typeof val})`,
-            });
-          }
+          errors.push(...validateNumber(key, val, currentPath));
         } else if (type === 'array' && val) {
           if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
@@ -964,14 +990,7 @@ async function validateGlobalConfig(
         });
       }
     } else if (type === 'integer') {
-      if (!is.number(val)) {
-        warnings.push({
-          topic: 'Configuration Error',
-          message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
-            val,
-          )} (${typeof val}).`,
-        });
-      }
+      warnings.push(...validateNumber(key, val, currentPath));
     } else if (type === 'boolean') {
       if (val !== true && val !== false) {
         warnings.push({
@@ -1037,12 +1056,9 @@ async function validateGlobalConfig(
           }
         } else if (key === 'cacheTtlOverride') {
           for (const [subKey, subValue] of Object.entries(val)) {
-            if (!is.number(subValue)) {
-              warnings.push({
-                topic: 'Configuration Error',
-                message: `Invalid \`${currentPath}.${subKey}\` configuration: value must be an integer.`,
-              });
-            }
+            warnings.push(
+              ...validateNumber(key, subValue, currentPath, subKey),
+            );
           }
         } else {
           const res = validatePlainObject(val);
