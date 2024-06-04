@@ -466,6 +466,9 @@ name = "pypi"
 The pip-compile manager extracts `--index-url` and `--extra-index-url` directives from its input file.
 Renovate will match those URLs with credentials from matching `hostRules` blocks in its configuration and pass them to `pip-compile` via environment variables.
 
+> [!NOTE]
+> Placing the `--[extra-]index-url` in the lockfile is not supported; it must go in the `.in` file for it to be used by pip-compile during renovate jobs.
+
 ```title="requirements.in"
 --extra-index-url https://pypi.my.domain/simple
 
