@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { GitlabHttp } from '../../../util/http/gitlab';
 import type { GitLabUser, GitlabUserStatus } from './types';
@@ -9,9 +10,7 @@ export async function getUserID(username: string): Promise<number> {
     await gitlabApi.getJson<{ id: number }[]>(`users?username=${username}`)
   ).body;
 
-  // when user ID is not found an empty array is returned
-  // this could happen if the user does not exist anymore
-  if (userInfo.length === 0) {
+  if (!is.nonEmptyArray(userInfo)) {
     throw new Error(
       `User ID for the username: ${username} could not be found.`,
     );
