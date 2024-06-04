@@ -2008,7 +2008,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
         } = alert.security_vulnerability;
         const patch = firstPatchedVersion?.identifier;
 
-        const normalizedName = normalizeNamePerEcosystem(name, ecosystem);
+        const normalizedName = normalizeNamePerEcosystem({ name, ecosystem });
         alert.security_vulnerability.package.name = normalizedName;
         const key = `${ecosystem.toLowerCase()}/${normalizedName}`;
         const range = vulnerableVersionRange;
