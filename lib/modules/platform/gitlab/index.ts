@@ -1221,7 +1221,8 @@ export async function addAssignees(
         const userId = await getUserID(assignee);
         assigneeIds.push(userId);
       } catch (err) {
-        logger.warn({ assignee }, 'Failed to add assignee');
+        logger.debug({ assignee, err }, 'getUserID() error');
+        logger.warn({ assignee }, 'Failed to add assignee - could not get ID');
       }
     }
     const url = `projects/${

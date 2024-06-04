@@ -1328,7 +1328,14 @@ describe('modules/platform/gitlab/index', () => {
         {
           assignee: 'someuser',
         },
-        'Failed to add assignee',
+        'Failed to add assignee - could not get ID',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          assignee: 'someuser',
+          err: expect.any(Error),
+        },
+        'getUserID() error',
       );
     });
   });
