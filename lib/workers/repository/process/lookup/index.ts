@@ -194,6 +194,11 @@ export async function lookupUpdates(
           },
           message,
         );
+        const warning: ValidationMessage = {
+          topic: config.packageName,
+          message: `Found no versions of package ${config.packageName} in datasource ${config.datasource}`,
+        };
+        res.warnings.push(warning);
         if (!config.currentDigest) {
           return Result.ok(res);
         }

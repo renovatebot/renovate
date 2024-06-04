@@ -3749,7 +3749,12 @@ describe('workers/repository/process/lookup/index', () => {
         sourceUrl: 'https://github.com/nodejs/node',
         updates: [],
         versioning: 'node',
-        warnings: [],
+        warnings: [
+          {
+            message: 'Found no versions of package node in datasource docker',
+            topic: 'node',
+          },
+        ],
       });
     });
 
