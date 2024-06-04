@@ -10,7 +10,7 @@ export async function getUserID(username: string): Promise<number> {
     await gitlabApi.getJson<{ id: number }[]>(`users?username=${username}`)
   ).body;
 
-  if (!is.nonEmptyArray(userInfo)) {
+  if (is.emptyArray(userInfo)) {
     throw new Error(
       `User ID for the username: ${username} could not be found.`,
     );
