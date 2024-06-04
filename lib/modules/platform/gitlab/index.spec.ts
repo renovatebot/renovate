@@ -1324,6 +1324,20 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.addAssignees(42, ['someuser', 'someotheruser']),
       ).toResolve();
+    });
+
+    it('should log message for each assignee that could not be found', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/users?username=someuser')
+        .reply(304, [])
+        .get('/api/v4/users?username=someotheruser')
+        .reply(200, [{ id: 124 }])
+        .put('/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=124')
+        .reply(200);
+      await expect(
+        gitlab.addAssignees(42, ['someuser', 'someotheruser']),
+      ).toResolve();
       expect(logger.warn).toHaveBeenCalledWith(
         {
           assignee: 'someuser',
@@ -1333,7 +1347,9 @@ describe('modules/platform/gitlab/index', () => {
       expect(logger.debug).toHaveBeenCalledWith(
         {
           assignee: 'someuser',
-          err: expect.any(Error),
+          err: new Error(
+            'User ID for the username: someuser could not be found.',
+          ),
         },
         'getUserID() error',
       );
