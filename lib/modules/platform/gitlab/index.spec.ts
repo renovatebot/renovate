@@ -1320,7 +1320,7 @@ describe('modules/platform/gitlab/index', () => {
         .get('/api/v4/users?username=someotheruser')
         .reply(200, [{ id: 124 }])
         .put('/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=124')
-        .reply(200);
+        .replyWithError('some error');
       await expect(
         gitlab.addAssignees(42, ['someuser', 'someotheruser']),
       ).toResolve();
