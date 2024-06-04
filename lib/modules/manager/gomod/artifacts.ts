@@ -286,15 +286,11 @@ export async function updateArtifacts({
 
     const goWorkSumFileName = upath.join(goModDir, 'go.work.sum');
     if (useVendor) {
-      // If go env GOWORK returns a non-empty path, check that it exists and if
-      // it does, then use go workspace vendoring.
+      // If we find a go.work, then use go workspace vendoring.
       const goWorkFile = await findLocalSiblingOrParent(
         goModFileName,
         'go.work',
       );
-      if (!goWorkFile) {
-        logger.debug('No go.work found');
-      }
 
       if (goWorkFile) {
         args = 'work vendor';
