@@ -1,12 +1,13 @@
 import urljoin from 'url-join';
 import { logger } from '../../../logger';
-import { parseYaml } from '../../../util/yaml';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type {
-  GlasskubePackageVersions,
+import {
   GlasskubePackageManifest,
-} from './types';
+  GlasskubePackageManifestYaml,
+  GlasskubePackageVersions,
+  GlasskubePackageVersionsYaml,
+} from './schema';
 
 export class GlasskubePackagesDatasource extends Datasource {
   static readonly id = 'glasskube-packages';
@@ -32,12 +33,7 @@ export class GlasskubePackagesDatasource extends Datasource {
       const response = await this.http.get(
         urljoin(registryUrl!, packageName, 'versions.yaml'),
       );
-      const parsedResponse = parseYaml<GlasskubePackageVersions>(response.body);
-      if (parsedResponse.length > 0) {
-        versions = parsedResponse[0];
-      } else {
-        throw new Error('unexpected empty response');
-      }
+      versions = GlasskubePackageVersionsYaml.parse(response.body);
     } catch (error) {
       logger.error(
         { error, registryUrl },
@@ -53,7 +49,6 @@ export class GlasskubePackagesDatasource extends Datasource {
     }));
 
     try {
-      let latestManifest: GlasskubePackageManifest;
       const response = await this.http.get(
         urljoin(
           registryUrl!,
@@ -62,13 +57,7 @@ export class GlasskubePackagesDatasource extends Datasource {
           'package.yaml',
         ),
       );
-      const parsedResponse = parseYaml<GlasskubePackageManifest>(response.body);
-      if (parsedResponse.length > 0) {
-        latestManifest = parsedResponse[0];
-      } else {
-        throw new Error('unexpected empty response');
-      }
-
+      const latestManifest = GlasskubePackageManifestYaml.parse(response.body);
       for (const ref of latestManifest?.references ?? []) {
         if (ref.label.toLowerCase() === 'github') {
           result.sourceUrl = ref.url;
