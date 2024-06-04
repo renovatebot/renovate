@@ -10,7 +10,8 @@ import type {
 
 export class GlasskubePackagesDatasource extends Datasource {
   static readonly id = 'glasskube-packages';
-  static defaultRegistryUrl = 'https://packages.dl.glasskube.dev/packages';
+  static readonly defaultRegistryUrl =
+    'https://packages.dl.glasskube.dev/packages';
 
   override defaultRegistryUrls = [
     GlasskubePackagesDatasource.defaultRegistryUrl,
@@ -29,7 +30,7 @@ export class GlasskubePackagesDatasource extends Datasource {
 
     try {
       const response = await this.http.get(
-        this.getVersionsUrl(registryUrl!, packageName),
+        urljoin(registryUrl!, packageName, 'versions.yaml'),
       );
       const parsedResponse = parseYaml<GlasskubePackageVersions>(response.body);
       if (parsedResponse.length > 0) {
@@ -54,10 +55,11 @@ export class GlasskubePackagesDatasource extends Datasource {
     try {
       let latestManifest: GlasskubePackageManifest;
       const response = await this.http.get(
-        this.getPackageManifestUrl(
+        urljoin(
           registryUrl!,
           packageName,
           versions.latestVersion,
+          'package.yaml',
         ),
       );
       const parsedResponse = parseYaml<GlasskubePackageManifest>(response.body);
@@ -82,17 +84,5 @@ export class GlasskubePackagesDatasource extends Datasource {
     }
 
     return result;
-  }
-
-  getVersionsUrl(registryUrl: string, packageName: string): string {
-    return urljoin(registryUrl, packageName, 'versions.yaml');
-  }
-
-  getPackageManifestUrl(
-    registryUrl: string,
-    packageName: string,
-    version: string,
-  ): string {
-    return urljoin(registryUrl, packageName, version, 'package.yaml');
   }
 }
