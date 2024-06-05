@@ -110,9 +110,6 @@ importers:
       cacache:
         specifier: 18.0.3
         version: 18.0.3
-      cacheable-lookup:
-        specifier: 5.0.4
-        version: 5.0.4
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -224,9 +221,6 @@ importers:
       klona:
         specifier: 2.0.6
         version: 2.0.6
-      lru-cache:
-        specifier: 10.2.2
-        version: 10.2.2
       luxon:
         specifier: 3.4.4
         version: 3.4.4
