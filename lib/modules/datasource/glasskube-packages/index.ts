@@ -1,5 +1,5 @@
-import urljoin from 'url-join';
 import { logger } from '../../../logger';
+import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import {
@@ -30,7 +30,7 @@ export class GlasskubePackagesDatasource extends Datasource {
 
     try {
       const response = await this.http.get(
-        urljoin(registryUrl!, packageName, 'versions.yaml'),
+        joinUrlParts(registryUrl!, packageName, 'versions.yaml'),
       );
       versions = GlasskubePackageVersionsYaml.parse(response.body);
     } catch (error) {
@@ -49,7 +49,7 @@ export class GlasskubePackagesDatasource extends Datasource {
 
     try {
       const response = await this.http.get(
-        urljoin(
+        joinUrlParts(
           registryUrl!,
           packageName,
           versions.latestVersion,
