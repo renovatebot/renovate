@@ -2,7 +2,6 @@ import { GlobalConfig } from '../../config/global';
 import { bootstrap } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
-import { dnsLookup } from './dns';
 import { applyHostRule, findMatchingRule } from './host-rules';
 import type { GotOptions } from './types';
 
@@ -121,22 +120,6 @@ describe('util/http/host-rules', () => {
     expect(applyHostRule(url, opts, hostRule)).toEqual({
       hostType: 'github',
       http2: true,
-      token: 'xxx',
-    });
-  });
-
-  it('uses dnsCache', () => {
-    hostRules.add({ dnsCache: true });
-
-    const opts = { ...options, token: 'xxx' };
-    const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      dnsCache: true,
-      token: 'token',
-    });
-    expect(applyHostRule(url, opts, hostRule)).toMatchObject({
-      hostType: 'github',
-      lookup: dnsLookup,
       token: 'xxx',
     });
   });

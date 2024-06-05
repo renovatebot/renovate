@@ -12,7 +12,6 @@ import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
 import { matchRegexOrGlobList } from '../string-match';
 import { parseUrl } from '../url';
-import { dnsLookup } from './dns';
 import { keepAliveAgents } from './keep-alive';
 import type { GotOptions, InternalHttpOptions } from './types';
 
@@ -159,10 +158,6 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
 
   if (hostRule.timeout) {
     options.timeout = hostRule.timeout;
-  }
-
-  if (hostRule.dnsCache) {
-    options.lookup = dnsLookup;
   }
 
   if (hostRule.headers) {
