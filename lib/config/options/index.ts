@@ -2666,6 +2666,8 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     experimental: true,
+    deprecationMsg:
+      'This option is deprecated and will be removed in a future release.',
   },
   {
     name: 'keepAlive',
