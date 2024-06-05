@@ -27,6 +27,10 @@ function isGreaterThan(version: string, other: string): boolean {
   const versionMajor = semverCoerced.getMajor(version)!;
   const otherMajor = semverCoerced.getMajor(other)!;
 
+  if (!versionMajor || !otherMajor) {
+    return false;
+  }
+
   return versionMajor > otherMajor;
 }
 
