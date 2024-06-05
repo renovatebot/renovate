@@ -4,7 +4,7 @@ Most of the information on this page is meant for users who want to self-host Re
 
 ## Easiest way to run Renovate
 
-For most users, the easiest way to get started is to install [the Mend Renovate app for Bitbucket](#).
+For most users, the easiest way to get started is to install [the Mend Renovate app for Bitbucket](https://marketplace.atlassian.com/apps/1232072/mend?tab=overview&hosting=cloud).
 When you use the app, Mend will:
 
 - authenticate the Renovate app to Bitbucket Cloud
