@@ -415,6 +415,7 @@ const repoGroups = {
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
   'opentelemetry-java': 'https://github.com/open-telemetry/opentelemetry-java',
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
+  'opentelemetry-rust': 'https://github.com/open-telemetry/opentelemetry-rust',
   orleans: 'https://github.com/dotnet/orleans',
   'panda-css': 'https://github.com/chakra-ui/panda',
   parcel: 'https://github.com/parcel-bundler/parcel',
