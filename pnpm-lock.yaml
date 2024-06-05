@@ -111,9 +111,6 @@ importers:
       cacache:
         specifier: 18.0.4
         version: 18.0.4
-      cacheable-lookup:
-        specifier: 5.0.4
-        version: 5.0.4
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -225,9 +222,6 @@ importers:
       klona:
         specifier: 2.0.6
         version: 2.0.6
-      lru-cache:
-        specifier: 10.4.3
-        version: 10.4.3
       luxon:
         specifier: 3.4.4
         version: 3.4.4
@@ -4545,10 +4539,6 @@ packages:
   minipass@5.0.0:
     resolution: {integrity: sha512-3FnjYuehv9k6ovOEbyOswadCDPX1piCfhV8ncmYtHOjuPwylVWsghTLo7rabjC3Rx5xD4HDx8Wm1xnMF7S5qFQ==}
     engines: {node: '>=8'}
-
-  minipass@7.1.0:
-    resolution: {integrity: sha512-oGZRv2OT1lO2UF1zUcwdTb3wqUwI0kBGTgt/T7OdSj6M6N5m3o5uPf0AIW6lVxGGoiWUR7e2AwTE+xiwK8WQig==}
-    engines: {node: '>=16 || 14 >=14.17'}
 
   minipass@7.1.2:
     resolution: {integrity: sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw==}
@@ -10095,7 +10085,7 @@ snapshots:
 
   fs-minipass@3.0.3:
     dependencies:
-      minipass: 7.1.0
+      minipass: 7.1.2
 
   fs.realpath@1.0.0: {}
 
@@ -11258,7 +11248,7 @@ snapshots:
       cacache: 18.0.4
       http-cache-semantics: 4.1.1
       is-lambda: 1.0.1
-      minipass: 7.1.0
+      minipass: 7.1.2
       minipass-fetch: 3.0.5
       minipass-flush: 1.0.5
       minipass-pipeline: 1.2.4
@@ -11458,11 +11448,11 @@ snapshots:
 
   minipass-collect@2.0.1:
     dependencies:
-      minipass: 7.1.0
+      minipass: 7.1.2
 
   minipass-fetch@3.0.5:
     dependencies:
-      minipass: 7.1.0
+      minipass: 7.1.2
       minipass-sized: 1.0.3
       minizlib: 2.1.2
     optionalDependencies:
@@ -11489,8 +11479,6 @@ snapshots:
   minipass@4.2.8: {}
 
   minipass@5.0.0: {}
-
-  minipass@7.1.0: {}
 
   minipass@7.1.2: {}
 
@@ -12468,7 +12456,7 @@ snapshots:
 
   ssri@10.0.6:
     dependencies:
-      minipass: 7.1.0
+      minipass: 7.1.2
 
   stack-utils@2.0.6:
     dependencies:
