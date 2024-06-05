@@ -15,7 +15,7 @@ If you self-host Renovate you must do the things listed above yourself.
 Self-hosting is meant for users with advanced use cases, or who want to be in full control of the bot and the environment it runs in.
 We recommend most users install the Mend Renovate app.
 
-Read the [Security and Permissions](https://docs.renovatebot.com/security-and-permissions/) page to learn about the Security and Permissions needed for the Mend Renovate app. 
+Read the [Security and Permissions](https://docs.renovatebot.com/security-and-permissions/) page to learn about the Security and Permissions needed for the Mend Renovate app.
 
 After you installed the hosted app, please read the [reading list](https://docs.renovatebot.com/reading-list/) to learn how to use and configure Renovate.
 
