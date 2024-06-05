@@ -58,12 +58,10 @@ describe('modules/datasource/glasskube-packages/index', () => {
       releases: [
         {
           version: 'v1.22.0+1',
-          isStable: false,
           registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
         },
         {
           version: 'v1.23.1+1',
-          isStable: true,
           registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
         },
       ],
@@ -89,12 +87,10 @@ describe('modules/datasource/glasskube-packages/index', () => {
       releases: [
         {
           version: 'v1.22.0+1',
-          isStable: false,
           registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
         },
         {
           version: 'v1.23.1+1',
-          isStable: true,
           registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
         },
       ],
@@ -120,12 +116,10 @@ describe('modules/datasource/glasskube-packages/index', () => {
       releases: [
         {
           version: 'v1.22.0+1',
-          isStable: false,
           registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
         },
         {
           version: 'v1.23.1+1',
-          isStable: true,
           registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
         },
       ],
@@ -153,12 +147,10 @@ describe('modules/datasource/glasskube-packages/index', () => {
       releases: [
         {
           version: 'v1.22.0+1',
-          isStable: false,
           registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
         },
         {
           version: 'v1.23.1+1',
-          isStable: true,
           registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
         },
       ],

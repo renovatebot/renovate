@@ -43,7 +43,6 @@ export class GlasskubePackagesDatasource extends Datasource {
 
     result.releases = versions.versions.map((it) => ({
       version: it.version,
-      isStable: it.version === versions.latestVersion,
       registryUrl,
     }));
 
