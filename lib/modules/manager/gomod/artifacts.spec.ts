@@ -268,6 +268,10 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'go mod tidy',
         options: { cwd: '/tmp/github/some/repo' },
       },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
     ]);
   });
 
@@ -360,6 +364,10 @@ describe('modules/manager/gomod/artifacts', () => {
       },
       {
         cmd: 'go work sync',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
