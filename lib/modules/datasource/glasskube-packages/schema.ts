@@ -21,4 +21,3 @@ export const GlasskubePackageVersionsYaml = Yaml.pipe(GlasskubePackageVersions);
 export const GlasskubePackageManifestYaml = Yaml.pipe(GlasskubePackageManifest);
 
 export type GlasskubePackageVersions = z.infer<typeof GlasskubePackageVersions>;
-export type GlasskubePackageManifest = z.infer<typeof GlasskubePackageManifest>;

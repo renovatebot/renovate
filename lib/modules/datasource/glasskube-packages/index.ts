@@ -3,7 +3,6 @@ import { logger } from '../../../logger';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import {
-  GlasskubePackageManifest,
   GlasskubePackageManifestYaml,
   GlasskubePackageVersions,
   GlasskubePackageVersionsYaml,
