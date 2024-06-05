@@ -3917,6 +3917,7 @@ describe('modules/platform/github/index', () => {
             },
           },
         ]);
+      await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
       expect(res[0].security_vulnerability!.package.name).toBe('friendly-bard');
     });
