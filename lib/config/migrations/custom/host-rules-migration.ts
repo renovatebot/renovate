@@ -94,6 +94,8 @@ function validateHostRule(rule: LegacyHostRule & HostRule): void {
 function massageUrl(url: string): string {
   if (!url.includes('://') && url.includes('/')) {
     return 'https://' + url;
+  } else if (!url.includes('://') && url.includes(':')) {
+    return 'https://' + url;
   } else {
     return url;
   }
