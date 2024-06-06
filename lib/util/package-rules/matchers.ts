@@ -30,6 +30,12 @@ export default matchers;
 // Therefore, when multiple matchers are set in a single packageRule, some may not be checked.
 // Since matchConfidence matcher can abort the run due to unauthenticated use, it should be evaluated first.
 matchers.push([new MergeConfidenceMatcher()]);
+matchers.push([new RepositoriesMatcher()]);
+matchers.push([new BaseBranchesMatcher()]);
+matchers.push([new CategoriesMatcher()]);
+matchers.push([new ManagersMatcher()]);
+matchers.push([new FileNamesMatcher()]);
+matchers.push([new DatasourcesMatcher()]);
 matchers.push([
   new DepNameMatcher(),
   new DepPatternsMatcher(),
@@ -38,16 +44,10 @@ matchers.push([
   new PackagePatternsMatcher(),
   new PackagePrefixesMatcher(),
 ]);
-matchers.push([new FileNamesMatcher()]);
 matchers.push([new DepTypesMatcher()]);
-matchers.push([new BaseBranchesMatcher()]);
-matchers.push([new ManagersMatcher()]);
-matchers.push([new DatasourcesMatcher()]);
+matchers.push([new CurrentValueMatcher()]);
+matchers.push([new CurrentVersionMatcher()]);
 matchers.push([new UpdateTypesMatcher()]);
 matchers.push([new SourceUrlsMatcher(), new SourceUrlPrefixesMatcher()]);
-matchers.push([new CurrentValueMatcher()]);
 matchers.push([new NewValueMatcher()]);
-matchers.push([new CurrentVersionMatcher()]);
-matchers.push([new RepositoriesMatcher()]);
-matchers.push([new CategoriesMatcher()]);
 matchers.push([new CurrentAgeMatcher()]);
