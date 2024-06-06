@@ -1206,7 +1206,7 @@ export async function setBranchStatus({
 
 // Issue
 
-export async function getIssues(): Promise<Issue[]> {
+async function getIssues(): Promise<Issue[]> {
   const result = await githubApi.queryRepoField<unknown>(
     getIssuesQuery,
     'issues',
