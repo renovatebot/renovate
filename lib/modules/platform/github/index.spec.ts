@@ -3889,6 +3889,38 @@ describe('modules/platform/github/index', () => {
       );
       expect(logger.logger.error).not.toHaveBeenCalled();
     });
+
+    it('returns normalized names for PIP ecosystem', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100',
+        )
+        .reply(200, [
+          {
+            security_advisory: {
+              description: 'description',
+              identifiers: [{ type: 'type', value: 'value' }],
+              references: [],
+            },
+            security_vulnerability: {
+              package: {
+                ecosystem: 'pip',
+                name: 'FrIeNdLy.-.BARD',
+              },
+              vulnerable_version_range: '0.0.2',
+              first_patched_version: { identifier: '0.0.3' },
+            },
+            dependency: {
+              manifest_path: 'bar/foo',
+            },
+          },
+        ]);
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getVulnerabilityAlerts();
+      expect(res[0].security_vulnerability!.package.name).toBe('friendly-bard');
+    });
   });
 
   describe('getJsonFile()', () => {

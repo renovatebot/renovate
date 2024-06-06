@@ -64,6 +64,7 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { repoFingerprint } from '../util';
+import { normalizeNamePerEcosystem } from '../utils/github-alerts';
 import { smartTruncate } from '../utils/pr-body';
 import { remoteBranchExists } from './branch';
 import { coerceRestPr, githubApi } from './common';
@@ -2008,7 +2009,9 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
         } = alert.security_vulnerability;
         const patch = firstPatchedVersion?.identifier;
 
-        const key = `${ecosystem.toLowerCase()}/${name}`;
+        const normalizedName = normalizeNamePerEcosystem({ name, ecosystem });
+        alert.security_vulnerability.package.name = normalizedName;
+        const key = `${ecosystem.toLowerCase()}/${normalizedName}`;
         const range = vulnerableVersionRange;
         const elem = shortAlerts[key] || {};
         elem[range] = coerceToNull(patch);
