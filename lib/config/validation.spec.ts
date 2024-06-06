@@ -1151,6 +1151,10 @@ describe('config/validation', () => {
             matchHost: undefined,
             token: 'token',
           },
+          {
+            hostType: 'github',
+            token: 'token',
+          },
         ],
       };
       const { errors } = await configValidation.validateConfig('repo', config);
