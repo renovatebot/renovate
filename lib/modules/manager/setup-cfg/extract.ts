@@ -79,6 +79,7 @@ function parseDep(
     datasource: PypiDatasource.id,
     depType,
   };
+
   if (currentValue?.startsWith('==')) {
     dep.currentVersion = currentValue.replace(/^==\s*/, '');
   }

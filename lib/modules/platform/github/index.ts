@@ -36,8 +36,8 @@ import type {
 } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
-import type { GithubHttpOptions } from '../../../util/http/github';
 import * as githubHttp from '../../../util/http/github';
+import type { GithubHttpOptions } from '../../../util/http/github';
 import type { HttpResponse } from '../../../util/http/types';
 import { coerceObject } from '../../../util/object';
 import { regEx } from '../../../util/regex';
