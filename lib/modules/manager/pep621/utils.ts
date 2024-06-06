@@ -3,6 +3,7 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { parse as parseToml } from '../../../util/toml';
 import { PypiDatasource } from '../../datasource/pypi';
+import { normalizePythonDepName } from '../../datasource/pypi/common';
 import type { PackageDependency } from '../types';
 import { PyProject, PyProjectSchema } from './schema';
 import type { Pep508ParseResult } from './types';
@@ -60,7 +61,7 @@ export function pep508ToPackageDependency(
   }
 
   const dep: PackageDependency = {
-    packageName: parsed.packageName,
+    packageName: normalizePythonDepName(parsed.packageName),
     depName: parsed.packageName,
     datasource: PypiDatasource.id,
     depType,
