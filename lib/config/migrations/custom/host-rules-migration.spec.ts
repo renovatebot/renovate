@@ -27,7 +27,7 @@ describe('config/migrations/custom/host-rules-migration', () => {
           { hostName: 'some.domain.com', token: '123test' },
           { endpoint: 'domain.com/', token: '123test' },
           { host: 'some.domain.com', token: '123test' },
-          { host: 'some.domain.com:8080', token: '123test' },
+          { matchHost: 'some.domain.com:8080', token: '123test' },
         ],
       } as any,
       {
