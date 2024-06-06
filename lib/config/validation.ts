@@ -15,6 +15,7 @@ import {
   matchRegexOrGlobList,
 } from '../util/string-match';
 import * as template from '../util/template';
+import { parseUrl } from '../util/url';
 import {
   hasValidSchedule,
   hasValidTimezone,
@@ -816,9 +817,7 @@ export async function validateConfig(
       for (const rule of val as HostRule[]) {
         if (is.nonEmptyString(rule.matchHost)) {
           if (rule.matchHost.includes('://')) {
-            try {
-              new URL(rule.matchHost);
-            } catch (err) {
+            if (is.null_(parseUrl(rule.matchHost))) {
               errors.push({
                 topic: 'Configuration Error',
                 message: `hostRules matchHost \`${rule.matchHost}\` is not a valid URL.`,
