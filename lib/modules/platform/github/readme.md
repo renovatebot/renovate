@@ -4,12 +4,12 @@ Most of the information on this page is meant for users who want to self-host Re
 
 ## Easiest way to run Renovate
 
-For most users, the easiest way to get started is to install [the Mend Renovate app](https://github.com/marketplace/renovate) from the GitHub marketplace.
+For users on GitHub Cloud (`github.com`), the easiest way to get started is to install [the Mend Renovate app](https://github.com/marketplace/renovate) from the GitHub marketplace.
 When you use the app, Mend will:
 
-- authenticate the Renovate app to GitHub or GitHub Enterprise
+- authenticate the Renovate app to GitHub
 - keep the tokens safe
-- update the Renovate program for you
+- maintain and update the Renovate version used
 
 If you self-host Renovate you must do the things listed above yourself.
 Self-hosting is meant for users with advanced use cases, or who want to be in full control of the bot and the environment it runs in.

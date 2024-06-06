@@ -4,18 +4,18 @@ Most of the information on this page is meant for users who want to self-host Re
 
 ## Easiest way to run Renovate
 
-For most users, the easiest way to get started is to install [the Mend Renovate app for Bitbucket](https://marketplace.atlassian.com/apps/1232072/mend?tab=overview&hosting=cloud).
+For most users, the easiest way to get started is to install [the Mend app for Bitbucket](https://marketplace.atlassian.com/apps/1232072/mend?tab=overview&hosting=cloud) and use the free Renovate plan.
 When you use the app, Mend will:
 
-- authenticate the Renovate app to Bitbucket Cloud
+- authenticate the app to Bitbucket Cloud
 - keep the tokens safe
-- update the Renovate program for you
+- maintain and update the Renovate version used
 
 If you self-host Renovate you must do the things listed above yourself.
 Self-hosting is meant for users with advanced use cases, or who want to be in full control of the bot and the environment it runs in.
-We recommend most users install the Mend Renovate app.
+We recommend most users install the Mend app.
 
-Read the [Security and Permissions](https://docs.renovatebot.com/security-and-permissions/) page to learn about the Security and Permissions needed for the Mend Renovate app.
+Read the [Security and Permissions](https://docs.renovatebot.com/security-and-permissions/) page to learn about the Security and Permissions needed for the Mend app.
 
 After you installed the hosted app, please read the [reading list](https://docs.renovatebot.com/reading-list/) to learn how to use and configure Renovate.
 
