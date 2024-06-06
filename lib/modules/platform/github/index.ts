@@ -1206,7 +1206,7 @@ export async function setBranchStatus({
 
 // Issue
 
-async function getIssues(): Promise<Issue[]> {
+export async function getIssues(): Promise<Issue[]> {
   const result = await githubApi.queryRepoField<unknown>(
     getIssuesQuery,
     'issues',
@@ -1214,7 +1214,7 @@ async function getIssues(): Promise<Issue[]> {
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
-        user: config.renovateUsername,
+        ...(!config.ignorePrAuthor && { user: config.renovateUsername }),
       },
       readOnly: true,
     },
