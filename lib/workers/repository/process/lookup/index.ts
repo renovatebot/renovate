@@ -187,18 +187,13 @@ export async function lookupUpdates(
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
-        logger.debug(
+        logger.info(
           {
             dependency: config.packageName,
             result: dependency,
           },
           message,
         );
-        const warning: ValidationMessage = {
-          topic: config.packageName,
-          message: `Found no versions of package ${config.packageName} in datasource ${config.datasource}`,
-        };
-        res.warnings.push(warning);
         if (!config.currentDigest) {
           return Result.ok(res);
         }
