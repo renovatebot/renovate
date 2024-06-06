@@ -452,6 +452,7 @@ const repoGroups = {
   'reg-suit': 'https://github.com/reg-viz/reg-suit',
   remark: 'https://github.com/remarkjs/remark',
   remix: 'https://github.com/remix-run/remix',
+  retrofit: 'https://github.com/square/retrofit',
   rjsf: 'https://github.com/rjsf-team/react-jsonschema-form',
   router5: 'https://github.com/router5/router5',
   'rust-futures': 'https://github.com/rust-lang/futures-rs',
