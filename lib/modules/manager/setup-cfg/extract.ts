@@ -74,13 +74,11 @@ function parseDep(
 
   const dep: PackageDependency = {
     depName,
+    packageName: normalizePythonDepName(depName),
     currentValue,
     datasource: PypiDatasource.id,
     depType,
   };
-  if (depName !== normalizePythonDepName(depName)) {
-    dep.packageName = normalizePythonDepName(depName);
-  }
   if (currentValue?.startsWith('==')) {
     dep.currentVersion = currentValue.replace(/^==\s*/, '');
   }

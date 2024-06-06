@@ -46,15 +46,13 @@ function depStringHandler(
 
   const dep: PackageDependency<ManagerData> = {
     depName,
+    packageName: normalizePythonDepName(depName),
     currentValue,
     managerData: {
       lineNumber: token.line - 1,
     },
     datasource: PypiDatasource.id,
   };
-  if (depName !== normalizePythonDepName(depName)) {
-    dep.packageName = normalizePythonDepName(depName);
-  }
 
   return { ...ctx, deps: [...ctx.deps, dep] };
 }

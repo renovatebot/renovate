@@ -155,8 +155,8 @@ export async function extractAllPackageFiles(
           }
         }
         for (const dep of packageFileContent.deps) {
-          const lockedVersion = lockedDeps?.find((lockedDep) =>
-            compareNames(dep, lockedDep),
+          const lockedVersion = lockedDeps?.find(
+            (lockedDep) => lockedDep.packageName! === dep.packageName!,
           )?.currentVersion;
           if (lockedVersion) {
             dep.lockedVersion = lockedVersion;
@@ -233,16 +233,14 @@ function extendWithIndirectDeps(
   lockedDeps: PackageDependency[],
 ): void {
   for (const lockedDep of lockedDeps) {
-    if (!packageFileContent.deps.find((dep) => compareNames(dep, lockedDep))) {
+    if (
+      !packageFileContent.deps.find(
+        (dep) => lockedDep.packageName! === dep.packageName!,
+      )
+    ) {
       packageFileContent.deps.push(indirectDep(lockedDep));
     }
   }
-}
-
-function compareNames(a: PackageDependency, b: PackageDependency): boolean {
-  const aName = a.packageName ?? a.depName;
-  const bName = b.packageName ?? b.depName;
-  return aName === bName;
 }
 
 /**
