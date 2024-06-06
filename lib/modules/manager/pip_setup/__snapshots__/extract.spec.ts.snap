@@ -10,6 +10,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 49,
       },
+      "packageName": "celery",
     },
     {
       "currentValue": ">=1.7",
@@ -18,6 +19,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 52,
       },
+      "packageName": "logging-tree",
     },
     {
       "currentValue": ">=2.2",
@@ -26,6 +28,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 53,
       },
+      "packageName": "pygments",
     },
     {
       "currentValue": ">=5.0",
@@ -34,6 +37,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 54,
       },
+      "packageName": "psutil",
     },
     {
       "currentValue": ">=3.0",
@@ -42,6 +46,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 55,
       },
+      "packageName": "objgraph",
     },
     {
       "currentValue": ">=1.11.23,<2.0",
@@ -50,6 +55,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 58,
       },
+      "packageName": "django",
     },
     {
       "currentValue": ">=0.11,<2.0",
@@ -58,6 +64,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 61,
       },
+      "packageName": "flask",
     },
     {
       "currentValue": ">=1.4,<2.0",
@@ -66,6 +73,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 62,
       },
+      "packageName": "blinker",
     },
     {
       "currentValue": ">=19.7.0,<20.0",
@@ -74,6 +82,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 74,
       },
+      "packageName": "gunicorn",
     },
     {
       "currentValue": ">=0.15.3,<0.16",
@@ -82,6 +91,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 75,
       },
+      "packageName": "werkzeug",
     },
     {
       "currentValue": ">=3.2.1,<4.0",
@@ -90,6 +100,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 75,
       },
+      "packageName": "statsd",
     },
     {
       "currentValue": ">=2.10.0,<3.0",
@@ -98,6 +109,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 76,
       },
+      "packageName": "requests",
       "skipReason": "ignored",
     },
     {
@@ -107,6 +119,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 77,
       },
+      "packageName": "raven",
     },
     {
       "currentValue": ">=0.15.2,<0.17",
@@ -115,6 +128,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 78,
       },
+      "packageName": "future",
     },
     {
       "currentValue": ">=1.0.16,<2.0",
@@ -123,6 +137,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 79,
       },
+      "packageName": "ipaddress",
     },
     {
       "currentValue": ">=5.5.2,<6.0.0",
@@ -131,6 +146,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "managerData": {
         "lineNumber": 80,
       },
+      "packageName": "zope-interface",
     },
   ],
 }
