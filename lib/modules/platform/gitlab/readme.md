@@ -10,8 +10,8 @@ To start, create either:
 - or a [Group Access Token](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html#bot-users-for-groups) for the bot account
 
 The bot account must have at least the Developer role in order to [create issues and merge requests](https://docs.gitlab.com/ee/user/permissions.html#project-members-permissions).
-If you are using automerge, the bot account must have the appropriate "Allowed to merge" [permission on the protected branch](https://docs.gitlab.com/ee/user/project/protected_branches.html#require-everyone-to-submit-merge-requests-for-a-protected-branch) of your projects.
-If this is restricted to Maintainers, the bot account must have the Maintainer role.
+If you are using automerge, the bot account must have the appropriate ["Allowed to merge" permission on the protected branch](https://docs.gitlab.com/ee/user/project/protected_branches.html#require-everyone-to-submit-merge-requests-for-a-protected-branch) of your projects.
+If merging is restricted to Maintainers, the bot account must have the Maintainer role.
 
 If you are using a group access token, to keep using the same GitLab-generated bot user you must [rotate/refresh the Group Access Token](https://docs.gitlab.com/ee/api/group_access_tokens.html#rotate-a-group-access-token) _before_ the token's expiry date.
 
