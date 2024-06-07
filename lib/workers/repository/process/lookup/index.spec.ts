@@ -4071,7 +4071,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = NpmDatasource.id;
       config.packageRules = [
         {
-          matchSourceUrlPrefixes: ['https://github.com/kriskowal/q'],
+          matchSourceUrls: ['https://github.com/kriskowal/**'],
           allowedVersions: '< 1.4.0',
         },
       ];

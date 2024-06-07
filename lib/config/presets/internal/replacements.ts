@@ -128,10 +128,10 @@ export const presets: Record<string, Preset> = {
         description:
           'Replace `containerbase/(buildpack|base)` and `renovate/buildpack` with `ghcr.io/containerbase/base`.',
         matchDatasources: ['docker'],
-        matchPackagePatterns: [
-          '^(?:docker\\.io/)?containerbase/(?:buildpack|base)$',
-          '^ghcr\\.io/containerbase/buildpack$',
-          '^(?:docker\\.io/)?renovate/buildpack$',
+        matchPackageNames: [
+          '/^(?:docker\\.io/)?containerbase/(?:buildpack|base)$/',
+          '/^ghcr\\.io/containerbase/buildpack$/',
+          '/^(?:docker\\.io/)?renovate/buildpack$/',
         ],
         replacementName: 'ghcr.io/containerbase/base',
       },
@@ -139,8 +139,8 @@ export const presets: Record<string, Preset> = {
         description:
           'Replace `containerbase/node` and `renovate/node` with `ghcr.io/containerbase/node`.',
         matchDatasources: ['docker'],
-        matchPackagePatterns: [
-          '^(?:docker\\.io/)?(?:containerbase|renovate)/node$',
+        matchPackageNames: [
+          '/^(?:docker\\.io/)?(?:containerbase|renovate)/node$/',
         ],
         replacementName: 'ghcr.io/containerbase/node',
       },
@@ -148,8 +148,8 @@ export const presets: Record<string, Preset> = {
         description:
           'Replace `containerbase/sidecar` and `renovate/sidecar` with `ghcr.io/containerbase/sidecar`.',
         matchDatasources: ['docker'],
-        matchPackagePatterns: [
-          '^(?:docker\\.io/)?(?:containerbase|renovate)/sidecar$',
+        matchPackageNames: [
+          '/^(?:docker\\.io/)?(?:containerbase|renovate)/sidecar$/',
         ],
         replacementName: 'ghcr.io/containerbase/sidecar',
       },
@@ -164,8 +164,10 @@ export const presets: Record<string, Preset> = {
         description: 'Replace `renovate` `slim` docker tag with `latest`.',
         matchCurrentValue: '/^slim$/',
         matchDatasources: ['docker'],
-        matchPackageNames: ['ghcr.io/renovatebot/renovate'],
-        matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
+        matchPackageNames: [
+          'ghcr.io/renovatebot/renovate',
+          '/^(?:docker\\.io/)?renovate/renovate$/',
+        ],
         replacementVersion: 'latest',
       },
       {
@@ -173,8 +175,10 @@ export const presets: Record<string, Preset> = {
         extractVersion: '^(?<version>.+)-slim$',
         matchCurrentValue: '/-slim$/',
         matchDatasources: ['docker'],
-        matchPackageNames: ['ghcr.io/renovatebot/renovate'],
-        matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
+        matchPackageNames: [
+          'ghcr.io/renovatebot/renovate',
+          '/^(?:docker\\.io/)?renovate/renovate$/s',
+        ],
         versioning: 'semver',
       },
     ],
@@ -675,7 +679,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         matchDatasources: ['docker'],
-        matchPackagePatterns: ['^k8s\\.gcr\\.io/.+$'],
+        matchPackageNames: ['/^k8s\\.gcr\\.io/.+$/'],
         replacementNameTemplate:
           "{{{replace 'k8s\\.gcr\\.io/' 'registry.k8s.io/' packageName}}}",
       },
@@ -959,9 +963,9 @@ export const presets: Record<string, Preset> = {
           'The `zap-stable` image has moved to the `zaproxy` organization.',
         matchCurrentVersion: '>=2.0.0 <2.14.0',
         matchDatasources: ['docker'],
-        matchPackagePatterns: [
-          '^(?:docker\\.io/)?owasp/zap2docker-stable$',
-          '^(?:docker\\.io/)?softwaresecurityproject/zap-stable$',
+        matchPackageNames: [
+          '/^(?:docker\\.io/)?owasp/zap2docker-stable$/',
+          '/^(?:docker\\.io/)?softwaresecurityproject/zap-stable$/',
         ],
         replacementName: 'zaproxy/zap-stable',
         replacementVersion: '2.14.0',
@@ -971,9 +975,9 @@ export const presets: Record<string, Preset> = {
           'The `zap-bare` image has moved to the `zaproxy` organization.',
         matchCurrentVersion: '>=2.0.0 <2.14.0',
         matchDatasources: ['docker'],
-        matchPackagePatterns: [
-          '^(?:docker\\.io/)?owasp/zap2docker-bare$',
-          '^(?:docker\\.io/)?softwaresecurityproject/zap-bare$',
+        matchPackageNames: [
+          '/^(?:docker\\.io/)?owasp/zap2docker-bare$/',
+          '/^(?:docker\\.io/)?softwaresecurityproject/zap-bare$/',
         ],
         replacementName: 'zaproxy/zap-bare',
         replacementVersion: '2.14.0',
