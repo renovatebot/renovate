@@ -133,7 +133,7 @@ You are better off to instead export the Environment Variable `RENOVATE_TOKEN` f
 ### Run against a real repo
 
 To make sure everything is working, create a test repository in your account, e.g. like `https://github.com/r4harry/testrepo1`.
-Now, add a file called `.nvmrc` with the content `20.12.2`.
+Now, add a file called `.nvmrc` with the content `20.0.0`.
 Now run against the test repo you created, e.g. `pnpm start r4harry/testrepo1`.
 If your token is set up correctly, you should find that Renovate created a "Configure Renovate" PR in the `testrepo1`.
 
