@@ -190,6 +190,11 @@ describe('modules/platform/bitbucket-server/index', () => {
       let logger: jest.Mocked<typeof _logger>;
       const username = 'abc';
       const password = '123';
+      const userInfo = {
+        name: username,
+        emailAddress: 'abc@def.com',
+        displayName: 'Abc Def',
+      };
 
       async function initRepo(config = {}): Promise<httpMock.Scope> {
         const scope = httpMock
@@ -234,6 +239,10 @@ describe('modules/platform/bitbucket-server/index', () => {
           .scope(urlHost)
           .get(`${urlPath}/rest/api/1.0/application-properties`)
           .reply(200, { version: '8.0.0' });
+        httpMock
+          .scope(urlHost)
+          .get(`${urlPath}/rest/api/1.0/users/${username}`)
+          .reply(200, userInfo);
         await bitbucket.initPlatform({
           endpoint,
           username,
@@ -292,6 +301,10 @@ describe('modules/platform/bitbucket-server/index', () => {
             .scope('https://stash.renovatebot.com')
             .get('/rest/api/1.0/application-properties')
             .reply(403);
+          httpMock
+            .scope('https://stash.renovatebot.com')
+            .get(`/rest/api/1.0/users/${username}`)
+            .reply(200, userInfo);
 
           await bitbucket.initPlatform({
             endpoint: 'https://stash.renovatebot.com',
@@ -304,8 +317,36 @@ describe('modules/platform/bitbucket-server/index', () => {
           );
         });
 
+        it('should not fail if user info fetch fails', async () => {
+          httpMock
+            .scope('https://stash.renovatebot.com')
+            .get('/rest/api/1.0/application-properties')
+            .reply(200, { version: '8.0.0' });
+          httpMock
+            .scope('https://stash.renovatebot.com')
+            .get(`/rest/api/1.0/users/${username}`)
+            .reply(404);
+
+          await expect(
+            bitbucket.initPlatform({
+              endpoint: 'https://stash.renovatebot.com',
+              username,
+              password,
+            }),
+          ).toResolve();
+          expect(logger.debug).toHaveBeenCalledWith(
+            expect.any(Object),
+            'Failed to get user info, please configure gitAuthor manually',
+          );
+        });
+
         it('should skip api call to fetch version when platform version is set in environment', async () => {
           process.env.RENOVATE_X_PLATFORM_VERSION = '8.0.0';
+          httpMock
+            .scope('https://stash.renovatebot.com')
+            .get(`/rest/api/1.0/users/${username}`)
+            .reply(200, userInfo);
+
           await expect(
             bitbucket.initPlatform({
               endpoint: 'https://stash.renovatebot.com',
@@ -316,11 +357,32 @@ describe('modules/platform/bitbucket-server/index', () => {
           delete process.env.RENOVATE_X_PLATFORM_VERSION;
         });
 
+        it('should skip users api call when gitAuthor is configured', async () => {
+          httpMock
+            .scope('https://stash.renovatebot.com')
+            .get('/rest/api/1.0/application-properties')
+            .reply(200, { version: '8.0.0' });
+
+          await expect(
+            bitbucket.initPlatform({
+              endpoint: 'https://stash.renovatebot.com',
+              username: 'def',
+              password: '123',
+              gitAuthor: `Def Abc <def@abc.com>`,
+            }),
+          ).toResolve();
+        });
+
         it('should init', async () => {
           httpMock
             .scope('https://stash.renovatebot.com')
             .get('/rest/api/1.0/application-properties')
             .reply(200, { version: '8.0.0' });
+          httpMock
+            .scope('https://stash.renovatebot.com')
+            .get(`/rest/api/1.0/users/${username}`)
+            .reply(200, userInfo);
+
           expect(
             await bitbucket.initPlatform({
               endpoint: 'https://stash.renovatebot.com',
