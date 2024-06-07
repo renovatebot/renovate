@@ -17,7 +17,7 @@ import {
   BitbucketServerHttp,
   setBaseUrl,
 } from '../../../util/http/bitbucket-server';
-import type { HttpResponse } from '../../../util/http/types';
+import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../../util/url';
@@ -88,6 +88,7 @@ export async function initPlatform({
   token,
   username,
   password,
+  gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
@@ -130,6 +131,40 @@ export async function initPlatform({
       { err },
       'Error authenticating with Bitbucket. Check that your token includes "api" permissions',
     );
+  }
+
+  if (!gitAuthor && username) {
+    const options: HttpOptions = {
+      memCache: false,
+    };
+
+    if (token) {
+      options.token = token;
+    } else {
+      options.username = username;
+      options.password = password;
+    }
+
+    try {
+      const { displayName, emailAddress } = (
+        await bitbucketServerHttp.getJson<{
+          displayName: string;
+          emailAddress: string;
+        }>(`./rest/api/1.0/users/${username}`, options)
+      ).body;
+
+      platformConfig.gitAuthor = `${displayName} <${emailAddress}>`;
+
+      logger.debug(
+        { gitAuthor: platformConfig.gitAuthor },
+        'Detected gitAuthor',
+      );
+    } catch (err) {
+      logger.debug(
+        { err },
+        'Failed to get user info, please configure gitAuthor manually',
+      );
+    }
   }
 
   return platformConfig;
