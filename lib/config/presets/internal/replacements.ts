@@ -52,7 +52,7 @@ export const presets: Record<string, Preset> = {
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
-  'airbnb-prop-types-to-prop-types-tools': {
+  'airbnb-prop-types-to-prop-types-tools': { // eslint-disable-line sort-keys
     description: '`airbnb-prop-types` was given to a new maintainer and renamed to `prop-types-tools`.',
     packageRules: [
       {
