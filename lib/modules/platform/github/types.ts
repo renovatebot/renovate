@@ -104,7 +104,6 @@ export interface LocalRepoConfig {
   renovateUsername: string | undefined;
   renovateForkUser: string | undefined;
   productLinks: any;
-  ignorePrAuthor: boolean;
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
