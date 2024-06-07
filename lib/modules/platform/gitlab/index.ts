@@ -564,8 +564,6 @@ async function fetchPrList(): Promise<Pr[]> {
         created_at: string;
       }[]
     >(urlString, { paginate: true });
-    // // eslint-disable-next-line
-    // console.log(res.body);
     return res.body.map((pr) =>
       massagePr({
         number: pr.iid,
@@ -1073,11 +1071,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
       per_page: '100',
       state: 'opened',
     };
-    // eslint-disable-next-line
-    console.log('ignore: ', GlobalConfig.get('ignorePrAuthor'));
     if (!GlobalConfig.get('ignorePrAuthor')) {
-      // eslint-disable-next-line
-      console.log('working');
       searchParams.scope = 'created_by_me';
     }
     const query = getQueryString(searchParams);
