@@ -829,7 +829,7 @@ export async function getPrList(): Promise<GhPr[]> {
     const repo = config.parentRepo ?? config.repository;
     const username =
       !config.forkToken &&
-      !GlobalConfig.get('ignorePrAuthor') &&
+      !GlobalConfig.get('ignorePrAuthor', false) &&
       config.renovateUsername
         ? config.renovateUsername
         : null;

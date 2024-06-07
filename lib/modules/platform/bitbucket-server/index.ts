@@ -334,7 +334,10 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
     const searchParams: Record<string, string> = {
       state: 'ALL',
     };
-    if (!GlobalConfig.get('ignorePrAuthor') && config.username !== undefined) {
+    if (
+      !GlobalConfig.get('ignorePrAuthor', false) &&
+      config.username !== undefined
+    ) {
       searchParams['role.1'] = 'AUTHOR';
       searchParams['username.1'] = config.username;
     }

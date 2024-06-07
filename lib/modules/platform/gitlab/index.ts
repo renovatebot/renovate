@@ -549,7 +549,7 @@ async function fetchPrList(): Promise<Pr[]> {
     per_page: '100',
   } as any;
   // istanbul ignore if
-  if (!GlobalConfig.get('ignorePrAuthor')) {
+  if (!GlobalConfig.get('ignorePrAuthor', false)) {
     searchParams.scope = 'created_by_me';
   }
   const query = getQueryString(searchParams);
@@ -1071,7 +1071,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
       per_page: '100',
       state: 'opened',
     };
-    if (!GlobalConfig.get('ignorePrAuthor')) {
+    if (!GlobalConfig.get('ignorePrAuthor', false)) {
       searchParams.scope = 'created_by_me';
     }
     const query = getQueryString(searchParams);
