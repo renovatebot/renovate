@@ -21,6 +21,10 @@ export class GlasskubePackagesDatasource extends Datasource {
     super(GlasskubePackagesDatasource.id);
   }
 
+  @cache({
+    namespace: `datasource-${GlasskubePackagesDatasource.id}`,
+    key: ({ packageName }: GetReleasesConfig) => `${packageName}`,
+  })
   override async getReleases({
     packageName,
     registryUrl,
