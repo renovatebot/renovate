@@ -44,14 +44,17 @@ describe('config/validation', () => {
         config,
       );
       expect(warnings).toHaveLength(3);
-      expect(warnings).toMatchObject([
+      expect(warnings).toEqual([
         {
+          topic: 'Configuration Error',
           message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
         {
+          topic: 'Configuration Error',
           message: `The "ignorePrAuthor" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
         {
+          topic: 'Configuration Error',
           message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
       ]);
