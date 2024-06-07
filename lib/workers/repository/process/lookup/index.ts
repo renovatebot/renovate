@@ -187,7 +187,7 @@ export async function lookupUpdates(
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
-        logger.debug(
+        logger.info(
           {
             dependency: config.packageName,
             result: dependency,
