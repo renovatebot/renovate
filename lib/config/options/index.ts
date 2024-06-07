@@ -1703,7 +1703,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'customChangelogUrl',
+    name: 'changelogUrl',
     description:
       'If set, Renovate will use this URL to fetch changelogs for a matched dependency. Valid only within a `packageRules` object.',
     type: 'string',

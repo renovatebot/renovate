@@ -3120,19 +3120,17 @@ Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostTyp
 }
 ```
 
-### customChangelogUrl
+### changelogUrl
 
-Use this field to set the source URL for a package, including overriding an existing one.
-Source URLs are necessary in order to look up changelogs.
-
+Use this field to set the changelog URL for a package, including overriding any existing one.
 Using this field we can specify the exact URL to fetch changelogs from.
 
-```json title="Setting the source URL for the dummy package"
+```json title="Setting the changelog URL for the dummy package"
 {
   "packageRules": [
     {
       "matchPackageNames": ["dummy"],
-      "customChangelogUrl": "https://github.com/org/dummy"
+      "changelogUrl": "https://github.com/org/dummy"
     }
   ]
 }
