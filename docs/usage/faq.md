@@ -64,7 +64,7 @@ Follow these steps to see which version the Mend Renovate app is on:
 | Feature               | Platforms which lack feature                               | See Renovate issue(s)                                        |
 | --------------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
 | Dependency Dashboard  | Azure, Bitbucket, Bitbucket Server, Gerrit                 | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
-| The Mend Renovate App | Azure, Bitbucket, Bitbucket Server, Forgejo, Gitea, GitLab |                                                              |
+| The Mend Renovate App | Azure, Bitbucket Server, Forgejo, Gitea, GitLab            |                                                              |
 
 ## Major platform features not supported by Renovate
 
