@@ -1,4 +1,4 @@
-import { presets } from './monorepo';
+import { presets } from './monorepos';
 
 const todo = new Set([
   'arcus.background-jobs',
