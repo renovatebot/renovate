@@ -14,8 +14,6 @@ export class HexDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = ['https://hex.pm/'];
 
-  override readonly customRegistrySupport = false;
-
   override readonly defaultVersioning = hexVersioning.id;
 
   override readonly releaseTimestampSupport = true;
