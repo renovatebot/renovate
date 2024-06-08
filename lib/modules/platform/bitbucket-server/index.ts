@@ -40,6 +40,7 @@ import type {
 } from '../types';
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
+import { UserSchema } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -147,10 +148,11 @@ export async function initPlatform({
 
     try {
       const { displayName, emailAddress } = (
-        await bitbucketServerHttp.getJson<{
-          displayName: string;
-          emailAddress: string;
-        }>(`./rest/api/1.0/users/${username}`, options)
+        await bitbucketServerHttp.getJson(
+          `./rest/api/1.0/users/${username}`,
+          options,
+          UserSchema,
+        )
       ).body;
 
       platformConfig.gitAuthor = `${displayName} <${emailAddress}>`;
