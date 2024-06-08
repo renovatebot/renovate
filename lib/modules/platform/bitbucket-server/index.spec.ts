@@ -10,6 +10,7 @@ import {
 import type { logger as _logger } from '../../../logger';
 import type * as _git from '../../../util/git';
 import type { LongCommitSha } from '../../../util/git/types';
+import { ensureTrailingSlash } from '../../../util/url';
 import type { Platform } from '../types';
 
 jest.mock('timers/promises');
@@ -317,23 +318,25 @@ describe('modules/platform/bitbucket-server/index', () => {
           );
         });
 
-        it('should not fail if user info fetch fails', async () => {
+        it('should not throw if user info fetch fails', async () => {
           httpMock
-            .scope('https://stash.renovatebot.com')
-            .get('/rest/api/1.0/application-properties')
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
             .reply(200, { version: '8.0.0' });
           httpMock
-            .scope('https://stash.renovatebot.com')
-            .get(`/rest/api/1.0/users/${username}`)
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/users/${username}`)
             .reply(404);
 
-          await expect(
-            bitbucket.initPlatform({
-              endpoint: 'https://stash.renovatebot.com',
+          expect(
+            await bitbucket.initPlatform({
+              endpoint: url.href,
               username,
               password,
             }),
-          ).toResolve();
+          ).toEqual({
+            endpoint: ensureTrailingSlash(url.href),
+          });
           expect(logger.debug).toHaveBeenCalledWith(
             expect.any(Object),
             'Failed to get user info, please configure gitAuthor manually',
@@ -359,18 +362,58 @@ describe('modules/platform/bitbucket-server/index', () => {
 
         it('should skip users api call when gitAuthor is configured', async () => {
           httpMock
-            .scope('https://stash.renovatebot.com')
-            .get('/rest/api/1.0/application-properties')
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
             .reply(200, { version: '8.0.0' });
 
-          await expect(
-            bitbucket.initPlatform({
-              endpoint: 'https://stash.renovatebot.com',
+          expect(
+            await bitbucket.initPlatform({
+              endpoint: url.href,
               username: 'def',
               password: '123',
               gitAuthor: `Def Abc <def@abc.com>`,
             }),
-          ).toResolve();
+          ).toEqual({
+            endpoint: ensureTrailingSlash(url.href),
+          });
+        });
+
+        it('should skip users api call when no username', async () => {
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
+            .reply(200, { version: '8.0.0' });
+
+          expect(
+            await bitbucket.initPlatform({
+              endpoint: url.href,
+              token: '123',
+            }),
+          ).toEqual({
+            endpoint: ensureTrailingSlash(url.href),
+          });
+        });
+
+        it('should fetch user info if token with username', async () => {
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
+            .reply(200, { version: '8.0.0' });
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/users/${username}`)
+            .reply(200, userInfo);
+
+          expect(
+            await bitbucket.initPlatform({
+              endpoint: url.href,
+              token: '123',
+              username,
+            }),
+          ).toEqual({
+            endpoint: ensureTrailingSlash(url.href),
+            gitAuthor: `${userInfo.displayName} <${userInfo.emailAddress}>`,
+          });
         });
 
         it('should init', async () => {
