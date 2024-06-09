@@ -89,6 +89,14 @@ Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to 
 
 Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
 
+## `RENOVATE_X_REBASE_PAGINATION_LINKS`
+
+If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to use the `endpoint` URL from the Renovate config.
+
+<!-- prettier-ignore -->
+!!! note
+    For the GitHub Enterprise Server platform only.
+
 ## `RENOVATE_X_S3_ENDPOINT`
 
 If set, Renovate will use this string as the `endpoint` when instantiating the AWS S3 client.
@@ -105,3 +113,7 @@ Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://doc
 
 If set, Renovate will use SQLite as the backend for the package cache.
 Don't combine with `redisUrl`, Redis would be preferred over SQlite.
+
+## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
+
+Suppress the pre-commit support warning in PR bodies.

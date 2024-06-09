@@ -91,8 +91,6 @@ const legacyExperimentalEnvVars = {
   RENOVATE_X_EXEC_GPID_HANDLE: 'execGpidHandle',
   RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK: 'noMavenPomCheck',
   RENOVATE_X_NUGET_DOWNLOAD_NUPKGS: 'nugetDownloadNupkgs',
-  RENOVATE_PAGINATE_ALL: 'paginateAll',
-  RENOVATE_X_REBASE_PAGINATION_LINKS: 'rebasePaginationLinks',
   RENOVATE_X_REPO_CACHE_FORCE_LOCAL: 'repoCacheForceLocal',
   RENOVATE_X_YARN_PROXY: 'yarnProxy',
   RENOVATE_X_USE_OPENPGP: 'useOpenpgp',

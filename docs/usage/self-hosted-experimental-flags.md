@@ -56,30 +56,6 @@ Example usage:
 experimentalFlags: ['nugetDownloadNupkgs'];
 ```
 
-## `paginateAll`
-
-If added to the `experimentalFlags` list, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
-
-Example usage:
-
-```js
-experimentalFlags: ['paginateAll'];
-```
-
-## `rebasePaginationLinks`
-
-If added to the `experimentalFlags` list, Renovate will rewrite GitHub Enterprise Server's pagination responses to use the `endpoint` URL from the Renovate config.
-
-Example usage:
-
-```js
-experimentalFlags: ['rebasePaginationLinks'];
-```
-
-<!-- prettier-ignore -->
-!!! note
-    For the GitHub Enterprise Server platform only.
-
 ## `repoCacheForceLocal`
 
 If added to the `experimentalFlags` list, Renovate will persist repository cache locally after uploading to S3.
@@ -88,16 +64,6 @@ Example usage:
 
 ```js
 experimentalFlags: ['repoCacheForceLocal'];
-```
-
-## `suppressPreCommitWarning`
-
-Suppress the pre-commit support warning in PR bodies.
-
-Example usage:
-
-```js
-experimentalFlags: ['suppressPreCommitWarning'];
 ```
 
 ## `yarnProxy`

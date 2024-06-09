@@ -1110,8 +1110,6 @@ function validateExperimentalFlag(
     'execGpidHandle',
     'noMavenPomCheck',
     'nugetDownloadNupkgs',
-    'paginateAll',
-    'rebasePaginationLinks',
     'repoCacheForceLocal',
     'yarnProxy',
     'useOpenpgp',
