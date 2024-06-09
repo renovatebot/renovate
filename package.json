@@ -309,7 +309,7 @@
     "@types/xmldoc": "1.1.9",
     "@typescript-eslint/eslint-plugin": "7.11.0",
     "@typescript-eslint/parser": "7.11.0",
-    "aws-sdk-client-mock": "4.0.0",
+    "aws-sdk-client-mock": "4.0.1",
     "callsite": "1.0.0",
     "common-tags": "1.8.2",
     "conventional-changelog-conventionalcommits": "7.0.2",
