@@ -7,7 +7,7 @@ Instead, secrets for the cloud apps must be stored in the app settings using the
 
 To use secrets in the Mend Cloud apps:
 
-1. Add the secret in the Credentials section of the Developer Portal Org or Repo settings.
+1. Add the secret in the **Credentials** section of the [Developer Portal](http://developer.mend.io) Org or Repo settings.
 
 ![Credentials settings page](../assets/images/app-settings/app-credentials.png)
 
@@ -35,12 +35,12 @@ When adding a secret in the Developer Portal UI, check whether you are adding **
 This image shows credentials from the Repo settings page. It shows inherited Organisation Secrets, plus the specific Repository Secrets.
 Only the Repo settings can be edited here. Org settings must be edited in the Org settings page.
 
-* **To access Org-level secrets**, press the “Settings” button on the Org page.<br/>
+* **To access Org-level secrets**, press the `Settings` button on the Org page.<br/>
   _Tip: You know you are on the Org page if you see the **Installed Repositories** table._
 
 ![Org settings button](../assets/images/app-settings/org-settings-button.png)
 
-* **To access Repo-level secrets**, press the “Settings” button on the Repo page.<br/>
+* **To access Repo-level secrets**, press the `Settings` button on the Repo page.<br/>
   _Tip: You know you are on a Repo page if you see the **Recent jobs** table._
 
 ![Repo settings button](../assets/images/app-settings/repo-settings-button.png)
@@ -89,7 +89,7 @@ Use of encrypted secrets in Renovate config files is deprecated with the Mend cl
 
 1. Go to the settings for the correct Org or Repo in the [Developer Portal](http://developer.mend.io) web UI.
 
-2. In the Credentials page, press `ADD SECRET` to add the plain text secret.
+2. In the **Credentials** page, press `ADD SECRET` to add the plain text secret.
 
 ![Add repo secret](../assets/images/app-settings/add-repo-secret.png)
 
@@ -97,7 +97,9 @@ Use of encrypted secrets in Renovate config files is deprecated with the Mend cl
 
 ![Add a Secret dialog box](../assets/images/app-settings/add-a-secret.png)
 
-Note: The value of a secret can never be retrieved, be it can be updated. If needed, secrets can be deleted and recreated.
+> [!NOTE]
+>
+> The value of a secret can never be retrieved, be it can be updated. If needed, secrets can be deleted and recreated.
 
 4. Look for a confirmation dialog showing **“Successfully stored secret”**.
 
@@ -115,7 +117,7 @@ The unencrypted secret is never shown, never logged and never stored.
 
 2. Go to the settings for the correct Org or Repo in the [Developer Portal](http://developer.mend.io) web UI.
 
-3. In the Credentials page, press `ADD SECRET` to add the encrypted secret.
+3. In the **Credentials** page, press `ADD SECRET` to add the encrypted secret.
 
 4. Provide a value for `Secret name`, put the encrypted secret in the `Secret Value` field, and press `SAVE`.
 
