@@ -7,8 +7,4 @@ export interface MatcherApi {
     inputConfig: PackageRuleInputConfig,
     packageRule: PackageRule,
   ): boolean | null;
-  excludes(
-    inputConfig: PackageRuleInputConfig,
-    packageRule: PackageRule,
-  ): boolean | null;
 }

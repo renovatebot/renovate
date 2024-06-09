@@ -190,6 +190,7 @@ some-package==0.3.1`;
             currentVersion: '20.3.0',
             datasource: 'pypi',
             depName: 'attrs',
+            packageName: 'attrs',
           },
         ],
       });

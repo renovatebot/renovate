@@ -14,7 +14,6 @@ export interface HostRule {
   headers?: Record<string, string>;
   maxRetryAfter?: number;
 
-  dnsCache?: boolean;
   keepAlive?: boolean;
   artifactAuth?: string[] | null;
   httpsCertificateAuthority?: string;

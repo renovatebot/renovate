@@ -54,11 +54,7 @@ exports[`config/validation validateConfig(config) errors for all types 1`] = `
     "topic": "Configuration Error",
   },
   {
-    "message": "Configuration option \`packageRules[3].matchDepPatterns\` should be a list (Array)",
-    "topic": "Configuration Error",
-  },
-  {
-    "message": "Configuration option \`packageRules[3].matchPackagePatterns\` should be a list (Array)",
+    "message": "Configuration option \`packageRules[2].matchPackageNames\` should be a list (Array)",
     "topic": "Configuration Error",
   },
   {
@@ -66,15 +62,7 @@ exports[`config/validation validateConfig(config) errors for all types 1`] = `
     "topic": "Configuration Error",
   },
   {
-    "message": "Invalid configuration option: packageRules[1].foo",
-    "topic": "Configuration Error",
-  },
-  {
-    "message": "Invalid regExp for packageRules[3].excludeDepPatterns: \`abc ([a-z]+) ([a-z]+))\`",
-    "topic": "Configuration Error",
-  },
-  {
-    "message": "Invalid regExp for packageRules[3].excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
+    "message": "Invalid configuration option: packageRules[0].foo",
     "topic": "Configuration Error",
   },
   {
@@ -90,7 +78,7 @@ exports[`config/validation validateConfig(config) errors for all types 1`] = `
     "topic": "Configuration Error",
   },
   {
-    "message": "packageRules[1]: Each packageRule must contain at least one match* or exclude* selector. Rule: {"foo":1}",
+    "message": "packageRules[0]: Each packageRule must contain at least one match* or exclude* selector. Rule: {"foo":1}",
     "topic": "Configuration Error",
   },
   {
@@ -220,7 +208,11 @@ exports[`config/validation validateConfig(config) returns nested errors 1`] = `
     "topic": "Configuration Error",
   },
   {
-    "message": "Invalid regExp for packageRules[0].excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
+    "message": "Invalid regExp for packageRules[0].matchPackageNames: \`!/abc ([a-z]+) ([a-z]+))/\`",
+    "topic": "Configuration Error",
+  },
+  {
+    "message": "Invalid regExp for packageRules[0].matchPackageNames: \`/abc ([a-z]+) ([a-z]+))/\`",
     "topic": "Configuration Error",
   },
 ]
@@ -268,7 +260,7 @@ exports[`config/validation validateConfig(config) warns if hostType has the wron
 exports[`config/validation validateConfig(config) warns if only selectors in packageRules 1`] = `
 [
   {
-    "message": "packageRules[0]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: {"matchDepTypes":["foo"],"excludePackageNames":["bar"]}",
+    "message": "packageRules[0]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: {"matchDepTypes":["foo"],"matchPackageNames":["bar"]}",
     "topic": "Configuration Error",
   },
 ]

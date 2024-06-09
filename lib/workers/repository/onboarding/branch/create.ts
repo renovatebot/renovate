@@ -61,7 +61,7 @@ export async function createOnboardingBranch(
       },
     ],
     message: commitMessage,
-    platformCommit: !!config.platformCommit,
+    platformCommit: config.platformCommit,
     force: true,
   });
 }

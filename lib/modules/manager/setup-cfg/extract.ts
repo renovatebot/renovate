@@ -3,6 +3,7 @@ import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
+import { normalizePythonDepName } from '../../datasource/pypi/common';
 import type { PackageDependency, PackageFileContent, Result } from '../types';
 
 function getSectionName(str: string): string {
@@ -73,6 +74,7 @@ function parseDep(
 
   const dep: PackageDependency = {
     depName,
+    packageName: normalizePythonDepName(depName),
     currentValue,
     datasource: PypiDatasource.id,
     depType,

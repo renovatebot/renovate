@@ -53,7 +53,7 @@ export async function shouldReuseExistingBranch(
     if (await scm.isBranchBehindBase(branchName, baseBranch)) {
       logger.debug(`Branch is behind base branch and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
-      if (await scm.isBranchModified(branchName)) {
+      if (await scm.isBranchModified(branchName, baseBranch)) {
         logger.debug('Cannot rebase branch as it has been modified');
         result.reuseExistingBranch = true;
         result.isModified = true;
@@ -74,7 +74,7 @@ export async function shouldReuseExistingBranch(
   if (result.isConflicted) {
     logger.debug('Branch is conflicted');
 
-    if ((await scm.isBranchModified(branchName)) === false) {
+    if ((await scm.isBranchModified(branchName, baseBranch)) === false) {
       logger.debug(`Branch is not mergeable and needs rebasing`);
       if (
         config.rebaseWhen === 'never' &&

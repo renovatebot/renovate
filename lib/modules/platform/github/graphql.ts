@@ -68,34 +68,6 @@ query(
 }
 `;
 
-export const vulnerabilityAlertsQuery = (filterByState: boolean): string => `
-query($owner: String!, $name: String!) {
-  repository(owner: $owner, name: $name) {
-    vulnerabilityAlerts(last: 100, ${filterByState ? 'states: [OPEN]' : ''}) {
-      edges {
-        node {
-          dismissReason
-          vulnerableManifestFilename
-          vulnerableManifestPath
-          vulnerableRequirements
-          securityAdvisory {
-            description
-            identifiers { type value }
-            references { url }
-            severity
-          }
-          securityVulnerability {
-            package { name ecosystem }
-            firstPatchedVersion { identifier }
-            vulnerableVersionRange
-          }
-        }
-      }
-    }
-  }
-}
-`;
-
 export const enableAutoMergeMutation = `
 mutation EnablePullRequestAutoMerge(
   $pullRequestId: ID!,

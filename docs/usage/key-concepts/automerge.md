@@ -56,7 +56,7 @@ But in many cases the new version(s) will pass tests, and if so then there's rea
   "packageRules": [
     {
       "matchDepTypes": ["devDependencies"],
-      "matchPackagePatterns": ["lint", "prettier"],
+      "matchPackageNames": ["lint", "prettier"],
       "automerge": true
     }
   ]
@@ -263,7 +263,7 @@ To turn off automerge for all dependencies of a selected repository, you need to
   "extends": ["local>org-name/.github:renovate-config"],
   "packageRules": [
     {
-      "matchPackagePatterns": ["*"],
+      "matchPackageNames": ["*"],
       "automerge": false
     }
   ]

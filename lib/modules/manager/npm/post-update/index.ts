@@ -420,16 +420,6 @@ export async function getAdditionalFiles(
     return { artifactErrors, updatedArtifacts };
   }
   if (
-    !config.updatedPackageFiles?.length &&
-    config.transitiveRemediation &&
-    config.upgrades?.every(
-      (upgrade) => upgrade.isRemediation ?? upgrade.isVulnerabilityAlert,
-    )
-  ) {
-    logger.debug('Skipping lock file generation for remediations');
-    return { artifactErrors, updatedArtifacts };
-  }
-  if (
     config.reuseExistingBranch &&
     !config.updatedPackageFiles?.length &&
     config.upgrades?.every((upgrade) => upgrade.isLockfileUpdate)

@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { isCustomManager } from '../../modules/manager/custom';
+import { matchRegexOrGlobList } from '../string-match';
 import { Matcher } from './base';
 
 export class ManagersMatcher extends Matcher {
@@ -15,8 +16,8 @@ export class ManagersMatcher extends Matcher {
       return false;
     }
     if (isCustomManager(manager)) {
-      return matchManagers.includes(`custom.${manager}`);
+      return matchRegexOrGlobList(`custom.${manager}`, matchManagers);
     }
-    return matchManagers.includes(manager);
+    return matchRegexOrGlobList(manager, matchManagers);
   }
 }

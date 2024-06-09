@@ -23,6 +23,13 @@ Legacy versions with the `===` prefix are ignored.
 1. Renovate searches for the latest version on [PyPI](https://pypi.org/) to decide if there are upgrades
 1. If the source package includes a GitHub URL as its source, and has a "changelog" file _or_ uses GitHub releases, a Release Note will be embedded in the generated PR
 
+## Package name matching
+
+Your `matchPackageName` or `matchPackagePattern` rules will be matching against normalized names.
+So if you have specified package `some.package` or `ANOTHER_DEP` in your package files (`requirements.txt`, `pyproject.toml`), they will be treated as `some-package` and `another-dep` respecitvely.
+Not only they will be case insensitive but will replace any amount `._-` to a single `-`.
+[Consult Python packaging documentation for the specification](https://packaging.python.org/en/latest/specifications/name-normalization/).
+
 ## Alternate registries
 
 By default Renovate checks for upgrades on the `pypi.org` registry.
