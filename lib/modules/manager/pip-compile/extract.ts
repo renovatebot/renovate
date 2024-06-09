@@ -11,34 +11,13 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types';
-import { extractHeaderCommand } from './common';
-import type {
-  DependencyBetweenFiles,
-  PipCompileArgs,
-  SupportedManagers,
-} from './types';
+import { extractHeaderCommand, matchManager } from './common';
+import type { DependencyBetweenFiles, PipCompileArgs } from './types';
 import {
   generateMermaidGraph,
   inferCommandExecDir,
   sortPackageFiles,
 } from './utils';
-
-function matchManager(filename: string): SupportedManagers | 'unknown' {
-  if (filename.endsWith('setup.py')) {
-    return 'pip_setup';
-  }
-  if (filename.endsWith('setup.cfg')) {
-    return 'setup-cfg';
-  }
-  if (filename.endsWith('pyproject.toml')) {
-    return 'pep621';
-  }
-  // naive, could be improved, maybe use pip_requirements.fileMatch
-  if (filename.endsWith('.in')) {
-    return 'pip_requirements';
-  }
-  return 'unknown';
-}
 
 export function extractPackageFile(
   content: string,
@@ -159,6 +138,10 @@ export async function extractAllPackageFiles(
       );
       if (packageFileContent) {
         if (packageFileContent.managerData?.requirementsFiles) {
+          packageFileContent.managerData.requirementsFiles =
+            packageFileContent.managerData.requirementsFiles.map(
+              (file: string) => upath.normalize(upath.join(compileDir, file)),
+            );
           for (const file of packageFileContent.managerData.requirementsFiles) {
             depsBetweenFiles.push({
               sourceFile: file,
@@ -168,6 +151,10 @@ export async function extractAllPackageFiles(
           }
         }
         if (packageFileContent.managerData?.constraintsFiles) {
+          packageFileContent.managerData.constraintsFiles =
+            packageFileContent.managerData.constraintsFiles.map(
+              (file: string) => upath.normalize(upath.join(compileDir, file)),
+            );
           for (const file of packageFileContent.managerData.constraintsFiles) {
             depsBetweenFiles.push({
               sourceFile: file,

@@ -260,6 +260,15 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('reads registryUrls from .yarnrc.yml', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && otherFile === '.yarnrc.yml') {
+            return Promise.resolve('.yarnrc.yml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.yarnrc.yml') {
           return Promise.resolve(
@@ -279,12 +288,22 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('reads registryUrls from .yarnrc', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && otherFile === '.yarnrc') {
+            return Promise.resolve('.yarnrc');
+          }
+          return Promise.resolve(null);
+        },
+      );
+
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.yarnrc') {
           return Promise.resolve('registry "https://registry.example.com"');
         }
         return Promise.resolve(null);
       });
+
       const res = await npmExtract.extractPackageFile(
         input02Content,
         'package.json',
@@ -296,6 +315,15 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('resolves registry URLs using the package name if set', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && otherFile === '.yarnrc.yml') {
+            return Promise.resolve('.yarnrc.yml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.yarnrc.yml') {
           return Promise.resolve(codeBlock`
@@ -773,6 +801,15 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('sets skipInstalls false if Yarn zero-install is used', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && otherFile === '.yarnrc.yml') {
+            return Promise.resolve('.yarnrc.yml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === 'yarn.lock') {
           return Promise.resolve('# yarn.lock');

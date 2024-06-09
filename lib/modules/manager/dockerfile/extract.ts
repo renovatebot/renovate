@@ -214,12 +214,12 @@ export function getDep(
     }
   }
 
-  if (dep.depName === 'ubuntu') {
+  if (dep.depName === 'ubuntu' || dep.depName?.endsWith('/ubuntu')) {
     dep.versioning = ubuntuVersioning.id;
   }
 
   if (
-    dep.depName === 'debian' &&
+    (dep.depName === 'debian' || dep.depName?.endsWith('/debian')) &&
     debianVersioning.api.isVersion(dep.currentValue)
   ) {
     dep.versioning = debianVersioning.id;

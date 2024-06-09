@@ -8,6 +8,7 @@ import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
+import { filterMap } from '../../../util/filter-map';
 import {
   ensureCacheDir,
   isValidLocalPath,
@@ -24,6 +25,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
+import { getExtraDepsNotice } from './artifacts-extra';
 
 const { major, valid } = semver;
 
@@ -364,14 +366,30 @@ export async function updateArtifacts({
       .replace(regEx(/\/\/ renovate-replace /g), '')
       .replace(regEx(/renovate-replace-bracket/g), ')');
     if (finalGoModContent !== newGoModContent) {
-      logger.debug('Found updated go.mod after go.sum update');
-      res.push({
+      const artifactResult: UpdateArtifactsResult = {
         file: {
           type: 'addition',
           path: goModFileName,
           contents: finalGoModContent,
         },
-      });
+      };
+
+      const updatedDepNames = filterMap(updatedDeps, (dep) => dep?.depName);
+      const extraDepsNotice = getExtraDepsNotice(
+        newGoModContent,
+        finalGoModContent,
+        updatedDepNames,
+      );
+
+      if (extraDepsNotice) {
+        artifactResult.notice = {
+          file: goModFileName,
+          message: extraDepsNotice,
+        };
+      }
+
+      logger.debug('Found updated go.mod after go.sum update');
+      res.push(artifactResult);
     }
     return res;
   } catch (err) {

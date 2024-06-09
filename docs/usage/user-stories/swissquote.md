@@ -21,7 +21,7 @@ But there are also other aspects like bugs caused by your dependencies.
 Depending on third-party software is a sword of Damocles; you never know when a new issue will force you to drop everything to upgrade your software.
 
 <figure markdown>
-  ![XKCD 2347](../assets/images/swissquote_xkcd.png){ loading=lazy }
+  ![Tower of blocks, with a small block that supports many large blocks. The whole stack is labeled: All modern digital infrastructure. A arrow points to the small block, with the label: A project some random person in Nebraska has been thanklessly maintaining since 2003.](../assets/images/swissquote_xkcd.png){ loading=lazy }
   <figcaption><a href=https://xkcd.com/2347/>XKCD comic 2347</a> is always relevant when talking about dependencies.</figcaption>
 </figure>
 
@@ -98,7 +98,7 @@ Every company that’s been around for sometime has that old project still runni
 People talk about it laughingly but become livid when a request comes to change anything in it.
 
 <figure markdown>
-  ![Sweating person](../assets/images/swissquote_sweating_guy.jpg){ loading=lazy }
+  ![Close-up of black man with streams of sweat on his face](../assets/images/swissquote_sweating_guy.jpg){ loading=lazy }
   <figcaption>There is a fix to make on that project, the last person working on it left three years ago.</figcaption>
 </figure>
 
@@ -143,7 +143,7 @@ On our first try, we enabled 30 repositories, a cron task was running every hour
 We received 700 Pull Requests in the first month, it was a never ending Pull Request whack-a-mole: every time we merged one, another replaced it.
 
 <figure markdown>
-  ![A cat playing Whack-a-mole with a finger](../assets/images/swissquote_cat_whack_a_mole.jpg){ loading=lazy }
+  ![A cat batting at fingers coming out of holes in a box, Whack-A-Mole style](../assets/images/swissquote_cat_whack_a_mole.jpg){ loading=lazy }
   <figcaption>Me and my team merging Pull Requests.</figcaption>
 </figure>
 
@@ -182,7 +182,9 @@ Some features and options we enjoy:
 There is an [on-premise option](https://www.mend.io/free-developer-tools/renovate/on-premises/), but you can also use [the Mend Renovate App](https://github.com/marketplace/renovate).
 On our side, we’re not using the on-premise but rather a custom scheduler using the open source Docker image.
 
-## Some stats after two years with Renovate
+## Some stats after four years with Renovate
+
+> The figures here have been updated in November 2023
 
 We started using Renovate Bot in 2019, using the (now deprecated) `renovate/pro` Docker image.
 We installed it as a GitHub app and some early adopters started to use it.
@@ -197,17 +199,42 @@ Here is the dashboard for our current scheduler:
 
 <figure markdown>
   ![Swissquote scheduler dashboard](../assets/images/swissquote_stats.png){ loading=lazy }
-  <figcaption>A dashboard we made at Swissquote to keep our Renovate runs in check, July 2022.</figcaption>
+  <figcaption>A dashboard we made at Swissquote to keep our Renovate runs in check, November 2023.</figcaption>
 </figure>
 
 We don’t force any team to use Renovate, each team can decide to opt-in and do it for each project separately.
 
 Some statistics:
 
-- 824 repositories enabled out of about 2000 active repositories
-- 8000 PRs were merged since we installed Renovate
+- 857 repositories enabled out of about 2000 active repositories
+- 11000 PRs were merged since we installed Renovate
 - 239 PRs were merged last month
 - 2 SSDs died on our Renovate machine with the number of projects to clone again and again
+
+### How does the scheduler work?
+
+The scheduler is a Node.js application that handles an in-memory queue and starts Docker containers to run Renovate on.
+Our custom scheduler application regularly sends data points to our InfluxDB database, which we then display in Grafana.
+
+Here is how it works:
+
+<figure markdown>
+  ![Swissquote scheduler diagram](../assets/images/swissquote_stats_collection.png){ loading=lazy }
+  <figcaption>A diagram explaining how our scheduler interacts with Renovate.</figcaption>
+</figure>
+
+All the information on the dashboard you saw above is created from three measurements:
+
+1. Queue: Every 5 minutes, we send the status of the queue size and the number of jobs currently running
+1. Webhook: When receiving a webhook request from GitHub, we send a data point on the duration of treatment for that item
+1. Runs: After each run, we send a data point on the run duration, success, and number of PRs created/updated/merged/closed
+
+The queue is filled by webhooks _or_ by re-queueing all repositories at regular intervals.
+For each repository, we start a Renovate Docker image and pipe its logs to a file.
+This allows us to run ten workers in parallel.
+We could technically run more workers but decided not to hammer our GitHub instance.
+
+You can find more details in this [discussion on the Renovate repository, from November 2023](https://github.com/renovatebot/renovate/discussions/23105#discussioncomment-6366621).
 
 ## The future of Renovate at Swissquote
 

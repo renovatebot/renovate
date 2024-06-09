@@ -1069,11 +1069,14 @@ export async function setBranchStatus({
 
 export async function getIssueList(): Promise<GitlabIssue[]> {
   if (!config.issueList) {
-    const query = getQueryString({
+    const searchParams: Record<string, string> = {
       per_page: '100',
-      scope: 'created_by_me',
       state: 'opened',
-    });
+    };
+    if (!config.ignorePrAuthor) {
+      searchParams.scope = 'created_by_me';
+    }
+    const query = getQueryString(searchParams);
     const res = await gitlabApi.getJson<
       { iid: number; title: string; labels: string[] }[]
     >(`projects/${config.repository}/issues?${query}`, {
@@ -1214,7 +1217,13 @@ export async function addAssignees(
     logger.debug(`Adding assignees '${assignees.join(', ')}' to #${iid}`);
     const assigneeIds: number[] = [];
     for (const assignee of assignees) {
-      assigneeIds.push(await getUserID(assignee));
+      try {
+        const userId = await getUserID(assignee);
+        assigneeIds.push(userId);
+      } catch (err) {
+        logger.debug({ assignee, err }, 'getUserID() error');
+        logger.warn({ assignee }, 'Failed to add assignee - could not get ID');
+      }
     }
     const url = `projects/${
       config.repository
