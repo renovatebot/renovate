@@ -565,9 +565,9 @@ The solution to this is that you should break your presets into public and priva
 It is strongly recommended that you avoid committing secrets to repositories, including private ones, and this includes secrets needed by Renovate to access private modules.
 The preferred approach to secrets is that the bot administrator configures them as `hostRules` which are then applied to all repositories which the bot accesses.
 
-> [!NOTE]
+> [!IMPORTANT]
 >
-> Use of encrypted secrets in Renovate config has been deprecated in the Mend Renovate App. Secrets must now be store in the App settings via the web UI.
+> Use of encrypted secrets in Renovate config has been deprecated in the Mend Renovate App. Secrets must now be stored in the App settings via the web UI.
 >
 > See [Using Secrets with Mend Cloud Apps](app-secrets.md) for more details, including instructions for [migrating encrypted secrets](app-secrets.md#migrating-secrets-from-repo-config-to-app-settings) from repo config into the App settings.
 

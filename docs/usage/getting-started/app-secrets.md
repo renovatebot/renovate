@@ -144,8 +144,8 @@ The settings UI will provide helpful information if you try to add the secret in
 
 > [!IMPORTANT]
 >
-> If the confirmation box does not say “Successfully migrated secret”, and instead says “Successfully stored secret” then the secret was not detected as a Renovate encrypted secret and the value was treated as plain text.
+> If the confirmation box does not say **“Successfully migrated secret”**, and instead says **“Successfully stored secret”** then the secret was not detected as a Renovate encrypted secret and the value was treated as plain text.
 > If you were expecting to import a secret originally encrypted by Renovate:
 >
-> - Make sure you are using the secret in the correct Org and/or Repo
-> - Check that you copied the encrypted secret correctly, and try again
+> - Make sure you are using the secret in the correct Org and/or Repo.
+> - Check that you copied the encrypted secret correctly, and try again.
