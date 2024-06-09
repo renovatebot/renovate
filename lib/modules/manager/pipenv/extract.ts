@@ -6,6 +6,7 @@ import { localPathExists } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { parse as parseToml } from '../../../util/toml';
 import { PypiDatasource } from '../../datasource/pypi';
+import { normalizePythonDepName } from '../../datasource/pypi/common';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { PipFile, PipRequirement, PipSource } from './types';
 
@@ -76,6 +77,7 @@ function extractFromSection(
       const dep: PackageDependency = {
         depType: sectionName,
         depName,
+        packageName: normalizePythonDepName(depName),
         managerData: {},
       };
       if (currentValue) {
