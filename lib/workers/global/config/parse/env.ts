@@ -94,8 +94,6 @@ const legacyExperimentalEnvVars = {
   RENOVATE_PAGINATE_ALL: 'paginateAll',
   RENOVATE_X_REBASE_PAGINATION_LINKS: 'rebasePaginationLinks',
   RENOVATE_X_REPO_CACHE_FORCE_LOCAL: 'repoCacheForceLocal',
-  RENOVATE_X_SQLITE_PACKAGE_CACHE: 'sqlitePackageCache',
-  RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING: 'suppressPreCommitWarning',
   RENOVATE_X_YARN_PROXY: 'yarnProxy',
   RENOVATE_X_USE_OPENPGP: 'useOpenpgp',
 };

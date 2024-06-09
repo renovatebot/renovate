@@ -1113,8 +1113,6 @@ function validateExperimentalFlag(
     'paginateAll',
     'rebasePaginationLinks',
     'repoCacheForceLocal',
-    'sqlitePackageCache',
-    'suppressPreCommitWarning',
     'yarnProxy',
     'useOpenpgp',
   ]);

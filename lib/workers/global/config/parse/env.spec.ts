@@ -105,8 +105,6 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_PAGINATE_ALL: 'true',
         RENOVATE_X_REBASE_PAGINATION_LINKS: 'true',
         RENOVATE_X_REPO_CACHE_FORCE_LOCAL: 'true',
-        RENOVATE_X_SQLITE_PACKAGE_CACHE: 'true',
-        RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING: 'true',
         RENOVATE_X_YARN_PROXY: 'true',
         RENOVATE_X_USE_OPENPGP: 'true',
       };
@@ -119,8 +117,6 @@ describe('workers/global/config/parse/env', () => {
           'paginateAll',
           'rebasePaginationLinks',
           'repoCacheForceLocal',
-          'sqlitePackageCache',
-          'suppressPreCommitWarning',
           'yarnProxy',
           'useOpenpgp',
         ],
