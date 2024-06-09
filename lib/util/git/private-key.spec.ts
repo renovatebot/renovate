@@ -1,5 +1,7 @@
-import { mocked } from '../../../test/util';
-import * as exec_ from '../exec';
+import fs from 'fs-extra';
+import { MockProxy, any, mockReset } from 'jest-mock-extended';
+import { Fixtures } from '../../../test/fixtures';
+import * as execModule from '../exec';
 import { configSigningKey, writePrivateKey } from './private-key';
 import { setPrivateKey } from '.';
 
@@ -10,12 +12,22 @@ jest.mock('fs-extra', () =>
     >('../../../test/fixtures')
     .fsExtra(),
 );
-jest.mock('../exec');
+jest.mock('../exec', () =>
+  jest
+    .requireActual<typeof import('jest-mock-extended')>('jest-mock-extended')
+    .mock<MockProxy<typeof execModule>>(),
+);
 
-const exec = mocked(exec_);
+const exec = execModule as MockProxy<typeof execModule>;
 
 describe('util/git/private-key', () => {
   describe('writePrivateKey()', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+      mockReset(exec);
+      Fixtures.reset();
+    });
+
     it('returns if no private key', async () => {
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey('/tmp/some-repo')).resolves.not.toThrow();
@@ -23,26 +35,98 @@ describe('util/git/private-key', () => {
 
     it('throws error if failing', async () => {
       setPrivateKey('some-key');
-      exec.exec.mockRejectedValueOnce({
-        stderr: `something wrong`,
-        stdout: '',
-      });
+      exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
+      exec.exec
+        .calledWith('gpg --import /tmp/git-private-gpg.key')
+        .mockRejectedValueOnce({
+          stderr: `something wrong`,
+          stdout: '',
+        });
       await expect(writePrivateKey()).rejects.toThrow();
     });
 
-    it('imports the private key', async () => {
+    it('imports the private GPG key', async () => {
+      const publicKey = 'BADC0FFEE';
+      const repoDir = '/tmp/some-repo';
+      exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
+      exec.exec
+        .calledWith(`gpg --import /tmp/git-private-gpg.key`)
+        .mockResolvedValueOnce({
+          stderr: `gpg: key ${publicKey}: secret key imported\nfoo\n`,
+          stdout: '',
+        });
       setPrivateKey('some-key');
-      exec.exec.mockResolvedValueOnce({
-        stderr: `gpg: key BADC0FFEE: secret key imported\nfoo\n`,
-        stdout: '',
-      });
       await expect(writePrivateKey()).resolves.not.toThrow();
-      await expect(configSigningKey('/tmp/some-repo')).resolves.not.toThrow();
+      await expect(configSigningKey(repoDir)).resolves.not.toThrow();
+      expect(exec.exec).toHaveBeenCalledWith(
+        `git config user.signingkey ${publicKey}`,
+        { cwd: repoDir },
+      );
+      expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
+        cwd: repoDir,
+      });
+      expect(exec.exec).toHaveBeenCalledWith('git config gpg.format opengpg', {
+        cwd: repoDir,
+      });
     });
 
     it('does not import the key again', async () => {
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey('/tmp/some-repo')).resolves.not.toThrow();
+    });
+
+    it('throws error if the private SSH key has a passphrase', async () => {
+      const privateKeyFile = '/tmp/git-private-ssh.key';
+      exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
+      exec.exec
+        .calledWith(`ssh-keygen -y -P "" -f ${privateKeyFile}`)
+        .mockRejectedValueOnce({
+          stderr: `Load key "${privateKeyFile}": incorrect passphrase supplied to decrypt private key`,
+          stdout: '',
+        });
+      setPrivateKey(`\
+-----BEGIN OPENSSH PRIVATE KEY-----
+some-private-key-with-passphrase
+-----END OPENSSH PRIVATE KEY-----`);
+      await expect(writePrivateKey()).rejects.toThrow();
+    });
+
+    it('imports the private SSH key', async () => {
+      const privateKey = `\
+-----BEGIN OPENSSH PRIVATE KEY-----
+some-private-key
+-----END OPENSSH PRIVATE KEY-----`;
+      const privateKeyFile = '/tmp/git-private-ssh.key';
+      const publicKey = 'some-public-key';
+      const repoDir = '/tmp/some-repo';
+      exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
+      exec.exec
+        .calledWith(`ssh-keygen -y -P "" -f ${privateKeyFile}`)
+        .mockResolvedValue({
+          stderr: '',
+          stdout: publicKey,
+        });
+      setPrivateKey(privateKey);
+      await expect(writePrivateKey()).resolves.not.toThrow();
+      await expect(configSigningKey(repoDir)).resolves.not.toThrow();
+      expect(exec.exec).toHaveBeenCalledWith(
+        `git config user.signingkey ${privateKeyFile}`,
+        { cwd: repoDir },
+      );
+      const privateKeyFileMode = (await fs.stat(privateKeyFile)).mode;
+      expect((privateKeyFileMode & 0o777).toString(8)).toBe('600');
+      expect((await fs.readFile(privateKeyFile)).toString()).toEqual(
+        privateKey,
+      );
+      expect((await fs.readFile(`${privateKeyFile}.pub`)).toString()).toEqual(
+        publicKey,
+      );
+      expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
+        cwd: repoDir,
+      });
+      expect(exec.exec).toHaveBeenCalledWith('git config gpg.format ssh', {
+        cwd: repoDir,
+      });
     });
   });
 });

@@ -100,6 +100,7 @@ export class Fixtures {
     fsExtraMock.writeFile.mockImplementation(memfs.promises.writeFile);
     fsExtraMock.outputFile.mockImplementation(outputFile);
     fsExtraMock.stat.mockImplementation(stat);
+    fsExtraMock.chmod.mockImplementation(memfs.promises.chmod);
   }
 
   private static getPathToFixtures(fixturesRoot = '.'): string {
@@ -116,6 +117,7 @@ const fsExtraMock = {
   writeFile: jest.fn(),
   outputFile: jest.fn(),
   stat: jest.fn(),
+  chmod: jest.fn(),
 };
 
 // Temporary solution, when all tests will be rewritten to Fixtures mocks can be moved into __mocks__ folder
