@@ -22,9 +22,10 @@ export async function tryDecrypt(
 ): Promise<string | null> {
   let decryptedStr: string | null = null;
   if (privateKey?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
-    const decryptedObjStr = GlobalConfig.getExperimentalFlag('useOpenpgp')
-      ? await tryDecryptOpenPgp(privateKey, encryptedStr)
-      : await tryDecryptKbPgp(privateKey, encryptedStr);
+    const decryptedObjStr =
+      process.env.RENOVATE_X_USE_OPENPGP === 'true'
+        ? await tryDecryptOpenPgp(privateKey, encryptedStr)
+        : await tryDecryptKbPgp(privateKey, encryptedStr);
     if (decryptedObjStr) {
       decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
     }

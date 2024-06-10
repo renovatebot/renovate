@@ -75,13 +75,3 @@ Example usage:
 ```js
 experimentalFlags: ['yarnProxy'];
 ```
-
-## `useOpenpgp`
-
-Use `openpgp` instead of `kbpgp` for `PGP` decryption.
-
-Example usage:
-
-```js
-experimentalFlags: ['useOpenpgp'];
-```

@@ -1112,7 +1112,6 @@ function validateExperimentalFlag(
     'nugetDownloadNupkgs',
     'repoCacheForceLocal',
     'yarnProxy',
-    'useOpenpgp',
   ]);
   if (!allowedExperimentalFlags.has(flagName)) {
     warnings.push({
