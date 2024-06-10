@@ -2,7 +2,6 @@ import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
 import { mocked } from '../../../test/util';
-import { GlobalConfig } from '../../config/global';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -53,6 +52,7 @@ describe('util/http/github', () => {
   let repoCache: RepoCacheData = {};
 
   beforeEach(() => {
+    delete process.env.RENOVATE_X_REBASE_PAGINATION_LINKS;
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     repoCache = {};
@@ -61,7 +61,6 @@ describe('util/http/github', () => {
 
   afterEach(() => {
     hostRules.clear();
-    GlobalConfig.reset();
   });
 
   describe('HTTP', () => {
@@ -231,7 +230,7 @@ describe('util/http/github', () => {
     });
 
     it('rebases GHE Server pagination links', async () => {
-      GlobalConfig.set({ experimentalFlags: ['rebasePaginationLinks'] });
+      process.env.RENOVATE_X_REBASE_PAGINATION_LINKS = '1';
       // The origin and base URL which Renovate uses (from its config) to reach GHE:
       const baseUrl = 'http://ghe.alternative.domain.com/api/v3';
       setBaseUrl(baseUrl);
@@ -278,7 +277,7 @@ describe('util/http/github', () => {
     });
 
     it('preserves pagination links for github.com', async () => {
-      GlobalConfig.set({ experimentalFlags: ['rebasePaginationLinks'] });
+      process.env.RENOVATE_X_REBASE_PAGINATION_LINKS = '1';
       const baseUrl = 'https://api.github.com/';
 
       setBaseUrl(baseUrl);
