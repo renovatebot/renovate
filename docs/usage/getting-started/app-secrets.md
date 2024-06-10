@@ -48,4 +48,4 @@ Only the Repo settings can be edited here. Org settings must be edited in the Or
 
 ## Related links:
 
-* [Migrating encrypted secrets from Repo Config to App Settings](migrating-secrets.md)
+- [Migrating encrypted secrets from Repo Config to App Settings](migrating-secrets.md)

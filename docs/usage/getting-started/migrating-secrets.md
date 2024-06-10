@@ -104,4 +104,4 @@ The settings UI will provide helpful information if you try to add the secret in
 
 ## Related links:
 
-* [Using Secrets with Mend Cloud Apps](app-secrets.md)
+- [Using Secrets with Mend Cloud Apps](app-secrets.md)
