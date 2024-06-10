@@ -569,7 +569,7 @@ The preferred approach to secrets is that the bot administrator configures them 
 >
 > Use of encrypted secrets in Renovate config has been deprecated in the Mend Renovate App. Secrets must now be stored in the App settings via the web UI.
 >
-> See [Using Secrets with Mend Cloud Apps](app-secrets.md) for more details, including instructions for [migrating encrypted secrets](app-secrets.md#migrating-secrets-from-repo-config-to-app-settings) from repo config into the App settings.
+> For more information, see [Migrating Secrets from Repo Config to App Settings](migrating-secrets.md)
 
 If you need to provide credentials to the Mend Renovate App, please do this:
 
@@ -589,6 +589,8 @@ If you need to provide credentials to the Mend Renovate App, please do this:
   ]
 }
 ```
+
+For more details, see [Using Secrets with Mend Cloud Apps](app-secrets.md).
 
 ### Access to GitHub Actions Secrets
 
