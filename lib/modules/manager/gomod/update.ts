@@ -81,6 +81,7 @@ export function updateDependency({
 
     if (updateLineExp) {
       const groups = lineToChange.match(updateLineExp)?.groups;
+      // istanbul ignore if: should never happen
       if (!groups) {
         return fileContent;
       }
