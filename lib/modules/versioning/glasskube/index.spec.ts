@@ -2,6 +2,7 @@ import { GlasskubeVersioningApi } from '.';
 
 describe('modules/versioning/glasskube/index', () => {
   const versioning = new GlasskubeVersioningApi();
+
   it.each`
     version         | expected
     ${'v1.2.3'}     | ${true}
@@ -37,7 +38,6 @@ describe('modules/versioning/glasskube/index', () => {
       expect(versioning.getMajor(version)).toBe(major);
       expect(versioning.getMinor(version)).toBe(minor);
       expect(versioning.getPatch(version)).toBe(patch);
-      expect(versioning.getNewValue);
     },
   );
 
