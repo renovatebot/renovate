@@ -145,6 +145,7 @@
     "@aws-sdk/client-codecommit": "3.588.0",
     "@aws-sdk/client-ec2": "3.588.0",
     "@aws-sdk/client-ecr": "3.588.0",
+    "@aws-sdk/client-eks": "3.588.0",
     "@aws-sdk/client-rds": "3.588.0",
     "@aws-sdk/client-s3": "3.588.0",
     "@aws-sdk/credential-providers": "3.588.0",
