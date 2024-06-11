@@ -2270,7 +2270,7 @@ Renovate will only add a milestone when it _creates_ the PR.
 
 This feature used to be called `stabilityDays`.
 
-If `minimumReleaseAge` is set to a number value _and_ the update has a release timestamp header, then Renovate will check if the set duration has passed.
+If `minimumReleaseAge` is set to a time duration _and_ the update has a release timestamp header, then Renovate will check if the set duration has passed.
 
 Note: Renovate will wait for the set duration to pass for each **separate** version.
 Renovate does not wait until the package has seen no releases for x time-duration(`minimumReleaseAge`).
