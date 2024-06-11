@@ -189,7 +189,7 @@ function collectDeps(
   }
 ): PackageDependency[] {
   const ctx = {
-    depType: options.depType || key,
+    depType: options.depType ?? key,
     registryUrls,
   };
   // A vector like [["dep-1" "1.0.0"] ["dep-2" "0.0.0"]] is nested
