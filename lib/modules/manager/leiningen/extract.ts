@@ -26,7 +26,7 @@ export function extractFromVectors(
   str: string,
   ctx: ExtractContext = {},
   vars: ExtractedVariables = {},
-  dimensions: 1 | 2 = 2
+  dimensions: 1 | 2 = 2,
 ): PackageDependency[] {
   if (!str.startsWith('[')) {
     return [];
@@ -38,7 +38,7 @@ export function extractFromVectors(
   let artifactId = '';
   let version = '';
   // Are we currently parsing a comment? If so, at what depth?
-  let commentLevel : number | null = null;
+  let commentLevel: number | null = null;
 
   const isSpace = (ch: string | null): boolean =>
     !!ch && regEx(/[\s,]/).test(ch);
@@ -96,7 +96,7 @@ export function extractFromVectors(
         commentLevel = null;
       }
 
-      if (balance === (dimensions - 1)) {
+      if (balance === dimensions - 1) {
         yieldDep();
       }
 
@@ -177,7 +177,7 @@ export function extractVariables(content: string): ExtractedVariables {
 type CollectDepsOptions = {
   nested: boolean;
   depType?: string;
-}
+};
 
 function collectDeps(
   content: string,
@@ -185,8 +185,8 @@ function collectDeps(
   registryUrls: string[],
   vars: ExtractedVariables,
   options: CollectDepsOptions = {
-    nested: true
-  }
+    nested: true,
+  },
 ): PackageDependency[] {
   const ctx = {
     depType: options.depType ?? key,
@@ -194,11 +194,14 @@ function collectDeps(
   };
   // A vector like [["dep-1" "1.0.0"] ["dep-2" "0.0.0"]] is nested
   // A vector like ["dep-1" "1.0.0"] is not
-  const dimensions = options.nested ? 2 : 1
+  const dimensions = options.nested ? 2 : 1;
   let result: PackageDependency[] = [];
   let restContent = trimAtKey(content, key);
   while (restContent) {
-    result = [...result, ...extractFromVectors(restContent, ctx, vars, dimensions)];
+    result = [
+      ...result,
+      ...extractFromVectors(restContent, ctx, vars, dimensions),
+    ];
     restContent = trimAtKey(restContent, key);
   }
   return result;
@@ -224,7 +227,7 @@ export function extractPackageFile(content: string): PackageFileContent {
       nested: false,
       // The top-level key is 'parent-project', but we skip directly to 'coords'.
       // So fix the dep type label
-      depType: "parent-project"
+      depType: 'parent-project',
     }),
   ];
 

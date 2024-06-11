@@ -11,8 +11,11 @@ describe('modules/manager/leiningen/extract', () => {
     expect(trimAtKey(':dependencies    ', 'dependencies')).toBeNull();
     expect(trimAtKey(':dependencies \nfoobar', 'dependencies')).toBe('foobar');
     expect(
-      trimAtKey(':parent-project {:coords [my-org/my-parent "4.3.0"]\n:inherit [:profiles]}', 'coords'))
-      .toBe('[my-org/my-parent "4.3.0"]\n:inherit [:profiles]}');
+      trimAtKey(
+        ':parent-project {:coords [my-org/my-parent "4.3.0"]\n:inherit [:profiles]}',
+        'coords',
+      ),
+    ).toBe('[my-org/my-parent "4.3.0"]\n:inherit [:profiles]}');
   });
 
   it('extractFromVectors', () => {
@@ -51,14 +54,20 @@ describe('modules/manager/leiningen/extract', () => {
         currentValue: '4.5.6',
       },
     ]);
-    expect(extractFromVectors('[my-org/my-parent "4.3.0"]\n:inherit [:profiles]}', {}, {} , 1))
-      .toEqual([
-        {
-          datasource: ClojureDatasource.id,
-          depName: 'my-org:my-parent',
-          currentValue: '4.3.0',
-        }
-      ]);
+    expect(
+      extractFromVectors(
+        '[my-org/my-parent "4.3.0"]\n:inherit [:profiles]}',
+        {},
+        {},
+        1,
+      ),
+    ).toEqual([
+      {
+        datasource: ClojureDatasource.id,
+        depName: 'my-org:my-parent',
+        currentValue: '4.3.0',
+      },
+    ]);
   });
 
   it('extractPackageFile', () => {
@@ -143,70 +152,70 @@ describe('modules/manager/leiningen/extract', () => {
           datasource: 'clojure',
           depType: 'dependencies',
           registryUrls: [],
-          currentValue: '1.6.681'
+          currentValue: '1.6.681',
         },
         {
           depName: 'org.clojure:core.match',
           datasource: 'clojure',
           depType: 'dependencies',
           registryUrls: [],
-          currentValue: '1.1.0'
+          currentValue: '1.1.0',
         },
         {
           depName: 'org.clojure:data.csv',
           datasource: 'clojure',
           depType: 'dependencies',
           registryUrls: [],
-          currentValue: '1.1.0'
+          currentValue: '1.1.0',
         },
         {
           depName: 'org.clojure:tools.cli',
           datasource: 'clojure',
           depType: 'dependencies',
           registryUrls: [],
-          currentValue: '1.1.230'
+          currentValue: '1.1.230',
         },
         {
           depName: 'metosin:malli',
           datasource: 'clojure',
           depType: 'dependencies',
           registryUrls: [],
-          currentValue: '0.15.0'
+          currentValue: '0.15.0',
         },
         {
           depName: 'lein-parent:lein-parent',
           datasource: 'clojure',
           depType: 'plugins',
           registryUrls: [],
-          currentValue: '0.3.9'
+          currentValue: '0.3.9',
         },
         {
           depName: 'lein-project-version:lein-project-version',
           datasource: 'clojure',
           depType: 'plugins',
           registryUrls: [],
-          currentValue: '0.1.0'
+          currentValue: '0.1.0',
         },
         {
           depName: 'lein-shell:lein-shell',
           datasource: 'clojure',
           depType: 'plugins',
           registryUrls: [],
-          currentValue: '0.5.0'
+          currentValue: '0.5.0',
         },
         {
           depName: 'lein-cljfmt:lein-cljfmt',
           datasource: 'clojure',
           depType: 'plugins',
           registryUrls: [],
-          currentValue: '0.9.2'
+          currentValue: '0.9.2',
         },
         {
           depName: 'my-org:my-parent',
           datasource: 'clojure',
           depType: 'parent-project',
           registryUrls: [],
-          currentValue: '4.3.0'
+          currentValue: '4.3.0',
         },
       ],
     });
