@@ -33,7 +33,7 @@ Once this endpoint is set, you can use all environment variables listed in the [
 You can also set the following environment variables:
 
 - `OTEL_SERVICE_NAME`: to control the service name that will be emitted in traces, defaults to `renovate`
-- `OTEL_SERVICE_NAMESPAC`E: to control the service namespace that will be emitted in traces, defaults to `renovatebot.com`
+- `OTEL_SERVICE_NAMESPACE`: to control the service namespace that will be emitted in traces, defaults to `renovatebot.com`
 - `OTEL_SERVICE_VERSION`: to control the service version that will be emitted in traces, defaults to using the pkg version
 
 ## Debugging
