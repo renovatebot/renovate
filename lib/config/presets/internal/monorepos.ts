@@ -471,6 +471,7 @@ const repoGroups = {
   serde: 'https://github.com/serde-rs/serde',
   'serenity-js': 'https://github.com/serenity-js/serenity-js',
   shedlock: 'https://github.com/lukas-krecan/ShedLock',
+  shiki: 'https://github.com/shikijs/shiki',
   'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
   'sitecore-jss': 'https://github.com/Sitecore/jss',
   skiasharp: 'https://github.com/mono/SkiaSharp',
