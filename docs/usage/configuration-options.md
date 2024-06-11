@@ -2116,7 +2116,9 @@ Also check out the `followTag` configuration option above if you wish Renovate t
 
 ## includePaths
 
-If you wish for Renovate to process only select paths in the repository, use `includePaths`.
+Renovate operates in the project root.
+
+If you wish for Renovate to process additional paths in the repository, use `includePaths`.
 
 Alternatively, if you need to _exclude_ certain paths in the repository then consider `ignorePaths` instead.
 If you are more interested in including only certain package managers (e.g. `npm`), then consider `enabledManagers` instead.
