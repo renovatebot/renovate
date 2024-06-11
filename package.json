@@ -241,7 +241,7 @@
     "source-map-support": "0.5.21",
     "toml-eslint-parser": "0.9.3",
     "traverse": "0.6.9",
-    "tslib": "2.6.2",
+    "tslib": "2.6.3",
     "upath": "2.0.1",
     "url-join": "4.0.1",
     "validate-npm-package-name": "5.0.1",
