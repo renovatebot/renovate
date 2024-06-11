@@ -47,7 +47,7 @@ describe('util/pretty-time', () => {
   });
 
   describe('satisfiesDateRange()', () => {
-    const t0 = DateTime.fromISO('2023-07-07T12:00:00Z');
+    const t0 = DateTime.fromISO('2023-07-07T12:00:00');
 
     beforeAll(() => {
       jest.useFakeTimers();
