@@ -153,11 +153,11 @@ importers:
         specifier: 10.3.0
         version: 10.3.0
       emojibase:
-        specifier: 15.3.0
-        version: 15.3.0
+        specifier: 15.3.1
+        version: 15.3.1
       emojibase-regex:
-        specifier: 15.3.0
-        version: 15.3.0
+        specifier: 15.3.1
+        version: 15.3.1
       extract-zip:
         specifier: 2.0.1
         version: 2.0.1
@@ -515,8 +515,8 @@ importers:
         specifier: 7.0.2
         version: 7.0.2
       emojibase-data:
-        specifier: 15.3.0
-        version: 15.3.0(emojibase@15.3.0)
+        specifier: 15.3.1
+        version: 15.3.1(emojibase@15.3.1)
       eslint:
         specifier: 8.57.0
         version: 8.57.0
@@ -2923,16 +2923,16 @@ packages:
   emoji-regex@9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
 
-  emojibase-data@15.3.0:
-    resolution: {integrity: sha512-cYsGq57W8wOd1CqQCjmtP1DpmlTVvJY+Um5UobWUQuTnqb8cO2cuqrxJxSIqxLcYZ3rtialT5kivoWigszdslg==}
+  emojibase-data@15.3.1:
+    resolution: {integrity: sha512-4dmrg4cUYnaBuT31zGtDEX07eZIku+ag9DLuAp3Dyxcpp0jdQGU7DKdqUeEXmDEMty9r3LXjNcagfwJ+TMJpUw==}
     peerDependencies:
       emojibase: '*'
 
-  emojibase-regex@15.3.0:
-    resolution: {integrity: sha512-EBz/292VBF9naBPBsGzkZUccgIv1xJibTXIINl8SezgVRnTCpKJx7MgZcR+UAd2RwjGkRJJZ/lhP7riOFZLicA==}
+  emojibase-regex@15.3.1:
+    resolution: {integrity: sha512-r+uRiuWvLdo2C8RAID7zhzNpwh3DjxM4hDP7pI096X/gjBCtBu0nH1iLXdLq4D5KWA5ZT/dJmexmUlovTef7wQ==}
 
-  emojibase@15.3.0:
-    resolution: {integrity: sha512-lFdQb14hoznwDh1xDoOFzkPdeeexmbuJdhUUjDaJZf/+jK+6Z3HkI5hWOemWfEdaMxtTujc1vNRx9DKtdtiOXA==}
+  emojibase@15.3.1:
+    resolution: {integrity: sha512-GNsjHnG2J3Ktg684Fs/vZR/6XpOSkZPMAv85EHrr6br2RN2cJNwdS4am/3YSK3y+/gOv2kmoK3GGdahXdMxg2g==}
 
   emojilib@2.4.0:
     resolution: {integrity: sha512-5U0rVMU5Y2n2+ykNLQqMoqklN9ICBT/KsvC1Gz6vqHbz2AXXGkG+Pm5rMWk/8Vjrr/mY9985Hi8DYzn1F09Nyw==}
@@ -9346,13 +9346,13 @@ snapshots:
 
   emoji-regex@9.2.2: {}
 
-  emojibase-data@15.3.0(emojibase@15.3.0):
+  emojibase-data@15.3.1(emojibase@15.3.1):
     dependencies:
-      emojibase: 15.3.0
+      emojibase: 15.3.1
 
-  emojibase-regex@15.3.0: {}
+  emojibase-regex@15.3.1: {}
 
-  emojibase@15.3.0: {}
+  emojibase@15.3.1: {}
 
   emojilib@2.4.0: {}
 
