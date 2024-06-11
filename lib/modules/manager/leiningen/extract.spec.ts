@@ -4,7 +4,6 @@ import { extractFromVectors, extractVariables, trimAtKey } from './extract';
 import { extractPackageFile } from '.';
 
 const leinProjectClj = Fixtures.get(`project.clj`);
-const leinParentProjectClj = Fixtures.get(`parent.clj`);
 
 describe('modules/manager/leiningen/extract', () => {
   it('trimAtKey', () => {
@@ -137,7 +136,7 @@ describe('modules/manager/leiningen/extract', () => {
       ],
     });
 
-    expect(extractPackageFile(leinParentProjectClj)).toMatchSnapshot({
+    expect(extractPackageFile(Fixtures.get(`parent.clj`))).toMatchSnapshot({
       deps: [
         {
           depName: 'org.clojure:core.async',
