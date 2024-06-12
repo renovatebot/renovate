@@ -6,6 +6,7 @@ import {
   EKSClient,
 } from '@aws-sdk/client-eks';
 import { mockClient } from 'aws-sdk-client-mock';
+import 'aws-sdk-client-mock-jest';
 import { getPkgReleases } from '../index';
 import { AwsEKSAddonDataSource } from '.';
 
@@ -57,6 +58,8 @@ const mockEmpty: DescribeAddonVersionsResponse = {
   addons: [],
 };
 
+const mockNull: DescribeAddonVersionsResponse = {};
+
 function mockDescribeAddonVersionsCommand(
   result: DescribeAddonVersionsResponse,
 ): void {
@@ -85,8 +88,11 @@ function mockDescribeAddonVersionsCommandWithRegion(
 
 describe('modules/datasource/aws-eks-addon/index', () => {
   describe('getPkgReleases()', () => {
-    it('without returned addons to be null', async () => {
-      mockDescribeAddonVersionsCommand(mockEmpty);
+    it.each([
+      ['null', mockNull],
+      ['empty', mockEmpty],
+    ])('returned %s addons to be null', async (_, mocked) => {
+      mockDescribeAddonVersionsCommand(mocked);
       const res = await getPkgReleases({
         datasource,
         packageName:
@@ -94,8 +100,11 @@ describe('modules/datasource/aws-eks-addon/index', () => {
       });
       expect(res).toBeNull();
       expect(eksMock.calls()).toHaveLength(1);
-      expect(eksMock.call(0).args).toMatchSnapshot();
-      expect(await eksMock.call(0).returnValue).toMatchSnapshot();
+      expect(eksMock).toHaveReceivedCommandWith(DescribeAddonVersionsCommand, {
+        kubernetesVersion: '1.30',
+        addonName: 'non-existing-addon',
+        maxResults: 1,
+      });
     });
 
     it('with matched addon to return all versions of the addon', async () => {
@@ -117,9 +126,15 @@ describe('modules/datasource/aws-eks-addon/index', () => {
           },
         ],
       });
-      expect(eksMock.calls()).toHaveLength(1);
-      expect(eksMock.calls()[0].args).toMatchSnapshot();
-      expect(await eksMock.call(0).returnValue).toMatchSnapshot();
+      expect(eksMock).toHaveReceivedCommandWith(DescribeAddonVersionsCommand, {
+        kubernetesVersion: '1.30',
+        addonName: 'vpc-cni',
+        maxResults: 1,
+      });
+      expect(await eksMock.call(0).returnValue).toEqual({
+        addons: [vpcCniAddonInfo],
+        nextToken: 'mars-east-1',
+      });
     });
   });
 });

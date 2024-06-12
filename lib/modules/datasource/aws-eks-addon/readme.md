@@ -60,18 +60,14 @@ Here's an example of using the custom manager to configure this datasource:
 {
   "packageRules": [
     {
-      "matchDatasources": [
-        "aws-eks-addon"
-      ],
+      "matchDatasources": ["aws-eks-addon"],
       "ignoreUnstable": false
     }
   ],
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [
-        ".*\\.tf"
-      ],
+      "fileMatch": [".*\\.tf"],
       "matchStrings": [
         ".*# renovate: eksAddonsFilter=(?<packageName>.*?)\n.*?[a-zA-Z0-9-_:]*[ ]*?[:|=][ ]*?[\"|']?(?<currentValue>[a-zA-Z0-9-_.]+)[\"|']?.*"
       ],
