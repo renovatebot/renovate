@@ -51,7 +51,6 @@ export function cacheKeyFromRegistryUrl(url: string): string {
   return url.split('/').slice(-2).join(':');
 }
 
-// TODO: Cache this output as well?
 /**
  * Extracts one or more files from the provided tarball in-memory.
  *
