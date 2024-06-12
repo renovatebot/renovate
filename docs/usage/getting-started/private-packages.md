@@ -409,12 +409,6 @@ npmRegistries:
     npmAuthToken: "${NPM_TOKEN}"
 ```
 
-or
-
-```yaml
-npmAuthToke: "${NPM_TOKEN:-}"
-```
-
 
 ### maven
 
