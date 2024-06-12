@@ -34,7 +34,7 @@ You can also set the following environment variables:
 
 - `OTEL_SERVICE_NAME`: to control the service name that will be emitted in traces, defaults to `renovate`
 - `OTEL_SERVICE_NAMESPACE`: to control the service namespace that will be emitted in traces, defaults to `renovatebot.com`
-- `OTEL_SERVICE_VERSION`: to control the service version that will be emitted in traces, defaults to using the pkg version
+- `OTEL_SERVICE_VERSION`: to control the service version that will be emitted in traces, defaults to using the release version of Renovate
 
 ## Debugging
 
