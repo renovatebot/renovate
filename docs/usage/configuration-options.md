@@ -3000,19 +3000,17 @@ Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostTyp
 }
 ```
 
-### customChangelogUrl
+### changelogUrl
 
-Use this field to set the source URL for a package, including overriding an existing one.
-Source URLs are necessary in order to look up changelogs.
-
+Use this field to set the changelog URL for a package, including overriding any existing one.
 Using this field we can specify the exact URL to fetch changelogs from.
 
-```json title="Setting the source URL for the dummy package"
+```json title="Setting the changelog URL for the dummy package"
 {
   "packageRules": [
     {
       "matchPackageNames": ["dummy"],
-      "customChangelogUrl": "https://github.com/org/dummy"
+      "changelogUrl": "https://github.com/org/dummy"
     }
   ]
 }
@@ -3111,6 +3109,42 @@ For example to replace the npm package `jade` with version `2.0.0` of the packag
   ]
 }
 ```
+
+### sourceUrl
+
+Use this field to set the source URL for a package, including overriding an existing one.
+Source URLs are necessary to link to the source of the package and in order to look up changelogs.
+
+```json title="Setting the source URL for the dummy package"
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["dummy"],
+      "sourceUrl": "https://github.com/org/dummy"
+    }
+  ]
+}
+```
+
+### sourceDirectory
+
+Use this field to set the directory in which the package is present at the source of the package.
+
+```json title="Setting the source directory for the kube-prometheus package from bitnami charts repo"
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["dummy"],
+      "sourceUrl": "https://github.com/bitnami/charts",
+      "sourceDirectory": "bitnami/kube-prometheus"
+    }
+  ]
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    `sourceDirectory` should be only be configured along with `sourceUrl`.
 
 ### prPriority
 

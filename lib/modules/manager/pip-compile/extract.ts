@@ -137,6 +137,10 @@ export async function extractAllPackageFiles(
       );
       if (packageFileContent) {
         if (packageFileContent.managerData?.requirementsFiles) {
+          packageFileContent.managerData.requirementsFiles =
+            packageFileContent.managerData.requirementsFiles.map(
+              (file: string) => upath.normalize(upath.join(compileDir, file)),
+            );
           for (const file of packageFileContent.managerData.requirementsFiles) {
             depsBetweenFiles.push({
               sourceFile: file,
@@ -146,6 +150,10 @@ export async function extractAllPackageFiles(
           }
         }
         if (packageFileContent.managerData?.constraintsFiles) {
+          packageFileContent.managerData.constraintsFiles =
+            packageFileContent.managerData.constraintsFiles.map(
+              (file: string) => upath.normalize(upath.join(compileDir, file)),
+            );
           for (const file of packageFileContent.managerData.constraintsFiles) {
             depsBetweenFiles.push({
               sourceFile: file,
