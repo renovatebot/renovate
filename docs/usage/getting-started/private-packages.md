@@ -399,13 +399,13 @@ npmRegistries:
     npmAuthToken: <Decrypted PAT Token>
 ```
 
-Thus, to allow for private registries to be used locally via the `NPM_TOKEN` environment variable AND with renovate, your local `.yarnrc.yml` should contain
+Thus, to allow for private registries to be used locally via the `NPM_TOKEN` environment variable _and_ with Renovate, your local `.yarnrc.yml` must contain:
+
+
 ```yaml
 npmRegistries:
    //npm.pkg.github.com/:
     npmAuthToken: "${NPM_TOKEN}"
-```
-which will be automatically updated by renovate via the hostRules. You *cannot* set a top level `npmAuthToken` in your `.yarnrc.yml` file, as it is not overriden.
 
 ### maven
 
