@@ -750,6 +750,7 @@ export const presets: Record<string, Preset> = {
       {
         description:
           'Replace `quay.io/kubecost1/kubecost-cost-model` with `ghcr.io/opencost/opencost`.',
+        matchCurrentVersion: '1.108.0',
         matchDatasources: ['docker'],
         matchPackageNames: ['quay.io/kubecost1/kubecost-cost-model'],
         replacementName: 'ghcr.io/opencost/opencost',
@@ -758,6 +759,7 @@ export const presets: Record<string, Preset> = {
       {
         description:
           'Replace `quay.io/kubecost1/opencost-ui` with `ghcr.io/opencost/opencost-ui`.',
+        matchCurrentVersion: '1.108.0',
         matchDatasources: ['docker'],
         matchPackageNames: ['quay.io/kubecost1/opencost-ui'],
         replacementName: 'ghcr.io/opencost/opencost-ui',
