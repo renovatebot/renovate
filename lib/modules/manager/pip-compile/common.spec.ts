@@ -342,5 +342,10 @@ describe('modules/manager/pip-compile/common', () => {
       expect(matchManager('file.in')).toBe('pip_requirements');
       expect(matchManager('another_file.in')).toBe('pip_requirements');
     });
+
+    it('matches pip_requirements any .txt file', () => {
+      expect(matchManager('file.txt')).toBe('pip_requirements');
+      expect(matchManager('another_file.txt')).toBe('pip_requirements');
+    });
   });
 });

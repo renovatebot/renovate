@@ -45,6 +45,7 @@ describe('modules/manager/asdf/extract', () => {
       const res = extractPackageFile(
         codeBlock`
 act 0.2.54
+actionlint 0.7.0
 adr-tools 3.0.0
 argocd 2.5.4
 asdf-plugin-manager 1.1.1
@@ -131,6 +132,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'nektos/act',
             depName: 'act',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.7.0',
+            datasource: 'github-releases',
+            packageName: 'rhysd/actionlint',
+            depName: 'actionlint',
             extractVersion: '^v(?<version>\\S+)',
           },
           {

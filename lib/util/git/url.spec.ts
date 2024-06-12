@@ -87,6 +87,16 @@ describe('util/git/url', () => {
       );
     });
 
+    it('returns bitbucket-server url', () => {
+      expect(getHttpUrl('http://git.mycompany.com/scm/proj/repo.git')).toBe(
+        'http://git.mycompany.com/scm/proj/repo.git',
+      );
+      hostRules.hostType.mockReturnValueOnce('bitbucket-server');
+      expect(getHttpUrl('ssh://git@git.mycompany.com:7999/proj/repo.git')).toBe(
+        'https://git.mycompany.com/scm/proj/repo.git',
+      );
+    });
+
     it('removes username/password from URL', () => {
       expect(getHttpUrl('https://user:password@foo.bar/someOrg/someRepo')).toBe(
         'https://foo.bar/someOrg/someRepo',

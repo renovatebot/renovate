@@ -16,7 +16,7 @@ Follow the rules below to increase the chance that your pull request gets merged
 
 We have multiple kinds of `group:` presets, with different rules.
 
-##### Rules for `group:monorepo` preset
+##### Rules for `group:monorepos` preset
 
 1. Only group dependencies that _must_ be updated together
 
@@ -27,7 +27,7 @@ We have multiple kinds of `group:` presets, with different rules.
 ##### Rules for `group:*` presets
 
 1. Finally, any other `group:*` presets can be added if they are beneficial to a wide number of users
-1. They don't need to be added to `group:recommended`, meaning that users will "opt in" to them one-by-one and _not_ get them automatically from `config:recommended`, which includes `group:monorepo` and `group:recommended`
+1. They don't need to be added to `group:recommended`, meaning that users will "opt in" to them one-by-one and _not_ get them automatically from `config:recommended`, which includes `group:monorepos` and `group:recommended`
 
 #### Rules for replacement presets
 
