@@ -22,7 +22,7 @@ export function updateDependency({
     // newName will be available for replacement
     const toPackageName = newName ?? fromPackageName;
     // istanbul ignore if: should never happen
-    if (!fromPackageName || !toPackageName || !upgrade.managerData) {
+    if (!fromPackageName || !upgrade.managerData) {
       return null;
     }
     const fromPackageNameNoVersion = getDepNameWithNoVersion(fromPackageName);
@@ -39,7 +39,7 @@ export function updateDependency({
       !lineToChange.includes('rethinkdb/rethinkdb-go.v5')
     ) {
       logger.debug(
-        { lineToChange, depName: toPackageName },
+        { lineToChange, depName: fromPackageName },
         "go.mod current line doesn't contain dependency",
       );
       return null;
