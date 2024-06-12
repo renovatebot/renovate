@@ -455,6 +455,16 @@ export class DockerDatasource extends Datasource {
     tag: string,
   ): Promise<Record<string, string> | undefined> {
     logger.debug(`getLabels(${registryHost}, ${dockerRepository}, ${tag})`);
+    // Skip Docker Hub image if RENOVATE_X_DISABLE_DOCKER_HUB_LABELS is set
+    if (
+      process.env.RENOVATE_X_DISABLE_DOCKER_HUB_LABELS &&
+      registryHost === 'https://index.docker.io'
+    ) {
+      logger.debug(
+        'Docker Hub image - skipping label lookup due to RENOVATE_X_DISABLE_DOCKER_HUB_LABELS',
+      );
+      return {};
+    }
     // Docker Hub library images don't have labels we need
     if (
       registryHost === 'https://index.docker.io' &&
