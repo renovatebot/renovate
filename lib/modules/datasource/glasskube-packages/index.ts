@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { joinUrlParts } from '../../../util/url';
+import * as glasskubeVersioning from '../../versioning/glasskube';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import {
@@ -13,6 +14,8 @@ export class GlasskubePackagesDatasource extends Datasource {
   static readonly id = 'glasskube-packages';
   static readonly defaultRegistryUrl =
     'https://packages.dl.glasskube.dev/packages';
+
+  override defaultVersioning = glasskubeVersioning.id;
 
   override defaultRegistryUrls = [
     GlasskubePackagesDatasource.defaultRegistryUrl,
