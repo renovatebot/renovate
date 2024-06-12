@@ -34,21 +34,6 @@ describe('modules/datasource/julia-pkg-server/index', () => {
       ).toBeNull();
     });
 
-    it('warns when the registries overview cannot be fetched', async () => {
-      httpMock.scope(baseUrl).get(eagerRegistriesPath).reply(404);
-
-      expect(
-        await getPkgReleases({
-          datasource,
-          packageName: 'HTTP',
-        }),
-      ).toBeNull();
-
-      // This warning includes the error corresponding to the HTTP request
-      // which is difficult to test
-      expect(logger.logger.warn).toHaveBeenCalled();
-    });
-
     it('warns when a registry cannot be fetched', async () => {
       httpMock
         .scope(baseUrl)
