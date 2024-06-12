@@ -754,7 +754,7 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['docker'],
         matchPackageNames: ['quay.io/kubecost1/kubecost-cost-model'],
         replacementName: 'ghcr.io/opencost/opencost',
-        replacementVersion: '1.110.0',
+        replacementVersion: '1.109.0',
       },
       {
         description:
@@ -763,7 +763,7 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['docker'],
         matchPackageNames: ['quay.io/kubecost1/opencost-ui'],
         replacementName: 'ghcr.io/opencost/opencost-ui',
-        replacementVersion: '1.110.0',
+        replacementVersion: '1.109.0',
       },
     ],
   },
