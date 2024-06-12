@@ -1,4 +1,5 @@
 import { quote } from 'shlex';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -8,13 +9,19 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
-import * as pipRequirements from '../pip_requirements';
-import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
+import { extractPackageFileFlags as extractRequirementsFileFlags } from '../pip_requirements/common';
+import type {
+  PackageFileContent,
+  UpdateArtifact,
+  UpdateArtifactsResult,
+  Upgrade,
+} from '../types';
 import {
   extractHeaderCommand,
   extractPythonVersion,
   getExecOptions,
-  getRegistryCredVarsFromPackageFile,
+  getRegistryCredVarsFromPackageFiles,
+  matchManager,
 } from './common';
 import type { PipCompileArgs } from './types';
 import { inferCommandExecDir } from './utils';
@@ -113,12 +120,25 @@ export async function updateArtifacts({
       );
       const cwd = inferCommandExecDir(outputFileName, compileArgs.outputFile);
       const upgradePackages = updatedDeps.filter((dep) => dep.isLockfileUpdate);
-      const packageFile = pipRequirements.extractPackageFile(newInputContent);
+      const packageFiles: PackageFileContent[] = [];
+      for (const name of compileArgs.sourceFiles) {
+        const manager = matchManager(name);
+        if (manager === 'pip_requirements') {
+          const path = upath.join(cwd, name);
+          const content = await readLocalFile(path, 'utf8');
+          if (content) {
+            const packageFile = extractRequirementsFileFlags(content);
+            if (packageFile) {
+              packageFiles.push(packageFile);
+            }
+          }
+        }
+      }
       const cmd = constructPipCompileCmd(compileArgs, upgradePackages);
       const execOptions = await getExecOptions(
         config,
         cwd,
-        getRegistryCredVarsFromPackageFile(packageFile),
+        getRegistryCredVarsFromPackageFiles(packageFiles),
         pythonVersion,
       );
       logger.trace({ cwd, cmd }, 'pip-compile command');

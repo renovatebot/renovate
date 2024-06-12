@@ -1,4 +1,4 @@
-import { presets } from './monorepo';
+import { presets } from './monorepos';
 
 const todo = new Set([
   'arcus.background-jobs',
@@ -17,7 +17,7 @@ const todo = new Set([
   'vaadinWebComponents',
 ]);
 
-describe('config/presets/internal/monorepo', () => {
+describe('config/presets/internal/monorepos', () => {
   it('presets should have right name', () => {
     for (const name of Object.keys(presets).filter((name) => !todo.has(name))) {
       expect(name).toMatch(/^[a-z0-9-]+$/);

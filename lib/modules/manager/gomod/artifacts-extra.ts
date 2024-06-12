@@ -110,6 +110,7 @@ export function getExtraDepsNotice(
 
   noticeLines.push('\n');
   noticeLines.push('Details:');
+  noticeLines.push('\n');
   noticeLines.push(extraDepsTable(extraDeps));
 
   return noticeLines.join('\n');
