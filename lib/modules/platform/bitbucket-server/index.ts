@@ -1,6 +1,7 @@
 import { setTimeout } from 'timers/promises';
 import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
+import { GlobalConfig } from '../../../config/global';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -188,7 +189,6 @@ export async function getJsonFile(
 export async function initRepo({
   repository,
   cloneSubmodules,
-  ignorePrAuthor,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${JSON.stringify({ repository }, null, 2)}")`);
@@ -205,7 +205,6 @@ export async function initRepo({
     repository,
     prVersions: new Map<number, number>(),
     username: opts.username,
-    ignorePrAuthor,
   } as any;
 
   try {
@@ -335,7 +334,10 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
     const searchParams: Record<string, string> = {
       state: 'ALL',
     };
-    if (!config.ignorePrAuthor && config.username !== undefined) {
+    if (
+      !GlobalConfig.get('ignorePrAuthor', false) &&
+      config.username !== undefined
+    ) {
       searchParams['role.1'] = 'AUTHOR';
       searchParams['username.1'] = config.username;
     }

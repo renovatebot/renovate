@@ -14,7 +14,6 @@ export interface Config {
   mergeMethod: string;
   owner: string;
   repository: string;
-  ignorePrAuthor: boolean;
   is_private: boolean;
 }
 

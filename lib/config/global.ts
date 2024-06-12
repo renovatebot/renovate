@@ -37,6 +37,7 @@ export class GlobalConfig {
     'autodiscoverRepoSort',
     'autodiscoverRepoOrder',
     'userAgent',
+    'ignorePrAuthor',
   ];
 
   private static config: RepoGlobalConfig = {};
