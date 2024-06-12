@@ -21,12 +21,13 @@ describe('modules/datasource/glasskube-packages/index', () => {
       .scope(versionsUrl.origin)
       .get(versionsUrl.pathname)
       .reply(500, 'internal server error');
-    const response = await getPkgReleases({
-      datasource: GlasskubePackagesDatasource.id,
-      packageName: 'cloudnative-pg',
-      registryUrls: [GlasskubePackagesDatasource.defaultRegistryUrl],
-    });
-    expect(response).toBeNull();
+    await expect(
+      getPkgReleases({
+        datasource: GlasskubePackagesDatasource.id,
+        packageName: 'cloudnative-pg',
+        registryUrls: [GlasskubePackagesDatasource.defaultRegistryUrl],
+      }),
+    ).rejects.toThrow();
   });
 
   it('should handle empty response on versions request', async () => {
@@ -48,24 +49,13 @@ describe('modules/datasource/glasskube-packages/index', () => {
       .scope(packageManifestUrl.origin)
       .get(packageManifestUrl.pathname)
       .reply(500, 'internal server error');
-    const response = await getPkgReleases({
-      datasource: GlasskubePackagesDatasource.id,
-      packageName: 'cloudnative-pg',
-      registryUrls: [GlasskubePackagesDatasource.defaultRegistryUrl],
-    });
-    expect(response).toEqual({
-      registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
-      releases: [
-        {
-          version: 'v1.22.0+1',
-          registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
-        },
-        {
-          version: 'v1.23.1+1',
-          registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
-        },
-      ],
-    });
+    await expect(
+      getPkgReleases({
+        datasource: GlasskubePackagesDatasource.id,
+        packageName: 'cloudnative-pg',
+        registryUrls: [GlasskubePackagesDatasource.defaultRegistryUrl],
+      }),
+    ).rejects.toThrow();
   });
 
   it('should handle empty response on manifest request', async () => {
@@ -82,19 +72,7 @@ describe('modules/datasource/glasskube-packages/index', () => {
       packageName: 'cloudnative-pg',
       registryUrls: [GlasskubePackagesDatasource.defaultRegistryUrl],
     });
-    expect(response).toEqual({
-      registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
-      releases: [
-        {
-          version: 'v1.22.0+1',
-          registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
-        },
-        {
-          version: 'v1.23.1+1',
-          registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
-        },
-      ],
-    });
+    expect(response).toBeNull();
   });
 
   it('should handle package manifest without references', async () => {

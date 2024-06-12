@@ -1,4 +1,3 @@
-import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { joinUrlParts } from '../../../util/url';
 import * as glasskubeVersioning from '../../versioning/glasskube';
@@ -41,12 +40,8 @@ export class GlasskubePackagesDatasource extends Datasource {
         joinUrlParts(registryUrl!, packageName, 'versions.yaml'),
       );
       versions = GlasskubePackageVersionsYaml.parse(response.body);
-    } catch (error) {
-      logger.error(
-        { error, registryUrl },
-        'Failed to request releases from Glasskube packages datasource',
-      );
-      return null;
+    } catch (err) {
+      this.handleGenericErrors(err);
     }
 
     result.releases = versions.versions.map((it) => ({
@@ -71,11 +66,8 @@ export class GlasskubePackagesDatasource extends Datasource {
           result.homepage = ref.url;
         }
       }
-    } catch (error) {
-      logger.error(
-        { error, registryUrl },
-        'Failed to request latest release from Glasskube packages datasource',
-      );
+    } catch (err) {
+      this.handleGenericErrors(err);
     }
 
     return result;
