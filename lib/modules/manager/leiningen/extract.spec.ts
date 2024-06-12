@@ -145,7 +145,7 @@ describe('modules/manager/leiningen/extract', () => {
       ],
     });
 
-    expect(extractPackageFile(Fixtures.get(`parent.clj`))).toMatchSnapshot({
+    expect(extractPackageFile(Fixtures.get(`parent.clj`))).toMatchObject({
       deps: [
         {
           depName: 'org.clojure:core.async',
