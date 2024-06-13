@@ -55,7 +55,6 @@ export async function updateArtifacts({
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
-
     }
 
     await exec(cmd, execOptions);
