@@ -179,7 +179,7 @@ export async function writeExistingFiles(
               (packageName === `node_modules/${depName}` ||
                 packageName.startsWith(`node_modules/${depName}/`))
             ) {
-              logger.trace({ packageName }, 'Massaging out package name');
+              logger.trace({ packageName }, 'Messaging out package name');
               lockFileChanged = true;
               delete npmLockParsed.packages[packageName];
             }
