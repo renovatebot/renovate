@@ -9,10 +9,9 @@ import { SbtPackageDatasource } from '../sbt-package';
 import { getLatestVersion, parseIndexDir } from '../sbt-package/util';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
-export const SBT_PLUGINS_REPO =
-  'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases';
+export const SBT_MVN_REPO = 'https://repo1.maven.org/maven2';
 
-export const defaultRegistryUrls = [SBT_PLUGINS_REPO];
+export const defaultRegistryUrls = [SBT_MVN_REPO];
 
 export class SbtPluginDatasource extends SbtPackageDatasource {
   static override readonly id = 'sbt-plugin';
