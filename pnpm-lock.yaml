@@ -48,8 +48,8 @@ importers:
         specifier: 0.52.0
         version: 0.52.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-bunyan':
-        specifier: 0.38.0
-        version: 0.38.0(@opentelemetry/api@1.9.0)
+        specifier: 0.39.0
+        version: 0.39.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-http':
         specifier: 0.52.0
         version: 0.52.0(@opentelemetry/api@1.9.0)
@@ -1297,10 +1297,6 @@ packages:
       typescript:
         optional: true
 
-  '@opentelemetry/api-logs@0.51.1':
-    resolution: {integrity: sha512-E3skn949Pk1z2XtXu/lxf6QAZpawuTM/IUEXcAzpiUkTd73Hmvw26FiN3cJuTmkpM5hZzHwkomVdtrh/n/zzwA==}
-    engines: {node: '>=14'}
-
   '@opentelemetry/api-logs@0.52.0':
     resolution: {integrity: sha512-HxjD7xH9iAE4OyhNaaSec65i1H6QZYBWSwWkowFfsc5YAcDvJG30/J1sRKXEQqdmUcKTXEAnA66UciqZha/4+Q==}
     engines: {node: '>=14'}
@@ -1327,20 +1323,14 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
 
-  '@opentelemetry/instrumentation-bunyan@0.38.0':
-    resolution: {integrity: sha512-ThNcgTE22W7PKzTzz5qfGxb5Gf7rA3EORousYo2nJWHHcF6gqiMNv2+GXY3MdpjLBr8IgCfhtvbQdD6rlIPUpA==}
+  '@opentelemetry/instrumentation-bunyan@0.39.0':
+    resolution: {integrity: sha512-AQ845Wh5Yhd7S0argkCd1vrThNo4q/p6LJePC4OlFifPa9i5O2MzfLNh4mo8YWa0rYvcc+jbhodkGNa+1YJk/A==}
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
 
   '@opentelemetry/instrumentation-http@0.52.0':
     resolution: {integrity: sha512-E6ywZuxTa4LnVXZGwL1oj3e2Eog1yIaNqa8KjKXoGkDNKte9/SjQnePXOmhQYI0A9nf0UyFbP9aKd+yHrkJXUA==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': ^1.3.0
-
-  '@opentelemetry/instrumentation@0.51.1':
-    resolution: {integrity: sha512-JIrvhpgqY6437QIqToyozrUG1h5UhwHkaGK/WAX+fkrpyPtc+RO5FkRtUd9BH0MibabHHvqsnBGKfKVijbmp8w==}
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
@@ -3643,9 +3633,6 @@ packages:
   import-from-esm@1.3.4:
     resolution: {integrity: sha512-7EyUlPFC0HOlBDpUFGfYstsU7XHxZJKAAMzCT8wZ0hMW7b+hG51LIKTDcsgtz8Pu6YC0HqRVbX+rVUtsGMUKvg==}
     engines: {node: '>=16.20'}
-
-  import-in-the-middle@1.7.4:
-    resolution: {integrity: sha512-Lk+qzWmiQuRPPulGQeK5qq0v32k2bHnWrRPFgqyvhw7Kkov5L6MOLOIU3pcWeujc9W4q54Cp3Q2WV16eQkc7Bg==}
 
   import-in-the-middle@1.8.0:
     resolution: {integrity: sha512-/xQjze8szLNnJ5rvHSzn+dcVXqCAU6Plbk4P24U/jwPmg1wy7IIp9OjKIO5tYue8GSPhDpPDiApQjvBUmWwhsQ==}
@@ -7457,10 +7444,6 @@ snapshots:
     optionalDependencies:
       typescript: 5.4.5
 
-  '@opentelemetry/api-logs@0.51.1':
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-
   '@opentelemetry/api-logs@0.52.0':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -7485,11 +7468,11 @@ snapshots:
       '@opentelemetry/resources': 1.25.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 1.25.0(@opentelemetry/api@1.9.0)
 
-  '@opentelemetry/instrumentation-bunyan@0.38.0(@opentelemetry/api@1.9.0)':
+  '@opentelemetry/instrumentation-bunyan@0.39.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/api-logs': 0.51.1
-      '@opentelemetry/instrumentation': 0.51.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/api-logs': 0.52.0
+      '@opentelemetry/instrumentation': 0.52.0(@opentelemetry/api@1.9.0)
       '@types/bunyan': 1.8.9
     transitivePeerDependencies:
       - supports-color
@@ -7501,18 +7484,6 @@ snapshots:
       '@opentelemetry/instrumentation': 0.52.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.25.0
       semver: 7.6.2
-    transitivePeerDependencies:
-      - supports-color
-
-  '@opentelemetry/instrumentation@0.51.1(@opentelemetry/api@1.9.0)':
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-      '@opentelemetry/api-logs': 0.51.1
-      '@types/shimmer': 1.0.5
-      import-in-the-middle: 1.7.4
-      require-in-the-middle: 7.3.0
-      semver: 7.6.2
-      shimmer: 1.2.1
     transitivePeerDependencies:
       - supports-color
 
@@ -10302,13 +10273,6 @@ snapshots:
       import-meta-resolve: 4.1.0
     transitivePeerDependencies:
       - supports-color
-
-  import-in-the-middle@1.7.4:
-    dependencies:
-      acorn: 8.11.3
-      acorn-import-attributes: 1.9.5(acorn@8.11.3)
-      cjs-module-lexer: 1.3.1
-      module-details-from-path: 1.0.3
 
   import-in-the-middle@1.8.0:
     dependencies:
