@@ -972,8 +972,8 @@ sub   rsa4096 2021-09-10 [E]
 <!-- prettier-ignore -->
 
 !!! note
-    If you use GnuPG `v2.4` (or newer) to generate the key, then you must disable `AEAD` preferences.
-    This is needed to allow  Renovate to decrypt the encrypted values.
+If you use GnuPG `v2.4` (or newer) to generate the key, then you must disable `AEAD` preferences.
+This is needed to allow Renovate to decrypt the encrypted values.
 
 <details><summary>key edit log</summary>
 
