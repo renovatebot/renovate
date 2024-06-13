@@ -463,7 +463,8 @@ export async function processBranch(
       );
       config.reuseExistingBranch = false;
     } else {
-      config = { ...config, ...(await shouldReuseExistingBranch(config)) };
+      const parentConfig = await shouldReuseExistingBranch(config);
+      config = { ...config, ...parentConfig };
     }
     // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
