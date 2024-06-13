@@ -43,12 +43,33 @@ export async function shouldReuseExistingBranch(
     return result;
   }
   logger.debug(`Branch already exists`);
+  if (config.rebaseWhen === 'auto') {
+    if (config.automerge === true) {
+      logger.debug(
+        'Converting rebaseWhen=auto to rebaseWhen=behind-base-branch because automerge=true',
+      );
+      config.rebaseWhen = 'behind-base-branch';
+    } else if (await platform.getBranchForceRebase?.(config.baseBranch)) {
+      logger.debug(
+        'Converting rebaseWhen=auto to rebaseWhen=behind-base-branch because platform is configured to require up-to-date branches',
+      );
+      config.rebaseWhen = 'behind-base-branch';
+    } else if (await shouldKeepUpdated(config, baseBranch, branchName)) {
+      logger.debug(
+        'Converting rebaseWhen=auto to rebaseWhen=behind-base-branch because keep-updated label is set',
+      );
+      config.rebaseWhen = 'behind-base-branch';
+    }
+  }
+  if (config.rebaseWhen === 'auto') {
+    logger.debug(
+      'Converting rebaseWhen=auto to rebaseWhen=conflicted because no rule for converting to rebaseWhen=behind-base-branch applies',
+    );
+    config.rebaseWhen = 'conflicted';
+  }
   if (
     config.rebaseWhen === 'behind-base-branch' ||
-    (await shouldKeepUpdated(config, baseBranch, branchName)) ||
-    (config.rebaseWhen === 'auto' &&
-      (config.automerge === true ||
-        (await platform.getBranchForceRebase?.(config.baseBranch))))
+    (await shouldKeepUpdated(config, baseBranch, branchName))
   ) {
     if (await scm.isBranchBehindBase(branchName, baseBranch)) {
       logger.debug(`Branch is behind base branch and needs rebasing`);

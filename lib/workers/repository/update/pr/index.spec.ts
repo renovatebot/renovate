@@ -79,7 +79,7 @@ describe('workers/repository/update/pr/index', () => {
 
     beforeEach(() => {
       GlobalConfig.reset();
-      prBody.getPrBody.mockResolvedValue(body);
+      prBody.getPrBody.mockReturnValue(body);
     });
 
     describe('Create', () => {
@@ -287,7 +287,7 @@ describe('workers/repository/update/pr/index', () => {
           labels: ['old_label'],
         };
         platform.getBranchPr.mockResolvedValueOnce(existingPr);
-        prBody.getPrBody.mockResolvedValueOnce(
+        prBody.getPrBody.mockReturnValueOnce(
           `\n<!--renovate-debug:${toBase64(
             JSON.stringify({ ...prDebugData, labels: ['new_label'] }),
           )}-->\n Some body`,

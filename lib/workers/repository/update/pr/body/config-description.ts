@@ -1,10 +1,7 @@
-import { platform } from '../../../../../modules/platform';
 import { emojify } from '../../../../../util/emoji';
 import type { BranchConfig } from '../../../../types';
 
-export async function getPrConfigDescription(
-  config: BranchConfig,
-): Promise<string> {
+export function getPrConfigDescription(config: BranchConfig): string {
   let prBody = `\n\n---\n\n### Configuration\n\n`;
   prBody += emojify(`:date: **Schedule**: `);
   prBody +=
@@ -26,16 +23,9 @@ export async function getPrConfigDescription(
   }
   prBody += '\n\n';
   prBody += emojify(':recycle: **Rebasing**: ');
-  const rebaseWhen =
-    config.rebaseWhen === 'auto'
-      ? config.automerge === true ||
-        (await platform.getBranchForceRebase?.(config.baseBranch))
-        ? 'behind-base-branch'
-        : 'conflicted'
-      : config.rebaseWhen;
-  if (rebaseWhen === 'behind-base-branch') {
+  if (config.rebaseWhen === 'behind-base-branch') {
     prBody += 'Whenever PR is behind base branch';
-  } else if (rebaseWhen === 'never' || config.stopUpdating) {
+  } else if (config.rebaseWhen === 'never' || config.stopUpdating) {
     prBody += 'Never';
   } else {
     prBody += 'Whenever PR becomes conflicted';
