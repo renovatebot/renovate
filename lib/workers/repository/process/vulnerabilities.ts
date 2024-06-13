@@ -409,7 +409,7 @@ export class Vulnerabilities {
       this.isVersionGt(version, depVersion, versioningApi),
     );
     if (fixedVersion) {
-      return ecosystem === 'PyPI' ? `==${fixedVersion}` : fixedVersion;
+      return ecosystem === 'PyPI' ? `>=${fixedVersion}` : fixedVersion;
     }
 
     lastAffectedVersions.sort((a, b) => versioningApi.sortVersions(a, b));

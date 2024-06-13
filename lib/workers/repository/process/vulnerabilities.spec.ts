@@ -104,13 +104,13 @@ describe('workers/repository/process/vulnerabilities', () => {
         {
           packageName: 'django',
           depVersion: '3.2',
-          fixedVersion: '==3.3.8',
+          fixedVersion: '>=3.3.8',
           datasource: 'pypi',
         },
         {
           packageName: 'django',
           depVersion: '3.2',
-          fixedVersion: '==3.2.16',
+          fixedVersion: '>=3.2.16',
           datasource: 'pypi',
         },
       ]);
@@ -581,7 +581,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchDatasources: ['pypi'],
           matchPackageNames: ['django'],
           matchCurrentVersion: '3.2',
-          allowedVersions: '==3.2.16',
+          allowedVersions: '>=3.2.16',
           isVulnerabilityAlert: true,
         },
       ]);
@@ -643,14 +643,14 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchDatasources: ['pypi'],
           matchPackageNames: ['django'],
           matchCurrentVersion: '3.2',
-          allowedVersions: '==3.2.16',
+          allowedVersions: '>=3.2.16',
           isVulnerabilityAlert: true,
         },
         {
           matchDatasources: ['pypi'],
           matchPackageNames: ['django'],
           matchCurrentVersion: '3.2',
-          allowedVersions: '==3.3.8',
+          allowedVersions: '>=3.3.8',
           isVulnerabilityAlert: true,
         },
       ]);
@@ -1065,7 +1065,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchDatasources: ['pypi'],
           matchPackageNames: ['django-mfa2'],
           matchCurrentVersion: '2.5.0',
-          allowedVersions: '==2.5.1',
+          allowedVersions: '>=2.5.1',
           isVulnerabilityAlert: true,
           prBodyNotes: [
             '\n\n' +
