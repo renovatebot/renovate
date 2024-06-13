@@ -2703,7 +2703,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('skips docker hub labels', async () => {
-      process.env.RENOVATE_X_DISABLE_DOCKER_HUB_LABELS = 'true';
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
 
       httpMock.scope('https://index.docker.io/v2');
 
@@ -2717,7 +2717,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('does not skip non docker hub registry labels', async () => {
-      process.env.RENOVATE_X_DISABLE_DOCKER_HUB_LABELS = 'true';
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
 
       httpMock
         .scope('https://ghcr.io/v2')

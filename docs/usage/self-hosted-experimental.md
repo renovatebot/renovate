@@ -39,7 +39,7 @@ You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE`
 
 The process that runs Renovate must have the correct permissions to delete the config file.
 
-## `RENOVATE_X_DISABLE_DOCKER_HUB_LABELS`
+## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
 
 If set to any value, Renovate will skip attempting to get release labels (e.g. gitRef, sourceUrl) from manifest annotations for `https://index.docker.io`.
 
