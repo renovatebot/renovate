@@ -252,7 +252,7 @@
   "optionalDependencies": {
     "better-sqlite3": "9.6.0",
     "openpgp": "5.11.1",
-    "re2": "1.21.1"
+    "re2": "1.21.2"
   },
   "devDependencies": {
     "@hyrious/marshal": "0.3.3",
