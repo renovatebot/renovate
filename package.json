@@ -154,7 +154,7 @@
     "@opentelemetry/context-async-hooks": "1.25.0",
     "@opentelemetry/exporter-trace-otlp-http": "0.52.0",
     "@opentelemetry/instrumentation": "0.52.0",
-    "@opentelemetry/instrumentation-bunyan": "0.38.0",
+    "@opentelemetry/instrumentation-bunyan": "0.39.0",
     "@opentelemetry/instrumentation-http": "0.52.0",
     "@opentelemetry/resources": "1.25.0",
     "@opentelemetry/sdk-trace-base": "1.25.0",
@@ -252,7 +252,7 @@
   "optionalDependencies": {
     "better-sqlite3": "9.6.0",
     "openpgp": "5.11.1",
-    "re2": "1.21.1"
+    "re2": "1.20.12"
   },
   "devDependencies": {
     "@hyrious/marshal": "0.3.3",
