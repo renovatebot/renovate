@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { logger } from '../../../../test/util';
+import { createRegistryTarballFromFixture } from './test';
 import { JuliaPkgServerDatasource } from '.';
 
 const baseUrl = 'https://pkg.julialang.org';
@@ -12,12 +12,13 @@ const generalRegistryUUID = '23338594-aafe-5451-b93e-139f81909106';
 const generalRegistryPath = `/registry/${generalRegistryUUID}/${eagerGeneralRegistryState}`;
 const eagerRegistriesPath = '/registries.eager';
 const eagerRegistriesResponse = `${generalRegistryPath}\n`;
-const generalRegistryResponse = Fixtures.getBinary('General.tar');
 
 describe('modules/datasource/julia-pkg-server/index', () => {
   describe('getReleases', () => {
     it('returns null for non-existent packages', async () => {
       const packageName = 'non_existent_package';
+      const generalRegistryResponse =
+        await createRegistryTarballFromFixture('General');
 
       httpMock
         .scope(baseUrl)
@@ -73,6 +74,8 @@ describe('modules/datasource/julia-pkg-server/index', () => {
         ],
         registryUrl: `${baseUrl}/registry/${generalRegistryUUID}/${eagerGeneralRegistryState}`,
       };
+      const generalRegistryResponse =
+        await createRegistryTarballFromFixture('General');
 
       httpMock
         .scope(baseUrl)
@@ -103,6 +106,8 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           ],
           registryUrl: `${customPkgServerBaseUrl}/registry/${generalRegistryUUID}/${eagerGeneralRegistryState}`,
         };
+        const generalRegistryResponse =
+          await createRegistryTarballFromFixture('General');
 
         httpMock
           .scope(customPkgServerBaseUrl)
@@ -135,7 +140,10 @@ describe('modules/datasource/julia-pkg-server/index', () => {
       it('merges multiple registries', async () => {
         const customPkgServerBaseUrl = 'https://example.com';
         // Contains an additional version (v0.3.0) for the HTTP package
-        const extraHTTPRegistryResponse = Fixtures.getBinary('ExtraHTTP.tar');
+        const extraHTTPRegistryResponse =
+          await createRegistryTarballFromFixture('ExtraHTTP');
+        const generalRegistryResponse =
+          await createRegistryTarballFromFixture('General');
 
         httpMock
           .scope(baseUrl)

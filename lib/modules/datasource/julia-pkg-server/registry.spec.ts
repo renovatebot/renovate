@@ -1,4 +1,3 @@
-import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { logger } from '../../../../test/util';
 import { Http } from '../../../util/http';
@@ -8,6 +7,7 @@ import {
   registryPathForPackage,
   retrieveRegistryState,
 } from './registry';
+import { createRegistryTarballFromFixture } from './test';
 import { JuliaPkgServerDatasource } from '.';
 
 const datasource = JuliaPkgServerDatasource.id;
@@ -20,9 +20,10 @@ const state = '1234567890abcdef1234567890abcdef12345678';
 describe('modules/datasource/julia-pkg-server/registry', () => {
   describe('extractFilesFromTarball', () => {
     const existingFile = 'H/HTTP/Versions.toml';
-    const tarball = Fixtures.getBinary('General.tar');
 
     it('extracts requested files if available', async () => {
+      const tarball = await createRegistryTarballFromFixture('General');
+
       const fileContents = await extractFilesFromTarball(tarball, [
         existingFile,
       ]);
@@ -36,12 +37,15 @@ describe('modules/datasource/julia-pkg-server/registry', () => {
     });
 
     it('returns null if no files are requested for extraction', async () => {
+      const tarball = await createRegistryTarballFromFixture('General');
+
       expect(await extractFilesFromTarball(tarball, [])).toBeNull();
     });
 
     it('returns null if not all files could be extracted', async () => {
       const nonExistentFile = 'does/not/exist';
       const files = [existingFile, nonExistentFile];
+      const tarball = await createRegistryTarballFromFixture('General');
 
       expect(await extractFilesFromTarball(tarball, files)).toBeNull();
     });
