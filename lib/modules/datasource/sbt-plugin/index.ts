@@ -13,7 +13,7 @@ export const SBT_MVN_REPO = 'https://repo1.maven.org/maven2';
 export const SBT_PLUGINS_REPO =
   'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases';
 
-export const defaultRegistryUrls = [SBT_MVN_REPO];
+export const defaultRegistryUrls = [SBT_MVN_REPO, SBT_PLUGINS_REPO];
 
 export class SbtPluginDatasource extends SbtPackageDatasource {
   static override readonly id = 'sbt-plugin';
