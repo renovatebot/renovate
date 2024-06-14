@@ -206,7 +206,7 @@ export async function retrieveRegistryState(
     .transform(({ body }) => {
       const registryPaths = body.split('\n').slice(0, -1);
 
-      const registryStates: { [key: string]: string } = {};
+      const registryStates: Record<string, string> = {};
       for (const registryPath of registryPaths) {
         const [uuid, state] = registryPath.split('/').slice(-2);
         registryStates[uuid] = state;
