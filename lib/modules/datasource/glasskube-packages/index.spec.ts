@@ -4,12 +4,11 @@ import * as httpMock from '../../../../test/http-mock';
 import { GlasskubePackagesDatasource } from '.';
 
 describe('modules/datasource/glasskube-packages/index', () => {
-  const versionsUrl = new URL(
-    `${GlasskubePackagesDatasource.defaultRegistryUrl}/cloudnative-pg/versions.yaml`,
-  );
+  const registryUrl = 'https://packages.test.example/packages';
+  const versionsUrl = new URL(`${registryUrl}/cloudnative-pg/versions.yaml`);
   const versionsYaml = Fixtures.get('versions.yaml');
   const packageManifestUrl = new URL(
-    `${GlasskubePackagesDatasource.defaultRegistryUrl}/cloudnative-pg/v1.23.1+1/package.yaml`,
+    `${registryUrl}/cloudnative-pg/v1.23.1+1/package.yaml`,
   );
   const packageManifestYaml = Fixtures.get('package.yaml');
   const packageManifestNoReferencesYaml = Fixtures.get(
@@ -25,7 +24,7 @@ describe('modules/datasource/glasskube-packages/index', () => {
       getPkgReleases({
         datasource: GlasskubePackagesDatasource.id,
         packageName: 'cloudnative-pg',
-        registryUrls: [GlasskubePackagesDatasource.defaultRegistryUrl],
+        registryUrls: [registryUrl],
       }),
     ).rejects.toThrow();
   });
@@ -35,7 +34,7 @@ describe('modules/datasource/glasskube-packages/index', () => {
     const response = await getPkgReleases({
       datasource: GlasskubePackagesDatasource.id,
       packageName: 'cloudnative-pg',
-      registryUrls: [GlasskubePackagesDatasource.defaultRegistryUrl],
+      registryUrls: [registryUrl],
     });
     expect(response).toBeNull();
   });
@@ -53,7 +52,7 @@ describe('modules/datasource/glasskube-packages/index', () => {
       getPkgReleases({
         datasource: GlasskubePackagesDatasource.id,
         packageName: 'cloudnative-pg',
-        registryUrls: [GlasskubePackagesDatasource.defaultRegistryUrl],
+        registryUrls: [registryUrl],
       }),
     ).rejects.toThrow();
   });
@@ -70,7 +69,7 @@ describe('modules/datasource/glasskube-packages/index', () => {
     const response = await getPkgReleases({
       datasource: GlasskubePackagesDatasource.id,
       packageName: 'cloudnative-pg',
-      registryUrls: [GlasskubePackagesDatasource.defaultRegistryUrl],
+      registryUrls: [registryUrl],
     });
     expect(response).toBeNull();
   });
@@ -87,18 +86,18 @@ describe('modules/datasource/glasskube-packages/index', () => {
     const response = await getPkgReleases({
       datasource: GlasskubePackagesDatasource.id,
       packageName: 'cloudnative-pg',
-      registryUrls: [GlasskubePackagesDatasource.defaultRegistryUrl],
+      registryUrls: [registryUrl],
     });
     expect(response).toEqual({
-      registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
+      registryUrl: registryUrl,
       releases: [
         {
           version: 'v1.22.0+1',
-          registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
+          registryUrl: registryUrl,
         },
         {
           version: 'v1.23.1+1',
-          registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
+          registryUrl: registryUrl,
         },
       ],
     });
@@ -116,20 +115,20 @@ describe('modules/datasource/glasskube-packages/index', () => {
     const response = await getPkgReleases({
       datasource: GlasskubePackagesDatasource.id,
       packageName: 'cloudnative-pg',
-      registryUrls: [GlasskubePackagesDatasource.defaultRegistryUrl],
+      registryUrls: [registryUrl],
     });
     expect(response).toEqual({
       sourceUrl: 'https://github.com/cloudnative-pg/cloudnative-pg',
       homepage: 'https://cloudnative-pg.io/',
-      registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
+      registryUrl: registryUrl,
       releases: [
         {
           version: 'v1.22.0+1',
-          registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
+          registryUrl: registryUrl,
         },
         {
           version: 'v1.23.1+1',
-          registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
+          registryUrl: registryUrl,
         },
       ],
     });
