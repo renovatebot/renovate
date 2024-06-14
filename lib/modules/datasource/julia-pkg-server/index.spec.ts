@@ -122,6 +122,16 @@ describe('modules/datasource/julia-pkg-server/index', () => {
         expect(result).toEqual(expectedResult);
       });
 
+      it('returns null for wrong registry URLs', async () => {
+        expect(
+          await getPkgReleases({
+            datasource,
+            packageName: 'HTTP',
+            registryUrls: ['https://foo.bar/not-a-registry-path'],
+          }),
+        ).toBeNull();
+      });
+
       it('merges multiple registries', async () => {
         const customPkgServerBaseUrl = 'https://example.com';
         // Contains an additional version (v0.3.0) for the HTTP package
