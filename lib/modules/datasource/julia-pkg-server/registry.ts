@@ -34,7 +34,7 @@ interface JuliaPkgServerRegistry {
  * datasource. Therefore that section is marked optional and should be ensured
  * to be filled before further processing.
  */
-const PKG_SERVER_REGISTRY_URL_FORMAT = new RegExp(
+const PKG_SERVER_REGISTRY_URL_FORMAT = regEx(
   '^(?<pkgServer>.+)/registry/(?<uuid>\\p{Hex_Digit}{8}(-\\p{Hex_Digit}{4}){3}-\\p{Hex_Digit}{12})(/(?<state>\\p{Hex_Digit}{40}))?/?$',
   'u',
 );
