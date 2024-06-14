@@ -196,16 +196,12 @@ function depHandler(ctx: Ctx): Ctx {
   delete ctx.variableName;
 
   const depName = `${groupId!}:${artifactId!}`;
-  const isScala3 = scalaVersion?.[0] === '3';
-  const scalaVersionForPackageName = isScala3 ? '3' : scalaVersion;
 
   const dep: PackageDependency = {
     datasource: SbtPackageDatasource.id,
     depName,
     packageName:
-      scalaVersionForPackageName && useScalaVersion
-        ? `${depName}_${scalaVersionForPackageName}`
-        : depName,
+      scalaVersion && useScalaVersion ? `${depName}_${scalaVersion}` : depName,
     currentValue,
   };
 
