@@ -156,8 +156,8 @@ importers:
         specifier: 15.3.1
         version: 15.3.1
       emojibase-regex:
-        specifier: 15.3.1
-        version: 15.3.1
+        specifier: 15.3.2
+        version: 15.3.2
       extract-zip:
         specifier: 2.0.1
         version: 2.0.1
@@ -515,8 +515,8 @@ importers:
         specifier: 7.0.2
         version: 7.0.2
       emojibase-data:
-        specifier: 15.3.1
-        version: 15.3.1(emojibase@15.3.1)
+        specifier: 15.3.2
+        version: 15.3.2(emojibase@15.3.1)
       eslint:
         specifier: 8.57.0
         version: 8.57.0
@@ -2952,13 +2952,13 @@ packages:
   emoji-regex@9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
 
-  emojibase-data@15.3.1:
-    resolution: {integrity: sha512-4dmrg4cUYnaBuT31zGtDEX07eZIku+ag9DLuAp3Dyxcpp0jdQGU7DKdqUeEXmDEMty9r3LXjNcagfwJ+TMJpUw==}
+  emojibase-data@15.3.2:
+    resolution: {integrity: sha512-TpDyTDDTdqWIJixV5sTA6OQ0P0JfIIeK2tFRR3q56G9LK65ylAZ7z3KyBXokpvTTJ+mLUXQXbLNyVkjvnTLE+A==}
     peerDependencies:
       emojibase: '*'
 
-  emojibase-regex@15.3.1:
-    resolution: {integrity: sha512-r+uRiuWvLdo2C8RAID7zhzNpwh3DjxM4hDP7pI096X/gjBCtBu0nH1iLXdLq4D5KWA5ZT/dJmexmUlovTef7wQ==}
+  emojibase-regex@15.3.2:
+    resolution: {integrity: sha512-ue6BVeb2qu33l97MkxcOoyMJlg6Tug3eTv2z1at+M9TjvlWKvdmAPvZIDG1JbT2RH3FSyJNLucO5K5H/yxT03w==}
 
   emojibase@15.3.1:
     resolution: {integrity: sha512-GNsjHnG2J3Ktg684Fs/vZR/6XpOSkZPMAv85EHrr6br2RN2cJNwdS4am/3YSK3y+/gOv2kmoK3GGdahXdMxg2g==}
@@ -9407,11 +9407,11 @@ snapshots:
 
   emoji-regex@9.2.2: {}
 
-  emojibase-data@15.3.1(emojibase@15.3.1):
+  emojibase-data@15.3.2(emojibase@15.3.1):
     dependencies:
       emojibase: 15.3.1
 
-  emojibase-regex@15.3.1: {}
+  emojibase-regex@15.3.2: {}
 
   emojibase@15.3.1: {}
 
