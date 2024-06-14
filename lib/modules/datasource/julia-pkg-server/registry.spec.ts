@@ -58,7 +58,7 @@ describe('modules/datasource/julia-pkg-server/registry', () => {
       });
     });
 
-    it('handles (optional) trailling slashes', async () => {
+    it('handles (optional) trailing slashes', async () => {
       const registryUrl = `${pkgServer}/registry/${registryUuid}/${state}/`;
 
       expect(await parseRegistryUrl(http, registryUrl)).toEqual({
@@ -68,7 +68,7 @@ describe('modules/datasource/julia-pkg-server/registry', () => {
       });
     });
 
-    it('returns null for incorrect URLs', async () => {
+    it('returns null for wrong URLs', async () => {
       const registryUrl = 'https://foo.bar/not-a-registry-path';
 
       expect(await parseRegistryUrl(http, registryUrl)).toBeNull();

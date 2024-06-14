@@ -9,7 +9,7 @@ import {
 } from './common';
 
 /**
- * Generic container for aggregating and passing around the contents of files.
+ * Generic container to aggregate and pass the contents of files.
  */
 interface FileContents<T extends Buffer[] | string> {
   [path: string]: T;
@@ -111,7 +111,7 @@ export async function extractFilesFromTarball(
 }
 
 /**
- * Parses the provided `registryURL` into an object containing all the
+ * Parses the provided `registryUrl` into an object containing all the
  * necessary information to uniquely identify the state of a registry at a
  * particular moment in time.
  *
@@ -169,7 +169,7 @@ export async function parseRegistryUrl(
  *
  * Packages in a Julia package registry are ordered as following:
  * - (uppercased) initial letter at the root of the registry.
- * - Packages tend to use CamelCase for naming, but it is not a requirement.
+ * - Packages tend to use CamelCase for naming, but this is not a rule/requirement.
  * - JLL packages are separated into a `jll` folder at the root of the
  *   registry, with packages further sorted as noted above.
  */

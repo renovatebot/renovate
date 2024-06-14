@@ -36,7 +36,7 @@ export class JuliaPkgServerDatasource extends Datasource {
 
   override readonly customRegistrySupport = true;
 
-  // Multiple package servers can contain the same package, but contain
+  // Multiple package servers can host the same package, but may have
   // different versions of that package
   override readonly registryStrategy = 'merge';
 
@@ -57,7 +57,7 @@ export class JuliaPkgServerDatasource extends Datasource {
       return null;
     }
 
-    // Hitting the URL for a registry results in a tarball containing the full
+    // Hitting the URL for a registry results in a tarball of the full
     // contents of the registry
     const fullRegistryUrl = joinUrlParts(
       registrySpecification.pkgServer,
