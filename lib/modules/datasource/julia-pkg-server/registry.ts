@@ -1,6 +1,7 @@
 import { Parse as tarParse } from 'tar';
 import { logger } from '../../../logger';
 import type { Http } from '../../../util/http';
+import { regEx } from '../../../util/regex';
 import { Result } from '../../../util/result';
 import { joinUrlParts } from '../../../util/url';
 import {
