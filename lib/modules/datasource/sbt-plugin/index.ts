@@ -10,6 +10,8 @@ import { getLatestVersion, parseIndexDir } from '../sbt-package/util';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const SBT_MVN_REPO = 'https://repo1.maven.org/maven2';
+export const SBT_PLUGINS_REPO =
+  'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases';
 
 export const defaultRegistryUrls = [SBT_MVN_REPO];
 

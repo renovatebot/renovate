@@ -6,7 +6,11 @@ import { parseUrl } from '../../../util/url';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { MavenDatasource } from '../../datasource/maven';
 import { SbtPackageDatasource } from '../../datasource/sbt-package';
-import { SBT_MVN_REPO, SbtPluginDatasource } from '../../datasource/sbt-plugin';
+import {
+  SBT_MVN_REPO,
+  SBT_PLUGINS_REPO,
+  SbtPluginDatasource,
+} from '../../datasource/sbt-plugin';
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
 import * as semverVersioning from '../../versioning/semver';
@@ -412,6 +416,8 @@ export async function extractAllPackageFiles(
       if (dep.datasource !== GithubReleasesDatasource.id) {
         if (proxyUrls.length > 0) {
           dep.registryUrls!.unshift(...proxyUrls);
+        } else if (dep.depType === 'plugin') {
+          dep.registryUrls!.unshift(SBT_MVN_REPO, SBT_PLUGINS_REPO);
         } else {
           dep.registryUrls!.unshift(SBT_MVN_REPO);
         }

@@ -551,6 +551,7 @@ describe('modules/manager/sbt/extract', () => {
         for (const dep of pkg.deps.filter((d) => d.depType === 'plugin')) {
           expect(dep.registryUrls).toStrictEqual([
             'https://repo1.maven.org/maven2',
+            'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
             'https://example.com/repos/1/',
             'https://example.com/repos/2/',
             'https://example.com/repos/3/',
