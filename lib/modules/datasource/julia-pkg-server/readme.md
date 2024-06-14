@@ -1,15 +1,14 @@
-This datasource returns releases for Julia packages from registries hosted
-through [`PkgServer`](https://github.com/JuliaPackaging/PkgServer.jl/)s, e.g.
-[the General registry](https://github.com/JuliaRegistries/General/) hosted
-through [https://pkg.julialang.org](https://pkg.julialang.org) (which is the
-default registry used by this datasource).
+This datasource returns releases for Julia packages from registries served through a Julia package server.
 
-Custom registries are supported by specifying the full URL of the registry,
-i.e. `https://<pkg-server>/registry/<uuid>`. Optionally a "state", which
-corresponds to a Git tree SHA from the regitries' repository, may be appended
-to the URL to retrieve releases for a package at a particular moment in time.
-If the state is not provided it will be automatically determined by querying
-the `PkgServer`.
+By default, this datasource fetches from [the `General` registry](https://github.com/JuliaRegistries/General/) through the `https://pkg.julialang.org` package server.
 
-When the same package is registered through multiple registries, the
-corresponding releases will be merged.
+You can control which registries Renovate fetches from by setting the full URL of the registry.
+The syntax pattern is: `https://<pkg-server>/registry/<uuid>`.
+For example: `https://pkg.julialang.org/registry/23338594-aafe-5451-b93e-139f81909106` leads to the `General` registry.
+
+If you want to fetch releases for a package from a _specific moment in time_, you can add a "state" to the end of the URL above.
+This "state" must match a Git tree SHA-1 hash for the root of the registries' repository.
+For example: `https://pkg.julialang.org/registry/23338594-aafe-5451-b93e-139f81909106/9b23351a11503de3096effc1f7feda386144c78b`.
+If you do not set a "state", Renovate will determine it by querying the package server.
+
+If Renovate finds the _same_ package in _multiple registries_, Renovate merges the corresponding releases.

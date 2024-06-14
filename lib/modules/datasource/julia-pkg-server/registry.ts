@@ -41,9 +41,9 @@ const PKG_SERVER_REGISTRY_URL_FORMAT = regEx(
 
 /**
  * The final part of the path of a (fully specified) registry URL references
- * the tree SHA of the state of of the registry repository the package server
- * is serving. Given the content-addressable nature of this SHA, it can be used
- * as a caching mechanism.
+ * the tree SHA of the state of the registry repository the package server is
+ * serving. Given the content-addressable nature of this SHA, it can be used as
+ * a caching mechanism.
  *
  * Cache keys are of the form `<registry UUID>:<registry state>`
  */
