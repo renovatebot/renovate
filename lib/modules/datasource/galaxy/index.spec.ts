@@ -87,7 +87,7 @@ describe('modules/datasource/galaxy/index', () => {
       expect(res).toBeDefined();
     });
 
-    it('handles multiple results when one matches', async () => {
+    it('handles multiple results when one user matches exactly', async () => {
       httpMock
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=datadog&name=datadog')
@@ -100,7 +100,7 @@ describe('modules/datasource/galaxy/index', () => {
       expect(res?.releases).toHaveLength(11);
     });
 
-    it('rejects multiple results when one matches', async () => {
+    it('rejects multiple results when no user matches exactly', async () => {
       httpMock
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=nope&name=nope')
