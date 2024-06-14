@@ -42,7 +42,8 @@ export class JuliaPkgServerDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${juliaPkgServerDatasourceId}-releases`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
+    key: ({ packageName, registryUrl }: GetReleasesConfig) =>
+      `${registryUrl}:${packageName}`,
   })
   async getReleases({
     packageName,
