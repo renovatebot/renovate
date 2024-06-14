@@ -501,7 +501,14 @@ export async function lookupUpdates(
     // Add digests if necessary
     if (supportsDigests(config.datasource)) {
       if (config.currentDigest) {
-        if (!config.digestOneAndOnly || !res.updates.length) {
+        // Custom datasources should not run a digest update
+        // on the current version if it already runs a version update.
+        if (
+          !(
+            config.digestOneAndOnly ?? config.datasource.startsWith('custom.')
+          ) ||
+          !res.updates.length
+        ) {
           // digest update
           res.updates.push({
             updateType: 'digest',
