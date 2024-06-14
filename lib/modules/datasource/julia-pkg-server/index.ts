@@ -21,7 +21,7 @@ type PackageMetadataPath = `${string}/Package.toml` | `${string}/Versions.toml`;
 
 export class JuliaPkgServerDatasource extends Datasource {
   // This URL will redirect to a suitable, geographically near, mirror
-  static readonly generalRegistryUrl =
+  static readonly defaultRegistryUrl =
     'https://pkg.julialang.org/registry/23338594-aafe-5451-b93e-139f81909106';
 
   static readonly id = juliaPkgServerDatasourceId;
@@ -31,7 +31,7 @@ export class JuliaPkgServerDatasource extends Datasource {
   }
 
   override readonly defaultRegistryUrls = [
-    JuliaPkgServerDatasource.generalRegistryUrl,
+    JuliaPkgServerDatasource.defaultRegistryUrl,
   ];
 
   override readonly customRegistrySupport = true;

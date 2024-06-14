@@ -55,7 +55,7 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           // This is the error corresponding to the HTTP request which is not
           // straightforward to replicate in test
           error: expect.anything(),
-          registryUrl: `${JuliaPkgServerDatasource.generalRegistryUrl}/${eagerGeneralRegistryState}`,
+          registryUrl: `${JuliaPkgServerDatasource.defaultRegistryUrl}/${eagerGeneralRegistryState}`,
         },
         'An error occurred fetching the registry',
       );
@@ -145,7 +145,7 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           datasource,
           packageName: 'HTTP',
           registryUrls: [
-            JuliaPkgServerDatasource.generalRegistryUrl,
+            JuliaPkgServerDatasource.defaultRegistryUrl,
             `${customPkgServerBaseUrl}/registry/${generalRegistryUUID}`,
           ],
         });
