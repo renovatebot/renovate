@@ -89,15 +89,15 @@ describe('modules/datasource/glasskube-packages/index', () => {
       registryUrls: [registryUrl],
     });
     expect(response).toEqual({
-      registryUrl: registryUrl,
+      registryUrl,
       releases: [
         {
           version: 'v1.22.0+1',
-          registryUrl: registryUrl,
+          registryUrl,
         },
         {
           version: 'v1.23.1+1',
-          registryUrl: registryUrl,
+          registryUrl,
         },
       ],
     });
@@ -120,15 +120,15 @@ describe('modules/datasource/glasskube-packages/index', () => {
     expect(response).toEqual({
       sourceUrl: 'https://github.com/cloudnative-pg/cloudnative-pg',
       homepage: 'https://cloudnative-pg.io/',
-      registryUrl: registryUrl,
+      registryUrl,
       releases: [
         {
           version: 'v1.22.0+1',
-          registryUrl: registryUrl,
+          registryUrl,
         },
         {
           version: 'v1.23.1+1',
-          registryUrl: registryUrl,
+          registryUrl,
         },
       ],
     });
