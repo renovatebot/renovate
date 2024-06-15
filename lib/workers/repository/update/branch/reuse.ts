@@ -34,13 +34,15 @@ async function shouldKeepUpdated(
 
 export async function shouldReuseExistingBranch(
   config: BranchConfig,
-): Promise<ParentBranch> {
+): Promise<BranchConfig> {
   const { baseBranch, branchName } = config;
+  // eslint-disable-next-line no-param-reassign
+  config = { ...config };
   const result: ParentBranch = { reuseExistingBranch: false };
   // Check if branch exists
   if (!(await scm.branchExists(branchName))) {
     logger.debug(`Branch needs creating`);
-    return result;
+    return { ...config, ...result };
   }
   logger.debug(`Branch already exists`);
   if (config.rebaseWhen === 'auto') {
@@ -78,10 +80,10 @@ export async function shouldReuseExistingBranch(
         logger.debug('Cannot rebase branch as it has been modified');
         result.reuseExistingBranch = true;
         result.isModified = true;
-        return result;
+        return { ...config, ...result };
       }
       logger.debug('Branch is unmodified, so can be rebased');
-      return result;
+      return { ...config, ...result };
     }
     logger.debug('Branch is up-to-date');
   } else {
@@ -106,7 +108,7 @@ export async function shouldReuseExistingBranch(
         result.isModified = false;
       }
       // Setting reuseExistingBranch back to undefined means that we'll use the default branch
-      return result;
+      return { ...config, ...result };
     }
     // Don't do anything different, but warn
     // TODO: Add warning to PR (#9720)
@@ -134,11 +136,11 @@ export async function shouldReuseExistingBranch(
       );
       result.reuseExistingBranch = false;
       result.isModified = false;
-      return result;
+      return { ...config, ...result };
     }
   }
 
   result.reuseExistingBranch = true;
   result.isModified = false;
-  return result;
+  return { ...config, ...result };
 }

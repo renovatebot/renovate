@@ -228,8 +228,9 @@ describe('workers/repository/update/branch/reuse', () => {
       config.automerge = true;
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(false);
-      await shouldReuseExistingBranch(config);
-      expect(config.rebaseWhen).toBe('behind-base-branch');
+      const result = await shouldReuseExistingBranch(config);
+      expect(config.rebaseWhen).toBe('auto');
+      expect(result.rebaseWhen).toBe('behind-base-branch');
     });
 
     it('converts rebaseWhen=auto to behind-base-branch if getBranchForceRebase', async () => {
@@ -237,8 +238,9 @@ describe('workers/repository/update/branch/reuse', () => {
       platform.getBranchForceRebase.mockResolvedValueOnce(true);
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(false);
-      await shouldReuseExistingBranch(config);
-      expect(config.rebaseWhen).toBe('behind-base-branch');
+      const result = await shouldReuseExistingBranch(config);
+      expect(config.rebaseWhen).toBe('auto');
+      expect(result.rebaseWhen).toBe('behind-base-branch');
     });
 
     it('converts rebaseWhen=auto to behind-base-branch if keepUpdatedLabel', async () => {
@@ -247,16 +249,18 @@ describe('workers/repository/update/branch/reuse', () => {
       platform.getBranchPr.mockResolvedValue(pr);
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(false);
-      await shouldReuseExistingBranch(config);
-      expect(config.rebaseWhen).toBe('behind-base-branch');
+      const result = await shouldReuseExistingBranch(config);
+      expect(config.rebaseWhen).toBe('auto');
+      expect(result.rebaseWhen).toBe('behind-base-branch');
     });
 
     it('converts rebaseWhen=auto to conflicted', async () => {
       config.rebaseWhen = 'auto';
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(false);
-      await shouldReuseExistingBranch(config);
-      expect(config.rebaseWhen).toBe('conflicted');
+      const result = await shouldReuseExistingBranch(config);
+      expect(config.rebaseWhen).toBe('auto');
+      expect(result.rebaseWhen).toBe('conflicted');
     });
   });
 });
