@@ -70,7 +70,7 @@ export function getPrList(
     prHourlyLimit < branches.length
   ) {
     prDesc += emojify(
-      `<br />\n\n:children_crossing: Branch creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See docs for \`prhourlylimit\` for details.\n\n`,
+      `\n\n:children_crossing: Branch creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See docs for \`prhourlylimit\` for details.\n\n`,
     );
   }
   return prDesc;
