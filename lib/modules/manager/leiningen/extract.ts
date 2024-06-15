@@ -174,10 +174,10 @@ export function extractVariables(content: string): ExtractedVariables {
   return result;
 }
 
-type CollectDepsOptions = {
+interface CollectDepsOptions {
   nested: boolean;
   depType?: string;
-};
+}
 
 function collectDeps(
   content: string,
