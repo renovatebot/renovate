@@ -4,12 +4,6 @@ import { scm } from '../../../../modules/platform/scm';
 import type { RangeStrategy } from '../../../../types';
 import type { BranchConfig } from '../../../types';
 
-type ParentBranch = {
-  reuseExistingBranch: boolean;
-  isModified?: boolean;
-  isConflicted?: boolean;
-};
-
 async function shouldKeepUpdated(
   config: BranchConfig,
   baseBranch: string,
@@ -36,42 +30,40 @@ export async function shouldReuseExistingBranch(
   config: BranchConfig,
 ): Promise<BranchConfig> {
   const { baseBranch, branchName } = config;
-  // eslint-disable-next-line no-param-reassign
-  config = { ...config };
-  const result: ParentBranch = { reuseExistingBranch: false };
+  const result: BranchConfig = { ...config, reuseExistingBranch: false };
   // Check if branch exists
   if (!(await scm.branchExists(branchName))) {
     logger.debug(`Branch needs creating`);
-    return { ...config, ...result };
+    return result;
   }
   logger.debug(`Branch already exists`);
-  if (config.rebaseWhen === 'auto') {
-    if (config.automerge === true) {
+  if (result.rebaseWhen === 'auto') {
+    if (result.automerge === true) {
       logger.debug(
         'Converting rebaseWhen=auto to rebaseWhen=behind-base-branch because automerge=true',
       );
-      config.rebaseWhen = 'behind-base-branch';
-    } else if (await platform.getBranchForceRebase?.(config.baseBranch)) {
+      result.rebaseWhen = 'behind-base-branch';
+    } else if (await platform.getBranchForceRebase?.(result.baseBranch)) {
       logger.debug(
         'Converting rebaseWhen=auto to rebaseWhen=behind-base-branch because platform is configured to require up-to-date branches',
       );
-      config.rebaseWhen = 'behind-base-branch';
-    } else if (await shouldKeepUpdated(config, baseBranch, branchName)) {
+      result.rebaseWhen = 'behind-base-branch';
+    } else if (await shouldKeepUpdated(result, baseBranch, branchName)) {
       logger.debug(
         'Converting rebaseWhen=auto to rebaseWhen=behind-base-branch because keep-updated label is set',
       );
-      config.rebaseWhen = 'behind-base-branch';
+      result.rebaseWhen = 'behind-base-branch';
     }
   }
-  if (config.rebaseWhen === 'auto') {
+  if (result.rebaseWhen === 'auto') {
     logger.debug(
       'Converting rebaseWhen=auto to rebaseWhen=conflicted because no rule for converting to rebaseWhen=behind-base-branch applies',
     );
-    config.rebaseWhen = 'conflicted';
+    result.rebaseWhen = 'conflicted';
   }
   if (
-    config.rebaseWhen === 'behind-base-branch' ||
-    (await shouldKeepUpdated(config, baseBranch, branchName))
+    result.rebaseWhen === 'behind-base-branch' ||
+    (await shouldKeepUpdated(result, baseBranch, branchName))
   ) {
     if (await scm.isBranchBehindBase(branchName, baseBranch)) {
       logger.debug(`Branch is behind base branch and needs rebasing`);
@@ -80,15 +72,15 @@ export async function shouldReuseExistingBranch(
         logger.debug('Cannot rebase branch as it has been modified');
         result.reuseExistingBranch = true;
         result.isModified = true;
-        return { ...config, ...result };
+        return result;
       }
       logger.debug('Branch is unmodified, so can be rebased');
-      return { ...config, ...result };
+      return result;
     }
     logger.debug('Branch is up-to-date');
   } else {
     logger.debug(
-      `Skipping behind base branch check due to rebaseWhen=${config.rebaseWhen!}`,
+      `Skipping behind base branch check due to rebaseWhen=${result.rebaseWhen!}`,
     );
   }
 
@@ -100,15 +92,15 @@ export async function shouldReuseExistingBranch(
     if ((await scm.isBranchModified(branchName)) === false) {
       logger.debug(`Branch is not mergeable and needs rebasing`);
       if (
-        config.rebaseWhen === 'never' &&
-        !(await shouldKeepUpdated(config, baseBranch, branchName))
+        result.rebaseWhen === 'never' &&
+        !(await shouldKeepUpdated(result, baseBranch, branchName))
       ) {
         logger.debug('Rebasing disabled by config');
         result.reuseExistingBranch = true;
         result.isModified = false;
       }
       // Setting reuseExistingBranch back to undefined means that we'll use the default branch
-      return { ...config, ...result };
+      return result;
     }
     // Don't do anything different, but warn
     // TODO: Add warning to PR (#9720)
@@ -122,7 +114,7 @@ export async function shouldReuseExistingBranch(
   // along with the changes to the package.json. Thus ending up with an incomplete branch update
   // This is why we are skipping branch reuse in this case (#10050)
   const groupedByPackageFile: Record<string, Set<RangeStrategy>> = {};
-  for (const upgrade of config.upgrades) {
+  for (const upgrade of result.upgrades) {
     const packageFile = upgrade.packageFile!;
     groupedByPackageFile[packageFile] ??= new Set();
     groupedByPackageFile[packageFile].add(upgrade.rangeStrategy!);
@@ -136,11 +128,11 @@ export async function shouldReuseExistingBranch(
       );
       result.reuseExistingBranch = false;
       result.isModified = false;
-      return { ...config, ...result };
+      return result;
     }
   }
 
   result.reuseExistingBranch = true;
   result.isModified = false;
-  return { ...config, ...result };
+  return result;
 }
