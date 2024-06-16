@@ -267,7 +267,7 @@ export async function ensureDependencyDashboard(
   issueBody = appendRepoProblems(config, issueBody);
 
   if (hasDeprecations) {
-    issueBody += '> [!WARNING]\n';
+    issueBody += '> ⚠ **Warning**\n> \n';
     issueBody += 'The following dependencies are deprecated:\n\n';
     issueBody += '| Datasource | Name | Replacement? |\n';
     issueBody += '|------------|------|--------------|\n';
