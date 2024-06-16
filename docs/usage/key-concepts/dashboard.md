@@ -51,7 +51,7 @@ This section explains some common use cases where having the Dependency Dashboar
 
 ### Warnings for deprecated dependencies
 
-If Renovate finds: 
+If Renovate finds:
 
 - packages flagged as deprecated on their registry, or
 - packages that have a community-sourced replacement PR available
