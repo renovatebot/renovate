@@ -36,9 +36,9 @@ export class AwsEKSAddonDataSource extends Datasource {
     return {
       releases: addons
         .flatMap((addon) => addon.addonVersions)
+        .filter((versionInfo) => versionInfo?.addonVersion)
         .map((versionInfo) => ({
           version: versionInfo!.addonVersion!,
-          isDeprecated: false,
         })),
     };
   }

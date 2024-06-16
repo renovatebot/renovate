@@ -508,9 +508,6 @@ importers:
       aws-sdk-client-mock:
         specifier: 4.0.1
         version: 4.0.1
-      aws-sdk-client-mock-jest:
-        specifier: 4.0.1
-        version: 4.0.1(aws-sdk-client-mock@4.0.1)
       callsite:
         specifier: 1.0.0
         version: 1.0.0
@@ -2406,11 +2403,6 @@ packages:
   available-typed-arrays@1.0.7:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
-
-  aws-sdk-client-mock-jest@4.0.1:
-    resolution: {integrity: sha512-PilgESg/u2sJvHg0+4C8/ty7w2+/pMhBYpdfPlCysnsjNfFk6a7eW7fwfIWoL93BCvcEblPdLyVL/vYTRCNFYA==}
-    peerDependencies:
-      aws-sdk-client-mock: 4.0.1
 
   aws-sdk-client-mock@4.0.1:
     resolution: {integrity: sha512-yD2mmgy73Xce097G5hIpr1k7j50qzvJ49/+6osGZiCyk4m6cwhb+2x7kKFY1gEMwTzaS8+m8fXv9SB29SkRYyQ==}
@@ -8873,12 +8865,6 @@ snapshots:
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.0.0
-
-  aws-sdk-client-mock-jest@4.0.1(aws-sdk-client-mock@4.0.1):
-    dependencies:
-      aws-sdk-client-mock: 4.0.1
-      expect: 29.7.0
-      tslib: 2.6.3
 
   aws-sdk-client-mock@4.0.1:
     dependencies:

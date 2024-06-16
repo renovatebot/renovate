@@ -6,8 +6,7 @@ import {
   EKSClient,
 } from '@aws-sdk/client-eks';
 import { mockClient } from 'aws-sdk-client-mock';
-import 'aws-sdk-client-mock-jest';
-import { getPkgReleases } from '../index';
+import { getPkgReleases } from '..';
 import { AwsEKSAddonDataSource } from '.';
 
 const datasource = AwsEKSAddonDataSource.id;
@@ -39,13 +38,16 @@ const addonVersion2: AddonVersionInfo = {
   requiresConfiguration: false,
 };
 
+// a bad addonVersion that's missing the basic fields.
+const addonVersionBad: AddonVersionInfo = {};
+
 /**
  * Testdata for mock implementation of EKSClient
  */
 const vpcCniAddonInfo: AddonInfo = {
   addonName: 'vpc-cni',
   type: 'networking',
-  addonVersions: [addonVersion1, addonVersion2],
+  addonVersions: [addonVersion1, addonVersion2, addonVersionBad],
   publisher: 'eks',
   owner: 'aws',
 };
@@ -59,6 +61,18 @@ const mockEmpty: DescribeAddonVersionsResponse = {
 };
 
 const mockNull: DescribeAddonVersionsResponse = {};
+
+const mockNullAddonVersions: DescribeAddonVersionsResponse = {
+  addons: [
+    {
+      addonName: 'non-existing-addon',
+      type: 'networking',
+      publisher: 'eks',
+      owner: 'aws',
+      // missing addonVersions
+    },
+  ],
+};
 
 function mockDescribeAddonVersionsCommand(
   result: DescribeAddonVersionsResponse,
@@ -91,6 +105,7 @@ describe('modules/datasource/aws-eks-addon/index', () => {
     it.each([
       ['null', mockNull],
       ['empty', mockEmpty],
+      ['nullAddonVersions', mockNullAddonVersions],
     ])('returned %s addons to be null', async (_, mocked) => {
       mockDescribeAddonVersionsCommand(mocked);
       const res = await getPkgReleases({
@@ -100,7 +115,7 @@ describe('modules/datasource/aws-eks-addon/index', () => {
       });
       expect(res).toBeNull();
       expect(eksMock.calls()).toHaveLength(1);
-      expect(eksMock).toHaveReceivedCommandWith(DescribeAddonVersionsCommand, {
+      expect(eksMock.call(0).args[0].input).toEqual({
         kubernetesVersion: '1.30',
         addonName: 'non-existing-addon',
         maxResults: 1,
@@ -117,16 +132,14 @@ describe('modules/datasource/aws-eks-addon/index', () => {
       expect(res).toEqual({
         releases: [
           {
-            isDeprecated: false,
             version: addonVersion1.addonVersion,
           },
           {
-            isDeprecated: false,
             version: addonVersion2.addonVersion,
           },
         ],
       });
-      expect(eksMock).toHaveReceivedCommandWith(DescribeAddonVersionsCommand, {
+      expect(eksMock.call(0).args[0].input).toEqual({
         kubernetesVersion: '1.30',
         addonName: 'vpc-cni',
         maxResults: 1,
