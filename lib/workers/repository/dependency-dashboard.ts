@@ -269,7 +269,7 @@ export async function ensureDependencyDashboard(
   if (hasDeprecations) {
     issueBody += '> ⚠ **Warning**\n> \n';
     issueBody += 'The following dependencies are deprecated:\n\n';
-    issueBody += '| Datasource | Name | Replacement? |\n';
+    issueBody += '| Datasource | Name | Replacement PR? |\n';
     issueBody += '|------------|------|--------------|\n';
     for (const manager of Object.keys(deprecatedPackages).sort()) {
       const deps = deprecatedPackages[manager];
