@@ -19,12 +19,12 @@ import {
   GitHubMaxPrBodyLen,
   massageMarkdown,
 } from '../../modules/platform/github';
+import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
 import { PackageFiles } from './package-files';
-import { clone } from '../../util/clone';
 
 const createVulnerabilitiesMock = jest.fn();
 jest.mock('./process/vulnerabilities', () => {

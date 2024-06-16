@@ -236,7 +236,7 @@ export async function ensureDependencyDashboard(
         const hasReplacement = !!dep.updates?.find(
           (updates) => updates.updateType === 'replacement',
         );
-        if (name && (dep.deprecationMessage || hasReplacement)) {
+        if (name && (dep.deprecationMessage ?? hasReplacement)) {
           hasDeprecations = true;
           deprecatedPackages[manager] ??= {};
           deprecatedPackages[manager][name] ??= hasReplacement;
