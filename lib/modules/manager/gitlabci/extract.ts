@@ -31,6 +31,9 @@ import { getGitlabDep, replaceReferenceTags } from './utils';
 const componentReferenceRegex = regEx(
   /(?<fqdn>[^/]+)\/(?<projectPath>.+)\/(?:.+)@(?<specificVersion>.+)/,
 );
+const componentFQDNRegex = regEx(
+  /[^/]+/,
+);
 const componentReferenceLatestVersion = '~latest';
 
 export function extractFromImage(
@@ -122,8 +125,13 @@ function extractDepFromIncludeComponent(
   includeComponent: GitlabIncludeComponent,
   registryAliases?: Record<string, string>,
 ): PackageDependency | null {
+  const componentFQDN = componentFQDNRegex.exec(includeComponent.component)?.[0];
+  let componentPath = includeComponent.component;
+  if (componentFQDN && registryAliases?.[componentFQDN]) {
+    componentPath = includeComponent.component.replace(componentFQDN, registryAliases[componentFQDN]);
+  }
   const componentReference = componentReferenceRegex.exec(
-    includeComponent.component,
+    componentPath,
   )?.groups;
   if (!componentReference) {
     logger.debug(
@@ -139,10 +147,6 @@ function extractDepFromIncludeComponent(
       'Ignoring component reference with incomplete project path',
     );
     return null;
-  }
-  const aliasValue = registryAliases?.[componentReference.fqdn];
-  if (aliasValue) {
-    componentReference.fqdn = aliasValue;
   }
 
   const dep: PackageDependency = {
