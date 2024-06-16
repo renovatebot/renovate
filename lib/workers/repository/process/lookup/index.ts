@@ -361,7 +361,7 @@ export async function lookupUpdates(
           unconstrainedValue ||
           versioning.isCompatible(v.version, compareValue),
       );
-      if (config.isVulnerabilityAlert && !config.osvVulnerabilityAlerts) {
+      if (config.isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
       }
       const buckets: Record<string, [Release]> = {};
