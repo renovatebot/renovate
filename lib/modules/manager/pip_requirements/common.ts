@@ -33,13 +33,23 @@ export function extractPackageFileFlags(
   const additionalRequirementsFiles: string[] = [];
   const additionalConstraintsFiles: string[] = [];
   content.split(newlineRegex).forEach((line) => {
-    if (line.startsWith('-i ') || line.startsWith('--index-url ')) {
-      registryUrls = [line.split(' ')[1]];
-    } else if (line.startsWith('--extra-index-url ')) {
+    if (line.startsWith('-i ') || line.startsWith('--index-url')) {
+      // parameters can be separated by space or =, same below for --extra-index-url
+      if (line.includes('=')) {
+        registryUrls = [line.split('=')[1]];
+      } else {
+        registryUrls = [line.split(' ')[1]];
+      }
+    } else if (line.startsWith('--extra-index-url')) {
+      if (line.includes('=')) {
+        const extraUrl = line.split('=')[1];
+        additionalRegistryUrls.push(extraUrl);
+      } else {
       const extraUrl = line
         .substring('--extra-index-url '.length)
         .split(' ')[0];
       additionalRegistryUrls.push(extraUrl);
+      }
     } else if (line.startsWith('-r ')) {
       additionalRequirementsFiles.push(line.split(' ')[1]);
     } else if (line.startsWith('-c ')) {
