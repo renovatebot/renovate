@@ -59,7 +59,6 @@ If Renovate finds:
 Then Renovate adds a prominent warning about these packages near the top of the Dependency Dashboard.
 Here is an example of how this can look:
 
-> [!WARNING]
 > The following dependencies are deprecated:
 
 | Datasource | Name                | Replacement?                                                                      |
