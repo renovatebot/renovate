@@ -228,7 +228,7 @@ export async function ensureDependencyDashboard(
   // Check packageFiles for any deprecations
   let hasDeprecations = false;
   const deprecatedPackages: Record<string, Record<string, boolean>> = {};
-  logger.debug({ packageFiles }, 'Checking packageFiles for deprecations');
+  logger.debug({ packageFiles }, 'Checking packageFiles for deprecated packages');
   for (const [manager, fileNames] of Object.entries(packageFiles)) {
     for (const fileName of fileNames) {
       for (const dep of fileName.deps) {
@@ -268,7 +268,7 @@ export async function ensureDependencyDashboard(
 
   if (hasDeprecations) {
     issueBody += '> ⚠ **Warning**\n> \n';
-    issueBody += 'The following dependencies are deprecated:\n\n';
+    issueBody += 'These dependencies are deprecated:\n\n';
     issueBody += '| Datasource | Name | Replacement PR? |\n';
     issueBody += '|------------|------|--------------|\n';
     for (const manager of Object.keys(deprecatedPackages).sort()) {
