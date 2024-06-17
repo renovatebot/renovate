@@ -45,10 +45,10 @@ export function extractPackageFileFlags(
         const extraUrl = line.split('=')[1];
         additionalRegistryUrls.push(extraUrl);
       } else {
-      const extraUrl = line
-        .substring('--extra-index-url '.length)
-        .split(' ')[0];
-      additionalRegistryUrls.push(extraUrl);
+        const extraUrl = line
+          .substring('--extra-index-url '.length)
+          .split(' ')[0];
+        additionalRegistryUrls.push(extraUrl);
       }
     } else if (line.startsWith('-r ')) {
       additionalRequirementsFiles.push(line.split(' ')[1]);
