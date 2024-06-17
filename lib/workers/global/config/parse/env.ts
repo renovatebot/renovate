@@ -41,6 +41,7 @@ const renameKeys = {
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
   mergeConfidenceApiBaseUrl: 'mergeConfidenceEndpoint',
   mergeConfidenceSupportedDatasources: 'mergeConfidenceDatasources',
+  eagerGlobalExtends: 'globalExtendsEager',
 };
 
 function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {

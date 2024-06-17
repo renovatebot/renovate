@@ -3106,7 +3106,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'eagerGlobalExtends',
+    name: 'globalExtendsEager',
     description:
       'If set to `true`, Renovate resolves and merges `globalExtends` presets _before_ other global config, instead of _after_.',
     type: 'boolean',

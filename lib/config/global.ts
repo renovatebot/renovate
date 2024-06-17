@@ -38,7 +38,7 @@ export class GlobalConfig {
     'autodiscoverRepoOrder',
     'userAgent',
     'deleteConfigFile',
-    'eagerGlobalExtends',
+    'globalExtendsEager',
     'ignoreNodeWarn',
     's3Endpoint',
     's3PathStyle',

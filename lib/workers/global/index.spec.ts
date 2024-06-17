@@ -92,7 +92,7 @@ describe('workers/global/index', () => {
       repositories: [],
       globalExtends: [':pinVersions'],
       hostRules: [{ matchHost: 'github.com', token: 'abc123' }],
-      eagerGlobalExtends: true,
+      globalExtendsEager: true,
     });
     presets.resolveConfigPresets.mockResolvedValueOnce({});
     await expect(globalWorker.start()).resolves.toBe(0);

@@ -563,12 +563,6 @@ You can choose from the following behaviors for the `dryRun` config option:
 
 Information provided mainly in debug log level.
 
-## eagerGlobalExtends
-
-By default, Renovate resolves and merges `globalExtends` presets _after_ other global config.
-
-But if you set `eagerGlobalExtends` to `true`, then Renovate will resolve and merge `globalExtends` presets _before_ the global config.
-
 ## encryptedWarning
 
 Use this if you want to stop supporting `encrypted` configuration capabilities but want to warn users first to migrate.
@@ -699,6 +693,12 @@ Use the `extends` field instead of this if, for example, you need the ability fo
     `globalExtends` presets can't be private.
     When Renovate resolves `globalExtends` it does not fully process the configuration.
     This means that Renovate does not have the authentication it needs to fetch private things.
+
+## globalExtendsEager
+
+By default, Renovate resolves and merges `globalExtends` presets _after_ other global config.
+
+But if you set `globalExtendsEager` to `true`, then Renovate will resolve and merge `globalExtends` presets _before_ the global config.
 
 ## httpCacheTtlDays
 
