@@ -1002,7 +1002,7 @@ None detected
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            'The following dependencies are deprecated',
+            'These dependencies are deprecated',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
             '| npm | `cookie-parser` | ![Unavailable]',
