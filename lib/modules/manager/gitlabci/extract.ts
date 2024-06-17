@@ -123,7 +123,7 @@ function extractDepFromIncludeComponent(
   registryAliases?: Record<string, string>,
 ): PackageDependency | null {
   let componentPath = includeComponent.component;
-  const componentFQDN = componentPath?.substring(0, componentPath.indexOf('/'));
+  const componentFQDN = componentPath.substring(0, componentPath.indexOf('/'));
   if (componentFQDN && registryAliases?.[componentFQDN]) {
     componentPath = componentPath.replace(
       componentFQDN,
