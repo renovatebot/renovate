@@ -101,6 +101,7 @@ describe('modules/datasource/glasskube-packages/index', () => {
     });
     expect(response).toEqual({
       registryUrl: customRegistryUrl,
+      tags: { latest: 'v1.23.1+1' },
       releases: [{ version: 'v1.22.0+1' }, { version: 'v1.23.1+1' }],
     });
   });
@@ -122,6 +123,7 @@ describe('modules/datasource/glasskube-packages/index', () => {
       sourceUrl: 'https://github.com/cloudnative-pg/cloudnative-pg',
       homepage: 'https://cloudnative-pg.io/',
       registryUrl: GlasskubePackagesDatasource.defaultRegistryUrl,
+      tags: { latest: 'v1.23.1+1' },
       releases: [{ version: 'v1.22.0+1' }, { version: 'v1.23.1+1' }],
     });
   });
@@ -144,6 +146,7 @@ describe('modules/datasource/glasskube-packages/index', () => {
       sourceUrl: 'https://github.com/cloudnative-pg/cloudnative-pg',
       homepage: 'https://cloudnative-pg.io/',
       registryUrl: customRegistryUrl,
+      tags: { latest: 'v1.23.1+1' },
       releases: [{ version: 'v1.22.0+1' }, { version: 'v1.23.1+1' }],
     });
   });

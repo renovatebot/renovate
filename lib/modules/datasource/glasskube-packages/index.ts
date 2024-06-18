@@ -47,6 +47,7 @@ export class GlasskubePackagesDatasource extends Datasource {
     result.releases = versions.versions.map((it) => ({
       version: it.version,
     }));
+    result.tags = { latest: versions.latestVersion };
 
     try {
       const response = await this.http.get(
