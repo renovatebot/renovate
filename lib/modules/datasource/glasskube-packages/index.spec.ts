@@ -117,7 +117,6 @@ describe('modules/datasource/glasskube-packages/index', () => {
     const response = await getPkgReleases({
       datasource: GlasskubePackagesDatasource.id,
       packageName: 'cloudnative-pg',
-      registryUrls: [],
     });
     expect(response).toEqual({
       sourceUrl: 'https://github.com/cloudnative-pg/cloudnative-pg',
