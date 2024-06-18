@@ -1,10 +1,9 @@
 import type { Category } from '../../../constants';
 import { DockerDatasource } from '../../datasource/docker';
-import * as dockerVersioning from '../../versioning/docker';
 
 export { extractPackageFile } from './extract';
 
-export const supportedDatasources = [DockerDatasource.id];
+export const url = 'https://devcenter.heroku.com/articles/python-runtimes';
 
 export const defaultConfig = {
   fileMatch: ['^runtime.txt$'],
@@ -12,3 +11,5 @@ export const defaultConfig = {
 };
 
 export const categories: Category[] = ['python'];
+
+export const supportedDatasources = [DockerDatasource.id];
