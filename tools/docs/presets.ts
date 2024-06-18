@@ -11,8 +11,8 @@ function getEditUrl(name: string): string {
     'https://github.com/renovatebot/renovate/edit/main/lib/config/presets/internal/';
 
   switch (name) {
-    case 'regexManagers':
-      return `${url}regex-managers.ts`;
+    case 'customManagers':
+      return `${url}custom-managers.ts`;
     case 'mergeConfidence':
       return `${url}merge-confidence.ts`;
     default:
