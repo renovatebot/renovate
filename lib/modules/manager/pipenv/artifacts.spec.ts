@@ -68,10 +68,10 @@ function mockFiles(mockFiles: MockFiles): void {
     for (const [key, value] of Object.entries(mockFiles)) {
       if (name.endsWith(key)) {
         const res = Array.isArray(value) ? value.shift() : value;
-        return Promise.resolve(res);
+        return res;
       }
     }
-    return Promise.reject(new Error('File not found'));
+    throw new Error('File not found');
   }) as never);
 }
 
