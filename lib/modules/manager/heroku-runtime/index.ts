@@ -3,6 +3,7 @@ import { DockerDatasource } from '../../datasource/docker';
 
 export { extractPackageFile } from './extract';
 
+export const displayName = 'Heroku Runtime';
 export const url = 'https://devcenter.heroku.com/articles/python-runtimes';
 
 export const defaultConfig = {
