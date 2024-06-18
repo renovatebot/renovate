@@ -19,11 +19,6 @@ We will try to keep breakage to a minimum, but make no guarantees that an experi
 If set, Renovate will export OpenTelemetry data to the supplied endpoint.
 For more information see [the OpenTelemetry docs](opentelemetry.md).
 
-## `RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK`
-
-If set to any value, Renovate will skip its default artifacts filter check in the Maven datasource.
-Skipping the check will speed things up, but may result in versions being returned which don't properly exist on the server.
-
 ## `RENOVATE_PAGINATE_ALL`
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
@@ -35,18 +30,10 @@ You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE`
 
 The process that runs Renovate must have the correct permissions to delete the config file.
 
-## `RENOVATE_X_DOCKER_HUB_TAGS_DISABLE`
-
-If set to any value, Renovate will stop using the Docker Hub API (`https://hub.docker.com`) to fetch tags and instead use the normal Docker API for images pulled from `https://index.docker.io`.
-
 ## `RENOVATE_X_DOCKER_MAX_PAGES`
 
 If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
 This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
-
-## `RENOVATE_X_EXEC_GPID_HANDLE`
-
-If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
 
 ## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
 
@@ -82,10 +69,6 @@ Suppress the default warning when a deprecated version of Node.js is used to run
 
 Skip initializing `RE2` for regular expressions and instead use Node-native `RegExp` instead.
 
-## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
-
-If set to any value, Renovate will download `nupkg` files for determining package metadata.
-
 ## `RENOVATE_X_PLATFORM_VERSION`
 
 Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
@@ -100,10 +83,6 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 <!-- prettier-ignore -->
 !!! note
     For the GitHub Enterprise Server platform only.
-
-## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
-
-If set, Renovate will persist repository cache locally after uploading to S3.
 
 ## `RENOVATE_X_S3_ENDPOINT`
 
@@ -125,11 +104,3 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
 Suppress the pre-commit support warning in PR bodies.
-
-## `RENOVATE_X_USE_OPENPGP`
-
-Use `openpgp` instead of `kbpgp` for `PGP` decryption.
-
-## `RENOVATE_X_YARN_PROXY`
-
-Configure global Yarn proxy settings if HTTP proxy environment variables are detected.

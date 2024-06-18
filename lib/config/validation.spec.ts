@@ -1940,4 +1940,42 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
     });
   });
+
+  describe('validate experimental flags', () => {
+    beforeEach(() => {
+      GlobalConfig.reset();
+    });
+
+    it('warns if invalid flag found', async () => {
+      const config = {
+        experimentalFlags: ['invalidtag', 10],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Experimental flags can only be of type string. Found invalid type number',
+        },
+        {
+          topic: 'Configuration Error',
+          message: 'Invalid flag `invalidtag` found in `experimentalFlags`.',
+        },
+      ]);
+    });
+
+    it('disableDockerHubTags', async () => {
+      const config = {
+        experimentalFlags: ['disableDockerHubTags'],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+    });
+  });
 });

@@ -160,6 +160,7 @@ export interface RepoGlobalConfig {
   presetCachePersistence?: boolean;
   privateKey?: string;
   privateKeyOld?: string;
+  experimentalFlags?: string[];
   httpCacheTtlDays?: number;
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;

@@ -2926,6 +2926,14 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['github'],
   },
   {
+    name: 'experimentalFlags',
+    description: 'Set which experimental flags you want Renovate to use.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+  },
+  {
     name: 'httpCacheTtlDays',
     description: 'Maximum duration in days to keep HTTP cache entries.',
     type: 'integer',

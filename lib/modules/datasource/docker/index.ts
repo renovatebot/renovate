@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { GlobalConfig } from '../../../config/global';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -1064,9 +1065,11 @@ export class DockerDatasource extends Datasource {
         'dockerhub-error' as const,
       ).catch(getTags);
 
+    const disableDockerHubTags = GlobalConfig.getExperimentalFlag(
+      'disableDockerHubTags',
+    );
     const tagsResult =
-      registryHost === 'https://index.docker.io' &&
-      !process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE
+      registryHost === 'https://index.docker.io' && !disableDockerHubTags
         ? getDockerHubTags()
         : getTags();
 

@@ -210,7 +210,7 @@ export async function generateLockFile(
       commands.push(`yarn set version ${quote(yarnUpdate.newValue!)}`);
     }
 
-    if (process.env.RENOVATE_X_YARN_PROXY) {
+    if (GlobalConfig.getExperimentalFlag('yarnProxy')) {
       if (process.env.HTTP_PROXY && !isYarn1) {
         commands.push('yarn config unset --home httpProxy');
         commands.push(

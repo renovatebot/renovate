@@ -1001,7 +1001,18 @@ async function validateGlobalConfig(
             }),
           );
         }
-        if (key === 'gitNoVerify') {
+        if (key === 'experimentalFlags') {
+          for (const flag of val) {
+            if (is.string(flag)) {
+              validateExperimentalFlag(flag, warnings, currentPath);
+            } else {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `Experimental flags can only be of type string. Found invalid type ${typeof flag}`,
+              });
+            }
+          }
+        } else if (key === 'gitNoVerify') {
           const allowedValues = ['commit', 'push'];
           for (const value of val as string[]) {
             if (!allowedValues.includes(value)) {
@@ -1087,4 +1098,27 @@ function isFalseGlobal(optionName: string, parentPath?: string): boolean {
   }
 
   return false;
+}
+
+function validateExperimentalFlag(
+  flagName: string,
+  warnings: ValidationMessage[],
+  currentPath: string | undefined,
+): void {
+  const allowedExperimentalFlags = new Set([
+    'disableDockerHubTags',
+    'execGpidHandle',
+    'noMavenPomCheck',
+    'nugetDownloadNupkgs',
+    'repoCacheForceLocal',
+    'yarnProxy',
+    'useOpenpgp',
+  ]);
+  if (!allowedExperimentalFlags.has(flagName)) {
+    warnings.push({
+      topic: 'Configuration Error',
+      message: `Invalid flag \`${flagName}\` found in \`${currentPath}\`.`,
+    });
+    return;
+  }
 }

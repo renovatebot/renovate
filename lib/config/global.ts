@@ -33,6 +33,7 @@ export class GlobalConfig {
     'gitTimeout',
     'platform',
     'endpoint',
+    'experimentalFlags',
     'httpCacheTtlDays',
     'autodiscoverRepoSort',
     'autodiscoverRepoOrder',
@@ -40,6 +41,7 @@ export class GlobalConfig {
   ];
 
   private static config: RepoGlobalConfig = {};
+  private static parsedExperimentalFlags: Set<string> = new Set();
 
   static get(): RepoGlobalConfig;
   static get<Key extends keyof RepoGlobalConfig>(
@@ -68,7 +70,28 @@ export class GlobalConfig {
     return result;
   }
 
+  static getExperimentalFlag(key: string): boolean {
+    const experimentalFlags = GlobalConfig.get('experimentalFlags');
+
+    if (!experimentalFlags?.length) {
+      return false;
+    }
+
+    if (!GlobalConfig.parsedExperimentalFlags.size) {
+      for (const flag of experimentalFlags) {
+        GlobalConfig.parsedExperimentalFlags.add(flag);
+      }
+    }
+
+    return GlobalConfig.parsedExperimentalFlags.has(key);
+  }
+
+  /**
+   * only used for testing
+   * @internal
+   */
   static reset(): void {
     GlobalConfig.config = {};
+    GlobalConfig.parsedExperimentalFlags.clear();
   }
 }

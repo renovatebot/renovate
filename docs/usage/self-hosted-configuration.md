@@ -566,6 +566,18 @@ If set to a string value, Renovate will log warnings with the `encryptedWarning`
 Default execution timeout in minutes for child processes Renovate creates.
 If this option is not set, Renovate will fallback to 15 minutes.
 
+## experimentalFlags
+
+The `experimentalFlags` configuration option helps you manage some of the experimental settings within Renovate.
+
+```javascript
+module.exports = {
+  experimentalFlags: ['disableDockerHubTags'],
+};
+```
+
+Read [Self-Hosted Experimental Flags](./self-hosted-experimental-flags.md) for the full list of flags supported by Renovate.
+
 ## exposeAllEnv
 
 To keep you safe, Renovate only passes a limited set of environment variables to package managers.
