@@ -104,6 +104,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_NUGET_DOWNLOAD_NUPKGS: 'true',
         RENOVATE_X_REPO_CACHE_FORCE_LOCAL: 'true',
         RENOVATE_X_YARN_PROXY: 'true',
+        RENOVATE_X_USE_OPENPGP: 'true',
       };
       expect(await env.getConfig(envArg)).toMatchObject({
         experimentalFlags: [
@@ -113,6 +114,7 @@ describe('workers/global/config/parse/env', () => {
           'nugetDownloadNupkgs',
           'repoCacheForceLocal',
           'yarnProxy',
+          'useOpenpgp',
         ],
       });
     });

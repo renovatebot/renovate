@@ -30,6 +30,10 @@ You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE`
 
 The process that runs Renovate must have the correct permissions to delete the config file.
 
+## `RENOVATE_X_DOCKER_HUB_TAGS_DISABLE`
+
+If set to any value, Renovate will stop using the Docker Hub API (`https://hub.docker.com`) to fetch tags and instead use the normal Docker API for images pulled from `https://index.docker.io`.
+
 ## `RENOVATE_X_DOCKER_MAX_PAGES`
 
 If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
@@ -104,7 +108,3 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
 Suppress the pre-commit support warning in PR bodies.
-
-## `RENOVATE_X_USE_OPENPGP`
-
-Use `openpgp` instead of `kbpgp` for `PGP` decryption.

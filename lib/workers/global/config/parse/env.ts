@@ -93,6 +93,7 @@ const legacyExperimentalEnvVars = {
   RENOVATE_X_NUGET_DOWNLOAD_NUPKGS: 'nugetDownloadNupkgs',
   RENOVATE_X_REPO_CACHE_FORCE_LOCAL: 'repoCacheForceLocal',
   RENOVATE_X_YARN_PROXY: 'yarnProxy',
+  RENOVATE_X_USE_OPENPGP: 'useOpenpgp',
 };
 
 function convertLegacyEnvVarsToFlags(env: NodeJS.ProcessEnv): string[] {
