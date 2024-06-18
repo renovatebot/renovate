@@ -482,8 +482,8 @@ importers:
         specifier: 0.2.6
         version: 0.2.6
       '@types/traverse':
-        specifier: 0.6.36
-        version: 0.6.36
+        specifier: 0.6.37
+        version: 0.6.37
       '@types/unist':
         specifier: 2.0.10
         version: 2.0.10
@@ -2120,8 +2120,8 @@ packages:
   '@types/tmp@0.2.6':
     resolution: {integrity: sha512-chhaNf2oKHlRkDGt+tiKE2Z5aJ6qalm7Z9rlLdBwmOiAAf09YQvvoLXjWK4HWPF1xU/fqvMgfNfpVoBscA/tKA==}
 
-  '@types/traverse@0.6.36':
-    resolution: {integrity: sha512-0ko4fZgKQf2J/2FvDJHua9KZ19zJkfI5FxG1ZeEUhezEwuq6UL+4T0IxcBfmHilBeAj7OSUTwrm/lPnh8EB1/Q==}
+  '@types/traverse@0.6.37':
+    resolution: {integrity: sha512-c90MVeDiUI1FhOZ6rLQ3kDWr50YE8+paDpM+5zbHjbmsqEp2DlMYkqnZnwbK9oI+NvDe8yRajup4jFwnVX6xsA==}
 
   '@types/treeify@1.0.3':
     resolution: {integrity: sha512-hx0o7zWEUU4R2Amn+pjCBQQt23Khy/Dk56gQU5xi5jtPL1h83ACJCeFaB2M/+WO1AntvWrSoVnnCAfI1AQH4Cg==}
@@ -8481,7 +8481,7 @@ snapshots:
 
   '@types/tmp@0.2.6': {}
 
-  '@types/traverse@0.6.36': {}
+  '@types/traverse@0.6.37': {}
 
   '@types/treeify@1.0.3': {}
 
