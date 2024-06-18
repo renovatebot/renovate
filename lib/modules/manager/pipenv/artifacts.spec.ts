@@ -67,7 +67,8 @@ function mockFiles(mockFiles: MockFiles): void {
   fsExtra.readFile.mockImplementation(((name: string) => {
     for (const [key, value] of Object.entries(mockFiles)) {
       if (name.endsWith(key)) {
-        return Array.isArray(value) ? value.shift() : value;
+        const res = Array.isArray(value) ? value.shift() : value;
+        return Promise.resolve(res);
       }
     }
     return Promise.reject(new Error('File not found'));
