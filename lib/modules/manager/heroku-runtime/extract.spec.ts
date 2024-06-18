@@ -1,6 +1,6 @@
 import { extractPackageFile } from '.';
 
-describe('modules/manager/heroku-python/extract', () => {
+describe('modules/manager/heroku-runtime/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns a result', () => {
       const res = extractPackageFile('python-3.12.4\n');
