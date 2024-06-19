@@ -1,4 +1,3 @@
-import { logger } from '../../../logger';
 import type { Registry } from './types';
 
 /**

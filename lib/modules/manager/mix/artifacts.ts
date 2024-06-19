@@ -12,7 +12,7 @@ import {
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { aliasRecordToRepositories, resolveAlias } from './utils';
+import { aliasRecordToRepositories } from './utils';
 
 const hexRepoUrl = 'https://hex.pm/';
 const hexRepoOrgUrlRegex = regEx(

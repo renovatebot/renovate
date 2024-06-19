@@ -46,26 +46,6 @@ describe('modules/datasource/hex/index', () => {
       ).toBeNull();
     });
 
-    // do we have to throw for for >401 responses? Don't see this elsewhere
-    // it('throws for 429', async () => {
-    //   httpMock.scope(baseRegistryUrl).get('/packages/some_crate').reply(429);
-    //   await expect(
-    //     getPkgReleases({ datasource, packageName: 'some_crate' }),
-    //   ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-    // });
-    // it('throws for 429', async () => {
-    //   httpMock.scope(baseUrl).get('/packages/some_crate').reply(429);
-    //   await expect(
-    //     getPkgReleases({ datasource, packageName: 'some_crate' }),
-    //   ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-    // });
-    // it('throws for 5xx', async () => {
-    //   httpMock.scope(baseUrl).get('/packages/some_crate').reply(502);
-    //   await expect(
-    //     getPkgReleases({ datasource, packageName: 'some_crate' }),
-    //   ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-    // });
-
     it('returns null for unknown error', async () => {
       httpMock
         .scope(baseRegistryUrl)
