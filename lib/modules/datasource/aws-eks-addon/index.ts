@@ -7,7 +7,7 @@ import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { cache } from '../../../util/cache/package/decorator';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { EKSAddonsFilter } from './types';
+import { EKSAddonsFilter, EKSAddonsFilterSchema } from './schema';
 
 export class AwsEKSAddonDataSource extends Datasource {
   static readonly id = 'aws-eks-addon';
@@ -26,7 +26,9 @@ export class AwsEKSAddonDataSource extends Datasource {
   async getReleases({
     packageName: serializedFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const filter: EKSAddonsFilter = JSON.parse(serializedFilter);
+    const filter: EKSAddonsFilter = EKSAddonsFilterSchema.parse(
+      JSON.parse(serializedFilter),
+    );
     const eksClient = this.getEKSClient(filter);
 
     const cmd = new DescribeAddonVersionsCommand(
