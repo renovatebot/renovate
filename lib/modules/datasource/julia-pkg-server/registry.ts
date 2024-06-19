@@ -122,7 +122,9 @@ export async function parseRegistryUrl(
   http: Http,
   registryUrl?: string,
 ): Promise<JuliaPkgServerRegistry | null> {
-  const parsedRegistryUrl = registryUrl?.match(PKG_SERVER_REGISTRY_URL_FORMAT);
+  const parsedRegistryUrl = registryUrl?.match(
+    PKG_SERVER_REGISTRY_URL_FORMAT,
+  )?.groups;
 
   if (!parsedRegistryUrl) {
     logger.warn(
@@ -136,9 +138,7 @@ export async function parseRegistryUrl(
     return null;
   }
 
-  // The groups will always be specified, as otherwise the URL wouldn't have
-  // parsed and the function returned above
-  const { pkgServer, state, uuid } = parsedRegistryUrl.groups!;
+  const { pkgServer, state, uuid } = parsedRegistryUrl;
 
   if (state) {
     return {
