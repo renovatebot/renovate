@@ -409,7 +409,7 @@ export class Vulnerabilities {
       this.isVersionGt(version, depVersion, versioningApi),
     );
     if (fixedVersion) {
-      return ecosystem === 'PyPI' ? `==${fixedVersion}` : fixedVersion;
+      return this.getFixedVersionByEcosystem(fixedVersion, ecosystem);
     }
 
     lastAffectedVersions.sort((a, b) => versioningApi.sortVersions(a, b));
@@ -421,6 +421,21 @@ export class Vulnerabilities {
     }
 
     return null;
+  }
+
+  private getFixedVersionByEcosystem(
+    fixedVersion: string,
+    ecosystem: Ecosystem,
+  ): string {
+    if (ecosystem === 'Maven') {
+      return `[${fixedVersion},)`;
+    } else if (ecosystem === 'NuGet') {
+      // TODO: add support for nuget version ranges when #26150 is merged
+      return fixedVersion;
+    }
+
+    // crates.io, Go, Hex, npm, RubyGems, PyPI
+    return `>= ${fixedVersion}`;
   }
 
   private getLastAffectedByEcosystem(
