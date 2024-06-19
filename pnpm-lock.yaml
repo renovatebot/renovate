@@ -2473,10 +2473,6 @@ packages:
       }
     engines: { node: '>=14.0.0' }
 
-  '@smithy/util-buffer-from@2.2.0':
-    resolution: {integrity: sha512-IJdWBbTcMQ6DA0gdNhh/BwrLkDR+ADW5Kr1aZmd4k3DIF6ezMV4R2NIAmT08wQJ3yUK82thHWmC/TnK/wpMMIA==}
-    engines: {node: '>=14.0.0'}
-
   '@smithy/util-buffer-from@3.0.0':
     resolution:
       {
