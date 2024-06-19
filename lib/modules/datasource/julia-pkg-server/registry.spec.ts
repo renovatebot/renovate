@@ -1,3 +1,5 @@
+import { fs as memfs } from 'memfs';
+import { Fixtures, buildTarball } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { logger } from '../../../../test/util';
 import { Http } from '../../../util/http';
@@ -13,7 +15,8 @@ import {
   registryPathForPackage,
   retrieveRegistryState,
 } from './registry';
-import { createRegistryTarballFromFixture } from './test';
+
+jest.mock('fs', () => memfs);
 
 const datasource = juliaPkgServerDatasourceId;
 const eagerRegistriesPath = '/registries.eager';
@@ -22,33 +25,40 @@ const state = '1234567890abcdef1234567890abcdef12345678';
 
 describe('modules/datasource/julia-pkg-server/registry', () => {
   describe('extractFilesFromTarball', () => {
-    const existingFile = 'H/HTTP/Versions.toml';
+    const fixtureName = 'ExtractFilesFixture';
+    const existingFile = 'some/file';
+    const existingFileContent = 'Some Content';
+
+    let tarball: Buffer;
+
+    afterAll(() => Fixtures.reset());
+
+    beforeAll(async () => {
+      Fixtures.mock({
+        [`${fixtureName}/${existingFile}`]: existingFileContent,
+      });
+
+      tarball = await buildTarball(fixtureName);
+    });
 
     it('extracts requested files if available', async () => {
-      const tarball = await createRegistryTarballFromFixture('General');
-
       const fileContents = await extractFilesFromTarball(tarball, [
         existingFile,
       ]);
 
       expect(fileContents).toContainKey(existingFile);
+
       const existingFileContents = fileContents?.[existingFile];
-      expect(existingFileContents).toContain('["1.0.0"]');
-      expect(existingFileContents).toContain(
-        'git-tree-sha-1 = "4444444444444444444444444444444444444444"',
-      );
+      expect(existingFileContents).toContain(existingFileContent);
     });
 
     it('returns null if no files are requested for extraction', async () => {
-      const tarball = await createRegistryTarballFromFixture('General');
-
       expect(await extractFilesFromTarball(tarball, [])).toBeNull();
     });
 
     it('returns null if not all files could be extracted', async () => {
       const nonExistentFile = 'does/not/exist';
       const files = [existingFile, nonExistentFile];
-      const tarball = await createRegistryTarballFromFixture('General');
 
       expect(await extractFilesFromTarball(tarball, files)).toBeNull();
     });

@@ -3,6 +3,7 @@ import type { PathLike, Stats } from 'node:fs';
 import callsite from 'callsite';
 import { DirectoryJSON, fs as memfs, vol } from 'memfs';
 import type { TDataOut } from 'memfs/lib/encoding';
+import { create as tarCreate } from 'tar';
 import upath from 'upath';
 
 const realFs = fs; //jest.requireActual<typeof fs>('fs');
@@ -124,6 +125,25 @@ export function fsExtra(): any {
     ...memfs,
     ...fsExtraMock,
   };
+}
+
+/**
+ * Builds a tarball from the folder referenced by the path
+ * @param path the path to the folder
+ * @returns the generated tarball as a Buffer
+ */
+export async function buildTarball(path: string): Promise<Buffer> {
+  const contents = (await memfs.promises.readdir(path)) as string[];
+
+  const tarballDir = await memfs.promises.mkdtemp('tarball-');
+  const tarballPath = upath.join(tarballDir, 'fixture.tar');
+
+  try {
+    await tarCreate({ cwd: path, file: tarballPath }, contents);
+    return memfs.promises.readFile(tarballPath) as Promise<Buffer>;
+  } finally {
+    await memfs.promises.rmdir(tarballDir, { recursive: true });
+  }
 }
 
 export function readFile(fileName: string, options: any): Promise<TDataOut> {

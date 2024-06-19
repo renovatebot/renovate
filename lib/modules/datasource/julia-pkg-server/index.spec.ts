@@ -1,7 +1,8 @@
+import { fs as memfs } from 'memfs';
 import { getPkgReleases } from '..';
+import { Fixtures, buildTarball } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { logger } from '../../../../test/util';
-import { createRegistryTarballFromFixture } from './test';
 import {
   buildRegistryUrl,
   defaultPkgServer,
@@ -17,12 +18,37 @@ const generalRegistryPath = `/registry/${generalRegistryUUID}/${eagerGeneralRegi
 const eagerRegistriesPath = '/registries.eager';
 const eagerRegistriesResponse = `${generalRegistryPath}\n`;
 
+jest.mock('fs', () => memfs);
+
 describe('modules/datasource/julia-pkg-server/index', () => {
   describe('getReleases', () => {
+    let generalRegistryResponse: Buffer;
+
+    afterAll(() => Fixtures.reset());
+
+    beforeAll(async () => {
+      const httpPackageToml =
+        'repo = "https://github.com/JuliaWeb/HTTP.jl.git"';
+
+      Fixtures.mock({
+        './ExtraHTTP/H/HTTP/Package.toml': httpPackageToml,
+        './ExtraHTTP/H/HTTP/Versions.toml': '["0.2.0"]',
+        './General/H/HTTP/Package.toml': httpPackageToml,
+        './General/H/HTTP/Versions.toml': `
+          ["0.1.0"]
+
+          ["0.1.1"]
+          yanked = true
+
+          ["1.0.0"]
+        `,
+      });
+
+      generalRegistryResponse = await buildTarball('./General');
+    });
+
     it('returns null for non-existent packages', async () => {
       const packageName = 'non_existent_package';
-      const generalRegistryResponse =
-        await createRegistryTarballFromFixture('General');
 
       httpMock
         .scope(defaultPkgServer)
@@ -71,10 +97,8 @@ describe('modules/datasource/julia-pkg-server/index', () => {
         sourceUrl: 'https://github.com/JuliaWeb/HTTP.jl',
         releases: [
           { version: '0.1.0' },
-          { version: '0.2.0' },
-          { version: '0.2.1', isDeprecated: true },
+          { version: '0.1.1', isDeprecated: true },
           { version: '1.0.0' },
-          { version: '1.1.0' },
         ],
         registryUrl: buildRegistryUrl(
           defaultPkgServer,
@@ -82,8 +106,6 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           eagerGeneralRegistryState,
         ),
       };
-      const generalRegistryResponse =
-        await createRegistryTarballFromFixture('General');
 
       httpMock
         .scope(defaultPkgServer)
@@ -107,10 +129,8 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           sourceUrl: 'https://github.com/JuliaWeb/HTTP.jl',
           releases: [
             { version: '0.1.0' },
-            { version: '0.2.0' },
-            { version: '0.2.1', isDeprecated: true },
+            { version: '0.1.1', isDeprecated: true },
             { version: '1.0.0' },
-            { version: '1.1.0' },
           ],
           registryUrl: buildRegistryUrl(
             customPkgServer,
@@ -118,8 +138,6 @@ describe('modules/datasource/julia-pkg-server/index', () => {
             eagerGeneralRegistryState,
           ),
         };
-        const generalRegistryResponse =
-          await createRegistryTarballFromFixture('General');
 
         httpMock
           .scope(customPkgServer)
@@ -151,11 +169,8 @@ describe('modules/datasource/julia-pkg-server/index', () => {
 
       it('merges multiple registries', async () => {
         const customPkgServer = 'https://example.com';
-        // Contains an additional version (v0.3.0) for the HTTP package
-        const extraHTTPRegistryResponse =
-          await createRegistryTarballFromFixture('ExtraHTTP');
-        const generalRegistryResponse =
-          await createRegistryTarballFromFixture('General');
+        // Contains an additional version (v0.2.0) for the HTTP package
+        const extraHTTPRegistryResponse = await buildTarball('./ExtraHTTP');
 
         httpMock
           .scope(defaultPkgServer)
