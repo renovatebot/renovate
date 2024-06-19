@@ -34,6 +34,10 @@ export class JuliaPkgServerDatasource extends Datasource {
   // different versions of that package
   override readonly registryStrategy = 'merge';
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    "The source URL is determined from the `repo` field in a package's `Package.toml`.";
+
   @cache({
     namespace: `datasource-${juliaPkgServerDatasourceId}-releases`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
