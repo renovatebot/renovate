@@ -36,7 +36,7 @@ interface JuliaPkgServerRegistry {
  * to be filled before further processing.
  */
 const PKG_SERVER_REGISTRY_URL_FORMAT = regEx(
-  '^(?<pkgServer>.+)/registry/(?<uuid>[[:xdigit:]]{8}(-[[:xdigit:]]{4}){3}-[[:xdigit:]]{12})(/(?<state>[[:xdigit:]]{40}))?/?$',
+  '^(?<pkgServer>.+)/registry/(?<uuid>[[:xdigit:]]{8}(-[[:xdigit:]]{4}){3}-[[:xdigit:]]{12})(/(?<state>[[:xdigit:]]{40,64}))?/?$',
 );
 
 /**

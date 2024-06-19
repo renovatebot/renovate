@@ -21,7 +21,7 @@ jest.mock('fs', () => memfs);
 const datasource = juliaPkgServerDatasourceId;
 const eagerRegistriesPath = '/registries.eager';
 const http = new Http(datasource);
-const state = '1234567890abcdef1234567890abcdef12345678';
+const sha1State = '1234567890abcdef1234567890abcdef12345678';
 
 describe('modules/datasource/julia-pkg-server/registry', () => {
   describe('extractFilesFromTarball', () => {
@@ -66,21 +66,37 @@ describe('modules/datasource/julia-pkg-server/registry', () => {
 
   describe('parseRegistryUrl', () => {
     it('parses a fully specified URL', async () => {
-      const registryUrl = buildRegistryUrl(pkgServer, registryUuid, state);
+      const registryUrl = buildRegistryUrl(pkgServer, registryUuid, sha1State);
 
       expect(await parseRegistryUrl(http, registryUrl)).toEqual({
         pkgServer,
-        state,
+        state: sha1State,
         uuid: registryUuid,
       });
     });
 
     it('handles (optional) trailing slashes', async () => {
-      const registryUrl = `${buildRegistryUrl(pkgServer, registryUuid, state)}/`;
+      const registryUrl = `${buildRegistryUrl(pkgServer, registryUuid, sha1State)}/`;
 
       expect(await parseRegistryUrl(http, registryUrl)).toEqual({
         pkgServer,
-        state,
+        state: sha1State,
+        uuid: registryUuid,
+      });
+    });
+
+    it('handles SHA-256 state', async () => {
+      // A SHA-256 is 64 hexadecimal characters. SHA-1 uses 40
+      const sha256State = `${sha1State}${sha1State.substring(0, 24)}`;
+      const registryUrl = buildRegistryUrl(
+        pkgServer,
+        registryUuid,
+        sha256State,
+      );
+
+      expect(await parseRegistryUrl(http, registryUrl)).toEqual({
+        pkgServer,
+        state: sha256State,
         uuid: registryUuid,
       });
     });
@@ -114,7 +130,7 @@ describe('modules/datasource/julia-pkg-server/registry', () => {
     describe('missing state from registryUrl', () => {
       it('retrieves the state from the PkgServer', async () => {
         const registryPath = `/registry/${registryUuid}`;
-        const registryPathWithState = `${registryPath}/${state}\n`;
+        const registryPathWithState = `${registryPath}/${sha1State}\n`;
         const registryUrl = `${pkgServer}${registryPath}`;
 
         httpMock
@@ -124,7 +140,7 @@ describe('modules/datasource/julia-pkg-server/registry', () => {
 
         expect(await parseRegistryUrl(http, registryUrl)).toEqual({
           pkgServer,
-          state,
+          state: sha1State,
           uuid: registryUuid,
         });
       });
@@ -159,7 +175,7 @@ describe('modules/datasource/julia-pkg-server/registry', () => {
 
   describe('retrieveRegistryState', () => {
     it('retrieves the state for a valid registry', async () => {
-      const registryPathWithState = `/registry/${registryUuid}/${state}\n`;
+      const registryPathWithState = `/registry/${registryUuid}/${sha1State}\n`;
 
       httpMock
         .scope(pkgServer)
@@ -168,7 +184,7 @@ describe('modules/datasource/julia-pkg-server/registry', () => {
 
       expect(
         await retrieveRegistryState(http, { pkgServer, uuid: registryUuid }),
-      ).toBe(state);
+      ).toBe(sha1State);
     });
 
     it('returns null when the registries overview cannot be fetched', async () => {
@@ -192,7 +208,7 @@ describe('modules/datasource/julia-pkg-server/registry', () => {
 
     it('returns null when the requested registry is not hosted by the PkgServer', async () => {
       const hostedRegistryUuid = '111111111111-1111-1111-1111-11111111';
-      const registryPathWithState = `/registry/${hostedRegistryUuid}/${state}\n`;
+      const registryPathWithState = `/registry/${hostedRegistryUuid}/${sha1State}\n`;
 
       httpMock
         .scope(pkgServer)
