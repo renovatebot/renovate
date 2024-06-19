@@ -1,0 +1,286 @@
+{
+  "meta": {
+    "links": {
+      "GitHub": "https://github.com/g-andrade/tls_certificate_check",
+      "GitLab": "https://gitlab.com/g-andrade/tls_certificate_check",
+      "Changelog": "https://github.com/g-andrade/tls_certificate_check/blob/master/CHANGELOG.md"
+    },
+    "description": "CA store + Partial chain handler",
+    "licenses": [
+      "MIT"
+    ],
+    "maintainers": []
+  },
+  "name": "tls_certificate_check",
+  "url": "https://hex.pm/api/packages/tls_certificate_check",
+  "owners": [
+    {
+      "url": "https://hex.pm/api/users/g-andrade",
+      "username": "g-andrade"
+    }
+  ],
+  "inserted_at": "2020-05-21T00:57:53.273033Z",
+  "updated_at": "2024-03-16T16:23:52.082051Z",
+  "repository": "hexpm",
+  "releases": [
+    {
+      "version": "1.22.1",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.22.1",
+      "inserted_at": "2024-03-16T16:21:24.461588Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.22.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.22.0",
+      "inserted_at": "2024-03-16T15:52:29.677084Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.21.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.21.0",
+      "inserted_at": "2023-12-12T16:32:01.017675Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.20.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.20.0",
+      "inserted_at": "2023-08-22T10:56:44.511807Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.19.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.19.0",
+      "inserted_at": "2023-05-30T10:51:23.377671Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.18.1",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.18.1",
+      "inserted_at": "2023-05-01T22:56:38.169742Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.18.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.18.0",
+      "inserted_at": "2023-03-20T18:07:34.489300Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.17.4",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.17.4",
+      "inserted_at": "2023-02-19T19:23:26.806829Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.17.3",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.17.3",
+      "inserted_at": "2023-01-17T15:12:42.271311Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.17.2",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.17.2",
+      "inserted_at": "2023-01-12T16:36:16.103810Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.17.1",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.17.1",
+      "inserted_at": "2023-01-12T01:15:19.695589Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.17.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.17.0",
+      "inserted_at": "2023-01-11T18:42:45.919698Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.16.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.16.0",
+      "inserted_at": "2022-10-11T10:52:36.095007Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.15.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.15.0",
+      "inserted_at": "2022-07-20T16:08:34.371497Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.14.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.14.0",
+      "inserted_at": "2022-04-27T14:12:18.990348Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.13.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.13.0",
+      "inserted_at": "2022-03-21T16:46:32.005405Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.12.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.12.0",
+      "inserted_at": "2022-02-02T16:40:07.824786Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.11.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.11.0",
+      "inserted_at": "2021-10-28T17:38:29.649085Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.10.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.10.0",
+      "inserted_at": "2021-10-01T18:01:02.256990Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.9.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.9.0",
+      "inserted_at": "2021-09-03T13:57:22.713386Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.8.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.8.0",
+      "inserted_at": "2021-08-31T20:17:24.102518Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.7.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.7.0",
+      "inserted_at": "2021-07-08T22:09:21.845989Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.6.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.6.0",
+      "inserted_at": "2021-05-30T19:57:29.487124Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.5.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.5.0",
+      "inserted_at": "2021-05-13T18:25:16.258659Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.4.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.4.0",
+      "inserted_at": "2021-04-16T23:00:02.486682Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.3.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.3.0",
+      "inserted_at": "2021-04-02T15:42:35.731727Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.2.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.2.0",
+      "inserted_at": "2021-03-12T22:07:36.263582Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.1.1",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.1.1",
+      "inserted_at": "2020-12-08T20:54:17.217376Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.1.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.1.0",
+      "inserted_at": "2020-12-05T19:33:37.712451Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.0.2",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.0.2",
+      "inserted_at": "2020-10-16T18:05:41.581431Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.0.1",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.0.1",
+      "inserted_at": "2020-05-21T09:56:01.525421Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.0.0",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.0.0",
+      "inserted_at": "2020-05-21T01:02:49.271902Z",
+      "has_docs": true
+    },
+    {
+      "version": "1.0.0-beta",
+      "url": "https://hex.pm/api/packages/tls_certificate_check/releases/1.0.0-beta",
+      "inserted_at": "2020-05-21T00:57:53.301695Z",
+      "has_docs": true
+    }
+  ],
+  "downloads": {
+    "all": 5478869,
+    "day": 11944,
+    "recent": 875817,
+    "week": 67617
+  },
+  "latest_version": "1.22.1",
+  "docs_html_url": "https://hexdocs.pm/tls_certificate_check/",
+  "html_url": "https://hex.pm/packages/tls_certificate_check",
+  "retirements": {
+    "1.0.0": {
+      "message": "Outdated Certification Authorities",
+      "reason": "security"
+    },
+    "1.0.1": {
+      "message": "Outdated Certification Authorities",
+      "reason": "security"
+    },
+    "1.0.2": {
+      "message": "Outdated Certification Authorities",
+      "reason": "security"
+    },
+    "1.0.0-beta": {
+      "message": "Publication went haywire; I had long deleted the '1.0.0-beta' tag from Git but it somehow made its way into this.",
+      "reason": "invalid"
+    },
+    "1.1.0": {
+      "message": "Outdated Certification Authorities",
+      "reason": "security"
+    },
+    "1.1.1": {
+      "message": "Outdated Certification Authorities",
+      "reason": "security"
+    },
+    "1.2.0": {
+      "message": "Outdated Certification Authorities",
+      "reason": "security"
+    },
+    "1.3.0": {
+      "message": "Outdated Certification Authorities",
+      "reason": "security"
+    },
+    "1.4.0": {
+      "message": "Outdated Certification Authorities",
+      "reason": "security"
+    },
+    "1.5.0": {
+      "message": "Outdated Certification Authorities",
+      "reason": "security"
+    },
+    "1.6.0": {
+      "message": "Outdated Certification Authorities",
+      "reason": "security"
+    }
+  },
+  "configs": {
+    "erlang.mk": "dep_tls_certificate_check = hex 1.22.1",
+    "mix.exs": "{:tls_certificate_check, \"~> 1.22\"}",
+    "rebar.config": "{tls_certificate_check, \"1.22.1\"}"
+  },
+  "latest_stable_version": "1.22.1"
+}

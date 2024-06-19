@@ -4,7 +4,12 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexDatasource } from '../../datasource/hex';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
+import { resolveAlias } from './utils';
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
@@ -15,6 +20,7 @@ const githubRegexp = regEx(/github:\s*"(?<value>[^"]+)"/);
 const refRegexp = regEx(/ref:\s*"(?<value>[^"]+)"/);
 const branchOrTagRegexp = regEx(/(?:branch|tag):\s*"(?<value>[^"]+)"/);
 const organizationRegexp = regEx(/organization:\s*"(?<value>[^"]+)"/);
+const repoRegexp = regEx(/repo:\s*"(?<value>[^"]+)"/);
 const commentMatchRegExp = regEx(/#.*$/);
 const lockedVersionRegExp = regEx(
   /^\s+"(?<app>\w+)".*?"(?<lockedVersion>\d+\.\d+\.\d+)"/,
@@ -23,12 +29,14 @@ const lockedVersionRegExp = regEx(
 export async function extractPackageFile(
   content: string,
   packageFile: string,
+  config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   logger.trace(`mix.extractPackageFile(${packageFile})`);
   const deps = new Map<string, PackageDependency>();
   const contentArr = content
     .split(newlineRegex)
     .map((line) => line.replace(commentMatchRegExp, ''));
+
   for (let lineNumber = 0; lineNumber < contentArr.length; lineNumber += 1) {
     if (contentArr[lineNumber].match(depSectionRegExp)) {
       let depBuffer = '';
@@ -44,6 +52,7 @@ export async function extractPackageFile(
         const ref = refRegexp.exec(opts)?.groups?.value;
         const branchOrTag = branchOrTagRegexp.exec(opts)?.groups?.value;
         const organization = organizationRegexp.exec(opts)?.groups?.value;
+        const repo = repoRegexp.exec(opts)?.groups?.value;
 
         let dep: PackageDependency;
 
@@ -60,10 +69,40 @@ export async function extractPackageFile(
             depName: app,
             currentValue: requirement,
             datasource: HexDatasource.id,
-            packageName: organization ? `${app}:${organization}` : app,
+            packageName: app,
           };
+
           if (requirement?.startsWith('==')) {
             dep.currentVersion = requirement.replace(regEx(/^==\s*/), '');
+          }
+
+          if (organization) {
+            dep.packageName = `org:${organization}:${app}`;
+          }
+
+          if (repo) {
+            dep.packageName = `repo:${repo}:${app}`;
+
+            if (config.registryAliases) {
+              const repoUrl = resolveAlias(
+                dep.packageName,
+                config.registryAliases,
+              );
+
+              if (repoUrl) {
+                dep.registryUrls = [repoUrl];
+              } else {
+                logger.debug(
+                  `No registry alias found for ${app} in repo ${repo}`,
+                );
+                dep.skipReason = 'no-repository';
+              }
+            } else {
+              logger.debug(
+                `No registryAliases defined. Cannot resolve for ${app} in repo ${repo}`,
+              );
+              dep.skipReason = 'no-repository';
+            }
           }
         }
 

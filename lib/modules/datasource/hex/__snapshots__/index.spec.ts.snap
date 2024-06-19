@@ -2,197 +2,308 @@
 
 exports[`modules/datasource/hex/index getReleases process public repo without auth 1`] = `
 {
-  "homepage": "https://hex.pm/packages/certifi",
-  "registryUrl": "https://hex.pm",
+  "changelogUrl": "https://github.com/g-andrade/tls_certificate_check/blob/master/CHANGELOG.md",
+  "homepage": "https://hex.pm/packages/tls_certificate_check",
+  "registryUrl": "https://repo.hex.pm",
   "releases": [
     {
       "isDeprecated": true,
-      "releaseTimestamp": "2015-09-10T13:58:55.620Z",
-      "version": "0.1.1",
+      "releaseTimestamp": "2020-05-21T00:57:53.301Z",
+      "version": "1.0.0-beta",
     },
     {
-      "releaseTimestamp": "2015-11-19T11:25:06.024Z",
-      "version": "0.2.0",
-    },
-    {
-      "version": "0.3.0",
-    },
-    {
-      "releaseTimestamp": "2016-03-02T20:37:38.856Z",
-      "version": "0.4.0",
-    },
-    {
-      "releaseTimestamp": "2016-08-25T14:22:42.043Z",
-      "version": "0.5.0",
-    },
-    {
-      "releaseTimestamp": "2016-09-12T10:05:24.327Z",
-      "version": "0.6.0",
-    },
-    {
-      "releaseTimestamp": "2016-10-02T23:16:44.504Z",
-      "version": "0.7.0",
-    },
-    {
-      "releaseTimestamp": "2017-01-24T11:14:00.415Z",
+      "isDeprecated": true,
+      "releaseTimestamp": "2020-05-21T01:02:49.271Z",
       "version": "1.0.0",
     },
     {
-      "releaseTimestamp": "2017-04-20T03:47:25.151Z",
+      "isDeprecated": true,
+      "releaseTimestamp": "2020-05-21T09:56:01.525Z",
+      "version": "1.0.1",
+    },
+    {
+      "isDeprecated": true,
+      "releaseTimestamp": "2020-10-16T18:05:41.581Z",
+      "version": "1.0.2",
+    },
+    {
+      "isDeprecated": true,
+      "releaseTimestamp": "2020-12-05T19:33:37.712Z",
       "version": "1.1.0",
     },
     {
-      "releaseTimestamp": "2017-05-20T17:36:20.704Z",
+      "isDeprecated": true,
+      "releaseTimestamp": "2020-12-08T20:54:17.217Z",
+      "version": "1.1.1",
+    },
+    {
+      "isDeprecated": true,
+      "releaseTimestamp": "2021-03-12T22:07:36.263Z",
       "version": "1.2.0",
     },
     {
-      "releaseTimestamp": "2017-05-22T10:05:04.091Z",
-      "version": "1.2.1",
+      "isDeprecated": true,
+      "releaseTimestamp": "2021-04-02T15:42:35.731Z",
+      "version": "1.3.0",
     },
     {
-      "releaseTimestamp": "2017-07-29T10:26:25.887Z",
-      "version": "2.0.0",
+      "isDeprecated": true,
+      "releaseTimestamp": "2021-04-16T23:00:02.486Z",
+      "version": "1.4.0",
     },
     {
-      "releaseTimestamp": "2018-02-15T14:24:33.990Z",
-      "version": "2.1.0",
+      "isDeprecated": true,
+      "releaseTimestamp": "2021-05-13T18:25:16.258Z",
+      "version": "1.5.0",
     },
     {
-      "releaseTimestamp": "2018-02-15T14:40:54.249Z",
-      "version": "2.2.0",
+      "isDeprecated": true,
+      "releaseTimestamp": "2021-05-30T19:57:29.487Z",
+      "version": "1.6.0",
     },
     {
-      "releaseTimestamp": "2018-02-27T21:20:24.804Z",
-      "version": "2.3.0",
+      "releaseTimestamp": "2021-07-08T22:09:21.845Z",
+      "version": "1.7.0",
     },
     {
-      "releaseTimestamp": "2018-03-01T12:09:47.479Z",
-      "version": "2.3.1",
+      "releaseTimestamp": "2021-08-31T20:17:24.102Z",
+      "version": "1.8.0",
     },
     {
-      "releaseTimestamp": "2018-08-23T08:18:39.658Z",
-      "version": "2.4.1",
+      "releaseTimestamp": "2021-09-03T13:57:22.713Z",
+      "version": "1.9.0",
     },
     {
-      "releaseTimestamp": "2018-08-30T08:21:29.349Z",
-      "version": "2.4.2",
+      "releaseTimestamp": "2021-10-01T18:01:02.256Z",
+      "version": "1.10.0",
     },
     {
-      "releaseTimestamp": "2019-01-24T15:14:25.991Z",
-      "version": "2.5.1",
+      "releaseTimestamp": "2021-10-28T17:38:29.649Z",
+      "version": "1.11.0",
     },
     {
-      "releaseTimestamp": "2020-03-04T14:54:16.283Z",
-      "version": "2.5.2",
+      "releaseTimestamp": "2022-02-02T16:40:07.824Z",
+      "version": "1.12.0",
+    },
+    {
+      "releaseTimestamp": "2022-03-21T16:46:32.005Z",
+      "version": "1.13.0",
+    },
+    {
+      "releaseTimestamp": "2022-04-27T14:12:18.990Z",
+      "version": "1.14.0",
+    },
+    {
+      "releaseTimestamp": "2022-07-20T16:08:34.371Z",
+      "version": "1.15.0",
+    },
+    {
+      "releaseTimestamp": "2022-10-11T10:52:36.095Z",
+      "version": "1.16.0",
+    },
+    {
+      "releaseTimestamp": "2023-01-11T18:42:45.919Z",
+      "version": "1.17.0",
+    },
+    {
+      "releaseTimestamp": "2023-01-12T01:15:19.695Z",
+      "version": "1.17.1",
+    },
+    {
+      "releaseTimestamp": "2023-01-12T16:36:16.103Z",
+      "version": "1.17.2",
+    },
+    {
+      "releaseTimestamp": "2023-01-17T15:12:42.271Z",
+      "version": "1.17.3",
+    },
+    {
+      "releaseTimestamp": "2023-02-19T19:23:26.806Z",
+      "version": "1.17.4",
+    },
+    {
+      "releaseTimestamp": "2023-03-20T18:07:34.489Z",
+      "version": "1.18.0",
+    },
+    {
+      "releaseTimestamp": "2023-05-01T22:56:38.169Z",
+      "version": "1.18.1",
+    },
+    {
+      "releaseTimestamp": "2023-05-30T10:51:23.377Z",
+      "version": "1.19.0",
+    },
+    {
+      "releaseTimestamp": "2023-08-22T10:56:44.511Z",
+      "version": "1.20.0",
+    },
+    {
+      "releaseTimestamp": "2023-12-12T16:32:01.017Z",
+      "version": "1.21.0",
+    },
+    {
+      "releaseTimestamp": "2024-03-16T15:52:29.677Z",
+      "version": "1.22.0",
+    },
+    {
+      "releaseTimestamp": "2024-03-16T16:21:24.461Z",
+      "version": "1.22.1",
     },
   ],
-  "sourceUrl": "https://github.com/certifi/erlang-certifi",
-}
-`;
-
-exports[`modules/datasource/hex/index getReleases processes a private repo with auth 1`] = `
-{
-  "homepage": "https://hex.pm/packages/renovate_test/private_package",
-  "registryUrl": "https://hex.pm",
-  "releases": [
-    {
-      "releaseTimestamp": "2021-08-04T15:26:26.500Z",
-      "version": "0.1.0",
-    },
-    {
-      "releaseTimestamp": "2021-08-04T17:46:00.274Z",
-      "version": "0.1.1",
-    },
-  ],
+  "sourceUrl": "https://github.com/g-andrade/tls_certificate_check",
 }
 `;
 
 exports[`modules/datasource/hex/index getReleases processes real data 1`] = `
 {
-  "homepage": "https://hex.pm/packages/certifi",
-  "registryUrl": "https://hex.pm",
+  "changelogUrl": "https://github.com/g-andrade/tls_certificate_check/blob/master/CHANGELOG.md",
+  "homepage": "https://hex.pm/packages/tls_certificate_check",
+  "registryUrl": "https://repo.hex.pm",
   "releases": [
     {
       "isDeprecated": true,
-      "releaseTimestamp": "2015-09-10T13:58:55.620Z",
-      "version": "0.1.1",
+      "releaseTimestamp": "2020-05-21T00:57:53.301Z",
+      "version": "1.0.0-beta",
     },
     {
-      "releaseTimestamp": "2015-11-19T11:25:06.024Z",
-      "version": "0.2.0",
-    },
-    {
-      "version": "0.3.0",
-    },
-    {
-      "releaseTimestamp": "2016-03-02T20:37:38.856Z",
-      "version": "0.4.0",
-    },
-    {
-      "releaseTimestamp": "2016-08-25T14:22:42.043Z",
-      "version": "0.5.0",
-    },
-    {
-      "releaseTimestamp": "2016-09-12T10:05:24.327Z",
-      "version": "0.6.0",
-    },
-    {
-      "releaseTimestamp": "2016-10-02T23:16:44.504Z",
-      "version": "0.7.0",
-    },
-    {
-      "releaseTimestamp": "2017-01-24T11:14:00.415Z",
+      "isDeprecated": true,
+      "releaseTimestamp": "2020-05-21T01:02:49.271Z",
       "version": "1.0.0",
     },
     {
-      "releaseTimestamp": "2017-04-20T03:47:25.151Z",
+      "isDeprecated": true,
+      "releaseTimestamp": "2020-05-21T09:56:01.525Z",
+      "version": "1.0.1",
+    },
+    {
+      "isDeprecated": true,
+      "releaseTimestamp": "2020-10-16T18:05:41.581Z",
+      "version": "1.0.2",
+    },
+    {
+      "isDeprecated": true,
+      "releaseTimestamp": "2020-12-05T19:33:37.712Z",
       "version": "1.1.0",
     },
     {
-      "releaseTimestamp": "2017-05-20T17:36:20.704Z",
+      "isDeprecated": true,
+      "releaseTimestamp": "2020-12-08T20:54:17.217Z",
+      "version": "1.1.1",
+    },
+    {
+      "isDeprecated": true,
+      "releaseTimestamp": "2021-03-12T22:07:36.263Z",
       "version": "1.2.0",
     },
     {
-      "releaseTimestamp": "2017-05-22T10:05:04.091Z",
-      "version": "1.2.1",
+      "isDeprecated": true,
+      "releaseTimestamp": "2021-04-02T15:42:35.731Z",
+      "version": "1.3.0",
     },
     {
-      "releaseTimestamp": "2017-07-29T10:26:25.887Z",
-      "version": "2.0.0",
+      "isDeprecated": true,
+      "releaseTimestamp": "2021-04-16T23:00:02.486Z",
+      "version": "1.4.0",
     },
     {
-      "releaseTimestamp": "2018-02-15T14:24:33.990Z",
-      "version": "2.1.0",
+      "isDeprecated": true,
+      "releaseTimestamp": "2021-05-13T18:25:16.258Z",
+      "version": "1.5.0",
     },
     {
-      "releaseTimestamp": "2018-02-15T14:40:54.249Z",
-      "version": "2.2.0",
+      "isDeprecated": true,
+      "releaseTimestamp": "2021-05-30T19:57:29.487Z",
+      "version": "1.6.0",
     },
     {
-      "releaseTimestamp": "2018-02-27T21:20:24.804Z",
-      "version": "2.3.0",
+      "releaseTimestamp": "2021-07-08T22:09:21.845Z",
+      "version": "1.7.0",
     },
     {
-      "releaseTimestamp": "2018-03-01T12:09:47.479Z",
-      "version": "2.3.1",
+      "releaseTimestamp": "2021-08-31T20:17:24.102Z",
+      "version": "1.8.0",
     },
     {
-      "releaseTimestamp": "2018-08-23T08:18:39.658Z",
-      "version": "2.4.1",
+      "releaseTimestamp": "2021-09-03T13:57:22.713Z",
+      "version": "1.9.0",
     },
     {
-      "releaseTimestamp": "2018-08-30T08:21:29.349Z",
-      "version": "2.4.2",
+      "releaseTimestamp": "2021-10-01T18:01:02.256Z",
+      "version": "1.10.0",
     },
     {
-      "releaseTimestamp": "2019-01-24T15:14:25.991Z",
-      "version": "2.5.1",
+      "releaseTimestamp": "2021-10-28T17:38:29.649Z",
+      "version": "1.11.0",
     },
     {
-      "releaseTimestamp": "2020-03-04T14:54:16.283Z",
-      "version": "2.5.2",
+      "releaseTimestamp": "2022-02-02T16:40:07.824Z",
+      "version": "1.12.0",
+    },
+    {
+      "releaseTimestamp": "2022-03-21T16:46:32.005Z",
+      "version": "1.13.0",
+    },
+    {
+      "releaseTimestamp": "2022-04-27T14:12:18.990Z",
+      "version": "1.14.0",
+    },
+    {
+      "releaseTimestamp": "2022-07-20T16:08:34.371Z",
+      "version": "1.15.0",
+    },
+    {
+      "releaseTimestamp": "2022-10-11T10:52:36.095Z",
+      "version": "1.16.0",
+    },
+    {
+      "releaseTimestamp": "2023-01-11T18:42:45.919Z",
+      "version": "1.17.0",
+    },
+    {
+      "releaseTimestamp": "2023-01-12T01:15:19.695Z",
+      "version": "1.17.1",
+    },
+    {
+      "releaseTimestamp": "2023-01-12T16:36:16.103Z",
+      "version": "1.17.2",
+    },
+    {
+      "releaseTimestamp": "2023-01-17T15:12:42.271Z",
+      "version": "1.17.3",
+    },
+    {
+      "releaseTimestamp": "2023-02-19T19:23:26.806Z",
+      "version": "1.17.4",
+    },
+    {
+      "releaseTimestamp": "2023-03-20T18:07:34.489Z",
+      "version": "1.18.0",
+    },
+    {
+      "releaseTimestamp": "2023-05-01T22:56:38.169Z",
+      "version": "1.18.1",
+    },
+    {
+      "releaseTimestamp": "2023-05-30T10:51:23.377Z",
+      "version": "1.19.0",
+    },
+    {
+      "releaseTimestamp": "2023-08-22T10:56:44.511Z",
+      "version": "1.20.0",
+    },
+    {
+      "releaseTimestamp": "2023-12-12T16:32:01.017Z",
+      "version": "1.21.0",
+    },
+    {
+      "releaseTimestamp": "2024-03-16T15:52:29.677Z",
+      "version": "1.22.0",
+    },
+    {
+      "releaseTimestamp": "2024-03-16T16:21:24.461Z",
+      "version": "1.22.1",
     },
   ],
-  "sourceUrl": "https://github.com/certifi/erlang-certifi",
+  "sourceUrl": "https://github.com/g-andrade/tls_certificate_check",
 }
 `;
