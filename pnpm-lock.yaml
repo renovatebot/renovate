@@ -2532,10 +2532,6 @@ packages:
       }
     engines: { node: '>=14.0.0' }
 
-  '@smithy/util-utf8@2.3.0':
-    resolution: {integrity: sha512-R8Rdn8Hy72KKcebgLiv8jQcQkXoLMOGGv5uI1/k0l+snqkOzQ1R0ChUBCxWMlBsFMekWjq0wRudIweFs7sKT5A==}
-    engines: {node: '>=14.0.0'}
-
   '@smithy/util-utf8@3.0.0':
     resolution:
       {
