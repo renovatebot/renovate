@@ -5,9 +5,9 @@
 // source: package.proto
 
 /* eslint-disable */
-import * as _m0 from "protobufjs/minimal";
+import * as _m0 from 'protobufjs/minimal';
 
-export const protobufPackage = "";
+export const protobufPackage = '';
 
 export enum RetirementReason {
   RETIRED_OTHER = 0,
@@ -21,22 +21,22 @@ export enum RetirementReason {
 export function retirementReasonFromJSON(object: any): RetirementReason {
   switch (object) {
     case 0:
-    case "RETIRED_OTHER":
+    case 'RETIRED_OTHER':
       return RetirementReason.RETIRED_OTHER;
     case 1:
-    case "RETIRED_INVALID":
+    case 'RETIRED_INVALID':
       return RetirementReason.RETIRED_INVALID;
     case 2:
-    case "RETIRED_SECURITY":
+    case 'RETIRED_SECURITY':
       return RetirementReason.RETIRED_SECURITY;
     case 3:
-    case "RETIRED_DEPRECATED":
+    case 'RETIRED_DEPRECATED':
       return RetirementReason.RETIRED_DEPRECATED;
     case 4:
-    case "RETIRED_RENAMED":
+    case 'RETIRED_RENAMED':
       return RetirementReason.RETIRED_RENAMED;
     case -1:
-    case "UNRECOGNIZED":
+    case 'UNRECOGNIZED':
     default:
       return RetirementReason.UNRECOGNIZED;
   }
@@ -45,18 +45,18 @@ export function retirementReasonFromJSON(object: any): RetirementReason {
 export function retirementReasonToJSON(object: RetirementReason): string {
   switch (object) {
     case RetirementReason.RETIRED_OTHER:
-      return "RETIRED_OTHER";
+      return 'RETIRED_OTHER';
     case RetirementReason.RETIRED_INVALID:
-      return "RETIRED_INVALID";
+      return 'RETIRED_INVALID';
     case RetirementReason.RETIRED_SECURITY:
-      return "RETIRED_SECURITY";
+      return 'RETIRED_SECURITY';
     case RetirementReason.RETIRED_DEPRECATED:
-      return "RETIRED_DEPRECATED";
+      return 'RETIRED_DEPRECATED';
     case RetirementReason.RETIRED_RENAMED:
-      return "RETIRED_RENAMED";
+      return 'RETIRED_RENAMED';
     case RetirementReason.UNRECOGNIZED:
     default:
-      return "UNRECOGNIZED";
+      return 'UNRECOGNIZED';
   }
 }
 
@@ -83,9 +83,7 @@ export interface Release {
    * If set the release is retired, a retired release should only be
    * resolved if it has already been locked in a project
    */
-  retired?:
-    | RetirementStatus
-    | undefined;
+  retired?: RetirementStatus | undefined;
   /**
    * sha256 checksum of outer package tarball
    * required when encoding but optional when decoding
@@ -104,40 +102,40 @@ export interface Dependency {
   /** Version requirement of dependency */
   requirement: string;
   /** If set and true the package is optional (see dependency resolution) */
-  optional?:
-    | boolean
-    | undefined;
+  optional?: boolean | undefined;
   /**
    * If set is the OTP application name of the dependency, if not set the
    * application name is the same as the package name
    */
-  app?:
-    | string
-    | undefined;
+  app?: string | undefined;
   /** If set, the repository where the dependency is located */
   repository?: string | undefined;
 }
 
 function createBasePackage(): Package {
-  return { releases: [], name: "", repository: "" };
+  return { releases: [], name: '', repository: '' };
 }
 
 export const Package = {
-  encode(message: Package, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(
+    message: Package,
+    writer: _m0.Writer = _m0.Writer.create(),
+  ): _m0.Writer {
     for (const v of message.releases) {
       Release.encode(v!, writer.uint32(10).fork()).ldelim();
     }
-    if (message.name !== "") {
+    if (message.name !== '') {
       writer.uint32(18).string(message.name);
     }
-    if (message.repository !== "") {
+    if (message.repository !== '') {
       writer.uint32(26).string(message.repository);
     }
     return writer;
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): Package {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    const reader =
+      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBasePackage();
     while (reader.pos < end) {
@@ -175,9 +173,13 @@ export const Package = {
 
   fromJSON(object: any): Package {
     return {
-      releases: globalThis.Array.isArray(object?.releases) ? object.releases.map((e: any) => Release.fromJSON(e)) : [],
-      name: isSet(object.name) ? globalThis.String(object.name) : "",
-      repository: isSet(object.repository) ? globalThis.String(object.repository) : "",
+      releases: globalThis.Array.isArray(object?.releases)
+        ? object.releases.map((e: any) => Release.fromJSON(e))
+        : [],
+      name: isSet(object.name) ? globalThis.String(object.name) : '',
+      repository: isSet(object.repository)
+        ? globalThis.String(object.repository)
+        : '',
     };
   },
 
@@ -186,10 +188,10 @@ export const Package = {
     if (message.releases?.length) {
       obj.releases = message.releases.map((e) => Release.toJSON(e));
     }
-    if (message.name !== "") {
+    if (message.name !== '') {
       obj.name = message.name;
     }
-    if (message.repository !== "") {
+    if (message.repository !== '') {
       obj.repository = message.repository;
     }
     return obj;
@@ -200,16 +202,17 @@ export const Package = {
   },
   fromPartial<I extends Exact<DeepPartial<Package>, I>>(object: I): Package {
     const message = createBasePackage();
-    message.releases = object.releases?.map((e) => Release.fromPartial(e)) || [];
-    message.name = object.name ?? "";
-    message.repository = object.repository ?? "";
+    message.releases =
+      object.releases?.map((e) => Release.fromPartial(e)) || [];
+    message.name = object.name ?? '';
+    message.repository = object.repository ?? '';
     return message;
   },
 };
 
 function createBaseRelease(): Release {
   return {
-    version: "",
+    version: '',
     innerChecksum: new Uint8Array(0),
     dependencies: [],
     retired: undefined,
@@ -218,8 +221,11 @@ function createBaseRelease(): Release {
 }
 
 export const Release = {
-  encode(message: Release, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.version !== "") {
+  encode(
+    message: Release,
+    writer: _m0.Writer = _m0.Writer.create(),
+  ): _m0.Writer {
+    if (message.version !== '') {
       writer.uint32(10).string(message.version);
     }
     if (message.innerChecksum.length !== 0) {
@@ -229,16 +235,23 @@ export const Release = {
       Dependency.encode(v!, writer.uint32(26).fork()).ldelim();
     }
     if (message.retired !== undefined) {
-      RetirementStatus.encode(message.retired, writer.uint32(34).fork()).ldelim();
+      RetirementStatus.encode(
+        message.retired,
+        writer.uint32(34).fork(),
+      ).ldelim();
     }
-    if (message.outerChecksum !== undefined && message.outerChecksum.length !== 0) {
+    if (
+      message.outerChecksum !== undefined &&
+      message.outerChecksum.length !== 0
+    ) {
       writer.uint32(42).bytes(message.outerChecksum);
     }
     return writer;
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): Release {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    const reader =
+      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseRelease();
     while (reader.pos < end) {
@@ -290,19 +303,25 @@ export const Release = {
 
   fromJSON(object: any): Release {
     return {
-      version: isSet(object.version) ? globalThis.String(object.version) : "",
-      innerChecksum: isSet(object.innerChecksum) ? bytesFromBase64(object.innerChecksum) : new Uint8Array(0),
+      version: isSet(object.version) ? globalThis.String(object.version) : '',
+      innerChecksum: isSet(object.innerChecksum)
+        ? bytesFromBase64(object.innerChecksum)
+        : new Uint8Array(0),
       dependencies: globalThis.Array.isArray(object?.dependencies)
         ? object.dependencies.map((e: any) => Dependency.fromJSON(e))
         : [],
-      retired: isSet(object.retired) ? RetirementStatus.fromJSON(object.retired) : undefined,
-      outerChecksum: isSet(object.outerChecksum) ? bytesFromBase64(object.outerChecksum) : new Uint8Array(0),
+      retired: isSet(object.retired)
+        ? RetirementStatus.fromJSON(object.retired)
+        : undefined,
+      outerChecksum: isSet(object.outerChecksum)
+        ? bytesFromBase64(object.outerChecksum)
+        : new Uint8Array(0),
     };
   },
 
   toJSON(message: Release): unknown {
     const obj: any = {};
-    if (message.version !== "") {
+    if (message.version !== '') {
       obj.version = message.version;
     }
     if (message.innerChecksum.length !== 0) {
@@ -314,7 +333,10 @@ export const Release = {
     if (message.retired !== undefined) {
       obj.retired = RetirementStatus.toJSON(message.retired);
     }
-    if (message.outerChecksum !== undefined && message.outerChecksum.length !== 0) {
+    if (
+      message.outerChecksum !== undefined &&
+      message.outerChecksum.length !== 0
+    ) {
       obj.outerChecksum = base64FromBytes(message.outerChecksum);
     }
     return obj;
@@ -325,34 +347,40 @@ export const Release = {
   },
   fromPartial<I extends Exact<DeepPartial<Release>, I>>(object: I): Release {
     const message = createBaseRelease();
-    message.version = object.version ?? "";
+    message.version = object.version ?? '';
     message.innerChecksum = object.innerChecksum ?? new Uint8Array(0);
-    message.dependencies = object.dependencies?.map((e) => Dependency.fromPartial(e)) || [];
-    message.retired = (object.retired !== undefined && object.retired !== null)
-      ? RetirementStatus.fromPartial(object.retired)
-      : undefined;
+    message.dependencies =
+      object.dependencies?.map((e) => Dependency.fromPartial(e)) || [];
+    message.retired =
+      object.retired !== undefined && object.retired !== null
+        ? RetirementStatus.fromPartial(object.retired)
+        : undefined;
     message.outerChecksum = object.outerChecksum ?? new Uint8Array(0);
     return message;
   },
 };
 
 function createBaseRetirementStatus(): RetirementStatus {
-  return { reason: 0, message: "" };
+  return { reason: 0, message: '' };
 }
 
 export const RetirementStatus = {
-  encode(message: RetirementStatus, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(
+    message: RetirementStatus,
+    writer: _m0.Writer = _m0.Writer.create(),
+  ): _m0.Writer {
     if (message.reason !== 0) {
       writer.uint32(8).int32(message.reason);
     }
-    if (message.message !== undefined && message.message !== "") {
+    if (message.message !== undefined && message.message !== '') {
       writer.uint32(18).string(message.message);
     }
     return writer;
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): RetirementStatus {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    const reader =
+      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseRetirementStatus();
     while (reader.pos < end) {
@@ -383,8 +411,10 @@ export const RetirementStatus = {
 
   fromJSON(object: any): RetirementStatus {
     return {
-      reason: isSet(object.reason) ? retirementReasonFromJSON(object.reason) : 0,
-      message: isSet(object.message) ? globalThis.String(object.message) : "",
+      reason: isSet(object.reason)
+        ? retirementReasonFromJSON(object.reason)
+        : 0,
+      message: isSet(object.message) ? globalThis.String(object.message) : '',
     };
   },
 
@@ -393,49 +423,63 @@ export const RetirementStatus = {
     if (message.reason !== 0) {
       obj.reason = retirementReasonToJSON(message.reason);
     }
-    if (message.message !== undefined && message.message !== "") {
+    if (message.message !== undefined && message.message !== '') {
       obj.message = message.message;
     }
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<RetirementStatus>, I>>(base?: I): RetirementStatus {
+  create<I extends Exact<DeepPartial<RetirementStatus>, I>>(
+    base?: I,
+  ): RetirementStatus {
     return RetirementStatus.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<RetirementStatus>, I>>(object: I): RetirementStatus {
+  fromPartial<I extends Exact<DeepPartial<RetirementStatus>, I>>(
+    object: I,
+  ): RetirementStatus {
     const message = createBaseRetirementStatus();
     message.reason = object.reason ?? 0;
-    message.message = object.message ?? "";
+    message.message = object.message ?? '';
     return message;
   },
 };
 
 function createBaseDependency(): Dependency {
-  return { package: "", requirement: "", optional: false, app: "", repository: "" };
+  return {
+    package: '',
+    requirement: '',
+    optional: false,
+    app: '',
+    repository: '',
+  };
 }
 
 export const Dependency = {
-  encode(message: Dependency, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.package !== "") {
+  encode(
+    message: Dependency,
+    writer: _m0.Writer = _m0.Writer.create(),
+  ): _m0.Writer {
+    if (message.package !== '') {
       writer.uint32(10).string(message.package);
     }
-    if (message.requirement !== "") {
+    if (message.requirement !== '') {
       writer.uint32(18).string(message.requirement);
     }
     if (message.optional !== undefined && message.optional !== false) {
       writer.uint32(24).bool(message.optional);
     }
-    if (message.app !== undefined && message.app !== "") {
+    if (message.app !== undefined && message.app !== '') {
       writer.uint32(34).string(message.app);
     }
-    if (message.repository !== undefined && message.repository !== "") {
+    if (message.repository !== undefined && message.repository !== '') {
       writer.uint32(42).string(message.repository);
     }
     return writer;
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): Dependency {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    const reader =
+      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseDependency();
     while (reader.pos < end) {
@@ -487,29 +531,35 @@ export const Dependency = {
 
   fromJSON(object: any): Dependency {
     return {
-      package: isSet(object.package) ? globalThis.String(object.package) : "",
-      requirement: isSet(object.requirement) ? globalThis.String(object.requirement) : "",
-      optional: isSet(object.optional) ? globalThis.Boolean(object.optional) : false,
-      app: isSet(object.app) ? globalThis.String(object.app) : "",
-      repository: isSet(object.repository) ? globalThis.String(object.repository) : "",
+      package: isSet(object.package) ? globalThis.String(object.package) : '',
+      requirement: isSet(object.requirement)
+        ? globalThis.String(object.requirement)
+        : '',
+      optional: isSet(object.optional)
+        ? globalThis.Boolean(object.optional)
+        : false,
+      app: isSet(object.app) ? globalThis.String(object.app) : '',
+      repository: isSet(object.repository)
+        ? globalThis.String(object.repository)
+        : '',
     };
   },
 
   toJSON(message: Dependency): unknown {
     const obj: any = {};
-    if (message.package !== "") {
+    if (message.package !== '') {
       obj.package = message.package;
     }
-    if (message.requirement !== "") {
+    if (message.requirement !== '') {
       obj.requirement = message.requirement;
     }
     if (message.optional !== undefined && message.optional !== false) {
       obj.optional = message.optional;
     }
-    if (message.app !== undefined && message.app !== "") {
+    if (message.app !== undefined && message.app !== '') {
       obj.app = message.app;
     }
-    if (message.repository !== undefined && message.repository !== "") {
+    if (message.repository !== undefined && message.repository !== '') {
       obj.repository = message.repository;
     }
     return obj;
@@ -518,20 +568,22 @@ export const Dependency = {
   create<I extends Exact<DeepPartial<Dependency>, I>>(base?: I): Dependency {
     return Dependency.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<Dependency>, I>>(object: I): Dependency {
+  fromPartial<I extends Exact<DeepPartial<Dependency>, I>>(
+    object: I,
+  ): Dependency {
     const message = createBaseDependency();
-    message.package = object.package ?? "";
-    message.requirement = object.requirement ?? "";
+    message.package = object.package ?? '';
+    message.requirement = object.requirement ?? '';
     message.optional = object.optional ?? false;
-    message.app = object.app ?? "";
-    message.repository = object.repository ?? "";
+    message.app = object.app ?? '';
+    message.repository = object.repository ?? '';
     return message;
   },
 };
 
 function bytesFromBase64(b64: string): Uint8Array {
   if ((globalThis as any).Buffer) {
-    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+    return Uint8Array.from(globalThis.Buffer.from(b64, 'base64'));
   } else {
     const bin = globalThis.atob(b64);
     const arr = new Uint8Array(bin.length);
@@ -544,27 +596,41 @@ function bytesFromBase64(b64: string): Uint8Array {
 
 function base64FromBytes(arr: Uint8Array): string {
   if ((globalThis as any).Buffer) {
-    return globalThis.Buffer.from(arr).toString("base64");
+    return globalThis.Buffer.from(arr).toString('base64');
   } else {
     const bin: string[] = [];
     arr.forEach((byte) => {
       bin.push(globalThis.String.fromCharCode(byte));
     });
-    return globalThis.btoa(bin.join(""));
+    return globalThis.btoa(bin.join(''));
   }
 }
 
-type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
+type Builtin =
+  | Date
+  | Function
+  | Uint8Array
+  | string
+  | number
+  | boolean
+  | undefined;
 
-export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
-  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
-  : Partial<T>;
+export type DeepPartial<T> = T extends Builtin
+  ? T
+  : T extends globalThis.Array<infer U>
+    ? globalThis.Array<DeepPartial<U>>
+    : T extends ReadonlyArray<infer U>
+      ? ReadonlyArray<DeepPartial<U>>
+      : T extends {}
+        ? { [K in keyof T]?: DeepPartial<T[K]> }
+        : Partial<T>;
 
 type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+export type Exact<P, I extends P> = P extends Builtin
+  ? P
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & {
+      [K in Exclude<keyof I, KeysOfUnion<P>>]: never;
+    };
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;
