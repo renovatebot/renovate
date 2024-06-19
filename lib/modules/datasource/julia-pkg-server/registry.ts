@@ -195,7 +195,7 @@ export async function retrieveRegistryState(
   // the hosted registries
   const registriesUrl = joinUrlParts(pkgServer, 'registries.eager');
 
-  const { val: registryStates, err: error } = await Result.wrap(
+  const { val: registryStates, err } = await Result.wrap(
     http.get(registriesUrl, {
       headers: PKG_SERVER_REQUEST_HEADERS,
     }),
@@ -216,16 +216,7 @@ export async function retrieveRegistryState(
     })
     .unwrap();
 
-  if (error) {
-    logger.warn(
-      {
-        datasource: juliaPkgServerDatasourceId,
-        error,
-        pkgServer,
-      },
-      'An error occurred fetching registries from the PgkServer',
-    );
-
+  if (err) {
     return null;
   }
 

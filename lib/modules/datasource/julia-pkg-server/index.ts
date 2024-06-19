@@ -1,4 +1,3 @@
-import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { Result } from '../../../util/result';
 import { Datasource } from '../datasource';
@@ -90,12 +89,6 @@ export class JuliaPkgServerDatasource extends Datasource {
       this.http.getBuffer(registryUrl, { headers: PKG_SERVER_REQUEST_HEADERS }),
     )
       .transform(({ body }) => body)
-      .onError((error) =>
-        logger.warn(
-          { datasource: juliaPkgServerDatasourceId, error, registryUrl },
-          'An error occurred fetching the registry',
-        ),
-      )
       .unwrap();
 
     if (err) {

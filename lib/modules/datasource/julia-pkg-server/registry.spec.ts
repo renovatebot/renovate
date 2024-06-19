@@ -193,17 +193,6 @@ describe('modules/datasource/julia-pkg-server/registry', () => {
       expect(
         await retrieveRegistryState(http, { pkgServer, uuid: registryUuid }),
       ).toBeNull();
-
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        {
-          datasource,
-          // This is the error corresponding to the HTTP request which is not
-          // straightforward to replicate in test
-          error: expect.anything(),
-          pkgServer,
-        },
-        'An error occurred fetching registries from the PgkServer',
-      );
     });
 
     it('returns null when the requested registry is not hosted by the PkgServer', async () => {

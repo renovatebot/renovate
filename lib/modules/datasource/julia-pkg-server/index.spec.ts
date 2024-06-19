@@ -79,17 +79,6 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           packageName: 'HTTP',
         }),
       ).toBeNull();
-
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        {
-          datasource,
-          // This is the error corresponding to the HTTP request which is not
-          // straightforward to replicate in test
-          error: expect.anything(),
-          registryUrl: `${defaultRegistryUrl}/${eagerGeneralRegistryState}`,
-        },
-        'An error occurred fetching the registry',
-      );
     });
 
     it('returns package information for existing packages', async () => {
