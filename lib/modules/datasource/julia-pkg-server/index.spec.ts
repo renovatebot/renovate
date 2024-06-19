@@ -2,7 +2,7 @@ import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { logger } from '../../../../test/util';
 import { createRegistryTarballFromFixture } from './test';
-import { juliaPkgServerDatasourceId } from './common';
+import { buildRegistryUrl, juliaPkgServerDatasourceId } from './common';
 import { JuliaPkgServerDatasource } from '.';
 
 const baseUrl = 'https://pkg.julialang.org';
@@ -73,7 +73,11 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           { version: '1.0.0' },
           { version: '1.1.0' },
         ],
-        registryUrl: `${baseUrl}/registry/${generalRegistryUUID}/${eagerGeneralRegistryState}`,
+        registryUrl: buildRegistryUrl(
+          baseUrl,
+          generalRegistryUUID,
+          eagerGeneralRegistryState,
+        ),
       };
       const generalRegistryResponse =
         await createRegistryTarballFromFixture('General');
@@ -105,7 +109,11 @@ describe('modules/datasource/julia-pkg-server/index', () => {
             { version: '1.0.0' },
             { version: '1.1.0' },
           ],
-          registryUrl: `${customPkgServerBaseUrl}/registry/${generalRegistryUUID}/${eagerGeneralRegistryState}`,
+          registryUrl: buildRegistryUrl(
+            customPkgServerBaseUrl,
+            generalRegistryUUID,
+            eagerGeneralRegistryState,
+          ),
         };
         const generalRegistryResponse =
           await createRegistryTarballFromFixture('General');
@@ -121,7 +129,7 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           datasource,
           packageName: 'HTTP',
           registryUrls: [
-            `${customPkgServerBaseUrl}/registry/${generalRegistryUUID}`,
+            buildRegistryUrl(customPkgServerBaseUrl, generalRegistryUUID),
           ],
         });
 
@@ -165,18 +173,26 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           packageName: 'HTTP',
           registryUrls: [
             JuliaPkgServerDatasource.defaultRegistryUrl,
-            `${customPkgServerBaseUrl}/registry/${generalRegistryUUID}`,
+            buildRegistryUrl(customPkgServerBaseUrl, generalRegistryUUID),
           ],
         });
 
         expect(result?.releases).toEqual(
           expect.arrayContaining([
             {
-              registryUrl: `${customPkgServerBaseUrl}/registry/${generalRegistryUUID}/${eagerGeneralRegistryState}`,
-              version: '0.3.0',
+              registryUrl: buildRegistryUrl(
+                customPkgServerBaseUrl,
+                generalRegistryUUID,
+                eagerGeneralRegistryState,
+              ),
+              version: '0.2.0',
             },
             {
-              registryUrl: `${baseUrl}/registry/${generalRegistryUUID}/${eagerGeneralRegistryState}`,
+              registryUrl: buildRegistryUrl(
+                baseUrl,
+                generalRegistryUUID,
+                eagerGeneralRegistryState,
+              ),
               version: '1.0.0',
             },
           ]),

@@ -1,7 +1,7 @@
 import * as httpMock from '../../../../test/http-mock';
 import { logger } from '../../../../test/util';
 import { Http } from '../../../util/http';
-import { juliaPkgServerDatasourceId } from './common';
+import { buildRegistryUrl, juliaPkgServerDatasourceId } from './common';
 import {
   extractFilesFromTarball,
   parseRegistryUrl,
@@ -53,7 +53,7 @@ describe('modules/datasource/julia-pkg-server/registry', () => {
 
   describe('parseRegistryUrl', () => {
     it('parses a fully specified URL', async () => {
-      const registryUrl = `${pkgServer}/registry/${registryUuid}/${state}`;
+      const registryUrl = buildRegistryUrl(pkgServer, registryUuid, state);
 
       expect(await parseRegistryUrl(http, registryUrl)).toEqual({
         pkgServer,
@@ -63,7 +63,7 @@ describe('modules/datasource/julia-pkg-server/registry', () => {
     });
 
     it('handles (optional) trailing slashes', async () => {
-      const registryUrl = `${pkgServer}/registry/${registryUuid}/${state}/`;
+      const registryUrl = `${buildRegistryUrl(pkgServer, registryUuid, state)}/`;
 
       expect(await parseRegistryUrl(http, registryUrl)).toEqual({
         pkgServer,
@@ -117,7 +117,7 @@ describe('modules/datasource/julia-pkg-server/registry', () => {
       });
 
       it('returns null if the state cannot be retrieved', async () => {
-        const registryUrl = `${pkgServer}/registry/${registryUuid}`;
+        const registryUrl = buildRegistryUrl(pkgServer, registryUuid);
 
         httpMock.scope(pkgServer).get(eagerRegistriesPath).reply(404);
 

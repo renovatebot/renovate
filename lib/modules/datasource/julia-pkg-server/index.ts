@@ -1,11 +1,11 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { Result } from '../../../util/result';
-import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import {
   PKG_SERVER_REQUEST_HEADERS,
+  buildRegistryUrl,
   juliaPkgServerDatasourceId,
 } from './common';
 import {
@@ -60,9 +60,8 @@ export class JuliaPkgServerDatasource extends Datasource {
 
     // Hitting the URL for a registry results in a tarball of the full
     // contents of the registry
-    const fullRegistryUrl = joinUrlParts(
+    const fullRegistryUrl = buildRegistryUrl(
       registrySpecification.pkgServer,
-      'registry',
       registrySpecification.uuid,
       registrySpecification.state,
     );
