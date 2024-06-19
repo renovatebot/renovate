@@ -6,6 +6,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 import {
   PKG_SERVER_REQUEST_HEADERS,
   buildRegistryUrl,
+  defaultRegistryUrl,
   juliaPkgServerDatasourceId,
 } from './common';
 import {
@@ -20,19 +21,13 @@ import { Package, Versions } from './schema';
 type PackageMetadataPath = `${string}/Package.toml` | `${string}/Versions.toml`;
 
 export class JuliaPkgServerDatasource extends Datasource {
-  // This URL will redirect to a suitable, geographically near, mirror
-  static readonly defaultRegistryUrl =
-    'https://pkg.julialang.org/registry/23338594-aafe-5451-b93e-139f81909106';
-
   static readonly id = juliaPkgServerDatasourceId;
 
   constructor() {
     super(juliaPkgServerDatasourceId);
   }
 
-  override readonly defaultRegistryUrls = [
-    JuliaPkgServerDatasource.defaultRegistryUrl,
-  ];
+  override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
   override readonly customRegistrySupport = true;
 

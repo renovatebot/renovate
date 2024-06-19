@@ -1,7 +1,12 @@
 import * as httpMock from '../../../../test/http-mock';
 import { logger } from '../../../../test/util';
 import { Http } from '../../../util/http';
-import { buildRegistryUrl, juliaPkgServerDatasourceId } from './common';
+import {
+  buildRegistryUrl,
+  juliaPkgServerDatasourceId,
+  defaultPkgServer as pkgServer,
+  generalRegistryUUID as registryUuid,
+} from './common';
 import {
   extractFilesFromTarball,
   parseRegistryUrl,
@@ -13,8 +18,6 @@ import { createRegistryTarballFromFixture } from './test';
 const datasource = juliaPkgServerDatasourceId;
 const eagerRegistriesPath = '/registries.eager';
 const http = new Http(datasource);
-const pkgServer = 'https://pkg.julialang.org';
-const registryUuid = '12345678-90ab-cdef-1234-1234567890ab';
 const state = '1234567890abcdef1234567890abcdef12345678';
 
 describe('modules/datasource/julia-pkg-server/registry', () => {

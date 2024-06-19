@@ -2,13 +2,16 @@ import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { logger } from '../../../../test/util';
 import { createRegistryTarballFromFixture } from './test';
-import { buildRegistryUrl, juliaPkgServerDatasourceId } from './common';
-import { JuliaPkgServerDatasource } from '.';
+import {
+  buildRegistryUrl,
+  defaultPkgServer,
+  defaultRegistryUrl,
+  generalRegistryUUID,
+  juliaPkgServerDatasourceId,
+} from './common';
 
-const baseUrl = 'https://pkg.julialang.org';
 const datasource = juliaPkgServerDatasourceId;
 const eagerGeneralRegistryState = '1111111111111111111111111111111111111111';
-const generalRegistryUUID = '23338594-aafe-5451-b93e-139f81909106';
 
 const generalRegistryPath = `/registry/${generalRegistryUUID}/${eagerGeneralRegistryState}`;
 const eagerRegistriesPath = '/registries.eager';
@@ -22,7 +25,7 @@ describe('modules/datasource/julia-pkg-server/index', () => {
         await createRegistryTarballFromFixture('General');
 
       httpMock
-        .scope(baseUrl)
+        .scope(defaultPkgServer)
         .get(eagerRegistriesPath)
         .reply(200, eagerRegistriesResponse)
         .get(generalRegistryPath)
@@ -38,7 +41,7 @@ describe('modules/datasource/julia-pkg-server/index', () => {
 
     it('warns when a registry cannot be fetched', async () => {
       httpMock
-        .scope(baseUrl)
+        .scope(defaultPkgServer)
         .get(eagerRegistriesPath)
         .reply(200, eagerRegistriesResponse)
         .get(generalRegistryPath)
@@ -57,7 +60,7 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           // This is the error corresponding to the HTTP request which is not
           // straightforward to replicate in test
           error: expect.anything(),
-          registryUrl: `${JuliaPkgServerDatasource.defaultRegistryUrl}/${eagerGeneralRegistryState}`,
+          registryUrl: `${defaultRegistryUrl}/${eagerGeneralRegistryState}`,
         },
         'An error occurred fetching the registry',
       );
@@ -74,7 +77,7 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           { version: '1.1.0' },
         ],
         registryUrl: buildRegistryUrl(
-          baseUrl,
+          defaultPkgServer,
           generalRegistryUUID,
           eagerGeneralRegistryState,
         ),
@@ -83,7 +86,7 @@ describe('modules/datasource/julia-pkg-server/index', () => {
         await createRegistryTarballFromFixture('General');
 
       httpMock
-        .scope(baseUrl)
+        .scope(defaultPkgServer)
         .get(eagerRegistriesPath)
         .reply(200, eagerRegistriesResponse)
         .get(generalRegistryPath)
@@ -99,7 +102,7 @@ describe('modules/datasource/julia-pkg-server/index', () => {
 
     describe('custom package servers', () => {
       it('supports package servers other than https://pkg.julialang.org', async () => {
-        const customPkgServerBaseUrl = 'https://example.com';
+        const customPkgServer = 'https://example.com';
         const expectedResult = {
           sourceUrl: 'https://github.com/JuliaWeb/HTTP.jl',
           releases: [
@@ -110,7 +113,7 @@ describe('modules/datasource/julia-pkg-server/index', () => {
             { version: '1.1.0' },
           ],
           registryUrl: buildRegistryUrl(
-            customPkgServerBaseUrl,
+            customPkgServer,
             generalRegistryUUID,
             eagerGeneralRegistryState,
           ),
@@ -119,7 +122,7 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           await createRegistryTarballFromFixture('General');
 
         httpMock
-          .scope(customPkgServerBaseUrl)
+          .scope(customPkgServer)
           .get(eagerRegistriesPath)
           .reply(200, eagerRegistriesResponse)
           .get(generalRegistryPath)
@@ -129,7 +132,7 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           datasource,
           packageName: 'HTTP',
           registryUrls: [
-            buildRegistryUrl(customPkgServerBaseUrl, generalRegistryUUID),
+            buildRegistryUrl(customPkgServer, generalRegistryUUID),
           ],
         });
 
@@ -147,7 +150,7 @@ describe('modules/datasource/julia-pkg-server/index', () => {
       });
 
       it('merges multiple registries', async () => {
-        const customPkgServerBaseUrl = 'https://example.com';
+        const customPkgServer = 'https://example.com';
         // Contains an additional version (v0.3.0) for the HTTP package
         const extraHTTPRegistryResponse =
           await createRegistryTarballFromFixture('ExtraHTTP');
@@ -155,14 +158,14 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           await createRegistryTarballFromFixture('General');
 
         httpMock
-          .scope(baseUrl)
+          .scope(defaultPkgServer)
           .get(eagerRegistriesPath)
           .reply(200, eagerRegistriesResponse)
           .get(generalRegistryPath)
           .reply(200, generalRegistryResponse);
 
         httpMock
-          .scope(customPkgServerBaseUrl)
+          .scope(customPkgServer)
           .get(eagerRegistriesPath)
           .reply(200, eagerRegistriesResponse)
           .get(generalRegistryPath)
@@ -172,8 +175,8 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           datasource,
           packageName: 'HTTP',
           registryUrls: [
-            JuliaPkgServerDatasource.defaultRegistryUrl,
-            buildRegistryUrl(customPkgServerBaseUrl, generalRegistryUUID),
+            defaultRegistryUrl,
+            buildRegistryUrl(customPkgServer, generalRegistryUUID),
           ],
         });
 
@@ -181,7 +184,7 @@ describe('modules/datasource/julia-pkg-server/index', () => {
           expect.arrayContaining([
             {
               registryUrl: buildRegistryUrl(
-                customPkgServerBaseUrl,
+                customPkgServer,
                 generalRegistryUUID,
                 eagerGeneralRegistryState,
               ),
@@ -189,7 +192,7 @@ describe('modules/datasource/julia-pkg-server/index', () => {
             },
             {
               registryUrl: buildRegistryUrl(
-                baseUrl,
+                defaultPkgServer,
                 generalRegistryUUID,
                 eagerGeneralRegistryState,
               ),
