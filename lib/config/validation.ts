@@ -817,7 +817,7 @@ export async function validateConfig(
       for (const rule of val as HostRule[]) {
         if (is.nonEmptyString(rule.matchHost)) {
           if (rule.matchHost.includes('://')) {
-            if (is.null_(parseUrl(rule.matchHost))) {
+            if (parseUrl(rule.matchHost) === null) {
               errors.push({
                 topic: 'Configuration Error',
                 message: `hostRules matchHost \`${rule.matchHost}\` is not a valid URL.`,
