@@ -1,6 +1,7 @@
 import * as httpMock from '../../../../test/http-mock';
 import { logger } from '../../../../test/util';
 import { Http } from '../../../util/http';
+import { juliaPkgServerDatasourceId } from './common';
 import {
   extractFilesFromTarball,
   parseRegistryUrl,
@@ -8,9 +9,8 @@ import {
   retrieveRegistryState,
 } from './registry';
 import { createRegistryTarballFromFixture } from './test';
-import { JuliaPkgServerDatasource } from '.';
 
-const datasource = JuliaPkgServerDatasource.id;
+const datasource = juliaPkgServerDatasourceId;
 const eagerRegistriesPath = '/registries.eager';
 const http = new Http(datasource);
 const pkgServer = 'https://pkg.julialang.org';

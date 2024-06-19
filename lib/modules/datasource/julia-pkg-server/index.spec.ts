@@ -2,10 +2,11 @@ import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { logger } from '../../../../test/util';
 import { createRegistryTarballFromFixture } from './test';
+import { juliaPkgServerDatasourceId } from './common';
 import { JuliaPkgServerDatasource } from '.';
 
 const baseUrl = 'https://pkg.julialang.org';
-const datasource = JuliaPkgServerDatasource.id;
+const datasource = juliaPkgServerDatasourceId;
 const eagerGeneralRegistryState = '1111111111111111111111111111111111111111';
 const generalRegistryUUID = '23338594-aafe-5451-b93e-139f81909106';
 

@@ -27,7 +27,7 @@ export class JuliaPkgServerDatasource extends Datasource {
   static readonly id = juliaPkgServerDatasourceId;
 
   constructor() {
-    super(JuliaPkgServerDatasource.id);
+    super(juliaPkgServerDatasourceId);
   }
 
   override readonly defaultRegistryUrls = [
@@ -98,7 +98,7 @@ export class JuliaPkgServerDatasource extends Datasource {
       .transform(({ body }) => body)
       .onError((error) =>
         logger.warn(
-          { datasource: JuliaPkgServerDatasource.id, error, registryUrl },
+          { datasource: juliaPkgServerDatasourceId, error, registryUrl },
           'An error occurred fetching the registry',
         ),
       )
