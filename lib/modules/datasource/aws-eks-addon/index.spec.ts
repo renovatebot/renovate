@@ -1,6 +1,5 @@
 import {
   type AddonInfo,
-  type AddonVersionInfo,
   DescribeAddonVersionsCommand,
   DescribeAddonVersionsResponse,
   EKSClient,
@@ -11,68 +10,6 @@ import { AwsEKSAddonDataSource } from '.';
 
 const datasource = AwsEKSAddonDataSource.id;
 const eksMock = mockClient(EKSClient);
-
-const addonVersion1: AddonVersionInfo = {
-  addonVersion: 'v1.18.1-eksbuild.1',
-  architecture: ['amd64', 'arm64'],
-  compatibilities: [
-    {
-      clusterVersion: '1.30',
-      platformVersions: ['*'],
-      defaultVersion: false,
-    },
-  ],
-  requiresConfiguration: false,
-};
-
-const addonVersion2: AddonVersionInfo = {
-  addonVersion: 'v1.18.2-eksbuild.1',
-  architecture: ['amd64', 'arm64'],
-  compatibilities: [
-    {
-      clusterVersion: '1.30',
-      platformVersions: ['*'],
-      defaultVersion: false,
-    },
-  ],
-  requiresConfiguration: false,
-};
-
-// a bad addonVersion that's missing the basic fields.
-const addonVersionBad: AddonVersionInfo = {};
-
-/**
- * Testdata for mock implementation of EKSClient
- */
-const vpcCniAddonInfo: AddonInfo = {
-  addonName: 'vpc-cni',
-  type: 'networking',
-  addonVersions: [addonVersion1, addonVersion2, addonVersionBad],
-  publisher: 'eks',
-  owner: 'aws',
-};
-
-const mockAddon: DescribeAddonVersionsResponse = {
-  addons: [vpcCniAddonInfo],
-};
-
-const mockEmpty: DescribeAddonVersionsResponse = {
-  addons: [],
-};
-
-const mockNull: DescribeAddonVersionsResponse = {};
-
-const mockNullAddonVersions: DescribeAddonVersionsResponse = {
-  addons: [
-    {
-      addonName: 'non-existing-addon',
-      type: 'networking',
-      publisher: 'eks',
-      owner: 'aws',
-      // missing addonVersions
-    },
-  ],
-};
 
 function mockDescribeAddonVersionsCommand(
   result: DescribeAddonVersionsResponse,
@@ -102,12 +39,13 @@ function mockDescribeAddonVersionsCommandWithRegion(
 
 describe('modules/datasource/aws-eks-addon/index', () => {
   describe('getPkgReleases()', () => {
-    it.each([
-      ['null', mockNull],
-      ['empty', mockEmpty],
-      ['nullAddonVersions', mockNullAddonVersions],
-    ])('returned %s addons to be null', async (_, mocked) => {
-      mockDescribeAddonVersionsCommand(mocked);
+    it.each<{ des: string; req: DescribeAddonVersionsResponse }>`
+      des               | req
+      ${'null'}         | ${{}}
+      ${'empty'}        | ${{ addons: [] }}
+      ${'emptyVersion'} | ${{ addons: [{}] }}
+    `('returned $des addons to be null', async ({ req }) => {
+      mockDescribeAddonVersionsCommand(req);
       const res = await getPkgReleases({
         datasource,
         packageName:
@@ -123,7 +61,44 @@ describe('modules/datasource/aws-eks-addon/index', () => {
     });
 
     it('with matched addon to return all versions of the addon', async () => {
-      mockDescribeAddonVersionsCommandWithRegion(mockAddon);
+      const vpcCniAddonInfo: AddonInfo = {
+        addonName: 'vpc-cni',
+        type: 'networking',
+        addonVersions: [
+          {
+            addonVersion: 'v1.18.1-eksbuild.1',
+            architecture: ['amd64', 'arm64'],
+            compatibilities: [
+              {
+                clusterVersion: '1.30',
+                platformVersions: ['*'],
+                defaultVersion: false,
+              },
+            ],
+            requiresConfiguration: false,
+          },
+          {
+            addonVersion: 'v1.18.2-eksbuild.1',
+            architecture: ['amd64', 'arm64'],
+            compatibilities: [
+              {
+                clusterVersion: '1.30',
+                platformVersions: ['*'],
+                defaultVersion: false,
+              },
+            ],
+            requiresConfiguration: false,
+          },
+          // a bad addonVersion that's missing the basic fields.
+          {},
+        ],
+        publisher: 'eks',
+        owner: 'aws',
+      };
+
+      mockDescribeAddonVersionsCommandWithRegion({
+        addons: [vpcCniAddonInfo],
+      });
       const res = await getPkgReleases({
         datasource,
         packageName:
@@ -132,10 +107,10 @@ describe('modules/datasource/aws-eks-addon/index', () => {
       expect(res).toEqual({
         releases: [
           {
-            version: addonVersion1.addonVersion,
+            version: 'v1.18.1-eksbuild.1',
           },
           {
-            version: addonVersion2.addonVersion,
+            version: 'v1.18.2-eksbuild.1',
           },
         ],
       });

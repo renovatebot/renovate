@@ -13,6 +13,7 @@ export class AwsEKSAddonDataSource extends Datasource {
   static readonly id = 'aws-eks-addon';
 
   override readonly caching = true;
+  private readonly eksClients: Record<string, EKSClient> = {};
 
   constructor() {
     super(AwsEKSAddonDataSource.id);
@@ -36,10 +37,10 @@ export class AwsEKSAddonDataSource extends Datasource {
     return {
       releases: addons
         .flatMap((addon) => addon.addonVersions)
-        .filter((versionInfo) => versionInfo?.addonVersion)
         .map((versionInfo) => ({
-          version: versionInfo!.addonVersion!,
-        })),
+          version: versionInfo?.addonVersion ?? '',
+        }))
+        .filter((release) => release.version),
     };
   }
 
@@ -56,9 +57,14 @@ export class AwsEKSAddonDataSource extends Datasource {
   }
 
   private getEKSClient({ region, profile }: EKSAddonsFilter): EKSClient {
-    return new EKSClient({
-      region,
-      credentials: fromNodeProviderChain({ profile }),
-    });
+    // we have two dimensions here, building a cache key for simplicity.
+    const cacheKey = `${region ?? 'default'}#${profile ?? 'default'}`;
+    if (!(cacheKey in this.eksClients)) {
+      this.eksClients[cacheKey] = new EKSClient({
+        region,
+        credentials: fromNodeProviderChain({ profile }),
+      });
+    }
+    return this.eksClients[cacheKey];
   }
 }
