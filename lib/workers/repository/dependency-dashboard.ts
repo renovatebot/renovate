@@ -232,17 +232,19 @@ export async function ensureDependencyDashboard(
     { packageFiles },
     'Checking packageFiles for deprecated packages',
   );
-  for (const [manager, fileNames] of Object.entries(packageFiles)) {
-    for (const fileName of fileNames) {
-      for (const dep of fileName.deps) {
-        const name = dep.packageName ?? dep.depName;
-        const hasReplacement = !!dep.updates?.find(
-          (updates) => updates.updateType === 'replacement',
-        );
-        if (name && (dep.deprecationMessage ?? hasReplacement)) {
-          hasDeprecations = true;
-          deprecatedPackages[manager] ??= {};
-          deprecatedPackages[manager][name] ??= hasReplacement;
+  if (is.nonEmptyObject(packageFiles)) {
+    for (const [manager, fileNames] of Object.entries(packageFiles)) {
+      for (const fileName of fileNames) {
+        for (const dep of fileName.deps) {
+          const name = dep.packageName ?? dep.depName;
+          const hasReplacement = !!dep.updates?.find(
+            (updates) => updates.updateType === 'replacement',
+          );
+          if (name && (dep.deprecationMessage ?? hasReplacement)) {
+            hasDeprecations = true;
+            deprecatedPackages[manager] ??= {};
+            deprecatedPackages[manager][name] ??= hasReplacement;
+          }
         }
       }
     }
