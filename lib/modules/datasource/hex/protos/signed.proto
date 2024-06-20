@@ -1,0 +1,8 @@
+syntax = "proto2";
+
+message Signed {
+  // Signed contents
+  required bytes payload = 1;
+  // The signature
+  optional bytes signature = 2;
+}
