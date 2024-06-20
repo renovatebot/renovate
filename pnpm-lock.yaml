@@ -366,6 +366,9 @@ importers:
       '@openpgp/web-stream-tools':
         specifier: 0.0.14
         version: 0.0.14(typescript@5.4.5)
+      '@protobuf-ts/protoc':
+        specifier: 2.9.4
+        version: 2.9.4
       '@renovate/eslint-plugin':
         specifier: file:tools/eslint
         version: '@renovatebot/eslint-plugin@file:tools/eslint'
@@ -2024,6 +2027,13 @@ packages:
         integrity: sha512-nRqvPYO8xUVdgy/KhJuaCrWlVT/4uZr97Mpbuizsa6CmvtCQf3NuYnVvOOrpYiKUJcZYtEvm84OooJ8+lJytMQ==,
       }
     engines: { node: '>=14.6' }
+
+  '@protobuf-ts/protoc@2.9.4':
+    resolution:
+      {
+        integrity: sha512-hQX+nOhFtrA+YdAXsXEDrLoGJqXHpgv4+BueYF0S9hy/Jq0VRTVlJS1Etmf4qlMt/WdigEes5LOd/LDzui4GIQ==,
+      }
+    hasBin: true
 
   '@protobufjs/aspromise@1.1.2':
     resolution:
