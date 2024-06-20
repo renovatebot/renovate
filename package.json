@@ -201,7 +201,7 @@
     "glob": "10.4.1",
     "global-agent": "3.0.0",
     "good-enough-parser": "1.1.23",
-    "google-auth-library": "9.10.0",
+    "google-auth-library": "9.11.0",
     "got": "11.8.6",
     "graph-data-structure": "3.5.0",
     "handlebars": "4.7.8",
@@ -253,7 +253,7 @@
   "optionalDependencies": {
     "better-sqlite3": "9.6.0",
     "openpgp": "5.11.1",
-    "re2": "1.20.12"
+    "re2": "1.21.3"
   },
   "devDependencies": {
     "@hyrious/marshal": "0.3.3",
@@ -325,7 +325,7 @@
     "eslint-plugin-typescript-enum": "2.1.0",
     "expect": "29.7.0",
     "expect-more-jest": "5.5.0",
-    "graphql": "16.8.1",
+    "graphql": "16.8.2",
     "husky": "9.0.11",
     "jest": "29.7.0",
     "jest-extended": "4.0.2",
