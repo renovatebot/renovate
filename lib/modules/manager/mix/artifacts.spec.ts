@@ -1,7 +1,13 @@
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, hostRules, mockedFunction } from '../../../../test/util';
+import {
+  env,
+  fs,
+  hostRules,
+  mockedFunction,
+  partial,
+} from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -26,7 +32,11 @@ const adminConfig: RepoGlobalConfig = {
 // support install mode
 process.env.CONTAINERBASE = 'true';
 
-const config: UpdateArtifactsConfig = {};
+const config = partial<UpdateArtifactsConfig>({
+  registryAliases: {
+    oban: 'https://getoban.pro/repo',
+  },
+});
 
 describe('modules/manager/mix/artifacts', () => {
   beforeEach(() => {
@@ -174,26 +184,24 @@ describe('modules/manager/mix/artifacts', () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+    hostRules.getAll.mockReturnValueOnce([
+      { matchHost: 'https://hex.pm/api/repos/renovate_test/' },
+      { matchHost: 'https://hex.pm/api/repos/unauthorized_organization/' },
+    ]);
     hostRules.find.mockReturnValueOnce({ token: 'valid_test_token' });
-    hostRules.find.mockReturnValueOnce({});
+    hostRules.find.mockReturnValueOnce({}); // unauthorized_organization token missing
 
     // erlang
     getPkgReleases.mockResolvedValueOnce({
-      releases: [
-        { version: '22.3.4.26' },
-        { version: '23.1.1.0' },
-        { version: '24.3.4.1' },
-        { version: '24.3.4.2' },
-        { version: '25.0.0.0' },
-      ],
+      releases: [{ version: '22.3.4.26' }, { version: '25.0.0.0' }],
     });
     // elixir
     getPkgReleases.mockResolvedValueOnce({
-      releases: [
-        { version: 'v1.8.2' },
-        { version: 'v1.13.3' },
-        { version: 'v1.13.4' },
-      ],
+      releases: [{ version: 'v1.8.2' }, { version: 'v1.13.4' }],
+    });
+
+    const config = partial<UpdateArtifactsConfig>({
+      registryAliases: {},
     });
 
     const result = await updateArtifacts({
@@ -201,11 +209,11 @@ describe('modules/manager/mix/artifacts', () => {
       updatedDeps: [
         {
           depName: 'private_package',
-          packageName: 'private_package:renovate_test',
+          packageName: 'org:renovate_test:private_package',
         },
         {
           depName: 'other_package',
-          packageName: 'other_package:unauthorized_organization',
+          packageName: 'org:unauthorized_organization:other_package',
         },
       ],
       newPackageFileContent: '{}',
@@ -266,6 +274,10 @@ describe('modules/manager/mix/artifacts', () => {
       ],
     });
 
+    const config = partial<UpdateArtifactsConfig>({
+      registryAliases: {},
+    });
+
     const result = await updateArtifacts({
       packageFileName: 'mix.exs',
       updatedDeps: [{ depName: 'some_package' }],
@@ -288,6 +300,45 @@ describe('modules/manager/mix/artifacts', () => {
         cmd: 'mix hex.organization auth other_organization --key other_org_token',
       },
       { cmd: 'mix deps.update some_package' },
+    ]);
+  });
+
+  it('does not add registries configured in registryAliases but no token in hostRules', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+    hostRules.getAll.mockReturnValueOnce([
+      { matchHost: 'https://getoban.pro/repo' },
+    ]);
+    hostRules.find.mockReturnValueOnce({});
+
+    // erlang
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '25.0.0.0' }],
+    });
+    // elixir
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: 'v1.13.4' }],
+    });
+
+    const result = await updateArtifacts({
+      packageFileName: 'mix.exs',
+      updatedDeps: [{ depName: 'oban_pro' }],
+      newPackageFileContent: '{}',
+      config,
+    });
+
+    expect(result).toEqual([
+      {
+        file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool erlang 25.0.0.0' },
+      { cmd: 'install-tool elixir v1.13.4' },
+      { cmd: 'mix deps.update oban_pro' },
     ]);
   });
 

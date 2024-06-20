@@ -8,6 +8,9 @@ export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 
 export const defaultConfig = {
+  registryAliases: {
+    hexpm: 'https://hex.pm',
+  },
   fileMatch: ['(^|/)mix\\.exs$'],
   versioning: hexVersioning.id,
 };

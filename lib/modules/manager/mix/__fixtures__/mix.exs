@@ -26,6 +26,7 @@ defmodule MyProject.MixProject do
       {:ecto, github: "elixir-ecto/ecto", ref: "795036d997c7503b21fb64d6bf1a89b83c44f2b5"},
       {:secret, "~> 1.0", organization: "acme"},
       {:also_secret, "~> 1.0", only: [:dev, :test], organization: "acme", runtime: false},
+      {:oban_pro, "~> 1.4", repo: "oban"},
       {:ex_doc, ">2.1.0 and <=3.0.0"},
       {:jason, ">= 1.0.0"},
       {:mason, "~> 1.0",
