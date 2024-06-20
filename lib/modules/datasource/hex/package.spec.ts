@@ -1,5 +1,4 @@
-// import { mockDeep } from 'jest-mock-extended';
-import { gunzipSync } from 'zlib';
+import { gunzip } from 'zlib';
 import { Fixtures } from '../../../../test/fixtures';
 import { Package } from './package';
 import { Signed } from './signed';
@@ -8,10 +7,16 @@ const packageResponse = Fixtures.getBinary('tls_certificate_check.bin.gz');
 
 describe('modules/datasource/hex/package', () => {
   it('decodes hex package protobuf response', () => {
-    const response = Signed.decode(gunzipSync(packageResponse));
+    gunzip(packageResponse, (err, signedPackage) => {
+      expect(err).toBeNull();
 
-    expect(response).toContainKeys(['payload', 'signature']);
+      const response = Signed.decode(signedPackage);
 
-    expect(Package.decode(response.payload).name).toBe('tls_certificate_check');
+      expect(response).toContainKeys(['payload', 'signature']);
+
+      expect(Package.decode(response.payload).name).toBe(
+        'tls_certificate_check',
+      );
+    });
   });
 });

@@ -1,4 +1,5 @@
-import { gunzipSync } from 'zlib';
+import { promisify } from 'util';
+import { gunzip } from 'zlib';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { joinUrlParts } from '../../../util/url';
@@ -73,24 +74,32 @@ export class HexDatasource extends Datasource {
     const resp = await this.http.getBuffer(hexRegistryUrl);
 
     if (resp.statusCode === 200) {
-      const { payload: payload } = Signed.decode(gunzipSync(resp.body));
-      const registryPackage = Package.decode(payload);
+      await decompressBuffer(resp.body)
+        .then((signedPackage) => {
+          const { payload: payload } = Signed.decode(signedPackage);
+          const registryPackage = Package.decode(payload);
 
-      const releases: Release[] = registryPackage.releases.map(
-        (rel): Release => {
-          const release: Release = { version: rel.version };
+          const releases: Release[] = registryPackage.releases.map(
+            (rel): Release => {
+              const release: Release = { version: rel.version };
 
-          if (rel.retired) {
-            release.isDeprecated = true;
-          }
+              if (rel.retired) {
+                release.isDeprecated = true;
+              }
 
-          return release;
-        },
-      );
+              return release;
+            },
+          );
 
-      releaseResult.releases = releases;
+          releaseResult.releases = releases;
 
-      if (this.hexRepoName === 'hexpm') {
+          return releaseResult;
+        })
+        .catch((err) => {
+          return null;
+        });
+
+      if (this.hexRepoName === 'hexpm' && releaseResult.releases.length > 0) {
         const metadataUrl = joinUrlParts(this.hexAPIBaseUrl, urlPath);
 
         logger.debug(`Package metadata url: ${metadataUrl}`);
@@ -131,4 +140,10 @@ export class HexDatasource extends Datasource {
       return null;
     }
   }
+}
+
+const gunzipAsync = promisify(gunzip);
+
+async function decompressBuffer(buffer: Buffer): Promise<Buffer> {
+  return await gunzipAsync(buffer);
 }
