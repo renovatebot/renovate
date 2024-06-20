@@ -81,6 +81,7 @@ const repoGroups = {
   ],
   commitlint: 'https://github.com/conventional-changelog/commitlint',
   'contentful-rich-text': 'https://github.com/contentful/rich-text',
+  cspell: 'https://github.com/streetsidesoftware/cspell',
   'datadog-browser-sdk': 'https://github.com/DataDog/browser-sdk',
   'datatables-net': [
     'https://github.com/DataTables/Dist-DataTables',
