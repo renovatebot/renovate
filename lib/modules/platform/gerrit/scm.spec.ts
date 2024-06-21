@@ -300,13 +300,17 @@ describe('modules/platform/gerrit/scm', () => {
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
-        message: ['commit msg', expect.stringMatching(/Change-Id: I.{32}/)],
+        message: [
+          'commit msg',
+          'Renovate-Source-Branch: renovate/dependency-1.x',
+          expect.stringMatching(/Change-Id: I.{32}/),
+        ],
         force: true,
       });
       expect(git.pushCommit).toHaveBeenCalledWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
-        targetRef: 'refs/for/main%t=sourceBranch-renovate/dependency-1.x',
+        targetRef: 'refs/for/main',
       });
     });
 
@@ -339,7 +343,11 @@ describe('modules/platform/gerrit/scm', () => {
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
-        message: ['commit msg', 'Change-Id: ...'],
+        message: [
+          'commit msg',
+          'Renovate-Source-Branch: renovate/dependency-1.x',
+          'Change-Id: ...',
+        ],
         force: true,
       });
       expect(git.fetchRevSpec).toHaveBeenCalledWith('refs/changes/1/2');
@@ -377,14 +385,18 @@ describe('modules/platform/gerrit/scm', () => {
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
-        message: ['commit msg', 'Change-Id: ...'],
+        message: [
+          'commit msg',
+          'Renovate-Source-Branch: renovate/dependency-1.x',
+          'Change-Id: ...',
+        ],
         force: true,
       });
       expect(git.fetchRevSpec).toHaveBeenCalledWith('refs/changes/1/2');
       expect(git.pushCommit).toHaveBeenCalledWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
-        targetRef: 'refs/for/main%t=sourceBranch-renovate/dependency-1.x',
+        targetRef: 'refs/for/main',
       });
       expect(clientMock.wasApprovedBy).toHaveBeenCalledWith(
         existingChange,

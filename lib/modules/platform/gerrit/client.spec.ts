@@ -98,7 +98,10 @@ describe('modules/platform/gerrit/client', () => {
       ['owner:self', { branchName: 'dependency-xyz' }],
       ['project:repo', { branchName: 'dependency-xyz' }],
       ['-is:wip', { branchName: 'dependency-xyz' }],
-      ['hashtag:sourceBranch-dependency-xyz', { branchName: 'dependency-xyz' }],
+      [
+        'footer:Renovate-Source-Branch=dependency-xyz',
+        { branchName: 'dependency-xyz' },
+      ],
       ['label:Code-Review=-2', { branchName: 'dependency-xyz', label: '-2' }],
       [
         'branch:otherTarget',
