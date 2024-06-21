@@ -1,9 +1,12 @@
 import { logger } from '../../../logger';
 import { NixhubDatasource } from '../../datasource/nixhub';
-import { id as nixhubVersioning } from '../../versioning/nixhub';
-import { isValidDependency } from '../custom/regex/utils';
+import * as nixhubVersioning from '../../versioning/nixhub';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { DevboxFile } from './schema';
+
+function isValidDependency(dep: PackageDependency): boolean {
+  return !!dep.currentValue && nixhubVersioning.api.isValid(dep.currentValue);
+}
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace('devbox.extractPackageFile()');
@@ -58,7 +61,7 @@ function getDep(pkgName: string, version: string): PackageDependency | null {
     currentValue: version,
     datasource: NixhubDatasource.id,
     packageName: getNixhubPackageName(pkgName),
-    versioning: nixhubVersioning,
+    versioning: nixhubVersioning.id,
   };
   if (!isValidDependency(dep)) {
     logger.trace(

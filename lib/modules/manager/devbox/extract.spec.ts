@@ -31,7 +31,7 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'nixhub',
             packageName: 'node',
-            versioning: 'loose',
+            versioning: 'nixhub',
           },
         ],
       });
@@ -52,13 +52,13 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'nixhub',
             packageName: 'node',
-            versioning: 'loose',
+            versioning: 'nixhub',
           },
         ],
       });
     });
 
-    it('returns a package dependency when the devbox JSON file has a single package with a version object and a version range', () => {
+    it('returns null when the devbox JSON file has a single package with a version object and a version range', () => {
       const result = extractPackageFile(codeBlock`
         {
           "packages": {
@@ -66,17 +66,7 @@ describe('modules/manager/devbox/extract', () => {
           }
         }
       `);
-      expect(result).toEqual({
-        deps: [
-          {
-            depName: 'nodejs',
-            currentValue: '^20.1.8',
-            datasource: 'nixhub',
-            packageName: 'node',
-            versioning: 'loose',
-          },
-        ],
-      });
+      expect(result).toBeNull();
     });
 
     it('returns a package dependency when the devbox JSON file has multiple packages', () => {
@@ -92,14 +82,14 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'nixhub',
             packageName: 'node',
-            versioning: 'loose',
+            versioning: 'nixhub',
           },
           {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'nixhub',
             packageName: 'yarn',
-            versioning: 'loose',
+            versioning: 'nixhub',
           },
         ],
       });
@@ -121,14 +111,14 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'nixhub',
             packageName: 'node',
-            versioning: 'loose',
+            versioning: 'nixhub',
           },
           {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'nixhub',
             packageName: 'yarn',
-            versioning: 'loose',
+            versioning: 'nixhub',
           },
         ],
       });
@@ -154,14 +144,14 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'nixhub',
             packageName: 'node',
-            versioning: 'loose',
+            versioning: 'nixhub',
           },
           {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'nixhub',
             packageName: 'yarn',
-            versioning: 'loose',
+            versioning: 'nixhub',
           },
         ],
       });
@@ -184,14 +174,14 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'nixhub',
             packageName: 'node',
-            versioning: 'loose',
+            versioning: 'nixhub',
           },
           {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'nixhub',
             packageName: 'yarn',
-            versioning: 'loose',
+            versioning: 'nixhub',
           },
         ],
       });
@@ -216,14 +206,14 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'nixhub',
             packageName: 'node',
-            versioning: 'loose',
+            versioning: 'nixhub',
           },
           {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'nixhub',
             packageName: 'yarn',
-            versioning: 'loose',
+            versioning: 'nixhub',
           },
         ],
       });
@@ -242,14 +232,14 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'nixhub',
             packageName: 'node',
-            versioning: 'loose',
+            versioning: 'nixhub',
           },
           {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'nixhub',
             packageName: 'yarn',
-            versioning: 'loose',
+            versioning: 'nixhub',
           },
         ],
       });
