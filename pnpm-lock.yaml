@@ -186,8 +186,8 @@ importers:
         specifier: 1.1.23
         version: 1.1.23
       google-auth-library:
-        specifier: 9.10.0
-        version: 9.10.0(encoding@0.1.13)
+        specifier: 9.11.0
+        version: 9.11.0(encoding@0.1.13)
       got:
         specifier: 11.8.6
         version: 11.8.6
@@ -337,8 +337,8 @@ importers:
         specifier: 5.11.1
         version: 5.11.1
       re2:
-        specifier: 1.20.12
-        version: 1.20.12
+        specifier: 1.21.3
+        version: 1.21.3
     devDependencies:
       '@hyrious/marshal':
         specifier: 0.3.3
@@ -482,8 +482,8 @@ importers:
         specifier: 0.2.6
         version: 0.2.6
       '@types/traverse':
-        specifier: 0.6.36
-        version: 0.6.36
+        specifier: 0.6.37
+        version: 0.6.37
       '@types/unist':
         specifier: 2.0.10
         version: 2.0.10
@@ -548,8 +548,8 @@ importers:
         specifier: 5.5.0
         version: 5.5.0
       graphql:
-        specifier: 16.8.1
-        version: 16.8.1
+        specifier: 16.8.2
+        version: 16.8.2
       husky:
         specifier: 9.0.11
         version: 9.0.11
@@ -2120,8 +2120,8 @@ packages:
   '@types/tmp@0.2.6':
     resolution: {integrity: sha512-chhaNf2oKHlRkDGt+tiKE2Z5aJ6qalm7Z9rlLdBwmOiAAf09YQvvoLXjWK4HWPF1xU/fqvMgfNfpVoBscA/tKA==}
 
-  '@types/traverse@0.6.36':
-    resolution: {integrity: sha512-0ko4fZgKQf2J/2FvDJHua9KZ19zJkfI5FxG1ZeEUhezEwuq6UL+4T0IxcBfmHilBeAj7OSUTwrm/lPnh8EB1/Q==}
+  '@types/traverse@0.6.37':
+    resolution: {integrity: sha512-c90MVeDiUI1FhOZ6rLQ3kDWr50YE8+paDpM+5zbHjbmsqEp2DlMYkqnZnwbK9oI+NvDe8yRajup4jFwnVX6xsA==}
 
   '@types/treeify@1.0.3':
     resolution: {integrity: sha512-hx0o7zWEUU4R2Amn+pjCBQQt23Khy/Dk56gQU5xi5jtPL1h83ACJCeFaB2M/+WO1AntvWrSoVnnCAfI1AQH4Cg==}
@@ -3482,8 +3482,8 @@ packages:
     resolution: {integrity: sha512-QUcQZutczESpdo2w9BMG6VpLFoq9ix7ER5HLM1mAdZdri2F3eISkCb8ep84W6YOo0grYWJdyT/8JkYqGjQfSSQ==}
     engines: {node: '>=18.12.0', yarn: ^1.17.0}
 
-  google-auth-library@9.10.0:
-    resolution: {integrity: sha512-ol+oSa5NbcGdDqA+gZ3G3mev59OHBZksBTxY/tYwjtcp1H/scAFwJfSQU9/1RALoyZ7FslNbke8j4i3ipwlyuQ==}
+  google-auth-library@9.11.0:
+    resolution: {integrity: sha512-epX3ww/mNnhl6tL45EQ/oixsY8JLEgUFoT4A5E/5iAR4esld9Kqv6IJGk7EmGuOgDvaarwF95hU2+v7Irql9lw==}
     engines: {node: '>=14'}
 
   gopd@1.0.1:
@@ -3508,8 +3508,8 @@ packages:
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
-  graphql@16.8.1:
-    resolution: {integrity: sha512-59LZHPdGZVh695Ud9lRzPBVTtlX9ZCV150Er2W43ro37wVof0ctenSaskPPjN7lVTIN8mSZt8PHUNKZuNQUuxw==}
+  graphql@16.8.2:
+    resolution: {integrity: sha512-cvVIBILwuoSyD54U4cF/UXDh5yAobhNV/tPygI4lZhgOIJQE/WLWC4waBRb4I6bDVYb3OVx3lfHbaQOEoUD5sg==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
 
   gtoken@7.1.0:
@@ -5062,8 +5062,8 @@ packages:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
     hasBin: true
 
-  re2@1.20.12:
-    resolution: {integrity: sha512-pfCHx+j0agxahWorhQZ2hyaZh/LH2e/vpoAilggksI3fFt+62oF0AY7UP7uvmpWleYLy6UoBTz4r/Kif0LfB/g==}
+  re2@1.21.3:
+    resolution: {integrity: sha512-GI+KoGkHT4kxTaX+9p0FgNB1XUnCndO9slG5qqeEoZ7kbf6Dk6ohQVpmwKVeSp7LPLn+g6Q3BaCopz4oHuBDuQ==}
 
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
@@ -8481,7 +8481,7 @@ snapshots:
 
   '@types/tmp@0.2.6': {}
 
-  '@types/traverse@0.6.36': {}
+  '@types/traverse@0.6.37': {}
 
   '@types/treeify@1.0.3': {}
 
@@ -10146,7 +10146,7 @@ snapshots:
       klona: 2.0.6
       moo: 0.5.2
 
-  google-auth-library@9.10.0(encoding@0.1.13):
+  google-auth-library@9.11.0(encoding@0.1.13):
     dependencies:
       base64-js: 1.5.1
       ecdsa-sig-formatter: 1.0.11
@@ -10186,7 +10186,7 @@ snapshots:
 
   graphemer@1.4.0: {}
 
-  graphql@16.8.1: {}
+  graphql@16.8.2: {}
 
   gtoken@7.1.0(encoding@0.1.13):
     dependencies:
@@ -11892,7 +11892,7 @@ snapshots:
       minimist: 1.2.8
       strip-json-comments: 2.0.1
 
-  re2@1.20.12:
+  re2@1.21.3:
     dependencies:
       install-artifact-from-github: 1.3.5
       nan: 2.20.0
