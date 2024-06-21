@@ -105,7 +105,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
       },
       config,
     );
-    return result ? [result] : /* istanbul ignore next: can this happen? */[];
+    return result ? [result] : /* istanbul ignore next: can this happen? */ [];
   }
   return regexMatchAll(regexes[index], content).flatMap((match) => {
     return processRecursive({
