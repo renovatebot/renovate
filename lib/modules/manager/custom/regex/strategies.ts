@@ -31,19 +31,9 @@ export function handleAny(
       ),
     )
     .filter(is.truthy)
-    .filter((dep: PackageDependency) => {
-      const isValid = isValidDependency(dep)
-      if (!isValid) {
-        const meta = {
-          packageDependency: dep,
-          packageFile,
-        }
-        logger.trace(meta, "Discovered a package dependency by matching regex, but it did not pass validation. Discarding")
-        return isValid
-      }
-
-      return isValid
-    });
+    .filter((dep: PackageDependency) =>
+      checkIsValidDependency(dep, packageFile),
+    );
 }
 
 export function handleCombination(
@@ -70,19 +60,9 @@ export function handleCombination(
     .reduce((base, addition) => mergeExtractionTemplate(base, addition));
   return [createDependency(extraction, config)]
     .filter(is.truthy)
-    .filter((dep: PackageDependency) => {
-      const isValid = isValidDependency(dep)
-      if (!isValid) {
-        const meta = {
-          packageDependency: dep,
-          packageFile,
-        }
-        logger.trace(meta, "Discovered a package dependency by matching regex, but it did not pass validation. Discarding")
-        return isValid
-      }
-
-      return isValid
-    });
+    .filter((dep: PackageDependency) =>
+      checkIsValidDependency(dep, packageFile),
+    );
 }
 
 export function handleRecursive(
@@ -103,19 +83,9 @@ export function handleRecursive(
     regexes,
   })
     .filter(is.truthy)
-    .filter((dep: PackageDependency) => {
-      const isValid = isValidDependency(dep)
-      if (!isValid) {
-        const meta = {
-          packageDependency: dep,
-          packageFile,
-        }
-        logger.trace(meta, "Discovered a package dependency by matching regex, but it did not pass validation. Discarding")
-        return isValid
-      }
-
-      return isValid
-    });
+    .filter((dep: PackageDependency) =>
+      checkIsValidDependency(dep, packageFile),
+    );
 }
 
 function processRecursive(parameters: RecursionParameter): PackageDependency[] {
@@ -135,7 +105,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
       },
       config,
     );
-    return result ? [result] : /* istanbul ignore next: can this happen? */ [];
+    return result ? [result] : /* istanbul ignore next: can this happen? */[];
   }
   return regexMatchAll(regexes[index], content).flatMap((match) => {
     return processRecursive({
@@ -145,4 +115,24 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
       combinedGroups: mergeGroups(combinedGroups, match.groups ?? {}),
     });
   });
+}
+
+function checkIsValidDependency(
+  dep: PackageDependency,
+  packageFile: string,
+): boolean {
+  const isValid = isValidDependency(dep);
+  if (!isValid) {
+    const meta = {
+      packageDependency: dep,
+      packageFile,
+    };
+    logger.trace(
+      meta,
+      'Discovered a package dependency by matching regex, but it did not pass validation. Discarding',
+    );
+    return isValid;
+  }
+
+  return isValid;
 }
