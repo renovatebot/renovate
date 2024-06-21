@@ -8,6 +8,7 @@ const Categories = [
   'ci',
   'custom',
   'dart',
+  'devbox',
   'docker',
   'dotnet',
   'elixir',

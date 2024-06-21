@@ -1,22 +1,40 @@
+import { logger } from '../../../logger';
 import { NixhubDatasource } from '../../datasource/nixhub';
-import { id as npmVersioning } from '../../versioning/npm';
+import { id as nixhubVersioning } from '../../versioning/nixhub';
+import { isValidDependency } from '../custom/regex/utils';
 import type { PackageDependency, PackageFileContent } from '../types';
+import { DevboxFile } from './schema';
 
 export function extractPackageFile(content: string): PackageFileContent | null {
+  logger.trace('devbox.extractPackageFile()');
+
+  const parsedFile = DevboxFile.safeParse(content);
+  if (parsedFile.error) {
+    logger.debug({ error: parsedFile.error }, 'Error parsing devbox.json');
+    return null;
+  }
+
+  const file = parsedFile.data;
   const deps: PackageDependency[] = [];
 
-  // TODO zod, jsonc, and object package syntax
-  const file: { packages: string[] } = JSON.parse(content);
-
-  for (const pkgStr of file.packages) {
-    const [pkgName, pkgVer] = pkgStr.split('@');
-    deps.push({
-      depName: pkgName,
-      currentValue: pkgVer,
-      datasource: NixhubDatasource.id,
-      // packageName: pkgName,
-      versioning: npmVersioning,
-    });
+  if (Array.isArray(file.packages)) {
+    for (const pkgStr of file.packages) {
+      const [pkgName, pkgVer] = pkgStr.split('@');
+      const pkgDep = getDep(pkgName, pkgVer);
+      if (pkgDep) {
+        deps.push(pkgDep);
+      }
+    }
+  } else {
+    for (const [pkgName, pkgVer] of Object.entries(file.packages)) {
+      const pkgDep = getDep(
+        pkgName,
+        typeof pkgVer === 'string' ? pkgVer : pkgVer.version,
+      );
+      if (pkgDep) {
+        deps.push(pkgDep);
+      }
+    }
   }
 
   if (deps.length) {
@@ -24,4 +42,30 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   }
 
   return null;
+}
+
+function getNixhubPackageName(pkgName: string): string {
+  // If any package names don't match the Nixhub package name, add them here
+  if (pkgName === 'nodejs') {
+    return 'node';
+  }
+  return pkgName;
+}
+
+function getDep(pkgName: string, version: string): PackageDependency | null {
+  const dep = {
+    depName: pkgName,
+    currentValue: version,
+    datasource: NixhubDatasource.id,
+    packageName: getNixhubPackageName(pkgName),
+    versioning: nixhubVersioning,
+  };
+  if (!isValidDependency(dep)) {
+    logger.trace(
+      { pkgName },
+      'Skipping invalid devbox dependency in devbox JSON file.',
+    );
+    return null;
+  }
+  return dep;
 }

@@ -1,11 +1,19 @@
+import { logger } from '../../../logger';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { HttpError } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import * as npmVersioning from '../../versioning/npm';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { defaultRegistryUrl } from './common';
+import { datasource, defaultRegistryUrl } from './common';
+import type { NixhubResponse } from './types';
 
 export class NixhubDatasource extends Datasource {
-  static readonly id = 'nixhub';
+  static readonly id = datasource;
+
+  constructor() {
+    super(datasource);
+  }
 
   override readonly customRegistrySupport = true;
 
@@ -15,26 +23,36 @@ export class NixhubDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
-  constructor() {
-    super(NixhubDatasource.id);
-  }
-
-  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  async getReleases({
+    registryUrl,
+    packageName,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const res: ReleaseResult = {
-      homepage: 'https://www.nixhub.io/',
+      homepage: 'https://www.nixhub.io',
       releases: [],
     };
 
+    logger.trace({ registryUrl, packageName }, 'fetching nixhub release');
+
     const nixhubPkgUrl = joinUrlParts(
-      defaultRegistryUrl,
-      `/packages/${config.packageName}?_data=routes/_nixhub.packages.$pkg._index`,
+      registryUrl!,
+      `/packages/${packageName}?_data=routes/_nixhub.packages.$pkg._index`,
     );
 
-    const response = await this.http.get(nixhubPkgUrl);
-    const parsedResponse: { releases: { version: string }[] } = JSON.parse(
-      response.body,
-    );
-    res.releases = parsedResponse.releases;
-    return res;
+    try {
+      const response = await this.http.getJson<NixhubResponse>(nixhubPkgUrl);
+      res.releases = response?.body?.releases.map((release) => ({
+        version: release.version,
+      }));
+    } catch (err) {
+      // istanbul ignore else: not testable with nock
+      if (err instanceof HttpError) {
+        if (err.response?.statusCode !== 404) {
+          throw new ExternalHostError(err);
+        }
+      }
+      this.handleGenericErrors(err);
+    }
+    return res.releases.length ? res : null;
   }
 }

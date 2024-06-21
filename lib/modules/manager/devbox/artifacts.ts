@@ -1,12 +1,8 @@
-import is from '@sindresorhus/is';
-import { quote } from 'shlex';
 import { logger } from '../../../logger';
-import { findGithubToken } from '../../../util/check-token';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import { readLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export async function updateArtifacts(

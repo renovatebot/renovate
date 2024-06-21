@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/nixhub/index processes real data 1`] = `
+{
+  "homepage": "https://www.nixhub.io",
+  "registryUrl": "https://www.nixhub.io",
+  "releases": [
+    {
+      "version": "20.10.0",
+    },
+    {
+      "version": "20.11.0",
+    },
+    {
+      "version": "20.11.1",
+    },
+    {
+      "version": "20.12.2",
+    },
+    {
+      "version": "21.0.0",
+    },
+    {
+      "version": "21.1.0",
+    },
+    {
+      "version": "21.2.0",
+    },
+    {
+      "version": "21.3.0",
+    },
+    {
+      "version": "21.4.0",
+    },
+    {
+      "version": "21.5.0",
+    },
+    {
+      "version": "21.6.0",
+    },
+    {
+      "version": "21.6.1",
+    },
+    {
+      "version": "21.6.2",
+    },
+    {
+      "version": "21.7.0",
+    },
+    {
+      "version": "21.7.1",
+    },
+    {
+      "version": "21.7.2",
+    },
+    {
+      "version": "21.7.3",
+    },
+    {
+      "version": "22.0.0",
+    },
+    {
+      "version": "22.2.0",
+    },
+  ],
+}
+`;

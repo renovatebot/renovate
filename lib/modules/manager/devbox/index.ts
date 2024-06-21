@@ -1,4 +1,6 @@
+import type { Category } from '../../../constants';
 import { NixhubDatasource } from '../../datasource/nixhub';
+import { NodeVersionDatasource } from '../../datasource/node-version';
 
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
@@ -12,4 +14,9 @@ export const defaultConfig = {
   enabled: true,
 };
 
-export const supportedDatasources = [NixhubDatasource.id];
+export const categories: Category[] = ['devbox', 'node'];
+
+export const supportedDatasources = [
+  NixhubDatasource.id,
+  NodeVersionDatasource.id,
+];
