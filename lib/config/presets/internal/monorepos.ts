@@ -81,6 +81,7 @@ const repoGroups = {
   ],
   commitlint: 'https://github.com/conventional-changelog/commitlint',
   'contentful-rich-text': 'https://github.com/contentful/rich-text',
+  cspell: 'https://github.com/streetsidesoftware/cspell',
   'datadog-browser-sdk': 'https://github.com/DataDog/browser-sdk',
   'datatables-net': [
     'https://github.com/DataTables/Dist-DataTables',
@@ -402,7 +403,10 @@ const repoGroups = {
     'https://github.com/nuxt/nuxt',
   ],
   okhttp: 'https://github.com/square/okhttp',
-  opencost: 'https://github.com/opencost/opencost',
+  opencost: [
+    'https://github.com/opencost/opencost',
+    'https://github.com/opencost/opencost-ui',
+  ],
   openiddict: 'https://github.com/openiddict/openiddict-core',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
@@ -468,6 +472,7 @@ const repoGroups = {
   serde: 'https://github.com/serde-rs/serde',
   'serenity-js': 'https://github.com/serenity-js/serenity-js',
   shedlock: 'https://github.com/lukas-krecan/ShedLock',
+  shiki: 'https://github.com/shikijs/shiki',
   'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
   'sitecore-jss': 'https://github.com/Sitecore/jss',
   skiasharp: 'https://github.com/mono/SkiaSharp',
