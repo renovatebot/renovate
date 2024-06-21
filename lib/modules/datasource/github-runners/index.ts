@@ -5,11 +5,16 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 export class GithubRunnersDatasource extends Datasource {
   static readonly id = 'github-runners';
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'We use the URL: https://github.com/actions/runner-images.';
+
   /**
    * Only add stable runners to the datasource. See datasource readme for details.
    */
   private static readonly releases: Record<string, Release[] | undefined> = {
     ubuntu: [
+      { version: '24.04', isStable: false },
       { version: '22.04' },
       { version: '20.04' },
       { version: '18.04', isDeprecated: true },

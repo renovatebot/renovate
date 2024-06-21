@@ -1214,7 +1214,7 @@ async function getIssues(): Promise<Issue[]> {
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
-        user: config.renovateUsername,
+        ...(!config.ignorePrAuthor && { user: config.renovateUsername }),
       },
       readOnly: true,
     },
@@ -1950,6 +1950,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/]: https:\/\/github\.com\//g), ']: https://togithub.com/')
     .replace('> ℹ **Note**\n> \n', '> [!NOTE]\n')
     .replace('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
+    .replace('> ⚠️ **Warning**\n> \n', '> [!WARNING]\n')
     .replace('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
   return smartTruncate(massagedInput, GitHubMaxPrBodyLen);
 }

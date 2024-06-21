@@ -32,43 +32,6 @@ Skipping the check will speed things up, but may result in versions being return
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
-## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
-
-<!-- prettier-ignore -->
-!!! note
-    For the Forgejo and Gitea platform only.
-
-The order method for autodiscover server side repository search.
-
-> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
-
-Allowed values:
-
-- `asc`
-- `desc`
-
-Default value: `asc`.
-
-## `RENOVATE_X_AUTODISCOVER_REPO_SORT`
-
-<!-- prettier-ignore -->
-!!! note
-    For the Forgejo and Gitea platform only.
-
-The sort method for autodiscover server side repository search.
-
-> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
-
-Allowed values:
-
-- `alpha`
-- `created`
-- `updated`
-- `size`
-- `id`
-
-Default value: `alpha`.
-
 ## `RENOVATE_X_DELETE_CONFIG_FILE`
 
 If `true` Renovate tries to delete the self-hosted config file after reading it.
@@ -126,26 +89,6 @@ Suppress the default warning when a deprecated version of Node.js is used to run
 ## `RENOVATE_X_IGNORE_RE2`
 
 Skip initializing `RE2` for regular expressions and instead use Node-native `RegExp` instead.
-
-## `RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL`
-
-If set, Renovate will query this API for Merge Confidence data.
-
-If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
-
-- have a static merge confidence token that you set via `MEND_RNV_MC_TOKEN`
-- _or_ set `MEND_RNV_MC_TOKEN` to `auto`
-
-Then you must set this variable at the _server_ and the _workers_.
-
-But if you have specified the token as a [`matchConfidence`](https://docs.renovatebot.com/configuration-options/#matchconfidence) `hostRule`, you only need to set this variable at the _workers_.
-
-This feature is in private beta.
-
-## `RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES`
-
-If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
-The expected value for this environment variable is a JSON array of strings.
 
 ## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
 

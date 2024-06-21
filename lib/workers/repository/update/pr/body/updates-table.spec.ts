@@ -152,7 +152,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
     );
   });
 
-  it('selects the best upgrade incase of duplicate table rows', () => {
+  it('selects the best upgrade in case of duplicate table rows', () => {
     const upgrade1 = partial<BranchUpgradeConfig>({
       manager: 'some-manager',
       branchName: 'some-branch',

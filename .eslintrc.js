@@ -224,5 +224,14 @@ module.exports = {
         'import/extensions': 0,
       },
     },
+    {
+      files: ['tools/docs/test/**/*.mjs'],
+      env: {
+        jest: false,
+      },
+      rules: {
+        '@typescript-eslint/no-floating-promises': 0,
+      },
+    },
   ],
 };

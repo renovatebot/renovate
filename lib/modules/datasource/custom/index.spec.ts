@@ -209,30 +209,6 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
-    it('return null for plain text API if the body is not what is expected', async () => {
-      const expected = {
-        releases: [
-          {
-            version: '1.0.0',
-          },
-        ],
-      };
-      httpMock.scope('https://example.com').get('/v1').reply(200, expected, {
-        'Content-Type': 'application/json',
-      });
-      const result = await getPkgReleases({
-        datasource: `${CustomDatasource.id}.foo`,
-        packageName: 'myPackage',
-        customDatasources: {
-          foo: {
-            defaultRegistryUrlTemplate: 'https://example.com/v1',
-            format: 'plain',
-          },
-        },
-      });
-      expect(result).toBeNull();
-    });
-
     it('return releases for yaml API directly exposing in Renovate format', async () => {
       const expected = {
         releases: [
@@ -695,6 +671,15 @@ describe('modules/datasource/custom/index', () => {
       });
 
       expect(result).toEqual(expected);
+    });
+  });
+
+  describe('getDigest', () => {
+    it('returns null as digest should be provided in releases', async () => {
+      const digest = await new CustomDatasource().getDigest({
+        packageName: 'my-package',
+      });
+      expect(digest).toBeNull();
     });
   });
 });

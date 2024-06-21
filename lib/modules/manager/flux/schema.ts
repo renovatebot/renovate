@@ -70,7 +70,25 @@ export const OCIRepository = KubernetesResource.extend({
   }),
 });
 
+export const Kustomization = KubernetesResource.extend({
+  apiVersion: z.string().startsWith('kustomize.toolkit.fluxcd.io/'),
+  kind: z.literal('Kustomization'),
+  spec: z.object({
+    images: z
+      .array(
+        z.object({
+          name: z.string(),
+          newName: z.string().optional(),
+          newTag: z.string().optional(),
+          digest: z.string().optional(),
+        }),
+      )
+      .optional(),
+  }),
+});
+
 export const FluxResource = HelmRelease.or(HelmRepository)
   .or(GitRepository)
-  .or(OCIRepository);
+  .or(OCIRepository)
+  .or(Kustomization);
 export type FluxResource = z.infer<typeof FluxResource>;

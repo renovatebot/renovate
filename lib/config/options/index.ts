@@ -2,9 +2,17 @@ import { getManagers } from '../../modules/manager';
 import { getCustomManagers } from '../../modules/manager/custom';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
+import { supportedDatasources } from '../presets/internal/merge-confidence';
 import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
+  {
+    name: 'mode',
+    description: 'Mode of operation.',
+    type: 'string',
+    default: 'full',
+    allowedValues: ['full', 'silent'],
+  },
   {
     name: 'allowedHeaders',
     description:
@@ -13,6 +21,27 @@ const options: RenovateOptions[] = [
     default: ['X-*'],
     subType: 'string',
     globalOnly: true,
+    patternMatch: true,
+  },
+  {
+    name: 'autodiscoverRepoOrder',
+    description:
+      'The order method for autodiscover server side repository search.',
+    type: 'string',
+    default: null,
+    globalOnly: true,
+    allowedValues: ['asc', 'desc'],
+    supportedPlatforms: ['gitea'],
+  },
+  {
+    name: 'autodiscoverRepoSort',
+    description:
+      'The sort method for autodiscover server side repository search.',
+    type: 'string',
+    default: null,
+    globalOnly: true,
+    allowedValues: ['alpha', 'created', 'updated', 'size', 'id'],
+    supportedPlatforms: ['gitea'],
   },
   {
     name: 'allowedEnv',
@@ -22,6 +51,7 @@ const options: RenovateOptions[] = [
     default: [],
     subType: 'string',
     globalOnly: true,
+    patternMatch: true,
   },
   {
     name: 'detectGlobalManagerConfig',
@@ -37,6 +67,27 @@ const options: RenovateOptions[] = [
       'If `true`, Renovate tries to detect host rules from environment variables.',
     type: 'boolean',
     default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'mergeConfidenceEndpoint',
+    description:
+      'If set, Renovate will query this API for Merge Confidence data.',
+    stage: 'global',
+    type: 'string',
+    default: 'https://developer.mend.io/',
+    advancedUse: true,
+    globalOnly: true,
+  },
+  {
+    name: 'mergeConfidenceDatasources',
+    description:
+      'If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.',
+    stage: 'global',
+    allowedValues: supportedDatasources,
+    default: supportedDatasources,
+    type: 'array',
+    subType: 'string',
     globalOnly: true,
   },
   {
@@ -463,7 +514,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.5.1',
+    default: 'ghcr.io/containerbase/sidecar:10.11.7',
     globalOnly: true,
   },
   {
@@ -599,9 +650,16 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'encryptedWarning',
+    description: 'Warning text to use if encrypted config is found.',
+    type: 'string',
+    globalOnly: true,
+    advancedUse: true,
+  },
+  {
     name: 'inheritConfig',
     description:
-      'If `true`, Renovate will inherit configuration from the `inheritConfigFileName` file in `inheritConfigRepoName',
+      'If `true`, Renovate will inherit configuration from the `inheritConfigFileName` file in `inheritConfigRepoName`.',
     type: 'boolean',
     default: false,
     globalOnly: true,
@@ -625,7 +683,7 @@ const options: RenovateOptions[] = [
   {
     name: 'inheritConfigStrict',
     description:
-      'If `true`, any `inheritedConfig` fetch errror will result in an aborted run.',
+      'If `true`, any `inheritedConfig` fetch error will result in an aborted run.',
     type: 'boolean',
     default: false,
     globalOnly: true,
@@ -910,6 +968,7 @@ const options: RenovateOptions[] = [
     description: 'Set to `false` to disable lock file updating.',
     type: 'boolean',
     default: true,
+    supportedManagers: ['npm'],
   },
   {
     name: 'skipInstalls',
@@ -957,6 +1016,7 @@ const options: RenovateOptions[] = [
     default: null,
     globalOnly: true,
     supportedPlatforms: ['bitbucket'],
+    patternMatch: true,
   },
   {
     name: 'autodiscoverTopics',
@@ -1238,6 +1298,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'excludeRepositories',
@@ -1342,7 +1403,6 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
-    advancedUse: true,
   },
   {
     name: 'excludeDepNames',
@@ -1473,7 +1533,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchCurrentValue',
     description:
-      'A regex to match against the raw `currentValue` string of a dependency. Valid only within a `packageRules` object.',
+      'A regex or glob pattern to match against the raw `currentValue` string of a dependency. Valid only within a `packageRules` object.',
     type: 'string',
     stage: 'package',
     parents: ['packageRules'],
@@ -1495,11 +1555,28 @@ const options: RenovateOptions[] = [
   {
     name: 'matchNewValue',
     description:
-      'A regex to match against the raw `newValue` string of a dependency. Valid only within a `packageRules` object.',
+      'A regex or glob pattern to match against the raw `newValue` string of a dependency. Valid only within a `packageRules` object.',
     type: 'string',
     stage: 'package',
     parents: ['packageRules'],
     mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'sourceUrl',
+    description: 'The source URL of the package.',
+    type: 'string',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'sourceDirectory',
+    description:
+      'The source directory in which the package is present at its source.',
+    type: 'string',
+    parents: ['packageRules'],
     cli: false,
     env: false,
   },
@@ -1627,7 +1704,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'customChangelogUrl',
+    name: 'changelogUrl',
     description:
       'If set, Renovate will use this URL to fetch changelogs for a matched dependency. Valid only within a `packageRules` object.',
     type: 'string',
@@ -1989,7 +2066,9 @@ const options: RenovateOptions[] = [
     description:
       'Set sorting priority for PR creation. PRs with higher priority are created first, negative priority last.',
     type: 'integer',
+    allowNegative: true,
     default: 0,
+    parents: ['packageRules'],
     cli: false,
     env: false,
   },
@@ -2588,6 +2667,8 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     experimental: true,
+    deprecationMsg:
+      'This option is deprecated and will be removed in a future release.',
   },
   {
     name: 'keepAlive',
