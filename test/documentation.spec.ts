@@ -27,7 +27,7 @@ describe('documentation', () => {
       const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
       const reg = `##\\s${configOption}(?<subHeadersStr>[\\s\\S]+?)\n##\\s`;
       const match = content.match(reg);
-      const subHeadersMatch = match?.[0]?.matchAll(/\n###\s(?<child>\w+)+\n/g);
+      const subHeadersMatch = match?.[0]?.matchAll(/\n###\s(?<child>\w+)\n/g);
       if (subHeadersMatch) {
         for (const subHeaderStr of subHeadersMatch) {
           if (subHeaderStr?.groups?.child) {
