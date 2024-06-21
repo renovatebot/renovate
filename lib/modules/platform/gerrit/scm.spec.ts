@@ -302,8 +302,11 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         message: [
           'commit msg',
-          'Renovate-Source-Branch: renovate/dependency-1.x',
-          expect.stringMatching(/Change-Id: I.{32}/),
+          expect.stringMatching(
+            new RegExp(
+              '^Renovate-Source-Branch: renovate/dependency-1.x\nChange-Id: I[a-z0-9]{40}$',
+            ),
+          ),
         ],
         force: true,
       });
@@ -345,8 +348,7 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         message: [
           'commit msg',
-          'Renovate-Source-Branch: renovate/dependency-1.x',
-          'Change-Id: ...',
+          'Renovate-Source-Branch: renovate/dependency-1.x\nChange-Id: ...',
         ],
         force: true,
       });
@@ -387,8 +389,7 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         message: [
           'commit msg',
-          'Renovate-Source-Branch: renovate/dependency-1.x',
-          'Change-Id: ...',
+          'Renovate-Source-Branch: renovate/dependency-1.x\nChange-Id: ...',
         ],
         force: true,
       });
