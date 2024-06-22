@@ -7,4 +7,5 @@ if [[ "${CODESPACES}" == true ]]; then
   sudo chmod 1777 /tmp
 fi
 
+pnpm config set store-dir ~/.pnpm
 COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm install
