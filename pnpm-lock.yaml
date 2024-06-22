@@ -572,8 +572,8 @@ importers:
         specifier: 0.13.0
         version: 0.13.0
       memfs:
-        specifier: 4.9.2
-        version: 4.9.2
+        specifier: 4.9.3
+        version: 4.9.3
       nock:
         specifier: 13.5.4
         version: 13.5.4
@@ -4365,8 +4365,8 @@ packages:
   mdurl@2.0.0:
     resolution: {integrity: sha512-Lf+9+2r+Tdp5wXDXC4PcIBjTDtq4UKjCPMQhKIuzpJNW0b96kVqSwW0bT7FhRSfmAiFYgP+SCRvdrDozfh0U5w==}
 
-  memfs@4.9.2:
-    resolution: {integrity: sha512-f16coDZlTG1jskq3mxarwB+fGRrd0uXWt+o1WIhRfOwbXQZqUDsTVxQBFK9JjRQHblg8eAG2JSbprDXKjc7ijQ==}
+  memfs@4.9.3:
+    resolution: {integrity: sha512-bsYSSnirtYTWi1+OPMFb0M048evMKyUYe0EbtuGQgq6BVQM1g1W8/KIUJCCvjgI/El0j6Q4WsmMiBwLUBSw8LA==}
     engines: {node: '>= 4.0.0'}
 
   memorystream@0.3.1:
@@ -5363,12 +5363,6 @@ packages:
   socks@2.8.3:
     resolution: {integrity: sha512-l5x7VUUWbjVFbafGLxPWkYsHIhEvmF85tbIeFZWc8ZPtoMyybuEhL7Jye/ooC4/d48FgOjSJXgsF/AJPYCW8Zw==}
     engines: {node: '>= 10.0.0', npm: '>= 3.0.0'}
-
-  sonic-forest@1.0.3:
-    resolution: {integrity: sha512-dtwajos6IWMEWXdEbW1IkEkyL2gztCAgDplRIX+OT5aRKnEd5e7r7YCxRgXZdhRP1FBdOBf8axeTPhzDv8T4wQ==}
-    engines: {node: '>=10.0'}
-    peerDependencies:
-      tslib: '2'
 
   sort-keys@4.2.0:
     resolution: {integrity: sha512-aUYIEU/UviqPgc8mHR6IW1EGxkAXpeRETYcrzg8cLAvUPZcpAlleSXHV2mY7G12GphSH6Gzv+4MMVSSkbdteHg==}
@@ -11214,11 +11208,11 @@ snapshots:
 
   mdurl@2.0.0: {}
 
-  memfs@4.9.2:
+  memfs@4.9.3:
     dependencies:
       '@jsonjoy.com/json-pack': 1.0.4(tslib@2.6.3)
       '@jsonjoy.com/util': 1.1.3(tslib@2.6.3)
-      sonic-forest: 1.0.3(tslib@2.6.3)
+      tree-dump: 1.0.1(tslib@2.6.3)
       tslib: 2.6.3
 
   memorystream@0.3.1: {}
@@ -12273,11 +12267,6 @@ snapshots:
       ip-address: 9.0.5
       smart-buffer: 4.2.0
     optional: true
-
-  sonic-forest@1.0.3(tslib@2.6.3):
-    dependencies:
-      tree-dump: 1.0.1(tslib@2.6.3)
-      tslib: 2.6.3
 
   sort-keys@4.2.0:
     dependencies:
