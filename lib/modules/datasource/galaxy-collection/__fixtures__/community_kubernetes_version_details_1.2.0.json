@@ -1,38 +1,28 @@
-
 {
-  "id": 6810,
-  "href": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/versions/1.2.0/",
-  "download_url": "https://galaxy.ansible.com/download/community-kubernetes-1.2.0.tar.gz",
+  "version": "1.2.0",
+  "href": "/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/versions/1.2.0/",
+  "created_at": "2023-05-08T20:27:29.625001Z",
+  "updated_at": "2023-09-29T13:51:22.996480Z",
+  "requires_ansible": ">=2.9.17",
+  "marks": [],
   "artifact": {
     "filename": "community-kubernetes-1.2.0.tar.gz",
-    "size": 119746,
-    "sha256": "a53eaf6a51987d30cc48ebcd20f0102dae0f17a7a02071928381e5a62951a0ed"
-  },
-  "namespace": {
-    "id": 17693,
-    "href": "https://galaxy.ansible.com/api/v1/namespaces/17693/",
-    "name": "community"
+    "sha256": "a53eaf6a51987d30cc48ebcd20f0102dae0f17a7a02071928381e5a62951a0ed",
+    "size": 119746
   },
   "collection": {
-    "id": 201,
-    "href": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/",
-    "name": "kubernetes"
-  },
-  "version": "1.2.0",
-  "hidden": false,
-  "metadata": {
+    "id": "ec17eff8-7c2b-4687-aa14-ee5edab9bd62",
     "name": "kubernetes",
-    "tags": [
-      "kubernetes",
-      "k8s",
-      "cloud",
-      "infrastructure",
-      "openshift",
-      "okd",
-      "cluster"
-    ],
-    "issues": "https://github.com/ansible-collections/community.kubernetes/issues",
-    "readme": "README.md",
+    "href": "/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/"
+  },
+  "download_url": "https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/artifacts/community-kubernetes-1.2.0.tar.gz",
+  "name": "kubernetes",
+  "namespace": {
+    "name": "community",
+    "metadata_sha256": null
+  },
+  "signatures": [],
+  "metadata": {
     "authors": [
       "chouseknecht (https://github.com/chouseknecht)",
       "geerlingguy (https://www.jeffgeerling.com/)",
@@ -43,14 +33,57 @@
       "mmazur (https://github.com/mmazur)",
       "jamescassell (https://github.com/jamescassell)"
     ],
-    "license": [],
-    "version": "1.2.0",
-    "homepage": "",
-    "namespace": "community",
-    "repository": "https://github.com/ansible-collections/community.kubernetes",
-    "description": "Kubernetes Collection for Ansible.",
+    "contents": [],
     "dependencies": {},
-    "license_file": "LICENSE",
-    "documentation": ""
-  }
+    "description": "Kubernetes Collection for Ansible.",
+    "documentation": "",
+    "homepage": "",
+    "issues": "https://github.com/ansible-collections/community.kubernetes/issues",
+    "license": [],
+    "repository": "https://github.com/ansible-collections/community.kubernetes",
+    "tags": [
+      "cluster",
+      "okd",
+      "k8s",
+      "cloud",
+      "kubernetes",
+      "openshift",
+      "infrastructure"
+    ]
+  },
+  "git_url": null,
+  "git_commit_sha": null,
+  "manifest": {
+    "format": 1,
+    "collection_info": {
+      "name": "kubernetes",
+      "issues": "https://github.com/ansible-collections/community.kubernetes/issues",
+      "authors": [
+        "chouseknecht (https://github.com/chouseknecht)",
+        "geerlingguy (https://www.jeffgeerling.com/)",
+        "maxamillion (https://github.com/maxamillion)",
+        "jmontleon (https://github.com/jmontleon)",
+        "fabianvf (https://github.com/fabianvf)",
+        "willthames (https://github.com/willthames)",
+        "mmazur (https://github.com/mmazur)",
+        "jamescassell (https://github.com/jamescassell)"
+      ],
+      "license": [],
+      "version": "1.2.0",
+      "homepage": "",
+      "namespace": "community",
+      "repository": "https://github.com/ansible-collections/community.kubernetes",
+      "description": "Kubernetes Collection for Ansible.",
+      "dependencies": {},
+      "documentation": ""
+    },
+    "file_manifest_file": {
+      "name": "FILES.json",
+      "ftype": "file",
+      "format": 1,
+      "chksum_type": "sha256",
+      "chksum_sha256": "f01d32a9d742c93b2fa52bee42e9af0a6275180d36efa607cbe84e4ca33236a6"
+    }
+  },
+  "files": {}
 }

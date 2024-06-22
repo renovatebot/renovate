@@ -10,11 +10,7 @@
     }
   ],
   "dependencies": {
-      "autoprefixer": "6.5.0",
-      "bower": "~1.6.0",
-      "browserify": "13.1.0",
-    "browserify-css": "0.9.2",
-    "cheerio": "0.22.0",
+    "@babel/core": "7.0.0",
     "config": "1.21.0"
   },
   "homepage": "https://keylocation.sg",

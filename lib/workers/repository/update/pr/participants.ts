@@ -3,32 +3,37 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
-import { sampleSize } from '../../../../util';
+import { noLeadingAtSymbol } from '../../../../util/common';
+import { sampleSize } from '../../../../util/sample';
 import { codeOwnersForPr } from './code-owners';
 
 async function addCodeOwners(
+  config: RenovateConfig,
   assigneesOrReviewers: string[],
-  pr: Pr
+  pr: Pr,
 ): Promise<string[]> {
-  return [...new Set(assigneesOrReviewers.concat(await codeOwnersForPr(pr)))];
+  const codeOwners = await codeOwnersForPr(pr);
+
+  const assignees =
+    config.expandCodeOwnersGroups && platform.expandGroupMembers
+      ? await platform.expandGroupMembers(codeOwners)
+      : codeOwners;
+
+  return [...new Set(assigneesOrReviewers.concat(assignees))];
 }
 
 function filterUnavailableUsers(
   config: RenovateConfig,
-  users: string[]
+  users: string[],
 ): Promise<string[]> {
   return config.filterUnavailableUsers && platform.filterUnavailableUsers
     ? platform.filterUnavailableUsers(users)
     : Promise.resolve(users);
 }
 
-function noLeadingAtSymbol(input: string): string {
-  return input.length && input.startsWith('@') ? input.slice(1) : input;
-}
-
 function prepareParticipants(
   config: RenovateConfig,
-  usernames: string[]
+  usernames: string[],
 ): Promise<string[]> {
   const normalizedUsernames = [...new Set(usernames.map(noLeadingAtSymbol))];
   return filterUnavailableUsers(config, normalizedUsernames);
@@ -36,12 +41,12 @@ function prepareParticipants(
 
 export async function addParticipants(
   config: RenovateConfig,
-  pr: Pr
+  pr: Pr,
 ): Promise<void> {
   let assignees = config.assignees ?? [];
   logger.debug(`addParticipants(pr=${pr?.number})`);
   if (config.assigneesFromCodeOwners) {
-    assignees = await addCodeOwners(assignees, pr);
+    assignees = await addCodeOwners(config, assignees, pr);
   }
   if (assignees.length > 0) {
     try {
@@ -60,25 +65,34 @@ export async function addParticipants(
     } catch (err) {
       logger.debug(
         { assignees: config.assignees, err },
-        'Failed to add assignees'
+        'Failed to add assignees',
       );
     }
   }
 
   let reviewers = config.reviewers ?? [];
   if (config.reviewersFromCodeOwners) {
-    reviewers = await addCodeOwners(reviewers, pr);
+    reviewers = await addCodeOwners(config, reviewers, pr);
+    logger.debug(
+      `Reviewers from code owners: ${reviewers.map((reviewer) => `"${reviewer}"`).join(', ')}`,
+    );
   }
   if (
     is.array(config.additionalReviewers) &&
     config.additionalReviewers.length > 0
   ) {
+    logger.debug(
+      `Additional reviewers: ${config.additionalReviewers.map((reviewer) => `"${reviewer}"`).join(', ')}`,
+    );
     reviewers = reviewers.concat(config.additionalReviewers);
   }
   if (reviewers.length > 0) {
     try {
       reviewers = await prepareParticipants(config, reviewers);
       if (is.number(config.reviewersSampleSize)) {
+        logger.debug(
+          `Sampling reviewersSampleSize=${config.reviewersSampleSize} reviewers`,
+        );
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
       }
       if (reviewers.length > 0) {
@@ -92,7 +106,7 @@ export async function addParticipants(
     } catch (err) {
       logger.debug(
         { reviewers: config.reviewers, err },
-        'Failed to add reviewers'
+        'Failed to add reviewers',
       );
     }
   }

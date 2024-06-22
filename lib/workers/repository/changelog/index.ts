@@ -1,21 +1,19 @@
-import pMap from 'p-map';
+import * as p from '../../../util/promises';
 import type { BranchUpgradeConfig } from '../../types';
 import { getChangeLogJSON } from '../update/pr/changelog';
 
-// istanbul ignore next
-async function embedChangelog(upgrade: BranchUpgradeConfig): Promise<void> {
+export async function embedChangelog(
+  upgrade: BranchUpgradeConfig,
+): Promise<void> {
+  // getChangeLogJSON returns null on error, so don't try again
+  if (upgrade.logJSON !== undefined) {
+    return;
+  }
   upgrade.logJSON = await getChangeLogJSON(upgrade);
 }
 
-// istanbul ignore next
 export async function embedChangelogs(
-  branchUpgrades: Record<string, BranchUpgradeConfig[]>
+  branches: BranchUpgradeConfig[],
 ): Promise<void> {
-  const upgrades = [];
-  for (const branchName of Object.keys(branchUpgrades)) {
-    for (const upgrade of branchUpgrades[branchName]) {
-      upgrades.push(upgrade);
-    }
-  }
-  await pMap(upgrades, embedChangelog, { concurrency: 10 });
+  await p.map(branches, embedChangelog, { concurrency: 10 });
 }

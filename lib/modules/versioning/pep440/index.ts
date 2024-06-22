@@ -16,7 +16,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
 
 const {
   compare: sortVersions,
-  satisfies: matches,
+  satisfies,
   valid,
   validRange,
   explain,
@@ -48,7 +48,7 @@ export function isValid(input: string): boolean {
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const found = pep440.filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[found.length - 1];
@@ -56,7 +56,7 @@ function getSatisfyingVersion(
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const found = pep440.filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[0];
@@ -73,6 +73,10 @@ export { isVersion, matches };
 
 const equals = (version1: string, version2: string): boolean =>
   isVersion(version1) && isVersion(version2) && eq(version1, version2);
+
+function matches(version: string, range: string): boolean {
+  return isVersion(version) && isValid(range) && satisfies(version, range);
+}
 
 export const api: VersioningApi = {
   equals,

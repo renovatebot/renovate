@@ -13,7 +13,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         yarn2Lock,
         'chalk',
         '^2.4.1',
-        '2.5.0'
+        '2.5.0',
       );
       expect(res).toBe(yarn2Lock);
     });
@@ -23,7 +23,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         yarnLock1,
         'fresh',
         '~0.2.1',
-        '0.2.5'
+        '0.2.5',
       );
       expect(res).not.toEqual(yarnLock1);
       const diffRes = Diff.diffLines(yarnLock1, res);
@@ -32,12 +32,12 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-        "  version \\"0.2.5\\"
+        "  version "0.2.5"
         "
       `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
-        "  version \\"0.2.4\\"
-          resolved \\"https://registry.yarnpkg.com/fresh/-/fresh-0.2.4.tgz#3582499206c9723714190edd74b4604feb4a614c\\"
+        "  version "0.2.4"
+          resolved "https://registry.yarnpkg.com/fresh/-/fresh-0.2.4.tgz#3582499206c9723714190edd74b4604feb4a614c"
           integrity sha1-NYJJkgbJcjcUGQ7ddLRgT+tKYUw=
         "
       `);
@@ -48,7 +48,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         yarnLock1,
         'express',
         '4.0.0',
-        '4.4.0'
+        '4.4.0',
       );
       expect(res).not.toEqual(yarnLock1);
       const diffRes = Diff.diffLines(yarnLock1, res);
@@ -57,15 +57,15 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-              "  version \\"4.4.0\\"
-              "
-          `);
+        "  version "4.4.0"
+        "
+      `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
-              "  version \\"4.0.0\\"
-                resolved \\"https://registry.yarnpkg.com/express/-/express-4.0.0.tgz#274dc82933c9f574cc38a0ce5ea8172be9c6b094\\"
-                integrity sha1-J03IKTPJ9XTMOKDOXqgXK+nGsJQ=
-              "
-          `);
+        "  version "4.0.0"
+          resolved "https://registry.yarnpkg.com/express/-/express-4.0.0.tgz#274dc82933c9f574cc38a0ce5ea8172be9c6b094"
+          integrity sha1-J03IKTPJ9XTMOKDOXqgXK+nGsJQ=
+        "
+      `);
     });
 
     it('replaces constraint too', () => {
@@ -74,7 +74,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         'express',
         '4.0.0',
         '4.4.0',
-        '4.4.0'
+        '4.4.0',
       );
       expect(res).not.toEqual(yarnLock1);
       const diffRes = Diff.diffLines(yarnLock1, res);
@@ -83,17 +83,17 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-                  "express@4.4.0:
-                    version \\"4.4.0\\"
-                  "
-              `);
+        "express@4.4.0:
+          version "4.4.0"
+        "
+      `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
-                  "express@4.0.0:
-                    version \\"4.0.0\\"
-                    resolved \\"https://registry.yarnpkg.com/express/-/express-4.0.0.tgz#274dc82933c9f574cc38a0ce5ea8172be9c6b094\\"
-                    integrity sha1-J03IKTPJ9XTMOKDOXqgXK+nGsJQ=
-                  "
-              `);
+        "express@4.0.0:
+          version "4.0.0"
+          resolved "https://registry.yarnpkg.com/express/-/express-4.0.0.tgz#274dc82933c9f574cc38a0ce5ea8172be9c6b094"
+          integrity sha1-J03IKTPJ9XTMOKDOXqgXK+nGsJQ=
+        "
+      `);
     });
 
     it('handles escaped constraints', () => {
@@ -101,7 +101,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         yarnLock2,
         'string-width',
         '^1.0.1 || ^2.0.0',
-        '2.2.0'
+        '2.2.0',
       );
       expect(res).not.toEqual(yarnLock2);
       const diffRes = Diff.diffLines(yarnLock2, res);
@@ -110,14 +110,13 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-        "  version \\"2.2.0\\"
+        "  version "2.2.0"
         "
       `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
-        "string-width@^1.0.1:
-          version \\"1.0.2\\"
-          resolved \\"https://registry.yarnpkg.com/string-width/-/string-width-1.0.2.tgz#118bdf5b8cdc51a2a7e70d211e07e2b0b9b107d3\\"
-          integrity sha1-EYvfW4zcUaKn5w0hHgfisLmxB9M=
+        "  version "2.0.0"
+          resolved "https://registry.yarnpkg.com/string-width/-/string-width-2.1.1.tgz#ab93f27a8dc13d28cac815c462143a6d9012ae9e"
+          integrity sha512-nOqH59deCq9SRHlxq1Aw85Jnt4w6KvLKqWVik6oA9ZklXLNIOlqg4F2yrT1MVaTjAqvVwdfeZ7w7aCvJD7ugkw==
         "
       `);
     });
@@ -127,7 +126,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         yarnLock2,
         '@embroider/addon-shim',
         '^0.48.0',
-        '0.48.1'
+        '0.48.1',
       );
       expect(res).not.toEqual(yarnLock2);
       const diffRes = Diff.diffLines(yarnLock2, res);
@@ -136,12 +135,12 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-        "  version \\"0.48.1\\"
+        "  version "0.48.1"
         "
       `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
-        "  version \\"0.48.0\\"
-          resolved \\"https://registry.yarnpkg.com/@embroider/addon-shim/-/addon-shim-0.48.0.tgz#2a950ecb82c45ae53e801bcddfd26dc420cac9e8\\"
+        "  version "0.48.0"
+          resolved "https://registry.yarnpkg.com/@embroider/addon-shim/-/addon-shim-0.48.0.tgz#2a950ecb82c45ae53e801bcddfd26dc420cac9e8"
           integrity sha512-hu2Yzv5xXHl1vCzkcybjyjCK2/fHwKPDJ5xpwRlvASU/8WMBVLekQQ9Tt8WhPMZJHdMkzIWchAPGkLZaKaeXmA==
         "
       `);

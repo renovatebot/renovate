@@ -21,10 +21,13 @@ const gitlabFossGemfileLock = Fixtures.get('Gemfile.gitlab-foss.lock');
 const gitlabFossGemfile = Fixtures.get('Gemfile.gitlab-foss');
 const sourceBlockGemfile = Fixtures.get('Gemfile.sourceBlock');
 const sourceBlockWithNewLinesGemfileLock = Fixtures.get(
-  'Gemfile.sourceBlockWithNewLines.lock'
+  'Gemfile.sourceBlockWithNewLines.lock',
 );
 const sourceBlockWithNewLinesGemfile = Fixtures.get(
-  'Gemfile.sourceBlockWithNewLines'
+  'Gemfile.sourceBlockWithNewLines',
+);
+const sourceBlockWithGroupsGemfile = Fixtures.get(
+  'Gemfile.sourceBlockWithGroups',
 );
 
 describe('modules/manager/bundler/extract', () => {
@@ -41,11 +44,11 @@ describe('modules/manager/bundler/extract', () => {
       expect(
         res?.deps
           .filter((dep) =>
-            Object.prototype.hasOwnProperty.call(dep, 'lockedVersion')
+            Object.prototype.hasOwnProperty.call(dep, 'lockedVersion'),
           )
           .every(
-            (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion)
-          )
+            (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion),
+          ),
       ).toBeTrue();
       expect(res?.deps).toHaveLength(68);
     });
@@ -62,8 +65,8 @@ describe('modules/manager/bundler/extract', () => {
       expect(res).toMatchSnapshot();
       expect(
         res?.deps.every(
-          (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion)
-        )
+          (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion),
+        ),
       ).toBeTrue();
       expect(res?.deps).toHaveLength(5);
     });
@@ -75,11 +78,11 @@ describe('modules/manager/bundler/extract', () => {
       expect(
         res?.deps
           .filter((dep) =>
-            Object.prototype.hasOwnProperty.call(dep, 'lockedVersion')
+            Object.prototype.hasOwnProperty.call(dep, 'lockedVersion'),
           )
           .every(
-            (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion)
-          )
+            (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion),
+          ),
       ).toBeTrue();
       expect(res?.deps).toHaveLength(125);
     });
@@ -90,8 +93,8 @@ describe('modules/manager/bundler/extract', () => {
       expect(res).toMatchSnapshot();
       expect(
         res?.deps.every(
-          (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion)
-        )
+          (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion),
+        ),
       ).toBeTrue();
       expect(res?.deps).toHaveLength(14);
     });
@@ -103,8 +106,8 @@ describe('modules/manager/bundler/extract', () => {
     expect(res).toMatchSnapshot();
     expect(
       res?.deps.every(
-        (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion)
-      )
+        (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion),
+      ),
     ).toBeTrue();
     expect(res?.deps).toHaveLength(252);
   });
@@ -119,9 +122,23 @@ describe('modules/manager/bundler/extract', () => {
     fs.readLocalFile.mockResolvedValueOnce(sourceBlockWithNewLinesGemfileLock);
     const res = await extractPackageFile(
       sourceBlockWithNewLinesGemfile,
-      'Gemfile'
+      'Gemfile',
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(2);
+  });
+
+  it('parses source blocks with groups in Gemfile', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(sourceBlockWithGroupsGemfile);
+    const res = await extractPackageFile(
+      sourceBlockWithGroupsGemfile,
+      'Gemfile',
+    );
+    expect(res?.deps).toMatchObject([
+      { depName: 'internal_test_gem', currentValue: '"~> 1"' },
+      { depName: 'internal_production_gem', currentValue: '"~> 1"' },
+      { depName: 'sfn_my_dep1', currentValue: '"~> 1"' },
+      { depName: 'sfn_my_dep2', currentValue: '"~> 1"' },
+    ]);
   });
 });

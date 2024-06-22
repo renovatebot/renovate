@@ -1,8 +1,8 @@
 // Code originally derived from https://github.com/hadfieldn/node-bunyan-prettystream but since heavily edited
 // Neither fork nor original repo appear to be maintained
 
-import { Stream } from 'stream';
-import * as util from 'util';
+import { Stream } from 'node:stream';
+import * as util from 'node:util';
 import chalk from 'chalk';
 import stringify from 'json-stringify-pretty-compact';
 import type { BunyanRecord } from './types';
@@ -19,6 +19,7 @@ const bunyanFields = [
 ];
 const metaFields = [
   'repository',
+  'baseBranch',
   'packageFile',
   'depType',
   'dependency',

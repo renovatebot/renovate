@@ -1,344 +1,57 @@
-import URL from 'url';
-import { ECR } from '@aws-sdk/client-ecr';
-import type { ECRClientConfig } from '@aws-sdk/client-ecr';
 import is from '@sindresorhus/is';
-import { parse } from 'auth-header';
-import hasha from 'hasha';
-import {
-  HOST_DISABLED,
-  PAGE_NOT_FOUND_ERROR,
-} from '../../../constants/error-messages';
+import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
-import * as hostRules from '../../../util/host-rules';
-import { Http, HttpError } from '../../../util/http';
-import type {
-  HttpOptions,
-  HttpResponse,
-  OutgoingHttpHeaders,
-} from '../../../util/http/types';
+import { HttpError } from '../../../util/http';
+import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
+import { type AsyncResult, Result } from '../../../util/result';
+import { isDockerDigest } from '../../../util/string-match';
 import {
   ensurePathPrefix,
-  ensureTrailingSlash,
+  joinUrlParts,
   parseLinkHeader,
-  parseUrl,
-  trimTrailingSlash,
 } from '../../../util/url';
-import {
-  api as dockerVersioning,
-  id as dockerVersioningId,
-} from '../../versioning/docker';
+import { id as dockerVersioningId } from '../../versioning/docker';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { gitRefLabel, sourceLabels } from './common';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types';
+import { isArtifactoryServer } from '../util';
 import {
-  Image,
-  ImageList,
-  MediaType,
-  OciImage,
-  OciImageList,
-  RegistryRepository,
-} from './types';
+  DOCKER_HUB,
+  dockerDatasourceId,
+  extractDigestFromResponseBody,
+  findHelmSourceUrl,
+  findLatestStable,
+  getAuthHeaders,
+  getRegistryRepository,
+  gitRefLabel,
+  imageUrlLabel,
+  isDockerHost,
+  sourceLabel,
+  sourceLabels,
+} from './common';
+import { DockerHubCache } from './dockerhub-cache';
+import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr';
+import {
+  DistributionManifest,
+  DockerHubTagsPage,
+  ManifestJson,
+  OciHelmConfig,
+  OciImageConfig,
+  OciImageManifest,
+} from './schema';
 
-export const DOCKER_HUB = 'https://index.docker.io';
-
-export const ecrRegex = regEx(/\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/);
-
-function isDockerHost(host: string): boolean {
-  const regex = regEx(/(?:^|\.)docker\.io$/);
-  return regex.test(host);
-}
-
-export async function getAuthHeaders(
-  http: Http,
-  registryHost: string,
-  dockerRepository: string,
-  apiCheckUrl = `${registryHost}/v2/`
-): Promise<OutgoingHttpHeaders | null> {
-  try {
-    const options = {
-      throwHttpErrors: false,
-      noAuth: true,
-    };
-    const apiCheckResponse = apiCheckUrl.endsWith('/v2/')
-      ? await http.get(apiCheckUrl, options)
-      : // use json request, as this will be cached for tags, so it returns json
-        // TODO: add cache test
-        await http.getJson(apiCheckUrl, options);
-
-    if (apiCheckResponse.statusCode === 200) {
-      logger.debug({ apiCheckUrl }, 'No registry auth required');
-      return {};
-    }
-    if (apiCheckResponse.statusCode === 404) {
-      logger.debug({ apiCheckUrl }, 'Page Not Found');
-      // throw error up to be caught and potentially retried with library/ prefix
-      throw new Error(PAGE_NOT_FOUND_ERROR);
-    }
-    if (
-      apiCheckResponse.statusCode !== 401 ||
-      !is.nonEmptyString(apiCheckResponse.headers['www-authenticate'])
-    ) {
-      logger.warn(
-        { apiCheckUrl, res: apiCheckResponse },
-        'Invalid registry response'
-      );
-      return null;
-    }
-
-    const authenticateHeader = parse(
-      apiCheckResponse.headers['www-authenticate']
-    );
-
-    const opts: HostRule & HttpOptions = hostRules.find({
-      hostType: DockerDatasource.id,
-      url: apiCheckUrl,
-    });
-    if (ecrRegex.test(registryHost)) {
-      logger.trace(
-        { registryHost, dockerRepository },
-        `Using ecr auth for Docker registry`
-      );
-      const [, region] = ecrRegex.exec(registryHost) ?? [];
-      const auth = await getECRAuthToken(region, opts);
-      if (auth) {
-        opts.headers = { authorization: `Basic ${auth}` };
-      }
-    } else if (opts.username && opts.password) {
-      logger.trace(
-        { registryHost, dockerRepository },
-        `Using basic auth for Docker registry`
-      );
-      const auth = Buffer.from(`${opts.username}:${opts.password}`).toString(
-        'base64'
-      );
-      opts.headers = { authorization: `Basic ${auth}` };
-    } else if (opts.token) {
-      const authType = opts.authType ?? 'Bearer';
-      logger.trace(
-        { registryHost, dockerRepository },
-        `Using ${authType} token for Docker registry`
-      );
-      opts.headers = { authorization: `${authType} ${opts.token}` };
-    }
-    delete opts.username;
-    delete opts.password;
-    delete opts.token;
-
-    // If realm isn't an url, we should directly use auth header
-    // Can happen when we get a Basic auth or some other auth type
-    // * WWW-Authenticate: Basic realm="Artifactory Realm"
-    // * Www-Authenticate: Basic realm="https://123456789.dkr.ecr.eu-central-1.amazonaws.com/",service="ecr.amazonaws.com"
-    // * www-authenticate: Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull"
-    // * www-authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
-    if (
-      authenticateHeader.scheme.toUpperCase() !== 'BEARER' ||
-      !is.string(authenticateHeader.params.realm) ||
-      !is.string(authenticateHeader.params.service) ||
-      parseUrl(authenticateHeader.params.realm) === null
-    ) {
-      logger.trace(
-        { registryHost, dockerRepository, authenticateHeader },
-        `Invalid realm, testing direct auth`
-      );
-      return opts.headers ?? null;
-    }
-
-    let scope = `repository:${dockerRepository}:pull`;
-    // repo isn't known to server yet, so causing wrong scope `repository:user/image:pull`
-    if (
-      is.string(authenticateHeader.params.scope) &&
-      !apiCheckUrl.endsWith('/v2/')
-    ) {
-      scope = authenticateHeader.params.scope;
-    }
-
-    const authUrl = `${authenticateHeader.params.realm}?service=${authenticateHeader.params.service}&scope=${scope}`;
-    logger.trace(
-      { registryHost, dockerRepository, authUrl },
-      `Obtaining docker registry token`
-    );
-    opts.noAuth = true;
-    const authResponse = (
-      await http.getJson<{ token?: string; access_token?: string }>(
-        authUrl,
-        opts
-      )
-    ).body;
-
-    const token = authResponse.token ?? authResponse.access_token;
-    // istanbul ignore if
-    if (!token) {
-      logger.warn('Failed to obtain docker registry token');
-      return null;
-    }
-    return {
-      authorization: `Bearer ${token}`,
-    };
-  } catch (err) /* istanbul ignore next */ {
-    if (err.host === 'quay.io') {
-      // TODO: debug why quay throws errors (#9604)
-      return null;
-    }
-    if (err.statusCode === 401) {
-      logger.debug(
-        { registryHost, dockerRepository },
-        'Unauthorized docker lookup'
-      );
-      logger.debug({ err });
-      return null;
-    }
-    if (err.statusCode === 403) {
-      logger.debug(
-        { registryHost, dockerRepository },
-        'Not allowed to access docker registry'
-      );
-      logger.debug({ err });
-      return null;
-    }
-    if (err.name === 'RequestError' && isDockerHost(registryHost)) {
-      throw new ExternalHostError(err);
-    }
-    if (err.statusCode === 429 && isDockerHost(registryHost)) {
-      throw new ExternalHostError(err);
-    }
-    if (err.statusCode >= 500 && err.statusCode < 600) {
-      throw new ExternalHostError(err);
-    }
-    if (err.message === PAGE_NOT_FOUND_ERROR) {
-      throw err;
-    }
-    if (err.message === HOST_DISABLED) {
-      logger.trace({ registryHost, dockerRepository, err }, 'Host disabled');
-      return null;
-    }
-    logger.warn(
-      { registryHost, dockerRepository, err },
-      'Error obtaining docker token'
-    );
-    return null;
-  }
-}
-
-async function getECRAuthToken(
-  region: string | undefined,
-  opts: HostRule
-): Promise<string | null> {
-  const config: ECRClientConfig = { region };
-  if (opts.username && opts.password) {
-    config.credentials = {
-      accessKeyId: opts.username,
-      secretAccessKey: opts.password,
-      ...(opts.token && { sessionToken: opts.token }),
-    };
-  }
-
-  const ecr = new ECR(config);
-  try {
-    const data = await ecr.getAuthorizationToken({});
-    const authorizationToken = data?.authorizationData?.[0]?.authorizationToken;
-    if (authorizationToken) {
-      return authorizationToken;
-    }
-    logger.warn(
-      'Could not extract authorizationToken from ECR getAuthorizationToken response'
-    );
-  } catch (err) {
-    logger.trace({ err }, 'err');
-    logger.debug('ECR getAuthorizationToken error');
-  }
-  return null;
-}
-
-export function getRegistryRepository(
-  packageName: string,
-  registryUrl: string
-): RegistryRepository {
-  if (registryUrl !== DOCKER_HUB) {
-    const registryEndingWithSlash = ensureTrailingSlash(
-      registryUrl.replace(regEx(/^https?:\/\//), '')
-    );
-    if (packageName.startsWith(registryEndingWithSlash)) {
-      let registryHost = trimTrailingSlash(registryUrl);
-      if (!regEx(/^https?:\/\//).test(registryHost)) {
-        registryHost = `https://${registryHost}`;
-      }
-      let dockerRepository = packageName.replace(registryEndingWithSlash, '');
-      const fullUrl = `${registryHost}/${dockerRepository}`;
-      const { origin, pathname } = parseUrl(fullUrl)!;
-      registryHost = origin;
-      dockerRepository = pathname.substring(1);
-      return {
-        registryHost,
-        dockerRepository,
-      };
-    }
-  }
-  let registryHost: string | undefined;
-  const split = packageName.split('/');
-  if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
-    [registryHost] = split;
-    split.shift();
-  }
-  let dockerRepository = split.join('/');
-  if (!registryHost) {
-    registryHost = registryUrl.replace(
-      'https://docker.io',
-      'https://index.docker.io'
-    );
-  }
-  if (registryHost === 'docker.io') {
-    registryHost = 'index.docker.io';
-  }
-  if (!regEx(/^https?:\/\//).exec(registryHost)) {
-    registryHost = `https://${registryHost}`;
-  }
-  const opts = hostRules.find({
-    hostType: DockerDatasource.id,
-    url: registryHost,
-  });
-  if (opts?.insecureRegistry) {
-    registryHost = registryHost.replace('https', 'http');
-  }
-  if (registryHost.endsWith('.docker.io') && !dockerRepository.includes('/')) {
-    dockerRepository = 'library/' + dockerRepository;
-  }
-  return {
-    registryHost,
-    dockerRepository,
-  };
-}
-
-function digestFromManifestStr(str: hasha.HashaInput): string {
-  return 'sha256:' + hasha(str, { algorithm: 'sha256' });
-}
-
-export function extractDigestFromResponseBody(
-  manifestResponse: HttpResponse
-): string {
-  return digestFromManifestStr(manifestResponse.body);
-}
-
-export function isECRMaxResultsError(err: HttpError): boolean {
-  const resp = err.response as HttpResponse<any> | undefined;
-  return !!(
-    resp?.statusCode === 405 &&
-    resp.headers?.['docker-distribution-api-version'] &&
-    // https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-    resp.body?.['errors']?.[0]?.message?.includes(
-      'Member must have value less than or equal to 1000'
-    )
-  );
-}
-
-export const defaultConfig = {
+const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
   commitMessageExtra:
-    'to {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{{prettyNewVersion}}}{{/if}}',
+    'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{{prettyNewVersion}}}{{/if}}{{/if}}',
   digest: {
     branchTopic: '{{{depNameSanitized}}}-{{{currentValue}}}',
     commitMessageExtra: 'to {{newDigestShort}}',
@@ -357,25 +70,23 @@ export const defaultConfig = {
       branchTopic: 'digests-pin',
     },
   },
-  group: {
-    commitMessageTopic: '{{{groupName}}} Docker tags',
-  },
 };
 
-function findLatestStable(tags: string[]): string | null {
-  const versions = tags
-    .filter((v) => dockerVersioning.isValid(v) && dockerVersioning.isStable(v))
-    .sort((a, b) => dockerVersioning.sortVersions(a, b));
-
-  return versions.pop() ?? tags.slice(-1).pop() ?? null;
-}
-
 export class DockerDatasource extends Datasource {
-  static readonly id = 'docker';
+  static readonly id = dockerDatasourceId;
 
   override readonly defaultVersioning = dockerVersioningId;
 
   override readonly defaultRegistryUrls = [DOCKER_HUB];
+
+  override readonly defaultConfig = defaultConfig;
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `tag_last_pushed` field in thre results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `org.opencontainers.image.source` and `org.label-schema.vcs-url` labels present in the metadata of the **latest stable** image found on the Docker registry.';
 
   constructor() {
     super(DockerDatasource.id);
@@ -386,26 +97,26 @@ export class DockerDatasource extends Datasource {
     registryHost: string,
     dockerRepository: string,
     tag: string,
-    mode: 'head' | 'get' = 'get'
+    mode: 'head' | 'get' = 'get',
   ): Promise<HttpResponse | null> {
     logger.debug(
-      `getManifestResponse(${registryHost}, ${dockerRepository}, ${tag})`
+      `getManifestResponse(${registryHost}, ${dockerRepository}, ${tag}, ${mode})`,
     );
     try {
       const headers = await getAuthHeaders(
         this.http,
         registryHost,
-        dockerRepository
+        dockerRepository,
       );
       if (!headers) {
-        logger.debug('No docker auth found - returning');
+        logger.warn('No docker auth found - returning');
         return null;
       }
       headers.accept = [
-        MediaType.manifestListV2,
-        MediaType.manifestV2,
-        MediaType.ociManifestV1,
-        MediaType.ociManifestIndexV1,
+        'application/vnd.docker.distribution.manifest.list.v2+json',
+        'application/vnd.docker.distribution.manifest.v2+json',
+        'application/vnd.oci.image.manifest.v1+json',
+        'application/vnd.oci.image.index.v1+json',
       ].join(', ');
       const url = `${registryHost}/v2/${dockerRepository}/manifests/${tag}`;
       const manifestResponse = await this.http[mode](url, {
@@ -420,7 +131,7 @@ export class DockerDatasource extends Datasource {
       if (err.statusCode === 401) {
         logger.debug(
           { registryHost, dockerRepository },
-          'Unauthorized docker lookup'
+          'Unauthorized docker lookup',
         );
         logger.debug({ err });
         return null;
@@ -433,7 +144,7 @@ export class DockerDatasource extends Datasource {
             dockerRepository,
             tag,
           },
-          'Docker Manifest is unknown'
+          'Docker Manifest is unknown',
         );
         return null;
       }
@@ -446,7 +157,7 @@ export class DockerDatasource extends Datasource {
       if (err.code === 'ETIMEDOUT') {
         logger.debug(
           { registryHost },
-          'Timeout when attempting to connect to docker registry'
+          'Timeout when attempting to connect to docker registry',
         );
         logger.debug({ err });
         return null;
@@ -458,22 +169,124 @@ export class DockerDatasource extends Datasource {
           dockerRepository,
           tag,
         },
-        'Unknown Error looking up docker manifest'
+        'Unknown Error looking up docker manifest',
       );
       return null;
     }
   }
 
+  @cache({
+    namespace: 'datasource-docker-imageconfig',
+    key: (
+      registryHost: string,
+      dockerRepository: string,
+      configDigest: string,
+    ) => `${registryHost}:${dockerRepository}@${configDigest}`,
+    ttlMinutes: 1440 * 28,
+  })
+  async getImageConfig(
+    registryHost: string,
+    dockerRepository: string,
+    configDigest: string,
+  ): Promise<HttpResponse<OciImageConfig> | undefined> {
+    logger.trace(
+      `getImageConfig(${registryHost}, ${dockerRepository}, ${configDigest})`,
+    );
+
+    const headers = await getAuthHeaders(
+      this.http,
+      registryHost,
+      dockerRepository,
+    );
+    // istanbul ignore if: Should never happen
+    if (!headers) {
+      logger.warn('No docker auth found - returning');
+      return undefined;
+    }
+    const url = joinUrlParts(
+      registryHost,
+      'v2',
+      dockerRepository,
+      'blobs',
+      configDigest,
+    );
+    return await this.http.getJson(
+      url,
+      {
+        headers,
+        noAuth: true,
+      },
+      OciImageConfig,
+    );
+  }
+
+  @cache({
+    namespace: 'datasource-docker-imageconfig',
+    key: (
+      registryHost: string,
+      dockerRepository: string,
+      configDigest: string,
+    ) => `${registryHost}:${dockerRepository}@${configDigest}`,
+    ttlMinutes: 1440 * 28,
+  })
+  async getHelmConfig(
+    registryHost: string,
+    dockerRepository: string,
+    configDigest: string,
+  ): Promise<HttpResponse<OciHelmConfig> | undefined> {
+    logger.trace(
+      `getImageConfig(${registryHost}, ${dockerRepository}, ${configDigest})`,
+    );
+
+    const headers = await getAuthHeaders(
+      this.http,
+      registryHost,
+      dockerRepository,
+    );
+    // istanbul ignore if: Should never happen
+    if (!headers) {
+      logger.warn('No docker auth found - returning');
+      return undefined;
+    }
+    const url = joinUrlParts(
+      registryHost,
+      'v2',
+      dockerRepository,
+      'blobs',
+      configDigest,
+    );
+    return await this.http.getJson(
+      url,
+      {
+        headers,
+        noAuth: true,
+      },
+      OciHelmConfig,
+    );
+  }
+
   private async getConfigDigest(
     registry: string,
     dockerRepository: string,
-    tag: string
+    tag: string,
   ): Promise<string | null> {
+    return (
+      (await this.getManifest(registry, dockerRepository, tag))?.config
+        ?.digest ?? null
+    );
+  }
+
+  private async getManifest(
+    registry: string,
+    dockerRepository: string,
+    tag: string,
+  ): Promise<OciImageManifest | DistributionManifest | null> {
     const manifestResponse = await this.getManifestResponse(
       registry,
       dockerRepository,
-      tag
+      tag,
     );
+
     // If getting the manifest fails here, then abort
     // This means that the latest tag doesn't have a manifest, which shouldn't
     // be possible
@@ -481,81 +294,147 @@ export class DockerDatasource extends Datasource {
     if (!manifestResponse) {
       return null;
     }
-    const manifest = JSON.parse(manifestResponse.body) as
-      | ImageList
-      | Image
-      | OciImageList
-      | OciImage;
-    if (manifest.schemaVersion !== 2) {
+
+    // Softfail on invalid manifests
+    const parsed = ManifestJson.safeParse(manifestResponse.body);
+    if (!parsed.success) {
       logger.debug(
-        { registry, dockerRepository, tag },
-        'Manifest schema version is not 2'
+        {
+          registry,
+          dockerRepository,
+          tag,
+          body: manifestResponse.body,
+          headers: manifestResponse.headers,
+          err: parsed.error,
+        },
+        'Invalid manifest response',
       );
       return null;
     }
 
-    if (manifest.mediaType === MediaType.manifestListV2) {
-      if (manifest.manifests.length) {
+    const manifest = parsed.data;
+
+    switch (manifest.mediaType) {
+      case 'application/vnd.docker.distribution.manifest.v2+json':
+      case 'application/vnd.oci.image.manifest.v1+json':
+        return manifest;
+      case 'application/vnd.docker.distribution.manifest.list.v2+json':
+      case 'application/vnd.oci.image.index.v1+json':
+        if (!manifest.manifests.length) {
+          logger.debug(
+            { manifest },
+            'Invalid manifest list with no manifests - returning',
+          );
+          return null;
+        }
         logger.trace(
           { registry, dockerRepository, tag },
-          'Found manifest list, using first image'
+          'Found manifest list, using first image',
         );
-        return this.getConfigDigest(
+        return this.getManifest(
           registry,
           dockerRepository,
-          manifest.manifests[0].digest
+          manifest.manifests[0].digest,
         );
-      } else {
-        logger.debug(
-          { manifest },
-          'Invalid manifest list with no manifests - returning'
-        );
+      // istanbul ignore next: can't happen
+      default:
         return null;
-      }
     }
+  }
 
-    if (
-      manifest.mediaType === MediaType.manifestV2 &&
-      is.string(manifest.config?.digest)
-    ) {
-      return manifest.config?.digest;
-    }
+  @cache({
+    namespace: 'datasource-docker-architecture',
+    key: (
+      registryHost: string,
+      dockerRepository: string,
+      currentDigest: string,
+    ) => `${registryHost}:${dockerRepository}@${currentDigest}`,
+    ttlMinutes: 1440 * 28,
+  })
+  async getImageArchitecture(
+    registryHost: string,
+    dockerRepository: string,
+    currentDigest: string,
+  ): Promise<string | null | undefined> {
+    try {
+      let manifestResponse: HttpResponse<string> | null;
 
-    // OCI image lists are not required to specify a mediaType
-    if (
-      manifest.mediaType === MediaType.ociManifestIndexV1 ||
-      (!manifest.mediaType && hasKey('manifests', manifest))
-    ) {
-      if (manifest.manifests.length) {
-        logger.trace(
-          { registry, dockerRepository, tag },
-          'Found manifest index, using first image'
-        );
-        return this.getConfigDigest(
-          registry,
+      try {
+        manifestResponse = await this.getManifestResponse(
+          registryHost,
           dockerRepository,
-          manifest.manifests[0].digest
+          currentDigest,
+          'head',
         );
-      } else {
-        logger.debug(
-          { manifest },
-          'Invalid manifest index with no manifests - returning'
-        );
+      } catch (_err) {
+        const err =
+          _err instanceof ExternalHostError
+            ? _err.err
+            : /* istanbul ignore next: can never happen */ _err;
+
+        if (
+          typeof err.statusCode === 'number' &&
+          err.statusCode >= 500 &&
+          err.statusCode < 600
+        ) {
+          // querying the digest manifest for a non existent image leads to a 500 statusCode
+          return null;
+        }
+
+        /* istanbul ignore next */
+        throw _err;
+      }
+
+      if (
+        manifestResponse?.headers['content-type'] !==
+          'application/vnd.docker.distribution.manifest.v2+json' &&
+        manifestResponse?.headers['content-type'] !==
+          'application/vnd.oci.image.manifest.v1+json'
+      ) {
         return null;
       }
+
+      const configDigest = await this.getConfigDigest(
+        registryHost,
+        dockerRepository,
+        currentDigest,
+      );
+      if (!configDigest) {
+        return null;
+      }
+
+      const configResponse = await this.getImageConfig(
+        registryHost,
+        dockerRepository,
+        configDigest,
+      );
+
+      // TODO: fix me, architecture is required in spec
+      if (
+        configResponse &&
+        ('config' in configResponse.body ||
+          'architecture' in configResponse.body)
+      ) {
+        const architecture = configResponse.body.architecture ?? null;
+        logger.debug(
+          `Current digest ${currentDigest} relates to architecture ${
+            architecture ?? 'null'
+          }`,
+        );
+
+        return architecture;
+      }
+    } catch (err) /* istanbul ignore next */ {
+      if (err.statusCode !== 404 || err.message === PAGE_NOT_FOUND_ERROR) {
+        throw err;
+      }
+      logger.debug(
+        { registryHost, dockerRepository, currentDigest, err },
+        'Unknown error getting image architecture',
+      );
     }
 
-    // OCI manifests are not required to specify a mediaType
-    if (
-      (manifest.mediaType === MediaType.ociManifestV1 ||
-        (!manifest.mediaType && hasKey('config', manifest))) &&
-      is.string(manifest.config?.digest)
-    ) {
-      return manifest.config?.digest;
-    }
-
-    logger.debug({ manifest }, 'Invalid manifest - returning');
-    return null;
+    return undefined;
   }
 
   /*
@@ -568,48 +447,99 @@ export class DockerDatasource extends Datasource {
     namespace: 'datasource-docker-labels',
     key: (registryHost: string, dockerRepository: string, tag: string) =>
       `${registryHost}:${dockerRepository}:${tag}`,
-    ttlMinutes: 60,
+    ttlMinutes: 24 * 60,
   })
-  public async getLabels(
+  async getLabels(
     registryHost: string,
     dockerRepository: string,
-    tag: string
-  ): Promise<Record<string, string>> {
+    tag: string,
+  ): Promise<Record<string, string> | undefined> {
     logger.debug(`getLabels(${registryHost}, ${dockerRepository}, ${tag})`);
+    // Docker Hub library images don't have labels we need
+    if (
+      registryHost === 'https://index.docker.io' &&
+      dockerRepository.startsWith('library/')
+    ) {
+      logger.debug('Docker Hub library image - skipping label lookup');
+      return {};
+    }
     try {
-      let labels: Record<string, string> = {};
-      const configDigest = await this.getConfigDigest(
+      let labels: Record<string, string> | undefined = {};
+      const manifest = await this.getManifest(
         registryHost,
         dockerRepository,
-        tag
+        tag,
       );
-      if (!configDigest) {
-        return {};
+
+      if (!manifest) {
+        logger.debug(
+          { registryHost, dockerRepository, tag },
+          'No manifest found',
+        );
+        return undefined;
       }
 
-      const headers = await getAuthHeaders(
-        this.http,
-        registryHost,
-        dockerRepository
-      );
-      // istanbul ignore if: Should never be happen
-      if (!headers) {
-        logger.debug('No docker auth found - returning');
-        return {};
+      if ('annotations' in manifest && manifest.annotations) {
+        labels = manifest.annotations;
       }
-      const url = `${registryHost}/v2/${dockerRepository}/blobs/${configDigest}`;
-      const configResponse = await this.http.get(url, {
-        headers,
-        noAuth: true,
-      });
-      labels = JSON.parse(configResponse.body).config.Labels;
+
+      switch (manifest.config.mediaType) {
+        case 'application/vnd.cncf.helm.config.v1+json': {
+          if (labels[sourceLabel]) {
+            // we already have the source url, so no need to pull the config
+            return labels;
+          }
+          const configResponse = await this.getHelmConfig(
+            registryHost,
+            dockerRepository,
+            manifest.config.digest,
+          );
+
+          if (configResponse) {
+            // Helm chart
+            const url = findHelmSourceUrl(configResponse.body);
+            if (url) {
+              labels[sourceLabel] = url;
+            }
+          }
+          break;
+        }
+        case 'application/vnd.oci.image.config.v1+json':
+        case 'application/vnd.docker.container.image.v1+json': {
+          if (labels[sourceLabel] && labels[gitRefLabel]) {
+            // we already have the source url, so no need to pull the config
+            return labels;
+          }
+          const configResponse = await this.getImageConfig(
+            registryHost,
+            dockerRepository,
+            manifest.config.digest,
+          );
+
+          // istanbul ignore if: should never happen
+          if (!configResponse) {
+            return labels;
+          }
+
+          const body = configResponse.body;
+          if (body.config) {
+            labels = { ...labels, ...body.config.Labels };
+          } else {
+            logger.debug(
+              { headers: configResponse.headers, body },
+              `manifest blob response body missing the "config" property`,
+            );
+          }
+          break;
+        }
+      }
 
       if (labels) {
         logger.debug(
           {
             labels,
           },
-          'found labels in manifest'
+          'found labels in manifest',
         );
       }
       return labels;
@@ -620,7 +550,7 @@ export class DockerDatasource extends Datasource {
       if (err.statusCode === 400 || err.statusCode === 401) {
         logger.debug(
           { registryHost, dockerRepository, err },
-          'Unauthorized docker lookup'
+          'Unauthorized docker lookup',
         );
       } else if (err.statusCode === 404) {
         logger.warn(
@@ -630,7 +560,7 @@ export class DockerDatasource extends Datasource {
             dockerRepository,
             tag,
           },
-          'Config Manifest is unknown'
+          'Config Manifest is unknown',
         );
       } else if (err.statusCode === 429 && isDockerHost(registryHost)) {
         logger.warn({ err }, 'docker registry failure: too many requests');
@@ -642,7 +572,7 @@ export class DockerDatasource extends Datasource {
             dockerRepository,
             tag,
           },
-          'docker registry failure: internal error'
+          'docker registry failure: internal error',
         );
       } else if (
         err.code === 'ERR_TLS_CERT_ALTNAME_INVALID' ||
@@ -650,17 +580,17 @@ export class DockerDatasource extends Datasource {
       ) {
         logger.debug(
           { registryHost, err },
-          'Error connecting to docker registry'
+          'Error connecting to docker registry',
         );
       } else if (registryHost === 'https://quay.io') {
         // istanbul ignore next
         logger.debug(
-          'Ignoring quay.io errors until they fully support v2 schema'
+          'Ignoring quay.io errors until they fully support v2 schema',
         );
       } else {
         logger.info(
           { registryHost, dockerRepository, tag, err },
-          'Unknown error getting Docker labels'
+          'Unknown error getting Docker labels',
         );
       }
       return {};
@@ -669,7 +599,7 @@ export class DockerDatasource extends Datasource {
 
   private async getTagsQuayRegistry(
     registry: string,
-    repository: string
+    repository: string,
   ): Promise<string[]> {
     let tags: string[] = [];
     const limit = 100;
@@ -690,7 +620,7 @@ export class DockerDatasource extends Datasource {
       // typescript issue :-/
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       const res = (await this.http.getJson<QuayRestDockerTags>(
-        url
+        url,
       )) as HttpResponse<QuayRestDockerTags>;
       const pageTags = res.body.tags.map((tag) => tag.name);
       tags = tags.concat(pageTags);
@@ -702,27 +632,33 @@ export class DockerDatasource extends Datasource {
 
   private async getDockerApiTags(
     registryHost: string,
-    dockerRepository: string
+    dockerRepository: string,
   ): Promise<string[] | null> {
     let tags: string[] = [];
     // AWS ECR limits the maximum number of results to 1000
     // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-    const limit = ecrRegex.test(registryHost) ? 1000 : 10000;
-    let url:
-      | string
-      | null = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
+    // See https://docs.aws.amazon.com/AmazonECRPublic/latest/APIReference/API_DescribeRepositories.html#ecrpublic-DescribeRepositories-request-maxResults
+    const limit =
+      ecrRegex.test(registryHost) || ecrPublicRegex.test(registryHost)
+        ? 1000
+        : 10000;
+    let url: string | null =
+      `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
     url = ensurePathPrefix(url, '/v2');
     const headers = await getAuthHeaders(
       this.http,
       registryHost,
       dockerRepository,
-      url
+      url,
     );
     if (!headers) {
       logger.debug('Failed to get authHeaders for getTags lookup');
       return null;
     }
-    let page = 1;
+    let page = 0;
+    const pages = process.env.RENOVATE_X_DOCKER_MAX_PAGES
+      ? parseInt(process.env.RENOVATE_X_DOCKER_MAX_PAGES, 10)
+      : 20;
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<{ tags: string[] }>;
@@ -747,9 +683,17 @@ export class DockerDatasource extends Datasource {
       }
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link);
-      url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
+      if (isArtifactoryServer(res)) {
+        // Artifactory incorrectly returns a next link without the virtual repository name
+        // this is due to a bug in Artifactory https://jfrog.atlassian.net/browse/RTFACT-18971
+        url = linkHeader?.next?.last
+          ? `${url}&last=${linkHeader.next.last}`
+          : null;
+      } else {
+        url = linkHeader?.next ? new URL(linkHeader.next.url, url).href : null;
+      }
       page += 1;
-    } while (url && page < 20);
+    } while (url && page < pages);
     return tags;
   }
 
@@ -758,13 +702,13 @@ export class DockerDatasource extends Datasource {
     key: (registryHost: string, dockerRepository: string) =>
       `${registryHost}:${dockerRepository}`,
   })
-  public async getTags(
+  async getTags(
     registryHost: string,
-    dockerRepository: string
+    dockerRepository: string,
   ): Promise<string[] | null> {
     try {
       const isQuay = regEx(/^https:\/\/quay\.io(?::[1-9][0-9]{0,4})?$/i).test(
-        registryHost
+        registryHost,
       );
       let tags: string[] | null;
       if (isQuay) {
@@ -773,43 +717,64 @@ export class DockerDatasource extends Datasource {
         tags = await this.getDockerApiTags(registryHost, dockerRepository);
       }
       return tags;
-    } catch (err) /* istanbul ignore next */ {
-      if (err instanceof ExternalHostError) {
-        throw err;
-      }
+    } catch (_err) /* istanbul ignore next */ {
+      const err = _err instanceof ExternalHostError ? _err.err : _err;
+
       if (
         (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
         !dockerRepository.includes('/')
       ) {
         logger.debug(
-          `Retrying Tags for ${registryHost}/${dockerRepository} using library/ prefix`
+          `Retrying Tags for ${registryHost}/${dockerRepository} using library/ prefix`,
         );
         return this.getTags(registryHost, 'library/' + dockerRepository);
       }
-      // prettier-ignore
+      // JFrog Artifactory - Retry handling when resolving Docker Official Images
+      // These follow the format of {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
+      if (
+        (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
+        isArtifactoryServer(err.response) &&
+        dockerRepository.split('/').length === 2
+      ) {
+        logger.debug(
+          `JFrog Artifactory: Retrying Tags for ${registryHost}/${dockerRepository} using library/ path between JFrog virtual repository and image`,
+        );
+
+        const dockerRepositoryParts = dockerRepository.split('/');
+        const jfrogRepository = dockerRepositoryParts[0];
+        const dockerImage = dockerRepositoryParts[1];
+
+        return this.getTags(
+          registryHost,
+          jfrogRepository + '/library/' + dockerImage,
+        );
+      }
       if (err.statusCode === 429 && isDockerHost(registryHost)) {
         logger.warn(
           { registryHost, dockerRepository, err },
-          'docker registry failure: too many requests'
-        );
-        throw new ExternalHostError(err);
-      }
-      // prettier-ignore
-      if (err.statusCode === 401 && isDockerHost(registryHost)) {
-        logger.warn(
-          { registryHost, dockerRepository, err },
-          'docker registry failure: unauthorized'
+          'docker registry failure: too many requests',
         );
         throw new ExternalHostError(err);
       }
       if (err.statusCode >= 500 && err.statusCode < 600) {
         logger.warn(
           { registryHost, dockerRepository, err },
-          'docker registry failure: internal error'
+          'docker registry failure: internal error',
         );
         throw new ExternalHostError(err);
       }
-      throw err;
+      const errorCodes = ['ECONNRESET', 'ETIMEDOUT'];
+      if (errorCodes.includes(err.code)) {
+        logger.warn(
+          { registryHost, dockerRepository, err },
+          'docker registry connection failure',
+        );
+        throw new ExternalHostError(err);
+      }
+      if (isDockerHost(registryHost)) {
+        logger.info({ err }, 'Docker Hub lookup failure');
+      }
+      throw _err;
     }
   }
 
@@ -825,57 +790,158 @@ export class DockerDatasource extends Datasource {
   @cache({
     namespace: 'datasource-docker-digest',
     key: (
-      { registryUrl, packageName }: GetReleasesConfig,
-      newValue?: string
+      { registryUrl, packageName, currentDigest }: DigestConfig,
+      newValue?: string,
     ) => {
       const newTag = newValue ?? 'latest';
       const { registryHost, dockerRepository } = getRegistryRepository(
         packageName,
-        registryUrl!
+        registryUrl!,
       );
-      return `${registryHost}:${dockerRepository}:${newTag}`;
+      const digest = currentDigest ? `@${currentDigest}` : '';
+      return `${registryHost}:${dockerRepository}:${newTag}${digest}`;
     },
   })
   override async getDigest(
-    { registryUrl, packageName }: GetReleasesConfig,
-    newValue?: string
+    { registryUrl, lookupName, packageName, currentDigest }: DigestConfig,
+    newValue?: string,
   ): Promise<string | null> {
-    const { registryHost, dockerRepository } = getRegistryRepository(
-      packageName,
-      registryUrl!
-    );
+    let registryHost: string;
+    let dockerRepository: string;
+    if (registryUrl && lookupName) {
+      // Reuse the resolved values from getReleases()
+      registryHost = registryUrl;
+      dockerRepository = lookupName;
+    } else {
+      // Resolve values independently
+      ({ registryHost, dockerRepository } = getRegistryRepository(
+        packageName,
+        registryUrl!,
+      ));
+    }
     logger.debug(
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
+      // TODO: types (#22198)
+      `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`,
     );
     const newTag = newValue ?? 'latest';
     let digest: string | null = null;
     try {
-      let manifestResponse = await this.getManifestResponse(
-        registryHost,
-        dockerRepository,
-        newTag,
-        'head'
-      );
-      if (manifestResponse) {
-        if (hasKey('docker-content-digest', manifestResponse.headers)) {
+      let architecture: string | null | undefined = null;
+      if (currentDigest && isDockerDigest(currentDigest)) {
+        architecture = await this.getImageArchitecture(
+          registryHost,
+          dockerRepository,
+          currentDigest,
+        );
+      }
+
+      let manifestResponse: HttpResponse | null = null;
+      if (!architecture) {
+        manifestResponse = await this.getManifestResponse(
+          registryHost,
+          dockerRepository,
+          newTag,
+          'head',
+        );
+
+        if (
+          manifestResponse &&
+          hasKey('docker-content-digest', manifestResponse.headers)
+        ) {
           digest =
             (manifestResponse.headers['docker-content-digest'] as string) ||
             null;
-        } else {
+        }
+      }
+
+      if (
+        is.string(architecture) ||
+        (manifestResponse &&
+          !hasKey('docker-content-digest', manifestResponse.headers))
+      ) {
+        logger.debug(
+          { registryHost, dockerRepository },
+          'Architecture-specific digest or missing docker-content-digest header - pulling full manifest',
+        );
+        manifestResponse = await this.getManifestResponse(
+          registryHost,
+          dockerRepository,
+          newTag,
+        );
+
+        if (architecture && manifestResponse) {
+          const parsed = ManifestJson.safeParse(manifestResponse.body);
+          /* istanbul ignore else: hard to test */
+          if (parsed.success) {
+            const manifestList = parsed.data;
+            if (
+              manifestList.mediaType ===
+                'application/vnd.docker.distribution.manifest.list.v2+json' ||
+              manifestList.mediaType ===
+                'application/vnd.oci.image.index.v1+json'
+            ) {
+              for (const manifest of manifestList.manifests) {
+                if (manifest.platform?.architecture === architecture) {
+                  digest = manifest.digest;
+                  break;
+                }
+              }
+              // TODO: return null if no matching architecture digest found
+              // https://github.com/renovatebot/renovate/discussions/22639
+            } else if (
+              hasKey('docker-content-digest', manifestResponse.headers)
+            ) {
+              // TODO: return null if no matching architecture, requires to fetch the config manifest
+              // https://github.com/renovatebot/renovate/discussions/22639
+              digest = manifestResponse.headers[
+                'docker-content-digest'
+              ] as string;
+            }
+          } else {
+            logger.debug(
+              {
+                registryHost,
+                dockerRepository,
+                newTag,
+                body: manifestResponse.body,
+                headers: manifestResponse.headers,
+                err: parsed.error,
+              },
+              'Failed to parse manifest response',
+            );
+          }
+        }
+
+        if (!digest) {
           logger.debug(
-            { registryHost },
-            'Missing docker content digest header, pulling full manifest'
-          );
-          manifestResponse = await this.getManifestResponse(
-            registryHost,
-            dockerRepository,
-            newTag
+            { registryHost, dockerRepository, newTag },
+            'Extraction digest from manifest response body is deprecated',
           );
           digest = extractDigestFromResponseBody(manifestResponse!);
         }
-        logger.debug({ digest }, 'Got docker digest');
+      }
+
+      if (
+        !manifestResponse &&
+        !dockerRepository.includes('/') &&
+        !packageName.includes('/')
+      ) {
+        logger.debug(
+          `Retrying Digest for ${registryHost}/${dockerRepository} using library/ prefix`,
+        );
+        return this.getDigest(
+          {
+            registryUrl,
+            packageName: 'library/' + packageName,
+            currentDigest,
+          },
+          newValue,
+        );
+      }
+
+      if (manifestResponse) {
+        // TODO: fix types (#22198)
+        logger.debug(`Got docker digest ${digest!}`);
       }
     } catch (err) /* istanbul ignore next */ {
       if (err instanceof ExternalHostError) {
@@ -887,10 +953,64 @@ export class DockerDatasource extends Datasource {
           packageName,
           newTag,
         },
-        'Unknown Error looking up docker image digest'
+        'Unknown Error looking up docker image digest',
       );
     }
     return digest;
+  }
+
+  @cache({
+    namespace: 'datasource-docker-hub-tags',
+    key: (dockerRepository: string) => `${dockerRepository}`,
+  })
+  async getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
+    let url = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
+
+    const cache = await DockerHubCache.init(dockerRepository);
+    let needNextPage: boolean = true;
+    while (needNextPage) {
+      const { val, err } = await this.http
+        .getJsonSafe(url, DockerHubTagsPage)
+        .unwrap();
+
+      if (err) {
+        logger.debug({ err }, `Docker: error fetching data from DockerHub`);
+        return null;
+      }
+
+      const { results, next } = val;
+
+      needNextPage = cache.reconcile(results);
+
+      if (!next) {
+        break;
+      }
+
+      url = next;
+    }
+
+    await cache.save();
+
+    const items = cache.getItems();
+    return items.map(
+      ({
+        name: version,
+        tag_last_pushed: releaseTimestamp,
+        digest: newDigest,
+      }) => {
+        const release: Release = { version };
+
+        if (releaseTimestamp) {
+          release.releaseTimestamp = releaseTimestamp;
+        }
+
+        if (newDigest) {
+          release.newDigest = newDigest;
+        }
+
+        return release;
+      },
+    );
   }
 
   /**
@@ -904,27 +1024,72 @@ export class DockerDatasource extends Datasource {
    *
    * This function will filter only tags that contain a semver version
    */
+  @cache({
+    namespace: 'datasource-docker-releases-v2',
+    key: ({ registryUrl, packageName }: GetReleasesConfig) => {
+      const { registryHost, dockerRepository } = getRegistryRepository(
+        packageName,
+        registryUrl!,
+      );
+      return `${registryHost}:${dockerRepository}`;
+    },
+    cacheable: ({ registryUrl, packageName }: GetReleasesConfig) => {
+      const { registryHost } = getRegistryRepository(packageName, registryUrl!);
+      return registryHost === 'https://index.docker.io';
+    },
+  })
   async getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
       packageName,
-      registryUrl!
+      registryUrl!,
     );
-    const tags = await this.getTags(registryHost, dockerRepository);
-    if (!tags) {
+
+    type TagsResultType = AsyncResult<
+      Release[],
+      NonNullable<Error | 'tags-error' | 'dockerhub-error'>
+    >;
+
+    const getTags = (): TagsResultType =>
+      Result.wrapNullable(
+        this.getTags(registryHost, dockerRepository),
+        'tags-error' as const,
+      ).transform((tags) => tags.map((version) => ({ version })));
+
+    const getDockerHubTags = (): TagsResultType =>
+      Result.wrapNullable(
+        this.getDockerHubTags(dockerRepository),
+        'dockerhub-error' as const,
+      ).catch(getTags);
+
+    const tagsResult =
+      registryHost === 'https://index.docker.io' &&
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS
+        ? getDockerHubTags()
+        : getTags();
+
+    const { val: releases, err } = await tagsResult.unwrap();
+    if (err instanceof Error) {
+      throw err;
+    } else if (err) {
       return null;
     }
-    const releases = tags.map((version) => ({ version }));
+
     const ret: ReleaseResult = {
       registryUrl: registryHost,
       releases,
     };
+    if (dockerRepository !== packageName) {
+      // This will be reused later if a getDigest() call is made
+      ret.lookupName = dockerRepository;
+    }
 
+    const tags = releases.map((release) => release.version);
     const latestTag = tags.includes('latest')
       ? 'latest'
-      : findLatestStable(tags);
+      : findLatestStable(tags) ?? tags[tags.length - 1];
 
     // istanbul ignore if: needs test
     if (!latestTag) {
@@ -933,7 +1098,7 @@ export class DockerDatasource extends Datasource {
     const labels = await this.getLabels(
       registryHost,
       dockerRepository,
-      latestTag
+      latestTag,
     );
     if (labels) {
       if (is.nonEmptyString(labels[gitRefLabel])) {
@@ -944,6 +1109,9 @@ export class DockerDatasource extends Datasource {
           ret.sourceUrl = labels[label];
           break;
         }
+      }
+      if (is.nonEmptyString(labels[imageUrlLabel])) {
+        ret.homepage = labels[imageUrlLabel];
       }
     }
     return ret;

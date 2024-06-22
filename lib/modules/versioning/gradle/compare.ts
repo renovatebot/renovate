@@ -1,20 +1,19 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum TokenType {
-  Number = 1,
-  String,
-}
+export const TokenType = {
+  Number: 1,
+  String: 2,
+};
 
 type Token = {
-  type: TokenType;
+  type: number;
   val: string | number;
 };
 
 function iterateChars(
   str: string,
-  cb: (p: string | null, n: string | null) => void
+  cb: (p: string | null, n: string | null) => void,
 ): void {
   let prev = null;
   let next = null;
@@ -51,6 +50,7 @@ export function tokenize(versionStr: string): Token[] | null {
 
   function yieldToken(): void {
     if (currentVal === '') {
+      // We tried to yield an empty token, which means we're in a bad state.
       result = null;
     }
     if (result) {
@@ -86,17 +86,16 @@ export function tokenize(versionStr: string): Token[] | null {
   return result;
 }
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum QualifierRank {
-  Dev = -1,
-  Default = 0,
-  RC,
-  Snapshot,
-  Final,
-  GA,
-  Release,
-  SP,
-}
+export const QualifierRank = {
+  Dev: -1,
+  Default: 0,
+  RC: 1,
+  Snapshot: 2,
+  Final: 3,
+  GA: 4,
+  Release: 5,
+  SP: 6,
+} as const;
 
 export function qualifierRank(input: string): number {
   const val = input.toLowerCase();
@@ -223,11 +222,7 @@ interface PrefixRange {
   tokens: Token[];
 }
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum RangeBound {
-  Inclusive = 1,
-  Exclusive,
-}
+export type RangeBound = 'inclusive' | 'exclusive';
 
 interface MavenBasedRange {
   leftBound: RangeBound;
@@ -259,7 +254,7 @@ export function parsePrefixRange(input: string): PrefixRange | null {
 }
 
 const mavenBasedRangeRegex = regEx(
-  /^(?<leftBoundStr>[[\](]\s*)(?<leftVal>[-._+a-zA-Z0-9]*?)(?<separator>\s*,\s*)(?<rightVal>[-._+a-zA-Z0-9]*?)(?<rightBoundStr>\s*[[\])])$/
+  /^(?<leftBoundStr>[[\](]\s*)(?<leftVal>[-._+a-zA-Z0-9]*?)(?<separator>\s*,\s*)(?<rightVal>[-._+a-zA-Z0-9]*?)(?<rightBoundStr>\s*[[\])])$/,
 );
 
 export function parseMavenBasedRange(input: string): MavenBasedRange | null {
@@ -293,14 +288,9 @@ export function parseMavenBasedRange(input: string): MavenBasedRange | null {
       ) {
         return null;
       }
-      const leftBound =
-        leftBoundStr.trim() === '['
-          ? RangeBound.Inclusive
-          : RangeBound.Exclusive;
+      const leftBound = leftBoundStr.trim() === '[' ? 'inclusive' : 'exclusive';
       const rightBound =
-        rightBoundStr.trim() === ']'
-          ? RangeBound.Inclusive
-          : RangeBound.Exclusive;
+        rightBoundStr.trim() === ']' ? 'inclusive' : 'exclusive';
       return {
         leftBound,
         leftBoundStr,

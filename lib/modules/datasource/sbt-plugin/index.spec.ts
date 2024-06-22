@@ -40,7 +40,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
           '<a href="scalatest/" title=\'scalatest/\'>scalatest_2.12/</a>\n' +
             '<a href="scalatest_2.12/" title=\'scalatest_2.12/\'>scalatest_2.12/</a>\n' +
             "<a href='scalatest_sjs2.12/'>scalatest_2.12/</a>" +
-            "<a href='scalatest_native2.12/'>scalatest_2.12/</a>"
+            "<a href='scalatest_native2.12/'>scalatest_2.12/</a>",
         );
       httpMock
         .scope('https://repo.maven.apache.org')
@@ -52,12 +52,12 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .reply(200, "<a href='1.2.3/'>4.5.6/</a>");
 
       httpMock
-        .scope('https://dl.bintray.com')
-        .get('/sbt/sbt-plugin-releases/com.github.gseitz/')
+        .scope('https://repo.scala-sbt.org')
+        .get('/scalasbt/sbt-plugin-releases/com.github.gseitz/')
         .reply(200, '');
       httpMock
-        .scope('https://dl.bintray.com')
-        .get('/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/')
+        .scope('https://repo.scala-sbt.org')
+        .get('/scalasbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/')
         .reply(
           200,
           '<html>\n' +
@@ -66,12 +66,12 @@ describe('modules/datasource/sbt-plugin/index', () => {
             '<body>\n' +
             '<pre><a href="scala_2.12/">scala_2.12/</a></pre>\n' +
             '</body>\n' +
-            '</html>'
+            '</html>',
         );
       httpMock
-        .scope('https://dl.bintray.com')
+        .scope('https://repo.scala-sbt.org')
         .get(
-          '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/'
+          '/scalasbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/',
         )
         .reply(
           200,
@@ -82,12 +82,12 @@ describe('modules/datasource/sbt-plugin/index', () => {
             '<body>\n' +
             '<pre><a href="sbt_1.0/">sbt_1.0/</a></pre>\n' +
             '</body>\n' +
-            '</html>\n'
+            '</html>\n',
         );
       httpMock
-        .scope('https://dl.bintray.com')
+        .scope('https://repo.scala-sbt.org')
         .get(
-          '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/sbt_1.0/'
+          '/scalasbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/sbt_1.0/',
         )
         .reply(
           200,
@@ -98,7 +98,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
             '<body>\n' +
             '<pre><a href="0.5.5/">0.5.5/</a></pre>\n' +
             '</body>\n' +
-            '</html>\n'
+            '</html>\n',
         );
 
       httpMock
@@ -109,7 +109,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
           '<a href="sbt-coursier_2.10_0.13/">sbt-coursier_2.10_0.13/</a>\n' +
             '<a href="sbt-coursier_2.12_1.0/">sbt-coursier_2.12_1.0/</a>\n' +
             '<a href="sbt-coursier_2.12_1.0.0-M5/">sbt-coursier_2.12_1.0.0-M5/</a>\n' +
-            '<a href="sbt-coursier_2.12_1.0.0-M6/">sbt-coursier_2.12_1.0.0-M6/</a>\n'
+            '<a href="sbt-coursier_2.12_1.0.0-M6/">sbt-coursier_2.12_1.0.0-M6/</a>\n',
         );
       httpMock
         .scope('https://repo.maven.apache.org')
@@ -119,12 +119,12 @@ describe('modules/datasource/sbt-plugin/index', () => {
           '<a href="2.0.0-RC2/">2.0.0-RC2/</a>\n' +
             '<a href="2.0.0-RC6-1/">2.0.0-RC6-1/</a>\n' +
             '<a href="2.0.0-RC6-2/">2.0.0-RC6-2/</a>\n' +
-            '<a href="2.0.0-RC6-6/">2.0.0-RC6-6/</a>\n'
+            '<a href="2.0.0-RC6-6/">2.0.0-RC6-6/</a>\n',
         );
       httpMock
         .scope('https://repo.maven.apache.org')
         .get(
-          '/maven2/io/get-coursier/sbt-coursier_2.12_1.0/2.0.0-RC6-6/sbt-coursier-2.0.0-RC6-6.pom'
+          '/maven2/io/get-coursier/sbt-coursier_2.12_1.0/2.0.0-RC6-6/sbt-coursier-2.0.0-RC6-6.pom',
         )
         .reply(
           200,
@@ -133,7 +133,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
             '<scm>\n' +
             '<url>https://github.com/coursier/sbt-coursier</url>\n' +
             '</scm>\n' +
-            '</project>\n'
+            '</project>\n',
         );
     });
 
@@ -145,17 +145,17 @@ describe('modules/datasource/sbt-plugin/index', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
-          depName: 'org.scalatest:scalatest',
+          packageName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
-        })
+        }),
       ).toBeNull();
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
-          depName: 'org.scalatest:scalaz',
+          packageName: 'org.scalatest:scalaz',
           registryUrls: [],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -164,13 +164,13 @@ describe('modules/datasource/sbt-plugin/index', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
-          depName: 'org.foundweekends:sbt-bintray',
+          packageName: 'org.foundweekends:sbt-bintray',
           registryUrls: [],
-        })
+        }),
       ).toEqual({
         dependencyUrl:
-          'https://dl.bintray.com/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray',
-        registryUrl: 'https://dl.bintray.com/sbt/sbt-plugin-releases',
+          'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/org.foundweekends/sbt-bintray',
+        registryUrl: 'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
         releases: [{ version: '0.5.5' }],
       });
     });
@@ -180,13 +180,13 @@ describe('modules/datasource/sbt-plugin/index', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
-          depName: 'org.foundweekends:sbt-bintray_2.12',
+          packageName: 'org.foundweekends:sbt-bintray_2.12',
           registryUrls: [],
-        })
+        }),
       ).toEqual({
         dependencyUrl:
-          'https://dl.bintray.com/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray',
-        registryUrl: 'https://dl.bintray.com/sbt/sbt-plugin-releases',
+          'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/org.foundweekends/sbt-bintray',
+        registryUrl: 'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
         releases: [{ version: '0.5.5' }],
       });
     });
@@ -196,9 +196,9 @@ describe('modules/datasource/sbt-plugin/index', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
-          depName: 'io.get-coursier:sbt-coursier',
+          packageName: 'io.get-coursier:sbt-coursier',
           registryUrls: [MAVEN_REPO],
-        })
+        }),
       ).toEqual({
         dependencyUrl:
           'https://repo.maven.apache.org/maven2/io/get-coursier/sbt-coursier',

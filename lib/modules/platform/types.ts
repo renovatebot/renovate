@@ -1,6 +1,6 @@
 import type { MergeStrategy } from '../../config/types';
-import type { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
-import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
+import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
+import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
 
 type VulnerabilityKey = string;
 type VulnerabilityRangeKey = string;
@@ -23,11 +23,16 @@ export interface PlatformResult {
   renovateUsername?: string;
   token?: string;
   gitAuthor?: string;
+  /*
+   * return these only if _additional_ rules/hosts are required
+   */
+  hostRules?: HostRule[];
 }
 
 export interface RepoResult {
   defaultBranch: string;
   isFork: boolean;
+  repoFingerprint: string;
 }
 
 export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
@@ -36,21 +41,27 @@ export interface RepoParams {
   repository: string;
   endpoint?: string;
   gitUrl?: GitUrlOption;
-  forkMode?: string;
+  forkCreation?: boolean;
+  forkOrg?: string;
   forkToken?: string;
-  includeForks?: boolean;
+  forkProcessing?: 'enabled' | 'disabled';
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   ignorePrAuthor?: boolean;
+  bbUseDevelopmentBranch?: boolean;
+  includeMirrors?: boolean;
 }
 
 export interface PrDebugData {
   createdInVer: string;
   updatedInVer: string;
+  targetBranch: string;
+  labels?: string[];
 }
 
 export interface PrBodyStruct {
   hash: string;
+  rawConfigHash?: string;
   rebaseRequested?: boolean;
   debugData?: PrDebugData;
 }
@@ -64,13 +75,11 @@ export interface Pr {
   cannotMergeReason?: string; // for reflecting platform policies which may prevent merging
   createdAt?: string;
   closedAt?: string;
-  displayNumber?: string;
   hasAssignees?: boolean;
-  hasReviewers?: boolean;
   labels?: string[];
   number: number;
   reviewers?: string[];
-  sha?: string;
+  sha?: LongCommitSha;
   sourceRepo?: string;
   state: string;
   targetBranch?: string;
@@ -88,12 +97,15 @@ export interface Issue {
   title?: string;
 }
 export type PlatformPrOptions = {
-  azureAutoApprove?: boolean;
+  autoApprove?: boolean;
+  automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
+  forkModeDisallowMaintainerEdits?: boolean;
 };
+
 export interface CreatePRConfig {
   sourceBranch: string;
   targetBranch: string;
@@ -102,13 +114,41 @@ export interface CreatePRConfig {
   labels?: string[] | null;
   platformOptions?: PlatformPrOptions;
   draftPR?: boolean;
+  milestone?: number;
 }
 export interface UpdatePrConfig {
   number: number;
   platformOptions?: PlatformPrOptions;
   prTitle: string;
   prBody?: string;
-  state?: PrState.Open | PrState.Closed;
+  state?: 'open' | 'closed';
+  targetBranch?: string;
+
+  /**
+   * This field allows for label management and is designed to
+   * accommodate the different label update methods on various platforms.
+   *
+   * - For Gitea, labels are updated by replacing the entire labels array.
+   * - In the case of GitHub and GitLab, specific endpoints exist
+   *   for adding and removing labels.
+   */
+  labels?: string[] | null;
+
+  /**
+   * Specifies an array of labels to be added.
+   * @see {@link labels}
+   */
+  addLabels?: string[] | null;
+
+  /**
+   * Specifies an array of labels to be removed.
+   * @see {@link labels}
+   */
+  removeLabels?: string[] | null;
+}
+export interface ReattemptPlatformAutomergeConfig {
+  number: number;
+  platformOptions?: PlatformPrOptions;
 }
 export interface EnsureIssueConfig {
   title: string;
@@ -129,8 +169,10 @@ export interface BranchStatusConfig {
 export interface FindPRConfig {
   branchName: string;
   prTitle?: string | null;
-  state?: PrState.Open | PrState.Closed | PrState.NotOpen | PrState.All;
+  state?: 'open' | 'closed' | '!open' | 'all';
   refreshCache?: boolean;
+  targetBranch?: string | null;
+  includeOtherAuthors?: boolean;
 }
 export interface MergePRConfig {
   branchName?: string;
@@ -159,26 +201,44 @@ export type EnsureCommentRemovalConfig =
 
 export type EnsureIssueResult = 'updated' | 'created';
 
+export type RepoSortMethod =
+  | 'alpha'
+  | 'created'
+  | 'updated'
+  | 'size'
+  | 'id'
+  | null;
+
+export type SortMethod = 'asc' | 'desc' | null;
+export interface AutodiscoverConfig {
+  topics?: string[];
+  sort?: RepoSortMethod;
+  order?: SortMethod;
+  includeMirrors?: boolean;
+  namespaces?: string[];
+  projects?: string[];
+}
+
 export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
-  getIssue?(number: number, useCache?: boolean): Promise<Issue | null>;
-  getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
+  getIssue?(number: number, memCache?: boolean): Promise<Issue | null>;
+  getVulnerabilityAlerts?(): Promise<VulnerabilityAlert[]>;
   getRawFile(
     fileName: string,
     repoName?: string,
-    branchOrTag?: string
+    branchOrTag?: string,
   ): Promise<string | null>;
   getJsonFile(
     fileName: string,
     repoName?: string,
-    branchOrTag?: string
-  ): Promise<any | null>;
+    branchOrTag?: string,
+  ): Promise<any>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
   ensureIssue(
-    issueConfig: EnsureIssueConfig
+    issueConfig: EnsureIssueConfig,
   ): Promise<EnsureIssueResult | null>;
   massageMarkdown(prBody: string): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
@@ -186,27 +246,49 @@ export interface Platform {
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;
-  getRepos(): Promise<string[]>;
-  getRepoForceRebase(): Promise<boolean>;
+  getRepos(config?: AutodiscoverConfig): Promise<string[]>;
+  getBranchForceRebase?(branchName: string): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
+  addLabel?(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(
     branchName: string,
-    // TODO: can be undefined or null ? #7154
-    context: string | null | undefined
+    // TODO: can be undefined or null ? #22198
+    context: string | null | undefined,
   ): Promise<BranchStatus | null>;
   ensureCommentRemoval(
     ensureCommentRemoval:
       | EnsureCommentRemovalConfigByTopic
-      | EnsureCommentRemovalConfigByContent
+      | EnsureCommentRemovalConfigByContent,
   ): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   getPr(number: number): Promise<Pr | null>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr | null>;
   refreshPr?(number: number): Promise<void>;
-  getBranchStatus(branchName: string): Promise<BranchStatus>;
-  getBranchPr(branchName: string): Promise<Pr | null>;
+  reattemptPlatformAutomerge?(
+    prConfig: ReattemptPlatformAutomergeConfig,
+  ): Promise<void>;
+  getBranchStatus(
+    branchName: string,
+    internalChecksAsSuccess: boolean,
+  ): Promise<BranchStatus>;
+  getBranchPr(branchName: string, targetBranch?: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
-  commitFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;
+  commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
+  expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
+}
+
+export interface PlatformScm {
+  isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean>;
+  isBranchModified(branchName: string): Promise<boolean>;
+  isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
+  branchExists(branchName: string): Promise<boolean>;
+  getBranchCommit(branchName: string): Promise<LongCommitSha | null>;
+  deleteBranch(branchName: string): Promise<void>;
+  commitAndPush(commitConfig: CommitFilesConfig): Promise<LongCommitSha | null>;
+  getFileList(): Promise<string[]>;
+  checkoutBranch(branchName: string): Promise<LongCommitSha>;
+  mergeToLocal(branchName: string): Promise<void>;
+  mergeAndPush(branchName: string): Promise<void>;
 }

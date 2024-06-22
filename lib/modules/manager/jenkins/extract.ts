@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { isSkipComment } from '../../../util/ignore';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { parseSingleYaml } from '../../../util/yaml';
 import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins';
 import * as mavenVersioning from '../../versioning/maven';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { JenkinsPlugin, JenkinsPlugins } from './types';
 
 const YamlExtension = regEx(/\.ya?ml$/);
@@ -23,11 +23,11 @@ function getDependency(plugin: JenkinsPlugin): PackageDependency {
       dep.skipReason = 'invalid-version';
       logger.warn(
         { dep },
-        'Jenkins plugin dependency version is not a string and will be ignored'
+        'Jenkins plugin dependency version is not a string and will be ignored',
       );
     }
   } else {
-    dep.skipReason = 'no-version';
+    dep.skipReason = 'unspecified-version';
   }
 
   if (
@@ -50,11 +50,15 @@ function getDependency(plugin: JenkinsPlugin): PackageDependency {
   return dep;
 }
 
-function extractYaml(content: string): PackageDependency[] {
+function extractYaml(
+  content: string,
+  packageFile: string,
+): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
   try {
-    const doc = load(content, { json: true }) as JenkinsPlugins;
+    // TODO: use schema (#9610)
+    const doc = parseSingleYaml<JenkinsPlugins>(content, { json: true });
     if (is.nonEmptyArray(doc?.plugins)) {
       for (const plugin of doc.plugins) {
         if (plugin.artifactId) {
@@ -64,7 +68,7 @@ function extractYaml(content: string): PackageDependency[] {
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error parsing Jenkins plugins');
+    logger.debug({ err, packageFile }, 'Error parsing Jenkins plugins');
   }
   return deps;
 }
@@ -72,7 +76,7 @@ function extractYaml(content: string): PackageDependency[] {
 function extractText(content: string): PackageDependency[] {
   const deps: PackageDependency[] = [];
   const regex = regEx(
-    /^\s*(?<depName>[\d\w-]+):(?<currentValue>[^#\s]+)[#\s]*(?<comment>.*)$/
+    /^\s*(?<depName>[\d\w-]+):(?<currentValue>[^#\s]+)[#\s]*(?<comment>.*)$/,
   );
 
   for (const line of content.split(newlineRegex)) {
@@ -97,13 +101,13 @@ function extractText(content: string): PackageDependency[] {
 
 export function extractPackageFile(
   content: string,
-  fileName: string
-): PackageFile | null {
-  logger.trace('jenkins.extractPackageFile()');
+  packageFile: string,
+): PackageFileContent | null {
+  logger.trace(`jenkins.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
 
-  if (YamlExtension.test(fileName)) {
-    deps.push(...extractYaml(content));
+  if (YamlExtension.test(packageFile)) {
+    deps.push(...extractYaml(content, packageFile));
   } else {
     deps.push(...extractText(content));
   }

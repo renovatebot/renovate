@@ -1,39 +1,8 @@
-export interface KubernetesResource {
-  apiVersion: string;
-  metadata: {
-    name: string;
-    // For Flux, the namespace property is optional, but matching HelmReleases to HelmRepositories would be
-    // much more difficult without it (we'd have to examine the parent Kustomizations to discover the value),
-    // so we require it for renovation.
-    namespace: string;
-  };
-}
+import type { FluxResource } from './schema';
 
-export interface HelmRelease extends KubernetesResource {
-  kind: 'HelmRelease';
-  spec: {
-    chart: {
-      spec: {
-        chart: string;
-        sourceRef: {
-          kind: string;
-          name: string;
-          namespace?: string;
-        };
-        version?: string;
-      };
-    };
-  };
-}
-
-export interface HelmRepository extends KubernetesResource {
-  kind: 'HelmRepository';
-  spec: {
-    url: string;
-  };
-}
-
-export type FluxResource = HelmRelease | HelmRepository;
+export type FluxManagerData = {
+  components: string;
+};
 
 export interface FluxFile {
   file: string;
@@ -41,8 +10,7 @@ export interface FluxFile {
 
 export interface ResourceFluxManifest extends FluxFile {
   kind: 'resource';
-  releases: HelmRelease[];
-  repositories: HelmRepository[];
+  resources: FluxResource[];
 }
 
 export interface SystemFluxManifest extends FluxFile {

@@ -8,7 +8,7 @@ const newWindowsWrapperContent = `Windows wrapper script for ${defaultTo}`;
 
 function artifactForPath(
   path: string,
-  newVersion: string = defaultTo
+  newVersion: string = defaultTo,
 ): UpdateArtifact {
   return {
     packageFileName: path,

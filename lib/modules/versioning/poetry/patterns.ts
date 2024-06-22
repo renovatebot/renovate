@@ -43,5 +43,5 @@ export const VERSION_PATTERN = regEx(
   );
 
 export const RANGE_COMPARATOR_PATTERN = regEx(
-  /(\s*(?:\^|~|[><!]?=|[><]|\|\|)\s*)/
+  /(\s*(?:\^|~|[><!]?=|[><]|\|\|)\s*)/,
 );

@@ -6,9 +6,9 @@ description: Configuring Renovate to use Semantic Commits
 # Semantic Commit messages
 
 Renovate looks at the last 10 commit messages in the base branch to decide if the repository uses semantic commits.
-If there are semantic commits, Renovate uses the [conventional-commits-detector](https://github.com/conventional-changelog/conventional-commits-detector) to decide what convention the commit messages follow.
+If there are Semantic Commits, Renovate uses the [conventional-commits-detector](https://github.com/conventional-changelog/conventional-commits-detector) to decide what convention the commit messages follow.
 
-Renovate only finds Angular-style conventional commits, it ignores other commit conventions.
+Renovate can only find Angular-style conventional commits, it does not "understand" other commit conventions.
 
 When Renovate finds Angular-style commits, Renovate creates commit messages and PR titles like this:
 
@@ -16,27 +16,23 @@ When Renovate finds Angular-style commits, Renovate creates commit messages and 
 
 By default, Renovate uses the `chore` prefix.
 
-If you extend from `config:base` then Renovate:
+If you extend from `config:recommended` then Renovate uses the `chore` prefix for nearly all updates.
+There are some exceptions:
 
-- still defaults to the `chore` prefix
-- uses the `fix` prefix for npm production dependencies
-- uses the `chore` prefix for npm development dependencies (`devDependencies`)
+- if the `depType` is a known "production dependency" type (e.g. `dependencies` or `require`), then Renovate uses the `fix` prefix
+- if an update uses the `maven` datasource _and_ `matchDepTypes` is a known production type (e.g. `compile`, `provided`, `runtime`, `system`, `import` or `parent`) then Renovate uses the `fix` prefix
 
 ## Manually enabling or disabling semantic commits
 
-You can override the default settings, and disable or enable semantic commits.
+You can override the default settings, and disable or enable Semantic Commits.
 
-If you want Renovate to use semantic commits: add `":semanticCommits"` to your `extends` array:
-
-```json
+```json title="If you want Renovate to use Semantic Commits"
 {
   "extends": [":semanticCommits"]
 }
 ```
 
-If you want Renovate to stop using semantic commits: add `":semanticCommitsDisabled"` to your `extends` array:
-
-```json
+```json title="If you want Renovate to stop using Semantic Commits"
 {
   "extends": [":semanticCommitsDisabled"]
 }
@@ -69,7 +65,7 @@ For example:
 
 ## Changing the Semantic Commit scope
 
-You can set your own word for the scope if you don't like the default "deps" scope.
+You can set your own word for the scope, if you do not like the default "deps" scope.
 For example, to set the scope to "package", add the preset `":semanticCommitScope(package)"` to your `extends` array:
 
 ```json
@@ -78,7 +74,7 @@ For example, to set the scope to "package", add the preset `":semanticCommitScop
 }
 ```
 
-To _remove_ the semantic commit scope, so Renovate uses `chore:` instead of `chore(deps):`, add the `":semanticCommitScopeDisabled"` preset to your `extends` array:
+To _remove_ the Semantic Commit scope, so Renovate uses `chore:` instead of `chore(deps):`, add the `":semanticCommitScopeDisabled"` preset to your `extends` array:
 
 ```json
 {

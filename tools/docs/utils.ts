@@ -17,14 +17,14 @@ export function formatName(input: string): string {
 
 export function getDisplayName(
   moduleName: string,
-  moduleDefinition: ModuleApi
+  moduleDefinition: ModuleApi,
 ): string {
   return moduleDefinition.displayName ?? formatName(moduleName);
 }
 
 export function getNameWithUrl(
   moduleName: string,
-  moduleDefinition: ModuleApi
+  moduleDefinition: ModuleApi,
 ): string {
   const displayName = getDisplayName(moduleName, moduleDefinition);
   if (moduleDefinition.url) {
@@ -50,7 +50,7 @@ export function replaceContent(content: string, txt: string): string {
 
 export function formatUrls(urls: string[] | null | undefined): string {
   if (Array.isArray(urls) && urls.length) {
-    return `**References**:\n\n${urls
+    return `## References\n\n${urls
       .map((url) => ` - [${url}](${url})`)
       .join('\n')}\n\n`;
   }
@@ -59,11 +59,15 @@ export function formatUrls(urls: string[] | null | undefined): string {
 
 export async function formatDescription(
   type: string,
-  name: string
+  name: string,
 ): Promise<string> {
   const content = await readFile(`lib/modules/${type}/${name}/readme.md`);
   if (!content) {
     return '';
   }
-  return `**Description**:\n\n${content}\n`;
+  return `## Description\n\n${content}\n`;
+}
+
+export function getModuleLink(module: string, title?: string): string {
+  return `[${title ?? module}](${module}/index.md)`;
 }

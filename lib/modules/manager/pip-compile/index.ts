@@ -1,13 +1,11 @@
-import { ProgrammingLanguage } from '../../../constants';
+import type { Category } from '../../../constants';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 
-export { extractPackageFile } from '../pip_requirements/extract';
+export { extractAllPackageFiles, extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 
-export const language = ProgrammingLanguage.Python;
 export const supportsLockFileMaintenance = true;
-
-export const supportedDatasources = [PypiDatasource.id];
 
 export const defaultConfig = {
   fileMatch: [],
@@ -17,3 +15,7 @@ export const defaultConfig = {
     commitMessageAction: 'Refresh pip-compile outputs',
   },
 };
+
+export const categories: Category[] = ['python'];
+
+export const supportedDatasources = [PypiDatasource.id, GitTagsDatasource.id];

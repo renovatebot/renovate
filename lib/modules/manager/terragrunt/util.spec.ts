@@ -1,29 +1,22 @@
-import { TerragruntDependencyTypes } from './common';
 import { getTerragruntDependencyType } from './util';
 
 describe('modules/manager/terragrunt/util', () => {
   describe('getTerragruntDependencyType()', () => {
-    it('returns TerragruntDependencyTypes.terragrunt', () => {
-      expect(getTerragruntDependencyType('terraform')).toBe(
-        TerragruntDependencyTypes.terragrunt
-      );
+    it('returns terraform', () => {
+      expect(getTerragruntDependencyType('terraform')).toBe('terraform');
     });
 
-    it('returns TerragruntDependencyTypes.unknown', () => {
-      expect(getTerragruntDependencyType('unknown')).toBe(
-        TerragruntDependencyTypes.unknown
-      );
+    it('returns unknown', () => {
+      expect(getTerragruntDependencyType('unknown')).toBe('unknown');
     });
 
-    it('returns TerragruntDependencyTypes.unknown on empty string', () => {
-      expect(getTerragruntDependencyType('')).toBe(
-        TerragruntDependencyTypes.unknown
-      );
+    it('returns unknown on empty string', () => {
+      expect(getTerragruntDependencyType('')).toBe('unknown');
     });
 
-    it('returns TerragruntDependencyTypes.unknown on string with random chars', () => {
+    it('returns unknown on string with random chars', () => {
       expect(getTerragruntDependencyType('sdfsgdsfadfhfghfhgdfsdf')).toBe(
-        TerragruntDependencyTypes.unknown
+        'unknown',
       );
     });
   });

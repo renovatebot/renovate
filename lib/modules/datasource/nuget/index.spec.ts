@@ -1,6 +1,12 @@
+import { Readable } from 'stream';
+import { mockDeep } from 'jest-mock-extended';
+import { join } from 'upath';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { logger, mocked } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
+import * as _packageCache from '../../../util/cache/package';
 import * as _hostRules from '../../../util/host-rules';
 import { id as versioning } from '../../versioning/nuget';
 import { parseRegistryUrl } from './common';
@@ -10,18 +16,21 @@ const datasource = NugetDatasource.id;
 
 const hostRules: any = _hostRules;
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
+
+jest.mock('../../../util/cache/package', () => mockDeep());
+const packageCache = mocked(_packageCache);
 
 const pkgInfoV3FromNuget = Fixtures.get('nunit/v3_nuget_org.xml');
 const pkgListV3Registration = Fixtures.get('nunit/v3_registration.json');
 
 const pkgListV2 = Fixtures.get('nunit/v2.xml');
 const pkgListV2NoGitHubProjectUrl = Fixtures.get(
-  'nunit/v2_noGitHubProjectUrl.xml'
+  'nunit/v2_noGitHubProjectUrl.xml',
 );
 const pkgListV2NoRelease = Fixtures.get('nunit/v2_no_release.xml');
 const pkgListV2WithoutProjectUrl = Fixtures.get(
-  'nunit/v2_withoutProjectUrl.xml'
+  'nunit/v2_withoutProjectUrl.xml',
 );
 
 const pkgListV2Page1of2 = Fixtures.get('nunit/v2_paginated_1.xml');
@@ -55,7 +64,7 @@ const nlogMocks = [
 const configV3V2 = {
   datasource,
   versioning,
-  depName: 'nunit',
+  packageName: 'nunit',
   registryUrls: [
     'https://api.nuget.org/v3/index.json',
     'https://www.nuget.org/api/v2/',
@@ -65,40 +74,49 @@ const configV3V2 = {
 const configV2 = {
   datasource,
   versioning,
-  depName: 'nunit',
+  packageName: 'nunit',
   registryUrls: ['https://www.nuget.org/api/v2/'],
 };
 
 const configV3 = {
   datasource,
   versioning,
-  depName: 'nunit',
+  packageName: 'nunit',
   registryUrls: ['https://api.nuget.org/v3/index.json'],
 };
 
 const configV3NotNugetOrg = {
   datasource,
   versioning,
-  depName: 'nunit',
+  packageName: 'nunit',
   registryUrls: ['https://myprivatefeed/index.json'],
 };
 
 const configV3Multiple = {
   datasource,
   versioning,
-  depName: 'nunit',
+  packageName: 'nunit',
   registryUrls: [
     'https://api.nuget.org/v3/index.json',
     'https://myprivatefeed/index.json',
   ],
 };
 
-describe('modules/datasource/nuget/index', () => {
-  describe('parseRegistryUrl', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
+const configV3AzureDevOps = {
+  datasource,
+  versioning,
+  packageName: 'nunit',
+  registryUrls: [
+    'https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/index.json',
+  ],
+};
 
+describe('modules/datasource/nuget/index', () => {
+  beforeEach(() => {
+    GlobalConfig.reset();
+  });
+
+  describe('parseRegistryUrl', () => {
     it('extracts feed version from registry URL hash (v3)', () => {
       const parsed = parseRegistryUrl('https://my-registry#protocolVersion=3');
 
@@ -130,7 +148,6 @@ describe('modules/datasource/nuget/index', () => {
 
   describe('getReleases', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       hostRules.hosts.mockReturnValue([]);
       hostRules.find.mockReturnValue({});
     });
@@ -139,14 +156,14 @@ describe('modules/datasource/nuget/index', () => {
       const config = {
         datasource,
         versioning,
-        depName: 'nunit',
+        packageName: 'nunit',
         registryUrls: ['#$#api.nuget.org/v3/index.xml'],
       };
 
       expect(
         await getPkgReleases({
           ...config,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -155,13 +172,13 @@ describe('modules/datasource/nuget/index', () => {
       const config = {
         datasource,
         versioning,
-        depName: 'nunit',
+        packageName: 'nunit',
         registryUrls: ['https://my-registry#protocolVersion=3'],
       };
       expect(
         await getPkgReleases({
           ...config,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -203,13 +220,13 @@ describe('modules/datasource/nuget/index', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(200);
       expect(
         await getPkgReleases({
           ...configV3V2,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -217,13 +234,13 @@ describe('modules/datasource/nuget/index', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(200, {});
       expect(
         await getPkgReleases({
           ...configV2,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -238,18 +255,230 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).toBeNull();
     });
 
+    it('logs instead of triggering a TypeError when PackageBaseAddress is missing from service index', async () => {
+      const nugetIndex = `
+        {
+          "version": "3.0.0",
+          "resources": [
+            {
+              "@id": "https://api.nuget.org/v3/metadata",
+              "@type": "RegistrationsBaseUrl/3.0.0-beta",
+              "comment": "Get package metadata."
+            }
+          ]
+        }
+      `;
+      const nunitRegistration = `
+        {
+          "count": 1,
+          "items": [
+            {
+              "@id": "https://api.nuget.org/v3/metadata/nunit/5.0.json",
+              "lower": "5.0",
+              "upper": "5.0",
+              "count": 1,
+              "items": [
+                {
+                  "@id": "foo",
+                  "packageContent": "foo",
+                  "catalogEntry": {
+                    "id": "nunit",
+                    "version": "5.0"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      `;
+
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .twice()
+        .reply(200, nugetIndex)
+        .get('/v3/metadata/nunit/index.json')
+        .reply(200, nunitRegistration);
+      const res = await getPkgReleases({
+        ...configV3,
+      });
+      expect(res).not.toBeNull();
+      expect(res!.releases).toHaveLength(1);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          url: 'https://api.nuget.org/v3/index.json',
+          servicesIndexRaw: JSON.parse(nugetIndex),
+        },
+        'no PackageBaseAddress services found',
+      );
+    });
+
+    describe('determine source URL from nupkg', () => {
+      beforeEach(() => {
+        GlobalConfig.set({
+          cacheDir: join('/tmp/cache'),
+        });
+        process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS = 'true';
+      });
+
+      afterEach(() => {
+        delete process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS;
+      });
+
+      it('can determine source URL from nupkg when PackageBaseAddress is missing', async () => {
+        const nugetIndex = `
+          {
+            "version": "3.0.0",
+            "resources": [
+              {
+                "@id": "https://some-registry/v3/metadata",
+                "@type": "RegistrationsBaseUrl/3.0.0-beta",
+                "comment": "Get package metadata."
+              }
+            ]
+          }
+        `;
+        const nlogRegistration = `
+          {
+            "count": 1,
+            "items": [
+              {
+                "@id": "https://some-registry/v3/metadata/nlog/4.7.3.json",
+                "lower": "4.7.3",
+                "upper": "4.7.3",
+                "count": 1,
+                "items": [
+                  {
+                    "@id": "foo",
+                    "catalogEntry": {
+                      "id": "NLog",
+                      "version": "4.7.3",
+                      "packageContent": "https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        `;
+        httpMock
+          .scope('https://some-registry')
+          .get('/v3/index.json')
+          .twice()
+          .reply(200, nugetIndex)
+          .get('/v3/metadata/nlog/index.json')
+          .reply(200, nlogRegistration)
+          .get('/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg')
+          .reply(200, () => {
+            const readableStream = new Readable();
+            readableStream.push(Fixtures.getBinary('nlog/NLog.4.7.3.nupkg'));
+            readableStream.push(null);
+            return readableStream;
+          });
+        const res = await getPkgReleases({
+          datasource,
+          versioning,
+          packageName: 'NLog',
+          registryUrls: ['https://some-registry/v3/index.json'],
+        });
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Determined sourceUrl https://github.com/NLog/NLog.git from https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg',
+        );
+        expect(packageCache.set).toHaveBeenCalledWith(
+          'datasource-nuget',
+          'cache-decorator:source-url:https://some-registry/v3/index.json:NLog',
+          {
+            cachedAt: expect.any(String),
+            value: 'https://github.com/NLog/NLog.git',
+          },
+          60 * 24 * 7,
+        );
+        expect(res?.sourceUrl).toBeDefined();
+      });
+
+      it('can handle nupkg without repository metadata', async () => {
+        const nugetIndex = `
+          {
+            "version": "3.0.0",
+            "resources": [
+              {
+                "@id": "https://some-registry/v3/metadata",
+                "@type": "RegistrationsBaseUrl/3.0.0-beta",
+                "comment": "Get package metadata."
+              }
+            ]
+          }
+        `;
+        const nlogRegistration = `
+          {
+            "count": 1,
+            "items": [
+              {
+                "@id": "https://some-registry/v3/metadata/nlog/4.7.3.json",
+                "lower": "4.7.3",
+                "upper": "4.7.3",
+                "count": 1,
+                "items": [
+                  {
+                    "@id": "foo",
+                    "catalogEntry": {
+                      "id": "NLog",
+                      "version": "4.7.3",
+                      "packageContent": "https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        `;
+        httpMock
+          .scope('https://some-registry')
+          .get('/v3/index.json')
+          .twice()
+          .reply(200, nugetIndex)
+          .get('/v3/metadata/nlog/index.json')
+          .reply(200, nlogRegistration)
+          .get('/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg')
+          .reply(200, () => {
+            const readableStream = new Readable();
+            readableStream.push(
+              Fixtures.getBinary('nlog/NLog.4.7.3-no-repo.nupkg'),
+            );
+            readableStream.push(null);
+            return readableStream;
+          });
+        const res = await getPkgReleases({
+          datasource,
+          versioning,
+          packageName: 'NLog',
+          registryUrls: ['https://some-registry/v3/index.json'],
+        });
+        expect(packageCache.set).toHaveBeenCalledWith(
+          'datasource-nuget',
+          'cache-decorator:source-url:https://some-registry/v3/index.json:NLog',
+          {
+            cachedAt: expect.any(String),
+            value: null,
+          },
+          60 * 24 * 7,
+        );
+        expect(res?.sourceUrl).toBeUndefined();
+      });
+    });
+
     it('returns null for non 200 (v3v2)', async () => {
       httpMock.scope('https://api.nuget.org').get('/v3/index.json').reply(500);
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(500);
       expect(
         await getPkgReleases({
           ...configV3V2,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -258,7 +487,7 @@ describe('modules/datasource/nuget/index', () => {
       expect(
         await getPkgReleases({
           ...configV3,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -266,13 +495,13 @@ describe('modules/datasource/nuget/index', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(500);
       expect(
         await getPkgReleases({
           ...configV2,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -284,13 +513,13 @@ describe('modules/datasource/nuget/index', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .replyWithError('');
       expect(
         await getPkgReleases({
           ...configV3V2,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -328,7 +557,7 @@ describe('modules/datasource/nuget/index', () => {
       expect(
         await getPkgReleases({
           ...configV3,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -342,7 +571,7 @@ describe('modules/datasource/nuget/index', () => {
       expect(
         await getPkgReleases({
           ...configV3,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -350,13 +579,13 @@ describe('modules/datasource/nuget/index', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .replyWithError('');
       expect(
         await getPkgReleases({
           ...configV2,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -378,6 +607,51 @@ describe('modules/datasource/nuget/index', () => {
       expect(res?.sourceUrl).toBeDefined();
     });
 
+    it('processes real data (v3) feed is azure devops', async () => {
+      httpMock
+        .scope('https://pkgs.dev.azure.com')
+        .get(
+          '/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/index.json',
+        )
+        .twice()
+        .reply(200, Fixtures.get('azure_devops/v3_index.json'))
+        .get(
+          '/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2-semver2/nunit/index.json',
+        )
+        .reply(200, Fixtures.get('azure_devops/nunit/v3_registration.json'))
+        .get(
+          '/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.13.2/nunit.nuspec',
+        )
+        .reply(200, Fixtures.get('azure_devops/nunit/nuspec.xml'));
+      const res = await getPkgReleases({
+        ...configV3AzureDevOps,
+      });
+      expect(res).toMatchObject({
+        homepage: 'https://nunit.org/',
+        registryUrl:
+          'https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/index.json',
+        releases: [
+          {
+            releaseTimestamp: '2021-12-03T03:20:52.000Z',
+            version: '2.5.7.10213',
+          },
+          {
+            releaseTimestamp: '2021-12-03T03:20:52.000Z',
+            version: '2.6.5',
+          },
+          {
+            releaseTimestamp: '2021-12-03T03:20:52.000Z',
+            version: '2.7.1',
+          },
+          {
+            releaseTimestamp: '2021-12-03T03:20:52.000Z',
+            version: '3.13.2',
+          },
+        ],
+        sourceUrl: 'https://github.com/nunit/nunit',
+      });
+    });
+
     it('processes real data (v3) for several catalog pages', async () => {
       const scope = httpMock
         .scope('https://api.nuget.org')
@@ -389,7 +663,7 @@ describe('modules/datasource/nuget/index', () => {
       });
       const res = await getPkgReleases({
         ...configV3,
-        depName: 'nlog',
+        packageName: 'nlog',
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
@@ -404,12 +678,12 @@ describe('modules/datasource/nuget/index', () => {
           200,
           pkgListV3Registration
             .replace(/"http:\/\/nunit\.org"/g, '""')
-            .replace('"published": "2012-10-23T15:37:48+00:00",', '')
+            .replace('"published": "2012-10-23T15:37:48+00:00",', ''),
         )
         .get('/v3-flatcontainer/nunit/3.12.0/nunit.nuspec')
         .reply(
           200,
-          pkgInfoV3FromNuget.replace('https://github.com/nunit/nunit', '')
+          pkgInfoV3FromNuget.replace('https://github.com/nunit/nunit', ''),
         );
       httpMock
         .scope('https://myprivatefeed')
@@ -465,7 +739,7 @@ describe('modules/datasource/nuget/index', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(200, pkgListV2);
       const res = await getPkgReleases({
@@ -476,11 +750,11 @@ describe('modules/datasource/nuget/index', () => {
       expect(res?.sourceUrl).toBeDefined();
     });
 
-    it('processes real data no relase (v2)', async () => {
+    it('processes real data no release (v2)', async () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(200, pkgListV2NoRelease);
       const res = await getPkgReleases({
@@ -493,7 +767,7 @@ describe('modules/datasource/nuget/index', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(200, pkgListV2WithoutProjectUrl);
       const res = await getPkgReleases({
@@ -508,7 +782,7 @@ describe('modules/datasource/nuget/index', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(200, pkgListV2NoGitHubProjectUrl);
       const res = await getPkgReleases({
@@ -518,11 +792,25 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).toMatchSnapshot();
     });
 
+    it('extracts latest tag (v2)', async () => {
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
+        )
+        .reply(200, pkgListV2NoGitHubProjectUrl);
+      const res = await getPkgReleases({
+        ...configV2,
+      });
+      expect(res).not.toBeNull();
+      expect(res?.tags?.latest).toBe('3.11.0');
+    });
+
     it('handles paginated results (v2)', async () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(200, pkgListV2Page1of2);
       httpMock

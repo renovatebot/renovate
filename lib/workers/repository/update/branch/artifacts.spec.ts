@@ -1,6 +1,6 @@
-import { getConfig, platform } from '../../../../../test/util';
+import { RenovateConfig, partial, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import { BranchStatus } from '../../../../types';
+import { logger } from '../../../../logger';
 import type { BranchConfig } from '../../../types';
 import { setArtifactErrorStatus } from './artifacts';
 
@@ -9,15 +9,16 @@ describe('workers/repository/update/branch/artifacts', () => {
 
   beforeEach(() => {
     GlobalConfig.set({});
-    jest.resetAllMocks();
-    // TODO #7154 incompatible types
     config = {
-      ...getConfig(),
+      baseBranch: 'base-branch',
       manager: 'some-manager',
       branchName: 'renovate/pin',
       upgrades: [],
       artifactErrors: [{ lockFile: 'some' }],
-    } as BranchConfig;
+      statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
+        artifactError: 'renovate/artifact',
+      }),
+    } satisfies BranchConfig;
   });
 
   describe('setArtifactsErrorStatus', () => {
@@ -28,20 +29,55 @@ describe('workers/repository/update/branch/artifacts', () => {
     });
 
     it('skips status', async () => {
-      platform.getBranchStatusCheck.mockResolvedValueOnce(BranchStatus.red);
+      platform.getBranchStatusCheck.mockResolvedValueOnce('red');
       await setArtifactErrorStatus(config);
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
+    it('skips status if statusCheckNames.artifactError is null', async () => {
+      await setArtifactErrorStatus({
+        ...config,
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
+          artifactError: null,
+        }),
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Status check is null or an empty string, skipping status check addition.',
+      );
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
+    it('skips status if statusCheckNames.artifactError is empty string', async () => {
+      await setArtifactErrorStatus({
+        ...config,
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
+          artifactError: '',
+        }),
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Status check is null or an empty string, skipping status check addition.',
+      );
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
+    it('skips status if statusCheckNames is undefined', async () => {
+      await setArtifactErrorStatus({
+        ...config,
+        statusCheckNames: undefined,
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Status check is null or an empty string, skipping status check addition.',
+      );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
 
     it('skips status (dry-run)', async () => {
       GlobalConfig.set({ dryRun: 'full' });
-      platform.getBranchStatusCheck.mockResolvedValueOnce(null);
       await setArtifactErrorStatus(config);
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
 
     it('skips status (no errors)', async () => {
-      platform.getBranchStatusCheck.mockResolvedValueOnce(null);
       config.artifactErrors = [];
       await setArtifactErrorStatus(config);
       expect(platform.setBranchStatus).not.toHaveBeenCalled();

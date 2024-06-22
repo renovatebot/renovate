@@ -1,6 +1,5 @@
-**Important**: This manager isn't aware of subresource integrity (SRI) hashes. It will search/replace any matching url it finds, without consideration for things such as script integrity hashes. Use the `html` manager instead if you need SRI updating.
-
-To enable this manager, add the matching files to `cdnurl.fileMatch`. For example:
+To enable this manager, add the matching files to `cdnurl.fileMatch`.
+For example:
 
 ```json
 {
@@ -9,3 +8,9 @@ To enable this manager, add the matching files to `cdnurl.fileMatch`. For exampl
   }
 }
 ```
+
+<!-- prettier-ignore -->
+!!! warning
+    This manager does _not_ read or update Subresource Integrity (SRI) hashes.
+    It replaces _any_ matching URL it finds, without adding or updating script integrity hashes.
+    We recommend you use the `html` manager if you need SRI updating.

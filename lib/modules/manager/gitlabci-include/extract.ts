@@ -1,58 +1,96 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { parseSingleYaml } from '../../../util/yaml';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
+import {
+  filterIncludeFromGitlabPipeline,
+  isGitlabIncludeProject,
+  isNonEmptyObject,
+} from '../gitlabci/common';
+import type {
+  GitlabInclude,
+  GitlabIncludeProject,
+  GitlabPipeline,
+} from '../gitlabci/types';
 import { replaceReferenceTags } from '../gitlabci/utils';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
-function extractDepFromIncludeFile(includeObj: {
-  file: any;
-  project: string;
-  ref: string;
-}): PackageDependency {
+function extractDepFromIncludeFile(
+  includeObj: GitlabIncludeProject,
+): PackageDependency {
   const dep: PackageDependency = {
     datasource: GitlabTagsDatasource.id,
     depName: includeObj.project,
     depType: 'repository',
   };
   if (!includeObj.ref) {
-    dep.skipReason = 'unknown-version';
+    dep.skipReason = 'unspecified-version';
     return dep;
   }
   dep.currentValue = includeObj.ref;
   return dep;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+function getIncludeProjectsFromInclude(
+  includeValue: GitlabInclude[] | GitlabInclude,
+): GitlabIncludeProject[] {
+  const includes = is.array(includeValue) ? includeValue : [includeValue];
+
+  // Filter out includes that dont have a file & project.
+  return includes.filter(isGitlabIncludeProject);
+}
+
+function getAllIncludeProjects(data: GitlabPipeline): GitlabIncludeProject[] {
+  // If Array, search each element.
+  if (is.array(data)) {
+    return (data as GitlabPipeline[])
+      .filter(isNonEmptyObject)
+      .map(getAllIncludeProjects)
+      .flat();
+  }
+
+  const childrenData = Object.values(filterIncludeFromGitlabPipeline(data))
+    .filter(isNonEmptyObject)
+    .map(getAllIncludeProjects)
+    .flat();
+
+  // Process include key.
+  if (data.include) {
+    childrenData.push(...getIncludeProjectsFromInclude(data.include));
+  }
+  return childrenData;
+}
+
+export function extractPackageFile(
+  content: string,
+  packageFile?: string,
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
-  const { platform, endpoint } = GlobalConfig.get();
+  const platform = GlobalConfig.get('platform');
+  const endpoint = GlobalConfig.get('endpoint');
   try {
-    // TODO: fix me (#9610)
-    const doc: any = load(replaceReferenceTags(content), {
+    // TODO: use schema (#9610)
+    const doc = parseSingleYaml<GitlabPipeline>(replaceReferenceTags(content), {
       json: true,
     });
-    let includes;
-    if (doc?.include && is.array(doc.include)) {
-      includes = doc.include;
-    } else {
-      includes = [doc.include];
-    }
+    const includes = getAllIncludeProjects(doc);
     for (const includeObj of includes) {
-      if (includeObj?.file && includeObj.project) {
-        const dep = extractDepFromIncludeFile(includeObj);
-        if (platform === 'gitlab' && endpoint) {
-          dep.registryUrls = [endpoint.replace(regEx(/\/api\/v4\/?/), '')];
-        }
-        deps.push(dep);
+      const dep = extractDepFromIncludeFile(includeObj);
+      if (platform === 'gitlab' && endpoint) {
+        dep.registryUrls = [endpoint.replace(regEx(/\/api\/v4\/?/), '')];
       }
+      deps.push(dep);
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.stack?.startsWith('YAMLException:')) {
-      logger.debug({ err }, 'YAML exception extracting GitLab CI includes');
+      logger.debug(
+        { err, packageFile },
+        'YAML exception extracting GitLab CI includes',
+      );
     } else {
-      logger.warn({ err }, 'Error extracting GitLab CI includes');
+      logger.debug({ err, packageFile }, 'Error extracting GitLab CI includes');
     }
   }
   if (!deps.length) {

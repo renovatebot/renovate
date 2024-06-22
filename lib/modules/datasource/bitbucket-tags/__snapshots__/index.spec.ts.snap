@@ -3,19 +3,19 @@
 exports[`modules/datasource/bitbucket-tags/index getDigest returns commits from bitbucket cloud 1`] = `"123"`;
 
 exports[`modules/datasource/bitbucket-tags/index getReleases returns tags from bitbucket cloud 1`] = `
-Object {
+{
   "registryUrl": "https://bitbucket.org",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "gitRef": "v1.0.0",
       "releaseTimestamp": "2020-11-19T09:05:35.000Z",
       "version": "v1.0.0",
     },
-    Object {
+    {
       "gitRef": "v1.1.0",
       "version": "v1.1.0",
     },
-    Object {
+    {
       "gitRef": "v1.1.1",
       "version": "v1.1.1",
     },

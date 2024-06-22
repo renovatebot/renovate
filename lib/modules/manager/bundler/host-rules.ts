@@ -18,12 +18,10 @@ export function findAllAuthenticatable({
 
 export function getAuthenticationHeaderValue(hostRule: HostRule): string {
   if (hostRule.username) {
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    return `${hostRule.username}:${hostRule.password}`;
+    // TODO: types (#22198)
+    return `${hostRule.username}:${hostRule.password!}`;
   }
 
-  // TODO: types (#7154)
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  return `${hostRule.token}`;
+  // TODO: types (#22198)
+  return `${hostRule.token!}`;
 }

@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import * as hostRules from '../../../../util/host-rules';
 import { regEx } from '../../../../util/regex';
 import { toBase64 } from '../../../../util/string';
-import { validateUrl } from '../../../../util/url';
+import { isHttpUrl } from '../../../../util/url';
 
 export interface HostRulesResult {
   additionalNpmrcContent: string[];
@@ -21,10 +21,9 @@ export function processHostRules(): HostRulesResult {
     if (hostRule.resolvedHost) {
       let uri = hostRule.matchHost;
       uri =
-        is.string(uri) && validateUrl(uri)
+        is.string(uri) && isHttpUrl(uri)
           ? uri.replace(regEx(/^https?:/), '')
-          : // TODO: types (#7154)
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          : // TODO: types (#22198)
             `//${uri}/`;
       if (hostRule.token) {
         const key = hostRule.authType === 'Basic' ? '_auth' : '_authToken';

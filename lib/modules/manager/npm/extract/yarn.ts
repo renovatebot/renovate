@@ -10,7 +10,7 @@ import {
 import type { LockFile } from './types';
 
 export async function getYarnLock(filePath: string): Promise<LockFile> {
-  // TODO #7154
+  // TODO #22198
   const yarnLockRaw = (await readLocalFile(filePath, 'utf8'))!;
   try {
     const parsed = parseSyml(yarnLockRaw);
@@ -21,19 +21,39 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
       if (key === '__metadata') {
         // yarn 2
         lockfileVersion = parseInt(val.cacheKey, 10);
+        logger.once.debug(
+          `yarn.lock ${filePath} has __metadata.cacheKey=${lockfileVersion}`,
+        );
       } else {
         for (const entry of key.split(', ')) {
-          const { scope, name, range } = structUtils.parseDescriptor(entry);
-          const packageName = scope ? `@${scope}/${name}` : name;
-          const { selector } = structUtils.parseRange(range);
+          try {
+            const { scope, name, range } = structUtils.parseDescriptor(entry);
+            const packageName = scope ? `@${scope}/${name}` : name;
+            const { selector } = structUtils.parseRange(range);
 
-          logger.trace({ entry, version: val.version });
-          lockedVersions[packageName + '@' + selector] = parsed[key].version;
+            logger.trace({ entry, version: val.version });
+            lockedVersions[packageName + '@' + selector] = parsed[key].version;
+          } catch (err) {
+            logger.debug(
+              { entry, err },
+              'Invalid descriptor or range found in yarn.lock',
+            );
+          }
         }
       }
     }
+    const isYarn1 = !('__metadata' in parsed);
+    if (isYarn1) {
+      logger.once.debug(
+        `yarn.lock ${filePath} is has no __metadata so is yarn 1`,
+      );
+    } else {
+      logger.once.debug(
+        `yarn.lock ${filePath} is has __metadata so is yarn 2+`,
+      );
+    }
     return {
-      isYarn1: !('__metadata' in parsed),
+      isYarn1,
       lockfileVersion,
       lockedVersions,
     };
@@ -44,14 +64,22 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
 }
 
 export function getZeroInstallPaths(yarnrcYml: string): string[] {
-  const conf = parseSyml(yarnrcYml);
+  let conf: any;
+  try {
+    conf = parseSyml(yarnrcYml);
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Error parsing .yarnrc.yml');
+  }
   const paths = [
-    conf.cacheFolder || './.yarn/cache',
+    conf?.cacheFolder || './.yarn/cache',
     '.pnp.cjs',
     '.pnp.js',
     '.pnp.loader.mjs',
   ];
-  if (miscUtils.tryParseOptionalBoolean(conf.pnpEnableInlining) === false) {
+  if (
+    conf &&
+    miscUtils.tryParseOptionalBoolean(conf.pnpEnableInlining) === false
+  ) {
     paths.push(conf.pnpDataPath || './.pnp.data.json');
   }
   return paths;
@@ -69,4 +97,27 @@ export async function isZeroInstall(yarnrcYmlPath: string): Promise<boolean> {
     }
   }
   return false;
+}
+
+export function getYarnVersionFromLock(lockfile: LockFile): string {
+  const { lockfileVersion, isYarn1 } = lockfile;
+  if (isYarn1) {
+    return '^1.22.18';
+  }
+  if (lockfileVersion && lockfileVersion >= 12) {
+    // This will probably be v5
+    return '>=4.0.0';
+  }
+  if (lockfileVersion && lockfileVersion >= 10) {
+    return '^4.0.0';
+  }
+  if (lockfileVersion && lockfileVersion >= 8) {
+    // https://github.com/yarnpkg/berry/commit/9bcd27ae34aee77a567dd104947407532fa179b3
+    return '^3.0.0';
+  } else if (lockfileVersion && lockfileVersion >= 6) {
+    // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
+    return '^2.2.0';
+  }
+
+  return '^2.0.0';
 }

@@ -2,7 +2,7 @@ import { compare, parseMavenBasedRange, parsePrefixRange } from './compare';
 import { api } from '.';
 
 describe('modules/versioning/gradle/index', () => {
-  test.each`
+  it.each`
     a                            | b                            | expected
     ${'1'}                       | ${'1'}                       | ${0}
     ${'a'}                       | ${'a'}                       | ${0}
@@ -76,11 +76,12 @@ describe('modules/versioning/gradle/index', () => {
     ${'Hoxton.SR1'}              | ${'Hoxton.RELEASE'}          | ${1}
     ${'1.0-sp-1'}                | ${'1.0-release'}             | ${1}
     ${'1.0-sp-2'}                | ${'1.0-sp-1'}                | ${1}
+    ${''}                        | ${''}                        | ${0}
   `('compare("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(compare(a, b)).toEqual(expected);
   });
 
-  test.each`
+  it.each`
     rangeStr
     ${''}
     ${'1.2.3-SNAPSHOT'}
@@ -91,7 +92,7 @@ describe('modules/versioning/gradle/index', () => {
     expect(range).toBeNull();
   });
 
-  test.each`
+  it.each`
     rangeStr
     ${''}
     ${'1.2.3-SNAPSHOT'}
@@ -113,7 +114,7 @@ describe('modules/versioning/gradle/index', () => {
     expect(range).toBeNull();
   });
 
-  test.each`
+  it.each`
     input                | expected
     ${'1.0.0'}           | ${true}
     ${'[1.12.6,1.18.6]'} | ${true}
@@ -122,7 +123,7 @@ describe('modules/versioning/gradle/index', () => {
     expect(api.isValid(input)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input                        | expected
     ${''}                        | ${false}
     ${'latest.integration'}      | ${false}
@@ -152,7 +153,7 @@ describe('modules/versioning/gradle/index', () => {
     expect(api.isVersion(input)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input                                   | expected
     ${''}                                   | ${false}
     ${'latest'}                             | ${false}
@@ -181,11 +182,12 @@ describe('modules/versioning/gradle/index', () => {
     ${'Hoxton.SR'}                          | ${true}
     ${'Hoxton.SR1'}                         | ${true}
     ${'1.3.5-native-mt-1.3.71-release-429'} | ${false}
+    ${'1.0-dev'}                            | ${false}
   `('isStable("$input") === $expected', ({ input, expected }) => {
     expect(api.isStable(input)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input         | major   | minor   | patch
     ${''}         | ${null} | ${null} | ${null}
     ${'1'}        | ${1}    | ${0}    | ${0}
@@ -203,10 +205,10 @@ describe('modules/versioning/gradle/index', () => {
       expect(api.getMajor(input)).toBe(major);
       expect(api.getMinor(input)).toBe(minor);
       expect(api.getPatch(input)).toBe(patch);
-    }
+    },
   );
 
-  test.each`
+  it.each`
     version          | range      | expected
     ${'1'}           | ${'[[]]'}  | ${false}
     ${'0'}           | ${'[0,1]'} | ${true}
@@ -231,40 +233,55 @@ describe('modules/versioning/gradle/index', () => {
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
       expect(api.matches(version, range)).toBe(expected);
-    }
+    },
   );
 
-  test.each`
+  it.each`
     a        | b      | expected
     ${'1.1'} | ${'1'} | ${true}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(api.isGreaterThan(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     versions                  | range    | expected
     ${['0', '1.5', '1', '2']} | ${'1.+'} | ${'1'}
   `(
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(api.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
-  test.each`
+  it.each`
     versions                  | range    | expected
     ${['0', '1', '1.5', '2']} | ${'1.+'} | ${'1.5'}
   `(
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(api.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
-  test.each`
+  it.each`
     currentValue             | rangeStrategy | currentVersion | newVersion  | expected
     ${'1'}                   | ${null}       | ${null}        | ${'1.1'}    | ${'1.1'}
-    ${'[1.2.3,]'}            | ${null}       | ${null}        | ${'1.2.4'}  | ${null}
+    ${'[1.2.3,]'}            | ${null}       | ${null}        | ${'1.2.4'}  | ${'[1.2.3,]'}
+    ${'[1.2.3,2)'}           | ${null}       | ${null}        | ${'2.0.0'}  | ${'[1.2.3,3)'}
+    ${'[1.3,1.4)'}           | ${null}       | ${null}        | ${'2.0.0'}  | ${'[2.0,3.0)'}
+    ${'[1.3,1.4)'}           | ${null}       | ${null}        | ${'1.5.1'}  | ${'[1.5,1.6)'}
+    ${'[1,1.4)'}             | ${null}       | ${null}        | ${'1.5.1'}  | ${'[1,1.6)'}
+    ${'[1.3,2)'}             | ${null}       | ${null}        | ${'1.4.0'}  | ${'[1.3,2)'}
+    ${'1.?'}                 | ${null}       | ${null}        | ${'2'}      | ${'1.?'}
+    ${'1..'}                 | ${null}       | ${null}        | ${'2'}      | ${'1..'}
+    ${'1--'}                 | ${null}       | ${null}        | ${'2'}      | ${'1--'}
+    ${'+'}                   | ${null}       | ${null}        | ${'1.2.4'}  | ${null}
+    ${'1.+'}                 | ${null}       | ${null}        | ${'1.2.4'}  | ${'1.+'}
+    ${'1.+'}                 | ${null}       | ${null}        | ${'2.1.2'}  | ${'2.+'}
+    ${'1.+'}                 | ${null}       | ${null}        | ${'2'}      | ${'2.+'}
+    ${'1.3.+'}               | ${null}       | ${null}        | ${'1.3.4'}  | ${'1.3.+'}
+    ${'1.3.+'}               | ${null}       | ${null}        | ${'1.5.2'}  | ${'1.5.+'}
+    ${'1.3.+'}               | ${null}       | ${null}        | ${'2'}      | ${'2'}
     ${'[1.2.3]'}             | ${'pin'}      | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.4'}
     ${'[1.0.0,1.2.3]'}       | ${'pin'}      | ${'1.0.0'}     | ${'1.2.4'}  | ${'1.2.4'}
     ${'[1.0.0,1.2.23]'}      | ${'pin'}      | ${'1.0.0'}     | ${'1.2.23'} | ${'1.2.23'}
@@ -286,6 +303,6 @@ describe('modules/versioning/gradle/index', () => {
         newVersion,
       });
       expect(res).toBe(expected);
-    }
+    },
   );
 });

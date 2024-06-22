@@ -36,6 +36,26 @@ describe('modules/manager/conan/extract', () => {
           replaceString: 'fake/8.62.134@test/dev',
         },
         {
+          autoReplaceStringTemplate:
+            '{{depName}}/{{newValue}}@_/_{{#if newDigest}}#{{newDigest}}{{/if}}',
+          currentDigest: 'aff2d03608351db075ec1348a3afc9ff',
+          currentValue: '1.17.2',
+          depName: 'cairo',
+          depType: 'requires',
+          packageName: 'cairo/1.17.2@_/_',
+          replaceString: 'cairo/1.17.2#aff2d03608351db075ec1348a3afc9ff',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}/{{newValue}}@_/_{{#if newDigest}}#{{newDigest}}{{/if}}',
+          currentDigest: 'aff2d03608351db075ec1348a3afc9ff',
+          currentValue: '1.17.2',
+          depName: 'cairo',
+          depType: 'requires',
+          packageName: 'cairo/1.17.2@_/_',
+          replaceString: 'cairo/1.17.2@_/_#aff2d03608351db075ec1348a3afc9ff',
+        },
+        {
           currentValue: '[>1.1 <2.1, include_prerelease=True]',
           depName: '7zip',
           depType: 'build_requires',
@@ -86,6 +106,16 @@ describe('modules/manager/conan/extract', () => {
           packageName: 'cryptopp/[1.2.7 || >=1.2.9 <2.0.0]@test/local',
           replaceString: 'cryptopp/[1.2.7 || >=1.2.9 <2.0.0]@test/local',
         },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}/{{newValue}}@_/_{{#if newDigest}}#{{newDigest}}{{/if}}',
+          currentDigest: 'bc592346b33fd19c1fbffce25d1e4236',
+          currentValue: '0.63.0',
+          depName: 'meson',
+          depType: 'build_requires',
+          packageName: 'meson/0.63.0@_/_',
+          replaceString: 'meson/0.63.0@_/_#bc592346b33fd19c1fbffce25d1e4236',
+        },
       ]);
     });
 
@@ -131,6 +161,13 @@ describe('modules/manager/conan/extract', () => {
           depType: 'requires',
           packageName: 'req_l/2.1@otheruser/testing',
           replaceString: 'req_l/2.1@otheruser/testing',
+        },
+        {
+          currentValue: '6.1',
+          depName: 'req_x',
+          depType: 'requires',
+          packageName: 'req_x/6.1@useronly/_',
+          replaceString: 'req_x/6.1@useronly',
         },
         {
           currentValue: '0.1',
@@ -180,6 +217,24 @@ describe('modules/manager/conan/extract', () => {
           depType: 'requires',
           packageName: 'req_g/[>1.0 <1.8]@user/stable',
           replaceString: 'req_g/[>1.0 <1.8]@user/stable',
+        },
+        {
+          currentValue: '[>1.0 <1.8, include_prerelease]',
+          depName: 'req_z',
+          depType: 'requires',
+          packageName: 'req_z/[>1.0 <1.8, include_prerelease]@user/stable',
+          replaceString: 'req_z/[>1.0 <1.8, include_prerelease]@user/stable',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}/{{newValue}}@user/stable{{#if newDigest}}#{{newDigest}}{{/if}}',
+          currentDigest: 'bc592346b33fd19c1fbffce25d1e4236',
+          currentValue: '1.0',
+          depName: 'req_l',
+          depType: 'requires',
+          packageName: 'req_l/1.0@user/stable',
+          replaceString:
+            'req_l/1.0@user/stable#bc592346b33fd19c1fbffce25d1e4236',
         },
         {
           currentValue: '1.2',

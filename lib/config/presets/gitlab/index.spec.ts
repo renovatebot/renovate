@@ -4,53 +4,54 @@ import { PRESET_DEP_NOT_FOUND } from '../util';
 import * as gitlab from '.';
 
 const gitlabApiHost = 'https://gitlab.com';
-const basePath = '/api/v4/projects/some%2Frepo/repository';
+const projectPath = '/api/v4/projects/some%2Frepo';
+const basePath = `${projectPath}/repository`;
 
 describe('config/presets/gitlab/index', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   describe('getPreset()', () => {
     it('throws EXTERNAL_HOST_ERROR', async () => {
-      httpMock.scope(gitlabApiHost).get(`${basePath}/branches`).reply(500);
+      httpMock.scope(gitlabApiHost).get(projectPath).reply(500);
       await expect(
         gitlab.getPreset({
           repo: 'some/repo',
           presetName: 'non-default',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('throws if project could not be found', async () => {
+      httpMock.scope(gitlabApiHost).get(projectPath).reply(404);
+      await expect(
+        gitlab.getPreset({
+          repo: 'some/repo',
+          presetName: 'non-default',
+        }),
+      ).rejects.toThrow(PRESET_DEP_NOT_FOUND);
     });
 
     it('throws if missing', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(`${basePath}/branches`)
+        .get(projectPath)
         .twice()
-        .reply(200, [])
+        .reply(200, {})
         .get(`${basePath}/files/default.json/raw?ref=master`)
         .reply(404)
         .get(`${basePath}/files/renovate.json/raw?ref=master`)
         .reply(404);
       await expect(gitlab.getPreset({ repo: 'some/repo' })).rejects.toThrow(
-        PRESET_DEP_NOT_FOUND
+        PRESET_DEP_NOT_FOUND,
       );
     });
 
     it('should return the preset', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(`${basePath}/branches`)
-        .reply(200, [
-          {
-            name: 'devel',
-          },
-          {
-            name: 'master',
-            default: true,
-          },
-        ])
-        .get(`${basePath}/files/default.json/raw?ref=master`)
+        .get(projectPath)
+        .reply(200, {
+          default_branch: 'main',
+        })
+        .get(`${basePath}/files/default.json/raw?ref=main`)
         .reply(200, { foo: 'bar' }, {});
 
       const content = await gitlab.getPreset({ repo: 'some/repo' });
@@ -73,16 +74,10 @@ describe('config/presets/gitlab/index', () => {
     it('should query custom paths', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(`${basePath}/branches`)
-        .reply(200, [
-          {
-            name: 'devel',
-          },
-          {
-            name: 'master',
-            default: true,
-          },
-        ])
+        .get(projectPath)
+        .reply(200, {
+          default_branch: 'master',
+        })
         .get(`${basePath}/files/path%2Fcustom.json/raw?ref=master`)
         .reply(200, { foo: 'bar' }, {});
 
@@ -97,16 +92,10 @@ describe('config/presets/gitlab/index', () => {
     it('should query custom paths with .json extension', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(`${basePath}/branches`)
-        .reply(200, [
-          {
-            name: 'devel',
-          },
-          {
-            name: 'master',
-            default: true,
-          },
-        ])
+        .get(projectPath)
+        .reply(200, {
+          default_branch: 'master',
+        })
         .get(`${basePath}/files/path%2Fcustom.json/raw?ref=master`)
         .reply(200, { foo: 'bar' }, {});
 
@@ -121,16 +110,10 @@ describe('config/presets/gitlab/index', () => {
     it('should query custom paths with .json5 extension', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(`${basePath}/branches`)
-        .reply(200, [
-          {
-            name: 'devel',
-          },
-          {
-            name: 'master',
-            default: true,
-          },
-        ])
+        .get(projectPath)
+        .reply(200, {
+          default_branch: 'master',
+        })
         .get(`${basePath}/files/path%2Fcustom.json5/raw?ref=master`)
         .reply(200, { foo: 'bar' }, {});
 
@@ -147,34 +130,28 @@ describe('config/presets/gitlab/index', () => {
     it('uses default endpoint', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(`${basePath}/branches`)
-        .reply(200, [
-          {
-            name: 'devel',
-            default: true,
-          },
-        ])
+        .get(projectPath)
+        .reply(200, {
+          default_branch: 'devel',
+        })
         .get(`${basePath}/files/some.json/raw?ref=devel`)
         .reply(200, { preset: { file: {} } });
       expect(
         await gitlab.getPresetFromEndpoint(
           'some/repo',
           'some/preset/file',
-          undefined
-        )
+          undefined,
+        ),
       ).toEqual({});
     });
 
     it('uses custom endpoint', async () => {
       httpMock
         .scope('https://gitlab.example.org')
-        .get(`${basePath}/branches`)
-        .reply(200, [
-          {
-            name: 'devel',
-            default: true,
-          },
-        ])
+        .get(projectPath)
+        .reply(200, {
+          default_branch: 'devel',
+        })
         .get(`${basePath}/files/some.json/raw?ref=devel`)
         .reply(404);
       await expect(
@@ -182,8 +159,8 @@ describe('config/presets/gitlab/index', () => {
           'some/repo',
           'some/preset/file',
           undefined,
-          'https://gitlab.example.org/api/v4'
-        )
+          'https://gitlab.example.org/api/v4',
+        ),
       ).rejects.toThrow(PRESET_DEP_NOT_FOUND);
     });
 
@@ -198,8 +175,8 @@ describe('config/presets/gitlab/index', () => {
           'some/preset/file',
           undefined,
           'https://gitlab.com/api/v4',
-          'someTag'
-        )
+          'someTag',
+        ),
       ).toEqual({});
     });
 
@@ -214,8 +191,8 @@ describe('config/presets/gitlab/index', () => {
           'some/preset/file',
           undefined,
           'https://gitlab.example.org/api/v4',
-          'someTag'
-        )
+          'someTag',
+        ),
       ).toEqual({});
     });
   });

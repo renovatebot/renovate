@@ -1,13 +1,14 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
+import * as hostRules from '../../../util/host-rules';
 import * as rubyVersioning from '../../versioning/ruby';
 import { PodDatasource } from '.';
 
 const config = {
   versioning: rubyVersioning.id,
   datasource: PodDatasource.id,
-  depName: 'foo',
+  packageName: 'foo',
   registryUrls: [],
 };
 
@@ -19,7 +20,7 @@ const cocoapodsHost = 'https://cdn.cocoapods.org';
 describe('modules/datasource/pod/index', () => {
   describe('getReleases', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
+      hostRules.clear();
     });
 
     it('returns null for invalid inputs', async () => {
@@ -31,9 +32,19 @@ describe('modules/datasource/pod/index', () => {
       expect(
         await getPkgReleases({
           datasource: PodDatasource.id,
-          depName: 'foobar',
+          packageName: 'foobar',
           registryUrls: [],
-        })
+        }),
+      ).toBeNull();
+    });
+
+    it('returns null disabled host', async () => {
+      hostRules.add({ matchHost: cocoapodsHost, enabled: false });
+      expect(
+        await getPkgReleases({
+          datasource: PodDatasource.id,
+          packageName: 'foobar',
+        }),
       ).toBeNull();
     });
 
@@ -119,6 +130,14 @@ describe('modules/datasource/pod/index', () => {
       await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
+    it('throws for 500', async () => {
+      httpMock
+        .scope(cocoapodsHost)
+        .get('/all_pods_versions_a_c_b.txt')
+        .reply(500);
+      await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
     it('returns null for unknown error', async () => {
       httpMock
         .scope(cocoapodsHost)
@@ -136,7 +155,7 @@ describe('modules/datasource/pod/index', () => {
         await getPkgReleases({
           ...config,
           registryUrls: ['https://github.com/CocoaPods/Specs'],
-        })
+        }),
       ).toEqual({
         registryUrl: 'https://github.com/CocoaPods/Specs',
         releases: [

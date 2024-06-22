@@ -19,7 +19,9 @@ describe('util/git/author', () => {
 
     it('parses bot name and email', () => {
       expect(
-        parseGitAuthor('renovate[bot] <renovate[bot]@users.noreply.github.com>')
+        parseGitAuthor(
+          'renovate[bot] <renovate[bot]@users.noreply.github.com>',
+        ),
       ).toEqual({
         address: 'renovate[bot]@users.noreply.github.com',
         name: 'renovate[bot]',
@@ -28,7 +30,7 @@ describe('util/git/author', () => {
 
     it('escapes names', () => {
       expect(parseGitAuthor('name [what] <name@what.com>')?.name).toBe(
-        `name [what]`
+        `name [what]`,
       );
     });
 

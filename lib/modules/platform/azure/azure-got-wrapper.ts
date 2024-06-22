@@ -4,18 +4,17 @@ import type { ICoreApi } from 'azure-devops-node-api/CoreApi';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
 import type { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces';
-import { PlatformId } from '../../../constants';
 import type { HostRule } from '../../../types';
 import * as hostRules from '../../../util/host-rules';
 
-const hostType = PlatformId.Azure;
+const hostType = 'azure';
 let endpoint: string;
 
 function getAuthenticationHandler(config: HostRule): IRequestHandler {
   if (!config.token && config.username && config.password) {
     return getBasicHandler(config.username, config.password, true);
   }
-  // TODO: token can be undefined here (#7154)
+  // TODO: token can be undefined here (#22198)
   return getHandlerFromToken(config.token!, true);
 }
 
@@ -25,7 +24,10 @@ export function azureObj(): azure.WebApi {
     throw new Error(`No config found for azure`);
   }
   const authHandler = getAuthenticationHandler(config);
-  return new azure.WebApi(endpoint, authHandler);
+  return new azure.WebApi(endpoint, authHandler, {
+    allowRetries: true,
+    maxRetries: 2,
+  });
 }
 
 export function gitApi(): Promise<IGitApi> {

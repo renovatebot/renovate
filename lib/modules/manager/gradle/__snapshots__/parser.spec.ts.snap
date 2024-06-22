@@ -1,100 +1,100 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/gradle/parser calculations parses fixture from "gradle" manager 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "1.5.2.RELEASE",
     "depName": "org.springframework.boot:spring-boot-gradle-plugin",
     "groupName": "springBootVersion",
-    "managerData": Object {
+    "managerData": {
       "fileReplacePosition": 53,
       "packageFile": "build.gradle",
     },
   },
-  Object {
+  {
     "currentValue": "1.2.3",
     "depName": "com.github.jengelman.gradle.plugins:shadow",
-    "managerData": Object {
+    "managerData": {
       "fileReplacePosition": 417,
       "packageFile": "build.gradle",
     },
   },
-  Object {
+  {
     "currentValue": "0.1",
     "depName": "com.fkorotkov:gradle-libraries-plugin",
-    "managerData": Object {
+    "managerData": {
       "fileReplacePosition": 481,
       "packageFile": "build.gradle",
     },
   },
-  Object {
+  {
     "currentValue": "0.2.3",
     "depName": "gradle.plugin.se.patrikerdes:gradle-use-latest-versions-plugin",
-    "managerData": Object {
+    "managerData": {
       "fileReplacePosition": 568,
       "packageFile": "build.gradle",
     },
   },
-  Object {
+  {
     "currentValue": "3.1.1",
     "depName": "org.apache.openjpa:openjpa",
-    "managerData": Object {
+    "managerData": {
       "fileReplacePosition": 621,
       "packageFile": "build.gradle",
     },
   },
-  Object {
+  {
     "currentValue": "0.13.0",
     "depName": "com.gradle.publish:plugin-publish-plugin",
-    "managerData": Object {
+    "managerData": {
       "fileReplacePosition": 688,
       "packageFile": "build.gradle",
     },
   },
-  Object {
+  {
     "currentValue": "6.0.9.RELEASE",
     "depName": "org.grails:gorm-hibernate5-spring-boot",
-    "managerData": Object {
+    "managerData": {
       "fileReplacePosition": 1882,
       "packageFile": "build.gradle",
     },
   },
-  Object {
+  {
     "currentValue": "6.0.5",
     "depName": "mysql:mysql-connector-java",
-    "managerData": Object {
+    "managerData": {
       "fileReplacePosition": 1938,
       "packageFile": "build.gradle",
     },
   },
-  Object {
+  {
     "currentValue": "1.0-groovy-2.4",
     "depName": "org.spockframework:spock-spring",
-    "managerData": Object {
+    "managerData": {
       "fileReplacePosition": 1996,
       "packageFile": "build.gradle",
     },
   },
-  Object {
+  {
     "currentValue": "1.3",
     "depName": "org.hamcrest:hamcrest-core",
-    "managerData": Object {
+    "managerData": {
       "fileReplacePosition": 2101,
       "packageFile": "build.gradle",
     },
   },
-  Object {
+  {
     "currentValue": "3.1",
     "depName": "cglib:cglib-nodep",
-    "managerData": Object {
+    "managerData": {
       "fileReplacePosition": 2189,
       "packageFile": "build.gradle",
     },
   },
-  Object {
+  {
     "currentValue": "3.1.1",
     "depName": "org.apache.openjpa:openjpa",
-    "managerData": Object {
+    "managerData": {
       "fileReplacePosition": 2295,
       "packageFile": "build.gradle",
     },

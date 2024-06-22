@@ -2,11 +2,13 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { id as semverVersioning } from '../../versioning/semver';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
 const VERSION_REGEX = regEx(/^\s+VERSION="(.*)"$/m);
 
-export function extractPackageFile(fileContent: string): PackageFile | null {
+export function extractPackageFile(
+  fileContent: string,
+): PackageFileContent | null {
   logger.trace('batect.extractPackageFile()');
   const match = VERSION_REGEX.exec(fileContent);
 

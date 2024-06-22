@@ -1,8 +1,8 @@
-import { ProgrammingLanguage } from '../../../constants';
+import type { Category } from '../../../constants';
 import { DockerDatasource } from '../../datasource/docker';
 export { extractPackageFile } from './extract';
 
-export const language = ProgrammingLanguage.Docker;
+export const categories: Category[] = ['ansible', 'iac'];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)tasks/[^/]+\\.ya?ml$'],

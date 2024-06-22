@@ -20,14 +20,20 @@ export class GradleVersionDatasource extends Datasource {
 
   override readonly registryStrategy = 'merge';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `buildTime` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'We use the URL: https://github.com/gradle/gradle.';
+
   private static readonly buildTimeRegex = regEx(
-    '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$'
+    '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$',
   );
 
   @cache({
     namespace: `datasource-${GradleVersionDatasource.id}`,
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    // TODO: types (#22198)
     key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
   })
   async getReleases({
@@ -43,13 +49,22 @@ export class GradleVersionDatasource extends Datasource {
       const response = await this.http.getJson<GradleRelease[]>(registryUrl);
       releases = response.body
         .filter((release) => !release.snapshot && !release.nightly)
-        .map((release) => ({
-          version: release.version,
-          releaseTimestamp: GradleVersionDatasource.formatBuildTime(
-            release.buildTime
-          ),
-          ...(release.broken && { isDeprecated: release.broken }),
-        }));
+        .map((release) => {
+          const { version, buildTime } = release;
+
+          const gitRef = GradleVersionDatasource.getGitRef(release.version);
+
+          const releaseTimestamp =
+            GradleVersionDatasource.formatBuildTime(buildTime);
+
+          const result: Release = { version, gitRef, releaseTimestamp };
+
+          if (release.broken) {
+            result.isDeprecated = true;
+          }
+
+          return result;
+        });
     } catch (err) {
       this.handleGenericErrors(err);
     }
@@ -72,9 +87,30 @@ export class GradleVersionDatasource extends Datasource {
     if (GradleVersionDatasource.buildTimeRegex.test(timeStr)) {
       return timeStr.replace(
         GradleVersionDatasource.buildTimeRegex,
-        '$1-$2-$3T$4:$5:$6$7'
+        '$1-$2-$3T$4:$5:$6$7',
       );
     }
     return null;
+  }
+
+  /**
+   * Calculate `gitTag` based on `version`:
+   *   - `8.1.2` -> `v8.1.2`
+   *   - `8.2` -> `v8.2.0`
+   *   - `8.2-rc-1` -> `v8.2.0-RC1`
+   *   - `8.2-milestone-1` -> `v8.2.0-M1`
+   */
+  private static getGitRef(version: string): string {
+    const [versionPart, typePart, unstablePart] = version.split(/-([a-z]+)-/);
+
+    let suffix = '';
+    if (typePart === 'rc') {
+      suffix = `-RC${unstablePart}`;
+    } else if (typePart === 'milestone') {
+      suffix = `-M${unstablePart}`;
+    }
+
+    const [major, minor, patch = '0'] = versionPart.split('.');
+    return `v${major}.${minor}.${patch}${suffix}`;
   }
 }

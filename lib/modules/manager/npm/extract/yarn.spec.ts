@@ -1,6 +1,6 @@
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
-import { getYarnLock } from './yarn';
+import { getYarnLock, getYarnVersionFromLock } from './yarn';
 
 jest.mock('../../../../util/fs');
 
@@ -10,7 +10,7 @@ describe('modules/manager/npm/extract/yarn', () => {
       fs.readLocalFile.mockResolvedValueOnce('abcd');
       const res = await getYarnLock('package.json');
       expect(res.isYarn1).toBeTrue();
-      expect(Object.keys(res.lockedVersions)).toHaveLength(0);
+      expect(Object.keys(res.lockedVersions!)).toHaveLength(0);
     });
 
     it('extracts yarn 1', async () => {
@@ -20,7 +20,7 @@ describe('modules/manager/npm/extract/yarn', () => {
       expect(res.isYarn1).toBeTrue();
       expect(res.lockfileVersion).toBeUndefined();
       expect(res.lockedVersions).toMatchSnapshot();
-      expect(Object.keys(res.lockedVersions)).toHaveLength(7);
+      expect(Object.keys(res.lockedVersions!)).toHaveLength(7);
     });
 
     it('extracts yarn 2', async () => {
@@ -30,7 +30,7 @@ describe('modules/manager/npm/extract/yarn', () => {
       expect(res.isYarn1).toBeFalse();
       expect(res.lockfileVersion).toBeNaN();
       expect(res.lockedVersions).toMatchSnapshot();
-      expect(Object.keys(res.lockedVersions)).toHaveLength(8);
+      expect(Object.keys(res.lockedVersions!)).toHaveLength(8);
     });
 
     it('extracts yarn 2 cache version', async () => {
@@ -40,7 +40,38 @@ describe('modules/manager/npm/extract/yarn', () => {
       expect(res.isYarn1).toBeFalse();
       expect(res.lockfileVersion).toBe(6);
       expect(res.lockedVersions).toMatchSnapshot();
-      expect(Object.keys(res.lockedVersions)).toHaveLength(10);
+      expect(Object.keys(res.lockedVersions!)).toHaveLength(10);
     });
+
+    it('ignores individual invalid entries', async () => {
+      const invalidNameLock = Fixtures.get(
+        'yarn1-invalid-name/yarn.lock',
+        '..',
+      );
+      fs.readLocalFile.mockResolvedValueOnce(invalidNameLock);
+      const res = await getYarnLock('package.json');
+      expect(res.isYarn1).toBeTrue();
+      expect(res.lockfileVersion).toBeUndefined();
+      expect(Object.keys(res.lockedVersions!)).toHaveLength(14);
+    });
+  });
+
+  it('getYarnVersionFromLock', () => {
+    expect(getYarnVersionFromLock({ isYarn1: true })).toBe('^1.22.18');
+    expect(
+      getYarnVersionFromLock({ isYarn1: false, lockfileVersion: 12 }),
+    ).toBe('>=4.0.0');
+    expect(
+      getYarnVersionFromLock({ isYarn1: false, lockfileVersion: 10 }),
+    ).toBe('^4.0.0');
+    expect(getYarnVersionFromLock({ isYarn1: false, lockfileVersion: 8 })).toBe(
+      '^3.0.0',
+    );
+    expect(getYarnVersionFromLock({ isYarn1: false, lockfileVersion: 6 })).toBe(
+      '^2.2.0',
+    );
+    expect(getYarnVersionFromLock({ isYarn1: false, lockfileVersion: 3 })).toBe(
+      '^2.0.0',
+    );
   });
 });

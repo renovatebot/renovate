@@ -1,4 +1,34 @@
-The `azure-pipelines` manager extracts container and repository resources from the `resources` block as well as tasks from `steps` blocks.
+The `azure-pipelines` manager is disabled by default.
+This is because there's no way for Renovate to know whether new task versions are yet available with the Azure DevOps environment, so new versions proposed by Renovate could fail.
+
+To opt into running it, set the following:
+
+```json
+{
+  "azure-pipelines": {
+    "enabled": true
+  }
+}
+```
+
+In most cases only major version numbers are specified in YAML when referencing a task version: `NodeTool@0`.
+By default, Renovate replaces these with the full version: `NodeTool@0.216.0`.
+
+To use the standard convention for Azure Pipelines, add:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["azure-pipelines-tasks"],
+      "extractVersion": "^(?<version>\\d+)"
+    }
+  ]
+}
+```
+
+Renovate now updates container and repository resources from the `resources` block, plus tasks from `steps` blocks.
+
 For example:
 
 ```yaml
@@ -12,7 +42,7 @@ resources:
       ref: refs/tags/v0.5.1
   containers:
     - container: linux
-      image: ubuntu:16.04
+      image: ubuntu:24.04
     - container: python
       image: python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077
 
@@ -28,7 +58,7 @@ stages:
 
 Read the [resources block][resources-docs] and the [tasks block][tasks-docs] Azure Pipelines documentation for more information.
 
-Files that are processed by the manager includes:
+The `azure-pipelines` manager can process these files:
 
 - `.azure-pipelines/**/*.yaml`
 - `.azure-pipelines.yaml`
@@ -39,6 +69,11 @@ Files that are processed by the manager includes:
 - `azure-pipeline/**/*.yaml`
 - `azure-pipeline.yaml`
 - `azure-pipeline.yml`
+
+<!-- prettier-ignore -->
+!!! warning
+    Renovate can't update (root) container-element in containers jobs, see [issue #21987](https://github.com/renovatebot/renovate/issues/21987).
+    Renovate can't read Azure repositories defined in resource blocks, see [issue #15028](https://github.com/renovatebot/renovate/issues/15028).
 
 [resources-docs]: https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/resources?view=azure-pipelines
 [tasks-docs]: https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/steps-task?view=azure-pipelines

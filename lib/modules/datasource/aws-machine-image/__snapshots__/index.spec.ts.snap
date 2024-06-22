@@ -1,463 +1,115 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/aws-machine-image/index getSortedAwsMachineImages() with 1 returned image 1`] = `
-Array [
-  Object {
-    "args": Array [
-      DescribeImagesCommand {
-        "input": Object {
-          "Filters": Array [
-            Object {
-              "Name": "owner-id",
-              "Values": Array [
-                "602401143452",
-              ],
-            },
-            Object {
-              "Name": "name",
-              "Values": Array [
-                "1image",
-              ],
-            },
+[
+  DescribeImagesCommand {
+    "deserialize": [Function],
+    "input": {
+      "Filters": [
+        {
+          "Name": "owner-id",
+          "Values": [
+            "602401143452",
           ],
         },
-        "middlewareStack": Object {
-          "add": [Function],
-          "addRelativeTo": [Function],
-          "applyToStack": [Function],
-          "clone": [Function],
-          "concat": [Function],
-          "remove": [Function],
-          "removeByTag": [Function],
-          "resolve": [Function],
-          "use": [Function],
+        {
+          "Name": "name",
+          "Values": [
+            "1image",
+          ],
         },
-      },
-    ],
-    "callId": 1,
-    "callback": undefined,
-    "errorWithCallStack": [Error],
-    "exception": undefined,
-    "firstArg": DescribeImagesCommand {
-      "input": Object {
-        "Filters": Array [
-          Object {
-            "Name": "owner-id",
-            "Values": Array [
-              "602401143452",
-            ],
-          },
-          Object {
-            "Name": "name",
-            "Values": Array [
-              "1image",
-            ],
-          },
-        ],
-      },
-      "middlewareStack": Object {
-        "add": [Function],
-        "addRelativeTo": [Function],
-        "applyToStack": [Function],
-        "clone": [Function],
-        "concat": [Function],
-        "remove": [Function],
-        "removeByTag": [Function],
-        "resolve": [Function],
-        "use": [Function],
-      },
+      ],
     },
-    "lastArg": DescribeImagesCommand {
-      "input": Object {
-        "Filters": Array [
-          Object {
-            "Name": "owner-id",
-            "Values": Array [
-              "602401143452",
-            ],
-          },
-          Object {
-            "Name": "name",
-            "Values": Array [
-              "1image",
-            ],
-          },
-        ],
-      },
-      "middlewareStack": Object {
-        "add": [Function],
-        "addRelativeTo": [Function],
-        "applyToStack": [Function],
-        "clone": [Function],
-        "concat": [Function],
-        "remove": [Function],
-        "removeByTag": [Function],
-        "resolve": [Function],
-        "use": [Function],
-      },
+    "middlewareStack": {
+      "add": [Function],
+      "addRelativeTo": [Function],
+      "applyToStack": [Function],
+      "clone": [Function],
+      "concat": [Function],
+      "identify": [Function],
+      "identifyOnResolve": [Function],
+      "remove": [Function],
+      "removeByTag": [Function],
+      "resolve": [Function],
+      "use": [Function],
     },
-    "proxy": [Function],
-    "returnValue": Promise {},
-    "thisValue": EC2Client {
-      "config": Object {
-        "apiVersion": "2016-11-15",
-        "base64Decoder": [Function],
-        "base64Encoder": [Function],
-        "bodyLengthChecker": [Function],
-        "credentialDefaultProvider": [Function],
-        "credentials": [Function],
-        "customUserAgent": undefined,
-        "defaultUserAgentProvider": [Function],
-        "defaultsMode": [Function],
-        "disableHostPrefix": false,
-        "endpoint": [Function],
-        "isCustomEndpoint": false,
-        "logger": Object {},
-        "maxAttempts": [Function],
-        "region": [Function],
-        "regionInfoProvider": [Function],
-        "requestHandler": NodeHttpHandler {
-          "configProvider": Promise {},
-          "metadata": Object {
-            "handlerProtocol": "http/1.1",
-          },
-        },
-        "retryMode": [Function],
-        "retryStrategy": [Function],
-        "runtime": "node",
-        "serviceId": "EC2",
-        "sha256": [Function],
-        "signer": [Function],
-        "signingEscapePath": true,
-        "streamCollector": [Function],
-        "systemClockOffset": 0,
-        "tls": true,
-        "urlParser": [Function],
-        "useDualstackEndpoint": [Function],
-        "useFipsEndpoint": [Function],
-        "utf8Decoder": [Function],
-        "utf8Encoder": [Function],
-      },
-      "middlewareStack": Object {
-        "add": [Function],
-        "addRelativeTo": [Function],
-        "applyToStack": [Function],
-        "clone": [Function],
-        "concat": [Function],
-        "remove": [Function],
-        "removeByTag": [Function],
-        "resolve": [Function],
-        "use": [Function],
-      },
-    },
+    "serialize": [Function],
   },
 ]
 `;
 
 exports[`modules/datasource/aws-machine-image/index getSortedAwsMachineImages() with 3 returned images 1`] = `
-Array [
-  Object {
-    "args": Array [
-      DescribeImagesCommand {
-        "input": Object {
-          "Filters": Array [
-            Object {
-              "Name": "owner-id",
-              "Values": Array [
-                "602401143452",
-              ],
-            },
-            Object {
-              "Name": "name",
-              "Values": Array [
-                "3images",
-              ],
-            },
+[
+  DescribeImagesCommand {
+    "deserialize": [Function],
+    "input": {
+      "Filters": [
+        {
+          "Name": "owner-id",
+          "Values": [
+            "602401143452",
           ],
         },
-        "middlewareStack": Object {
-          "add": [Function],
-          "addRelativeTo": [Function],
-          "applyToStack": [Function],
-          "clone": [Function],
-          "concat": [Function],
-          "remove": [Function],
-          "removeByTag": [Function],
-          "resolve": [Function],
-          "use": [Function],
+        {
+          "Name": "name",
+          "Values": [
+            "3images",
+          ],
         },
-      },
-    ],
-    "callId": 0,
-    "callback": undefined,
-    "errorWithCallStack": [Error],
-    "exception": undefined,
-    "firstArg": DescribeImagesCommand {
-      "input": Object {
-        "Filters": Array [
-          Object {
-            "Name": "owner-id",
-            "Values": Array [
-              "602401143452",
-            ],
-          },
-          Object {
-            "Name": "name",
-            "Values": Array [
-              "3images",
-            ],
-          },
-        ],
-      },
-      "middlewareStack": Object {
-        "add": [Function],
-        "addRelativeTo": [Function],
-        "applyToStack": [Function],
-        "clone": [Function],
-        "concat": [Function],
-        "remove": [Function],
-        "removeByTag": [Function],
-        "resolve": [Function],
-        "use": [Function],
-      },
+      ],
     },
-    "lastArg": DescribeImagesCommand {
-      "input": Object {
-        "Filters": Array [
-          Object {
-            "Name": "owner-id",
-            "Values": Array [
-              "602401143452",
-            ],
-          },
-          Object {
-            "Name": "name",
-            "Values": Array [
-              "3images",
-            ],
-          },
-        ],
-      },
-      "middlewareStack": Object {
-        "add": [Function],
-        "addRelativeTo": [Function],
-        "applyToStack": [Function],
-        "clone": [Function],
-        "concat": [Function],
-        "remove": [Function],
-        "removeByTag": [Function],
-        "resolve": [Function],
-        "use": [Function],
-      },
+    "middlewareStack": {
+      "add": [Function],
+      "addRelativeTo": [Function],
+      "applyToStack": [Function],
+      "clone": [Function],
+      "concat": [Function],
+      "identify": [Function],
+      "identifyOnResolve": [Function],
+      "remove": [Function],
+      "removeByTag": [Function],
+      "resolve": [Function],
+      "use": [Function],
     },
-    "proxy": [Function],
-    "returnValue": Promise {},
-    "thisValue": EC2Client {
-      "config": Object {
-        "apiVersion": "2016-11-15",
-        "base64Decoder": [Function],
-        "base64Encoder": [Function],
-        "bodyLengthChecker": [Function],
-        "credentialDefaultProvider": [Function],
-        "credentials": [Function],
-        "customUserAgent": undefined,
-        "defaultUserAgentProvider": [Function],
-        "defaultsMode": [Function],
-        "disableHostPrefix": false,
-        "endpoint": [Function],
-        "isCustomEndpoint": false,
-        "logger": Object {},
-        "maxAttempts": [Function],
-        "region": [Function],
-        "regionInfoProvider": [Function],
-        "requestHandler": NodeHttpHandler {
-          "configProvider": Promise {},
-          "metadata": Object {
-            "handlerProtocol": "http/1.1",
-          },
-        },
-        "retryMode": [Function],
-        "retryStrategy": [Function],
-        "runtime": "node",
-        "serviceId": "EC2",
-        "sha256": [Function],
-        "signer": [Function],
-        "signingEscapePath": true,
-        "streamCollector": [Function],
-        "systemClockOffset": 0,
-        "tls": true,
-        "urlParser": [Function],
-        "useDualstackEndpoint": [Function],
-        "useFipsEndpoint": [Function],
-        "utf8Decoder": [Function],
-        "utf8Encoder": [Function],
-      },
-      "middlewareStack": Object {
-        "add": [Function],
-        "addRelativeTo": [Function],
-        "applyToStack": [Function],
-        "clone": [Function],
-        "concat": [Function],
-        "remove": [Function],
-        "removeByTag": [Function],
-        "resolve": [Function],
-        "use": [Function],
-      },
-    },
+    "serialize": [Function],
   },
 ]
 `;
 
 exports[`modules/datasource/aws-machine-image/index getSortedAwsMachineImages() without returned images 1`] = `
-Array [
-  Object {
-    "args": Array [
-      DescribeImagesCommand {
-        "input": Object {
-          "Filters": Array [
-            Object {
-              "Name": "owner-id",
-              "Values": Array [
-                "602401143452",
-              ],
-            },
-            Object {
-              "Name": "name",
-              "Values": Array [
-                "noiamge",
-              ],
-            },
+[
+  DescribeImagesCommand {
+    "deserialize": [Function],
+    "input": {
+      "Filters": [
+        {
+          "Name": "owner-id",
+          "Values": [
+            "602401143452",
           ],
         },
-        "middlewareStack": Object {
-          "add": [Function],
-          "addRelativeTo": [Function],
-          "applyToStack": [Function],
-          "clone": [Function],
-          "concat": [Function],
-          "remove": [Function],
-          "removeByTag": [Function],
-          "resolve": [Function],
-          "use": [Function],
+        {
+          "Name": "name",
+          "Values": [
+            "noiamge",
+          ],
         },
-      },
-    ],
-    "callId": 2,
-    "callback": undefined,
-    "errorWithCallStack": [Error],
-    "exception": undefined,
-    "firstArg": DescribeImagesCommand {
-      "input": Object {
-        "Filters": Array [
-          Object {
-            "Name": "owner-id",
-            "Values": Array [
-              "602401143452",
-            ],
-          },
-          Object {
-            "Name": "name",
-            "Values": Array [
-              "noiamge",
-            ],
-          },
-        ],
-      },
-      "middlewareStack": Object {
-        "add": [Function],
-        "addRelativeTo": [Function],
-        "applyToStack": [Function],
-        "clone": [Function],
-        "concat": [Function],
-        "remove": [Function],
-        "removeByTag": [Function],
-        "resolve": [Function],
-        "use": [Function],
-      },
+      ],
     },
-    "lastArg": DescribeImagesCommand {
-      "input": Object {
-        "Filters": Array [
-          Object {
-            "Name": "owner-id",
-            "Values": Array [
-              "602401143452",
-            ],
-          },
-          Object {
-            "Name": "name",
-            "Values": Array [
-              "noiamge",
-            ],
-          },
-        ],
-      },
-      "middlewareStack": Object {
-        "add": [Function],
-        "addRelativeTo": [Function],
-        "applyToStack": [Function],
-        "clone": [Function],
-        "concat": [Function],
-        "remove": [Function],
-        "removeByTag": [Function],
-        "resolve": [Function],
-        "use": [Function],
-      },
+    "middlewareStack": {
+      "add": [Function],
+      "addRelativeTo": [Function],
+      "applyToStack": [Function],
+      "clone": [Function],
+      "concat": [Function],
+      "identify": [Function],
+      "identifyOnResolve": [Function],
+      "remove": [Function],
+      "removeByTag": [Function],
+      "resolve": [Function],
+      "use": [Function],
     },
-    "proxy": [Function],
-    "returnValue": Promise {},
-    "thisValue": EC2Client {
-      "config": Object {
-        "apiVersion": "2016-11-15",
-        "base64Decoder": [Function],
-        "base64Encoder": [Function],
-        "bodyLengthChecker": [Function],
-        "credentialDefaultProvider": [Function],
-        "credentials": [Function],
-        "customUserAgent": undefined,
-        "defaultUserAgentProvider": [Function],
-        "defaultsMode": [Function],
-        "disableHostPrefix": false,
-        "endpoint": [Function],
-        "isCustomEndpoint": false,
-        "logger": Object {},
-        "maxAttempts": [Function],
-        "region": [Function],
-        "regionInfoProvider": [Function],
-        "requestHandler": NodeHttpHandler {
-          "configProvider": Promise {},
-          "metadata": Object {
-            "handlerProtocol": "http/1.1",
-          },
-        },
-        "retryMode": [Function],
-        "retryStrategy": [Function],
-        "runtime": "node",
-        "serviceId": "EC2",
-        "sha256": [Function],
-        "signer": [Function],
-        "signingEscapePath": true,
-        "streamCollector": [Function],
-        "systemClockOffset": 0,
-        "tls": true,
-        "urlParser": [Function],
-        "useDualstackEndpoint": [Function],
-        "useFipsEndpoint": [Function],
-        "utf8Decoder": [Function],
-        "utf8Encoder": [Function],
-      },
-      "middlewareStack": Object {
-        "add": [Function],
-        "addRelativeTo": [Function],
-        "applyToStack": [Function],
-        "clone": [Function],
-        "concat": [Function],
-        "remove": [Function],
-        "removeByTag": [Function],
-        "resolve": [Function],
-        "use": [Function],
-      },
-    },
+    "serialize": [Function],
   },
 ]
 `;

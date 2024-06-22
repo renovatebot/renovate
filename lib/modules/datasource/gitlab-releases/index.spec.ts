@@ -23,7 +23,7 @@ describe('modules/datasource/gitlab-releases/index', () => {
       const res = await getPkgReleases({
         datasource: GitlabReleasesDatasource.id,
         registryUrls: ['https://gitlab.company.com'],
-        depName: 'some/dep2',
+        packageName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(2);
@@ -36,7 +36,7 @@ describe('modules/datasource/gitlab-releases/index', () => {
         .reply(200, body);
       const res = await getPkgReleases({
         datasource: GitlabReleasesDatasource.id,
-        depName: 'some/dep2',
+        packageName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(2);
@@ -50,8 +50,8 @@ describe('modules/datasource/gitlab-releases/index', () => {
       expect(
         await getPkgReleases({
           datasource: GitlabReleasesDatasource.id,
-          depName: 'some/dep2',
-        })
+          packageName: 'some/dep2',
+        }),
       ).toBeNull();
     });
   });

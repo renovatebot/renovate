@@ -3,17 +3,12 @@ import { logger } from '../../../logger';
 import { DebianVersioningApi } from '.';
 
 describe('modules/versioning/debian/index', () => {
-  const dt = DateTime.fromISO('2022-04-20');
+  const dt = DateTime.fromISO('2023-07-10');
 
-  const spy = jest.spyOn(Settings, 'now');
   const debian = new DebianVersioningApi();
 
   beforeEach(() => {
-    spy.mockReturnValue(dt.valueOf());
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
+    Settings.now = () => dt.valueOf();
   });
 
   it.each`
@@ -38,7 +33,7 @@ describe('modules/versioning/debian/index', () => {
     ${'buster'}       | ${true}
     ${'Buster'}       | ${false}
     ${'bullseye'}     | ${true}
-    ${'bookworm'}     | ${false}
+    ${'bookworm'}     | ${true}
     ${'trixie'}       | ${false}
     ${'sid'}          | ${false}
     ${'1.1'}          | ${true}
@@ -57,7 +52,7 @@ describe('modules/versioning/debian/index', () => {
     ${'10'}           | ${true}
     ${'10-slim'}      | ${false}
     ${'11'}           | ${true}
-    ${'12'}           | ${false}
+    ${'12'}           | ${true}
     ${'13'}           | ${false}
     ${'sid'}          | ${false}
     ${'stable'}       | ${true}
@@ -65,7 +60,7 @@ describe('modules/versioning/debian/index', () => {
     ${'oldoldstable'} | ${true}
     ${'experimental'} | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
-    spy.mockReturnValue(dt.valueOf());
+    Settings.now = () => dt.valueOf();
     expect(debian.isValid(version)).toBe(expected);
   });
 
@@ -76,18 +71,19 @@ describe('modules/versioning/debian/index', () => {
     ${''}             | ${undefined} | ${false}
     ${'7'}            | ${undefined} | ${true}
     ${'11'}           | ${undefined} | ${true}
-    ${'12'}           | ${undefined} | ${false}
+    ${'12'}           | ${undefined} | ${true}
     ${'stable'}       | ${undefined} | ${true}
     ${'oldstable'}    | ${undefined} | ${true}
     ${'oldoldstable'} | ${undefined} | ${true}
     ${'wheezy'}       | ${undefined} | ${true}
     ${'bullseye'}     | ${undefined} | ${true}
-    ${'bookworm'}     | ${undefined} | ${false}
+    ${'bookworm'}     | ${undefined} | ${true}
+    ${'trixie'}       | ${undefined} | ${false}
   `(
     'isCompatible("$version") === $expected',
     ({ version, range, expected }) => {
       expect(debian.isCompatible(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -119,10 +115,10 @@ describe('modules/versioning/debian/index', () => {
     ${'squeeze'}      | ${false}
     ${'wheezy'}       | ${false}
     ${'jessie'}       | ${false}
-    ${'stretch'}      | ${true}
+    ${'stretch'}      | ${false}
     ${'buster'}       | ${true}
     ${'bullseye'}     | ${true}
-    ${'bookworm'}     | ${false}
+    ${'bookworm'}     | ${true}
     ${'trixie'}       | ${false}
     ${'sid'}          | ${false}
     ${'1.1'}          | ${false}
@@ -137,10 +133,10 @@ describe('modules/versioning/debian/index', () => {
     ${'6'}            | ${false}
     ${'7'}            | ${false}
     ${'8'}            | ${false}
-    ${'9'}            | ${true}
+    ${'9'}            | ${false}
     ${'10'}           | ${true}
     ${'11'}           | ${true}
-    ${'12'}           | ${false}
+    ${'12'}           | ${true}
     ${'13'}           | ${false}
     ${'sid'}          | ${false}
     ${'experimental'} | ${false}
@@ -148,7 +144,7 @@ describe('modules/versioning/debian/index', () => {
     ${'oldstable'}    | ${true}
     ${'oldoldstable'} | ${true}
   `('isStable("$version") === $expected', ({ version, expected }) => {
-    spy.mockReturnValue(dt.valueOf());
+    Settings.now = () => dt.valueOf();
     expect(debian.isStable(version)).toBe(expected);
   });
 
@@ -168,19 +164,19 @@ describe('modules/versioning/debian/index', () => {
     ({ version, expected }) => {
       debian.isStable(version);
       expect(logger.debug).toHaveBeenCalledTimes(0);
-    }
+    },
   );
 
   it('checks runtime date handling & refresh rolling release data', () => {
     const future = DateTime.now().toUTC().plus({ year: 3 }).valueOf();
     const past = DateTime.fromISO('2019-08-06', { zone: 'UTC' }).valueOf();
-    spy.mockReturnValue(past);
+    Settings.now = () => past.valueOf();
     expect(debian.isStable('buster')).toBeTrue();
-    spy.mockReturnValue(future);
+    Settings.now = () => future.valueOf();
     expect(debian.isStable('buster')).toBeFalse();
     expect(logger.debug).toHaveBeenCalledTimes(1);
     expect(logger.debug).toHaveBeenCalledWith(
-      'RollingReleasesData - data written'
+      'RollingReleasesData - data written',
     );
   });
 
@@ -211,7 +207,7 @@ describe('modules/versioning/debian/index', () => {
     ${'stretch'}      | ${true}
     ${'buster'}       | ${true}
     ${'bullseye'}     | ${true}
-    ${'bookworm'}     | ${false}
+    ${'bookworm'}     | ${true}
     ${'trixie'}       | ${false}
     ${'sid'}          | ${false}
     ${'1.1'}          | ${true}
@@ -229,7 +225,7 @@ describe('modules/versioning/debian/index', () => {
     ${'9'}            | ${true}
     ${'10'}           | ${true}
     ${'11'}           | ${true}
-    ${'12'}           | ${false}
+    ${'12'}           | ${true}
     ${'13'}           | ${false}
     ${'sid'}          | ${false}
     ${'experimental'} | ${false}
@@ -257,16 +253,16 @@ describe('modules/versioning/debian/index', () => {
     ${'8'}            | ${8}    | ${null} | ${null}
     ${'9'}            | ${9}    | ${null} | ${null}
     ${'10'}           | ${10}   | ${null} | ${null}
-    ${'oldoldstable'} | ${9}    | ${null} | ${null}
-    ${'oldstable'}    | ${10}   | ${null} | ${null}
-    ${'stable'}       | ${11}   | ${null} | ${null}
+    ${'oldoldstable'} | ${10}   | ${null} | ${null}
+    ${'oldstable'}    | ${11}   | ${null} | ${null}
+    ${'stable'}       | ${12}   | ${null} | ${null}
   `(
     'getMajor, getMinor, getPatch for "$version"',
     ({ version, major, minor, patch }) => {
       expect(debian.getMajor(version)).toBe(major);
       expect(debian.getMinor(version)).toBe(minor);
       expect(debian.getPatch(version)).toBe(patch);
-    }
+    },
   );
 
   it.each`
@@ -278,12 +274,12 @@ describe('modules/versioning/debian/index', () => {
     ${'10'}           | ${'buster'}       | ${true}
     ${'6'}            | ${'squeeze'}      | ${true}
     ${'buster'}       | ${'10'}           | ${true}
-    ${'oldoldstable'} | ${'9'}            | ${true}
-    ${'oldstable'}    | ${'10'}           | ${true}
-    ${'stable'}       | ${'11'}           | ${true}
-    ${'9'}            | ${'oldoldstable'} | ${true}
-    ${'10'}           | ${'oldstable'}    | ${true}
-    ${'11'}           | ${'stable'}       | ${true}
+    ${'oldoldstable'} | ${'10'}           | ${true}
+    ${'oldstable'}    | ${'11'}           | ${true}
+    ${'stable'}       | ${'12'}           | ${true}
+    ${'10'}           | ${'oldoldstable'} | ${true}
+    ${'11'}           | ${'oldstable'}    | ${true}
+    ${'12'}           | ${'stable'}       | ${true}
   `('equals($a, $b) === $expected', ({ a, b, expected }) => {
     expect(debian.equals(a, b)).toBe(expected);
   });
@@ -308,9 +304,9 @@ describe('modules/versioning/debian/index', () => {
     ${'oldoldstable'} | ${'8'}            | ${true}
     ${'oldstable'}    | ${'oldoldstable'} | ${true}
     ${'stable'}       | ${'oldstable'}    | ${true}
-    ${'11'}           | ${'oldoldstable'} | ${true}
-    ${'10'}           | ${'oldstable'}    | ${false}
-    ${'9'}            | ${'stable'}       | ${false}
+    ${'12'}           | ${'oldoldstable'} | ${true}
+    ${'11'}           | ${'oldstable'}    | ${false}
+    ${'10'}           | ${'stable'}       | ${false}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(debian.isGreaterThan(a, b)).toBe(expected);
   });
@@ -327,13 +323,13 @@ describe('modules/versioning/debian/index', () => {
     ${['jessie', 'stretch', 'buster', 'bullseye']}      | ${'bullseye'} | ${'bullseye'}
     ${['jessie', 'stretch', 'buster', 'bullseye']}      | ${'buster'}   | ${'buster'}
     ${['jessie', 'stretch', 'buster', 'stable']}        | ${'stable'}   | ${'stable'}
-    ${['jessie', 'stretch', 'oldstable', 'bullseye']}   | ${'buster'}   | ${'oldstable'}
+    ${['jessie', 'stretch', 'oldstable', 'bullseye']}   | ${'bullseye'} | ${'oldstable'}
     ${['jessie', 'oldoldstable', 'buster', 'bullseye']} | ${'warty'}    | ${null}
   `(
     'getSatisfyingVersion($versions, "$range") === "$expected"',
     ({ versions, range, expected }) => {
       expect(debian.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -349,13 +345,13 @@ describe('modules/versioning/debian/index', () => {
     ${['jessie', 'stretch', 'buster', 'bullseye']}      | ${'buster'}   | ${'buster'}
     ${['jessie', 'stretch', 'buster', 'bullseye']}      | ${'warty'}    | ${null}
     ${['jessie', 'stretch', 'buster', 'stable']}        | ${'stable'}   | ${'stable'}
-    ${['jessie', 'stretch', 'oldstable', 'bullseye']}   | ${'buster'}   | ${'oldstable'}
+    ${['jessie', 'stretch', 'oldstable', 'bullseye']}   | ${'bullseye'} | ${'oldstable'}
     ${['jessie', 'oldoldstable', 'buster', 'bullseye']} | ${'warty'}    | ${null}
   `(
     'minSatisfyingVersion($versions, "$range") === "$expected"',
     ({ versions, range, expected }) => {
       expect(debian.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -363,35 +359,35 @@ describe('modules/versioning/debian/index', () => {
     ${undefined}      | ${undefined}  | ${undefined}   | ${'foobar'}   | ${'foobar'}
     ${'stretch'}      | ${undefined}  | ${undefined}   | ${'11'}       | ${'bullseye'}
     ${'stretch'}      | ${undefined}  | ${undefined}   | ${'bullseye'} | ${'bullseye'}
-    ${'stretch'}      | ${undefined}  | ${undefined}   | ${'stable'}   | ${'bullseye'}
+    ${'stretch'}      | ${undefined}  | ${undefined}   | ${'stable'}   | ${'bookworm'}
     ${'9'}            | ${undefined}  | ${undefined}   | ${'11'}       | ${'11'}
-    ${'oldoldstable'} | ${undefined}  | ${undefined}   | ${'11'}       | ${'stable'}
-    ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'11'}       | ${'stable'}
-    ${'9'}            | ${undefined}  | ${undefined}   | ${'stable'}   | ${'11'}
-    ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'11'}       | ${'stable'}
+    ${'oldoldstable'} | ${undefined}  | ${undefined}   | ${'12'}       | ${'stable'}
+    ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'12'}       | ${'stable'}
+    ${'9'}            | ${undefined}  | ${undefined}   | ${'stable'}   | ${'12'}
+    ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'12'}       | ${'stable'}
     ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'3'}        | ${'3'}
     ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
-    ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'11'}
+    ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'12'}
     ${'oldstable'}    | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}
     ${'buster'}       | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
-    ${'buster'}       | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'11'}
+    ${'buster'}       | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'12'}
     ${'buster'}       | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}
     ${'10'}           | ${'pin'}      | ${undefined}   | ${'11'}       | ${'11'}
-    ${'10'}           | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'11'}
+    ${'10'}           | ${'pin'}      | ${undefined}   | ${'stable'}   | ${'12'}
     ${'10'}           | ${'pin'}      | ${undefined}   | ${'bullseye'} | ${'11'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
-      spy.mockReturnValue(dt.valueOf());
+      Settings.now = () => dt.valueOf();
       expect(
         debian.getNewValue({
           currentValue,
           rangeStrategy,
           currentVersion,
           newVersion,
-        })
+        }),
       ).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -404,12 +400,12 @@ describe('modules/versioning/debian/index', () => {
     ${'10'}           | ${'buster'}       | ${0}
     ${'6'}            | ${'squeeze'}      | ${0}
     ${'buster'}       | ${'10'}           | ${0}
-    ${'oldoldstable'} | ${'8'}            | ${1}
+    ${'oldoldstable'} | ${'9'}            | ${1}
     ${'oldstable'}    | ${'oldoldstable'} | ${1}
     ${'stable'}       | ${'oldstable'}    | ${1}
-    ${'11'}           | ${'oldoldstable'} | ${2}
-    ${'10'}           | ${'oldstable'}    | ${0}
-    ${'9'}            | ${'stable'}       | ${-2}
+    ${'12'}           | ${'oldoldstable'} | ${2}
+    ${'11'}           | ${'oldstable'}    | ${0}
+    ${'10'}           | ${'stable'}       | ${-2}
   `('debian.sortVersions($a, $b) === $expected ', ({ a, b, expected }) => {
     expect(debian.sortVersions(a, b)).toEqual(expected);
   });
@@ -423,6 +419,6 @@ describe('modules/versioning/debian/index', () => {
     'matches("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(debian.matches(version, range)).toBe(expected);
-    }
+    },
   );
 });

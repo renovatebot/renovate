@@ -1,9 +1,10 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
+import { isComment } from './common';
 
 const regex = regEx(
-  `(?<name>[-_a-z0-9]+)/(?<version>[^@\n{*"']+)(?<userChannel>@[-_a-zA-Z0-9]+/[^\n.{*"' ]+)?`
+  `(?<name>[-_a-z0-9]+)/(?<version>[^@#\n{*"']+)(?<userChannel>@[-_a-zA-Z0-9]+(?:/[^#\n.{*"' ]+|))?#?(?<revision>[-_a-f0-9]+[^\n{*"'])?`,
 );
 
 function setDepType(content: string, originalType: string): string {
@@ -18,13 +19,13 @@ function setDepType(content: string, originalType: string): string {
   return depType;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   // only process sections where requirements are defined
   const sections = content.split(/def |\n\[/).filter(
     (part) =>
       part.includes('python_requires') || // only matches python_requires
       part.includes('build_require') || // matches [build_requires], build_requirements(), and build_requires
-      part.includes('require') // matches [requires], requirements(), and requires
+      part.includes('require'), // matches [requires], requirements(), and requires
   );
 
   const deps: PackageDependency[] = [];
@@ -32,13 +33,11 @@ export function extractPackageFile(content: string): PackageFile | null {
     let depType = setDepType(section, 'requires');
     const rawLines = section.split('\n').filter(is.nonEmptyString);
 
-    for (const rawline of rawLines) {
-      // don't process after a comment
-      const sanitizedLine = rawline.split('#')[0].split('//')[0];
-      if (sanitizedLine) {
-        depType = setDepType(sanitizedLine, depType);
+    for (const rawLine of rawLines) {
+      if (!isComment(rawLine)) {
+        depType = setDepType(rawLine, depType);
         // extract all dependencies from each line
-        const lines = sanitizedLine.split(/["'],/);
+        const lines = rawLine.split(/["'],/);
         for (const line of lines) {
           const matches = regex.exec(line.trim());
           if (matches?.groups) {
@@ -53,6 +52,9 @@ export function extractPackageFile(content: string): PackageFile | null {
             if (matches.groups.userChannel) {
               userAndChannel = matches.groups.userChannel;
               replaceString = `${depName}/${currentValue}${userAndChannel}`;
+              if (!userAndChannel.includes('/')) {
+                userAndChannel = `${userAndChannel}/_`;
+              }
             }
             const packageName = `${depName}/${currentValue}${userAndChannel}`;
 
@@ -64,6 +66,12 @@ export function extractPackageFile(content: string): PackageFile | null {
               replaceString,
               depType,
             };
+            if (matches.groups.revision) {
+              dep.currentDigest = matches.groups.revision;
+              dep.autoReplaceStringTemplate = `{{depName}}/{{newValue}}${userAndChannel}{{#if newDigest}}#{{newDigest}}{{/if}}`;
+              dep.replaceString = `${replaceString}#${dep.currentDigest}`;
+            }
+
             deps.push(dep);
           }
         }

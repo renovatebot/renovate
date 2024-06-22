@@ -1,5 +1,4 @@
 export type SkipReason =
-  | 'any-version'
   | 'contains-variable'
   | 'disabled'
   | 'empty'
@@ -25,15 +24,15 @@ export type SkipReason =
   | 'no-repository'
   | 'no-source-match'
   | 'no-source'
-  | 'no-version'
   | 'non-hex-dep-types'
   | 'not-a-version'
+  | 'package-rules'
   | 'path-dependency'
   | 'placeholder-url'
   | 'unknown-engines'
   | 'unknown-registry'
-  | 'unknown-version'
   | 'unknown-volta'
+  | 'unspecified-version'
   | 'unsupported-chart-type'
   | 'unsupported-datasource'
   | 'unsupported-remote'
@@ -45,4 +44,5 @@ export type SkipReason =
   | 'is-pinned'
   | 'missing-depname'
   | 'recursive-placeholder'
-  | 'github-token-required';
+  | 'github-token-required'
+  | 'inherited-dependency';

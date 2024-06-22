@@ -1,85 +1,85 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/html/extract extractPackageFile 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "15.6.1",
       "datasource": "cdnjs",
       "depName": "prop-types",
       "packageName": "prop-types/prop-types.min.js",
-      "replaceString": "<script type=\\"text/javascript\\"
-            src=\\"https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.6.1/prop-types.min.js\\">",
+      "replaceString": "<script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.6.1/prop-types.min.js">",
     },
-    Object {
+    {
       "currentValue": "16.3.2",
       "datasource": "cdnjs",
       "depName": "react",
       "packageName": "react/umd/react.production.min.js",
-      "replaceString": "<script type=\\"text/javascript\\"
-            src=\\"https://cdnjs.cloudflare.com/ajax/libs/react/16.3.2/umd/react.production.min.js\\">",
+      "replaceString": "<script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/react/16.3.2/umd/react.production.min.js">",
     },
-    Object {
+    {
       "currentValue": "16.3.2",
       "datasource": "cdnjs",
       "depName": "react-dom",
       "packageName": "react-dom/umd/react-dom.production.min.js",
-      "replaceString": "<script type=\\"text/javascript\\"
-            src=\\"https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.3.2/umd/react-dom.production.min.js\\">",
+      "replaceString": "<script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.3.2/umd/react-dom.production.min.js">",
     },
-    Object {
+    {
       "currentValue": "2.2.1",
       "datasource": "cdnjs",
       "depName": "react-transition-group",
       "packageName": "react-transition-group/react-transition-group.min.js",
-      "replaceString": "<script type=\\"text/javascript\\"
-            src=\\"https://cdnjs.cloudflare.com/ajax/libs/react-transition-group/2.2.1/react-transition-group.min.js\\">",
+      "replaceString": "<script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/react-transition-group/2.2.1/react-transition-group.min.js">",
     },
-    Object {
+    {
       "currentValue": "1.14.3",
       "datasource": "cdnjs",
       "depName": "popper.js",
       "packageName": "popper.js/umd/popper.min.js",
-      "replaceString": "<script type=\\"text/javascript\\"
-            src=\\"https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js\\">",
+      "replaceString": "<script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js">",
     },
-    Object {
+    {
       "currentValue": "0.10.4",
       "datasource": "cdnjs",
       "depName": "react-popper",
       "packageName": "react-popper/umd/react-popper.min.js",
-      "replaceString": "<script type=\\"text/javascript\\"
-            src=\\"https://cdnjs.cloudflare.com/ajax/libs/react-popper/0.10.4/umd/react-popper.min.js\\">",
+      "replaceString": "<script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/react-popper/0.10.4/umd/react-popper.min.js">",
     },
-    Object {
+    {
       "currentValue": "7.1.0",
       "datasource": "cdnjs",
       "depName": "reactstrap",
       "packageName": "reactstrap/reactstrap.min.js",
-      "replaceString": "<script src=\\"https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js\\">",
+      "replaceString": "<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">",
     },
-    Object {
+    {
       "currentValue": "4.3.1",
       "datasource": "cdnjs",
       "depName": "react-router",
       "packageName": "react-router/react-router.min.js",
-      "replaceString": "<script src=\\" https://cdnjs.cloudflare.com/ajax/libs/react-router/4.3.1/react-router.min.js\\">",
+      "replaceString": "<script src=" https://cdnjs.cloudflare.com/ajax/libs/react-router/4.3.1/react-router.min.js">",
     },
-    Object {
+    {
       "currentValue": "4.0.6",
       "datasource": "cdnjs",
       "depName": "react-markdown",
       "packageName": "react-markdown/react-markdown.js",
-      "replaceString": "<script src=\\"https://cdnjs.cloudflare.com/ajax/libs/react-markdown/4.0.6/react-markdown.js\\">",
+      "replaceString": "<script src="https://cdnjs.cloudflare.com/ajax/libs/react-markdown/4.0.6/react-markdown.js">",
     },
-    Object {
+    {
       "currentDigest": "sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=",
       "currentValue": "0.18.0",
       "datasource": "cdnjs",
       "depName": "axios",
       "packageName": "axios/axios.min.js",
-      "replaceString": "<script src=\\"https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js\\"
-            integrity=\\"sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=\\" crossorigin=\\"anonymous\\">",
+      "replaceString": "<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"
+            integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=" crossorigin="anonymous">",
     },
   ],
 }

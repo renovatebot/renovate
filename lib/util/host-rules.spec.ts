@@ -1,6 +1,4 @@
-import { PlatformId } from '../constants';
 import { NugetDatasource } from '../modules/datasource/nuget';
-import type { HostRule } from '../types';
 import {
   add,
   clear,
@@ -20,30 +18,30 @@ describe('util/host-rules', () => {
     it('throws if both domainName and hostName', () => {
       expect(() =>
         add({
-          hostType: PlatformId.Azure,
+          hostType: 'azure',
           domainName: 'github.com',
           hostName: 'api.github.com',
-        } as HostRule)
+        } as never),
       ).toThrow();
     });
 
     it('throws if both domainName and baseUrl', () => {
       expect(() =>
         add({
-          hostType: PlatformId.Azure,
+          hostType: 'azure',
           domainName: 'github.com',
           matchHost: 'https://api.github.com',
-        } as HostRule)
+        } as never),
       ).toThrow();
     });
 
     it('throws if both hostName and baseUrl', () => {
       expect(() =>
         add({
-          hostType: PlatformId.Azure,
+          hostType: 'azure',
           hostName: 'api.github.com',
           matchHost: 'https://api.github.com',
-        } as HostRule)
+        } as never),
       ).toThrow();
     });
 
@@ -76,16 +74,16 @@ describe('util/host-rules', () => {
         username: 'root',
         password: 'p4$$w0rd',
         token: undefined,
-      } as HostRule);
+      } as never);
       expect(find({ hostType: NugetDatasource.id })).toEqual({});
       expect(
-        find({ hostType: NugetDatasource.id, url: 'https://nuget.org' })
+        find({ hostType: NugetDatasource.id, url: 'https://nuget.org' }),
       ).not.toEqual({});
       expect(
-        find({ hostType: NugetDatasource.id, url: 'https://not.nuget.org' })
+        find({ hostType: NugetDatasource.id, url: 'https://not.nuget.org' }),
       ).not.toEqual({});
       expect(
-        find({ hostType: NugetDatasource.id, url: 'https://not-nuget.org' })
+        find({ hostType: NugetDatasource.id, url: 'https://not-nuget.org' }),
       ).toEqual({});
     });
 
@@ -94,7 +92,7 @@ describe('util/host-rules', () => {
         enabled: true,
       });
       expect(
-        find({ hostType: NugetDatasource.id, url: 'https://api.github.com' })
+        find({ hostType: NugetDatasource.id, url: 'https://api.github.com' }),
       ).toEqual({ enabled: true });
     });
 
@@ -104,7 +102,7 @@ describe('util/host-rules', () => {
         token: 'abc',
       });
       expect(
-        find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' })
+        find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' }),
       ).toEqual({ token: 'abc' });
     });
 
@@ -112,44 +110,44 @@ describe('util/host-rules', () => {
       add({
         domainName: 'github.com',
         token: 'def',
-      } as HostRule);
+      } as never);
       expect(
         find({ hostType: NugetDatasource.id, url: 'https://api.github.com' })
-          .token
+          .token,
       ).toBe('def');
       expect(
-        find({ hostType: NugetDatasource.id, url: 'https://github.com' }).token
+        find({ hostType: NugetDatasource.id, url: 'https://github.com' }).token,
       ).toBe('def');
       expect(
         find({ hostType: NugetDatasource.id, url: 'https://apigithub.com' })
-          .token
+          .token,
       ).toBeUndefined();
     });
 
     it('matches on specific path', () => {
       // Initialized platform holst rule
       add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'https://api.github.com',
         token: 'abc',
       });
       // specific host rule for using other token in different org
       add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'https://api.github.com/repos/org-b/',
         token: 'def',
       });
       // Initialized generic host rule for github platform
       add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'https://api.github.com',
         token: 'abc',
       });
       expect(
         find({
-          hostType: PlatformId.Github,
+          hostType: 'github',
           url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
-        }).token
+        }).token,
       ).toBe('def');
     });
 
@@ -160,21 +158,21 @@ describe('util/host-rules', () => {
       });
       expect(
         find({
-          hostType: PlatformId.Github,
+          hostType: 'github',
           url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
-        }).token
+        }).token,
       ).toBe('abc');
       expect(
         find({
           hostType: 'github-releases',
           url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
-        }).token
+        }).token,
       ).toBe('abc');
     });
 
     it('matches if hostType is configured and host rule is filtered with datasource', () => {
       add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'https://api.github.com',
         token: 'abc',
       });
@@ -187,7 +185,7 @@ describe('util/host-rules', () => {
         find({
           hostType: 'github-tags',
           url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
-        }).token
+        }).token,
       ).toBe('def');
     });
 
@@ -195,9 +193,9 @@ describe('util/host-rules', () => {
       add({
         hostName: 'nuget.local',
         token: 'abc',
-      } as HostRule);
+      } as never);
       expect(
-        find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' })
+        find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' }),
       ).toEqual({ token: 'abc' });
     });
 
@@ -212,7 +210,7 @@ describe('util/host-rules', () => {
         find({
           hostType: NugetDatasource.id,
           url: 'https://domain.com/renovatebot',
-        }).token
+        }).token,
       ).toBe('def');
     });
 
@@ -236,6 +234,26 @@ describe('util/host-rules', () => {
       expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
     });
 
+    it('matches on matchHost with port', () => {
+      add({
+        matchHost: 'https://domain.com:9118',
+        token: 'def',
+      });
+      expect(find({ url: 'https://domain.com:9118' }).token).toBe('def');
+      expect(find({ url: 'https://domain.com' }).token).toBeUndefined();
+      expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
+    });
+
+    it('host with port is interpreted as empty', () => {
+      add({
+        matchHost: 'domain.com:9118',
+        token: 'def',
+      });
+      expect(find({ url: 'https://domain.com:9118' }).token).toBe('def');
+      expect(find({ url: 'https://domain.com' }).token).toBe('def');
+      expect(find({ url: 'httpsdomain.com' }).token).toBe('def');
+    });
+
     it('matches on hostType and endpoint', () => {
       add({
         hostType: NugetDatasource.id,
@@ -244,7 +262,7 @@ describe('util/host-rules', () => {
       });
       expect(
         find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' })
-          .token
+          .token,
       ).toBe('abc');
     });
 
@@ -258,7 +276,7 @@ describe('util/host-rules', () => {
         find({
           hostType: NugetDatasource.id,
           url: 'https://nuget.local/api/sub-resource',
-        })
+        }),
       ).toEqual({ token: 'abc' });
     });
 
@@ -274,8 +292,27 @@ describe('util/host-rules', () => {
       expect(
         find({
           url: 'https://nuget.local/api/sub-resource',
-        })
+        }),
       ).toEqual({ token: 'longest' });
+    });
+
+    it('matches readOnly requests', () => {
+      add({
+        matchHost: 'https://api.github.com/repos/',
+        token: 'aaa',
+        hostType: 'github',
+      });
+      add({
+        matchHost: 'https://api.github.com',
+        token: 'bbb',
+        readOnly: true,
+      });
+      expect(
+        find({
+          url: 'https://api.github.com/repos/foo/bar/tags',
+          readOnly: true,
+        }),
+      ).toEqual({ token: 'bbb' });
     });
   });
 
@@ -294,7 +331,7 @@ describe('util/host-rules', () => {
         hostType: NugetDatasource.id,
         hostName: 'my.local.registry',
         token: 'def',
-      } as HostRule);
+      } as never);
       add({
         hostType: NugetDatasource.id,
         matchHost: 'another.local.registry',
@@ -364,11 +401,11 @@ describe('util/host-rules', () => {
   describe('hostType()', () => {
     it('return hostType', () => {
       add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         token: 'aaaaaa',
       });
       add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'github.example.com',
         token: 'abc',
       });
@@ -380,17 +417,17 @@ describe('util/host-rules', () => {
       expect(
         hostType({
           url: 'https://github.example.com/chalk/chalk',
-        })
+        }),
       ).toBe('github-changelog');
     });
 
     it('returns null', () => {
       add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         token: 'aaaaaa',
       });
       add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'github.example.com',
         token: 'abc',
       });
@@ -402,12 +439,12 @@ describe('util/host-rules', () => {
       expect(
         hostType({
           url: 'https://github.example.com/chalk/chalk',
-        })
+        }),
       ).toBe('github-changelog');
       expect(
         hostType({
           url: 'https://gitlab.example.com/chalk/chalk',
-        })
+        }),
       ).toBeNull();
     });
   });

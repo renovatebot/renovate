@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import type { GitLabBranch } from '../../../types/platform/gitlab';
+import type { GitlabProject } from '../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../util/http/gitlab';
 import type { HttpResponse } from '../../../util/http/types';
 import type { Preset, PresetConfig } from '../types';
@@ -12,28 +12,19 @@ export const Endpoint = 'https://gitlab.com/api/v4/';
 
 async function getDefaultBranchName(
   urlEncodedPkgName: string,
-  endpoint: string
+  endpoint: string,
 ): Promise<string> {
-  const branchesUrl = `${endpoint}projects/${urlEncodedPkgName}/repository/branches`;
-
-  const res = await gitlabApi.getJson<GitLabBranch[]>(branchesUrl);
-  const branches = res.body;
-  let defaultBranchName = 'master';
-  for (const branch of branches) {
-    if (branch.default) {
-      defaultBranchName = branch.name;
-      break;
-    }
-  }
-
-  return defaultBranchName;
+  const res = await gitlabApi.getJson<GitlabProject>(
+    `${endpoint}projects/${urlEncodedPkgName}`,
+  );
+  return res.body.default_branch ?? 'master'; // should never happen, but we keep this to ensure the current behavior
 }
 
 export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  tag?: string | null
+  tag?: string | undefined,
 ): Promise<Preset> {
   let url = endpoint;
   let ref = '';
@@ -46,7 +37,7 @@ export async function fetchJSONFile(
     } else {
       const defaultBranchName = await getDefaultBranchName(
         urlEncodedRepo,
-        endpoint
+        endpoint,
       );
       ref = `?ref=${defaultBranchName}`;
     }
@@ -57,14 +48,11 @@ export async function fetchJSONFile(
     if (err instanceof ExternalHostError) {
       throw err;
     }
-    logger.debug(
-      { statusCode: err.statusCode, url },
-      `Failed to retrieve ${fileName} from repo`
-    );
+    logger.debug(`Preset file ${fileName} not found in ${repo}`);
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  return parsePreset(res.body);
+  return parsePreset(res.body, fileName);
 }
 
 export function getPresetFromEndpoint(
@@ -72,7 +60,7 @@ export function getPresetFromEndpoint(
   presetName: string,
   presetPath?: string,
   endpoint = Endpoint,
-  tag?: string | null
+  tag?: string | undefined,
 ): Promise<Preset | undefined> {
   return fetchPreset({
     repo,

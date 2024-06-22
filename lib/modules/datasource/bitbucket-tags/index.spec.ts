@@ -1,8 +1,8 @@
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import { BitBucketTagsDatasource } from '.';
+import { BitbucketTagsDatasource } from '.';
 
-const datasource = BitBucketTagsDatasource.id;
+const datasource = BitbucketTagsDatasource.id;
 
 describe('modules/datasource/bitbucket-tags/index', () => {
   describe('getReleases', () => {
@@ -32,7 +32,7 @@ describe('modules/datasource/bitbucket-tags/index', () => {
         .reply(200, body);
       const res = await getPkgReleases({
         datasource,
-        depName: 'some/dep2',
+        packageName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(3);
@@ -62,14 +62,18 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       httpMock
         .scope('https://api.bitbucket.org')
         .get('/2.0/repositories/some/dep2')
-        .reply(200, { mainbranch: { name: 'master' } });
+        .reply(200, {
+          mainbranch: { name: 'master' },
+          uuid: '123',
+          full_name: 'some/repo',
+        });
       httpMock
         .scope('https://api.bitbucket.org')
         .get('/2.0/repositories/some/dep2/commits/master')
         .reply(200, body);
       const res = await getDigest({
         datasource,
-        depName: 'some/dep2',
+        packageName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
       expect(res).toBeString();
@@ -87,14 +91,18 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       httpMock
         .scope('https://api.bitbucket.org')
         .get('/2.0/repositories/some/dep2')
-        .reply(200, { mainbranch: { name: 'master' } });
+        .reply(200, {
+          mainbranch: { name: 'master' },
+          uuid: '123',
+          full_name: 'some/repo',
+        });
       httpMock
         .scope('https://api.bitbucket.org')
         .get('/2.0/repositories/some/dep2/commits/master')
         .reply(200, body);
       const res = await getDigest({
         datasource,
-        depName: 'some/dep2',
+        packageName: 'some/dep2',
       });
       expect(res).toBeNull();
     });
@@ -116,13 +124,31 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       const res = await getDigest(
         {
           datasource,
-          depName: 'some/dep2',
+          packageName: 'some/dep2',
         },
-        'v1.0.0'
+        'v1.0.0',
       );
       expect(res).toMatchSnapshot();
       expect(res).toBeString();
       expect(res).toBe('123');
+    });
+
+    it('returns null for missing hash', async () => {
+      const body = {
+        name: 'v1.0.0',
+      };
+      httpMock
+        .scope('https://api.bitbucket.org')
+        .get('/2.0/repositories/some/dep2/refs/tags/v1.0.0')
+        .reply(200, body);
+      const res = await getDigest(
+        {
+          datasource,
+          packageName: 'some/dep2',
+        },
+        'v1.0.0',
+      );
+      expect(res).toBeNull();
     });
   });
 });

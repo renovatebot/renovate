@@ -1,63 +1,63 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/cdnurl/extract extractPackageFile 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "15.6.1",
       "datasource": "cdnjs",
       "depName": "prop-types",
       "packageName": "prop-types/prop-types.min.js",
     },
-    Object {
+    {
       "currentValue": "16.3.2",
       "datasource": "cdnjs",
       "depName": "react",
       "packageName": "react/umd/react.production.min.js",
     },
-    Object {
+    {
       "currentValue": "16.3.2",
       "datasource": "cdnjs",
       "depName": "react-dom",
       "packageName": "react-dom/umd/react-dom.production.min.js",
     },
-    Object {
+    {
       "currentValue": "2.2.1",
       "datasource": "cdnjs",
       "depName": "react-transition-group",
       "packageName": "react-transition-group/react-transition-group.min.js",
     },
-    Object {
+    {
       "currentValue": "1.14.3",
       "datasource": "cdnjs",
       "depName": "popper.js",
       "packageName": "popper.js/umd/popper.min.js",
     },
-    Object {
+    {
       "currentValue": "0.10.4",
       "datasource": "cdnjs",
       "depName": "react-popper",
       "packageName": "react-popper/umd/react-popper.min.js",
     },
-    Object {
+    {
       "currentValue": "7.1.0",
       "datasource": "cdnjs",
       "depName": "reactstrap",
       "packageName": "reactstrap/reactstrap.min.js",
     },
-    Object {
+    {
       "currentValue": "4.3.1",
       "datasource": "cdnjs",
       "depName": "react-router",
       "packageName": "react-router/react-router.min.js",
     },
-    Object {
+    {
       "currentValue": "4.0.6",
       "datasource": "cdnjs",
       "depName": "react-markdown",
       "packageName": "react-markdown/react-markdown.js",
     },
-    Object {
+    {
       "currentValue": "0.18.0",
       "datasource": "cdnjs",
       "depName": "axios",

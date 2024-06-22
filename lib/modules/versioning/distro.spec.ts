@@ -6,7 +6,7 @@ describe('modules/versioning/distro', () => {
 
   beforeAll(() => {
     const dt = DateTime.fromISO('2021-03-20');
-    jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
+    Settings.now = () => dt.valueOf();
   });
 
   it.each`
@@ -38,7 +38,7 @@ describe('modules/versioning/distro', () => {
     'getVersionByCodename("$version") === $expected',
     ({ version, expected }) => {
       expect(di.getVersionByCodename(version)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -55,7 +55,7 @@ describe('modules/versioning/distro', () => {
     'getCodenameByVersion("$version") === $expected',
     ({ version, expected }) => {
       expect(di.getCodenameByVersion(version)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -157,5 +157,10 @@ describe('modules/versioning/distro', () => {
 
   it('retrieves non-existent release schedule', () => {
     expect(di.getSchedule('20.06')).toBeNull();
+  });
+
+  it('works with debian', () => {
+    const di = new DistroInfo('data/debian-distro-info.json');
+    expect(di.isEolLts('trixie')).toBe(true);
   });
 });

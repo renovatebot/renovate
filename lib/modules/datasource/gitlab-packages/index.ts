@@ -19,6 +19,10 @@ export class GitlabPackagesDatasource extends Datasource {
 
   override defaultRegistryUrls = ['https://gitlab.com'];
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `created_at` field in the results.';
+
   constructor() {
     super(datasource);
     this.http = new GitlabHttp(datasource);
@@ -27,7 +31,7 @@ export class GitlabPackagesDatasource extends Datasource {
   static getGitlabPackageApiUrl(
     registryUrl: string,
     projectName: string,
-    packageName: string
+    packageName: string,
   ): string {
     const projectNameEncoded = encodeURIComponent(projectName);
     const packageNameEncoded = encodeURIComponent(packageName);
@@ -36,15 +40,14 @@ export class GitlabPackagesDatasource extends Datasource {
       registryUrl,
       `api/v4/projects`,
       projectNameEncoded,
-      `packages?package_name=${packageNameEncoded}&per_page=100`
+      `packages?package_name=${packageNameEncoded}&per_page=100`,
     );
   }
 
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      // TODO: types (#22198)
       `${registryUrl}-${packageName}`,
   })
   async getReleases({
@@ -61,7 +64,7 @@ export class GitlabPackagesDatasource extends Datasource {
     const apiUrl = GitlabPackagesDatasource.getGitlabPackageApiUrl(
       registryUrl,
       projectPart,
-      packagePart
+      packagePart,
     );
 
     const result: ReleaseResult = {

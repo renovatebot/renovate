@@ -15,17 +15,31 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toBe('some-group-name-grouptopic');
     });
 
-    it('uses groupSlug if defined', () => {
+    it('compile groupName before slugging', () => {
       const upgrade: RenovateConfig = {
-        groupName: 'some group name',
-        groupSlug: 'some group slug',
+        groupName: '{{parentDir}}',
+        parentDir: 'myService',
         group: {
           branchName: '{{groupSlug}}-{{branchTopic}}',
           branchTopic: 'grouptopic',
         },
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toBe('some-group-slug-grouptopic');
+      expect(upgrade.branchName).toBe('myservice-grouptopic');
+    });
+
+    it('uses groupSlug if defined', () => {
+      const upgrade: RenovateConfig = {
+        groupName: 'some group name',
+        groupSlug: 'some group {{parentDir}}',
+        parentDir: 'abc',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('some-group-abc-grouptopic');
     });
 
     it('separates major with groups', () => {
@@ -43,6 +57,43 @@ describe('workers/repository/updates/branch-name', () => {
       };
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('major-2-some-group-slug-grouptopic');
+    });
+
+    it('separates minor with groups', () => {
+      const upgrade: RenovateConfig = {
+        groupName: 'some group name',
+        groupSlug: 'some group slug',
+        updateType: 'minor',
+        separateMultipleMinor: true,
+        newMinor: 1,
+        newMajor: 2,
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('minor-2.1-some-group-slug-grouptopic');
+    });
+
+    it('separates minor when separateMultipleMinor=true', () => {
+      const upgrade: RenovateConfig = {
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchPrefix: 'renovate/',
+        additionalBranchPrefix: '',
+        depNameSanitized: 'lodash',
+        newMajor: 4,
+        separateMinorPatch: true,
+        isPatch: true,
+        newMinor: 17,
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        depName: 'dep',
+        group: {},
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('renovate/lodash-4.17.x');
     });
 
     it('uses single major with groups', () => {
@@ -76,7 +127,7 @@ describe('workers/repository/updates/branch-name', () => {
       };
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe(
-        'update-branch-patch-some-group-slug-update-topic'
+        'update-branch-patch-some-group-slug-update-topic',
       );
     });
 
@@ -146,6 +197,22 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toBe('renovate/jest-42.x');
     });
 
+    it('realistic defaults with strict branch name enabled', () => {
+      const upgrade: RenovateConfig = {
+        branchNameStrict: true,
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        branchPrefix: 'renovate/',
+        depNameSanitized: 'jest',
+        newMajor: '42',
+        group: {},
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('renovate/jest-42-x');
+    });
+
     it('hashedBranchLength hashing', () => {
       const upgrade: RenovateConfig = {
         branchName:
@@ -196,6 +263,24 @@ describe('workers/repository/updates/branch-name', () => {
       };
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('dep-df9ca0');
+    });
+
+    it('hashedBranchLength no topic', () => {
+      const upgrade: RenovateConfig = {
+        hashedBranchLength: 3,
+        branchPrefix: 'dep-',
+        depNameSanitized: 'jest',
+        newMajor: '42',
+        groupName: 'some group name',
+        group: {
+          branchName:
+            '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+          additionalBranchPrefix:
+            '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('dep-cf83e1');
     });
 
     it('enforces valid git branch name', () => {
@@ -274,6 +359,36 @@ describe('workers/repository/updates/branch-name', () => {
         generateBranchName(fixture.upgrade);
         expect(fixture.upgrade.branchName).toEqual(fixture.expectedBranchName);
       });
+    });
+
+    it('strict branch name enabled group', () => {
+      const upgrade: RenovateConfig = {
+        branchNameStrict: true,
+        groupName: 'some group name `~#$%^&*()-_=+[]{}|;,./<>? .version',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe(
+        'some-group-name-dollarpercentand-or-lessgreater-version-grouptopic',
+      );
+    });
+
+    it('strict branch name disabled', () => {
+      const upgrade: RenovateConfig = {
+        branchNameStrict: false,
+        groupName: '[some] group name.#$%version',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe(
+        'some-group-name.dollarpercentversion-grouptopic',
+      );
     });
   });
 });

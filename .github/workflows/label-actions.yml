@@ -5,17 +5,19 @@ on:
     types: [labeled]
   discussion:
     types: [labeled]
+  pull_request_target:
+    types: [labeled]
 
 permissions:
   contents: read
   issues: write
   discussions: write
+  pull-requests: write
 
 jobs:
   reaction:
     runs-on: ubuntu-latest
     steps:
-      - uses: dessant/label-actions@93ea5ec1d65e6a21427a1571a18a5b8861206b0b # renovate: tag=v2.2.0
+      - uses: dessant/label-actions@102faf474a544be75fbaf4df54e73d3c515a0e65 # v4.0.1
         with:
           github-token: ${{ github.token }}
-          process-only: 'issues, discussions'

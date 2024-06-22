@@ -1,5 +1,5 @@
+import type { lexer } from 'good-enough-parser';
 import type { PackageDependency } from '../types';
-import type { TokenType } from './common';
 
 export interface GradleManagerData {
   fileReplacePosition?: number;
@@ -14,56 +14,9 @@ export interface VariableData extends GradleManagerData {
 export type PackageVariables = Record<string, VariableData>;
 export type VariableRegistry = Record<string, PackageVariables>;
 
-export interface Token {
-  type: TokenType;
-  value: string;
-  offset: number;
-}
-
-export interface StringInterpolation extends Token {
-  type: TokenType.StringInterpolation;
-  children: Token[]; // Tokens inside double-quoted string that are subject of interpolation
-  isComplete: boolean; // True if token has parsed completely
-  isValid: boolean; // False if string contains something unprocessable
-}
-
-// Matcher on single token
-export interface SyntaxMatcher {
-  matchType: TokenType | TokenType[];
-  matchValue?: string | string[];
-  lookahead?: boolean;
-  tokenMapKey?: string;
-}
-
-export type TokenMap = Record<string, Token>;
-
-export interface SyntaxHandlerInput {
-  packageFile?: string;
-  variables: PackageVariables;
-  tokenMap: TokenMap;
-}
-
-export type SyntaxHandlerOutput = {
-  deps?: PackageDependency<GradleManagerData>[];
-  vars?: PackageVariables;
-  urls?: string[];
-  scriptFile?: string | null;
-} | null;
-
-export interface SyntaxMatchConfig {
-  matchers: SyntaxMatcher[];
-  handler: (_: SyntaxHandlerInput) => SyntaxHandlerOutput;
-}
-
-export interface MatchConfig {
-  tokens: Token[];
-  variables: PackageVariables;
-  packageFile?: string;
-}
-
 export interface ParseGradleResult {
   deps: PackageDependency<GradleManagerData>[];
-  urls: string[];
+  urls: PackageRegistry[];
   vars: PackageVariables;
 }
 
@@ -113,3 +66,26 @@ export interface RichVersion {
 // references cannot themselves be references
 export type GradleVersionPointerTarget = string | RichVersion;
 export type GradleVersionCatalogVersion = string | VersionPointer | RichVersion;
+
+export interface PackageRegistry {
+  registryUrl: string;
+  scope: 'dep' | 'plugin';
+}
+
+export interface Ctx {
+  readonly packageFile: string;
+  readonly fileContents: Record<string, string | null>;
+  recursionDepth: number;
+
+  globalVars: PackageVariables;
+  deps: PackageDependency<GradleManagerData>[];
+  registryUrls: PackageRegistry[];
+
+  varTokens: lexer.Token[];
+  tmpKotlinImportStore: lexer.Token[][];
+  tmpNestingDepth: lexer.Token[];
+  tmpTokenStore: Record<string, lexer.Token[]>;
+  tokenMap: Record<string, lexer.Token[]>;
+}
+
+export type NonEmptyArray<T> = T[] & { 0: T };

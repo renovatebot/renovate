@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/helm-requirements/extract extractPackageFile() ensure that currentValue is string 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "0.9",
       "depName": "redis",
-      "registryUrls": Array [
+      "registryUrls": [
         "@placeholder",
       ],
       "skipReason": "placeholder-url",
@@ -17,20 +17,20 @@ Object {
 `;
 
 exports[`modules/manager/helm-requirements/extract extractPackageFile() parses simple requirements.yaml correctly 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "0.9.0",
       "depName": "redis",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://charts.helm.sh/stable/",
       ],
     },
-    Object {
+    {
       "currentValue": "0.8.1",
       "depName": "postgresql",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://charts.helm.sh/stable/",
       ],
     },
@@ -39,20 +39,20 @@ Object {
 `;
 
 exports[`modules/manager/helm-requirements/extract extractPackageFile() resolves aliased registry urls 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "0.9.0",
       "depName": "redis",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://my-registry.gcr.io/",
       ],
     },
-    Object {
+    {
       "currentValue": "1.0.0",
       "depName": "example",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://registry.example.com/",
       ],
     },
@@ -61,26 +61,26 @@ Object {
 `;
 
 exports[`modules/manager/helm-requirements/extract extractPackageFile() skips invalid registry urls 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "0.9.0",
       "depName": "redis",
-      "registryUrls": Array [
+      "registryUrls": [
         "@placeholder",
       ],
       "skipReason": "placeholder-url",
     },
-    Object {
+    {
       "currentValue": "0.8.1",
       "depName": "postgresql",
-      "registryUrls": Array [
+      "registryUrls": [
         "nope",
       ],
       "skipReason": "invalid-url",
     },
-    Object {
+    {
       "currentValue": "0.8.1",
       "depName": "broken",
       "skipReason": "no-repository",
@@ -90,20 +90,20 @@ Object {
 `;
 
 exports[`modules/manager/helm-requirements/extract extractPackageFile() skips local dependencies 1`] = `
-Object {
+{
   "datasource": "helm",
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "0.9.0",
       "depName": "redis",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://charts.helm.sh/stable/",
       ],
     },
-    Object {
+    {
       "currentValue": "0.8.1",
       "depName": "postgresql",
-      "registryUrls": Array [
+      "registryUrls": [
         "file:///some/local/path/",
       ],
       "skipReason": "local-dependency",

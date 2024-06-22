@@ -1,169 +1,173 @@
-import is from '@sindresorhus/is';
-import { quote, split } from 'shlex';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
-  ensureCacheDir,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
-import { regEx } from '../../../util/regex';
+import { extractPackageFileFlags as extractRequirementsFileFlags } from '../pip_requirements/common';
 import type {
+  PackageFileContent,
   UpdateArtifact,
-  UpdateArtifactsConfig,
   UpdateArtifactsResult,
+  Upgrade,
 } from '../types';
+import {
+  extractHeaderCommand,
+  extractPythonVersion,
+  getExecOptions,
+  getRegistryCredVarsFromPackageFiles,
+  matchManager,
+} from './common';
+import type { PipCompileArgs } from './types';
+import { inferCommandExecDir } from './utils';
 
-function getPythonConstraint(
-  config: UpdateArtifactsConfig
-): string | undefined | null {
-  const { constraints = {} } = config;
-  const { python } = constraints;
-
-  if (python) {
-    logger.debug('Using python constraint from config');
-    return python;
-  }
-
-  return undefined;
-}
-
-function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
-  const { constraints = {} } = config;
-  const { pipTools } = constraints;
-
-  if (is.string(pipTools)) {
-    logger.debug('Using pipTools constraint from config');
-    return pipTools;
-  }
-
-  return '';
-}
-
-const constraintLineRegex = regEx(
-  /^(#.*?\r?\n)+# {4}pip-compile(?<arguments>.*?)\r?\n/
-);
-const allowedPipArguments = [
-  '--allow-unsafe',
-  '--generate-hashes',
-  '--no-emit-index-url',
-];
-
-export function constructPipCompileCmd(
-  content: string,
-  inputFileName: string,
-  outputFileName: string
-): string {
-  const headers = constraintLineRegex.exec(content);
-  const args = ['pip-compile'];
-  if (headers?.groups) {
-    logger.debug({ header: headers[0] }, 'Found pip-compile header');
-    for (const argument of split(headers.groups.arguments)) {
-      if (allowedPipArguments.includes(argument)) {
-        args.push(argument);
-      } else if (argument.startsWith('--output-file=')) {
-        const file = upath.parse(outputFileName).base;
-        if (argument !== `--output-file=${file}`) {
-          // we don't trust the user-supplied output-file argument; use our value here
-          logger.warn(
-            { argument },
-            'pip-compile was previously executed with an unexpected `--output-file` filename'
-          );
-        }
-        args.push(`--output-file=${file}`);
-      } else if (argument.startsWith('--')) {
-        logger.trace(
-          { argument },
-          'pip-compile argument is not (yet) supported'
-        );
-      } else {
-        // ignore position argument (.in file)
+function haveCredentialsInPipEnvironmentVariables(): boolean {
+  if (process.env.PIP_INDEX_URL) {
+    try {
+      const indexUrl = new URL(process.env.PIP_INDEX_URL);
+      if (!!indexUrl.username || !!indexUrl.password) {
+        return true;
       }
+    } catch {
+      // Assume that an invalid URL contains credentials, just in case
+      return true;
     }
   }
-  args.push(upath.parse(inputFileName).base);
 
-  return args.map((argument) => quote(argument)).join(' ');
+  try {
+    if (process.env.PIP_EXTRA_INDEX_URL) {
+      return process.env.PIP_EXTRA_INDEX_URL.split(' ')
+        .map((urlString) => new URL(urlString))
+        .some((url) => !!url.username || !!url.password);
+    }
+  } catch {
+    // Assume that an invalid URL contains credentials, just in case
+    return true;
+  }
+
+  return false;
+}
+
+export function constructPipCompileCmd(
+  compileArgs: PipCompileArgs,
+  upgradePackages: Upgrade[] = [],
+): string {
+  if (compileArgs.isCustomCommand) {
+    throw new Error(
+      'Detected custom command, header modified or set by CUSTOM_COMPILE_COMMAND',
+    );
+  }
+
+  if (!compileArgs.outputFile) {
+    logger.debug(`pip-compile: implicit output file`);
+  }
+  // safeguard against index url leak if not explicitly set by an option
+  if (
+    !compileArgs.noEmitIndexUrl &&
+    !compileArgs.emitIndexUrl &&
+    haveCredentialsInPipEnvironmentVariables()
+  ) {
+    compileArgs.argv.splice(1, 0, '--no-emit-index-url');
+  }
+  for (const dep of upgradePackages) {
+    compileArgs.argv.push(
+      `--upgrade-package=${quote(dep.depName + '==' + dep.newVersion)}`,
+    );
+  }
+  return compileArgs.argv.map(quote).join(' ');
 }
 
 export async function updateArtifacts({
   packageFileName: inputFileName,
   newPackageFileContent: newInputContent,
+  updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  const outputFileName = inputFileName.replace(regEx(/(\.in)?$/), '.txt');
-  logger.debug(
-    `pipCompile.updateArtifacts(${inputFileName}->${outputFileName})`
-  );
-  const existingOutput = await readLocalFile(outputFileName, 'utf8');
-  if (!existingOutput) {
-    logger.debug('No pip-compile output file found');
+  if (!config.lockFiles) {
+    logger.warn(
+      { packageFileName: inputFileName },
+      'pip-compile: No lock files associated with a package file',
+    );
     return null;
   }
-  try {
-    await writeLocalFile(inputFileName, newInputContent);
-    if (config.isLockFileMaintenance) {
-      await deleteLocalFile(outputFileName);
-    }
-    const cmd = constructPipCompileCmd(
-      existingOutput,
-      inputFileName,
-      outputFileName
-    );
-    const constraint = getPythonConstraint(config);
-    const pipToolsConstraint = getPipToolsConstraint(config);
-    const execOptions: ExecOptions = {
-      cwdFile: inputFileName,
-      docker: {
-        image: 'sidecar',
-      },
-      preCommands: [
-        `pip install --user ${quote(`pip-tools${pipToolsConstraint}`)}`,
-      ],
-      toolConstraints: [
-        {
-          toolName: 'python',
-          constraint,
-        },
-      ],
-      extraEnv: {
-        PIP_CACHE_DIR: await ensureCacheDir('pip'),
-      },
-    };
-    logger.debug({ cmd }, 'pip-compile command');
-    await exec(cmd, execOptions);
-    const status = await getRepoStatus();
-    if (!status?.modified.includes(outputFileName)) {
+  logger.debug(
+    `pipCompile.updateArtifacts(${inputFileName}->${JSON.stringify(
+      config.lockFiles,
+    )})`,
+  );
+  const result: UpdateArtifactsResult[] = [];
+  for (const outputFileName of config.lockFiles) {
+    const existingOutput = await readLocalFile(outputFileName, 'utf8');
+    if (!existingOutput) {
+      logger.debug('pip-compile: No output file found');
       return null;
     }
-    logger.debug('Returning updated pip-compile result');
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: outputFileName,
-          contents: await readLocalFile(outputFileName, 'utf8'),
-        },
-      },
-    ];
-  } catch (err) {
-    // istanbul ignore if
-    if (err.message === TEMPORARY_ERROR) {
-      throw err;
-    }
-    logger.debug({ err }, 'Failed to pip-compile');
-    return [
-      {
+    try {
+      await writeLocalFile(inputFileName, newInputContent);
+      // TODO(not7cd): use --upgrade option instead deleting
+      if (config.isLockFileMaintenance) {
+        await deleteLocalFile(outputFileName);
+      }
+      const compileArgs = extractHeaderCommand(existingOutput, outputFileName);
+      const pythonVersion = extractPythonVersion(
+        existingOutput,
+        outputFileName,
+      );
+      const cwd = inferCommandExecDir(outputFileName, compileArgs.outputFile);
+      const upgradePackages = updatedDeps.filter((dep) => dep.isLockfileUpdate);
+      const packageFiles: PackageFileContent[] = [];
+      for (const name of compileArgs.sourceFiles) {
+        const manager = matchManager(name);
+        if (manager === 'pip_requirements') {
+          const path = upath.join(cwd, name);
+          const content = await readLocalFile(path, 'utf8');
+          if (content) {
+            const packageFile = extractRequirementsFileFlags(content);
+            if (packageFile) {
+              packageFiles.push(packageFile);
+            }
+          }
+        }
+      }
+      const cmd = constructPipCompileCmd(compileArgs, upgradePackages);
+      const execOptions = await getExecOptions(
+        config,
+        cwd,
+        getRegistryCredVarsFromPackageFiles(packageFiles),
+        pythonVersion,
+      );
+      logger.trace({ cwd, cmd }, 'pip-compile command');
+      logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
+      await exec(cmd, execOptions);
+      const status = await getRepoStatus();
+      if (status?.modified.includes(outputFileName)) {
+        result.push({
+          file: {
+            type: 'addition',
+            path: outputFileName,
+            contents: await readLocalFile(outputFileName, 'utf8'),
+          },
+        });
+      }
+    } catch (err) {
+      // istanbul ignore if
+      if (err.message === TEMPORARY_ERROR) {
+        throw err;
+      }
+      logger.debug({ err }, 'pip-compile: Failed to run command');
+      result.push({
         artifactError: {
           lockFile: outputFileName,
           stderr: err.message,
         },
-      },
-    ];
+      });
+    }
   }
+  logger.debug('pip-compile: Returning updated output file(s)');
+  return result.length === 0 ? null : result;
 }

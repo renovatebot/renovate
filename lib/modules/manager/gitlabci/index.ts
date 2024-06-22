@@ -1,13 +1,17 @@
-import { ProgrammingLanguage } from '../../../constants';
+import type { Category } from '../../../constants';
 import { DockerDatasource } from '../../datasource/docker';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { extractAllPackageFiles, extractPackageFile } from './extract';
-
-export const language = ProgrammingLanguage.Docker;
 
 export { extractAllPackageFiles, extractPackageFile };
 
 export const defaultConfig = {
-  fileMatch: ['\\.gitlab-ci\\.yml$'],
+  fileMatch: ['\\.gitlab-ci\\.ya?ml$'],
 };
 
-export const supportedDatasources = [DockerDatasource.id];
+export const categories: Category[] = ['ci'];
+
+export const supportedDatasources = [
+  DockerDatasource.id,
+  GitlabTagsDatasource.id,
+];

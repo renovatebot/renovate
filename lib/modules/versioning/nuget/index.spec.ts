@@ -1,7 +1,7 @@
 import nuget from '.';
 
 describe('modules/versioning/nuget/index', () => {
-  test.each`
+  it.each`
     input                        | expected
     ${'9.0.3'}                   | ${true}
     ${'1.2019.3.22'}             | ${true}
@@ -17,7 +17,7 @@ describe('modules/versioning/nuget/index', () => {
     expect(res).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input                        | expected
     ${'9.0.3'}                   | ${true}
     ${'1.2019.3.22'}             | ${true}
@@ -33,7 +33,7 @@ describe('modules/versioning/nuget/index', () => {
     expect(res).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input                        | expected
     ${'9.0.3'}                   | ${true}
     ${'1.2019.3.22'}             | ${true}
@@ -45,7 +45,7 @@ describe('modules/versioning/nuget/index', () => {
     expect(nuget.isStable(input)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a            | b                   | expected
     ${'17.4'}    | ${'17.04'}          | ${true}
     ${'1.4'}     | ${'1.4.0'}          | ${true}
@@ -55,7 +55,7 @@ describe('modules/versioning/nuget/index', () => {
     expect(nuget.equals(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a                   | b                  | expected
     ${'2.4.2'}          | ${'2.4.1'}         | ${true}
     ${'2.4-beta'}       | ${'2.4-alpha'}     | ${true}

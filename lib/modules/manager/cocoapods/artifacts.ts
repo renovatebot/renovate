@@ -2,6 +2,7 @@ import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
@@ -65,22 +66,22 @@ export async function updateArtifacts({
   }
 
   const match = regEx(/^COCOAPODS: (?<cocoapodsVersion>.*)$/m).exec(
-    existingLockFileContent
+    existingLockFileContent,
   );
   const cocoapods = match?.groups?.cocoapodsVersion ?? null;
 
   const cmd = [...getPluginCommands(newPackageFileContent), 'pod install'];
   const execOptions: ExecOptions = {
+    userConfiguredEnv: config.env,
     cwdFile: packageFileName,
     extraEnv: {
       CP_HOME_DIR: await ensureCacheDir('cocoapods'),
     },
-    docker: {
-      image: 'ruby',
-      tagScheme: 'ruby',
-      tagConstraint: '< 3.0', // currently using v2 on docker image
-    },
+    docker: {},
     toolConstraints: [
+      {
+        toolName: 'ruby',
+      },
       {
         toolName: 'cocoapods',
         constraint: cocoapods,
@@ -135,7 +136,7 @@ export async function updateArtifacts({
         });
       }
     }
-    for (const f of status.deleted || []) {
+    for (const f of coerceArray(status.deleted)) {
       res.push({
         file: {
           type: 'deletion',

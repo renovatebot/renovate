@@ -10,7 +10,7 @@ type TableDefinition = {
 
 function getRowDefinition(
   prBodyColumns: string[],
-  upgrade: BranchUpgradeConfig
+  upgrade: BranchUpgradeConfig,
 ): TableDefinition[] {
   const res: TableDefinition[] = [];
   if (upgrade.prBodyDefinitions) {
@@ -24,7 +24,7 @@ function getRowDefinition(
 
 function getNonEmptyColumns(
   prBodyColumns: string[],
-  rows: Record<string, string>[]
+  rows: Record<string, string>[],
 ): string[] {
   const res: string[] = [];
   for (const header of prBodyColumns) {
@@ -44,14 +44,15 @@ export function getPrUpdatesTable(config: BranchConfig): string {
     logger.warn('getPrUpdatesTable - prBodyColumns is undefined');
     return '';
   }
-  const tableValues = config.upgrades
-    .filter((upgrade) => upgrade !== undefined)
-    .map((upgrade) => {
+
+  const tableKeyValuePairs: Record<string, Record<string, string>> = {};
+  for (const upgrade of config.upgrades) {
+    if (upgrade) {
+      // Create a key based on the properties which are significant in the updates table
+      const key = `${upgrade.depName ?? ''}_${upgrade.depType ?? ''}_${upgrade.newValue ?? ''}_${upgrade.newVersion ?? ''}_${upgrade.currentValue ?? ''}_${upgrade.currentVersion ?? ''}_${upgrade.updateType}`;
+
       const res: Record<string, string> = {};
-      const rowDefinition = getRowDefinition(
-        config.prBodyColumns ?? [],
-        upgrade
-      );
+      const rowDefinition = getRowDefinition(config.prBodyColumns, upgrade);
       for (const column of rowDefinition) {
         const { header, value } = column;
         try {
@@ -67,8 +68,22 @@ export function getPrUpdatesTable(config: BranchConfig): string {
           logger.warn({ header, value, err }, 'Handlebars compilation error');
         }
       }
-      return res;
-    });
+
+      if (tableKeyValuePairs[key]) {
+        // compare the duplicate upgrades as per their table values
+        // and select one with better values
+        tableKeyValuePairs[key] = compareTableValues(
+          tableKeyValuePairs[key],
+          res,
+          config.prBodyColumns,
+        );
+      } else {
+        tableKeyValuePairs[key] = res;
+      }
+    }
+  }
+
+  const tableValues = Object.values(tableKeyValuePairs);
   const tableColumns = getNonEmptyColumns(config.prBodyColumns, tableValues);
   let res = '\n\nThis PR contains the following updates:\n\n';
   res += '| ' + tableColumns.join(' | ') + ' |\n';
@@ -91,4 +106,32 @@ export function getPrUpdatesTable(config: BranchConfig): string {
   res += uniqueRows.join('');
   res += '\n\n';
   return res;
+}
+
+// return the row with better table values
+function compareTableValues(
+  a: Record<string, string>,
+  b: Record<string, string>,
+  prBodyColumns: string[],
+): Record<string, string> {
+  let score = 0;
+
+  for (const header of prBodyColumns) {
+    if (!b[header] && !a[header]) {
+      continue;
+    }
+    if (!b[header]) {
+      score--;
+      continue;
+    }
+    if (!a[header]) {
+      score++;
+      continue;
+    }
+
+    if (a[header] !== b[header]) {
+      a[header].length < b[header].length ? score++ : score--;
+    }
+  }
+  return score > 0 ? b : a;
 }

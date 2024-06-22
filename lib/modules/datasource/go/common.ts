@@ -1,19 +1,17 @@
-import { BitBucketTagsDatasource } from '../bitbucket-tags';
-import { getSourceUrl as githubSourceUrl } from '../github-releases/common';
+import { getSourceUrl as githubSourceUrl } from '../../../util/github/url';
+import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import { getSourceUrl as gitlabSourceUrl } from '../gitlab-tags/util';
 
 import type { DataSource } from './types';
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum GoproxyFallback {
-  WhenNotFoundOrGone = ',',
-  Always = '|',
-}
+export type GoproxyFallback =
+  | ',' // WhenNotFoundOrGone
+  | '|'; // Always
 
 export function getSourceUrl(
-  dataSource?: DataSource | null
+  dataSource?: DataSource | null,
 ): string | undefined {
   if (dataSource) {
     const { datasource, registryUrl, packageName } = dataSource;
@@ -26,8 +24,8 @@ export function getSourceUrl(
       return gitlabSourceUrl(packageName, registryUrl);
     }
 
-    if (datasource === BitBucketTagsDatasource.id) {
-      return BitBucketTagsDatasource.getSourceUrl(packageName, registryUrl);
+    if (datasource === BitbucketTagsDatasource.id) {
+      return BitbucketTagsDatasource.getSourceUrl(packageName, registryUrl);
     }
   }
 

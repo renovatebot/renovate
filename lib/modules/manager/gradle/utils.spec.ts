@@ -1,12 +1,11 @@
-import { TokenType } from './common';
 import type { VariableRegistry } from './types';
 import {
   getVars,
-  interpolateString,
   isDependencyString,
   parseDependencyString,
   reorderFiles,
   toAbsolutePath,
+  updateVars,
   versionLikeSubstring,
 } from './utils';
 
@@ -14,13 +13,11 @@ describe('modules/manager/gradle/utils', () => {
   it('versionLikeSubstring', () => {
     [
       '1.2.3',
-      'foobar',
       '[1.0,2.0]',
       '(,2.0[',
       '2.1.1.RELEASE',
       '1.0.+',
       '2022-05-10_55',
-      'latest',
     ].forEach((input) => {
       expect(versionLikeSubstring(input)).toEqual(input);
       expect(versionLikeSubstring(`${input}'`)).toEqual(input);
@@ -32,6 +29,8 @@ describe('modules/manager/gradle/utils', () => {
     expect(versionLikeSubstring('')).toBeNull();
     expect(versionLikeSubstring(undefined)).toBeNull();
     expect(versionLikeSubstring(null)).toBeNull();
+    expect(versionLikeSubstring('foobar')).toBeNull();
+    expect(versionLikeSubstring('latest')).toBeNull();
   });
 
   it('isDependencyString', () => {
@@ -39,12 +38,14 @@ describe('modules/manager/gradle/utils', () => {
     expect(isDependencyString('foo.foo:bar.bar:1.2.3')).toBeTrue();
     expect(isDependencyString('foo:bar:baz:qux')).toBeFalse();
     expect(isDependencyString('foo.bar:baz:1.2.3')).toBeTrue();
+    expect(isDependencyString('foo.bar:baz:1.2.3:linux-cpu-x86_64')).toBeTrue();
     expect(isDependencyString('foo.bar:baz:1.2.+')).toBeTrue();
-    expect(isDependencyString('foo.bar:baz:qux:quux')).toBeFalse();
+    expect(isDependencyString('foo:bar:baz:qux:quux')).toBeFalse();
     expect(isDependencyString("foo:bar:1.2.3'")).toBeFalse();
     expect(isDependencyString('foo:bar:1.2.3"')).toBeFalse();
     expect(isDependencyString('-Xep:ParameterName:OFF')).toBeFalse();
     expect(isDependencyString('foo$bar:baz:1.2.+')).toBeFalse();
+    expect(isDependencyString('scm:git:https://some.git')).toBeFalse();
   });
 
   it('parseDependencyString', () => {
@@ -56,7 +57,6 @@ describe('modules/manager/gradle/utils', () => {
       depName: 'foo.foo:bar.bar',
       currentValue: '1.2.3',
     });
-    expect(parseDependencyString('foo:bar:baz:qux')).toBeNull();
     expect(parseDependencyString('foo.bar:baz:1.2.3')).toMatchObject({
       depName: 'foo.bar:baz',
       currentValue: '1.2.3',
@@ -65,38 +65,11 @@ describe('modules/manager/gradle/utils', () => {
       depName: 'foo:bar',
       currentValue: '1.2.+',
     });
-    expect(parseDependencyString('foo.bar:baz:qux:quux')).toBeNull();
+    expect(parseDependencyString('foo:bar:baz:qux')).toBeNull();
+    expect(parseDependencyString('foo:bar:baz:qux:quux')).toBeNull();
     expect(parseDependencyString("foo:bar:1.2.3'")).toBeNull();
     expect(parseDependencyString('foo:bar:1.2.3"')).toBeNull();
     expect(parseDependencyString('-Xep:ParameterName:OFF')).toBeNull();
-  });
-
-  it('interpolateString', () => {
-    expect(interpolateString([], {})).toBeEmptyString();
-    expect(
-      interpolateString(
-        [
-          { type: TokenType.String, value: 'foo' },
-          { type: TokenType.Variable, value: 'bar' },
-          { type: TokenType.String, value: 'baz' },
-        ] as never,
-        {
-          bar: { value: 'BAR' },
-        } as never
-      )
-    ).toBe('fooBARbaz');
-    expect(
-      interpolateString(
-        [{ type: TokenType.Variable, value: 'foo' }] as never,
-        {} as never
-      )
-    ).toBeNull();
-    expect(
-      interpolateString(
-        [{ type: TokenType.UnknownFragment, value: 'foo' }] as never,
-        {} as never
-      )
-    ).toBeNull();
   });
 
   it('reorderFiles', () => {
@@ -107,7 +80,7 @@ describe('modules/manager/gradle/utils', () => {
         'b.gradle',
         'a.gradle',
         'versions.gradle',
-      ])
+      ]),
     ).toStrictEqual([
       'versions.gradle',
       'a.gradle',
@@ -126,7 +99,7 @@ describe('modules/manager/gradle/utils', () => {
         'a/versions.gradle',
         'build.gradle',
         'a/b/c/versions.gradle',
-      ])
+      ]),
     ).toStrictEqual([
       'versions.gradle',
       'build.gradle',
@@ -145,7 +118,7 @@ describe('modules/manager/gradle/utils', () => {
     ]);
 
     expect(
-      reorderFiles(['b.gradle', 'c.gradle', 'a.gradle', 'gradle.properties'])
+      reorderFiles(['b.gradle', 'c.gradle', 'a.gradle', 'gradle.properties']),
     ).toStrictEqual(['gradle.properties', 'a.gradle', 'b.gradle', 'c.gradle']);
 
     expect(
@@ -161,7 +134,7 @@ describe('modules/manager/gradle/utils', () => {
         'b.gradle',
         'c.gradle',
         'a.gradle',
-      ])
+      ]),
     ).toStrictEqual([
       'gradle.properties',
       'a.gradle',
@@ -180,17 +153,17 @@ describe('modules/manager/gradle/utils', () => {
   it('getVars', () => {
     const registry: VariableRegistry = {
       [toAbsolutePath('/foo')]: {
-        foo: { key: 'foo', value: 'FOO' } as never,
-        bar: { key: 'bar', value: 'BAR' } as never,
-        baz: { key: 'baz', value: 'BAZ' } as never,
-        qux: { key: 'qux', value: 'QUX' } as never,
+        foo: { key: 'foo', value: 'FOO' },
+        bar: { key: 'bar', value: 'BAR' },
+        baz: { key: 'baz', value: 'BAZ' },
+        qux: { key: 'qux', value: 'QUX' },
       },
       [toAbsolutePath('/foo/bar')]: {
-        foo: { key: 'foo', value: 'foo' } as never,
+        foo: { key: 'foo', value: 'foo' },
       },
       [toAbsolutePath('/foo/bar/baz')]: {
-        bar: { key: 'bar', value: 'bar' } as never,
-        baz: { key: 'baz', value: 'baz' } as never,
+        bar: { key: 'bar', value: 'bar' },
+        baz: { key: 'baz', value: 'baz' },
       },
     };
     const res = getVars(registry, '/foo/bar/baz/build.gradle');
@@ -199,6 +172,23 @@ describe('modules/manager/gradle/utils', () => {
       bar: { key: 'bar', value: 'bar' },
       baz: { key: 'baz', value: 'baz' },
       qux: { key: 'qux', value: 'QUX' },
+    });
+  });
+
+  it('updateVars', () => {
+    const registry: VariableRegistry = {
+      [toAbsolutePath('/foo/bar/baz')]: {
+        bar: { key: 'bar', value: 'bar' },
+        baz: { key: 'baz', value: 'baz' },
+      },
+    };
+
+    updateVars(registry, '/foo/bar/baz', { qux: { key: 'qux', value: 'qux' } });
+    const res = getVars(registry, '/foo/bar/baz/build.gradle');
+    expect(res).toStrictEqual({
+      bar: { key: 'bar', value: 'bar' },
+      baz: { key: 'baz', value: 'baz' },
+      qux: { key: 'qux', value: 'qux' },
     });
   });
 });

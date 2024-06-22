@@ -2,13 +2,14 @@ import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
-import { PlatformId } from '../../../../constants';
 import { logger } from '../../../../logger';
+import { coersions } from './coersions';
 import type { ParseConfigOptions } from './types';
+import { migrateAndValidateConfig } from './util';
 
 function normalizePrefixes(
   env: NodeJS.ProcessEnv,
-  prefix: string | undefined
+  prefix: string | undefined,
 ): NodeJS.ProcessEnv {
   const result = { ...env };
   if (prefix) {
@@ -38,6 +39,8 @@ const renameKeys = {
   aliases: 'registryAliases',
   azureAutoComplete: 'platformAutomerge', // migrate: azureAutoComplete
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
+  mergeConfidenceApiBaseUrl: 'mergeConfidenceEndpoint',
+  mergeConfidenceSupportedDatasources: 'mergeConfidenceDatasources',
 };
 
 function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
@@ -53,10 +56,70 @@ function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return result;
 }
 
-export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
+const migratedKeysWithValues = [
+  {
+    oldName: 'recreateClosed',
+    newName: 'recreateWhen',
+    from: 'true',
+    to: 'always',
+  },
+  {
+    oldName: 'recreateClosed',
+    newName: 'recreateWhen',
+    from: 'false',
+    to: 'auto',
+  },
+];
+
+function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  const result = { ...env };
+  for (const { oldName, newName, from, to } of migratedKeysWithValues) {
+    const key = getEnvName({ name: oldName });
+    if (env[key] !== undefined) {
+      if (result[key] === from) {
+        delete result[key];
+        result[getEnvName({ name: newName })] = to;
+      }
+    }
+  }
+  return result;
+}
+
+const convertedExperimentalEnvVars = [
+  'RENOVATE_X_AUTODISCOVER_REPO_SORT',
+  'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
+  'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
+  'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',
+];
+
+/**
+ * Massages the experimental env vars which have been converted to config options
+ *
+ * e.g. RENOVATE_X_AUTODISCOVER_REPO_SORT -> RENOVATE_AUTODISCOVER_REPO_SORT
+ */
+function massageConvertedExperimentalVars(
+  env: NodeJS.ProcessEnv,
+): NodeJS.ProcessEnv {
+  const result = { ...env };
+  for (const key of convertedExperimentalEnvVars) {
+    if (env[key] !== undefined) {
+      const newKey = key.replace('RENOVATE_X_', 'RENOVATE_');
+      result[newKey] = env[key];
+      delete result[key];
+    }
+  }
+  return result;
+}
+
+export async function getConfig(
+  inputEnv: NodeJS.ProcessEnv,
+): Promise<AllConfig> {
   let env = inputEnv;
   env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
+  env = massageConvertedExperimentalVars(env);
   env = renameEnvKeys(env);
+  // massage the values of migrated configuration keys
+  env = massageEnvKeyValues(env);
 
   const options = getOptions();
 
@@ -66,6 +129,8 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
     try {
       config = JSON5.parse(env.RENOVATE_CONFIG);
       logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
+
+      config = await migrateAndValidateConfig(config, 'RENOVATE_CONFIG');
     } catch (err) {
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
       process.exit(1);
@@ -73,14 +138,6 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   }
 
   config.hostRules ||= [];
-
-  const coersions = {
-    boolean: (val: string): boolean => val === 'true',
-    array: (val: string): string[] => val.split(',').map((el) => el.trim()),
-    string: (val: string): string => val.replace(/\\n/g, '\n'),
-    object: (val: string): any => JSON5.parse(val),
-    integer: parseInt,
-  };
 
   options.forEach((option) => {
     if (option.env !== false) {
@@ -95,13 +152,13 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
             } else {
               logger.debug(
                 { val: envVal, envName },
-                'Could not parse object array'
+                'Could not parse object array',
               );
             }
           } catch (err) {
             logger.debug(
               { val: envVal, envName },
-              'Could not parse environment variable'
+              'Could not parse environment variable',
             );
           }
         } else {
@@ -110,12 +167,12 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
           if (option.name === 'dryRun') {
             if ((config[option.name] as string) === 'true') {
               logger.warn(
-                'env config dryRun property has been changed to full'
+                'env config dryRun property has been changed to full',
               );
               config[option.name] = 'full';
             } else if ((config[option.name] as string) === 'false') {
               logger.warn(
-                'env config dryRun property has been changed to null'
+                'env config dryRun property has been changed to null',
               );
               delete config[option.name];
             } else if ((config[option.name] as string) === 'null') {
@@ -125,12 +182,12 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
           if (option.name === 'requireConfig') {
             if ((config[option.name] as string) === 'true') {
               logger.warn(
-                'env config requireConfig property has been changed to required'
+                'env config requireConfig property has been changed to required',
               );
               config[option.name] = 'required';
             } else if ((config[option.name] as string) === 'false') {
               logger.warn(
-                'env config requireConfig property has been changed to optional'
+                'env config requireConfig property has been changed to optional',
               );
               config[option.name] = 'optional';
             }
@@ -143,7 +200,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   if (env.GITHUB_COM_TOKEN) {
     logger.debug(`Converting GITHUB_COM_TOKEN into a global host rule`);
     config.hostRules.push({
-      hostType: PlatformId.Github,
+      hostType: 'github',
       matchHost: 'github.com',
       token: env.GITHUB_COM_TOKEN,
     });

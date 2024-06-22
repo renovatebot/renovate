@@ -8,7 +8,7 @@ describe('config/migrations/custom/branch-name-migration', () => {
       },
       {
         branchName: 'test {{additionalBranchPrefix}} test',
-      }
+      },
     );
   });
 
@@ -20,7 +20,7 @@ describe('config/migrations/custom/branch-name-migration', () => {
       {
         branchName: 'test',
       },
-      false
+      false,
     );
   });
 
@@ -32,7 +32,7 @@ describe('config/migrations/custom/branch-name-migration', () => {
       {
         branchName: true,
       } as any,
-      false
+      false,
     );
   });
 });

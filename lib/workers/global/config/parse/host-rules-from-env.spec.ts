@@ -1,3 +1,4 @@
+import { logger } from '../../../../../test/util';
 import { hostRulesFromEnv } from './host-rules-from-env';
 
 describe('workers/global/config/parse/host-rules-from-env', () => {
@@ -6,7 +7,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
       DOCKER_USERNAME: 'some-username',
       DOCKER_PASSWORD: 'some-password',
     };
-    expect(hostRulesFromEnv(envParam)).toMatchSnapshot([
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
       {
         hostType: 'docker',
         password: 'some-password',
@@ -19,7 +20,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
     const envParam: NodeJS.ProcessEnv = {
       NPM_PASSWORD: 'some-password',
     };
-    expect(hostRulesFromEnv(envParam)).toMatchSnapshot([
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
       { hostType: 'npm', password: 'some-password' },
     ]);
   });
@@ -30,7 +31,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
       pypi_my_CUSTOM_HOST_passWORD: 'some-password',
     };
 
-    expect(hostRulesFromEnv(envParam)).toMatchSnapshot([
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
       { matchHost: 'github.com', token: 'some-token' },
       { matchHost: 'my.custom.host', password: 'some-password' },
     ]);
@@ -41,7 +42,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
       GIT__TAGS_GITLAB_EXAMPLE__DOMAIN_NET_USERNAME: 'some-user',
       GIT__TAGS_GITLAB_EXAMPLE__DOMAIN_NET_PASSWORD: 'some-password',
     };
-    expect(hostRulesFromEnv(envParam)).toMatchSnapshot([
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
       {
         hostType: 'git-tags',
         matchHost: 'gitlab.example-domain.net',
@@ -51,13 +52,57 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
     ]);
   });
 
+  it('support https authentication options', () => {
+    const envParam: NodeJS.ProcessEnv = {
+      GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSPRIVATEKEY: 'private-key',
+      GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATE: 'certificate',
+      GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATEAUTHORITY:
+        'certificate-authority',
+    };
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
+      {
+        hostType: 'github',
+        matchHost: 'some.github-enterprise.host',
+        httpsPrivateKey: 'private-key',
+        httpsCertificate: 'certificate',
+        httpsCertificateAuthority: 'certificate-authority',
+      },
+    ]);
+  });
+
+  it('make sure {{PLATFORM}}_TOKEN will not be picked up', () => {
+    const unsupportedEnv = ['GITHUB_TOKEN'];
+
+    for (const e of unsupportedEnv) {
+      const envParam: NodeJS.ProcessEnv = {
+        [e]: 'private-key',
+      };
+      expect(hostRulesFromEnv(envParam)).toMatchObject([]);
+    }
+  });
+
   it('supports datasource env token', () => {
     const envParam: NodeJS.ProcessEnv = {
       PYPI_TOKEN: 'some-token',
     };
-    expect(hostRulesFromEnv(envParam)).toMatchSnapshot([
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
       { hostType: 'pypi', token: 'some-token' },
     ]);
+  });
+
+  it('supports platform env token', () => {
+    const envParam: NodeJS.ProcessEnv = {
+      GITHUB_COM_TOKEN: 'this-should-be-ignored-here',
+      GITHUB_SOME_GITHUB__ENTERPRISE_HOST_TOKEN: 'some-token',
+    };
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
+      {
+        hostType: 'github',
+        matchHost: 'some.github-enterprise.host',
+        token: 'some-token',
+      },
+    ]);
+    expect(logger.logger.warn).not.toHaveBeenCalled();
   });
 
   it('rejects incomplete datasource env token', () => {

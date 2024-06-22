@@ -11,6 +11,7 @@ export interface TerraformBuild {
   arch: string;
   filename: string;
   url: string;
+  shasums_url?: string;
 }
 
 export interface TerraformProvider {
@@ -34,13 +35,10 @@ export interface TerraformProviderVersionsVersion {
   version: string;
 }
 
-export type TerraformProviderReleaseBackend = Record<
-  string,
-  {
-    name: string;
-    versions: VersionsReleaseBackend;
-  }
->;
+export interface TerraformProviderReleaseBackend {
+  name: string;
+  versions: VersionsReleaseBackend;
+}
 
 export type VersionsReleaseBackend = Record<string, VersionDetailResponse>;
 
@@ -60,4 +58,5 @@ export interface TerraformRegistryBuildResponse {
   arch: string;
   filename: string;
   download_url: string;
+  shasums_url?: string;
 }

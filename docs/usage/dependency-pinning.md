@@ -6,9 +6,9 @@ description: The pros and cons of dependency pinning for JavaScript/npm
 # Should you Pin your JavaScript Dependencies?
 
 Once you start using a tool/service like Renovate, probably the biggest decision you need to make is whether to "pin" your dependencies instead of using SemVer ranges.
-The answer is "It's your choice", but we can certainly make some generalisations/recommendations to help you.
+The answer is "It's your choice", but we can certainly make some generalizations/recommendations to help you.
 
-If you do not want to read the in-depth discussion, and just want our recommendations, skip ahead to the ["So what's best?" section](#so-whats-best).
+If you don't want to read the in-depth discussion, you can skip ahead to our recommendations in the ["So what's best?" section](#so-whats-best).
 
 ## What is Dependency Pinning?
 
@@ -65,18 +65,18 @@ If you were using default caret SemVer ranges, then your `main` branch is now "b
 You would need to manually check and work out which dependency caused the failure (`foobar` may not have been the only dependency to have "automatically" upgraded since the last time your tests passed) and then you would need to pin the dependency yourself to stop `npm` installing `1.2.0`.
 
 Consider the same situation if instead you were _pinning_ dependency versions.
-Your `main` branch would not be broken because it's pinned to `foobar@1.1.0` - instead you'd just have a Pull Request for upgrading to `foobar@1.2.0` which would fail.
+Your `main` branch would not be broken because it's pinned to `foobar@1.1.0` - instead you'd have a Pull Request for upgrading to `foobar@1.2.0` which would fail.
 You'd know not to merge it and can wait for `foobar@1.2.1` or later when it's fixed.
 By pinning dependencies you know exactly what you're running and you know exactly what failed.
 
 Now consider a similar theoretical scenario where `foobar@1.2.0` is faulty but it is _not_ caught by any of your automated tests.
 This is more common and more dangerous.
 
-If you were using SemVer ranges then this new version of `foobar` will likely be deployed to production automatically one day, sometime after which you notice errors and realise you need to fix it.
+If you were using SemVer ranges then this new version of `foobar` will likely be deployed to production automatically one day, sometime after which you notice errors and realize you need to fix it.
 Like before, you need to manually work out which dependency caused it - assuming you guess correctly that it was a new dependency version at fault - and pin it manually by editing `package.json` one dependency at a time.
 
 Alternatively, if you were instead pinning `foobar` then you would get a PR for `foobar@1.2.0` which awaits your approval.
-So first of all, you can choose to read the release notes and/or visually inspect the branch yourself before merging, hopefully saving you from pushing this faulty code to production.
+So first of all, you can choose to read the changelogs and/or visually inspect the branch yourself before merging, hopefully saving you from pushing this faulty code to production.
 
 If you did not catch the fault before merging, you are still better off with a pinned version.
 If you discover something wrong in production, you can easily "roll back" commits in your development environment until you find which rollback fixes the problem.
@@ -102,7 +102,7 @@ There are some dependencies that either (a) don't have the potential to break so
 
 For example, it's very hard for `eslint` to break anything in production.
 If your build/tests pass, then you are fine.
-Consider enabling automerge for all lint packages to save yourself the pointless click when you manually approve them each time.
+Consider enabling automerge for all lint packages to save yourself the work of manually approving the update each time.
 In this case you might wake up to 5/10 of your overnight Pull Requests having already merged themselves.
 
 Another example of a good candidate for automerging might be a database driver like `node-postgres` (`pg` on npm), if you have 100% test coverage of your API.
@@ -128,21 +128,21 @@ And worse still, npm package versions that are less than 24 hours [can be unpubl
 So to reduce the interruptions of automated dependency updates, consider putting Renovate on a schedule, such as:
 
 - Update only on weekends? This way you update packages at most once per week, _and_ your CI build runners are likely to be idle anyway
-- Update daily, but between hours like midnight and 5am? That way notifications don't pop up in people's feed while they're working, _and_ you also get the benefit of not tying up build machines when developers need to use them
+- Update daily, but between midnight and 5am? This way developers aren't bothered by notifications when they're working, _and_ you're keeping the build machines free for the developers
 
-To learn all about controlling Renovate's schedule, read the [key concepts, scheduling](https://docs.renovatebot.com/key-concepts/scheduling/) docs.
+To learn all about controlling Renovate's schedule, read the [key concepts, scheduling](./key-concepts/scheduling.md) docs.
 
 ### Grouping related packages
 
 Although it's good to isolate each dependency update for ease of troubleshooting, there are times when the extra noise isn't worth it, or when packages naturally belong together anyway (such as all `babel` packages).
-You can add a package rule in our Renovate configuration to group these together and you'll get just one branch combined even if multiple packages have updates available.
+You can add a package rule in our Renovate configuration to group these together and you'll get one branch combined even if multiple packages have updates available.
 
 ## Pinning Dependencies and Lock Files
 
 Since both `yarn` and `npm@5` both support lock files, it's a common question to ask "Why should I pin dependencies if I'm already using a lock file?".
 It's a good question!
 
-![broken-lockfile](assets/images/broken-lockfile.jpg)
+![A scary bald man in a subway carriage, surrounded with this text: when your dependencies are broken but you still got a lockfile](assets/images/broken-lockfile.jpg){ loading=lazy }
 
 Lock files are a great companion to SemVer ranges _or_ pinning dependencies, because these files lock (pin) deeper into your dependency tree than you see in `package.json`.
 
@@ -158,7 +158,7 @@ If a lock file gets out of sync with its `package.json`, it can no longer be gua
 
 The lock file has only delayed the inevitable problem, and provides much less visibility than `package.json`, because it's not designed to be human readable and is quite dense.
 
-![all-dead](assets/images/all-dead.jpg)
+![Man with goth-style hair and makeup saying: They're all dead. They just don't know it yet.](assets/images/all-dead.jpg){ loading=lazy }
 
 If the `package.json` has a range, and a new in-range version is released that would break the build, then essentially your `package.json` is in a state of "broken", even if the lock file is still holding things together.
 
@@ -184,9 +184,9 @@ Meanwhile you could be upgrading all the other essential fixes of other dependen
 You could even be running `yarn upgrade` regularly to be getting _indirect_ package updates in the lockfile and seeing if everything still passes.
 
 So the lock file does not solve the same SemVer problems that pinning solves - but it compliments it.
-For this reason our usual recommendation using a lock file regardless of whether you pin dependencies or not, and pinning even if you have a lock file.
+For this reason our usual recommendation is using a lock file regardless of whether you pin dependencies or not, and pinning even if you have a lock file.
 
-Don't forget though that our motto is "Flexible, so you don't need to be", so go ahead and configure however you want.
+But you may also go ahead and configure however you want.
 Also, we're open to ideas for how to make lock file updates more "visible" too.
 e.g. are you interested in a Renovate feature where you get a lockfile-only PR any time a direct dependency gets an in-range update?
 
@@ -194,7 +194,7 @@ e.g. are you interested in a Renovate feature where you get a lockfile-only PR a
 
 A good argument made by [@LinusU](https://github.com/LinusU) is:
 
-> pinning will only protect you against breakage in a, in many cases, small percentage of your packages. If you for example have installed express and pinned it, you will only protect yourself against a bad express release, it will not help with the 30 dependencies that express has.
+> Pinning will only protect you against breakage in a, in many cases, small percentage of your packages. If you for example have installed Express and pinned it, you will only protect yourself against a bad Express release, it will not help with the 30 dependencies that Express has.
 >
 > Because of this, I personally think that pinning dependencies just creates a false sense of security, and that using a lock file is superior in every way.
 

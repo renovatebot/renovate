@@ -1,20 +1,28 @@
 import * as npmVersioning from '../../versioning/npm';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { id } from './common';
+import { defaultRegistryUrls as npmDefaultRegistryUrl } from './common';
 import { getDependency } from './get';
 
-export { resetMemCache, resetCache } from './get';
 export { setNpmrc } from './npmrc';
 
 export class NpmDatasource extends Datasource {
-  static readonly id = id;
+  static readonly id = 'npm';
 
   override readonly customRegistrySupport = true;
 
   override readonly registryStrategy = 'first';
 
   override readonly defaultVersioning = npmVersioning.id;
+
+  override readonly defaultRegistryUrls = npmDefaultRegistryUrl;
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `time` field in the results.';
+  override readonly sourceUrlSupport = 'release';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `repository` field in the results.';
 
   constructor() {
     super(NpmDatasource.id);
@@ -30,10 +38,6 @@ export class NpmDatasource extends Datasource {
     }
 
     const res = await getDependency(this.http, registryUrl, packageName);
-    if (res) {
-      res.tags ||= res['dist-tags'];
-      delete res['dist-tags'];
-    }
     return res;
   }
 }

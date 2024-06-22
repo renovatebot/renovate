@@ -1,12 +1,13 @@
+import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
 import { getOptions } from '../../lib/config/options';
-import { getManagerList } from '../../lib/modules/manager';
+import { allManagersList } from '../../lib/modules/manager';
 import { getCliName } from '../../lib/workers/global/config/parse/cli';
 import { getEnvName } from '../../lib/workers/global/config/parse/env';
 import { readFile, updateFile } from '../utils';
 
 const options = getOptions();
-const managers = new Set(getManagerList());
+const managers = new Set(allManagersList);
 
 /**
  * Merge string arrays one by one
@@ -91,6 +92,9 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'experimental',
     'experimentalDescription',
     'experimentalIssues',
+    'advancedUse',
+    'deprecationMsg',
+    'patternMatch',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];
@@ -178,6 +182,17 @@ function genExperimentalMsg(el: Record<string, any>): string {
   return warning + '\n';
 }
 
+function genDeprecationMsg(el: Record<string, any>): string {
+  let warning =
+    '\n<!-- prettier-ignore -->\n!!! warning "This feature has been deprecated"\n';
+
+  if (el.deprecationMsg) {
+    warning += indent`${2}${el.deprecationMsg}`;
+  }
+
+  return warning + '\n';
+}
+
 function indexMarkdown(lines: string[]): Record<string, [number, number]> {
   const indexed: Record<string, [number, number]> = {};
 
@@ -204,22 +219,22 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
   }
 
   const configOptionsRaw = (await readFile(`docs/usage/${configFile}`)).split(
-    '\n'
+    '\n',
   );
 
   const indexed = indexMarkdown(configOptionsRaw);
 
   options
     .filter(
-      (option) => !!option.globalOnly === bot && !managers.has(option.name)
+      (option) => !!option.globalOnly === bot && !managers.has(option.name),
     )
     .forEach((option) => {
-      // TODO: fix types (#7154,#9610)
+      // TODO: fix types (#22198,#9610)
       const el: Record<string, any> = { ...option };
 
       if (!indexed[option.name]) {
         throw new Error(
-          `Config option "${option.name}" is missing an entry in ${configFile}`
+          `Config option "${option.name}" is missing an entry in ${configFile}`,
         );
       }
 
@@ -233,10 +248,25 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
         `\n${option.description}\n\n` +
         genTable(Object.entries(el), option.type, option.default);
 
+      if (el.advancedUse) {
+        configOptionsRaw[headerIndex] += generateAdvancedUse();
+      }
+
       if (el.experimental) {
         configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+      }
+
+      if (is.nonEmptyString(el.deprecationMsg)) {
+        configOptionsRaw[footerIndex] += genDeprecationMsg(el);
       }
     });
 
   await updateFile(`${dist}/${configFile}`, configOptionsRaw.join('\n'));
+}
+
+function generateAdvancedUse(): string {
+  return (
+    '\n<!-- prettier-ignore -->\n!!! warning\n' +
+    '    For advanced use only! Use at your own risk!\n'
+  );
 }

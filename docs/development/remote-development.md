@@ -23,39 +23,15 @@ You'll use the same code editor and have the same config as all other developers
 - Start work in a fresh environment every time
 - Reproducible development environment
 - Similar config for all developers
-- Use VSCode in the browser
+- Use VS Code in the browser
 
 ### Drawbacks
 
 - Waiting for the remote container to start
-- If your internet is down or Gitpod or GitHub Codespaces are down then you can't work
-
-## Gitpod
-
-You can use [Gitpod](https://gitpod.io/) for light development work like:
-
-- Editing the docs
-- Running ESLint, Prettier
-
-For proper development, use GitHub Codespaces.
-
-The config file for Gitpod is `.gitpod.yml` in the root of the repository.
-
-Gitpod comes with 50 free hours each month.
-If you need more hours you'll need to buy a plan with more hours.
-
-### Gitpod tips
-
-- Use `yarn jest:16` to run the tests on Gitpod
-
-### Known problems with Gitpod
-
-- `yarn jest:16` has some failing tests
-- You can't preview Markdown files in the VS Code online editor
+- If your internet is down you can't work
+- If Codespaces is down you can't work
 
 ## GitHub Codespaces
 
 The Renovate developers use [GitHub Codespaces](https://github.com/features/codespaces).
 The config files are in the `.devcontainer` folder in the repository.
-
-You can only use GitHub Codespaces if you're invited into the beta by GitHub.

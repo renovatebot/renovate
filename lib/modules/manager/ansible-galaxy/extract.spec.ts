@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { getSliceEndNumber } from './extract';
 import { extractPackageFile } from './';
@@ -27,6 +28,31 @@ describe('modules/manager/ansible-galaxy/extract', () => {
       expect(res?.deps).toHaveLength(2);
     });
 
+    it('extracts dependencies from requirements.yml with a space at the end of line', () => {
+      const yamlFile = codeBlock`collections:
+      - name: https://github.com/lowlydba/lowlydba.sqlserver.git
+      type: git
+      version: 1.1.3`;
+      const res = extractPackageFile(yamlFile, 'requirements.yml');
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].currentValue).toBe('1.1.3');
+    });
+
+    it('extracts git@ dependencies', () => {
+      const yamlFile = codeBlock`collections:
+      - name: community.docker
+        source: git@github.com:ansible-collections/community.docker
+        type: git
+        version: 2.7.5`;
+      const res = extractPackageFile(yamlFile, 'requirements.yml');
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].currentValue).toBe('2.7.5');
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+      expect(res?.deps[0].packageName).toBe(
+        'git@github.com:ansible-collections/community.docker',
+      );
+    });
+
     it('check if an empty file returns null', () => {
       const res = extractPackageFile('\n', 'requirements.yml');
       expect(res).toBeNull();
@@ -40,7 +66,7 @@ describe('modules/manager/ansible-galaxy/extract', () => {
     it('check collection style requirements file', () => {
       const res = extractPackageFile(collections1, 'requirements.yml');
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(13);
+      expect(res?.deps).toHaveLength(14);
       expect(res?.deps.filter((value) => value.skipReason)).toHaveLength(6);
     });
 
@@ -53,7 +79,7 @@ describe('modules/manager/ansible-galaxy/extract', () => {
     it('check galaxy definition file', () => {
       const res = extractPackageFile(galaxy, 'galaxy.yml');
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(2);
+      expect(res?.deps).toHaveLength(10);
     });
   });
 
@@ -75,7 +101,7 @@ describe('modules/manager/ansible-galaxy/extract', () => {
 
     it('choose second block', () => {
       const res = getSliceEndNumber(5, 10, 5);
-      expect(res).toBe(9);
+      expect(res).toBe(10);
     });
   });
 });

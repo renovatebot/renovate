@@ -7,7 +7,7 @@ import { FlutterVersionDatasource } from '.';
 const baseUrl = 'https://storage.googleapis.com';
 const urlPath = '/flutter_infra_release/releases/releases_linux.json';
 const datasource = FlutterVersionDatasource.id;
-const depName = 'flutter';
+const packageName = 'flutter';
 
 describe('modules/datasource/flutter-version/index', () => {
   describe('getReleases', () => {
@@ -16,8 +16,8 @@ describe('modules/datasource/flutter-version/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName,
-        })
+          packageName,
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -26,18 +26,18 @@ describe('modules/datasource/flutter-version/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName,
-        })
+          packageName,
+        }),
       ).toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
-      httpMock.scope(baseUrl).get(urlPath).reply(200, []);
+      httpMock.scope(baseUrl).get(urlPath).reply(200, { releases: [] });
       expect(
         await getPkgReleases({
           datasource,
-          depName,
-        })
+          packageName,
+        }),
       ).toBeNull();
     });
 
@@ -48,7 +48,7 @@ describe('modules/datasource/flutter-version/index', () => {
         .reply(200, Fixtures.get('index.json'));
       const res = await getPkgReleases({
         datasource,
-        depName,
+        packageName,
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(31);

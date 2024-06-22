@@ -1,7 +1,21 @@
+import { ZodError } from 'zod';
+import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { cache } from '../../../util/cache/package/decorator';
+import type { HttpError } from '../../../util/http';
+import { Result } from '../../../util/result';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { CdnjsResponse } from './types';
+import { DigestsConfig, ReleasesConfig } from '../schema';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types';
+import {
+  CdnjsAPISriResponseSchema,
+  CdnjsAPIVersionResponseSchema,
+} from './schema';
 
 export class CdnJsDatasource extends Datasource {
   static readonly id = 'cdnjs';
@@ -14,46 +28,93 @@ export class CdnJsDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = ['https://api.cdnjs.com/'];
 
-  override readonly caching = true;
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `repository` field in the results.';
 
-  // this.handleErrors will always throw
+  @cache({
+    namespace: `datasource-${CdnJsDatasource.id}`,
+    key: ({ packageName }: GetReleasesConfig) => packageName.split('/')[0],
+  })
+  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const result = Result.parse(config, ReleasesConfig)
+      .transform(({ packageName, registryUrl }) => {
+        const [library] = packageName.split('/');
 
-  async getReleases({
-    packageName,
-    registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // Each library contains multiple assets, so we cache at the library level instead of per-asset
-    const library = packageName.split('/')[0];
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    const url = `${registryUrl}libraries/${library}?fields=homepage,repository,assets`;
-    let result: ReleaseResult | null = null;
-    try {
-      const { assets, homepage, repository } = (
-        await this.http.getJson<CdnjsResponse>(url)
-      ).body;
-      if (!assets) {
-        return null;
-      }
-      const assetName = packageName.replace(`${library}/`, '');
-      const releases = assets
-        .filter(({ files }) => files.includes(assetName))
-        .map(({ version, sri }) => ({ version, newDigest: sri?.[assetName] }));
+        const url = `${registryUrl}libraries/${library}?fields=homepage,repository,versions`;
 
-      result = { releases };
+        return this.http.getJsonSafe(url, CdnjsAPIVersionResponseSchema);
+      })
+      .transform(({ versions, homepage, repository }): ReleaseResult => {
+        const releases: Release[] = versions;
 
-      if (homepage) {
-        result.homepage = homepage;
-      }
-      if (repository?.url) {
-        result.sourceUrl = repository.url;
-      }
-    } catch (err) {
-      if (err.statusCode !== 404) {
-        throw new ExternalHostError(err);
-      }
+        const res: ReleaseResult = { releases };
+
+        if (homepage) {
+          res.homepage = homepage;
+        }
+
+        if (repository) {
+          res.sourceUrl = repository;
+        }
+
+        return res;
+      });
+
+    const { val, err } = await result.unwrap();
+
+    if (err instanceof ZodError) {
+      logger.debug({ err }, 'cdnjs: validation error');
+      return null;
+    }
+
+    if (err) {
       this.handleGenericErrors(err);
     }
-    return result;
+
+    return val;
+  }
+
+  @cache({
+    namespace: `datasource-${CdnJsDatasource.id}-digest`,
+    key: ({ registryUrl, packageName }: DigestConfig, newValue: string) =>
+      `${registryUrl}:${packageName}:${newValue}}`,
+  })
+  override async getDigest(
+    config: DigestConfig,
+    newValue: string,
+  ): Promise<string | null> {
+    const { packageName } = config;
+    const [library] = packageName.split('/');
+    const assetName = packageName.replace(`${library}/`, '');
+
+    const result = Result.parse(config, DigestsConfig)
+      .transform(({ registryUrl }) => {
+        const url = `${registryUrl}libraries/${library}/${newValue}?fields=sri`;
+
+        return this.http.getJsonSafe(url, CdnjsAPISriResponseSchema);
+      })
+      .transform(({ sri }): string => {
+        return sri?.[assetName];
+      });
+
+    const { val = null, err } = await result.unwrap();
+
+    if (err instanceof ZodError) {
+      logger.debug({ err }, 'cdnjs: validation error');
+      return null;
+    }
+
+    if (err) {
+      this.handleGenericErrors(err);
+    }
+
+    return val;
+  }
+
+  override handleHttpErrors(err: HttpError): void {
+    if (err.response?.statusCode !== 404) {
+      throw new ExternalHostError(err);
+    }
   }
 }

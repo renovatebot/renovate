@@ -1,12 +1,9 @@
-import { getConfig, git, partial, platform } from '../../../../../test/util';
+import { partial, platform, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { Pr } from '../../../../modules/platform';
-import { BranchStatus } from '../../../../types';
 import type { BranchConfig } from '../../../types';
 import * as schedule from '../branch/schedule';
 import * as prAutomerge from './automerge';
-
-jest.mock('../../../../util/git');
 
 describe('workers/repository/update/pr/automerge', () => {
   describe('checkAutoMerge(pr, config)', () => {
@@ -15,15 +12,14 @@ describe('workers/repository/update/pr/automerge', () => {
     let pr: Pr;
 
     beforeEach(() => {
-      // TODO #7154 incompatible types
       config = {
-        ...getConfig(),
-      } as BranchConfig;
-      pr = partial<Pr>({});
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
+        baseBranch: 'base-branch',
+        manager: 'some-manager',
+        branchName: 'renovate/pin',
+        upgrades: [],
+      } satisfies BranchConfig;
+      pr = partial<Pr>();
+      spy.mockReturnValue(true);
     });
 
     it('should not automerge if not configured', async () => {
@@ -40,7 +36,7 @@ describe('workers/repository/update/pr/automerge', () => {
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automerge = true;
       config.pruneBranchAfterAutomerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      platform.getBranchStatus.mockResolvedValueOnce('green');
       platform.mergePr.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
       expect(res).toEqual({ automerged: true, branchRemoved: true });
@@ -49,7 +45,7 @@ describe('workers/repository/update/pr/automerge', () => {
 
     it('should indicate if automerge failed', async () => {
       config.automerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      platform.getBranchStatus.mockResolvedValueOnce('green');
       platform.mergePr.mockResolvedValueOnce(false);
       const res = await prAutomerge.checkAutoMerge(pr, config);
       expect(res).toEqual({
@@ -63,7 +59,7 @@ describe('workers/repository/update/pr/automerge', () => {
       config.automerge = true;
       config.automergeType = 'pr-comment';
       config.automergeComment = '!merge';
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      platform.getBranchStatus.mockResolvedValueOnce('green');
       platform.ensureComment.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
       expect(res).toEqual({ automerged: true, branchRemoved: false });
@@ -76,7 +72,7 @@ describe('workers/repository/update/pr/automerge', () => {
       config.automergeType = 'pr-comment';
       config.automergeComment = '!merge';
       config.rebaseRequested = true;
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      platform.getBranchStatus.mockResolvedValueOnce('green');
       platform.ensureComment.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
       expect(res).toEqual({ automerged: true, branchRemoved: false });
@@ -87,7 +83,7 @@ describe('workers/repository/update/pr/automerge', () => {
     it('should skip branch deletion after automerge if prune is disabled', async () => {
       config.automerge = true;
       config.pruneBranchAfterAutomerge = false;
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      platform.getBranchStatus.mockResolvedValueOnce('green');
       platform.mergePr.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
       expect(res).toEqual({ automerged: true, branchRemoved: false });
@@ -96,8 +92,8 @@ describe('workers/repository/update/pr/automerge', () => {
 
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
       config.automerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      git.isBranchModified.mockResolvedValueOnce(true);
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      scm.isBranchModified.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
       expect(res).toEqual({
         automerged: false,
@@ -108,7 +104,7 @@ describe('workers/repository/update/pr/automerge', () => {
 
     it('should not automerge if enabled and pr is mergeable but branch status is not success', async () => {
       config.automerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
+      platform.getBranchStatus.mockResolvedValueOnce('yellow');
       const res = await prAutomerge.checkAutoMerge(pr, config);
       expect(res).toEqual({
         automerged: false,
@@ -130,7 +126,7 @@ describe('workers/repository/update/pr/automerge', () => {
 
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automerge = true;
-      git.isBranchConflicted.mockResolvedValueOnce(true);
+      scm.isBranchConflicted.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
       expect(res).toEqual({
         automerged: false,
@@ -142,7 +138,7 @@ describe('workers/repository/update/pr/automerge', () => {
     it('dryRun full should not automerge', async () => {
       config.automerge = true;
       GlobalConfig.set({ dryRun: 'full' });
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      platform.getBranchStatus.mockResolvedValueOnce('green');
       const res = await prAutomerge.checkAutoMerge(pr, config);
       expect(res).toEqual({
         automerged: false,
@@ -157,7 +153,7 @@ describe('workers/repository/update/pr/automerge', () => {
         automerged: false,
         prAutomergeBlockReason: 'DryRun',
       };
-      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      platform.getBranchStatus.mockResolvedValueOnce('green');
       GlobalConfig.set({ dryRun: 'full' });
       const res = await prAutomerge.checkAutoMerge(pr, config);
       expect(res).toEqual(expectedResult);

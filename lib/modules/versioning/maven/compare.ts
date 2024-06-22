@@ -27,7 +27,7 @@ export type Token = NumberToken | QualifierToken;
 
 function iterateChars(
   str: string,
-  cb: (p: string | null, n: string | null) => void
+  cb: (p: string | null, n: string | null) => void,
 ): void {
   let prev = null;
   let next = null;
@@ -44,7 +44,7 @@ function isDigit(char: string): boolean {
 }
 
 function isLetter(char: string): boolean {
-  return regEx(/^[a-z_]$/i).test(char);
+  return regEx(/^[a-z_+]$/i).test(char);
 }
 
 function isTransition(prevChar: string, nextChar: string): boolean {
@@ -111,19 +111,12 @@ function isNull(token: Token): boolean {
   );
 }
 
-const zeroToken: NumberToken = {
-  prefix: PREFIX_HYPHEN,
-  type: TYPE_NUMBER,
-  val: 0,
-  isTransition: false,
-};
-
 function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
   let buf: Token[] = [];
   let result: Token[] = [];
   let leadingZero = true;
   iterateTokens(versionStr.toLowerCase().replace(regEx(/^v/i), ''), (token) => {
-    if (token.prefix === PREFIX_HYPHEN) {
+    if (token.prefix === PREFIX_HYPHEN || token.type === TYPE_QUALIFIER) {
       buf = [];
     }
     buf.push(token);
@@ -136,7 +129,7 @@ function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
       buf = [];
     }
   });
-  return result.length ? result : [zeroToken];
+  return result;
 }
 
 function nullFor(token: Token): Token {
@@ -154,10 +147,7 @@ function nullFor(token: Token): Token {
 }
 
 function commonOrder(token: Token): number {
-  if (token.prefix === PREFIX_DOT && token.type === TYPE_QUALIFIER) {
-    return 0;
-  }
-  if (token.prefix === PREFIX_HYPHEN && token.type === TYPE_QUALIFIER) {
+  if (token.type === TYPE_QUALIFIER) {
     return 1;
   }
   if (token.prefix === PREFIX_HYPHEN && token.type === TYPE_NUMBER) {
@@ -166,16 +156,15 @@ function commonOrder(token: Token): number {
   return 3;
 }
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum QualifierTypes {
-  Alpha = 1,
-  Beta,
-  Milestone,
-  RC,
-  Snapshot,
-  Release,
-  SP,
-}
+export const QualifierTypes = {
+  Alpha: 1,
+  Beta: 2,
+  Milestone: 3,
+  RC: 4,
+  Snapshot: 5,
+  Release: 6,
+  SP: 7,
+} as const;
 
 export function qualifierType(token: Token): number | null {
   const val = token.val;
@@ -282,7 +271,7 @@ function isVersion(version: unknown): version is string {
   if (!version || typeof version !== 'string') {
     return false;
   }
-  if (!regEx(/^[a-z_0-9.-]+$/i).test(version)) {
+  if (!regEx(/^[-.a-z_+0-9]+$/i).test(version)) {
     return false;
   }
   if (regEx(/^[.-]/).test(version)) {
@@ -368,7 +357,7 @@ function parseRange(rangeStr: string): Range[] | null {
   if (interval.leftType) {
     return null;
   } // something like '[1,2],[3'
-  if (!ranges || !ranges.length) {
+  if (!ranges?.length) {
     return null;
   }
 
@@ -434,7 +423,7 @@ function rangeToStr(fullRange: Range[] | null): string | null {
     return null;
   }
 
-  const valToStr = (val: string | null): string => (val === null ? '' : val);
+  const valToStr = (val: string | null): string => val ?? '';
 
   if (fullRange.length === 1) {
     const { leftBracket, rightBracket, leftValue, rightValue } = fullRange[0];
@@ -454,7 +443,7 @@ function rangeToStr(fullRange: Range[] | null): string | null {
       ',',
       valToStr(val.rightValue),
       val.rightBracket,
-    ].join('')
+    ].join(''),
   );
   return intervals.join(',');
 }
@@ -491,7 +480,7 @@ function incrementRangeValue(value: string): string {
 
 function autoExtendMavenRange(
   currentRepresentation: string,
-  newValue: string
+  newValue: string,
 ): string | null {
   const range = parseRange(currentRepresentation);
   if (!range) {
@@ -546,7 +535,7 @@ function autoExtendMavenRange(
       }
     } else {
       interval.rightValue = incrementRangeValue(
-        coerceRangeValue(rightValue, newValue)
+        coerceRangeValue(rightValue, newValue),
       );
     }
   } else if (leftValue !== null) {

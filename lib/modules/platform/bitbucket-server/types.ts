@@ -48,6 +48,7 @@ export interface BbsRestPr {
 }
 
 export interface BbsRestRepo {
+  id: number;
   project: { key: string };
   origin: { name: string; slug: string };
   links: {

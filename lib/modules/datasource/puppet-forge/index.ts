@@ -12,14 +12,17 @@ export class PuppetForgeDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = [PUPPET_FORGE];
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `created_at` field from the response.';
+
   async getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // https://forgeapi.puppet.com
     const moduleSlug = packageName.replace('/', '-');
-    // TODO: types (#7154)
-    /* eslint-disable-next-line @typescript-eslint/restrict-template-expressions */
+    // TODO: types (#22198)
     const url = `${registryUrl}/v3/modules/${moduleSlug}?exclude_fields=current_release`;
 
     let module: PuppetModule;
@@ -47,10 +50,11 @@ export class PuppetForgeDatasource extends Datasource {
 
   static createReleaseResult(
     releases: Release[],
-    module: PuppetModule
+    module: PuppetModule,
   ): ReleaseResult {
     const result: ReleaseResult = {
       releases,
+      // the homepage url in the fixtures is a github repo, we can use this as sourceUrl
       homepage: module.homepage_url,
     };
 

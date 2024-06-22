@@ -1,4 +1,4 @@
-import type { Url } from 'url';
+import type { Url } from 'node:url';
 import { afterAll, afterEach, beforeAll } from '@jest/globals';
 // eslint-disable-next-line no-restricted-imports
 import nock from 'nock';
@@ -97,7 +97,7 @@ export function getTrace(): RequestLogItem[] /* istanbul ignore next */ {
         'Completed requests:',
         ...requestLog.map(({ method, url }) => `  ${method} ${url}`),
         ...errorLines,
-      ].join('\n')
+      ].join('\n'),
     );
   }
   return requestLog;

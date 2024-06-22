@@ -1,19 +1,24 @@
 import { logger } from '../../../logger';
+import { Result } from '../../../util/result';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
-import { extractLockFileEntries } from './locked-version';
+import { Lockfile } from './schema';
 
 export function updateLockedDependency(
-  config: UpdateLockedConfig
+  config: UpdateLockedConfig,
 ): UpdateLockedResult {
   const { depName, currentVersion, newVersion, lockFile, lockFileContent } =
     config;
   logger.debug(
-    // TODO: types (#7154)
-    `poetry.updateLockedDependency: ${depName}@${currentVersion!} -> ${newVersion} [${lockFile}]`
+    `poetry.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`,
   );
-  const locked = extractLockFileEntries(lockFileContent ?? '');
-  if (depName && locked[depName] === newVersion) {
-    return { status: 'already-updated' };
-  }
-  return { status: 'unsupported' };
+
+  const LockedVersionSchema = Lockfile.transform(({ lock }) => lock[depName]);
+  return Result.parse(lockFileContent, LockedVersionSchema)
+    .transform(
+      (lockedVersion): UpdateLockedResult =>
+        lockedVersion === newVersion
+          ? { status: 'already-updated' }
+          : { status: 'unsupported' },
+    )
+    .unwrapOrElse({ status: 'unsupported' });
 }

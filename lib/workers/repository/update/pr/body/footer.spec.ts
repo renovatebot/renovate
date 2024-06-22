@@ -6,29 +6,27 @@ jest.mock('../../../../../util/template');
 const template = mocked(_template);
 
 describe('workers/repository/update/pr/body/footer', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   it('renders empty footer', () => {
     expect(
       getPrFooter({
         manager: 'some-manager',
+        baseBranch: 'base',
         branchName: 'branch',
         upgrades: [],
-      })
+      }),
     ).toBe('');
   });
 
   it('renders prFooter', () => {
-    template.compile.mockImplementation((x) => x);
+    template.safeCompile.mockImplementation((x) => x);
     expect(
       getPrFooter({
         manager: 'some-manager',
+        baseBranch: 'base',
         branchName: 'branch',
         upgrades: [],
         prFooter: 'FOOTER',
-      })
+      }),
     ).toMatchInlineSnapshot(`
       "
       ---

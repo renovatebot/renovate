@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/repology/index getReleases returns correct version for api package 1`] = `
-Object {
+{
   "registryUrl": "https://repology.org",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "1.181",
     },
   ],
@@ -12,10 +12,10 @@ Object {
 `;
 
 exports[`modules/datasource/repology/index getReleases returns correct version for binary package 1`] = `
-Object {
+{
   "registryUrl": "https://repology.org",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "1.14.2-2+deb10u1",
     },
   ],
@@ -23,10 +23,10 @@ Object {
 `;
 
 exports[`modules/datasource/repology/index getReleases returns correct version for multi-package project with different name 1`] = `
-Object {
+{
   "registryUrl": "https://repology.org",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "12.2-4+deb10u1",
     },
   ],
@@ -34,10 +34,10 @@ Object {
 `;
 
 exports[`modules/datasource/repology/index getReleases returns correct version for multi-package project with same name 1`] = `
-Object {
+{
   "registryUrl": "https://repology.org",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "9.3.0-r2",
     },
   ],
@@ -45,10 +45,10 @@ Object {
 `;
 
 exports[`modules/datasource/repology/index getReleases returns correct version for source package 1`] = `
-Object {
+{
   "registryUrl": "https://repology.org",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "1.181",
     },
   ],
@@ -56,25 +56,25 @@ Object {
 `;
 
 exports[`modules/datasource/repology/index getReleases returns multiple versions if they are present in repository 1`] = `
-Object {
+{
   "registryUrl": "https://repology.org",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "1:11.0.7.10-1.el8_1",
     },
-    Object {
+    {
       "version": "1:11.0.8.10-0.el8_2",
     },
-    Object {
+    {
       "version": "1:11.0.8.10-6.el8",
     },
-    Object {
+    {
       "version": "1:11.0.9.11-0.el8_2",
     },
-    Object {
+    {
       "version": "1:11.0.9.11-2.el8_3",
     },
-    Object {
+    {
       "version": "1:11.0.9.11-3.el8_3",
     },
   ],

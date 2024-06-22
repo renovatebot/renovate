@@ -99,7 +99,7 @@ describe('modules/datasource/hermit/index', () => {
         datasource.getReleases({
           packageName: 'go',
           registryUrl,
-        })
+        }),
       ).resolves.toBeNull();
     });
 
@@ -126,7 +126,7 @@ describe('modules/datasource/hermit/index', () => {
         datasource.getReleases({
           packageName: 'go',
           registryUrl,
-        })
+        }),
       ).rejects.toThrow();
     });
 
@@ -135,7 +135,7 @@ describe('modules/datasource/hermit/index', () => {
         datasource.getReleases({
           packageName: 'go',
           registryUrl: 'https://gitlab.com/owner/project',
-        })
+        }),
       ).resolves.toBeNull();
     });
 
@@ -144,13 +144,13 @@ describe('modules/datasource/hermit/index', () => {
         datasource.getReleases({
           packageName: 'go',
           registryUrl: 'https://github.com/test',
-        })
+        }),
       ).resolves.toBeNull();
       await expect(
         datasource.getReleases({
           packageName: 'go',
           registryUrl: 'https://github.com/',
-        })
+        }),
       ).resolves.toBeNull();
     });
 
@@ -159,7 +159,7 @@ describe('modules/datasource/hermit/index', () => {
         datasource.getReleases({
           packageName: 'go',
           registryUrl: 'https://github.com/test/repo/extra-path',
-        })
+        }),
       ).resolves.toBeNull();
     });
 
@@ -167,7 +167,7 @@ describe('modules/datasource/hermit/index', () => {
       await expect(
         datasource.getReleases({
           packageName: 'go',
-        })
+        }),
       ).resolves.toBeNull();
     });
 
@@ -188,7 +188,7 @@ describe('modules/datasource/hermit/index', () => {
         datasource.getReleases({
           packageName: 'go',
           registryUrl,
-        })
+        }),
       ).resolves.toBeNull();
     });
 
@@ -214,7 +214,7 @@ describe('modules/datasource/hermit/index', () => {
         datasource.getReleases({
           packageName: 'go',
           registryUrl,
-        })
+        }),
       ).resolves.toBeNull();
     });
 
@@ -223,7 +223,7 @@ describe('modules/datasource/hermit/index', () => {
         datasource.getReleases({
           packageName: 'go',
           registryUrl: 'invalid url',
-        })
+        }),
       ).resolves.toBeNull();
     });
   });

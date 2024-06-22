@@ -25,6 +25,15 @@ describe('workers/repository/model/semantic-commit-message', () => {
     expect(message.toString()).toBe('fix(scope): test');
   });
 
+  it('should transform to lowercase only first letter', () => {
+    const message = new SemanticCommitMessage();
+    message.subject = 'Update My Org dependencies';
+    message.type = 'fix';
+    message.scope = 'deps ';
+
+    expect(message.toString()).toBe('fix(deps): update My Org dependencies');
+  });
+
   it('should create instance from string without scope', () => {
     const instance = SemanticCommitMessage.fromString('feat: ticket 123');
 
@@ -40,7 +49,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
 
   it('should create instance from string with scope', () => {
     const instance = SemanticCommitMessage.fromString(
-      'fix(dashboard): ticket 123'
+      'fix(dashboard): ticket 123',
     );
 
     expect(SemanticCommitMessage.is(instance)).toBeTrue();

@@ -32,6 +32,7 @@ describe('modules/manager/pip_setup/extract', () => {
           { depName: 'raven', currentValue: '>=5.27.1,<7.0' },
           { depName: 'future', currentValue: '>=0.15.2,<0.17' },
           { depName: 'ipaddress', currentValue: '>=1.0.16,<2.0' },
+          { depName: 'zope.interface', currentValue: '>=5.5.2,<6.0.0' },
         ],
       });
     });

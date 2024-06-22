@@ -1,20 +1,32 @@
 {
   "name": "Renovate",
-  "dockerFile": "Dockerfile",
-  "settings": {
-    "terminal.integrated.profiles.linux": { "bash": { "path": "/bin/bash" } },
-    "terminal.integrated.defaultProfile.linux": "bash"
+  "build": {
+    "dockerfile": "Dockerfile"
   },
-  "extensions": [
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "orta.vscode-jest"
-  ],
-  "runArgs": [
-    "--cap-add=SYS_PTRACE",
-    "--security-opt",
-    "seccomp=unconfined",
-    "--privileged"
-  ],
-  "postCreateCommand": "yarn install"
+  "init": true,
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "7gb",
+    "storage": "32gb"
+  },
+  "customizations": {
+    "vscode": {
+      "terminal.integrated.profiles.linux": {
+        "bash": {
+          "path": "bash",
+          "icon": "terminal-bash"
+        }
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "orta.vscode-jest",
+        "editorconfig.editorconfig",
+        "github.vscode-github-actions"
+      ]
+    }
+  },
+  "postCreateCommand": [".devcontainer/post-create.sh"],
+  // Otherwise jest watcher fails because deps were not installed yet
+  "waitFor": "postCreateCommand"
 }

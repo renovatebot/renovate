@@ -1,14 +1,14 @@
-import { defaultConfig } from '../../test/util';
 import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
 } from '../constants/error-messages';
+import { getConfig } from './defaults';
 import { applySecretsToConfig, validateConfigSecrets } from './secrets';
 
 describe('config/secrets', () => {
   describe('validateConfigSecrets(config)', () => {
     it('works with default config', () => {
-      expect(() => validateConfigSecrets(defaultConfig)).not.toThrow();
+      expect(() => validateConfigSecrets(getConfig())).not.toThrow();
     });
 
     it('returns if no secrets', () => {
@@ -17,19 +17,19 @@ describe('config/secrets', () => {
 
     it('throws if secrets is not an object', () => {
       expect(() => validateConfigSecrets({ secrets: 'hello' } as any)).toThrow(
-        CONFIG_SECRETS_INVALID
+        CONFIG_SECRETS_INVALID,
       );
     });
 
     it('throws for invalid secret names', () => {
       expect(() =>
-        validateConfigSecrets({ secrets: { '123': 'abc' } })
+        validateConfigSecrets({ secrets: { '123': 'abc' } }),
       ).toThrow(CONFIG_SECRETS_INVALID);
     });
 
     it('throws for non-string secret', () => {
       expect(() =>
-        validateConfigSecrets({ secrets: { abc: 123 } } as any)
+        validateConfigSecrets({ secrets: { abc: 123 } } as any),
       ).toThrow(CONFIG_SECRETS_INVALID);
     });
 
@@ -39,14 +39,14 @@ describe('config/secrets', () => {
           repositories: [
             { repository: 'abc/def', secrets: { abc: 123 } },
           ] as any,
-        })
+        }),
       ).toThrow(CONFIG_SECRETS_INVALID);
     });
   });
 
   describe('applySecretsToConfig(config)', () => {
     it('works with default config', () => {
-      expect(() => applySecretsToConfig(defaultConfig)).not.toThrow();
+      expect(() => applySecretsToConfig(getConfig())).not.toThrow();
     });
 
     it('throws if disallowed field is used', () => {
@@ -152,7 +152,7 @@ describe('config/secrets', () => {
         allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
       };
       expect(() => applySecretsToConfig(config, {}, false)).toThrow(
-        CONFIG_VALIDATION
+        CONFIG_VALIDATION,
       );
     });
 
@@ -174,9 +174,9 @@ describe('config/secrets', () => {
         secrets: { SECRET_MANAGER: 'npm' },
         allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
       };
-      // TODO fix me? #7154
+      // TODO fix me? #22198
       expect(() => applySecretsToConfig(config, null as never, false)).toThrow(
-        CONFIG_VALIDATION
+        CONFIG_VALIDATION,
       );
     });
   });

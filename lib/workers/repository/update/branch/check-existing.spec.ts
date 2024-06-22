@@ -1,7 +1,6 @@
-import { defaultConfig, partial, platform } from '../../../../../test/util';
+import { partial, platform } from '../../../../../test/util';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
-import { PrState } from '../../../../types';
 import type { BranchConfig } from '../../../types';
 import { prAlreadyExisted } from './check-existing';
 
@@ -10,13 +9,13 @@ describe('workers/repository/update/branch/check-existing', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      // TODO #7154 incompatible types
       config = {
-        ...defaultConfig,
+        baseBranch: 'base-branch',
+        manager: 'some-manager',
+        upgrades: [],
         branchName: 'some-branch',
         prTitle: 'some-title',
-      } as BranchConfig;
-      jest.resetAllMocks();
+      } satisfies BranchConfig;
     });
 
     it('returns false if recreating closed PRs', async () => {
@@ -26,17 +25,19 @@ describe('workers/repository/update/branch/check-existing', () => {
     });
 
     it('returns false if check misses', async () => {
-      config.recreatedClosed = true;
+      config.recreateClosed = false;
       expect(await prAlreadyExisted(config)).toBeNull();
       expect(platform.findPr).toHaveBeenCalledTimes(1);
     });
 
     it('returns true if first check hits', async () => {
-      platform.findPr.mockResolvedValueOnce({ number: 12 } as never);
-      platform.getPr.mockResolvedValueOnce({
-        number: 12,
-        state: PrState.Closed,
-      } as never);
+      platform.findPr.mockResolvedValueOnce(partial<Pr>({ number: 12 }));
+      platform.getPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 12,
+          state: 'closed',
+        }),
+      );
       expect(await prAlreadyExisted(config)).toEqual({ number: 12 });
       expect(platform.findPr).toHaveBeenCalledTimes(1);
     });
@@ -48,13 +49,13 @@ describe('workers/repository/update/branch/check-existing', () => {
       platform.getPr.mockResolvedValueOnce(
         partial<Pr>({
           number: 12,
-          state: PrState.Closed,
-        })
+          state: 'closed',
+        }),
       );
       expect(await prAlreadyExisted(config)).toEqual({ number: 12 });
       expect(platform.findPr).toHaveBeenCalledTimes(2);
       expect(logger.debug).toHaveBeenCalledWith(
-        `Found closed PR with current title`
+        `Found closed PR with current title`,
       );
     });
   });

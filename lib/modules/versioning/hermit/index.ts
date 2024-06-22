@@ -1,3 +1,4 @@
+import { satisfies } from 'semver';
 import { RegExpVersion, RegExpVersioningApi } from '../regex';
 import type { VersioningApiConstructor } from '../types';
 
@@ -9,8 +10,10 @@ export const urls = [
 export const supportsRanges = false;
 
 export class HermitVersioning extends RegExpVersioningApi {
+  // add <supplement> element to accomondate openjdk versioning defined in JEP322
+  // https://openjdk.org/jeps/322
   static versionRegex =
-    '^(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(_(?<build>\\d+))?([-]?(?<prerelease>[^.+][^+]*))?([+](?<compatibility>[^.-][^+]*))?$';
+    '^(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(\\.(?<supplement>\\d+))?(_(?<build>\\d+))?([-]?(?<prerelease>[^.+][^+]*))?([+](?<compatibility>[^.-][^+]*))?$';
 
   public constructor() {
     super(HermitVersioning.versionRegex);
@@ -20,8 +23,41 @@ export class HermitVersioning extends RegExpVersioningApi {
     return super._parse(version) !== null;
   }
 
+  private _parseHermitVersioning(version: string): RegExpVersion | null {
+    const groups = this._config?.exec(version)?.groups;
+    if (!groups) {
+      return null;
+    }
+
+    const {
+      major,
+      minor,
+      patch,
+      supplement,
+      build,
+      prerelease,
+      compatibility,
+    } = groups;
+    const release = [
+      Number.parseInt(major, 10),
+      typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
+      typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
+      typeof supplement === 'undefined' ? 0 : Number.parseInt(supplement, 10),
+    ];
+
+    if (build) {
+      release.push(Number.parseInt(build, 10));
+    }
+
+    return {
+      release,
+      prerelease,
+      compatibility,
+    };
+  }
+
   protected override _parse(version: string): RegExpVersion | null {
-    const parsed = super._parse(version);
+    const parsed = this._parseHermitVersioning(version);
     if (parsed) {
       return parsed;
     }
@@ -33,7 +69,15 @@ export class HermitVersioning extends RegExpVersioningApi {
       return null;
     }
 
-    const { major, minor, patch, build, prerelease, compatibility } = groups;
+    const {
+      major,
+      minor,
+      patch,
+      supplement,
+      build,
+      prerelease,
+      compatibility,
+    } = groups;
     const release = [];
 
     if (major) {
@@ -46,14 +90,17 @@ export class HermitVersioning extends RegExpVersioningApi {
     if (patch) {
       release.push(Number.parseInt(patch, 10));
     }
+    if (supplement) {
+      release.push(Number.parseInt(supplement, 10));
+    }
     if (build) {
       release.push(Number.parseInt(build, 10));
     }
 
     return {
       release,
-      prerelease: prerelease,
-      compatibility: compatibility,
+      prerelease,
+      compatibility,
     };
   }
 
@@ -127,7 +174,14 @@ export class HermitVersioning extends RegExpVersioningApi {
   }
 
   override matches(version: string, range: string): boolean {
-    return this.equals(version, range);
+    if (
+      HermitVersioning._isChannel(version) ||
+      HermitVersioning._isChannel(range)
+    ) {
+      return this.equals(version, range);
+    }
+
+    return satisfies(version, range);
   }
 }
 

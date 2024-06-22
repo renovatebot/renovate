@@ -1,8 +1,10 @@
-import type { IncomingHttpHeaders } from 'http';
+import type { IncomingHttpHeaders } from 'node:http';
 import type {
   OptionsOfBufferResponseBody,
   OptionsOfJSONResponseBody,
+  ParseJsonFunction,
 } from 'got';
+import type { HttpCacheProvider } from './cache/types';
 
 export type GotContextOptions = {
   authType?: string;
@@ -19,7 +21,7 @@ export type GotExtraOptions = {
   token?: string;
   hostType?: string;
   enabled?: boolean;
-  useCache?: boolean;
+  memCache?: boolean;
   noAuth?: boolean;
   context?: GotContextOptions;
 };
@@ -45,6 +47,8 @@ export interface GraphqlOptions {
   limit?: number;
   cursor?: string | null;
   acceptHeader?: string;
+  token?: string;
+  readOnly?: boolean;
 }
 
 export interface HttpOptions {
@@ -62,17 +66,16 @@ export interface HttpOptions {
   throwHttpErrors?: boolean;
 
   token?: string;
-  useCache?: boolean;
-}
-
-export interface HttpPostOptions extends HttpOptions {
-  body: unknown;
+  memCache?: boolean;
+  cacheProvider?: HttpCacheProvider;
+  readOnly?: boolean;
 }
 
 export interface InternalHttpOptions extends HttpOptions {
-  json?: Record<string, unknown>;
+  json?: HttpOptions['body'];
   responseType?: 'json' | 'buffer';
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
+  parseJson?: ParseJsonFunction;
 }
 
 export interface HttpHeaders extends IncomingHttpHeaders {
@@ -85,3 +88,6 @@ export interface HttpResponse<T = string> {
   headers: HttpHeaders;
   authorization?: boolean;
 }
+
+export type Task<T> = () => Promise<T>;
+export type GotTask<T> = Task<HttpResponse<T>>;

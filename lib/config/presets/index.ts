@@ -6,8 +6,12 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
+import * as packageCache from '../../util/cache/package';
+import { getTtlOverride } from '../../util/cache/package/decorator';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
+import * as template from '../../util/template';
+import { GlobalConfig } from '../global';
 import * as massage from '../massage';
 import * as migration from '../migration';
 import type { AllConfig, RenovateConfig } from '../types';
@@ -16,6 +20,7 @@ import { removedPresets } from './common';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
+import * as http from './http';
 import * as internal from './internal';
 import * as local from './local';
 import * as npm from './npm';
@@ -36,41 +41,44 @@ const presetSources: Record<string, PresetApi> = {
   gitea,
   local,
   internal,
+  http,
 };
 
+const presetCacheNamespace = 'preset';
+
 const nonScopedPresetWithSubdirRegex = regEx(
-  /^(?<repo>~?[\w\-. /]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<tag>[\w\-./]+?))?$/
+  /^(?<repo>~?[\w\-. /]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<tag>[\w\-./]+?))?$/,
 );
 const gitPresetRegex = regEx(
-  /^(?<repo>~?[\w\-. /]+)(?::(?<presetName>[\w\-.+/]+))?(?:#(?<tag>[\w\-./]+?))?$/
+  /^(?<repo>~?[\w\-. /]+)(?::(?<presetName>[\w\-.+/]+))?(?:#(?<tag>[\w\-./]+?))?$/,
 );
 
 export function replaceArgs(
   obj: string,
-  argMapping: Record<string, any>
+  argMapping: Record<string, any>,
 ): string;
 export function replaceArgs(
   obj: string[],
-  argMapping: Record<string, any>
+  argMapping: Record<string, any>,
 ): string[];
 export function replaceArgs(
   obj: Record<string, any>,
-  argMapping: Record<string, any>
+  argMapping: Record<string, any>,
 ): Record<string, any>;
 export function replaceArgs(
   obj: Record<string, any>[],
-  argMapping: Record<string, any>
+  argMapping: Record<string, any>,
 ): Record<string, any>[];
 
 /**
- * TODO: fix me #7154
+ * TODO: fix me #22198
  * @param obj
  * @param argMapping
  */
 export function replaceArgs(obj: any, argMapping: Record<string, any>): any;
 export function replaceArgs(
   obj: string | string[] | Record<string, any> | Record<string, any>[],
-  argMapping: Record<string, any>
+  argMapping: Record<string, any>,
 ): any {
   if (is.string(obj)) {
     let returnStr = obj;
@@ -117,6 +125,8 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('local>')) {
     presetSource = 'local';
     str = str.substring('local>'.length);
+  } else if (str.startsWith('http://') || str.startsWith('https://')) {
+    presetSource = 'http';
   } else if (
     !str.startsWith('@') &&
     !str.startsWith(':') &&
@@ -133,20 +143,25 @@ export function parsePreset(input: string): ParsedPreset {
       .map((elem) => elem.trim());
     str = str.slice(0, str.indexOf('('));
   }
+  if (presetSource === 'http') {
+    return { presetSource, repo: str, presetName: '', params };
+  }
   const presetsPackages = [
     'compatibility',
     'config',
+    'customManagers',
     'default',
     'docker',
     'group',
     'helpers',
+    'mergeConfidence',
     'monorepo',
     'npm',
     'packages',
     'preview',
-    'regexManagers',
     'replacements',
     'schedule',
+    'security',
     'workarounds',
   ];
   if (
@@ -182,9 +197,9 @@ export function parsePreset(input: string): ParsedPreset {
       throw new Error(PRESET_INVALID);
     }
     ({ repo, presetPath, presetName, tag } =
-      nonScopedPresetWithSubdirRegex.exec(str)?.groups ?? {});
+      nonScopedPresetWithSubdirRegex.exec(str)!.groups!);
   } else {
-    ({ repo, presetName, tag } = gitPresetRegex.exec(str)?.groups ?? {});
+    ({ repo, presetName, tag } = gitPresetRegex.exec(str)!.groups!);
 
     if (presetSource === 'npm' && !repo.startsWith('renovate-config-')) {
       repo = `renovate-config-${repo}`;
@@ -206,7 +221,7 @@ export function parsePreset(input: string): ParsedPreset {
 
 export async function getPreset(
   preset: string,
-  baseConfig?: RenovateConfig
+  baseConfig?: RenovateConfig,
 ): Promise<RenovateConfig> {
   logger.trace(`getPreset(${preset})`);
   // Check if the preset has been removed or replaced
@@ -220,7 +235,19 @@ export async function getPreset(
   const { presetSource, repo, presetPath, presetName, tag, params } =
     parsePreset(preset);
   const cacheKey = `preset:${preset}`;
-  let presetConfig = memCache.get<Preset | null | undefined>(cacheKey);
+  const presetCachePersistence = GlobalConfig.get(
+    'presetCachePersistence',
+    false,
+  );
+
+  let presetConfig: Preset | null | undefined;
+
+  if (presetCachePersistence) {
+    presetConfig = await packageCache.get(presetCacheNamespace, cacheKey);
+  } else {
+    presetConfig = memCache.get(cacheKey);
+  }
+
   if (is.nullOrUndefined(presetConfig)) {
     presetConfig = await presetSources[presetSource].getPreset({
       repo,
@@ -228,7 +255,16 @@ export async function getPreset(
       presetName,
       tag,
     });
-    memCache.set(cacheKey, presetConfig);
+    if (presetCachePersistence) {
+      await packageCache.set(
+        presetCacheNamespace,
+        cacheKey,
+        presetConfig,
+        getTtlOverride(presetCacheNamespace) ?? 15,
+      );
+    } else {
+      memCache.set(cacheKey, presetConfig);
+    }
   }
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
@@ -272,7 +308,7 @@ export async function resolveConfigPresets(
   inputConfig: AllConfig,
   baseConfig?: RenovateConfig,
   _ignorePresets?: string[],
-  existingPresets: string[] = []
+  existingPresets: string[] = [],
 ): Promise<AllConfig> {
   let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
@@ -280,11 +316,15 @@ export async function resolveConfigPresets(
   }
   logger.trace(
     { config: inputConfig, existingPresets },
-    'resolveConfigPresets'
+    'resolveConfigPresets',
   );
   let config: AllConfig = {};
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
+    // Compile templates
+    inputConfig.extends = inputConfig.extends.map((tmpl) =>
+      template.compile(tmpl, {}),
+    );
     for (const preset of inputConfig.extends) {
       if (shouldResolvePreset(preset, existingPresets, ignorePresets)) {
         logger.trace(`Resolving preset "${preset}"`);
@@ -292,13 +332,13 @@ export async function resolveConfigPresets(
           preset,
           baseConfig,
           inputConfig,
-          existingPresets
+          existingPresets,
         );
         const presetConfig = await resolveConfigPresets(
           fetchedPreset,
           baseConfig ?? inputConfig,
           ignorePresets,
-          existingPresets.concat([preset])
+          existingPresets.concat([preset]),
         );
         // istanbul ignore if
         if (inputConfig?.ignoreDeps?.length === 0) {
@@ -326,8 +366,8 @@ export async function resolveConfigPresets(
               element as RenovateConfig,
               baseConfig,
               ignorePresets,
-              existingPresets
-            )
+              existingPresets,
+            ),
           );
         } else {
           (config[key] as unknown[]).push(element);
@@ -340,7 +380,7 @@ export async function resolveConfigPresets(
         val as RenovateConfig,
         baseConfig,
         ignorePresets,
-        existingPresets
+        existingPresets,
       );
     }
   }
@@ -353,7 +393,7 @@ async function fetchPreset(
   preset: string,
   baseConfig: RenovateConfig | undefined,
   inputConfig: AllConfig,
-  existingPresets: string[]
+  existingPresets: string[],
 ): Promise<AllConfig> {
   try {
     return await getPreset(preset, baseConfig ?? inputConfig);
@@ -390,7 +430,7 @@ async function fetchPreset(
     }
     logger.info(
       { validationError: error.validationError },
-      'Throwing preset error'
+      'Throwing preset error',
     );
     throw error;
   }
@@ -399,19 +439,19 @@ async function fetchPreset(
 function shouldResolvePreset(
   preset: string,
   existingPresets: string[],
-  ignorePresets: string[]
+  ignorePresets: string[],
 ): boolean {
   // istanbul ignore if
   if (existingPresets.includes(preset)) {
     logger.debug(
-      `Already seen preset ${preset} in [${existingPresets.join(', ')}]`
+      `Already seen preset ${preset} in [${existingPresets.join(', ')}]`,
     );
     return false;
   }
   if (ignorePresets.includes(preset)) {
     // istanbul ignore next
     logger.debug(
-      `Ignoring preset ${preset} in [${existingPresets.join(', ')}]`
+      `Ignoring preset ${preset} in [${existingPresets.join(', ')}]`,
     );
     return false;
   }

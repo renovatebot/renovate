@@ -13,7 +13,7 @@ describe('modules/manager/cocoapods/extract', () => {
     it('extracts from simple file', async () => {
       GlobalConfig.set(adminConfig);
       const res = await extractPackageFile(simplePodfile, 'Podfile');
-      expect(res?.deps).toMatchSnapshot([
+      expect(res?.deps).toMatchObject([
         { depName: 'a' },
         { depName: 'a/sub' },
         { depName: 'b', currentValue: '1.2.3' },
@@ -42,7 +42,7 @@ describe('modules/manager/cocoapods/extract', () => {
     it('extracts from complex file', async () => {
       GlobalConfig.set(adminConfig);
       const res = await extractPackageFile(complexPodfile, 'Podfile');
-      expect(res?.deps).toMatchSnapshot([
+      expect(res?.deps).toMatchObject([
         { depName: 'IQKeyboardManager', currentValue: '~> 6.5.0' },
         { depName: 'CYLTabBarController', currentValue: '~> 1.28.3' },
         { depName: 'PureLayout', currentValue: '~> 3.1.4' },
@@ -62,16 +62,16 @@ describe('modules/manager/cocoapods/extract', () => {
         { depName: 'TOCropViewController', currentValue: '~> 2.5.1' },
         { depName: 'FMDB', currentValue: '~> 2.7.5' },
         { depName: 'FDStackView', currentValue: '~> 1.0.1' },
-        { depName: 'LYEmptyView', skipReason: 'unknown-version' },
+        { depName: 'LYEmptyView', skipReason: 'unspecified-version' },
         { depName: 'MMKV', currentValue: '~> 1.0.22' },
-        { depName: 'fishhook', skipReason: 'unknown-version' },
+        { depName: 'fishhook', skipReason: 'unspecified-version' },
         { depName: 'CocoaLumberjack', currentValue: '~> 3.5.3' },
         { depName: 'GZIP', currentValue: '~> 1.2' },
         { depName: 'LBXScan/LBXNative', currentValue: '~> 2.3' },
         { depName: 'LBXScan/LBXZXing', currentValue: '~> 2.3' },
         { depName: 'LBXScan/UI', currentValue: '~> 2.3' },
-        { depName: 'MLeaksFinder', skipReason: 'unknown-version' },
-        { depName: 'FBMemoryProfiler', skipReason: 'unknown-version' },
+        { depName: 'MLeaksFinder', skipReason: 'unspecified-version' },
+        { depName: 'FBMemoryProfiler', skipReason: 'unspecified-version' },
       ]);
     });
   });

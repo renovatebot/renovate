@@ -1,56 +1,38 @@
+import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
 
 export function getCachedConflictResult(
-  targetBranchName: string,
-  targetBranchSha: string,
-  sourceBranchName: string,
-  sourceBranchSha: string
+  branchName: string,
+  branchSha: string,
+  baseBranch: string,
+  baseBranchSha: string,
 ): boolean | null {
-  const { gitConflicts } = getCache();
-  if (!gitConflicts) {
-    return null;
+  const cache = getCache();
+  const branch = cache?.branches?.find((br) => br.branchName === branchName);
+  if (
+    branch &&
+    branch.baseBranch === baseBranch &&
+    branch.baseBranchSha === baseBranchSha &&
+    branch.sha === branchSha &&
+    branch.isConflicted !== undefined
+  ) {
+    return branch.isConflicted;
   }
 
-  const targetBranchConflicts = gitConflicts[targetBranchName];
-  if (targetBranchConflicts?.targetBranchSha !== targetBranchSha) {
-    return null;
-  }
-
-  const sourceBranchConflict =
-    targetBranchConflicts.sourceBranches[sourceBranchName];
-  if (sourceBranchConflict?.sourceBranchSha !== sourceBranchSha) {
-    return null;
-  }
-
-  return sourceBranchConflict.isConflicted;
+  return null;
 }
 
 export function setCachedConflictResult(
-  targetBranchName: string,
-  targetBranchSha: string,
-  sourceBranchName: string,
-  sourceBranchSha: string,
-  isConflicted: boolean
+  branchName: string,
+  isConflicted: boolean,
 ): void {
   const cache = getCache();
-  cache.gitConflicts ??= {};
-  const { gitConflicts } = cache;
+  const branch = cache?.branches?.find((br) => br.branchName === branchName);
 
-  let targetBranchConflicts = gitConflicts[targetBranchName];
-  if (targetBranchConflicts?.targetBranchSha !== targetBranchSha) {
-    gitConflicts[targetBranchName] = {
-      targetBranchSha,
-      sourceBranches: {},
-    };
-    targetBranchConflicts = gitConflicts[targetBranchName];
+  if (!branch) {
+    logger.debug(`setCachedConflictResult(): Branch cache not present`);
+    return;
   }
 
-  const sourceBranchConflict =
-    targetBranchConflicts.sourceBranches[sourceBranchName];
-  if (sourceBranchConflict?.sourceBranchSha !== sourceBranchSha) {
-    targetBranchConflicts.sourceBranches[sourceBranchName] = {
-      sourceBranchSha,
-      isConflicted,
-    };
-  }
+  branch.isConflicted = isConflicted;
 }

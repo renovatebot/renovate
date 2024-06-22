@@ -6,6 +6,7 @@ import {
 import type { RenovateConfig } from '../../../config/types';
 import { getDefaultConfig } from '../../../modules/datasource';
 import { get } from '../../../modules/manager';
+import { detectSemanticCommits } from '../../../util/git/semantic';
 import { applyPackageRules } from '../../../util/package-rules';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
@@ -44,15 +45,15 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
         .replace(regEx(/-+/g), '-'); // remove multiple hyphens
       updateConfig.sourceRepo = parsedSourceUrl.pathname.replace(
         regEx(/^\//),
-        ''
+        '',
       ); // remove leading slash
       updateConfig.sourceRepoOrg = updateConfig.sourceRepo.replace(
         regEx(/\/.*/g),
-        ''
+        '',
       ); // remove everything after first slash
       updateConfig.sourceRepoName = updateConfig.sourceRepo.replace(
         regEx(/.*\//g),
-        ''
+        '',
       ); // remove everything up to the last slash
     }
   }
@@ -62,7 +63,7 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
 
 export async function flattenUpdates(
   config: RenovateConfig,
-  packageFiles: Record<string, any[]>
+  packageFiles: Record<string, any[]>,
 ): Promise<RenovateConfig[]> {
   const updates = [];
   const updateTypes = [
@@ -90,10 +91,12 @@ export async function flattenUpdates(
         packageFileConfig.parentDir = '';
         packageFileConfig.packageFileDir = '';
       }
+      let depIndex = 0;
       for (const dep of packageFile.deps) {
         if (dep.updates.length) {
           const depConfig = mergeChildConfig(packageFileConfig, dep);
           delete depConfig.deps;
+          depConfig.depIndex = depIndex; // used for autoreplace
           for (const update of dep.updates) {
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
@@ -107,14 +110,14 @@ export async function flattenUpdates(
             }
             // apply config from datasource
             const datasourceConfig = await getDefaultConfig(
-              depConfig.datasource
+              depConfig.datasource,
             );
             updateConfig = mergeChildConfig(updateConfig, datasourceConfig);
             updateConfig = applyPackageRules(updateConfig);
             // apply major/minor/patch/pin/digest
             updateConfig = mergeChildConfig(
               updateConfig,
-              updateConfig[updateConfig.updateType]
+              updateConfig[updateConfig.updateType],
             );
             for (const updateType of updateTypes) {
               delete updateConfig[updateType];
@@ -127,6 +130,7 @@ export async function flattenUpdates(
             updates.push(updateConfig);
           }
         }
+        depIndex += 1;
       }
       if (
         get(manager, 'supportsLockFileMaintenance') &&
@@ -135,7 +139,7 @@ export async function flattenUpdates(
         // Apply lockFileMaintenance config before packageRules
         let lockFileConfig = mergeChildConfig(
           packageFileConfig,
-          packageFileConfig.lockFileMaintenance
+          packageFileConfig.lockFileMaintenance,
         );
         lockFileConfig.updateType = 'lockFileMaintenance';
         lockFileConfig.isLockFileMaintenance = true;
@@ -143,7 +147,7 @@ export async function flattenUpdates(
         // Apply lockFileMaintenance and packageRules again
         lockFileConfig = mergeChildConfig(
           lockFileConfig,
-          lockFileConfig.lockFileMaintenance
+          lockFileConfig.lockFileMaintenance,
         );
         lockFileConfig = applyPackageRules(lockFileConfig);
         // Remove unnecessary objects
@@ -166,11 +170,11 @@ export async function flattenUpdates(
             for (const remediation of remediations) {
               let updateConfig = mergeChildConfig(
                 packageFileConfig,
-                remediation
+                remediation,
               );
               updateConfig = mergeChildConfig(
                 updateConfig,
-                config.vulnerabilityAlerts
+                config.vulnerabilityAlerts,
               );
               delete updateConfig.vulnerabilityAlerts;
               updateConfig.isVulnerabilityAlert = true;
@@ -185,6 +189,12 @@ export async function flattenUpdates(
           }
         }
       }
+    }
+  }
+  if (config.semanticCommits === 'auto') {
+    const semanticCommits = await detectSemanticCommits();
+    for (const update of updates) {
+      update.semanticCommits = semanticCommits;
     }
   }
   return updates

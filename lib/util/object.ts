@@ -7,7 +7,16 @@
  */
 export function hasKey<K extends string, T>(
   k: K,
-  o: T
+  o: T,
 ): o is T & Record<K, unknown> {
-  return typeof o === 'object' && k in o;
+  return o && typeof o === 'object' && k in o;
+}
+
+/**
+ * Coerce a value to a object with optional default value.
+ * @param val value to coerce
+ * @returns the coerced value.
+ */
+export function coerceObject<T>(val: T | null | undefined, def?: T): T {
+  return val ?? def ?? ({} as T);
 }

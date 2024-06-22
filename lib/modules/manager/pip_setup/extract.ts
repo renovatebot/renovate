@@ -1,14 +1,18 @@
 import { RANGE_PATTERN } from '@renovatebot/pep440';
-import { lang, lexer, query as q } from 'good-enough-parser';
+import { lang, lexer, parser, query as q } from 'good-enough-parser';
 import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 
 interface ManagerData {
   lineNumber: number;
 }
 
-type Context = PackageFile<ManagerData>;
+type Context = PackageFileContent<ManagerData>;
 
 const python = lang.createLang('python');
 
@@ -19,7 +23,7 @@ function cleanupNamedGroups(regexSource: string): string {
 
 const rangePattern = cleanupNamedGroups(RANGE_PATTERN);
 const versionPattern = `(?:${rangePattern}(?:\\s*,\\s*${rangePattern})*)`;
-const depNamePattern = '(?:[a-zA-Z][-_a-zA-Z0-9]*[a-zA-Z0-9])';
+const depNamePattern = '(?:[a-zA-Z][-_a-zA-Z0-9\\.]*[a-zA-Z0-9])';
 const depPattern = [
   '^',
   `(?<depName>${depNamePattern})`,
@@ -32,11 +36,11 @@ const extractRegex = regEx(depPattern);
 // Extract dependency string
 function depStringHandler(
   ctx: Context,
-  token: lexer.StringValueToken
+  token: lexer.StringValueToken,
 ): Context {
   const depStr = token.value;
   const match = extractRegex.exec(depStr);
-  // TODO #7154
+  // TODO #22198
   const { depName, currentValue } = match!.groups!;
 
   const dep: PackageDependency<ManagerData> = {
@@ -69,7 +73,7 @@ const depString = q
   .opt(
     q
       .opt(q.op<Context>(','))
-      .comment(/^#\s*renovate\s*:\s*ignore\s*$/, depSkipHandler)
+      .comment(/^#\s*renovate\s*:\s*ignore\s*$/, depSkipHandler),
   );
 
 const query = q.alt(incompleteDepString, depString);
@@ -77,8 +81,8 @@ const query = q.alt(incompleteDepString, depString);
 export function extractPackageFile(
   content: string,
   _packageFile: string,
-  _config: ExtractConfig
-): PackageFile | null {
-  const res = python.query<Context>(content, query, { deps: [] });
+  _config: ExtractConfig,
+): PackageFileContent | null {
+  const res = python.query<Context, parser.Node>(content, query, { deps: [] });
   return res?.deps?.length ? res : null;
 }

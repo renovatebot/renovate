@@ -1,10 +1,10 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
-import type { HttpResponse } from '../../../util/http/types';
+import { joinUrlParts } from '../../../util/url';
 import * as hexVersioning from '../../versioning/hex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { HexRelease } from './types';
+import { HexRelease } from './schema';
 
 export class HexDatasource extends Datasource {
   static readonly id = 'hex';
@@ -13,11 +13,16 @@ export class HexDatasource extends Datasource {
     super(HexDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://hex.pm/'];
-
-  override readonly customRegistrySupport = false;
+  override readonly defaultRegistryUrls = ['https://hex.pm'];
 
   override readonly defaultVersioning = hexVersioning.id;
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined the `inserted_at` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `Github` field in the results.';
 
   @cache({
     namespace: `datasource-${HexDatasource.id}`,
@@ -41,46 +46,21 @@ export class HexDatasource extends Datasource {
     const organizationUrlPrefix = organizationName
       ? `repos/${organizationName}/`
       : '';
-    const hexUrl = `${registryUrl}api/${organizationUrlPrefix}packages/${hexPackageName}`;
 
-    let response: HttpResponse<HexRelease>;
-    try {
-      response = await this.http.getJson<HexRelease>(hexUrl);
-    } catch (err) {
+    const hexUrl = joinUrlParts(
+      registryUrl,
+      `/api/${organizationUrlPrefix}packages/${hexPackageName}`,
+    );
+
+    const { val: result, err } = await this.http
+      .getJsonSafe(hexUrl, HexRelease)
+      .onError((err) => {
+        logger.warn({ datasource: 'hex', packageName, err }, `Error fetching ${hexUrl}`); // prettier-ignore
+      })
+      .unwrap();
+
+    if (err) {
       this.handleGenericErrors(err);
-    }
-
-    const hexRelease: HexRelease = response.body;
-
-    if (!hexRelease) {
-      logger.warn({ datasource: 'hex', packageName }, `Invalid response body`);
-      return null;
-    }
-
-    const { releases = [], html_url: homepage, meta } = hexRelease;
-
-    if (releases.length === 0) {
-      logger.debug(`No versions found for ${hexPackageName} (${hexUrl})`); // prettier-ignore
-      return null;
-    }
-
-    const result: ReleaseResult = {
-      releases: releases.map(({ version, inserted_at }) =>
-        inserted_at
-          ? {
-              version,
-              releaseTimestamp: inserted_at,
-            }
-          : { version }
-      ),
-    };
-
-    if (homepage) {
-      result.homepage = homepage;
-    }
-
-    if (meta?.links?.Github) {
-      result.sourceUrl = meta?.links?.Github;
     }
 
     return result;

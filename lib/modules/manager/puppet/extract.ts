@@ -3,14 +3,14 @@ import { parseUrl } from '../../../util/url';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { isGithubUrl, parseGitOwnerRepo } from './common';
 import { parsePuppetfile } from './puppetfile-parser';
 import type { PuppetfileModule } from './types';
 
 function parseForgeDependency(
   module: PuppetfileModule,
-  forgeUrl: string | null
+  forgeUrl: string | null,
 ): PackageDependency {
   const dep: PackageDependency = {
     depName: module.name,
@@ -44,8 +44,8 @@ function parseGitDependency(module: PuppetfileModule): PackageDependency {
   const githubUrl = isGithubUrl(git, parsedUrl);
 
   if (githubUrl && parsedUrl && parsedUrl.protocol !== 'https:') {
-    logger.warn(
-      `Access to github is only allowed for https, your url was: ${git}`
+    logger.debug(
+      `Access to github is only allowed for https, your url was: ${git}`,
     );
     return {
       depName: moduleName,
@@ -85,7 +85,7 @@ function isGitModule(module: PuppetfileModule): boolean {
   return module.tags?.has('git') ?? false;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace('puppet.extractPackageFile()');
 
   const puppetFile = parsePuppetfile(content);

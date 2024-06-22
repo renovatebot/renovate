@@ -11,6 +11,13 @@ export class GitlabReleasesDatasource extends Datasource {
 
   static readonly registryStrategy = 'first';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `released_at` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
+
   constructor() {
     super(GitlabReleasesDatasource.id);
     this.http = new GitlabHttp(GitlabReleasesDatasource.id);
@@ -19,8 +26,7 @@ export class GitlabReleasesDatasource extends Datasource {
   @cache({
     namespace: `datasource-${GitlabReleasesDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      // TODO: types (#22198)
       `${registryUrl}/${packageName}`,
   })
   async getReleases({

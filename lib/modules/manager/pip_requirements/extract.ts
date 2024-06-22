@@ -1,67 +1,34 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
 import { RANGE_PATTERN } from '@renovatebot/pep440';
 import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { isSkipComment } from '../../../util/ignore';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
+import { extractPackageFileFlags } from './common';
+import type { PipRequirementsManagerData } from './types';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
-const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
+export const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 const packageGitRegex = regEx(
-  /(?<source>(?:git\+)(?<protocol>git|ssh|https):\/\/(?<gitUrl>(?:(?<user>[^@]+)@)?(?<hostname>[\w.-]+)(?<delimiter>\/)(?<scmPath>.*\/(?<depName>[\w/-]+))(\.git)?(?:@(?<version>.*))))/
+  /(?<source>(?:git\+)(?<protocol>git|ssh|https):\/\/(?<gitUrl>(?:(?<user>[^@]+)@)?(?<hostname>[\w.-]+)(?<delimiter>\/)(?<scmPath>.*\/(?<depName>[\w/-]+))(\.git)?(?:@(?<version>.*))))/,
 );
 
 const rangePattern: string = RANGE_PATTERN;
 const specifierPartPattern = `\\s*${rangePattern.replace(
   regEx(/\?<\w+>/g),
-  '?:'
+  '?:',
 )}`;
 const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
 export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
 
-export function cleanRegistryUrls(registryUrls: string[]): string[] {
-  return registryUrls.map((url) => {
-    // handle the optional quotes in eg. `--extra-index-url "https://foo.bar"`
-    const cleaned = url.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
-    if (!GlobalConfig.get('exposeAllEnv')) {
-      return cleaned;
-    }
-    // interpolate any environment variables
-    return cleaned.replace(
-      regEx(/(\$[A-Za-z\d_]+)|(\${[A-Za-z\d_]+})/g),
-      (match) => {
-        const envvar = match
-          .substring(1)
-          .replace(regEx(/^{/), '')
-          .replace(regEx(/}$/), '');
-        const sub = process.env[envvar];
-        return sub ?? match;
-      }
-    );
-  });
-}
-
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+): PackageFileContent<PipRequirementsManagerData> | null {
   logger.trace('pip_requirements.extractPackageFile()');
-
-  let registryUrls: string[] = [];
-  const additionalRegistryUrls: string[] = [];
-  content.split(newlineRegex).forEach((line) => {
-    if (line.startsWith('--index-url ')) {
-      registryUrls = [line.substring('--index-url '.length).split(' ')[0]];
-    }
-    if (line.startsWith('--extra-index-url ')) {
-      const extraUrl = line
-        .substring('--extra-index-url '.length)
-        .split(' ')[0];
-      additionalRegistryUrls.push(extraUrl);
-    }
-  });
 
   const pkgRegex = regEx(`^(${packagePattern})$`);
   const pkgValRegex = regEx(`^${dependencyPattern}$`);
@@ -123,15 +90,18 @@ export function extractPackageFile(content: string): PackageFile | null {
       return dep;
     })
     .filter(is.truthy);
-  if (!deps.length) {
+
+  const res = extractPackageFileFlags(content);
+  res.deps = deps;
+
+  if (
+    !res.deps.length &&
+    !res.registryUrls?.length &&
+    !res.additionalRegistryUrls?.length &&
+    !res.managerData?.requirementsFiles?.length &&
+    !res.managerData?.constraintsFiles?.length
+  ) {
     return null;
-  }
-  const res: PackageFile = { deps };
-  if (registryUrls.length > 0) {
-    res.registryUrls = cleanRegistryUrls(registryUrls);
-  }
-  if (additionalRegistryUrls.length) {
-    res.additionalRegistryUrls = cleanRegistryUrls(additionalRegistryUrls);
   }
   return res;
 }

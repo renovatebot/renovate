@@ -39,7 +39,7 @@
     "series": "potato",
     "created": "1999-03-09",
     "release": "2000-08-15",
-    "eol": "2003-07-30"
+    "eol": "2003-06-30"
   },
   "v3": {
     "codename": "Woody",
@@ -53,7 +53,7 @@
     "series": "sarge",
     "created": "2002-07-19",
     "release": "2005-06-06",
-    "eol": "2008-03-30"
+    "eol": "2008-03-31"
   },
   "v4": {
     "codename": "Etch",
@@ -82,7 +82,7 @@
     "series": "wheezy",
     "created": "2011-02-06",
     "release": "2013-05-04",
-    "eol": "2016-04-26",
+    "eol": "2016-04-25",
     "eol_lts": "2018-05-31",
     "eol_elts": "2020-06-30"
   },
@@ -90,44 +90,55 @@
     "codename": "Jessie",
     "series": "jessie",
     "created": "2013-05-04",
-    "release": "2015-04-25",
+    "release": "2015-04-26",
     "eol": "2018-06-17",
     "eol_lts": "2020-06-30",
-    "eol_elts": "2022-06-30"
+    "eol_elts": "2025-06-30"
   },
   "v9": {
     "codename": "Stretch",
     "series": "stretch",
-    "created": "2015-04-25",
+    "created": "2015-04-26",
     "release": "2017-06-17",
-    "eol": "2020-07-06",
+    "eol": "2020-07-18",
     "eol_lts": "2022-06-30",
-    "eol_elts": "2024-06-30"
+    "eol_elts": "2027-06-30"
   },
   "v10": {
     "codename": "Buster",
     "series": "buster",
     "created": "2017-06-17",
     "release": "2019-07-06",
-    "eol": "2022-08-14",
+    "eol": "2022-09-10",
     "eol_lts": "2024-06-30",
-    "eol_elts": "2026-06-30"
+    "eol_elts": "2029-06-30"
   },
   "v11": {
     "codename": "Bullseye",
     "series": "bullseye",
     "created": "2019-07-06",
     "release": "2021-08-14",
-    "eol": "2024-08-14"
+    "eol": "2024-08-14",
+    "eol_lts": "2026-08-31",
+    "eol_elts": "2031-06-30"
   },
   "v12": {
     "codename": "Bookworm",
     "series": "bookworm",
-    "created": "2021-08-14"
+    "created": "2021-08-14",
+    "release": "2023-06-10",
+    "eol": "2026-06-10",
+    "eol_lts": "2028-06-30",
+    "eol_elts": "2033-06-30"
   },
   "v13": {
     "codename": "Trixie",
     "series": "trixie",
-    "created": "2023-08-01"
+    "created": "2023-06-10"
+  },
+  "v14": {
+    "codename": "Forky",
+    "series": "forky",
+    "created": "2025-08-01"
   }
 }

@@ -33,7 +33,7 @@
     "series": "edgy",
     "created": "2006-06-01",
     "release": "2006-10-26",
-    "eol": "2008-04-26"
+    "eol": "2008-04-25"
   },
   "v7.04": {
     "codename": "Feisty Fawn",
@@ -114,7 +114,7 @@
     "release": "2012-04-26",
     "eol": "2017-04-28",
     "eol_server": "2017-04-28",
-    "eol_esm": "2019-04-28"
+    "eol_esm": "2019-04-26"
   },
   "v12.10": {
     "codename": "Quantal Quetzal",
@@ -172,8 +172,8 @@
     "series": "xenial",
     "created": "2015-10-22",
     "release": "2016-04-21",
-    "eol": "2021-04-21",
-    "eol_server": "2021-04-21",
+    "eol": "2021-04-30",
+    "eol_server": "2021-04-30",
     "eol_esm": "2026-04-23"
   },
   "v16.10": {
@@ -202,8 +202,8 @@
     "series": "bionic",
     "created": "2017-10-19",
     "release": "2018-04-26",
-    "eol": "2023-04-26",
-    "eol_server": "2023-04-26",
+    "eol": "2023-05-31",
+    "eol_server": "2023-05-31",
     "eol_esm": "2028-04-26"
   },
   "v18.10": {
@@ -232,8 +232,8 @@
     "series": "focal",
     "created": "2019-10-17",
     "release": "2020-04-23",
-    "eol": "2025-04-23",
-    "eol_server": "2025-04-23",
+    "eol": "2025-05-29",
+    "eol_server": "2025-05-29",
     "eol_esm": "2030-04-23"
   },
   "v20.10": {
@@ -262,8 +262,8 @@
     "series": "jammy",
     "created": "2021-10-14",
     "release": "2022-04-21",
-    "eol": "2027-04-21",
-    "eol_server": "2027-04-21",
+    "eol": "2027-06-01",
+    "eol_server": "2027-06-01",
     "eol_esm": "2032-04-21"
   },
   "v22.10": {
@@ -272,5 +272,35 @@
     "created": "2022-04-21",
     "release": "2022-10-20",
     "eol": "2023-07-20"
+  },
+  "v23.04": {
+    "codename": "Lunar Lobster",
+    "series": "lunar",
+    "created": "2022-10-20",
+    "release": "2023-04-20",
+    "eol": "2024-01-25"
+  },
+  "v23.10": {
+    "codename": "Mantic Minotaur",
+    "series": "mantic",
+    "created": "2023-04-20",
+    "release": "2023-10-12",
+    "eol": "2024-07-11"
+  },
+  "v24.04": {
+    "codename": "Noble Numbat",
+    "series": "noble",
+    "created": "2023-10-12",
+    "release": "2024-04-25",
+    "eol": "2029-05-31",
+    "eol_server": "2029-05-31",
+    "eol_esm": "2034-04-25"
+  },
+  "v24.10": {
+    "codename": "Oracular Oriole",
+    "series": "oracular",
+    "created": "2024-04-25",
+    "release": "2024-10-10",
+    "eol": "2025-07-10"
   }
 }

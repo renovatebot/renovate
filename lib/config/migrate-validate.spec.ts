@@ -1,10 +1,10 @@
-import { RenovateConfig, getConfig } from '../../test/util';
+import type { RenovateConfig } from '../../test/util';
+import { getConfig } from './defaults';
 import { migrateAndValidate } from './migrate-validate';
 
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = getConfig();
 });
 
@@ -38,8 +38,8 @@ describe('config/migrate-validate', () => {
     it('isOnboarded', async () => {
       const input: RenovateConfig = {};
       const res = await migrateAndValidate(
-        { ...config, repoIsOnboarded: true, warnings: undefined },
-        input
+        { ...config, repoIsOnboarded: true },
+        input,
       );
       expect(res.warnings).toBeUndefined();
       expect(res).toMatchSnapshot();

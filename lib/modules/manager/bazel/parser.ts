@@ -1,170 +1,289 @@
-import is from '@sindresorhus/is';
-import { lang, query as q } from 'good-enough-parser';
-import hasha from 'hasha';
+import { lang, lexer, parser, query as q } from 'good-enough-parser';
+import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
-import { supportedRulesRegex } from './common';
-import type { MetaPath, ParsedResult, Target, TargetAttribute } from './types';
-
-function isTarget(target: Partial<Target>): target is Target {
-  return !!target.rule && !!target.name;
-}
+import { hash } from '../../../util/hash';
+import { supportedRulesRegex } from './rules';
+import type { NestedFragment, RecordFragment } from './types';
 
 interface Ctx {
-  result: ParsedResult;
-  currentTarget: Partial<Target>;
-  currentAttrKey?: string;
-  currentAttrVal?: TargetAttribute;
-  currentArray?: string[];
-  currentMetaPath: MetaPath;
-  ruleIndex: number;
-  ruleStartOffset?: number; // deprecated
+  readonly source: string;
+  results: RecordFragment[];
+  stack: NestedFragment[];
+  recordKey?: string;
+  subRecordKey?: string;
+  argIndex?: number;
 }
 
-const emptyCtx: Ctx = {
-  result: { targets: [], meta: [] },
-  currentTarget: {},
-  currentMetaPath: [],
-  ruleIndex: 0,
-};
+function emptyCtx(source: string): Ctx {
+  return {
+    source,
+    results: [],
+    stack: [],
+  };
+}
 
-const starlark = lang.createLang('starlark');
+function currentFragment(ctx: Ctx): NestedFragment {
+  const deepestFragment = ctx.stack[ctx.stack.length - 1];
+  return deepestFragment;
+}
 
-/**
- * Matches rule type:
- * - `git_repository`
- * - `go_repository`
- **/
-const ruleSym = q.sym<Ctx>(supportedRulesRegex, (ctx, { value, offset }) => {
-  ctx.currentTarget.rule = value;
-
-  // TODO: remove it (#9667)
-  if (!is.number(ctx.ruleStartOffset)) {
-    ctx.ruleStartOffset = offset;
+function extractTreeValue(
+  source: string,
+  tree: parser.Tree,
+  offset: number,
+): string {
+  if (tree.type === 'wrapped-tree') {
+    const { endsWith } = tree;
+    const to = endsWith.offset + endsWith.value.length;
+    return source.slice(offset, to);
   }
 
-  return ctx;
-});
+  // istanbul ignore next
+  return '';
+}
 
 /**
  * Matches key-value pairs:
  * - `tag = "1.2.3"`
  * - `name = "foobar"`
  * - `deps = ["foo", "bar"]`
+ * - `
+ *     artifacts = [
+         maven.artifact(
+           group = "com.example1",
+           artifact = "foobar",
+           version = "1.2.3",
+         )
+       ]
+     `
  **/
 const kwParams = q
-  .sym<Ctx>((ctx, { value }) => {
-    ctx.currentAttrKey = value;
-    const leaf = ctx.currentMetaPath.pop();
-    if (is.number(leaf)) {
-      ctx.currentMetaPath.push(leaf);
-    }
-    ctx.currentMetaPath.push(value);
-    return ctx;
+  .sym<Ctx>((ctx, { value: recordKey }) => {
+    return { ...ctx, recordKey };
   })
   .op('=')
   .alt(
-    // string case
+    // string
     q.str((ctx, { offset, value }) => {
-      ctx.currentTarget[ctx.currentAttrKey!] = value;
-      ctx.result.meta.push({
-        path: [...ctx.currentMetaPath],
-        data: { offset: offset, length: value.length },
-      });
+      const frag = currentFragment(ctx);
+      if (frag.type === 'record' && ctx.recordKey) {
+        const key = ctx.recordKey;
+        frag.children[key] = { type: 'string', value, offset };
+      }
       return ctx;
     }),
-    // array of strings case
+    // array of strings or calls
     q.tree({
       type: 'wrapped-tree',
       maxDepth: 1,
-      preHandler: (ctx) => {
-        ctx.currentArray = [];
+      startsWith: '[',
+      endsWith: ']',
+      preHandler: (ctx, tree) => {
+        const parentRecord = currentFragment(ctx) as RecordFragment;
+        if (
+          parentRecord.type === 'record' &&
+          ctx.recordKey &&
+          tree.type === 'wrapped-tree'
+        ) {
+          const key = ctx.recordKey;
+          parentRecord.children[key] = {
+            type: 'array',
+            value: '',
+            offset: tree.startsWith.offset,
+            children: [],
+          };
+        }
         return ctx;
       },
-      search: q.str<Ctx>((ctx, { value, offset }) => {
-        ctx.result.meta.push({
-          path: [...ctx.currentMetaPath, ctx.currentArray!.length],
-          data: { offset: offset, length: value.length },
-        });
-        ctx.currentArray?.push(value);
-        return ctx;
-      }),
-      postHandler: (ctx) => {
-        ctx.currentTarget[ctx.currentAttrKey!] = ctx.currentArray;
-        ctx.currentArray = [];
+      search: q.alt(
+        q.str<Ctx>((ctx, { value, offset }) => {
+          const parentRecord = currentFragment(ctx);
+          if (parentRecord.type === 'record' && ctx.recordKey) {
+            const key = ctx.recordKey;
+            const array = parentRecord.children[key];
+            if (array.type === 'array') {
+              array.children.push({ type: 'string', value, offset });
+            }
+          }
+          return ctx;
+        }),
+        q
+          .sym<Ctx>()
+          .handler(recordStartHandler)
+          .handler((ctx, { value, offset }) => {
+            const ruleFragment = currentFragment(ctx);
+            if (ruleFragment.type === 'record') {
+              ruleFragment.children._function = {
+                type: 'string',
+                value,
+                offset,
+              };
+            }
+            return ctx;
+          })
+          .many(
+            q.op<Ctx>('.').sym((ctx, { value }) => {
+              const ruleFragment = currentFragment(ctx);
+              if (
+                ruleFragment.type === 'record' &&
+                ruleFragment.children._function
+              ) {
+                ruleFragment.children._function.value += `.${value}`;
+              }
+              return ctx;
+            }),
+            0,
+            3,
+          )
+          .tree({
+            type: 'wrapped-tree',
+            maxDepth: 1,
+            startsWith: '(',
+            endsWith: ')',
+            search: q
+              .opt(
+                q
+                  .sym<Ctx>((ctx, { value: subRecordKey }) => ({
+                    ...ctx,
+                    subRecordKey,
+                  }))
+                  .op('='),
+              )
+              .str((ctx, { value: subRecordValue, offset }) => {
+                const argIndex = ctx.argIndex ?? 0;
+
+                const subRecordKey = ctx.subRecordKey! ?? argIndex.toString();
+                const ruleFragment = currentFragment(ctx);
+                if (ruleFragment.type === 'record') {
+                  ruleFragment.children[subRecordKey] = {
+                    type: 'string',
+                    value: subRecordValue,
+                    offset,
+                  };
+                }
+                delete ctx.subRecordKey;
+                ctx.argIndex = argIndex + 1;
+                return ctx;
+              }),
+            postHandler: (ctx, tree) => {
+              delete ctx.argIndex;
+
+              const callFrag = currentFragment(ctx);
+              ctx.stack.pop();
+              if (callFrag.type === 'record' && tree.type === 'wrapped-tree') {
+                callFrag.value = extractTreeValue(
+                  ctx.source,
+                  tree,
+                  callFrag.offset,
+                );
+
+                const parentRecord = currentFragment(ctx);
+                if (parentRecord.type === 'record' && ctx.recordKey) {
+                  const key = ctx.recordKey;
+                  const array = parentRecord.children[key];
+                  if (array.type === 'array') {
+                    array.children.push(callFrag);
+                  }
+                }
+              }
+              return ctx;
+            },
+          }),
+      ),
+      postHandler: (ctx, tree) => {
+        const parentRecord = currentFragment(ctx);
+        if (
+          parentRecord.type === 'record' &&
+          ctx.recordKey &&
+          tree.type === 'wrapped-tree'
+        ) {
+          const key = ctx.recordKey;
+          const array = parentRecord.children[key];
+          if (array.type === 'array') {
+            array.value = extractTreeValue(ctx.source, tree, array.offset);
+          }
+        }
         return ctx;
       },
-    })
-  );
+    }),
+  )
+  .handler((ctx) => {
+    delete ctx.recordKey;
+    return ctx;
+  });
 
 /**
- * Matches rule signature, i.e. content of `git_repository(...)`
+ * Matches rule signature:
+ *   `git_repository(......)`
+ *                  ^^^^^^^^
  *
  * @param search something to match inside parens
  */
-function ruleCall(search: q.QueryBuilder<Ctx>): q.QueryBuilder<Ctx> {
+function ruleCall(
+  search: q.QueryBuilder<Ctx, parser.Node>,
+): q.QueryBuilder<Ctx, parser.Node> {
   return q.tree({
     type: 'wrapped-tree',
     maxDepth: 1,
-    preHandler: (ctx) => {
-      ctx.currentMetaPath.push(ctx.ruleIndex);
-      return ctx;
-    },
     search,
     postHandler: (ctx, tree) => {
-      // TODO: remove it (#9667)
-      if (is.number(ctx.ruleStartOffset) && tree.type === 'wrapped-tree') {
-        const { children, endsWith } = tree;
-        const lastElem = children[children.length - 1];
-        if (lastElem.type === '_end') {
-          const ruleEndOffset = lastElem.offset + endsWith.value.length;
-          const offset = ctx.ruleStartOffset;
-          const length = ruleEndOffset - ctx.ruleStartOffset;
-          ctx.result.meta.push({
-            path: [ctx.ruleIndex],
-            data: { offset, length },
-          });
-          delete ctx.ruleStartOffset;
-        }
+      const frag = currentFragment(ctx);
+      if (frag.type === 'record' && tree.type === 'wrapped-tree') {
+        frag.value = extractTreeValue(ctx.source, tree, frag.offset);
+        ctx.stack.pop();
+        ctx.results.push(frag);
       }
-
-      if (isTarget(ctx.currentTarget)) {
-        ctx.result.targets.push(ctx.currentTarget);
-      }
-      ctx.currentTarget = {};
-      ctx.ruleIndex += 1;
-      ctx.currentMetaPath.pop();
 
       return ctx;
     },
   });
 }
 
+function recordStartHandler(ctx: Ctx, { offset }: lexer.Token): Ctx {
+  ctx.stack.push({
+    type: 'record',
+    value: '',
+    offset,
+    children: {},
+  });
+  return ctx;
+}
+
+function ruleNameHandler(ctx: Ctx, { value, offset }: lexer.Token): Ctx {
+  const ruleFragment = currentFragment(ctx);
+  if (ruleFragment.type === 'record') {
+    ruleFragment.children['rule'] = { type: 'string', value, offset };
+  }
+
+  return ctx;
+}
+
 /**
  * Matches regular rules:
  * - `git_repository(...)`
- * - `go_repository(...)`
+ * - `_go_repository(...)`
  */
-const regularRule = ruleSym.join(ruleCall(kwParams));
-
-const maybeFirstArg = q.begin<Ctx>().join(ruleSym).op(',');
+const regularRule = q
+  .sym<Ctx>(supportedRulesRegex, (ctx, token) =>
+    ruleNameHandler(recordStartHandler(ctx, token), token),
+  )
+  .join(ruleCall(kwParams));
 
 /**
  * Matches "maybe"-form rules:
  * - `maybe(git_repository, ...)`
- * - `maybe(go_repository, ...)`
+ * - `maybe(_go_repository, ...)`
  */
 const maybeRule = q
-  .sym<Ctx>(
-    'maybe',
-    // TODO: remove it (#9667)
-    (ctx, { offset }) => {
-      if (!is.number(ctx.ruleStartOffset)) {
-        ctx.ruleStartOffset = offset;
-      }
-      return ctx;
-    }
-  )
-  .join(ruleCall(q.alt(maybeFirstArg, kwParams)));
+  .sym<Ctx>('maybe', recordStartHandler)
+  .join(
+    ruleCall(
+      q.alt(
+        q.begin<Ctx>().sym(supportedRulesRegex, ruleNameHandler).op(','),
+        kwParams,
+      ),
+    ),
+  );
 
 const rule = q.alt<Ctx>(maybeRule, regularRule);
 
@@ -175,25 +294,32 @@ const query = q.tree<Ctx>({
 });
 
 function getCacheKey(input: string): string {
-  const hash = hasha(input);
-  return `bazel-parser-${hash}`;
+  const hashedInput = hash(input);
+  return `bazel-parser-${hashedInput}`;
 }
 
-export function parse(input: string, ctx = emptyCtx): ParsedResult | null {
+const starlark = lang.createLang('starlark');
+
+export function parse(
+  input: string,
+  packageFile?: string,
+): RecordFragment[] | null {
   const cacheKey = getCacheKey(input);
 
-  const cachedResult = memCache.get<ParsedResult | null>(cacheKey);
+  const cachedResult = memCache.get<RecordFragment[] | null>(cacheKey);
   // istanbul ignore if
   if (cachedResult === null || cachedResult) {
     return cachedResult;
   }
 
-  const parsedResult = starlark.query(input, query, ctx);
-
-  let result: ParsedResult | null = null;
-
-  if (parsedResult) {
-    result = parsedResult.result;
+  let result: RecordFragment[] | null = null;
+  try {
+    const parsedResult = starlark.query(input, query, emptyCtx(input));
+    if (parsedResult) {
+      result = parsedResult.results;
+    }
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err, packageFile }, 'Bazel parsing error');
   }
 
   memCache.set(cacheKey, result);

@@ -1,17 +1,46 @@
 import is from '@sindresorhus/is';
-import moo from 'moo';
-import pAll from 'p-all';
+import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
-import { regEx } from '../../../util/regex';
+import { filterMap } from '../../../util/filter-map';
+import { HttpError } from '../../../util/http';
+import * as p from '../../../util/promises';
+import { newlineRegex, regEx } from '../../../util/regex';
+import goVersioning from '../../versioning/go-mod-directive';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
-import { GoproxyFallback, getSourceUrl } from './common';
+import { getSourceUrl } from './common';
+import { parseGoproxy, parseNoproxy } from './goproxy-parser';
 import { GoDirectDatasource } from './releases-direct';
-import type { GoproxyItem, VersionInfo } from './types';
+import type { VersionInfo } from './types';
 
-const parsedGoproxy: Record<string, GoproxyItem[]> = {};
+const modRegex = regEx(/^(?<baseMod>.*?)(?:[./]v(?<majorVersion>\d+))?$/);
+
+/**
+ * @see https://go.dev/ref/mod#pseudo-versions
+ */
+const pseudoVersionRegex = regEx(
+  /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?(?<timestamp>\d{14})-(?<digest>[a-f0-9]{12})/i,
+);
+
+export function pseudoVersionToRelease(pseudoVersion: string): Release | null {
+  const match = pseudoVersion.match(pseudoVersionRegex)?.groups;
+  if (!match) {
+    return null;
+  }
+
+  const { digest: newDigest, timestamp } = match;
+  const releaseTimestamp = DateTime.fromFormat(timestamp, 'yyyyMMddHHmmss', {
+    zone: 'UTC',
+  }).toISO({ suppressMilliseconds: true });
+
+  return {
+    version: pseudoVersion,
+    newDigest,
+    releaseTimestamp,
+  };
+}
 
 export class GoProxyDatasource extends Datasource {
   static readonly id = 'go-proxy';
@@ -29,10 +58,12 @@ export class GoProxyDatasource extends Datasource {
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { packageName } = config;
     logger.trace(`goproxy.getReleases(${packageName})`);
-
-    const goproxy = process.env.GOPROXY;
-    const proxyList = this.parseGoproxy(goproxy);
-    const noproxy = GoProxyDatasource.parseNoproxy();
+    const goproxy = process.env.GOPROXY ?? 'https://proxy.golang.org,direct';
+    if (goproxy === 'direct') {
+      return this.direct.getReleases(config);
+    }
+    const proxyList = parseGoproxy(goproxy);
+    const noproxy = parseNoproxy();
 
     let result: ReleaseResult | null = null;
 
@@ -51,28 +82,15 @@ export class GoProxyDatasource extends Datasource {
           break;
         }
 
-        const versions = await this.listVersions(url, packageName);
-        const queue = versions.map((version) => async (): Promise<Release> => {
-          try {
-            return await this.versionInfo(url, packageName, version);
-          } catch (err) {
-            logger.trace({ err }, `Can't obtain data from ${url}`);
-            return { version };
-          }
-        });
-        const releases = await pAll(queue, { concurrency: 5 });
-        if (releases.length) {
-          const datasource = await BaseGoDatasource.getDatasource(packageName);
-          const sourceUrl = getSourceUrl(datasource);
-          result = { releases, sourceUrl };
+        const res = await this.getVersionsWithInfo(url, packageName);
+        if (res.releases.length) {
+          result = res;
           break;
         }
       } catch (err) {
         const statusCode = err?.response?.statusCode;
         const canFallback =
-          fallback === GoproxyFallback.Always
-            ? true
-            : statusCode === 404 || statusCode === 410;
+          fallback === '|' ? true : statusCode === 404 || statusCode === 410;
         const msg = canFallback
           ? 'Goproxy error: trying next URL provided with GOPROXY'
           : 'Goproxy error: skipping other URLs provided with GOPROXY';
@@ -83,109 +101,18 @@ export class GoProxyDatasource extends Datasource {
       }
     }
 
-    return result;
-  }
-
-  /**
-   * Parse `GOPROXY` to the sequence of url + fallback strategy tags.
-   *
-   * @example
-   * parseGoproxy('foo.example.com|bar.example.com,baz.example.com')
-   * // [
-   * //   { url: 'foo.example.com', fallback: '|' },
-   * //   { url: 'bar.example.com', fallback: ',' },
-   * //   { url: 'baz.example.com', fallback: '|' },
-   * // ]
-   *
-   * @see https://golang.org/ref/mod#goproxy-protocol
-   */
-  parseGoproxy(input: string | undefined = process.env.GOPROXY): GoproxyItem[] {
-    if (!is.string(input)) {
-      return [];
+    if (result && !result.sourceUrl) {
+      try {
+        const datasource = await BaseGoDatasource.getDatasource(packageName);
+        const sourceUrl = getSourceUrl(datasource);
+        if (sourceUrl) {
+          result.sourceUrl = sourceUrl;
+        }
+      } catch (err) {
+        logger.trace({ err }, `Can't get datasource for ${packageName}`);
+      }
     }
 
-    if (parsedGoproxy[input]) {
-      return parsedGoproxy[input];
-    }
-
-    const result: GoproxyItem[] = input
-      .split(regEx(/([^,|]*(?:,|\|))/))
-      .filter(Boolean)
-      .map((s) => s.split(/(?=,|\|)/)) // TODO: #12872 lookahead
-      .map(([url, separator]) => ({
-        url,
-        fallback:
-          separator === ','
-            ? GoproxyFallback.WhenNotFoundOrGone
-            : GoproxyFallback.Always,
-      }));
-
-    parsedGoproxy[input] = result;
-    return result;
-  }
-  // https://golang.org/pkg/path/#Match
-  static lexer = moo.states({
-    main: {
-      separator: {
-        match: /\s*?,\s*?/, // TODO #12870
-        value: (_: string) => '|',
-      },
-      asterisk: {
-        match: '*',
-        value: (_: string) => '[^\\/]*',
-      },
-      qmark: {
-        match: '?',
-        value: (_: string) => '[^\\/]',
-      },
-      characterRangeOpen: {
-        match: '[',
-        push: 'characterRange',
-        value: (_: string) => '[',
-      },
-      trailingSlash: {
-        match: /\/$/,
-        value: (_: string) => '',
-      },
-      char: {
-        match: /[^*?\\[\n]/,
-        value: (s: string) => s.replace(regEx('\\.', 'g'), '\\.'),
-      },
-      escapedChar: {
-        match: /\\./, // TODO #12870
-        value: (s: string) => s.slice(1),
-      },
-    },
-    characterRange: {
-      char: /[^\\\]\n]/, // TODO #12870
-      escapedChar: {
-        match: /\\./, // TODO #12870
-        value: (s: string) => s.slice(1),
-      },
-      characterRangeEnd: {
-        match: ']',
-        pop: 1,
-      },
-    },
-  });
-
-  static parsedNoproxy: Record<string, RegExp | null> = {};
-
-  static parseNoproxy(
-    input: unknown = process.env.GONOPROXY ?? process.env.GOPRIVATE
-  ): RegExp | null {
-    if (!is.string(input)) {
-      return null;
-    }
-    if (this.parsedNoproxy[input] !== undefined) {
-      return this.parsedNoproxy[input];
-    }
-    this.lexer.reset(input);
-    const noproxyPattern = [...this.lexer].map(({ value }) => value).join('');
-    const result = noproxyPattern
-      ? regEx(`^(?:${noproxyPattern})(?:/.*)?$`)
-      : null;
-    this.parsedNoproxy[input] = result;
     return result;
   }
 
@@ -198,19 +125,29 @@ export class GoProxyDatasource extends Datasource {
     return input.replace(regEx(/([A-Z])/g), (x) => `!${x.toLowerCase()}`);
   }
 
-  async listVersions(baseUrl: string, packageName: string): Promise<string[]> {
+  async listVersions(baseUrl: string, packageName: string): Promise<Release[]> {
     const url = `${baseUrl}/${this.encodeCase(packageName)}/@v/list`;
     const { body } = await this.http.get(url);
-    return body
-      .split(regEx(/\s+/))
-      .filter(Boolean)
-      .filter((x) => x.indexOf('+') === -1);
+    return filterMap(body.split(newlineRegex), (str) => {
+      if (!is.nonEmptyStringAndNotWhitespace(str)) {
+        return null;
+      }
+
+      const [version, releaseTimestamp] = str.trim().split(regEx(/\s+/));
+      const release: Release = pseudoVersionToRelease(version) ?? { version };
+
+      if (releaseTimestamp) {
+        release.releaseTimestamp = releaseTimestamp;
+      }
+
+      return release;
+    });
   }
 
   async versionInfo(
     baseUrl: string,
     packageName: string,
-    version: string
+    version: string,
   ): Promise<Release> {
     const url = `${baseUrl}/${this.encodeCase(packageName)}/@v/${version}.info`;
     const res = await this.http.getJson<VersionInfo>(url);
@@ -226,11 +163,90 @@ export class GoProxyDatasource extends Datasource {
     return result;
   }
 
+  async getLatestVersion(
+    baseUrl: string,
+    packageName: string,
+  ): Promise<string | null> {
+    try {
+      const url = `${baseUrl}/${this.encodeCase(packageName)}/@latest`;
+      const res = await this.http.getJson<VersionInfo>(url);
+      return res.body.Version;
+    } catch (err) {
+      logger.trace({ err }, 'Failed to get latest version');
+      return null;
+    }
+  }
+
+  async getVersionsWithInfo(
+    baseUrl: string,
+    packageName: string,
+  ): Promise<ReleaseResult> {
+    const isGopkgin = packageName.startsWith('gopkg.in/');
+    const majorSuffixSeparator = isGopkgin ? '.' : '/';
+    const modParts = packageName.match(modRegex)?.groups;
+    const baseMod = modParts?.baseMod ?? /* istanbul ignore next */ packageName;
+    const packageMajor = parseInt(modParts?.majorVersion ?? '0');
+
+    const result: ReleaseResult = { releases: [] };
+    for (let major = packageMajor; ; major += 1) {
+      let pkg = `${baseMod}${majorSuffixSeparator}v${major}`;
+      if (!isGopkgin && major < 2) {
+        pkg = baseMod;
+        major += 1; // v0 and v1 are the same module
+      }
+
+      try {
+        const res = await this.listVersions(baseUrl, pkg);
+        const releases = await p.map(res, async (versionInfo) => {
+          const { version, newDigest, releaseTimestamp } = versionInfo;
+
+          if (releaseTimestamp) {
+            return { version, newDigest, releaseTimestamp };
+          }
+
+          try {
+            return await this.versionInfo(baseUrl, pkg, version);
+          } catch (err) {
+            logger.trace({ err }, `Can't obtain data from ${baseUrl}`);
+            return { version };
+          }
+        });
+        result.releases.push(...releases);
+      } catch (err) {
+        if (
+          err instanceof HttpError &&
+          err.response?.statusCode === 404 &&
+          major !== packageMajor
+        ) {
+          break;
+        }
+
+        throw err;
+      }
+
+      const latestVersion = await this.getLatestVersion(baseUrl, pkg);
+      if (latestVersion) {
+        result.tags ??= {};
+        result.tags.latest ??= latestVersion;
+        if (goVersioning.isGreaterThan(latestVersion, result.tags.latest)) {
+          result.tags.latest = latestVersion;
+        }
+        if (!result.releases.length) {
+          const releaseFromLatest = pseudoVersionToRelease(latestVersion);
+          if (releaseFromLatest) {
+            result.releases.push(releaseFromLatest);
+          }
+        }
+      }
+    }
+
+    return result;
+  }
+
   static getCacheKey({ packageName }: GetReleasesConfig): string {
     const goproxy = process.env.GOPROXY;
-    const noproxy = GoProxyDatasource.parseNoproxy();
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    const noproxy = parseNoproxy();
+    // TODO: types (#22198)
     return `${packageName}@@${goproxy}@@${noproxy?.toString()}`;
   }
 }

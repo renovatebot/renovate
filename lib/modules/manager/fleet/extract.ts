@@ -1,12 +1,14 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { parseYaml } from '../../../util/yaml';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
+import { getDep } from '../dockerfile/extract';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import { checkIfStringIsPath } from '../terraform/util';
-import type { PackageDependency, PackageFile } from '../types';
-import type { FleetFile, FleetFileHelm, GitRepo } from './types';
+import type { PackageDependency, PackageFileContent } from '../types';
+import { FleetFile, type FleetHelmBlock, GitRepo } from './schema';
 
 function extractGitRepo(doc: GitRepo): PackageDependency {
   const dep: PackageDependency = {
@@ -28,7 +30,7 @@ function extractGitRepo(doc: GitRepo): PackageDependency {
   if (!currentValue) {
     return {
       ...dep,
-      skipReason: 'no-version',
+      skipReason: 'unspecified-version',
     };
   }
 
@@ -38,7 +40,7 @@ function extractGitRepo(doc: GitRepo): PackageDependency {
   };
 }
 
-function extractFleetFile(doc: FleetFileHelm): PackageDependency {
+function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
   const dep: PackageDependency = {
     depType: 'fleet',
     datasource: HelmDatasource.id,
@@ -50,7 +52,26 @@ function extractFleetFile(doc: FleetFileHelm): PackageDependency {
       skipReason: 'missing-depname',
     };
   }
+
+  if (isOCIRegistry(doc.chart)) {
+    const dockerDep = getDep(
+      `${removeOCIPrefix(doc.chart)}:${doc.version}`,
+      false,
+    );
+
+    return {
+      ...dockerDep,
+      depType: 'fleet',
+      depName: dockerDep.depName,
+      packageName: dockerDep.depName,
+      // https://github.com/helm/helm/issues/10312
+      // https://github.com/helm/helm/issues/10678
+      pinDigests: false,
+    };
+  }
+
   dep.depName = doc.chart;
+  dep.packageName = doc.chart;
 
   if (!doc.repo) {
     if (checkIfStringIsPath(doc.chart)) {
@@ -70,7 +91,7 @@ function extractFleetFile(doc: FleetFileHelm): PackageDependency {
   if (!doc.version) {
     return {
       ...dep,
-      skipReason: 'no-version',
+      skipReason: 'unspecified-version',
     };
   }
 
@@ -80,10 +101,37 @@ function extractFleetFile(doc: FleetFileHelm): PackageDependency {
   };
 }
 
+function extractFleetFile(doc: FleetFile): PackageDependency[] {
+  const result: PackageDependency[] = [];
+
+  result.push(extractFleetHelmBlock(doc.helm));
+
+  if (!is.undefined(doc.targetCustomizations)) {
+    // remove version from helm block to allow usage of variables defined in the global block, but do not create PRs
+    // if there is no version defined in the customization.
+    const helmBlockContext: FleetHelmBlock = { ...doc.helm };
+    delete helmBlockContext.version;
+
+    for (const custom of doc.targetCustomizations) {
+      const dep = extractFleetHelmBlock({
+        // merge base config with customization
+        ...helmBlockContext,
+        ...custom.helm,
+      });
+      result.push({
+        // overwrite name with customization name to allow splitting of PRs
+        ...dep,
+        depName: custom.name,
+      });
+    }
+  }
+  return result;
+}
+
 export function extractPackageFile(
   content: string,
-  packageFile: string
-): PackageFile | null {
+  packageFile: string,
+): PackageFileContent | null {
   if (!content) {
     return null;
   }
@@ -91,23 +139,25 @@ export function extractPackageFile(
 
   try {
     if (regEx('fleet.ya?ml').test(packageFile)) {
-      // TODO: fix me (#9610)
-      const docs = loadAll(content, null, { json: true }) as FleetFile[];
-      const fleetDeps = docs
-        .filter((doc) => is.truthy(doc?.helm))
-        .flatMap((doc) => extractFleetFile(doc.helm));
+      const docs = parseYaml(content, null, {
+        json: true,
+        customSchema: FleetFile,
+        failureBehaviour: 'filter',
+      });
+      const fleetDeps = docs.flatMap(extractFleetFile);
 
       deps.push(...fleetDeps);
     } else {
-      // TODO: fix me (#9610)
-      const docs = loadAll(content, null, { json: true }) as GitRepo[];
-      const gitRepoDeps = docs
-        .filter((doc) => doc.kind === 'GitRepo') // ensure only GitRepo manifests are processed
-        .flatMap((doc) => extractGitRepo(doc));
+      const docs = parseYaml(content, null, {
+        json: true,
+        customSchema: GitRepo,
+        failureBehaviour: 'filter',
+      });
+      const gitRepoDeps = docs.flatMap(extractGitRepo);
       deps.push(...gitRepoDeps);
     }
   } catch (err) {
-    logger.error({ error: err, packageFile }, 'Failed to parse fleet YAML');
+    logger.debug({ error: err, packageFile }, 'Failed to parse fleet YAML');
   }
 
   return deps.length ? { deps } : null;

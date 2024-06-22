@@ -12,7 +12,7 @@ import { regEx } from '../../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { isSingleOperator, isValidOperator } from './operator';
 import { ltr, parse as parseRange } from './range';
-import { bump, pin, replace } from './strategies';
+import { bump, pin, replace, widen } from './strategies';
 import { parse as parseVersion } from './version';
 
 export const id = 'ruby';
@@ -83,14 +83,14 @@ export const matches = (version: string, range: string): boolean =>
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return maxSatisfying(versions.map(vtrim), vtrim(range));
 }
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return minSatisfying(versions.map(vtrim), vtrim(range));
 }
@@ -109,10 +109,10 @@ const getNewValue = ({
   } else {
     switch (rangeStrategy) {
       case 'update-lockfile':
-        if (satisfies(newVersion, currentValue)) {
-          newValue = currentValue;
+        if (satisfies(newVersion, vtrim(currentValue))) {
+          newValue = vtrim(currentValue);
         } else {
-          newValue = getNewValue({
+          return getNewValue({
             currentValue,
             rangeStrategy: 'replace',
             currentVersion,
@@ -127,16 +127,21 @@ const getNewValue = ({
         newValue = bump({ range: vtrim(currentValue), to: vtrim(newVersion) });
         break;
       case 'auto':
-      case 'widen':
       case 'replace':
         newValue = replace({
           range: vtrim(currentValue),
           to: vtrim(newVersion),
         });
         break;
+      case 'widen':
+        newValue = widen({
+          range: vtrim(currentValue),
+          to: vtrim(newVersion),
+        });
+        break;
       // istanbul ignore next
       default:
-        logger.warn(`Unsupported strategy ${rangeStrategy}`);
+        logger.warn({ rangeStrategy }, 'Unsupported range strategy');
     }
   }
   if (newValue && regEx(/^('|")/).exec(currentValue)) {
@@ -146,12 +151,12 @@ const getNewValue = ({
       .map((element) =>
         element.replace(
           regEx(`^(?<whitespace>\\s*)`),
-          `$<whitespace>${delimiter}`
-        )
+          `$<whitespace>${delimiter}`,
+        ),
       )
       .map(
         (element) =>
-          element.replace(/(?<whitespace>\s*)$/, `${delimiter}$<whitespace>`) // TODO #12875 adds ' at front when re2 is used
+          element.replace(/(?<whitespace>\s*)$/, `${delimiter}$<whitespace>`), // TODO #12875 adds ' at front when re2 is used
       )
       .join(',');
   }

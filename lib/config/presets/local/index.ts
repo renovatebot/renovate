@@ -1,21 +1,32 @@
-import { PlatformId } from '../../../constants';
+import type { PlatformId } from '../../../constants';
 import { GlobalConfig } from '../../global';
-import * as azure from '../azure';
-import * as bitbucket from '../bitbucket';
-import * as bitbucketServer from '../bitbucket-server';
 import * as gitea from '../gitea';
 import * as github from '../github';
 import * as gitlab from '../gitlab';
 import type { Preset, PresetConfig } from '../types';
+import * as local from './common';
+
+interface Resolver {
+  getPresetFromEndpoint(
+    repo: string,
+    filePreset: string,
+    presetPath?: string,
+    endpoint?: string,
+    tag?: string,
+  ): Promise<Preset | undefined>;
+}
 
 const resolvers = {
-  [PlatformId.Azure]: azure,
-  [PlatformId.Bitbucket]: bitbucket,
-  [PlatformId.BitbucketServer]: bitbucketServer,
-  [PlatformId.Gitea]: gitea,
-  [PlatformId.Github]: github,
-  [PlatformId.Gitlab]: gitlab,
-} as const;
+  azure: local,
+  bitbucket: local,
+  'bitbucket-server': local,
+  codecommit: null,
+  gerrit: local,
+  gitea,
+  github,
+  gitlab,
+  local: null,
+} satisfies Record<PlatformId, Resolver | null>;
 
 export function getPreset({
   repo,
@@ -23,23 +34,23 @@ export function getPreset({
   presetPath,
   tag,
 }: PresetConfig): Promise<Preset | undefined> {
-  const { platform, endpoint } = GlobalConfig.get();
+  const platform = GlobalConfig.get('platform');
   if (!platform) {
     throw new Error(`Missing platform config for local preset.`);
   }
-  const resolver = resolvers[platform.toLowerCase() as PlatformId];
+  const resolver = resolvers[platform];
   if (!resolver) {
     throw new Error(
-      // TODO: can be undefined? #7154
-      `Unsupported platform '${platform}' for local preset.`
+      `The platform you're using (${platform}) does not support local presets.`,
     );
   }
+  const endpoint = GlobalConfig.get('endpoint');
   return resolver.getPresetFromEndpoint(
     repo,
     presetName,
     presetPath,
-    // TODO: fix type #7154
+    // TODO: fix type #22198
     endpoint!,
-    tag
+    tag,
   );
 }

@@ -5,9 +5,12 @@ import { TerraformModuleDatasource } from '.';
 
 const consulData = Fixtures.get('registry-consul.json');
 const consulVersionsData = Fixtures.get('registry-consul-versions.json');
+const versionsDataWithSourceUrl = Fixtures.get(
+  'registry-versions-with-source.json',
+);
 const serviceDiscoveryResult = Fixtures.get('service-discovery.json');
 const serviceDiscoveryCustomResult = Fixtures.get(
-  'service-custom-discovery.json'
+  'service-custom-discovery.json',
 );
 
 const datasource = TerraformModuleDatasource.id;
@@ -16,10 +19,6 @@ const localTerraformEnterprisebaseUrl = 'https://terraform.foo.bar';
 
 describe('modules/datasource/terraform-module/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
     it('returns null for empty result', async () => {
       httpMock
         .scope(baseUrl)
@@ -30,8 +29,8 @@ describe('modules/datasource/terraform-module/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'hashicorp/consul/aws',
-        })
+          packageName: 'hashicorp/consul/aws',
+        }),
       ).toBeNull();
     });
 
@@ -45,8 +44,8 @@ describe('modules/datasource/terraform-module/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'hashicorp/consul/aws',
-        })
+          packageName: 'hashicorp/consul/aws',
+        }),
       ).toBeNull();
     });
 
@@ -60,8 +59,8 @@ describe('modules/datasource/terraform-module/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'hashicorp/consul/aws',
-        })
+          packageName: 'hashicorp/consul/aws',
+        }),
       ).toBeNull();
     });
 
@@ -74,7 +73,7 @@ describe('modules/datasource/terraform-module/index', () => {
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
         datasource,
-        depName: 'hashicorp/consul/aws',
+        packageName: 'hashicorp/consul/aws',
       });
       expect(res).toEqual({
         homepage: 'https://registry.terraform.io/modules/hashicorp/consul/aws',
@@ -108,9 +107,9 @@ describe('modules/datasource/terraform-module/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'hashicorp/consul/aws',
+          packageName: 'hashicorp/consul/aws',
           registryUrls: ['https://terraform.company.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -124,9 +123,9 @@ describe('modules/datasource/terraform-module/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'hashicorp/consul/aws',
+          packageName: 'hashicorp/consul/aws',
           registryUrls: ['https://terraform.company.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -140,9 +139,9 @@ describe('modules/datasource/terraform-module/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'hashicorp/consul/aws',
+          packageName: 'hashicorp/consul/aws',
           registryUrls: ['https://terraform.company.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -155,7 +154,7 @@ describe('modules/datasource/terraform-module/index', () => {
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
         datasource,
-        depName: 'hashicorp/consul/aws',
+        packageName: 'hashicorp/consul/aws',
         registryUrls: ['https://terraform.company.com'],
       });
       expect(res).toEqual({
@@ -180,6 +179,32 @@ describe('modules/datasource/terraform-module/index', () => {
       });
     });
 
+    it('processes real data from third party including source url', async () => {
+      httpMock
+        .scope('https://terraform.company.com')
+        .get('/v1/modules/renovate-issue-25003/mymodule/local/versions')
+        .reply(200, versionsDataWithSourceUrl)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'renovate-issue-25003/mymodule/local',
+        registryUrls: ['https://terraform.company.com'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://terraform.company.com',
+        releases: [
+          {
+            version: '0.0.1',
+          },
+          {
+            version: '0.0.2',
+          },
+        ],
+        sourceUrl: 'https://gitlab.com/renovate-issue-25003/mymodule',
+      });
+    });
+
     it('processes with registry in name', async () => {
       httpMock
         .scope(baseUrl)
@@ -189,7 +214,7 @@ describe('modules/datasource/terraform-module/index', () => {
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
         datasource,
-        depName: 'registry.terraform.io/hashicorp/consul/aws',
+        packageName: 'registry.terraform.io/hashicorp/consul/aws',
       });
       expect(res).toEqual({
         homepage: 'https://registry.terraform.io/modules/hashicorp/consul/aws',
@@ -224,7 +249,7 @@ describe('modules/datasource/terraform-module/index', () => {
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
         datasource,
-        depName: 'consul/foo',
+        packageName: 'consul/foo',
         registryUrls: ['https://terraform.company.com'],
       });
       expect(res).toBeNull();
@@ -241,7 +266,7 @@ describe('modules/datasource/terraform-module/index', () => {
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
         datasource,
-        depName: 'consul/foo',
+        packageName: 'consul/foo',
         registryUrls: ['https://terraform.company.com'],
       });
       expect(res).toBeNull();
@@ -254,7 +279,7 @@ describe('modules/datasource/terraform-module/index', () => {
         .reply(404);
       const res = await getPkgReleases({
         datasource,
-        depName: 'consul/foo',
+        packageName: 'consul/foo',
         registryUrls: ['https://terraform.company.com'],
       });
       expect(res).toBeNull();
@@ -270,7 +295,7 @@ describe('modules/datasource/terraform-module/index', () => {
       const res = await getPkgReleases({
         datasource,
         registryUrls: ['https://terraform.foo.bar'],
-        depName: 'hashicorp/consul/aws',
+        packageName: 'hashicorp/consul/aws',
       });
 
       expect(res).toEqual({

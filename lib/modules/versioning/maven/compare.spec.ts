@@ -1,8 +1,10 @@
 import {
   autoExtendMavenRange,
   compare,
+  isSubversion,
   parseRange,
   rangeToStr,
+  tokenize,
 } from './compare';
 
 describe('modules/versioning/maven/compare', () => {
@@ -10,7 +12,7 @@ describe('modules/versioning/maven/compare', () => {
     // @see https://github.com/apache/maven/blob/master/maven-artifact/src/test/java/org/apache/maven/artifact/versioning/ComparableVersionTest.java
     // @see https://github.com/apache/maven/blob/master/maven-artifact/src/test/java/org/apache/maven/artifact/versioning/DefaultArtifactVersionTest.java
     describe('equality', () => {
-      test.each`
+      it.each`
         x                       | y
         ${'1'}                  | ${'1'}
         ${'1'}                  | ${'1.0'}
@@ -92,6 +94,8 @@ describe('modules/versioning/maven/compare', () => {
         ${'Hoxton.RELEASE'}     | ${'hoxton'}
         ${'Hoxton.SR1'}         | ${'hoxton.sr-1'}
         ${'1_5ea'}              | ${'1.0_5ea'}
+        ${'1.foo'}              | ${'1-foo'}
+        ${'1.x'}                | ${'1-x'}
       `('$x == $y', ({ x, y }) => {
         expect(compare(x, y)).toBe(0);
         expect(compare(y, x)).toBe(0);
@@ -99,7 +103,7 @@ describe('modules/versioning/maven/compare', () => {
     });
 
     describe('ordering', () => {
-      test.each`
+      it.each`
         x                                               | y
         ${'1'}                                          | ${'2'}
         ${'1.5'}                                        | ${'2'}
@@ -164,7 +168,6 @@ describe('modules/versioning/maven/compare', () => {
         ${'1'}                                          | ${'1-sp'}
         ${'1-foo2'}                                     | ${'1-foo10'}
         ${'1-m1'}                                       | ${'1-milestone-2'}
-        ${'1.foo'}                                      | ${'1-foo'}
         ${'1-foo'}                                      | ${'1-1'}
         ${'1-alpha.1'}                                  | ${'1-beta.1'}
         ${'1-1'}                                        | ${'1.1'}
@@ -187,6 +190,7 @@ describe('modules/versioning/maven/compare', () => {
         ${'1-0.alpha'}                                  | ${'1-0.beta'}
         ${'1_5ea'}                                      | ${'1_c3b'}
         ${'1_c3b'}                                      | ${'2'}
+        ${'17.0.5'}                                     | ${'17.0.5+8'}
       `('$x < $y', ({ x, y }) => {
         expect(compare(x, y)).toBe(-1);
         expect(compare(y, x)).toBe(1);
@@ -194,9 +198,223 @@ describe('modules/versioning/maven/compare', () => {
     });
   });
 
+  // @see https://issues.apache.org/jira/browse/MNG-7644
+  describe('MNG-7644', () => {
+    it.each`
+      qualifier
+      ${'abc'}
+      ${'alpha'}
+      ${'a'}
+      ${'beta'}
+      ${'b'}
+      ${'def'}
+      ${'milestone'}
+      ${'m'}
+      ${'RC'}
+    `('$qualifier', ({ qualifier }: { qualifier: string }) => {
+      // 1.0.0.X1 < 1.0.0-X2 for any string x
+      expect(compare(`1.0.0.${qualifier}1`, `1.0.0-${qualifier}2`)).toBe(-1);
+
+      // 2.0.X == 2-X == 2.0.0.X for any string x
+      expect(compare(`2-${qualifier}`, `2.0.${qualifier}`)).toBe(0); // previously ordered, now equals
+      expect(compare(`2-${qualifier}`, `2.0.0.${qualifier}`)).toBe(0); // previously ordered, now equals
+      expect(compare(`2.0.${qualifier}`, `2.0.0.${qualifier}`)).toBe(0); // previously ordered, now equals
+    });
+  });
+
+  describe('isSubversion', () => {
+    it.each`
+      majorVersion         | minorVersion    | expected
+      ${'1.2.3'}           | ${'1.2.3'}      | ${true}
+      ${'1.2.3'}           | ${'1.0.0'}      | ${false}
+      ${'2.0.0'}           | ${'2.0.1'}      | ${true}
+      ${'3.1.0'}           | ${'3.01.00'}    | ${true}
+      ${'4.0.0'}           | ${''}           | ${false}
+      ${'5.0.0'}           | ${'4.5.2'}      | ${false}
+      ${'6.0.0'}           | ${'6.0.0-beta'} | ${true}
+      ${'invalid.version'} | ${''}           | ${false}
+      ${''}                | ${'1.2.3'}      | ${false}
+      ${'v1.2.3'}          | ${'1.2.3'}      | ${true}
+      ${'v1.2.3'}          | ${'v1.2.3'}     | ${true}
+    `(
+      'isSubversion("$majorVersion", "$minorVersion") === $expected',
+      ({ majorVersion, minorVersion, expected }) => {
+        expect(isSubversion(majorVersion, minorVersion)).toBe(expected);
+      },
+    );
+  });
+
+  describe('tokenize', () => {
+    const zeroToken = {
+      prefix: 'PREFIX_HYPHEN',
+      type: 'TYPE_NUMBER',
+      val: 0,
+      isTransition: false,
+    };
+    const testObj = [
+      {
+        input: '1.2.3',
+        expected: [
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_NUMBER',
+            val: 1,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 2,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 3,
+          },
+        ],
+      },
+      {
+        input: 'alpha.beta.rc',
+        expected: [
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_QUALIFIER',
+            val: 'alpha',
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_QUALIFIER',
+            val: 'beta',
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_QUALIFIER',
+            val: 'rc',
+          },
+        ],
+      },
+      {
+        input: '1.2.3-alpha.beta',
+        expected: [
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_NUMBER',
+            val: 1,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 2,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 3,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_QUALIFIER',
+            val: 'alpha',
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_QUALIFIER',
+            val: 'beta',
+          },
+        ],
+      },
+      {
+        input: '1.2.x-3',
+        expected: [
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_NUMBER',
+            val: 1,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 2,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_QUALIFIER',
+            val: 'x',
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_NUMBER',
+            val: 3,
+          },
+        ],
+      },
+      {
+        input: '00.02.003',
+        expected: [
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_NUMBER',
+            val: 0,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 2,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 3,
+          },
+        ],
+      },
+      {
+        input: 'invalid.version',
+        expected: [
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_QUALIFIER',
+            val: 'invalid',
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_QUALIFIER',
+            val: 'version',
+          },
+        ],
+      },
+      { input: '', expected: [zeroToken] },
+    ];
+
+    it('should tokenize', () => {
+      for (const { input, expected } of testObj) {
+        expect(tokenize(input)).toEqual(expected);
+      }
+    });
+  });
+
   describe('Non-standard behavior', () => {
     describe('equality', () => {
-      test.each`
+      it.each`
         x              | y
         ${'1-ga-1'}    | ${'1-1'}
         ${'1.0-SNAP'}  | ${'1-snapshot'}
@@ -211,7 +429,7 @@ describe('modules/versioning/maven/compare', () => {
     });
 
     describe('ordering', () => {
-      test.each`
+      it.each`
         x              | y
         ${'1-snap'}    | ${'1'}
         ${'1-preview'} | ${'1-snapshot'}
@@ -223,7 +441,7 @@ describe('modules/versioning/maven/compare', () => {
   });
 
   describe('Ranges', () => {
-    test.each`
+    it.each`
       input
       ${'1.2.3-SNAPSHOT'}
       ${'[]'}
@@ -254,7 +472,7 @@ describe('modules/versioning/maven/compare', () => {
       expect(rangeToStr(range)).toBeNull();
     });
 
-    test.each`
+    it.each`
       input           | leftType             | leftValue | leftBracket | rightType            | rightValue | rightBracket
       ${'[1.0]'}      | ${'INCLUDING_POINT'} | ${'1.0'}  | ${'['}      | ${'INCLUDING_POINT'} | ${'1.0'}   | ${']'}
       ${'(,1.0]'}     | ${'EXCLUDING_POINT'} | ${null}   | ${'('}      | ${'INCLUDING_POINT'} | ${'1.0'}   | ${']'}
@@ -288,12 +506,12 @@ describe('modules/versioning/maven/compare', () => {
         ];
         expect(parseRange(input)).toEqual(parseResult);
         expect(rangeToStr(parseResult as never)).toEqual(
-          input.replace(/\s*/g, '')
+          input.replace(/\s*/g, ''),
         );
-      }
+      },
     );
 
-    test.each`
+    it.each`
       range                      | version      | expected
       ${'[1.2.3]'}               | ${'1.2.3'}   | ${'[1.2.3]'}
       ${'[1.2.3]'}               | ${'1.2.4'}   | ${'[1.2.4]'}
@@ -339,7 +557,7 @@ describe('modules/versioning/maven/compare', () => {
       'autoExtendMavenRange("$range", "$version") === $expected',
       ({ range, version, expected }) => {
         expect(autoExtendMavenRange(range, version)).toEqual(expected);
-      }
+      },
     );
   });
 });

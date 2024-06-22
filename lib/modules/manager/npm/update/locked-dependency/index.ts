@@ -5,7 +5,7 @@ import * as packageLock from './package-lock';
 import * as yarnLock from './yarn-lock';
 
 export async function updateLockedDependency(
-  config: UpdateLockedConfig
+  config: UpdateLockedConfig,
 ): Promise<UpdateLockedResult> {
   const { currentVersion, newVersion, lockFile } = config;
   if (!(semver.isVersion(currentVersion) && semver.isVersion(newVersion))) {
@@ -19,6 +19,14 @@ export async function updateLockedDependency(
   if (lockFile.endsWith('yarn.lock')) {
     return yarnLock.updateLockedDependency(config);
   }
-  logger.debug({ lockFile }, 'Unsupported lock file');
+  if (lockFile.endsWith('pnpm-lock.yaml')) {
+    logger.debug(
+      'Cannot patch pnpm lock file directly - falling back to using pnpm',
+    );
+    return { status: 'unsupported' };
+  }
+
+  logger.debug(`updateLockedDependency(): unsupported lock file: ${lockFile}`);
+
   return { status: 'update-failed' };
 }

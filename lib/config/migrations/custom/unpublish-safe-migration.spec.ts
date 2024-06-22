@@ -8,7 +8,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       },
       {
         extends: ['npm:unpublishSafe'],
-      }
+      },
     );
   });
 
@@ -20,7 +20,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       } as any,
       {
         extends: ['test', 'npm:unpublishSafe'],
-      }
+      },
     );
   });
 
@@ -32,7 +32,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       } as any,
       {
         extends: ['npm:unpublishSafe'],
-      }
+      },
     );
   });
 
@@ -44,7 +44,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       } as any,
       {
         extends: ['foo', 'npm:unpublishSafe', 'bar'],
-      }
+      },
     );
 
     expect(UnpublishSafeMigration).toMigrate(
@@ -54,7 +54,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       } as any,
       {
         extends: ['foo', 'npm:unpublishSafe', 'bar'],
-      }
+      },
     );
 
     expect(UnpublishSafeMigration).toMigrate(
@@ -64,7 +64,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       } as any,
       {
         extends: ['foo', 'npm:unpublishSafe', 'bar'],
-      }
+      },
     );
   });
 
@@ -76,7 +76,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       } as any,
       {
         extends: ['foo', 'bar'],
-      }
+      },
     );
   });
 
@@ -88,7 +88,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       },
       {
         extends: ['npm:unpublishSafe'],
-      }
+      },
     );
   });
 });

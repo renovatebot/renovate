@@ -33,9 +33,9 @@ terraform {
   source = "github.com/hashicorp/example?ref=next"
 }
 
-#hostname
+#IP
 terraform {
-  source = "https://104.196.242.174"example?ref=next"
+  source = "https://104.196.242.174/example?ref=next"
 }
 
 #local hostname
@@ -63,7 +63,7 @@ terraform {
   source = "my.host.local/sources/example?ref=v1.2.1"
 }
 
-#ip
+#hostname
 terraform {
   source = "my.host/example?ref=next"
 }
@@ -127,32 +127,32 @@ terraform {
 
 # foobar
 terraform {
-  source = "https://bitbucket.com/hashicorp/example?ref=v1.0.0"
+  source = "https://mygit.com/hashicorp/example?ref=v1.0.0"
 }
 
 # gittags
 terraform {
-  source = "git::https://bitbucket.com/hashicorp/example?ref=v1.0.0"
+  source = "git::https://mygit.com/hashicorp/example?ref=v1.0.0"
 }
 
 # gittags_badversion
 terraform {
-  source = "git::https://bitbucket.com/hashicorp/example?ref=next"
+  source = "git::https://mygit.com/hashicorp/example?ref=next"
 }
 
 # gittags_subdir
 terraform {
-  source = "git::https://bitbucket.com/hashicorp/example//subdir/test?ref=v1.0.1"
+  source = "git::https://mygit.com/hashicorp/example//subdir/test?ref=v1.0.1"
 }
 
 # gittags_http
 terraform {
-  source = "git::http://bitbucket.com/hashicorp/example?ref=v1.0.2"
+  source = "git::http://mygit.com/hashicorp/example?ref=v1.0.2"
 }
 
 # gittags_ssh
 terraform {
-  source = "git::ssh://git@bitbucket.com/hashicorp/example?ref=v1.0.3"
+  source = "git::ssh://git@mygit.com/hashicorp/example?ref=v1.0.3"
 }
 
 # invalid, ignored by test since it does not have source on the next line
@@ -163,4 +163,34 @@ terraform {
 terraform {
   name  = "foo"
   dummy = "true"
+}
+
+# bitbucket-tags
+terraform {
+  source = "git::https://bitbucket.com/hashicorp/example?ref=v1.0.0"
+}
+
+# gitlab-tags
+terraform {
+  source = "git::https://gitlab.com/hashicorp/example?ref=v1.0.0"
+}
+
+# gitlab-tags https with custom port
+terraform {
+  source = "git::https://gitlab.com:4321/hashicorp/example?ref=v1.0.1"
+}
+
+# gitlab-tags ssh with custom port
+terraform {
+  source = "git::ssh://gitlab.com:1234/hashicorp/example.git//foo/bar?ref=v1.0.2"
+}
+
+# gitea-tags
+terraform {
+  source = "git::https://gitea.com/hashicorp/example?ref=v1.0.0"
+}
+
+# gittags fallback for bitbucket-server
+terraform {
+  source = "git::https://bitbucket.example.com/hashicorp/example?ref=v1.0.0"
 }

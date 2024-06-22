@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -7,12 +7,18 @@ import { platform } from '../../../modules/platform';
 
 export async function raiseDeprecationWarnings(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]>,
 ): Promise<void> {
   if (!config.repoIsOnboarded) {
     return;
   }
   if (config.suppressNotifications?.includes('deprecationWarningIssues')) {
+    return;
+  }
+  if (config.mode === 'silent') {
+    logger.debug(
+      `Deprecation warning issues are not created, updated or closed when mode=silent`,
+    );
     return;
   }
   for (const [manager, files] of Object.entries(packageFiles)) {
@@ -31,7 +37,7 @@ export async function raiseDeprecationWarnings(
             depPackageFiles: [],
           };
           deprecatedPackages[dep.depName!].depPackageFiles.push(
-            packageFile.packageFile!
+            packageFile.packageFile,
           );
         }
       }
@@ -48,7 +54,7 @@ export async function raiseDeprecationWarnings(
           deprecationMessage,
           packageFiles: depPackageFiles,
         },
-        'dependency is deprecated'
+        'dependency is deprecated',
       );
       const issueTitle = `${issueTitlePrefix} ${depName} (${manager})`;
       issueTitleList.push(issueTitle);
@@ -71,12 +77,12 @@ export async function raiseDeprecationWarnings(
       }
     }
     logger.debug(
-      'Checking for existing deprecated package issues missing in current deprecatedPackages'
+      'Checking for existing deprecated package issues missing in current deprecatedPackages',
     );
     const issueList = await platform.getIssueList();
     if (issueList?.length) {
       const deprecatedIssues = issueList.filter(
-        (i) => i.title!.startsWith(issueTitlePrefix) && i.state === 'open'
+        (i) => i.title!.startsWith(issueTitlePrefix) && i.state === 'open',
       );
       for (const i of deprecatedIssues) {
         if (!issueTitleList.includes(i.title!)) {

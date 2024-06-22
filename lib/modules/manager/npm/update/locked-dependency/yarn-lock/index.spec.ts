@@ -21,6 +21,9 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/index', () => {
 
     it('returns if yarn lock 2', () => {
       config.lockFileContent = yarn2Lock;
+      config.depName = 'chalk';
+      config.currentVersion = '2.4.2';
+      config.newVersion = '2.4.3';
       expect(updateLockedDependency(config).status).toBe('unsupported');
     });
 

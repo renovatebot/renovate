@@ -1,5 +1,6 @@
 /node_modules
-/config.js
+/.pnpm-store
+/config.js*
 /coverage
 /dist
 /tmp

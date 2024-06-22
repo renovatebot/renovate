@@ -1,21 +1,24 @@
-'reproduction:needed':
+'auto:reproduction':
   comment: >
     Hi there,
 
 
-    Get your issue fixed faster by creating a minimal reproduction.
+    Get your discussion fixed faster by creating a minimal reproduction.
     This means a repository dedicated to reproducing this issue with the minimal dependencies and config possible.
 
 
     Before we start working on your issue we need to know exactly what's causing the current behavior.
     A minimal reproduction helps us with this.
+    Discussions without reproductions are less likely to be converted to Issues.
 
 
-    To get started, please read our guide on creating a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md).
-
-
-    We may close the issue if you, or someone else, haven't created a minimal reproduction within two weeks.
-    If you need more time, or are stuck, please ask for help or more time in a comment.
+    Please follow these steps:
+     1. Read our guide on creating a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md).
+     2. Go to our [minimal reproduction template repository](https://github.com/renovatebot/minimal-reproduction-template).
+     3. Select the _Use this template_ button to create a new repository based on the template.
+     4. Work on the minimal reproduction in your own repository.
+     5. Fill out the information in your repository's `README.md`.
+     6. Add the link to your reproduction to the first post of your Discussion. If you are not the original author, you can post a new comment with the link.
 
 
     Good luck,
@@ -23,34 +26,34 @@
 
     The Renovate team
 
-'logs:problem':
+'auto:logs':
   comment: >
     Hi there,
 
 
-    We have found that there's a problem with the logs.
+    This issue or discussion is missing some logs, making it difficult or impossible to help you.
     Depending on which situation applies follow one, some or all of these instructions.
 
 
     ### No logs at all
 
-    If there's no log posted yet, we need you to find and copy/paste the log into the issue template.
+    If you haven't posted any log yet, we need you to find and copy/paste the log into the issue template.
 
 
     #### Finding logs on hosted app
 
-    <details><summary>Click me to read instructions</summary>
+    <details><summary>Select me to read instructions</summary>
 
 
-    If you use the Renovate app (GitHub):
+    If you use the Mend Renovate app (GitHub):
 
-    1. Go to the affected PR, and search for "View repository job log here"
+    1. Log in to [the Mend Developer Portal](https://developer.mend.io/)
 
-    1. Click on the link to go to the "Mend Renovate Dashboard" and log in
+    1. Navigate to the correct organization and repository
 
-    1. You are now in the correct repository log overview screen
+    1. Locate the appropriate log (it may not always be the latest one)
 
-    1. Copy/paste the correct log
+    1. Copy/paste the log contents
 
     1. Follow the steps in the **formatting your logs** section
 
@@ -59,53 +62,62 @@
 
     #### Finding logs when self-hosting
 
-    <details><summary>Click me to read instructions</summary>
+    <details><summary>Select me to read instructions</summary>
 
 
-    If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
+    Read the [Renovate docs, troubleshooting, self-hosted](https://docs.renovatebot.com/troubleshooting/#self-hosted) to learn how to find the logs.
 
     </details>
 
 
     ### Insufficient logs
 
-    <details><summary>Click me to read instructions</summary>
+    <details><summary>Select me to read instructions</summary>
 
 
-    If you already provided logs, and the Renovate team said they are not enough, follow the instructions from the **No logs at all** section.
+    If you already gave us a log, and the Renovate team said it's not enough, then follow the instructions from the **No logs at all** section.
 
     </details>
 
 
     ### Formatting your logs
 
-    <details><summary>Click me to read instructions</summary>
+    <details><summary>Select me to read instructions</summary>
 
 
     Please put your logs in a `<details>` and `<summary>` element like this:
 
 
-        <details><summary>Click me to see logs</summary>
+        <details><summary>Select me to see logs</summary>
 
         ```
-        Copy/paste any log here, between the starting and ending backticks
+        Copy/paste your logs here, between the starting and ending backticks
         ```
 
         </details>
 
     </details>
 
+
+    If you feel the logs are too large to paste here, please use a service like [GitHub Gist](https://gist.github.com/) and paste the link here.
+
+
+    Good luck,
+
+
+    The Renovate team
+
 'new package manager':
   comment: >
     Hi there,
 
 
-    You're requesting support for a new package manager.
+    You're asking us to support a new package manager.
     We need to know some basic information about this package manager first.
     Please copy/paste [the new package manager questionnaire](https://github.com/renovatebot/renovate/blob/main/docs/development/new-package-manager-template.md), and fill it out in full.
 
 
-    Once the questionnaire is filled out we will evaluate if adding support for this manager is something we want to do.
+    Once the questionnaire is filled out we'll decide if we want to support this new manager.
 
 
     Good luck,
@@ -113,16 +125,217 @@
 
     The Renovate team
 
-'retry latest version':
+'auto:retry-latest':
   comment: >
     Hi there,
 
 
-    You're reporting a problem with an outdated version of Renovate.
+    You're reporting a problem with an old version of Renovate.
     Please try the latest version and tell us if that fixes your problem.
+
+
+    Be sure to provide updated logs once you have run with a newer version.
 
 
     Good luck,
 
 
     The Renovate team
+
+'auto:no-coverage-ignore':
+  comment: >
+    Hi there,
+
+
+    You're skipping code tests with `istanbul ignore`.
+
+
+    Please only skip tests if:
+     - you cannot test the code, or
+     - the code is very difficult to test, or
+     - the edge case won't usually happen at runtime
+
+
+    If you skip a test, always comment why:
+
+
+    ```ts
+    // istanbul ignore next: typescript strict null check
+    if (!url) {
+      return null;
+    }
+    ```
+
+
+    Good luck,
+
+
+    The Renovate team
+
+'auto:no-done-comments':
+  comment: >
+    Hi there,
+
+
+    You are using `done` comments which cause a lot of noise/notifications.
+    Instead, please use GitHub's web interface to request another review.
+    Please read our [contributing guidelines](https://github.com/renovatebot/renovate/blob/main/.github/contributing.md#resolve-review-comments-instead-of-commenting) to reduce noise.
+
+
+    Good luck,
+
+
+    The Renovate team
+
+'auto:discussion-first':
+  comment: >
+    **Please create a GitHub Discussion before continuing with this PR.**
+
+
+    Thank you for your PR, but we need to discuss the requirements and implementation first.
+
+
+    The maintainers believe that there is a lack of - or misalignment of - requirements about this PR.
+    We need to discuss the requirements and implementation first so that you don't write code that won't be merged.
+
+
+    This PR will be closed for now to avoid confusion, but you can reopen it after the discussion has been resolved.
+
+
+    Thanks, the Renovate team
+  close: true
+
+'auto:more-details':
+  comment: >
+    Hi there,
+
+
+    This discussion is missing some details, making it difficult or impossible to help you.
+    Please try again to provide more details.
+
+
+    For example, you may have left out information about your platform (e.g. GitHub Enterprise Server, etc), your version of Renovate (npm, Docker, GitHub Action, etc), or how you're running Renovate.
+
+
+    If you can't think of what possible information might be required, please reply to this message and ask for help.
+
+'needs-discussion':
+  comment: >
+    **Please create a GitHub Discussion instead of this issue.**
+
+
+    Issues in this repository are for creation by Maintainers only - please create a GitHub Discussion instead.
+    If needed, a Renovate maintainer will create an Issue after your Discussion been triaged and confirmed.
+
+
+    This Issue will now be closed and locked. We may later batch-delete this issue. This way we keep Issues actionable, and free of duplicates or wrong bug reports.
+
+
+    Thanks, the Renovate team
+  close: true
+  close-reason: 'not planned'
+
+'auto:inactivity-pr-close':
+  comment: >
+    **We're closing this PR due to inactivity, but we are happy for you, or others, to finish the PR.**
+
+
+    We limit the number of open PRs, so we close stale PRs, or PRs that are not getting ready to merge.
+
+
+    If you, or someone else, want to continue working on this PR, then please reopen this PR and let us know.
+
+
+    Thanks, the Renovate team
+  close: true
+  close-reason: 'not planned'
+
+'auto:format-code':
+  comment: >
+    Hi, please format any copy/pasted code or logs so they're readable.
+
+
+    You can find a Markdown code formatting guide [here](https://www.markdownguide.org/basic-syntax/#code) as well as some GitHub-specific information formatting code blocks [here](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
+
+
+    Thanks, the Renovate team
+
+'auto:discussion-closed':
+  comment: >
+    Hi there,
+
+
+    We're closing this discussion because it's missing some details, or because something else about it made it hard or impossible for us to help resolve the issue.
+
+
+    We want high quality discussions, so users can search them for answers.
+    This means we'll close (and later delete) low quality discussions.
+
+
+    You are welcome to create a new discussion with more details in future.
+
+
+    Thanks, the Renovate team.
+  close: true
+  close-reason: 'not planned'
+
+'auto:bad-vibes':
+  comment: >
+    Hi there,
+
+
+    A maintainer has flagged this discussion as giving off some bad vibes. **Maintainers will no longer participate in this discussion unless/until such "vibes" are resolved.**
+
+
+    This is typically when someone is overly critical of the product or the assistance they're receiving.
+    Or being unreasonably demanding or lazy, such as refusing to provide logs, or other information, when asked.
+
+
+    Open Source means you're welcome to use the software with few limits applied.
+    But you should _not_ give maintainers a bad day or contribute to Open Source burnout.
+
+
+    If you feel this message is wrong or due to a misunderstanding, please let us know. If you see this message but don't take it as a sign to cool off or back off, we may close the discussion and block you from the repository.
+
+
+    If you want to get the discussion back on track, we would like you to:
+     - Remove, or edit, the bad vibes parts of your comments
+     - Say that you understand the problem (we don't need a lengthy apology)
+     - Stop giving off more bad vibes
+
+
+    Thanks, the Renovate team
+
+'auto:one-topic':
+  comment: >
+    Hi there,
+
+
+    Please stick to one topic/question per Discussion. Start a new discussion per topic.
+
+
+    This prevents future users from finding this discussion and getting confused by multiple questions and answers. One question and answer per Discussion works best.
+
+
+    For example:
+     - Don't create a discussion with multiple questions requiring multiple answers
+     - If you got an answer to your first question, don't change topic like "Can I also ask you how I might..." which would then require a different answer. Mark the current discussion as answered and open a new one.
+
+
+    Thanks, the Renovate team
+
+'auto:no-mentions':
+  comment: >
+    Hi there,
+
+
+    This is intended as a polite, automated _request_ that users avoid `@` mentioning repository maintainers like `@rarkins` or `@viceice`. Doing so causes annoying mobile notifications and makes it harder to maintain this repository.
+
+
+    We know it might be common elsewhere but we participate in hundreds of discussions a week and would need to turn off GitHub mobile notifications if we were mentioned in every one.
+
+
+    As a general rule, we will read and respond to all discussions in this repository, so there is no need to mention us.
+
+
+    Thanks, the Renovate team

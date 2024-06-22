@@ -6,16 +6,18 @@ export type DependenciesMeta = Record<
   { optional: boolean; built: boolean; unplugged: boolean }
 >;
 
-export interface NpmPackage extends PackageJson {
+export type NpmPackage = PackageJson & {
   renovate?: unknown;
   _from?: any;
   _args?: any;
   _id?: any;
   dependenciesMeta?: DependenciesMeta;
-  packageManager?: string;
   overrides?: OverrideDependency;
   volta?: PackageJson.Dependency;
-}
+  pnpm?: {
+    overrides?: PackageJson.Dependency;
+  };
+};
 
 export type LockFileEntry = Record<
   string,
@@ -23,7 +25,11 @@ export type LockFileEntry = Record<
 >;
 
 export interface LockFile {
-  lockedVersions: Record<string, string>;
+  lockedVersions?: Record<string, string>;
+  lockedVersionsWithPath?: Record<
+    string,
+    Record<string, Record<string, string>>
+  >;
   lockfileVersion?: number; // cache version for Yarn
   isYarn1?: boolean;
 }

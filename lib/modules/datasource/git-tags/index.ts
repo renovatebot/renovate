@@ -11,6 +11,9 @@ export class GitTagsDatasource extends GitDatasource {
   }
 
   override readonly customRegistrySupport = false;
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   @cache({
     namespace: `datasource-${GitTagsDatasource.id}`,
@@ -46,7 +49,7 @@ export class GitTagsDatasource extends GitDatasource {
 
   override async getDigest(
     { packageName }: DigestConfig,
-    newValue?: string
+    newValue?: string,
   ): Promise<string | null> {
     const rawRefs = await this.getRawRefs({ packageName });
     const findValue = newValue ?? 'HEAD';

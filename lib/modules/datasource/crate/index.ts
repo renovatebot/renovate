@@ -1,4 +1,3 @@
-import hasha from 'hasha';
 import Git from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
@@ -7,12 +6,13 @@ import * as memCache from '../../../util/cache/memory';
 import { cache } from '../../../util/cache/package/decorator';
 import { privateCacheDir, readCacheFile } from '../../../util/fs';
 import { simpleGitConfig } from '../../../util/git/config';
+import { toSha256 } from '../../../util/hash';
 import { newlineRegex, regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
+import { joinUrlParts, parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import {
+import type {
   CrateMetadata,
   CrateRecord,
   RegistryFlavor,
@@ -35,11 +35,14 @@ export class CrateDatasource extends Datasource {
 
   static readonly CRATES_IO_API_BASE_URL = 'https://crates.io/api/v1/';
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `repository` field in the results.';
+
   @cache({
     namespace: `datasource-${CrateDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      // TODO: types (#22198)
       `${registryUrl}/${packageName}`,
     cacheable: ({ registryUrl }: GetReleasesConfig) =>
       CrateDatasource.areReleasesCacheable(registryUrl),
@@ -51,7 +54,7 @@ export class CrateDatasource extends Datasource {
     // istanbul ignore if
     if (!registryUrl) {
       logger.warn(
-        'crate datasource: No registryUrl specified, cannot perform getReleases'
+        'crate datasource: No registryUrl specified, cannot perform getReleases',
       );
       return null;
     }
@@ -61,18 +64,18 @@ export class CrateDatasource extends Datasource {
       registryUrl,
     });
     if (!registryInfo) {
-      logger.debug({ registryUrl }, 'Could not fetch registry info');
+      logger.debug(`Could not fetch registry info from ${registryUrl}`);
       return null;
     }
 
     const dependencyUrl = CrateDatasource.getDependencyUrl(
       registryInfo,
-      packageName
+      packageName,
     );
 
     const payload = await this.fetchCrateRecordsPayload(
       registryInfo,
-      packageName
+      packageName,
     );
     const lines = payload
       .split(newlineRegex) // break into lines
@@ -98,10 +101,15 @@ export class CrateDatasource extends Datasource {
     result.releases = lines
       .map((version) => {
         const release: Release = {
-          version: version.vers,
+          version: version.vers.replace(/\+.*$/, ''),
         };
         if (version.yanked) {
           release.isDeprecated = true;
+        }
+        if (version.rust_version) {
+          release.constraints = {
+            rust: [version.rust_version],
+          };
         }
         return release;
       })
@@ -123,9 +131,9 @@ export class CrateDatasource extends Datasource {
   })
   public async getCrateMetadata(
     info: RegistryInfo,
-    packageName: string
+    packageName: string,
   ): Promise<CrateMetadata | null> {
-    if (info.flavor !== RegistryFlavor.CratesIo) {
+    if (info.flavor !== 'crates.io') {
       return null;
     }
 
@@ -136,7 +144,7 @@ export class CrateDatasource extends Datasource {
 
     logger.debug(
       { crateUrl, packageName, registryUrl: info.rawUrl },
-      'downloading crate metadata'
+      'downloading crate metadata',
     );
 
     try {
@@ -146,7 +154,7 @@ export class CrateDatasource extends Datasource {
     } catch (err) {
       logger.warn(
         { err, packageName, registryUrl: info.rawUrl },
-        'failed to download crate metadata'
+        'failed to download crate metadata',
       );
     }
 
@@ -155,20 +163,26 @@ export class CrateDatasource extends Datasource {
 
   public async fetchCrateRecordsPayload(
     info: RegistryInfo,
-    packageName: string
+    packageName: string,
   ): Promise<string> {
     if (info.clonePath) {
       const path = upath.join(
         info.clonePath,
-        ...CrateDatasource.getIndexSuffix(packageName)
+        ...CrateDatasource.getIndexSuffix(packageName),
       );
       return readCacheFile(path, 'utf8');
     }
 
-    if (info.flavor === RegistryFlavor.CratesIo) {
-      const crateUrl =
-        CrateDatasource.CRATES_IO_BASE_URL +
-        CrateDatasource.getIndexSuffix(packageName).join('/');
+    const baseUrl =
+      info.flavor === 'crates.io'
+        ? CrateDatasource.CRATES_IO_BASE_URL
+        : info.rawUrl;
+
+    if (info.flavor === 'crates.io' || info.isSparse) {
+      const packageSuffix = CrateDatasource.getIndexSuffix(
+        packageName.toLowerCase(),
+      );
+      const crateUrl = joinUrlParts(baseUrl, ...packageSuffix);
       try {
         return (await this.http.get(crateUrl)).body;
       } catch (err) {
@@ -184,12 +198,12 @@ export class CrateDatasource extends Datasource {
    */
   private static getDependencyUrl(
     info: RegistryInfo,
-    packageName: string
+    packageName: string,
   ): string {
     switch (info.flavor) {
-      case RegistryFlavor.CratesIo:
+      case 'crates.io':
         return `https://crates.io/crates/${packageName}`;
-      case RegistryFlavor.Cloudsmith: {
+      case 'cloudsmith': {
         // input: https://dl.cloudsmith.io/basic/$org/$repo/cargo/index.git
         const tokens = info.url.pathname.split('/');
         const org = tokens[2];
@@ -208,11 +222,17 @@ export class CrateDatasource extends Datasource {
   private static cacheDirFromUrl(url: URL): string {
     const proto = url.protocol.replace(regEx(/:$/), '');
     const host = url.hostname;
-    const hash = hasha(url.pathname, {
-      algorithm: 'sha256',
-    }).substring(0, 7);
+    const hash = toSha256(url.pathname).substring(0, 7);
 
     return `crate-registry-${proto}-${host}-${hash}`;
+  }
+
+  private static isSparseRegistry(url: string): boolean {
+    const parsed = parseUrl(url);
+    if (!parsed) {
+      return false;
+    }
+    return parsed.protocol.startsWith('sparse+');
   }
 
   /**
@@ -230,37 +250,45 @@ export class CrateDatasource extends Datasource {
       return null;
     }
 
-    const url = parseUrl(registryUrl);
+    const isSparseRegistry = CrateDatasource.isSparseRegistry(registryUrl);
+    const registryFetchUrl = isSparseRegistry
+      ? registryUrl.replace(/^sparse\+/, '')
+      : registryUrl;
+
+    const url = parseUrl(registryFetchUrl);
     if (!url) {
-      logger.debug({ registryUrl }, 'could not parse registry URL');
+      logger.debug(`Could not parse registry URL ${registryFetchUrl}`);
       return null;
     }
 
     let flavor: RegistryFlavor;
     if (url.hostname === 'crates.io') {
-      flavor = RegistryFlavor.CratesIo;
+      flavor = 'crates.io';
     } else if (url.hostname === 'dl.cloudsmith.io') {
-      flavor = RegistryFlavor.Cloudsmith;
+      flavor = 'cloudsmith';
     } else {
-      flavor = RegistryFlavor.Other;
+      flavor = 'other';
     }
 
     const registry: RegistryInfo = {
       flavor,
-      rawUrl: registryUrl,
+      rawUrl: registryFetchUrl,
       url,
+      isSparse: isSparseRegistry,
     };
 
-    if (flavor !== RegistryFlavor.CratesIo) {
-      if (!GlobalConfig.get('allowCustomCrateRegistries')) {
-        logger.warn(
-          'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out'
-        );
-        return null;
-      }
-
-      const cacheKey = `crate-datasource/registry-clone-path/${registryUrl}`;
-      const cacheKeyForError = `crate-datasource/registry-clone-path/${registryUrl}/error`;
+    if (
+      registry.flavor !== 'crates.io' &&
+      !GlobalConfig.get('allowCustomCrateRegistries')
+    ) {
+      logger.warn(
+        'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out',
+      );
+      return null;
+    }
+    if (registry.flavor !== 'crates.io' && !registry.isSparse) {
+      const cacheKey = `crate-datasource/registry-clone-path/${registryFetchUrl}`;
+      const cacheKeyForError = `crate-datasource/registry-clone-path/${registryFetchUrl}/error`;
 
       // We need to ensure we don't run `git clone` in parallel. Therefore we store
       // a promise of the running operation in the mem cache, which in the end resolves
@@ -274,29 +302,29 @@ export class CrateDatasource extends Datasource {
       } else {
         clonePath = upath.join(
           privateCacheDir(),
-          CrateDatasource.cacheDirFromUrl(url)
+          CrateDatasource.cacheDirFromUrl(url),
         );
         logger.info(
-          { clonePath, registryUrl },
-          `Cloning private cargo registry`
+          { clonePath, registryFetchUrl },
+          `Cloning private cargo registry`,
         );
 
         const git = Git({ ...simpleGitConfig(), maxConcurrentProcesses: 1 });
-        const clonePromise = git.clone(registryUrl, clonePath, {
+        const clonePromise = git.clone(registryFetchUrl, clonePath, {
           '--depth': 1,
         });
 
         memCache.set(
           cacheKey,
-          clonePromise.then(() => clonePath).catch(() => null)
+          clonePromise.then(() => clonePath).catch(() => null),
         );
 
         try {
           await clonePromise;
         } catch (err) {
           logger.warn(
-            { err, packageName, registryUrl },
-            'failed cloning git registry'
+            { err, packageName, registryFetchUrl },
+            'failed cloning git registry',
           );
           memCache.set(cacheKeyForError, err);
 
@@ -307,8 +335,8 @@ export class CrateDatasource extends Datasource {
       if (!clonePath) {
         const err = memCache.get(cacheKeyForError);
         logger.warn(
-          { err, packageName, registryUrl },
-          'Previous git clone failed, bailing out.'
+          { err, packageName, registryFetchUrl },
+          'Previous git clone failed, bailing out.',
         );
 
         return null;
@@ -321,7 +349,7 @@ export class CrateDatasource extends Datasource {
   }
 
   private static areReleasesCacheable(
-    registryUrl: string | undefined
+    registryUrl: string | undefined,
   ): boolean {
     // We only cache public releases, we don't want to cache private
     // cloned data between runs.

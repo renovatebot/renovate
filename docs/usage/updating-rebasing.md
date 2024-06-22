@@ -12,6 +12,7 @@ Here is a list of the most common cases where Renovate must update/rebase the br
 - When a pull request has conflicts due to changes on the base branch
 - When you have enabled "Require branches to be up to date before merging" on GitHub
 - When you have manually told Renovate to rebase when behind the base branch with `"rebaseWhen": "behind-base-branch"`
+- When you have set `keepUpdatedLabel` and included the label on a PR
 - When a newer version of the dependency is released
 - When you request a manual rebase from the Renovate bot
 - When you use `"automerge": true` and `"rebaseWhen": "auto"` on a branch / pr
@@ -22,8 +23,13 @@ Instead, Renovate reapplies all updates into a new commit based off of the head 
 ## No rebasing if you have made edits
 
 First of all, here is the one time when Renovate _won't_ update branches.
-If you edit a Renovate branch directly (e.g. to make a code fix to allow tests to pass again) then Renovate stops all updates of that branch.
-It is up to you to either finish the job and merge the PR, or rename it and close it so that Renovate can take back over again.
+If you push a new commit to a Renovate branch, for example to fix your code so the tests pass, then Renovate stops all updates of that branch.
+It is up to you to either finish the job and merge the PR, or rename it and close it so that Renovate can take over again.
+
+<!-- prettier-ignore -->
+!!! warning
+    Do _not_ amend Renovate's commits, because Renovate will rebase over your amended commit.
+    Keep your work safe and always push your own _new_ commit to any Renovate branch.
 
 ## Rebasing conflicted PRs
 
@@ -52,13 +58,13 @@ This way:
 
 ## Manual rebasing
 
-You can request that Renovate rebase a PR by ticking the rebase/retry checkbox on GitHub or GitLab.
+You can request that Renovate rebase a PR by selecting the rebase/retry checkbox on GitHub or GitLab.
 Or you can add a "rebase" label to the PR.
 The label name is configurable via the `rebaseLabel` option.
 
 If you apply a rebase label then Renovate will regenerate its commit for the branch, even if the branch has been modified.
 The rebase label is useful in situations like:
 
-- If a branch is stale but you don't have `rebaseWhen=behind-base-branch` enabled
+- If a branch is behind the base branch but you don't have `rebaseWhen=behind-base-branch` enabled
 - If a branch has been edited and you want to discard the edits and have Renovate create it again
 - If a branch was created with an error (e.g. lockfile generation) and you want Renovate to try again

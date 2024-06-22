@@ -7,19 +7,18 @@ exports[`modules/platform/bitbucket/index ensureComment() does not throw 1`] = `
 exports[`modules/platform/bitbucket/index ensureCommentRemoval() does not throw 1`] = `undefined`;
 
 exports[`modules/platform/bitbucket/index findIssue() does not throw 1`] = `
-Object {
+{
   "body": "content",
   "number": 25,
 }
 `;
 
 exports[`modules/platform/bitbucket/index findPr() finds pr 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
   },
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
-  "displayNumber": "Pull Request #5",
   "number": 5,
   "sourceBranch": "branch",
   "state": "open",
@@ -29,13 +28,11 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket/index getBranchPr() bitbucket finds PR for branch 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
   },
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
-  "displayNumber": "Pull Request #5",
-  "hasReviewers": false,
   "number": 5,
   "sourceBranch": "branch",
   "state": "open",
@@ -45,16 +42,16 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket/index getIssueList() get issues 1`] = `
-Array [
-  Object {
-    "content": Object {
+[
+  {
+    "content": {
       "raw": "content",
     },
     "id": 25,
     "title": "title",
   },
-  Object {
-    "content": Object {
+  {
+    "content": {
       "raw": "content",
     },
     "id": 26,
@@ -64,13 +61,11 @@ Array [
 `;
 
 exports[`modules/platform/bitbucket/index getPr() canRebase 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
   },
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
-  "displayNumber": "Pull Request #3",
-  "hasReviewers": false,
   "number": 3,
   "sourceBranch": "branch",
   "state": "open",
@@ -80,13 +75,11 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket/index getPr() canRebase 2`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
   },
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
-  "displayNumber": "Pull Request #5",
-  "hasReviewers": false,
   "number": 5,
   "sourceBranch": "branch",
   "state": "open",
@@ -96,13 +89,11 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket/index getPr() canRebase 3`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
   },
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
-  "displayNumber": "Pull Request #5",
-  "hasReviewers": false,
   "number": 5,
   "sourceBranch": "branch",
   "state": "open",
@@ -112,13 +103,11 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket/index getPr() exists 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
   },
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
-  "displayNumber": "Pull Request #5",
-  "hasReviewers": false,
   "number": 5,
   "sourceBranch": "branch",
   "state": "open",
@@ -128,13 +117,12 @@ Object {
 `;
 
 exports[`modules/platform/bitbucket/index getPrList() filters PR list by author 1`] = `
-Array [
-  Object {
-    "bodyStruct": Object {
+[
+  {
+    "bodyStruct": {
       "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     },
     "createdAt": undefined,
-    "displayNumber": "Pull Request #1",
     "number": 1,
     "sourceBranch": "branch-a",
     "state": "open",
@@ -144,20 +132,17 @@ Array [
 ]
 `;
 
-exports[`modules/platform/bitbucket/index initPlatform() should init 1`] = `
-Object {
-  "endpoint": "https://api.bitbucket.org/",
-}
-`;
+exports[`modules/platform/bitbucket/index massageMarkdown() returns diff files 1`] = `
+"**foo**
 
-exports[`modules/platform/bitbucket/index initRepo() works 1`] = `
-Object {
-  "defaultBranch": "master",
-  "isFork": false,
-}
-`;
 
-exports[`modules/platform/bitbucket/index massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
+**text**
+
+
+
+
+"
+`;
 
 exports[`modules/platform/bitbucket/index updatePr() rethrows exception when PR update error due to unknown reviewers error 1`] = `"Response code 400 (Bad Request)"`;
 

@@ -1,13 +1,14 @@
+import type { Indent } from 'detect-indent';
 import type { RequestError, Response } from 'got';
 import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
-  getConfig,
-  git,
   partial,
   platform,
+  scm,
 } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
@@ -16,20 +17,19 @@ import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message';
 import type { MigratedData } from '../branch/migrated-data';
 import { ensureConfigMigrationPr } from '.';
 
-jest.mock('../../../../util/git');
-
 describe('workers/repository/config-migration/pr/index', () => {
   const spy = jest.spyOn(platform, 'massageMarkdown');
   const { configFileName, migratedContent } = Fixtures.getJson(
-    './migrated-data.json'
+    './migrated-data.json',
   );
   const prTitle = new ConfigMigrationCommitMessageFactory(
     {},
-    configFileName
+    configFileName,
   ).getPrTitle();
   const migratedData: MigratedData = {
     content: migratedContent,
     filename: configFileName,
+    indent: partial<Indent>(),
   };
   let config: RenovateConfig;
 
@@ -37,7 +37,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     GlobalConfig.set({
       dryRun: null,
     });
-    jest.resetAllMocks();
+
     config = {
       ...getConfig(),
       configMigration: true,
@@ -49,7 +49,7 @@ describe('workers/repository/config-migration/pr/index', () => {
   describe('ensureConfigMigrationPr()', () => {
     beforeEach(() => {
       spy.mockImplementation((input) => input);
-      platform.createPr.mockResolvedValueOnce(partial<Pr>({}));
+      platform.createPr.mockResolvedValueOnce(partial<Pr>());
     });
 
     let createPrBody: string;
@@ -65,7 +65,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     it('creates PR with default PR title', async () => {
       await ensureConfigMigrationPr(
         { ...config, onboardingPrTitle: '' },
-        migratedData
+        migratedData,
       );
       expect(platform.getBranchPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
@@ -75,7 +75,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     it('Founds an open PR and as it is up to date and returns', async () => {
       hash = hashBody(createPrBody);
       platform.getBranchPr.mockResolvedValueOnce(
-        mock<Pr>({ bodyStruct: { hash }, title: prTitle })
+        mock<Pr>({ bodyStruct: { hash }, title: prTitle }),
       );
       await ensureConfigMigrationPr(config, migratedData);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
@@ -84,7 +84,7 @@ describe('workers/repository/config-migration/pr/index', () => {
 
     it('Founds an open PR and updates it', async () => {
       platform.getBranchPr.mockResolvedValueOnce(
-        mock<Pr>({ bodyStruct: { hash: '' } })
+        mock<Pr>({ bodyStruct: { hash: '' } }),
       );
       await ensureConfigMigrationPr(config, migratedData);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
@@ -94,7 +94,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     it('updates an open PR with unexpected PR title', async () => {
       hash = hashBody(createPrBody);
       platform.getBranchPr.mockResolvedValueOnce(
-        mock<Pr>({ bodyStruct: { hash }, title: 'unexpected PR title' })
+        mock<Pr>({ bodyStruct: { hash }, title: 'unexpected PR title' }),
       );
       await ensureConfigMigrationPr(config, migratedData);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
@@ -107,17 +107,17 @@ describe('workers/repository/config-migration/pr/index', () => {
         dryRun: 'full',
       });
       platform.getBranchPr.mockResolvedValueOnce(
-        mock<Pr>({ bodyStruct: { hash: '' } })
+        mock<Pr>({ bodyStruct: { hash: '' } }),
       );
       await ensureConfigMigrationPr(config, migratedData);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(logger.debug).toHaveBeenCalledWith('Found open migration PR');
       expect(logger.debug).not.toHaveBeenLastCalledWith(
-        `does not need updating`
+        `does not need updating`,
       );
       expect(logger.info).toHaveBeenLastCalledWith(
-        'DRY-RUN: Would update migration PR'
+        'DRY-RUN: Would update migration PR',
       );
     });
 
@@ -129,7 +129,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       expect(platform.getBranchPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(logger.info).toHaveBeenLastCalledWith(
-        'DRY-RUN: Would create migration PR'
+        'DRY-RUN: Would create migration PR',
       );
     });
 
@@ -140,12 +140,12 @@ describe('workers/repository/config-migration/pr/index', () => {
           labels: ['label'],
           addLabels: ['label', 'additional-label'],
         },
-        migratedData
+        migratedData,
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].labels).toEqual([
-        'label',
         'additional-label',
+        'label',
       ]);
     });
 
@@ -156,7 +156,7 @@ describe('workers/repository/config-migration/pr/index', () => {
           prHeader: '',
           prFooter: '',
         },
-        migratedData
+        migratedData,
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
@@ -166,6 +166,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       await ensureConfigMigrationPr(config, {
         content: migratedContent,
         filename: 'renovate.json5',
+        indent: partial<Indent>(),
       });
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
@@ -179,7 +180,7 @@ describe('workers/repository/config-migration/pr/index', () => {
           prFooter:
             'There should be several empty lines at the end of the PR\r\n\n\n',
         },
-        migratedData
+        migratedData,
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
@@ -193,11 +194,11 @@ describe('workers/repository/config-migration/pr/index', () => {
           prFooter:
             'There should be several empty lines at the end of the PR\r\n\n\n',
         },
-        migratedData
+        migratedData,
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
-        'Migrate renovate config'
+        'Migrate renovate config',
       );
     });
 
@@ -211,11 +212,11 @@ describe('workers/repository/config-migration/pr/index', () => {
           prFooter:
             'There should be several empty lines at the end of the PR\r\n\n\n',
         },
-        migratedData
+        migratedData,
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prTitle).toBe(
-        'chore(config): migrate renovate config'
+        'chore(config): migrate renovate config',
       );
     });
 
@@ -229,17 +230,17 @@ describe('workers/repository/config-migration/pr/index', () => {
           prFooter:
             'And this is a footer for repository:{{repository}} baseBranch:{{baseBranch}}',
         },
-        migratedData
+        migratedData,
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
-        /platform:github/
+        /platform:github/,
       );
       expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
-        /repository:test/
+        /repository:test/,
       );
       expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
-        /baseBranch:some-branch/
+        /baseBranch:some-branch/,
       );
       expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
     });
@@ -250,15 +251,14 @@ describe('workers/repository/config-migration/pr/index', () => {
     const err = partial<RequestError>({ response });
 
     beforeEach(() => {
-      jest.resetAllMocks();
       GlobalConfig.reset();
-      git.deleteBranch.mockResolvedValue();
+      scm.deleteBranch.mockResolvedValue();
     });
 
     it('throws when trying to create a new PR', async () => {
       platform.createPr.mockRejectedValueOnce(err);
       await expect(ensureConfigMigrationPr(config, migratedData)).toReject();
-      expect(git.deleteBranch).toHaveBeenCalledTimes(0);
+      expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
     });
 
     it('deletes branch when PR already exists but cannot find it', async () => {
@@ -269,9 +269,9 @@ describe('workers/repository/config-migration/pr/index', () => {
       await expect(ensureConfigMigrationPr(config, migratedData)).toResolve();
       expect(logger.warn).toHaveBeenCalledWith(
         { err },
-        'Migration PR already exists but cannot find it. It was probably created by a different user.'
+        'Migration PR already exists but cannot find it. It was probably created by a different user.',
       );
-      expect(git.deleteBranch).toHaveBeenCalledTimes(1);
+      expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
     });
   });
 });

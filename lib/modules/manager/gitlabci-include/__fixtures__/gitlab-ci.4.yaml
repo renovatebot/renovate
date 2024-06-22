@@ -1,0 +1,13 @@
+---
+include:
+- project: mikebryant/include-source-example
+  file: /template.yaml
+  ref: 1.0.0
+
+trigger-my-job:
+  extends: .extend-trigger-job
+  trigger:
+    include:
+      - project: mikebryant/include-source-example
+        file: /template.yaml
+        ref: master

@@ -1,16 +1,17 @@
 import upath from 'upath';
-import { XmlDocument } from 'xmldoc';
+import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger';
 import { findUpLocal, readLocalFile } from '../../../util/fs';
+import { minimatch } from '../../../util/minimatch';
 import { regEx } from '../../../util/regex';
-import { defaultRegistryUrls } from '../../datasource/nuget';
-import type { Registry } from './types';
+import { nugetOrg } from '../../datasource/nuget';
+import type { NugetPackageDependency, Registry } from './types';
 
 export async function readFileAsXmlDocument(
-  file: string
+  file: string,
 ): Promise<XmlDocument | undefined> {
   try {
-    // TODO #7154
+    // TODO #22198
     const doc = new XmlDocument((await readLocalFile(file, 'utf8'))!);
     // don't return empty documents
     return doc?.firstChild ? doc : undefined;
@@ -20,30 +21,31 @@ export async function readFileAsXmlDocument(
   }
 }
 
-const defaultRegistries = defaultRegistryUrls.map(
-  (registryUrl) => ({ url: registryUrl } as Registry)
-);
-
+/**
+ * The default `nuget.org` named registry.
+ * @returns the default registry for NuGet
+ */
 export function getDefaultRegistries(): Registry[] {
-  return [...defaultRegistries];
+  return [{ url: nugetOrg, name: 'nuget.org' }];
 }
 
 export async function getConfiguredRegistries(
-  packageFile: string
+  packageFile: string,
 ): Promise<Registry[] | undefined> {
   // Valid file names taken from https://github.com/NuGet/NuGet.Client/blob/f64621487c0b454eda4b98af853bf4a528bef72a/src/NuGet.Core/NuGet.Configuration/Settings/Settings.cs#L34
   const nuGetConfigFileNames = ['nuget.config', 'NuGet.config', 'NuGet.Config'];
   // normalize paths, otherwise startsWith can fail because of path delimitter mismatch
   const nuGetConfigPath = await findUpLocal(
     nuGetConfigFileNames,
-    upath.dirname(packageFile)
+    upath.dirname(packageFile),
   );
   if (!nuGetConfigPath) {
     return undefined;
   }
 
-  logger.debug({ nuGetConfigPath }, 'found NuGet.config');
+  logger.debug(`Found NuGet.config at ${nuGetConfigPath}`);
   const nuGetConfig = await readFileAsXmlDocument(nuGetConfigPath);
+
   if (!nuGetConfig) {
     return undefined;
   }
@@ -53,7 +55,20 @@ export async function getConfiguredRegistries(
     return undefined;
   }
 
+  const packageSourceMapping = nuGetConfig.childNamed('packageSourceMapping');
+
   const registries = getDefaultRegistries();
+
+  // Map optional source mapped package patterns to default registries
+  for (const registry of registries) {
+    const sourceMappedPackagePatterns = packageSourceMapping
+      ?.childWithAttribute('key', registry.name)
+      ?.childrenNamed('package')
+      .map((packagePattern) => packagePattern.attr['pattern']);
+
+    registry.sourceMappedPackagePatterns = sourceMappedPackagePatterns;
+  }
+
   for (const child of packageSources.children) {
     if (child.type === 'element') {
       if (child.name === 'clear') {
@@ -66,15 +81,29 @@ export async function getConfiguredRegistries(
           if (child.attr.protocolVersion) {
             registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
           }
-          logger.debug({ registryUrl }, 'adding registry URL');
+          const sourceMappedPackagePatterns = packageSourceMapping
+            ?.childWithAttribute('key', child.attr.key)
+            ?.childrenNamed('package')
+            .map((packagePattern) => packagePattern.attr['pattern']);
+
+          logger.debug(
+            {
+              name: child.attr.key,
+              registryUrl,
+              sourceMappedPackagePatterns,
+            },
+            `Adding registry URL ${registryUrl}`,
+          );
+
           registries.push({
             name: child.attr.key,
             url: registryUrl,
+            sourceMappedPackagePatterns,
           });
         } else {
           logger.debug(
             { registryUrl: child.attr.value },
-            'ignoring local registry URL'
+            'ignoring local registry URL',
           );
         }
       }
@@ -82,4 +111,73 @@ export async function getConfiguredRegistries(
     }
   }
   return registries;
+}
+
+export function findVersion(parsedXml: XmlDocument): XmlElement | null {
+  for (const tag of ['Version', 'VersionPrefix']) {
+    for (const l1Elem of parsedXml.childrenNamed('PropertyGroup')) {
+      for (const l2Elem of l1Elem.childrenNamed(tag)) {
+        return l2Elem;
+      }
+    }
+  }
+  return null;
+}
+
+export function applyRegistries(
+  dep: NugetPackageDependency,
+  registries: Registry[] | undefined,
+): NugetPackageDependency {
+  if (registries) {
+    if (!registries.some((reg) => reg.sourceMappedPackagePatterns)) {
+      dep.registryUrls = registries.map((reg) => reg.url);
+      return dep;
+    }
+
+    const regs = registries.filter((r) => r.sourceMappedPackagePatterns);
+    const map = new Map<string, Registry[]>(
+      regs.flatMap((r) => r.sourceMappedPackagePatterns!.map((p) => [p, []])),
+    );
+    const depName = dep.depName;
+
+    for (const reg of regs) {
+      for (const pattern of reg.sourceMappedPackagePatterns!) {
+        map.get(pattern)!.push(reg);
+      }
+    }
+
+    const urls: string[] = [];
+
+    for (const [pattern, regs] of [...map].sort(sortPatterns)) {
+      if (minimatch(pattern, { nocase: true }).match(depName)) {
+        urls.push(...regs.map((r) => r.url));
+        break;
+      }
+    }
+
+    if (urls.length) {
+      dep.registryUrls = urls;
+    }
+  }
+  return dep;
+}
+
+/*
+ * Sorts patterns by specificity:
+ * 1. Exact match patterns
+ * 2. Wildcard match patterns
+ */
+function sortPatterns(
+  a: [string, Registry[]],
+  b: [string, Registry[]],
+): number {
+  if (a[0].endsWith('*') && !b[0].endsWith('*')) {
+    return 1;
+  }
+
+  if (!a[0].endsWith('*') && b[0].endsWith('*')) {
+    return -1;
+  }
+
+  return a[0].localeCompare(b[0]) * -1;
 }

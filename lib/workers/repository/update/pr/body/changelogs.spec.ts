@@ -6,14 +6,11 @@ jest.mock('../../../../../util/template');
 const template = mocked(_template);
 
 describe('workers/repository/update/pr/body/changelogs', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   it('returns empty string when there is no release notes', () => {
     const res = getChangelogs({
       manager: 'some-manager',
       branchName: 'some-branch',
+      baseBranch: 'base',
       upgrades: [],
       hasReleaseNotes: false,
     });
@@ -34,6 +31,7 @@ describe('workers/repository/update/pr/body/changelogs', () => {
 
     const res = getChangelogs({
       branchName: 'some-branch',
+      baseBranch: 'base',
       manager: 'some-manager',
       upgrades: [
         {
@@ -76,7 +74,7 @@ describe('workers/repository/update/pr/body/changelogs', () => {
       some/repo (dep-1)
       some/repo (dep-2)
       some/repo (dep-3)
-      other/repo
+      other/repo (dep-4)
 
       "
     `);

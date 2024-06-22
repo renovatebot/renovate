@@ -4,7 +4,7 @@ import { isVersion } from '../../versioning/ruby';
 
 const DEP_REGEX = new RegExp('(?<=\\().*(?=\\))'); // TODO #12872  (?<=re)	after text matching
 export function extractLockFileEntries(
-  lockFileContent: string
+  lockFileContent: string,
 ): Map<string, string> {
   const gemLock = new Map<string, string>();
   try {
@@ -35,7 +35,7 @@ export function extractLockFileEntries(
         }
       }
     });
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     logger.warn({ err }, `Failed to parse Bundler lockfile`);
   }
   return gemLock;

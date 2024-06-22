@@ -10,7 +10,7 @@ describe('config/migrations/custom/automerge-major-migration', () => {
         major: {
           automerge: true,
         },
-      }
+      },
     );
   });
 
@@ -19,15 +19,15 @@ describe('config/migrations/custom/automerge-major-migration', () => {
       {
         automergeMajor: 'some-value',
         major: {
-          matchFiles: ['test'],
+          matchFileNames: ['test'],
         },
       },
       {
         major: {
           automerge: true,
-          matchFiles: ['test'],
+          matchFileNames: ['test'],
         },
-      }
+      },
     );
   });
 
@@ -41,7 +41,7 @@ describe('config/migrations/custom/automerge-major-migration', () => {
         major: {
           automerge: true,
         },
-      }
+      },
     );
   });
 });

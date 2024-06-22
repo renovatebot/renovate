@@ -1,104 +1,104 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/nuget/extract extractPackageFile() extracts all dependencies 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "1.0.0",
     "datasource": "nuget",
     "depName": "My.Package",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.0.0",
     "datasource": "nuget",
     "depName": "Microsoft.VisualStudio.Web.CodeGeneration.Tools",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.2.3",
     "datasource": "nuget",
     "depName": "Range3",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.2.3",
     "datasource": "nuget",
     "depName": "Range2",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.2.3",
     "datasource": "nuget",
     "depName": "Range1",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "3.1.0.5",
     "datasource": "nuget",
     "depName": "Stateless",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "2.1.0",
     "datasource": "nuget",
     "depName": "Serilog.Sinks.Literate",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.4.0",
     "datasource": "nuget",
     "depName": "Serilog.Extensions.Logging",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "2.4.0",
     "datasource": "nuget",
     "depName": "Serilog",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "10.0.2",
     "datasource": "nuget",
     "depName": "Newtonsoft.Json",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.1.2",
     "datasource": "nuget",
     "depName": "Microsoft.Extensions.Logging.Debug",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.1.2",
     "datasource": "nuget",
     "depName": "Microsoft.Extensions.Configuration.Json",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.1.2",
     "datasource": "nuget",
     "depName": "Microsoft.AspNetCore.Server.Kestrel",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.1.3",
     "datasource": "nuget",
     "depName": "Microsoft.AspNetCore.Mvc.Core",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.1.2",
     "datasource": "nuget",
     "depName": "Microsoft.AspNetCore.Hosting",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "4.1.0",
     "datasource": "nuget",
     "depName": "Autofac.Extensions.DependencyInjection",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "4.5.0",
     "datasource": "nuget",
     "depName": "Autofac",
@@ -108,104 +108,104 @@ Array [
 `;
 
 exports[`modules/manager/nuget/extract extractPackageFile() extracts all dependencies from global packages file 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "1.0.0",
     "datasource": "nuget",
     "depName": "Microsoft.VisualStudio.Web.CodeGeneration.Tools",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.2.3",
     "datasource": "nuget",
     "depName": "Range3",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.2.3",
     "datasource": "nuget",
     "depName": "Range2",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.2.3",
     "datasource": "nuget",
     "depName": "Range1",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "3.1.0.5",
     "datasource": "nuget",
     "depName": "Stateless",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "2.1.0",
     "datasource": "nuget",
     "depName": "Serilog.Sinks.Literate",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.4.0",
     "datasource": "nuget",
     "depName": "Serilog.Extensions.Logging",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "2.4.0",
     "datasource": "nuget",
     "depName": "Serilog",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "10.0.2",
     "datasource": "nuget",
     "depName": "Newtonsoft.Json",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.1.2",
     "datasource": "nuget",
     "depName": "Microsoft.Extensions.Logging.Debug",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.1.2",
     "datasource": "nuget",
     "depName": "Microsoft.Extensions.Configuration.Json",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.1.2",
     "datasource": "nuget",
     "depName": "Microsoft.AspNetCore.Server.Kestrel",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.1.3",
     "datasource": "nuget",
     "depName": "Microsoft.AspNetCore.Mvc.Core",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "1.1.2",
     "datasource": "nuget",
     "depName": "Microsoft.AspNetCore.Hosting",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "4.1.0",
     "datasource": "nuget",
     "depName": "Autofac.Extensions.DependencyInjection",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "4.5.0",
     "datasource": "nuget",
     "depName": "Autofac",
     "depType": "nuget",
   },
-  Object {
+  {
     "currentValue": "2.0.0",
     "datasource": "nuget",
     "depName": "Roslynator.Analyzers",
@@ -215,8 +215,8 @@ Array [
 `;
 
 exports[`modules/manager/nuget/extract extractPackageFile() extracts package version dependency 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "4.5.0",
     "datasource": "nuget",
     "depName": "Autofac",

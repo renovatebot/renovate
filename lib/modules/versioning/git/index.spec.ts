@@ -1,7 +1,7 @@
 import git from '.';
 
 describe('modules/versioning/git/index', () => {
-  test.each`
+  it.each`
     input                                         | expected
     ${''}                                         | ${false}
     ${'2'}                                        | ${false}
@@ -17,7 +17,7 @@ describe('modules/versioning/git/index', () => {
     expect(git.isValid(input)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version               | range | expected
     ${''}                 | ${''} | ${false}
     ${'1234567890aBcDeF'} | ${''} | ${true}
@@ -26,10 +26,10 @@ describe('modules/versioning/git/index', () => {
     ({ version, range, expected }) => {
       const res = git.isCompatible(version, range);
       expect(!!res).toBe(expected);
-    }
+    },
   );
 
-  test.each`
+  it.each`
     a        | b        | expected
     ${''}    | ${''}    | ${false}
     ${'abc'} | ${'bca'} | ${false}

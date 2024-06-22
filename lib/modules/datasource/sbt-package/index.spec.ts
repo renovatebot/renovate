@@ -13,7 +13,7 @@ describe('modules/datasource/sbt-package/index', () => {
 
   it('parses sbt index directory', () => {
     expect(
-      parseIndexDir(Fixtures.get(`sbt-plugins-index.html`))
+      parseIndexDir(Fixtures.get(`sbt-plugins-index.html`)),
     ).toMatchSnapshot();
   });
 
@@ -32,12 +32,14 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/maven/org/scalatest/')
         .reply(404)
         .get('/maven/org.scalatest/')
+        .reply(404)
+        .get('/maven/org/scalatest/scalatest/maven-metadata.xml')
         .reply(404);
 
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
         datasource: SbtPackageDatasource.id,
-        depName: 'org.scalatest:scalatest',
+        packageName: 'org.scalatest:scalatest',
         registryUrls: ['https://failed_repo/maven'],
       });
 
@@ -52,12 +54,16 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/maven2/com/example/empty/')
         .reply(200, '')
         .get('/maven2/com.example/')
+        .reply(404)
+        .get('/maven2/com/example/empty/maven-metadata.xml')
+        .reply(404)
+        .get('/maven2/com/example/empty/index.html')
         .reply(404);
 
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
         datasource: SbtPackageDatasource.id,
-        depName: 'com.example:empty',
+        packageName: 'com.example:empty',
         registryUrls: [],
       });
 
@@ -75,7 +81,7 @@ describe('modules/datasource/sbt-package/index', () => {
             `<a href="example_2.12/" title='example_2.12/'>example_2.12/</a>`,
             `<a href="example_native/" title='example_native/'>example_native/</a>`,
             `<a href="example_sjs/" title='example_sjs/'>example_sjs/</a>`,
-          ].join('\n')
+          ].join('\n'),
         )
         .get('/org/example/example/')
         .reply(200, `<a href='1.2.0/'>1.2.0/</a>`)
@@ -92,7 +98,7 @@ describe('modules/datasource/sbt-package/index', () => {
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
         datasource: SbtPackageDatasource.id,
-        depName: 'org.example:example',
+        packageName: 'org.example:example',
         registryUrls: [MAVEN_REPO],
       });
 
@@ -109,7 +115,7 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/org/example/')
         .reply(
           200,
-          `<a href="example_2.12/" title='example_2.12/'>example_2.12/</a>`
+          `<a href="example_2.12/" title='example_2.12/'>example_2.12/</a>`,
         )
         .get('/org/example/example_2.12/')
         .reply(200, `<a href='1.2.3/'>1.2.3/</a>`)
@@ -121,7 +127,7 @@ describe('modules/datasource/sbt-package/index', () => {
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
         datasource: SbtPackageDatasource.id,
-        depName: 'org.example:example_2.12',
+        packageName: 'org.example:example_2.12',
         registryUrls: [],
       });
 
@@ -138,12 +144,12 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/')
         .reply(
           200,
-          '<a href="/maven/io/confluent/kafka-avro-serializer/">kafka-avro-serializer/</a>'
+          '<a href="/maven/io/confluent/kafka-avro-serializer/">kafka-avro-serializer/</a>',
         )
         .get('/kafka-avro-serializer/')
         .reply(
           200,
-          '<a href="/maven/io/confluent/kafka-avro-serializer/7.0.1/">7.0.1/</a>'
+          '<a href="/maven/io/confluent/kafka-avro-serializer/7.0.1/">7.0.1/</a>',
         )
         .get('/kafka-avro-serializer/7.0.1/kafka-avro-serializer-7.0.1.pom')
         .reply(
@@ -156,13 +162,13 @@ describe('modules/datasource/sbt-package/index', () => {
             <packaging>jar</packaging>
             <name>kafka-avro-serializer</name>
           </project>
-        `
+        `,
         );
 
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
         datasource: SbtPackageDatasource.id,
-        depName: 'io.confluent:kafka-avro-serializer',
+        packageName: 'io.confluent:kafka-avro-serializer',
         registryUrls: ['https://packages.confluent.io/maven'],
       });
       expect(res).toEqual({
@@ -189,13 +195,13 @@ describe('modules/datasource/sbt-package/index', () => {
                 <url>https://example.org/repo.git</url>
               </scm>
             </project>
-          `
+          `,
         );
 
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
         datasource: SbtPackageDatasource.id,
-        depName: 'org.example:example',
+        packageName: 'org.example:example',
         registryUrls: [MAVEN_REPO],
       });
 
@@ -206,10 +212,14 @@ describe('modules/datasource/sbt-package/index', () => {
       });
     });
 
-    it('falls back to Maven for GitLab-hosted packages', async () => {
+    it('falls back to Maven for orgarization root folder non-listable repositories', async () => {
       httpMock
         .scope('https://gitlab.com/api/v4/projects/123/packages/maven/')
-        .get('/org/example/example/maven-metadata.xml')
+        .get('/org/example/')
+        .reply(404)
+        .get('/org.example/')
+        .reply(404)
+        .get('/org/example/example_2.13/maven-metadata.xml')
         .reply(
           200,
           `
@@ -225,17 +235,17 @@ describe('modules/datasource/sbt-package/index', () => {
                 </versions>
               </versioning>
             </metadata>
-          `
+          `,
         )
-        .head('/org/example/example/1.2.3/example-1.2.3.pom')
+        .head('/org/example/example_2.13/1.2.3/example_2.13-1.2.3.pom')
         .reply(200)
-        .get('/org/example/example/1.2.3/example-1.2.3.pom')
+        .get('/org/example/example_2.13/1.2.3/example_2.13-1.2.3.pom')
         .reply(200);
 
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
         datasource: SbtPackageDatasource.id,
-        depName: 'org.example:example',
+        packageName: 'org.example:example_2.13',
         registryUrls: [
           'https://gitlab.com/api/v4/projects/123/packages/maven/',
         ],

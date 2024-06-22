@@ -1,6 +1,13 @@
 import later from '@breejs/later';
-import { parseCron } from '@cheap-glitch/mi-cron';
 import is from '@sindresorhus/is';
+import {
+  CronExpression,
+  DayOfTheMonthRange,
+  DayOfTheWeekRange,
+  HourRange,
+  MonthRange,
+  parseExpression,
+} from 'cron-parser';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
 import type { RenovateConfig } from '../../../../config/types';
@@ -9,9 +16,20 @@ import { logger } from '../../../../logger';
 const minutesChar = '*';
 
 const scheduleMappings: Record<string, string> = {
-  'every month': 'before 3am on the first day of the month',
-  monthly: 'before 3am on the first day of the month',
+  'every month': 'before 5am on the first day of the month',
+  monthly: 'before 5am on the first day of the month',
 };
+
+function parseCron(
+  scheduleText: string,
+  timezone?: string,
+): CronExpression | undefined {
+  try {
+    return parseExpression(scheduleText, { tz: timezone });
+  } catch (err) {
+    return undefined;
+  }
+}
 
 export function hasValidTimezone(timezone: string): [true] | [false, string] {
   if (!DateTime.local().setZone(timezone).isValid) {
@@ -21,7 +39,7 @@ export function hasValidTimezone(timezone: string): [true] | [false, string] {
 }
 
 export function hasValidSchedule(
-  schedule: string[] | null | 'at any time'
+  schedule: string[] | null | 'at any time',
 ): [true] | [false, string] {
   let message = '';
   if (
@@ -36,7 +54,7 @@ export function hasValidSchedule(
     const parsedCron = parseCron(scheduleText);
     if (parsedCron !== undefined) {
       if (
-        parsedCron.minutes.length !== 60 ||
+        parsedCron.fields.minute.length !== 60 ||
         scheduleText.indexOf(minutesChar) !== 0
       ) {
         message = `Invalid schedule: "${scheduleText}" has cron syntax, but doesn't have * as minutes`;
@@ -48,7 +66,7 @@ export function hasValidSchedule(
     }
 
     const massagedText = fixShortHours(
-      scheduleMappings[scheduleText] || scheduleText
+      scheduleMappings[scheduleText] || scheduleText,
     );
 
     const parsedSchedule = later.parse.text(massagedText);
@@ -64,7 +82,7 @@ export function hasValidSchedule(
     if (
       !parsedSchedule.schedules.some(
         (s) =>
-          !!s.M || s.d !== undefined || !!s.D || s.t_a !== undefined || !!s.t_b
+          !!s.M || s.d !== undefined || !!s.D || s.t_a !== undefined || !!s.t_b,
       )
     ) {
       message = `Invalid schedule: "${scheduleText}" has no months, days of week or time of day`;
@@ -80,30 +98,37 @@ export function hasValidSchedule(
   return [true];
 }
 
-function cronMatches(cron: string, now: DateTime): boolean {
-  const parsedCron = parseCron(cron);
+function cronMatches(cron: string, now: DateTime, timezone?: string): boolean {
+  const parsedCron = parseCron(cron, timezone);
 
-  // istanbul ignore if: doesn't return undefined but type will include undefined
+  // it will always parse because it is checked beforehand
+  // istanbul ignore if
   if (!parsedCron) {
     return false;
   }
 
-  if (parsedCron.hours.indexOf(now.hour) === -1) {
+  if (parsedCron.fields.hour.indexOf(now.hour as HourRange) === -1) {
     // Hours mismatch
     return false;
   }
 
-  if (parsedCron.days.indexOf(now.day) === -1) {
+  if (
+    parsedCron.fields.dayOfMonth.indexOf(now.day as DayOfTheMonthRange) === -1
+  ) {
     // Days mismatch
     return false;
   }
 
-  if (parsedCron.weekDays.indexOf(now.weekday) === -1) {
+  if (
+    !parsedCron.fields.dayOfWeek.includes(
+      (now.weekday % 7) as DayOfTheWeekRange,
+    )
+  ) {
     // Weekdays mismatch
     return false;
   }
 
-  if (parsedCron.months.indexOf(now.month) === -1) {
+  if (parsedCron.fields.month.indexOf(now.month as MonthRange) === -1) {
     // Months mismatch
     return false;
   }
@@ -114,12 +139,12 @@ function cronMatches(cron: string, now: DateTime): boolean {
 
 export function isScheduledNow(
   config: RenovateConfig,
-  scheduleKey: 'schedule' | 'automergeSchedule' = 'schedule'
+  scheduleKey: 'schedule' | 'automergeSchedule' = 'schedule',
 ): boolean {
   let configSchedule = config[scheduleKey];
   logger.debug(
-    // TODO: types (#7154)
-    `Checking schedule(${String(configSchedule)}, ${config.timezone!})`
+    // TODO: types (#22198)
+    `Checking schedule(schedule=${String(configSchedule)}, tz=${config.timezone!}, now=${new Date().toISOString()})`,
   );
   if (
     !configSchedule ||
@@ -132,7 +157,7 @@ export function isScheduledNow(
   }
   if (!is.array(configSchedule)) {
     logger.warn(
-      `config schedule is not an array: ${JSON.stringify(configSchedule)}`
+      `config schedule is not an array: ${JSON.stringify(configSchedule)}`,
     );
     configSchedule = [configSchedule];
   }
@@ -141,11 +166,11 @@ export function isScheduledNow(
     logger.warn(validSchedule[1]);
     return true;
   }
-  let now = DateTime.local();
-  logger.trace(`now=${now.toISO()}`);
+  let now: DateTime = DateTime.local();
+  logger.trace(`now=${now.toISO()!}`);
   // Adjust the time if repo is in a different timezone to renovate
   if (config.timezone) {
-    logger.debug({ timezone: config.timezone }, 'Found timezone');
+    logger.debug(`Found timezone: ${config.timezone}`);
     const validTimezone = hasValidTimezone(config.timezone);
     if (!validTimezone[0]) {
       logger.warn(validTimezone[1]);
@@ -153,7 +178,7 @@ export function isScheduledNow(
     }
     logger.debug('Adjusting now for timezone');
     now = now.setZone(config.timezone);
-    logger.trace(`now=${now.toISO()}`);
+    logger.trace(`now=${now.toISO()!}`);
   }
   const currentDay = now.weekday;
   logger.trace(`currentDay=${currentDay}`);
@@ -174,7 +199,7 @@ export function isScheduledNow(
     const cronSchedule = parseCron(scheduleText);
     if (cronSchedule) {
       // We have Cron syntax
-      if (cronMatches(scheduleText, now)) {
+      if (cronMatches(scheduleText, now, config.timezone)) {
         logger.debug(`Matches schedule ${scheduleText}`);
         return true;
       }

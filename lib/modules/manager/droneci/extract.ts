@@ -1,9 +1,17 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  packageFile: string,
+  config: ExtractConfig,
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split(newlineRegex);
@@ -11,7 +19,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       const line = lines[lineNumber];
 
       const firstLineMatch = regEx(
-        /^(?<leading>\s* image:\s*)(?<replaceString>['"](?<currentFrom>[^\s'"]+)\\)$/
+        /^(?<leading>\s* image:\s*)(?<replaceString>['"](?<currentFrom>[^\s'"]+)\\)$/,
       ).exec(line);
 
       if (firstLineMatch?.groups) {
@@ -21,20 +29,20 @@ export function extractPackageFile(content: string): PackageFile | null {
         for (let i = lineNumber + 1; i < lines.length; i += 1) {
           const internalLine = lines[i];
           const middleLineMatch = regEx(
-            /^(?<replaceString>\s*(?<currentFrom>[^\s'"]+)\\)$/
+            /^(?<replaceString>\s*(?<currentFrom>[^\s'"]+)\\)$/,
           ).exec(internalLine);
           if (middleLineMatch?.groups) {
             currentFrom += middleLineMatch.groups.currentFrom;
             replaceString += '\n' + middleLineMatch.groups.replaceString;
           } else {
             const finalLineMatch = regEx(
-              /^(?<replaceString>\s*(?<currentFrom>[^\s'"]+)['"])$/
+              /^(?<replaceString>\s*(?<currentFrom>[^\s'"]+)['"])$/,
             ).exec(internalLine);
             if (finalLineMatch?.groups) {
               currentFrom += finalLineMatch.groups.currentFrom;
               replaceString += '\n' + finalLineMatch.groups.replaceString;
 
-              const dep = getDep(currentFrom);
+              const dep = getDep(currentFrom, true, config.registryAliases);
               dep.depType = 'docker';
               dep.replaceString = replaceString;
               if (dep.autoReplaceStringTemplate) {
@@ -51,17 +59,21 @@ export function extractPackageFile(content: string): PackageFile | null {
         }
       } else {
         const match = regEx(
-          /^\s* image:\s*'?"?(?<currentFrom>[^\s'"]+)'?"?\s*$/
+          /^\s* image:\s*'?"?(?<currentFrom>[^\s'"]+)'?"?\s*$/,
         ).exec(line);
         if (match?.groups) {
-          const dep = getDep(match.groups.currentFrom);
+          const dep = getDep(
+            match.groups.currentFrom,
+            true,
+            config.registryAliases,
+          );
           dep.depType = 'docker';
           deps.push(dep);
         }
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting DroneCI images');
+    logger.debug({ err, packageFile }, 'Error extracting DroneCI images');
   }
   if (!deps.length) {
     return null;

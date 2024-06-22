@@ -1,4 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
+import { logger } from '../../../../test/util';
 import { extractLockFileEntries } from './locked-version';
 
 const railsGemfileLock = Fixtures.get('Gemfile.rails.lock');
@@ -36,5 +37,16 @@ describe('modules/manager/bundler/locked-version', () => {
     const parsedLockEntries = extractLockFileEntries(gitlabFossGemfileLock);
     expect(parsedLockEntries.size).toBe(478);
     expect(parsedLockEntries).toMatchSnapshot();
+  });
+
+  it('returns empty map for empty string', () => {
+    const parsedLockEntries = extractLockFileEntries('');
+    expect(parsedLockEntries.size).toBe(0);
+  });
+
+  it('returns empty map when errors occur', () => {
+    const parsedLockEntries = extractLockFileEntries(undefined as never);
+    expect(parsedLockEntries.size).toBe(0);
+    expect(logger.logger.warn).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { parse } from '../../../util/html';
@@ -19,6 +20,13 @@ export class RubyVersionDatasource extends Datasource {
 
   override readonly defaultVersioning = rubyVersioningId;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `release-list` table in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'We use the URL: https://github.com/ruby/ruby.';
+
   @cache({ namespace: `datasource-${RubyVersionDatasource.id}`, key: 'all' })
   async getReleases({
     registryUrl,
@@ -28,8 +36,7 @@ export class RubyVersionDatasource extends Datasource {
       sourceUrl: 'https://github.com/ruby/ruby',
       releases: [],
     };
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    // TODO: types (#22198)
     const rubyVersionsUrl = `${registryUrl}en/downloads/releases/`;
     try {
       const response = await this.http.get(rubyVersionsUrl);
@@ -53,7 +60,8 @@ export class RubyVersionDatasource extends Datasource {
         }
       });
       if (!res.releases.length) {
-        throw new Error('Missing ruby releases');
+        logger.warn({ registryUrl }, 'Missing ruby releases');
+        return null;
       }
     } catch (err) {
       this.handleGenericErrors(err);
@@ -62,7 +70,7 @@ export class RubyVersionDatasource extends Datasource {
     return res;
   }
 
-  override handleSpecificErrors(err: HttpError): never | void {
+  override handleHttpErrors(err: HttpError): never | void {
     throw new ExternalHostError(err);
   }
 }

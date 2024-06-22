@@ -8,6 +8,7 @@ import type {
 } from './types';
 import {
   BITBUCKET_INVALID_REVIEWERS_EXCEPTION,
+  getExtraCloneOpts,
   getInvalidReviewers,
   getRepoGitUrl,
 } from './utils';
@@ -19,7 +20,7 @@ function sshLink(projectKey: string, repositorySlug: string): string {
 function httpLink(
   endpointStr: string,
   projectKey: string,
-  repositorySlug: string
+  repositorySlug: string,
 ): string {
   return `${endpointStr}scm/${projectKey}/${repositorySlug}.git`;
 }
@@ -30,7 +31,7 @@ function infoMock(
   repositorySlug: string,
   options: { cloneUrl: { https: boolean; ssh: boolean } } = {
     cloneUrl: { https: true, ssh: true },
-  }
+  },
 ): BbsRestRepo {
   const endpointStr = endpoint.toString();
   const links: {
@@ -60,24 +61,26 @@ function infoMock(
       });
     }
     return {
+      id: 123,
       project: { key: projectKey },
       origin: { name: repositorySlug, slug: repositorySlug },
       links,
-    } as BbsRestRepo;
+    };
   } else {
     // This mimics the behavior of bb-server which does not include the clone property at all
     // if ssh and https are both turned off
     return {
+      id: 1,
       project: { key: projectKey },
       origin: { name: repositorySlug, slug: repositorySlug },
       links: { clone: undefined },
-    } as BbsRestRepo;
+    };
   }
 }
 
 describe('modules/platform/bitbucket-server/utils', () => {
   function createError(
-    body: Partial<BitbucketErrorResponse> | undefined = undefined
+    body: Partial<BitbucketErrorResponse> | undefined = undefined,
   ) {
     return partial<BitbucketError>({
       response: partial<Response<BitbucketErrorResponse>>({ body }),
@@ -94,16 +97,16 @@ describe('modules/platform/bitbucket-server/utils', () => {
               reviewerErrors: [{ context: 'dummy' }, {}],
             },
           ],
-        })
-      )
+        }),
+      ),
     ).toStrictEqual(['dummy']);
     expect(getInvalidReviewers(createError())).toStrictEqual([]);
     expect(
       getInvalidReviewers(
         createError({
           errors: [{ exceptionName: BITBUCKET_INVALID_REVIEWERS_EXCEPTION }],
-        })
-      )
+        }),
+      ),
     ).toStrictEqual([]);
   });
 
@@ -118,8 +121,8 @@ describe('modules/platform/bitbucket-server/utils', () => {
         const username = 'abc';
         const password = '123';
         const opts = {
-          username: username,
-          password: password,
+          username,
+          password,
         };
 
         it('works gitUrl:undefined generate endpoint', () => {
@@ -131,13 +134,13 @@ describe('modules/platform/bitbucket-server/utils', () => {
               infoMock(url, 'SOME', 'repo', {
                 cloneUrl: { https: false, ssh: false },
               }),
-              opts
-            )
+              opts,
+            ),
           ).toBe(
             httpLink(url.toString(), 'SOME', 'repo').replace(
               'https://',
-              `https://${username}:${password}@`
-            )
+              `https://${username}:${password}@`,
+            ),
           );
         });
 
@@ -150,13 +153,13 @@ describe('modules/platform/bitbucket-server/utils', () => {
               infoMock(url, 'SOME', 'repo', {
                 cloneUrl: { https: true, ssh: false },
               }),
-              opts
-            )
+              opts,
+            ),
           ).toBe(
             httpLink(url.toString(), 'SOME', 'repo').replace(
               'https://',
-              `https://${username}:${password}@`
-            )
+              `https://${username}:${password}@`,
+            ),
           );
         });
 
@@ -169,8 +172,8 @@ describe('modules/platform/bitbucket-server/utils', () => {
               infoMock(url, 'SOME', 'repo', {
                 cloneUrl: { https: false, ssh: true },
               }),
-              opts
-            )
+              opts,
+            ),
           ).toBe(sshLink('SOME', 'repo'));
         });
 
@@ -181,13 +184,13 @@ describe('modules/platform/bitbucket-server/utils', () => {
               url.toString(),
               'default',
               infoMock(url, 'SOME', 'repo'),
-              opts
-            )
+              opts,
+            ),
           ).toBe(
             httpLink(url.toString(), 'SOME', 'repo').replace(
               'https://',
-              `https://${username}:${password}@`
-            )
+              `https://${username}:${password}@`,
+            ),
           );
         });
 
@@ -200,8 +203,8 @@ describe('modules/platform/bitbucket-server/utils', () => {
               infoMock('invalidUrl', 'SOME', 'repo', {
                 cloneUrl: { https: true, ssh: false },
               }),
-              opts
-            )
+              opts,
+            ),
           ).toThrow(Error(CONFIG_GIT_URL_UNAVAILABLE));
         });
 
@@ -214,13 +217,13 @@ describe('modules/platform/bitbucket-server/utils', () => {
               infoMock(url, 'SOME', 'repo', {
                 cloneUrl: { https: false, ssh: false },
               }),
-              opts
-            )
+              opts,
+            ),
           ).toBe(
             httpLink(url.toString(), 'SOME', 'repo').replace(
               'https://',
-              `https://${username}:${password}@`
-            )
+              `https://${username}:${password}@`,
+            ),
           );
         });
 
@@ -233,8 +236,8 @@ describe('modules/platform/bitbucket-server/utils', () => {
               infoMock(url, 'SOME', 'repo', {
                 cloneUrl: { https: false, ssh: false },
               }),
-              opts
-            )
+              opts,
+            ),
           ).toThrow(Error(CONFIG_GIT_URL_UNAVAILABLE));
         });
 
@@ -245,8 +248,8 @@ describe('modules/platform/bitbucket-server/utils', () => {
               url.toString(),
               'ssh',
               infoMock(url, 'SOME', 'repo'),
-              opts
-            )
+              opts,
+            ),
           ).toBe(sshLink('SOME', 'repo'));
         });
 
@@ -257,15 +260,41 @@ describe('modules/platform/bitbucket-server/utils', () => {
               url.toString(),
               'endpoint',
               infoMock(url, 'SOME', 'repo'),
-              opts
-            )
+              opts,
+            ),
           ).toBe(
             httpLink(url.toString(), 'SOME', 'repo').replace(
               'https://',
-              `https://${username}:${password}@`
-            )
+              `https://${username}:${password}@`,
+            ),
           );
         });
+
+        it('works gitUrl:endpoint no basic auth', () => {
+          expect(
+            getRepoGitUrl(
+              'SOME/repo',
+              url.toString(),
+              'endpoint',
+              infoMock(url, 'SOME', 'repo'),
+              {},
+            ),
+          ).toBe(httpLink(url.toString(), 'SOME', 'repo'));
+        });
+      });
+    });
+  });
+
+  describe('getExtraCloneOpts', () => {
+    it('should not configure bearer token', () => {
+      const res = getExtraCloneOpts({});
+      expect(res).toEqual({});
+    });
+
+    it('should configure bearer token', () => {
+      const res = getExtraCloneOpts({ token: 'abc' });
+      expect(res).toEqual({
+        '-c': 'http.extraheader=Authorization: Bearer abc',
       });
     });
   });

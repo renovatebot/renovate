@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { exec as cpExec, envMock } from '../../../test/exec-util';
 import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
@@ -11,15 +12,15 @@ import { exec } from '.';
 const getHermitEnvsMock = mockedFunction(getHermitEnvs);
 
 jest.mock('./hermit', () => ({
-  ...jest.requireActual('./hermit'),
+  ...jest.requireActual<typeof import('./hermit')>('./hermit'),
   getHermitEnvs: jest.fn(),
 }));
-jest.mock('../../modules/datasource');
+jest.mock('../../modules/datasource', () => mockDeep());
 
 interface TestInput {
   processEnv: Record<string, string>;
   inCmd: string | string[];
-  inOpts: ExecOptions;
+  inOpts?: ExecOptions;
   outCmd: string[];
   outOpts: RawExecOptions[];
   adminConfig?: Partial<RepoGlobalConfig>;
@@ -30,19 +31,22 @@ describe('util/exec/index', () => {
   let processEnvOrig: NodeJS.ProcessEnv;
 
   const cacheDir = '/tmp/renovate/cache/';
+  const containerbaseDir = '/tmp/renovate/cache/containerbase';
   const cwd = '/tmp/renovate/github/some/repo/';
 
   const defaultCwd = `-w "${cwd}"`;
   const defaultCacheVolume = `-v "${cacheDir}":"${cacheDir}"`;
   const defaultVolumes = `-v "${cwd}":"${cwd}" ${defaultCacheVolume}`;
 
-  const globalConfig: RepoGlobalConfig = { cacheDir };
+  const globalConfig: RepoGlobalConfig = {
+    cacheDir,
+    containerbaseDir,
+    dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  };
 
   beforeEach(() => {
     dockerModule.resetPrefetchedImages();
-    jest.resetAllMocks();
     jest.restoreAllMocks();
-    jest.resetModules();
     processEnvOrig = process.env;
     GlobalConfig.reset();
   });
@@ -51,10 +55,9 @@ describe('util/exec/index', () => {
     process.env = processEnvOrig;
   });
 
-  const image = 'image';
-  const fullImage = `renovate/${image}`;
+  const image = dockerModule.sideCarImage;
+  const fullImage = `ghcr.io/containerbase/sidecar`;
   const name = `renovate_${image}`;
-  const tag = '1.2.3';
   const inCmd = 'echo hello';
   const outCmd = ['echo hello'];
   const volume_1 = '/path/to/volume-1';
@@ -67,20 +70,20 @@ describe('util/exec/index', () => {
     [volume_2_from, volume_2_to],
   ];
   const encoding = 'utf-8';
-  const docker = { image };
+  const docker = {};
   const processEnv = envMock.full;
   const dockerPullCmd = `docker pull ${fullImage}`;
   const dockerRemoveCmd = `docker ps --filter name=${name} -aq`;
   const dockerPullOpts = { encoding };
   const dockerRemoveOpts = dockerPullOpts;
 
-  const buildpackEnv = {
+  const containerbaseEnv = {
     ...envMock.basic,
-    BUILDPACK_CACHE_DIR: `${cacheDir}buildpack`,
+    CONTAINERBASE_CACHE_DIR: `${cacheDir}containerbase`,
   };
-  const buildpackEnvFiltered = {
+  const containerbaseEnvFiltered = {
     ...envMock.filtered,
-    BUILDPACK_CACHE_DIR: `${cacheDir}buildpack`,
+    CONTAINERBASE_CACHE_DIR: `${cacheDir}containerbase`,
   };
 
   const testInputs: [string, TestInput][] = [
@@ -90,6 +93,25 @@ describe('util/exec/index', () => {
         processEnv,
         inCmd,
         inOpts: {},
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+      },
+    ],
+
+    [
+      'Command without options',
+      {
+        processEnv,
+        inCmd,
+        inOpts: undefined,
         outCmd,
         outOpts: [
           {
@@ -203,7 +225,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e BUILDPACK_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -211,7 +233,7 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: buildpackEnv,
+            env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
           },
@@ -238,7 +260,7 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: buildpackEnvFiltered,
+            env: containerbaseEnvFiltered,
             timeout: 900000,
             maxBuffer: 10485760,
           },
@@ -265,7 +287,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR -e BUILDPACK_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -273,7 +295,7 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: buildpackEnvFiltered,
+            env: containerbaseEnvFiltered,
             timeout: 900000,
             maxBuffer: 10485760,
           },
@@ -293,7 +315,7 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: { ...buildpackEnv, SELECTED_ENV_VAR: 'Default value' },
+            env: { ...containerbaseEnv, SELECTED_ENV_VAR: 'Default value' },
             timeout: 900000,
             maxBuffer: 10485760,
           },
@@ -315,7 +337,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR -e BUILDPACK_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -323,33 +345,7 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: { ...buildpackEnv, SELECTED_ENV_VAR: 'Default value' },
-            timeout: 900000,
-            maxBuffer: 10485760,
-          },
-        ],
-        adminConfig: { binarySource: 'docker' },
-      },
-    ],
-
-    [
-      'Docker tags',
-      {
-        processEnv,
-        inCmd,
-        inOpts: { docker: { image, tag }, cwd },
-        outCmd: [
-          `${dockerPullCmd}:${tag}`,
-          dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e BUILDPACK_CACHE_DIR ${defaultCwd} ${fullImage}:${tag} bash -l -c "${inCmd}"`,
-        ],
-        outOpts: [
-          dockerPullOpts,
-          dockerRemoveOpts,
-          {
-            cwd,
-            encoding,
-            env: buildpackEnv,
+            env: { ...containerbaseEnv, SELECTED_ENV_VAR: 'Default value' },
             timeout: 900000,
             maxBuffer: 10485760,
           },
@@ -363,11 +359,11 @@ describe('util/exec/index', () => {
       {
         processEnv,
         inCmd,
-        inOpts: { cwd, docker: { image, volumes } },
+        inOpts: { cwd, docker: { volumes } },
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -e BUILDPACK_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -375,7 +371,7 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: buildpackEnv,
+            env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
           },
@@ -393,7 +389,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child --user=foobar ${defaultVolumes} -e BUILDPACK_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child --user=foobar ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -401,7 +397,7 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: buildpackEnv,
+            env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
           },
@@ -420,9 +416,9 @@ describe('util/exec/index', () => {
         inCmd,
         inOpts: { docker },
         outCmd: [
-          `docker pull ghcr.io/renovatebot/image`,
+          `docker pull ghcr.io/containerbase/${image}`,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e BUILDPACK_CACHE_DIR -w "${cwd}" ghcr.io/renovatebot/image bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ghcr.io/containerbase/${image} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -430,13 +426,13 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: buildpackEnv,
+            env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
           },
         ],
         adminConfig: {
-          dockerImagePrefix: 'ghcr.io/renovatebot',
+          dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
           binarySource: 'docker',
         },
       },
@@ -451,7 +447,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           `docker ps --filter name=myprefix_${image} -aq`,
-          `docker run --rm --name=myprefix_${image} --label=myprefix_child ${defaultVolumes} -e BUILDPACK_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=myprefix_${image} --label=myprefix_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -459,7 +455,7 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: buildpackEnv,
+            env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
           },
@@ -477,15 +473,13 @@ describe('util/exec/index', () => {
         processEnv,
         inCmd,
         inOpts: {
-          docker: {
-            image,
-          },
+          docker,
           preCommands: ['preCommand1', 'preCommand2', null as never],
         },
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e BUILDPACK_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "preCommand1 && preCommand2 && ${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "preCommand1 && preCommand2 && ${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -493,7 +487,7 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: buildpackEnv,
+            env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
           },
@@ -507,15 +501,11 @@ describe('util/exec/index', () => {
       {
         processEnv,
         inCmd,
-        inOpts: {
-          docker: {
-            image,
-          },
-        },
+        inOpts: { docker },
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e BUILDPACK_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -523,7 +513,7 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: buildpackEnv,
+            env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 10485760,
           },
@@ -545,7 +535,7 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: buildpackEnv,
+            env: containerbaseEnv,
             timeout: 20 * 60 * 1000,
             maxBuffer: 10485760,
           },
@@ -587,7 +577,7 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: buildpackEnv,
+            env: containerbaseEnv,
             timeout: 900000,
             maxBuffer: 1024,
           },
@@ -608,7 +598,7 @@ describe('util/exec/index', () => {
             cwd,
             encoding,
             env: {
-              ...buildpackEnv,
+              ...containerbaseEnv,
               CUSTOM_KEY: 'CUSTOM_VALUE',
             },
             timeout: 900000,
@@ -636,7 +626,7 @@ describe('util/exec/index', () => {
             cwd,
             encoding,
             env: {
-              ...buildpackEnv,
+              ...containerbaseEnv,
               CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
             },
             timeout: 900000,
@@ -661,7 +651,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY -e BUILDPACK_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -670,7 +660,7 @@ describe('util/exec/index', () => {
             cwd,
             encoding,
             env: {
-              ...buildpackEnv,
+              ...containerbaseEnv,
               CUSTOM_KEY: 'CUSTOM_VALUE',
             },
             timeout: 900000,
@@ -695,7 +685,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY -e BUILDPACK_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -704,7 +694,7 @@ describe('util/exec/index', () => {
             cwd,
             encoding,
             env: {
-              ...buildpackEnv,
+              ...containerbaseEnv,
               CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
             },
             timeout: 900000,
@@ -717,6 +707,29 @@ describe('util/exec/index', () => {
           },
           binarySource: 'docker',
         },
+      },
+    ],
+
+    [
+      'Discarded stdout if ignoreStdout=true',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          ignoreStdout: true,
+          cwdFile: '/somefile',
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        ],
       },
     ],
 
@@ -761,7 +774,7 @@ describe('util/exec/index', () => {
     ],
   ];
 
-  test.each(testInputs)('%s', async (_msg, testOpts) => {
+  it.each(testInputs)('%s', async (_msg, testOpts) => {
     const {
       processEnv: procEnv,
       inCmd: cmd,
@@ -821,17 +834,17 @@ describe('util/exec/index', () => {
     expect(actualCmd).toEqual([
       `echo hello`,
       `echo hello`,
-      `docker pull renovate/image`,
-      `docker ps --filter name=renovate_image -aq`,
-      `docker run --rm --name=renovate_image --label=renovate_child ${defaultCacheVolume} -e BUILDPACK_CACHE_DIR renovate/image bash -l -c "echo hello"`,
-      `docker ps --filter name=renovate_image -aq`,
-      `docker run --rm --name=renovate_image --label=renovate_child ${defaultCacheVolume} -e BUILDPACK_CACHE_DIR renovate/image bash -l -c "echo hello"`,
+      `docker pull ${fullImage}`,
+      `docker ps --filter name=renovate_${image} -aq`,
+      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_${image} -aq`,
+      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
       `echo hello`,
       `echo hello`,
-      `docker ps --filter name=renovate_image -aq`,
-      `docker run --rm --name=renovate_image --label=renovate_child ${defaultCacheVolume} -e BUILDPACK_CACHE_DIR renovate/image bash -l -c "echo hello"`,
-      `docker ps --filter name=renovate_image -aq`,
-      `docker run --rm --name=renovate_image --label=renovate_child ${defaultCacheVolume} -e BUILDPACK_CACHE_DIR renovate/image bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_${image} -aq`,
+      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_${image} -aq`,
+      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
     ]);
   });
 
@@ -841,7 +854,7 @@ describe('util/exec/index', () => {
       throw new Error('some error occurred');
     });
     GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
-    process.env.BUILDPACK = 'true';
+    process.env.CONTAINERBASE = 'true';
     const promise = exec('foobar', { toolConstraints: [{ toolName: 'npm' }] });
     await expect(promise).rejects.toThrow('No tool releases found.');
   });
@@ -855,7 +868,7 @@ describe('util/exec/index', () => {
     });
 
     GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
-    process.env.BUILDPACK = 'true';
+    process.env.CONTAINERBASE = 'true';
     await exec('foobar', { preCommands: ['install-pip foobar'] });
     expect(actualCmd).toEqual([`install-pip foobar`, `foobar`]);
   });
@@ -867,7 +880,7 @@ describe('util/exec/index', () => {
 
     const removeDockerContainerSpy = jest.spyOn(
       dockerModule,
-      'removeDockerContainer'
+      'removeDockerContainer',
     );
 
     const promise = exec('foobar', {});
@@ -889,9 +902,9 @@ describe('util/exec/index', () => {
     let calledOnce = false;
     const removeDockerContainerSpy = jest.spyOn(
       dockerModule,
-      'removeDockerContainer'
+      'removeDockerContainer',
     );
-    removeDockerContainerSpy.mockImplementation((): any => {
+    removeDockerContainerSpy.mockImplementation((): Promise<void> => {
       if (!calledOnce) {
         calledOnce = true;
         return Promise.resolve();
@@ -903,8 +916,8 @@ describe('util/exec/index', () => {
     const promise = exec('foobar', { docker });
     await expect(promise).rejects.toThrow(
       new Error(
-        'Error: "removeDockerContainer failed" - Original Error: "some error occurred"'
-      )
+        'Error: "removeDockerContainer failed" - Original Error: "some error occurred"',
+      ),
     );
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(2);
   });
@@ -920,7 +933,7 @@ describe('util/exec/index', () => {
     });
     const removeDockerContainerSpy = jest.spyOn(
       dockerModule,
-      'removeDockerContainer'
+      'removeDockerContainer',
     );
     const promise = exec('foobar', {});
     await expect(promise).rejects.toThrow(TEMPORARY_ERROR);

@@ -3,6 +3,7 @@ import semver from 'semver';
 import semverUtils from 'semver-utils';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { isSemVerXRange } from '../semver/common';
 import type { NewValueConfig } from '../types';
 
 const {
@@ -56,13 +57,23 @@ function replaceCaretValue(oldValue: string, newValue: string): string {
   return needReplace ? resultTuple.join('.') : oldValue;
 }
 
-// TODO: #7154
+function stripV(value: string): string {
+  return value.replace(/^v/, '');
+}
+
+// TODO: #22198
 export function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,
   newVersion,
 }: NewValueConfig): string | null {
+  if (
+    !['pin', 'update-lockfile'].includes(rangeStrategy) &&
+    isSemVerXRange(currentValue)
+  ) {
+    return null;
+  }
   if (rangeStrategy === 'pin' || isVersion(currentValue)) {
     return newVersion;
   }
@@ -93,7 +104,7 @@ export function getNewValue({
       // TODO fix this
       const splitCurrent = currentValue.split(element.operator);
       splitCurrent.pop();
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       return `${splitCurrent.join(element.operator)}${newValue!}`;
     }
     if (parsedRange.length > 1) {
@@ -101,7 +112,7 @@ export function getNewValue({
       if (previousElement.operator === '-') {
         const splitCurrent = currentValue.split('-');
         splitCurrent.pop();
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         return `${splitCurrent.join('-')}- ${newValue!}`;
       }
       if (element.operator?.startsWith('>')) {
@@ -109,7 +120,7 @@ export function getNewValue({
         return null;
       }
     }
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     return `${currentValue} || ${newValue!}`;
   }
   const toVersionMajor = major(newVersion);
@@ -121,50 +132,21 @@ export function getNewValue({
   if (rangeStrategy === 'bump') {
     if (parsedRange.length === 1) {
       if (!element.operator) {
-        return getNewValue({
-          currentValue,
-          rangeStrategy: 'replace',
-          currentVersion,
-          newVersion,
-        });
+        return stripV(newVersion);
       }
       if (element.operator === '^') {
-        const split = currentValue.split('.');
-        if (suffix.length) {
-          return `^${newVersion}`;
-        }
-        if (split.length === 1) {
-          // ^4
-          return `^${toVersionMajor}`;
-        }
-        if (split.length === 2) {
-          // ^4.1
-          return `^${toVersionMajor}.${toVersionMinor}`;
-        }
-        return `^${newVersion}`;
+        return `^${stripV(newVersion)}`;
       }
       if (element.operator === '~') {
-        const split = currentValue.split('.');
-        if (suffix.length) {
-          return `~${newVersion}`;
-        }
-        if (split.length === 1) {
-          // ~4
-          return `~${toVersionMajor}`;
-        }
-        if (split.length === 2) {
-          // ~4.1
-          return `~${toVersionMajor}.${toVersionMinor}`;
-        }
-        return `~${newVersion}`;
+        return `~${stripV(newVersion)}`;
       }
       if (element.operator === '=') {
-        return `=${newVersion}`;
+        return `=${stripV(newVersion)}`;
       }
       if (element.operator === '>=') {
         return currentValue.includes('>= ')
-          ? `>= ${newVersion}`
-          : `>=${newVersion}`;
+          ? `>= ${stripV(newVersion)}`
+          : `>=${stripV(newVersion)}`;
       }
       if (element.operator.startsWith('<')) {
         return currentValue;
@@ -196,7 +178,7 @@ export function getNewValue({
         .join(' ');
     }
     logger.debug(
-      'Unsupported range type for rangeStrategy=bump: ' + currentValue
+      'Unsupported range type for rangeStrategy=bump: ' + currentValue,
     );
     return null;
   }
@@ -210,7 +192,7 @@ export function getNewValue({
     return `^${replaceCaretValue(currentVersion, newVersion)}`;
   }
   if (element.operator === '=') {
-    return `=${newVersion}`;
+    return `=${stripV(newVersion)}`;
   }
   if (element.operator === '~') {
     if (suffix.length) {
@@ -220,8 +202,8 @@ export function getNewValue({
   }
   if (element.operator === '<=') {
     let res;
-    if (element.patch || suffix.length) {
-      res = `<=${newVersion}`;
+    if (!!element.patch || suffix.length) {
+      res = `<=${stripV(newVersion)}`;
     } else if (element.minor) {
       res = `<=${toVersionMajor}.${toVersionMinor}`;
     } else {
@@ -238,7 +220,7 @@ export function getNewValue({
       const newMajor = toVersionMajor + 1;
       res = `<${newMajor}.0.0`;
     } else if (element.patch) {
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       res = `<${increment(newVersion, 'patch')!}`;
     } else if (element.minor) {
       res = `<${toVersionMajor}.${toVersionMinor + 1}`;

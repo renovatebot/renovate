@@ -1,11 +1,7 @@
-import { BranchStatus } from '../../../../../types';
 import { emojify } from '../../../../../util/emoji';
 import type { BranchConfig } from '../../../../types';
-import { resolveBranchStatus } from '../../branch/status-checks';
 
-export async function getPrConfigDescription(
-  config: BranchConfig
-): Promise<string> {
+export function getPrConfigDescription(config: BranchConfig): string {
   let prBody = `\n\n---\n\n### Configuration\n\n`;
   prBody += emojify(`:date: **Schedule**: `);
   prBody +=
@@ -18,15 +14,9 @@ export async function getPrConfigDescription(
   prBody += '\n\n';
   prBody += emojify(':vertical_traffic_light: **Automerge**: ');
   if (config.automerge) {
-    const branchStatus = await resolveBranchStatus(
-      config.branchName,
-      config.ignoreTests
-    );
-    if (branchStatus === BranchStatus.red) {
-      prBody += 'Disabled due to failing status checks.';
-    } else {
-      prBody += 'Enabled.';
-    }
+    prBody += 'Enabled.';
+  } else if (config.automergedPreviously) {
+    prBody += 'Disabled because a matching PR was automerged previously.';
   } else {
     prBody +=
       'Disabled by config. Please merge this manually once you are satisfied.';
@@ -43,15 +33,13 @@ export async function getPrConfigDescription(
   prBody += `, or you tick the rebase/retry checkbox.\n\n`;
   if (config.recreateClosed) {
     prBody += emojify(
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${config.productLinks?.help}) if that's undesired.\n\n`
+      `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${config.productLinks?.help}) if that's undesired.\n\n`,
     );
   } else {
     prBody += emojify(
       `:no_bell: **Ignore**: Close this PR and you won't be reminded about ${
         config.upgrades.length === 1 ? 'this update' : 'these updates'
-      } again.\n\n`
+      } again.\n\n`,
     );
   }
   return prBody;
@@ -59,7 +47,7 @@ export async function getPrConfigDescription(
 
 function scheduleToString(
   schedule: string[] | undefined,
-  timezone: string | undefined
+  timezone: string | undefined,
 ): string {
   let scheduleString = '';
   if (schedule && schedule[0] !== 'at any time') {

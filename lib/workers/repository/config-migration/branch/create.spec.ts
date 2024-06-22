@@ -1,7 +1,10 @@
+import type { Indent } from 'detect-indent';
 import { Fixtures } from '../../../../../test/fixtures';
-import { RenovateConfig, getConfig, platform } from '../../../../../test/util';
-import { commitFiles } from '../../../../util/git';
+import { RenovateConfig, partial } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
+import { scm } from '../../../../modules/platform/scm';
 import { createConfigMigrationBranch } from './create';
+import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 
 jest.mock('../../../../util/git');
@@ -11,21 +14,33 @@ describe('workers/repository/config-migration/branch/create', () => {
   const indent = '  ';
   const renovateConfig = JSON.stringify(raw, undefined, indent) + '\n';
   const filename = 'renovate.json';
+  const prettierSpy = jest.spyOn(
+    MigratedDataFactory,
+    'applyPrettierFormatting',
+  );
 
   let config: RenovateConfig;
   let migratedConfigData: MigratedData;
 
   beforeEach(() => {
-    jest.clearAllMocks();
     config = getConfig();
-    migratedConfigData = { content: renovateConfig, filename };
+    config.baseBranch = 'dev';
+    config.defaultBranch = 'master';
+    migratedConfigData = {
+      content: renovateConfig,
+      filename,
+      indent: partial<Indent>(),
+    };
+    prettierSpy.mockResolvedValueOnce(migratedConfigData.content);
   });
 
   describe('createConfigMigrationBranch', () => {
     it('applies the default commit message', async () => {
       await createConfigMigrationBranch(config, migratedConfigData);
-      expect(commitFiles).toHaveBeenCalledWith({
+      expect(scm.checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
+      expect(scm.commitAndPush).toHaveBeenCalledWith({
         branchName: 'renovate/migrate-config',
+        baseBranch: 'dev',
         files: [
           {
             type: 'addition',
@@ -38,25 +53,6 @@ describe('workers/repository/config-migration/branch/create', () => {
       });
     });
 
-    it('commits via platform', async () => {
-      config.platformCommit = true;
-
-      await createConfigMigrationBranch(config, migratedConfigData);
-
-      expect(platform.commitFiles).toHaveBeenCalledWith({
-        branchName: 'renovate/migrate-config',
-        files: [
-          {
-            type: 'addition',
-            path: 'renovate.json',
-            contents: renovateConfig,
-          },
-        ],
-        message: 'Migrate config renovate.json',
-        platformCommit: true,
-      });
-    });
-
     it('applies supplied commit message', async () => {
       const message = 'We can migrate config if we want to, or we can not';
 
@@ -64,8 +60,10 @@ describe('workers/repository/config-migration/branch/create', () => {
 
       await createConfigMigrationBranch(config, migratedConfigData);
 
-      expect(commitFiles).toHaveBeenCalledWith({
+      expect(scm.checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
+      expect(scm.commitAndPush).toHaveBeenCalledWith({
         branchName: 'renovate/migrate-config',
+        baseBranch: 'dev',
         files: [
           {
             type: 'addition',
@@ -73,7 +71,7 @@ describe('workers/repository/config-migration/branch/create', () => {
             contents: renovateConfig,
           },
         ],
-        message: message,
+        message,
         platformCommit: false,
       });
     });
@@ -86,8 +84,10 @@ describe('workers/repository/config-migration/branch/create', () => {
         const message = `PREFIX: migrate config renovate.json`;
         await createConfigMigrationBranch(config, migratedConfigData);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/migrate-config',
+          baseBranch: 'dev',
           files: [
             {
               type: 'addition',
@@ -95,7 +95,7 @@ describe('workers/repository/config-migration/branch/create', () => {
               contents: renovateConfig,
             },
           ],
-          message: message,
+          message,
           platformCommit: false,
         });
       });
@@ -109,8 +109,10 @@ describe('workers/repository/config-migration/branch/create', () => {
         const message = `Migrate config renovate.json ${suffix}`;
         await createConfigMigrationBranch(config, migratedConfigData);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/migrate-config',
+          baseBranch: 'dev',
           files: [
             {
               type: 'addition',
@@ -118,7 +120,7 @@ describe('workers/repository/config-migration/branch/create', () => {
               contents: renovateConfig,
             },
           ],
-          message: message,
+          message,
           platformCommit: false,
         });
       });
@@ -133,8 +135,10 @@ describe('workers/repository/config-migration/branch/create', () => {
 
         await createConfigMigrationBranch(config, migratedConfigData);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/migrate-config',
+          baseBranch: 'dev',
           files: [
             {
               type: 'addition',
@@ -142,7 +146,7 @@ describe('workers/repository/config-migration/branch/create', () => {
               contents: renovateConfig,
             },
           ],
-          message: message,
+          message,
           platformCommit: false,
         });
       });
@@ -156,8 +160,10 @@ describe('workers/repository/config-migration/branch/create', () => {
 
         await createConfigMigrationBranch(config, migratedConfigData);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/migrate-config',
+          baseBranch: 'dev',
           files: [
             {
               type: 'addition',
@@ -165,7 +171,7 @@ describe('workers/repository/config-migration/branch/create', () => {
               contents: renovateConfig,
             },
           ],
-          message: message,
+          message,
           platformCommit: false,
         });
       });

@@ -8,8 +8,6 @@ describe('modules/platform/bitbucket/comments', () => {
   const config: comments.CommentsConfig = { repository: 'some/repo' };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-
     setBaseUrl(baseUrl);
   });
 
@@ -26,7 +24,7 @@ describe('modules/platform/bitbucket/comments', () => {
           number: 3,
           topic: 'topic',
           content: 'content',
-        })
+        }),
       ).toBeFalse();
     });
 
@@ -45,8 +43,54 @@ describe('modules/platform/bitbucket/comments', () => {
           number: 5,
           topic: 'topic',
           content: 'content',
-        })
+        }),
       ).toBeTrue();
+    });
+
+    it('finds reopen comment', async () => {
+      const prComment = {
+        content: {
+          raw: 'reopen! comment',
+        },
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
+      };
+
+      expect.assertions(1);
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, {
+          values: [prComment],
+        });
+
+      expect(await comments.reopenComments(config, 5)).toEqual([prComment]);
+    });
+
+    it('finds no reopen comment', async () => {
+      const prComment = {
+        content: {
+          raw: 'comment',
+        },
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
+      };
+
+      expect.assertions(1);
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, {
+          values: [prComment],
+        });
+
+      expect(await comments.reopenComments(config, 5)).toBeEmptyArray();
     });
 
     it('add updates comment if necessary', async () => {
@@ -92,7 +136,7 @@ describe('modules/platform/bitbucket/comments', () => {
           number: 5,
           topic: null,
           content: 'blablabla',
-        })
+        }),
       ).toBeTrue();
     });
   });
@@ -109,7 +153,7 @@ describe('modules/platform/bitbucket/comments', () => {
           type: 'by-topic',
           number: 5,
           topic: 'topic',
-        })
+        }),
       ).toResolve();
     });
 
@@ -134,7 +178,7 @@ describe('modules/platform/bitbucket/comments', () => {
           type: 'by-topic',
           number: 5,
           topic: 'some-subject',
-        })
+        }),
       ).toResolve();
     });
 
@@ -159,7 +203,7 @@ describe('modules/platform/bitbucket/comments', () => {
           type: 'by-content',
           number: 5,
           content: 'some-content',
-        })
+        }),
       ).toResolve();
     });
 
@@ -175,7 +219,7 @@ describe('modules/platform/bitbucket/comments', () => {
           type: 'by-content',
           number: 5,
           content: 'topic',
-        })
+        }),
       ).toResolve();
     });
   });

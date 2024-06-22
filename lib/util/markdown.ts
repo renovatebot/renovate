@@ -6,7 +6,7 @@ import { regEx } from './regex';
 export function sanitizeMarkdown(markdown: string): string {
   let res = markdown;
   // Put a zero width space after every # followed by a digit
-  res = res.replace(regEx(/#(\d)/gi), '#&#8203;$1');
+  res = res.replace(regEx(/(\W)#(\d)/gi), '$1#&#8203;$2');
   // Put a zero width space after every @ symbol to prevent unintended hyperlinking
   res = res.replace(regEx(/@/g), '@&#8203;');
   res = res.replace(regEx(/(`\[?@)&#8203;/g), '$1');
@@ -18,6 +18,10 @@ export function sanitizeMarkdown(markdown: string): string {
   const backTickRe = regEx(/&#x60;([^/]*?)&#x60;/g);
   res = res.replace(backTickRe, '`$1`');
   res = res.replace(regEx(/`#&#8203;(\d+)`/g), '`#$1`');
+  res = res.replace(
+    regEx(/(?<before>[^\n]\n)(?<title>#.*)/g),
+    '$<before>\n$<title>',
+  );
   return res;
 }
 
@@ -29,7 +33,7 @@ export function sanitizeMarkdown(markdown: string): string {
  */
 export async function linkify(
   content: string,
-  options: github.RemarkGithubOptions
+  options: github.RemarkGithubOptions,
 ): Promise<string> {
   // https://github.com/syntax-tree/mdast-util-to-markdown#optionsbullet
   const output = await remark()

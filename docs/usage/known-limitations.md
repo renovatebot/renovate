@@ -13,7 +13,7 @@ This document tries to list out the most commonly seen limitations and describe 
 ## Time/schedule based limitations
 
 When a user configures a schedule in their repo config, they may think that this schedule "controls" when Renovate runs.
-In actuality, Renovate may be running frequently, but just skipping updates to the repo if the configured schedule is not met.
+In actuality, Renovate may be running frequently, but skipping updates to the repo if the configured schedule is not met.
 Additionally, the Renovate admin may have put the bot on its own schedule, or the job queue may be too long, so Renovate doesn't even get a chance to run on your repository during a certain scheduled time window.
 
 For scheduled action to take place, both these need to happen:
@@ -21,12 +21,17 @@ For scheduled action to take place, both these need to happen:
 - The bot needs to run against your repository
 - The current time needs to fall within your repository's configured schedule
 
-For the GitHub hosted app, all active repositories will be enqueued hourly by default, but it's often the case that not every repository gets processed every hour.
-For this reason, it's best to allow for a minimum 2-3 hours schedule window per run, if you want a high chance that the bot will have run on your repo at least once while the schedule is active.
+### The Mend Renovate app and scheduled jobs
+
+The Mend Renovate App checks each active repository roughly every three hours, if no activity has been seen before then (merged PRs, etc).
+
+For this reason, you should set your schedule window to at least three or four hours.
+This makes it likely that Renovate bot checks your repository at least once during the schedule.
 
 ## Automerge limitations
 
-- Renovate automerges at most one branch per run
+- Renovate automerges at most one branch/PR per run
+- If an automerge happened, the repository run will be restarted at most once. The second run can also potentially automerge, so it may appear as like two automerges in one run.
 - Renovate will only automerge a branch when it is up-to-date with the target branch
 - Renovate may not be able to automerge as many branches as you expect, especially if your base branch is receiving regular commits at the same time
 

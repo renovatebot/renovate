@@ -1,6 +1,7 @@
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import { readLocalFile } from '../../../util/fs';
@@ -21,7 +22,7 @@ function dependencyUrl(dep: PackageDependency): string {
 }
 
 export async function updateArtifacts(
-  updateArtifact: UpdateArtifact
+  updateArtifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName, updatedDeps, config } = updateArtifact;
   logger.trace({ packageFileName }, 'jsonnet-bundler.updateArtifacts()');
@@ -41,9 +42,8 @@ export async function updateArtifacts(
 
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
-    docker: {
-      image: 'sidecar',
-    },
+    docker: {},
+    userConfiguredEnv: config.env,
     toolConstraints: [jsonnetBundlerToolConstraint],
   };
 
@@ -55,7 +55,7 @@ export async function updateArtifacts(
       if (dependencyUrls.length > 0) {
         await exec(
           `jb update ${dependencyUrls.map(quote).join(' ')}`,
-          execOptions
+          execOptions,
         );
       }
     }
@@ -68,7 +68,7 @@ export async function updateArtifacts(
 
     const res: UpdateArtifactsResult[] = [];
 
-    for (const f of status.modified ?? []) {
+    for (const f of coerceArray(status.modified)) {
       res.push({
         file: {
           type: 'addition',
@@ -77,7 +77,7 @@ export async function updateArtifacts(
         },
       });
     }
-    for (const f of status.not_added ?? []) {
+    for (const f of coerceArray(status.not_added)) {
       res.push({
         file: {
           type: 'addition',
@@ -86,7 +86,7 @@ export async function updateArtifacts(
         },
       });
     }
-    for (const f of status.deleted ?? []) {
+    for (const f of coerceArray(status.deleted)) {
       res.push({
         file: {
           type: 'deletion',

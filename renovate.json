@@ -10,13 +10,11 @@
   },
   "packageRules": [
     {
-      "matchPackageNames": [
-        "mcr.microsoft.com/vscode/devcontainers/typescript-node"
-      ],
-      "extends": ["schedule:monthly"]
+      "matchPackageNames": ["containerbase/node"],
+      "versioning": "node"
     },
     {
-      "matchDepTypes": ["dependencies"],
+      "matchDepTypes": ["dependencies", "optionalDependencies"],
       "semanticCommitType": "build"
     },
     {
@@ -28,8 +26,29 @@
       "groupName": "jest monorepo"
     },
     {
-      "matchPaths": ["**/__fixtures__/**"],
+      "matchFileNames": ["**/__fixtures__/**"],
       "enabled": false
+    },
+    {
+      "description": "set fix scope for base image",
+      "matchDepNames": ["ghcr.io/renovatebot/base-image"],
+      "semanticCommitType": "fix"
+    },
+    {
+      "description": "set feat scope for base image major",
+      "matchDepNames": ["ghcr.io/renovatebot/base-image"],
+      "matchUpdateTypes": ["major", "minor"],
+      "semanticCommitType": "feat"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["config/options/index.ts"],
+      "matchStrings": [
+        "default: '(?<depName>ghcr.io/containerbase/sidecar):(?<currentValue>.*)'"
+      ],
+      "datasourceTemplate": "docker"
     }
   ]
 }

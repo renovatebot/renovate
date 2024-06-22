@@ -1,35 +1,68 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
+import { trimTrailingSlash } from '../../../util/url';
+import { parseYaml } from '../../../util/yaml';
+import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type { ApplicationDefinition, ApplicationSource } from './types';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
+import {
+  ApplicationDefinition,
+  type ApplicationSource,
+  type ApplicationSpec,
+} from './schema';
 import { fileTestRegex } from './util';
 
-function createDependency(
-  definition: ApplicationDefinition
-): PackageDependency | null {
-  let source: ApplicationSource;
-  switch (definition.kind) {
-    case 'Application':
-      source = definition?.spec?.source;
-      break;
-    case 'ApplicationSet':
-      source = definition?.spec?.template?.spec?.source;
-      break;
-  }
-
-  if (
-    !source ||
-    !is.nonEmptyString(source.repoURL) ||
-    !is.nonEmptyString(source.targetRevision)
-  ) {
+export function extractPackageFile(
+  content: string,
+  packageFile: string,
+  _config?: ExtractConfig,
+): PackageFileContent | null {
+  // check for argo reference. API version for the kind attribute is used
+  if (fileTestRegex.test(content) === false) {
+    logger.debug(
+      `Skip file ${packageFile} as no argoproj.io apiVersion could be found in matched file`,
+    );
     return null;
   }
 
+  let definitions: ApplicationDefinition[];
+  try {
+    definitions = parseYaml(content, null, {
+      customSchema: ApplicationDefinition,
+      failureBehaviour: 'filter',
+      removeTemplates: true,
+    });
+  } catch (err) {
+    logger.debug({ err, packageFile }, 'Failed to parse ArgoCD definition.');
+    return null;
+  }
+
+  const deps = definitions.flatMap(processAppSpec);
+
+  return deps.length ? { deps } : null;
+}
+
+function processSource(source: ApplicationSource): PackageDependency | null {
   // a chart variable is defined this is helm declaration
   if (source.chart) {
+    // assume OCI helm chart if repoURL doesn't contain explicit protocol
+    if (isOCIRegistry(source.repoURL) || !source.repoURL.includes('://')) {
+      const registryURL = trimTrailingSlash(removeOCIPrefix(source.repoURL));
+
+      return {
+        depName: `${registryURL}/${source.chart}`,
+        currentValue: source.targetRevision,
+        datasource: DockerDatasource.id,
+      };
+    }
+
     return {
       depName: source.chart,
       registryUrls: [source.repoURL],
@@ -37,6 +70,7 @@ function createDependency(
       datasource: HelmDatasource.id,
     };
   }
+
   return {
     depName: source.repoURL,
     currentValue: source.targetRevision,
@@ -44,27 +78,23 @@ function createDependency(
   };
 }
 
-export function extractPackageFile(
-  content: string,
-  fileName: string,
-  _config?: ExtractConfig
-): PackageFile | null {
-  // check for argo reference. API version for the kind attribute is used
-  if (fileTestRegex.test(content) === false) {
-    return null;
+function processAppSpec(
+  definition: ApplicationDefinition,
+): PackageDependency[] {
+  const spec: ApplicationSpec =
+    definition.kind === 'Application'
+      ? definition.spec
+      : definition.spec.template.spec;
+
+  const deps: (PackageDependency | null)[] = [];
+
+  if (is.nonEmptyObject(spec.source)) {
+    deps.push(processSource(spec.source));
   }
 
-  let definitions: ApplicationDefinition[];
-  try {
-    definitions = loadAll(content) as ApplicationDefinition[];
-  } catch (err) {
-    logger.debug({ err, fileName }, 'Failed to parse ArgoCD definition.');
-    return null;
+  for (const source of coerceArray(spec.sources)) {
+    deps.push(processSource(source));
   }
 
-  const deps = definitions
-    .map((definition) => createDependency(definition))
-    .filter(is.truthy);
-
-  return deps.length ? { deps } : null;
+  return deps.filter(is.truthy);
 }

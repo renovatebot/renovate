@@ -1,11 +1,11 @@
-import { spawn as _spawn } from 'child_process';
-import type { ChildProcess, SendHandle, Serializable } from 'child_process';
-import { Readable } from 'stream';
+import { spawn as _spawn } from 'node:child_process';
+import type { SendHandle, Serializable } from 'node:child_process';
+import { Readable } from 'node:stream';
 import { mockedFunction, partial } from '../../../test/util';
 import { exec } from './common';
 import type { RawExecOptions } from './types';
 
-jest.mock('child_process');
+jest.mock('node:child_process');
 const spawn = mockedFunction(_spawn);
 
 type MessageListener = (message: Serializable, sendHandle: SendHandle) => void;
@@ -33,11 +33,12 @@ interface StubArgs {
   stdout?: string;
   stderr?: string;
   timeout?: number;
+  pid?: number;
 }
 
 function getReadable(
   data: string | undefined,
-  encoding: BufferEncoding
+  encoding: BufferEncoding,
 ): Readable {
   const readable = new Readable();
   readable._read = (size: number): void => {
@@ -56,7 +57,8 @@ function getReadable(
   return readable;
 }
 
-function getSpawnStub(args: StubArgs): ChildProcess {
+// TODO: fix types, jest is using wrong overload (#22198)
+function getSpawnStub(args: StubArgs): any {
   const {
     cmd,
     error,
@@ -66,6 +68,7 @@ function getSpawnStub(args: StubArgs): ChildProcess {
     stderr,
     encoding,
     timeout,
+    pid = 31415,
   } = args;
   const listeners: Events = {};
 
@@ -140,17 +143,14 @@ function getSpawnStub(args: StubArgs): ChildProcess {
     emit,
     unref,
     kill,
-  } as ChildProcess;
+    pid,
+  };
 }
 
 describe('util/exec/common', () => {
   const cmd = 'ls -l';
   const stdout = 'out message';
   const stderr = 'err message';
-
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
 
   describe('rawExec', () => {
     it('command exits with code 0', async () => {
@@ -166,8 +166,8 @@ describe('util/exec/common', () => {
       await expect(
         exec(
           cmd,
-          partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' })
-        )
+          partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' }),
+        ),
       ).resolves.toEqual({
         stderr,
         stdout,
@@ -181,7 +181,7 @@ describe('util/exec/common', () => {
       const stub = getSpawnStub({ cmd, exitCode, exitSignal: null, stderr });
       spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
       ).rejects.toMatchObject({
         cmd,
         message: `Command failed: ${cmd}\n${stderr}`,
@@ -196,7 +196,7 @@ describe('util/exec/common', () => {
       const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
       spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
       ).rejects.toMatchObject({
         cmd,
         signal: exitSignal,
@@ -214,7 +214,7 @@ describe('util/exec/common', () => {
       });
       spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
       ).toReject();
     });
 
@@ -229,7 +229,7 @@ describe('util/exec/common', () => {
       });
       spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
       ).rejects.toMatchObject({ cmd: 'ls -l', message: 'error message' });
     });
 
@@ -248,8 +248,8 @@ describe('util/exec/common', () => {
           partial<RawExecOptions>({
             encoding: 'utf8',
             maxBuffer: 5,
-          })
-        )
+          }),
+        ),
       ).rejects.toMatchObject({
         cmd: 'ls -l',
         message: 'stdout maxBuffer exceeded',
@@ -272,13 +272,57 @@ describe('util/exec/common', () => {
           partial<RawExecOptions>({
             encoding: 'utf8',
             maxBuffer: 5,
-          })
-        )
+          }),
+        ),
       ).rejects.toMatchObject({
         cmd: 'ls -l',
         message: 'stderr maxBuffer exceeded',
         stderr: '',
         stdout: '',
+      });
+    });
+  });
+
+  describe('handle gpid', () => {
+    const killSpy = jest.spyOn(process, 'kill');
+
+    afterEach(() => {
+      delete process.env.RENOVATE_X_EXEC_GPID_HANDLE;
+      jest.restoreAllMocks();
+    });
+
+    it('calls process.kill on the gpid', async () => {
+      process.env.RENOVATE_X_EXEC_GPID_HANDLE = 'true';
+      const cmd = 'ls -l';
+      const exitSignal = 'SIGTERM';
+      const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
+      spawn.mockImplementationOnce((cmd, opts) => stub);
+      killSpy.mockImplementationOnce((pid, signal) => true);
+      await expect(
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
+      ).rejects.toMatchObject({
+        cmd,
+        signal: exitSignal,
+        message: `Command failed: ${cmd}\nInterrupted by ${exitSignal}`,
+      });
+      expect(process.kill).toHaveBeenCalledWith(-stub.pid!, exitSignal);
+    });
+
+    it('handles process.kill call on non existent gpid', async () => {
+      process.env.RENOVATE_X_EXEC_GPID_HANDLE = 'true';
+      const cmd = 'ls -l';
+      const exitSignal = 'SIGTERM';
+      const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
+      spawn.mockImplementationOnce((cmd, opts) => stub);
+      killSpy.mockImplementationOnce((pid, signal) => {
+        throw new Error();
+      });
+      await expect(
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
+      ).rejects.toMatchObject({
+        cmd,
+        signal: exitSignal,
+        message: `Command failed: ${cmd}\nInterrupted by ${exitSignal}`,
       });
     });
   });

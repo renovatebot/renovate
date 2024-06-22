@@ -26,7 +26,7 @@ To convert your .NET Framework `.csproj`, `.fsproj` or `.vbproj` files into an S
 
 1. Renovate searches in each repository for any files with a `.csproj`, `.fsproj`, or `.vbproj` extension
 1. Existing dependencies are extracted from `<PackageReference>` and `<PackageVersion>` tags
-1. Renovate looks up the latest version on [nuget.org](https://nuget.org) (or on [alternate feeds](#Alternate%20feeds)) to see if any upgrades are available
+1. Renovate looks up the latest version on [nuget.org](https://nuget.org) (or an alternative feed if configured) to see if any upgrades are available
 1. If the source package includes a GitHub URL as its source, and has either:
 
    - a "changelog" file, or
@@ -59,27 +59,47 @@ You can set alternative feeds:
 
 In the example above we've set three NuGet feeds.
 The package resolving process uses the `merge` strategy to handle the three feeds.
-All feeds are checked for dependency updates, and duplicate updates are merged/joined together into a single dependency update.
+All feeds are checked for dependency updates, and duplicate updates are merged into a single dependency update.
 
-If your project uses lockfiles (a `package.lock.json` exists), alternate feed settings must be defined in a `NuGet.config` only, as `registryUrls` are not passed through to the NuGet commands used.
+<!-- prettier-ignore -->
+!!! warning
+    If your project has lockfile(s), for example a `package.lock.json` file, then you must set alternate feed settings in the `NuGet.config` file only.
+    `registryUrls` set in other files are **not** passed to the NuGet commands.
 
 ### Protocol versions
 
 NuGet supports two protocol versions, `v2` and `v3`.
 The NuGet client and server must use the same version.
+When Renovate acts as the client, it can use the `v2` and `v3` protocols.
 
-Renovate as a NuGet client supports both `v2` and `v3` protocols, and will use `v2` unless the configured feed URL ends with `index.json`.
-This mirrors the behavior of the official NuGet client.
+By default, Renovate uses the `v2` protocol.
+If the configured feed URL ends with `index.json`, Renovate uses the `v3` protocol.
+So Renovate behaves like the official NuGet client.
 
-If you have a `v3` feed that doesn't end with `index.json`, like for example on the JFrog Artifactory, then you must append `#protocolVersion=3` to the registry URL:
+#### v3 feed URL not ending with index.json
 
-```json
-{
-  "nuget": {
-    "registryUrls": ["http://myV3feed#protocolVersion=3"]
+If a `v3` feed URL does not end with `index.json`, you must specify the version explicitly.
+
+- If the feed is defined in a `NuGet.config` file set the `protocolVersion` attribute to `3`:
+
+  ```xml
+  <packageSources>
+     <clear />
+     <add key="myV3feed" value="http://myV3feed" protocolVersion="3" />
+  </packageSources>
+  ```
+
+- If the feed is defined via Renovate configuration append `#protocolVersion=3` to the registry URL:
+
+  ```json
+  {
+    "nuget": {
+      "registryUrls": ["http://myV3feed#protocolVersion=3"]
+    }
   }
-}
-```
+  ```
+
+You may need this workaround when you use the JFrog Artifactory.
 
 ## Authenticated feeds
 
@@ -98,10 +118,14 @@ Credentials for authenticated/private feeds can be given via host rules in the c
 }
 ```
 
+If you're using Azure DevOps, you can set `matchHost` to `pkgs.dev.azure.com`.
+
 <!-- prettier-ignore -->
 !!! note
     Only Basic HTTP authentication (via username and password) is supported.
+    For Azure DevOps, you can use a PAT with `read` permissions on `Packaging` plus an empty username.
+    The generated `nuget.config` enforces basic authentication and cannot be overridden externally!
 
 ## Future work
 
-Contributions and/or feature requests are welcome to support more patterns or additional use cases.
+We welcome contributions or feature requests to support more patterns or use cases.

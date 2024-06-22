@@ -8,11 +8,11 @@ describe('config/migrations/custom/node-migration', () => {
       },
       {
         travis: { enabled: true },
-      }
+      },
     );
   });
 
-  it('should not delete node incase it has more than one property', () => {
+  it('should not delete node in case it has more than one property', () => {
     expect(NodeMigration).toMigrate(
       {
         node: { enabled: true, automerge: false },
@@ -20,7 +20,7 @@ describe('config/migrations/custom/node-migration', () => {
       {
         node: { automerge: false },
         travis: { enabled: true },
-      }
+      },
     );
   });
 });

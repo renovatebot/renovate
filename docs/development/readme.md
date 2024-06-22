@@ -1,6 +1,9 @@
 # Renovate Developer Docs
 
-This directory is intended to provide documentation for developers/contributors on the Renovate project.
-For information on how to configure Renovate as an end-user, please see the [Renovate bot documentation](https://docs.renovatebot.com).
+> [!NOTE]
+> If you're an end-user of Renovate, please read the [Renovate documentation](https://docs.renovatebot.com).
 
-If you want to contribute to Renovate or get it running locally for some other reason, please check out [contributing.md](../../.github/contributing.md) for steps on how to set up the project locally.
+The `docs/development` directory is for developers and contributors.
+The Markdown files explain how to work on Renovate's code.
+
+If you need to get Renovate running locally, to contribute, or for some other reason, please read our [contributing guidelines](../../.github/contributing.md) to learn how.

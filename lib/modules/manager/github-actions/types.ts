@@ -18,6 +18,7 @@ export interface Container {
 export interface Job {
   container?: string | Container;
   services?: Record<string, string | Container>;
+  'runs-on'?: string | string[];
 }
 
 /**

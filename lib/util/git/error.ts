@@ -63,7 +63,7 @@ export function checkForPlatformFailure(err: Error): Error | null {
       logger.debug({ err }, 'Converting git error to CONFIG_VALIDATION error');
       const res = new Error(CONFIG_VALIDATION);
       res.validationError = message;
-      res.validationMessage = err.message;
+      res.validationMessage = `\`${err.message.replaceAll('`', "'")}\``;
       return res;
     }
   }
@@ -73,25 +73,25 @@ export function checkForPlatformFailure(err: Error): Error | null {
 
 // istanbul ignore next
 export function handleCommitError(
-  files: FileChange[],
+  err: Error,
   branchName: string,
-  err: Error
+  files?: FileChange[],
 ): null {
   checkForPlatformFailure(err);
   if (err.message.includes(`'refs/heads/renovate' exists`)) {
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = 'None';
     error.validationError = 'An existing branch is blocking Renovate';
-    error.validationMessage = `Renovate needs to create the branch "${branchName}" but is blocked from doing so because of an existing branch called "renovate". Please remove it so that Renovate can proceed.`;
+    error.validationMessage = `Renovate needs to create the branch \`${branchName}\` but is blocked from doing so because of an existing branch called \`renovate\`. Please remove it so that Renovate can proceed.`;
     throw error;
   }
   if (
     err.message.includes(
-      'refusing to allow a GitHub App to create or update workflow'
+      'refusing to allow a GitHub App to create or update workflow',
     )
   ) {
     logger.warn(
-      'App has not been granted permissions to update Workflows - aborting branch.'
+      'App has not been granted permissions to update Workflows - aborting branch.',
     );
     return null;
   }
@@ -114,9 +114,10 @@ export function handleCommitError(
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = branchName;
     error.validationError = 'Bitbucket committer error';
-    error.validationMessage = `Renovate has experienced the following error when attempting to push its branch to the server: "${String(
-      err.message
-    )}"`;
+    error.validationMessage = `Renovate has experienced the following error when attempting to push its branch to the server: \`${err.message.replaceAll(
+      '`',
+      "'",
+    )}\``;
     throw error;
   }
   if (err.message.includes('remote: error: cannot lock ref')) {
@@ -137,4 +138,8 @@ export function handleCommitError(
   logger.debug({ err }, 'Unknown error committing files');
   // We don't know why this happened, so this will cause bubble up to a branch error
   throw err;
+}
+
+export function bulkChangesDisallowed(err: Error): boolean {
+  return err.message.includes('update more than');
 }

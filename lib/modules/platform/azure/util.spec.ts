@@ -1,10 +1,9 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import { streamToString } from '../../../util/streams';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
-  getNewBranchName,
   getProjectAndRepo,
   getRenovatePRFormat,
   getRepoByName,
@@ -13,18 +12,6 @@ import {
 } from './util';
 
 describe('modules/platform/azure/util', () => {
-  describe('getNewBranchName', () => {
-    it('should add refs/heads', () => {
-      const res = getNewBranchName('testBB');
-      expect(res).toBe(`refs/heads/testBB`);
-    });
-
-    it('should be the same', () => {
-      const res = getNewBranchName('refs/heads/testBB');
-      expect(res).toBe(`refs/heads/testBB`);
-    });
-  });
-
   describe('getGitStatusContextCombinedName', () => {
     it('should return undefined if null context passed', () => {
       const contextName = getGitStatusContextCombinedName(null);
@@ -56,7 +43,7 @@ describe('modules/platform/azure/util', () => {
 
     it('should parse valid genre and name with slash', () => {
       const context = getGitStatusContextFromCombinedName(
-        'my-genre/status-name'
+        'my-genre/status-name',
       );
       expect(context).toEqual({
         genre: 'my-genre',
@@ -66,7 +53,7 @@ describe('modules/platform/azure/util', () => {
 
     it('should parse valid genre and name with multiple slashes', () => {
       const context = getGitStatusContextFromCombinedName(
-        'my-genre/sub-genre/status-name'
+        'my-genre/sub-genre/status-name',
       );
       expect(context).toEqual({
         genre: 'my-genre/sub-genre',
@@ -183,8 +170,8 @@ describe('modules/platform/azure/util', () => {
     it('should return an error', () => {
       expect(() => getProjectAndRepo('prjName/myRepoName/blalba')).toThrow(
         Error(
-          `prjName/myRepoName/blalba can be only structured this way : 'repository' or 'projectName/repository'!`
-        )
+          `prjName/myRepoName/blalba can be only structured this way : 'repository' or 'projectName/repository'!`,
+        ),
       );
     });
   });
@@ -198,7 +185,7 @@ describe('modules/platform/azure/util', () => {
 
     it('returns null when repo is not found', () => {
       expect(
-        getRepoByName('foo/foo', [{ name: 'bar', project: { name: 'bar' } }])
+        getRepoByName('foo/foo', [{ name: 'bar', project: { name: 'bar' } }]),
       ).toBeNull();
     });
 
@@ -211,7 +198,7 @@ describe('modules/platform/azure/util', () => {
           { id: '2', name: 'bar' },
           { id: '3', name: 'bar', project: { name: 'foo' } },
           { id: '4', name: 'bar', project: { name: 'foo' } },
-        ])
+        ]),
       ).toMatchObject({ id: '3' });
     });
 
@@ -220,7 +207,7 @@ describe('modules/platform/azure/util', () => {
         getRepoByName('foo', [
           { id: '1', name: 'bar', project: { name: 'bar' } },
           { id: '2', name: 'foo', project: { name: 'foo' } },
-        ])
+        ]),
       ).toMatchObject({ id: '2' });
     });
 
@@ -235,7 +222,7 @@ describe('modules/platform/azure/util', () => {
     });
 
     it('throws when repo name is invalid', () => {
-      // TODO: better error handling #7154
+      // TODO: better error handling #22198
       expect(() => getRepoByName(undefined as never, [])).toThrow();
       expect(() => getRepoByName(null as never, [])).toThrow();
       expect(() => getRepoByName('foo/bar/baz', [])).toThrow();

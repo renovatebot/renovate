@@ -1,7 +1,6 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
-import type { PackageDependency, PackageFile } from '../types';
-import { TerragruntDependencyTypes } from './common';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { analyseTerragruntModule, extractTerragruntModule } from './modules';
 import type { ExtractionResult, TerraformManagerData } from './types';
 import {
@@ -12,8 +11,11 @@ import {
 const dependencyBlockExtractionRegex = regEx(/^\s*(?<type>[a-z_]+)\s+{\s*$/);
 const contentCheckList = ['terraform {'];
 
-export function extractPackageFile(content: string): PackageFile | null {
-  logger.trace({ content }, 'terragrunt.extractPackageFile()');
+export function extractPackageFile(
+  content: string,
+  packageFile?: string,
+): PackageFileContent | null {
+  logger.trace({ content }, `terragrunt.extractPackageFile(${packageFile!})`);
   if (!checkFileContainsDependency(content, contentCheckList)) {
     return null;
   }
@@ -25,21 +27,21 @@ export function extractPackageFile(content: string): PackageFile | null {
       const terragruntDependency = dependencyBlockExtractionRegex.exec(line);
       if (terragruntDependency?.groups) {
         logger.trace(
-          `Matched ${terragruntDependency.groups.type} on line ${lineNumber}`
+          `Matched ${terragruntDependency.groups.type} on line ${lineNumber}`,
         );
         const tfDepType = getTerragruntDependencyType(
-          terragruntDependency.groups.type
+          terragruntDependency.groups.type,
         );
         let result: ExtractionResult | null = null;
         switch (tfDepType) {
-          case TerragruntDependencyTypes.terragrunt: {
+          case 'terraform': {
             result = extractTerragruntModule(lineNumber, lines);
             break;
           }
           /* istanbul ignore next */
           default:
             logger.trace(
-              `Could not identify TerragruntDependencyType ${terragruntDependency.groups.type} on line ${lineNumber}.`
+              `Could not identify TerragruntDependencyType ${terragruntDependency.groups.type} on line ${lineNumber}.`,
             );
             break;
         }
@@ -51,12 +53,12 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting terragrunt plugins');
+    logger.debug({ err, packageFile }, 'Error extracting terragrunt plugins');
   }
   deps.forEach((dep) => {
-    // TODO #7154
+    // TODO #22198
     switch (dep.managerData!.terragruntDependencyType) {
-      case TerragruntDependencyTypes.terragrunt:
+      case 'terraform':
         analyseTerragruntModule(dep);
         break;
       /* istanbul ignore next */

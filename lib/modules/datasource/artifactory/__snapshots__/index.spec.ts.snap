@@ -1,22 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/artifactory/index getReleases parses real data (files): without slash at the end 1`] = `
-Object {
+{
   "registryUrl": "https://jfrog.company.com/artifactory",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "releaseTimestamp": "2021-07-21T20:08:00.000Z",
       "version": "1.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-08-23T20:03:00.000Z",
       "version": "1.0.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-07-21T20:09:00.000Z",
       "version": "1.0.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-02-06T09:54:00.000Z",
       "version": "1.0.3",
     },
@@ -25,22 +25,22 @@ Object {
 `;
 
 exports[`modules/datasource/artifactory/index getReleases parses real data (folders): with slash at the end 1`] = `
-Object {
+{
   "registryUrl": "https://jfrog.company.com/artifactory",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "releaseTimestamp": "2021-07-21T20:08:00.000Z",
       "version": "1.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-08-23T20:03:00.000Z",
       "version": "1.0.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-07-21T20:09:00.000Z",
       "version": "1.0.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2021-02-06T09:54:00.000Z",
       "version": "1.0.3",
     },
@@ -49,29 +49,29 @@ Object {
 `;
 
 exports[`modules/datasource/artifactory/index getReleases parses real data (merge strategy with 2 registries) 1`] = `
-Object {
-  "releases": Array [
-    Object {
+{
+  "releases": [
+    {
       "registryUrl": "https://jfrog.company.com/artifactory",
       "releaseTimestamp": "2021-07-21T20:08:00.000Z",
       "version": "1.0.0",
     },
-    Object {
+    {
       "registryUrl": "https://jfrog.company.com/artifactory",
       "releaseTimestamp": "2021-08-23T20:03:00.000Z",
       "version": "1.0.1",
     },
-    Object {
+    {
       "registryUrl": "https://jfrog.company.com/artifactory",
       "releaseTimestamp": "2021-07-21T20:09:00.000Z",
       "version": "1.0.2",
     },
-    Object {
+    {
       "registryUrl": "https://jfrog.company.com/artifactory",
       "releaseTimestamp": "2021-02-06T09:54:00.000Z",
       "version": "1.0.3",
     },
-    Object {
+    {
       "registryUrl": "https://jfrog.company.com/artifactory/production",
       "version": "1.3.0",
     },

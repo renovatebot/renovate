@@ -15,7 +15,7 @@ Having the Dependency Dashboard also enables the concept of an "approval" workfl
 ## Supported platforms
 
 The Dependency Dashboard requires that the host platforms supports the concept of issues with dynamic Markdown checkboxes.
-Read [our FAQ, Renovate core features not supported on all platforms](https://docs.renovatebot.com/faq/#renovate-core-features-not-supported-on-all-platforms) to see if your platform can use the Dependency Dashboard feature.
+Read [our FAQ, Renovate core features not supported on all platforms](../faq.md#renovate-core-features-not-supported-on-all-platforms) to see if your platform can use the Dependency Dashboard feature.
 
 ## How to enable the dashboard
 
@@ -23,7 +23,7 @@ To turn on the Dashboard manually, add the `:dependencyDashboard` preset to your
 
 ```json
 {
-  "extends": ["config:base", ":dependencyDashboard"]
+  "extends": ["config:recommended", ":dependencyDashboard"]
 }
 ```
 
@@ -41,7 +41,7 @@ To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard
 
 ```json
 {
-  "extends": ["config:base", ":disableDependencyDashboard"]
+  "extends": ["config:recommended", ":disableDependencyDashboard"]
 }
 ```
 
@@ -49,12 +49,29 @@ To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard
 
 This section explains some common use cases where having the Dependency Dashboard can help.
 
+### Warnings for deprecated dependencies
+
+If Renovate finds:
+
+- packages flagged as deprecated on their registry, or
+- packages that have a community-sourced replacement PR available
+
+Then Renovate adds a prominent warning about these packages near the top of the Dependency Dashboard.
+Here is an example of how this can look:
+
+> The following dependencies are deprecated:
+
+| Datasource | Name                | Replacement?                                                                      |
+| ---------- | ------------------- | --------------------------------------------------------------------------------- |
+| npm        | `airbnb-prop-types` | ![Available](https://img.shields.io/badge/available-green?style=flat-square)      |
+| npm        | `left-pad`          | ![Unavailable](https://img.shields.io/badge/unavailable-orange?style=flat-square) |
+
 ### Visibility into rejected/deferred updates
 
 Renovate's Dependency Dashboard shows an overview of all updates that are still "to do".
 
 If you close an update PR from Renovate without merging, the Dashboard will list this update in the Closed/Ignored section.
-If you later change your mind about the update, you can get a new PR by clicking the corresponding checkbox on the dashboard.
+If you later change your mind about the update, you can get a new PR by selecting the corresponding checkbox on the dashboard.
 
 ### Dependency Dashboard Approval workflow
 
@@ -86,7 +103,7 @@ To require manual approval for _all updates_, add the `:dependencyDashboardAppro
 
 ```json
 {
-  "extends": ["config:base", ":dependencyDashboardApproval"]
+  "extends": ["config:recommended", ":dependencyDashboardApproval"]
 }
 ```
 

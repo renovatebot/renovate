@@ -1,89 +1,125 @@
-import {
-  RenovateConfig,
-  defaultConfig,
-  git,
-  platform,
-} from '../../../../../test/util';
+import { RenovateConfig, mocked, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
+import { logger } from '../../../../logger';
+import * as memCache from '../../../../util/cache/memory';
+import { toSha256 } from '../../../../util/hash';
+import * as _config from './config';
 import { rebaseOnboardingBranch } from './rebase';
 
-jest.mock('../../../../util/git');
+const configModule = mocked(_config);
+
+jest.mock('./config');
 
 describe('workers/repository/onboarding/branch/rebase', () => {
   beforeAll(() => {
     GlobalConfig.set({
       localDir: '',
+      platform: 'github',
     });
   });
 
   describe('rebaseOnboardingBranch()', () => {
     let config: RenovateConfig;
+    const hash = 'hash';
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      memCache.init();
+
+      // using default options
       config = {
-        ...defaultConfig,
+        semanticCommits: 'auto',
+        semanticCommitScope: 'deps',
+        semanticCommitType: 'chore',
+        onboardingConfig: {
+          $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        },
+        onboardingConfigFileName: 'renovate.json',
         repository: 'some/repo',
       };
-    });
-
-    it('does not rebase modified branch', async () => {
-      git.isBranchModified.mockResolvedValueOnce(true);
-      await rebaseOnboardingBranch(config);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      configModule.getOnboardingConfigContents.mockResolvedValue('');
     });
 
     it('does nothing if branch is up to date', async () => {
-      const contents =
-        JSON.stringify(defaultConfig.onboardingConfig, null, 2) + '\n';
-      git.getFile
-        .mockResolvedValueOnce(contents) // package.json
-        .mockResolvedValueOnce(contents); // renovate.json
-      await rebaseOnboardingBranch(config);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      const contents = JSON.stringify(config.onboardingConfig, null, 2) + '\n';
+      configModule.getOnboardingConfigContents.mockResolvedValueOnce(contents);
+      await rebaseOnboardingBranch(config, toSha256(contents));
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
     });
 
     it('rebases onboarding branch', async () => {
-      git.isBranchBehindBase.mockResolvedValueOnce(true);
-      await rebaseOnboardingBranch(config);
-      expect(git.commitFiles).toHaveBeenCalledTimes(1);
-    });
-
-    it('rebases via platform', async () => {
-      platform.commitFiles = jest.fn();
-      config.platformCommit = true;
-      git.isBranchBehindBase.mockResolvedValueOnce(true);
-      await rebaseOnboardingBranch(config);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(1);
+      await rebaseOnboardingBranch(config, hash);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
     });
 
     it('uses the onboardingConfigFileName if set', async () => {
-      git.isBranchBehindBase.mockResolvedValueOnce(true);
-      await rebaseOnboardingBranch({
-        ...config,
-        onboardingConfigFileName: '.github/renovate.json',
-      });
-      expect(git.commitFiles).toHaveBeenCalledTimes(1);
-      expect(git.commitFiles.mock.calls[0][0].message).toContain(
-        '.github/renovate.json'
+      await rebaseOnboardingBranch(
+        {
+          ...config,
+          onboardingConfigFileName: '.github/renovate.json',
+        },
+        hash,
       );
-      expect(git.commitFiles.mock.calls[0][0].files[0].path).toBe(
-        '.github/renovate.json'
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
+      expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
+        '.github/renovate.json',
+      );
+      expect(scm.commitAndPush.mock.calls[0][0].files[0].path).toBe(
+        '.github/renovate.json',
       );
     });
 
     it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
-      git.isBranchBehindBase.mockResolvedValueOnce(true);
-      await rebaseOnboardingBranch({
-        ...config,
-        onboardingConfigFileName: undefined,
-      });
-      expect(git.commitFiles).toHaveBeenCalledTimes(1);
-      expect(git.commitFiles.mock.calls[0][0].message).toContain(
-        'renovate.json'
+      await rebaseOnboardingBranch(
+        {
+          ...config,
+          onboardingConfigFileName: undefined,
+        },
+        hash,
       );
-      expect(git.commitFiles.mock.calls[0][0].files[0].path).toBe(
-        'renovate.json'
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
+      expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
+        'renovate.json',
+      );
+      expect(scm.commitAndPush.mock.calls[0][0].files[0].path).toBe(
+        'renovate.json',
+      );
+    });
+
+    it('handles a missing previous config hash', async () => {
+      await rebaseOnboardingBranch(config, undefined);
+      expect(scm.commitAndPush).toHaveBeenCalled();
+    });
+
+    it('does nothing if config hashes match', async () => {
+      const contents = JSON.stringify(config.onboardingConfig, null, 2) + '\n';
+      configModule.getOnboardingConfigContents.mockResolvedValueOnce(contents);
+      await rebaseOnboardingBranch(config, toSha256(contents));
+      expect(scm.commitAndPush).not.toHaveBeenCalled();
+    });
+
+    it('dryRun=full', async () => {
+      GlobalConfig.set({ localDir: '', dryRun: 'full', platform: 'github' });
+      await rebaseOnboardingBranch(config, hash);
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would rebase files in onboarding branch',
+      );
+      expect(scm.commitAndPush).not.toHaveBeenCalled();
+    });
+
+    // does not rebase on platforms that do not support html comments
+    it.each`
+      platform
+      ${'azure'}
+      ${'bitbucket'}
+      ${'bitbucket-server'}
+      ${'codecommit'}
+    `('returns null for $platform', async ({ platform }) => {
+      GlobalConfig.set({ platform, localDir: '' });
+      const res = await rebaseOnboardingBranch(config, hash);
+      expect(res).toBeNull();
+      expect(scm.commitAndPush).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Skipping rebase as ${platform} does not support html comments`,
       );
     });
   });

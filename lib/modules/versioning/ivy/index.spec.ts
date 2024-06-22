@@ -7,7 +7,7 @@ import {
 import ivy from '.';
 
 describe('modules/versioning/ivy/index', () => {
-  test.each`
+  it.each`
     input                   | type               | value
     ${'latest'}             | ${REV_TYPE_LATEST} | ${''}
     ${'latest.release'}     | ${REV_TYPE_LATEST} | ${'release'}
@@ -27,10 +27,10 @@ describe('modules/versioning/ivy/index', () => {
     'parseDynamicRevision("$input") === { type: "$type", value: "$value" }',
     ({ input, type, value }) => {
       expect(parseDynamicRevision(input)).toEqual({ type, value });
-    }
+    },
   );
 
-  test.each`
+  it.each`
     input
     ${null}
     ${''}
@@ -40,7 +40,7 @@ describe('modules/versioning/ivy/index', () => {
     expect(parseDynamicRevision(value)).toBeNull();
   });
 
-  test.each`
+  it.each`
     input                   | expected
     ${''}                   | ${false}
     ${'1.0.0'}              | ${true}
@@ -69,7 +69,7 @@ describe('modules/versioning/ivy/index', () => {
     expect(res).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input                   | expected
     ${''}                   | ${false}
     ${'1.0.0'}              | ${true}
@@ -97,7 +97,7 @@ describe('modules/versioning/ivy/index', () => {
     expect(ivy.isVersion(input)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version            | range                   | expected
     ${''}              | ${'latest'}             | ${false}
     ${'0'}             | ${''}                   | ${false}
@@ -137,10 +137,10 @@ describe('modules/versioning/ivy/index', () => {
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
       expect(ivy.matches(version, range)).toBe(expected);
-    }
+    },
   );
 
-  test.each`
+  it.each`
     currentValue             | rangeStrategy | currentVersion | newVersion  | expected
     ${'1'}                   | ${'auto'}     | ${'1'}         | ${'1.1'}    | ${'1.1'}
     ${'[1.2.3,]'}            | ${'auto'}     | ${'1.2.3'}     | ${'1.2.4'}  | ${'[1.2.3,]'}
@@ -167,27 +167,27 @@ describe('modules/versioning/ivy/index', () => {
         newVersion,
       });
       expect(res).toEqual(expected);
-    }
+    },
   );
 
-  test.each`
+  it.each`
     versions           | range     | expected
     ${['0', '1', '2']} | ${'(,2)'} | ${'1'}
   `(
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(ivy.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
-  test.each`
+  it.each`
     version    | expected
     ${'1.2.0'} | ${true}
   `('isCompatible("$version") === $expected', ({ version, expected }) => {
     expect(ivy.isCompatible(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version     | expected
     ${'1.2.0'}  | ${true}
     ${'^1.2.0'} | ${false}

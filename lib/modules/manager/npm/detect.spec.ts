@@ -7,16 +7,16 @@ describe('modules/manager/npm/detect', () => {
   describe('.detectGlobalConfig()', () => {
     it('detects .npmrc in home directory', async () => {
       fs.readSystemFile.mockResolvedValueOnce(
-        'registry=https://registry.npmjs.org\n'
+        'registry=https://registry.npmjs.org\n',
       );
       const res = await detectGlobalConfig();
       expect(res).toMatchInlineSnapshot(`
-Object {
-  "npmrc": "registry=https://registry.npmjs.org
-",
-  "npmrcMerge": true,
-}
-`);
+        {
+          "npmrc": "registry=https://registry.npmjs.org
+        ",
+          "npmrcMerge": true,
+        }
+      `);
       expect(res.npmrc).toBeDefined();
       expect(res.npmrcMerge).toBe(true);
     });

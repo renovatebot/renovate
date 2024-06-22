@@ -1,65 +1,112 @@
-import { load } from 'js-yaml';
-import { logger } from '../../../logger';
+import is from '@sindresorhus/is';
+import type { SkipReason } from '../../../types';
 import { DartDatasource } from '../../datasource/dart';
-import type { PackageDependency, PackageFile } from '../types';
+import { DartVersionDatasource } from '../../datasource/dart-version';
+import { FlutterVersionDatasource } from '../../datasource/flutter-version';
+import type { PackageDependency, PackageFileContent } from '../types';
+import type { PubspecSchema } from './schema';
+import { parsePubspec } from './utils';
 
-function getDeps(
-  depsObj: { [x: string]: any },
-  preset: { depType: string }
+function extractFromSection(
+  pubspec: PubspecSchema,
+  sectionKey: keyof Pick<PubspecSchema, 'dependencies' | 'dev_dependencies'>,
 ): PackageDependency[] {
-  if (!depsObj) {
+  const sectionContent = pubspec[sectionKey];
+  if (!sectionContent) {
     return [];
   }
-  return Object.keys(depsObj).reduce((acc, depName) => {
-    if (depName === 'meta') {
-      return acc;
+
+  const skippedPackages = [
+    'flutter_driver',
+    'flutter_localizations',
+    'flutter_test',
+    'flutter_web_plugins',
+    'meta',
+  ];
+  const deps: PackageDependency[] = [];
+  for (const depName of Object.keys(sectionContent)) {
+    if (skippedPackages.includes(depName)) {
+      continue;
     }
 
-    const section = depsObj[depName];
+    let currentValue = sectionContent[depName];
+    let skipReason: SkipReason | undefined;
+    let registryUrls: string[] | undefined;
 
-    let currentValue: string | null = null;
-    if (section?.version) {
-      currentValue = section.version.toString();
-    } else if (section) {
-      if (typeof section === 'string') {
-        currentValue = section;
+    if (!is.string(currentValue)) {
+      const version = currentValue.version;
+      const path = currentValue.path;
+      const hosted = currentValue.hosted;
+
+      if (is.string(hosted)) {
+        registryUrls = [hosted];
+      } else if (is.string(hosted?.url)) {
+        registryUrls = [hosted.url];
       }
-      if (typeof section === 'number') {
-        currentValue = section.toString();
+
+      if (version) {
+        currentValue = version;
+      } else if (path) {
+        currentValue = '';
+        skipReason = 'path-dependency';
+      } else {
+        currentValue = '';
       }
     }
 
-    const dep: PackageDependency = { ...preset, depName, currentValue };
+    deps.push({
+      depName,
+      depType: sectionKey,
+      currentValue,
+      datasource: DartDatasource.id,
+      ...(registryUrls && { registryUrls }),
+      skipReason,
+    });
+  }
 
-    return [...acc, dep];
-  }, [] as PackageDependency[]);
+  return deps;
+}
+
+function extractDart(pubspec: PubspecSchema): PackageDependency[] {
+  return [
+    {
+      depName: 'dart',
+      currentValue: pubspec.environment.sdk,
+      datasource: DartVersionDatasource.id,
+    },
+  ];
+}
+
+function extractFlutter(pubspec: PubspecSchema): PackageDependency[] {
+  const currentValue = pubspec.environment.flutter;
+  if (!currentValue) {
+    return [];
+  }
+
+  return [
+    {
+      depName: 'flutter',
+      currentValue,
+      datasource: FlutterVersionDatasource.id,
+    },
+  ];
 }
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
-): PackageFile | null {
-  try {
-    // TODO: fix me (#9610)
-    const doc = load(content, { json: true }) as any;
-    const deps = [
-      ...getDeps(doc.dependencies, {
-        depType: 'dependencies',
-      }),
-      ...getDeps(doc.dev_dependencies, {
-        depType: 'dev_dependencies',
-      }),
-    ];
-
-    if (deps.length) {
-      return {
-        packageFile,
-        datasource: DartDatasource.id,
-        deps,
-      };
-    }
-  } catch (e) {
-    logger.debug({ packageFile }, 'Can not parse dependency');
+  packageFile: string,
+): PackageFileContent | null {
+  const pubspec = parsePubspec(packageFile, content);
+  if (!pubspec) {
+    return null;
   }
-  return null;
+
+  return {
+    deps: [
+      ...extractFromSection(pubspec, 'dependencies'),
+      ...extractFromSection(pubspec, 'dev_dependencies'),
+      ...extractDart(pubspec),
+      ...extractFlutter(pubspec),
+    ],
+  };
 }

@@ -5,6 +5,7 @@ export interface HelmRelease {
   sources?: string[];
   version: string;
   created: string;
+  digest: string | null;
   urls: string[];
 }
 
@@ -13,8 +14,3 @@ export interface HelmRepository {
 }
 
 export type HelmRepositoryData = Record<string, ReleaseResult>;
-
-export interface RepoSource {
-  sourceUrl?: string;
-  sourceDirectory?: string;
-}

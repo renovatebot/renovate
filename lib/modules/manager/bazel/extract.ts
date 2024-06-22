@@ -1,43 +1,40 @@
-import { logger } from '../../../logger';
-import type { PackageDependency, PackageFile } from '../types';
-import { extractDepFromTarget, getRuleDefinition } from './common';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { parse } from './parser';
-import type { ParsedResult } from './types';
+import { extractDepsFromFragment } from './rules';
+import { dockerRules } from './rules/docker';
+import { gitRules } from './rules/git';
+import { goRules } from './rules/go';
+import { ociRules } from './rules/oci';
+import type { RecordFragment } from './types';
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
-): PackageFile | null {
+  packageFile: string,
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
-  let parsed: ParsedResult | null = null;
-  try {
-    parsed = parse(content);
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err, packageFile }, 'Bazel parsing error');
-  }
-
-  if (!parsed) {
+  const fragments: RecordFragment[] | null = parse(content, packageFile);
+  if (!fragments) {
     return null;
   }
 
-  const { targets, meta: meta } = parsed;
-  for (let idx = 0; idx < targets.length; idx += 1) {
-    const target = targets[idx];
-    const dep = extractDepFromTarget(target);
-    if (!dep) {
-      continue;
-    }
+  for (let idx = 0; idx < fragments.length; idx += 1) {
+    const fragment = fragments[idx];
+    for (const dep of extractDepsFromFragment(fragment)) {
+      dep.managerData = { idx };
 
-    const def = getRuleDefinition(content, meta, idx);
-    // istanbul ignore if: should not happen
-    if (!def) {
-      logger.warn({ dep }, `Bazel: can't extract definition fragment`);
-      continue;
-    }
+      // Selectively provide `replaceString` in order to make auto-replace
+      // functionality work correctly.
+      const rules = [...dockerRules, ...ociRules, ...gitRules, ...goRules];
+      const replaceString = fragment.value;
+      if (rules.some((rule) => replaceString.startsWith(rule))) {
+        if (dep.currentValue && dep.currentDigest) {
+          dep.replaceString = replaceString;
+        }
+      }
 
-    dep.managerData = { def };
-    deps.push(dep);
+      deps.push(dep);
+    }
   }
 
   return deps.length ? { deps } : null;

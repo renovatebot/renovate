@@ -1,58 +1,94 @@
 # About minimal reproductions
 
-We may ask you to create a "minimal reproduction" repository to help us fix bugs or work on a feature.
-
-This document explains why we need a minimal reproduction, why we won't use your production repository to debug, and how to create a good minimal reproduction.
-
-## Help yourself by creating a minimal reproduction
-
-A minimal reproduction helps us to:
-
-- Fix your bug faster
-- Work on your feature request faster
-- Confirm the cause of the behavior
-
-It's fastest if you - as the bug reporter or feature requester - create the reproduction.
-
-## How the Renovate developers use your minimal reproduction
-
-The first benefit of a public reproduction is to prove that the problem is not caused by your environment or by a setting you left out of your description, thinking it wasn't relevant.
-If there were any doubts about whether you'd found a genuine problem before, they are usually removed once a reproduction is made.
-
-Next, when a reproduction has minimal config, it can often let us narrow down or even identify the root cause, suggest workarounds, etc.
-This means we can often help you from code inspection alone.
-
-Finally, by making the code/dependencies minimal, it usually makes the problem feasible to step through using a debugging if code inspection wasn't sufficient.
-Production repositories or non-minimal reproductions are often very difficult to debug because break points get triggered dozens or hundreds or times.
+We may ask you to create a "minimal reproduction" repository.
 
 ## What is a minimal reproduction?
 
-The basic idea of a minimal reproduction is to use the _least_ amount of both code and config to trigger missing or wrong behavior.
-A minimal reproduction helps the developers see where the bug or missing feature is, and allows us to verify that the new code meets the requirements.
+A minimal reproduction is a repository with the _least_ amount of code and config that still triggers missing or wrong behavior.
 
-## Where to host the minimal reproduction
+### Example of a perfect reproduction
 
-If you can, use GitHub to host your reproduction.
-If the reproduction needs to be on GitLab or Bitbucket, that's also okay.
+The [`renovate-reproductions/12260` repository](https://github.com/renovate-reproductions/12260) shows a perfect reproduction, because it:
+
+- Only has the files/config needed to trigger the bug
+- Explains the current behavior and the expected behavior in the `readme.md`
+- Links to the Renovate Issue, or Discussion in the `readme.md`
+- Uses headings to organize information
 
 ## Creating a minimal reproduction
 
-There are two ways to create a minimal reproduction:
+Please read this section in full _before_ starting on your minimal reproduction.
 
-- Start with an empty repository and copy files from your production repository
-- Start with a fork of your production repository and remove files and config
+### Ways to create a minimal reproduction
 
-General steps:
+There are two methods to create a reproduction, see the table for a comparison.
 
-1. Create your minimal reproduction repository on GitHub, only use GitLab or Bitbucket if really needed
+| Start point                                                                                       | Method                  | Benefits                          | Drawbacks                                  |
+| :------------------------------------------------------------------------------------------------ | :---------------------- | :-------------------------------- | :----------------------------------------- |
+| [our minimal reproduction template](https://github.com/renovatebot/minimal-reproduction-template) | Copy files and config   | Minimal start point               | Crafting the bad config/setup from scratch |
+| Fork production repo                                                                              | Remove files and config | Start with known bad config/setup | May need to edit/delete many files         |
+
+Either method will work.
+We recommend you start from [our minimal reproduction template](https://github.com/renovatebot/minimal-reproduction-template).
+
+### General steps
+
+_Always_ follow these steps:
+
+1. Put your minimal reproduction repository on GitHub, only use GitLab or Bitbucket if needed
 1. Use the fewest number of repository files and dependencies
-1. Reduce the Renovate config to a minimum
+1. Reduce your Renovate config to a minimum
 1. Remove private or secret information
-1. Create a `readme.md` file that explains the current behavior and expected behavior
+1. Create a `readme.md` file (or edit the template `readme.md`) and:
+   - Explain the _Current behavior_ and _Expected behavior_
+   - Link to the Renovate Issue or Discussion
+   - Use headings to organize the information
 1. Set the repository visibility to `public`
 1. Give us the link to the repository
 
-### Why we won't use your production repository to debug
+### Host your reproduction on GitHub.com, if possible
+
+Please put your reproduction in a _public_ repository on GitHub.com, if possible.
+
+You may put the reproduction on another platform like GitLab or Bitbucket, _if_ the reproduction needs features/behavior of that platform.
+
+### Tips
+
+You can find tips for specific situations here.
+
+#### Forcing Renovate to create a lot of pending updates
+
+Put an old version of a frequently updated dependency in your repository.
+Then set a high `minimumReleaseAge` for that dependency, for example:
+
+```json
+{
+  "extends": ["config:best-practices"],
+  "packageRules": [
+    {
+      "description": "Force lots of pending updates for the Prettier package",
+      "matchPackageNames": ["prettier"],
+      "minimumReleaseAge": "365 days"
+    }
+  ]
+}
+```
+
+You'll get a lot of pending updates, which you can see on the Dependency Dashboard.
+
+## How we use your minimal reproduction
+
+A minimal reproduction helps the Renovate developers:
+
+- confirm the problem is with Renovate, and _not_ with your environment, or your configuration settings
+- see where the bug or missing feature is
+- verify that the new code solves the problem, or correctly adds a feature
+- identify the root cause, or narrow down the possible causes
+- suggest workarounds for the problem
+- find where to look in our code to help you
+- step through the code with a debugger
+
+## Why we will not use your production repository to debug
 
 You may think:
 
@@ -60,28 +96,33 @@ You may think:
 > I already have the reproduction on my production repository and it's public.
 > Why not use that to debug?
 
-A production repository usually has:
+This is because a production repository often has:
 
 - many dependencies
 - many custom rules in the Renovate configuration file
 - many files that are not relevant
 
-Having lots of "moving parts" makes debugging tricky, because debug break points can be triggered hundreds of times.
+Lots of "moving parts" makes it hard to debug, as debug break points can trigger hundreds of times.
 
-When you have lots of custom config for Renovate, it's easy to think that you've found the root cause of the behavior.
+When you have lots of custom config for Renovate, it's hard for us to find the root cause of the behavior.
 Bugs are often caused by multiple features interacting.
-Reducing the config to a minimum helps us find out exactly which config elements are required to trigger the bug.
+Reducing the config to a minimum helps us find exactly which config elements are needed to trigger the bug.
+
+## Response to common objections
+
+Here are our responses to some common objections from users about creating a minimal reproduction.
 
 ### "It's too much work to create a minimal reproduction"
 
-We'd love to get down to zero reported bugs or feature requests remaining, but we have a lot to do and must set our priorities.
-This means we prefer working on issues with a minimal reproduction, as they allow us to spend our time efficiently.
+We know that it can be hard to create a minimal reproduction.
 
-If you don't create a minimal reproduction, we won't prioritize working on your issue.
+The Renovate maintainers prioritize issues that have a minimal reproduction repository.
+If you do not create a minimal reproduction, the Renovate maintainers will probably work on other issues first.
 
-Issues without a reproduction will probably stay open until you, or somebody else, creates a minimal reproduction.
-After a while, issues without a reproduction may be closed unfixed.
+Discussions without a reproduction usually go stale.
 
 ### "I already described what you need in the issue"
 
-If it's simple then it shouldn't take you much time to commit it to a repo.
+Thank you for describing your issue in detail.
+But we still need a minimal reproduction.
+Make sure your minimal reproduction matches your description and your expected behavior.

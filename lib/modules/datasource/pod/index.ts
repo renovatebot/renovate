@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -10,13 +10,11 @@ import { Datasource } from '../datasource';
 import { massageGithubUrl } from '../metadata';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
-// eslint-disable-next-line typescript-enum/no-enum, typescript-enum/no-const-enum
-const enum URLFormatOptions {
-  WithShardWithSpec,
-  WithShardWithoutSpec,
-  WithSpecsWithoutShard,
-  WithoutSpecsWithoutShard,
-}
+type URLFormatOptions =
+  | 'withShardWithSpec'
+  | 'withShardWithoutSpec'
+  | 'withSpecsWithoutShard'
+  | 'withoutSpecsWithoutShard';
 
 function shardParts(packageName: string): string[] {
   return crypto
@@ -28,7 +26,7 @@ function shardParts(packageName: string): string[] {
 }
 
 const githubRegex = regEx(
-  /(?<hostURL>(^https:\/\/[a-zA-z0-9-.]+))\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/
+  /(?<hostURL>^https:\/\/[a-zA-Z0-9-.]+)\/(?<account>[^/]+)\/(?<repo>[^/]+?)(?:\.git|\/.*)?$/,
 );
 
 function releasesGithubUrl(
@@ -39,7 +37,7 @@ function releasesGithubUrl(
     repo: string;
     useShard: boolean;
     useSpecs: boolean;
-  }
+  },
 ): string {
   const { hostURL, account, repo, useShard, useSpecs } = opts;
   const prefix =
@@ -70,7 +68,6 @@ function handleError(packageName: string, err: HttpError): void {
   } else if (statusCode === 404) {
     logger.debug(errorData, 'Package lookup error');
   } else if (err.message === HOST_DISABLED) {
-    // istanbul ignore next
     logger.trace(errorData, 'Host disabled');
   } else {
     logger.warn(errorData, 'CocoaPods lookup failure: Unknown error');
@@ -79,8 +76,8 @@ function handleError(packageName: string, err: HttpError): void {
 
 function isDefaultRepo(url: string): boolean {
   const match = githubRegex.exec(url);
-  if (match) {
-    const { account, repo } = match.groups ?? {};
+  if (match?.groups) {
+    const { account, repo } = match.groups;
     return (
       account.toLowerCase() === 'cocoapods' && repo.toLowerCase() === 'specs'
     ); // https://github.com/CocoaPods/Specs.git
@@ -109,7 +106,7 @@ export class PodDatasource extends Datasource {
 
   private async requestCDN(
     url: string,
-    packageName: string
+    packageName: string,
   ): Promise<string | null> {
     try {
       const resp = await this.http.get(url);
@@ -125,7 +122,7 @@ export class PodDatasource extends Datasource {
 
   private async requestGithub<T = unknown>(
     url: string,
-    packageName: string
+    packageName: string,
   ): Promise<T | null> {
     try {
       const resp = await this.githubHttp.getJson<T>(url);
@@ -144,7 +141,7 @@ export class PodDatasource extends Datasource {
     opts: { hostURL: string; account: string; repo: string },
     useShard = true,
     useSpecs = true,
-    urlFormatOptions = URLFormatOptions.WithShardWithSpec
+    urlFormatOptions: URLFormatOptions = 'withShardWithSpec',
   ): Promise<ReleaseResult | null> {
     const url = releasesGithubUrl(packageName, { ...opts, useShard, useSpecs });
     const resp = await this.requestGithub<{ name: string }[]>(url, packageName);
@@ -153,33 +150,33 @@ export class PodDatasource extends Datasource {
       return { releases };
     }
 
-    // iterating through enum to support different url formats
+    // support different url formats
     switch (urlFormatOptions) {
-      case URLFormatOptions.WithShardWithSpec:
+      case 'withShardWithSpec':
         return this.getReleasesFromGithub(
           packageName,
           opts,
           true,
           false,
-          URLFormatOptions.WithShardWithoutSpec
+          'withShardWithoutSpec',
         );
-      case URLFormatOptions.WithShardWithoutSpec:
+      case 'withShardWithoutSpec':
         return this.getReleasesFromGithub(
           packageName,
           opts,
           false,
           true,
-          URLFormatOptions.WithSpecsWithoutShard
+          'withSpecsWithoutShard',
         );
-      case URLFormatOptions.WithSpecsWithoutShard:
+      case 'withSpecsWithoutShard':
         return this.getReleasesFromGithub(
           packageName,
           opts,
           false,
           false,
-          URLFormatOptions.WithoutSpecsWithoutShard
+          'withoutSpecsWithoutShard',
         );
-      case URLFormatOptions.WithoutSpecsWithoutShard:
+      case 'withoutSpecsWithoutShard':
       default:
         return null;
     }
@@ -187,7 +184,7 @@ export class PodDatasource extends Datasource {
 
   private async getReleasesFromCDN(
     packageName: string,
-    registryUrl: string
+    registryUrl: string,
   ): Promise<ReleaseResult | null> {
     const url = releasesCDNUrl(packageName, registryUrl);
     const resp = await this.requestCDN(url, packageName);
@@ -209,8 +206,7 @@ export class PodDatasource extends Datasource {
     ttlMinutes: 30,
     namespace: `datasource-${PodDatasource.id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      // TODO: types (#22198)
       `${registryUrl}:${packageName}`,
   })
   async getReleases({
@@ -231,9 +227,9 @@ export class PodDatasource extends Datasource {
 
     let result: ReleaseResult | null = null;
     const match = githubRegex.exec(baseUrl);
-    if (match) {
+    if (match?.groups) {
       baseUrl = massageGithubUrl(baseUrl);
-      const { hostURL, account, repo } = match?.groups ?? {};
+      const { hostURL, account, repo } = match.groups;
       const opts = { hostURL, account, repo };
       result = await this.getReleasesFromGithub(podName, opts);
     } else {

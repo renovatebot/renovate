@@ -1,9 +1,10 @@
-import { getConfig, mocked } from '../../../../../test/util';
+import { mocked } from '../../../../../test/util';
 import type { Release } from '../../../../modules/datasource';
 import * as allVersioning from '../../../../modules/versioning';
 import { clone } from '../../../../util/clone';
 import * as _dateUtil from '../../../../util/date';
 import * as _mergeConfidence from '../../../../util/merge-confidence';
+import { toMs } from '../../../../util/pretty-time';
 import { filterInternalChecks } from './filter-checks';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 
@@ -40,23 +41,22 @@ describe('workers/repository/process/lookup/filter-checks', () => {
   let sortedReleases: Release[];
 
   beforeEach(() => {
-    config = getConfig();
-    config.currentVersion = '1.0.0';
+    config = { currentVersion: '1.0.0' };
     sortedReleases = clone(releases);
-    jest.resetAllMocks();
-    dateUtil.getElapsedDays.mockReturnValueOnce(3);
-    dateUtil.getElapsedDays.mockReturnValueOnce(5);
-    dateUtil.getElapsedDays.mockReturnValueOnce(7);
-    dateUtil.getElapsedDays.mockReturnValueOnce(9);
+    dateUtil.getElapsedMs.mockReturnValueOnce(toMs('3 days') ?? 0);
+    dateUtil.getElapsedMs.mockReturnValueOnce(toMs('5 days') ?? 0);
+    dateUtil.getElapsedMs.mockReturnValueOnce(toMs('7 days') ?? 0);
+    dateUtil.getElapsedMs.mockReturnValueOnce(toMs('9 days') ?? 0);
   });
 
   describe('.filterInternalChecks()', () => {
     it('returns latest release if internalChecksFilter=none', async () => {
+      config.internalChecksFilter = 'none';
       const res = await filterInternalChecks(
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -66,12 +66,12 @@ describe('workers/repository/process/lookup/filter-checks', () => {
 
     it('returns non-pending latest release if internalChecksFilter=flexible and none pass checks', async () => {
       config.internalChecksFilter = 'flexible';
-      config.stabilityDays = 10;
+      config.minimumReleaseAge = '10 days';
       const res = await filterInternalChecks(
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -81,12 +81,12 @@ describe('workers/repository/process/lookup/filter-checks', () => {
 
     it('returns pending latest release if internalChecksFilter=strict and none pass checks', async () => {
       config.internalChecksFilter = 'strict';
-      config.stabilityDays = 10;
+      config.minimumReleaseAge = '10 days';
       const res = await filterInternalChecks(
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeTrue();
@@ -96,12 +96,12 @@ describe('workers/repository/process/lookup/filter-checks', () => {
 
     it('returns non-latest release if internalChecksFilter=strict and some pass checks', async () => {
       config.internalChecksFilter = 'strict';
-      config.stabilityDays = 6;
+      config.minimumReleaseAge = '6 days';
       const res = await filterInternalChecks(
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -111,12 +111,12 @@ describe('workers/repository/process/lookup/filter-checks', () => {
 
     it('returns non-latest release if internalChecksFilter=flexible and some pass checks', async () => {
       config.internalChecksFilter = 'strict';
-      config.stabilityDays = 6;
+      config.minimumReleaseAge = '6 days';
       const res = await filterInternalChecks(
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -124,15 +124,17 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res.release.version).toBe('1.0.2');
     });
 
-    it('picks up stabilityDays settings from hostRules', async () => {
+    it('picks up minimumReleaseAge settings from hostRules', async () => {
       config.internalChecksFilter = 'strict';
-      config.stabilityDays = 6;
-      config.packageRules = [{ matchUpdateTypes: ['patch'], stabilityDays: 1 }];
+      config.minimumReleaseAge = '6 days';
+      config.packageRules = [
+        { matchUpdateTypes: ['patch'], minimumReleaseAge: '1 day' },
+      ];
       const res = await filterInternalChecks(
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -140,14 +142,14 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res.release.version).toBe('1.0.4');
     });
 
-    it('picks up stabilityDays settings from updateType', async () => {
+    it('picks up minimumReleaseAge settings from updateType', async () => {
       config.internalChecksFilter = 'strict';
-      config.patch = { stabilityDays: 4 };
+      config.patch = { minimumReleaseAge: '4 days' };
       const res = await filterInternalChecks(
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -167,7 +169,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();

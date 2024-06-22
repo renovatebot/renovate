@@ -11,7 +11,7 @@ describe('modules/manager/sbt/update', () => {
       const { bumpedContent } = sbtUpdater.bumpPackageVersion(
         content,
         '0.0.2',
-        'patch'
+        'patch',
       );
 
       expect(bumpedContent).toEqual(content.replace('0.0.2', '0.0.3'));
@@ -22,7 +22,7 @@ describe('modules/manager/sbt/update', () => {
       const { bumpedContent } = sbtUpdater.bumpPackageVersion(
         content,
         '0.0.1',
-        'patch'
+        'patch',
       );
 
       expect(bumpedContent).toEqual(content);
@@ -32,7 +32,7 @@ describe('modules/manager/sbt/update', () => {
       const { bumpedContent } = sbtUpdater.bumpPackageVersion(
         content,
         '0.0.1',
-        'minor'
+        'minor',
       );
       expect(bumpedContent).toEqual(content.replace('0.0.2', '0.1.0'));
       expect(bumpedContent).not.toEqual(content);
@@ -42,7 +42,7 @@ describe('modules/manager/sbt/update', () => {
       const { bumpedContent } = sbtUpdater.bumpPackageVersion(
         content,
         '0.0.2',
-        true as any
+        true as any,
       );
 
       expect(bumpedContent).toEqual(content);

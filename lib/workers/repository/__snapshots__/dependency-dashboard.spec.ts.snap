@@ -6,11 +6,10 @@ exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() che
 
 ---
 
-### ⚠ Dependency Lookup Warnings ⚠
-
--   Renovate failed to look up the following dependencies: \`dependency-2\`.
-
-Files affected: \`package.json\`
+> [!WARNING]
+> Renovate failed to look up the following dependencies: \`dependency-2\`.
+> 
+> Files affected: \`package.json\`
 
 ---
 
@@ -425,7 +424,6 @@ This repository currently has no open or pending branches.
 
 <details><summary>no-ver-no-digest/Dockerfile</summary>
 
- - \`ubuntu no version found\`
 
 </details>
 
@@ -452,13 +450,35 @@ exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() con
 
 ## Repository problems
 
-These problems occurred while renovating this repository.
+Renovate tried to run on this repository, but found these problems.
 
  - ERROR: everything is broken
  - WARN: just a bit
  - ERROR: i am a duplicated problem
  - ERROR: i am a non-duplicated problem
  - WARN: i am a non-duplicated problem
+
+## Pending Status Checks
+
+These updates await pending status checks. To force their creation now, click the checkbox below.
+
+ - [ ] <!-- approvePr-branch=branchName1 -->pr1
+
+## Detected dependencies
+
+None detected
+
+"
+`;
+
+exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() contains logged problems with custom header 1`] = `
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+## Repository problems
+
+platform is github
+
+ - ERROR: i am a non-duplicated problem
 
 ## Pending Status Checks
 
@@ -510,6 +530,7 @@ These branches will be created by Renovate only once you click their checkbox be
 
  - [ ] <!-- approve-branch=branchName1 -->pr1
  - [ ] <!-- approve-branch=branchName2 -->pr2
+ - [ ] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
 
 ## Awaiting Schedule
 

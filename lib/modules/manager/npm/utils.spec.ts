@@ -54,10 +54,10 @@ describe('modules/manager/npm/utils', () => {
       expect(lockFileComposed).toMatchSnapshot();
     });
 
-    it('adds trailing newline to match npms behaviour and avoid diffs', () => {
+    it('adds trailing newline to match npms behavior and avoid diffs', () => {
       const lockFile = Fixtures.get('lockfile-parsing/package-lock.json');
       const { detectedIndent, lockFileParsed } = parseLockFile(lockFile);
-      // TODO #7154
+      // TODO #22198
       const lockFileComposed = composeLockFile(lockFileParsed!, detectedIndent);
       expect(lockFileComposed).toBe(lockFile);
     });
