@@ -38,11 +38,25 @@ export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
   return result;
 }
 
+/**
+ * prefix https:// to hosts with port or path
+ */
+function massageHostUrl(url: string): string {
+  if (!url.includes('://') && url.includes('/')) {
+    return 'https://' + url;
+  } else if (!url.includes('://') && url.includes(':')) {
+    return 'https://' + url;
+  }
+
+  return url;
+}
+
 export function add(params: HostRule): void {
   const rule = migrateRule(params);
 
   const confidentialFields: (keyof HostRule)[] = ['password', 'token'];
   if (rule.matchHost) {
+    rule.matchHost = massageHostUrl(rule.matchHost);
     const parsedUrl = parseUrl(rule.matchHost);
     rule.resolvedHost = parsedUrl?.hostname ?? rule.matchHost;
     confidentialFields.forEach((field) => {
