@@ -187,7 +187,7 @@ export async function lookupUpdates(
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
-        logger.debug(
+        logger.info(
           {
             dependency: config.packageName,
             result: dependency,
@@ -361,7 +361,7 @@ export async function lookupUpdates(
           unconstrainedValue ||
           versioning.isCompatible(v.version, compareValue),
       );
-      if (config.isVulnerabilityAlert && !config.osvVulnerabilityAlerts) {
+      if (config.isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
       }
       const buckets: Record<string, [Release]> = {};

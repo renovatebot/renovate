@@ -1,6 +1,7 @@
 import JSON5 from 'json5';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
+  BITBUCKET_SERVER_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
@@ -56,6 +57,9 @@ export function detectPlatform(
     return null;
   }
 
+  if (BITBUCKET_SERVER_API_USING_HOST_TYPES.includes(hostType)) {
+    return 'bitbucket-server';
+  }
   if (BITBUCKET_API_USING_HOST_TYPES.includes(hostType)) {
     return 'bitbucket';
   }

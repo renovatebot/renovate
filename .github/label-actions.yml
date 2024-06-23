@@ -12,7 +12,13 @@
     Discussions without reproductions are less likely to be converted to Issues.
 
 
-    To get started, please read our guide on creating a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md).
+    Please follow these steps:
+     1. Read our guide on creating a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md).
+     2. Go to our [minimal reproduction template repository](https://github.com/renovatebot/minimal-reproduction-template).
+     3. Select the _Use this template_ button to create a new repository based on the template.
+     4. Work on the minimal reproduction in your own repository.
+     5. Fill out the information in your repository's `README.md`.
+     6. Add the link to your reproduction to the first post of your Discussion. If you are not the original author, you can post a new comment with the link.
 
 
     Good luck,

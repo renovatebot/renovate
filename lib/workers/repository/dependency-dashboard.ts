@@ -224,8 +224,34 @@ export async function ensureDependencyDashboard(
     return;
   }
   logger.debug('Ensuring Dependency Dashboard');
+
+  // Check packageFiles for any deprecations
+  let hasDeprecations = false;
+  const deprecatedPackages: Record<string, Record<string, boolean>> = {};
+  logger.debug(
+    { packageFiles },
+    'Checking packageFiles for deprecated packages',
+  );
+  if (is.nonEmptyObject(packageFiles)) {
+    for (const [manager, fileNames] of Object.entries(packageFiles)) {
+      for (const fileName of fileNames) {
+        for (const dep of fileName.deps) {
+          const name = dep.packageName ?? dep.depName;
+          const hasReplacement = !!dep.updates?.find(
+            (updates) => updates.updateType === 'replacement',
+          );
+          if (name && (dep.deprecationMessage ?? hasReplacement)) {
+            hasDeprecations = true;
+            deprecatedPackages[manager] ??= {};
+            deprecatedPackages[manager][name] ??= hasReplacement;
+          }
+        }
+      }
+    }
+  }
+
   const hasBranches = is.nonEmptyArray(branches);
-  if (config.dependencyDashboardAutoclose && !hasBranches) {
+  if (config.dependencyDashboardAutoclose && !hasBranches && !hasDeprecations) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         { title: config.dependencyDashboardTitle },
@@ -244,6 +270,25 @@ export async function ensureDependencyDashboard(
   }
 
   issueBody = appendRepoProblems(config, issueBody);
+
+  if (hasDeprecations) {
+    issueBody += '> ⚠ **Warning**\n> \n';
+    issueBody += 'These dependencies are deprecated:\n\n';
+    issueBody += '| Datasource | Name | Replacement PR? |\n';
+    issueBody += '|------------|------|--------------|\n';
+    for (const manager of Object.keys(deprecatedPackages).sort()) {
+      const deps = deprecatedPackages[manager];
+      for (const depName of Object.keys(deps).sort()) {
+        const hasReplacement = deps[depName];
+        issueBody += `| ${manager} | \`${depName}\` | ${
+          hasReplacement
+            ? '![Available](https://img.shields.io/badge/available-green?style=flat-square)'
+            : '![Unavailable](https://img.shields.io/badge/unavailable-orange?style=flat-square)'
+        } |\n`;
+      }
+    }
+    issueBody += '\n';
+  }
 
   const pendingApprovals = branches.filter(
     (branch) => branch.result === 'needs-approval',

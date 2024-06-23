@@ -320,7 +320,7 @@ export function matchManager(filename: string): SupportedManagers | 'unknown' {
     return 'pep621';
   }
   // naive, could be improved, maybe use pip_requirements.fileMatch
-  if (filename.endsWith('.in')) {
+  if (filename.endsWith('.in') || filename.endsWith('.txt')) {
     return 'pip_requirements';
   }
   return 'unknown';
