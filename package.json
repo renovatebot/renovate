@@ -252,7 +252,7 @@
   "optionalDependencies": {
     "better-sqlite3": "9.6.0",
     "openpgp": "5.11.1",
-    "re2": "1.20.12"
+    "re2": "1.21.3"
   },
   "devDependencies": {
     "@hyrious/marshal": "0.3.3",
@@ -332,7 +332,7 @@
     "jest-mock-extended": "3.0.7",
     "jest-snapshot": "29.7.0",
     "markdownlint-cli2": "0.13.0",
-    "memfs": "4.9.2",
+    "memfs": "4.9.3",
     "nock": "13.5.4",
     "npm-run-all2": "6.2.0",
     "nyc": "15.1.0",
@@ -341,9 +341,9 @@
     "semantic-release": "22.0.12",
     "tar": "6.2.1",
     "tmp-promise": "3.0.3",
-    "ts-jest": "29.1.4",
+    "ts-jest": "29.1.5",
     "ts-node": "10.9.2",
-    "type-fest": "4.20.0",
+    "type-fest": "4.20.1",
     "typescript": "5.4.5",
     "unified": "9.2.2"
   },
