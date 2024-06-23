@@ -26,6 +26,7 @@ export function extractFromVectors(
   str: string,
   ctx: ExtractContext = {},
   vars: ExtractedVariables = {},
+  dimensions: 1 | 2 = 2,
 ): PackageDependency[] {
   if (!str.startsWith('[')) {
     return [];
@@ -36,7 +37,8 @@ export function extractFromVectors(
   let vecPos = 0;
   let artifactId = '';
   let version = '';
-  let commentLevel = 0;
+  // Are we currently parsing a comment? If so, at what depth?
+  let commentLevel: number | null = null;
 
   const isSpace = (ch: string | null): boolean =>
     !!ch && regEx(/[\s,]/).test(ch);
@@ -82,7 +84,7 @@ export function extractFromVectors(
 
     if (char === '[') {
       balance += 1;
-      if (balance === 2) {
+      if (balance === dimensions) {
         vecPos = 0;
       }
     } else if (char === ']') {
@@ -91,15 +93,17 @@ export function extractFromVectors(
       if (commentLevel === balance) {
         artifactId = '';
         version = '';
-        commentLevel = 0;
+        commentLevel = null;
       }
 
-      if (balance === 1) {
+      if (balance === dimensions - 1) {
         yieldDep();
-      } else if (balance === 0) {
+      }
+
+      if (balance === 0) {
         break;
       }
-    } else if (balance === 2) {
+    } else if (balance === dimensions) {
       if (isSpace(char)) {
         if (!isSpace(prevChar)) {
           vecPos += 1;
@@ -170,20 +174,34 @@ export function extractVariables(content: string): ExtractedVariables {
   return result;
 }
 
+interface CollectDepsOptions {
+  nested: boolean;
+  depType?: string;
+}
+
 function collectDeps(
   content: string,
   key: string,
   registryUrls: string[],
   vars: ExtractedVariables,
+  options: CollectDepsOptions = {
+    nested: true,
+  },
 ): PackageDependency[] {
   const ctx = {
-    depType: key,
+    depType: options.depType ?? key,
     registryUrls,
   };
+  // A vector like [["dep-1" "1.0.0"] ["dep-2" "0.0.0"]] is nested
+  // A vector like ["dep-1" "1.0.0"] is not
+  const dimensions = options.nested ? 2 : 1;
   let result: PackageDependency[] = [];
   let restContent = trimAtKey(content, key);
   while (restContent) {
-    result = [...result, ...extractFromVectors(restContent, ctx, vars)];
+    result = [
+      ...result,
+      ...extractFromVectors(restContent, ctx, vars, dimensions),
+    ];
     restContent = trimAtKey(restContent, key);
   }
   return result;
@@ -198,6 +216,19 @@ export function extractPackageFile(content: string): PackageFileContent {
     ...collectDeps(content, 'managed-dependencies', registryUrls, vars),
     ...collectDeps(content, 'plugins', registryUrls, vars),
     ...collectDeps(content, 'pom-plugins', registryUrls, vars),
+    // 'coords' is used in lein parent, and specifies zero or one
+    // dependencies. These are not wrapped in a vector in the way other
+    // dependencies are. The project.clj fragment looks like
+    //
+    // :parent-project {... :coords ["parent" "version"] ...}
+    //
+    // - https://github.com/achin/lein-parent
+    ...collectDeps(content, 'coords', registryUrls, vars, {
+      nested: false,
+      // The top-level key is 'parent-project', but we skip directly to 'coords'.
+      // So fix the dep type label
+      depType: 'parent-project',
+    }),
   ];
 
   return { deps };
