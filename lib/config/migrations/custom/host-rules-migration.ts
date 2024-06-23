@@ -2,7 +2,8 @@ import is from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
-import { type LegacyHostRule, massageHostUrl } from '../../../util/host-rules';
+import type { LegacyHostRule } from '../../../util/host-rules';
+import { massageHostUrl } from '../../../util/url';
 import { AbstractMigration } from '../base/abstract-migration';
 import { migrateDatasource } from './datasource-migration';
 

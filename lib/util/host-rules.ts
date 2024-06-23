@@ -4,7 +4,7 @@ import type { CombinedHostRule, HostRule } from '../types';
 import { clone } from './clone';
 import * as sanitize from './sanitize';
 import { toBase64 } from './string';
-import { isHttpUrl, parseUrl } from './url';
+import { isHttpUrl, massageHostUrl, parseUrl } from './url';
 
 let hostRules: HostRule[] = [];
 
@@ -36,19 +36,6 @@ export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
   }
 
   return result;
-}
-
-/**
- * prefix https:// to hosts with port or path
- */
-export function massageHostUrl(url: string): string {
-  if (!url.includes('://') && url.includes('/')) {
-    return 'https://' + url;
-  } else if (!url.includes('://') && url.includes(':')) {
-    return 'https://' + url;
-  }
-
-  return url;
 }
 
 export function add(params: HostRule): void {
