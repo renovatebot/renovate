@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
-import type { LegacyHostRule } from '../../../util/host-rules';
+import { type LegacyHostRule, massageHostUrl } from '../../../util/host-rules';
 import { AbstractMigration } from '../base/abstract-migration';
 import { migrateDatasource } from './datasource-migration';
 
@@ -25,7 +25,7 @@ export class HostRulesMigration extends AbstractMigration {
 
         if (key === 'matchHost') {
           if (is.string(value)) {
-            newRule.matchHost ??= massageUrl(value);
+            newRule.matchHost ??= massageHostUrl(value);
           }
           continue;
         }
@@ -45,7 +45,7 @@ export class HostRulesMigration extends AbstractMigration {
           key === 'domainName'
         ) {
           if (is.string(value)) {
-            newRule.matchHost ??= massageUrl(value);
+            newRule.matchHost ??= massageHostUrl(value);
           }
           continue;
         }
@@ -88,16 +88,6 @@ function validateHostRule(rule: LegacyHostRule & HostRule): void {
         'Duplicate host values found, please only use `matchHost` to specify the host',
       );
     }
-  }
-}
-
-function massageUrl(url: string): string {
-  if (!url.includes('://') && url.includes('/')) {
-    return 'https://' + url;
-  } else if (!url.includes('://') && url.includes(':')) {
-    return 'https://' + url;
-  } else {
-    return url;
   }
 }
 

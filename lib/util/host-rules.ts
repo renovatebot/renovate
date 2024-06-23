@@ -41,7 +41,7 @@ export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
 /**
  * prefix https:// to hosts with port or path
  */
-function massageHostUrl(url: string): string {
+export function massageHostUrl(url: string): string {
   if (!url.includes('://') && url.includes('/')) {
     return 'https://' + url;
   } else if (!url.includes('://') && url.includes(':')) {
