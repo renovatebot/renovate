@@ -1,70 +1,53 @@
+// <major>.<minor>.<patch>.<revision>-<prerelease>+<metadata>
 export interface NugetVersion {
-  type: 'version';
+  type: 'nuget-version';
   major: number;
-  minor: number | undefined;
-  patch: number | undefined;
-  revision: number | undefined; // Fourth version component
-  prerelease: string | undefined;
-  metadata: string | undefined;
+  minor?: number;
+  patch?: number;
+  revision?: number;
+  prerelease?: string;
+  metadata?: string;
 }
 
-interface NugetExactVersionRange {
-  type: 'range-exact';
+export type NugetFloatingRange = {
+  type: 'nuget-floating-range';
+  major: number;
+  minor?: number;
+  patch?: number;
+  floatingComponent?: 'major' | 'minor' | 'patch' | 'revision';
+  revision?: number;
+  prerelease?: `${string}*`; // Prerelease of floating versions must end with an asterisk
+};
+
+export interface NugetExactRange {
+  type: 'nuget-exact-range';
   version: NugetVersion;
 }
 
-interface NugetMinVersionRange {
-  type: 'range-min';
-  min: NugetVersion;
-  minInclusive: boolean;
-}
-
-interface NugetMaxVersionRange {
-  type: 'range-max';
-  max: NugetVersion;
-  maxInclusive: boolean;
-}
-
-interface NugetMixedRange {
-  type: 'range-mixed';
-  min: NugetVersion;
-  minInclusive: boolean;
-  max: NugetVersion;
-  maxInclusive: boolean;
-}
-
-interface NugetFloatingMajor {
-  type: 'floating-major';
-  unstable: boolean;
-}
-
-interface NugetFloatingMinor {
-  type: 'floating-minor';
-  major: number;
-  unstable: boolean;
-}
-
-interface NugetFloatingPatch {
-  type: 'floating-patch';
-  major: number;
-  minor: number;
-  unstable: boolean;
-}
-
-interface NugetFloatingRevision {
-  type: 'floating-revision';
-  major: number;
-  minor: number;
-  patch: number;
-  unstable: boolean;
-}
+export type NugetBracketRange =
+  | {
+      type: 'nuget-bracket-range';
+      min: NugetVersion | NugetFloatingRange;
+      max?: undefined;
+      minInclusive: boolean;
+      maxInclusive: boolean;
+    }
+  | {
+      type: 'nuget-bracket-range';
+      min?: undefined;
+      max: NugetVersion;
+      minInclusive: boolean;
+      maxInclusive: boolean;
+    }
+  | {
+      type: 'nuget-bracket-range';
+      min: NugetVersion | NugetFloatingRange;
+      max: NugetVersion;
+      minInclusive: boolean;
+      maxInclusive: boolean;
+    };
 
 export type NugetRange =
-  | NugetExactVersionRange
-  | NugetMinVersionRange
-  | NugetMaxVersionRange
-  | NugetMixedRange
-  | NugetFloatingMajor
-  | NugetFloatingMinor
-  | NugetFloatingPatch
-  | NugetFloatingRevision;
+  | NugetExactRange
+  | NugetFloatingRange
+  | NugetBracketRange;

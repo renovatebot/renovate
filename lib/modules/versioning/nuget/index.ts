@@ -1,8 +1,8 @@
 import type { NewValueConfig, VersioningApi } from '../types';
-import { cmp } from './compare';
-import { parseRange, parseVersion } from './parse';
+import { getFloatingRangeLowerBound, parseRange, parseVersion } from './parser';
 import * as nugetRange from './range';
 import type { NugetVersion } from './types';
+import { compare } from './version';
 
 export const id = 'nuget';
 export const displayName = 'NuGet';
@@ -18,61 +18,80 @@ class NugetVersioningApi implements VersioningApi {
   }
 
   isSingleVersion(version: string): boolean {
-    if (this.isVersion(version)) {
-      return true;
+    const r = parseRange(version);
+    if (!r) {
+      return false;
     }
 
-    const parsed = parseRange(version);
-    return !!parsed && parsed.type === 'range-exact';
+    return r.type === 'nuget-exact-range';
   }
 
   isStable(version: string): boolean {
-    const parsedVersion = parseVersion(version);
-    if (parsedVersion) {
-      return !parsedVersion.prerelease;
+    const v = parseVersion(version);
+    if (v) {
+      return !v.prerelease;
     }
 
-    const parsedRange = parseRange(version);
-    if (parsedRange?.type === 'range-exact') {
-      return !parsedRange.version.prerelease;
+    const r = parseRange(version);
+    if (!r || r.type !== 'nuget-floating-range') {
+      return false;
+    }
+
+    return !r.prerelease;
+  }
+
+  isValid(input: string): boolean {
+    const v = parseVersion(input);
+    if (v) {
+      return true;
+    }
+
+    const r = parseRange(input);
+    if (r) {
+      return true;
     }
 
     return false;
   }
 
-  isValid(input: string): boolean {
-    return !!parseVersion(input) || !!parseRange(input);
-  }
-
   isVersion(input: string | undefined | null): boolean {
-    return input ? !!parseVersion(input) : false;
+    if (!input) {
+      return false;
+    }
+
+    const v = parseVersion(input);
+    if (!v) {
+      return false;
+    }
+
+    return true;
   }
 
   getMajor(version: string): number | null {
-    const parsed = parseVersion(version);
-    if (!parsed) {
+    const v = parseVersion(version);
+    if (!v) {
       return null;
     }
 
-    return parsed.major;
+    return v.major;
   }
 
   getMinor(version: string): number | null {
-    const parsed = parseVersion(version);
-    if (!parsed) {
+    const v = parseVersion(version);
+    if (!v) {
       return null;
     }
 
-    return parsed.minor ?? null;
+    return v.minor ?? null;
   }
 
   getPatch(version: string): number | null {
-    const parsed = parseVersion(version);
-    if (!parsed) {
+    const v = parseVersion(version);
+    if (!v) {
       return null;
     }
 
-    return parsed.patch ?? null;
+    return v.patch ?? null;
   }
 
   equals(version: string, other: string): boolean {
@@ -82,7 +101,7 @@ class NugetVersioningApi implements VersioningApi {
       return false;
     }
 
-    return cmp(x, y) === 0;
+    return compare(x, y) === 0;
   }
 
   isGreaterThan(version: string, other: string): boolean {
@@ -92,71 +111,44 @@ class NugetVersioningApi implements VersioningApi {
       return false;
     }
 
-    return cmp(x, y) > 0;
+    return compare(x, y) > 0;
   }
 
   isLessThanRange(version: string, range: string): boolean {
-    if (this.isVersion(range)) {
-      return this.isGreaterThan(range, version);
-    }
-
     const v = parseVersion(version);
     if (!v) {
       return false;
     }
 
+    const u = parseVersion(range);
+    if (u) {
+      return compare(v, u) < 0;
+    }
+
     const r = parseRange(range);
-    if (!r || r.type === 'range-max' || r.type === 'floating-major') {
+    if (!r) {
       return false;
     }
 
-    if (r.type === 'range-exact') {
-      return cmp(v, r.version) < 0;
+    if (r.type === 'nuget-exact-range') {
+      return compare(v, r.version) < 0;
     }
 
-    if (r.type === 'range-min' || r.type === 'range-mixed') {
-      if (r.minInclusive) {
-        return cmp(v, r.min) < 0;
+    if (r.type === 'nuget-bracket-range') {
+      if (!r.min) {
+        return false;
       }
 
-      return cmp(v, r.min) <= 0;
+      const minBound =
+        r.min.type === 'nuget-version'
+          ? r.min
+          : getFloatingRangeLowerBound(r.min);
+      const cmp = compare(v, minBound);
+      return r.minInclusive ? cmp < 0 : cmp <= 0;
     }
 
-    const u: NugetVersion = {
-      type: 'version',
-      major: 0,
-      minor: 0,
-      patch: 0,
-      revision: 0,
-      prerelease: undefined,
-      metadata: undefined,
-    };
-    if (r.type === 'floating-minor') {
-      u.major = r.major;
-    } else if (r.type === 'floating-patch') {
-      u.major = r.major;
-      u.minor = r.minor;
-    } else {
-      u.major = r.major;
-      u.minor = r.minor;
-      u.patch = r.patch;
-    }
-
-    const res = cmp({ ...v, prerelease: undefined }, u);
-
-    if (res < 0) {
-      return true;
-    }
-
-    if (res > 0) {
-      return false;
-    }
-
-    if (r.unstable) {
-      return false;
-    }
-
-    return !!v.prerelease;
+    const minBound = getFloatingRangeLowerBound(r);
+    return compare(v, minBound) < 0;
   }
 
   getSatisfyingVersion(versions: string[], range: string): string | null {
@@ -170,7 +162,7 @@ class NugetVersioningApi implements VersioningApi {
     for (const version of versions) {
       if (this.matches(version, range)) {
         const parsed = parseVersion(version)!;
-        if (!maxParsed || cmp(parsed, maxParsed) > 0) {
+        if (!maxParsed || compare(parsed, maxParsed) > 0) {
           max = version;
           maxParsed = parsed;
         }
@@ -191,7 +183,7 @@ class NugetVersioningApi implements VersioningApi {
     for (const version of versions) {
       if (this.matches(version, range)) {
         const parsed = parseVersion(version)!;
-        if (!minParsed || cmp(parsed, minParsed) < 0) {
+        if (!minParsed || compare(parsed, minParsed) < 0) {
           min = version;
           minParsed = parsed;
         }
@@ -235,7 +227,7 @@ class NugetVersioningApi implements VersioningApi {
       return 0;
     }
 
-    return cmp(x, y);
+    return compare(x, y);
   }
 
   matches(version: string, range: string): boolean {
@@ -246,7 +238,7 @@ class NugetVersioningApi implements VersioningApi {
 
     const u = parseVersion(range);
     if (u) {
-      return cmp(v, u) === 0;
+      return compare(v, u) === 0;
     }
 
     const r = parseRange(range);

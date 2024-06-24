@@ -1,4 +1,20 @@
+import { regEx } from '../../../util/regex';
 import type { NugetVersion } from './types';
+
+// We can't just use `Number.parseInt()` beacause it parses `123abc` as `123`,
+// which leads to incorrect version comparison.
+function ensureNumber(input: string): number | null {
+  if (!regEx(/^\d+$/).test(input)) {
+    return null;
+  }
+
+  const res = Number.parseInt(input, 10);
+  if (Number.isNaN(res)) {
+    return null;
+  }
+
+  return res;
+}
 
 function comparePrereleases(x: string, y: string): number {
   const xParts = x.split('.');
@@ -8,11 +24,11 @@ function comparePrereleases(x: string, y: string): number {
   for (let i = 0; i < maxLen; i += 1) {
     const xPart = xParts[i] ?? '';
     const yPart = yParts[i] ?? '';
-    const xNum = Number(xPart);
-    const yNum = Number(yPart);
+    const xNum = ensureNumber(xPart);
+    const yNum = ensureNumber(yPart);
 
     const res =
-      !Number.isNaN(xNum) && !Number.isNaN(yNum)
+      xNum !== null && yNum !== null
         ? Math.sign(xNum - yNum)
         : xPart.localeCompare(yPart, undefined, { sensitivity: 'base' });
 
@@ -24,7 +40,7 @@ function comparePrereleases(x: string, y: string): number {
   return 0;
 }
 
-export function cmp(x: NugetVersion, y: NugetVersion): number {
+export function compare(x: NugetVersion, y: NugetVersion): number {
   const xMajor = x.major;
   const yMajor = y.major;
 
