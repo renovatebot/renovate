@@ -30,7 +30,7 @@ export function matchesHelmValuesDockerHeuristic(
     parentKeyRe.test(parentKey) &&
     data &&
     typeof data === 'object' &&
-    hasKey('repository', data) &&
+    (hasKey('repository', data)|| hasKey("image", data)) &&
     (hasKey('tag', data) || hasKey('version', data))
   );
 }
