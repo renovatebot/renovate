@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import { api as semverCoerced } from '../semver-coerced';
 import type { VersioningApi } from '../types';
 
@@ -14,6 +15,10 @@ export const supportsRanges = false;
 function massageVersion(input: string): string {
   // return the input if it is a range
   if (!semverCoerced.isSingleVersion(input)) {
+    logger.warn(
+      { version: input },
+      'Same major versioning expects a single version but got a range. Please switch to a different versioning as this may lead to unexpected behaviour.',
+    );
     return input;
   }
 
