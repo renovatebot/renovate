@@ -33,7 +33,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/maven/org/scalatest/')
         .reply(404);
       httpMock
-        .scope('https://repo1.maven.org')
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/')
         .reply(
           200,
@@ -43,17 +43,17 @@ describe('modules/datasource/sbt-plugin/index', () => {
             "<a href='scalatest_native2.12/'>scalatest_2.12/</a>",
         );
       httpMock
-        .scope('https://repo1.maven.org')
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/scalatest/')
         .reply(200, "<a href='1.2.0/'>1.2.0/</a>");
       httpMock
-        .scope('https://repo1.maven.org')
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/scalatest_2.12/')
         .reply(200, "<a href='1.2.3/'>4.5.6/</a>");
 
       httpMock
-        .scope('https://repo1.maven.org')
-        .get('/maven2/org.foundweekends/sbt-bintray/')
+        .scope('https://repo.maven.apache.org')
+        .get('/maven2/org/foundweekends/sbt-bintray/')
         .reply(
           200,
           '<html>\n' +
@@ -65,8 +65,8 @@ describe('modules/datasource/sbt-plugin/index', () => {
             '</html>',
         );
       httpMock
-        .scope('https://repo1.maven.org')
-        .get('/maven2/org.foundweekends/sbt-bintray/scala_2.12/')
+        .scope('https://repo.maven.apache.org')
+        .get('/maven2/org/foundweekends/sbt-bintray/scala_2.12/')
         .reply(
           200,
           '\n' +
@@ -79,8 +79,8 @@ describe('modules/datasource/sbt-plugin/index', () => {
             '</html>\n',
         );
       httpMock
-        .scope('https://repo1.maven.org')
-        .get('/maven2/org.foundweekends/sbt-bintray/scala_2.12/sbt_1.0/')
+        .scope('https://repo.maven.apache.org')
+        .get('/maven2/org/foundweekends/sbt-bintray/scala_2.12/sbt_1.0/')
         .reply(
           200,
           '\n' +
@@ -161,8 +161,8 @@ describe('modules/datasource/sbt-plugin/index', () => {
         }),
       ).toEqual({
         dependencyUrl:
-          'https://repo1.maven.org/maven2/org.foundweekends/sbt-bintray',
-        registryUrl: 'https://repo1.maven.org/maven2',
+          'https://repo.maven.apache.org/maven2/org/foundweekends/sbt-bintray',
+        registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '0.5.5' }],
       });
     });
@@ -177,8 +177,8 @@ describe('modules/datasource/sbt-plugin/index', () => {
         }),
       ).toEqual({
         dependencyUrl:
-          'https://repo1.maven.org/maven2/org.foundweekends/sbt-bintray',
-        registryUrl: 'https://repo1.maven.org/maven2',
+          'https://repo.maven.apache.org/maven2/org/foundweekends/sbt-bintray',
+        registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '0.5.5' }],
       });
     });
