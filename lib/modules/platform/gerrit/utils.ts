@@ -90,14 +90,23 @@ export function mapGerritChangeStateToPrState(
   return 'all';
 }
 export function extractSourceBranch(change: GerritChange): string | undefined {
-  if (change.current_revision === undefined) {
-    // This should never happen in production, but it does happen in tests
-    return undefined;
+  let sourceBranch: string | undefined = undefined;
+
+  if (change.current_revision !== undefined) {
+    sourceBranch = change.revisions[
+      change.current_revision
+    ]?.commit?.message?.match(/^Renovate-Source-Branch: (.+)$/m)?.[1];
   }
 
-  return change.revisions[change.current_revision]?.commit?.message?.match(
-    /^Renovate-Source-Branch: (.+)$/m,
-  )?.[1];
+  // for backwards compatibility
+  if (sourceBranch === undefined) {
+    sourceBranch =
+      change.hashtags
+        ?.find((tag) => tag.startsWith('sourceBranch-'))
+        ?.replace('sourceBranch-', '') ?? undefined;
+  }
+
+  return sourceBranch;
 }
 
 export function findPullRequestBody(change: GerritChange): string | undefined {

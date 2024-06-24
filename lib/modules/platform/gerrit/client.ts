@@ -233,6 +233,9 @@ class GerritClient {
     const filters = ['owner:self', 'project:' + repository, filterState];
     if (searchConfig.branchName !== '') {
       filters.push(`footer:Renovate-Source-Branch=${searchConfig.branchName}`);
+      // for backwards compatibility
+      filters.push(`OR`);
+      filters.push(`hashtag:sourceBranch-${searchConfig.branchName}`);
     }
     if (searchConfig.targetBranch) {
       filters.push(`branch:${searchConfig.targetBranch}`);
