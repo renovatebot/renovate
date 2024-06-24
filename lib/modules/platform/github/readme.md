@@ -1,5 +1,24 @@
 # GitHub and GitHub Enterprise Server
 
+Most of the information on this page is meant for users who want to self-host Renovate on GitHub or GitHub Enterprise Server.
+
+## Easiest way to run Renovate
+
+For users on GitHub Cloud (`github.com`), the easiest way to get started is to install [the Mend Renovate app](https://github.com/marketplace/renovate) from the GitHub marketplace.
+When you use the app, Mend will:
+
+- authenticate the Renovate app to GitHub
+- keep the tokens safe
+- maintain and update the Renovate version used
+
+If you self-host Renovate you must do the things listed above yourself.
+Self-hosting is meant for users with advanced use cases, or who want to be in full control of the bot and the environment it runs in.
+We recommend most users install the Mend Renovate app.
+
+Read the [Security and Permissions](../../../security-and-permissions.md) page to learn about the Security and Permissions needed for the Mend Renovate app.
+
+After you installed the hosted app, please read the [reading list](../../../reading-list.md) to learn how to use and configure Renovate.
+
 ## Authentication
 
 First, create a [fine-grained](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token) _or_ a [classic](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic) PAT.
