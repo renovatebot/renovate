@@ -51,8 +51,8 @@ function findDependencies(
       let registry = currentItem.registry;
       registry = registry ? `${registry}/` : '';
       if (
-        currentItem.repository == undefined &&
-        currentItem.image == undefined
+        currentItem.repository === undefined &&
+        currentItem.image === undefined
       ) {
         logger.debug('repository and image are both undefined');
       }
