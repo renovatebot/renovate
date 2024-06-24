@@ -48,10 +48,15 @@ function findDependencies(
   Object.entries(parsedContent).forEach(([key, value]) => {
     if (matchesHelmValuesDockerHeuristic(key, value)) {
       const currentItem = value;
-
       let registry = currentItem.registry;
       registry = registry ? `${registry}/` : '';
-      const repository = String(currentItem.repository);
+      if (
+        currentItem.repository == undefined &&
+        currentItem.image == undefined
+      ) {
+        logger.debug('repository and image are both undefined');
+      }
+      const repository = `${currentItem.repository ?? currentItem.image}`;
       const tag = `${currentItem.tag ?? currentItem.version}`;
       packageDependencies.push(getHelmDep(registry, repository, tag, config));
     } else if (matchesHelmValuesInlineImage(key, value)) {
