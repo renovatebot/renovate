@@ -231,7 +231,7 @@ class GerritClient {
   ): string[] {
     const filterState = mapPrStateToGerritFilter(searchConfig.state);
     const filters = ['owner:self', 'project:' + repository, filterState];
-    if (searchConfig.branchName !== '') {
+    if (searchConfig.branchName) {
       filters.push(`footer:Renovate-Branch=${searchConfig.branchName}`);
       // for backwards compatibility
       filters.push(`OR`);

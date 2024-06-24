@@ -102,8 +102,7 @@ describe('modules/platform/gerrit/client', () => {
         'footer:Renovate-Branch=dependency-xyz',
         { branchName: 'dependency-xyz' },
       ],
-      // for backwards compatibility
-      ['hashtag:sourceBranch-dependency-xyz', { branchName: 'dependency-xyz' }],
+      ['hashtag:sourceBranch-dependency-xyz', { branchName: 'dependency-xyz' }], // for backwards compatibility
       ['label:Code-Review=-2', { branchName: 'dependency-xyz', label: '-2' }],
       [
         'branch:otherTarget',

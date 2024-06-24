@@ -34,7 +34,7 @@ export type GerritReviewersType = 'REVIEWER' | 'CC' | 'REMOVED';
 
 export interface GerritChange {
   branch: string;
-  hashtags?: string[];
+  hashtags?: string[]; // for backwards compatibility
   change_id: string;
   subject: string;
   status: GerritChangeStatus;
