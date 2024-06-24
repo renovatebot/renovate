@@ -292,7 +292,6 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`
   "separateMinorPatch": true,
   "suppressNotifications": [
     "lockFileErrors",
-    "deprecationWarningIssues",
   ],
   "travis": {
     "enabled": true,
