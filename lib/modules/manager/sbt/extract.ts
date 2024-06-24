@@ -5,9 +5,9 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { MavenDatasource } from '../../datasource/maven';
+import { MAVEN_REPO } from '../../datasource/maven/common';
 import { SbtPackageDatasource } from '../../datasource/sbt-package';
 import {
-  SBT_MVN_REPO,
   SBT_PLUGINS_REPO,
   SbtPluginDatasource,
 } from '../../datasource/sbt-plugin';
@@ -307,7 +307,7 @@ export function extractProxyUrls(
     if (extraction?.groups?.proxy) {
       extractedProxyUrls.push(extraction.groups.proxy);
     } else if (line.trim() === 'maven-central') {
-      extractedProxyUrls.push(SBT_MVN_REPO);
+      extractedProxyUrls.push(MAVEN_REPO);
     }
   }
   return extractedProxyUrls;
@@ -417,9 +417,9 @@ export async function extractAllPackageFiles(
         if (proxyUrls.length > 0) {
           dep.registryUrls!.unshift(...proxyUrls);
         } else if (dep.depType === 'plugin') {
-          dep.registryUrls!.unshift(SBT_MVN_REPO, SBT_PLUGINS_REPO);
+          dep.registryUrls!.unshift(SBT_PLUGINS_REPO, MAVEN_REPO);
         } else {
-          dep.registryUrls!.unshift(SBT_MVN_REPO);
+          dep.registryUrls!.unshift(MAVEN_REPO);
         }
       }
     }
