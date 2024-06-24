@@ -109,7 +109,7 @@ export class GerritScm extends DefaultGitScm {
       typeof commit.message === 'string' ? [commit.message] : commit.message;
     commit.message = [
       ...origMsg,
-      `Renovate-Source-Branch: ${commit.branchName}\nChange-Id: ${existingChange?.change_id ?? generateChangeId()}`,
+      `Renovate-Branch: ${commit.branchName}\nChange-Id: ${existingChange?.change_id ?? generateChangeId()}`,
     ];
     const commitResult = await git.prepareCommit({ ...commit, force: true });
     if (commitResult) {

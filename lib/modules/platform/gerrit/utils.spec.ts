@@ -96,7 +96,7 @@ describe('modules/platform/gerrit/utils', () => {
           abc: partial<GerritRevisionInfo>({
             commit: {
               message:
-                'Some change\n\nRenovate-Source-Branch: renovate/dependency-1.x\nChange-Id: ...',
+                'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
             },
           }),
         },
@@ -179,7 +179,7 @@ describe('modules/platform/gerrit/utils', () => {
           abc: partial<GerritRevisionInfo>({
             commit: {
               message:
-                'Some change\n\nRenovate-Source-Branch: renovate/dependency-1.x\nChange-Id: ...',
+                'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
             },
           }),
         },
@@ -220,7 +220,7 @@ describe('modules/platform/gerrit/utils', () => {
           abc: partial<GerritRevisionInfo>({
             commit: {
               message:
-                'Some change\n\nRenovate-Source-Branch: renovate/dependency-2.x\nChange-Id: ...',
+                'Some change\n\nRenovate-Branch: renovate/dependency-2.x\nChange-Id: ...',
             },
           }),
         },

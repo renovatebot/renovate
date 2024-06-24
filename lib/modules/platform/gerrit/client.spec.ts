@@ -99,7 +99,7 @@ describe('modules/platform/gerrit/client', () => {
       ['project:repo', { branchName: 'dependency-xyz' }],
       ['-is:wip', { branchName: 'dependency-xyz' }],
       [
-        'footer:Renovate-Source-Branch=dependency-xyz',
+        'footer:Renovate-Branch=dependency-xyz',
         { branchName: 'dependency-xyz' },
       ],
       // for backwards compatibility
