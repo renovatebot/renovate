@@ -1,5 +1,4 @@
-The 'Same Major' versioning is a `unique` type of versioning that Renovate provides, which is not implemented t handle a manager or datasource.
-But instead to provide a way for users to handle the case where a version needs to treated as a constraint.
+The 'Same Major' versioning is designed to handle the case where a version needs to treated as a "greate than or equal to" constraint.
 Specifically, the case where the version say, `X.Y.Z` signifies a range of compatibility from greater than or equal to `X.Y.Z` to less than `X+1`.
 
 This process uses Semver-Coerced versioning beneath the surface, single versions (e.g., `X.Y.Z`) are converted to a range like `X+1` and then passed to the corresponding semver-coerced method.
