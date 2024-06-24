@@ -4,7 +4,7 @@ By default, Renovate checks <https://repo1.maven.org/maven2/> for SBT plugins, a
 
 ```json
 {
-  "matchDatasources": ["sbt-package"],
+  "matchDatasources": ["sbt-plugin"],
   "registryUrls": [
     "https://repo1.maven.org/maven2/",
     "https://oss.sonatype.org/content/repositories/snapshots",
