@@ -21,7 +21,6 @@ const moveFiles = async (sourceDir: string, destDir: string): Promise<void> => {
       const destPath: string = `${destDir}/${file}`;
 
       await fs.promises.rename(sourcePath, destPath);
-      console.log(`Moved: ${file}`);
     }
 
     console.log('All files have been moved successfully.');
@@ -45,9 +44,15 @@ void (async () => {
   }
 })();
 
-function generateProto(path: string): Promise<string> {
+function generateProto(protos_path: string, file: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const res = exec('pnpm', ['protoc', `--ts_proto_out=.`, path]);
+    const file_path = `${protos_path}/${file}`;
+    const res = exec('pnpm', [
+      'protoc',
+      `--ts_proto_out=${protos_path}`,
+      file_path,
+      `--proto_path=${protos_path}`,
+    ]);
 
     if (res.signal) {
       logger.error(`Signal received: ${res.signal}`);
@@ -69,8 +74,9 @@ function generateProto(path: string): Promise<string> {
 async function generateHexProtos(): Promise<string> {
   logger.info('Generating Hex protos ...');
 
-  await generateProto('./lib/modules/datasource/hex/protos/package.proto');
-  await generateProto('./lib/modules/datasource/hex/protos/signed.proto');
+  const protos_path = './lib/modules/datasource/hex/protos';
+  await generateProto(protos_path, 'package.proto');
+  await generateProto(protos_path, 'signed.proto');
   await moveFiles(
     `${process.cwd()}/lib/modules/datasource/hex/protos`,
     `${process.cwd()}/lib/modules/datasource/hex`,
