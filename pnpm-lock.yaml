@@ -362,8 +362,8 @@ importers:
         specifier: 2.2.3
         version: 2.2.3
       '@openpgp/web-stream-tools':
-        specifier: 0.0.14
-        version: 0.0.14(typescript@5.4.5)
+        specifier: 0.1.2
+        version: 0.1.2(typescript@5.4.5)
       '@renovate/eslint-plugin':
         specifier: file:tools/eslint
         version: '@renovatebot/eslint-plugin@file:tools/eslint'
@@ -1296,8 +1296,9 @@ packages:
   '@one-ini/wasm@0.1.1':
     resolution: {integrity: sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==}
 
-  '@openpgp/web-stream-tools@0.0.14':
-    resolution: {integrity: sha512-6btCNVf6YSsmlyIS7yw+IbzXeXCEcJxeSpxvSxkDuZj9B/ekt4fXkZj4oOaIxG4SKTftIK1svnlVroJ1cCMT4g==}
+  '@openpgp/web-stream-tools@0.1.2':
+    resolution: {integrity: sha512-uyTIFj6kjYMmeTv1bTIUcaTjC34ewpHny3XE+CvRCWGom642YCtIfd+6JFdemPgp18ZZc/u11D1SU16lpH3l0w==}
+    engines: {node: '>= 16.5.0'}
     peerDependencies:
       typescript: '>=4.2'
     peerDependenciesMeta:
@@ -7465,7 +7466,7 @@ snapshots:
 
   '@one-ini/wasm@0.1.1': {}
 
-  '@openpgp/web-stream-tools@0.0.14(typescript@5.4.5)':
+  '@openpgp/web-stream-tools@0.1.2(typescript@5.4.5)':
     optionalDependencies:
       typescript: 5.4.5
 
