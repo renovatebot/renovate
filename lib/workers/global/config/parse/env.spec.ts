@@ -275,8 +275,6 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_DOCKER_MAX_PAGES: '10',
         RENOVATE_AUTODISCOVER_REPO_ORDER: 'desc',
         RENOVATE_X_DELETE_CONFIG_FILE: 'true',
-        RENOVATE_X_EAGER_GLOBAL_EXTENDS: 'true',
-        RENOVATE_X_IGNORE_NODE_WARN: 'true',
         RENOVATE_X_S3_ENDPOINT: 'endpoint',
         RENOVATE_X_S3_PATH_STYLE: 'true',
       };
@@ -288,7 +286,6 @@ describe('workers/global/config/parse/env', () => {
         autodiscoverRepoSort: 'alpha',
         autodiscoverRepoOrder: 'desc',
         deleteConfigFile: true,
-        ignoreNodeWarn: true,
         s3Endpoint: 'endpoint',
         s3PathStyle: true,
       });

@@ -69,11 +69,11 @@ function haveReachedLimits(): boolean {
 }
 
 /* istanbul ignore next */
-function checkEnv(ignoreNodeWarn: boolean): void {
+function checkEnv(): void {
   const range = pkg.engines!.node!;
   const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
-    logger[ignoreNodeWarn ? 'info' : 'warn'](
+    logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
       { release: process.release, versions: process.versions },
       'Unknown node environment detected.',
     );
@@ -86,7 +86,7 @@ function checkEnv(ignoreNodeWarn: boolean): void {
     rangeNext &&
     !semver.satisfies(process.versions?.node, rangeNext)
   ) {
-    logger[ignoreNodeWarn ? 'info' : 'warn'](
+    logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
       { versions: process.versions },
       `Please upgrade the version of Node.js used to run Renovate to satisfy "${rangeNext}". Support for your current version will be removed in Renovate's next major release.`,
     );
@@ -173,7 +173,7 @@ export async function start(): Promise<number> {
 
       await validatePresets(config);
 
-      checkEnv(!!config.ignoreNodeWarn);
+      checkEnv();
 
       // validate secrets. Will throw and abort if invalid
       validateConfigSecrets(config);

@@ -704,12 +704,6 @@ Value of `0` means no caching.
 !!! warning
     When you set `httpCacheTtlDays` to `0`, Renovate will remove the cached HTTP data.
 
-## ignoreNodeWarn
-
-Using this option, you can suppress the default warning when a deprecated version of Node.js is used to run Renovate.
-
-By default, Renovate logs a `WARN` debug message if this option is set to true, Renovate will log an `INFO` debug message instead.
-
 ## includeMirrors
 
 By default, Renovate does not autodiscover repositories that are mirrors.

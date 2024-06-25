@@ -3106,14 +3106,6 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'ignoreNodeWarn',
-    description:
-      'When set to `true`, suppresses the default warning when a deprecated version of Node.js is used to run Renovate.',
-    type: 'boolean',
-    default: false,
-    globalOnly: true,
-  },
-  {
     name: 's3Endpoint',
     description:
       'If set, Renovate will use this string as the `endpoint` when creating the AWS S3 client instance.',
