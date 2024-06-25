@@ -8,11 +8,11 @@ import type {
 } from './types';
 
 const versionRegex = regEx(
-  /^(?<major>\d+)(?:\.(?<minor>\d+)(?:\.(?<patch>\d+)(?:\.(?<revision>\d+))?)?)?\s*(?:-(?<prerelease>[-a-zA-Z0-9]+(?:\.[-a-zA-Z0-9]+)*))?(?:\+(?<metadata>[-a-zA-Z0-9]+(?:\.[-a-zA-Z0-9]+)*))?$/,
+  /^(?<major>\d+)(?:\s*\.\s*(?<minor>\d+)(?:\s*\.\s*(?<patch>\d+)(?:\s*\.\s*(?<revision>\d+))?)?)?\s*(?:-(?<prerelease>[-a-zA-Z0-9]+(?:\.[-a-zA-Z0-9]+)*))?(?:\+(?<metadata>[-a-zA-Z0-9]+(?:\.[-a-zA-Z0-9]+)*))?$/,
 );
 
 export function parseVersion(input: string): NugetVersion | null {
-  const groups = versionRegex.exec(input)?.groups;
+  const groups = versionRegex.exec(input?.trim())?.groups;
   if (!groups) {
     return null;
   }
@@ -61,6 +61,11 @@ function parseFloatingComponent(input: string): number {
   return int ? 10 * Number.parseInt(int, 10) : 0;
 }
 
+function floatingComponentToString(component: number): string {
+  const int = component / 10;
+  return int === 0 ? '*' : `${int}*`;
+}
+
 export function parseFloatingRange(input: string): NugetFloatingRange | null {
   const groups = floatingRangeRegex.exec(input)?.groups;
   if (!groups) {
@@ -89,7 +94,11 @@ export function parseFloatingRange(input: string): NugetFloatingRange | null {
   }
 
   if (floating_major) {
-    return { ...res, major: parseFloatingComponent(floating_major) };
+    return {
+      ...res,
+      major: parseFloatingComponent(floating_major),
+      floating: 'major',
+    };
   }
 
   const majorNum = Number.parseInt(major, 10);
@@ -98,7 +107,11 @@ export function parseFloatingRange(input: string): NugetFloatingRange | null {
   }
 
   if (floating_minor) {
-    return { ...res, minor: parseFloatingComponent(floating_minor) };
+    return {
+      ...res,
+      minor: parseFloatingComponent(floating_minor),
+      floating: 'minor',
+    };
   }
 
   const minorNum = Number.parseInt(minor, 10);
@@ -107,7 +120,11 @@ export function parseFloatingRange(input: string): NugetFloatingRange | null {
   }
 
   if (floating_patch) {
-    return { ...res, patch: parseFloatingComponent(floating_patch) };
+    return {
+      ...res,
+      patch: parseFloatingComponent(floating_patch),
+      floating: 'patch',
+    };
   }
 
   const patchNum = Number.parseInt(patch, 10);
@@ -116,7 +133,11 @@ export function parseFloatingRange(input: string): NugetFloatingRange | null {
   }
 
   if (floating_revision) {
-    return { ...res, revision: parseFloatingComponent(floating_revision) };
+    return {
+      ...res,
+      revision: parseFloatingComponent(floating_revision),
+      floating: 'revision',
+    };
   }
 
   const revisionNum = Number.parseInt(revision, 10);
@@ -286,15 +307,58 @@ export function rangeToString(range: NugetRange): string {
   }
 
   if (range.type === 'nuget-floating-range') {
-    const { major, minor, patch, revision, prerelease } = range;
+    const { major, minor, patch, revision, floating, prerelease } = range;
     let res = '';
 
     if (prerelease) {
       res = `-${prerelease}`;
     }
 
-    let;
+    if (revision !== undefined) {
+      const revisionPart =
+        floating === 'revision'
+          ? floatingComponentToString(revision)
+          : `${revision}`;
+      res = `.${revisionPart}${res}`;
+    }
+
+    if (patch !== undefined) {
+      const patchPart =
+        floating === 'patch' ? floatingComponentToString(patch) : `${patch}`;
+      res = `.${patchPart}${res}`;
+    }
+
+    if (minor !== undefined) {
+      const minorPart =
+        floating === 'minor' ? floatingComponentToString(minor) : `${minor}`;
+      res = `.${minorPart}${res}`;
+    }
+
+    if (major !== undefined) {
+      const majorPart =
+        floating === 'major' ? floatingComponentToString(major) : `${major}`;
+      res = `${majorPart}${res}`;
+    }
 
     return res;
   }
+
+  const { min, max, minInclusive, maxInclusive } = range;
+  const leftBracket = minInclusive ? '[' : '(';
+  const rightBracket = maxInclusive ? ']' : ')';
+  if (min && max) {
+    const minStr =
+      min.type === 'nuget-version' ? versionToString(min) : rangeToString(min);
+    const maxStr = versionToString(max);
+    return `${leftBracket}${minStr},${maxStr}${rightBracket}`;
+  }
+
+  if (min) {
+    const minStr =
+      min.type === 'nuget-version' ? versionToString(min) : rangeToString(min);
+    return `${leftBracket}${minStr},${rightBracket}`;
+  }
+
+  const maxStr = versionToString(max);
+  return `${leftBracket},${maxStr}${rightBracket}`;
 }

@@ -33,11 +33,11 @@ class NugetVersioningApi implements VersioningApi {
     }
 
     const r = parseRange(version);
-    if (!r || r.type !== 'nuget-floating-range') {
+    if (!r || r.type !== 'nuget-exact-range') {
       return false;
     }
 
-    return !r.prerelease;
+    return !r.version.prerelease;
   }
 
   isValid(input: string): boolean {

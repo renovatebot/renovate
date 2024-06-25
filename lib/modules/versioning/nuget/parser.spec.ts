@@ -3,7 +3,9 @@ import {
   parseBracketRange,
   parseExactRange,
   parseFloatingRange,
+  parseRange,
   parseVersion,
+  rangeToString,
   versionToString,
 } from './parser';
 
@@ -35,37 +37,41 @@ describe('modules/versioning/nuget/parser', () => {
     });
 
     test.each`
-      input             | major   | minor        | patch        | revision     | prerelease
-      ${'*-*'}          | ${0}    | ${undefined} | ${undefined} | ${undefined} | ${'*'}
-      ${'*-foo*'}       | ${0}    | ${undefined} | ${undefined} | ${undefined} | ${'foo*'}
-      ${'*-foo.bar*'}   | ${0}    | ${undefined} | ${undefined} | ${undefined} | ${'foo.bar*'}
-      ${'*'}            | ${0}    | ${undefined} | ${undefined} | ${undefined} | ${undefined}
-      ${'1.*'}          | ${1}    | ${0}         | ${undefined} | ${undefined} | ${undefined}
-      ${'1.*-*'}        | ${1}    | ${0}         | ${undefined} | ${undefined} | ${'*'}
-      ${'1.*-foo*'}     | ${1}    | ${0}         | ${undefined} | ${undefined} | ${'foo*'}
-      ${'1.2.*'}        | ${1}    | ${2}         | ${0}         | ${undefined} | ${undefined}
-      ${'1.2.*-*'}      | ${1}    | ${2}         | ${0}         | ${undefined} | ${'*'}
-      ${'1.2.*-foo*'}   | ${1}    | ${2}         | ${0}         | ${undefined} | ${'foo*'}
-      ${'1.2.3.*'}      | ${1}    | ${2}         | ${3}         | ${0}         | ${undefined}
-      ${'1.2.3.*-*'}    | ${1}    | ${2}         | ${3}         | ${0}         | ${'*'}
-      ${'1.2.3.*-foo*'} | ${1}    | ${2}         | ${3}         | ${0}         | ${'foo*'}
-      ${'1.2.3.4-*'}    | ${1}    | ${2}         | ${3}         | ${4}         | ${'*'}
-      ${'1.2.3.4-foo*'} | ${1}    | ${2}         | ${3}         | ${4}         | ${'foo*'}
-      ${'123*'}         | ${1230} | ${undefined} | ${undefined} | ${undefined} | ${undefined}
-      ${'1-*'}          | ${1}    | ${undefined} | ${undefined} | ${undefined} | ${'*'}
-      ${'1.2-*'}        | ${1}    | ${2}         | ${undefined} | ${undefined} | ${'*'}
-      ${'1.2.3-*'}      | ${1}    | ${2}         | ${3}         | ${undefined} | ${'*'}
-      ${'1.2.3.4-*'}    | ${1}    | ${2}         | ${3}         | ${4}         | ${'*'}
-    `('$input', ({ input, major, minor, patch, revision, prerelease }) => {
-      expect(parseFloatingRange(input)).toEqual({
-        type: 'nuget-floating-range',
-        major,
-        minor,
-        patch,
-        revision,
-        prerelease,
-      });
-    });
+      input             | major   | minor        | patch        | revision     | floating      | prerelease
+      ${'*-*'}          | ${0}    | ${undefined} | ${undefined} | ${undefined} | ${'major'}    | ${'*'}
+      ${'*-foo*'}       | ${0}    | ${undefined} | ${undefined} | ${undefined} | ${'major'}    | ${'foo*'}
+      ${'*-foo.bar*'}   | ${0}    | ${undefined} | ${undefined} | ${undefined} | ${'major'}    | ${'foo.bar*'}
+      ${'*'}            | ${0}    | ${undefined} | ${undefined} | ${undefined} | ${'major'}    | ${undefined}
+      ${'1.*'}          | ${1}    | ${0}         | ${undefined} | ${undefined} | ${'minor'}    | ${undefined}
+      ${'1.*-*'}        | ${1}    | ${0}         | ${undefined} | ${undefined} | ${'minor'}    | ${'*'}
+      ${'1.*-foo*'}     | ${1}    | ${0}         | ${undefined} | ${undefined} | ${'minor'}    | ${'foo*'}
+      ${'1.2.*'}        | ${1}    | ${2}         | ${0}         | ${undefined} | ${'patch'}    | ${undefined}
+      ${'1.2.*-*'}      | ${1}    | ${2}         | ${0}         | ${undefined} | ${'patch'}    | ${'*'}
+      ${'1.2.*-foo*'}   | ${1}    | ${2}         | ${0}         | ${undefined} | ${'patch'}    | ${'foo*'}
+      ${'1.2.3.*'}      | ${1}    | ${2}         | ${3}         | ${0}         | ${'revision'} | ${undefined}
+      ${'1.2.3.*-*'}    | ${1}    | ${2}         | ${3}         | ${0}         | ${'revision'} | ${'*'}
+      ${'1.2.3.*-foo*'} | ${1}    | ${2}         | ${3}         | ${0}         | ${'revision'} | ${'foo*'}
+      ${'1.2.3.4-*'}    | ${1}    | ${2}         | ${3}         | ${4}         | ${undefined}  | ${'*'}
+      ${'1.2.3.4-foo*'} | ${1}    | ${2}         | ${3}         | ${4}         | ${undefined}  | ${'foo*'}
+      ${'123*'}         | ${1230} | ${undefined} | ${undefined} | ${undefined} | ${'major'}    | ${undefined}
+      ${'1-*'}          | ${1}    | ${undefined} | ${undefined} | ${undefined} | ${undefined}  | ${'*'}
+      ${'1.2-*'}        | ${1}    | ${2}         | ${undefined} | ${undefined} | ${undefined}  | ${'*'}
+      ${'1.2.3-*'}      | ${1}    | ${2}         | ${3}         | ${undefined} | ${undefined}  | ${'*'}
+      ${'1.2.3.4-*'}    | ${1}    | ${2}         | ${3}         | ${4}         | ${undefined}  | ${'*'}
+    `(
+      '$input',
+      ({ input, major, minor, patch, revision, floating, prerelease }) => {
+        expect(parseFloatingRange(input)).toEqual({
+          type: 'nuget-floating-range',
+          major,
+          minor,
+          patch,
+          revision,
+          floating,
+          prerelease,
+        });
+      },
+    );
   });
 
   describe('getFloatingRangeLowerBound', () => {
@@ -189,7 +195,12 @@ describe('modules/versioning/nuget/parser', () => {
     it('handles floating ranges as lower bounds', () => {
       expect(parseBracketRange('[1.*,2]')).toEqual({
         type: 'nuget-bracket-range',
-        min: { type: 'nuget-floating-range', major: 1, minor: 0 },
+        min: {
+          type: 'nuget-floating-range',
+          major: 1,
+          minor: 0,
+          floating: 'minor',
+        },
         max: { type: 'nuget-version', major: 2 },
         minInclusive: true,
         maxInclusive: true,
@@ -197,7 +208,12 @@ describe('modules/versioning/nuget/parser', () => {
 
       expect(parseBracketRange('[1.*,)')).toEqual({
         type: 'nuget-bracket-range',
-        min: { type: 'nuget-floating-range', major: 1, minor: 0 },
+        min: {
+          type: 'nuget-floating-range',
+          major: 1,
+          minor: 0,
+          floating: 'minor',
+        },
         minInclusive: true,
         maxInclusive: false,
       });
@@ -215,8 +231,60 @@ describe('modules/versioning/nuget/parser', () => {
       ${'1.2-beta'}
       ${'1.2.3-beta'}
       ${'1.2.3.4-beta'}
+      ${'1.2.3.4-beta+ABC'}
     `('$version', ({ version }) => {
-      expect(versionToString(parseVersion(version)!)).toEqual(version);
+      const v = versionToString(parseVersion(version)!);
+      expect(v).toEqual(version);
+    });
+  });
+
+  describe('rangeToString', () => {
+    test.each`
+      version
+      ${'[1]'}
+      ${'[1.2]'}
+      ${'[1.2.3]'}
+      ${'[1.2.3.4]'}
+      ${'[1-foo]'}
+      ${'[1.2-bar]'}
+      ${'[1.2.3-baz]'}
+      ${'[1.2.3.4-qux]'}
+      ${'*'}
+      ${'1.*'}
+      ${'1.2.*'}
+      ${'1.2.3.*'}
+      ${'1.2.3.4-*'}
+      ${'1.2.3.*-*'}
+      ${'1.2.*-*'}
+      ${'1.*-*'}
+      ${'*-*'}
+      ${'1234*'}
+      ${'1.234*'}
+      ${'1.2.34*'}
+      ${'1.2.3.4*'}
+      ${'(1,2)'}
+      ${'[1,2)'}
+      ${'(1,2]'}
+      ${'[1,2]'}
+      ${'(*,2)'}
+      ${'[*,2)'}
+      ${'(*,2]'}
+      ${'[*,2]'}
+      ${'(1,)'}
+      ${'(1,]'}
+      ${'[1,]'}
+      ${'[1,)'}
+      ${'(*,)'}
+      ${'(*,]'}
+      ${'[*,]'}
+      ${'[*,)'}
+      ${'(,1)'}
+      ${'(,1]'}
+      ${'[,1]'}
+      ${'[,1)'}
+    `('$version', ({ version }) => {
+      const r = parseRange(version)!;
+      expect(rangeToString(r)).toEqual(version);
     });
   });
 });

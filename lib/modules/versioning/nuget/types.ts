@@ -9,13 +9,23 @@ export interface NugetVersion {
   metadata?: string;
 }
 
+/**
+ * Floatings ranges could look like:
+ * - `1.*`
+ * - `1.2*`
+ * - `1.*-*`
+ * - `1-*`
+ * - `1-alpha*`
+ *
+ * Invalid range: `1.2.*-foo`
+ */
 export type NugetFloatingRange = {
   type: 'nuget-floating-range';
   major: number;
   minor?: number;
   patch?: number;
-  floatingComponent?: 'major' | 'minor' | 'patch' | 'revision';
   revision?: number;
+  floating?: 'major' | 'minor' | 'patch' | 'revision';
   prerelease?: `${string}*`; // Prerelease of floating versions must end with an asterisk
 };
 
