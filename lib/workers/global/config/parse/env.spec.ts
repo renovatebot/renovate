@@ -288,7 +288,6 @@ describe('workers/global/config/parse/env', () => {
         autodiscoverRepoSort: 'alpha',
         autodiscoverRepoOrder: 'desc',
         deleteConfigFile: true,
-        globalExtendsEager: true,
         ignoreNodeWarn: true,
         s3Endpoint: 'endpoint',
         s3PathStyle: true,

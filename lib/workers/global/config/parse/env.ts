@@ -41,7 +41,6 @@ const renameKeys = {
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
   mergeConfidenceApiBaseUrl: 'mergeConfidenceEndpoint',
   mergeConfidenceSupportedDatasources: 'mergeConfidenceDatasources',
-  eagerGlobalExtends: 'globalExtendsEager',
 };
 
 function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
@@ -90,7 +89,6 @@ const convertedExperimentalEnvVars = [
   'RENOVATE_X_AUTODISCOVER_REPO_SORT',
   'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
   'RENOVATE_X_DELETE_CONFIG_FILE',
-  'RENOVATE_X_EAGER_GLOBAL_EXTENDS',
   'RENOVATE_X_IGNORE_NODE_WARN',
   'RENOVATE_X_S3_ENDPOINT',
   'RENOVATE_X_S3_PATH_STYLE',

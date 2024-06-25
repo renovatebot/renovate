@@ -3106,14 +3106,6 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'globalExtendsEager',
-    description:
-      'If set to `true`, Renovate resolves and merges `globalExtends` presets _before_ other global config, instead of _after_.',
-    type: 'boolean',
-    default: false,
-    globalOnly: true,
-  },
-  {
     name: 'ignoreNodeWarn',
     description:
       'When set to `true`, suppresses the default warning when a deprecated version of Node.js is used to run Renovate.',

@@ -694,12 +694,6 @@ Use the `extends` field instead of this if, for example, you need the ability fo
     When Renovate resolves `globalExtends` it does not fully process the configuration.
     This means that Renovate does not have the authentication it needs to fetch private things.
 
-## globalExtendsEager
-
-By default, Renovate resolves and merges `globalExtends` presets _after_ other global config.
-
-But if you set `globalExtendsEager` to `true`, then Renovate will resolve and merge `globalExtends` presets _before_ the global config.
-
 ## httpCacheTtlDays
 
 This option sets the number of days that Renovate will cache HTTP responses.

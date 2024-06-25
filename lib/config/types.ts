@@ -167,7 +167,6 @@ export interface RepoGlobalConfig {
   autodiscoverRepoOrder?: SortMethod;
   userAgent?: string;
   deleteConfigFile?: boolean;
-  globalExtendsEager?: boolean;
   ignoreNodeWarn?: boolean;
   s3Endpoint?: string;
   s3PathStyle?: boolean;
