@@ -81,6 +81,7 @@ const repoGroups = {
   ],
   commitlint: 'https://github.com/conventional-changelog/commitlint',
   'contentful-rich-text': 'https://github.com/contentful/rich-text',
+  cspell: 'https://github.com/streetsidesoftware/cspell',
   'datadog-browser-sdk': 'https://github.com/DataDog/browser-sdk',
   'datatables-net': [
     'https://github.com/DataTables/Dist-DataTables',
@@ -437,6 +438,7 @@ const repoGroups = {
   'prometheus-net': 'https://github.com/prometheus-net/prometheus-net',
   promster: 'https://github.com/tdeekens/promster',
   quartznet: 'https://github.com/quartznet/quartznet',
+  'radix-ui-primitives': 'https://github.com/radix-ui/primitives',
   'reach-ui': 'https://github.com/reach/reach-ui',
   react: 'https://github.com/facebook/react',
   'react-admin': 'https://github.com/marmelab/react-admin',
