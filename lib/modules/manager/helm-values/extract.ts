@@ -55,6 +55,7 @@ function findDependencies(
         currentItem.image === undefined
       ) {
         logger.debug('repository and image are both undefined');
+        return null;
       }
       const repository = `${currentItem.repository ?? currentItem.image}`;
       const tag = `${currentItem.tag ?? currentItem.version}`;
