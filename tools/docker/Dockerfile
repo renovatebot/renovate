@@ -51,8 +51,6 @@ LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate" 
 
 WORKDIR /usr/src/app
 
-ENV RENOVATE_X_IGNORE_NODE_WARN=true
-
 COPY tools/docker/bin/ /usr/local/bin/
 CMD ["renovate"]
 
