@@ -187,16 +187,13 @@ export class PypiDatasource extends Datasource {
       srcText.startsWith(srcPrefix) &&
       srcSuffixes.some((srcSuffix) => srcText.endsWith(srcSuffix))
     ) {
-      let res = srcText.replace(srcPrefix, '');
+      const res = srcText.replace(srcPrefix, '');
       for (const suffix of srcSuffixes) {
         if (res.endsWith(suffix)) {
           // strip off the suffix using character length
-          res = res.slice(0, -suffix.length);
-          // strip off only one prefix
-          break;
+          return res.slice(0, -suffix.length);
         }
       }
-      return res;
     }
 
     // pep-0427 wheel packages
