@@ -182,9 +182,21 @@ export class PypiDatasource extends Datasource {
     // source packages
     const srcText = PypiDatasource.normalizeName(text);
     const srcPrefix = `${packageName}-`;
-    const srcSuffix = '.tar.gz';
-    if (srcText.startsWith(srcPrefix) && srcText.endsWith(srcSuffix)) {
-      return srcText.replace(srcPrefix, '').replace(regEx(/\.tar\.gz$/), '');
+    const srcSuffixes = ['.tar.gz', '.tar.bz2', '.tar.xz', '.zip'];
+    if (
+      srcText.startsWith(srcPrefix) &&
+      srcSuffixes.some((srcSuffix) => srcText.endsWith(srcSuffix))
+    ) {
+      let res = srcText.replace(srcPrefix, '');
+      for (const suffix of srcSuffixes) {
+        if (res.endsWith(suffix)) {
+          // strip off the suffix using character length
+          res = res.slice(0, -suffix.length);
+          // strip off only one prefix
+          break;
+        }
+      }
+      return res;
     }
 
     // pep-0427 wheel packages
