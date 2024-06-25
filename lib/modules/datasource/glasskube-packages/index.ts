@@ -26,7 +26,8 @@ export class GlasskubePackagesDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${GlasskubePackagesDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => `${packageName}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      [registryUrl, packageName].filter((s) => s).join('-'),
   })
   override async getReleases({
     packageName,
