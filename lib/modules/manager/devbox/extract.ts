@@ -47,25 +47,20 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   return null;
 }
 
-function getNixhubPackageName(pkgName: string): string {
-  // If any package names don't match the Nixhub package name, add them here
-  if (pkgName === 'nodejs') {
-    return 'node';
-  }
-  return pkgName;
-}
-
-function getDep(pkgName: string, version: string): PackageDependency | null {
+function getDep(
+  packageName: string,
+  version: string,
+): PackageDependency | null {
   const dep = {
-    depName: pkgName,
+    depName: packageName,
     currentValue: version,
     datasource: NixhubDatasource.id,
-    packageName: getNixhubPackageName(pkgName),
+    packageName,
     versioning: nixhubVersioning.id,
   };
   if (!isValidDependency(dep)) {
     logger.trace(
-      { pkgName },
+      { packageName },
       'Skipping invalid devbox dependency in devbox JSON file.',
     );
     return null;

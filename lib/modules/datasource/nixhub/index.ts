@@ -2,7 +2,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { HttpError } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
-import * as npmVersioning from '../../versioning/npm';
+import * as nixhubVersioning from '../../versioning/nixhub';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
@@ -16,10 +16,11 @@ export class NixhubDatasource extends Datasource {
   }
 
   override readonly customRegistrySupport = true;
+  override readonly releaseTimestampSupport = true;
 
   override readonly registryStrategy = 'first';
 
-  override readonly defaultVersioning = npmVersioning.id;
+  override readonly defaultVersioning = nixhubVersioning.id;
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
@@ -43,6 +44,7 @@ export class NixhubDatasource extends Datasource {
       const response = await this.http.getJson<NixhubResponse>(nixhubPkgUrl);
       res.releases = response?.body?.releases.map((release) => ({
         version: release.version,
+        releaseTimestamp: release.last_updated,
       }));
     } catch (err) {
       // istanbul ignore else: not testable with nock
