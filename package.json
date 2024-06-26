@@ -197,7 +197,7 @@
     "fs-extra": "11.2.0",
     "git-url-parse": "14.0.0",
     "github-url-from-git": "1.5.0",
-    "glob": "10.4.1",
+    "glob": "10.4.2",
     "global-agent": "3.0.0",
     "good-enough-parser": "1.1.23",
     "google-auth-library": "9.11.0",
@@ -251,7 +251,7 @@
   },
   "optionalDependencies": {
     "better-sqlite3": "9.6.0",
-    "openpgp": "5.11.1",
+    "openpgp": "5.11.2",
     "re2": "1.21.3"
   },
   "devDependencies": {
@@ -265,7 +265,7 @@
     "@openpgp/web-stream-tools": "0.0.14",
     "@renovate/eslint-plugin": "file:tools/eslint",
     "@semantic-release/exec": "6.0.3",
-    "@swc/core": "1.6.1",
+    "@swc/core": "1.6.5",
     "@types/auth-header": "1.0.6",
     "@types/aws4": "1.11.6",
     "@types/better-sqlite3": "7.6.10",
@@ -295,7 +295,7 @@
     "@types/mdast": "3.0.15",
     "@types/moo": "0.5.9",
     "@types/ms": "0.7.34",
-    "@types/node": "18.19.34",
+    "@types/node": "18.19.39",
     "@types/parse-link-header": "2.0.3",
     "@types/semver": "7.5.8",
     "@types/semver-stable": "3.0.2",
@@ -307,8 +307,8 @@
     "@types/url-join": "4.0.3",
     "@types/validate-npm-package-name": "4.0.2",
     "@types/xmldoc": "1.1.9",
-    "@typescript-eslint/eslint-plugin": "7.13.0",
-    "@typescript-eslint/parser": "7.13.0",
+    "@typescript-eslint/eslint-plugin": "7.14.1",
+    "@typescript-eslint/parser": "7.14.1",
     "aws-sdk-client-mock": "4.0.1",
     "callsite": "1.0.0",
     "common-tags": "1.8.2",
@@ -347,7 +347,7 @@
     "typescript": "5.4.5",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@9.3.0",
+  "packageManager": "pnpm@9.4.0",
   "files": [
     "dist",
     "renovate-schema.json"

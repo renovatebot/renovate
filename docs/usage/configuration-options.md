@@ -2250,6 +2250,10 @@ Be careful with remapping `warn` or `error` messages to lower log levels, as it 
     {
       "matchMessage": "Package lookup error",
       "newLogLevel": "warn"
+    },
+    {
+      "matchMessage": "/^Please upgrade the version of Node.js/",
+      "newLogLevel": "info"
     }
   ]
 }
