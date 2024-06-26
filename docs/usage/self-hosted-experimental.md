@@ -82,10 +82,6 @@ Default value: `250` (milliseconds).
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
 See [issue 8660](https://github.com/renovatebot/renovate/issues/8660) for background on why this was created.
 
-## `RENOVATE_X_IGNORE_NODE_WARN`
-
-Suppress the default warning when a deprecated version of Node.js is used to run Renovate.
-
 ## `RENOVATE_X_IGNORE_RE2`
 
 Skip initializing `RE2` for regular expressions and instead use Node-native `RegExp` instead.
