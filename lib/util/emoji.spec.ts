@@ -51,15 +51,6 @@ describe('util/emoji', () => {
       expect(result).toEqual(text);
     });
 
-    describe('unsupported characters', () => {
-      const unsupported = '🫠';
-
-      it('uses replacement character', () => {
-        setEmojiConfig({ unicodeEmoji: false });
-        expect(unemojify(unsupported)).toBe('�');
-      });
-    });
-
     it('converts warning emoji to shortcode', () => {
       setEmojiConfig({ unicodeEmoji: false });
       const emoji = '⚠️';

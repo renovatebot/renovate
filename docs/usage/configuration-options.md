@@ -114,7 +114,11 @@ Must be valid usernames on the platform in use.
 
 If enabled Renovate tries to determine PR assignees by matching rules defined in a CODEOWNERS file against the changes in the PR.
 
-See [GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
+Read the docs for your platform for details on syntax and allowed file locations:
+
+- [GitHub Docs, About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)
+- [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/code_owners.html)
+- [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
 
 ## assigneesSampleSize
 
@@ -2065,7 +2069,7 @@ An additional use case is for GitLab users of project or group access tokens who
 If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
 You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
 
-Setting this field to `true` in GitLab will also mean that all Issues will be fetched instead of only those by the bot itself.
+Setting this field to `true` in Github or GitLab will also mean that all Issues will be fetched instead of only those by the bot itself.
 
 ## ignorePresets
 
@@ -2246,6 +2250,10 @@ Be careful with remapping `warn` or `error` messages to lower log levels, as it 
     {
       "matchMessage": "Package lookup error",
       "newLogLevel": "warn"
+    },
+    {
+      "matchMessage": "/^Please upgrade the version of Node.js/",
+      "newLogLevel": "info"
     }
   ]
 }
@@ -2270,38 +2278,41 @@ Renovate will only add a milestone when it _creates_ the PR.
 
 This feature used to be called `stabilityDays`.
 
-If this is set _and_ an update has a release timestamp header, then Renovate will check if the set duration has passed.
+If `minimumReleaseAge` is set to a time duration _and_ the update has a release timestamp header, then Renovate will check if the set duration has passed.
 
 Note: Renovate will wait for the set duration to pass for each **separate** version.
 Renovate does not wait until the package has seen no releases for x time-duration(`minimumReleaseAge`).
-`minimumReleaseAge` is not intended to help with slowing down fast releasing project updates.
-If you want to slow down PRs for a specific package, setup a custom schedule for that package.
-Read [our selective-scheduling help](./noise-reduction.md#selective-scheduling) to learn how to set the schedule.
 
-If the time since the release is less than the set `minimumReleaseAge` a "pending" status check is added to the branch.
-If enough days have passed then the "pending" status is removed, and a "passing" status check is added.
+Do _not_ use `minimumReleaseAge` to slow down fast releasing project updates.
+Instead setup a custom `schedule` for that package, read [our selective-scheduling help](./noise-reduction.md#selective-scheduling) to learn how.
 
-Some datasources don't have a release timestamp, in which case this feature is not compatible.
-Other datasources may have a release timestamp, but Renovate does not support it yet, in which case a feature request needs to be implemented.
+When the time passed since the release is _less_ than the set `minimumReleaseAge`: Renovate adds a "pending" status check to that update's branch.
+After enough days have passed: Renovate replaces the "pending" status with a "passing" status check.
 
-Maven users: you cannot use `minimumReleaseAge` if a Maven source returns unreliable `last-modified` headers.
+The datasource that Renovate uses must have a release timestamp for the `minimumReleaseAge` config option to work.
+Some datasources may have a release timestamp, but in a format that's Renovate does not support.
+In those cases a feature request needs to be implemented.
+
+<!-- prettier-ignore -->
+!!! warning "Warning for Maven users"
+    For `minimumReleaseAge` to work, the Maven source must return reliable `last-modified` headers.
 
 <!-- prettier-ignore -->
 !!! note
     Configuring this option will add a `renovate/stability-days` option to the status checks.
 
-There are a couple of uses for `minimumReleaseAge`:
+Examples of how you can use `minimumReleaseAge`:
 
 <!-- markdownlint-disable MD001 -->
 
 #### Suppress branch/PR creation for X days
 
-If you combine `minimumReleaseAge=3 days` and `internalChecksFilter="strict"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
-We recommend that you set `dependencyDashboard=true` so you can see these pending PRs.
+If you use `minimumReleaseAge=3 days` and `internalChecksFilter="strict"` then Renovate only creates branches when 3 (or more days) have passed since the version was released.
+We recommend you set `dependencyDashboard=true`, so you can see these pending PRs.
 
 #### Prevent holding broken npm packages
 
-npm packages less than 72 hours (3 days) old can be unpublished, which could result in a service impact if you have already updated to it.
+npm packages less than 72 hours (3 days) old can be unpublished from the npm registry, which could result in a service impact if you have already updated to it.
 Set `minimumReleaseAge` to `3 days` for npm packages to prevent relying on a package that can be removed from the registry:
 
 ```json
@@ -2317,8 +2328,10 @@ Set `minimumReleaseAge` to `3 days` for npm packages to prevent relying on a pac
 
 #### Await X time duration before Automerging
 
-If you enabled `automerge` _and_ `minimumReleaseAge`, it means that PRs will be created immediately but automerging will be delayed until the time-duration has passed.
-This works because Renovate will add a "renovate/stability-days" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
+If you enable `automerge` _and_ `minimumReleaseAge`, Renovate will create PRs immediately, but only automerge them when the `minimumReleaseAge` time-duration has passed.
+
+Renovate adds a "renovate/stability-days" pending status check to each branch/PR.
+This pending check prevents the branch going green to automerge before the time has passed.
 
 <!-- markdownlint-enable MD001 -->
 
@@ -2383,6 +2396,24 @@ Renovate only queries the OSV database for dependencies that use one of these da
 ## packageRules
 
 `packageRules` is a powerful feature that lets you apply rules to individual packages or to groups of packages using regex pattern matching.
+
+`packageRules` is a collection of rules, that are **all** evaluated.
+If multiple rules match a dependency, configurations from matching rules will be merged together.
+The order of rules matters, because later rules may override configuration options from earlier ones, if they both specify the same option.
+
+The matching process for a package rule:
+
+- Each package rule can include `match...` matchers to identify dependencies and `exclude...` matchers to filter them out.
+- If no match/exclude matchers are defined, everything matches.
+- If an aspect is both `match`ed and `exclude`d, the exclusion wins.
+- Multiple values within a single matcher will be evaluated independently (they're OR-ed together).
+- Combining multiple matchers will restrict the resulting matches (they're AND-ed together):
+  `matchCurrentVersion`, `matchCurrentValue`, `matchNewValue`, `matchConfidence`, `matchCurrentAge`,
+  `matchManagers`, `matchDatasources`, `matchCategories`, `matchDepTypes`, `matchUpdateTypes`,
+  `matchRepositories`/`excludeRepositories`, `matchBaseBranches`, `matchFileNames`
+- Two special groups of matchers provide alternatives (they're OR-ed within their respective groups, and AND-ed with others):
+  - Source URL: `matchSourceUrls`, `matchSourceUrlPrefixes`
+  - Package/Dep identifiers: `matchDepNames`/`excludeDepNames`, `matchDepPatterns`/`excludeDepPatterns`, `matchDepPrefixes`/`excludeDepPrefixes`, `matchPackageNames`/`excludePackageNames`, `matchPackagePatterns`/`excludePackagePatterns`, `matchPackagePrefixes`/`excludePackagePrefixes`
 
 Here is an example if you want to group together all packages starting with `eslint` into a single branch/PR:
 
@@ -2463,7 +2494,6 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 
 <!-- prettier-ignore -->
 !!! tip
-    Renovate evaluates all `packageRules` and does not stop after the first match.
     Order your `packageRules` so the least important rules are at the _top_, and the most important rules at the _bottom_.
     This way important rules override settings from earlier rules if needed.
 
@@ -3103,19 +3133,17 @@ Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostTyp
 }
 ```
 
-### customChangelogUrl
+### changelogUrl
 
-Use this field to set the source URL for a package, including overriding an existing one.
-Source URLs are necessary in order to look up changelogs.
-
+Use this field to set the changelog URL for a package, including overriding any existing one.
 Using this field we can specify the exact URL to fetch changelogs from.
 
-```json title="Setting the source URL for the dummy package"
+```json title="Setting the changelog URL for the dummy package"
 {
   "packageRules": [
     {
       "matchPackageNames": ["dummy"],
-      "customChangelogUrl": "https://github.com/org/dummy"
+      "changelogUrl": "https://github.com/org/dummy"
     }
   ]
 }
@@ -3214,6 +3242,42 @@ For example to replace the npm package `jade` with version `2.0.0` of the packag
   ]
 }
 ```
+
+### sourceUrl
+
+Use this field to set the source URL for a package, including overriding an existing one.
+Source URLs are necessary to link to the source of the package and in order to look up changelogs.
+
+```json title="Setting the source URL for the dummy package"
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["dummy"],
+      "sourceUrl": "https://github.com/org/dummy"
+    }
+  ]
+}
+```
+
+### sourceDirectory
+
+Use this field to set the directory in which the package is present at the source of the package.
+
+```json title="Setting the source directory for the kube-prometheus package from bitnami charts repo"
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["dummy"],
+      "sourceUrl": "https://github.com/bitnami/charts",
+      "sourceDirectory": "bitnami/kube-prometheus"
+    }
+  ]
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    `sourceDirectory` should be only be configured along with `sourceUrl`.
 
 ### prPriority
 
@@ -3647,6 +3711,7 @@ This feature works with the following managers:
 - [`docker-compose`](modules/manager/docker-compose/index.md)
 - [`dockerfile`](modules/manager/dockerfile/index.md)
 - [`droneci`](modules/manager/droneci/index.md)
+- [`flux`](modules/manager/flux/index.md)
 - [`gitlabci`](modules/manager/gitlabci/index.md)
 - [`helm-requirements`](modules/manager/helm-requirements/index.md)
 - [`helm-values`](modules/manager/helm-values/index.md)
@@ -3723,7 +3788,11 @@ For example: if the username or team name is `bar` then you would set the config
 
 If enabled Renovate tries to determine PR reviewers by matching rules defined in a CODEOWNERS file against the changes in the PR.
 
-See [GitHub](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
+Read the docs for your platform for details on syntax and allowed file locations:
+
+- [GitHub Docs, About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)
+- [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/code_owners.html)
+- [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
 
 ## reviewersSampleSize
 

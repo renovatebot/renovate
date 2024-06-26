@@ -47,6 +47,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  actionlint: {
+    asdfPluginUrl: 'https://github.com/crazy-matt/asdf-actionlint',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'rhysd/actionlint',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   'adr-tools': {
     asdfPluginUrl: 'https://gitlab.com/td7x/asdf/adr-tools.git',
     config: {
@@ -413,6 +421,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
       packageName: 'grafana/mimir',
       extractVersion: '^mimir-(?<version>\\S+)',
+    },
+  },
+  minikube: {
+    asdfPluginUrl: 'https://github.com/alvarobp/asdf-minikube.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'kubernetes/minikube',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   nim: {

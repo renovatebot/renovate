@@ -46,7 +46,7 @@ export interface RenovateSharedConfig {
   commitMessagePrefix?: string;
   commitMessageTopic?: string;
   confidential?: boolean;
-  customChangelogUrl?: string;
+  changelogUrl?: string;
   dependencyDashboardApproval?: boolean;
   draftPR?: boolean;
   enabled?: boolean;
@@ -116,6 +116,8 @@ export interface GlobalOnlyConfig {
   globalExtends?: string[];
   logFile?: string;
   logFileLevel?: LogLevel;
+  mergeConfidenceDatasources?: string[];
+  mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
   prCommitsPerRunLimit?: number;
   privateKeyPath?: string;
@@ -147,6 +149,7 @@ export interface RepoGlobalConfig {
   dockerSidecarImage?: string;
   dockerUser?: string;
   dryRun?: DryRunConfig;
+  encryptedWarning?: string;
   endpoint?: string;
   executionTimeout?: number;
   exposeAllEnv?: boolean;
@@ -154,8 +157,6 @@ export interface RepoGlobalConfig {
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
   localDir?: string;
-  mergeConfidenceEndpoint?: string;
-  mergeConfidenceDatasources?: string[];
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   presetCachePersistence?: boolean;
@@ -453,6 +454,11 @@ export interface RenovateOptionBase {
    * For internal use only: add it to any config option that supports regex or glob matching
    */
   patternMatch?: boolean;
+
+  /**
+   * For internal use only: add it to any config option of type integer that supports negative integers
+   */
+  allowNegative?: boolean;
 }
 
 export interface RenovateArrayOption<

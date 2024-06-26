@@ -1,7 +1,11 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
-import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import {
+  findLocalSiblingOrParent,
+  getSiblingFileName,
+  readLocalFile,
+} from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { NpmDatasource } from '../../../datasource/npm';
 
@@ -122,17 +126,29 @@ export async function extractPackageFile(
     npmrc = config.npmrc;
   }
 
-  const yarnrcYmlFileName = getSiblingFileName(packageFile, '.yarnrc.yml');
-  const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
+  const yarnrcYmlFileName = await findLocalSiblingOrParent(
+    packageFile,
+    '.yarnrc.yml',
+  );
+  const yarnZeroInstall = yarnrcYmlFileName
+    ? await isZeroInstall(yarnrcYmlFileName)
+    : false;
 
   let yarnConfig: YarnConfig | null = null;
-  const repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
+  const repoYarnrcYml = yarnrcYmlFileName
+    ? await readLocalFile(yarnrcYmlFileName, 'utf8')
+    : null;
   if (is.string(repoYarnrcYml) && repoYarnrcYml.trim().length > 0) {
     yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
   }
 
-  const legacyYarnrcFileName = getSiblingFileName(packageFile, '.yarnrc');
-  const repoLegacyYarnrc = await readLocalFile(legacyYarnrcFileName, 'utf8');
+  const legacyYarnrcFileName = await findLocalSiblingOrParent(
+    packageFile,
+    '.yarnrc',
+  );
+  const repoLegacyYarnrc = legacyYarnrcFileName
+    ? await readLocalFile(legacyYarnrcFileName, 'utf8')
+    : null;
   if (is.string(repoLegacyYarnrc) && repoLegacyYarnrc.trim().length > 0) {
     yarnConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
   }

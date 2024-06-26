@@ -1214,7 +1214,7 @@ async function getIssues(): Promise<Issue[]> {
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
-        user: config.renovateUsername,
+        ...(!config.ignorePrAuthor && { user: config.renovateUsername }),
       },
       readOnly: true,
     },

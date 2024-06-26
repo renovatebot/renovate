@@ -21,6 +21,7 @@ export class GlobalConfig {
     'dockerSidecarImage',
     'dockerUser',
     'dryRun',
+    'encryptedWarning',
     'exposeAllEnv',
     'executionTimeout',
     'githubTokenWarn',
@@ -35,8 +36,6 @@ export class GlobalConfig {
     'httpCacheTtlDays',
     'autodiscoverRepoSort',
     'autodiscoverRepoOrder',
-    'mergeConfidenceEndpoint',
-    'mergeConfidenceDatasources',
     'userAgent',
   ];
 

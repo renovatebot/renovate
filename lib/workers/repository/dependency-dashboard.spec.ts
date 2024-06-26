@@ -19,6 +19,7 @@ import {
   GitHubMaxPrBodyLen,
   massageMarkdown,
 } from '../../modules/platform/github';
+import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
@@ -978,6 +979,37 @@ None detected
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
+          // same with dry run
+          await dryRun(branches, platform, 0, 1);
+        });
+
+        it('shows deprecations', async () => {
+          const branches: BranchConfig[] = [];
+          const packageFilesWithDeprecations = clone(packageFiles);
+          packageFilesWithDeprecations.npm[0].deps[0].deprecationMessage =
+            'some deprecation message';
+          packageFilesWithDeprecations.npm[0].deps[2].updates.push({
+            updateType: 'replacement',
+            newName: 'prop-types-tools',
+            newValue: '2.17.0',
+            branchName: 'renovate/airbnb-prop-types-replacement',
+          });
+          PackageFiles.add('main', packageFilesWithDeprecations);
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            packageFilesWithDeprecations,
+          );
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
+            'These dependencies are deprecated',
+          );
+          expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
+            '| npm | `cookie-parser` | ![Unavailable]',
+          );
+          expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
+            'npm | `express-handlebars` | ![Available]',
+          );
           // same with dry run
           await dryRun(branches, platform, 0, 1);
         });

@@ -73,6 +73,7 @@ const options: RenovateOptions[] = [
     name: 'mergeConfidenceEndpoint',
     description:
       'If set, Renovate will query this API for Merge Confidence data.',
+    stage: 'global',
     type: 'string',
     default: 'https://developer.mend.io/',
     advancedUse: true,
@@ -82,6 +83,7 @@ const options: RenovateOptions[] = [
     name: 'mergeConfidenceDatasources',
     description:
       'If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.',
+    stage: 'global',
     allowedValues: supportedDatasources,
     default: supportedDatasources,
     type: 'array',
@@ -512,7 +514,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.6.14',
+    default: 'ghcr.io/containerbase/sidecar:10.11.7',
     globalOnly: true,
   },
   {
@@ -648,9 +650,16 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'encryptedWarning',
+    description: 'Warning text to use if encrypted config is found.',
+    type: 'string',
+    globalOnly: true,
+    advancedUse: true,
+  },
+  {
     name: 'inheritConfig',
     description:
-      'If `true`, Renovate will inherit configuration from the `inheritConfigFileName` file in `inheritConfigRepoName',
+      'If `true`, Renovate will inherit configuration from the `inheritConfigFileName` file in `inheritConfigRepoName`.',
     type: 'boolean',
     default: false,
     globalOnly: true,
@@ -959,6 +968,7 @@ const options: RenovateOptions[] = [
     description: 'Set to `false` to disable lock file updating.',
     type: 'boolean',
     default: true,
+    supportedManagers: ['npm'],
   },
   {
     name: 'skipInstalls',
@@ -1554,6 +1564,23 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'sourceUrl',
+    description: 'The source URL of the package.',
+    type: 'string',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'sourceDirectory',
+    description:
+      'The source directory in which the package is present at its source.',
+    type: 'string',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchSourceUrlPrefixes',
     description:
       'A list of source URL prefixes to match against, commonly used to group monorepos or packages from the same organization.',
@@ -1677,7 +1704,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'customChangelogUrl',
+    name: 'changelogUrl',
     description:
       'If set, Renovate will use this URL to fetch changelogs for a matched dependency. Valid only within a `packageRules` object.',
     type: 'string',
@@ -2039,6 +2066,7 @@ const options: RenovateOptions[] = [
     description:
       'Set sorting priority for PR creation. PRs with higher priority are created first, negative priority last.',
     type: 'integer',
+    allowNegative: true,
     default: 0,
     parents: ['packageRules'],
     cli: false,
@@ -2639,6 +2667,8 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     experimental: true,
+    deprecationMsg:
+      'This option is deprecated and will be removed in a future release.',
   },
   {
     name: 'keepAlive',
@@ -2772,13 +2802,12 @@ const options: RenovateOptions[] = [
       'Options to suppress various types of warnings and other notifications.',
     type: 'array',
     subType: 'string',
-    default: ['deprecationWarningIssues'],
+    default: [],
     allowedValues: [
       'artifactErrors',
       'branchAutomergeFailure',
       'configErrorIssue',
       'dependencyLookupWarnings',
-      'deprecationWarningIssues',
       'lockFileErrors',
       'missingCredentialsError',
       'onboardingClose',

@@ -553,6 +553,12 @@ You can choose from the following behaviors for the `dryRun` config option:
 
 Information provided mainly in debug log level.
 
+## encryptedWarning
+
+Use this if you want to stop supporting `encrypted` configuration capabilities but want to warn users first to migrate.
+
+If set to a string value, Renovate will log warnings with the `encryptedWarning` text, meaning the message will be visible to users such as on the Dependency Dashboard.
+
 ## endpoint
 
 ## executionTimeout
@@ -962,10 +968,14 @@ uid                      Renovate Bot <renovate@whitesourcesoftware.com>
 sub   rsa4096 2021-09-10 [E]
 ```
 
+</details>
+
 <!-- prettier-ignore -->
 !!! note
     If you use GnuPG `v2.4` (or newer) to generate the key, then you must disable `AEAD` preferences.
-    This is needed to allow  Renovate to decrypt the encrypted values.
+    This is needed to allow Renovate to decrypt the encrypted values.
+
+<details><summary>key edit log</summary>
 
 ```bash
 ❯ gpg --edit-key renovate@whitesourcesoftware.com

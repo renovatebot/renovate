@@ -20,6 +20,7 @@ export const ReleaseResultZodSchema = z.object({
         };
       }),
   ),
+  tags: z.record(z.string(), z.string()).optional(),
   sourceUrl: z.string().optional(),
   sourceDirectory: z.string().optional(),
   changelogUrl: z.string().optional(),
