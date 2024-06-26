@@ -10,13 +10,6 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
-type CopierListOpt = 'skip' | 'exclude';
-
-const listOpts: Record<CopierListOpt, string> = {
-  skip: '--skip',
-  exclude: '--exclude',
-};
-
 const DEFAULT_COMMAND_OPTIONS = ['--skip-answered', '--defaults'];
 
 function buildCommand(
@@ -24,22 +17,9 @@ function buildCommand(
   packageFileName: string,
   newVersion: string,
 ): string {
-  const command = ['copier'];
-  if (config?.copierOptions?.recopy) {
-    command.push('recopy', ...DEFAULT_COMMAND_OPTIONS, '--overwrite');
-  } else {
-    command.push('update', ...DEFAULT_COMMAND_OPTIONS);
-  }
+  const command = ['copier', 'update', ...DEFAULT_COMMAND_OPTIONS];
   if (config?.allowScripts) {
     command.push('--trust');
-  }
-  for (const [key, value] of Object.entries(config.copierOptions?.data ?? {})) {
-    command.push('--data', quote(`${key}=${value}`));
-  }
-  for (const [opt, param] of Object.entries(listOpts)) {
-    config.copierOptions?.[opt]?.forEach((item: string) => {
-      command.push(param, quote(item));
-    });
   }
   command.push(
     '--answers-file',

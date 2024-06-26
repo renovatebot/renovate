@@ -12,12 +12,6 @@ jest.mock('../../../util/git');
 jest.mock('../../../util/fs');
 
 const config: UpdateArtifactsConfig = {
-  copierOptions: {
-    data: {},
-    exclude: [],
-    recopy: false,
-    skip: [],
-  },
   allowScripts: false,
 };
 
@@ -137,60 +131,6 @@ describe('modules/manager/copier/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'copier update --skip-answered --defaults --trust --answers-file .copier-answers.yml --vcs-ref 1.1.0',
-        },
-      ]);
-    });
-
-    it('handles data and list options correctly', async () => {
-      const execSnapshots = mockExecAll();
-
-      const optionsConfig = {
-        ...config,
-        copierOptions: {
-          ...config.copierOptions,
-          data: {
-            variable1: 'value1',
-            variable2: 'value2',
-          },
-          skip: ['file1.txt', 'file2.txt'],
-          exclude: ['*.tmp', 'backup/*'],
-        },
-      };
-
-      await updateArtifacts({
-        packageFileName: '.copier-answers.yml',
-        updatedDeps: upgrades,
-        newPackageFileContent: '',
-        config: optionsConfig,
-      });
-
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: "copier update --skip-answered --defaults --data variable1=value1 --data variable2=value2 --skip file1.txt --skip file2.txt --exclude '*.tmp' --exclude 'backup/*' --answers-file .copier-answers.yml --vcs-ref 1.1.0",
-        },
-      ]);
-    });
-
-    it('supports recopy instead of update', async () => {
-      const execSnapshots = mockExecAll();
-
-      const optionsConfig = {
-        ...config,
-        copierOptions: {
-          recopy: true,
-        },
-      };
-
-      await updateArtifacts({
-        packageFileName: '.copier-answers.yml',
-        updatedDeps: upgrades,
-        newPackageFileContent: '',
-        config: optionsConfig,
-      });
-
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'copier recopy --skip-answered --defaults --overwrite --answers-file .copier-answers.yml --vcs-ref 1.1.0',
         },
       ]);
     });

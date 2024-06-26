@@ -266,7 +266,6 @@ export interface RenovateConfig
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
   forkModeDisallowMaintainerEdits?: boolean;
-  copierOptions?: CopierOptions;
 
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
@@ -402,8 +401,7 @@ export type AllowedParents =
   | 'hostRules'
   | 'postUpgradeTasks'
   | 'packageRules'
-  | 'logLevelRemap'
-  | 'copierOptions';
+  | 'logLevelRemap';
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.
@@ -578,11 +576,4 @@ export interface ManagerConfig extends RenovateConfig {
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
-}
-
-export interface CopierOptions extends Record<string, any> {
-  data?: Record<string, string>;
-  exclude?: string[];
-  recopy?: boolean;
-  skip?: string[];
 }
