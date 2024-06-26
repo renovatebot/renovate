@@ -1,13 +1,13 @@
 import { extractPackageFile } from '.';
 
-describe('modules/manager/python-runtime/extract', () => {
+describe('modules/manager/runtime-version/extract', () => {
   describe('extractPackageFile()', () => {
-    it('returns a result', () => {
-      const res = extractPackageFile('python-3.12.4\n');
+    it('returns a result - python', () => {
+      const res = extractPackageFile('python-3.12.4');
       expect(res?.deps).toEqual([
         {
           depName: 'python',
-          commitMessageTopic: 'Python Runtime',
+          commitMessageTopic: 'Runtime Version',
           currentValue: '3.12.4',
           datasource: 'docker',
         },
@@ -15,7 +15,7 @@ describe('modules/manager/python-runtime/extract', () => {
     });
 
     it('returns no result', () => {
-      const res = extractPackageFile('3.12.4\n');
+      const res = extractPackageFile('3.12.4');
       expect(res).toBeNull();
     });
   });

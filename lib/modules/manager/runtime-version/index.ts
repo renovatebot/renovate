@@ -3,7 +3,7 @@ import { DockerDatasource } from '../../datasource/docker';
 
 export { extractPackageFile } from './extract';
 
-export const displayName = 'Python Runtime';
+export const displayName = 'Runtime Version';
 
 export const defaultConfig = {
   fileMatch: ['^runtime.txt$'],

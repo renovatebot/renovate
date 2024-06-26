@@ -3,7 +3,7 @@ import { DockerDatasource } from '../../datasource/docker';
 import type { PackageDependency, PackageFileContent } from '../types';
 
 export const pythonRuntimeRegex = regEx(
-  'python-(?<version>\\d+\\.\\d+\\.\\d+)',
+  '^python-(?<version>\\d+\\.\\d+\\.\\d+)$',
 );
 
 export function extractPackageFile(content: string): PackageFileContent | null {
@@ -13,7 +13,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   if (runtimeVersion) {
     const dep: PackageDependency = {
       depName: 'python',
-      commitMessageTopic: 'Python Runtime',
+      commitMessageTopic: 'Runtime',
       currentValue: runtimeVersion,
       datasource: DockerDatasource.id,
     };
