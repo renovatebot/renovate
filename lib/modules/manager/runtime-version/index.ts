@@ -6,7 +6,7 @@ export { extractPackageFile } from './extract';
 export const displayName = 'Runtime Version';
 
 export const defaultConfig = {
-  fileMatch: ['^runtime.txt$'],
+  fileMatch: ['(^|/)runtime.txt$'],
   pinDigests: false,
 };
 
