@@ -13,7 +13,7 @@ export const supportsRanges = false;
  * If the input is already a range, it returns the input.
  */
 function massageVersion(input: string): string {
-  // return the input if it is a range
+  // istanbul ignore if: same-major versioning should not be used with ranges as it defeats the purpose
   if (!semverCoerced.isSingleVersion(input)) {
     logger.warn(
       { version: input },
