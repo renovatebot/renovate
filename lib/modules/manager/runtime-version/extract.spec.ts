@@ -7,7 +7,6 @@ describe('modules/manager/runtime-version/extract', () => {
       expect(res?.deps).toEqual([
         {
           depName: 'python',
-          commitMessageTopic: 'Runtime Version',
           currentValue: '3.12.4',
           datasource: 'docker',
         },
