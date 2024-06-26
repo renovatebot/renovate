@@ -1,6 +1,12 @@
 This datasource finds SBT plugin updates from Maven repositories.
 
-By default, Renovate checks <https://repo1.maven.org/maven2/> for SBT plugins, and then falls back to the legacy URL <https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases>. You can override this behavior by overriding the `registryUrls` setting. For example:
+By default, Renovate:
+
+1. Checks `https://repo1.maven.org/maven2/` for SBT plugins
+1. If the above URL returns no results, then Renovate tries the _legacy_ URL: `https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases`
+ 
+You can override the default behavior with the `registryUrls` config option.
+For example:
 
 ```json
 {
