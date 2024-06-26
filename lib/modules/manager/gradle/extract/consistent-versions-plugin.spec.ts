@@ -32,7 +32,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
     expect(usesGcv('versions.props', fsMock)).toBeTrue();
   });
 
-  it('detects lock file header introduced with gradle-consistent-versions version 2.30.0', () => {
+  it('detects lock file header introduced with gradle-consistent-versions version 2.23.0', () => {
     const fsMock = {
       'build.gradle.kts': `(this file contains) 'com.palantir.consistent-versions'`,
       'versions.props': `org.apache.lucene:* = 1.2.3`,
