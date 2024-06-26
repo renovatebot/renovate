@@ -13,7 +13,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   if (runtimeVersion) {
     const dep: PackageDependency = {
       depName: 'python',
-      commitMessageTopic: 'Heroku Runtime - Python',
+      commitMessageTopic: 'Python Runtime',
       currentValue: runtimeVersion,
       datasource: DockerDatasource.id,
     };

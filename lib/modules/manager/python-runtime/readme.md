@@ -1,0 +1,1 @@
+Keep a Python `runtime.txt` file updated, used in platforms like [Heroku](https://devcenter.heroku.com/articles/python-runtimes), [Koyeb](https://www.koyeb.com/docs/build-and-deploy/build-from-git/python), [CloudFoundary](https://docs.cloudfoundry.org/buildpacks/python/index.html)
