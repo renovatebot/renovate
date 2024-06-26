@@ -251,7 +251,7 @@
   },
   "optionalDependencies": {
     "better-sqlite3": "9.6.0",
-    "openpgp": "5.11.1",
+    "openpgp": "5.11.2",
     "re2": "1.21.3"
   },
   "devDependencies": {
