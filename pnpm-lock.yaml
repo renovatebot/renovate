@@ -581,8 +581,8 @@ importers:
         specifier: 6.2.0
         version: 6.2.0
       nyc:
-        specifier: 15.1.0
-        version: 15.1.0
+        specifier: 17.0.0
+        version: 17.0.0
       pretty-format:
         specifier: 29.7.0
         version: 29.7.0
@@ -3900,10 +3900,6 @@ packages:
     resolution: {integrity: sha512-Pt/uge1Q9s+5VAZ+pCo16TYMWPBIl+oaNIjgLQxcX0itS6ueeaA+pEfThZpH8WxhFgCiEb8sAJY6MdUKgiIWaQ==}
     engines: {node: '>=8'}
 
-  istanbul-lib-instrument@4.0.3:
-    resolution: {integrity: sha512-BXgQl9kf4WTCPCCpmFGoJkz/+uhvm7h7PFKUYxh7qarQd3ER33vHG//qaE8eN25l07YqZPpHXU9I09l/RD5aGQ==}
-    engines: {node: '>=8'}
-
   istanbul-lib-instrument@5.2.1:
     resolution: {integrity: sha512-pzqtp31nLv/XFOzXGuvhCb8qhjmTVo5vjVk19XE4CRlSWz0KoeJ3bw9XsA7nOp9YBf4qHjwBxkDzKcME/J29Yg==}
     engines: {node: '>=8'}
@@ -4715,9 +4711,9 @@ packages:
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
-  nyc@15.1.0:
-    resolution: {integrity: sha512-jMW04n9SxKdKi1ZMGhvUTHBN0EICCRkHemEoE5jm6mTYcqcdas0ATzgUgejlQUHMvpnOZqGB5Xxsv9KxJW1j8A==}
-    engines: {node: '>=8.9'}
+  nyc@17.0.0:
+    resolution: {integrity: sha512-ISp44nqNCaPugLLGGfknzQwSwt10SSS5IMoPR7GLoMAyS18Iw5js8U7ga2VF9lYuMZ42gOHr3UddZw4WZltxKg==}
+    engines: {node: '>=18'}
     hasBin: true
 
   object-inspect@1.13.1:
@@ -10530,15 +10526,6 @@ snapshots:
     dependencies:
       append-transform: 2.0.0
 
-  istanbul-lib-instrument@4.0.3:
-    dependencies:
-      '@babel/core': 7.24.7
-      '@istanbuljs/schema': 0.1.3
-      istanbul-lib-coverage: 3.2.2
-      semver: 6.3.1
-    transitivePeerDependencies:
-      - supports-color
-
   istanbul-lib-instrument@5.2.1:
     dependencies:
       '@babel/core': 7.24.7
@@ -11521,7 +11508,7 @@ snapshots:
     dependencies:
       boolbase: 1.0.0
 
-  nyc@15.1.0:
+  nyc@17.0.0:
     dependencies:
       '@istanbuljs/load-nyc-config': 1.1.0
       '@istanbuljs/schema': 0.1.3
@@ -11535,7 +11522,7 @@ snapshots:
       glob: 7.2.3
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-hook: 3.0.0
-      istanbul-lib-instrument: 4.0.3
+      istanbul-lib-instrument: 6.0.2
       istanbul-lib-processinfo: 2.0.3
       istanbul-lib-report: 3.0.1
       istanbul-lib-source-maps: 4.0.1
