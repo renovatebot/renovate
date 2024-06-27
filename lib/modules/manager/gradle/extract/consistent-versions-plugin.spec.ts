@@ -32,6 +32,18 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
     expect(usesGcv('versions.props', fsMock)).toBeTrue();
   });
 
+  it('detects lock file header introduced with gradle-consistent-versions version 2.23.0', () => {
+    const fsMock = {
+      'build.gradle.kts': `(this file contains) 'com.palantir.consistent-versions'`,
+      'versions.props': `org.apache.lucene:* = 1.2.3`,
+      'versions.lock': stripIndent`
+        # Run ./gradlew writeVersionsLocks to regenerate this file
+        org.apache.lucene:lucene-core:1.2.3`,
+    };
+
+    expect(usesGcv('versions.props', fsMock)).toBeTrue();
+  });
+
   it('gradle-consistent-versions plugin correct position for CRLF and LF', () => {
     const crlfProps = parsePropsFile(`a.b:c.d=1\r\na.b:c.e=2`);
     expect(crlfProps).toBeArrayOfSize(2);
