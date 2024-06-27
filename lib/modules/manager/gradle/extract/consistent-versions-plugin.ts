@@ -9,7 +9,7 @@ import { isDependencyString, versionLikeSubstring } from '../utils';
 export const VERSIONS_PROPS = 'versions.props';
 export const VERSIONS_LOCK = 'versions.lock';
 export const LOCKFIlE_HEADER_TEXT = regEx(
-  /^# Run \.\/gradlew (?:--write-locks|writeVersionsLock) to regenerate this file/,
+  /^# Run \.\/gradlew (?:--write-locks|writeVersionsLock|writeVersionsLocks) to regenerate this file/,
 );
 
 /**

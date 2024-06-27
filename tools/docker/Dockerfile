@@ -3,12 +3,12 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:2.21.3@sha256:1b12034f6953c8fc01e490df10e841617cfb1ed80eea4b5adcf483e5005dc4b9 AS slim-base
+FROM ghcr.io/renovatebot/base-image:2.22.3@sha256:a2be1f18ed315bb12feca12c7b606aa2df587cf38ca59db78e83a9cc5c9763ab AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:2.21.3-full@sha256:fbdb93beb7cba3acca2bad6ef527b9475edd344d5665b898b0d124a79a06a426 AS full-base
+FROM ghcr.io/renovatebot/base-image:2.22.3-full@sha256:c78750d75763eb790f67d77552b1139fa3036d71c33b690527b683827cdc8ae7 AS full-base
 
 # --------------------------------------
 # build image
@@ -50,8 +50,6 @@ LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate" 
   org.opencontainers.image.licenses="AGPL-3.0-only"
 
 WORKDIR /usr/src/app
-
-ENV RENOVATE_X_IGNORE_NODE_WARN=true
 
 COPY tools/docker/bin/ /usr/local/bin/
 CMD ["renovate"]
