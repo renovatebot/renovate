@@ -8,12 +8,7 @@ function ensureNumber(input: string): number | null {
     return null;
   }
 
-  const res = Number.parseInt(input, 10);
-  if (Number.isNaN(res)) {
-    return null;
-  }
-
-  return res;
+  return Number.parseInt(input, 10);
 }
 
 function comparePrereleases(x: string, y: string): number {

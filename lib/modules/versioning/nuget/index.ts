@@ -1,7 +1,16 @@
 import type { NewValueConfig, VersioningApi } from '../types';
-import { getFloatingRangeLowerBound, parseRange, parseVersion } from './parser';
-import * as nugetRange from './range';
-import type { NugetVersion } from './types';
+import {
+  getFloatingRangeLowerBound,
+  parseRange,
+  parseVersion,
+  rangeToString,
+  versionToString,
+} from './parser';
+import type {
+  NugetBracketRange,
+  NugetFloatingRange,
+  NugetVersion,
+} from './types';
 import { compare } from './version';
 
 export const id = 'nuget';
@@ -10,7 +19,7 @@ export const urls = [
   'https://docs.microsoft.com/en-us/nuget/concepts/package-versioning',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['pin', 'replace'];
+export const supportedRangeStrategies = ['pin', 'bump'];
 
 class NugetVersioningApi implements VersioningApi {
   isCompatible(version: string, _current?: string | undefined): boolean {
@@ -152,8 +161,7 @@ class NugetVersioningApi implements VersioningApi {
   }
 
   getSatisfyingVersion(versions: string[], range: string): string | null {
-    const parsedRange = parseRange(range);
-    if (!parsedRange) {
+    if (!this.isValid(range)) {
       return null;
     }
 
@@ -161,10 +169,10 @@ class NugetVersioningApi implements VersioningApi {
     let maxParsed: NugetVersion | undefined;
     for (const version of versions) {
       if (this.matches(version, range)) {
-        const parsed = parseVersion(version)!;
-        if (!maxParsed || compare(parsed, maxParsed) > 0) {
+        const v = parseVersion(version)!;
+        if (!maxParsed || compare(v, maxParsed) > 0) {
           max = version;
-          maxParsed = parsed;
+          maxParsed = v;
         }
       }
     }
@@ -205,7 +213,7 @@ class NugetVersioningApi implements VersioningApi {
     }
 
     if (rangeStrategy === 'pin') {
-      return nugetRange.pin(v);
+      return rangeToString({ type: 'nuget-exact-range', version: v });
     }
 
     if (this.isVersion(currentValue)) {
@@ -217,7 +225,73 @@ class NugetVersioningApi implements VersioningApi {
       return null;
     }
 
-    return nugetRange.replace(r, v);
+    if (this.isLessThanRange(newVersion, currentValue)) {
+      return currentValue;
+    }
+
+    if (r.type === 'nuget-exact-range') {
+      return rangeToString({ type: 'nuget-exact-range', version: v });
+    }
+
+    if (r.type === 'nuget-floating-range') {
+      const floating = r.floating;
+      if (!floating) {
+        return versionToString(v);
+      }
+
+      const res: NugetFloatingRange = { ...r };
+
+      const prepareResult = (): string => {
+        const newRange = rangeToString(res);
+        return this.matches(newVersion, newRange) ? newRange : currentValue;
+      };
+
+      const prepareComponent = (component: number | undefined): number =>
+        component ? Math.floor(component / 10) * 10 : 0;
+
+      if (floating === 'major') {
+        res.major = prepareComponent(v.major);
+        return prepareResult();
+      }
+      res.major = v.major;
+
+      if (floating === 'minor') {
+        res.minor = prepareComponent(v.minor);
+        return prepareResult();
+      }
+      res.minor = v.minor ?? 0;
+
+      if (floating === 'patch') {
+        res.patch = prepareComponent(v.patch);
+        return prepareResult();
+      }
+      res.patch = v.patch ?? 0;
+
+      res.revision = prepareComponent(v.revision);
+      return prepareResult();
+    }
+
+    const res: NugetBracketRange = { ...r };
+
+    if (!r.max) {
+      res.min = v;
+      res.minInclusive = true;
+      return rangeToString(res);
+    }
+
+    if (this.matches(newVersion, currentValue)) {
+      return currentValue;
+    }
+
+    if (!r.min) {
+      res.max = v;
+      res.maxInclusive = true;
+      return rangeToString(res);
+    }
+
+    res.max = v;
+    res.maxInclusive = true;
+    return rangeToString(res);
   }
 
   sortVersions(version: string, other: string): number {
@@ -238,15 +312,51 @@ class NugetVersioningApi implements VersioningApi {
 
     const u = parseVersion(range);
     if (u) {
-      return compare(v, u) === 0;
+      return compare(v, u) >= 0;
     }
 
     const r = parseRange(range);
-    if (r) {
-      return nugetRange.matches(v, r);
+    if (!r) {
+      return false;
     }
 
-    return false;
+    if (r.type === 'nuget-exact-range') {
+      return compare(v, r.version) === 0;
+    }
+
+    if (r.type === 'nuget-floating-range') {
+      if (!r.prerelease && v.prerelease) {
+        return false;
+      }
+
+      const lowerBound = getFloatingRangeLowerBound(r);
+      return compare(v, lowerBound) >= 0;
+    }
+
+    let minBoundMatches = false;
+    let maxBoundMatches = false;
+
+    const { min, minInclusive, max, maxInclusive } = r;
+
+    if (min) {
+      const minBound =
+        min.type === 'nuget-version' ? min : getFloatingRangeLowerBound(min);
+      const cmp = compare(v, minBound);
+      minBoundMatches = minInclusive ? cmp >= 0 : cmp > 0;
+    } else {
+      minBoundMatches = true;
+    }
+
+    if (max) {
+      if (!(v.prerelease && !max.prerelease)) {
+        const cmp = compare(v, max);
+        maxBoundMatches = maxInclusive ? cmp <= 0 : cmp < 0;
+      }
+    } else {
+      maxBoundMatches = true;
+    }
+
+    return minBoundMatches && maxBoundMatches;
   }
 }
 
