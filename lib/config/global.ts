@@ -37,6 +37,9 @@ export class GlobalConfig {
     'autodiscoverRepoSort',
     'autodiscoverRepoOrder',
     'userAgent',
+    'deleteConfigFile',
+    's3Endpoint',
+    's3PathStyle',
   ];
 
   private static config: RepoGlobalConfig = {};

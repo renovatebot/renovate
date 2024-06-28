@@ -3117,6 +3117,29 @@ const options: RenovateOptions[] = [
     default: 90,
     globalOnly: true,
   },
+  {
+    name: 'deleteConfigFile',
+    description:
+      'If set to `true`, Renovate tries to delete the self-hosted config file after reading it.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
+    name: 's3Endpoint',
+    description:
+      'If set, Renovate will use this string as the `endpoint` when creating the AWS S3 client instance.',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
+    name: 's3PathStyle',
+    description:
+      'If set, Renovate will enable `forcePathStyle` when creating the AWS S3 client instance.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {
