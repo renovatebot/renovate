@@ -93,9 +93,10 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
   let sourceBranch: string | undefined = undefined;
 
   if (change.current_revision) {
-    sourceBranch = change.revisions[
+    const re = regEx(/^Renovate-Branch: (.+)$/m);
+    sourceBranch = re.exec(change.revisions[
       change.current_revision
-    ]?.commit?.message?.match(/^Renovate-Branch: (.+)$/m)?.[1];
+    ]?.commit?.message ?? '')?.[1];
   }
 
   // for backwards compatibility

@@ -303,9 +303,7 @@ describe('modules/platform/gerrit/scm', () => {
         message: [
           'commit msg',
           expect.stringMatching(
-            new RegExp(
-              '^Renovate-Branch: renovate/dependency-1\\.x\\nChange-Id: I[a-z0-9]{40}$',
-            ),
+            /^Renovate-Branch: renovate/dependency-1\\.x\\nChange-Id: I[a-z0-9]{40}$/,
           ),
         ],
         force: true,
