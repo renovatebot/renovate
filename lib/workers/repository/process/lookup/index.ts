@@ -454,7 +454,9 @@ export async function lookupUpdates(
         if (
           update.updateType !== 'rollback' &&
           update.newValue &&
+          versioning.isVersion(update.newValue) &&
           compareValue &&
+          versioning.isVersion(compareValue) &&
           versioning.isGreaterThan(compareValue, update.newValue)
         ) {
           logger.warn(
