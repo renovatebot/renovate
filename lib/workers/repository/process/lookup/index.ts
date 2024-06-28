@@ -452,10 +452,10 @@ export async function lookupUpdates(
           versioning.isSingleVersion(update.newValue);
         // istanbul ignore if
         if (
+          update.updateType !== 'rollback' &&
           update.newValue &&
           compareValue &&
-          versioning.isGreaterThan(compareValue, update.newValue) &&
-          update.updateType !== 'rollback'
+          versioning.isGreaterThan(compareValue, update.newValue)
         ) {
           logger.warn(
             { update, allVersions, filteredReleases },
