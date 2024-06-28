@@ -61,8 +61,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
           200,
           html`
             <html>
-              <head>
-              </head>
+              <head> </head>
               <body>
                 <pre><a href="scala_2.12/">scala_2.12/</a></pre>
               </body>
@@ -76,8 +75,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
           200,
           html`
             <html>
-              <head>
-              </head>
+              <head> </head>
               <body>
                 <pre><a href="sbt_1.0/">sbt_1.0/</a></pre>
               </body>
@@ -91,8 +89,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
           200,
           html`
             <html>
-              <head>
-              </head>
+              <head> </head>
               <body>
                 <pre><a href="0.5.5/">0.5.5/</a></pre>
               </body>
@@ -108,8 +105,12 @@ describe('modules/datasource/sbt-plugin/index', () => {
           html`
             <a href="sbt-coursier_2.10_0.13/">sbt-coursier_2.10_0.13/</a>
             <a href="sbt-coursier_2.12_1.0/">sbt-coursier_2.12_1.0/</a>
-            <a href="sbt-coursier_2.12_1.0.0-M5/">sbt-coursier_2.12_1.0.0-M5/</a>
-            <a href="sbt-coursier_2.12_1.0.0-M6/">sbt-coursier_2.12_1.0.0-M6/</a>
+            <a href="sbt-coursier_2.12_1.0.0-M5/"
+              >sbt-coursier_2.12_1.0.0-M5/</a
+            >
+            <a href="sbt-coursier_2.12_1.0.0-M6/"
+              >sbt-coursier_2.12_1.0.0-M6/</a
+            >
           `,
         );
       httpMock
