@@ -450,7 +450,20 @@ export async function lookupUpdates(
         res.isSingleVersion ??=
           is.string(update.newValue) &&
           versioning.isSingleVersion(update.newValue);
-        res.updates.push(update);
+        // istanbul ignore if
+        if (
+          update.newValue &&
+          compareValue &&
+          versioning.isGreaterThan(compareValue, update.newValue) &&
+          update.updateType !== 'rollback'
+        ) {
+          logger.warn(
+            { update, allVersions, filteredReleases },
+            'Unexpected downgrade detected: skipping',
+          );
+        } else {
+          res.updates.push(update);
+        }
       }
     } else if (compareValue) {
       logger.debug(
