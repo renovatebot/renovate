@@ -1,4 +1,4 @@
-import { codeBlock } from 'common-tags';
+import { codeBlock, html } from 'common-tags';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
@@ -38,7 +38,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/maven2/org/scalatest/')
         .reply(
           200,
-          codeBlock`
+          html`
             <a href="scalatest/">scalatest/</a>
             <a href="scalatest_2.12/">scalatest_2.12/</a>
             <a href="scalatest_sjs2.12/">scalatest_sjs2.12/</a>
@@ -59,7 +59,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/maven2/org/foundweekends/sbt-bintray/')
         .reply(
           200,
-          codeBlock`
+          html`
             <html>
               <head>
               </head>
@@ -74,7 +74,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/maven2/org/foundweekends/sbt-bintray/scala_2.12/')
         .reply(
           200,
-          codeBlock`
+          html`
             <html>
               <head>
               </head>
@@ -89,7 +89,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/maven2/org/foundweekends/sbt-bintray/scala_2.12/sbt_1.0/')
         .reply(
           200,
-          codeBlock`
+          html`
             <html>
               <head>
               </head>
@@ -105,7 +105,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/maven2/io/get-coursier/')
         .reply(
           200,
-          codeBlock`
+          html`
             <a href="sbt-coursier_2.10_0.13/">sbt-coursier_2.10_0.13/</a>
             <a href="sbt-coursier_2.12_1.0/">sbt-coursier_2.12_1.0/</a>
             <a href="sbt-coursier_2.12_1.0.0-M5/">sbt-coursier_2.12_1.0.0-M5/</a>
@@ -117,7 +117,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/maven2/io/get-coursier/sbt-coursier_2.12_1.0/')
         .reply(
           200,
-          codeBlock`
+          html`
             <a href="2.0.0-RC2/">2.0.0-RC2/</a>
             <a href="2.0.0-RC6-1/">2.0.0-RC6-1/</a>
             <a href="2.0.0-RC6-2/">2.0.0-RC6-2/</a>
