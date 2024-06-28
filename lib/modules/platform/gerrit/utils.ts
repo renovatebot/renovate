@@ -2,6 +2,7 @@ import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
 import * as hostRules from '../../../util/host-rules';
+import { regEx } from '../../../util/regex';
 import { joinUrlParts, parseUrl } from '../../../util/url';
 import { hashBody } from '../pr-body';
 import type { Pr } from '../types';
@@ -94,9 +95,9 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
 
   if (change.current_revision) {
     const re = regEx(/^Renovate-Branch: (.+)$/m);
-    sourceBranch = re.exec(change.revisions[
-      change.current_revision
-    ]?.commit?.message ?? '')?.[1];
+    sourceBranch = re.exec(
+      change.revisions[change.current_revision]?.commit?.message ?? '',
+    )?.[1];
   }
 
   // for backwards compatibility
