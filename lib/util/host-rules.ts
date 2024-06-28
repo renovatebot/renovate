@@ -4,7 +4,7 @@ import type { CombinedHostRule, HostRule } from '../types';
 import { clone } from './clone';
 import * as sanitize from './sanitize';
 import { toBase64 } from './string';
-import { isHttpUrl, parseUrl } from './url';
+import { isHttpUrl, massageHostUrl, parseUrl } from './url';
 
 let hostRules: HostRule[] = [];
 
@@ -43,6 +43,7 @@ export function add(params: HostRule): void {
 
   const confidentialFields: (keyof HostRule)[] = ['password', 'token'];
   if (rule.matchHost) {
+    rule.matchHost = massageHostUrl(rule.matchHost);
     const parsedUrl = parseUrl(rule.matchHost);
     rule.resolvedHost = parsedUrl?.hostname ?? rule.matchHost;
     confidentialFields.forEach((field) => {
