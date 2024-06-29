@@ -107,6 +107,22 @@
 
     The Renovate team
 
+'auto:logs-packages':
+  comment: >
+    Hi there,
+
+
+    This issue or discussion needs some particular logs, in order to help you more.
+
+
+    Please ensure you are running with `LOG_LEVEL=debug` in order to get debug log messages. Next, look for the log message `packageFiles with updates`. This is often a large, structured log message which includes every detected package file, dependency, and update found.
+
+
+    Locate the relevant dependency/dependencies in that log message and then copy/paste them into this discussion. If in doubt you can copy/paste the full log message but it's usually not necessary.
+
+
+    Thanks, the Renovate team
+
 'new package manager':
   comment: >
     Hi there,
