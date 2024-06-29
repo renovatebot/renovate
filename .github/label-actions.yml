@@ -381,3 +381,16 @@
 
 
     Thanks, the Renovate team
+
+'auto:idea-rewrite':
+  comment: >
+    Hi there,
+
+
+    The repository maintainers would like to convert this idea into a Feature Request issue, but either the original title/description is either not ready.
+
+
+    Please review the title/description to reflect the current state of the idea so that it's ready for direct conversion into an issue. You may need to copy/pate examples, links or other text from comments into the original description. Once this is done to your satisfaction, please let us know and we'll convert it into an issue.
+
+
+    Thanks, the Renovate team
