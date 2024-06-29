@@ -339,3 +339,45 @@
 
 
     Thanks, the Renovate team
+
+'auto:bug-to-idea':
+  comment: >
+    Hi there,
+
+
+    The bad news is that you've submitted a bug report for something which a maintainer has assessed is not a bug, and this Discussion will be closed to avoid confusing other users. Bugs are things which are not working as intended or documented, and that is not the case here. This doesn't mean that the behavior is good, but we can't treat every missing or unforeseen feature as a bug or else the term bug loses its meaning.
+
+
+    The good news is that a maintainer agrees with your idea in general and would like you to resubmit with [Suggest an Idea](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea) so that it can be converted into a feature request issue.
+
+
+    You're welcome to copy/paste as much of this Discussion as you wish, but please make sure to explain the problem in terms of a feature request, focusing on what intelligence Renovate needs to add, and how/when it should know to do so.
+
+
+    Thanks, the Renovate team
+
+'auto:bug-invalid':
+  comment: >
+    Hi there,
+
+
+    This is an automated message to flag to future readers of this discussion that it has been closed because it is not a bug, and behaving as designed.
+
+
+    The behavior which the the original poster thought was a bug is intentional behavior, for reasons which have hopefully been explained in addition to this message.
+
+
+    We're now closing this discussion to avoid confusion for future readers. If you have an idea for a new feature or an improvement to an existing one, please submit it as a [Suggest an Idea](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea).
+
+
+    Thanks, the Renovate team
+
+'auto:bug-converted':
+  comment: >
+    Hi there,
+
+
+    This is an automated message to flag that this bug has been confirmed and converted to an issue. This Discussion will be closed so that any further discussion can happen in the issue.
+
+
+    Thanks, the Renovate team
