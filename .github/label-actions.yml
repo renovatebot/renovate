@@ -370,6 +370,9 @@
     You're welcome to copy/paste as much of this Discussion as you wish, but please make sure to explain the problem in terms of a feature request, focusing on what intelligence Renovate needs to add, and how/when it should know to do so.
 
 
+    For more details on Bug report handling in this repo, please see https://github.com/renovatebot/renovate/blob/main/docs/development/bug-handling.md
+
+
     Thanks, the Renovate team
 
 'auto:bug-invalid':
@@ -384,6 +387,9 @@
 
 
     We're now closing this discussion to avoid confusion for future readers. If you have an idea for a new feature or an improvement to an existing one, please submit it as a [Suggest an Idea](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea).
+
+
+    For more details on Bug report handling in this repo, please see https://github.com/renovatebot/renovate/blob/main/docs/development/bug-handling.md
 
 
     Thanks, the Renovate team
