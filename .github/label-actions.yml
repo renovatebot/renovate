@@ -416,3 +416,17 @@
 
 
     Thanks, the Renovate team
+
+'auto:no-slas':
+  comment: >
+    Hi there,
+
+
+    This is a reminder that there are no SLAs in Open Source, and when you post messages like "Any update on this?" or "When will this be fixed?" or chase a maintainer to answer your personal question then it will be seen as demanding or impatient and may result in a block if occurring multiple times.
+
+
+    Learn more about how we prioritize Renovate work here: https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#how-we-prioritize-work.
+    If you're already a paying Mend.io customer, please get in touch with your support or customer contact to let them know that this issue is important to you.
+
+
+    Thanks, the Renovate team
