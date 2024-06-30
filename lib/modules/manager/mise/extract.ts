@@ -39,13 +39,10 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         version = toolData[0]; // Get the first version in the array
       }
 
-      if (version) {
-        // Proceed only if a version is available
-        const depName = name.trim();
-        const toolConfig = getToolConfig(depName, version);
-        const dep = createDependency(depName, version, toolConfig);
-        deps.push(dep);
-      }
+      const depName = name.trim();
+      const toolConfig = getToolConfig(depName, version);
+      const dep = createDependency(depName, version, toolConfig);
+      deps.push(dep);
     }
   }
 
@@ -54,8 +51,12 @@ export function extractPackageFile(content: string): PackageFileContent | null {
 
 function getToolConfig(
   name: string,
-  version: string,
+  version: string | undefined,
 ): ToolingConfig | undefined {
+  if (version === undefined) {
+    return undefined; // Early return if version is undefined
+  }
+
   let toolDefinition = miseTooling[name];
   let config = toolDefinition
     ? typeof toolDefinition.config === 'function'
@@ -79,19 +80,26 @@ function getToolConfig(
 
 function createDependency(
   name: string,
-  version: string,
+  version?: string,
   config?: ToolingConfig,
 ): PackageDependency {
-  if (config) {
-    return {
-      depName: name,
-      currentValue: version,
-      ...config,
-    };
+  if (version) {
+    if (config) {
+      return {
+        depName: name,
+        currentValue: version,
+        ...config,
+      };
+    } else {
+      return {
+        depName: name,
+        skipReason: 'unsupported-datasource',
+      };
+    }
   } else {
     return {
       depName: name,
-      skipReason: 'unsupported-datasource',
+      skipReason: 'unspecified-version',
     };
   }
 }

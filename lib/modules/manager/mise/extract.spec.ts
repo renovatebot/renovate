@@ -10,6 +10,7 @@ const mise3toml = Fixtures.get('Mise.3.toml');
 const mise4toml = Fixtures.get('Mise.4.toml');
 const mise5toml = Fixtures.get('Mise.5.toml');
 const mise6toml = Fixtures.get('Mise.6.toml');
+const mise7toml = Fixtures.get('Mise.7.toml');
 
 describe('modules/manager/mise/extract', () => {
   describe('extractPackageFile()', () => {
@@ -93,6 +94,22 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('provides skipReason for missing version', () => {
+      const missingVersion = codeBlock`
+      [tools]
+      python = {virtualenv='.venv'}
+    `;
+      const result = extractPackageFile(missingVersion);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'python',
+            skipReason: 'unspecified-version',
+          },
+        ],
+      });
+    });
+
     it('complete .mise.toml example', () => {
       const result = extractPackageFile(mise5toml);
       expect(result).toMatchObject({
@@ -111,6 +128,36 @@ describe('modules/manager/mise/extract', () => {
             depName: 'node',
             currentValue: '16',
             datasource: 'node-version',
+          },
+        ],
+      });
+    });
+
+    it('complete example with skip', () => {
+      const result = extractPackageFile(mise7toml);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+          {
+            depName: 'erlang',
+            currentValue: '23.3',
+            datasource: 'github-tags',
+          },
+          {
+            depName: 'terraform',
+            currentValue: '1.8.0',
+          },
+          {
+            depName: 'python',
+            skipReason: 'unspecified-version',
+          },
+          {
+            depName: 'fake-tool',
+            skipReason: 'unsupported-datasource',
           },
         ],
       });
