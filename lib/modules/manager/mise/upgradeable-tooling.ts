@@ -51,6 +51,15 @@ export const miseTooling: Record<string, ToolingDefinition> = {
   java: {
     misePluginUrl: 'https://mise.jdx.dev/lang/java.html',
     config: (version) => {
+      // no prefix is shorthand for openjdk
+      const versionMatch = version.match(/^(\d\S+)/)?.[1];
+      if (versionMatch) {
+        return {
+          datasource: JavaVersionDatasource.id,
+          packageName: 'java-jdk',
+          currentValue: versionMatch,
+        };
+      }
       const adoptOpenJdkMatches = version.match(
         /^adoptopenjdk-(?<version>\d\S+)/,
       )?.groups;
@@ -59,16 +68,6 @@ export const miseTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: adoptOpenJdkMatches.version,
-        };
-      }
-      const adoptOpenJreMatches = version.match(
-        /^adoptopenjdk-jre-(?<version>\d\S+)/,
-      )?.groups;
-      if (adoptOpenJreMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jre',
-          currentValue: adoptOpenJreMatches.version,
         };
       }
       const semeruJdkMatches = version.match(
@@ -81,16 +80,6 @@ export const miseTooling: Record<string, ToolingDefinition> = {
           currentValue: semeruJdkMatches.version,
         };
       }
-      const semeruJreMatches = version.match(
-        /^semeru-jre-openj9-(?<version>\d\S+)_openj9-\d\S+/,
-      )?.groups;
-      if (semeruJreMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jre',
-          currentValue: semeruJreMatches.version,
-        };
-      }
       const temurinJdkMatches = version.match(
         /^temurin-(?<version>\d\S+)/,
       )?.groups;
@@ -101,14 +90,32 @@ export const miseTooling: Record<string, ToolingDefinition> = {
           currentValue: temurinJdkMatches.version,
         };
       }
-      const temurinJreMatches = version.match(
-        /^temurin-jre-(?<version>\d\S+)/,
+      const correttoJdkMatches = version.match(
+        /^corretto-(?<version>\d\S+)/,
       )?.groups;
-      if (temurinJreMatches) {
+      if (correttoJdkMatches) {
         return {
           datasource: JavaVersionDatasource.id,
-          packageName: 'java-jre',
-          currentValue: temurinJreMatches.version,
+          packageName: 'java-jdk',
+          currentValue: correttoJdkMatches.version,
+        };
+      }
+      const zuluJdkMatches = version.match(/^zulu-(?<version>\d\S+)/)?.groups;
+      if (zuluJdkMatches) {
+        return {
+          datasource: JavaVersionDatasource.id,
+          packageName: 'java-jdk',
+          currentValue: zuluJdkMatches.version,
+        };
+      }
+      const oracleGraalvmJdkMatches = version.match(
+        /^oracle-graalvm-(?<version>\d\S+)/,
+      )?.groups;
+      if (oracleGraalvmJdkMatches) {
+        return {
+          datasource: JavaVersionDatasource.id,
+          packageName: 'java-jdk',
+          currentValue: oracleGraalvmJdkMatches.version,
         };
       }
 
