@@ -13,7 +13,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   try {
     misefile = parseToml(content) as MiseFile;
   } catch (err) {
-    logger.debug({ err }, 'Error parsing .mise.toml file');
+    logger.debug({ err }, 'Mise: error parsing .mise.toml');
     return null;
   }
 
@@ -25,17 +25,20 @@ export function extractPackageFile(content: string): PackageFileContent | null {
       let version: string | undefined;
 
       if (typeof toolData === 'string') {
-        // Handle the string case (e.g., 'erlang = "23.3"')
+        // Handle the string case
+        // e.g. 'erlang = "23.3"'
         version = toolData;
       } else if (
         typeof toolData === 'object' &&
         'version' in toolData &&
         typeof toolData.version === 'string'
       ) {
-        // Handle the object case with a string version (e.g., 'python = { version = "3.11.2" }')
+        // Handle the object case with a string version
+        // e.g. 'python = { version = "3.11.2" }'
         version = toolData.version;
       } else if (Array.isArray(toolData)) {
-        // Handle the array case (e.g., 'erlang = ["23.3", "24.0"]')
+        // Handle the array case
+        // e.g. 'erlang = ["23.3", "24.0"]'
         version = toolData[0]; // Get the first version in the array
       }
 
