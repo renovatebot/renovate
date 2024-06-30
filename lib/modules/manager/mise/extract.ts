@@ -21,15 +21,32 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   const tools = misefile.tools;
 
   if (tools) {
-    Object.entries(tools).forEach(([name, versions]) => {
-      const depName = name.trim();
-      const version = Array.isArray(versions) ? versions[0] : versions;
+    for (const [name, toolData] of Object.entries(tools)) {
+      let version: string | undefined;
 
-      const toolConfig = getToolConfig(depName, version);
-      const dep = createDependency(depName, version, toolConfig);
+      if (typeof toolData === 'string') {
+        // Handle the string case (e.g., 'erlang = "23.3"')
+        version = toolData;
+      } else if (
+        typeof toolData === 'object' &&
+        'version' in toolData &&
+        typeof toolData.version === 'string'
+      ) {
+        // Handle the object case with a string version (e.g., 'python = { version = "3.11.2" }')
+        version = toolData.version;
+      } else if (Array.isArray(toolData)) {
+        // Handle the array case (e.g., 'erlang = ["23.3", "24.0"]')
+        version = toolData[0]; // Get the first version in the array
+      }
 
-      deps.push(dep);
-    });
+      if (version) {
+        // Proceed only if a version is available
+        const depName = name.trim();
+        const toolConfig = getToolConfig(depName, version);
+        const dep = createDependency(depName, version, toolConfig);
+        deps.push(dep);
+      }
+    }
   }
 
   return deps.length ? { deps } : null;

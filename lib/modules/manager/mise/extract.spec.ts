@@ -9,6 +9,7 @@ const mise2toml = Fixtures.get('Mise.2.toml');
 const mise3toml = Fixtures.get('Mise.3.toml');
 const mise4toml = Fixtures.get('Mise.4.toml');
 const mise5toml = Fixtures.get('Mise.5.toml');
+const mise6toml = Fixtures.get('Mise.6.toml');
 
 describe('modules/manager/mise/extract', () => {
   describe('extractPackageFile()', () => {
@@ -63,6 +64,18 @@ describe('modules/manager/mise/extract', () => {
             depName: 'node',
             currentValue: '16',
             datasource: 'node-version',
+          },
+        ],
+      });
+    });
+
+    it('extracts tools with plugin options', () => {
+      const result = extractPackageFile(mise6toml);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'python',
+            currentValue: '3.11',
           },
         ],
       });
