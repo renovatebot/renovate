@@ -356,7 +356,7 @@ describe('util/git/auth', () => {
         getGitAuthenticatedEnvironmentVariables('https://git.mycompany.com/', {
           token: 'token1234',
           hostType: 'bitbucket-server',
-          matchHost: 'git.mycompay.com',
+          matchHost: 'git.mycompany.com',
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
