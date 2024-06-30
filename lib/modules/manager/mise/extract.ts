@@ -62,7 +62,7 @@ function parseVersion(
 
 function getToolConfig(
   name: string,
-  version?: string,
+  version: string | undefined,
 ): ToolingConfig | undefined {
   if (!version) {
     return undefined; // Early return if version is undefined
@@ -86,8 +86,8 @@ function getToolConfig(
 
 function createDependency(
   name: string,
-  version?: string,
-  config?: ToolingConfig,
+  version: string | undefined,
+  config: ToolingConfig | undefined,
 ): PackageDependency {
   if (!version) {
     return { depName: name, skipReason: 'unspecified-version' };
