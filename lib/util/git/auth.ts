@@ -122,12 +122,8 @@ export function getAuthenticationRules(
   const authenticationRules = [];
   const hasUser = token.split(':').length > 1;
   const insteadUrl = parseGitUrl(gitUrl);
-  let type = hostType;
-  if (!type) {
-    type = detectPlatform(gitUrl);
-  }
 
-  if (type === 'bitbucket-server') {
+  if (hostType === 'bitbucket-server') {
     insteadUrl.source = 'bitbucket-server';
   }
 
@@ -137,7 +133,7 @@ export function getAuthenticationRules(
     : 'https';
 
   const sshUrl = { ...insteadUrl };
-  if (type === 'bitbucket-server' && !sshUrl.port) {
+  if (hostType === 'bitbucket-server' && !sshUrl.port) {
     // By default, bitbucket-server SSH port is 7999.
     // For non-default port, the generated auth config will likely be incorrect.
     sshUrl.port = 7999;
