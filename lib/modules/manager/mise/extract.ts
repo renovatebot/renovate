@@ -54,9 +54,9 @@ export function extractPackageFile(content: string): PackageFileContent | null {
 
 function getToolConfig(
   name: string,
-  version: string | undefined,
+  version?: string,
 ): ToolingConfig | undefined {
-  if (version === undefined) {
+  if (!version) {
     return undefined; // Early return if version is undefined
   }
 
