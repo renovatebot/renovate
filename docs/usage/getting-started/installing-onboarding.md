@@ -1,5 +1,15 @@
 # Installing and onboarding Renovate into repositories
 
+## About the security and privacy of installing Renovate
+
+Read the [Security and Permissions](../security-and-permissions.md) page to learn more about:
+
+- Renovate's security stance
+- What do if you need to use certificed software
+- The security/disclosure process
+- Permissions
+- Privacy
+
 ## Repository installation
 
 Renovate administrators can configure Renovate to either "autodiscover" installed repositories, or configure a fixed list of repository names to operate on.

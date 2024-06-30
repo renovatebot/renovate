@@ -10,11 +10,9 @@ import type { ChangeLogResult } from './types';
 export * from './types';
 
 export async function getChangeLogJSON(
-  _config: BranchUpgradeConfig,
+  config: BranchUpgradeConfig,
 ): Promise<ChangeLogResult | null> {
-  const sourceUrl = _config.customChangelogUrl ?? _config.sourceUrl!;
-  const config: BranchUpgradeConfig = { ..._config, sourceUrl };
-  const { versioning, currentVersion, newVersion } = config;
+  const { sourceUrl, versioning, currentVersion, newVersion } = config;
   try {
     if (!(sourceUrl && currentVersion && newVersion)) {
       return null;

@@ -34,7 +34,7 @@ Set to `off` if changelog fetching is causing a problem.
 
 Set to `branch` if you have an advanced use case where you're embedding changelogs in the Git commit itself, we don't recommend this due to its potential size.
 
-### [`customChangelogUrl`](../configuration-options.md#customchangelogurl)
+### [`changelogUrl`](../configuration-options.md#changelogurl)
 
 This doesn't help with _fetching_ the changelogs, but if you configure it then Renovate will include a link to this URL in the PR body, so users can click through to read the changelog.
 

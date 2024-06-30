@@ -83,6 +83,7 @@ export class MigrationsService {
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
     ['adoptium-java', 'java-version'],
     ['azureAutoApprove', 'autoApprove'],
+    ['customChangelogUrl', 'changelogUrl'],
     ['endpoints', 'hostRules'],
     ['excludedPackageNames', 'excludePackageNames'],
     ['exposeEnv', 'exposeAllEnv'],

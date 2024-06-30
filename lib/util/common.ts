@@ -1,6 +1,7 @@
 import JSON5 from 'json5';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
+  BITBUCKET_SERVER_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
@@ -17,13 +18,23 @@ import { parseUrl } from './url';
  */
 export function detectPlatform(
   url: string,
-): 'azure' | 'bitbucket' | 'gitea' | 'github' | 'gitlab' | null {
+):
+  | 'azure'
+  | 'bitbucket'
+  | 'bitbucket-server'
+  | 'gitea'
+  | 'github'
+  | 'gitlab'
+  | null {
   const { hostname } = parseUrl(url) ?? {};
   if (hostname === 'dev.azure.com' || hostname?.endsWith('.visualstudio.com')) {
     return 'azure';
   }
-  if (hostname === 'bitbucket.org' || hostname?.includes('bitbucket')) {
+  if (hostname === 'bitbucket.org' || hostname === 'bitbucket.com') {
     return 'bitbucket';
+  }
+  if (hostname?.includes('bitbucket')) {
+    return 'bitbucket-server';
   }
   if (
     hostname &&
@@ -46,6 +57,9 @@ export function detectPlatform(
     return null;
   }
 
+  if (BITBUCKET_SERVER_API_USING_HOST_TYPES.includes(hostType)) {
+    return 'bitbucket-server';
+  }
   if (BITBUCKET_API_USING_HOST_TYPES.includes(hostType)) {
     return 'bitbucket';
   }

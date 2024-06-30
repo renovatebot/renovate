@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { joinUrlParts } from '../../../util/url';
 import * as hexVersioning from '../../versioning/hex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -12,9 +13,7 @@ export class HexDatasource extends Datasource {
     super(HexDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://hex.pm/'];
-
-  override readonly customRegistrySupport = false;
+  override readonly defaultRegistryUrls = ['https://hex.pm'];
 
   override readonly defaultVersioning = hexVersioning.id;
 
@@ -47,7 +46,11 @@ export class HexDatasource extends Datasource {
     const organizationUrlPrefix = organizationName
       ? `repos/${organizationName}/`
       : '';
-    const hexUrl = `${registryUrl}api/${organizationUrlPrefix}packages/${hexPackageName}`;
+
+    const hexUrl = joinUrlParts(
+      registryUrl,
+      `/api/${organizationUrlPrefix}packages/${hexPackageName}`,
+    );
 
     const { val: result, err } = await this.http
       .getJsonSafe(hexUrl, HexRelease)

@@ -415,6 +415,7 @@ const repoGroups = {
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
   'opentelemetry-java': 'https://github.com/open-telemetry/opentelemetry-java',
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
+  'opentelemetry-rust': 'https://github.com/open-telemetry/opentelemetry-rust',
   orleans: 'https://github.com/dotnet/orleans',
   'panda-css': 'https://github.com/chakra-ui/panda',
   parcel: 'https://github.com/parcel-bundler/parcel',
@@ -451,6 +452,7 @@ const repoGroups = {
   'reg-suit': 'https://github.com/reg-viz/reg-suit',
   remark: 'https://github.com/remarkjs/remark',
   remix: 'https://github.com/remix-run/remix',
+  retrofit: 'https://github.com/square/retrofit',
   rjsf: 'https://github.com/rjsf-team/react-jsonschema-form',
   router5: 'https://github.com/router5/router5',
   'rust-futures': 'https://github.com/rust-lang/futures-rs',
@@ -508,6 +510,7 @@ const repoGroups = {
   'trust-dns': 'https://github.com/bluejekyll/trust-dns',
   tsoa: 'https://github.com/lukeautry/tsoa',
   turbo: 'https://github.com/vercel/turbo',
+  turf: 'https://github.com/Turfjs/turf',
   'typed-signalr':
     'https://github.com/nenoNaninu/TypedSignalR.Client.TypeScript',
   typefaces: 'https://github.com/KyleAMathews/typefaces',

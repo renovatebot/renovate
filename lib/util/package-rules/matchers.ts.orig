@@ -24,19 +24,44 @@ export default matchers;
 // applyPackageRules evaluates matchers in the order of insertion and returns early on failure.
 // Therefore, when multiple matchers are set in a single packageRule, some may not be checked.
 // Since matchConfidence matcher can abort the run due to unauthenticated use, it should be evaluated first.
+<<<<<<< HEAD
+matchers.push([new MergeConfidenceMatcher()]);
+matchers.push([new RepositoriesMatcher()]);
+matchers.push([new BaseBranchesMatcher()]);
+matchers.push([new CategoriesMatcher()]);
+matchers.push([new ManagersMatcher()]);
+matchers.push([new FileNamesMatcher()]);
+matchers.push([new DatasourcesMatcher()]);
+matchers.push([
+  new DepNameMatcher(),
+  new DepPatternsMatcher(),
+  new DepPrefixesMatcher(),
+  new PackageNameMatcher(),
+  new PackagePatternsMatcher(),
+  new PackagePrefixesMatcher(),
+]);
+matchers.push([new DepTypesMatcher()]);
+matchers.push([new CurrentValueMatcher()]);
+matchers.push([new CurrentVersionMatcher()]);
+matchers.push([new UpdateTypesMatcher()]);
+matchers.push([new SourceUrlsMatcher(), new SourceUrlPrefixesMatcher()]);
+matchers.push([new NewValueMatcher()]);
+matchers.push([new CurrentAgeMatcher()]);
+=======
 matchers.push(new MergeConfidenceMatcher());
-matchers.push(new RepositoriesMatcher());
-matchers.push(new BaseBranchesMatcher());
-matchers.push(new CategoriesMatcher());
-matchers.push(new ManagersMatcher());
-matchers.push(new FileNamesMatcher());
-matchers.push(new DatasourcesMatcher());
-matchers.push(new PackageNameMatcher());
 matchers.push(new DepNameMatcher());
+matchers.push(new PackageNameMatcher());
+matchers.push(new FileNamesMatcher());
 matchers.push(new DepTypesMatcher());
-matchers.push(new CurrentValueMatcher());
-matchers.push(new CurrentVersionMatcher());
+matchers.push(new BaseBranchesMatcher());
+matchers.push(new ManagersMatcher());
+matchers.push(new DatasourcesMatcher());
 matchers.push(new UpdateTypesMatcher());
 matchers.push(new SourceUrlsMatcher());
+matchers.push(new CurrentValueMatcher());
 matchers.push(new NewValueMatcher());
+matchers.push(new CurrentVersionMatcher());
+matchers.push(new RepositoriesMatcher());
+matchers.push(new CategoriesMatcher());
 matchers.push(new CurrentAgeMatcher());
+>>>>>>> b66597a89 (feat(packageRules): migrate matchers and excludes (#28602))

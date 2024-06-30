@@ -81,6 +81,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     // Find CODEOWNERS file
     const codeOwnersFile =
       (await readLocalFile('CODEOWNERS', 'utf8')) ??
+      (await readLocalFile('.bitbucket/CODEOWNERS', 'utf8')) ??
       (await readLocalFile('.github/CODEOWNERS', 'utf8')) ??
       (await readLocalFile('.gitlab/CODEOWNERS', 'utf8')) ??
       (await readLocalFile('docs/CODEOWNERS', 'utf8'));

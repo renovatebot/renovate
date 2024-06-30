@@ -74,7 +74,33 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
           currentValue,
         });
       }
+    } else if (name === 'Sdk') {
+      const depName = attr?.Name;
+      const version = attr?.Version;
+      // if sdk element is present it will always have the Name field but the Version is an optional field
+      if (depName && version) {
+        results.push({
+          depName,
+          currentValue: version,
+          depType: 'msbuild-sdk',
+          datasource: NugetDatasource.id,
+        });
+      }
     } else {
+      if (name === 'Project') {
+        if (attr?.Sdk) {
+          const str = attr?.Sdk;
+          const [name, version] = str.split('/');
+          if (name && version) {
+            results.push({
+              depName: name,
+              depType: 'msbuild-sdk',
+              currentValue: version,
+              datasource: NugetDatasource.id,
+            });
+          }
+        }
+      }
       todo.push(...(child.children.filter(isXmlElem) as XmlElement[]));
     }
   }

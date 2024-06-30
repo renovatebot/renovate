@@ -168,11 +168,9 @@ export default async function executePostUpgradeCommands(
       config.updatedPackageFiles.length > 0) ||
     (is.array(config.updatedArtifacts) && config.updatedArtifacts.length > 0);
 
-  if (
+  if (!hasChangedFiles) {
     /* Only run post-upgrade tasks if there are changes to package files... */
-    !hasChangedFiles ||
-    is.emptyArray(GlobalConfig.get('allowedPostUpgradeCommands'))
-  ) {
+    logger.debug('No changes to package files, skipping post-upgrade tasks');
     return null;
   }
 

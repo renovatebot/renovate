@@ -86,6 +86,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('returns null if all unchanged', async () => {
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
+    fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     expect(
@@ -106,6 +107,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('returns null if no config.lockFiles', async () => {
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
+    fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     expect(
       await updateArtifacts({
@@ -125,6 +127,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('returns updated requirements.txt', async () => {
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
+    fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
@@ -162,6 +165,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
+    fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
     expect(
       await updateArtifacts({
@@ -215,6 +219,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
+    fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.in',
@@ -328,6 +333,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
   it('catches errors', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('Current requirements.txt');
+    fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
@@ -348,6 +354,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('returns updated requirements.txt when doing lockfile maintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
+    fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
@@ -370,6 +377,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('uses --upgrade-package only for isLockfileUpdate', async () => {
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
+    fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
@@ -397,6 +405,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('uses pip-compile version from config', async () => {
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
+    fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     GlobalConfig.set(dockerAdminConfig);
     // pip-tools
     datasource.getPkgReleases.mockResolvedValueOnce({

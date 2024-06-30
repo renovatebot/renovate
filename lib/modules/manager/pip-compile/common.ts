@@ -281,13 +281,17 @@ function cleanUrl(url: string): URL | null {
   }
 }
 
-export function getRegistryCredVarsFromPackageFile(
-  packageFile: PackageFileContent | null,
+export function getRegistryCredVarsFromPackageFiles(
+  packageFiles: PackageFileContent[],
 ): ExtraEnv<string> {
-  const urls = [
-    ...(packageFile?.registryUrls ?? []),
-    ...(packageFile?.additionalRegistryUrls ?? []),
-  ];
+  const urls: string[] = [];
+  for (const packageFile of packageFiles) {
+    urls.push(
+      ...(packageFile.registryUrls ?? []),
+      ...(packageFile.additionalRegistryUrls ?? []),
+    );
+  }
+  logger.debug(urls, 'Extracted registry URLs from package files');
 
   const uniqueHosts = new Set<URL>(
     urls.map(cleanUrl).filter(isNotNullOrUndefined),
@@ -316,7 +320,7 @@ export function matchManager(filename: string): SupportedManagers | 'unknown' {
     return 'pep621';
   }
   // naive, could be improved, maybe use pip_requirements.fileMatch
-  if (filename.endsWith('.in')) {
+  if (filename.endsWith('.in') || filename.endsWith('.txt')) {
     return 'pip_requirements';
   }
   return 'unknown';

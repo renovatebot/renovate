@@ -27,3 +27,16 @@ export function normalizeScalaVersion(str: string): string {
   // istanbul ignore next
   return str;
 }
+
+export function sortPackageFiles(packageFiles: string[]): string[] {
+  // process build.sbt first
+  const sortedPackageFiles = [...packageFiles];
+  const buildSbtIndex = sortedPackageFiles.findIndex((file) =>
+    file.endsWith('build.sbt'),
+  );
+  if (buildSbtIndex !== -1) {
+    const buildSbt = sortedPackageFiles.splice(buildSbtIndex, 1)[0];
+    sortedPackageFiles.unshift(buildSbt);
+  }
+  return sortedPackageFiles;
+}
