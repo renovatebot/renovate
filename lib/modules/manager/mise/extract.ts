@@ -2,7 +2,7 @@ import { logger } from '../../../logger';
 import { parse as parseToml } from '../../../util/toml';
 import type { ToolingConfig } from '../asdf/upgradeable-tooling';
 import type { PackageDependency, PackageFileContent } from '../types';
-import type { MiseFile } from './types';
+import type { MiseFile, MisePackages } from './types';
 import {
   ToolingDefinition,
   asdfTooling,
@@ -37,7 +37,9 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   return deps.length ? { deps } : null;
 }
 
-function parseVersion(toolData: any): string | undefined {
+function parseVersion(
+  toolData: MisePackages[keyof MisePackages],
+): string | undefined {
   if (typeof toolData === 'string') {
     // Handle the string case
     // e.g. 'erlang = "23.3"'
