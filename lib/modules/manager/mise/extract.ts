@@ -26,26 +26,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
 
   if (tools) {
     for (const [name, toolData] of Object.entries(tools)) {
-      let version: string | undefined;
-
-      if (typeof toolData === 'string') {
-        // Handle the string case
-        // e.g. 'erlang = "23.3"'
-        version = toolData;
-      } else if (
-        typeof toolData === 'object' &&
-        'version' in toolData &&
-        typeof toolData.version === 'string'
-      ) {
-        // Handle the object case with a string version
-        // e.g. 'python = { version = "3.11.2" }'
-        version = toolData.version;
-      } else if (Array.isArray(toolData)) {
-        // Handle the array case
-        // e.g. 'erlang = ["23.3", "24.0"]'
-        version = toolData[0]; // Get the first version in the array
-      }
-
+      const version = parseVersion(toolData);
       const depName = name.trim();
       const toolConfig = getToolConfig(depName, version);
       const dep = createDependency(depName, version, toolConfig);
@@ -54,6 +35,27 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   }
 
   return deps.length ? { deps } : null;
+}
+
+function parseVersion(toolData: any): string | undefined {
+  if (typeof toolData === 'string') {
+    // Handle the string case
+    // e.g. 'erlang = "23.3"'
+    return toolData;
+  } else if (
+    typeof toolData === 'object' &&
+    'version' in toolData &&
+    typeof toolData.version === 'string'
+  ) {
+    // Handle the object case with a string version
+    // e.g. 'python = { version = "3.11.2" }'
+    return toolData.version;
+  } else if (Array.isArray(toolData)) {
+    // Handle the array case
+    // e.g. 'erlang = ["23.3", "24.0"]'
+    return toolData[0]; // Get the first version in the array
+  }
+  return undefined; // Return undefined if no version is found
 }
 
 function getToolConfig(
