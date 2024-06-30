@@ -1,8 +1,9 @@
 import { logger } from '../../../logger';
 import { parse as parseToml } from '../../../util/toml';
+import type { ToolingConfig } from '../asdf/upgradeable-tooling';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { MiseFile } from './types';
-import { ToolingConfig, asdfTooling, miseTooling } from './upgradeable-tooling';
+import { asdfTooling, miseTooling } from './upgradeable-tooling';
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace(`mise.extractPackageFile()`);

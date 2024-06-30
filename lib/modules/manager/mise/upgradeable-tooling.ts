@@ -5,33 +5,14 @@ import { NodeVersionDatasource } from '../../datasource/node-version';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import * as regexVersioning from '../../versioning/regex';
 import * as semverVersioning from '../../versioning/semver';
-import { upgradeableTooling } from '../asdf/upgradeable-tooling';
-import type { PackageDependency } from '../types';
+import { ToolingConfig, upgradeableTooling } from '../asdf/upgradeable-tooling';
 
-export type StaticTooling = Partial<PackageDependency> &
-  Required<Pick<PackageDependency, 'datasource'>>;
-
-export type DynamicTooling = (version: string) => StaticTooling | undefined;
-
-export type ToolingConfig = StaticTooling | DynamicTooling;
 export interface ToolingDefinition {
   config: ToolingConfig;
   misePluginUrl?: string;
-  asdfPluginUrl?: string;
 }
 
 export const asdfTooling = upgradeableTooling;
-
-export const miseCorePlugins = [
-  'bun',
-  'deno',
-  'erlang',
-  'go',
-  'java',
-  'node',
-  'python',
-  'ruby',
-];
 
 export const miseTooling: Record<string, ToolingDefinition> = {
   bun: {
