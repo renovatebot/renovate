@@ -1,2 +1,3 @@
 [tools]
-fake-tool = '1.0.0'
+erlang = ['23.3', '24.0']
+node = ['16', 'prefix:20', 'ref:master', 'path:~/.nodes/14']

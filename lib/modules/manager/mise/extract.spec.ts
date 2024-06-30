@@ -6,6 +6,7 @@ jest.mock('../../../util/fs');
 const mise1toml = Fixtures.get('Mise.1.toml');
 const mise2toml = Fixtures.get('Mise.2.toml');
 const mise3toml = Fixtures.get('Mise.3.toml');
+const mise4toml = Fixtures.get('Mise.4.toml');
 
 describe('modules/manager/mise/extract', () => {
   describe('extractPackageFile()', () => {
@@ -17,14 +18,10 @@ describe('modules/manager/mise/extract', () => {
       expect(extractPackageFile('foo')).toBeNull();
     });
 
-    it('extracts tools', () => {
+    it('extracts tools - mise core plugins', () => {
       const result = extractPackageFile(mise1toml);
       expect(result).toMatchObject({
         deps: [
-          {
-            depName: 'terraform',
-            currentValue: '1.8.0',
-          },
           {
             depName: 'erlang',
             currentValue: '23.3',
@@ -39,8 +36,20 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('extracts tools with multiple versions', () => {
+    it('extracts tools - asdf plugins', () => {
       const result = extractPackageFile(mise2toml);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'terraform',
+            currentValue: '1.8.0',
+          },
+        ],
+      });
+    });
+
+    it('extracts tools with multiple versions', () => {
+      const result = extractPackageFile(mise3toml);
       expect(result).toMatchObject({
         deps: [
           {
@@ -58,7 +67,7 @@ describe('modules/manager/mise/extract', () => {
     });
 
     it('invalid datasource', () => {
-      const result = extractPackageFile(mise3toml);
+      const result = extractPackageFile(mise4toml);
       expect(result).toMatchObject({
         deps: [
           {

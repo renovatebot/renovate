@@ -1,4 +1,3 @@
 [tools]
-terraform = '1.8.0'
 erlang = '23.3'
 node = '16'
