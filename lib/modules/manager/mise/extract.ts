@@ -3,7 +3,11 @@ import { parse as parseToml } from '../../../util/toml';
 import type { ToolingConfig } from '../asdf/upgradeable-tooling';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { MiseFile } from './types';
-import { asdfTooling, miseTooling } from './upgradeable-tooling';
+import {
+  ToolingDefinition,
+  asdfTooling,
+  miseTooling,
+} from './upgradeable-tooling';
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace(`mise.extractPackageFile()`);
@@ -60,25 +64,20 @@ function getToolConfig(
     return undefined; // Early return if version is undefined
   }
 
-  let toolDefinition = miseTooling[name];
-  let config = toolDefinition
-    ? typeof toolDefinition.config === 'function'
-      ? toolDefinition.config(version)
-      : toolDefinition.config
-    : undefined;
-
-  // If config is not found in miseTooling, try asdfTooling
-  // Example being Java JRE - not in miseTooling but in asdfTooling
-  if (!config) {
-    toolDefinition = asdfTooling[name];
-    config = toolDefinition
-      ? typeof toolDefinition.config === 'function'
+  const getConfigFromTooling = (
+    toolingSource: Record<string, ToolingDefinition>,
+  ): ToolingConfig | undefined => {
+    const toolDefinition = toolingSource[name];
+    return (
+      toolDefinition &&
+      (typeof toolDefinition.config === 'function'
         ? toolDefinition.config(version)
-        : toolDefinition.config
-      : undefined;
-  }
+        : toolDefinition.config)
+    );
+  };
 
-  return config;
+  // Try to get the config from miseTooling first, then asdfTooling
+  return getConfigFromTooling(miseTooling) ?? getConfigFromTooling(asdfTooling);
 }
 
 function createDependency(
