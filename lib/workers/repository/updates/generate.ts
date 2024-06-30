@@ -13,6 +13,37 @@ import { uniq } from '../../../util/uniq';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { CommitMessage } from '../model/commit-message';
 
+function mergeProxy(
+  a: Record<string, unknown>,
+  b: Record<string, unknown>,
+): Record<string, unknown> {
+  const handler: ProxyHandler<Record<string, unknown>> = {
+    get(_target: any, prop: string) {
+      return a[prop] ?? b[prop];
+    },
+
+    has(_target: any, prop: PropertyKey): boolean {
+      return Object.hasOwn(a, prop) || Object.hasOwn(b, prop);
+    },
+
+    ownKeys(_target: any): string[] {
+      return Array.from(new Set(Object.keys(a).concat(Object.keys(b))));
+    },
+
+    getOwnPropertyDescriptor(
+      _target: any,
+      prop: PropertyKey,
+    ): PropertyDescriptor | undefined {
+      return (
+        Object.getOwnPropertyDescriptor(a, prop) ??
+        Object.getOwnPropertyDescriptor(b, prop)
+      );
+    },
+  };
+
+  return new Proxy<Record<string, unknown>>({} as any, handler);
+}
+
 function prettifyVersion(version: string): string {
   if (regEx(/^\d/).test(version)) {
     return `v${version}`;
@@ -208,14 +239,12 @@ export function generateBranchConfig(
       upgrade.isRange = false;
     }
     // Use templates to generate strings
+    const templateInput = mergeProxy({ upgrades: branchUpgrades }, upgrade);
     if (upgrade.semanticCommits === 'enabled' && !upgrade.commitMessagePrefix) {
       logger.trace('Upgrade has semantic commits enabled');
       let semanticPrefix = upgrade.semanticCommitType;
       if (upgrade.semanticCommitScope) {
-        semanticPrefix += `(${template.compile(
-          upgrade.semanticCommitScope,
-          upgrade,
-        )})`;
+        semanticPrefix += `(${template.compile(upgrade.semanticCommitScope, templateInput)})`;
       }
       upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix!);
       upgrade.toLowerCase =
@@ -226,10 +255,16 @@ export function generateBranchConfig(
     // Compile a few times in case there are nested templates
     upgrade.commitMessage = template.compile(
       upgrade.commitMessage ?? '',
-      upgrade,
+      templateInput,
     );
-    upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
-    upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
+    upgrade.commitMessage = template.compile(
+      upgrade.commitMessage,
+      templateInput,
+    );
+    upgrade.commitMessage = template.compile(
+      upgrade.commitMessage,
+      templateInput,
+    );
     // istanbul ignore if
     if (upgrade.commitMessage !== sanitize(upgrade.commitMessage)) {
       logger.debug(
@@ -253,10 +288,10 @@ export function generateBranchConfig(
 
     logger.trace(`commitMessage: ` + JSON.stringify(upgrade.commitMessage));
     if (upgrade.prTitle) {
-      upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
-      upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
+      upgrade.prTitle = template.compile(upgrade.prTitle, templateInput);
+      upgrade.prTitle = template.compile(upgrade.prTitle, templateInput);
       upgrade.prTitle = template
-        .compile(upgrade.prTitle, upgrade)
+        .compile(upgrade.prTitle, templateInput)
         .trim()
         .replace(regEx(/\s+/g), ' ');
       // istanbul ignore if
@@ -291,7 +326,7 @@ export function generateBranchConfig(
       }
     }
     // Compile again to allow for nested templates
-    upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
+    upgrade.prTitle = template.compile(upgrade.prTitle, templateInput);
     logger.trace(`prTitle: ` + JSON.stringify(upgrade.prTitle));
     config.upgrades.push(upgrade);
     if (upgrade.releaseTimestamp) {

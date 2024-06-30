@@ -1497,5 +1497,67 @@ describe('workers/repository/updates/generate', () => {
         expect(upgrade.depTypes).toEqual(res.depTypes);
       }
     });
+
+    it('allows upgrades in commitMessage', () => {
+      const group = {
+        commitMessageTopic: '{{{groupName}}}',
+        commitMessagePrefix:
+          '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
+        commitMessageExtra: '',
+      };
+
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          groupName: 'deps',
+          depName: 'dep1',
+          branchName: 'deps',
+          newValue: '1.2.0',
+          isGroup: true,
+          updateType: 'minor' as UpdateType,
+          fileReplacePosition: 1,
+          prBodyDefinitions: {
+            Issue: 'I1',
+          },
+          group,
+        },
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          groupName: 'deps',
+          depName: 'dep2',
+          branchName: 'deps',
+          newValue: '1.0.0',
+          isGroup: true,
+          updateType: 'major' as UpdateType,
+          fileReplacePosition: 2,
+          prBodyDefinitions: {
+            Issue: 'I2',
+          },
+          group,
+        },
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          groupName: 'deps',
+          depName: 'dep3',
+          branchName: 'deps',
+          newValue: '1.2.3',
+          isGroup: true,
+          updateType: 'patch' as UpdateType,
+          fileReplacePosition: 0,
+          prBodyDefinitions: {
+            Issue: 'I3',
+          },
+          group,
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res).toMatchObject({
+        commitMessage: 'I1 I2 I3 Update deps',
+        prTitle: 'I1 I2 I3 Update deps',
+      });
+    });
   });
 });
