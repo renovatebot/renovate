@@ -71,6 +71,7 @@ export function getGitAuthenticatedEnvironmentVariables(
 
     authenticationRules = getAuthenticationRules(
       originalGitUrl,
+      hostType,
       `${encodedUsername}:${encodedPassword}`,
     );
   }
@@ -106,7 +107,7 @@ function getAuthenticationRulesWithToken(
   if (type === 'gitlab') {
     token = `gitlab-ci-token:${authToken}`;
   }
-  return getAuthenticationRules(url, token);
+  return getAuthenticationRules(url, type, token);
 }
 
 /**
@@ -115,16 +116,32 @@ function getAuthenticationRulesWithToken(
  */
 export function getAuthenticationRules(
   gitUrl: string,
+  hostType: string | undefined | null,
   token: string,
 ): AuthenticationRule[] {
   const authenticationRules = [];
   const hasUser = token.split(':').length > 1;
   const insteadUrl = parseGitUrl(gitUrl);
+  let type = hostType;
+  if (!type) {
+    type = detectPlatform(gitUrl);
+  }
+
+  if (type === 'bitbucket-server') {
+    insteadUrl.source = 'bitbucket-server';
+  }
 
   const url = { ...insteadUrl };
   const protocol = regEx(/^https?$/).test(url.protocol)
     ? url.protocol
     : 'https';
+
+  const sshUrl = { ...insteadUrl };
+  if (type === 'bitbucket-server' && !sshUrl.port) {
+    // By default, bitbucket-server SSH port is 7999.
+    // For non-default port, the generated auth config will likely be incorrect.
+    sshUrl.port = 7999;
+  }
 
   // ssh protocol with user if empty
   url.token = hasUser ? token : `ssh:${token}`;
@@ -132,16 +149,16 @@ export function getAuthenticationRules(
     url: url.toString(protocol),
     // only edge case, need to stringify ourself because the exact syntax is not supported by the library
     // https://github.com/IonicaBizau/git-url-parse/blob/246c9119fb42c2ea1c280028fe77c53eb34c190c/lib/index.js#L246
-    insteadOf: `ssh://git@${insteadUrl.resource}${
-      insteadUrl.port ? `:${insteadUrl.port}` : ''
-    }/${insteadUrl.full_name}${insteadUrl.git_suffix ? '.git' : ''}`,
+    insteadOf: `ssh://git@${sshUrl.resource}${
+      sshUrl.port ? `:${sshUrl.port}` : ''
+    }/${sshUrl.full_name}${sshUrl.git_suffix ? '.git' : ''}`,
   });
 
   // alternative ssh protocol with user if empty
   url.token = hasUser ? token : `git:${token}`;
   authenticationRules.push({
     url: url.toString(protocol),
-    insteadOf: insteadUrl.toString('ssh'),
+    insteadOf: sshUrl.toString('ssh'),
   });
 
   // https protocol with no user as default fallback
