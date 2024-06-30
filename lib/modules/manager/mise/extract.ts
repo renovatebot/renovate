@@ -86,23 +86,15 @@ function createDependency(
   version?: string,
   config?: ToolingConfig,
 ): PackageDependency {
-  if (version) {
-    if (config) {
-      return {
-        depName: name,
-        currentValue: version,
-        ...config,
-      };
-    } else {
-      return {
-        depName: name,
-        skipReason: 'unsupported-datasource',
-      };
-    }
-  } else {
-    return {
-      depName: name,
-      skipReason: 'unspecified-version',
-    };
+  if (!version) {
+    return { depName: name, skipReason: 'unspecified-version' };
   }
+  if (!config) {
+    return { depName: name, skipReason: 'unsupported-datasource' };
+  }
+  return {
+    depName: name,
+    currentValue: version,
+    ...config,
+  };
 }
