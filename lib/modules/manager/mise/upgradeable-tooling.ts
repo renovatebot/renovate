@@ -60,6 +60,16 @@ export const miseTooling: Record<string, ToolingDefinition> = {
           currentValue: versionMatch,
         };
       }
+      const openJdkMatches = version.match(
+        /^openjdk-(?<version>\d\S+)/,
+      )?.groups;
+      if (openJdkMatches) {
+        return {
+          datasource: JavaVersionDatasource.id,
+          packageName: 'java-jdk',
+          currentValue: openJdkMatches.version,
+        };
+      }
       const adoptOpenJdkMatches = version.match(
         /^adoptopenjdk-(?<version>\d\S+)/,
       )?.groups;
@@ -68,16 +78,6 @@ export const miseTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: adoptOpenJdkMatches.version,
-        };
-      }
-      const semeruJdkMatches = version.match(
-        /^semeru-openj9-(?<version>\d\S+)_openj9-(?<openj9>\d\S+)/,
-      )?.groups;
-      if (semeruJdkMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jdk',
-          currentValue: semeruJdkMatches.version,
         };
       }
       const temurinJdkMatches = version.match(

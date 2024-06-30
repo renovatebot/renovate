@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
@@ -97,6 +98,114 @@ describe('modules/manager/mise/extract', () => {
             depName: 'node',
             currentValue: '16',
             datasource: 'node-version',
+          },
+        ],
+      });
+    });
+
+    it('core java plugin function', () => {
+      const content = codeBlock`
+      [tools]
+      java = "21.0.2"
+    `;
+      const result = extractPackageFile(content);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+
+      const content2 = codeBlock`
+      [tools]
+      java = "openjdk-21.0.2"
+    `;
+      const result2 = extractPackageFile(content2);
+      expect(result2).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+
+      const content3 = codeBlock`
+      [tools]
+      java = "temurin-21.0.2"
+    `;
+      const result3 = extractPackageFile(content3);
+      expect(result3).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+
+      const content4 = codeBlock`
+      [tools]
+      java = "zulu-21.0.2"
+    `;
+      const result4 = extractPackageFile(content4);
+      expect(result4).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+
+      const content5 = codeBlock`
+      [tools]
+      java = "corretto-21.0.2"
+    `;
+      const result5 = extractPackageFile(content5);
+      expect(result5).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+
+      const content6 = codeBlock`
+      [tools]
+      java = "oracle-graalvm-21.0.2"
+    `;
+      const result6 = extractPackageFile(content6);
+      expect(result6).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+
+      // Test that fallback to asdf Plugin works
+      const content7 = codeBlock`
+      [tools]
+      java = "adoptopenjdk-jre-16.0.0+36"
+    `;
+      const result7 = extractPackageFile(content7);
+      expect(result7).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '16.0.0+36',
+            datasource: 'java-version',
           },
         ],
       });

@@ -39,12 +39,25 @@ function getToolConfig(
   name: string,
   version: string,
 ): ToolingConfig | undefined {
-  const toolDefinition = miseTooling[name] || asdfTooling[name];
-  return toolDefinition
+  let toolDefinition = miseTooling[name];
+  let config = toolDefinition
     ? typeof toolDefinition.config === 'function'
       ? toolDefinition.config(version)
       : toolDefinition.config
     : undefined;
+
+  // If config is not found in miseTooling, try asdfTooling
+  // Example being Java JRE - not in miseTooling but in asdfTooling
+  if (!config) {
+    toolDefinition = asdfTooling[name];
+    config = toolDefinition
+      ? typeof toolDefinition.config === 'function'
+        ? toolDefinition.config(version)
+        : toolDefinition.config
+      : undefined;
+  }
+
+  return config;
 }
 
 function createDependency(
