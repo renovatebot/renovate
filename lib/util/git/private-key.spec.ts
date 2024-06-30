@@ -15,7 +15,7 @@ jest.mock('fs-extra', () =>
 jest.mock('../exec', () =>
   jest
     .requireActual<typeof import('jest-mock-extended')>('jest-mock-extended')
-    .mock(),
+    .mockDeep(),
 );
 
 const exec = exec_ as MockProxy<typeof exec_>;
