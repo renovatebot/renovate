@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import { MockProxy, any, mockReset } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
-import * as execModule from '../exec';
+import * as exec_ from '../exec';
 import { configSigningKey, writePrivateKey } from './private-key';
 import { setPrivateKey } from '.';
 
@@ -15,10 +15,10 @@ jest.mock('fs-extra', () =>
 jest.mock('../exec', () =>
   jest
     .requireActual<typeof import('jest-mock-extended')>('jest-mock-extended')
-    .mock<MockProxy<typeof execModule>>(),
+    .mock<MockProxy<typeof exec_>>(),
 );
 
-const exec = execModule as MockProxy<typeof execModule>;
+const exec = exec_ as MockProxy<typeof exec_>;
 
 describe('util/git/private-key', () => {
   describe('writePrivateKey()', () => {
