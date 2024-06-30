@@ -361,7 +361,7 @@ export async function lookupUpdates(
           unconstrainedValue ||
           versioning.isCompatible(v.version, compareValue),
       );
-      if (config.isVulnerabilityAlert && !config.osvVulnerabilityAlerts) {
+      if (config.isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
       }
       const buckets: Record<string, [Release]> = {};
@@ -450,7 +450,22 @@ export async function lookupUpdates(
         res.isSingleVersion ??=
           is.string(update.newValue) &&
           versioning.isSingleVersion(update.newValue);
-        res.updates.push(update);
+        // istanbul ignore if
+        if (
+          update.updateType !== 'rollback' &&
+          update.newValue &&
+          versioning.isVersion(update.newValue) &&
+          compareValue &&
+          versioning.isVersion(compareValue) &&
+          versioning.isGreaterThan(compareValue, update.newValue)
+        ) {
+          logger.warn(
+            { update, allVersions, filteredReleases },
+            'Unexpected downgrade detected: skipping',
+          );
+        } else {
+          res.updates.push(update);
+        }
       }
     } else if (compareValue) {
       logger.debug(

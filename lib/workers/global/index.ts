@@ -73,7 +73,7 @@ function checkEnv(): void {
   const range = pkg.engines!.node!;
   const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
-    logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
+    logger.warn(
       { release: process.release, versions: process.versions },
       'Unknown node environment detected.',
     );
@@ -86,7 +86,7 @@ function checkEnv(): void {
     rangeNext &&
     !semver.satisfies(process.versions?.node, rangeNext)
   ) {
-    logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
+    logger.warn(
       { versions: process.versions },
       `Please upgrade the version of Node.js used to run Renovate to satisfy "${rangeNext}". Support for your current version will be removed in Renovate's next major release.`,
     );
@@ -173,12 +173,12 @@ export async function start(): Promise<number> {
 
       await validatePresets(config);
 
+      setGlobalLogLevelRemaps(config.logLevelRemap);
+
       checkEnv();
 
       // validate secrets. Will throw and abort if invalid
       validateConfigSecrets(config);
-
-      setGlobalLogLevelRemaps(config.logLevelRemap);
     });
 
     // autodiscover repositories (needs to come after platform initialization)

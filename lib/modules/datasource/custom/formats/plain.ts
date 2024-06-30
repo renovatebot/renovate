@@ -20,11 +20,6 @@ export class PlainFetcher implements CustomDatasourceFetcher {
   async fetch(http: Http, registryURL: string): Promise<unknown> {
     const response = await http.getPlain(registryURL);
 
-    const contentType = response.headers['content-type'];
-    if (!contentType?.startsWith('text/')) {
-      return null;
-    }
-
     return convertLinesToVersions(response.body);
   }
 
