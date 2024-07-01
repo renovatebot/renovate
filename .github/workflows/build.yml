@@ -125,8 +125,23 @@ jobs:
         run: |
           echo "$(pnpm -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
 
-      - name: remove `node_modules`
-        run: rm -rf ./node_modules
+  setup-build:
+    runs-on: ubuntu-latest
+
+    outputs:
+      node-version: ${{ env.NODE_VERSION_BUILD }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          filter: blob:none # we don't need all blobs
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          show-progress: false
+
+      # - name: Set outputs
+      #   id: set-outputs
+      #   run: echo "node-version=${{ env.NODE_VERSION_BUILD }}" >> "$GITHUB_OUTPUT"
 
       - name: Prefetch build modules for `ubuntu-latest`
         uses: ./.github/actions/setup-node
@@ -176,7 +191,8 @@ jobs:
           save-cache: true
 
   lint-eslint:
-    needs: [setup]
+    needs:
+      - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -192,7 +208,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_BUILD }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Restore eslint cache
@@ -221,7 +237,8 @@ jobs:
           key: eslint-main-cache
 
   lint-prettier:
-    needs: [setup]
+    needs:
+      - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 7
 
@@ -237,7 +254,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_BUILD }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
@@ -266,7 +283,8 @@ jobs:
           key: prettier-main-cache
 
   lint-docs:
-    needs: [setup]
+    needs:
+      - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 7
 
@@ -279,7 +297,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_BUILD }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Lint markdown
@@ -295,7 +313,8 @@ jobs:
         run: pnpm markdown-lint
 
   lint-other:
-    needs: [setup]
+    needs:
+      - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 7
 
@@ -308,7 +327,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_BUILD }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Type check
@@ -426,6 +445,7 @@ jobs:
   coverage-threshold:
     needs:
       - test
+      - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 3
     if: (success() || failure()) && github.event.pull_request.draft != true
@@ -440,7 +460,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_BUILD }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Download coverage reports
@@ -515,7 +535,8 @@ jobs:
         run: exit 1
 
   build:
-    needs: setup
+    needs:
+      - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     if: github.event.pull_request.draft != true
@@ -528,7 +549,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_BUILD }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Build
@@ -549,7 +570,9 @@ jobs:
           path: renovate-0.0.0-semantic-release.tgz
 
   build-docs:
-    needs: [lint-docs]
+    needs:
+      - lint-docs
+      - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 5
     if: github.event.pull_request.draft != true
@@ -562,7 +585,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_BUILD }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Build
@@ -613,7 +636,7 @@ jobs:
 
   release:
     needs:
-      - setup
+      - setup-build
       - lint-eslint
       - lint-prettier
       - lint-docs
@@ -649,7 +672,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_BUILD }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
