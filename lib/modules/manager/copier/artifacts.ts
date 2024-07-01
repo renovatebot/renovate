@@ -1,4 +1,5 @@
 import { quote } from 'shlex';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
@@ -18,7 +19,7 @@ function buildCommand(
   newVersion: string,
 ): string {
   const command = ['copier', 'update', ...DEFAULT_COMMAND_OPTIONS];
-  if (config?.allowScripts) {
+  if (GlobalConfig.get('allowScripts') && !config.ignoreScripts) {
     command.push('--trust');
   }
   command.push(
@@ -69,7 +70,7 @@ export async function updateArtifacts({
   try {
     await exec(command);
   } catch (err) {
-    logger.error({ err }, `Failed to update copier template: ${err.message}`);
+    logger.debug({ err }, `Failed to update copier template: ${err.message}`);
     return artifactError(packageFileName, err.message);
   }
 
@@ -85,7 +86,7 @@ export async function updateArtifacts({
       `Updating the Copier template yielded ${status.conflicted.length} merge conflicts. ` +
       'Please check the proposed changes carefully! Conflicting files:\n  * ' +
       status.conflicted.join('\n  * ');
-    logger.warn({ packageFileName, depName: updatedDeps[0]?.depName }, msg);
+    logger.debug({ packageFileName, depName: updatedDeps[0]?.depName }, msg);
   }
 
   const res: UpdateArtifactsResult[] = [];

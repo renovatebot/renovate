@@ -12,7 +12,7 @@ jest.mock('../../../util/git');
 jest.mock('../../../util/fs');
 
 const config: UpdateArtifactsConfig = {
-  allowScripts: false,
+  ignoreScripts: true,
 };
 
 const upgrades: Upgrade[] = [
@@ -26,6 +26,7 @@ const upgrades: Upgrade[] = [
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
+  allowScripts: false,
 };
 
 describe('modules/manager/copier/artifacts', () => {
@@ -113,12 +114,13 @@ describe('modules/manager/copier/artifacts', () => {
       ]);
     });
 
-    it('includes --trust when allowScripts is true', async () => {
+    it('includes --trust when allowScripts is true and ignoreScripts is false', async () => {
+      GlobalConfig.set({ ...adminConfig, allowScripts: true });
       const execSnapshots = mockExecAll();
 
       const trustConfig = {
         ...config,
-        allowScripts: true,
+        ignoreScripts: false,
       };
 
       await updateArtifacts({
@@ -131,6 +133,24 @@ describe('modules/manager/copier/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'copier update --skip-answered --defaults --trust --answers-file .copier-answers.yml --vcs-ref 1.1.0',
+        },
+      ]);
+    });
+
+    it('does not include --trust when ignoreScripts is true', async () => {
+      GlobalConfig.set({ ...adminConfig, allowScripts: true });
+      const execSnapshots = mockExecAll();
+
+      await updateArtifacts({
+        packageFileName: '.copier-answers.yml',
+        updatedDeps: upgrades,
+        newPackageFileContent: '',
+        config,
+      });
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'copier update --skip-answered --defaults --answers-file .copier-answers.yml --vcs-ref 1.1.0',
         },
       ]);
     });
@@ -248,7 +268,7 @@ describe('modules/manager/copier/artifacts', () => {
         newPackageFileContent: '',
         config,
       });
-      expect(logger.warn).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         {
           depName: 'https://github.com/foo/bar',
           packageFileName: '.copier-answers.yml',

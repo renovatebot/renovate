@@ -41,7 +41,6 @@ export interface UpdateArtifactsConfig {
   registryAliases?: Record<string, string>;
   lockFiles?: string[];
   env?: UserEnv;
-  allowScripts?: boolean;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
