@@ -331,8 +331,8 @@ importers:
         version: 3.23.8
     optionalDependencies:
       better-sqlite3:
-        specifier: 9.6.0
-        version: 9.6.0
+        specifier: 11.0.0
+        version: 11.0.0
       openpgp:
         specifier: 5.11.2
         version: 5.11.2
@@ -2457,8 +2457,8 @@ packages:
   before-after-hook@2.2.3:
     resolution: {integrity: sha512-NzUnlZexiaH/46WDhANlyR2bXRopNg4F/zuSA3OpZnllCUgRaOF2znDioDWrmbNVsuZk6l9pMquQB38cfBZwkQ==}
 
-  better-sqlite3@9.6.0:
-    resolution: {integrity: sha512-yR5HATnqeYNVnkaUTf4bOP2dJSnyhP4puJN/QPRyx4YkBEEUxib422n2XzPqDEHjQQqazoYoADdAm5vE15+dAQ==}
+  better-sqlite3@11.0.0:
+    resolution: {integrity: sha512-1NnNhmT3EZTsKtofJlMox1jkMxdedILury74PwUbQBjWgo4tL4kf7uTAjU55mgQwjdzqakSTjkf+E1imrFwjnA==}
 
   bignumber.js@9.1.2:
     resolution: {integrity: sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==}
@@ -8898,7 +8898,7 @@ snapshots:
 
   before-after-hook@2.2.3: {}
 
-  better-sqlite3@9.6.0:
+  better-sqlite3@11.0.0:
     dependencies:
       bindings: 1.5.0
       prebuild-install: 7.1.2
