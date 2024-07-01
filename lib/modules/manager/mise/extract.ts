@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type { ToolingConfig } from '../asdf/upgradeable-tooling';
 import type { PackageDependency, PackageFileContent } from '../types';
-import type { MisePackageValueSchema } from './schema';
+import type { MiseToolSchema } from './schema';
 import {
   ToolingDefinition,
   asdfTooling,
@@ -37,7 +37,7 @@ export function extractPackageFile(
   return deps.length ? { deps } : null;
 }
 
-function parseVersion(toolData: MisePackageValueSchema): string | null {
+function parseVersion(toolData: MiseToolSchema): string | null {
   if (is.nonEmptyString(toolData)) {
     // Handle the string case
     // e.g. 'erlang = "23.3"'

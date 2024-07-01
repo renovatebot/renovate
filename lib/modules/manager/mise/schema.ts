@@ -1,17 +1,15 @@
 import { z } from 'zod';
 import { Toml } from '../../../util/schema-utils';
 
-const MisePackageValueSchema = z.union([
+const MiseToolSchema = z.union([
   z.string(),
   z.object({ version: z.string() }),
   z.array(z.string()),
 ]);
-export type MisePackageValueSchema = z.infer<typeof MisePackageValueSchema>;
-
-export const MisePackagesSchema = z.record(MisePackageValueSchema);
+export type MiseToolSchema = z.infer<typeof MiseToolSchema>;
 
 export const MiseFileSchema = z.object({
-  tools: MisePackagesSchema.optional(),
+  tools: z.record(MiseToolSchema),
 });
 export type MiseFileSchema = z.infer<typeof MiseFileSchema>;
 
