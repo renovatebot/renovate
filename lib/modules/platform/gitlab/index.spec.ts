@@ -2262,15 +2262,13 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toEqual(
-        {
-          "id": 1,
-          "iid": 12345,
-          "number": 12345,
-          "sourceBranch": "some-branch",
-          "title": "some title",
-        }
-      );
+      ).toEqual({
+        id: 1,
+        iid: 12345,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
     });
 
     it('will modify a rule of type any_approvers, if such a rule exists', async () => {
