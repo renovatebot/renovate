@@ -4,16 +4,18 @@ import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
 
+const miseFilename = '.mise.toml';
+
 const mise1toml = Fixtures.get('Mise.1.toml');
 
 describe('modules/manager/mise/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile('')).toBeNull();
+      expect(extractPackageFile('', miseFilename)).toBeNull();
     });
 
     it('returns null for invalid TOML', () => {
-      expect(extractPackageFile('foo')).toBeNull();
+      expect(extractPackageFile('foo', miseFilename)).toBeNull();
     });
 
     it('extracts tools - mise core plugins', () => {
@@ -22,7 +24,7 @@ describe('modules/manager/mise/extract', () => {
       erlang = '23.3'
       node = '16'
     `;
-      const result = extractPackageFile(content);
+      const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -44,7 +46,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       terraform = '1.8.0'
     `;
-      const result = extractPackageFile(content);
+      const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -61,7 +63,7 @@ describe('modules/manager/mise/extract', () => {
       erlang = ['23.3', '24.0']
       node = ['16', 'prefix:20', 'ref:master', 'path:~/.nodes/14']
     `;
-      const result = extractPackageFile(content);
+      const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -83,7 +85,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       python = {version='3.11', virtualenv='.venv'}
     `;
-      const result = extractPackageFile(content);
+      const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -99,7 +101,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       fake-tool = '1.0.0'
     `;
-      const result = extractPackageFile(content);
+      const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -115,7 +117,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       python = ''
     `;
-      const result = extractPackageFile(content);
+      const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -127,7 +129,7 @@ describe('modules/manager/mise/extract', () => {
     });
 
     it('complete .mise.toml example', () => {
-      const result = extractPackageFile(mise1toml);
+      const result = extractPackageFile(mise1toml, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -157,7 +159,7 @@ describe('modules/manager/mise/extract', () => {
       terraform = {version='1.8.0'}
       fake-tool = '1.6.2'
     `;
-      const result = extractPackageFile(content);
+      const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -187,7 +189,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = "21.0.2"
     `;
-      const result = extractPackageFile(content);
+      const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
@@ -202,7 +204,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = "openjdk-21.0.2"
     `;
-      const result2 = extractPackageFile(content2);
+      const result2 = extractPackageFile(content2, miseFilename);
       expect(result2).toMatchObject({
         deps: [
           {
@@ -217,7 +219,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = "temurin-21.0.2"
     `;
-      const result3 = extractPackageFile(content3);
+      const result3 = extractPackageFile(content3, miseFilename);
       expect(result3).toMatchObject({
         deps: [
           {
@@ -232,7 +234,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = "zulu-21.0.2"
     `;
-      const result4 = extractPackageFile(content4);
+      const result4 = extractPackageFile(content4, miseFilename);
       expect(result4).toMatchObject({
         deps: [
           {
@@ -247,7 +249,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = "corretto-21.0.2"
     `;
-      const result5 = extractPackageFile(content5);
+      const result5 = extractPackageFile(content5, miseFilename);
       expect(result5).toMatchObject({
         deps: [
           {
@@ -262,7 +264,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = "oracle-graalvm-21.0.2"
     `;
-      const result6 = extractPackageFile(content6);
+      const result6 = extractPackageFile(content6, miseFilename);
       expect(result6).toMatchObject({
         deps: [
           {
@@ -277,7 +279,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = "adoptopenjdk-21.0.2"
     `;
-      const result7 = extractPackageFile(content7);
+      const result7 = extractPackageFile(content7, miseFilename);
       expect(result7).toMatchObject({
         deps: [
           {
@@ -293,7 +295,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = "adoptopenjdk-jre-16.0.0+36"
     `;
-      const result8 = extractPackageFile(content8);
+      const result8 = extractPackageFile(content8, miseFilename);
       expect(result8).toMatchObject({
         deps: [
           {

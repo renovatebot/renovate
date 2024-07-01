@@ -1,6 +1,8 @@
 import { codeBlock } from 'common-tags';
 import { parseTomlFile } from './utils';
 
+const miseFilename = '.mise.toml';
+
 describe('modules/manager/mise/utils', () => {
   describe('parseTomlFile', () => {
     it('load and parse successfully', () => {
@@ -9,7 +11,7 @@ describe('modules/manager/mise/utils', () => {
         erlang = '23.3'
         node = '16'
       `;
-      const actual = parseTomlFile(fileContent);
+      const actual = parseTomlFile(fileContent, miseFilename);
       expect(actual).toMatchObject({
         tools: {
           erlang: '23.3',
@@ -22,7 +24,7 @@ describe('modules/manager/mise/utils', () => {
       const invalidToml = codeBlock`
       clearly: "invalid" "toml"
     `;
-      const actual = parseTomlFile(invalidToml);
+      const actual = parseTomlFile(invalidToml, miseFilename);
       expect(actual).toBeNull();
     });
 
@@ -30,7 +32,7 @@ describe('modules/manager/mise/utils', () => {
       const invalidSchema = codeBlock`
       clearly: invalid
     `;
-      const actual = parseTomlFile(invalidSchema);
+      const actual = parseTomlFile(invalidSchema, miseFilename);
       expect(actual).toBeNull();
     });
   });

@@ -9,10 +9,13 @@ import {
 } from './upgradeable-tooling';
 import { parseTomlFile } from './utils';
 
-export function extractPackageFile(content: string): PackageFileContent | null {
-  logger.trace(`mise.extractPackageFile()`);
+export function extractPackageFile(
+  content: string,
+  packageFile: string,
+): PackageFileContent | null {
+  logger.trace(`mise.extractPackageFile(${packageFile})`);
 
-  const misefile = parseTomlFile(content);
+  const misefile = parseTomlFile(content, packageFile);
   if (!misefile) {
     return null;
   }
