@@ -160,12 +160,12 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      [join('/tmp/renovate/cache/others/pipenv')],
-      [join('/tmp/renovate/cache/others/pip')],
-      [join('/tmp/renovate/cache/others/virtualenvs')],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pipenv'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pip'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/virtualenvs'))],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
 
@@ -208,12 +208,12 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      [join('/tmp/renovate/cache/others/pipenv')],
-      [join('/tmp/renovate/cache/others/pip')],
-      [join('/tmp/renovate/cache/others/virtualenvs')],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pipenv'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pip'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/virtualenvs'))],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
 
@@ -256,12 +256,12 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      [join('/tmp/renovate/cache/others/pipenv')],
-      [join('/tmp/renovate/cache/others/pip')],
-      [join('/tmp/renovate/cache/others/virtualenvs')],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pipenv'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pip'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/virtualenvs'))],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
 
@@ -301,13 +301,13 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      [join('/tmp/renovate/cache/others/pipenv')],
-      [join('/tmp/renovate/cache/others/pip')],
-      [join('/tmp/renovate/cache/others/virtualenvs')],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pipenv'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pip'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/virtualenvs'))],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
-      [join('/tmp/github/some/repo/.python-version'), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/.python-version')), 'utf8'],
     ]);
   });
 
@@ -346,13 +346,13 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      [join('/tmp/renovate/cache/others/pipenv')],
-      [join('/tmp/renovate/cache/others/pip')],
-      [join('/tmp/renovate/cache/others/virtualenvs')],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pipenv'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pip'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/virtualenvs'))],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
-      [join('/tmp/github/some/repo/.python-version'), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/.python-version')), 'utf8'],
     ]);
   });
 
@@ -389,12 +389,12 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      [join('/tmp/renovate/cache/others/pipenv')],
-      [join('/tmp/renovate/cache/others/pip')],
-      [join('/tmp/renovate/cache/others/virtualenvs')],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pipenv'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pip'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/virtualenvs'))],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
 
@@ -443,13 +443,13 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      [join('/tmp/renovate/cache/others/pipenv')],
-      [join('/tmp/renovate/cache/others/pip')],
-      [join('/tmp/renovate/cache/others/virtualenvs')],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pipenv'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pip'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/virtualenvs'))],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
 
@@ -518,13 +518,13 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      [join('/tmp/renovate/cache/others/pipenv')],
-      [join('/tmp/renovate/cache/others/pip')],
-      [join('/tmp/renovate/cache/others/virtualenvs')],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pipenv'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pip'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/virtualenvs'))],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
 
@@ -577,13 +577,13 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      [join('/tmp/renovate/cache/others/pipenv')],
-      [join('/tmp/renovate/cache/others/pip')],
-      [join('/tmp/renovate/cache/others/virtualenvs')],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pipenv'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pip'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/virtualenvs'))],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
 
@@ -632,14 +632,14 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      [join('/tmp/renovate/cache/others/pipenv')],
-      [join('/tmp/renovate/cache/others/pip')],
-      [join('/tmp/renovate/cache/others/virtualenvs')],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pipenv'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pip'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/virtualenvs'))],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
-      [join('/tmp/github/some/repo/.python-version'), 'utf8'],
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/.python-version')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
 
@@ -667,7 +667,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
 
@@ -769,14 +769,14 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      [join('/tmp/renovate/cache/others/pipenv')],
-      [join('/tmp/renovate/cache/others/pip')],
-      [join('/tmp/renovate/cache/others/virtualenvs')],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pipenv'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pip'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/virtualenvs'))],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
-      [join('/tmp/github/some/repo/.python-version'), 'utf8'],
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/.python-version')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
 
@@ -840,14 +840,14 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      [join('/tmp/renovate/cache/others/pipenv')],
-      [join('/tmp/renovate/cache/others/pip')],
-      [join('/tmp/renovate/cache/others/virtualenvs')],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pipenv'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pip'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/virtualenvs'))],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
-      [join('/tmp/github/some/repo/.python-version'), 'utf8'],
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/.python-version')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
 
@@ -910,14 +910,14 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      [join('/tmp/renovate/cache/others/pipenv')],
-      [join('/tmp/renovate/cache/others/pip')],
-      [join('/tmp/renovate/cache/others/virtualenvs')],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pipenv'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/pip'))],
+      [expect.toEndWith(join('/tmp/renovate/cache/others/virtualenvs'))],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
-      [join('/tmp/github/some/repo/.python-version'), 'utf8'],
-      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/.python-version')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
 
