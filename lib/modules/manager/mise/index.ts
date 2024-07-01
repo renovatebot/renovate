@@ -1,4 +1,4 @@
-import { supportedDatasources as asdfSupportedDatasources } from '../asdf/index';
+import { supportedDatasources as asdfSupportedDatasources } from '../asdf';
 
 export { extractPackageFile } from './extract';
 
