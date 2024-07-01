@@ -2262,7 +2262,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchInlineSnapshot(`
+      ).toEqual(
         {
           "id": 1,
           "iid": 12345,
@@ -2270,7 +2270,7 @@ describe('modules/platform/gitlab/index', () => {
           "sourceBranch": "some-branch",
           "title": "some title",
         }
-      `);
+      );
     });
 
     it('will modify a rule of type any_approvers, if such a rule exists', async () => {
