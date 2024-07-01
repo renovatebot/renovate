@@ -139,10 +139,6 @@ jobs:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
 
-      # - name: Set outputs
-      #   id: set-outputs
-      #   run: echo "node-version=${{ env.NODE_VERSION_BUILD }}" >> "$GITHUB_OUTPUT"
-
       - name: Prefetch build modules for `ubuntu-latest`
         uses: ./.github/actions/setup-node
         with:

@@ -36,7 +36,7 @@
     "prepare": "run-s 'prepare:*'",
     "prepare:husky": "husky",
     "prepare:generate": "run-s 'generate:*'",
-    "prepare:re2": "node tools/check-re2.mjs",
+    "prepare:deps": "node tools/prepare-deps.mjs",
     "prestart": "run-s 'generate:*'",
     "pretest": "run-s 'generate:*'",
     "prettier": "prettier --cache --check '**/*.{ts,js,mjs,json,md,yml}'",
