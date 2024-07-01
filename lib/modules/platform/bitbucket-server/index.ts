@@ -135,6 +135,7 @@ export async function initPlatform({
   }
 
   if (!gitAuthor && username) {
+    logger.debug(`Attempting to confirm gitAuthor from username`);
     const options: HttpOptions = {
       memCache: false,
     };
@@ -157,14 +158,11 @@ export async function initPlatform({
 
       platformConfig.gitAuthor = `${displayName} <${emailAddress}>`;
 
-      logger.debug(
-        { gitAuthor: platformConfig.gitAuthor },
-        'Detected gitAuthor',
-      );
+      logger.debug(`Detected gitAuthor: ${platformConfig.gitAuthor});
     } catch (err) {
       logger.debug(
         { err },
-        'Failed to get user info, please configure gitAuthor manually',
+        'Failed to get user info, fallback gitAuthor will be used',
       );
     }
   }
