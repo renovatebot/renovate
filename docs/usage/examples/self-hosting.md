@@ -105,7 +105,7 @@ data:
   config.json: |-
     {
       "repositories": ["orgname/repo","username/repo"],
-      "dryRun" : "true"
+      "dryRun" : "full"
     }
 
 ---
