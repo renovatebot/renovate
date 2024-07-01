@@ -126,7 +126,6 @@ jobs:
           echo "$(pnpm -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
 
       - name: Prefetch build modules for `ubuntu-latest`
-        id: setup-node
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION_BUILD }}
