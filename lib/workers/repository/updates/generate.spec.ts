@@ -1499,58 +1499,51 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('allows upgrades in commitMessage', () => {
-      const group = {
-        commitMessageTopic: '{{{groupName}}}',
-        commitMessagePrefix:
-          '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
-        commitMessageExtra: '',
+      const commonOptions = {
+        ...requiredDefaultOptions,
+        manager: 'some-manager',
+        branchName: 'deps',
+        groupName: 'deps',
+        group: {
+          commitMessageTopic: '{{{groupName}}}',
+          commitMessagePrefix:
+            '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
+        },
       };
 
       const branch = [
         {
-          ...requiredDefaultOptions,
-          manager: 'some-manager',
-          groupName: 'deps',
+          ...commonOptions,
           depName: 'dep1',
-          branchName: 'deps',
+          newVersion: '1.2.0',
           newValue: '1.2.0',
-          isGroup: true,
           updateType: 'minor' as UpdateType,
           fileReplacePosition: 1,
           prBodyDefinitions: {
             Issue: 'I1',
           },
-          group,
         },
         {
-          ...requiredDefaultOptions,
-          manager: 'some-manager',
-          groupName: 'deps',
+          ...commonOptions,
           depName: 'dep2',
-          branchName: 'deps',
+          newVersion: '1.0.0',
           newValue: '1.0.0',
-          isGroup: true,
           updateType: 'major' as UpdateType,
           fileReplacePosition: 2,
           prBodyDefinitions: {
             Issue: 'I2',
           },
-          group,
         },
         {
-          ...requiredDefaultOptions,
-          manager: 'some-manager',
-          groupName: 'deps',
+          ...commonOptions,
           depName: 'dep3',
-          branchName: 'deps',
+          newVersion: '1.2.3',
           newValue: '1.2.3',
-          isGroup: true,
           updateType: 'patch' as UpdateType,
           fileReplacePosition: 0,
           prBodyDefinitions: {
             Issue: 'I3',
           },
-          group,
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
