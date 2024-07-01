@@ -132,11 +132,11 @@ export function getAuthenticationRules(
     ? url.protocol
     : 'https';
 
-  const sshUrl = { ...insteadUrl };
-  if (hostType === 'bitbucket-server' && !sshUrl.port) {
+  let sshPort = insteadUrl.port;
+  if (hostType === 'bitbucket-server' && !sshPort) {
     // By default, bitbucket-server SSH port is 7999.
     // For non-default port, the generated auth config will likely be incorrect.
-    sshUrl.port = 7999;
+    sshPort = 7999;
   }
 
   // ssh protocol with user if empty
@@ -145,16 +145,16 @@ export function getAuthenticationRules(
     url: url.toString(protocol),
     // only edge case, need to stringify ourself because the exact syntax is not supported by the library
     // https://github.com/IonicaBizau/git-url-parse/blob/246c9119fb42c2ea1c280028fe77c53eb34c190c/lib/index.js#L246
-    insteadOf: `ssh://git@${sshUrl.resource}${
-      sshUrl.port ? `:${sshUrl.port}` : ''
-    }/${sshUrl.full_name}${sshUrl.git_suffix ? '.git' : ''}`,
+    insteadOf: `ssh://git@${insteadUrl.resource}${
+      sshPort ? `:${sshPort}` : ''
+    }/${insteadUrl.full_name}${insteadUrl.git_suffix ? '.git' : ''}`,
   });
 
   // alternative ssh protocol with user if empty
   url.token = hasUser ? token : `git:${token}`;
   authenticationRules.push({
     url: url.toString(protocol),
-    insteadOf: sshUrl.toString('ssh'),
+    insteadOf: { ...insteadUrl, port: sshPort }.toString('ssh'),
   });
 
   // https protocol with no user as default fallback
