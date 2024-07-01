@@ -1,34 +1,35 @@
 import { execSync } from 'child_process';
 
-async function testRe2() {
-  const { default: RE2 } = await import('re2');
-  new RE2('.*').exec('test');
-  console.log(`ok.`);
+function testRe2() {
+  execSync(
+    `node -e "try{require('re2')('.*').exec('test')}catch(e){console.error(e);if(e.code === 'ERR_DLOPEN_FAILED' && e.message.includes('NODE_MODULE_VERSION')) process.exit(1); else process.exit(-1)}"`,
+    { stdio: 'inherit' },
+  );
+  console.log(`Ok.`);
 }
 
-async function testSqlite() {
-  const { default: Sqlite } = await import('better-sqlite3');
-  new Sqlite(':memory:');
-  console.log(`ok.`);
+function testSqlite() {
+  execSync(
+    `node -e "try{new require('better-sqlite3')(':memory:')}catch(e){console.error(e);if(e.code === 'ERR_DLOPEN_FAILED' && e.message.includes('NODE_MODULE_VERSION')) process.exit(1); else process.exit(-1)}"`,
+    { stdio: 'inherit' },
+  );
+  console.log(`Ok.`);
 }
 
-await (async () => {
+(() => {
   console.log('Checking re2 ... ');
   try {
-    await testRe2();
+    testRe2();
   } catch (e) {
-    console.error(`failed.\n${e}`);
+    console.error(`Failed.\n${e}`);
     try {
-      if (
-        e.code === 'ERR_DLOPEN_FAILED' &&
-        e.message.includes('NODE_MODULE_VERSION')
-      ) {
+      if (e.status === 1) {
         console.log(`Retry re2 install ...`);
         execSync('pnpm run install', {
           stdio: 'inherit',
           cwd: `${process.cwd()}/node_modules/re2`,
         });
-        await testRe2();
+        testRe2();
         return;
       }
     } catch (e1) {
@@ -39,12 +40,12 @@ await (async () => {
   }
 })();
 
-await (async () => {
+(() => {
   console.log('Checking better-sqlite3 ... ');
   try {
-    await testSqlite();
+    testSqlite();
   } catch (e) {
-    console.error(`failed.\n${e}`);
+    console.error(`Failed.\n${e}`);
     try {
       if (
         e.code === 'ERR_DLOPEN_FAILED' &&
@@ -55,7 +56,7 @@ await (async () => {
           stdio: 'inherit',
           cwd: `${process.cwd()}/node_modules/better-sqlite3`,
         });
-        await testRe2();
+        testSqlite();
         return;
       }
     } catch (e1) {
