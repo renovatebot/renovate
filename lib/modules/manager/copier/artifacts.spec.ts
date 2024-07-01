@@ -1,15 +1,22 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { mockExecAll } from '../../../../test/exec-util';
-import { fs, git, partial } from '../../../../test/util';
+import { fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { StatusResult } from '../../../util/git/types';
+import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig, Upgrade } from '../types';
 import { updateArtifacts } from '.';
 
+const datasource = mocked(_datasource);
+
 jest.mock('../../../util/git');
 jest.mock('../../../util/fs');
+jest.mock('../../datasource', () => mockDeep());
+
+process.env.CONTAINERBASE = 'true';
 
 const config: UpdateArtifactsConfig = {
   ignoreScripts: true,
@@ -26,6 +33,7 @@ const upgrades: Upgrade[] = [
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
+  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
   allowScripts: false,
 };
 
@@ -113,6 +121,53 @@ describe('modules/manager/copier/artifacts', () => {
         },
       ]);
     });
+
+    it.each([
+      [null, null],
+      ['3.11.3', null],
+      [null, '9.1.0'],
+      ['3.11.3', '9.1.0'],
+    ])(
+      'supports dynamic install with constraints python=%o copier=%o',
+      async (pythonConstraint, copierConstraint) => {
+        GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+        const constraintConfig = {
+          python: pythonConstraint ?? '',
+          copier: copierConstraint ?? '',
+        };
+        if (!pythonConstraint) {
+          datasource.getPkgReleases.mockResolvedValueOnce({
+            releases: [{ version: '3.12.4' }],
+          });
+        }
+        if (!copierConstraint) {
+          datasource.getPkgReleases.mockResolvedValueOnce({
+            releases: [{ version: '9.2.0' }],
+          });
+        }
+        const execSnapshots = mockExecAll();
+
+        expect(
+          await updateArtifacts({
+            packageFileName: '.copier-answers.yml',
+            updatedDeps: upgrades,
+            newPackageFileContent: '',
+            config: {
+              ...config,
+              constraints: constraintConfig,
+            },
+          }),
+        ).not.toBeNull();
+
+        expect(execSnapshots).toMatchObject([
+          { cmd: 'install-tool python ' + (pythonConstraint ?? '3.12.4') },
+          { cmd: 'install-tool copier ' + (copierConstraint ?? '9.2.0') },
+          {
+            cmd: 'copier update --skip-answered --defaults --answers-file .copier-answers.yml --vcs-ref 1.1.0',
+          },
+        ]);
+      },
+    );
 
     it('includes --trust when allowScripts is true and ignoreScripts is false', async () => {
       GlobalConfig.set({ ...adminConfig, allowScripts: true });
