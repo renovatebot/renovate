@@ -337,6 +337,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             }),
           ).toEqual({
             endpoint: ensureTrailingSlash(url.href),
+            gitIgnoredAuthors: undefined,
           });
           expect(logger.debug).toHaveBeenCalledWith(
             expect.any(Object),
@@ -376,6 +377,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             }),
           ).toEqual({
             endpoint: ensureTrailingSlash(url.href),
+            gitIgnoredAuthors: undefined,
           });
         });
 
@@ -392,6 +394,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             }),
           ).toEqual({
             endpoint: ensureTrailingSlash(url.href),
+            gitIgnoredAuthors: undefined,
           });
         });
 
