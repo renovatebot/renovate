@@ -30,7 +30,8 @@ concurrency:
 
 env:
   DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-  NODE_VERSION: 18
+  NODE_VERSION_TEST: 18
+  NODE_VERSION_BUILD: 20
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -105,13 +106,13 @@ jobs:
         with:
           repo: ${{ github.event.repository.full_name }}
           token: ${{ github.token }}
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION_TEST }}
 
-      - name: Prefetch modules for `ubuntu-latest`
+      - name: Prefetch test modules for `ubuntu-latest`
         id: setup-node
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION_TEST }}
           os: ${{ runner.os }}
           save-cache: true
 
@@ -123,6 +124,14 @@ jobs:
           CHANGED_FILES: ${{ steps.changed-files.outputs.changed-files }}
         run: |
           echo "$(pnpm -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
+
+      - name: Prefetch build modules for `ubuntu-latest`
+        id: setup-node
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION_BUILD }}
+          os: ${{ runner.os }}
+          save-cache: true
 
   prefetch:
     needs: [setup]
@@ -142,7 +151,6 @@ jobs:
     strategy:
       matrix:
         os: ${{ fromJSON(needs.setup.outputs.os-matrix-prefetch) }}
-        node-version: [18]
 
     runs-on: ${{ matrix.os }}
 
@@ -161,7 +169,7 @@ jobs:
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION_TEST }}
           os: ${{ runner.os }}
           save-cache: true
 
@@ -182,7 +190,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION_BUILD }}
           os: ${{ runner.os }}
 
       - name: Restore eslint cache
@@ -227,7 +235,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION_BUILD }}
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
@@ -269,7 +277,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION_BUILD }}
           os: ${{ runner.os }}
 
       - name: Lint markdown
@@ -298,7 +306,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION_BUILD }}
           os: ${{ runner.os }}
 
       - name: Type check
@@ -337,7 +345,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION_TEST }}
           os: ${{ runner.os }}
 
       - name: Cache jest
@@ -348,7 +356,7 @@ jobs:
             jest-cache-${{
               runner.os
             }}-${{
-              env.NODE_VERSION
+              env.NODE_VERSION_TEST
             }}-${{
               hashFiles('pnpm-lock.yaml')
             }}-${{
@@ -430,7 +438,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION_BUILD }}
           os: ${{ runner.os }}
 
       - name: Download coverage reports
@@ -518,7 +526,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION_BUILD }}
           os: ${{ runner.os }}
 
       - name: Build
@@ -552,7 +560,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION_BUILD }}
           os: ${{ runner.os }}
 
       - name: Build
@@ -588,7 +596,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION_TEST }}
 
       - name: Download package
         uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
@@ -639,7 +647,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION_BUILD }}
           os: ${{ runner.os }}
 
       - uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
