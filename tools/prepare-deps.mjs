@@ -47,10 +47,7 @@ function testSqlite() {
   } catch (e) {
     console.error(`Failed.\n${e}`);
     try {
-      if (
-        e.code === 'ERR_DLOPEN_FAILED' &&
-        e.message.includes('NODE_MODULE_VERSION')
-      ) {
+      if (e.status === 1) {
         console.log(`Retry better-sqlite3 install ...`);
         execSync('pnpm run install', {
           stdio: 'inherit',
