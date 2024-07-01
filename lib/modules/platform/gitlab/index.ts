@@ -648,12 +648,12 @@ async function tryPrAutomerge(
   pr: number,
   platformOptions: PlatformPrOptions | undefined,
 ): Promise<void> {
-  if (platformOptions?.usePlatformAutomerge) {
-    try {
-      if (platformOptions?.gitLabIgnoreApprovals) {
-        await ignoreApprovals(pr);
-      }
+  try {
+    if (platformOptions?.gitLabIgnoreApprovals) {
+      await ignoreApprovals(pr);
+    }
 
+    if (platformOptions?.usePlatformAutomerge) {
       // https://docs.gitlab.com/ee/api/merge_requests.html#merge-status
       const desiredDetailedMergeStatus = [
         'mergeable',
@@ -730,9 +730,9 @@ async function tryPrAutomerge(
         }
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
       }
-    } catch (err) /* istanbul ignore next */ {
-      logger.debug({ err }, 'Automerge on PR creation failed');
     }
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, 'Automerge on PR creation failed');
   }
 }
 
