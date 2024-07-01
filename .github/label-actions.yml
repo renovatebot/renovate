@@ -112,13 +112,16 @@
     Hi there,
 
 
-    This issue or discussion needs some particular logs, in order to help you more.
+    Please give us specific logs, so we can help you more.
 
 
-    Please ensure you are running with `LOG_LEVEL=debug` in order to get debug log messages. Next, look for the log message `packageFiles with updates`. This is often a large, structured log message which includes every detected package file, dependency, and update found.
+    If you self-host Renovate: make sure you run Renovate with `LOG_LEVEL=debug` to get the debug log messages! Next, open the debug-level logs and search for `packageFiles with updates`. This text marks the start of a structured log message that shows every package file, dependency, and update that Renovate found.
 
 
-    Locate the relevant dependency/dependencies in that log message and then copy/paste them into this discussion. If in doubt you can copy/paste the full log message but it's usually not necessary.
+    Find the relevant dependency/dependencies in the log message, and copy/paste those parts into this discussion. If you do not know which bits we need, you can copy/paste the full log message.
+
+
+    Read the [Renovate docs, Troubleshooting](https://docs.renovatebot.com/troubleshooting/) to learn more about getting the docs, and getting the correct type of logs.
 
 
     Thanks, the Renovate team
@@ -361,16 +364,16 @@
     Hi there,
 
 
-    The bad news is that you've submitted a bug report for something which a maintainer has assessed is not a bug, and this Discussion will be closed to avoid confusing other users. Bugs are things which are not working as intended or documented, and that is not the case here. This doesn't mean that the behavior is good, but we can't treat every missing or unforeseen feature as a bug or else the term bug loses its meaning.
+    A maintainer reviewed the information, and decided that this is not a bug. To avoid confusing others, we will close this Discussion. Please keep reading as there is good news too!
 
 
-    The good news is that a maintainer agrees with your idea in general and would like you to resubmit with [Suggest an Idea](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea) so that it can be converted into a feature request issue.
+    The good news is that the maintainer likes your idea, in general. Please create a new [Suggest an Idea](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea) Discussion. Feel free to copy/paste what you need from this Discussion. Please focus on the feature request: explain what Renovate should do, and how Renovate can know when/what to do. We may convert that Discussion to an Issue when it is ready. Note that you will still have to wait for a maintainer, or someone else, to do the work needed for your feature.
 
 
-    You're welcome to copy/paste as much of this Discussion as you wish, but please make sure to explain the problem in terms of a feature request, focusing on what intelligence Renovate needs to add, and how/when it should know to do so.
+    Why are we closing your Discussion? For us, bug reports are about things that are not working as intended, or things that are not working as described in the docs. What you found may be bad behavior, but we do not think it is a bug.
 
 
-    For more details on Bug report handling in this repo, please see https://github.com/renovatebot/renovate/blob/main/docs/development/bug-handling.md
+    For more details, please read [our development docs about bug handling](https://github.com/renovatebot/renovate/blob/main/docs/development/bug-handling.md).
 
 
     Thanks, the Renovate team
@@ -380,16 +383,13 @@
     Hi there,
 
 
-    This is an automated message to flag to future readers of this discussion that it has been closed because it is not a bug, and behaving as designed.
+    A maintainer decided this is not a bug, and behaving as designed. The maintainer will explain why this behavior is correct. To avoid confusing future readers, we will close this Discussion.
 
 
-    The behavior which the the original poster thought was a bug is intentional behavior, for reasons which have hopefully been explained in addition to this message.
+    We want Bug-type Discussions to be about things that we rate as bugs. For more details, please read [our development docs about bug handling](https://github.com/renovatebot/renovate/blob/main/docs/development/bug-handling.md).
 
 
-    We're now closing this discussion to avoid confusion for future readers. If you have an idea for a new feature or an improvement to an existing one, please submit it as a [Suggest an Idea](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea).
-
-
-    For more details on Bug report handling in this repo, please see https://github.com/renovatebot/renovate/blob/main/docs/development/bug-handling.md
+    If this bug report makes you think of an idea for a new feature, or how to improve a current feature, feel free to create a new [Suggest an Idea](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea) Discussion.
 
 
     Thanks, the Renovate team
@@ -399,7 +399,10 @@
     Hi there,
 
 
-    This is an automated message to flag that this bug has been confirmed and converted to an issue. This Discussion will be closed so that any further discussion can happen in the issue.
+    A maintainer confirmed this is a bug, and converted this Discussion to an Issue. If you have more thoughts/info about the bug, please post them in the Issue.
+
+
+    We will close this Discussion, as we want new info to go in the Issue.
 
 
     Thanks, the Renovate team
@@ -409,10 +412,13 @@
     Hi there,
 
 
-    The repository maintainers would like to convert this idea into a Feature Request issue, but either the original title/description is either not ready.
+    The maintainers want to convert this idea into a Feature Request issue. Before we can convert, we need you update the Discussion title and/or the description(s).
 
 
-    Please review the title/description to reflect the current state of the idea so that it's ready for direct conversion into an issue. You may need to copy/pate examples, links or other text from comments into the original description. Once this is done to your satisfaction, please let us know and we'll convert it into an issue.
+   We want the top post, and title, to match the current state of your idea/feature request. This is because a discussion often has lots of info, thoughts and comments. There may also be ideas that turn out to be dead ends. In simple terms, we only want the good stuff to go in the top post.
+
+
+    So please put the current information in the top post and update the title. Feel free to copy/paste examples, links or comments into the description. Let us know when you are finished updating, and we will convert your discussion to an Issue.
 
 
     Thanks, the Renovate team
@@ -422,11 +428,14 @@
     Hi there,
 
 
-    This is a reminder that there are no SLAs in Open Source, and when you post messages like "Any update on this?" or "When will this be fixed?" or chase a maintainer to answer your personal question then it will be seen as demanding or impatient and may result in a block if occurring multiple times.
+    Please remember that there are no Service Level Agreements (SLAs) or roadmap commitments in Open Source projects like Renovate. The maintainers and contributors work on bugs/features/docs at their own pace. This means that sometimes you will have to wait for things to happen, or to get a response.
 
 
-    Learn more about how we prioritize Renovate work here: https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#how-we-prioritize-work.
-    If you're already a paying Mend.io customer, please get in touch with your support or customer contact to let them know that this issue is important to you.
+    Please avoid comments like: "Any update on this?" or "When will this be fixed?". Do not chase a maintainer to get answers quickly. We will block you if you nudge us frequently.
+
+
+    Please read our [Code of Conduct, how we prioritize work](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#how-we-prioritize-work) to learn more about how we prioritize what to work on.
+    If you are a paying Mend.io customer, please tell your support or customer contact that this issue is important to you.
 
 
     Thanks, the Renovate team
