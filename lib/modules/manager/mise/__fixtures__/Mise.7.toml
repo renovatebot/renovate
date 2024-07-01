@@ -1,6 +1,0 @@
-[tools]
-java = '21.0.2'
-erlang = ['23.3', '24.0']
-terraform = {version='1.8.0'}
-python = {virtualenv='.venv'}
-fake-tool = '1.6.2'

@@ -5,12 +5,6 @@ import { extractPackageFile } from '.';
 jest.mock('../../../util/fs');
 
 const mise1toml = Fixtures.get('Mise.1.toml');
-const mise2toml = Fixtures.get('Mise.2.toml');
-const mise3toml = Fixtures.get('Mise.3.toml');
-const mise4toml = Fixtures.get('Mise.4.toml');
-const mise5toml = Fixtures.get('Mise.5.toml');
-const mise6toml = Fixtures.get('Mise.6.toml');
-const mise7toml = Fixtures.get('Mise.7.toml');
 
 describe('modules/manager/mise/extract', () => {
   describe('extractPackageFile()', () => {
@@ -23,7 +17,12 @@ describe('modules/manager/mise/extract', () => {
     });
 
     it('extracts tools - mise core plugins', () => {
-      const result = extractPackageFile(mise1toml);
+      const content = codeBlock`
+      [tools]
+      erlang = '23.3'
+      node = '16'
+    `;
+      const result = extractPackageFile(content);
       expect(result).toMatchObject({
         deps: [
           {
@@ -41,7 +40,11 @@ describe('modules/manager/mise/extract', () => {
     });
 
     it('extracts tools - asdf plugins', () => {
-      const result = extractPackageFile(mise2toml);
+      const content = codeBlock`
+      [tools]
+      terraform = '1.8.0'
+    `;
+      const result = extractPackageFile(content);
       expect(result).toMatchObject({
         deps: [
           {
@@ -53,7 +56,12 @@ describe('modules/manager/mise/extract', () => {
     });
 
     it('extracts tools with multiple versions', () => {
-      const result = extractPackageFile(mise3toml);
+      const content = codeBlock`
+      [tools]
+      erlang = ['23.3', '24.0']
+      node = ['16', 'prefix:20', 'ref:master', 'path:~/.nodes/14']
+    `;
+      const result = extractPackageFile(content);
       expect(result).toMatchObject({
         deps: [
           {
@@ -71,7 +79,11 @@ describe('modules/manager/mise/extract', () => {
     });
 
     it('extracts tools with plugin options', () => {
-      const result = extractPackageFile(mise6toml);
+      const content = codeBlock`
+      [tools]
+      python = {version='3.11', virtualenv='.venv'}
+    `;
+      const result = extractPackageFile(content);
       expect(result).toMatchObject({
         deps: [
           {
@@ -83,7 +95,11 @@ describe('modules/manager/mise/extract', () => {
     });
 
     it('provides skipReason for lines with unsupported tooling', () => {
-      const result = extractPackageFile(mise4toml);
+      const content = codeBlock`
+      [tools]
+      fake-tool = '1.0.0'
+    `;
+      const result = extractPackageFile(content);
       expect(result).toMatchObject({
         deps: [
           {
@@ -111,7 +127,7 @@ describe('modules/manager/mise/extract', () => {
     });
 
     it('complete .mise.toml example', () => {
-      const result = extractPackageFile(mise5toml);
+      const result = extractPackageFile(mise1toml);
       expect(result).toMatchObject({
         deps: [
           {
@@ -134,7 +150,15 @@ describe('modules/manager/mise/extract', () => {
     });
 
     it('complete example with skip', () => {
-      const result = extractPackageFile(mise7toml);
+      const content = codeBlock`
+      [tools]
+      java = '21.0.2'
+      erlang = ['23.3', '24.0']
+      terraform = {version='1.8.0'}
+      python = {virtualenv='.venv'}
+      fake-tool = '1.6.2'
+    `;
+      const result = extractPackageFile(content);
       expect(result).toMatchObject({
         deps: [
           {
