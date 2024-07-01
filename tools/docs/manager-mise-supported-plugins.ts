@@ -20,7 +20,7 @@ function generateAsdfTooling(): string {
 export async function generateManagerMiseSupportedPlugins(
   dist: string,
 ): Promise<void> {
-  const indexFileName = `${dist}/modules/manager/asdf/index.md`;
+  const indexFileName = `${dist}/modules/manager/mise/index.md`;
   let indexContent = await readFile(indexFileName);
   // Combine the output of both mise and asdf tooling generation
   const combinedTooling = `${generateMiseTooling()}\n${generateAsdfTooling()}`;
