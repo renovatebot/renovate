@@ -112,10 +112,26 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('provides skipReason for missing version', () => {
+    it('provides skipReason for missing version - empty string', () => {
       const content = codeBlock`
       [tools]
       python = ''
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'python',
+            skipReason: 'unspecified-version',
+          },
+        ],
+      });
+    });
+
+    it('provides skipReason for missing version - missing version in object', () => {
+      const content = codeBlock`
+      [tools]
+      python = {virtualenv='.venv'}
     `;
       const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({

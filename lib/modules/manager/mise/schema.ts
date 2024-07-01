@@ -3,7 +3,7 @@ import { Toml } from '../../../util/schema-utils';
 
 const MiseToolSchema = z.union([
   z.string(),
-  z.object({ version: z.string() }),
+  z.object({ version: z.string().optional() }),
   z.array(z.string()),
 ]);
 export type MiseToolSchema = z.infer<typeof MiseToolSchema>;

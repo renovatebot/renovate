@@ -51,7 +51,9 @@ function parseVersion(toolData: MiseToolSchema): string | null {
   if (is.object(toolData)) {
     // Handle the object case with a string version
     // e.g. 'python = { version = "3.11.2" }'
-    return toolData.version;
+    if (is.string(toolData.version)) {
+      return toolData.version;
+    }
   }
   return null; // Return null if no version is found
 }
