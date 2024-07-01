@@ -111,11 +111,11 @@ describe('modules/manager/mise/extract', () => {
     });
 
     it('provides skipReason for missing version', () => {
-      const missingVersion = codeBlock`
+      const content = codeBlock`
       [tools]
-      python = {virtualenv='.venv'}
+      python = ''
     `;
-      const result = extractPackageFile(missingVersion);
+      const result = extractPackageFile(content);
       expect(result).toMatchObject({
         deps: [
           {
@@ -155,7 +155,6 @@ describe('modules/manager/mise/extract', () => {
       java = '21.0.2'
       erlang = ['23.3', '24.0']
       terraform = {version='1.8.0'}
-      python = {virtualenv='.venv'}
       fake-tool = '1.6.2'
     `;
       const result = extractPackageFile(content);
@@ -174,10 +173,6 @@ describe('modules/manager/mise/extract', () => {
           {
             depName: 'terraform',
             currentValue: '1.8.0',
-          },
-          {
-            depName: 'python',
-            skipReason: 'unspecified-version',
           },
           {
             depName: 'fake-tool',

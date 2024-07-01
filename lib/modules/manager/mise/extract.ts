@@ -1,23 +1,19 @@
 import { logger } from '../../../logger';
-import { parse as parseToml } from '../../../util/toml';
 import type { ToolingConfig } from '../asdf/upgradeable-tooling';
 import type { PackageDependency, PackageFileContent } from '../types';
-import type { MiseFile, MisePackages } from './types';
+import type { MisePackageValueSchema } from './schema';
 import {
   ToolingDefinition,
   asdfTooling,
   miseTooling,
 } from './upgradeable-tooling';
+import { parseTomlFile } from './utils';
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace(`mise.extractPackageFile()`);
 
-  let misefile: MiseFile;
-
-  try {
-    misefile = parseToml(content) as MiseFile;
-  } catch (err) {
-    logger.debug({ err }, 'Mise: error parsing .mise.toml');
+  const misefile = parseTomlFile(content);
+  if (!misefile) {
     return null;
   }
 
@@ -37,10 +33,8 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   return deps.length ? { deps } : null;
 }
 
-function parseVersion(
-  toolData: MisePackages[keyof MisePackages],
-): string | null {
-  if (typeof toolData === 'string') {
+function parseVersion(toolData: MisePackageValueSchema): string | null {
+  if (typeof toolData === 'string' && toolData.trim() !== '') {
     // Handle the string case
     // e.g. 'erlang = "23.3"'
     return toolData;
