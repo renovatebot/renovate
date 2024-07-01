@@ -39,7 +39,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
 
 function parseVersion(
   toolData: MisePackages[keyof MisePackages],
-): string | undefined {
+): string | null {
   if (typeof toolData === 'string') {
     // Handle the string case
     // e.g. 'erlang = "23.3"'
@@ -57,15 +57,15 @@ function parseVersion(
     // e.g. 'erlang = ["23.3", "24.0"]'
     return toolData[0]; // Get the first version in the array
   }
-  return undefined; // Return undefined if no version is found
+  return null; // Return null if no version is found
 }
 
 function getToolConfig(
   name: string,
-  version: string | undefined,
-): ToolingConfig | undefined {
-  if (!version) {
-    return undefined; // Early return if version is undefined
+  version: string | null,
+): ToolingConfig | null {
+  if (version === null) {
+    return null; // Early return if version is null
   }
 
   // Try to get the config from miseTooling first, then asdfTooling
@@ -75,30 +75,32 @@ function getToolConfig(
   );
 }
 
-// Define getConfigFromTooling as a named function outside of getToolConfig
 function getConfigFromTooling(
   toolingSource: Record<string, ToolingDefinition>,
   name: string,
   version: string,
-): ToolingConfig | undefined {
+): ToolingConfig | null {
   const toolDefinition = toolingSource[name];
+  if (!toolDefinition) {
+    return null;
+  } // Return null if no toolDefinition is found
+
   return (
-    toolDefinition &&
     (typeof toolDefinition.config === 'function'
       ? toolDefinition.config(version)
-      : toolDefinition.config)
-  );
+      : toolDefinition.config) ?? null
+  ); // Ensure null is returned instead of undefined
 }
 
 function createDependency(
   name: string,
-  version: string | undefined,
-  config: ToolingConfig | undefined,
+  version: string | null,
+  config: ToolingConfig | null,
 ): PackageDependency {
-  if (!version) {
+  if (version === null) {
     return { depName: name, skipReason: 'unspecified-version' };
   }
-  if (!config) {
+  if (config === null) {
     return { depName: name, skipReason: 'unsupported-datasource' };
   }
   return {
