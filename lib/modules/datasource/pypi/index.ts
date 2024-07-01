@@ -182,7 +182,7 @@ export class PypiDatasource extends Datasource {
     // source packages
     const srcText = PypiDatasource.normalizeName(text);
     const srcPrefix = `${packageName}-`;
-    const srcSuffixes = ['.tar.gz', '.tar.bz2', '.tar.xz', '.zip'];
+    const srcSuffixes = ['.tar.gz', '.tar.bz2', '.tar.xz', '.zip', '.tgz'];
     if (
       srcText.startsWith(srcPrefix) &&
       srcSuffixes.some((srcSuffix) => srcText.endsWith(srcSuffix))
