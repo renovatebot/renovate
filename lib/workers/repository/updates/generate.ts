@@ -22,10 +22,6 @@ function mergeProxy(
       return a[prop] ?? b[prop];
     },
 
-    has(_target: any, prop: PropertyKey): boolean {
-      return Object.hasOwn(a, prop) || Object.hasOwn(b, prop);
-    },
-
     ownKeys(_target: any): string[] {
       return Array.from(new Set(Object.keys(a).concat(Object.keys(b))));
     },
