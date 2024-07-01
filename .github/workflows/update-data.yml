@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: 18
+  NODE_VERSION: 20
 
 permissions:
   contents: read
@@ -22,7 +22,7 @@ jobs:
           show-progress: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
         with:
           standalone: true
 
