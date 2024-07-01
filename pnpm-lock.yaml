@@ -219,8 +219,8 @@ importers:
         specifier: 2.0.5
         version: 2.0.5
       jsonc-parser:
-        specifier: 3.2.1
-        version: 3.2.1
+        specifier: 3.3.0
+        version: 3.3.0
       klona:
         specifier: 2.0.6
         version: 2.0.6
@@ -4136,6 +4136,9 @@ packages:
 
   jsonc-parser@3.2.1:
     resolution: {integrity: sha512-AilxAyFOAcK5wA1+LeaySVBrHsGQvUFCDWXKpZjzaL0PqW+xfBOttn8GNtWKFWqneyMZj41MWF9Kl6iPWLwgOA==}
+
+  jsonc-parser@3.3.0:
+    resolution: {integrity: sha512-RK1Xb5alM78sdXpB2hqqK7jxAE5jTRH05GvUiLWqh7Vbp6OPHuJYlsAMRUDYNYJTAQgkmhHgkdwOEknxwP4ojQ==}
 
   jsonfile@6.1.0:
     resolution: {integrity: sha512-5dgndWOriYSm5cnYaJNhalLNDKOqFwyDB/rr1E9ZsGciGvKPs8R2xYGCacuf3z6K1YKDz182fd+fY3cn3pMqXQ==}
@@ -10928,6 +10931,8 @@ snapshots:
   jsonata@2.0.5: {}
 
   jsonc-parser@3.2.1: {}
+
+  jsonc-parser@3.3.0: {}
 
   jsonfile@6.1.0:
     dependencies:
