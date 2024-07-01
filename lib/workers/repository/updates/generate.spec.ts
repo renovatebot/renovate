@@ -1555,8 +1555,8 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res).toMatchObject({
-        commitMessage: 'I1 I2 I3 Update deps',
-        prTitle: 'I1 I2 I3 Update deps',
+        commitMessage: 'I3 I2 I1 Update deps',
+        prTitle: 'I3 I2 I1 Update deps',
       });
     });
   });
