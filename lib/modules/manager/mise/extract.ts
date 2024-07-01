@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type { ToolingConfig } from '../asdf/upgradeable-tooling';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -37,22 +38,20 @@ export function extractPackageFile(
 }
 
 function parseVersion(toolData: MisePackageValueSchema): string | null {
-  if (typeof toolData === 'string' && toolData.trim() !== '') {
+  if (is.nonEmptyString(toolData)) {
     // Handle the string case
     // e.g. 'erlang = "23.3"'
     return toolData;
-  } else if (
-    typeof toolData === 'object' &&
-    'version' in toolData &&
-    typeof toolData.version === 'string'
-  ) {
-    // Handle the object case with a string version
-    // e.g. 'python = { version = "3.11.2" }'
-    return toolData.version;
-  } else if (Array.isArray(toolData)) {
+  }
+  if (is.array(toolData, is.string)) {
     // Handle the array case
     // e.g. 'erlang = ["23.3", "24.0"]'
     return toolData[0]; // Get the first version in the array
+  }
+  if (is.object(toolData)) {
+    // Handle the object case with a string version
+    // e.g. 'python = { version = "3.11.2" }'
+    return toolData.version;
   }
   return null; // Return null if no version is found
 }
