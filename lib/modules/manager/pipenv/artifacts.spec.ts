@@ -43,9 +43,9 @@ process.env.CONTAINERBASE = 'true';
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/renovate/cache'),
-  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
+  localDir: join(join('/tmp/github/some/repo')),
+  cacheDir: join(join('/tmp/renovate/cache')),
+  containerbaseDir: join(join('/tmp/renovate/cache/containerbase')),
 };
 const dockerAdminConfig = {
   ...adminConfig,
@@ -55,9 +55,9 @@ const dockerAdminConfig = {
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
-const pipenvCacheDir = '/tmp/renovate/cache/others/pipenv';
-const pipCacheDir = '/tmp/renovate/cache/others/pip';
-const virtualenvsCacheDir = '/tmp/renovate/cache/others/virtualenvs';
+const pipenvCacheDir = join('/tmp/renovate/cache/others/pipenv');
+const pipCacheDir = join('/tmp/renovate/cache/others/pip');
+const virtualenvsCacheDir = join('/tmp/renovate/cache/others/virtualenvs');
 
 interface MockFiles {
   [key: string]: string | string[];
@@ -151,7 +151,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       {
         cmd: 'pipenv lock',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
           },
@@ -160,12 +160,12 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      ['/tmp/renovate/cache/others/pipenv'],
-      ['/tmp/renovate/cache/others/pip'],
-      ['/tmp/renovate/cache/others/virtualenvs'],
+      [join('/tmp/renovate/cache/others/pipenv')],
+      [join('/tmp/renovate/cache/others/pip')],
+      [join('/tmp/renovate/cache/others/virtualenvs')],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
     ]);
   });
 
@@ -199,7 +199,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       {
         cmd: 'pipenv lock',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
           },
@@ -208,12 +208,12 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      ['/tmp/renovate/cache/others/pipenv'],
-      ['/tmp/renovate/cache/others/pip'],
-      ['/tmp/renovate/cache/others/virtualenvs'],
+      [join('/tmp/renovate/cache/others/pipenv')],
+      [join('/tmp/renovate/cache/others/pip')],
+      [join('/tmp/renovate/cache/others/virtualenvs')],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
     ]);
   });
 
@@ -247,7 +247,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       {
         cmd: 'pipenv lock',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
           },
@@ -256,12 +256,12 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      ['/tmp/renovate/cache/others/pipenv'],
-      ['/tmp/renovate/cache/others/pip'],
-      ['/tmp/renovate/cache/others/virtualenvs'],
+      [join('/tmp/renovate/cache/others/pipenv')],
+      [join('/tmp/renovate/cache/others/pip')],
+      [join('/tmp/renovate/cache/others/virtualenvs')],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
     ]);
   });
 
@@ -292,7 +292,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       {
         cmd: 'pipenv lock',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
           },
@@ -301,13 +301,13 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      ['/tmp/renovate/cache/others/pipenv'],
-      ['/tmp/renovate/cache/others/pip'],
-      ['/tmp/renovate/cache/others/virtualenvs'],
+      [join('/tmp/renovate/cache/others/pipenv')],
+      [join('/tmp/renovate/cache/others/pip')],
+      [join('/tmp/renovate/cache/others/virtualenvs')],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
-      ['/tmp/github/some/repo/.python-version', 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [join('/tmp/github/some/repo/.python-version'), 'utf8'],
     ]);
   });
 
@@ -337,7 +337,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       {
         cmd: 'pipenv lock',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
           },
@@ -346,13 +346,13 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      ['/tmp/renovate/cache/others/pipenv'],
-      ['/tmp/renovate/cache/others/pip'],
-      ['/tmp/renovate/cache/others/virtualenvs'],
+      [join('/tmp/renovate/cache/others/pipenv')],
+      [join('/tmp/renovate/cache/others/pip')],
+      [join('/tmp/renovate/cache/others/virtualenvs')],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
-      ['/tmp/github/some/repo/.python-version', 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [join('/tmp/github/some/repo/.python-version'), 'utf8'],
     ]);
   });
 
@@ -378,7 +378,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       {
         cmd: 'pipenv lock',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
             PIP_CACHE_DIR: pipCacheDir,
@@ -389,12 +389,12 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      ['/tmp/renovate/cache/others/pipenv'],
-      ['/tmp/renovate/cache/others/pip'],
-      ['/tmp/renovate/cache/others/virtualenvs'],
+      [join('/tmp/renovate/cache/others/pipenv')],
+      [join('/tmp/renovate/cache/others/pip')],
+      [join('/tmp/renovate/cache/others/virtualenvs')],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
     ]);
   });
 
@@ -432,7 +432,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       {
         cmd: 'pipenv lock',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
             PIP_CACHE_DIR: pipCacheDir,
@@ -443,13 +443,13 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      ['/tmp/renovate/cache/others/pipenv'],
-      ['/tmp/renovate/cache/others/pip'],
-      ['/tmp/renovate/cache/others/virtualenvs'],
+      [join('/tmp/renovate/cache/others/pipenv')],
+      [join('/tmp/renovate/cache/others/pip')],
+      [join('/tmp/renovate/cache/others/virtualenvs')],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
     ]);
   });
 
@@ -507,7 +507,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           'pipenv lock' +
           '"',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
             PIP_CACHE_DIR: pipCacheDir,
@@ -518,13 +518,13 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      ['/tmp/renovate/cache/others/pipenv'],
-      ['/tmp/renovate/cache/others/pip'],
-      ['/tmp/renovate/cache/others/virtualenvs'],
+      [join('/tmp/renovate/cache/others/pipenv')],
+      [join('/tmp/renovate/cache/others/pip')],
+      [join('/tmp/renovate/cache/others/virtualenvs')],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
     ]);
   });
 
@@ -566,7 +566,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       {
         cmd: 'pipenv lock',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
             PIP_CACHE_DIR: pipCacheDir,
@@ -577,13 +577,13 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      ['/tmp/renovate/cache/others/pipenv'],
-      ['/tmp/renovate/cache/others/pip'],
-      ['/tmp/renovate/cache/others/virtualenvs'],
+      [join('/tmp/renovate/cache/others/pipenv')],
+      [join('/tmp/renovate/cache/others/pip')],
+      [join('/tmp/renovate/cache/others/virtualenvs')],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
     ]);
   });
 
@@ -621,7 +621,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       {
         cmd: 'pipenv lock',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
             PIP_CACHE_DIR: pipCacheDir,
@@ -632,14 +632,14 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      ['/tmp/renovate/cache/others/pipenv'],
-      ['/tmp/renovate/cache/others/pip'],
-      ['/tmp/renovate/cache/others/virtualenvs'],
+      [join('/tmp/renovate/cache/others/pipenv')],
+      [join('/tmp/renovate/cache/others/pip')],
+      [join('/tmp/renovate/cache/others/virtualenvs')],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
-      ['/tmp/github/some/repo/.python-version', 'utf8'],
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [join('/tmp/github/some/repo/.python-version'), 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
     ]);
   });
 
@@ -667,7 +667,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
     ]);
   });
 
@@ -698,7 +698,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       {
         cmd: 'pipenv lock',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
             PIP_CACHE_DIR: pipCacheDir,
@@ -759,7 +759,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           'pipenv lock' +
           '"',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
             WORKON_HOME: virtualenvsCacheDir,
@@ -769,14 +769,14 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      ['/tmp/renovate/cache/others/pipenv'],
-      ['/tmp/renovate/cache/others/pip'],
-      ['/tmp/renovate/cache/others/virtualenvs'],
+      [join('/tmp/renovate/cache/others/pipenv')],
+      [join('/tmp/renovate/cache/others/pip')],
+      [join('/tmp/renovate/cache/others/virtualenvs')],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
-      ['/tmp/github/some/repo/.python-version', 'utf8'],
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [join('/tmp/github/some/repo/.python-version'), 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
     ]);
   });
 
@@ -830,7 +830,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           'pipenv lock' +
           '"',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
             WORKON_HOME: virtualenvsCacheDir,
@@ -840,14 +840,14 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      ['/tmp/renovate/cache/others/pipenv'],
-      ['/tmp/renovate/cache/others/pip'],
-      ['/tmp/renovate/cache/others/virtualenvs'],
+      [join('/tmp/renovate/cache/others/pipenv')],
+      [join('/tmp/renovate/cache/others/pip')],
+      [join('/tmp/renovate/cache/others/virtualenvs')],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
-      ['/tmp/github/some/repo/.python-version', 'utf8'],
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [join('/tmp/github/some/repo/.python-version'), 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
     ]);
   });
 
@@ -900,7 +900,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           'pipenv lock' +
           '"',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
             WORKON_HOME: virtualenvsCacheDir,
@@ -910,14 +910,14 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([
-      ['/tmp/renovate/cache/others/pipenv'],
-      ['/tmp/renovate/cache/others/pip'],
-      ['/tmp/renovate/cache/others/virtualenvs'],
+      [join('/tmp/renovate/cache/others/pipenv')],
+      [join('/tmp/renovate/cache/others/pip')],
+      [join('/tmp/renovate/cache/others/virtualenvs')],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
-      ['/tmp/github/some/repo/.python-version', 'utf8'],
-      ['/tmp/github/some/repo/Pipfile.lock', 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
+      [join('/tmp/github/some/repo/.python-version'), 'utf8'],
+      [join('/tmp/github/some/repo/Pipfile.lock'), 'utf8'],
     ]);
   });
 
@@ -961,7 +961,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       {
         cmd: 'pipenv lock',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
             WORKON_HOME: virtualenvsCacheDir,
@@ -1037,7 +1037,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       {
         cmd: 'pipenv lock',
         options: {
-          cwd: '/tmp/github/some/repo',
+          cwd: join('/tmp/github/some/repo'),
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
             WORKON_HOME: virtualenvsCacheDir,
