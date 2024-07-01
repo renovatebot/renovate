@@ -9,6 +9,7 @@ import {
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
 import type * as _git from '../../../util/git';
+import { FALLBACK_GIT_AUTHOR } from '../../../util/git';
 import type { LongCommitSha } from '../../../util/git/types';
 import { ensureTrailingSlash } from '../../../util/url';
 import type { Platform } from '../types';
@@ -339,7 +340,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           });
           expect(logger.debug).toHaveBeenCalledWith(
             expect.any(Object),
-            'Failed to get user info, please configure gitAuthor manually',
+            'Failed to get user info, fallback gitAuthor will be used',
           );
         });
 
@@ -413,6 +414,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           ).toEqual({
             endpoint: ensureTrailingSlash(url.href),
             gitAuthor: `${userInfo.displayName} <${userInfo.emailAddress}>`,
+            gitIgnoredAuthors: [FALLBACK_GIT_AUTHOR],
           });
         });
 
