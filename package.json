@@ -357,6 +357,7 @@
       "dtrace-provider"
     ],
     "overrides": {
+      "@semantic-release/github>@octokit/plugin-paginate-rest": "11.3.0",
       "@types/linkify-it": "<5.0.0"
     }
   }
