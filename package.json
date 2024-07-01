@@ -250,7 +250,7 @@
     "zod": "3.23.8"
   },
   "optionalDependencies": {
-    "better-sqlite3": "9.6.0",
+    "better-sqlite3": "11.0.0",
     "openpgp": "5.11.2",
     "re2": "1.21.3"
   },
@@ -312,7 +312,7 @@
     "aws-sdk-client-mock": "4.0.1",
     "callsite": "1.0.0",
     "common-tags": "1.8.2",
-    "conventional-changelog-conventionalcommits": "7.0.2",
+    "conventional-changelog-conventionalcommits": "8.0.0",
     "emojibase-data": "15.3.2",
     "eslint": "8.57.0",
     "eslint-formatter-gha": "1.5.0",
