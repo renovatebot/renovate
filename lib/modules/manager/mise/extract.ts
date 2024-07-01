@@ -68,20 +68,26 @@ function getToolConfig(
     return undefined; // Early return if version is undefined
   }
 
-  const getConfigFromTooling = (
-    toolingSource: Record<string, ToolingDefinition>,
-  ): ToolingConfig | undefined => {
-    const toolDefinition = toolingSource[name];
-    return (
-      toolDefinition &&
-      (typeof toolDefinition.config === 'function'
-        ? toolDefinition.config(version)
-        : toolDefinition.config)
-    );
-  };
-
   // Try to get the config from miseTooling first, then asdfTooling
-  return getConfigFromTooling(miseTooling) ?? getConfigFromTooling(asdfTooling);
+  return (
+    getConfigFromTooling(miseTooling, name, version) ??
+    getConfigFromTooling(asdfTooling, name, version)
+  );
+}
+
+// Define getConfigFromTooling as a named function outside of getToolConfig
+function getConfigFromTooling(
+  toolingSource: Record<string, ToolingDefinition>,
+  name: string,
+  version: string,
+): ToolingConfig | undefined {
+  const toolDefinition = toolingSource[name];
+  return (
+    toolDefinition &&
+    (typeof toolDefinition.config === 'function'
+      ? toolDefinition.config(version)
+      : toolDefinition.config)
+  );
 }
 
 function createDependency(
