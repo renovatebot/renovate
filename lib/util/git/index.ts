@@ -63,6 +63,9 @@ import type {
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
 
+export const FALLBACK_GIT_AUTHOR =
+  'Renovate Bot <renovate@whitesourcesoftware.com>';
+
 // Retry parameters
 const retryCount = 5;
 const delaySeconds = 3;
@@ -273,9 +276,7 @@ async function cleanLocalBranches(): Promise<void> {
 }
 
 export function setGitAuthor(gitAuthor: string | undefined): void {
-  const gitAuthorParsed = parseGitAuthor(
-    gitAuthor ?? 'Renovate Bot <renovate@whitesourcesoftware.com>',
-  );
+  const gitAuthorParsed = parseGitAuthor(gitAuthor ?? FALLBACK_GIT_AUTHOR);
   if (!gitAuthorParsed) {
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = 'None';
