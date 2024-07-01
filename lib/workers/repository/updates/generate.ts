@@ -273,18 +273,9 @@ export function generateBranchConfig(
       !config.semanticCommitType!.startsWith(':');
   }
   // Compile a few times in case there are nested templates
-  config.commitMessage = template.compile(
-    config.commitMessage ?? '',
-    config,
-  );
-  config.commitMessage = template.compile(
-    config.commitMessage,
-    config,
-  );
-  config.commitMessage = template.compile(
-    config.commitMessage,
-    config,
-  );
+  config.commitMessage = template.compile(config.commitMessage ?? '', config);
+  config.commitMessage = template.compile(config.commitMessage, config);
+  config.commitMessage = template.compile(config.commitMessage, config);
   // istanbul ignore if
   if (config.commitMessage !== sanitize(config.commitMessage)) {
     logger.debug(
