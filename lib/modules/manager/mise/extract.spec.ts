@@ -278,13 +278,28 @@ describe('modules/manager/mise/extract', () => {
         ],
       });
 
-      // Test that fallback to asdf Plugin works
       const content7 = codeBlock`
       [tools]
-      java = "adoptopenjdk-jre-16.0.0+36"
+      java = "adoptopenjdk-21.0.2"
     `;
       const result7 = extractPackageFile(content7);
       expect(result7).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+
+      // Test that fallback to asdf Plugin works
+      const content8 = codeBlock`
+      [tools]
+      java = "adoptopenjdk-jre-16.0.0+36"
+    `;
+      const result8 = extractPackageFile(content8);
+      expect(result8).toMatchObject({
         deps: [
           {
             depName: 'java',
