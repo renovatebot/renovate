@@ -17,12 +17,16 @@ FROM slim-base as build
 
 WORKDIR /usr/local/renovate
 
-ENV CI=1 npm_config_modules_cache_max_age=0
+ENV CI=1 npm_config_modules_cache_max_age=0 \
+  npm_config_better-sqlite3_binary_host=https://cdn.containerbase.dev/github.com/WiseLibs/better-sqlite3/releases/download \
+  npm_config_loglevel=info
 
 COPY pnpm-lock.yaml ./
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN corepack pnpm fetch --prod
+
+RUN false
 
 COPY . ./
 
