@@ -34,7 +34,7 @@ export function extractPackageFile(
     }
   }
 
-  return deps.length ? { deps } : null;
+  return { deps };
 }
 
 function parseVersion(toolData: MiseToolSchema): string | null {
@@ -46,14 +46,12 @@ function parseVersion(toolData: MiseToolSchema): string | null {
   if (is.array(toolData, is.string)) {
     // Handle the array case
     // e.g. 'erlang = ["23.3", "24.0"]'
-    return toolData[0]; // Get the first version in the array
+    return toolData.length ? toolData[0] : null; // Get the first version in the array
   }
-  if (is.object(toolData)) {
+  if (is.nonEmptyString(toolData.version)) {
     // Handle the object case with a string version
     // e.g. 'python = { version = "3.11.2" }'
-    if (is.string(toolData.version)) {
-      return toolData.version;
-    }
+    return toolData.version;
   }
   return null; // Return null if no version is found
 }

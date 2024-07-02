@@ -144,6 +144,27 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('provides skipReason for missing version - empty array', () => {
+      const content = codeBlock`
+      [tools]
+      java = '21.0.2'
+      erlang = []
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+          },
+          {
+            depName: 'erlang',
+            skipReason: 'unspecified-version',
+          },
+        ],
+      });
+    });
+
     it('complete .mise.toml example', () => {
       const result = extractPackageFile(mise1toml, miseFilename);
       expect(result).toMatchObject({
