@@ -3117,6 +3117,46 @@ const options: RenovateOptions[] = [
     default: 90,
     globalOnly: true,
   },
+  {
+    name: 'dockerMaxPages',
+    description:
+      'By default, Renovate fetches up to 20 pages of Docker tags from registries, but this maximum can be adjusted by setting this option.',
+    type: 'integer',
+    default: 20,
+    globalOnly: true,
+  },
+  {
+    name: 'gitlabAutoMergeableCheckAttempts',
+    description:
+      'If set to a positive integer, Renovate tries this many times to check if a merge request on GitLab is mergeable, before trying to automerge.',
+    type: 'integer',
+    default: 5,
+    globalOnly: true,
+  },
+  {
+    name: 'gitlabBranchStatusDelay',
+    description:
+      'Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.',
+    type: 'integer',
+    default: 1000,
+    globalOnly: true,
+  },
+  {
+    name: 'gitlabMergeRequestDelay',
+    description:
+      'If set, Renovate will use this as a delay to proceed with an automerge.',
+    type: 'integer',
+    default: 250,
+    globalOnly: true,
+  },
+  {
+    name: 'platformVersion',
+    description:
+      'Set a version string here to let Renovate skip some API calls to fetch the platform version.',
+    type: 'string',
+    globalOnly: true,
+    supportedPlatforms: ['gitlab', 'bitbucket-server'],
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

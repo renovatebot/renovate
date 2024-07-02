@@ -16,6 +16,10 @@ export interface PlatformParams {
   username?: string;
   password?: string;
   gitAuthor?: string;
+  platformVersion?: string;
+  gitlabAutoMergeableCheckAttempts?: number;
+  gitlabBranchStatusDelay?: number;
+  gitlabMergeRequestDelay?: number;
 }
 
 export interface PlatformResult {

@@ -501,6 +501,13 @@ For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `d
 
 Read the [Docker Docs, configure runtime resource constraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
 
+## dockerMaxPages
+
+By default, Renovate will fetch a maximum of 20 pages when looking up Docker tags on Docker registries.
+
+If set to an positive integer, Renovate will use this value as the maximum page number.
+Setting a different limit is useful for registries that ignore the `n` parameter in Renovate's query string and thus only return 50 tags per page.
+
 ## dockerSidecarImage
 
 By default Renovate pulls the sidecar Docker containers from `ghcr.io/containerbase/sidecar`.
@@ -670,6 +677,27 @@ Possible values:
 By default, Renovate logs and displays a warning when the `GITHUB_COM_TOKEN` is not set.
 By setting `githubTokenWarn` to `false`, Renovate suppresses these warnings on Pull Requests, etc.
 Disabling the warning is helpful for self-hosted environments that can't access the `github.com` domain, because the warning is useless in these environments.
+
+## gitlabAutoMergeableCheckAttempts
+
+If set to a positive integer, Renovate tries this many times to check if a Merge Request on GitLab is mergeable, before trying to automerge.
+Renovate calculates the delay between attempts with this formula: `gitlabAutoMergeableCheckAttempts * attempt * attempt` milliseconds.
+
+Default value: `5` (attempts results in max. 13.75 seconds timeout).
+
+## gitlabBranchStatusDelay
+
+Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.
+
+Can be useful for slow-running, self-hosted GitLab instances that do not react fast enough for the default delay to help.
+
+Default value: `1000` (milliseconds).
+
+## gitlabMergeRequestDelay
+
+If set, Renovate will use this as a delay to proceed with an automerge.
+
+Default value: `250` (milliseconds).
 
 ## globalExtends
 
@@ -890,6 +918,15 @@ The intention is that this allows Renovate to do a faster `git fetch` between ru
 It also may mean that ignored directories like `node_modules` can be preserved and save time on operations like `npm install`.
 
 ## platform
+
+## platformVersion
+
+Set a string here to let Renovate skip some API calls to fetch the platform version.
+Renovate will use this value as the GitLab or Bitbucket server version.
+
+Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to reduce API calls for Bitbucket.
+
+Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
 
 ## prCommitsPerRunLimit
 

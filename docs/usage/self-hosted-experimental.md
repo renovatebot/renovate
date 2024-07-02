@@ -55,11 +55,6 @@ This includes the following:
 
 If set to any value, Renovate will use the Docker Hub API (`https://hub.docker.com`) to fetch tags instead of the normal Docker API for images pulled from `https://index.docker.io`.
 
-## `RENOVATE_X_DOCKER_MAX_PAGES`
-
-If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
-This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
-
 ## `RENOVATE_X_EAGER_GLOBAL_EXTENDS`
 
 Resolve and merge `globalExtends` presets before other global config, instead of after.
@@ -67,27 +62,6 @@ Resolve and merge `globalExtends` presets before other global config, instead of
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
-
-## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
-
-If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergeable before trying to automerge.
-The formula for the delay between attempts is `RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY * attempt * attempt` milliseconds.
-
-Default value: `5` (attempts results in max. 13.75 seconds timeout).
-
-## `RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY`
-
-Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.
-
-Can be useful for slow-running, self-hosted GitLab instances that don't react fast enough for the default delay to help.
-
-Default value: `1000` (milliseconds).
-
-## `RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY`
-
-If set, Renovate will use this as a delay to proceed with an automerge.
-
-Default value: `250` (milliseconds).
 
 ## `RENOVATE_X_HARD_EXIT`
 
@@ -101,13 +75,6 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 ## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
 
 If set to any value, Renovate will download `nupkg` files for determining package metadata.
-
-## `RENOVATE_X_PLATFORM_VERSION`
-
-Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
-Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to reduce API calls for Bitbucket.
-
-Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
 
 ## `RENOVATE_X_REBASE_PAGINATION_LINKS`
 

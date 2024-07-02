@@ -305,15 +305,14 @@ describe('modules/platform/bitbucket-server/index', () => {
         });
 
         it('should skip api call to fetch version when platform version is set in environment', async () => {
-          process.env.RENOVATE_X_PLATFORM_VERSION = '8.0.0';
           await expect(
             bitbucket.initPlatform({
               endpoint: 'https://stash.renovatebot.com',
               username: 'abc',
               password: '123',
+              platformVersion: '8.0.0',
             }),
           ).toResolve();
-          delete process.env.RENOVATE_X_PLATFORM_VERSION;
         });
 
         it('should init', async () => {

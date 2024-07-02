@@ -166,6 +166,11 @@ export interface RepoGlobalConfig {
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;
   userAgent?: string;
+  dockerMaxPages?: number;
+  gitlabAutoMergeableCheckAttempts?: number;
+  gitlabBranchStatusDelay?: number;
+  gitlabMergeRequestDelay?: number;
+  platformVersion?: string;
 }
 
 export interface LegacyAdminConfig {

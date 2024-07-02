@@ -88,6 +88,7 @@ export async function initPlatform({
   token,
   username,
   password,
+  platformVersion,
 }: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
@@ -109,9 +110,8 @@ export async function initPlatform({
   };
   try {
     let bitbucketServerVersion: string;
-    // istanbul ignore if: experimental feature
-    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
-      bitbucketServerVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
+    if (platformVersion) {
+      bitbucketServerVersion = platformVersion;
     } else {
       const { version } = (
         await bitbucketServerHttp.getJson<{ version: string }>(
