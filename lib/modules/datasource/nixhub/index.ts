@@ -35,10 +35,7 @@ export class NixhubDatasource extends Datasource {
 
     logger.trace({ registryUrl, packageName }, 'fetching nixhub release');
 
-    const nixhubPkgUrl = joinUrlParts(
-      registryUrl!,
-      `/packages/${packageName}?_data=routes/_nixhub.packages.$pkg._index`,
-    );
+    const nixhubPkgUrl = joinUrlParts(registryUrl!, `/pkg?name=${packageName}`);
 
     try {
       const response = await this.http.getJson<NixhubResponse>(nixhubPkgUrl);

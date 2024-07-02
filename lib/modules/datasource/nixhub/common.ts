@@ -1,4 +1,4 @@
-export const defaultRegistryUrl = 'https://www.nixhub.io/';
+export const defaultRegistryUrl = 'https://search.devbox.sh/v2/';
 
 export const datasource = 'nixhub';
 
