@@ -8,5 +8,5 @@ export const defaultConfig = {
   fileMatch: ['(^|/)\\.mise\\.toml$'],
 };
 
-// Shares the same datasources as asdf as they both support the same plugins.
+// Re-use the asdf datasources, as mise and asdf support the same plugins.
 export const supportedDatasources = asdfSupportedDatasources;
