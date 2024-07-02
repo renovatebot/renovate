@@ -1,6 +1,6 @@
 import type { Indent } from 'detect-indent';
 import { Fixtures } from '../../../../test/fixtures';
-import { mockedFunction, partial } from '../../../../test/util';
+import { RenovateConfig, mockedFunction, partial } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { checkConfigMigrationBranch } from './branch';
 import { MigratedDataFactory } from './branch/migrated-data';
@@ -16,8 +16,8 @@ const filename = 'renovate.json';
 const branchName = 'renovate/config-migration';
 const config = {
   ...getConfig(),
-  configMigration: true,
-};
+  configMigration: 'enabled',
+} satisfies RenovateConfig;
 
 describe('workers/repository/config-migration/index', () => {
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe('workers/repository/config-migration/index', () => {
   });
 
   it('does nothing when config migration is disabled', async () => {
-    await configMigration({ ...config, configMigration: false }, []);
+    await configMigration({ ...config, configMigration: 'disabled' }, []);
     expect(MigratedDataFactory.getAsync).toHaveBeenCalledTimes(0);
     expect(checkConfigMigrationBranch).toHaveBeenCalledTimes(0);
     expect(ensureConfigMigrationPr).toHaveBeenCalledTimes(0);

@@ -4,7 +4,7 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   'best-practices': {
-    configMigration: true,
+    configMigration: 'enabled',
     description:
       'Preset with best practices from the Renovate maintainers. Recommended for advanced users, who want to follow our best practices.',
     extends: [

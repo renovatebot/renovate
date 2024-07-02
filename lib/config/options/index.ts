@@ -226,8 +226,9 @@ const options: RenovateOptions[] = [
     name: 'configMigration',
     description: 'Enable this to get config migration PRs when needed.',
     stage: 'repository',
-    type: 'boolean',
-    default: false,
+    type: 'string',
+    allowedValues: ['auto', 'disabled', 'enabled'],
+    default: 'auto',
     experimental: true,
     experimentalDescription:
       'Config migration PRs are still being improved, in particular to reduce the amount of reordering and whitespace changes.',

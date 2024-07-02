@@ -557,7 +557,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
 }
 
 export interface ConfigMigration {
-  configMigration?: boolean;
+  configMigration?: 'auto' | 'disabled' | 'enabled';
 }
 
 export interface MigratedConfig {

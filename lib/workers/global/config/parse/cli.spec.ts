@@ -33,19 +33,19 @@ describe('workers/global/config/parse/cli', () => {
     });
 
     it('supports boolean no value', () => {
-      argv.push('--config-migration');
-      expect(cli.getConfig(argv)).toEqual({ configMigration: true });
+      argv.push('--draft-p-r');
+      expect(cli.getConfig(argv)).toEqual({ draftPR: true });
       argv = argv.slice(0, -1);
     });
 
     it('supports boolean space true', () => {
-      argv.push('--config-migration');
+      argv.push('--draft-p-r');
       argv.push('true');
-      expect(cli.getConfig(argv)).toEqual({ configMigration: true });
+      expect(cli.getConfig(argv)).toEqual({ draftPR: true });
     });
 
     it('throws exception for invalid boolean value', () => {
-      argv.push('--config-migration');
+      argv.push('--draft-p-r');
       argv.push('badvalue');
       expect(() => cli.getConfig(argv)).toThrow(
         Error(
@@ -55,19 +55,19 @@ describe('workers/global/config/parse/cli', () => {
     });
 
     it('supports boolean space false', () => {
-      argv.push('--config-migration');
+      argv.push('--draft-p-r');
       argv.push('false');
-      expect(cli.getConfig(argv)).toEqual({ configMigration: false });
+      expect(cli.getConfig(argv)).toEqual({ draftPR: false });
     });
 
     it('supports boolean equals true', () => {
-      argv.push('--config-migration=true');
-      expect(cli.getConfig(argv)).toEqual({ configMigration: true });
+      argv.push('--draft-p-r=true');
+      expect(cli.getConfig(argv)).toEqual({ draftPR: true });
     });
 
     it('supports boolean equals false', () => {
-      argv.push('--config-migration=false');
-      expect(cli.getConfig(argv)).toEqual({ configMigration: false });
+      argv.push('--draft-p-r=false');
+      expect(cli.getConfig(argv)).toEqual({ draftPR: false });
     });
 
     it('supports list single', () => {
@@ -136,6 +136,12 @@ describe('workers/global/config/parse/cli', () => {
       ${'--recreate-when=auto'}        | ${{ recreateWhen: 'auto' }}
       ${'--recreate-when=always'}      | ${{ recreateWhen: 'always' }}
       ${'--recreate-when=never'}       | ${{ recreateWhen: 'never' }}
+      ${'--config-migration=false'}    | ${{ configMigration: 'disabled' }}
+      ${'--config-migration=true'}     | ${{ configMigration: 'enabled' }}
+      ${'--config-migration'}          | ${{ configMigration: 'enabled' }}
+      ${'--config-migration=auto'}     | ${{ configMigration: 'auto' }}
+      ${'--config-migration=enabled'}  | ${{ configMigration: 'enabled' }}
+      ${'--config-migration=disabled'} | ${{ configMigration: 'disabled' }}
     `('"$arg" -> $config', ({ arg, config }) => {
       argv.push(arg);
       expect(cli.getConfig(argv)).toMatchObject(config);

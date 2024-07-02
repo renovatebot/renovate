@@ -8,7 +8,7 @@ export async function configMigration(
   config: RenovateConfig,
   branchList: string[],
 ): Promise<void> {
-  if (config.configMigration) {
+  if (config.configMigration === 'enabled') {
     if (config.mode === 'silent') {
       logger.debug(
         'Config migration issues are not created, updated or closed when mode=silent',

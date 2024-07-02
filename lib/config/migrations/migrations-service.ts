@@ -15,6 +15,7 @@ import { BranchNameMigration } from './custom/branch-name-migration';
 import { BranchPrefixMigration } from './custom/branch-prefix-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
+import { ConfigMigrationMigration } from './custom/config-migration-migration';
 import { CustomManagersMigration } from './custom/custom-managers-migration';
 import { DatasourceMigration } from './custom/datasource-migration';
 import { DepTypesMigration } from './custom/dep-types-migration';
@@ -156,6 +157,7 @@ export class MigrationsService {
     FetchReleaseNotesMigration,
     MatchManagersMigration,
     CustomManagersMigration,
+    ConfigMigrationMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {

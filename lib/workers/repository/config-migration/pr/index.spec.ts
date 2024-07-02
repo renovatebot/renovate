@@ -40,7 +40,6 @@ describe('workers/repository/config-migration/pr/index', () => {
 
     config = {
       ...getConfig(),
-      configMigration: true,
       defaultBranch: 'main',
       description: [],
     };

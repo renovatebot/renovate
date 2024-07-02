@@ -10,20 +10,20 @@ describe('workers/global/config/parse/env', () => {
     });
 
     it('supports boolean true', async () => {
-      const envParam: NodeJS.ProcessEnv = { RENOVATE_CONFIG_MIGRATION: 'true' };
-      expect((await env.getConfig(envParam)).configMigration).toBeTrue();
+      const envParam: NodeJS.ProcessEnv = { RENOVATE_DRAFT_P_R: 'true' };
+      expect((await env.getConfig(envParam)).draftPR).toBeTrue();
     });
 
     it('supports boolean false', async () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_CONFIG_MIGRATION: 'false',
+        RENOVATE_DRAFT_P_R: 'false',
       };
-      expect((await env.getConfig(envParam)).configMigration).toBeFalse();
+      expect((await env.getConfig(envParam)).draftPR).toBeFalse();
     });
 
     it('throws exception for invalid boolean value', async () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_CONFIG_MIGRATION: 'badvalue',
+        RENOVATE_DRAFT_P_R: 'badvalue',
       };
       await expect(env.getConfig(envParam)).rejects.toThrow(
         Error(
@@ -86,12 +86,17 @@ describe('workers/global/config/parse/env', () => {
     });
 
     test.each`
-      envArg                                   | config
-      ${{ RENOVATE_RECREATE_CLOSED: 'true' }}  | ${{ recreateWhen: 'always' }}
-      ${{ RENOVATE_RECREATE_CLOSED: 'false' }} | ${{ recreateWhen: 'auto' }}
-      ${{ RENOVATE_RECREATE_WHEN: 'auto' }}    | ${{ recreateWhen: 'auto' }}
-      ${{ RENOVATE_RECREATE_WHEN: 'always' }}  | ${{ recreateWhen: 'always' }}
-      ${{ RENOVATE_RECREATE_WHEN: 'never' }}   | ${{ recreateWhen: 'never' }}
+      envArg                                       | config
+      ${{ RENOVATE_RECREATE_CLOSED: 'true' }}      | ${{ recreateWhen: 'always' }}
+      ${{ RENOVATE_RECREATE_CLOSED: 'false' }}     | ${{ recreateWhen: 'auto' }}
+      ${{ RENOVATE_RECREATE_WHEN: 'auto' }}        | ${{ recreateWhen: 'auto' }}
+      ${{ RENOVATE_RECREATE_WHEN: 'always' }}      | ${{ recreateWhen: 'always' }}
+      ${{ RENOVATE_RECREATE_WHEN: 'never' }}       | ${{ recreateWhen: 'never' }}
+      ${{ RENOVATE_CONFIG_MIGRATION: 'true' }}     | ${{ configMigration: 'enabled' }}
+      ${{ RENOVATE_CONFIG_MIGRATION: 'false' }}    | ${{ configMigration: 'disabled' }}
+      ${{ RENOVATE_CONFIG_MIGRATION: 'enabled' }}  | ${{ configMigration: 'enabled' }}
+      ${{ RENOVATE_CONFIG_MIGRATION: 'disabled' }} | ${{ configMigration: 'disabled' }}
+      ${{ RENOVATE_CONFIG_MIGRATION: 'auto' }}     | ${{ configMigration: 'auto' }}
     `('"$envArg" -> $config', async ({ envArg, config }) => {
       expect(await env.getConfig(envArg)).toMatchObject(config);
     });
