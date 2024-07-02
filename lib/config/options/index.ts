@@ -232,6 +232,7 @@ const options: RenovateOptions[] = [
     experimentalDescription:
       'Config migration PRs are still being improved, in particular to reduce the amount of reordering and whitespace changes.',
     experimentalIssues: [16359],
+    parents: ['.'],
   },
   {
     name: 'productLinks',
@@ -291,6 +292,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     allowString: true,
     cli: false,
+    parents: ['.'],
   },
   {
     name: 'migratePresets',
@@ -423,6 +425,7 @@ const options: RenovateOptions[] = [
       'If enabled, Renovate logs the fully resolved config for each repository, plus the fully resolved presets.',
     type: 'boolean',
     default: false,
+    parents: ['.'],
   },
   {
     name: 'binarySource',
@@ -493,6 +496,7 @@ const options: RenovateOptions[] = [
     experimentalIssues: [23286],
     default: {},
     mergeable: true,
+    parents: ['.'],
   },
   {
     name: 'dockerChildPrefix',
@@ -602,6 +606,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'enabled', 'disabled'],
     default: 'auto',
+    parents: ['.'],
   },
   {
     name: 'includeMirrors',
@@ -715,6 +720,7 @@ const options: RenovateOptions[] = [
       'Whether to create a "Dependency Dashboard" issue in the repository.',
     type: 'boolean',
     default: false,
+    parents: ['.'],
   },
   {
     name: 'dependencyDashboardApproval',
@@ -729,12 +735,14 @@ const options: RenovateOptions[] = [
       'Set to `true` to let Renovate close the Dependency Dashboard issue if there are no more updates.',
     type: 'boolean',
     default: false,
+    parents: ['.'],
   },
   {
     name: 'dependencyDashboardTitle',
     description: 'Title for the Dependency Dashboard issue.',
     type: 'string',
     default: `Dependency Dashboard`,
+    parents: ['.'],
   },
   {
     name: 'dependencyDashboardHeader',
@@ -743,12 +751,14 @@ const options: RenovateOptions[] = [
     type: 'string',
     default:
       'This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.',
+    parents: ['.'],
   },
   {
     name: 'dependencyDashboardFooter',
     description:
       'Any text added here will be placed last in the Dependency Dashboard issue body, with a divider separator before it.',
     type: 'string',
+    parents: ['.'],
   },
   {
     name: 'dependencyDashboardLabels',
@@ -757,6 +767,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     default: null,
+    parents: ['.'],
   },
   {
     name: 'dependencyDashboardOSVVulnerabilitySummary',
@@ -766,6 +777,7 @@ const options: RenovateOptions[] = [
     allowedValues: ['none', 'all', 'unresolved'],
     default: 'none',
     experimental: true,
+    parents: ['.'],
   },
   {
     name: 'configWarningReuseIssue',
@@ -773,6 +785,7 @@ const options: RenovateOptions[] = [
       'Set this to `false` to make Renovate create a new issue for each config warning, instead of reopening or reusing an existing issue.',
     type: 'boolean',
     default: true,
+    parents: ['.'],
   },
 
   // encryption
@@ -1054,6 +1067,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     stage: 'package',
     cli: false,
+    parents: ['.'],
   },
   {
     name: 'useBaseBranchConfig',
@@ -1062,6 +1076,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['merge', 'none'],
     default: 'none',
+    parents: ['.'],
   },
   {
     name: 'gitAuthor',
@@ -1101,6 +1116,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     mergeable: false,
     stage: 'repository',
+    parents: ['.'],
   },
   {
     name: 'includePaths',
@@ -2046,6 +2062,7 @@ const options: RenovateOptions[] = [
       'Rate limit PRs to maximum x created per hour. 0 means no limit.',
     type: 'integer',
     default: 2,
+    parents: ['.'],
   },
   {
     name: 'prConcurrentLimit',
@@ -2053,6 +2070,7 @@ const options: RenovateOptions[] = [
       'Limit to a maximum of x concurrent branches/PRs. 0 means no limit.',
     type: 'integer',
     default: 10,
+    parents: ['.'],
   },
   {
     name: 'branchConcurrentLimit',
@@ -2060,6 +2078,7 @@ const options: RenovateOptions[] = [
       'Limit to a maximum of x concurrent branches. 0 means no limit, `null` (default) inherits value from `prConcurrentLimit`.',
     type: 'integer',
     default: null, // inherit prConcurrentLimit
+    parents: ['.'],
   },
   {
     name: 'prPriority',
@@ -2160,6 +2179,7 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     supportedPlatforms: ['github'],
+    parents: ['.'],
   },
   {
     name: 'osvVulnerabilityAlerts',
@@ -2168,6 +2188,7 @@ const options: RenovateOptions[] = [
     default: false,
     experimental: true,
     experimentalIssues: [20542],
+    parents: ['.'],
   },
   {
     name: 'pruneBranchAfterAutomerge',
@@ -2315,6 +2336,7 @@ const options: RenovateOptions[] = [
     additionalProperties: {
       type: 'string',
     },
+    parents: ['.'],
   },
   {
     name: 'lockFileMaintenance',
@@ -2544,6 +2566,7 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     cli: true,
     mergeable: true,
+    parents: ['.'],
   },
   {
     name: 'hostType',
@@ -2846,6 +2869,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     cli: true,
     mergeable: true,
+    parents: ['.'],
   },
   {
     name: 'customType',
@@ -3064,6 +3088,7 @@ const options: RenovateOptions[] = [
     experimental: true,
     globalOnly: true,
     default: [],
+    parents: ['.'],
   },
   {
     name: 'maxRetryAfter',
@@ -3084,6 +3109,7 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     cli: false,
     env: false,
+    parents: ['.'],
   },
   {
     name: 'matchMessage',
@@ -3121,6 +3147,10 @@ const options: RenovateOptions[] = [
 
 export function getOptions(): RenovateOptions[] {
   return options;
+}
+
+export function isTopLevelOnlyOption(option: RenovateOptions): boolean {
+  return option.parents?.length === 1 && option.parents[0] === '.';
 }
 
 function loadManagerOptions(): void {
