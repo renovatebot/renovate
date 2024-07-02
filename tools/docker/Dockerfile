@@ -53,7 +53,8 @@ WORKDIR /usr/src/app
 
 ENV RENOVATE_X_IGNORE_NODE_WARN=true
 
-COPY tools/docker/bin/ /usr/local/bin/
+COPY tools/docker/bin/ /usr/local/sbin/
+ENTRYPOINT ["/usr/local/sbin/renovate-entrypoint.sh"]
 CMD ["renovate"]
 
 ARG RENOVATE_VERSION
