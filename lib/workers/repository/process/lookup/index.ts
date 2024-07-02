@@ -467,7 +467,7 @@ export async function lookupUpdates(
               currentVersion: config.currentVersion,
               update,
               allVersionsLength: allVersions.length,
-              filteredReleases,
+              filteredReleaseVersions: filteredReleases.map((r) => r.version),
             },
             'Unexpected downgrade detected: skipping',
           );
