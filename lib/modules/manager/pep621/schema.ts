@@ -54,6 +54,20 @@ export const PyProjectSchema = z.object({
             .optional(),
         })
         .optional(),
+      rye: z
+        .object({
+          'dev-dependencies': DependencyRecordSchema,
+          sources: z
+            .array(
+              z.object({
+                name: z.string(),
+                url: z.string(),
+                verify_ssl: z.boolean().optional(),
+              }),
+            )
+            .optional(),
+        })
+        .optional(),
     })
     .optional(),
 });

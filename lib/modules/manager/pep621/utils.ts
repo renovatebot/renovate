@@ -15,6 +15,7 @@ export const depTypes = {
   dependencies: 'project.dependencies',
   optionalDependencies: 'project.optional-dependencies',
   pdmDevDependencies: 'tool.pdm.dev-dependencies',
+  ryeDevDependencies: 'tool.rye.dev-dependencies',
   buildSystemRequires: 'build-system.requires',
 };
 
