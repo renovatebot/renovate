@@ -234,10 +234,12 @@ class GerritClient {
     if (searchConfig.branchName) {
       filters.push(
         ...[
+          '(',
           `footer:Renovate-Branch=${searchConfig.branchName}`,
           // for backwards compatibility
           'OR',
           `hashtag:sourceBranch-${searchConfig.branchName}`,
+          ')',
         ],
       );
     }
