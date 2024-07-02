@@ -542,6 +542,11 @@ jobs:
         with:
           show-progress: false
 
+      - name: docker-config
+        uses: containerbase/internal-tools@0b4162e48b68b3521953c3c663376ca22a1f769b # v3.3.2
+        with:
+          command: docker-config
+
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
