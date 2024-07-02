@@ -25,8 +25,6 @@ COPY pnpm-lock.yaml ./
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN corepack pnpm fetch --prod
 
-RUN false
-
 COPY . ./
 
 # install
