@@ -22,6 +22,8 @@ ENV CI=1 npm_config_modules_cache_max_age=0 \
 
 COPY pnpm-lock.yaml ./
 
+RUN ldd --version
+
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN corepack pnpm fetch --prod
 
