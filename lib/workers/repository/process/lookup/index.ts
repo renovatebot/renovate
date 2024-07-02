@@ -363,6 +363,10 @@ export async function lookupUpdates(
       );
       if (config.isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
+        logger.debug(
+          { filteredReleases },
+          'Vulnerability alert found: limiting results to a single release',
+        );
       }
       const buckets: Record<string, [Release]> = {};
       for (const release of filteredReleases) {
