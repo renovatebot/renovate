@@ -353,9 +353,7 @@
     "renovate-schema.json"
   ],
   "pnpm": {
-    "neverBuiltDependencies": [
-      "dtrace-provider"
-    ],
+    "ignoredOptionalDependencies": ["dtrace-provider", "moment", "mv", "safe-json-stringify"],
     "overrides": {
       "@semantic-release/github>@octokit/plugin-paginate-rest": "11.3.0",
       "@types/linkify-it": "<5.0.0"
