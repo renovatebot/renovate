@@ -11,6 +11,7 @@ export const ReleaseResultZodSchema = z.object({
         sourceDirectory: z.string().optional(),
         changelogUrl: z.string().optional(),
         digest: z.string().optional(),
+        isStable: z.boolean().optional(),
       })
       .transform((input) => {
         return {
