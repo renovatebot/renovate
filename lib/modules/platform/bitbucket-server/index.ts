@@ -1,4 +1,5 @@
 import { setTimeout } from 'timers/promises';
+import is from '@sindresorhus/is';
 import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
 import {
@@ -71,6 +72,7 @@ const defaults: {
   endpoint?: string;
   hostType: string;
   version: string;
+  username?: string;
 } = {
   hostType: 'bitbucket-server',
   version: '0.0.0',
@@ -92,7 +94,15 @@ export async function initPlatform({
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
   }
-  if (!(username && password) && !token) {
+
+  const hostRule = hostRules.find({
+    hostType: defaults.hostType,
+    url: endpoint,
+  });
+  const hasHttpsPrivateKey =
+    is.nonEmptyStringAndNotWhitespace(hostRule.httpsPrivateKey) &&
+    is.nonEmptyStringAndNotWhitespace(hostRule.httpsCertificate);
+  if (!(username && password) && !token && !hasHttpsPrivateKey) {
     throw new Error(
       'Init: You must either configure a Bitbucket Server username/password or a HTTP access token',
     );
@@ -101,9 +111,34 @@ export async function initPlatform({
       'Init: You must either configure a Bitbucket Server password or a HTTP access token',
     );
   }
+
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
   defaults.endpoint = ensureTrailingSlash(endpoint);
   setBaseUrl(defaults.endpoint);
+
+  let renovateUsername: string;
+  if (is.nonEmptyString(username)) {
+    renovateUsername = username;
+  } else if (hasHttpsPrivateKey === false) {
+    throw new Error(
+      'Init: You must configure a Bitbucket Server username or provide an httpsPrivateKey that can be used for authentication.',
+    );
+  } else {
+    logger.debug('No username provided. Resolving via BitBucket API.');
+    try {
+      renovateUsername = (
+        await bitbucketServerHttp.get(`./plugins/servlet/applinks/whoami`)
+      ).body;
+      logger.debug(`Resolved username '${renovateUsername}'.`);
+    } catch (err) {
+      throw new Error(
+        `Init: Failed to resolve username using BitBucket API. You may need to specify this in the config: ${err}`,
+        { cause: err },
+      );
+    }
+  }
+  defaults.username = renovateUsername;
+
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
@@ -204,8 +239,8 @@ export async function initRepo({
     repositorySlug,
     repository,
     prVersions: new Map<number, number>(),
-    username: opts.username,
     ignorePrAuthor,
+    username: defaults.username,
   } as any;
 
   try {
