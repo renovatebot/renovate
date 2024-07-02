@@ -29,10 +29,12 @@ describe('modules/manager/mise/utils', () => {
     });
 
     it('invalid schema', () => {
-      const invalidSchema = codeBlock`
-      clearly: invalid
+      const content = codeBlock`
+      [invalid]
+      erlang = '23.3'
+      node = '16'
     `;
-      const actual = parseTomlFile(invalidSchema, miseFilename);
+      const actual = parseTomlFile(content, miseFilename);
       expect(actual).toBeNull();
     });
   });
