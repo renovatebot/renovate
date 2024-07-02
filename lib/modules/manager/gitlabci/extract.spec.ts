@@ -231,6 +231,7 @@ describe('modules/manager/gitlabci/extract', () => {
     it('extract images via registry aliases', () => {
       const registryAliases = {
         $CI_REGISTRY: 'registry.com',
+        $BUILD_IMAGES: 'registry.com/build-images',
         foo: 'foo.registry.com',
       };
       const res = extractPackageFile(
@@ -242,6 +243,7 @@ describe('modules/manager/gitlabci/extract', () => {
           - foo/mariadb:10.4.11
           - name: $CI_REGISTRY/other/image1:1.0.0
             alias: imagealias1
+          - $BUILD_IMAGES/image2:1.0.0
       `,
         '',
         {
@@ -278,6 +280,16 @@ describe('modules/manager/gitlabci/extract', () => {
           depName: 'registry.com/other/image1',
           depType: 'service-image',
           replaceString: '$CI_REGISTRY/other/image1:1.0.0',
+        },
+        {
+          autoReplaceStringTemplate:
+            '$BUILD_IMAGES/image2:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '1.0.0',
+          datasource: 'docker',
+          depName: 'registry.com/build-images/image2',
+          depType: 'service-image',
+          replaceString: '$BUILD_IMAGES/image2:1.0.0',
         },
       ]);
     });
@@ -357,6 +369,7 @@ describe('modules/manager/gitlabci/extract', () => {
     it('extracts component references via registry aliases', () => {
       const registryAliases = {
         $CI_SERVER_HOST: 'gitlab.example.com',
+        $COMPONENT_REGISTRY: 'gitlab.example.com/a-group',
       };
       const content = codeBlock`
         include:
@@ -373,6 +386,7 @@ describe('modules/manager/gitlabci/extract', () => {
               malformed: true
           - component: $CI_SERVER_HOST/an-org/a-component@1.0
           - component: other-gitlab.example.com/an-org/a-project/a-component@1.0
+          - component: $COMPONENT_REGISTRY/a-project/a-component@1.0
       `;
       const res = extractPackageFile(content, '', {
         registryAliases,
@@ -413,6 +427,13 @@ describe('modules/manager/gitlabci/extract', () => {
           depName: 'an-org/a-project',
           depType: 'repository',
           registryUrls: ['https://other-gitlab.example.com'],
+        },
+        {
+          currentValue: '1.0',
+          datasource: 'gitlab-tags',
+          depName: 'a-group/a-project',
+          depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
         },
       ]);
     });
