@@ -294,15 +294,28 @@ export const presets: Record<string, Preset> = {
   ignoreModulesAndTests: {
     description:
       'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories.',
-    ignorePaths: [
-      '**/node_modules/**',
-      '**/bower_components/**',
-      '**/vendor/**',
-      '**/examples/**',
-      '**/__tests__/**',
-      '**/test/**',
-      '**/tests/**',
-      '**/__fixtures__/**',
+    packageRules: [
+      {
+        ignorePaths: [
+          '**/vendor/**',
+          '**/examples/**',
+          '**/__tests__/**',
+          '**/__fixtures__/**',
+        ],
+        matchCategories: ['dotnet'],
+      },
+      {
+        ignorePaths: [
+          '**/node_modules/**',
+          '**/bower_components/**',
+          '**/vendor/**',
+          '**/examples/**',
+          '**/__tests__/**',
+          '**/test/**',
+          '**/tests/**',
+          '**/__fixtures__/**',
+        ],
+      },
     ],
   },
   ignoreUnstable: {
