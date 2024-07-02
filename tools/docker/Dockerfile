@@ -17,9 +17,12 @@ FROM slim-base as build
 
 WORKDIR /usr/local/renovate
 
-ENV CI=1 npm_config_modules_cache_max_age=0
+ENV CI=1 npm_config_modules_cache_max_age=0 \
+  npm_config_loglevel=info
 
 COPY pnpm-lock.yaml ./
+
+RUN ldd --version
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN corepack pnpm fetch --prod
