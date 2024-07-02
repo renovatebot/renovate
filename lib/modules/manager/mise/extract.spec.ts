@@ -18,6 +18,13 @@ describe('modules/manager/mise/extract', () => {
       expect(extractPackageFile('foo', miseFilename)).toBeNull();
     });
 
+    it('returns null for empty tools section', () => {
+      const content = codeBlock`
+      [tools]
+    `;
+      expect(extractPackageFile(content, miseFilename)).toBeNull();
+    });
+
     it('extracts tools - mise core plugins', () => {
       const content = codeBlock`
       [tools]

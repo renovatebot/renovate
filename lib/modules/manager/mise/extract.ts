@@ -34,7 +34,7 @@ export function extractPackageFile(
     }
   }
 
-  return { deps };
+  return deps.length ? { deps } : null;
 }
 
 function parseVersion(toolData: MiseToolSchema): string | null {
