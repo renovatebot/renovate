@@ -2354,8 +2354,11 @@ Configuring `silent` mode is quite similar to `dryRun=lookup` except:
 - It can create branches/PRs if `checkedBranches` is set
 - It will keep any existing branches up-to-date (e.g. ones created previously using `checkedBranches`)
 
-When in `silent` mode, Renovate does not create issues (such as Dependency Dashboard, or due to config errors) or Config Migration PRs, even if enabled.
-It also does not prune/close any which already exist.
+When in `silent` mode Renovate will:
+
+- _not_ create or update any Issue: even the Dependency Dashboard or Config Warning Issues will stay as-is
+- _not_ prune or close any existing Issues
+- _not_ create any Config Migration PRs, even if you explictly enabled Config Migration PRs in your Renovate config
 
 ## npmToken
 
