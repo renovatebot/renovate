@@ -533,7 +533,7 @@ jobs:
   build:
     needs:
       - setup-build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     timeout-minutes: 15
     # if: github.event.pull_request.draft != true
     steps:
@@ -555,6 +555,8 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - run: ldd --version
 
       - name: Build docker
         run: pnpm build:docker build --tries=3 # --platform=linux/amd64,linux/arm64
