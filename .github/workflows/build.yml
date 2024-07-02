@@ -552,7 +552,7 @@ jobs:
         run: pnpm build
 
       - name: Build docker
-        run: pnpm build:docker build --tries=3
+        run: pnpm build:docker build --tries=3 --platform=linux/amd64,linux/arm64
         env:
           LOG_LEVEL: debug
 
