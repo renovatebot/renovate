@@ -45,7 +45,7 @@ The [`config:best-practices` preset](./presets-config.md#configbest-practices) h
 
 ```json
 {
-  "configMigration": true,
+  "configMigration": "enabled",
   "extends": [
     "config:recommended",
     "docker:pinDigests",

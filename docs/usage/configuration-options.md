@@ -554,6 +554,12 @@ If enabled, all issues created by Renovate are set as confidential, even in a pu
 If enabled, Renovate raises a pull request when it needs to migrate the Renovate config file.
 Renovate only performs `configMigration` on `.json` and `.json5` files.
 
+You can select which behavior you want from Renovate:
+
+- `auto` (default): Currently does nothing (same as `disabled`), but new behavior is in development
+- `enabled`: Renovate creates a migration PR when needed
+- `disabled`: Renovate never creates a migration PR
+
 We're adding new features to Renovate bot often.
 Often you can keep using your Renovate config and use the new features right away.
 But sometimes you need to update your Renovate configuration.
