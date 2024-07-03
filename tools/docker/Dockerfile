@@ -13,7 +13,7 @@ FROM ghcr.io/renovatebot/base-image:2.24.0-full@sha256:323eb53c3a1706e6bf87d4e8e
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM slim-base as build
+FROM slim-base AS build
 
 WORKDIR /usr/local/renovate
 
@@ -21,8 +21,6 @@ ENV CI=1 npm_config_modules_cache_max_age=0 \
   npm_config_loglevel=info
 
 COPY pnpm-lock.yaml ./
-
-RUN ldd --version
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN corepack pnpm fetch --prod
