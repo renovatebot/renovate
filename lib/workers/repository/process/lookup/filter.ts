@@ -44,10 +44,8 @@ export function filterVersions(
   );
 
   // Don't upgrade from non-deprecated to deprecated
-  const fromRelease = releases.find(
-    (release) => release.version === currentVersion,
-  );
-  if (ignoreDeprecated && fromRelease && !fromRelease.isDeprecated) {
+  const currentRelease = releases.find((r) => r.version === currentVersion);
+  if (ignoreDeprecated && currentRelease && !currentRelease.isDeprecated) {
     filteredReleases = filteredReleases.filter((release) => {
       if (release.isDeprecated) {
         logger.trace(
@@ -123,7 +121,6 @@ export function filterVersions(
     return filteredReleases;
   }
 
-  const currentRelease = releases.find((r) => r.version === currentVersion);
   if (currentRelease && isReleaseStable(currentRelease, versioning)) {
     return filteredReleases.filter((r) => isReleaseStable(r, versioning));
   }
