@@ -6,7 +6,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 export const supportedDatasources = [GithubReleasesDatasource.id];
 
 export const defaultConfig = {
-  fileMatch: ['^.bun-version$'],
+  fileMatch: ['(^|/)\\.bun-version$'],
   versioning: semverVersioning.id,
 };
 
