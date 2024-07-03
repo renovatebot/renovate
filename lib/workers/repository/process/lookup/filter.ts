@@ -9,6 +9,18 @@ import * as poetryVersioning from '../../../../modules/versioning/poetry';
 import { getRegexPredicate } from '../../../../util/string-match';
 import type { FilterConfig } from './types';
 
+function isReleaseStable(release: Release, versioning: VersioningApi): boolean {
+  if (!versioning.isStable(release.version)) {
+    return false;
+  }
+
+  if (release.isStable === false) {
+    return false;
+  }
+
+  return true;
+}
+
 export function filterVersions(
   config: FilterConfig,
   currentVersion: string,
@@ -18,17 +30,7 @@ export function filterVersions(
 ): Release[] {
   const { ignoreUnstable, ignoreDeprecated, respectLatest, allowedVersions } =
     config;
-  function isVersionStable(version: string): boolean {
-    if (!versioning.isStable(version)) {
-      return false;
-    }
-    // Check if the datasource returned isStable = false
-    const release = releases.find((r) => r.version === version);
-    if (release?.isStable === false) {
-      return false;
-    }
-    return true;
-  }
+
   // istanbul ignore if: shouldn't happen
   if (!currentVersion) {
     return [];
@@ -125,18 +127,19 @@ export function filterVersions(
     return filteredVersions;
   }
 
-  if (isVersionStable(currentVersion)) {
-    return filteredVersions.filter((v) => isVersionStable(v.version));
+  const currentRelease = releases.find((r) => r.version === currentVersion);
+  if (currentRelease && isReleaseStable(currentRelease, versioning)) {
+    return filteredVersions.filter((r) => isReleaseStable(r, versioning));
   }
 
   // if current is unstable then allow unstable in the current major only
   // Allow unstable only in current major
-  return filteredVersions.filter((v) => {
-    if (isVersionStable(v.version)) {
+  return filteredVersions.filter((r) => {
+    if (isReleaseStable(r, versioning)) {
       return true;
     }
     if (
-      versioning.getMajor(v.version) !== versioning.getMajor(currentVersion)
+      versioning.getMajor(r.version) !== versioning.getMajor(currentVersion)
     ) {
       return false;
     }
@@ -145,8 +148,8 @@ export function filterVersions(
       return true;
     }
     return (
-      versioning.getMinor(v.version) === versioning.getMinor(currentVersion) &&
-      versioning.getPatch(v.version) === versioning.getPatch(currentVersion)
+      versioning.getMinor(r.version) === versioning.getMinor(currentVersion) &&
+      versioning.getPatch(r.version) === versioning.getPatch(currentVersion)
     );
   });
 }
