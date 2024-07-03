@@ -103,8 +103,8 @@ importers:
         specifier: 1.13.0
         version: 1.13.0
       azure-devops-node-api:
-        specifier: 13.0.0
-        version: 13.0.0
+        specifier: 14.0.0
+        version: 14.0.0
       bunyan:
         specifier: 1.8.15
         version: 1.8.15
@@ -2436,8 +2436,9 @@ packages:
   aws4@1.13.0:
     resolution: {integrity: sha512-3AungXC4I8kKsS9PuS4JH2nc+0bVY/mjgrephHTIi8fpEeGsTHBUJeosp0Wc1myYMElmD0B3Oc4XL/HVJ4PV2g==}
 
-  azure-devops-node-api@13.0.0:
-    resolution: {integrity: sha512-T/i3pt2Dxb2//1+TJT05Ff5heUmQEWKwa8sdguIhdRYT3Zge9FYw98zpfFvCD7CZsz6AN74SKGgqF3ISVN2TGg==}
+  azure-devops-node-api@14.0.0:
+    resolution: {integrity: sha512-VjMPCkaM3Z4ZRyzbZWlBz/AQvDlt+gPLzPoInkl3OcUs0xLtyFQpCa9Ni4Z9MmfMxTn9kuQuYCzBOmBIoM2WnQ==}
+    engines: {node: '>= 16.0.0'}
 
   babel-jest@29.7.0:
     resolution: {integrity: sha512-BrvGY3xZSwEcCzKvKsCi2GgHqDqsYkOP4/by5xCgIwGXQxIEh+8ew3gmrE1y7XRR6LHZIj6yLYnUi/mm2KXKBg==}
@@ -2897,6 +2898,9 @@ packages:
   dequal@2.0.3:
     resolution: {integrity: sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==}
     engines: {node: '>=6'}
+
+  des.js@1.1.0:
+    resolution: {integrity: sha512-r17GxjhUCjSRy8aiJpr8/UadFIzMzJGexI3Nmz4ADi9LYSFx4gTBp80+NaX/YsXWWLhpZ7v/v/ubEc/bCNfKwg==}
 
   detect-indent@6.1.0:
     resolution: {integrity: sha512-reYkTUJAZb9gUuZ2RvVCNhVHdg62RHnJ7WJl8ftMi4diZ6NWlciOzQN88pUhSELEwflJht4oQDv0F0BMlwaYtA==}
@@ -4122,6 +4126,9 @@ packages:
     peerDependenciesMeta:
       node-notifier:
         optional: true
+
+  js-md4@0.3.2:
+    resolution: {integrity: sha512-/GDnfQYsltsjRswQhN9fhv3EMw2sCpUdrdxyWDOUK7eyD++r3gRhzgiQgc/x4MAv2i1iuQ4lxO5mvqM3vj4bwA==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -5812,8 +5819,9 @@ packages:
     resolution: {integrity: sha512-/OxDN6OtAk5KBpGb28T+HZc2M+ADtvRxXrKKbUwtsLgdoxgX13hyy7ek6bFRl5+aBs2yZzB0c4CnQfAtVypW/g==}
     engines: {node: '>= 0.4'}
 
-  typed-rest-client@1.8.11:
-    resolution: {integrity: sha512-5UvfMpd1oelmUPRbbaVnq+rHP7ng2cE4qoQkQeAqxRL6PklkxsM0g32/HL0yfvruK6ojQ5x8EE+HF4YV6DtuCA==}
+  typed-rest-client@2.0.1:
+    resolution: {integrity: sha512-LSfgVu+jKUbkceVBGJ6bdIMzzpvjhw6A+aKsVnGa2S7bT82QCALh/RAtq/fdV3aLXxHqsChuClrQ93fXMrIckA==}
+    engines: {node: '>= 16.0.0'}
 
   typedarray-to-buffer@3.1.5:
     resolution: {integrity: sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==}
@@ -8931,10 +8939,10 @@ snapshots:
 
   aws4@1.13.0: {}
 
-  azure-devops-node-api@13.0.0:
+  azure-devops-node-api@14.0.0:
     dependencies:
       tunnel: 0.0.6
-      typed-rest-client: 1.8.11
+      typed-rest-client: 2.0.1
 
   babel-jest@29.7.0(@babel/core@7.24.7):
     dependencies:
@@ -9437,6 +9445,11 @@ snapshots:
   deprecation@2.3.1: {}
 
   dequal@2.0.3: {}
+
+  des.js@1.1.0:
+    dependencies:
+      inherits: 2.0.4
+      minimalistic-assert: 1.0.1
 
   detect-indent@6.1.0: {}
 
@@ -11001,6 +11014,8 @@ snapshots:
       - supports-color
       - ts-node
 
+  js-md4@0.3.2: {}
+
   js-tokens@4.0.0: {}
 
   js-yaml@3.14.1:
@@ -11361,8 +11376,7 @@ snapshots:
 
   min-indent@1.0.1: {}
 
-  minimalistic-assert@1.0.1:
-    optional: true
+  minimalistic-assert@1.0.1: {}
 
   minimatch@3.1.2:
     dependencies:
@@ -12763,8 +12777,10 @@ snapshots:
       is-typed-array: 1.1.13
       possible-typed-array-names: 1.0.0
 
-  typed-rest-client@1.8.11:
+  typed-rest-client@2.0.1:
     dependencies:
+      des.js: 1.1.0
+      js-md4: 0.3.2
       qs: 6.12.1
       tunnel: 0.0.6
       underscore: 1.13.6
