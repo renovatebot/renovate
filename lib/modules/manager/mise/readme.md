@@ -7,8 +7,11 @@ Renovate's `mise` manager can version these tools:
 
 <!-- prettier-ignore -->
 !!! warning
-    Only the _first_ version entry for each supported tool is managed!
-    This is due to `.mise.toml` supporting fallback versions.
+    Only the _first_ version entry for each supported tool is managed by Renovate. This limitation arises from the way `.mise.toml` is designed to handle fallback versions.
+    Specifically, when multiple versions are specified for a tool, `.mise.toml` allows for fallback to secondary versions if the primary version is unavailable.
+    Example: 'erlang = ["23.3", "22.0"]'
+    Fallback versions provide a safety net in case the primary version is not accessible - the first version provided is the primary version and should be used where possible.
+    Renovate will only update the primary version - it is the users' responsibility to maintain functioning fallback versions.
 
 To understand the versioning, Renovate re-uses:
 
