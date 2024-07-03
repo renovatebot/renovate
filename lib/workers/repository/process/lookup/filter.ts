@@ -43,8 +43,9 @@ export function filterVersions(
       versioning.isGreaterThan(r.version, currentVersion),
   );
 
-  // Don't upgrade from non-deprecated to deprecated
   const currentRelease = releases.find((r) => r.version === currentVersion);
+
+  // Don't upgrade from non-deprecated to deprecated
   if (ignoreDeprecated && currentRelease && !currentRelease.isDeprecated) {
     filteredReleases = filteredReleases.filter((release) => {
       if (release.isDeprecated) {
