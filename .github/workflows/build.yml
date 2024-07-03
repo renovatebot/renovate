@@ -533,7 +533,7 @@ jobs:
   build:
     needs:
       - setup-build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     # if: github.event.pull_request.draft != true
     steps:
@@ -542,10 +542,10 @@ jobs:
         with:
           show-progress: false
 
-      # - name: docker-config
-      #   uses: containerbase/internal-tools@0b4162e48b68b3521953c3c663376ca22a1f769b # v3.3.2
-      #   with:
-      #     command: docker-config
+      - name: docker-config
+        uses: containerbase/internal-tools@0b4162e48b68b3521953c3c663376ca22a1f769b # v3.3.2
+        with:
+          command: docker-config
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -556,10 +556,8 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - run: ldd --version
-
       - name: Build docker
-        run: pnpm build:docker build --tries=3 # --platform=linux/amd64,linux/arm64
+        run: pnpm build:docker build --tries=3 --platform=linux/amd64,linux/arm64
         env:
           LOG_LEVEL: debug
 
