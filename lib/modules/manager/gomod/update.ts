@@ -17,16 +17,17 @@ export function updateDependency({
 }: UpdateDependencyConfig): string | null {
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
-    const { depName, depType, updateType } = upgrade;
+    const { depType, updateType } = upgrade;
+    const fromPackageName = upgrade.depName;
     if (updateType === 'replacement') {
       logger.warn('gomod manager does not support replacement updates yet');
       return null;
     }
     // istanbul ignore if: should never happen
-    if (!depName || !upgrade.managerData) {
+    if (!fromPackageName || !upgrade.managerData) {
       return null;
     }
-    const depNameNoVersion = getDepNameWithNoVersion(depName);
+    const depNameNoVersion = getDepNameWithNoVersion(fromPackageName);
     const lines = fileContent.split(newlineRegex);
     // istanbul ignore if: hard to test
     if (lines.length <= upgrade.managerData.lineNumber) {
@@ -40,7 +41,7 @@ export function updateDependency({
       !lineToChange.includes('rethinkdb/rethinkdb-go.v5')
     ) {
       logger.debug(
-        { lineToChange, depName },
+        { lineToChange, depName: fromPackageName },
         "go.mod current line doesn't contain dependency",
       );
       return null;
@@ -85,7 +86,7 @@ export function updateDependency({
         return fileContent;
       }
       logger.debug(
-        { depName, lineToChange, newDigestRightSized },
+        { depName: fromPackageName, lineToChange, newDigestRightSized },
         'gomod: need to update digest',
       );
       newLine = lineToChange.replace(
@@ -101,9 +102,9 @@ export function updateDependency({
       );
     }
     if (upgrade.updateType === 'major') {
-      logger.debug(`gomod: major update for ${depName}`);
-      if (depName.startsWith('gopkg.in/')) {
-        const oldV = depName.split('.').pop();
+      logger.debug(`gomod: major update for ${fromPackageName}`);
+      if (fromPackageName.startsWith('gopkg.in/')) {
+        const oldV = fromPackageName.split('.').pop();
         newLine = newLine.replace(`.${oldV}`, `.v${upgrade.newMajor}`);
         // Package renames - I couldn't think of a better place to do this
         newLine = newLine.replace(
@@ -115,9 +116,12 @@ export function updateDependency({
         !newLine.includes(`/v${upgrade.newMajor}`) &&
         !upgrade.newValue!.endsWith('+incompatible')
       ) {
-        if (depName === depNameNoVersion) {
+        if (fromPackageName === depNameNoVersion) {
           // If package currently has no version, pin to latest one.
-          newLine = newLine.replace(depName, `${depName}/v${upgrade.newMajor}`);
+          newLine = newLine.replace(
+            fromPackageName,
+            `${fromPackageName}/v${upgrade.newMajor}`,
+          );
         } else {
           // Replace version
           const [oldV] = upgrade.currentValue!.split('.');
