@@ -5,6 +5,31 @@
 Automated dependency updates.
 Multi-platform and multi-language.
 
+## Check if you're reading the right docs
+
+This documentation is meant for:
+
+- The Renovate Open Source CLI, or
+- The Mend Renovate App for GitHub.com
+
+If you're using, or going to use a tool listed above, you can skip ahead to the next heading.
+
+Renovate also has variants, which use the Renovate CLI as base.
+If you're using, or going to use a variant of Renovate, then start by reading the docs for the variant.
+The table below lists the correct docs for each variant.
+
+| Name                                                                           | Docs                 |
+| ------------------------------------------------------------------------------ | -------------------- |
+| Renovate Community Edition (CE)                                                | link to correct docs |
+| Renovate Enterprise Edition (EE)                                               | link to correct docs |
+| Mend app for Bitbucket Cloud                                                   | link to correct docs |
+| Mend app for Bitbucket Cloud with Mend's full AppSec solution (SCA, SAST, etc) | link to correct docs |
+
+After you read the docs for your variant, you should come back here, and read this documentation.
+Much of the information here applies to variants too.
+But remember: your variant may be (subtly) different.
+If in doubt, refer to the docs for your variant.
+
 ## Why use Renovate?
 
 <!-- markdownlint-disable list-marker-space -->
