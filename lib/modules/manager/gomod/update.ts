@@ -27,7 +27,7 @@ export function updateDependency({
     if (!fromPackageName || !upgrade.managerData) {
       return null;
     }
-    const depNameNoVersion = getDepNameWithNoVersion(fromPackageName);
+    const fromPackageNameNoVersion = getDepNameWithNoVersion(fromPackageName);
     const lines = fileContent.split(newlineRegex);
     // istanbul ignore if: hard to test
     if (lines.length <= upgrade.managerData.lineNumber) {
@@ -37,7 +37,7 @@ export function updateDependency({
     const lineToChange = lines[upgrade.managerData.lineNumber];
     logger.trace({ upgrade, lineToChange }, 'go.mod current line');
     if (
-      !lineToChange.includes(depNameNoVersion) &&
+      !lineToChange.includes(fromPackageNameNoVersion) &&
       !lineToChange.includes('rethinkdb/rethinkdb-go.v5')
     ) {
       logger.debug(
@@ -116,7 +116,7 @@ export function updateDependency({
         !newLine.includes(`/v${upgrade.newMajor}`) &&
         !upgrade.newValue!.endsWith('+incompatible')
       ) {
-        if (fromPackageName === depNameNoVersion) {
+        if (fromPackageName === fromPackageNameNoVersion) {
           // If package currently has no version, pin to latest one.
           newLine = newLine.replace(
             fromPackageName,
