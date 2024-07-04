@@ -534,18 +534,13 @@ jobs:
     needs:
       - setup-build
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    # if: github.event.pull_request.draft != true
+    timeout-minutes: 15
+    if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           show-progress: false
-
-      - name: docker-config
-        uses: containerbase/internal-tools@0b4162e48b68b3521953c3c663376ca22a1f769b # v3.3.2
-        with:
-          command: docker-config
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -557,7 +552,7 @@ jobs:
         run: pnpm build
 
       - name: Build docker
-        run: pnpm build:docker build --tries=3 --platform=linux/amd64,linux/arm64
+        run: pnpm build:docker build --tries=3
         env:
           LOG_LEVEL: debug
 
