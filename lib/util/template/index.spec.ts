@@ -96,6 +96,52 @@ describe('util/template/index', () => {
     expect(output).toMatchSnapshot();
   });
 
+  it('to JSON', () => {
+    const userTemplate = '{{{ toJSON upgrades }}}';
+    const input = {
+      upgrades: [
+        {
+          depName: 'foo-lib',
+          currentVersion: '1.0.0',
+          newVersion: '1.0.1',
+        },
+      ],
+    };
+    const output = template.compile(userTemplate, input);
+    expect(JSON.parse(output)).toEqual(input.upgrades);
+  });
+
+  it('to JSON empty array', () => {
+    const userTemplate = '{{{ toJSON (toArray) }}}';
+    const output = template.compile(userTemplate, {});
+    expect(JSON.parse(output)).toEqual([]);
+  });
+
+  it('to JSON empty object', () => {
+    const userTemplate = '{{{ toJSON (toObject) }}}';
+    const output = template.compile(userTemplate, {});
+    expect(JSON.parse(output)).toEqual({});
+  });
+
+  it('build complex json', () => {
+    const userTemplate =
+      "{{{ toJSON (toObject 'upgrades' upgrades 'array' (toArray platform isMajor 'foo')) }}}";
+    const input = {
+      platform: 'github',
+      isMajor: true,
+      upgrades: [
+        {
+          depName: 'foo-lib',
+        },
+      ],
+    };
+    const output = template.compile(userTemplate, input);
+    expect(JSON.parse(output)).toEqual({
+      upgrades: input.upgrades,
+      array: [input.platform, input.isMajor, 'foo'],
+    });
+  });
+
   it('lowercase', () => {
     const userTemplate = "{{{ lowercase 'FOO'}}}";
     const output = template.compile(userTemplate, undefined as never);

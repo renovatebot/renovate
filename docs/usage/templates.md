@@ -39,6 +39,18 @@ If you want to print pretty JSON with Handlebars you can use the built-in functi
 
 In the example above `myvar` is a variable/field, that has valid JSON.
 
+### toJSON
+
+If you want to convert an object to a JSON string, you can use the built-in function `toJSON` like this:
+
+`{{{ toJSON upgrades }}}`
+
+#### Generate complex JSON string
+
+You can generate a complex JSON string using `toJSON`, `toObject` and `toArray` functions, e.g.,
+
+`{{{ toJSON (toObject 'key' 'value' 'array' (toArray 'foo' 'bar')) }}}` will render `{"key":"value","array":["foo","bar"]}`.
+
 ### encodeURIComponent
 
 If you want to convert a string to a valid URI, use the built-in function `encodeURIComponent` like this:
