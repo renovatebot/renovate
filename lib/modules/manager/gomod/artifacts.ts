@@ -135,7 +135,7 @@ export async function updateArtifacts({
   const vendorModulesFileName = upath.join(vendorDir, 'modules.txt');
   const useVendor =
     (await readLocalFile(vendorModulesFileName)) !== null &&
-    !config.postUpdateOptions?.includes('gomodVendorSkip');
+    !config.postUpdateOptions?.includes('gomodSkipVendor');
 
   let massagedGoMod = newGoModContent;
 
