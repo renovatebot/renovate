@@ -5,7 +5,6 @@ Renovate's `mise` manager can version these tools:
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
 <!-- Autogenerate end -->
 
-<!-- prettier-ignore -->
 ### Renovate only updates primary versions
 
 Renovate's `mise` manager is designed to automatically update the _first_ (primary) version listed for each tool in the `mise.toml` file.
@@ -33,20 +32,22 @@ This follows the same workflow that Renovate's `asdf` manager uses.
 
 ### Plugin/Tool support
 
-Renovate leverages:
+Renovate uses:
 
 - [mise's plugins](https://github.com/jdx/mise/tree/main/src/plugins/core)
 - [asdf's plugins](https://mise.jdx.dev/registry.html)
 
-for understanding and managing tool versioning.
+to understand and manage tool versioning.
 
 Support for new tools/plugins needs to be _manually_ added to Renovate's logic.
 
 #### Adding new tool support
 
-Adding support for a new tool involves either contributing to Mise Plugins or extending Renovate's asdf manager, which indirectly benefits mise management.
+There are 2 ways to integrate versioning for a new tool:
 
-To integrate versioning for a new tool:
+- Renovate's `mise` manager: ensure upstream `mise` supports the tool, then add support to the `mise` manager in Renovate
+- Renovate's `asdf` manager: improve the `asdf` manager in Renovate, which automatically extends support to `mise`
 
-- Mise Native Support: Add the tool directly to Mise Plugins.
-- Via Renovate's `asdf` Manager: Enhance the asdf manager in Renovate, which automatically extends support to mise.
+If `mise` adds support for more tools via it's own [core plugins](https://mise.jdx.dev/plugins.html#core-plugins), you can create a PR to extend Renovate's `mise` manager to add support for the new tooling.
+
+If you are wanting to add support for an existing `asdf-x` plugin to `mise`, you can create a PR to extend Renovate's `asdf` manager, which indirectly helps Renovate's `mise` manager as well.
