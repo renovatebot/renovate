@@ -47,10 +47,10 @@ export function filterVersions(
 
   // Don't upgrade from non-deprecated to deprecated
   if (ignoreDeprecated && currentRelease && !currentRelease.isDeprecated) {
-    filteredReleases = filteredReleases.filter((release) => {
-      if (release.isDeprecated) {
+    filteredReleases = filteredReleases.filter((r) => {
+      if (r.isDeprecated) {
         logger.trace(
-          `Skipping ${config.depName!}@${release.version} because it is deprecated`,
+          `Skipping ${config.depName!}@${r.version} because it is deprecated`,
         );
         return false;
       }
