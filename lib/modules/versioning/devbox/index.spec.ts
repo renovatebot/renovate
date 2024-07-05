@@ -1,13 +1,16 @@
-import nixhub from '.';
+import devbox from '.';
 
-describe('modules/versioning/nixhub/index', () => {
+describe('modules/versioning/devbox/index', () => {
   it.each`
     version     | expected
+    ${'1'}      | ${true}
+    ${'01'}     | ${false}
+    ${'1.01'}   | ${false}
     ${'1.1'}    | ${true}
     ${'1.3.0'}  | ${true}
     ${'2.1.20'} | ${true}
   `('isVersion("$version") === $expected', ({ version, expected }) => {
-    expect(!!nixhub.isVersion(version)).toBe(expected);
+    expect(!!devbox.isVersion(version)).toBe(expected);
   });
 
   it.each`
@@ -30,6 +33,6 @@ describe('modules/versioning/nixhub/index', () => {
     ${'1.2.3-foo'}    | ${false}
     ${'1.2.3foo'}     | ${false}
   `('isValid("$version") === $isValid', ({ version, isValid }) => {
-    expect(!!nixhub.isValid(version)).toBe(isValid);
+    expect(!!devbox.isValid(version)).toBe(isValid);
   });
 });

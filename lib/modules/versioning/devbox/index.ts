@@ -2,14 +2,14 @@ import { regEx } from '../../../util/regex';
 import { GenericVersion, GenericVersioningApi } from '../generic';
 import type { VersioningApi } from '../types';
 
-export const id = 'nixhub';
-export const displayName = 'nixhub';
+export const id = 'devbox';
+export const displayName = 'devbox';
 
 export const supportsRanges = false;
 
 const versionPattern = regEx(/^((\d|[1-9]\d*)(\.(\d|[1-9]\d*)){0,2})$/);
 
-class NixhubVersioningApi extends GenericVersioningApi {
+class DevboxVersioningApi extends GenericVersioningApi {
   protected _parse(version: string): GenericVersion | null {
     const matches = versionPattern.exec(version);
     if (!matches) {
@@ -21,9 +21,8 @@ class NixhubVersioningApi extends GenericVersioningApi {
   protected override _compare(version: string, other: string): number {
     const parsed1 = this._parse(version);
     const parsed2 = this._parse(other);
-    // istanbul ignore if
     if (!(parsed1 && parsed2)) {
-      return 1;
+      return 0;
     }
     const length = Math.max(parsed1.release.length, parsed2.release.length);
     for (let i = 0; i < length; i += 1) {
@@ -45,6 +44,6 @@ class NixhubVersioningApi extends GenericVersioningApi {
   }
 }
 
-export const api: VersioningApi = new NixhubVersioningApi();
+export const api: VersioningApi = new DevboxVersioningApi();
 
 export default api;

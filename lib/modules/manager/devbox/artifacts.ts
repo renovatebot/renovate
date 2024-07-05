@@ -1,15 +1,15 @@
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { readLocalFile } from '../../../util/fs';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export async function updateArtifacts(
   updateConfig: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
-  const lockFileName = updateConfig.packageFileName.replace(
-    /devbox.json$/,
+  const lockFileName = getSiblingFileName(
+    updateConfig.packageFileName,
     'devbox.lock',
   );
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
@@ -38,8 +38,8 @@ export async function updateArtifacts(
 
   try {
     await exec(cmd, execOptions);
-
     const status = await getRepoStatus();
+
     if (!status.modified.includes(lockFileName)) {
       return null;
     }

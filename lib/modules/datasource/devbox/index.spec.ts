@@ -7,10 +7,10 @@ import { datasource, defaultRegistryUrl } from './common';
 const packageName = 'nodejs';
 
 function getPath(packageName: string): string {
-  return `/packages/${packageName}?_data=routes/_nixhub.packages.$pkg._index`;
+  return `/pkg?name=${packageName}`;
 }
 
-describe('modules/datasource/nixhub/index', () => {
+describe('modules/datasource/devbox/index', () => {
   describe('getReleases', () => {
     it('throws for error', async () => {
       httpMock
@@ -78,7 +78,11 @@ describe('modules/datasource/nixhub/index', () => {
       datasource,
       packageName,
     });
-    expect(res).toMatchSnapshot();
+    expect(res?.homepage).toBe('https://nodejs.org');
+    expect(res?.releases[0]).toStrictEqual({
+      version: '20.10.0',
+      releaseTimestamp: '2024-01-14T03:55:27.000Z',
+    });
     expect(res?.releases).toHaveLength(19);
   });
 });

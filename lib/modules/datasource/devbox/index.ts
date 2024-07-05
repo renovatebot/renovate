@@ -2,13 +2,13 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { HttpError } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
-import * as nixhubVersioning from '../../versioning/nixhub';
+import * as devboxVersioning from '../../versioning/devbox';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
-import type { NixhubResponse } from './types';
+import type { DevboxResponse } from './types';
 
-export class NixhubDatasource extends Datasource {
+export class DevboxDatasource extends Datasource {
   static readonly id = datasource;
 
   constructor() {
@@ -20,7 +20,7 @@ export class NixhubDatasource extends Datasource {
 
   override readonly registryStrategy = 'first';
 
-  override readonly defaultVersioning = nixhubVersioning.id;
+  override readonly defaultVersioning = devboxVersioning.id;
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
@@ -29,16 +29,16 @@ export class NixhubDatasource extends Datasource {
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const res: ReleaseResult = {
-      homepage: 'https://www.nixhub.io',
       releases: [],
     };
 
-    logger.trace({ registryUrl, packageName }, 'fetching nixhub release');
+    logger.trace({ registryUrl, packageName }, 'fetching devbox release');
 
-    const nixhubPkgUrl = joinUrlParts(registryUrl!, `/pkg?name=${packageName}`);
+    const devboxPkgUrl = joinUrlParts(registryUrl!, `/pkg?name=${packageName}`);
 
     try {
-      const response = await this.http.getJson<NixhubResponse>(nixhubPkgUrl);
+      const response = await this.http.getJson<DevboxResponse>(devboxPkgUrl);
+      res.homepage = response?.body?.homepage_url;
       res.releases = response?.body?.releases.map((release) => ({
         version: release.version,
         releaseTimestamp: release.last_updated,
