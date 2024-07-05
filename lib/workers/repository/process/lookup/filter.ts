@@ -80,7 +80,7 @@ export function filterVersions(
         semver.satisfies(
           semver.valid(r.version)
             ? r.version
-            : /** istanbul ignore next: not reachable, but it's safer to preserve it */ semver.coerce(
+            : /* istanbul ignore next: not reachable, but it's safer to preserve it */ semver.coerce(
                 r.version,
               )!,
           allowedVersions,
