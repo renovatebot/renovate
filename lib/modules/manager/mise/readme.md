@@ -30,7 +30,7 @@ To maintain consistency and reliability, Renovate opts to only manage the _first
 
 This follows the same workflow that Renovate's `asdf` manager uses.
 
-### Plugin/Tool support
+### Plugin/tool support
 
 Renovate uses:
 
@@ -48,8 +48,8 @@ There are 2 ways to integrate versioning for a new tool:
 - Renovate's `mise` manager: ensure upstream `mise` supports the tool, then add support to the `mise` manager in Renovate
 - Renovate's `asdf` manager: improve the `asdf` manager in Renovate, which automatically extends support to `mise`
 
-If `mise` adds support for more tools via it's own [core plugins](https://mise.jdx.dev/plugins.html#core-plugins), you can create a PR to extend Renovate's `mise` manager to add support for the new tooling.
+If `mise` adds support for more tools via its own [core plugins](https://mise.jdx.dev/plugins.html#core-plugins), you can create a PR to extend Renovate's `mise` manager to add support for the new tooling.
 
-- You may be able to add support for new tooling upstream in the core plugins - create an issue and see if the community agrees whether it belongs there, or if it would be better as an `asdf-` plugin.
+You may be able to add support for new tooling upstream in the core plugins - create an issue and see if the community agrees whether it belongs there, or if it would be better as an `asdf-` plugin.
 
 If you are wanting to add support for an existing `asdf-x` plugin to `mise`, you can create a PR to extend Renovate's `asdf` manager, which indirectly helps Renovate's `mise` manager as well.
