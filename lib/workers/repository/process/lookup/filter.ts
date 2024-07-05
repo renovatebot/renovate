@@ -77,7 +77,14 @@ export function filterVersions(
         'Falling back to npm semver syntax for allowedVersions',
       );
       filteredReleases = filteredReleases.filter((r) =>
-        semver.satisfies(r.version, allowedVersions),
+        semver.satisfies(
+          semver.valid(r.version)
+            ? r.version
+            : /** istanbul ignore next: not reachable, but it's safer to preserve it */ semver.coerce(
+                r.version,
+              )!,
+          allowedVersions,
+        ),
       );
     } else if (
       config.versioning === poetryVersioning.id &&
