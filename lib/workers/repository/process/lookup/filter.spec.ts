@@ -81,5 +81,34 @@ describe('workers/repository/process/lookup/filter', () => {
 
       expect(filteredVersions).toEqual([{ version: '1.2.3-beta' }]);
     });
+
+    it('ignores version insufficient prefixes', () => {
+      const releases = [
+        { version: '1.0.1' },
+        { version: '1.2.0' },
+        { version: '2.0.0', isDeprecated: true },
+        { version: '2.1.0' },
+      ] satisfies Release[];
+
+      const config = partial<FilterConfig>({
+        ignoreUnstable: true,
+        ignoreDeprecated: true,
+      });
+      const currentVersion = 'v1.0.1';
+      const latestVersion = 'v2.0.0';
+
+      const filteredVersions = filterVersions(
+        config,
+        currentVersion,
+        latestVersion,
+        releases,
+        versioning,
+      );
+
+      expect(filteredVersions).toEqual([
+        { version: '1.2.0' },
+        { version: '2.1.0' },
+      ]);
+    });
   });
 });
