@@ -374,10 +374,6 @@ describe('modules/datasource/docker/index', () => {
         password: 'some-password',
       });
 
-      mockEcrAuthResolve({
-        authorizationData: [{ authorizationToken: 'test' }],
-      });
-
       const res = await getDigest(
         {
           datasource: 'docker',
