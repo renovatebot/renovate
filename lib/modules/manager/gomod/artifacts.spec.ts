@@ -284,7 +284,6 @@ describe('modules/manager/gomod/artifacts', () => {
     const baz = join('vendor/github.com/baz/baz/go.mod');
 
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-    fs.readLocalFile.mockResolvedValueOnce('modules.txt content'); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
@@ -294,8 +293,6 @@ describe('modules/manager/gomod/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
-    fs.readLocalFile.mockResolvedValueOnce('Foo go.sum');
-    fs.readLocalFile.mockResolvedValueOnce('Bar go.sum');
     fs.readLocalFile.mockResolvedValueOnce('New go.mod');
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
@@ -303,7 +300,7 @@ describe('modules/manager/gomod/artifacts', () => {
       newPackageFileContent: gomod1,
       config: {
         ...config,
-        postUpdateOptions: ['gomodSkipVendor', 'gomodTidy'],
+        postUpdateOptions: ['gomodSkipVendor'],
       },
     });
     expect(res).toEqual([
@@ -326,22 +323,6 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod vendor',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
