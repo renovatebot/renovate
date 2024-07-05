@@ -3118,6 +3118,14 @@ const options: RenovateOptions[] = [
     default: 90,
     globalOnly: true,
   },
+  {
+    name: 'cachePrivatePackages',
+    description:
+      'Cache private packages in the datasource cache. This is useful for self-hosted setups',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {
