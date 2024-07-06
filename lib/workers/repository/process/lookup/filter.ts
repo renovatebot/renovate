@@ -78,7 +78,11 @@ export function filterVersions(
       );
       filteredReleases = filteredReleases.filter((r) =>
         semver.satisfies(
-          semver.valid(r.version) ? r.version : semver.coerce(r.version)!,
+          semver.valid(r.version)
+            ? r.version
+            : /* istanbul ignore next: not reachable, but it's safer to preserve it */ semver.coerce(
+                r.version,
+              )!,
           allowedVersions,
         ),
       );
@@ -126,24 +130,28 @@ export function filterVersions(
     return filteredReleases.filter((r) => isReleaseStable(r, versioning));
   }
 
-  // if current is unstable then allow unstable in the current major only
-  // Allow unstable only in current major
+  const currentMajor = versioning.getMajor(currentVersion);
+  const currentMinor = versioning.getMinor(currentVersion);
+  const currentPatch = versioning.getPatch(currentVersion);
+
   return filteredReleases.filter((r) => {
     if (isReleaseStable(r, versioning)) {
       return true;
     }
-    if (
-      versioning.getMajor(r.version) !== versioning.getMajor(currentVersion)
-    ) {
+
+    const major = versioning.getMajor(r.version);
+
+    if (major !== currentMajor) {
       return false;
     }
-    // istanbul ignore if: test passes without touching this
+
     if (versioning.allowUnstableMajorUpgrades) {
       return true;
     }
-    return (
-      versioning.getMinor(r.version) === versioning.getMinor(currentVersion) &&
-      versioning.getPatch(r.version) === versioning.getPatch(currentVersion)
-    );
+
+    const minor = versioning.getMinor(r.version);
+    const patch = versioning.getPatch(r.version);
+
+    return minor === currentMinor && patch === currentPatch;
   });
 }
