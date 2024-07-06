@@ -1897,6 +1897,17 @@ describe('modules/platform/azure/index', () => {
       expect(res).toEqual(data);
     });
 
+    it('returns null when file not found', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItem: jest.fn(() => Promise.resolve(null)),
+          }) as any,
+      );
+      const res = await azure.getJsonFile('file.json');
+      expect(res).toBeNull();
+    });
+
     it('returns file content in json5 format', async () => {
       const json5Data = `
         {

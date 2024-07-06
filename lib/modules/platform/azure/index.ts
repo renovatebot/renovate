@@ -158,7 +158,7 @@ export async function getRawFile(
       true,
     );
 
-    return item.content ?? null;
+    return item?.content ?? null;
   } catch (err) /* istanbul ignore next */ {
     if (
       err.message?.includes('<title>Azure DevOps Services Unavailable</title>')
