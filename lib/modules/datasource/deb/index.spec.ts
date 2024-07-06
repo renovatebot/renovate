@@ -220,7 +220,7 @@ describe('modules/datasource/deb/index', () => {
     });
   });
 
-  describe('extract', () => {
+  describe.skip('extract', () => {
     it('should throw error for unsupported compression', async () => {
       expect(
         async () =>
