@@ -26,19 +26,20 @@ First you would set a custom manager in your `renovate.json` file for `Dockerfil
 
 ```json
 {
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "customManagers": [
     {
       "customType": "regex",
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": [
-        "#\\s*renovate:\\s* depName=(?<depName>.*?)( versioning=(?<versioning>loose))?\\sENV .*?_VERSION=\"(?<currentValue>.*)\"\\s"
+        "#\\s*renovate:\\s*?depName=(?<depName>.*?)?\\sENV .*?_VERSION=\"(?<currentValue>.*)\"\\s"
       ],
-      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}loose{{/if}}"
+      "datasourceTemplate": "deb"
     }
   ],
   "packageRules": [
     {
-      "datasources": ["deb"],
+      "matchDatasources": ["deb"],
       "registryUrls": [
         "https://ftp.debian.org/debian?suite=stable&components=main,contrib,non-free&binaryArch=amd64"
       ]
@@ -52,12 +53,12 @@ Then you would put comments in your Dockerfile, to tell Renovate where to find t
 ```dockerfile
 FROM debian:bullseye
 
-# renovate: depName=gcc versioning=loose
-ENV GCC_VERSION="10.2.1-6"
+# renovate: depName=gcc-11
+ENV GCC_VERSION="11.2.0-19"
 
 RUN apt-get update && \
     apt-get install -y \
-    gcc="${GCC_VERSION}" && \
+    gcc-11="${GCC_VERSION}" && \
     apt-get clean
 ```
 
