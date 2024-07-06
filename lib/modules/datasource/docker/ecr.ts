@@ -17,10 +17,14 @@ export async function getECRAuthToken(
 ): Promise<string | null> {
   const config: ECRClientConfig = { region };
   if (opts.username === `AWS` && opts.password) {
-    logger.trace(`AWS user specified, encoding basic auth credentials for ECR registry`);
+    logger.trace(
+      `AWS user specified, encoding basic auth credentials for ECR registry`,
+    );
     return Buffer.from(`AWS:${opts.password}`).toString('base64');
   } else if (opts.username && opts.password) {
-    logger.trace(`Using AWS accessKey to get Authorization token for ECR registry`);
+    logger.trace(
+      `Using AWS accessKey to get Authorization token for ECR registry`,
+    );
     config.credentials = {
       accessKeyId: opts.username,
       secretAccessKey: opts.password,
