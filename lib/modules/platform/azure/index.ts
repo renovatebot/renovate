@@ -1,4 +1,3 @@
-import { IncomingMessage } from 'http';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import {
@@ -23,7 +22,6 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { streamToString } from '../../../util/streams';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   BranchStatusConfig,
