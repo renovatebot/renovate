@@ -1,3 +1,4 @@
+import { IncomingMessage } from 'http';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import {
@@ -146,7 +147,7 @@ export async function getRawFile(
       version: branchOrTag,
     } satisfies GitVersionDescriptor;
 
-    const buf = await azureApiGit.getItemContent(
+    const item = await azureApiGit.getItem(
       repoId,
       fileName,
       undefined,
@@ -156,10 +157,10 @@ export async function getRawFile(
       undefined,
       undefined,
       branchOrTag ? versionDescriptor : undefined,
+      true,
     );
 
-    const str = await streamToString(buf);
-    return str;
+    return item.content ?? null;
   } catch (err) /* istanbul ignore next */ {
     if (
       err.message?.includes('<title>Azure DevOps Services Unavailable</title>')

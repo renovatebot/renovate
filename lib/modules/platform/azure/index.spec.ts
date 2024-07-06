@@ -1888,8 +1888,8 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getItemContent: jest.fn(() =>
-              Promise.resolve(Readable.from(JSON.stringify(data))),
+            getItem: jest.fn(() =>
+              Promise.resolve({ content: JSON.stringify(data) }),
             ),
           }) as any,
       );
@@ -1907,9 +1907,7 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getItemContent: jest.fn(() =>
-              Promise.resolve(Readable.from(json5Data)),
-            ),
+            getItem: jest.fn(() => Promise.resolve({ content: json5Data })),
           }) as any,
       );
       const res = await azure.getJsonFile('file.json5');
@@ -1921,8 +1919,8 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getItemContent: jest.fn(() =>
-              Promise.resolve(Readable.from(JSON.stringify(data))),
+            getItem: jest.fn(() =>
+              Promise.resolve({ content: JSON.stringify(data) }),
             ),
           }) as any,
       );
@@ -1957,8 +1955,8 @@ describe('modules/platform/azure/index', () => {
     it('supports fetch from another repo', async () => {
       const data = { foo: 'bar' };
       const gitApiMock = {
-        getItemContent: jest.fn(() =>
-          Promise.resolve(Readable.from(JSON.stringify(data))),
+        getItem: jest.fn(() =>
+          Promise.resolve({ content: JSON.stringify(data) }),
         ),
         getRepositories: jest.fn(() =>
           Promise.resolve([
@@ -1969,7 +1967,7 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(() => gitApiMock as any);
       const res = await azure.getJsonFile('file.json', 'foo/bar');
       expect(res).toEqual(data);
-      expect(gitApiMock.getItemContent.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.getItem.mock.calls).toMatchSnapshot();
     });
 
     it('returns null', async () => {
