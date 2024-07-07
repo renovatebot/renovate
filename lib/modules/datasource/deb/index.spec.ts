@@ -10,6 +10,8 @@ import { GlobalConfig } from '../../../config/global';
 import type { GetPkgReleasesConfig } from '../types';
 import { DebDatasource } from '.';
 
+const debBaseUrl = 'http://ftp.debian.org';
+
 const fixturePackagesArchivePath = Fixtures.getPath(`Packages.gz`);
 const fixturePackagesArchivePath2 = Fixtures.getPath(`Packages2.gz`);
 const fixturePackagesPath = Fixtures.getPath(`Packages`);
@@ -30,14 +32,16 @@ describe('modules/datasource/deb/index', () => {
     extractionFolder = await fs.ensureCacheDir(DebDatasource.cacheSubDir);
     extractedPackageFile = upath.join(
       extractionFolder,
-      `${createHash('sha256').update('http://ftp.debian.org/debian/dists/stable/non-free/binary-amd64').digest('hex')}.txt`,
+      `${createHash('sha256')
+        .update(getComponentUrl(debBaseUrl, 'stable', 'non-free', 'amd64'))
+        .digest('hex')}.txt`,
     );
 
     cfg = {
       datasource: 'deb',
       packageName: 'album',
       registryUrls: [
-        'http://ftp.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
+        getRegistryUrl(debBaseUrl, 'stable', ['non-free'], 'amd64'),
       ],
     };
   });
@@ -49,8 +53,8 @@ describe('modules/datasource/deb/index', () => {
       const ts = stats.ctime;
 
       httpMock
-        .scope('http://ftp.debian.org')
-        .head('/debian/dists/stable/non-free/binary-amd64/Packages.gz')
+        .scope(debBaseUrl)
+        .head(getPackageUrl('', 'stable', 'non-free', 'amd64'))
         .reply(304);
 
       const res = await getPkgReleases(cfg);
@@ -66,7 +70,7 @@ describe('modules/datasource/deb/index', () => {
     describe('parsing of registry url', () => {
       it('returns null when registry url misses components', async () => {
         cfg.registryUrls = [
-          'http://ftp.debian.org/debian?suite=stable&binaryArch=amd64',
+          `${debBaseUrl}/debian?suite=stable&binaryArch=amd64`,
         ];
         const res = await getPkgReleases(cfg);
         expect(res).toBeNull();
@@ -74,7 +78,7 @@ describe('modules/datasource/deb/index', () => {
 
       it('returns null when registry url misses binaryArch', async () => {
         cfg.registryUrls = [
-          'http://ftp.debian.org/debian?suite=stable&components=non-free',
+          `${debBaseUrl}/debian?suite=stable&components=non-free`,
         ];
         const res = await getPkgReleases(cfg);
         expect(res).toBeNull();
@@ -82,7 +86,7 @@ describe('modules/datasource/deb/index', () => {
 
       it('returns null when registry url misses suite or release', async () => {
         cfg.registryUrls = [
-          'http://ftp.debian.org/debian?components=non-free&binaryArch=amd64',
+          `${debBaseUrl}/debian?components=non-free&binaryArch=amd64`,
         ];
         const res = await getPkgReleases(cfg);
         expect(res).toBeNull();
@@ -92,8 +96,8 @@ describe('modules/datasource/deb/index', () => {
     describe('without local version', () => {
       beforeEach(() => {
         httpMock
-          .scope('http://ftp.debian.org')
-          .get('/debian/dists/stable/non-free/binary-amd64/Packages.gz')
+          .scope(debBaseUrl)
+          .get(getPackageUrl('', 'stable', 'non-free', 'amd64'))
           .replyWithFile(200, fixturePackagesArchivePath);
       });
 
@@ -105,7 +109,7 @@ describe('modules/datasource/deb/index', () => {
 
       it('returns a valid version for the package `album` if release is used in the registryUrl', async () => {
         cfg.registryUrls = [
-          'http://ftp.debian.org/debian?release=stable&components=non-free&binaryArch=amd64',
+          getRegistryUrl(debBaseUrl, 'stable', ['non-free'], 'amd64'),
         ];
         const res = await getPkgReleases(cfg);
         expect(res).toBeObject();
@@ -121,14 +125,17 @@ describe('modules/datasource/deb/index', () => {
       describe('with two components', () => {
         beforeEach(() => {
           httpMock
-            .scope('http://ftp.debian.org')
-            .get(
-              '/debian/dists/stable/non-free-second/binary-amd64/Packages.gz',
-            )
+            .scope(debBaseUrl)
+            .get(getPackageUrl('', 'stable', 'non-free-second', 'amd64'))
             .replyWithFile(200, fixturePackagesArchivePath2);
 
           cfg.registryUrls = [
-            'http://ftp.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
+            getRegistryUrl(
+              debBaseUrl,
+              'stable',
+              ['non-free', 'non-free-second'],
+              'amd64',
+            ),
           ];
         });
 
@@ -149,8 +156,8 @@ describe('modules/datasource/deb/index', () => {
     describe('without server response', () => {
       beforeEach(() => {
         httpMock
-          .scope('http://ftp.debian.org')
-          .get('/debian/dists/stable/non-free/binary-amd64/Packages.gz')
+          .scope(debBaseUrl)
+          .get(getPackageUrl('', 'stable', 'non-free', 'amd64'))
           .reply(404);
       });
 
@@ -163,12 +170,12 @@ describe('modules/datasource/deb/index', () => {
 
     it('supports specifying a custom binary arch', async () => {
       httpMock
-        .scope('http://ftp.debian.org')
-        .get('/debian/dists/stable/non-free/binary-riscv/Packages.gz')
+        .scope(debBaseUrl)
+        .get(getPackageUrl('', 'stable', 'non-free', 'riscv'))
         .replyWithFile(200, fixturePackagesArchivePath);
 
       cfg.registryUrls = [
-        'http://ftp.debian.org/debian?suite=stable&components=non-free&binaryArch=riscv',
+        getRegistryUrl(debBaseUrl, 'stable', ['non-free'], 'riscv'),
       ];
 
       const res = await getPkgReleases(cfg);
@@ -235,8 +242,8 @@ describe('modules/datasource/deb/index', () => {
   describe('downloadAndExtractPackage', () => {
     beforeEach(() => {
       httpMock
-        .scope('http://ftp.debian.org')
-        .get('/debian/dists/bullseye/main/binary-amd64/Packages.gz')
+        .scope(debBaseUrl)
+        .get(getPackageUrl('', 'bullseye', 'main', 'amd64'))
         .replyWithFile(200, fixturePackagesArchivePath2);
     });
 
@@ -244,7 +251,7 @@ describe('modules/datasource/deb/index', () => {
       DebDatasource.extract = jest.fn().mockRejectedValueOnce(new Error());
       await expect(
         debDatasource.downloadAndExtractPackage(
-          'http://ftp.debian.org/debian/dists/bullseye/main/binary-amd64',
+          getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
         ),
       ).rejects.toThrow(`No compression standard worked for `);
     });
@@ -253,13 +260,13 @@ describe('modules/datasource/deb/index', () => {
   describe('checkIfModified', () => {
     it('should return true for different status code', async () => {
       httpMock
-        .scope('http://ftp.debian.org')
-        .head('/debian/dists/stable/non-free/binary-amd64/Packages.gz')
+        .scope(debBaseUrl)
+        .head(getPackageUrl('', 'stable', 'non-free', 'amd64'))
         .reply(200);
 
       await expect(
         debDatasource.checkIfModified(
-          'http://ftp.debian.org/debian/dists/stable/non-free/binary-amd64/Packages.gz',
+          getPackageUrl(debBaseUrl, 'stable', 'non-free', 'amd64'),
           new Date(),
         ),
       ).resolves.toBe(true);
@@ -267,16 +274,38 @@ describe('modules/datasource/deb/index', () => {
 
     it('should return true if request failed', async () => {
       httpMock
-        .scope('http://ftp.debian.org')
-        .head('/debian/dists/stable/non-free/binary-amd64/Packages.gz')
+        .scope(debBaseUrl)
+        .head(getPackageUrl('', 'stable', 'non-free', 'amd64'))
         .replyWithError('Unexpected Error');
 
       await expect(
         debDatasource.checkIfModified(
-          'http://ftp.debian.org/debian/dists/stable/non-free/binary-amd64/Packages.gz',
+          getPackageUrl(debBaseUrl, 'stable', 'non-free', 'amd64'),
           new Date(),
         ),
       ).resolves.toBe(true);
     });
   });
 });
+
+const getComponentUrl = (
+  baseUrl: string,
+  release: string,
+  component: string,
+  arch: string,
+) => `${baseUrl}/debian/dists/${release}/${component}/binary-${arch}`;
+
+const getPackageUrl = (
+  baseUrl: string,
+  release: string,
+  component: string,
+  arch: string,
+) => `${getComponentUrl(baseUrl, release, component, arch)}/Packages.gz`;
+
+const getRegistryUrl = (
+  baseUrl: string,
+  release: string,
+  components: string[],
+  arch: string,
+) =>
+  `${baseUrl}/debian?suite=${release}&components=${components.join(',')}&binaryArch=${arch}`;
