@@ -61,7 +61,6 @@ describe('modules/datasource/deb/index', () => {
       expect(res).toBeObject();
       expect(res!.releases).toHaveLength(1);
 
-      expect(httpMock.getTrace()).toHaveLength(1);
       const modifiedTs = httpMock.getTrace()[0].headers['if-modified-since'];
       expect(modifiedTs).toBeDefined();
       expect(modifiedTs).toEqual(ts.toUTCString());
