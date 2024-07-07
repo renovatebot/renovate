@@ -156,7 +156,13 @@ export class DebDatasource extends Datasource {
           await fs.rmCache(compressedFile);
         }
       }
-      return { extractedFile, lastTimestamp: lastTimestamp! };
+
+      if (!lastTimestamp) {
+        //extracting went wrong
+        break;
+      }
+
+      return { extractedFile, lastTimestamp };
     }
 
     throw new Error(`No compression standard worked for ${componentUrl}`);
@@ -325,8 +331,9 @@ export class DebDatasource extends Datasource {
 
     const getReleaseParam = (url: URL): string => {
       for (const param of OPTIONAL_PARAMS) {
-        if (url.searchParams.has(param)) {
-          return url.searchParams.get(param) ?? '';
+        const paramValue = url.searchParams.get(param);
+        if (paramValue !== null) {
+          return paramValue;
         }
       }
       throw new Error(

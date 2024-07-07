@@ -220,16 +220,63 @@ describe('modules/datasource/deb/index', () => {
     });
   });
 
-  describe.skip('extract', () => {
+  describe('extract', () => {
     it('should throw error for unsupported compression', async () => {
-      expect(
-        async () =>
-          await DebDatasource.extract(
-            fixturePackagesArchivePath,
-            'xz',
-            extractedPackageFile,
-          ),
-      ).toThrow();
+      await expect(
+        DebDatasource.extract(
+          fixturePackagesArchivePath,
+          'xz',
+          extractedPackageFile,
+        ),
+      ).rejects.toThrow('Unsupported compression standard');
+    });
+  });
+
+  describe('downloadAndExtractPackage', () => {
+    beforeEach(() => {
+      httpMock
+        .scope('http://ftp.debian.org')
+        .get('/debian/dists/bullseye/main/binary-amd64/Packages.gz')
+        .replyWithFile(200, fixturePackagesArchivePath2);
+    });
+
+    it('should throw error for unsupported compression', async () => {
+      DebDatasource.extract = jest.fn().mockRejectedValueOnce(new Error());
+      await expect(
+        debDatasource.downloadAndExtractPackage(
+          'http://ftp.debian.org/debian/dists/bullseye/main/binary-amd64',
+        ),
+      ).rejects.toThrow(`No compression standard worked for `);
+    });
+  });
+
+  describe('checkIfModified', () => {
+    it('should return true for different status code', async () => {
+      httpMock
+        .scope('http://ftp.debian.org')
+        .head('/debian/dists/stable/non-free/binary-amd64/Packages.gz')
+        .reply(200);
+
+      await expect(
+        debDatasource.checkIfModified(
+          'http://ftp.debian.org/debian/dists/stable/non-free/binary-amd64/Packages.gz',
+          new Date(),
+        ),
+      ).resolves.toBe(true);
+    });
+
+    it('should return true if request failed', async () => {
+      httpMock
+        .scope('http://ftp.debian.org')
+        .head('/debian/dists/stable/non-free/binary-amd64/Packages.gz')
+        .replyWithError('Unexpected Error');
+
+      await expect(
+        debDatasource.checkIfModified(
+          'http://ftp.debian.org/debian/dists/stable/non-free/binary-amd64/Packages.gz',
+          new Date(),
+        ),
+      ).resolves.toBe(true);
     });
   });
 });
