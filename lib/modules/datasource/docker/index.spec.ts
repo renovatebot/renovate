@@ -358,6 +358,33 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBeNull();
     });
 
+    it('supports ECR authentication for private repositories', async () => {
+      httpMock
+        .scope(amazonUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/node/manifests/some-tag')
+        .matchHeader('authorization', 'Basic QVdTOnNvbWUtcGFzc3dvcmQ=')
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      hostRules.find.mockReturnValue({
+        username: 'AWS',
+        password: 'some-password',
+      });
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+        },
+        'some-tag',
+      );
+
+      expect(res).toBe('some-digest');
+    });
+
     it('supports Google ADC authentication for gcr', async () => {
       httpMock
         .scope(gcrUrl)

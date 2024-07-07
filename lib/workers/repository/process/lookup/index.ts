@@ -363,6 +363,10 @@ export async function lookupUpdates(
       );
       if (config.isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
+        logger.debug(
+          { filteredReleases },
+          'Vulnerability alert found: limiting results to a single release',
+        );
       }
       const buckets: Record<string, [Release]> = {};
       for (const release of filteredReleases) {
@@ -460,7 +464,15 @@ export async function lookupUpdates(
           versioning.isGreaterThan(compareValue, update.newValue)
         ) {
           logger.warn(
-            { update, allVersions, filteredReleases },
+            {
+              packageName: config.packageName,
+              currentValue: config.currentValue,
+              compareValue,
+              currentVersion: config.currentVersion,
+              update,
+              allVersionsLength: allVersions.length,
+              filteredReleaseVersions: filteredReleases.map((r) => r.version),
+            },
             'Unexpected downgrade detected: skipping',
           );
         } else {
