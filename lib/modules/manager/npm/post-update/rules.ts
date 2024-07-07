@@ -32,7 +32,7 @@ export function processHostRules(): HostRulesResult {
 
     const uri = `//${matchedHost}/`;
     let cleanedUri = uri;
-    if (is.string(matchedHost) && isHttpUrl(matchedHost)) {
+    if (isHttpUrl(matchedHost)) {
       cleanedUri = matchedHost.replace(regEx(/^https?:/), '');
     }
 
@@ -74,11 +74,11 @@ export function processHostRules(): HostRulesResult {
     }
   }
 
-  const hasYarnRCNPMRegistries =
+  const hasYarnRcNpmRegistries =
     Object.keys(additionalYarnRcYml.npmRegistries).length > 0;
   return {
     additionalNpmrcContent,
-    additionalYarnRcYml: hasYarnRCNPMRegistries
+    additionalYarnRcYml: hasYarnRcNpmRegistries
       ? additionalYarnRcYml
       : undefined,
   };
