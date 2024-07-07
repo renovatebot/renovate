@@ -43,7 +43,14 @@ export function filterVersions(
       versioning.isGreaterThan(r.version, currentVersion),
   );
 
-  const currentRelease = releases.find((r) => r.version === currentVersion);
+  const currentRelease = releases.find(
+    (r) =>
+      versioning.isValid(r.version) &&
+      versioning.isVersion(r.version) &&
+      versioning.isValid(currentVersion) &&
+      versioning.isVersion(currentVersion) &&
+      versioning.equals(r.version, currentVersion),
+  );
 
   // Don't upgrade from non-deprecated to deprecated
   if (ignoreDeprecated && currentRelease && !currentRelease.isDeprecated) {
