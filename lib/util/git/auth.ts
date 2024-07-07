@@ -122,22 +122,22 @@ export function getAuthenticationRules(
   const authenticationRules = [];
   const hasUser = token.split(':').length > 1;
   const insteadUrl = parseGitUrl(gitUrl);
+  let sshPort = insteadUrl.port;
 
   if (hostType === 'bitbucket-server') {
     insteadUrl.source = 'bitbucket-server';
+
+    if (!sshPort) {
+      // By default, bitbucket-server SSH port is 7999.
+      // For non-default port, the generated auth config will likely be incorrect.
+      sshPort = 7999;
+    }
   }
 
   const url = { ...insteadUrl };
   const protocol = regEx(/^https?$/).test(url.protocol)
     ? url.protocol
     : 'https';
-
-  let sshPort = insteadUrl.port;
-  if (hostType === 'bitbucket-server' && !sshPort) {
-    // By default, bitbucket-server SSH port is 7999.
-    // For non-default port, the generated auth config will likely be incorrect.
-    sshPort = 7999;
-  }
 
   // ssh protocol with user if empty
   url.token = hasUser ? token : `ssh:${token}`;
