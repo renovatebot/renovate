@@ -24,7 +24,7 @@ export function processHostRules(): HostRulesResult {
     }
 
     const matchedHost = hostRule.matchHost;
-    // Should never be needed as if we have a resolvedHost there has to be a matchHost
+    // Should never be necessary as if we have a resolvedHost, there has to be a matchHost
     // istanbul ignore next
     if (!matchedHost) {
       continue;
