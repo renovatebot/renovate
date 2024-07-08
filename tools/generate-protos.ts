@@ -14,6 +14,7 @@ const moveFiles = async (sourceDir: string, destDir: string): Promise<void> => {
     // Read all files in the source directory
     const files: string[] = await fs.promises.readdir(sourceDir);
 
+    // find and move generated ts files
     const tsFiles: string[] = files.filter((file) => file.endsWith('.ts'));
 
     for (const file of tsFiles) {
