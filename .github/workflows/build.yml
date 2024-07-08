@@ -207,6 +207,9 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
+      - name: Generate protos
+        run: pnpm create-protos
+
       - name: Restore eslint cache
         uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
@@ -296,6 +299,9 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
+      - name: Generate protos
+        run: pnpm create-protos
+
       - name: Lint markdown
         uses: DavidAnson/markdownlint-cli2-action@b4c9feab76d8025d1e83c653fa3990936df0e6c8 # v16.0.0
 
@@ -379,6 +385,9 @@ jobs:
             }}-${{
               matrix.cache-key
             }}
+
+      - name: Generate protos
+        run: pnpm create-protos
 
       - name: Unit tests
         shell: bash
