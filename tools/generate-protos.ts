@@ -9,17 +9,17 @@ process.on('unhandledRejection', (err) => {
   process.exit(-1);
 });
 
-const moveFiles = async (sourceDir, destDir) => {
+const moveFiles = async (sourceDir: string, destDir: string): Promise<void> => {
   try {
     // Read all files in the source directory
-    const files = await fs.promises.readdir(sourceDir);
+    const files: string[] = await fs.promises.readdir(sourceDir);
 
     // find and move generated ts files
-    const tsFiles = files.filter((file) => file.endsWith('.ts'));
+    const tsFiles: string[] = files.filter((file) => file.endsWith('.ts'));
 
     for (const file of tsFiles) {
-      const sourcePath = `${sourceDir}/${file}`;
-      const destPath = `${destDir}/${file}`;
+      const sourcePath: string = `${sourceDir}/${file}`;
+      const destPath: string = `${destDir}/${file}`;
 
       await fs.promises.rename(sourcePath, destPath);
     }
@@ -45,7 +45,7 @@ void (async () => {
   }
 })();
 
-function generateProto(protos_path, file) {
+function generateProto(protos_path: string, file: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const file_path = `${protos_path}/${file}`;
     const res = exec('pnpm', [
@@ -72,7 +72,7 @@ function generateProto(protos_path, file) {
   });
 }
 
-async function generateHexProtos() {
+async function generateHexProtos(): Promise<string> {
   logger.info('Generating Hex protos ...');
 
   const protos_path = './lib/modules/datasource/hex/protos';
