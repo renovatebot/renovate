@@ -21,7 +21,7 @@ export function updateDependency({
     let depName = upgrade.depName;
     // newName will be available for replacement
     if (newName) {
-      depName = newName
+      depName = newName;
     }
     // istanbul ignore if: should never happen
     if (!depName || !upgrade.managerData) {
@@ -140,10 +140,7 @@ export function updateDependency({
       ) {
         if (depName === depNameNoVersion) {
           // If package currently has no version, pin to latest one.
-          newLine = newLine.replace(
-            depName,
-            `${depName}/v${upgrade.newMajor}`,
-          );
+          newLine = newLine.replace(depName, `${depName}/v${upgrade.newMajor}`);
         } else {
           // Replace version
           const [oldV] = upgrade.currentValue!.split('.');
