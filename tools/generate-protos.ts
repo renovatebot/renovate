@@ -45,10 +45,14 @@ void (async () => {
   }
 })();
 
-function istanbulIgnoreFile(file_path: string) {
+function istanbulIgnoreFile(file_path: string): string {
   fs.appendFile(file_path, '\n// istanbul ignore file', function (err) {
-    if (err) throw err;
+    if (err) {
+      throw err;
+    }
   });
+
+  return '';
 }
 
 function generateProto(protos_path: string, file: string): Promise<string> {
