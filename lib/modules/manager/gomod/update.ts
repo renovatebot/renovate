@@ -18,16 +18,18 @@ export function updateDependency({
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
     const { depType, newName } = upgrade;
-    let depName = upgrade.depName;
+    // const oldDepName = upgrade.depName;
+    const fromDepName = upgrade.depName;
+    let toDepName = upgrade.depName;
     // newName will be available for replacement
     if (newName) {
-      depName = newName;
+      toDepName = newName;
     }
     // istanbul ignore if: should never happen
-    if (!depName || !upgrade.managerData) {
+    if (!fromDepName || !toDepName || !upgrade.managerData) {
       return null;
     }
-    const depNameNoVersion = getDepNameWithNoVersion(depName);
+    const fromDepNameNoVersion = getDepNameWithNoVersion(fromDepName);
     const lines = fileContent.split(newlineRegex);
     // istanbul ignore if: hard to test
     if (lines.length <= upgrade.managerData.lineNumber) {
@@ -37,11 +39,11 @@ export function updateDependency({
     const lineToChange = lines[upgrade.managerData.lineNumber];
     logger.trace({ upgrade, lineToChange }, 'go.mod current line');
     if (
-      !lineToChange.includes(depNameNoVersion) &&
+      !lineToChange.includes(fromDepNameNoVersion) &&
       !lineToChange.includes('rethinkdb/rethinkdb-go.v5')
     ) {
       logger.debug(
-        { lineToChange, depName },
+        { lineToChange, depName: toDepName },
         "go.mod current line doesn't contain dependency",
       );
       return null;
@@ -105,28 +107,28 @@ export function updateDependency({
         return fileContent;
       }
       logger.debug(
-        { depName, lineToChange, newDigestRightSized },
+        { depName: toDepName, lineToChange, newDigestRightSized },
         'gomod: need to update digest',
       );
       newLine = lineToChange.replace(
         // TODO: can be undefined? (#22198)
         updateLineExp!,
-        `$<depPart>${quote}${depName}${quote}$<divider>${newDigestRightSized}`,
+        `$<depPart>${quote}${toDepName}${quote}$<divider>${newDigestRightSized}`,
       );
     } else {
       newLine = lineToChange.replace(
         // TODO: can be undefined? (#22198)
         updateLineExp!,
-        `$<depPart>${quote}${depName}${quote}$<divider>${upgrade.newValue}`,
+        `$<depPart>${quote}${toDepName}${quote}$<divider>${upgrade.newValue}`,
       );
     }
     if (
       upgrade.updateType === 'major' ||
       (upgrade.updateType === 'replacement' && upgrade.newMajor)
     ) {
-      logger.debug(`gomod: major update for ${depName}`);
-      if (depName.startsWith('gopkg.in/')) {
-        const oldV = depName.split('.').pop();
+      logger.debug(`gomod: major update for ${toDepName}`);
+      if (toDepName.startsWith('gopkg.in/')) {
+        const oldV = toDepName.split('.').pop();
         newLine = newLine.replace(`.${oldV}`, `.v${upgrade.newMajor}`);
         // Package renames - I couldn't think of a better place to do this
         newLine = newLine.replace(
@@ -138,9 +140,9 @@ export function updateDependency({
         !newLine.includes(`/v${upgrade.newMajor}`) &&
         !upgrade.newValue!.endsWith('+incompatible')
       ) {
-        if (depName === depNameNoVersion) {
+        if (toDepName === fromDepNameNoVersion) {
           // If package currently has no version, pin to latest one.
-          newLine = newLine.replace(depName, `${depName}/v${upgrade.newMajor}`);
+          newLine = newLine.replace(toDepName, `${toDepName}/v${upgrade.newMajor}`);
         } else {
           // Replace version
           const [oldV] = upgrade.currentValue!.split('.');
