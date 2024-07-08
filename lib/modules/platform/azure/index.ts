@@ -146,16 +146,16 @@ export async function getRawFile(
     } satisfies GitVersionDescriptor;
 
     const item = await azureApiGit.getItem(
-      repoId,
-      fileName,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      branchOrTag ? versionDescriptor : undefined,
-      true,
+      repoId, // repositoryId
+      fileName, // path
+      undefined, // project
+      undefined, // scopePath
+      undefined, // recursionLevel
+      undefined, // includeContentMetadata
+      undefined, // latestProcessedChange
+      undefined, // download
+      branchOrTag ? versionDescriptor : undefined, // versionDescriptor
+      true, // includeContent
     );
 
     return item?.content ?? null;
