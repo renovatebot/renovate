@@ -593,6 +593,9 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
+      - name: Generate protos
+        run: pnpm create-protos
+
       - name: Build
         run: pnpm build:docs
 
