@@ -113,6 +113,9 @@ function getAuthenticationRulesWithToken(
 /**
  * Generates the authentication rules for later git usage for the given host
  * @link https://coolaj86.com/articles/vanilla-devops-git-credentials-cheatsheet/
+ * @param gitUrl Git repository URL
+ * @param hostType Git host type
+ * @param token Authentication token or `username:password` string
  */
 export function getAuthenticationRules(
   gitUrl: string,
@@ -125,6 +128,9 @@ export function getAuthenticationRules(
   let sshPort = insteadUrl.port;
 
   if (hostType === 'bitbucket-server') {
+    // For Bitbucket Server/Data Center, `source` must be `bitbucket-server`
+    // to generate HTTP(s) URLs correctly.
+    // https://github.com/IonicaBizau/git-url-parse/blob/28828546c148d58bbcff61409915a4e1e8f7eb11/lib/index.js#L304
     insteadUrl.source = 'bitbucket-server';
 
     if (!sshPort) {
