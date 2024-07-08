@@ -45,6 +45,12 @@ void (async () => {
   }
 })();
 
+function istanbulIgnoreFile(file_path: string) {
+  fs.appendFile(file_path, '\n// istanbul ignore file', function (err) {
+    if (err) throw err;
+  });
+}
+
 function generateProto(protos_path: string, file: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const file_path = `${protos_path}/${file}`;
@@ -78,6 +84,8 @@ async function generateHexProtos(): Promise<string> {
   const protos_path = './lib/modules/datasource/hex/protos';
   await generateProto(protos_path, 'package.proto');
   await generateProto(protos_path, 'signed.proto');
+  istanbulIgnoreFile(`${protos_path}/package.ts`);
+  istanbulIgnoreFile(`${protos_path}/signed.ts`);
   await moveFiles(
     `${process.cwd()}/lib/modules/datasource/hex/protos`,
     `${process.cwd()}/lib/modules/datasource/hex`,

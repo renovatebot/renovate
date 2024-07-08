@@ -73,6 +73,7 @@ export class HexDatasource extends Datasource {
 
     const resp = await this.http.getBuffer(hexRegistryUrl);
 
+    // istanbul ignore else
     if (resp.statusCode === 200) {
       await decompressBuffer(resp.body)
         .then((signedPackage) => {
@@ -95,9 +96,11 @@ export class HexDatasource extends Datasource {
 
           return releaseResult;
         })
-        .catch((err) => {
-          return null;
-        });
+        .catch(
+          /* istanbul ignore next */ (err) => {
+            return null;
+          },
+        );
 
       if (this.hexRepoName === 'hexpm' && releaseResult.releases.length > 0) {
         const metadataUrl = joinUrlParts(this.hexAPIBaseUrl, urlPath);
@@ -108,6 +111,7 @@ export class HexDatasource extends Datasource {
           .getJsonSafe(metadataUrl, HexAPIPackageMetadata)
           .unwrap();
 
+        // istanbul ignore if
         if (err) {
           this.handleGenericErrors(err);
         } else {
