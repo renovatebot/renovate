@@ -63,6 +63,10 @@ describe('modules/platform/codecommit/index', () => {
     );
   });
 
+  it('maxBodyLength', () => {
+    expect(codeCommit.maxBodyLength()).toBe(Infinity);
+  });
+
   describe('initPlatform()', () => {
     it('should init', async () => {
       expect(

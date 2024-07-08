@@ -809,7 +809,7 @@ export async function mergePr({
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
-  return smartTruncate(input, 4000)
+  return smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"',
@@ -820,6 +820,10 @@ export function massageMarkdown(input: string): string {
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+}
+
+export function maxBodyLength(): number {
+  return 4000;
 }
 
 /* istanbul ignore next */
