@@ -8,7 +8,7 @@
     "renovate-config-validator": "dist/config-validator.js"
   },
   "scripts": {
-    "build": "run-s clean 'generate:*' 'compile:*' create-json-schema",
+    "build": "run-s clean 'generate:*' 'compile:*' create-json-schema create-protos",
     "build:docker": "ts-node tools/docker.ts",
     "build:docs": "ts-node tools/generate-docs.ts",
     "clean": "rimraf dist tmp",
@@ -16,6 +16,7 @@
     "compile:ts": "tsc -p tsconfig.app.json",
     "config-validator": "ts-node lib/config-validator.ts",
     "create-json-schema": "ts-node tools/generate-schema.ts && prettier --write --cache 'renovate-schema.json'",
+    "create-protos": "ts-node tools/generate-protos.ts",
     "debug": "NODE_OPTIONS=--inspect-brk ts-node lib/renovate.ts",
     "doc-fix": "run-s markdown-lint-fix prettier-fix",
     "doc-fix-everything": "run-s doc-fix doc-fence-check lint-documentation",
@@ -26,7 +27,6 @@
     "eslint-ci": "eslint . --cache --cache-strategy content --cache-location .cache/eslint --format gha",
     "generate": "run-s 'generate:*'",
     "generate:imports": "node tools/generate-imports.mjs",
-    "generate:protos": "ts-node tools/generate-protos.ts",
     "git-check": "node tools/check-git-version.mjs",
     "jest": "GIT_ALLOW_PROTOCOL=file LOG_LEVEL=fatal node --experimental-vm-modules node_modules/jest/bin/jest.js --logHeapUsage",
     "lint": "run-s ls-lint type-check eslint prettier markdown-lint git-check doc-fence-check",
