@@ -1886,12 +1886,11 @@ describe('modules/platform/azure/index', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItem: jest.fn(() =>
-              Promise.resolve({ content: JSON.stringify(data) }),
-            ),
-          }) as any,
+        jest.fn().mockImplementationOnce(() => ({
+          getItem: jest.fn(() =>
+            Promise.resolve({ content: JSON.stringify(data) }),
+          ),
+        })),
       );
       const res = await azure.getJsonFile('file.json');
       expect(res).toEqual(data);
@@ -1899,10 +1898,9 @@ describe('modules/platform/azure/index', () => {
 
     it('returns null when file not found', async () => {
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItem: jest.fn(() => Promise.resolve(null)),
-          }) as any,
+        jest.fn().mockImplementationOnce(() => ({
+          getItem: jest.fn(() => Promise.resolve(null)),
+        })),
       );
       const res = await azure.getJsonFile('file.json');
       expect(res).toBeNull();
@@ -1916,10 +1914,9 @@ describe('modules/platform/azure/index', () => {
         }
       `;
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItem: jest.fn(() => Promise.resolve({ content: json5Data })),
-          }) as any,
+        jest.fn().mockImplementationOnce(() => ({
+          getItem: jest.fn(() => Promise.resolve({ content: json5Data })),
+        })),
       );
       const res = await azure.getJsonFile('file.json5');
       expect(res).toEqual({ foo: 'bar' });
@@ -1927,58 +1924,55 @@ describe('modules/platform/azure/index', () => {
 
     it('returns file content from branch or tag', async () => {
       const data = { foo: 'bar' };
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItem: jest.fn(() =>
-              Promise.resolve({ content: JSON.stringify(data) }),
-            ),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getItem: jest.fn(() =>
+            Promise.resolve({ content: JSON.stringify(data) }),
+          ),
+        }),
       );
       const res = await azure.getJsonFile('file.json', undefined, 'dev');
       expect(res).toEqual(data);
     });
 
     it('throws on malformed JSON', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemContent: jest.fn(() =>
-              Promise.resolve(Readable.from('!@#')),
-            ),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getItemContent: jest.fn(() => Promise.resolve(Readable.from('!@#'))),
+        }),
       );
       await expect(azure.getJsonFile('file.json')).rejects.toThrow();
     });
 
     it('throws on errors', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemContent: jest.fn(() => {
-              throw new Error('some error');
-            }),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getItemContent: jest.fn(() => {
+            throw new Error('some error');
+          }),
+        }),
       );
       await expect(azure.getJsonFile('file.json')).rejects.toThrow();
     });
 
     it('supports fetch from another repo', async () => {
       const data = { foo: 'bar' };
-      const gitApiMock = {
-        getItem: jest.fn(() =>
-          Promise.resolve({ content: JSON.stringify(data) }),
-        ),
-        getRepositories: jest.fn(() =>
-          Promise.resolve([
-            { id: '123456', name: 'bar', project: { name: 'foo' } },
-          ]),
-        ),
-      };
-      azureApi.gitApi.mockImplementationOnce(() => gitApiMock as any);
+      const getItemFn = jest
+        .fn()
+        .mockResolvedValueOnce({ content: JSON.stringify(data) });
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getItem: getItemFn,
+          getRepositories: jest
+            .fn()
+            .mockResolvedValue([
+              { id: '123456', name: 'bar', project: { name: 'foo' } },
+            ]),
+        }),
+      );
       const res = await azure.getJsonFile('file.json', 'foo/bar');
       expect(res).toEqual(data);
-      expect(gitApiMock.getItem.mock.calls).toMatchSnapshot();
+      expect(getItemFn.mock.calls).toMatchSnapshot();
     });
 
     it('returns null', async () => {
