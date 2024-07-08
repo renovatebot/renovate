@@ -8,7 +8,7 @@
     "renovate-config-validator": "dist/config-validator.js"
   },
   "scripts": {
-    "build": "run-s clean 'generate:*' 'compile:*' create-json-schema create-protos",
+    "build": "run-s clean 'generate:*' create-protos 'compile:*' create-json-schema",
     "build:docker": "ts-node tools/docker.ts",
     "build:docs": "ts-node tools/generate-docs.ts",
     "clean": "rimraf dist tmp",
