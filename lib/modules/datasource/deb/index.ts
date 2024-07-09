@@ -56,7 +56,6 @@ export class DebDatasource extends Datasource {
 
   override readonly caching = true;
 
-
   /**
    * Not all Debian packages follow Semver, so it's wise to keep this loose but make sure to
    * have enough tests in your application.
@@ -262,7 +261,7 @@ export class DebDatasource extends Datasource {
     // read line by line to avoid high memory consumption as the extracted Packages
     // files can be multiple MBs in size
     const rl = readline.createInterface({
-      input: fs.createReadStream(extractedFile),
+      input: fs.createCacheReadStream(extractedFile),
       terminal: false,
     });
 
