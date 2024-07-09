@@ -6,10 +6,11 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import * as fs from '../../../util/fs';
 import type { HttpOptions } from '../../../util/http/types';
-import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { formatReleaseResult, releaseMetaInformationMatches } from './release';
 import type { PackageDescription } from './types';
+import { constructComponentUrls } from './url';
 
 export class DebDatasource extends Datasource {
   static readonly id = 'deb';
@@ -271,7 +272,7 @@ export class DebDatasource extends Datasource {
       if (line === '') {
         // All information of the package are available, early return possible
         if (currentPackage.Package === packageName) {
-          return this.formatReleaseResult(currentPackage);
+          return formatReleaseResult(currentPackage);
         }
         currentPackage = {};
       } else {
@@ -286,83 +287,10 @@ export class DebDatasource extends Datasource {
 
     // Check the last package after file reading is complete
     if (currentPackage.Package === packageName) {
-      return this.formatReleaseResult(currentPackage);
+      return formatReleaseResult(currentPackage);
     }
 
     return null;
-  }
-
-  /**
-   * Formats the package description into a ReleaseResult.
-   *
-   * @param packageDesc - The package description object.
-   * @returns A formatted ReleaseResult.
-   */
-  formatReleaseResult(packageDesc: PackageDescription): ReleaseResult {
-    return {
-      releases: [{ version: packageDesc.Version! }],
-      homepage: packageDesc.Homepage,
-    };
-  }
-
-  /**
-   * Constructs the component URLs from the given registry URL.
-   *
-   * @param registryUrl - The base URL of the registry.
-   * @returns An array of component URLs.
-   * @throws Will throw an error if required parameters are missing from the URL.
-   */
-  constructComponentUrls(registryUrl: string): string[] {
-    const REQUIRED_PARAMS = ['components', 'binaryArch'];
-    const OPTIONAL_PARAMS = ['release', 'suite'];
-
-    const validateUrlAndParams = (url: URL): void => {
-      REQUIRED_PARAMS.forEach((param) => {
-        if (!url.searchParams.has(param)) {
-          throw new Error(`Missing required query parameter '${param}'`);
-        }
-      });
-    };
-
-    const getReleaseParam = (url: URL): string => {
-      for (const param of OPTIONAL_PARAMS) {
-        const paramValue = url.searchParams.get(param);
-        if (paramValue !== null) {
-          return paramValue;
-        }
-      }
-      throw new Error(
-        `Missing one of ${OPTIONAL_PARAMS.join(', ')} query parameter`,
-      );
-    };
-
-    try {
-      const url = new URL(registryUrl);
-      validateUrlAndParams(url);
-
-      const release = getReleaseParam(url);
-      const binaryArch = url.searchParams.get('binaryArch');
-      const components = url.searchParams.get('components')!.split(',');
-
-      // Clean up URL search parameters for constructing new URLs
-      [...REQUIRED_PARAMS, ...OPTIONAL_PARAMS].forEach((param) =>
-        url.searchParams.delete(param),
-      );
-
-      return components.map((component) => {
-        return joinUrlParts(
-          url.toString(),
-          `dists`,
-          release,
-          component,
-          `binary-${binaryArch}`,
-        );
-      });
-    } catch (error) {
-      throw new Error(
-        `Invalid deb repo URL: ${registryUrl} - see documentation: ${error.message}`,
-      );
-    }
   }
 
   /**
@@ -380,7 +308,7 @@ export class DebDatasource extends Datasource {
       return null;
     }
 
-    const componentUrls = this.constructComponentUrls(registryUrl);
+    const componentUrls = constructComponentUrls(registryUrl);
     let aggregatedRelease: ReleaseResult | null = null;
 
     for (const componentUrl of componentUrls) {
@@ -397,9 +325,7 @@ export class DebDatasource extends Datasource {
           if (aggregatedRelease === null) {
             aggregatedRelease = newRelease;
           } else {
-            if (
-              !this.releaseMetaInformationMatches(aggregatedRelease, newRelease)
-            ) {
+            if (!releaseMetaInformationMatches(aggregatedRelease, newRelease)) {
               logger.warn(
                 { packageName },
                 'Package occurred in more than one repository with different meta information. Aggregating releases anyway.',
@@ -417,19 +343,5 @@ export class DebDatasource extends Datasource {
     }
 
     return aggregatedRelease;
-  }
-
-  /**
-   * Checks if two release metadata objects match.
-   *
-   * @param lhs - The first release result.
-   * @param rhs - The second release result.
-   * @returns True if the metadata matches, otherwise false.
-   */
-  releaseMetaInformationMatches(
-    lhs: ReleaseResult,
-    rhs: ReleaseResult,
-  ): boolean {
-    return lhs.homepage === rhs.homepage;
   }
 }
