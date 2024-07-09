@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { allowedExperimentalFlags } from '../constants/experimental-flags';
 import { logger } from '../logger';
 import { allManagersList, getManagerList } from '../modules/manager';
 import { isCustomManager } from '../modules/manager/custom';
@@ -1105,15 +1106,6 @@ function validateExperimentalFlag(
   warnings: ValidationMessage[],
   currentPath: string | undefined,
 ): void {
-  const allowedExperimentalFlags = new Set([
-    'disableDockerHubTags',
-    'execGpidHandle',
-    'noMavenPomCheck',
-    'nugetDownloadNupkgs',
-    'repoCacheForceLocal',
-    'yarnProxy',
-    'useOpenpgp',
-  ]);
   if (!allowedExperimentalFlags.has(flagName)) {
     warnings.push({
       topic: 'Configuration Error',

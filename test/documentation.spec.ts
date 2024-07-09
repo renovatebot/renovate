@@ -115,5 +115,25 @@ describe('documentation', () => {
         );
       });
     });
+
+    describe('docs/usage/self-hosted-experimental-flags.md', () => {
+      function getSelfHostedExperimentalFlagsHeaders(file: string): string[] {
+        const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
+        const matches = content.match(/\n## (.*?)\n/g) ?? [];
+        return matches.map((match) => match.substring(4, match.length - 1));
+      }
+
+      it('has headers sorted alphabetically', () => {
+        expect(
+          getSelfHostedExperimentalFlagsHeaders(
+            'self-hosted-experimental-flags.md',
+          ),
+        ).toEqual(
+          getSelfHostedExperimentalFlagsHeaders(
+            'self-hosted-experimental-flags.md',
+          ).sort(),
+        );
+      });
+    });
   });
 });

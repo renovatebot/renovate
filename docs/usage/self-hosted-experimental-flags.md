@@ -66,16 +66,6 @@ Example usage:
 experimentalFlags: ['repoCacheForceLocal'];
 ```
 
-## `yarnProxy`
-
-Configure global Yarn proxy settings if HTTP proxy environment variables are detected.
-
-Example usage:
-
-```js
-experimentalFlags: ['yarnProxy'];
-```
-
 ## `useOpenpgp`
 
 Use `openpgp` instead of `kbpgp` for `PGP` decryption.
@@ -84,4 +74,14 @@ Example usage:
 
 ```js
 experimentalFlags: ['useOpenpgp'];
+```
+
+## `yarnProxy`
+
+Configure global Yarn proxy settings if HTTP proxy environment variables are detected.
+
+Example usage:
+
+```js
+experimentalFlags: ['yarnProxy'];
 ```
