@@ -56,10 +56,6 @@ export class DebDatasource extends Datasource {
 
   override readonly caching = true;
 
-  /**
-   * Here, we tell Renovate that this data source can respect multiple upstream repositories
-   */
-  override readonly registryStrategy = 'merge';
 
   /**
    * Not all Debian packages follow Semver, so it's wise to keep this loose but make sure to
@@ -87,11 +83,11 @@ export class DebDatasource extends Datasource {
     outputFile: string,
   ): Promise<void> {
     if (compression === 'gz') {
-      const source = fs.createReadStream(compressedFile);
+      const source = fs.createCacheReadStream(compressedFile);
       const destination = fs.createCacheWriteStream(outputFile);
       await fs.pipeline(source, createUnzip(), destination);
     } else {
-      throw new Error('Unsupported compression standard');
+      throw new Error(`Unsupported compression standard '${compression}'`);
     }
   }
 
