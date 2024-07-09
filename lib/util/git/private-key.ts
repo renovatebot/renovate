@@ -12,7 +12,8 @@ import { addSecretForSanitizing } from '../sanitize';
 type PrivateKeyFormat = 'gpg' | 'ssh';
 
 const sshKeyRegex = regEx(
-  /-----BEGIN ([A-Z ]+ )?PRIVATE KEY-----(.|\n)*?-----END ([A-Z]+ )?PRIVATE KEY-----/,
+  /-----BEGIN ([A-Z ]+ )?PRIVATE KEY-----.*?-----END ([A-Z]+ )?PRIVATE KEY-----/,
+  's',
 );
 
 let gitPrivateKey: PrivateKey | undefined;

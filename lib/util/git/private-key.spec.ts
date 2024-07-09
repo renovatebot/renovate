@@ -81,7 +81,8 @@ describe('util/git/private-key', () => {
         });
       setPrivateKey(`\
 -----BEGIN OPENSSH PRIVATE KEY-----
-some-private-key-with-passphrase
+some-private-key with-passphrase
+some-private-key with-passphrase
 -----END OPENSSH PRIVATE KEY-----`);
       await expect(writePrivateKey()).rejects.toThrow();
     });
@@ -89,6 +90,7 @@ some-private-key-with-passphrase
     it('imports the private SSH key', async () => {
       const privateKey = `\
 -----BEGIN OPENSSH PRIVATE KEY-----
+some-private-key
 some-private-key
 -----END OPENSSH PRIVATE KEY-----`;
       const privateKeyFile = '/tmp/git-private-ssh.key';
