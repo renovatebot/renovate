@@ -2,6 +2,7 @@ import Git from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
+import { readLocalFile } from '../../../util/fs';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import type { UpdateDependencyConfig } from '../types';
 
@@ -33,6 +34,8 @@ export default async function updateDependency({
         upgrade.newValue,
         upgrade.depName!,
       ]);
+      const updatedPackageContent = await readLocalFile(upgrade.packageFile!);
+      return updatedPackageContent!.toString();
     }
     return fileContent;
   } catch (err) {

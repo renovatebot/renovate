@@ -8,7 +8,7 @@ import { simpleGitConfig } from '../../../util/git/config';
 import { getHttpUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
-import * as semVerCoercedVersioning from '../../versioning/semver-coerced';
+import * as semVerVersioning from '../../versioning/semver';
 import type { ExtractConfig, PackageFileContent } from '../types';
 import type { GitModule } from './types';
 
@@ -139,8 +139,8 @@ export default async function extractPackageFile(
         packageName: httpSubModuleUrl,
         currentValue,
         currentDigest,
-        ...(semVerCoercedVersioning.api.isVersion(currentValue)
-          ? { versioning: semVerCoercedVersioning.id }
+        ...(semVerVersioning.api.isVersion(currentValue)
+          ? { versioning: semVerVersioning.id }
           : {}),
       });
     } catch (err) /* istanbul ignore next */ {

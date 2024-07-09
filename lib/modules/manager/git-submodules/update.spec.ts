@@ -2,11 +2,13 @@ import { mock } from 'jest-mock-extended';
 import { SimpleGit, simpleGit } from 'simple-git';
 import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
+import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as hostRules from '../../../util/host-rules';
 import type { Upgrade } from '../types';
 import { updateDependency } from '.';
+jest.mock('../../../util/fs');
 
 jest.mock('simple-git');
 const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
@@ -91,6 +93,12 @@ describe('modules/manager/git-submodules/update', () => {
     it('update gitmodule branch value if value changed', async () => {
       gitMock.submoduleUpdate.mockResolvedValue('');
       gitMock.checkout.mockResolvedValue('');
+      const updatedGitModules = `[submodule "renovate"]
+      path = deps/renovate
+      url = https://github.com/renovatebot/renovate.git
+      branch = v0.0.2`;
+      fs.readLocalFile.mockResolvedValueOnce(updatedGitModules);
+
       upgrade = {
         depName: 'renovate',
         currentValue: 'v0.0.1',
@@ -101,7 +109,7 @@ describe('modules/manager/git-submodules/update', () => {
         fileContent: '',
         upgrade,
       });
-      expect(update).toBe('');
+      expect(update).toBe(updatedGitModules);
       expect(gitMock.subModule).toHaveBeenCalledWith([
         'set-branch',
         '--branch',

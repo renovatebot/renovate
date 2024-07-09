@@ -22,7 +22,8 @@ If you want to update your git submodules to a specific tag, you can set the cur
   branch = v0.0.1
 ```
 
-Notice: Using this will break the native git submodule update experience using `git submodule update --remote` with an error like `fatal: Unable to find refs/remotes ... revision in submodule path ...`.
+Notice: Using this will break the native git submodule update experience using `git submodule update --remote` with an error like `fatal: Unable to find refs/remotes/origin/v0.0.01 revision in submodule path...` as git can only update when tracking a branch.
+To manually update the submodule, go into the submodule and run `git fetch && git checkout <new tag>` in there.
 
 ### Private Modules Authentication
 

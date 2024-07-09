@@ -338,7 +338,7 @@ describe('modules/manager/git-submodules/extract', () => {
       });
     });
 
-    it('given semver version is extracted from branch and versioning is set to semver-coerced', async () => {
+    it('given semver version is extracted from branch and versioning is set to semver', async () => {
       const res = await extractPackageFile('', '.gitmodules.8', {});
       expect(res).toEqual({
         datasource: 'git-refs',
@@ -348,14 +348,14 @@ describe('modules/manager/git-submodules/extract', () => {
             currentValue: 'v0.0.1',
             depName: 'deps/renovate1',
             packageName: 'https://github.com/renovatebot/renovate.git',
-            versioning: 'semver-coerced',
+            versioning: 'semver',
           },
           {
             currentDigest: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
             currentValue: '0.0.1',
             depName: 'deps/renovate2',
             packageName: 'https://github.com/renovatebot/renovate.git',
-            versioning: 'semver-coerced',
+            versioning: 'semver',
           },
           {
             currentDigest: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
