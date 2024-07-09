@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import { getOptions } from '../lib/config/options';
+import { allowedExperimentalFlags } from '../lib/constants/experimental-flags';
 import { regEx } from '../lib/util/regex';
 
 const options = getOptions();
@@ -120,7 +121,9 @@ describe('documentation', () => {
       function getSelfHostedExperimentalFlagsHeaders(file: string): string[] {
         const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
         const matches = content.match(/\n## (.*?)\n/g) ?? [];
-        return matches.map((match) => match.substring(4, match.length - 1));
+        return matches.map((match) =>
+          match.substring(4, match.length - 1).replaceAll('`', ''),
+        );
       }
 
       it('has headers sorted alphabetically', () => {
@@ -133,6 +136,14 @@ describe('documentation', () => {
             'self-hosted-experimental-flags.md',
           ).sort(),
         );
+      });
+
+      it('all experimental flags are documented', () => {
+        expect(
+          getSelfHostedExperimentalFlagsHeaders(
+            'self-hosted-experimental-flags.md',
+          ).sort(),
+        ).toEqual(Array.from(allowedExperimentalFlags).sort());
       });
     });
   });
