@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { any, mockReset } from 'jest-mock-extended';
+import { any, mockDeep, mockReset } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
 import { mockedDeep } from '../../../test/util';
 import * as exec_ from '../exec';
@@ -13,11 +13,7 @@ jest.mock('fs-extra', () =>
     >('../../../test/fixtures')
     .fsExtra(),
 );
-jest.mock('../exec', () =>
-  jest
-    .requireActual<typeof import('jest-mock-extended')>('jest-mock-extended')
-    .mockDeep(),
-);
+jest.mock('../exec', () => mockDeep());
 
 const exec = mockedDeep(exec_);
 
