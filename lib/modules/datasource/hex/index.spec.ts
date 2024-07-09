@@ -5,12 +5,12 @@ import * as httpMock from '../../../../test/http-mock';
 import { hostRules } from '../../../../test/util';
 import { HexDatasource } from '.';
 
-const tlsCertificateCheckAPIResponse = Fixtures.get(
-  'tls_certificate_check.json',
+const renovateTestPackageAPIResponse = Fixtures.get(
+  'renovate_test_package.json',
 );
 
-const tlsCertificateCheckRegistryResponse = Fixtures.getBinary(
-  'tls_certificate_check.bin.gz',
+const renovateTestPackageRegistryResponse = Fixtures.getBinary(
+  'renovate_test_package.bin.gz',
 );
 
 jest.mock('../../../util/host-rules', () => mockDeep());
@@ -63,7 +63,7 @@ describe('modules/datasource/hex/index', () => {
             authorization: 'abc',
           },
         })
-        .get('/packages/tls_certificate_check')
+        .get('/packages/renovate_test_package')
         .reply(401);
 
       hostRules.find.mockReturnValueOnce({
@@ -73,7 +73,7 @@ describe('modules/datasource/hex/index', () => {
 
       const res = await getPkgReleases({
         ...config,
-        packageName: 'tls_certificate_check',
+        packageName: 'renovate_test_package',
       });
 
       expect(res).toBeNull();
@@ -82,17 +82,17 @@ describe('modules/datasource/hex/index', () => {
     it('processes real data', async () => {
       httpMock
         .scope(baseRegistryUrl)
-        .get('/packages/tls_certificate_check')
-        .reply(200, tlsCertificateCheckRegistryResponse);
+        .get('/packages/renovate_test_package')
+        .reply(200, renovateTestPackageRegistryResponse);
 
       httpMock
         .scope(baseHexpmUrl)
-        .get('/packages/tls_certificate_check')
-        .reply(200, tlsCertificateCheckAPIResponse);
+        .get('/packages/renovate_test_package')
+        .reply(200, renovateTestPackageAPIResponse);
 
       const res = await getPkgReleases({
         ...config,
-        packageName: 'tls_certificate_check',
+        packageName: 'renovate_test_package',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -102,18 +102,18 @@ describe('modules/datasource/hex/index', () => {
     it('process public repo without auth', async () => {
       httpMock
         .scope(baseRegistryUrl)
-        .get('/packages/tls_certificate_check')
-        .reply(200, tlsCertificateCheckRegistryResponse);
+        .get('/packages/renovate_test_package')
+        .reply(200, renovateTestPackageRegistryResponse);
 
       httpMock
         .scope(baseHexpmUrl)
-        .get('/packages/tls_certificate_check')
-        .reply(200, tlsCertificateCheckAPIResponse);
+        .get('/packages/renovate_test_package')
+        .reply(200, renovateTestPackageAPIResponse);
 
       hostRules.find.mockReturnValueOnce({});
       const res = await getPkgReleases({
         ...config,
-        packageName: 'tls_certificate_check',
+        packageName: 'renovate_test_package',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -123,18 +123,18 @@ describe('modules/datasource/hex/index', () => {
     it('extracts deprecated info', async () => {
       httpMock
         .scope(baseRegistryUrl)
-        .get('/packages/tls_certificate_check')
-        .reply(200, tlsCertificateCheckRegistryResponse);
+        .get('/packages/renovate_test_package')
+        .reply(200, renovateTestPackageRegistryResponse);
 
       httpMock
         .scope(baseHexpmUrl)
-        .get('/packages/tls_certificate_check')
-        .reply(200, tlsCertificateCheckAPIResponse);
+        .get('/packages/renovate_test_package')
+        .reply(200, renovateTestPackageAPIResponse);
 
       hostRules.find.mockReturnValueOnce({});
       const res = await getPkgReleases({
         ...config,
-        packageName: 'tls_certificate_check',
+        packageName: 'renovate_test_package',
       });
       expect(res?.releases.some((rel) => rel.isDeprecated)).toBeTrue();
     });
@@ -146,8 +146,8 @@ describe('modules/datasource/hex/index', () => {
             authorization: 'abc',
           },
         })
-        .get('/repos/private_org/packages/tls_certificate_check')
-        .reply(200, tlsCertificateCheckRegistryResponse);
+        .get('/repos/private_org/packages/renovate_test_package')
+        .reply(200, renovateTestPackageRegistryResponse);
 
       httpMock
         .scope(baseHexpmUrl, {
@@ -155,8 +155,8 @@ describe('modules/datasource/hex/index', () => {
             authorization: 'abc',
           },
         })
-        .get('/repos/private_org/packages/tls_certificate_check')
-        .reply(200, tlsCertificateCheckAPIResponse);
+        .get('/repos/private_org/packages/renovate_test_package')
+        .reply(200, renovateTestPackageAPIResponse);
 
       hostRules.find.mockReturnValue({
         authType: 'Token-Only',
@@ -164,7 +164,7 @@ describe('modules/datasource/hex/index', () => {
       });
       const result = await getPkgReleases({
         ...config,
-        packageName: 'org:private_org:tls_certificate_check',
+        packageName: 'org:private_org:renovate_test_package',
       });
 
       expect(result).not.toBeNull();
@@ -178,15 +178,15 @@ describe('modules/datasource/hex/index', () => {
             authorization: 'abc',
           },
         })
-        .get('/packages/tls_certificate_check')
-        .reply(200, tlsCertificateCheckRegistryResponse);
+        .get('/packages/renovate_test_package')
+        .reply(200, renovateTestPackageRegistryResponse);
       hostRules.find.mockReturnValueOnce({
         authType: 'Token-Only',
         token: 'abc',
       });
       const result = await getPkgReleases({
         ...config,
-        packageName: 'repo:private_repo:tls_certificate_check',
+        packageName: 'repo:private_repo:renovate_test_package',
         registryUrls: ['https://getoban.pro/repo'],
       });
       expect(result).not.toBeNull();
