@@ -63,8 +63,3 @@ RUN apt-get update && \
 ```
 
 When the apt package for `gcc` is updated, Renovate updates the environment variable.
-
-<!-- prettier-ignore -->
-!!! tip
-    We recommend you try `loose` versioning for distribution packages first.
-    This is because the version number usually doesn't match Renovate's default `semver-coerced` specification.

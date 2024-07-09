@@ -65,7 +65,7 @@ export class DebDatasource extends Datasource {
    * Not all Debian packages follow Semver, so it's wise to keep this loose but make sure to
    * have enough tests in your application.
    */
-  override readonly defaultVersioning = 'loose';
+  override readonly defaultVersioning = 'deb';
 
   static requiredPackageKeys: Array<keyof PackageDescription> = [
     'Package',
