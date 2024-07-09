@@ -1,1 +1,76 @@
-{"meta":{"links":{"Changelog":"https://github.com/bryannaegele/renovate_test_package/blob/main/CHANGELOG.md","Github":"https://github.com/bryannaegele/renovate_test_package"},"description":"Test package for renovate bot hex support.","licenses":["MIT"],"maintainers":[]},"name":"renovate_test_package","url":"https://hex.pm/api/packages/renovate_test_package","owners":[{"url":"https://hex.pm/api/users/b-side","username":"b-side"}],"inserted_at":"2024-07-08T23:37:16.029206Z","updated_at":"2024-07-09T00:05:00.951422Z","repository":"hexpm","releases":[{"version":"0.2.1","url":"https://hex.pm/api/packages/renovate_test_package/releases/0.2.1","inserted_at":"2024-07-09T00:04:58.487236Z","has_docs":true},{"version":"0.2.0","url":"https://hex.pm/api/packages/renovate_test_package/releases/0.2.0","inserted_at":"2024-07-08T23:38:56.711476Z","has_docs":true},{"version":"0.1.2","url":"https://hex.pm/api/packages/renovate_test_package/releases/0.1.2","inserted_at":"2024-07-08T23:38:33.889948Z","has_docs":true},{"version":"0.1.1","url":"https://hex.pm/api/packages/renovate_test_package/releases/0.1.1","inserted_at":"2024-07-08T23:38:10.795617Z","has_docs":true},{"version":"0.1.0","url":"https://hex.pm/api/packages/renovate_test_package/releases/0.1.0","inserted_at":"2024-07-08T23:37:16.035620Z","has_docs":true}],"downloads":{},"latest_version":"0.2.1","docs_html_url":"https://hexdocs.pm/renovate_test_package/","configs":{"erlang.mk":"dep_renovate_test_package = hex 0.2.1","mix.exs":"{:renovate_test_package, \"~> 0.2.1\"}","rebar.config":"{renovate_test_package, \"0.2.1\"}"},"html_url":"https://hex.pm/packages/renovate_test_package","retirements":{"0.1.1":{"message":"test retirement invalid reason","reason":"invalid"},"0.1.2":{"message":"test retirement security","reason":"security"}},"latest_stable_version":"0.2.1"}
+{
+  "meta": {
+    "links": {
+      "Changelog": "https://github.com/bryannaegele/renovate_test_package/blob/main/CHANGELOG.md",
+      "Github": "https://github.com/bryannaegele/renovate_test_package"
+    },
+    "description": "Test package for renovate bot hex support.",
+    "licenses": [
+      "MIT"
+    ],
+    "maintainers": []
+  },
+  "name": "renovate_test_package",
+  "url": "https://hex.pm/api/packages/renovate_test_package",
+  "owners": [
+    {
+      "url": "https://hex.pm/api/users/b-side",
+      "username": "b-side"
+    }
+  ],
+  "inserted_at": "2024-07-08T23:37:16.029206Z",
+  "updated_at": "2024-07-09T00:05:00.951422Z",
+  "repository": "hexpm",
+  "releases": [
+    {
+      "version": "0.2.1",
+      "url": "https://hex.pm/api/packages/renovate_test_package/releases/0.2.1",
+      "inserted_at": "2024-07-09T00:04:58.487236Z",
+      "has_docs": true
+    },
+    {
+      "version": "0.2.0",
+      "url": "https://hex.pm/api/packages/renovate_test_package/releases/0.2.0",
+      "inserted_at": "2024-07-08T23:38:56.711476Z",
+      "has_docs": true
+    },
+    {
+      "version": "0.1.2",
+      "url": "https://hex.pm/api/packages/renovate_test_package/releases/0.1.2",
+      "inserted_at": "2024-07-08T23:38:33.889948Z",
+      "has_docs": true
+    },
+    {
+      "version": "0.1.1",
+      "url": "https://hex.pm/api/packages/renovate_test_package/releases/0.1.1",
+      "inserted_at": "2024-07-08T23:38:10.795617Z",
+      "has_docs": true
+    },
+    {
+      "version": "0.1.0",
+      "url": "https://hex.pm/api/packages/renovate_test_package/releases/0.1.0",
+      "inserted_at": "2024-07-08T23:37:16.035620Z",
+      "has_docs": true
+    }
+  ],
+  "downloads": {},
+  "latest_version": "0.2.1",
+  "docs_html_url": "https://hexdocs.pm/renovate_test_package/",
+  "configs": {
+    "erlang.mk": "dep_renovate_test_package = hex 0.2.1",
+    "mix.exs": "{:renovate_test_package, \"~> 0.2.1\"}",
+    "rebar.config": "{renovate_test_package, \"0.2.1\"}"
+  },
+  "html_url": "https://hex.pm/packages/renovate_test_package",
+  "retirements": {
+    "0.1.1": {
+      "message": "test retirement invalid reason",
+      "reason": "invalid"
+    },
+    "0.1.2": {
+      "message": "test retirement security",
+      "reason": "security"
+    }
+  },
+  "latest_stable_version": "0.2.1"
+}
