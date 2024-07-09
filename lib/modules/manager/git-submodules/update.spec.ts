@@ -88,6 +88,45 @@ describe('modules/manager/git-submodules/update', () => {
       });
     });
 
+    it('update gitmodule branch value if value changed', async () => {
+      gitMock.submoduleUpdate.mockResolvedValue('');
+      gitMock.checkout.mockResolvedValue('');
+      upgrade = {
+        depName: 'renovate',
+        currentValue: 'v0.0.1',
+        newValue: 'v0.0.2',
+        packageFile: '.gitmodules',
+      };
+      const update = await updateDependency({
+        fileContent: '',
+        upgrade,
+      });
+      expect(update).toBe('');
+      expect(gitMock.subModule).toHaveBeenCalledWith([
+        'set-branch',
+        '--branch',
+        'v0.0.2',
+        'renovate',
+      ]);
+    });
+
+    it('do not update gitmodule branch value if value not changed', async () => {
+      gitMock.submoduleUpdate.mockResolvedValue('');
+      gitMock.checkout.mockResolvedValue('');
+      upgrade = {
+        depName: 'renovate',
+        currentValue: 'main',
+        newValue: 'main',
+        packageFile: '.gitmodules',
+      };
+      const update = await updateDependency({
+        fileContent: '',
+        upgrade,
+      });
+      expect(update).toBe('');
+      expect(gitMock.subModule).toHaveBeenCalledTimes(0);
+    });
+
     it('returns content on update and uses git environment variables for git-tags/git-refs', async () => {
       gitMock.submoduleUpdate.mockResolvedValue('');
       gitMock.checkout.mockResolvedValue('');

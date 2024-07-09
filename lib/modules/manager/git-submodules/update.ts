@@ -26,6 +26,14 @@ export default async function updateDependency({
   try {
     await git.submoduleUpdate(['--init', upgrade.depName!]);
     await submoduleGit.checkout([upgrade.newDigest!]);
+    if (upgrade.newValue && upgrade.currentValue !== upgrade.newValue) {
+      await git.subModule([
+        'set-branch',
+        '--branch',
+        upgrade.newValue,
+        upgrade.depName!,
+      ]);
+    }
     return fileContent;
   } catch (err) {
     logger.debug({ err }, 'submodule checkout error');
