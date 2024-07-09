@@ -116,6 +116,7 @@ export async function updateArtifacts({
     ).reduce((acc, { name, registry }) => {
       const hostRule = hostRules.find({ url: registry });
 
+      // istanbul ignore if: no good way to test
       if (hostRule?.token) {
         logger.debug(`Adding repo registry ${name}`);
         const authCommand = `mix repo.add ${name} ${registry} --auth-key ${hostRule.token}`;

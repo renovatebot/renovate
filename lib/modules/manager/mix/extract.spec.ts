@@ -10,6 +10,12 @@ const config = partial<ExtractConfig>({
   },
 });
 
+const missingRepoConfig = partial<ExtractConfig>({
+  registryAliases: {
+    unused: 'https://unused.com',
+  },
+});
+
 describe('modules/manager/mix/extract', () => {
   beforeEach(() => {
     GlobalConfig.set({ localDir: '' });
@@ -222,11 +228,104 @@ describe('modules/manager/mix/extract', () => {
       ]);
     });
 
-    it('skips dependencies when repo not in registryAliases', async () => {
+    it('skips dependencies when registryAliases empty', async () => {
       const res = await extractPackageFile(
         Fixtures.get('mix.exs'),
         'mix.exs',
         (config.registryAliases = {}),
+      );
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '~> 0.8.1',
+          datasource: 'hex',
+          depName: 'postgrex',
+          packageName: 'postgrex',
+        },
+        {
+          currentValue: '>2.1.0 or <=3.0.0',
+          datasource: 'hex',
+          depName: 'foo_bar',
+          packageName: 'foo_bar',
+        },
+        {
+          currentDigest: undefined,
+          currentValue: 'v0.4.1',
+          datasource: 'github-tags',
+          depName: 'cowboy',
+          packageName: 'ninenines/cowboy',
+        },
+        {
+          currentDigest: undefined,
+          currentValue: 'main',
+          datasource: 'git-tags',
+          depName: 'phoenix',
+          packageName: 'https://github.com/phoenixframework/phoenix.git',
+        },
+        {
+          currentDigest: '795036d997c7503b21fb64d6bf1a89b83c44f2b5',
+          currentValue: undefined,
+          datasource: 'github-tags',
+          depName: 'ecto',
+          packageName: 'elixir-ecto/ecto',
+        },
+        {
+          currentValue: '~> 1.0',
+          datasource: 'hex',
+          depName: 'secret',
+          packageName: 'org:acme:secret',
+        },
+        {
+          currentValue: '~> 1.0',
+          datasource: 'hex',
+          depName: 'also_secret',
+          packageName: 'org:acme:also_secret',
+        },
+        {
+          currentValue: '~> 1.4',
+          datasource: 'hex',
+          depName: 'oban_pro',
+          packageName: 'repo:oban:oban_pro',
+          skipReason: 'no-repository',
+        },
+        {
+          currentValue: '>2.1.0 and <=3.0.0',
+          datasource: 'hex',
+          depName: 'ex_doc',
+          packageName: 'ex_doc',
+        },
+        {
+          currentValue: '>= 1.0.0',
+          datasource: 'hex',
+          depName: 'jason',
+          packageName: 'jason',
+        },
+        {
+          currentValue: '~> 1.0',
+          datasource: 'hex',
+          depName: 'mason',
+          packageName: 'mason',
+        },
+        {
+          currentValue: '~> 6.1',
+          datasource: 'hex',
+          depName: 'hammer_backend_redis',
+          packageName: 'hammer_backend_redis',
+        },
+        {
+          currentValue: '== 1.6.14',
+          currentVersion: '1.6.14',
+          datasource: 'hex',
+          depName: 'public',
+          packageName: 'public',
+        },
+      ]);
+    });
+
+    it('skips dependencies when repo not in registryAliases', async () => {
+      const res = await extractPackageFile(
+        Fixtures.get('mix.exs'),
+        'mix.exs',
+        missingRepoConfig,
       );
       expect(res?.deps).toEqual([
         {
