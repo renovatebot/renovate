@@ -456,6 +456,7 @@ export async function lookupUpdates(
           versioning.isSingleVersion(update.newValue);
         // istanbul ignore if
         if (
+          config.versioning === 'docker' &&
           update.updateType !== 'rollback' &&
           update.newValue &&
           versioning.isVersion(update.newValue) &&
