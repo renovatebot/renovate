@@ -3,6 +3,7 @@ import { mergeChildConfig } from '../../../../config';
 import type { ValidationMessage } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
+import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import {
   GetDigestInputConfig,
   Release,
@@ -456,7 +457,7 @@ export async function lookupUpdates(
           versioning.isSingleVersion(update.newValue);
         // istanbul ignore if
         if (
-          config.versioning === 'docker' &&
+          config.versioning === dockerVersioningId &&
           update.updateType !== 'rollback' &&
           update.newValue &&
           versioning.isVersion(update.newValue) &&
