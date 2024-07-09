@@ -81,6 +81,7 @@ class SSHKey extends PrivateKey {
       throw new Error('SSH key must have an empty passhprase');
     }
     await fs.outputFile(keyFileName, this.key);
+    process.on('exit', () => fs.removeSync(keyFileName));
     await fs.chmod(keyFileName, 0o600);
     // HACK: `git` calls `ssh-keygen -Y sign ...` internally for SSH-based
     // commit signing. Technically, only the private key is needed for signing,
@@ -90,7 +91,9 @@ class SSHKey extends PrivateKey {
     // resolved.
     // https://github.com/renovatebot/renovate/issues/18197#issuecomment-2152333710
     const { stdout } = await exec(`ssh-keygen -y -P "" -f ${keyFileName}`);
-    await fs.outputFile(`${keyFileName}.pub`, stdout);
+    const pubFileName = `${keyFileName}.pub`;
+    await fs.outputFile(pubFileName, stdout);
+    process.on('exit', () => fs.removeSync(pubFileName));
     return keyFileName;
   }
 

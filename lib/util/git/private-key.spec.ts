@@ -94,6 +94,7 @@ some-private-key
 some-private-key
 -----END OPENSSH PRIVATE KEY-----`;
       const privateKeyFile = '/tmp/git-private-ssh.key';
+      const publicKeyFile = `${privateKeyFile}.pub`;
       const publicKey = 'some-public-key';
       const repoDir = '/tmp/some-repo';
       exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
@@ -115,15 +116,16 @@ some-private-key
       expect((await fs.readFile(privateKeyFile)).toString()).toEqual(
         privateKey,
       );
-      expect((await fs.readFile(`${privateKeyFile}.pub`)).toString()).toEqual(
-        publicKey,
-      );
+      expect((await fs.readFile(publicKeyFile)).toString()).toEqual(publicKey);
       expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
         cwd: repoDir,
       });
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format ssh', {
         cwd: repoDir,
       });
+      process.emit('exit', 0);
+      expect(fs.existsSync(privateKeyFile)).toBeFalse();
+      expect(fs.existsSync(publicKeyFile)).toBeFalse();
     });
   });
 });

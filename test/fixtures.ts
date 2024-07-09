@@ -96,6 +96,7 @@ export class Fixtures {
     vol.reset();
     fsExtraMock.pathExists.mockImplementation(pathExists);
     fsExtraMock.remove.mockImplementation(memfs.promises.rm);
+    fsExtraMock.removeSync.mockImplementation(memfs.rmSync);
     fsExtraMock.readFile.mockImplementation(readFile);
     fsExtraMock.writeFile.mockImplementation(memfs.promises.writeFile);
     fsExtraMock.outputFile.mockImplementation(outputFile);
@@ -113,6 +114,7 @@ export class Fixtures {
 const fsExtraMock = {
   pathExists: jest.fn(),
   remove: jest.fn(),
+  removeSync: jest.fn(),
   readFile: jest.fn(),
   writeFile: jest.fn(),
   outputFile: jest.fn(),
