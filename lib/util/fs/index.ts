@@ -176,8 +176,9 @@ export function createCacheWriteStream(path: string): fs.WriteStream {
   return fs.createWriteStream(fullPath);
 }
 
-export function createReadStream(path: string): fs.ReadStream {
-  return fs.createReadStream(path);
+export function createCacheReadStream(path: string): fs.ReadStream {
+  const fullPath = ensureCachePath(path);
+  return fs.createReadStream(fullPath);
 }
 
 export async function localPathIsFile(pathName: string): Promise<boolean> {
