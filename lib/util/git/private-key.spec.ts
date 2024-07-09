@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import { any, mockDeep } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
-import { mockedDeep } from '../../../test/util';
+import { mockedExtended } from '../../../test/util';
 import * as exec_ from '../exec';
 import { configSigningKey, writePrivateKey } from './private-key';
 import { setPrivateKey } from '.';
@@ -15,7 +15,7 @@ jest.mock('fs-extra', () =>
 );
 jest.mock('../exec', () => mockDeep());
 
-const exec = mockedDeep(exec_);
+const exec = mockedExtended(exec_);
 
 describe('util/git/private-key', () => {
   describe('writePrivateKey()', () => {

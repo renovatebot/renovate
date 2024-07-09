@@ -25,7 +25,7 @@ export function mocked<T extends object>(module: T): jest.Mocked<T> {
  * Simple wrapper for getting mocked version of a module
  * @param module module which is mocked by `jest-mock-extended.mockDeep`
  */
-export function mockedDeep<T extends object>(module: T): DeepMockProxy<T> {
+export function mockedExtended<T extends object>(module: T): DeepMockProxy<T> {
   return module as DeepMockProxy<T>;
 }
 
