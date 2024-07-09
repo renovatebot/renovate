@@ -3,7 +3,6 @@ import { mergeChildConfig } from '../../../../config';
 import type { ValidationMessage } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import {
   GetDigestInputConfig,
   Release,
@@ -20,6 +19,7 @@ import {
 } from '../../../../modules/datasource/common';
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
+import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { assignKeys } from '../../../../util/assign-keys';
 import { applyPackageRules } from '../../../../util/package-rules';
