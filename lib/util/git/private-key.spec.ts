@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { any, mockDeep, mockReset } from 'jest-mock-extended';
+import { any, mockDeep } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
 import { mockedDeep } from '../../../test/util';
 import * as exec_ from '../exec';
@@ -20,8 +20,6 @@ const exec = mockedDeep(exec_);
 describe('util/git/private-key', () => {
   describe('writePrivateKey()', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
-      mockReset(exec);
       Fixtures.reset();
     });
 
