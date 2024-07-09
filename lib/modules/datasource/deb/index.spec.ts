@@ -287,6 +287,15 @@ describe('modules/datasource/deb/index', () => {
   });
 });
 
+/**
+ * Constructs a URL for accessing the component directory for a specific release and architecture.
+ *
+ * @param baseUrl - The base URL of the repository.
+ * @param release - The release name or codename (e.g., 'buster', 'bullseye').
+ * @param component - The component name (e.g., 'main', 'contrib', 'non-free').
+ * @param arch - The architecture name (e.g., 'amd64', 'i386').
+ * @returns The complete URL to the component directory.
+ */
 const getComponentUrl = (
   baseUrl: string,
   release: string,
@@ -294,6 +303,15 @@ const getComponentUrl = (
   arch: string,
 ) => `${baseUrl}/debian/dists/${release}/${component}/binary-${arch}`;
 
+/**
+ * Constructs a URL for accessing the Packages.gz file for a specific component, release, and architecture.
+ *
+ * @param baseUrl - The base URL of the repository.
+ * @param release - The release name or codename (e.g., 'buster', 'bullseye').
+ * @param component - The component name (e.g., 'main', 'contrib', 'non-free').
+ * @param arch - The architecture name (e.g., 'amd64', 'i386').
+ * @returns The complete URL to the Packages.gz file.
+ */
 const getPackageUrl = (
   baseUrl: string,
   release: string,
@@ -301,6 +319,15 @@ const getPackageUrl = (
   arch: string,
 ) => `${getComponentUrl(baseUrl, release, component, arch)}/Packages.gz`;
 
+/**
+ * Constructs a URL used generating the component url with specific release, components, and architecture.
+ *
+ * @param baseUrl - The base URL of the repository.
+ * @param release - The release name or codename (e.g., 'buster', 'bullseye').
+ * @param components - An array of component names (e.g., ['main', 'contrib', 'non-free']).
+ * @param arch - The architecture name (e.g., 'amd64', 'i386').
+ * @returns The complete URL to the package registry.
+ */
 const getRegistryUrl = (
   baseUrl: string,
   release: string,
