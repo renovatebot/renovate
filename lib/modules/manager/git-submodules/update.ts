@@ -34,8 +34,11 @@ export default async function updateDependency({
         upgrade.newValue,
         upgrade.depName!,
       ]);
-      const updatedPackageContent = await readLocalFile(upgrade.packageFile!);
-      return updatedPackageContent!.toString();
+      const updatedPackageContent = await readLocalFile(
+        upgrade.packageFile!,
+        'utf8',
+      );
+      return updatedPackageContent!;
     }
     return fileContent;
   } catch (err) {
