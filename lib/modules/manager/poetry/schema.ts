@@ -9,7 +9,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { PypiDatasource } from '../../datasource/pypi';
-import { normalizeDepName } from '../../datasource/pypi/common';
+import { normalizePythonDepName } from '../../datasource/pypi/common';
 import * as gitVersioning from '../../versioning/git';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
@@ -158,7 +158,7 @@ export const PoetryDependencies = LooseRecord(
   for (const [depName, dep] of Object.entries(record)) {
     dep.depName = depName;
     if (!dep.packageName) {
-      const packageName = normalizeDepName(depName);
+      const packageName = normalizePythonDepName(depName);
       if (depName !== packageName) {
         dep.packageName = packageName;
       }

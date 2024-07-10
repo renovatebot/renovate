@@ -96,6 +96,7 @@ export async function cleanup(): Promise<void> {
           DateTime.local() > DateTime.fromISO(cachedValue.expiry))
       ) {
         await cacache.rm.entry(cacheFileName, cachedItem.key);
+        await cacache.rm.content(cacheFileName, cachedItem.integrity);
         deletedCount += 1;
       }
     }

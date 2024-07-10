@@ -21,6 +21,10 @@ export class DartVersionDatasource extends Datasource {
 
   private readonly channels = ['stable', 'beta', 'dev'];
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'We use the URL: https://github.com/dart-lang/sdk.';
+
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {

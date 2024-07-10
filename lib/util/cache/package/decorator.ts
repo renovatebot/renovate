@@ -50,7 +50,12 @@ export function cache<T>({
   ttlMinutes = 30,
 }: CacheParameters): Decorator<T> {
   return decorate(async ({ args, instance, callback, methodName }) => {
-    if (!cacheable.apply(instance, args)) {
+    const cachePrivatePackages = GlobalConfig.get(
+      'cachePrivatePackages',
+      false,
+    );
+    const isCacheable = cachePrivatePackages || cacheable.apply(instance, args);
+    if (!isCacheable) {
       return callback();
     }
 

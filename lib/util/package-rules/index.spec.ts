@@ -210,6 +210,34 @@ describe('util/package-rules/index', () => {
     expect(res2.automerge).toBeFalse();
   });
 
+  it('sets skipReason=package-rules if enabled=false', () => {
+    const dep: any = {
+      depName: 'foo',
+      packageRules: [
+        {
+          enabled: false,
+        },
+      ],
+    };
+    const res = applyPackageRules(dep);
+    expect(res.enabled).toBeFalse();
+    expect(res.skipReason).toBe('package-rules');
+  });
+
+  it('skips skipReason=package-rules if enabled=true', () => {
+    const dep: any = {
+      enabled: false,
+      depName: 'foo',
+      packageRules: [
+        {
+          enabled: false,
+        },
+      ],
+    };
+    const res = applyPackageRules(dep);
+    expect(res.skipReason).toBeUndefined();
+  });
+
   it('matches anything if missing inclusive rules', () => {
     const config: TestConfig = {
       packageRules: [
@@ -1224,6 +1252,54 @@ describe('util/package-rules/index', () => {
     const res2 = applyPackageRules({
       ...config,
       depName: 'test1',
+    });
+    applyPackageRules(config); // coverage
+
+    expect(res1.x).toBeUndefined();
+    expect(res2.x).toBe(1);
+  });
+
+  it('matches matchDepPrefixes(depName)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchDepPrefixes: ['abc'],
+          x: 1,
+        },
+      ],
+    };
+
+    const res1 = applyPackageRules({
+      ...config,
+      depName: 'abc1',
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      depName: 'def1',
+    });
+    applyPackageRules(config); // coverage
+
+    expect(res1.x).toBe(1);
+    expect(res2.x).toBeUndefined();
+  });
+
+  it('matches excludeDepPrefixes(depName)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          excludeDepPrefixes: ['abc'],
+          x: 1,
+        },
+      ],
+    };
+
+    const res1 = applyPackageRules({
+      ...config,
+      depName: 'abc1',
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      depName: 'def1',
     });
     applyPackageRules(config); // coverage
 

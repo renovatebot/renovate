@@ -22,7 +22,6 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { streamToString } from '../../../util/streams';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   BranchStatusConfig,
@@ -146,20 +145,20 @@ export async function getRawFile(
       version: branchOrTag,
     } satisfies GitVersionDescriptor;
 
-    const buf = await azureApiGit.getItemContent(
-      repoId,
-      fileName,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      branchOrTag ? versionDescriptor : undefined,
+    const item = await azureApiGit.getItem(
+      repoId, // repositoryId
+      fileName, // path
+      undefined, // project
+      undefined, // scopePath
+      undefined, // recursionLevel
+      undefined, // includeContentMetadata
+      undefined, // latestProcessedChange
+      undefined, // download
+      branchOrTag ? versionDescriptor : undefined, // versionDescriptor
+      true, // includeContent
     );
 
-    const str = await streamToString(buf);
-    return str;
+    return item?.content ?? null;
   } catch (err) /* istanbul ignore next */ {
     if (
       err.message?.includes('<title>Azure DevOps Services Unavailable</title>')
@@ -809,7 +808,7 @@ export async function mergePr({
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
-  return smartTruncate(input, 4000)
+  return smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"',
@@ -820,6 +819,10 @@ export function massageMarkdown(input: string): string {
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+}
+
+export function maxBodyLength(): number {
+  return 4000;
 }
 
 /* istanbul ignore next */
@@ -855,7 +858,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const validReviewers = new Set<string>();
 
   // TODO #22198
-  const teams = await azureApiCore.getTeams(repo.project!.id!);
+  const teams = await azureHelper.getAllProjectTeams(repo.project!.id!);
   const members = await Promise.all(
     teams.map(
       async (t) =>

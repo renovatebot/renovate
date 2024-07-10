@@ -201,8 +201,19 @@ export type EnsureCommentRemovalConfig =
 
 export type EnsureIssueResult = 'updated' | 'created';
 
+export type RepoSortMethod =
+  | 'alpha'
+  | 'created'
+  | 'updated'
+  | 'size'
+  | 'id'
+  | null;
+
+export type SortMethod = 'asc' | 'desc' | null;
 export interface AutodiscoverConfig {
   topics?: string[];
+  sort?: RepoSortMethod;
+  order?: SortMethod;
   includeMirrors?: boolean;
   namespaces?: string[];
   projects?: string[];
@@ -266,6 +277,8 @@ export interface Platform {
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
+
+  maxBodyLength(): number;
 }
 
 export interface PlatformScm {

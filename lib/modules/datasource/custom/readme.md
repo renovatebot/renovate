@@ -70,7 +70,8 @@ All available options:
       "changelogUrl": "https://github.com/demo-org/demo/blob/main/CHANGELOG.md#v0710",
       "sourceUrl": "https://github.com/demo-org/demo",
       "sourceDirectory": "monorepo/folder",
-      "digest": "c667f758f9e46e1d8111698e8d3a181c0b10f430"
+      "digest": "c667f758f9e46e1d8111698e8d3a181c0b10f430",
+      "isStable": true
     }
   ],
   "sourceUrl": "https://github.com/demo-org/demo",

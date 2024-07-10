@@ -6,8 +6,9 @@ import { Matcher } from './base';
 export class PackagePrefixesMatcher extends Matcher {
   override matches(
     { depName, packageName }: PackageRuleInputConfig,
-    { matchPackagePrefixes }: PackageRule,
+    packageRule: PackageRule,
   ): boolean | null {
+    const { matchPackagePrefixes } = packageRule;
     if (is.undefined(matchPackagePrefixes)) {
       return null;
     }
@@ -23,9 +24,9 @@ export class PackagePrefixesMatcher extends Matcher {
       return true;
     }
     if (matchPackagePrefixes.some((prefix) => depName.startsWith(prefix))) {
-      logger.once.info(
-        { packageName, depName },
-        'Use matchDepPatterns instead of matchPackagePrefixes',
+      logger.once.warn(
+        { packageRule, packageName, depName },
+        'Use matchDepPrefixes instead of matchPackagePrefixes',
       );
       return true;
     }
@@ -52,9 +53,9 @@ export class PackagePrefixesMatcher extends Matcher {
       return true;
     }
     if (excludePackagePrefixes.some((prefix) => depName.startsWith(prefix))) {
-      logger.once.info(
-        { packageName, depName },
-        'Use excludeDepPatterns instead of excludePackagePrefixes',
+      logger.once.warn(
+        { packageRule, packageName, depName },
+        'Use excludeDepPrefixes instead of excludePackagePrefixes',
       );
       return true;
     }

@@ -41,8 +41,8 @@ function minSatisfyingVersion(
     : pep440.minSatisfyingVersion(versions, range);
 }
 
-function getNewValue(_: NewValueConfig): string | null {
-  return null;
+function getNewValue(newValue: NewValueConfig): string | null {
+  return poetry.getNewValue(newValue);
 }
 
 function subset(subRange: string, superRange: string): boolean | undefined {

@@ -3,6 +3,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import {
   extractAllPackageFiles,
+  extractExtensions,
   extractPackage,
   extractRegistries,
   resolveParents,
@@ -243,6 +244,20 @@ describe('modules/manager/maven/extract', () => {
         packageFileVersion: '1',
       });
     });
+
+    it('tries minimum snapshot manifests', () => {
+      const res = extractPackage(
+        Fixtures.get(`minimum_snapshot.pom.xml`),
+        'some-file',
+      );
+      expect(res).toEqual({
+        datasource: 'maven',
+        deps: [],
+        mavenProps: {},
+        packageFile: 'some-file',
+        packageFileVersion: '0.0.1-SNAPSHOT',
+      });
+    });
   });
 
   describe('resolveParents', () => {
@@ -348,6 +363,27 @@ describe('modules/manager/maven/extract', () => {
       expect(res).toStrictEqual([
         'https://proxy-repo.com/artifactory/apache-maven',
       ]);
+    });
+  });
+
+  describe('extractExtensions', () => {
+    it('returns null for invalid xml files', () => {
+      expect(extractExtensions('', '.mvn/extensions.xml')).toBeNull();
+      expect(
+        extractExtensions('invalid xml content', '.mvn/extensions.xml'),
+      ).toBeNull();
+      expect(
+        extractExtensions('<foobar></foobar>', '.mvn/extensions.xml'),
+      ).toBeNull();
+      expect(
+        extractExtensions('<extensions></extensions>', '.mvn/extensions.xml'),
+      ).toBeNull();
+      expect(
+        extractExtensions(
+          '<extensions xmlns="http://maven.apache.org/EXTENSIONS/1.0.0"></extensions>',
+          '.mvn/extensions.xml',
+        ),
+      ).toBeNull();
     });
   });
 
@@ -690,6 +726,47 @@ describe('modules/manager/maven/extract', () => {
           packageFile: 'random.pom.xml',
         },
       ]);
+    });
+
+    it('should extract from .mvn/extensions.xml file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+      <extensions xmlns="http://maven.apache.org/EXTENSIONS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/EXTENSIONS/1.0.0 http://maven.apache.org/xsd/core-extensions-1.0.0.xsd">
+        <extension>
+          <groupId>io.jenkins.tools.incrementals</groupId>
+          <artifactId>git-changelist-maven-extension</artifactId>
+          <version>1.6</version>
+        </extension>
+      </extensions>
+    `);
+      const res = await extractAllPackageFiles({}, ['.mvn/extensions.xml']);
+      expect(res).toMatchObject([
+        {
+          packageFile: '.mvn/extensions.xml',
+          deps: [
+            {
+              datasource: 'maven',
+              depName:
+                'io.jenkins.tools.incrementals:git-changelist-maven-extension',
+              currentValue: '1.6',
+              depType: 'build',
+              fileReplacePosition: 372,
+              registryUrls: ['https://repo.maven.apache.org/maven2'],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should return empty array if extensions file is invalid or empty', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce('')
+        .mockResolvedValueOnce('invalid xml content');
+      expect(
+        await extractAllPackageFiles({}, [
+          '.mvn/extensions.xml',
+          'grp/.mvn/extensions.xml',
+        ]),
+      ).toBeEmptyArray();
     });
 
     describe('root pom handling', () => {

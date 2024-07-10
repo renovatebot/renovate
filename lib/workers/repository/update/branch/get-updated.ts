@@ -5,6 +5,7 @@ import { logger } from '../../../../logger';
 import { get } from '../../../../modules/manager';
 import type {
   ArtifactError,
+  ArtifactNotice,
   PackageDependency,
   PackageFile,
   UpdateArtifact,
@@ -21,6 +22,7 @@ export interface PackageFilesResult {
   reuseExistingBranch?: boolean;
   updatedPackageFiles: FileChange[];
   updatedArtifacts: FileChange[];
+  artifactNotices: ArtifactNotice[];
 }
 
 async function getFileContent(
@@ -288,6 +290,7 @@ export async function getUpdatedPackageFiles(
   }));
   const updatedArtifacts: FileChange[] = [];
   const artifactErrors: ArtifactError[] = [];
+  const artifactNotices: ArtifactNotice[] = [];
   // istanbul ignore if
   if (is.nonEmptyArray(updatedPackageFiles)) {
     logger.debug('updateArtifacts for updatedPackageFiles');
@@ -308,7 +311,12 @@ export async function getUpdatedPackageFiles(
             packageFile.path,
           ),
         });
-        processUpdateArtifactResults(results, updatedArtifacts, artifactErrors);
+        processUpdateArtifactResults(
+          results,
+          updatedArtifacts,
+          artifactErrors,
+          artifactNotices,
+        );
       }
     }
   }
@@ -339,7 +347,12 @@ export async function getUpdatedPackageFiles(
             packageFile.path,
           ),
         });
-        processUpdateArtifactResults(results, updatedArtifacts, artifactErrors);
+        processUpdateArtifactResults(
+          results,
+          updatedArtifacts,
+          artifactErrors,
+          artifactNotices,
+        );
         if (is.nonEmptyArray(results)) {
           updatedPackageFiles.push(packageFile);
         }
@@ -373,6 +386,7 @@ export async function getUpdatedPackageFiles(
             results,
             updatedArtifacts,
             artifactErrors,
+            artifactNotices,
           );
         }
       }
@@ -383,6 +397,7 @@ export async function getUpdatedPackageFiles(
     updatedPackageFiles,
     updatedArtifacts,
     artifactErrors,
+    artifactNotices,
   };
 }
 
@@ -425,15 +440,21 @@ function processUpdateArtifactResults(
   results: UpdateArtifactsResult[] | null,
   updatedArtifacts: FileChange[],
   artifactErrors: ArtifactError[],
+  artifactNotices: ArtifactNotice[],
 ): void {
   if (is.nonEmptyArray(results)) {
     for (const res of results) {
-      const { file, artifactError } = res;
-      // istanbul ignore else
+      const { file, notice, artifactError } = res;
       if (file) {
         updatedArtifacts.push(file);
-      } else if (artifactError) {
+      }
+
+      if (artifactError) {
         artifactErrors.push(artifactError);
+      }
+
+      if (notice) {
+        artifactNotices.push(notice);
       }
     }
   }

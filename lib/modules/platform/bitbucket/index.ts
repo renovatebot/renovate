@@ -570,7 +570,7 @@ async function closeIssue(issueNumber: number): Promise<void> {
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
-  return smartTruncate(input, 50000)
+  return smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
       'by renaming this PR to start with "rebase!"',
@@ -584,6 +584,10 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+}
+
+export function maxBodyLength(): number {
+  return 50000;
 }
 
 export async function ensureIssue({
@@ -782,7 +786,10 @@ async function sanitizeReviewers(
         // Validate that each previous PR reviewer account is still active
         for (const reviewer of reviewers) {
           const reviewerUser = (
-            await bitbucketHttp.getJson<Account>(`/2.0/users/${reviewer.uuid}`)
+            await bitbucketHttp.getJson<Account>(
+              `/2.0/users/${reviewer.uuid}`,
+              { memCache: true },
+            )
           ).body;
 
           if (reviewerUser.account_status === 'active') {
@@ -836,6 +843,7 @@ async function isAccountMemberOfWorkspace(
   try {
     await bitbucketHttp.get(
       `/2.0/workspaces/${workspace}/members/${reviewer.uuid}`,
+      { memCache: true },
     );
 
     return true;

@@ -3,40 +3,59 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:2.1.0@sha256:6d202223ebdecea136f630d2ad74b4df803cbf6d2f24b71ab15ddf606a50e7ef AS slim-base
+FROM ghcr.io/renovatebot/base-image:2.25.0@sha256:cbdea86afc1701cc49ea729cbebd4977017843ef1727c1c0f9d259ed123b26eb AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:2.1.0-full@sha256:bee888f0c2f7800b486c1fb6fbcd9f0f82de1196aa0baac72706e4ba4e099d7a AS full-base
+FROM ghcr.io/renovatebot/base-image:2.25.0-full@sha256:ff6a7d49893c6bf8d2dc4ba2ec2d5a04e3eda010311ca2be440ca9bbcccdb528 AS full-base
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM slim-base as build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:2.25.0@sha256:cbdea86afc1701cc49ea729cbebd4977017843ef1727c1c0f9d259ed123b26eb AS build
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+RUN set -ex; \
+  echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM"; \
+  uname -a; \
+  true
 
 WORKDIR /usr/local/renovate
 
-ENV CI=1 npm_config_modules_cache_max_age=0
+ENV CI=1 npm_config_modules_cache_max_age=0 \
+  npm_config_loglevel=info \
+  ARCH=arm64
 
 COPY pnpm-lock.yaml ./
 
+# trim `linux/` from TARGETPLATFORM
+# replace `amd64` with `x64` for `node`
+# set `npm_config_arch` for `prebuild-install`
+# set `npm_config_platform_arch` for `install-artifact-from-github`
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
-RUN pnpm fetch --prod
+RUN set -ex; \
+  arch=${TARGETPLATFORM:6}; \
+  export npm_config_arch=${arch/amd64/x64} npm_config_platform_arch=${arch/amd64/x64}; \
+  corepack pnpm fetch --prod; \
+  true
 
 COPY . ./
 
 # install
 RUN set -ex; \
-  pnpm install --prod --offline --ignore-scripts; \
+  corepack pnpm install --prod --offline --ignore-scripts; \
   true
 
 # test
 COPY tools/docker/bin/ /usr/local/bin/
+# RE2 doesn't work on cross compile
+ENV RENOVATE_X_IGNORE_RE2=true
 RUN set -ex; \
   renovate --version; \
   renovate-config-validator; \
-  node -e "new require('re2')('.*').exec('test')"; \
   true
 
 # --------------------------------------
@@ -50,8 +69,6 @@ LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate" 
   org.opencontainers.image.licenses="AGPL-3.0-only"
 
 WORKDIR /usr/src/app
-
-ENV RENOVATE_X_IGNORE_NODE_WARN=true
 
 COPY tools/docker/bin/ /usr/local/bin/
 CMD ["renovate"]
@@ -70,8 +87,7 @@ RUN set -ex; \
 
 RUN set -ex; \
   renovate --version; \
-  renovate-config-validator; \
-  node -e "new require('re2')('.*').exec('test')"; \
+  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
   true
 
 LABEL \

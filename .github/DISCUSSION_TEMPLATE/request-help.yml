@@ -27,6 +27,9 @@ body:
     id: the-question
     attributes:
       label: Please tell us more about your question or problem
+      description: |
+        Remember to [follow these guidelines](https://github.com/renovatebot/renovate/blob/main/docs/development/help-us-help-you.md) for maximum effectiveness.
+        It may help to include a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) as well.
     validations:
       required: true
 
