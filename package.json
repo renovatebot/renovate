@@ -356,7 +356,9 @@
     "ignoredOptionalDependencies": ["dtrace-provider", "moment", "mv", "safe-json-stringify"],
     "overrides": {
       "@semantic-release/github>@octokit/plugin-paginate-rest": "11.3.0",
-      "@types/linkify-it": "<5.0.0"
+      "@types/linkify-it": "<5.0.0",
+      "glob": "^10.0.0",
+      "test-exclude": "^7.0.1"
     }
   }
 }
