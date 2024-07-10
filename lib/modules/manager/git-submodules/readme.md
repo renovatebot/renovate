@@ -11,9 +11,10 @@ You can customize the per-submodule checks of the git-submodules manager like th
 }
 ```
 
-### Updating to tag values
+### Updating to Specific Tag Values
 
-If you want to update your git submodules to a specific tag, you can set the current tag as `branch` in the `.gitmodules`-files and Renovate will update this version to the latest git tag.
+If you want to update your Git submodules to a specific tag, you can set the desired tag as the `branch` in your `.gitmodules` file.
+Renovate will then automatically update this version to the latest Git tag.
 
 ```ini
 [submodule "renovate"]
@@ -22,8 +23,8 @@ If you want to update your git submodules to a specific tag, you can set the cur
   branch = v0.0.1
 ```
 
-Notice: Using this will break the native git submodule update experience using `git submodule update --remote` with an error like `fatal: Unable to find refs/remotes/origin/v0.0.01 revision in submodule path...` as git can only update when tracking a branch.
-To manually update the submodule, go into the submodule and run `git fetch && git checkout <new tag>` in there.
+**Note:** Using this approach will disrupt the native git submodule update experience when using `git submodule update --remote`. You may encounter an error like `fatal: Unable to find refs/remotes/origin/v0.0.1 revision in submodule path...` because Git can only update submodules when tracking a branch.
+To manually update the submodule, navigate to the submodule directory and run the following commands: `git fetch && git checkout <new tag>`.
 
 ### Private Modules Authentication
 
