@@ -101,7 +101,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   }
 
   if (cache.configFileName) {
-    logger.debug('Checking cached config file name');
+    logger.debug(`Checking cached config file name: ${cache.configFileName}`);
     try {
       const configFileContent = await platform.getJsonFile(
         cache.configFileName,
