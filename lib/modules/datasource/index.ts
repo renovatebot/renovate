@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
+import { GlobalConfig } from '../../config/global';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -29,7 +30,6 @@ import type {
   GetReleasesConfig,
   ReleaseResult,
 } from './types';
-import { GlobalConfig } from '../../config/global';
 
 export * from './types';
 export { isGetPkgReleasesConfig } from './common';
