@@ -1,10 +1,10 @@
 import * as defaultsParser from '../../../../config/defaults';
 import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
-import { addStream, logger, setContext } from '../../../../logger';
+import { logger, setContext } from '../../../../logger';
 import { detectAllGlobalConfig } from '../../../../modules/manager';
 import { coerceArray } from '../../../../util/array';
-import { ensureDir, getParentDir, readSystemFile } from '../../../../util/fs';
+import { readSystemFile } from '../../../../util/fs';
 import { addSecretForSanitizing } from '../../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../../util/url';
 import * as cliParser from './cli';
@@ -66,21 +66,6 @@ export async function parseConfigs(
     setContext(config.logContext);
   }
 
-  // Add file logger
-  // istanbul ignore if
-  if (config.logFile) {
-    logger.debug(
-      // TODO: types (#22198)
-      `Enabling ${config.logFileLevel!} logging to ${config.logFile}`,
-    );
-    await ensureDir(getParentDir(config.logFile));
-    addStream({
-      name: 'logfile',
-      path: config.logFile,
-      level: config.logFileLevel,
-    });
-  }
-
   logger.trace({ config: defaultConfig }, 'Default config');
   logger.debug({ config: fileConfig }, 'File config');
   logger.debug({ config: cliConfig }, 'CLI config');
@@ -113,9 +98,11 @@ export async function parseConfigs(
     config.forkProcessing = 'enabled';
   }
 
-  // Remove log file entries
-  delete config.logFile;
-  delete config.logFileLevel;
+  // Massage onboardingNoDeps
+  if (!config.autodiscover && config.onboardingNoDeps !== 'disabled') {
+    logger.debug('Enabling onboardingNoDeps while in non-autodiscover mode');
+    config.onboardingNoDeps = 'enabled';
+  }
 
   return config;
 }

@@ -515,7 +515,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.11.7',
+    default: 'ghcr.io/containerbase/sidecar:10.11.1',
     globalOnly: true,
   },
   {
@@ -542,6 +542,25 @@ const options: RenovateOptions[] = [
     supportedManagers: ['gomod'],
   },
   // Log options
+  {
+    name: 'logFile',
+    description: 'Log file path.',
+    stage: 'global',
+    type: 'string',
+    globalOnly: true,
+    deprecationMsg:
+      'Instead of configuring log file path in the file config. Use the `LOG_FILE` environment variable instead.',
+  },
+  {
+    name: 'logFileLevel',
+    description: 'Set the log file log level.',
+    stage: 'global',
+    type: 'string',
+    default: 'debug',
+    globalOnly: true,
+    deprecationMsg:
+      'Instead of configuring log file level in the file config. Use the `LOG_FILE_LEVEL` environment variable instead.',
+  },
   {
     name: 'logContext',
     description: 'Add a global or per-repo log context to each log entry.',
@@ -1398,6 +1417,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+<<<<<<< HEAD
     name: 'sourceUrl',
     description: 'The source URL of the package.',
     type: 'string',
@@ -1415,6 +1435,21 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchSourceUrlPrefixes',
+    description:
+      'A list of source URL prefixes to match against, commonly used to group monorepos or packages from the same organization.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+=======
+>>>>>>> b66597a89 (feat(packageRules): migrate matchers and excludes (#28602))
     name: 'matchSourceUrls',
     description: 'A list of source URLs to exact match against.',
     type: 'array',
@@ -2858,11 +2893,9 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'platformCommit',
-    description:
-      'Use platform API to perform commits instead of using Git directly.',
-    type: 'string',
-    default: 'auto',
-    allowedValues: ['auto', 'disabled', 'enabled'],
+    description: `Use platform API to perform commits instead of using Git directly.`,
+    type: 'boolean',
+    default: false,
     supportedPlatforms: ['github'],
   },
   {

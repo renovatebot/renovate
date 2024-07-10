@@ -384,6 +384,7 @@ describe('modules/manager/pip-compile/extract', () => {
       datasource: 'pypi',
       depType: 'indirect',
       depName: 'bards-friend',
+      packageName: 'bards-friend',
       lockedVersion: '1.0.0',
       enabled: false,
     });

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { minimatch } from '../minimatch';
+import { anyMatchRegexOrGlobList, matchRegexOrGlobList } from '../string-match';
 import { Matcher } from './base';
 
 export class FileNamesMatcher extends Matcher {
@@ -15,13 +15,14 @@ export class FileNamesMatcher extends Matcher {
       return false;
     }
 
-    return matchFileNames.some(
-      (matchFileName) =>
-        minimatch(matchFileName, { dot: true }).match(packageFile) ||
-        (is.array(lockFiles) &&
-          lockFiles.some((lockFile) =>
-            minimatch(matchFileName, { dot: true }).match(lockFile),
-          )),
-    );
+    if (matchRegexOrGlobList(packageFile, matchFileNames)) {
+      return true;
+    }
+
+    if (is.array(lockFiles)) {
+      return anyMatchRegexOrGlobList(lockFiles, matchFileNames);
+    }
+
+    return false;
   }
 }
