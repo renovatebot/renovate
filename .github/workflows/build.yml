@@ -615,7 +615,7 @@ jobs:
           standalone: true
 
       - name: Setup Node.js
-        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
           node-version: ${{ env.NODE_VERSION_TEST }}
 
@@ -661,7 +661,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@4883899e455499739a005ede0bd2b8d4fb1afa82 # v3.3.4
+        uses: containerbase/internal-tools@80955f4a3e86de153243d9319aa91c4566b805cb # v3.3.5
         with:
           command: docker-config
 

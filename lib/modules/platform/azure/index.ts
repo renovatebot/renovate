@@ -22,7 +22,6 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { streamToString } from '../../../util/streams';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   BranchStatusConfig,
@@ -146,20 +145,20 @@ export async function getRawFile(
       version: branchOrTag,
     } satisfies GitVersionDescriptor;
 
-    const buf = await azureApiGit.getItemContent(
-      repoId,
-      fileName,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      branchOrTag ? versionDescriptor : undefined,
+    const item = await azureApiGit.getItem(
+      repoId, // repositoryId
+      fileName, // path
+      undefined, // project
+      undefined, // scopePath
+      undefined, // recursionLevel
+      undefined, // includeContentMetadata
+      undefined, // latestProcessedChange
+      undefined, // download
+      branchOrTag ? versionDescriptor : undefined, // versionDescriptor
+      true, // includeContent
     );
 
-    const str = await streamToString(buf);
-    return str;
+    return item?.content ?? null;
   } catch (err) /* istanbul ignore next */ {
     if (
       err.message?.includes('<title>Azure DevOps Services Unavailable</title>')

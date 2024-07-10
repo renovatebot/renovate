@@ -19,6 +19,7 @@ import {
 } from '../../../../modules/datasource/common';
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
+import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { assignKeys } from '../../../../util/assign-keys';
 import { applyPackageRules } from '../../../../util/package-rules';
@@ -456,6 +457,7 @@ export async function lookupUpdates(
           versioning.isSingleVersion(update.newValue);
         // istanbul ignore if
         if (
+          config.versioning === dockerVersioningId &&
           update.updateType !== 'rollback' &&
           update.newValue &&
           versioning.isVersion(update.newValue) &&
