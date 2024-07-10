@@ -186,7 +186,7 @@ export function extractDependency(
     const len = 7; // length of 'semver:'
     const maybeVersion = depRefPart.substring(len);
 
-    if (depRefPart.startsWith('semver:') && isVersion(maybeVersion)) {
+    if (depRefPart.startsWith('semver:') && isValid(maybeVersion)) {
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = maybeVersion;
       dep.datasource = GithubTagsDatasource.id;
