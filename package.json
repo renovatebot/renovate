@@ -334,7 +334,7 @@
     "markdownlint-cli2": "0.13.0",
     "memfs": "4.9.3",
     "nock": "13.5.4",
-    "npm-run-all2": "6.2.1",
+    "npm-run-all2": "6.2.2",
     "nyc": "17.0.0",
     "pretty-format": "29.7.0",
     "rimraf": "5.0.7",
