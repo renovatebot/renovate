@@ -29,6 +29,7 @@ import type {
   GetReleasesConfig,
   ReleaseResult,
 } from './types';
+import { GlobalConfig } from '../../config/global';
 
 export * from './types';
 export { isGetPkgReleasesConfig } from './common';
@@ -79,10 +80,16 @@ async function getRegistryReleases(
     res.registryUrl ??= registryUrl;
   }
   // cache non-null responses unless marked as private
-  if (datasource.caching && res && !res.isPrivate) {
-    logger.trace({ cacheKey }, 'Caching datasource response');
-    const cacheMinutes = 15;
-    await packageCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
+  if (datasource.caching && res) {
+    const cachePrivatePackages = GlobalConfig.get(
+      'cachePrivatePackages',
+      false,
+    );
+    if (cachePrivatePackages || !res.isPrivate) {
+      logger.trace({ cacheKey }, 'Caching datasource response');
+      const cacheMinutes = 15;
+      await packageCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
+    }
   }
   return res;
 }
