@@ -3,6 +3,10 @@
 The Mend-hosted cloud apps - Renovate App on GitHub, Mend App on Bitbucket - have deprecated the use of encrypted secrets in Renovate config files stored in the repo.
 Instead, secrets for the cloud apps must be stored in the app settings using the web UI available at [developer.mend.io](http://developer.mend.io).
 
+> [!NOTE]
+>
+> Only users with admin rights can add secrets.
+
 ## How to use secrets in the Mend Hosted Cloud Apps
 
 To use secrets in the Mend Cloud apps:
@@ -36,13 +40,15 @@ When adding a secret in the web UI, check whether you are adding **Organization 
 This image shows credentials from the Repo settings page. It shows inherited Organisation Secrets, plus the specific Repository Secrets.
 Only the Repo settings can be edited here. Org settings must be edited in the Org settings page.
 
-- **To access Org-level secrets**, press the `Settings` button on the Org page.<br/>
-  _Tip: You know you are on the Org page if you see the **Installed Repositories** table._
+- **To access Org-level secrets**, press the `Settings` button on the Org page.
+
+_Tip: You know you are on the Org page if you see the **Installed Repositories** table._
 
 ![Org settings button](../assets/images/app-settings/org-settings-button.png)
 
-- **To access Repo-level secrets**, press the `Settings` button on the Repo page.<br/>
-  _Tip: You know you are on a Repo page if you see the **Recent jobs** table._
+- **To access Repo-level secrets**, press the `Settings` button on the Repo page.
+
+_Tip: You know you are on a Repo page if you see the **Recent jobs** table._
 
 ![Repo settings button](../assets/images/app-settings/repo-settings-button.png)
 
