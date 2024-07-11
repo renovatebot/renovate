@@ -6,13 +6,10 @@ const GithubResponseMetadata = z.object({
   path: z.string(),
 });
 
-// if the file is inside a directory content list it does not have an encoding or content field.
-// This is the case if RAW is requested as the upstream Github URL reader does.
 export const GithubFile = GithubResponseMetadata.extend({
   type: z.literal('file'),
 });
 
-// contains
 export type GithubFile = z.infer<typeof GithubFile>;
 
 export const GithubDirectory = GithubResponseMetadata.extend({
