@@ -37,6 +37,7 @@ export class GlobalConfig {
     'autodiscoverRepoSort',
     'autodiscoverRepoOrder',
     'userAgent',
+    'cachePrivatePackages',
   ];
 
   private static config: RepoGlobalConfig = {};

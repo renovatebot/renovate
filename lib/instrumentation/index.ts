@@ -43,9 +43,12 @@ export function init(): void {
   const traceProvider = new NodeTracerProvider({
     resource: new Resource({
       // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value
-      [SemanticResourceAttributes.SERVICE_NAME]: 'renovate',
-      [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'renovatebot.com',
-      [SemanticResourceAttributes.SERVICE_VERSION]: pkg.version,
+      [SemanticResourceAttributes.SERVICE_NAME]:
+        process.env.OTEL_SERVICE_NAME ?? 'renovate',
+      [SemanticResourceAttributes.SERVICE_NAMESPACE]:
+        process.env.OTEL_SERVICE_NAMESPACE ?? 'renovatebot.com',
+      [SemanticResourceAttributes.SERVICE_VERSION]:
+        process.env.OTEL_SERVICE_VERSION ?? pkg.version,
     }),
   });
 

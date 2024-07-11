@@ -3,26 +3,44 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:2.18.4@sha256:e5e8acb4884b05247bb57e74cc1d22d1780a8cbb2b9da8ee2ffe73be7859db44 AS slim-base
+FROM ghcr.io/renovatebot/base-image:2.25.2@sha256:e58afb4d4ea3589dd0f3bf29f2f28126072047eb358efb0c739350bad8692d63 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:2.18.4-full@sha256:deac8587531b7e54d357ad6eb2e4ee0fd31f05dd716c27506ec2ccabe1e91283 AS full-base
+FROM ghcr.io/renovatebot/base-image:2.25.2-full@sha256:60a0efe024cd2c50741e872499d4b5d9256158e9edef7db22224167b352fa67f AS full-base
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM slim-base as build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:2.25.2@sha256:e58afb4d4ea3589dd0f3bf29f2f28126072047eb358efb0c739350bad8692d63 AS build
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+RUN set -ex; \
+  echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM"; \
+  uname -a; \
+  true
 
 WORKDIR /usr/local/renovate
 
-ENV CI=1 npm_config_modules_cache_max_age=0
+ENV CI=1 npm_config_modules_cache_max_age=0 \
+  npm_config_loglevel=info \
+  ARCH=arm64
 
 COPY pnpm-lock.yaml ./
 
+# trim `linux/` from TARGETPLATFORM
+# replace `amd64` with `x64` for `node`
+# set `npm_config_arch` for `prebuild-install`
+# set `npm_config_platform_arch` for `install-artifact-from-github`
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
-RUN corepack pnpm fetch --prod
+RUN set -ex; \
+  arch=${TARGETPLATFORM:6}; \
+  export npm_config_arch=${arch/amd64/x64} npm_config_platform_arch=${arch/amd64/x64}; \
+  corepack pnpm fetch --prod; \
+  true
 
 COPY . ./
 
@@ -33,10 +51,11 @@ RUN set -ex; \
 
 # test
 COPY tools/docker/bin/ /usr/local/bin/
+# RE2 doesn't work on cross compile
+ENV RENOVATE_X_IGNORE_RE2=true
 RUN set -ex; \
   renovate --version; \
   renovate-config-validator; \
-  node -e "new require('re2')('.*').exec('test')"; \
   true
 
 # --------------------------------------
@@ -50,8 +69,6 @@ LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate" 
   org.opencontainers.image.licenses="AGPL-3.0-only"
 
 WORKDIR /usr/src/app
-
-ENV RENOVATE_X_IGNORE_NODE_WARN=true
 
 COPY tools/docker/bin/ /usr/local/bin/
 CMD ["renovate"]
@@ -70,8 +87,7 @@ RUN set -ex; \
 
 RUN set -ex; \
   renovate --version; \
-  renovate-config-validator; \
-  node -e "new require('re2')('.*').exec('test')"; \
+  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
   true
 
 LABEL \

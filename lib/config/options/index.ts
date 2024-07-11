@@ -514,7 +514,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.11.1',
+    default: 'ghcr.io/containerbase/sidecar:10.15.3',
     globalOnly: true,
   },
   {
@@ -2508,6 +2508,7 @@ const options: RenovateOptions[] = [
       'gomodTidy1.17',
       'gomodTidyE',
       'gomodUpdateImportPaths',
+      'gomodSkipVendor',
       'helmUpdateSubChartArchives',
       'npmDedupe',
       'pnpmDedupe',
@@ -2802,13 +2803,12 @@ const options: RenovateOptions[] = [
       'Options to suppress various types of warnings and other notifications.',
     type: 'array',
     subType: 'string',
-    default: ['deprecationWarningIssues'],
+    default: [],
     allowedValues: [
       'artifactErrors',
       'branchAutomergeFailure',
       'configErrorIssue',
       'dependencyLookupWarnings',
-      'deprecationWarningIssues',
       'lockFileErrors',
       'missingCredentialsError',
       'onboardingClose',
@@ -3116,6 +3116,14 @@ const options: RenovateOptions[] = [
     type: 'integer',
     stage: 'repository',
     default: 90,
+    globalOnly: true,
+  },
+  {
+    name: 'cachePrivatePackages',
+    description:
+      'Cache private packages in the datasource cache. This is useful for self-hosted setups',
+    type: 'boolean',
+    default: false,
     globalOnly: true,
   },
 ];

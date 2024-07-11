@@ -327,6 +327,10 @@ Results which are soft expired are reused in the following manner:
 - The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
 - If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
 
+## cachePrivatePackages
+
+In the self-hosted setup, use option to enable caching of private packages to improve performance.
+
 ## cacheTtlOverride
 
 Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
@@ -968,10 +972,14 @@ uid                      Renovate Bot <renovate@whitesourcesoftware.com>
 sub   rsa4096 2021-09-10 [E]
 ```
 
+</details>
+
 <!-- prettier-ignore -->
 !!! note
     If you use GnuPG `v2.4` (or newer) to generate the key, then you must disable `AEAD` preferences.
-    This is needed to allow  Renovate to decrypt the encrypted values.
+    This is needed to allow Renovate to decrypt the encrypted values.
+
+<details><summary>key edit log</summary>
 
 ```bash
 ❯ gpg --edit-key renovate@whitesourcesoftware.com
