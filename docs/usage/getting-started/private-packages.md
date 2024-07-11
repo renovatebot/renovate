@@ -593,7 +593,7 @@ The preferred approach to secrets is that the bot administrator configures them 
 
 If you need to provide credentials to the Mend Renovate App, please do this:
 
-1. Add each secret string in the Credentials section of Organisation or Repository settings [Developer Portal](https://developer.mend.io/) web UI.
+1. Add each secret string in the Credentials section of Organisation or Repository settings in the web UI at [http://developer.mend.io](http://developer.mend.io).
 
    ![Organisation and Repository secrets in Credentials settings page](../assets/images/app-settings/org-and-repo-secrets.png)
 

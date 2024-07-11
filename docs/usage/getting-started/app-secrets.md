@@ -7,7 +7,7 @@ Instead, secrets for the cloud apps must be stored in the app settings using the
 
 To use secrets in the Mend Cloud apps:
 
-1. Add the secret in the **Credentials** section of the [Developer Portal](http://developer.mend.io) Org or Repo settings.
+1. Add the secret in the **Credentials** section of the Org or Repo settings in the web UI at [http://developer.mend.io](http://developer.mend.io).
 
    ![Credentials settings page](../assets/images/app-settings/app-credentials.png)
 
@@ -26,7 +26,7 @@ To use secrets in the Mend Cloud apps:
 
 ## Org secrets versus Repo secrets
 
-When adding a secret in the Developer Portal UI, check whether you are adding **Organization secrets** or **Repository secrets**.
+When adding a secret in the web UI, check whether you are adding **Organization secrets** or **Repository secrets**.
 
 - Org-level secrets will be inherited by all repos in the org.
 - Repo-level secrets can be referenced by only the specific repo.
