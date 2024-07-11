@@ -48,17 +48,17 @@ They can be referenced from the Renovate config files inside the repo using `{{ 
 
 4. Provide a value for `Secret name`, put the encrypted secret in the `Secret Value` field, and press `SAVE`.
 
-    > [!NOTE]
-    >
-    > When migrating an existing secret from a repo, be sure to add the secret to the same Org or Repo for which the secret was generated.
-    >
-    > - A secret generated for a specific repo cannot be added to a different repo.
-    >   - A secret generated for a specific repo cannot be added to the Org settings. It can only be added into Repo settings for the matching repo.
-    >   - A secret generated without a specific repo can be added into Org or Repo settings in the matching org.
+   > [!NOTE]
+   >
+   > When migrating an existing secret from a repo, be sure to add the secret to the same Org or Repo for which the secret was generated.
+   >
+   > - A secret generated for a specific repo cannot be added to a different repo.
+   >   - A secret generated for a specific repo cannot be added to the Org settings. It can only be added into Repo settings for the matching repo.
+   >   - A secret generated without a specific repo can be added into Org or Repo settings in the matching org.
 
-    The settings UI will provide helpful information if you try to add the secret in the wrong place.
+   The settings UI will provide helpful information if you try to add the secret in the wrong place.
 
-    ![Migrating secrets error](../assets/images/app-settings/encrypted-secrets-error.png)
+   ![Migrating secrets error](../assets/images/app-settings/encrypted-secrets-error.png)
 
 5. Look for the confirmation box to say **“Successfully migrated secret”** to confirm that the secret was correctly decrypted and stored in the correct Org or Repo.
 
@@ -78,15 +78,15 @@ They can be referenced from the Renovate config files inside the repo using `{{ 
 
 2. In the **Credentials** page, press `ADD SECRET` to add the plain text secret.
 
-    ![Add repo secret](../assets/images/app-settings/add-repo-secret.png)
+   ![Add repo secret](../assets/images/app-settings/add-repo-secret.png)
 
 3. Provide a value for `Secret name`, put the secret in the `Secret Value` field, and press `SAVE`.
 
-    ![Add a Secret dialog box](../assets/images/app-settings/add-a-secret.png)
+   ![Add a Secret dialog box](../assets/images/app-settings/add-a-secret.png)
 
 4. Look for a confirmation dialog showing **“Successfully stored secret”**.
 
-    ![Successfully stored secret](../assets/images/app-settings/stored-secret-plaintext.png)
+   ![Successfully stored secret](../assets/images/app-settings/stored-secret-plaintext.png)
 
 ## Related links
 
