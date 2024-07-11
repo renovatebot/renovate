@@ -579,16 +579,16 @@ If you need to provide credentials to the Mend Renovate App, please do this:
 
 2. Reference secrets inside your Renovate config files with notation: `{{ secrets.YOUR_SECRET }}`.
 
-```json
-{
-  "hostRules": [
+    ```json
     {
-      "matchHost": "github.com",
-      "token": "{{ secrets.GITHUB_COM_TOKEN }}"
+      "hostRules": [
+        {
+          "matchHost": "github.com",
+          "token": "{{ secrets.GITHUB_COM_TOKEN }}"
+        }
+      ]
     }
-  ]
-}
-```
+    ```
 
 For more details, see [Using Secrets with Mend Cloud Apps](app-secrets.md).
 
