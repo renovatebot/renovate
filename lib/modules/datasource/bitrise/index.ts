@@ -1,8 +1,16 @@
+import is from '@sindresorhus/is';
+import { logger } from '../../../logger';
+import { cache } from '../../../util/cache/package/decorator';
+import { detectPlatform } from '../../../util/common';
+import { parseGitUrl } from '../../../util/git/url';
+import { GithubHttp } from '../../../util/http/github';
+import { joinUrlParts } from '../../../util/url';
+import { parseSingleYaml } from '../../../util/yaml';
+import { GithubDirectoryResponse } from '../../platform/github/schema';
+import semver from '../../versioning/semver';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import is from '@sindresorhus/is';
-import { fetchPackages } from './util';
-import { GithubHttp } from '../../../util/http/github';
+import { BitriseStepFile } from './schema';
 
 export class BitriseDatasource extends Datasource {
   static readonly id = 'bitrise';
@@ -13,7 +21,9 @@ export class BitriseDatasource extends Datasource {
 
   override readonly customRegistrySupport = true;
 
-  override readonly defaultRegistryUrls = ['https://github.com/bitrise-io/bitrise-steplib.git'];
+  override readonly defaultRegistryUrls = [
+    'https://github.com/bitrise-io/bitrise-steplib.git',
+  ];
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -22,27 +32,58 @@ export class BitriseDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `source_code_url` field of the release object in the results.';
 
+  @cache({
+    namespace: `datasource-${BitriseDatasource.id}`,
+    key: ({ packageName, registryUrl }: GetReleasesConfig) =>
+      `${registryUrl}/${packageName}`,
+  })
   async getReleases({
-                      packageName,
-                      registryUrl,
-                    }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    packageName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // istanbul ignore if
     if (!registryUrl) {
       return null;
     }
 
-    const client = new GithubHttp(this.id)
-    const packages = await fetchPackages(client, registryUrl);
-    if (!packages) {
+    const client = new GithubHttp(this.id);
+
+    const parsedUrl = parseGitUrl(registryUrl);
+    if (detectPlatform(registryUrl) !== 'github') {
+      logger.warn(
+        `${parsedUrl.source} is not a supported Git hoster for this datasource`,
+      );
       return null;
     }
-    const releases = packages[packageName];
 
-    const filtered = releases?.filter(is.truthy);
+    const result: ReleaseResult = {
+      releases: [],
+    };
 
-    if (!filtered?.length) {
-      return null;
+    const massagedPackageName = encodeURIComponent(packageName);
+    const packageUrl = `https://api.${parsedUrl.resource}/repos/${parsedUrl.full_name}/contents/steps/${massagedPackageName}`;
+
+    const response = await client.getJson(packageUrl, GithubDirectoryResponse);
+
+    for (const versionDir of response.body.filter((element) =>
+      semver.isValid(element.name),
+    )) {
+      const stepUrl = joinUrlParts(packageUrl, versionDir.name, 'step.yml');
+      const file = await client.getRawFile(stepUrl);
+      const { published_at, source_code_url } = parseSingleYaml(file.body, {
+        customSchema: BitriseStepFile,
+      });
+
+      const releaseTimestamp = is.string(published_at)
+        ? published_at
+        : published_at.toISOString();
+      result.releases.push({
+        version: versionDir.name,
+        releaseTimestamp,
+        sourceUrl: source_code_url,
+      });
     }
-    return { releases: filtered };
+
+    return result;
   }
 }
