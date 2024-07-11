@@ -575,7 +575,7 @@ If you need to provide credentials to the Mend Renovate App, please do this:
 
 1. Add each secret string in the Credentials section of Organisation or Repository settings [Developer Portal](https://developer.mend.io/) web UI.
 
-![Organisation and Repository secrets in Credentials settings page](../assets/images/app-settings/org-and-repo-secrets.png)
+    ![Organisation and Repository secrets in Credentials settings page](../assets/images/app-settings/org-and-repo-secrets.png)
 
 2. Reference secrets inside your Renovate config files with notation: `{{ secrets.YOUR_SECRET }}`.
 

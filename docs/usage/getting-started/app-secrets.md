@@ -9,20 +9,20 @@ To use secrets in the Mend Cloud apps:
 
 1. Add the secret in the **Credentials** section of the [Developer Portal](http://developer.mend.io) Org or Repo settings.
 
-![Credentials settings page](../assets/images/app-settings/app-credentials.png)
+    ![Credentials settings page](../assets/images/app-settings/app-credentials.png)
 
 2. Reference the secret from Renovate config files inside the repo.
 
-```json
-{
-  "hostRules": [
+    ```json
     {
-      "matchHost": "github.com",
-      "token": "{{ secrets.MY-ORG-SECRET-1 }}"
+      "hostRules": [
+        {
+          "matchHost": "github.com",
+          "token": "{{ secrets.MY-ORG-SECRET-1 }}"
+        }
+      ]
     }
-  ]
-}
-```
+    ```
 
 ## Org secrets versus Repo secrets
 
@@ -46,6 +46,6 @@ Only the Repo settings can be edited here. Org settings must be edited in the Or
 
 ![Repo settings button](../assets/images/app-settings/repo-settings-button.png)
 
-## Related links:
+## Related links
 
 - [Migrating encrypted secrets from Repo Config to App Settings](migrating-secrets.md)
