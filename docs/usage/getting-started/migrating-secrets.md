@@ -38,16 +38,10 @@ Secrets can be referenced in the repo using `{{ secrets.SECRET_NAME }}` notation
 
 > [!NOTE]
 >
-> When migrating encrypted secrets, we recommend copying over the existing secret in its _**encrypted form**_. The UI will handle the decryption and store the value securely.
+> When migrating encrypted secrets, we recommend copying over the existing secrets in their _**encrypted form**_. The UI will handle the decryption and store the value securely.
 > Avoid trying to change the secret during migration, as this will introduce an additional potential point of failure.
 
 ### To migrate encrypted secrets using the encrypted value:
-
-You can migrate the encrypted secret directly to the App settings in the Developer Portal. (Note: This is the recommended approach.)
-The App will decrypt it to its original value and store it re-encrypted with a new key.
-The unencrypted secret is never shown, never logged and never stored.
-
-#### Steps to migrate encrypted secrets
 
 1. Copy the encrypted secret from the Renovate config file.
 
