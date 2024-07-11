@@ -41,7 +41,7 @@ Secrets can be referenced in the repo using `{{ secrets.SECRET_NAME }}` notation
 > When migrating encrypted secrets, we recommend copying over the existing secrets in their _**encrypted form**_. The UI will handle the decryption and store the value securely.
 > Avoid trying to change the secret during migration, as this will introduce an additional potential point of failure.
 
-### To migrate encrypted secrets using the encrypted value:
+## To migrate encrypted secrets using the encrypted value:
 
 1. Copy the encrypted secret from the Renovate config file.
 
@@ -75,7 +75,7 @@ The settings UI will provide helpful information if you try to add the secret in
 > - Make sure you are using the secret in the correct Org and/or Repo.
 > - Check that you copied the encrypted secret correctly, and try again.
 
-### To migrate encrypted secrets using the plain text value:
+## To migrate encrypted secrets using the plain text value:
 
 1. Go to the settings for the correct Org or Repo in the web UI at http://developer.mend.io.
 
