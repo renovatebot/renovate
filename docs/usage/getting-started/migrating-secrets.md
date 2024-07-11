@@ -36,43 +36,22 @@ Secrets can be referenced in the repo using `{{ secrets.SECRET_NAME }}` notation
 }
 ```
 
-## Moving encrypted secrets
-
-Use of encrypted secrets in Renovate config files is deprecated with the Mend cloud apps. All Renovate encrypted secrets that exist in your repo today must be moved to the App settings via the Developer Portal.
-
-### If you know the original secret (unencrypted / plain text):
-
-#### To migrate plain text secrets:
-
-1. Go to the settings for the correct Org or Repo in the [Developer Portal](http://developer.mend.io) web UI.
-
-2. In the **Credentials** page, press `ADD SECRET` to add the plain text secret.
-
-![Add repo secret](../assets/images/app-settings/add-repo-secret.png)
-
-3. Provide a value for `Secret name`, put the secret in the `Secret Value` field, and press `SAVE`.
-
-![Add a Secret dialog box](../assets/images/app-settings/add-a-secret.png)
-
 > [!NOTE]
 >
-> The value of a secret can never be retrieved, be it can be updated. If needed, secrets can be deleted and recreated.
+> When migrating encrypted secrets, we recommend copying over the existing secret in its _**encrypted form**_. The UI will handle the decryption and store the value securely.
+> Avoid trying to change the secret during migration, as this will introduce an additional potential point of failure.
 
-4. Look for a confirmation dialog showing **“Successfully stored secret”**.
+### To migrate encrypted secrets using the encrypted value:
 
-![Successfully stored secret](../assets/images/app-settings/stored-secret-plaintext.png)
-
-### If you DO NOT KNOW the original unencrypted secret:
-
-You can migrate the encrypted secret directly to the App settings in the Developer Portal.
+You can migrate the encrypted secret directly to the App settings in the Developer Portal. (Note: This is the recommended approach.)
 The App will decrypt it to its original value and store it re-encrypted with a new key.
 The unencrypted secret is never shown, never logged and never stored.
 
-#### To migrate encrypted secrets:
+#### Steps to migrate encrypted secrets
 
 1. Copy the encrypted secret from the Renovate config file.
 
-2. Go to the settings for the correct Org or Repo in the [Developer Portal](http://developer.mend.io) web UI.
+2. Go to the settings for the correct Org or Repo in the web UI at http://developer.mend.io.
 
 3. In the **Credentials** page, press `ADD SECRET` to add the encrypted secret.
 
@@ -101,6 +80,22 @@ The settings UI will provide helpful information if you try to add the secret in
 >
 > - Make sure you are using the secret in the correct Org and/or Repo.
 > - Check that you copied the encrypted secret correctly, and try again.
+
+### To migrate encrypted secrets using the plain text value:
+
+1. Go to the settings for the correct Org or Repo in the web UI at http://developer.mend.io.
+
+2. In the **Credentials** page, press `ADD SECRET` to add the plain text secret.
+
+![Add repo secret](../assets/images/app-settings/add-repo-secret.png)
+
+3. Provide a value for `Secret name`, put the secret in the `Secret Value` field, and press `SAVE`.
+
+![Add a Secret dialog box](../assets/images/app-settings/add-a-secret.png)
+
+4. Look for a confirmation dialog showing **“Successfully stored secret”**.
+
+![Successfully stored secret](../assets/images/app-settings/stored-secret-plaintext.png)
 
 ## Related links:
 
