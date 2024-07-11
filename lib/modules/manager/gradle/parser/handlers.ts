@@ -371,7 +371,7 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
 
   const matchResult = parseGradle(
     // TODO #22198
-    ctx.fileContents[scriptFilePath]!,
+    ctx.fileContents[scriptFilePath],
     ctx.globalVars,
     scriptFilePath,
     ctx.fileContents,

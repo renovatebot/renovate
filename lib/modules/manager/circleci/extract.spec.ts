@@ -51,6 +51,7 @@ describe('modules/manager/circleci/extract', () => {
       const res = extractPackageFile(file3);
       expect(res?.deps).toMatchObject([
         { currentValue: '14.8.0', depName: 'cimg/node' },
+        { currentValue: '14.8.0', depName: 'cimg/node' },
       ]);
     });
 

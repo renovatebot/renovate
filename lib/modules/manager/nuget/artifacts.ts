@@ -163,7 +163,7 @@ export async function updateArtifacts({
           file: {
             type: 'addition',
             path: lockFileName,
-            contents: newLockFileContentMap[lockFileName]!,
+            contents: newLockFileContentMap[lockFileName],
           },
         });
       }
