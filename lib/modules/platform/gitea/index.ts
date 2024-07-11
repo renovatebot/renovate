@@ -1001,9 +1001,15 @@ const platform: Platform = {
   },
 
   massageMarkdown(prBody: string): string {
-    return smartTruncate(smartLinks(prBody), 1000000);
+    return smartTruncate(smartLinks(prBody), maxBodyLength());
   },
+
+  maxBodyLength,
 };
+
+export function maxBodyLength(): number {
+  return 1000000;
+}
 
 /* eslint-disable @typescript-eslint/unbound-method */
 export const {

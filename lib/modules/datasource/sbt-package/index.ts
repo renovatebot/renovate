@@ -8,7 +8,11 @@ import { compare } from '../../versioning/maven/compare';
 import { MavenDatasource } from '../maven';
 import { MAVEN_REPO } from '../maven/common';
 import { downloadHttpProtocol } from '../maven/util';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  GetReleasesConfig,
+  RegistryStrategy,
+  ReleaseResult,
+} from '../types';
 import {
   getLatestVersion,
   normalizeRootRelativeUrls,
@@ -22,7 +26,7 @@ export class SbtPackageDatasource extends MavenDatasource {
 
   override readonly defaultVersioning = ivyVersioning.id;
 
-  override readonly registryStrategy = 'hunt';
+  override readonly registryStrategy: RegistryStrategy = 'hunt';
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =

@@ -48,15 +48,34 @@ runs:
         }}' >> "$GITHUB_ENV"
 
     - name: Setup pnpm
-      uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
+      uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
       with:
         standalone: true
 
     - name: Setup Node
-      uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+      uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
       with:
         node-version: ${{ inputs.node-version }}
-        cache: ${{ env.CACHE_HIT != 'true' && 'pnpm' || '' }}
+
+    - name: Calculate `PNPM_STORE`
+      shell: bash
+      run: |
+        echo "PNPM_STORE=$(pnpm store path)" >> "$GITHUB_ENV"
+
+    - name: Cache and restore `pnpm store`
+      if: env.CACHE_HIT != 'true'
+      uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+      with:
+        path: ${{ env.PNPM_STORE }}
+        key: |
+          pnpm_store-${{
+          inputs.os
+          }}-${{
+            inputs.node-version
+          }}-${{
+            hashFiles('pnpm-lock.yaml', 'package.json')
+          }}
+        enableCrossOsArchive: true
 
     - name: Install dependencies
       uses: nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e # v3.0.0
