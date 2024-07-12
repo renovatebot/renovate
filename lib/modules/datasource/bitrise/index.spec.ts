@@ -15,6 +15,47 @@ describe('modules/datasource/bitrise/index', () => {
       ).resolves.toBeNull();
     });
 
+    it('support GHE api url', async () => {
+      httpMock
+        .scope(
+          'https://github.mycompany.com/api/v3/repos/foo/bar/contents/steps',
+        )
+        .get('/script')
+        .reply(200, [
+          {
+            type: 'dir',
+            name: '1.0.0',
+            path: 'steps/script/1.0.0',
+          },
+        ])
+        .get('/script/1.0.0/step.yml')
+        .reply(
+          200,
+          codeBlock`
+          published_at: 2024-03-19T13:54:48.081077+01:00
+          source_code_url: https://github.com/bitrise-steplib/bitrise-step-activate-build-cache-for-bazel
+          website: https://github.com/bitrise-steplib/bitrise-step-activate-build-cache-for-bazel
+        `,
+        );
+      await expect(
+        getPkgReleases({
+          datasource: BitriseDatasource.id,
+          packageName: 'script',
+          registryUrls: ['https://github.mycompany.com/foo/bar'],
+        }),
+      ).resolves.toEqual({
+        registryUrl: 'https://github.mycompany.com/foo/bar',
+        releases: [
+          {
+            releaseTimestamp: '2024-03-19T12:54:48.081Z',
+            sourceUrl:
+              'https://github.com/bitrise-steplib/bitrise-step-activate-build-cache-for-bazel',
+            version: '1.0.0',
+          },
+        ],
+      });
+    });
+
     it('returns version and filter out asset folder', async () => {
       httpMock
         .scope(

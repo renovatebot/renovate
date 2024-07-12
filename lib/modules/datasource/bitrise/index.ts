@@ -15,8 +15,12 @@ import { BitriseStepFile } from './schema';
 export class BitriseDatasource extends Datasource {
   static readonly id = 'bitrise';
 
+  override readonly http: GithubHttp;
+
   constructor() {
     super(BitriseDatasource.id);
+
+    this.http = new GithubHttp(this.id);
   }
 
   override readonly customRegistrySupport = true;
@@ -46,8 +50,6 @@ export class BitriseDatasource extends Datasource {
       return null;
     }
 
-    const client = new GithubHttp(this.id);
-
     const parsedUrl = parseGitUrl(registryUrl);
     if (detectPlatform(registryUrl) !== 'github') {
       logger.warn(
@@ -61,15 +63,28 @@ export class BitriseDatasource extends Datasource {
     };
 
     const massagedPackageName = encodeURIComponent(packageName);
-    const packageUrl = `https://api.${parsedUrl.resource}/repos/${parsedUrl.full_name}/contents/steps/${massagedPackageName}`;
+    const baseApiURL =
+      parsedUrl.resource === 'github.com'
+        ? 'https://api.github.com'
+        : `https://${parsedUrl.resource}/api/v3`;
+    const packageUrl = joinUrlParts(
+      baseApiURL,
+      'repos',
+      parsedUrl.full_name,
+      'contents/steps',
+      massagedPackageName,
+    );
 
-    const response = await client.getJson(packageUrl, GithubDirectoryResponse);
+    const response = await this.http.getJson(
+      packageUrl,
+      GithubDirectoryResponse,
+    );
 
     for (const versionDir of response.body.filter((element) =>
       semver.isValid(element.name),
     )) {
       const stepUrl = joinUrlParts(packageUrl, versionDir.name, 'step.yml');
-      const file = await client.getRawFile(stepUrl);
+      const file = await this.http.getRawFile(stepUrl);
       const { published_at, source_code_url } = parseSingleYaml(file.body, {
         customSchema: BitriseStepFile,
       });
