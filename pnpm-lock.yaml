@@ -178,8 +178,8 @@ importers:
         specifier: 1.5.0
         version: 1.5.0
       glob:
-        specifier: 10.4.3
-        version: 10.4.3
+        specifier: 10.4.5
+        version: 10.4.5
       global-agent:
         specifier: 3.0.0
         version: 3.0.0
@@ -3481,9 +3481,8 @@ packages:
     resolution: {integrity: sha512-XxwI8EOhVQgWp6iDL+3b0r86f4d6AX6zSU55HfB4ydCEuXLXc5FcYeOu+nnGftS4TEju/11rt4KJPTMgbfmv4A==}
     engines: {node: '>=10.13.0'}
 
-  glob@10.4.3:
-    resolution: {integrity: sha512-Q38SGlYRpVtDBPSWEylRyctn7uDeTp4NQERTLiCT1FqA9JXPYWqAVmQU6qh4r/zMM5ehxTcbaO8EjhWnvEhmyg==}
-    engines: {node: '>=18'}
+  glob@10.4.5:
+    resolution: {integrity: sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==}
     hasBin: true
 
   glob@7.2.3:
@@ -9103,7 +9102,7 @@ snapshots:
     dependencies:
       '@npmcli/fs': 3.1.1
       fs-minipass: 3.0.3
-      glob: 10.4.3
+      glob: 10.4.5
       lru-cache: 10.3.1
       minipass: 7.1.2
       minipass-collect: 2.0.1
@@ -10190,7 +10189,7 @@ snapshots:
     dependencies:
       is-glob: 4.0.3
 
-  glob@10.4.3:
+  glob@10.4.5:
     dependencies:
       foreground-child: 3.2.1
       jackspeak: 3.4.1
@@ -11540,7 +11539,7 @@ snapshots:
     dependencies:
       env-paths: 2.2.1
       exponential-backoff: 3.1.1
-      glob: 10.4.3
+      glob: 10.4.5
       graceful-fs: 4.2.11
       make-fetch-happen: 13.0.1
       nopt: 7.2.1
@@ -12177,7 +12176,7 @@ snapshots:
 
   rimraf@5.0.7:
     dependencies:
-      glob: 10.4.3
+      glob: 10.4.5
 
   roarr@2.15.4:
     dependencies:
