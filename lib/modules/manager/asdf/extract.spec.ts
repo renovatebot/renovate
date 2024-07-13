@@ -287,7 +287,7 @@ dummy 1.2.3
           },
           {
             currentValue: '1.3.1',
-            datasource: 'github-releases',
+            datasource: 'github-tags',
             packageName: 'gleam-lang/gleam',
             depName: 'gleam',
             extractVersion: '^v(?<version>\\S+)',
