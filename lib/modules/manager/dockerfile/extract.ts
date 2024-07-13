@@ -244,12 +244,7 @@ export function extractPackageFile(
   _packageFile: string,
   config: ExtractConfig,
 ): PackageFileContent | null {
-  let sanitizedContent = content;
-  // Remove the BOM marker if found
-  if (sanitizedContent.charCodeAt(0) === 0xfeff) {
-    sanitizedContent = content.slice(1);
-  }
-
+  const sanitizedContent = content.replace(regEx(/^\uFEFF/), ''); // remove bom marker
   const deps: PackageDependency[] = [];
   const stageNames: string[] = [];
   const args: Record<string, string> = {};
