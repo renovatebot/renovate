@@ -805,5 +805,19 @@ describe('util/http/github', () => {
         body: 'foo',
       });
     });
+
+    it('support relative path', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/foo/bar/contents/lore/ipsum.txt')
+        .reply(200, 'foo');
+      await expect(
+        githubApi.getRawFile(
+          `${githubApiHost}/foo/bar/contents/foo/../lore/ipsum.txt`,
+        ),
+      ).resolves.toMatchObject({
+        body: 'foo',
+      });
+    });
   });
 });
