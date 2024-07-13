@@ -290,7 +290,7 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'gleam-lang/gleam',
             depName: 'gleam',
-            extractVersion: '^v(?<version>\\S+)',
+            extractVersion: '^v(?<version>.+)',
           },
           {
             currentValue: '0.104.3',
