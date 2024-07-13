@@ -332,7 +332,7 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('extracts tags from Dockerfile which begins with a BOM marker', () => {
       const res = extractPackageFile(
-        '\uFEFF' + 'FROM node:6.12.3 as frontend\n\n',
+        '\uFEFFFROM node:6.12.3 as frontend\n\n',
         '',
         {},
       )?.deps;
