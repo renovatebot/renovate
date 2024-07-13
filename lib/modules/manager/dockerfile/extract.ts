@@ -258,6 +258,7 @@ export function extractPackageFile(
   let escapeChar = '\\\\';
   let lookForEscapeChar = true;
   let lookForSyntaxDirective = true;
+
   const lineFeed = sanitizedContent.indexOf('\r\n') >= 0 ? '\r\n' : '\n';
   const lines = sanitizedContent.split(newlineRegex);
   for (let lineNumber = 0; lineNumber < lines.length; ) {
