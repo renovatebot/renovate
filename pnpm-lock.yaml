@@ -588,8 +588,8 @@ importers:
         specifier: 29.7.0
         version: 29.7.0
       rimraf:
-        specifier: 5.0.8
-        version: 5.0.8
+        specifier: 5.0.9
+        version: 5.0.9
       semantic-release:
         specifier: 24.0.0
         version: 24.0.0(typescript@5.4.5)
@@ -5251,9 +5251,9 @@ packages:
     deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
-  rimraf@5.0.8:
-    resolution: {integrity: sha512-XSh0V2/yNhDEi8HwdIefD8MLgs4LQXPag/nEJWs3YUc3Upn+UHa1GyIkEg9xSSNt7HnkO5FjTvmcRzgf+8UZuw==}
-    engines: {node: '>=18'}
+  rimraf@5.0.9:
+    resolution: {integrity: sha512-3i7b8OcswU6CpU8Ej89quJD4O98id7TtVM5U4Mybh84zQXdrFmDLouWBEEaD/QfO3gDDfH+AGFCGsR7kngzQnA==}
+    engines: {node: 14 >=14.20 || 16 >=16.20 || >=18}
     hasBin: true
 
   roarr@2.15.4:
@@ -12173,7 +12173,7 @@ snapshots:
     dependencies:
       glob: 7.2.3
 
-  rimraf@5.0.8:
+  rimraf@5.0.9:
     dependencies:
       glob: 10.4.5
 
