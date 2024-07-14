@@ -523,7 +523,7 @@ const platform: Platform = {
     prTitle,
     prBody: rawBody,
     labels: labelNames,
-    platformOptions,
+    platformPrOptions,
     draftPR,
   }: CreatePRConfig): Promise<Pr> {
     let title = prTitle;
@@ -547,12 +547,12 @@ const platform: Platform = {
         labels: labels.filter(is.number),
       });
 
-      if (platformOptions?.usePlatformAutomerge) {
+      if (platformPrOptions?.usePlatformAutomerge) {
         if (semver.gte(defaults.version, '1.17.0')) {
           try {
             await helper.mergePR(config.repository, gpr.number, {
               Do:
-                getMergeMethod(platformOptions?.automergeStrategy) ??
+                getMergeMethod(platformPrOptions?.automergeStrategy) ??
                 config.mergeMethod,
               merge_when_checks_succeed: true,
             });
