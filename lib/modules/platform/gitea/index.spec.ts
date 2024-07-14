@@ -2834,6 +2834,10 @@ describe('modules/platform/gitea/index', () => {
     });
   });
 
+  it('maxBodyLength', () => {
+    expect(gitea.maxBodyLength()).toBe(1000000);
+  });
+
   describe('getJsonFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
