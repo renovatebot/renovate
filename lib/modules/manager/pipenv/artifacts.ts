@@ -140,7 +140,9 @@ export async function updateArtifacts({
     }
     const cmd = 'pipenv lock';
     const pipfileDir = getParentDir(ensureLocalPath(pipfileName));
-    const tagConstraint = await pipenvDetect.getPythonConstraint(pipfileDir);
+    const tagConstraint =
+      config?.constraints?.python ??
+      (await pipenvDetect.getPythonConstraint(pipfileDir));
     const pipenvConstraint =
       config?.constraints?.pipenv ??
       (await pipenvDetect.getPipenvConstraint(pipfileDir));
