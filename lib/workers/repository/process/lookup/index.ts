@@ -19,6 +19,7 @@ import {
 } from '../../../../modules/datasource/common';
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
+import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { assignKeys } from '../../../../util/assign-keys';
 import { applyPackageRules } from '../../../../util/package-rules';
@@ -363,6 +364,10 @@ export async function lookupUpdates(
       );
       if (config.isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
+        logger.debug(
+          { filteredReleases },
+          'Vulnerability alert found: limiting results to a single release',
+        );
       }
       const buckets: Record<string, [Release]> = {};
       for (const release of filteredReleases) {
@@ -452,6 +457,7 @@ export async function lookupUpdates(
           versioning.isSingleVersion(update.newValue);
         // istanbul ignore if
         if (
+          config.versioning === dockerVersioningId &&
           update.updateType !== 'rollback' &&
           update.newValue &&
           versioning.isVersion(update.newValue) &&
@@ -460,7 +466,15 @@ export async function lookupUpdates(
           versioning.isGreaterThan(compareValue, update.newValue)
         ) {
           logger.warn(
-            { update, allVersions, filteredReleases },
+            {
+              packageName: config.packageName,
+              currentValue: config.currentValue,
+              compareValue,
+              currentVersion: config.currentVersion,
+              update,
+              allVersionsLength: allVersions.length,
+              filteredReleaseVersions: filteredReleases.map((r) => r.version),
+            },
             'Unexpected downgrade detected: skipping',
           );
         } else {

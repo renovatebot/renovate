@@ -404,7 +404,7 @@ jobs:
 
       - name: Save coverage artifacts
         if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
@@ -424,7 +424,7 @@ jobs:
           show-progress: false
 
       - name: Download coverage reports
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           pattern: coverage-*
           path: coverage
@@ -460,7 +460,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           pattern: coverage-*
           path: coverage
@@ -560,7 +560,7 @@ jobs:
         run: pnpm test-e2e:pack
 
       - name: Upload
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
         with:
           name: renovate-package
           path: renovate-0.0.0-semantic-release.tgz
@@ -591,7 +591,7 @@ jobs:
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
         with:
           name: docs
           path: tmp/docs/
@@ -615,12 +615,12 @@ jobs:
           standalone: true
 
       - name: Setup Node.js
-        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
           node-version: ${{ env.NODE_VERSION_TEST }}
 
       - name: Download package
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           name: renovate-package
 
@@ -661,7 +661,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@0b4162e48b68b3521953c3c663376ca22a1f769b # v3.3.2
+        uses: containerbase/internal-tools@0e63fc864db69586d89e4145596a0332e262485f # v3.3.7
         with:
           command: docker-config
 

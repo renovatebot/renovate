@@ -3,26 +3,44 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:2.23.1@sha256:ba75ae8e5609d3d0803a4d555f44b5dbe55b4340a8e238ff4af18d742f529c7b AS slim-base
+FROM ghcr.io/renovatebot/base-image:2.26.1@sha256:ce0d9e480e83837c64c4d68675555d755e128407b3813ac4b4f4abab3cff4be5 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:2.23.1-full@sha256:772da65d627fd3a54bb37ec2669bf98a4801cb94d7d402cb8d272cdb0ecc85c8 AS full-base
+FROM ghcr.io/renovatebot/base-image:2.26.1-full@sha256:08f4f75252b7fe55c889c11ac68bab21428f1c45feb14062e52a4fc9d8d1dbcc AS full-base
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM slim-base as build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:2.26.1@sha256:ce0d9e480e83837c64c4d68675555d755e128407b3813ac4b4f4abab3cff4be5 AS build
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+RUN set -ex; \
+  echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM"; \
+  uname -a; \
+  true
 
 WORKDIR /usr/local/renovate
 
-ENV CI=1 npm_config_modules_cache_max_age=0
+ENV CI=1 npm_config_modules_cache_max_age=0 \
+  npm_config_loglevel=info \
+  ARCH=arm64
 
 COPY pnpm-lock.yaml ./
 
+# trim `linux/` from TARGETPLATFORM
+# replace `amd64` with `x64` for `node`
+# set `npm_config_arch` for `prebuild-install`
+# set `npm_config_platform_arch` for `install-artifact-from-github`
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
-RUN corepack pnpm fetch --prod
+RUN set -ex; \
+  arch=${TARGETPLATFORM:6}; \
+  export npm_config_arch=${arch/amd64/x64} npm_config_platform_arch=${arch/amd64/x64}; \
+  corepack pnpm fetch --prod; \
+  true
 
 COPY . ./
 
@@ -33,10 +51,11 @@ RUN set -ex; \
 
 # test
 COPY tools/docker/bin/ /usr/local/bin/
+# RE2 doesn't work on cross compile
+ENV RENOVATE_X_IGNORE_RE2=true
 RUN set -ex; \
   renovate --version; \
   renovate-config-validator; \
-  node -e "new require('re2')('.*').exec('test')"; \
   true
 
 # --------------------------------------
@@ -68,8 +87,7 @@ RUN set -ex; \
 
 RUN set -ex; \
   renovate --version; \
-  renovate-config-validator; \
-  node -e "new require('re2')('.*').exec('test')"; \
+  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
   true
 
 LABEL \

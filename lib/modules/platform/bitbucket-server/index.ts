@@ -1068,7 +1068,7 @@ export async function mergePr({
 export function massageMarkdown(input: string): string {
   logger.debug(`massageMarkdown(${input.split(newlineRegex)[0]})`);
   // Remove any HTML we use
-  return smartTruncate(input, 30000)
+  return smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"',
@@ -1081,4 +1081,8 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
     .replace(regEx('<!--.*?-->', 'g'), '');
+}
+
+export function maxBodyLength(): number {
+  return 30000;
 }

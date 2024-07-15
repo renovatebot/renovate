@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import type { XmlDocument } from 'xmldoc';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { filterMap } from '../../../util/filter-map';
@@ -110,7 +111,11 @@ export class MavenDatasource extends Datasource {
       (acc, version) => ({ ...acc, [version]: null }),
       {},
     );
-    if (isCacheable) {
+    const cachePrivatePackages = GlobalConfig.get(
+      'cachePrivatePackages',
+      false,
+    );
+    if (cachePrivatePackages || isCacheable) {
       await packageCache.set(cacheNamespace, cacheKey, releaseMap, 30);
     }
     return releaseMap;

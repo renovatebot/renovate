@@ -1510,7 +1510,7 @@ Example:
 
 Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
-This option works only when `automerge=true`, `automergeType=pr` or `automergeType=branch`, and `platformAutomerge=true`.
+This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
 ## goGetDirs
@@ -3378,6 +3378,7 @@ Table with options:
 | `gomodTidy1.17`              | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                    |
 | `gomodTidyE`                 | Run `go mod tidy -e` after Go module updates.                                                                                                              |
 | `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
+| `gomodSkipVendor`            | Never run `go mod vendor` after Go module updates.                                                                                                         |
 | `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
 | `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                       |
 | `pnpmDedupe`                 | Run `pnpm dedupe --config.ignore-scripts=true` after `pnpm-lock.yaml` updates.                                                                             |
@@ -3721,11 +3722,22 @@ This feature works with the following managers:
 - [`terraform`](modules/manager/terraform/index.md)
 - [`woodpecker`](modules/manager/woodpecker/index.md)
 
-```json
+```json title="Setting generic aliases"
 {
   "registryAliases": {
     "jfrogecosystem": "some.jfrog.mirror",
     "jfrog.com": "some.jfrog.mirror"
+  }
+}
+```
+
+```json title="Setting aliases for a specific Renovate manager only"
+{
+  "gitlabci": {
+    "registryAliases": {
+      "$HARBOR_HOST/$HARBOR_PROJECT": "registry.example.com/proxy",
+      "$HARBOR_HOST/tools": "registry.example.com/tools"
+    }
   }
 }
 ```
