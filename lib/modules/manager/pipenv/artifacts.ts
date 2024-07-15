@@ -1,4 +1,4 @@
-import * as detectTools from '@renovatebot/detect-tools';
+import { pipenv as pipenvDetect } from '@renovatebot/detect-tools';
 import is from '@sindresorhus/is';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -140,11 +140,10 @@ export async function updateArtifacts({
     }
     const cmd = 'pipenv lock';
     const pipfileDir = getParentDir(ensureLocalPath(pipfileName));
-    const tagConstraint =
-      await detectTools.pipenv.getPythonConstraint(pipfileDir);
+    const tagConstraint = await pipenvDetect.getPythonConstraint(pipfileDir);
     const pipenvConstraint =
       config?.constraints?.pipenv ??
-      (await detectTools.pipenv.getPipenvConstraint(pipfileDir));
+      (await pipenvDetect.getPipenvConstraint(pipfileDir));
     const extraEnv: Opt<ExtraEnv> = {
       PIPENV_CACHE_DIR: await ensureCacheDir('pipenv'),
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
