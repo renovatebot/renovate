@@ -15,10 +15,7 @@ import type {
   PackageFile,
 } from '../../modules/manager/types';
 import type { Platform } from '../../modules/platform';
-import {
-  GitHubMaxPrBodyLen,
-  massageMarkdown,
-} from '../../modules/platform/github';
+import { massageMarkdown } from '../../modules/platform/github';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
@@ -47,6 +44,7 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   massageMdSpy.mockImplementation(massageMarkdown);
+  platform.maxBodyLength.mockReturnValue(60000); // Github Limit
   config = getConfig();
   config.platform = 'github';
   config.errors = [];
@@ -1063,7 +1061,7 @@ None detected
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(
             platform.ensureIssue.mock.calls[0][0].body.length <
-              GitHubMaxPrBodyLen,
+              platform.maxBodyLength(),
           ).toBeTrue();
 
           // same with dry run
