@@ -49,6 +49,7 @@ import type {
   BbsRestUserRef,
 } from './types';
 import * as utils from './utils';
+import { getExtraCloneOpts } from './utils';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -84,15 +85,20 @@ function updatePrVersion(pr: number, version: number): number {
 
 export async function initPlatform({
   endpoint,
+  token,
   username,
   password,
 }: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
   }
-  if (!(username && password)) {
+  if (!(username && password) && !token) {
     throw new Error(
-      'Init: You must configure a Bitbucket Server username/password',
+      'Init: You must either configure a Bitbucket Server username/password or a HTTP access token',
+    );
+  } else if (password && token) {
+    throw new Error(
+      'Init: You must either configure a Bitbucket Server password or a HTTP access token',
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
@@ -231,6 +237,7 @@ export async function initRepo({
     await git.initRepo({
       ...config,
       url,
+      extraCloneOpts: getExtraCloneOpts(opts),
       cloneSubmodules,
       fullClone: semver.lte(defaults.version, '8.0.0'),
     });
@@ -328,7 +335,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
     const searchParams: Record<string, string> = {
       state: 'ALL',
     };
-    if (!config.ignorePrAuthor) {
+    if (!config.ignorePrAuthor && config.username !== undefined) {
       searchParams['role.1'] = 'AUTHOR';
       searchParams['username.1'] = config.username;
     }
@@ -1061,7 +1068,7 @@ export async function mergePr({
 export function massageMarkdown(input: string): string {
   logger.debug(`massageMarkdown(${input.split(newlineRegex)[0]})`);
   // Remove any HTML we use
-  return smartTruncate(input, 30000)
+  return smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"',
@@ -1074,4 +1081,8 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
     .replace(regEx('<!--.*?-->', 'g'), '');
+}
+
+export function maxBodyLength(): number {
+  return 30000;
 }

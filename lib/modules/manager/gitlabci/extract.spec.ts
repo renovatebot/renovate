@@ -38,6 +38,16 @@ describe('modules/manager/gitlabci/extract', () => {
       ).toBeNull();
     });
 
+    it('extracts from multidoc yaml', async () => {
+      const res = await extractAllPackageFiles(config, [
+        'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.multi-doc.yaml',
+      ]);
+      expect(res).toHaveLength(3);
+
+      const deps = res?.map((entry) => entry.deps).flat();
+      expect(deps).toHaveLength(8);
+    });
+
     it('extracts multiple included image lines', async () => {
       const res = await extractAllPackageFiles(config, [
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.3.yaml',
@@ -45,12 +55,7 @@ describe('modules/manager/gitlabci/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(3);
 
-      const deps: PackageDependency[] = [];
-      res?.forEach((e) => {
-        e.deps.forEach((d) => {
-          deps.push(d);
-        });
-      });
+      const deps = res?.map((entry) => entry.deps).flat();
       expect(deps).toHaveLength(5);
     });
 
@@ -347,6 +352,69 @@ describe('modules/manager/gitlabci/extract', () => {
       ];
       expect(extractFromJob(undefined)).toBeEmptyArray();
       expect(extractFromJob({ image: 'image:test' })).toEqual(expectedRes);
+    });
+
+    it('extracts component references via registry aliases', () => {
+      const registryAliases = {
+        $CI_SERVER_HOST: 'gitlab.example.com',
+      };
+      const content = codeBlock`
+        include:
+          - component: $CI_SERVER_HOST/an-org/a-project/a-component@1.0
+            inputs:
+              stage: build
+          - component: $CI_SERVER_HOST/an-org/a-subgroup/a-project/a-component@e3262fdd0914fa823210cdb79a8c421e2cef79d8
+          - component: $CI_SERVER_HOST/an-org/a-subgroup/another-project/a-component@main
+          - component: $CI_SERVER_HOST/another-org/a-project/a-component@~latest
+            inputs:
+              stage: test
+          - component: $CI_SERVER_HOST/malformed-component-reference
+          - component:
+              malformed: true
+          - component: $CI_SERVER_HOST/an-org/a-component@1.0
+          - component: other-gitlab.example.com/an-org/a-project/a-component@1.0
+      `;
+      const res = extractPackageFile(content, '', {
+        registryAliases,
+      });
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '1.0',
+          datasource: 'gitlab-tags',
+          depName: 'an-org/a-project',
+          depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
+        },
+        {
+          currentValue: 'e3262fdd0914fa823210cdb79a8c421e2cef79d8',
+          datasource: 'gitlab-tags',
+          depName: 'an-org/a-subgroup/a-project',
+          depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
+        },
+        {
+          currentValue: 'main',
+          datasource: 'gitlab-tags',
+          depName: 'an-org/a-subgroup/another-project',
+          depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
+        },
+        {
+          currentValue: '~latest',
+          datasource: 'gitlab-tags',
+          depName: 'another-org/a-project',
+          depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
+          skipReason: 'unsupported-version',
+        },
+        {
+          currentValue: '1.0',
+          datasource: 'gitlab-tags',
+          depName: 'an-org/a-project',
+          depType: 'repository',
+          registryUrls: ['https://other-gitlab.example.com'],
+        },
+      ]);
     });
 
     it('extracts component references', () => {

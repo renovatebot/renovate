@@ -18,9 +18,11 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          show-progress: false
 
       - name: Build and run dev container task
-        uses: devcontainers/ci@7957e0cf6d027a8ab027745f399fcdbd3aa74f0f # v0.3.1900000348
+        uses: devcontainers/ci@a56d055efecd725e8cfe370543b6071b79989cc8 # v0.3.1900000349
         with:
           runCmd: pnpm build

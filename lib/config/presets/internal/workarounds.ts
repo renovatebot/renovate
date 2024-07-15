@@ -21,8 +21,26 @@ export const presets: Record<string, Preset> = {
       'workarounds:disableEclipseLifecycleMapping',
       'workarounds:disableMavenParentRoot',
       'workarounds:containerbase',
+      'workarounds:bitnamiDockerImageVersioning',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
+  },
+  bitnamiDockerImageVersioning: {
+    description: 'Use custom regex versioning for bitnami images',
+    packageRules: [
+      {
+        matchCurrentValue:
+          '/^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?$/',
+        matchDatasources: ['docker'],
+        matchPackagePrefixes: [
+          'bitnami/',
+          'docker.io/bitnami/',
+          'gcr.io/bitnami-containers/',
+        ],
+        versioning:
+          'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?(:?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?)?$',
+      },
+    ],
   },
   containerbase: {
     description: 'Add some containerbase overrides.',
@@ -62,6 +80,12 @@ export const presets: Record<string, Preset> = {
   doNotUpgradeFromAlpineStableToEdge: {
     description: 'Do not upgrade from Alpine stable to edge.',
     packageRules: [
+      {
+        allowedVersions: '<20000000',
+        matchCurrentVersion: '!/^\\d{8}$/',
+        matchDatasources: ['docker'],
+        matchDepNames: ['alpine'],
+      },
       {
         allowedVersions: '<20000000',
         matchCurrentVersion: '!/^\\d{8}$/',
@@ -125,7 +149,24 @@ export const presets: Record<string, Preset> = {
           '^cimg/openjdk',
         ],
         versioning:
-          'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>\\d+))?(-(?<compatibility>.*))?$',
+          'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
+      },
+      {
+        allowedVersions: '/^(?:8|11|17|21)(?:\\.|-|$)/',
+        description:
+          'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
+        matchDatasources: ['docker', 'java-version'],
+        matchDepNames: [
+          'eclipse-temurin',
+          'amazoncorretto',
+          'adoptopenjdk',
+          'openjdk',
+          'java',
+          'java-jre',
+          'sapmachine',
+        ],
+        versioning:
+          'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
       },
     ],
   },

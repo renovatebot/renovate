@@ -3,7 +3,7 @@ import { logger } from '../../../../../logger';
 import { joinUrlParts } from '../../../../../util/url';
 import { HelmDatasource } from '../../../../datasource/helm';
 import { getDep } from '../../../dockerfile/extract';
-import { isOCIRegistry } from '../../../helmv3/utils';
+import { isOCIRegistry, removeOCIPrefix } from '../../../helmv3/oci';
 import type { ExtractConfig, PackageDependency } from '../../../types';
 import { DependencyExtractor } from '../../base';
 import type { TerraformDefinitionFile } from '../../hcl/types';
@@ -50,7 +50,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
         dep.skipReason = 'invalid-name';
       } else if (isOCIRegistry(helmRelease.chart)) {
         // For oci charts, we remove the oci:// and use the docker datasource
-        dep.depName = helmRelease.chart.replace('oci://', '');
+        dep.depName = removeOCIPrefix(helmRelease.chart);
         this.processOCI(dep.depName, config, dep);
       } else if (checkIfStringIsPath(helmRelease.chart)) {
         dep.skipReason = 'local-chart';
@@ -59,7 +59,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
           // For oci charts, we remove the oci:// and use the docker datasource
           this.processOCI(
             joinUrlParts(
-              helmRelease.repository.replace('oci://', ''),
+              removeOCIPrefix(helmRelease.repository),
               helmRelease.chart,
             ),
             config,

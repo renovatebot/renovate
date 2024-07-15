@@ -1,3 +1,4 @@
+import { HTTPError } from 'got';
 import * as httpMock from '../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { GitlabReleasesDatasource } from '../../modules/datasource/gitlab-releases';
@@ -141,6 +142,46 @@ describe('util/http/gitlab', () => {
       httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(200, '{{');
       await expect(gitlabApi.getJson('some-url')).rejects.toThrow(
         EXTERNAL_HOST_ERROR,
+      );
+    });
+  });
+
+  describe('handles 409 errors', () => {
+    let NODE_ENV: string | undefined;
+
+    beforeAll(() => {
+      // Unset NODE_ENV so that we can test the retry logic
+      NODE_ENV = process.env.NODE_ENV;
+      delete process.env.NODE_ENV;
+    });
+
+    afterAll(() => {
+      process.env.NODE_ENV = NODE_ENV;
+    });
+
+    it('retries the request on resource lock', async () => {
+      const body = { message: '409 Conflict: Resource lock' };
+      httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(409, body);
+      httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(200, {});
+      const res = await gitlabApi.postJson('some-url', {});
+      expect(res.statusCode).toBe(200);
+    });
+
+    it('does not retry more than twice on resource lock', async () => {
+      const body = { message: '409 Conflict: Resource lock' };
+      httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(409, body);
+      httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(409, body);
+      httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(409, body);
+      await expect(gitlabApi.postJson('some-url', {})).rejects.toThrow(
+        HTTPError,
+      );
+    });
+
+    it('does not retry for other reasons', async () => {
+      const body = { message: 'Other reason' };
+      httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(409, body);
+      await expect(gitlabApi.postJson('some-url', {})).rejects.toThrow(
+        HTTPError,
       );
     });
   });

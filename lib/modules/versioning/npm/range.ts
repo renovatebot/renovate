@@ -132,12 +132,7 @@ export function getNewValue({
   if (rangeStrategy === 'bump') {
     if (parsedRange.length === 1) {
       if (!element.operator) {
-        return getNewValue({
-          currentValue,
-          rangeStrategy: 'replace',
-          currentVersion,
-          newVersion,
-        });
+        return stripV(newVersion);
       }
       if (element.operator === '^') {
         return `^${stripV(newVersion)}`;

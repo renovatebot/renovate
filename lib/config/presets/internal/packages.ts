@@ -27,7 +27,13 @@ export const presets: Record<string, Preset> = {
       'babel-eslint',
       '@babel/eslint-parser',
     ],
-    matchPackagePrefixes: ['@typescript-eslint/', 'eslint'],
+    matchPackagePrefixes: [
+      '@eslint/',
+      '@stylistic/eslint-plugin',
+      '@types/eslint__',
+      '@typescript-eslint/',
+      'eslint',
+    ],
   },
   gatsby: {
     description: 'All packages published by Gatsby.',
@@ -133,6 +139,7 @@ export const presets: Record<string, Preset> = {
   },
   stylelint: {
     description: 'All Stylelint packages.',
+    matchPackageNames: ['@stylistic/stylelint-plugin'],
     matchPackagePrefixes: ['stylelint'],
   },
   test: {

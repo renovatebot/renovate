@@ -1,4 +1,4 @@
-import { XmlDocument } from 'xmldoc';
+import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import * as Unity3dVersioning from '../../versioning/unity3d';
@@ -7,7 +7,7 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
 export class Unity3dDatasource extends Datasource {
   static readonly homepage = 'https://unity.com/';
-  static readonly streams: { [key: string]: string } = {
+  static readonly streams: Record<string, string> = {
     lts: `${Unity3dDatasource.homepage}releases/editor/lts-releases.xml`,
     stable: `${Unity3dDatasource.homepage}releases/editor/releases.xml`,
     beta: `${Unity3dDatasource.homepage}releases/editor/beta/latest.xml`,
@@ -24,6 +24,10 @@ export class Unity3dDatasource extends Datasource {
 
   override readonly registryStrategy = 'merge';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `pubDate` tag in the results.';
+
   constructor() {
     super(Unity3dDatasource.id);
   }
@@ -32,7 +36,7 @@ export class Unity3dDatasource extends Datasource {
     registryUrl: string | undefined,
     withHash: boolean,
   ): Promise<ReleaseResult | null> {
-    let channel = null;
+    let channel: XmlElement | undefined = undefined;
     try {
       const response = await this.http.get(registryUrl!);
       const document = new XmlDocument(response.body);
