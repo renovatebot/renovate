@@ -498,11 +498,19 @@ export class GithubHttp extends Http<GithubHttpOptions> {
     url: string,
     options: InternalHttpOptions & GithubHttpOptions = {},
   ): Promise<HttpResponse> {
-    return this.get(url, {
+    const newOptions: InternalHttpOptions & GithubHttpOptions = {
       ...options,
       headers: {
         accept: 'application/vnd.github.raw+json',
       },
-    });
+    };
+
+    let newURL = url;
+    const httpRegex = regEx(/^https?:\/\//);
+    if (options.repository && !httpRegex.test(options.repository)) {
+      newURL = joinUrlParts(options.repository, 'contents', url);
+    }
+
+    return this.get(newURL, newOptions);
   }
 }
