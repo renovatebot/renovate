@@ -341,7 +341,7 @@
     "semantic-release": "24.0.0",
     "tar": "6.2.1",
     "tmp-promise": "3.0.3",
-    "ts-jest": "29.2.0",
+    "ts-jest": "29.2.2",
     "ts-node": "10.9.2",
     "type-fest": "4.21.0",
     "typescript": "5.4.5",
