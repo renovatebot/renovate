@@ -29,7 +29,14 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
 
   options.headers ??= {};
   if (options.token) {
-    if (
+    const authType = options.context?.authType;
+    if (authType) {
+      if (authType === 'Token-Only') {
+        options.headers.authorization = options.token;
+      } else {
+        options.headers.authorization = `${authType} ${options.token}`;
+      }
+    } else if (
       options.hostType &&
       GITEA_API_USING_HOST_TYPES.includes(options.hostType)
     ) {
@@ -61,14 +68,7 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
         options.headers.authorization = `Bearer ${options.token}`;
       }
     } else {
-      // Custom Auth type, eg `Basic XXXX_TOKEN`
-      const type = options.context?.authType ?? 'Bearer';
-
-      if (type === 'Token-Only') {
-        options.headers.authorization = options.token;
-      } else {
-        options.headers.authorization = `${type} ${options.token}`;
-      }
+      options.headers.authorization = `Bearer ${options.token}`;
     }
     delete options.token;
   } else if (options.password !== undefined) {

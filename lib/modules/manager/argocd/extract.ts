@@ -6,6 +6,7 @@ import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -36,6 +37,7 @@ export function extractPackageFile(
     definitions = parseYaml(content, null, {
       customSchema: ApplicationDefinition,
       failureBehaviour: 'filter',
+      removeTemplates: true,
     });
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse ArgoCD definition.');
@@ -51,12 +53,8 @@ function processSource(source: ApplicationSource): PackageDependency | null {
   // a chart variable is defined this is helm declaration
   if (source.chart) {
     // assume OCI helm chart if repoURL doesn't contain explicit protocol
-    if (
-      source.repoURL.startsWith('oci://') ||
-      !source.repoURL.includes('://')
-    ) {
-      let registryURL = source.repoURL.replace('oci://', '');
-      registryURL = trimTrailingSlash(registryURL);
+    if (isOCIRegistry(source.repoURL) || !source.repoURL.includes('://')) {
+      const registryURL = trimTrailingSlash(removeOCIPrefix(source.repoURL));
 
       return {
         depName: `${registryURL}/${source.chart}`,

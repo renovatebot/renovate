@@ -16,6 +16,7 @@ import type {
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
+import { exportStats, finalizeReport } from '../../instrumentation/reporting';
 import { getProblems, logger, setMeta } from '../../logger';
 import { setGlobalLogLevelRemaps } from '../../logger/remap';
 import * as hostRules from '../../util/host-rules';
@@ -37,6 +38,10 @@ export async function getRepositoryConfig(
     globalConfig,
     is.string(repository) ? { repository } : repository,
   );
+  const repoParts = repoConfig.repository.split('/');
+  repoParts.pop();
+  repoConfig.parentOrg = repoParts.join('/');
+  repoConfig.topLevelOrg = repoParts.shift();
   // TODO: types (#22198)
   const platform = GlobalConfig.get('platform')!;
   repoConfig.localDir =
@@ -68,7 +73,7 @@ function checkEnv(): void {
   const range = pkg.engines!.node!;
   const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
-    logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
+    logger.warn(
       { release: process.release, versions: process.versions },
       'Unknown node environment detected.',
     );
@@ -81,7 +86,7 @@ function checkEnv(): void {
     rangeNext &&
     !semver.satisfies(process.versions?.node, rangeNext)
   ) {
-    logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
+    logger.warn(
       { versions: process.versions },
       `Please upgrade the version of Node.js used to run Renovate to satisfy "${rangeNext}". Support for your current version will be removed in Renovate's next major release.`,
     );
@@ -139,28 +144,41 @@ export async function start(): Promise<number> {
       config = await getGlobalConfig();
       if (config?.globalExtends) {
         // resolve global presets immediately
-        config = mergeChildConfig(
-          config,
-          await resolveGlobalExtends(config.globalExtends),
-        );
+        if (process.env.RENOVATE_X_EAGER_GLOBAL_EXTENDS) {
+          config = mergeChildConfig(
+            await resolveGlobalExtends(config.globalExtends),
+            config,
+          );
+        } else {
+          config = mergeChildConfig(
+            config,
+            await resolveGlobalExtends(config.globalExtends),
+          );
+        }
       }
+
+      // Set allowedHeaders in case hostRules headers are configured in file config
+      GlobalConfig.set({
+        allowedHeaders: config.allowedHeaders,
+      });
       // initialize all submodules
       config = await globalInitialize(config);
 
-      // Set platform and endpoint in case local presets are used
+      // Set platform, endpoint and allowedHeaders in case local presets are used
       GlobalConfig.set({
+        allowedHeaders: config.allowedHeaders,
         platform: config.platform,
         endpoint: config.endpoint,
       });
 
       await validatePresets(config);
 
+      setGlobalLogLevelRemaps(config.logLevelRemap);
+
       checkEnv();
 
       // validate secrets. Will throw and abort if invalid
       validateConfigSecrets(config);
-
-      setGlobalLogLevelRemaps(config.logLevelRemap);
     });
 
     // autodiscover repositories (needs to come after platform initialization)
@@ -210,6 +228,9 @@ export async function start(): Promise<number> {
         },
       );
     }
+
+    finalizeReport();
+    await exportStats(config);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {
       logger.fatal(err.message.substring(6));

@@ -15,12 +15,12 @@ export const MSBUILD_CENTRAL_FILE = 'Packages.props';
  */
 export async function getDependentPackageFiles(
   packageFileName: string,
-  isCentralManament = false,
+  isCentralManagement = false,
 ): Promise<ProjectFile[]> {
   const packageFiles = await getAllPackageFiles();
   const graph: ReturnType<typeof Graph> = Graph();
 
-  if (isCentralManament) {
+  if (isCentralManagement) {
     graph.addNode(packageFileName);
   }
 
@@ -33,7 +33,7 @@ export async function getDependentPackageFiles(
   for (const f of packageFiles) {
     graph.addNode(f);
 
-    if (isCentralManament && upath.dirname(f).startsWith(parentDir)) {
+    if (isCentralManagement && upath.dirname(f).startsWith(parentDir)) {
       graph.addEdge(packageFileName, f);
     }
   }
@@ -70,7 +70,7 @@ export async function getDependentPackageFiles(
   const deps = new Map<string, boolean>();
   recursivelyGetDependentPackageFiles(packageFileName, graph, deps);
 
-  if (isCentralManament) {
+  if (isCentralManagement) {
     // remove props file, as we don't need it
     deps.delete(packageFileName);
   }

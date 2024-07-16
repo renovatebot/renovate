@@ -97,7 +97,6 @@ describe('workers/repository/updates/generate', () => {
         lockedVersion: '1.0.0',
         newValue: '^1.0.0',
         newVersion: '1.0.1',
-        reuseLockFiles: true,
         prettyNewVersion: 'v1.0.1',
         upgrades: [
           {
@@ -1442,6 +1441,61 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(upgrades);
       expect(res.additionalReviewers).toEqual(['foo', 'bar']);
+    });
+
+    it('merges depTypes', () => {
+      const upgrades = [
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          depType: 'devDependencies',
+        },
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          depType: 'dependencies',
+        },
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          depType: 'devDependencies',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(upgrades);
+      expect(res.depTypes).toEqual(['dependencies', 'devDependencies']);
+    });
+
+    it('depTypes is available on each branch upgrade object', () => {
+      const upgrades = [
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          depType: 'devDependencies',
+        },
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          depType: 'dependencies',
+        },
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          depType: 'devDependencies',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(upgrades);
+
+      expect(res.depTypes).toEqual(['dependencies', 'devDependencies']);
+
+      for (const upgrade of res.upgrades) {
+        expect(upgrade.depTypes).toEqual(res.depTypes);
+      }
     });
   });
 });

@@ -1,12 +1,10 @@
 import is from '@sindresorhus/is';
-import jsonValidator from 'json-dup-key-validator';
-import JSON5 from 'json5';
-import upath from 'upath';
 import { mergeChildConfig } from '../../../config';
 import { configFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import { migrateConfig } from '../../../config/migration';
+import { parseFileConfig } from '../../../config/parse';
 import * as presets from '../../../config/presets';
 import { applySecretsToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
@@ -25,6 +23,8 @@ import { readLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
+import { getOnboardingConfig } from '../onboarding/branch/config';
+import { getDefaultConfigFileName } from '../onboarding/branch/create';
 import {
   getOnboardingConfigFromCache,
   getOnboardingFileNameFromCache,
@@ -60,7 +60,7 @@ export async function detectConfigFile(): Promise<string | null> {
 export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
-  if (configFileName) {
+  if (is.nonEmptyString(configFileName)) {
     let configFileRaw: string | null;
     try {
       configFileRaw = await platform.getRawFile(configFileName);
@@ -91,6 +91,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
 
   if (!configFileName) {
     logger.debug('No renovate config file found');
+    cache.configFileName = '';
     return {};
   }
   cache.configFileName = configFileName;
@@ -131,71 +132,18 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       configFileRaw = '{}';
     }
 
-    const fileType = upath.extname(configFileName);
+    const parseResult = parseFileConfig(configFileName, configFileRaw);
 
-    if (fileType === '.json5') {
-      try {
-        configFileParsed = JSON5.parse(configFileRaw);
-      } catch (err) /* istanbul ignore next */ {
-        logger.debug(
-          { renovateConfig: configFileRaw },
-          'Error parsing renovate config renovate.json5',
-        );
-        const validationError = 'Invalid JSON5 (parsing failed)';
-        const validationMessage = `JSON5.parse error: \`${err.message.replaceAll(
-          '`',
-          "'",
-        )}\``;
-        return {
-          configFileName,
-          configFileParseError: { validationError, validationMessage },
-        };
-      }
-    } else {
-      let allowDuplicateKeys = true;
-      let jsonValidationError = jsonValidator.validate(
-        configFileRaw,
-        allowDuplicateKeys,
-      );
-      if (jsonValidationError) {
-        const validationError = 'Invalid JSON (parsing failed)';
-        const validationMessage = jsonValidationError;
-        return {
-          configFileName,
-          configFileParseError: { validationError, validationMessage },
-        };
-      }
-      allowDuplicateKeys = false;
-      jsonValidationError = jsonValidator.validate(
-        configFileRaw,
-        allowDuplicateKeys,
-      );
-      if (jsonValidationError) {
-        const validationError = 'Duplicate keys in JSON';
-        const validationMessage = JSON.stringify(jsonValidationError);
-        return {
-          configFileName,
-          configFileParseError: { validationError, validationMessage },
-        };
-      }
-      try {
-        configFileParsed = parseJson(configFileRaw, configFileName);
-      } catch (err) /* istanbul ignore next */ {
-        logger.debug(
-          { renovateConfig: configFileRaw },
-          'Error parsing renovate config',
-        );
-        const validationError = 'Invalid JSON (parsing failed)';
-        const validationMessage = `JSON.parse error:  \`${err.message.replaceAll(
-          '`',
-          "'",
-        )}\``;
-        return {
-          configFileName,
-          configFileParseError: { validationError, validationMessage },
-        };
-      }
+    if (!parseResult.success) {
+      return {
+        configFileName,
+        configFileParseError: {
+          validationError: parseResult.validationError,
+          validationMessage: parseResult.validationMessage,
+        },
+      };
     }
+    configFileParsed = parseResult.parsedContents;
     logger.debug(
       { fileName: configFileName, config: configFileParsed },
       'Repository config',
@@ -225,6 +173,16 @@ export async function mergeRenovateConfig(
   let repoConfig: RepoFileConfig = {};
   if (config.requireConfig !== 'ignored') {
     repoConfig = await detectRepoFileConfig();
+  }
+  if (!repoConfig.configFileParsed && config.mode === 'silent') {
+    logger.debug(
+      'When mode=silent and repo has no config file, we use the onboarding config as repo config',
+    );
+    const configFileName = getDefaultConfigFileName(config);
+    repoConfig = {
+      configFileName,
+      configFileParsed: await getOnboardingConfig(config),
+    };
   }
   const configFileParsed = repoConfig?.configFileParsed || {};
   if (is.nonEmptyArray(returnConfig.extends)) {

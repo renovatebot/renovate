@@ -10,11 +10,14 @@ export const presets: Record<string, Preset> = {
   all: {
     description: 'Apply crowd-sourced package replacement rules.',
     extends: [
+      'replacements:airbnb-prop-types-to-prop-types-tools',
       'replacements:apollo-server-to-scoped',
       'replacements:babel-eslint-to-eslint-parser',
       'replacements:containerbase',
       'replacements:cpx-to-maintenance-fork',
       'replacements:cucumber-to-scoped',
+      'replacements:eslint-config-standard-with-typescript-to-eslint-config-love',
+      'replacements:eslint-plugin-node-to-maintained-fork',
       'replacements:fakerjs-to-scoped',
       'replacements:fastify-to-scoped',
       'replacements:hapi-to-scoped',
@@ -22,9 +25,11 @@ export const presets: Record<string, Preset> = {
       'replacements:joi-to-scoped',
       'replacements:joi-to-unscoped',
       'replacements:k8s-registry-move',
+      'replacements:mem-rename',
       'replacements:middie-to-scoped',
       'replacements:now-to-vercel',
       'replacements:npm-run-all-to-maintenance-fork',
+      'replacements:opencost-registry-move',
       'replacements:parcel-css-to-lightningcss',
       'replacements:passport-saml',
       'replacements:react-query-devtools-to-scoped',
@@ -36,14 +41,31 @@ export const presets: Record<string, Preset> = {
       'replacements:rollup-babel-to-scoped',
       'replacements:rollup-json-to-scoped',
       'replacements:rollup-node-resolve-to-scoped',
+      'replacements:rollup-terser-to-scoped',
       'replacements:rome-to-biome',
       'replacements:semantic-release-replace-plugin-to-unscoped',
       'replacements:spectre-cli-to-spectre-console-cli',
+      'replacements:standard-version-to-commit-and-tag',
       'replacements:vso-task-lib-to-azure-pipelines-task-lib',
       'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
+      'replacements:zap',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
+  },
+  // eslint-disable-next-line sort-keys
+  'airbnb-prop-types-to-prop-types-tools': {
+    description:
+      '`airbnb-prop-types` was given to a new maintainer and renamed to `prop-types-tools`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^2',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['airbnb-prop-types'],
+        replacementName: 'prop-types-tools',
+        replacementVersion: '2.17.0',
+      },
+    ],
   },
   'apollo-server-to-scoped': {
     description: '`apollo-server` packages became scoped.',
@@ -169,6 +191,7 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['docker'],
         matchPackageNames: ['ghcr.io/renovatebot/renovate'],
         matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
+        versioning: 'semver',
       },
     ],
   },
@@ -191,6 +214,32 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['cucumber'],
         replacementName: '@cucumber/cucumber',
         replacementVersion: '7.0.0',
+      },
+    ],
+  },
+  'eslint-config-standard-with-typescript-to-eslint-config-love': {
+    description:
+      '`eslint-config-standard-with-typescript` was renamed to `eslint-config-love`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^43.0.1',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['eslint-config-standard-with-typescript'],
+        replacementName: 'eslint-config-love',
+        replacementVersion: '43.1.0',
+      },
+    ],
+  },
+  'eslint-plugin-node-to-maintained-fork': {
+    description:
+      'Replace stale `eslint-plugin-node` with a maintained fork: `eslint-plugin-n`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^11.1.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['eslint-plugin-node'],
+        replacementName: 'eslint-plugin-n',
+        replacementVersion: '14.0.0',
       },
     ],
   },
@@ -648,6 +697,18 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'mem-rename': {
+    description: '`mem` was renamed to `memoize`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^10.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['mem'],
+        replacementName: 'memoize',
+        replacementVersion: '10.0.0',
+      },
+    ],
+  },
   'middie-to-scoped': {
     description: '`middie` became scoped.',
     packageRules: [
@@ -680,6 +741,29 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['npm-run-all'],
         replacementName: 'npm-run-all2',
         replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'opencost-registry-move': {
+    description: 'Replace OpenCost registry from quay.io to ghcr.io.',
+    packageRules: [
+      {
+        description:
+          'Replace `quay.io/kubecost1/kubecost-cost-model` with `ghcr.io/opencost/opencost`.',
+        matchCurrentVersion: '1.108.0',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['quay.io/kubecost1/kubecost-cost-model'],
+        replacementName: 'ghcr.io/opencost/opencost',
+        replacementVersion: '1.109.0',
+      },
+      {
+        description:
+          'Replace `quay.io/kubecost1/opencost-ui` with `ghcr.io/opencost/opencost-ui`.',
+        matchCurrentVersion: '1.108.0',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['quay.io/kubecost1/opencost-ui'],
+        replacementName: 'ghcr.io/opencost/opencost-ui',
+        replacementVersion: '1.109.0',
       },
     ],
   },
@@ -810,6 +894,18 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'rollup-terser-to-scoped': {
+    description: 'The terser plugin for rollup became scoped.',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=7.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rollup-plugin-terser'],
+        replacementName: '@rollup/plugin-terser',
+        replacementVersion: '0.1.0',
+      },
+    ],
+  },
   'rome-to-biome': {
     description:
       'The Rome repository is archived, and Biome is the community replacement. Read [the Biome announcement](https://biomejs.dev/blog/annoucing-biome/) for migration instructions.',
@@ -843,6 +939,19 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['Spectre.Cli'],
         replacementName: 'Spectre.Console.Cli',
         replacementVersion: '0.45.0',
+      },
+    ],
+  },
+  'standard-version-to-commit-and-tag': {
+    description:
+      '`standard-version` is now maintained as `commit-and-tag-version`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^9.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['standard-version'],
+        replacementName: 'commit-and-tag-version',
+        replacementVersion: '9.5.0',
       },
     ],
   },
@@ -881,6 +990,35 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  zap: {
+    description: 'Replace ZAP dependencies.',
+    packageRules: [
+      {
+        description:
+          'The `zap-stable` image has moved to the `zaproxy` organization.',
+        matchCurrentVersion: '>=2.0.0 <2.14.0',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?owasp/zap2docker-stable$',
+          '^(?:docker\\.io/)?softwaresecurityproject/zap-stable$',
+        ],
+        replacementName: 'zaproxy/zap-stable',
+        replacementVersion: '2.14.0',
+      },
+      {
+        description:
+          'The `zap-bare` image has moved to the `zaproxy` organization.',
+        matchCurrentVersion: '>=2.0.0 <2.14.0',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?owasp/zap2docker-bare$',
+          '^(?:docker\\.io/)?softwaresecurityproject/zap-bare$',
+        ],
+        replacementName: 'zaproxy/zap-bare',
+        replacementVersion: '2.14.0',
+      },
+    ],
+  },
 };
 
 const muiReplacement: Replacement[] = [
@@ -913,7 +1051,7 @@ const mui: PresetTemplate = {
 
 const messageFormat: PresetTemplate = {
   description:
-    'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
+    'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}` to `@messageformat/{{package}}`.',
   packageRules: [
     {
       matchCurrentVersion: '>=2.0.0 <3.0.0',
@@ -940,7 +1078,7 @@ const messageFormat: PresetTemplate = {
       replacementVersion: '5.0.0',
     },
   ],
-  title: 'messageFormat-{{package}}-to-@messageformat/{{package}}',
+  title: 'messageFormat-to-scoped',
 };
 
 addPresets(presets, messageFormat, mui);

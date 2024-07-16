@@ -395,41 +395,6 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       // TODO: find right mocks
       httpMock.clear(false);
     });
-
-    it('supports overwriting sourceUrl for self-hosted gitea changelog', async () => {
-      httpMock.scope('https://git.test.com').persist().get(/.*/).reply(200, []);
-      const sourceUrl = 'https://git.test.com/meno/dropzone/';
-      const replacementSourceUrl =
-        'https://git.test.com/replacement/sourceurl/';
-      const config = {
-        ...upgrade,
-        platform: 'gitea',
-        endpoint: 'https://git.test.com/api/v1/',
-        sourceUrl,
-        customChangelogUrl: replacementSourceUrl,
-      };
-      hostRules.add({
-        hostType: 'gitea',
-        matchHost: 'https://git.test.com/',
-        token: 'abc',
-      });
-      expect(await getChangeLogJSON(config)).toMatchObject({
-        hasReleaseNotes: false,
-        project: {
-          apiBaseUrl: 'https://git.test.com/api/v1/',
-          baseUrl: 'https://git.test.com/',
-          packageName: 'renovate',
-          repository: 'replacement/sourceurl',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://git.test.com/replacement/sourceurl/',
-          type: 'gitea',
-        },
-      });
-      expect(config.sourceUrl).toBe(sourceUrl); // ensure unmodified function argument
-
-      // TODO: find right mocks
-      httpMock.clear(false);
-    });
   });
 
   describe('hasValidRepository', () => {

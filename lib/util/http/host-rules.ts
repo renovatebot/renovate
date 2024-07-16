@@ -14,10 +14,10 @@ import { matchRegexOrGlobList } from '../string-match';
 import { parseUrl } from '../url';
 import { dnsLookup } from './dns';
 import { keepAliveAgents } from './keep-alive';
-import type { GotOptions } from './types';
+import type { GotOptions, InternalHttpOptions } from './types';
 
 export type HostRulesGotOptions = Pick<
-  GotOptions,
+  GotOptions & InternalHttpOptions,
   | 'hostType'
   | 'url'
   | 'noAuth'
@@ -34,14 +34,15 @@ export type HostRulesGotOptions = Pick<
   | 'agent'
   | 'http2'
   | 'https'
+  | 'readOnly'
 >;
 
 export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   url: string,
   options: GotOptions,
 ): HostRule {
-  const { hostType } = options;
-  let res = hostRules.find({ hostType, url });
+  const { hostType, readOnly } = options;
+  let res = hostRules.find({ hostType, url, readOnly });
 
   if (
     is.nonEmptyString(res.token) ||

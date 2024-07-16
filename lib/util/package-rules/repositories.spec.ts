@@ -1,11 +1,11 @@
 import { RepositoriesMatcher } from './repositories';
 
 describe('util/package-rules/repositories', () => {
-  const packageNameMatcher = new RepositoriesMatcher();
+  const repositoryMatcher = new RepositoriesMatcher();
 
   describe('match', () => {
     it('should return null if match repositories is not defined', () => {
-      const result = packageNameMatcher.matches(
+      const result = repositoryMatcher.matches(
         {
           repository: 'org/repo',
         },
@@ -17,7 +17,7 @@ describe('util/package-rules/repositories', () => {
     });
 
     it('should return false if repository is not defined', () => {
-      const result = packageNameMatcher.matches(
+      const result = repositoryMatcher.matches(
         {
           repository: undefined,
         },
@@ -29,7 +29,7 @@ describe('util/package-rules/repositories', () => {
     });
 
     it('should return true if repository matches regex pattern', () => {
-      const result = packageNameMatcher.matches(
+      const result = repositoryMatcher.matches(
         {
           repository: 'org/repo',
         },
@@ -41,7 +41,7 @@ describe('util/package-rules/repositories', () => {
     });
 
     it('should return false if repository has invalid regex pattern', () => {
-      const result = packageNameMatcher.matches(
+      const result = repositoryMatcher.matches(
         {
           repository: 'org/repo',
         },
@@ -53,7 +53,7 @@ describe('util/package-rules/repositories', () => {
     });
 
     it('should return false if repository does not match regex pattern', () => {
-      const result = packageNameMatcher.matches(
+      const result = repositoryMatcher.matches(
         {
           repository: 'org/repo',
         },
@@ -65,7 +65,7 @@ describe('util/package-rules/repositories', () => {
     });
 
     it('should return true if repository matches minimatch pattern', () => {
-      const result = packageNameMatcher.matches(
+      const result = repositoryMatcher.matches(
         {
           repository: 'org/repo',
         },
@@ -77,7 +77,7 @@ describe('util/package-rules/repositories', () => {
     });
 
     it('should return false if repository does not match minimatch pattern', () => {
-      const result = packageNameMatcher.matches(
+      const result = repositoryMatcher.matches(
         {
           repository: 'org/repo',
         },
@@ -89,7 +89,7 @@ describe('util/package-rules/repositories', () => {
     });
 
     it('should return true if repository matches at least one pattern', () => {
-      const result = packageNameMatcher.matches(
+      const result = repositoryMatcher.matches(
         {
           repository: 'org/repo-archived',
         },
@@ -103,7 +103,7 @@ describe('util/package-rules/repositories', () => {
 
   describe('excludes', () => {
     it('should return null if exclude repositories is not defined', () => {
-      const result = packageNameMatcher.excludes(
+      const result = repositoryMatcher.excludes(
         {
           repository: 'org/repo',
         },
@@ -115,7 +115,7 @@ describe('util/package-rules/repositories', () => {
     });
 
     it('should return false if exclude repository is not defined', () => {
-      const result = packageNameMatcher.excludes(
+      const result = repositoryMatcher.excludes(
         {
           repository: undefined,
         },
@@ -127,7 +127,7 @@ describe('util/package-rules/repositories', () => {
     });
 
     it('should return true if exclude repository matches regex pattern', () => {
-      const result = packageNameMatcher.excludes(
+      const result = repositoryMatcher.excludes(
         {
           repository: 'org/repo',
         },
@@ -139,7 +139,7 @@ describe('util/package-rules/repositories', () => {
     });
 
     it('should return false if exclude repository has invalid regex pattern', () => {
-      const result = packageNameMatcher.excludes(
+      const result = repositoryMatcher.excludes(
         {
           repository: 'org/repo',
         },
@@ -151,7 +151,7 @@ describe('util/package-rules/repositories', () => {
     });
 
     it('should return false if exclude repository does not match regex pattern', () => {
-      const result = packageNameMatcher.excludes(
+      const result = repositoryMatcher.excludes(
         {
           repository: 'org/repo',
         },
@@ -163,7 +163,7 @@ describe('util/package-rules/repositories', () => {
     });
 
     it('should return true if exclude repository matches minimatch pattern', () => {
-      const result = packageNameMatcher.excludes(
+      const result = repositoryMatcher.excludes(
         {
           repository: 'org/repo',
         },
@@ -175,7 +175,7 @@ describe('util/package-rules/repositories', () => {
     });
 
     it('should return false if exclude repository does not match minimatch pattern', () => {
-      const result = packageNameMatcher.excludes(
+      const result = repositoryMatcher.excludes(
         {
           repository: 'org/repo',
         },
@@ -187,7 +187,7 @@ describe('util/package-rules/repositories', () => {
     });
 
     it('should return true if exclude repository matches at least one pattern', () => {
-      const result = packageNameMatcher.excludes(
+      const result = repositoryMatcher.excludes(
         {
           repository: 'org/repo-archived',
         },

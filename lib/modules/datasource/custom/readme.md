@@ -7,11 +7,11 @@ This example shows how to update the `k3s.version` file with a custom datasource
 
 Options:
 
-| option                     | default | description                                                                                                                                                              |
-| -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| defaultRegistryUrlTemplate | ""      | URL used if no `registryUrl` is provided when looking up new releases                                                                                                    |
-| format                     | "json"  | format used by the API. Available values are: `json`, `plain`, `yaml`, `html`                                                                                            |
-| transformTemplates         | []      | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
+| option                     | default  | description                                                                                                                                                              |
+| -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| defaultRegistryUrlTemplate | `""`     | URL used if no `registryUrl` is provided when looking up new releases                                                                                                    |
+| format                     | `"json"` | format used by the API. Available values are: `json`, `plain`, `yaml`, `html`                                                                                            |
+| transformTemplates         | `[]`     | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
 Available template variables:
 
@@ -70,7 +70,8 @@ All available options:
       "changelogUrl": "https://github.com/demo-org/demo/blob/main/CHANGELOG.md#v0710",
       "sourceUrl": "https://github.com/demo-org/demo",
       "sourceDirectory": "monorepo/folder",
-      "digest": "c667f758f9e46e1d8111698e8d3a181c0b10f430"
+      "digest": "c667f758f9e46e1d8111698e8d3a181c0b10f430",
+      "isStable": true
     }
   ],
   "sourceUrl": "https://github.com/demo-org/demo",

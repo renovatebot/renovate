@@ -114,6 +114,22 @@ describe('util/template/index', () => {
     expect(output).toBe('CUSTOM_FOO is foo');
   });
 
+  it('and has access to prBodyDefinitions', () => {
+    const userTemplate =
+      'Issues: {{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}';
+    const config = {
+      upgrades: [
+        {
+          prBodyDefinitions: {
+            Issue: '1234',
+          },
+        },
+      ],
+    };
+    const output = template.compile(userTemplate, config);
+    expect(output).toBe('Issues: 1234 ');
+  });
+
   it('replace', () => {
     const userTemplate =
       "{{ replace '[a-z]+\\.github\\.com' 'ghc' depName }}{{ replace 'some' 'other' depType }}";
@@ -274,6 +290,52 @@ describe('util/template/index', () => {
         },
       );
       expect(output).toBe('not equals');
+    });
+  });
+
+  describe('includes', () => {
+    it('includes is true', () => {
+      const output = template.compile(
+        '{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}',
+        {
+          labels: ['dependencies'],
+        },
+      );
+
+      expect(output).toBe('production');
+    });
+
+    it('includes is false', () => {
+      const output = template.compile(
+        '{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}',
+        {
+          labels: ['devDependencies'],
+        },
+      );
+
+      expect(output).toBe('notProduction');
+    });
+
+    it('includes with incorrect type first argument', () => {
+      const output = template.compile(
+        '{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}',
+        {
+          labels: 'devDependencies',
+        },
+      );
+
+      expect(output).toBe('notProduction');
+    });
+
+    it('includes with incorrect type second argument', () => {
+      const output = template.compile(
+        '{{#if (includes labels 555)}}production{{else}}notProduction{{/if}}',
+        {
+          labels: ['devDependencies'],
+        },
+      );
+
+      expect(output).toBe('notProduction');
     });
   });
 });

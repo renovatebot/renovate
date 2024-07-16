@@ -5,6 +5,7 @@ import { logger } from '../../../../logger';
 import { get } from '../../../../modules/manager';
 import type {
   ArtifactError,
+  ArtifactNotice,
   PackageDependency,
   PackageFile,
   UpdateArtifact,
@@ -21,6 +22,7 @@ export interface PackageFilesResult {
   reuseExistingBranch?: boolean;
   updatedPackageFiles: FileChange[];
   updatedArtifacts: FileChange[];
+  artifactNotices: ArtifactNotice[];
 }
 
 async function getFileContent(
@@ -288,6 +290,11 @@ export async function getUpdatedPackageFiles(
   }));
   const updatedArtifacts: FileChange[] = [];
   const artifactErrors: ArtifactError[] = [];
+  const artifactNotices: ArtifactNotice[] = [];
+  // istanbul ignore if
+  if (is.nonEmptyArray(updatedPackageFiles)) {
+    logger.debug('updateArtifacts for updatedPackageFiles');
+  }
   for (const packageFile of updatedPackageFiles) {
     const updatedDeps = packageFileUpdatedDeps[packageFile.path];
     const managers = packageFileManagers[packageFile.path];
@@ -298,9 +305,18 @@ export async function getUpdatedPackageFiles(
           updatedDeps,
           // TODO #22198
           newPackageFileContent: packageFile.contents!.toString(),
-          config,
+          config: patchConfigForArtifactsUpdate(
+            config,
+            manager,
+            packageFile.path,
+          ),
         });
-        processUpdateArtifactResults(results, updatedArtifacts, artifactErrors);
+        processUpdateArtifactResults(
+          results,
+          updatedArtifacts,
+          artifactErrors,
+          artifactNotices,
+        );
       }
     }
   }
@@ -311,6 +327,10 @@ export async function getUpdatedPackageFiles(
     path: name,
     contents: nonUpdatedFileContents[name],
   }));
+  // istanbul ignore if
+  if (is.nonEmptyArray(nonUpdatedPackageFiles)) {
+    logger.debug('updateArtifacts for nonUpdatedPackageFiles');
+  }
   for (const packageFile of nonUpdatedPackageFiles) {
     const updatedDeps = packageFileUpdatedDeps[packageFile.path];
     const managers = packageFileManagers[packageFile.path];
@@ -321,9 +341,18 @@ export async function getUpdatedPackageFiles(
           updatedDeps,
           // TODO #22198
           newPackageFileContent: packageFile.contents!.toString(),
-          config,
+          config: patchConfigForArtifactsUpdate(
+            config,
+            manager,
+            packageFile.path,
+          ),
         });
-        processUpdateArtifactResults(results, updatedArtifacts, artifactErrors);
+        processUpdateArtifactResults(
+          results,
+          updatedArtifacts,
+          artifactErrors,
+          artifactNotices,
+        );
         if (is.nonEmptyArray(results)) {
           updatedPackageFiles.push(packageFile);
         }
@@ -332,6 +361,10 @@ export async function getUpdatedPackageFiles(
   }
   if (!reuseExistingBranch) {
     // Only perform lock file maintenance if it's a fresh commit
+    // istanbul ignore if
+    if (is.nonEmptyArray(lockFileMaintenanceFiles)) {
+      logger.debug('updateArtifacts for lockFileMaintenanceFiles');
+    }
     for (const packageFileName of lockFileMaintenanceFiles) {
       const managers = packageFileManagers[packageFileName];
       if (is.nonEmptySet(managers)) {
@@ -353,6 +386,7 @@ export async function getUpdatedPackageFiles(
             results,
             updatedArtifacts,
             artifactErrors,
+            artifactNotices,
           );
         }
       }
@@ -363,6 +397,7 @@ export async function getUpdatedPackageFiles(
     updatedPackageFiles,
     updatedArtifacts,
     artifactErrors,
+    artifactNotices,
   };
 }
 
@@ -405,15 +440,21 @@ function processUpdateArtifactResults(
   results: UpdateArtifactsResult[] | null,
   updatedArtifacts: FileChange[],
   artifactErrors: ArtifactError[],
+  artifactNotices: ArtifactNotice[],
 ): void {
   if (is.nonEmptyArray(results)) {
     for (const res of results) {
-      const { file, artifactError } = res;
-      // istanbul ignore else
+      const { file, notice, artifactError } = res;
       if (file) {
         updatedArtifacts.push(file);
-      } else if (artifactError) {
+      }
+
+      if (artifactError) {
         artifactErrors.push(artifactError);
+      }
+
+      if (notice) {
+        artifactNotices.push(notice);
       }
     }
   }

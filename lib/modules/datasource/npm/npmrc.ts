@@ -8,7 +8,7 @@ import type { HostRule } from '../../../types';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { fromBase64 } from '../../../util/string';
-import { ensureTrailingSlash, validateUrl } from '../../../util/url';
+import { ensureTrailingSlash, isHttpUrl } from '../../../util/url';
 import { defaultRegistryUrls } from './common';
 import type { NpmrcRules } from './types';
 
@@ -89,7 +89,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
   const { registry } = npmrc;
   // packageRules order matters, so look for a default registry first
   if (is.nonEmptyString(registry)) {
-    if (validateUrl(registry)) {
+    if (isHttpUrl(registry)) {
       // Default registry
       rules.packageRules?.push({
         matchDatasources,
@@ -108,7 +108,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
     const keyType = keyParts.pop();
     if (keyType === 'registry' && keyParts.length && is.nonEmptyString(value)) {
       const scope = keyParts.join(':');
-      if (validateUrl(value)) {
+      if (isHttpUrl(value)) {
         rules.packageRules?.push({
           matchDatasources,
           matchPackagePrefixes: [scope + '/'],

@@ -32,57 +32,24 @@ Skipping the check will speed things up, but may result in versions being return
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
-## `RENOVATE_REUSE_PACKAGE_LOCK`
-
-If set to "false" (string), Renovate will remove any existing `package-lock.json` before trying to update it.
-
-## `RENOVATE_USER_AGENT`
-
-If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
-
-## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
-
-<!-- prettier-ignore -->
-!!! note
-    For the Forgejo and Gitea platform only.
-
-The order method for autodiscover server side repository search.
-
-> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
-
-Allowed values:
-
-- `asc`
-- `desc`
-
-Default value: `asc`.
-
-## `RENOVATE_X_AUTODISCOVER_REPO_SORT`
-
-<!-- prettier-ignore -->
-!!! note
-    For the Forgejo and Gitea platform only.
-
-The sort method for autodiscover server side repository search.
-
-> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
-
-Allowed values:
-
-- `alpha`
-- `created`
-- `updated`
-- `size`
-- `id`
-
-Default value: `alpha`.
-
 ## `RENOVATE_X_DELETE_CONFIG_FILE`
 
 If `true` Renovate tries to delete the self-hosted config file after reading it.
 You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE` environment variable.
 
 The process that runs Renovate must have the correct permissions to delete the config file.
+
+## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
+
+If set to any value, Renovate will skip attempting to get release labels (e.g. gitRef, sourceUrl) from manifest annotations for `https://index.docker.io`.
+
+Due to the missing label information like sourceUrl, Renovate will not be able to perform certain actions dependent on these information for the images.
+
+This includes the following:
+
+- Generating changelogs
+- Applying package rules dependent on the labels
+- Including the sourceUrls in PR bodies
 
 ## `RENOVATE_X_DOCKER_HUB_TAGS`
 
@@ -92,6 +59,10 @@ If set to any value, Renovate will use the Docker Hub API (`https://hub.docker.c
 
 If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
 This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
+
+## `RENOVATE_X_EAGER_GLOBAL_EXTENDS`
+
+Resolve and merge `globalExtends` presets before other global config, instead of after.
 
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 
@@ -123,28 +94,18 @@ Default value: `250` (milliseconds).
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
 See [issue 8660](https://github.com/renovatebot/renovate/issues/8660) for background on why this was created.
 
-## `RENOVATE_X_IGNORE_NODE_WARN`
-
-Suppress the default warning when a deprecated version of Node.js is used to run Renovate.
-
 ## `RENOVATE_X_IGNORE_RE2`
 
 Skip initializing `RE2` for regular expressions and instead use Node-native `RegExp` instead.
 
-## `RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL`
+## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
 
-If set, Renovate will query this API for Merge Confidence data.
-This feature is in private beta.
-
-## `RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES`
-
-If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
-The expected value for this environment variable is a JSON array of strings.
+If set to any value, Renovate will download `nupkg` files for determining package metadata.
 
 ## `RENOVATE_X_PLATFORM_VERSION`
 
-If set, Renovate will use this string as GitLab server version instead of checking via the GitLab API.
-This can be useful when you use the GitLab `CI_JOB_TOKEN` to authenticate Renovate.
+Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
+Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to reduce API calls for Bitbucket.
 
 Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
 
@@ -155,6 +116,10 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 <!-- prettier-ignore -->
 !!! note
     For the GitHub Enterprise Server platform only.
+
+## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
+
+If set, Renovate will persist repository cache locally after uploading to S3.
 
 ## `RENOVATE_X_S3_ENDPOINT`
 
@@ -176,3 +141,11 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
 Suppress the pre-commit support warning in PR bodies.
+
+## `RENOVATE_X_USE_OPENPGP`
+
+Use `openpgp` instead of `kbpgp` for `PGP` decryption.
+
+## `RENOVATE_X_YARN_PROXY`
+
+Configure global Yarn proxy settings if HTTP proxy environment variables are detected.

@@ -1,5 +1,8 @@
 import { Readable } from 'node:stream';
-import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
+import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
+import { partial } from '../../../../test/util';
 
 jest.mock('./azure-got-wrapper');
 
@@ -238,6 +241,35 @@ describe('modules/platform/azure/azure-helper', () => {
       );
     });
 
+    it('should return Squash when Project wide exact branch policy exists', async () => {
+      const refMock = 'refs/heads/ding';
+
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyConfigurations: jest.fn(() =>
+            Promise.resolve([
+              partial<PolicyConfiguration>({
+                settings: {
+                  allowSquash: true,
+                  scope: [
+                    {
+                      // null here means project wide
+                      repositoryId: null,
+                      matchKind: 'Exact',
+                      refName: refMock,
+                    },
+                  ],
+                },
+              }),
+            ]),
+          ),
+        }),
+      );
+      expect(await azureHelper.getMergeMethod('', '', refMock)).toEqual(
+        GitPullRequestMergeStrategy.Squash,
+      );
+    });
+
     it('should return default branch policy', async () => {
       azureApi.policyApi.mockImplementationOnce(
         () =>
@@ -400,6 +432,29 @@ describe('modules/platform/azure/azure-helper', () => {
       expect(
         await azureHelper.getMergeMethod('', '', refMock, defaultBranchMock),
       ).toEqual(GitPullRequestMergeStrategy.Rebase);
+    });
+  });
+
+  describe('getAllProjectTeams', () => {
+    it('should get all teams ', async () => {
+      const team1 = Array.from({ length: 100 }, (_, index) => ({
+        description: `team1 ${index + 1}`,
+      }));
+      const team2 = Array.from({ length: 3 }, (_, index) => ({
+        description: `team2 ${index + 1}`,
+      }));
+      const allTeams = team1.concat(team2);
+      azureApi.coreApi.mockImplementationOnce(
+        () =>
+          ({
+            getTeams: jest
+              .fn()
+              .mockResolvedValueOnce(team1)
+              .mockResolvedValueOnce(team2),
+          }) as any,
+      );
+      const res = await azureHelper.getAllProjectTeams('projectId');
+      expect(res).toEqual(allTeams);
     });
   });
 });

@@ -1,13 +1,9 @@
 import is from '@sindresorhus/is';
+import type { RetryObject } from 'got';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { parseLinkHeader, parseUrl } from '../url';
-import type {
-  HttpOptions,
-  HttpRequestOptions,
-  HttpResponse,
-  InternalHttpOptions,
-} from './types';
+import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
 import { Http } from '.';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
@@ -26,7 +22,7 @@ export class GitlabHttp extends Http<GitlabHttpOptions> {
 
   protected override async request<T>(
     url: string | URL,
-    options?: InternalHttpOptions & GitlabHttpOptions & HttpRequestOptions<T>,
+    options?: InternalHttpOptions & GitlabHttpOptions,
   ): Promise<HttpResponse<T>> {
     const opts = {
       baseUrl,
@@ -87,5 +83,20 @@ export class GitlabHttp extends Http<GitlabHttpOptions> {
       }
       throw err;
     }
+  }
+
+  protected override calculateRetryDelay(retryObject: RetryObject): number {
+    const { error, attemptCount, retryOptions } = retryObject;
+    if (
+      attemptCount <= retryOptions.limit &&
+      error.options.method === 'POST' &&
+      error.response?.statusCode === 409 &&
+      error.response.rawBody.toString().includes('Resource lock')
+    ) {
+      const noise = Math.random() * 100;
+      return 2 ** (attemptCount - 1) * 1000 + noise;
+    }
+
+    return super.calculateRetryDelay(retryObject);
   }
 }
