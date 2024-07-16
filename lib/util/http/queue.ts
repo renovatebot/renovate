@@ -1,6 +1,7 @@
 import PQueue from 'p-queue';
 import { logger } from '../../logger';
 import { parseUrl } from '../url';
+import { getDefaultConcurrentRequestsLimit } from './default-limits';
 import { getConcurrentRequestsLimit } from './host-rules';
 
 const hostQueues = new Map<string, PQueue | null>();
@@ -16,7 +17,11 @@ export function getQueue(url: string): PQueue | null {
   let queue = hostQueues.get(host);
   if (queue === undefined) {
     queue = null; // null represents "no queue", as opposed to undefined
-    const concurrency = getConcurrentRequestsLimit(url);
+    const hostConcurrency = getConcurrentRequestsLimit(url);
+    const defaultConcurrency = getDefaultConcurrentRequestsLimit(url);
+    const concurrency = Math.min(
+      ...[hostConcurrency, defaultConcurrency].filter((x) => x !== null),
+    );
     if (concurrency) {
       logger.debug(`Using queue: host=${host}, concurrency=${concurrency}`);
       queue = new PQueue({ concurrency });
