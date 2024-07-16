@@ -35,6 +35,20 @@ describe('modules/manager/pipenv/extract', () => {
           },
           {
             depType: 'packages',
+            depName: 'splinter',
+            currentValue: '==3.43.1',
+            currentVersion: '3.43.1',
+            datasource: 'pypi',
+          },
+          {
+            depType: 'packages',
+            depName: 'requests',
+            currentValue: '==1.1.1',
+            currentVersion: '1.1.1',
+            datasource: 'pypi',
+          },
+          {
+            depType: 'packages',
             depName: 'some-other-package',
             currentValue: '==1.0.0',
             currentVersion: '1.0.0',
@@ -63,6 +77,20 @@ describe('modules/manager/pipenv/extract', () => {
             },
           },
           {
+            currentValue: '==1.2.3',
+            currentVersion: '1.2.3',
+            datasource: 'pypi',
+            depName: 'container-specific-package',
+            depType: 'container',
+          },
+          {
+            currentValue: '==2.3.4',
+            currentVersion: '2.3.4',
+            datasource: 'pypi',
+            depName: 'function-specific-package',
+            depType: 'function',
+          },
+          {
             depType: 'dev-packages',
             depName: 'dev-package',
             currentValue: '==0.1.0',
@@ -80,7 +108,7 @@ describe('modules/manager/pipenv/extract', () => {
         ],
       });
 
-      expect(res?.deps.filter((dep) => !dep.skipReason)).toHaveLength(4);
+      expect(res?.deps.filter((dep) => !dep.skipReason)).toHaveLength(8);
     });
 
     it('marks packages with "extras" as skipReason === unspecified-version', async () => {

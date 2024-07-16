@@ -34,7 +34,7 @@ Set to `off` if changelog fetching is causing a problem.
 
 Set to `branch` if you have an advanced use case where you're embedding changelogs in the Git commit itself, we don't recommend this due to its potential size.
 
-### [`customChangelogUrl`](../configuration-options.md#customchangelogurl)
+### [`changelogUrl`](../configuration-options.md#changelogurl)
 
 This doesn't help with _fetching_ the changelogs, but if you configure it then Renovate will include a link to this URL in the PR body, so users can click through to read the changelog.
 
@@ -98,11 +98,11 @@ If your repository uses the monorepo pattern make sure _each_ `package.json` fil
 
 ### maven package maintainers
 
-Read [`maven` datasource, making your changelogs fetchable](https://docs.renovatebot.com/modules/datasource/maven/#making-your-changelogs-fetchable).
+Read [`maven` datasource, making your changelogs fetchable](../modules/datasource/maven/index.md#making-your-changelogs-fetchable).
 
 ### Docker image maintainers
 
-Read the [Docker datasource](https://docs.renovatebot.com/modules/datasource/docker/) docs.
+Read the [Docker datasource](../modules/datasource/docker/index.md) docs.
 
 ### Nuget package maintainers
 

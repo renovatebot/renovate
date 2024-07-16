@@ -144,7 +144,7 @@ export function isScheduledNow(
   let configSchedule = config[scheduleKey];
   logger.debug(
     // TODO: types (#22198)
-    `Checking schedule(${String(configSchedule)}, ${config.timezone!})`,
+    `Checking schedule(schedule=${String(configSchedule)}, tz=${config.timezone!}, now=${new Date().toISOString()})`,
   );
   if (
     !configSchedule ||

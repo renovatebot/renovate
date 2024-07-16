@@ -10,6 +10,7 @@ import type {
 import type { Release } from '../modules/datasource/types';
 import type {
   ArtifactError,
+  ArtifactNotice,
   ExtractConfig,
   LookupUpdate,
   PackageDependency,
@@ -30,6 +31,7 @@ export interface BranchUpgradeConfig
     Partial<LookupUpdate>,
     RenovateSharedConfig {
   artifactErrors?: ArtifactError[];
+  artifactNotices?: ArtifactNotice[];
   autoReplaceStringTemplate?: string;
   baseDeps?: PackageDependency[];
   branchName: string;
@@ -40,6 +42,7 @@ export interface BranchUpgradeConfig
   currentDigestShort?: string;
   currentValue?: string;
   depIndex?: number;
+  depTypes?: string[];
 
   displayPending?: string;
   excludeCommitPaths?: string[];

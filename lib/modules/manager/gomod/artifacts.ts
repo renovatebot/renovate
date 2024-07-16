@@ -8,8 +8,10 @@ import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
+import { filterMap } from '../../../util/filter-map';
 import {
   ensureCacheDir,
+  findLocalSiblingOrParent,
   isValidLocalPath,
   readLocalFile,
   writeLocalFile,
@@ -24,6 +26,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
+import { getExtraDepsNotice } from './artifacts-extra';
 
 const { major, valid } = semver;
 
@@ -126,9 +129,13 @@ export async function updateArtifacts({
     return null;
   }
 
-  const vendorDir = upath.join(upath.dirname(goModFileName), 'vendor/');
+  const goModDir = upath.dirname(goModFileName);
+
+  const vendorDir = upath.join(goModDir, 'vendor/');
   const vendorModulesFileName = upath.join(vendorDir, 'modules.txt');
-  const useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
+  const useVendor =
+    !config.postUpdateOptions?.includes('gomodSkipVendor') &&
+    (await readLocalFile(vendorModulesFileName)) !== null;
 
   let massagedGoMod = newGoModContent;
 
@@ -281,10 +288,28 @@ export async function updateArtifacts({
       execCommands.push(`${cmd} ${args}`);
     }
 
+    const goWorkSumFileName = upath.join(goModDir, 'go.work.sum');
     if (useVendor) {
-      args = 'mod vendor';
-      logger.debug('go mod tidy command included');
-      execCommands.push(`${cmd} ${args}`);
+      // If we find a go.work, then use go workspace vendoring.
+      const goWorkFile = await findLocalSiblingOrParent(
+        goModFileName,
+        'go.work',
+      );
+
+      if (goWorkFile) {
+        args = 'work vendor';
+        logger.debug('using go work vendor');
+        execCommands.push(`${cmd} ${args}`);
+
+        args = 'work sync';
+        logger.debug('using go work sync');
+        execCommands.push(`${cmd} ${args}`);
+      } else {
+        args = 'mod vendor';
+        logger.debug('using go mod vendor');
+        execCommands.push(`${cmd} ${args}`);
+      }
+
       if (isGoModTidyRequired) {
         args = 'mod tidy' + tidyOpts;
         logger.debug('go mod tidy command included');
@@ -304,7 +329,8 @@ export async function updateArtifacts({
     const status = await getRepoStatus();
     if (
       !status.modified.includes(sumFileName) &&
-      !status.modified.includes(goModFileName)
+      !status.modified.includes(goModFileName) &&
+      !status.modified.includes(goWorkSumFileName)
     ) {
       return null;
     }
@@ -317,6 +343,17 @@ export async function updateArtifacts({
           type: 'addition',
           path: sumFileName,
           contents: await readLocalFile(sumFileName),
+        },
+      });
+    }
+
+    if (status.modified.includes(goWorkSumFileName)) {
+      logger.debug('Returning updated go.work.sum');
+      res.push({
+        file: {
+          type: 'addition',
+          path: goWorkSumFileName,
+          contents: await readLocalFile(goWorkSumFileName),
         },
       });
     }
@@ -364,14 +401,30 @@ export async function updateArtifacts({
       .replace(regEx(/\/\/ renovate-replace /g), '')
       .replace(regEx(/renovate-replace-bracket/g), ')');
     if (finalGoModContent !== newGoModContent) {
-      logger.debug('Found updated go.mod after go.sum update');
-      res.push({
+      const artifactResult: UpdateArtifactsResult = {
         file: {
           type: 'addition',
           path: goModFileName,
           contents: finalGoModContent,
         },
-      });
+      };
+
+      const updatedDepNames = filterMap(updatedDeps, (dep) => dep?.depName);
+      const extraDepsNotice = getExtraDepsNotice(
+        newGoModContent,
+        finalGoModContent,
+        updatedDepNames,
+      );
+
+      if (extraDepsNotice) {
+        artifactResult.notice = {
+          file: goModFileName,
+          message: extraDepsNotice,
+        };
+      }
+
+      logger.debug('Found updated go.mod after go.sum update');
+      res.push(artifactResult);
     }
     return res;
   } catch (err) {

@@ -1,9 +1,31 @@
 # GitHub and GitHub Enterprise Server
 
+Most of the information on this page is meant for users who want to self-host Renovate on GitHub or GitHub Enterprise Server.
+
+## Easiest way to run Renovate
+
+For users on GitHub Cloud (`github.com`), the easiest way to get started is to install [the Mend Renovate app](https://github.com/marketplace/renovate) from the GitHub marketplace.
+When you use the app, Mend will:
+
+- authenticate the Renovate app to GitHub
+- keep the tokens safe
+- maintain and update the Renovate version used
+
+If you self-host Renovate you must do the things listed above yourself.
+Self-hosting is meant for users with advanced use cases, or who want to be in full control of the bot and the environment it runs in.
+We recommend most users install the Mend Renovate app.
+
+Read the [Security and Permissions](../../../security-and-permissions.md) page to learn about the Security and Permissions needed for the Mend Renovate app.
+
+After you installed the hosted app, please read the [reading list](../../../reading-list.md) to learn how to use and configure Renovate.
+
 ## Authentication
 
-First, [create a classic Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic) for the bot account, select `repo` scope.
-Fine-grained Personal Access Tokens do not support the GitHub GraphQL API and cannot be used with Renovate.
+First, create a [fine-grained](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token) _or_ a [classic](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic) PAT.
+The PAT must have the `repo` scope.
+If you want Renovate to also update your GitHub Action files, you must grant the `workflow` scope.
+
+Read the [GitHub Docs, about Personal Access Tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#about-personal-access-tokens) to learn more about PATs.
 
 Let Renovate use your PAT by doing _one_ of the following:
 
@@ -24,6 +46,26 @@ You can choose where you want to set `endpoint`:
 !!! tip "Labels and forking mode"
     If you're self-hosting Renovate on GitHub.com with GitHub Actions in forking mode, and want Renovate to apply labels then you must give the PAT `triage` level rights on `issues`.
     The `triage` level allows the PAT to apply/dismiss existing labels.
+
+## Running using a fine-grained token
+
+### Permissions
+
+A fine-grained token must have these permissions:
+
+| Permission          | Access           | Level                          |
+| ------------------- | ---------------- | ------------------------------ |
+| `Members`           | `Read-only`      | _Organization_                 |
+| `Commit statuses`   | `Read and write` | _Repository_ or _Organization_ |
+| `Contents`          | `Read and write` | _Repository_ or _Organization_ |
+| `Dependabot alerts` | `Read-only`      | _Repository_ or _Organization_ |
+| `Issues`            | `Read and write` | _Repository_ or _Organization_ |
+| `Pull requests`     | `Read and write` | _Repository_ or _Organization_ |
+| `Workflows`         | `Read and write` | _Repository_ or _Organization_ |
+
+<!-- prettier-ignore -->
+!!! tip "Use a bot role account"
+    Consider creating a GitHub App to use instead of using your own GitHub user account.
 
 ## Running as a GitHub App
 

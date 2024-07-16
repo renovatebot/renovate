@@ -10,12 +10,11 @@ import type {
   PackageFile,
 } from '../../../modules/manager/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as memCache from '../../../util/cache/memory';
-import type { LookupStats } from '../../../util/cache/memory/types';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import * as p from '../../../util/promises';
 import { Result } from '../../../util/result';
+import { LookupStats } from '../../../util/stats';
 import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig, UpdateResult } from './lookup/types';
@@ -82,42 +81,35 @@ async function lookup(
     return Result.ok(dep);
   }
 
-  logger.trace({ depName }, 'Dependency lookup start');
-  const start = Date.now();
+  return LookupStats.wrap(depConfig.datasource, async () => {
+    return await Result.wrap(lookupUpdates(depConfig as LookupUpdateConfig))
+      .onValue((dep) => {
+        logger.trace({ dep }, 'Dependency lookup success');
+      })
+      .onError((err) => {
+        logger.trace({ err, depName }, 'Dependency lookup error');
+      })
+      .catch((err): Result<UpdateResult, Error> => {
+        if (
+          packageFileConfig.repoIsOnboarded === true ||
+          !(err instanceof ExternalHostError)
+        ) {
+          return Result.err(err);
+        }
 
-  const result = await Result.wrap(
-    lookupUpdates(depConfig as LookupUpdateConfig),
-  )
-    .onValue((dep) => {
-      logger.trace({ dep }, 'Dependency lookup success');
-    })
-    .onError((err) => {
-      logger.trace({ err, depName }, 'Dependency lookup error');
-    })
-    .catch((err): Result<UpdateResult, Error> => {
-      if (
-        packageFileConfig.repoIsOnboarded === true ||
-        !(err instanceof ExternalHostError)
-      ) {
-        return Result.err(err);
-      }
-
-      const cause = err.err;
-      return Result.ok({
-        updates: [],
-        warnings: [
-          { topic: 'Lookup Error', message: `${depName}: ${cause.message}` },
-        ],
-      });
-    })
-    .transform((upd): PackageDependency => Object.assign(dep, upd));
-
-  const duration = Date.now() - start;
-  const lookups = memCache.get<LookupStats[]>('lookup-stats') || [];
-  lookups.push({ datasource: depConfig.datasource, duration });
-  memCache.set('lookup-stats', lookups);
-
-  return result;
+        const cause = err.err;
+        return Result.ok({
+          updates: [],
+          warnings: [
+            {
+              topic: 'Lookup Error',
+              message: `${depName}: ${cause.message}`,
+            },
+          ],
+        });
+      })
+      .transform((upd): PackageDependency => Object.assign(dep, upd));
+  });
 }
 
 function createLookupTasks(

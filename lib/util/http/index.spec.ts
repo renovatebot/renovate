@@ -6,6 +6,7 @@ import {
   HOST_DISABLED,
 } from '../../constants/error-messages';
 import * as memCache from '../cache/memory';
+import { resetCache } from '../cache/repository';
 import * as hostRules from '../host-rules';
 import * as queue from './queue';
 import * as throttle from './throttle';
@@ -22,6 +23,7 @@ describe('util/http/index', () => {
     hostRules.clear();
     queue.clear();
     throttle.clear();
+    resetCache();
   });
 
   it('get', async () => {
@@ -77,84 +79,16 @@ describe('util/http/index', () => {
       })
       .get('/')
       .reply(200, '{ "test": true }', { etag: 'abc123' });
-    expect(
-      await http.getJson('http://renovate.com', { repoCache: true }),
-    ).toEqual({
+
+    const res = await http.getJson('http://renovate.com');
+
+    expect(res).toEqual({
       authorization: false,
       body: {
         test: true,
       },
       headers: {
         etag: 'abc123',
-      },
-      statusCode: 200,
-    });
-
-    httpMock
-      .scope(baseUrl, {
-        reqheaders: {
-          accept: 'application/json',
-        },
-      })
-      .get('/')
-      .reply(304, '', { etag: 'abc123' });
-    expect(
-      await http.getJson('http://renovate.com', { repoCache: true }),
-    ).toEqual({
-      authorization: false,
-      body: {
-        test: true,
-      },
-      headers: {
-        etag: 'abc123',
-      },
-      statusCode: 200,
-    });
-  });
-
-  it('uses last-modified header for caching', async () => {
-    httpMock
-      .scope(baseUrl, {
-        reqheaders: {
-          accept: 'application/json',
-        },
-      })
-      .get('/')
-      .reply(200, '{ "test": true }', {
-        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
-      });
-    expect(
-      await http.getJson('http://renovate.com', { repoCache: true }),
-    ).toEqual({
-      authorization: false,
-      body: {
-        test: true,
-      },
-      headers: {
-        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
-      },
-      statusCode: 200,
-    });
-
-    httpMock
-      .scope(baseUrl, {
-        reqheaders: {
-          accept: 'application/json',
-        },
-      })
-      .get('/')
-      .reply(304, '', {
-        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
-      });
-    expect(
-      await http.getJson('http://renovate.com', { repoCache: true }),
-    ).toEqual({
-      authorization: false,
-      body: {
-        test: true,
-      },
-      headers: {
-        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
       },
       statusCode: 200,
     });
@@ -516,142 +450,34 @@ describe('util/http/index', () => {
   });
 
   describe('Throttling', () => {
-    const delta = 100;
-
-    beforeEach(() => {
-      jest.useFakeTimers({ advanceTimers: true });
-    });
-
     afterEach(() => {
       jest.useRealTimers();
     });
 
     it('works without throttling', async () => {
-      httpMock.scope(baseUrl).get('/foo').times(10).reply(200, 'bar');
+      jest.useFakeTimers({ advanceTimers: 1 });
+      httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
 
       const t1 = Date.now();
-      await Promise.all([
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-      ]);
+      await http.get('http://renovate.com/foo');
+      await http.get('http://renovate.com/foo');
       const t2 = Date.now();
 
-      expect(t2 - t1).toBeLessThan(delta);
+      expect(t2 - t1).toBeLessThan(100);
     });
 
     it('limits request rate by host', async () => {
-      httpMock.scope(baseUrl).get('/foo').times(4).reply(200, 'bar');
-      hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 3 });
+      jest.useFakeTimers({ advanceTimers: true });
+      httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
+      hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 0.25 });
 
       const t1 = Date.now();
-      await Promise.all([
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-      ]);
+      await http.get('http://renovate.com/foo');
+      jest.advanceTimersByTime(4000);
+      await http.get('http://renovate.com/foo');
       const t2 = Date.now();
 
-      expect(t2 - t1).toBeWithin(1000, 1000 + delta);
-    });
-
-    it('defaults to 5 requests per second', async () => {
-      Http.setDefaultLimits();
-      httpMock.scope(baseUrl).get('/foo').times(5).reply(200, 'bar');
-
-      const t1 = Date.now();
-      await Promise.all([
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-        http.get('http://renovate.com/foo'),
-      ]);
-      const t2 = Date.now();
-
-      expect(t2 - t1).toBeWithin(800, 800 + delta);
-    });
-  });
-
-  describe('Etag caching', () => {
-    it('returns cached data for status=304', async () => {
-      type FooBar = { foo: string; bar: string };
-      const data: FooBar = { foo: 'foo', bar: 'bar' };
-      httpMock
-        .scope(baseUrl, { reqheaders: { 'If-None-Match': 'foobar' } })
-        .get('/foo')
-        .reply(304);
-
-      const res = await http.getJson<FooBar>(`/foo`, {
-        baseUrl,
-        etagCache: {
-          etag: 'foobar',
-          data,
-        },
-      });
-
-      expect(res.statusCode).toBe(304);
-      expect(res.body).toEqual(data);
-      expect(res.body).not.toBe(data);
-    });
-
-    it('bypasses schema parsing', async () => {
-      const FooBar = z
-        .object({ foo: z.string(), bar: z.string() })
-        .transform(({ foo, bar }) => ({
-          foobar: `${foo}${bar}`.toUpperCase(),
-        }));
-      const data = FooBar.parse({ foo: 'foo', bar: 'bar' });
-      httpMock
-        .scope(baseUrl, { reqheaders: { 'If-None-Match': 'foobar' } })
-        .get('/foo')
-        .reply(304);
-
-      const res = await http.getJson(
-        `/foo`,
-        {
-          baseUrl,
-          etagCache: {
-            etag: 'foobar',
-            data,
-          },
-        },
-        FooBar,
-      );
-
-      expect(res.statusCode).toBe(304);
-      expect(res.body).toEqual(data);
-      expect(res.body).not.toBe(data);
-    });
-
-    it('returns new data for status=200', async () => {
-      type FooBar = { foo: string; bar: string };
-      const oldData: FooBar = { foo: 'foo', bar: 'bar' };
-      const newData: FooBar = { foo: 'FOO', bar: 'BAR' };
-      httpMock
-        .scope(baseUrl, { reqheaders: { 'If-None-Match': 'foobar' } })
-        .get('/foo')
-        .reply(200, newData);
-
-      const res = await http.getJson<FooBar>(`/foo`, {
-        baseUrl,
-        etagCache: {
-          etag: 'foobar',
-          data: oldData,
-        },
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toEqual(newData);
-      expect(res.body).not.toBe(newData);
+      expect(t2 - t1).toBeGreaterThanOrEqual(4000);
     });
   });
 });

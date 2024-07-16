@@ -97,7 +97,6 @@ export interface LocalRepoConfig {
   forkToken?: string;
   forkCreation?: boolean;
   prList: GhPr[] | null;
-  issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
   repositoryOwner: string;
@@ -133,6 +132,7 @@ export interface GhRepo {
       oid: string;
     };
   };
+  issues: { nodes: unknown[] };
 }
 
 export interface GhAutomergeResponse {

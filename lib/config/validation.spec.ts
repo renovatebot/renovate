@@ -25,7 +25,10 @@ describe('config/validation', () => {
       const config = {
         prTitle: 'something',
       };
-      const { warnings } = await configValidation.validateConfig(false, config);
+      const { warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(warnings).toHaveLength(1);
       expect(warnings).toMatchSnapshot();
     });
@@ -35,14 +38,37 @@ describe('config/validation', () => {
         binarySource: 'something',
         username: 'user',
       };
-      const { warnings } = await configValidation.validateConfig(false, config);
+      const { warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(warnings).toHaveLength(2);
       expect(warnings).toMatchObject([
         {
-          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
         {
-          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+        },
+      ]);
+    });
+
+    it('catches global options in inherit config', async () => {
+      const config = {
+        binarySource: 'something',
+        username: 'user',
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'inherit',
+        config,
+      );
+      expect(warnings).toHaveLength(2);
+      expect(warnings).toMatchObject([
+        {
+          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+        },
+        {
+          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
       ]);
     });
@@ -57,7 +83,21 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { warnings } = await configValidation.validateConfig(false, config);
+      const { warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('does not warn for valid inheritConfig', async () => {
+      const config = {
+        onboarding: false,
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'inherit',
+        config,
+      );
       expect(warnings).toHaveLength(0);
     });
 
@@ -65,7 +105,7 @@ describe('config/validation', () => {
       const config = {
         commitMessage: '{{{something}}',
       };
-      const { errors } = await configValidation.validateConfig(false, config);
+      const { errors } = await configValidation.validateConfig('repo', config);
       expect(errors).toHaveLength(1);
       expect(errors).toMatchSnapshot();
     });
@@ -95,7 +135,7 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { errors } = await configValidation.validateConfig(false, config);
+      const { errors } = await configValidation.validateConfig('repo', config);
       expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
     });
@@ -123,10 +163,15 @@ describe('config/validation', () => {
             matchCurrentValue: '/^2/i',
             enabled: true,
           },
+          {
+            matchPackageNames: ['bad'],
+            matchNewValue: '/^2(/',
+            enabled: true,
+          },
         ],
       };
-      const { errors } = await configValidation.validateConfig(false, config);
-      expect(errors).toHaveLength(2);
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toHaveLength(1);
     });
 
     it('catches invalid matchNewValue', async () => {
@@ -152,10 +197,50 @@ describe('config/validation', () => {
             matchNewValue: '/^2/i',
             enabled: true,
           },
+          {
+            matchPackageNames: ['bad'],
+            matchNewValue: '/^2(/',
+            enabled: true,
+          },
         ],
       };
-      const { errors } = await configValidation.validateConfig(false, config);
-      expect(errors).toHaveLength(2);
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toHaveLength(1);
+    });
+
+    it('validates matchBaseBranches', async () => {
+      const config = {
+        baseBranches: ['foo'],
+        packageRules: [
+          {
+            matchBaseBranches: ['foo'],
+            addLabels: ['foo'],
+          },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('catches invalid matchBaseBranches when baseBranches is not defined', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchBaseBranches: ['foo'],
+            addLabels: ['foo'],
+          },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
     });
 
     it('catches invalid matchCurrentVersion regex', async () => {
@@ -188,7 +273,7 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { errors } = await configValidation.validateConfig(false, config);
+      const { errors } = await configValidation.validateConfig('repo', config);
       expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
     });
@@ -197,25 +282,30 @@ describe('config/validation', () => {
       const config = {
         customDatasources: {
           foo: {
+            description: 3,
             randomKey: '',
             defaultRegistryUrlTemplate: [],
             transformTemplates: [{}],
           },
         },
       } as any;
-      const { errors } = await configValidation.validateConfig(false, config);
+      const { errors } = await configValidation.validateConfig('repo', config);
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `customDatasources.customDatasources.defaultRegistryUrlTemplate` configuration: is a string',
+            'Invalid `customDatasources.defaultRegistryUrlTemplate` configuration: is a string',
         },
         {
           message:
-            'Invalid `customDatasources.customDatasources.randomKey` configuration: key is not allowed',
+            'Invalid `customDatasources.description` configuration: is not an array of strings',
         },
         {
           message:
-            'Invalid `customDatasources.customDatasources.transformTemplates` configuration: is not an array of string',
+            'Invalid `customDatasources.randomKey` configuration: key is not allowed',
+        },
+        {
+          message:
+            'Invalid `customDatasources.transformTemplates` configuration: is not an array of string',
         },
       ]);
     });
@@ -230,7 +320,7 @@ describe('config/validation', () => {
         },
       };
       // @ts-expect-error invalid options
-      const { errors } = await configValidation.validateConfig(false, config);
+      const { errors } = await configValidation.validateConfig('repo', config);
       expect(errors).toMatchObject([
         {
           message:
@@ -250,7 +340,7 @@ describe('config/validation', () => {
           randomKey: '',
         },
       } as any;
-      const { errors } = await configValidation.validateConfig(false, config);
+      const { errors } = await configValidation.validateConfig('repo', config);
       expect(errors).toMatchObject([
         {
           message:
@@ -263,7 +353,7 @@ describe('config/validation', () => {
       const config = {
         baseBranches: ['/***$}{]][/', '/branch/i'],
       };
-      const { errors } = await configValidation.validateConfig(false, config);
+      const { errors } = await configValidation.validateConfig('repo', config);
       expect(errors).toEqual([
         {
           topic: 'Configuration Error',
@@ -290,7 +380,7 @@ describe('config/validation', () => {
         major: null,
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -308,7 +398,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -326,7 +416,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config as any,
       );
       expect(warnings).toHaveLength(0);
@@ -346,7 +436,7 @@ describe('config/validation', () => {
       ],
     ])('validates enabled managers for %s', async (_case, config) => {
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -364,7 +454,7 @@ describe('config/validation', () => {
       'errors if included not supported enabled managers for %s',
       async (_case, config) => {
         const { warnings, errors } = await configValidation.validateConfig(
-          false,
+          'repo',
           config,
         );
         expect(warnings).toHaveLength(0);
@@ -405,7 +495,7 @@ describe('config/validation', () => {
         major: null,
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(warnings).toHaveLength(1);
@@ -434,7 +524,7 @@ describe('config/validation', () => {
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(warnings).toHaveLength(4);
@@ -453,7 +543,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
         true,
       );
@@ -472,7 +562,7 @@ describe('config/validation', () => {
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -493,7 +583,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
         true,
       );
@@ -512,7 +602,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config as any,
         true,
       );
@@ -540,7 +630,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config as any,
         true,
       );
@@ -569,7 +659,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config as any,
         true,
       );
@@ -606,7 +696,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config as RenovateConfig,
         true,
       );
@@ -637,7 +727,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config as any,
         true,
       );
@@ -659,7 +749,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
         true,
       );
@@ -680,7 +770,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
         true,
       );
@@ -701,10 +791,20 @@ describe('config/validation', () => {
             extractVersionTemplate: '^(?<version>v\\d+\\.\\d+)',
             depTypeTemplate: 'apple',
           },
+          {
+            customType: 'regex',
+            fileMatch: ['Dockerfile'],
+            matchStrings: ['ENV (?<currentValue>.*?)\\s'],
+            packageNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            registryUrlTemplate: 'foobar',
+            extractVersionTemplate: '^(?<version>v\\d+\\.\\d+)',
+            depTypeTemplate: 'apple',
+          },
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
         true,
       );
@@ -727,7 +827,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config as any,
         true,
       );
@@ -748,7 +848,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
         true,
       );
@@ -762,7 +862,7 @@ describe('config/validation', () => {
         $schema: 'renovate.json',
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
         true,
       );
@@ -775,7 +875,7 @@ describe('config/validation', () => {
         extends: [':timezone', ':timezone(Europe/Berlin)'],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
         true,
       );
@@ -788,7 +888,7 @@ describe('config/validation', () => {
         constraints: { packageRules: [{}] },
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config as never, // TODO: #15963
         true,
       );
@@ -801,7 +901,7 @@ describe('config/validation', () => {
         prBodyDefinitions: {},
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
         true,
       );
@@ -817,7 +917,7 @@ describe('config/validation', () => {
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -833,7 +933,7 @@ describe('config/validation', () => {
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -854,7 +954,7 @@ describe('config/validation', () => {
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -887,7 +987,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(errors).toHaveLength(1);
@@ -908,7 +1008,7 @@ describe('config/validation', () => {
         },
       } as never;
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(errors).toHaveLength(1);
@@ -921,7 +1021,7 @@ describe('config/validation', () => {
         hostType: 'npm',
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(errors).toHaveLength(0);
@@ -934,7 +1034,7 @@ describe('config/validation', () => {
         extends: ['foo', 'bar', 42] as never,
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
         true,
       );
@@ -949,7 +1049,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
         true,
       );
@@ -968,7 +1068,7 @@ describe('config/validation', () => {
         ],
       } as any;
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
         true,
       );
@@ -988,7 +1088,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
         true,
       );
@@ -1004,11 +1104,14 @@ describe('config/validation', () => {
           example2: 123,
         },
       };
-      const { warnings } = await configValidation.validateConfig(false, config);
+      const { warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(warnings).toMatchObject([
         {
           topic: 'Configuration Error',
-          message: `The "customEnvVariables" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "customEnvVariables" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
       ]);
     });
@@ -1018,7 +1121,7 @@ describe('config/validation', () => {
         schedule: ['30 5 * * *'],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -1027,6 +1130,48 @@ describe('config/validation', () => {
           message:
             'Invalid schedule: `Invalid schedule: "30 5 * * *" has cron syntax, but doesn\'t have * as minutes`',
           topic: 'Configuration Error',
+        },
+      ]);
+    });
+
+    it('errors if invalid matchHost values in hostRules', async () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: '://',
+            token: 'token',
+          },
+          {
+            matchHost: '',
+            token: 'token',
+          },
+          {
+            matchHost: undefined,
+            token: 'token',
+          },
+          {
+            hostType: 'github',
+            token: 'token',
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Configuration option `hostRules[2].matchHost` should be a string',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid value for hostRules matchHost. It cannot be an empty string.',
+        },
+        {
+          topic: 'Configuration Error',
+          message: 'hostRules matchHost `://` is not a valid URL.',
         },
       ]);
     });
@@ -1046,7 +1191,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -1073,7 +1218,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -1100,7 +1245,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -1123,7 +1268,7 @@ describe('config/validation', () => {
         },
       };
       const { errors, warnings } = await configValidation.validateConfig(
-        false,
+        'repo',
         // @ts-expect-error: testing invalid values in env object
         config,
       );
@@ -1159,7 +1304,7 @@ describe('config/validation', () => {
         ],
       };
       const { errors, warnings } = await configValidation.validateConfig(
-        false,
+        'repo',
         config,
       );
       expect(errors).toMatchObject([
@@ -1177,6 +1322,69 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);
     });
+
+    it('catches when * or ** is combined with others patterns in a regexOrGlob option', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchRepositories: ['groupA/**', 'groupB/**'], // valid
+            enabled: false,
+          },
+          {
+            matchRepositories: ['*', 'repo'], // invalid
+            enabled: true,
+          },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toMatchObject([
+        {
+          message:
+            'packageRules[1].matchRepositories: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.',
+          topic: 'Configuration Error',
+        },
+      ]);
+      expect(errors).toHaveLength(1);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('catches when negative number is used for integer type', async () => {
+      const config = {
+        azureWorkItemId: -2,
+      };
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Configuration option `azureWorkItemId` should be a positive integer. Found negative value instead.',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
+    it('validates prPriority', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchDepNames: ['somedep'],
+            prPriority: -2,
+          },
+          {
+            matchDepNames: ['some-other-dep'],
+            prPriority: 2,
+          },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
   });
 
   describe('validateConfig() -> globaOnly options', () => {
@@ -1193,7 +1401,7 @@ describe('config/validation', () => {
         allowedHeaders: ['X-Auth-Token'],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        true,
+        'global',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -1211,7 +1419,10 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { errors } = await configValidation.validateConfig(true, config);
+      const { errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message:
@@ -1229,7 +1440,7 @@ describe('config/validation', () => {
         allowedEnv: ['SOME*'],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        true,
+        'global',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -1242,7 +1453,10 @@ describe('config/validation', () => {
           SOME_VAR: 'SOME_VALUE',
         },
       };
-      const { errors } = await configValidation.validateConfig(true, config);
+      const { errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message:
@@ -1277,7 +1491,7 @@ describe('config/validation', () => {
         reviewersSampleSize: null,
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        false,
+        'repo',
         // @ts-expect-error: contains invalid values
         config,
       );
@@ -1293,7 +1507,7 @@ describe('config/validation', () => {
           binarySource: 'invalid' as never,
         };
         const { warnings } = await configValidation.validateConfig(
-          true,
+          'global',
           config,
         );
         expect(warnings).toEqual([
@@ -1310,7 +1524,7 @@ describe('config/validation', () => {
           baseDir: false as never,
         };
         const { warnings } = await configValidation.validateConfig(
-          true,
+          'global',
           config,
         );
         expect(warnings).toEqual([
@@ -1326,7 +1540,7 @@ describe('config/validation', () => {
           requireConfig: 'invalid' as never,
         };
         const { warnings } = await configValidation.validateConfig(
-          true,
+          'global',
           config,
         );
         expect(warnings).toEqual([
@@ -1343,7 +1557,7 @@ describe('config/validation', () => {
           dryRun: 'invalid' as never,
         };
         const { warnings } = await configValidation.validateConfig(
-          true,
+          'global',
           config,
         );
         expect(warnings).toEqual([
@@ -1360,7 +1574,7 @@ describe('config/validation', () => {
           repositoryCache: 'invalid' as never,
         };
         const { warnings } = await configValidation.validateConfig(
-          true,
+          'global',
           config,
         );
         expect(warnings).toEqual([
@@ -1377,7 +1591,7 @@ describe('config/validation', () => {
           onboardingConfigFileName: 'invalid' as never,
         };
         const { warnings } = await configValidation.validateConfig(
-          true,
+          'global',
           config,
         );
         expect(warnings).toEqual([
@@ -1397,7 +1611,7 @@ describe('config/validation', () => {
           },
         };
         const { warnings } = await configValidation.validateConfig(
-          true,
+          'global',
           config,
         );
         expect(warnings).toEqual([
@@ -1408,7 +1622,7 @@ describe('config/validation', () => {
           },
           {
             topic: 'Configuration Error',
-            message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+            message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
           },
         ]);
       });
@@ -1425,7 +1639,7 @@ describe('config/validation', () => {
           },
         };
         const { warnings } = await configValidation.validateConfig(
-          true,
+          'global',
           config,
         );
         expect(warnings).toEqual([
@@ -1442,7 +1656,7 @@ describe('config/validation', () => {
           gitUrl: 'invalid' as never,
         };
         const { warnings } = await configValidation.validateConfig(
-          true,
+          'global',
           config,
         );
         expect(warnings).toEqual([
@@ -1460,7 +1674,10 @@ describe('config/validation', () => {
         unicodeEmoji: false,
         detectGlobalManagerConfig: 'invalid-type',
       };
-      const { warnings } = await configValidation.validateConfig(true, config);
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
       expect(warnings).toMatchObject([
         {
           message: `Configuration option \`detectGlobalManagerConfig\` should be a boolean. Found: ${JSON.stringify(
@@ -1476,7 +1693,10 @@ describe('config/validation', () => {
         prCommitsPerRunLimit: 2,
         gitTimeout: 'invalid-type',
       };
-      const { warnings } = await configValidation.validateConfig(true, config);
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
       expect(warnings).toMatchObject([
         {
           message: `Configuration option \`gitTimeout\` should be an integer. Found: ${JSON.stringify(
@@ -1492,9 +1712,10 @@ describe('config/validation', () => {
         allowedPostUpgradeCommands: ['cmd'],
         checkedBranches: 'invalid-type',
         gitNoVerify: ['invalid'],
+        mergeConfidenceDatasources: [1],
       };
       const { warnings } = await configValidation.validateConfig(
-        true,
+        'global',
         // @ts-expect-error: contains invalid values
         config,
       );
@@ -1503,6 +1724,11 @@ describe('config/validation', () => {
           message:
             'Configuration option `checkedBranches` should be a list (Array).',
           topic: 'Configuration Error',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid value `1` for `mergeConfidenceDatasources`. The allowed values are go, maven, npm, nuget, packagist, pypi, rubygems.',
         },
         {
           message:
@@ -1525,19 +1751,36 @@ describe('config/validation', () => {
         },
       };
       const { warnings } = await configValidation.validateConfig(
-        true,
+        'global',
         // @ts-expect-error: contains invalid values
         config,
       );
       expect(warnings).toMatchObject([
         {
+          topic: 'Configuration Error',
+          message:
+            'Configuration option `cacheTtlOverride.someField` should be an integer. Found: false (boolean).',
+        },
+        {
           message: 'Configuration option `secrets` should be a JSON object.',
           topic: 'Configuration Error',
         },
+      ]);
+    });
+
+    it('warns if negative number is used for integer type', async () => {
+      const config = {
+        prCommitsPerRunLimit: -2,
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toMatchObject([
         {
-          topic: 'Configuration Error',
           message:
-            'Invalid `cacheTtlOverride.someField` configuration: value must be an integer.',
+            'Configuration option `prCommitsPerRunLimit` should be a positive integer. Found negative value instead.',
+          topic: 'Configuration Error',
         },
       ]);
     });
@@ -1549,7 +1792,10 @@ describe('config/validation', () => {
           example2: 123,
         },
       };
-      const { warnings } = await configValidation.validateConfig(true, config);
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
       expect(warnings).toMatchObject([
         {
           message:
@@ -1567,7 +1813,7 @@ describe('config/validation', () => {
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        true,
+        'global',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -1586,12 +1832,102 @@ describe('config/validation', () => {
         autodiscoverTopics: null,
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        true,
+        'global',
         // @ts-expect-error: contains invalid values
         config,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
+    });
+
+    it('fails for missing reportPath if reportType is "s3"', async () => {
+      const config: RenovateConfig = {
+        reportType: 's3',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+
+    it('validates reportPath if reportType is "s3"', async () => {
+      const config: RenovateConfig = {
+        reportType: 's3',
+        reportPath: 's3://bucket-name/key-name',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('fails for missing reportPath if reportType is "file"', async () => {
+      const config: RenovateConfig = {
+        reportType: 'file',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+
+    it('validates reportPath if reportType is "file"', async () => {
+      const config: RenovateConfig = {
+        reportType: 'file',
+        reportPath: './report.json',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('catches when * or ** is combined with others patterns in a regexOrGlob option', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchRepositories: ['*', 'repo'], // invalid
+            enabled: false,
+          },
+        ],
+        allowedHeaders: ['*', '**'], // invalid
+        autodiscoverProjects: ['**', 'project'], // invalid
+        allowedEnv: ['env_var'], // valid
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toMatchObject([
+        {
+          message:
+            'allowedHeaders: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'autodiscoverProjects: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.',
+          topic: 'Configuration Error',
+        },
+      ]);
+
+      expect(errors).toMatchObject([
+        {
+          message:
+            'packageRules[0].matchRepositories: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.',
+          topic: 'Configuration Error',
+        },
+      ]);
+      expect(warnings).toHaveLength(2);
+      expect(errors).toHaveLength(1);
     });
   });
 });

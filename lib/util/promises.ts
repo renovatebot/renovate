@@ -15,7 +15,6 @@ export function handleMultipleErrors(errors: Error[]): never {
   if (hostError) {
     throw hostError;
   }
-
   if (
     errors.length === 1 ||
     new Set(errors.map(({ message }) => message)).size === 1

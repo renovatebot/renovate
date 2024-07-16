@@ -1,3 +1,5 @@
+import { codeBlock } from 'common-tags';
+import { extractAllPackageFiles } from '..';
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
 import { logger } from '../../../../logger';
@@ -258,6 +260,15 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('reads registryUrls from .yarnrc.yml', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && otherFile === '.yarnrc.yml') {
+            return Promise.resolve('.yarnrc.yml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.yarnrc.yml') {
           return Promise.resolve(
@@ -277,12 +288,22 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('reads registryUrls from .yarnrc', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && otherFile === '.yarnrc') {
+            return Promise.resolve('.yarnrc');
+          }
+          return Promise.resolve(null);
+        },
+      );
+
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.yarnrc') {
           return Promise.resolve('registry "https://registry.example.com"');
         }
         return Promise.resolve(null);
       });
+
       const res = await npmExtract.extractPackageFile(
         input02Content,
         'package.json',
@@ -291,6 +312,39 @@ describe('modules/manager/npm/extract/index', () => {
       expect(
         res?.deps.flatMap((dep) => dep.registryUrls),
       ).toBeArrayIncludingOnly(['https://registry.example.com']);
+    });
+
+    it('resolves registry URLs using the package name if set', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && otherFile === '.yarnrc.yml') {
+            return Promise.resolve('.yarnrc.yml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === '.yarnrc.yml') {
+          return Promise.resolve(codeBlock`
+            npmScopes:
+              yarnpkg:
+                  npmRegistryServer: https://registry.example.com
+          `);
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        '{"packageManager": "yarn@4.1.1"}',
+        'package.json',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        expect.objectContaining({
+          depName: 'yarn',
+          registryUrls: ['https://registry.example.com'],
+        }),
+      ]);
     });
 
     it('finds complex yarn workspaces', async () => {
@@ -747,6 +801,15 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('sets skipInstalls false if Yarn zero-install is used', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && otherFile === '.yarnrc.yml') {
+            return Promise.resolve('.yarnrc.yml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === 'yarn.lock') {
           return Promise.resolve('# yarn.lock');
@@ -869,15 +932,95 @@ describe('modules/manager/npm/extract/index', () => {
         ],
       });
     });
+
+    it('extracts dependencies from pnpm.overrides', async () => {
+      const content = `{
+        "devDependencies": {
+          "@types/react": "18.0.5"
+        },
+        "pnpm": {
+          "overrides": {
+            "node": "8.9.2",
+            "@types/react": "18.0.5",
+            "baz": {
+              "node": "8.9.2",
+              "bar": {
+                "foo": "1.0.0"
+              }
+            },
+            "foo2": {
+              ".": "1.0.0",
+              "bar2": "1.0.0"
+            },
+            "emptyObject":{}
+          }
+        }
+      }`;
+      const res = await npmExtract.extractPackageFile(
+        content,
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res).toMatchObject({
+        deps: [
+          {
+            depType: 'devDependencies',
+            depName: '@types/react',
+            currentValue: '18.0.5',
+            datasource: 'npm',
+            prettyDepType: 'devDependency',
+          },
+          {
+            depType: 'pnpm.overrides',
+            depName: 'node',
+            currentValue: '8.9.2',
+            datasource: 'npm',
+            commitMessageTopic: 'Node.js',
+            prettyDepType: 'overrides',
+          },
+          {
+            depType: 'pnpm.overrides',
+            depName: '@types/react',
+            currentValue: '18.0.5',
+            datasource: 'npm',
+            prettyDepType: 'overrides',
+          },
+          {
+            depName: 'node',
+            managerData: { parents: ['baz'] },
+            commitMessageTopic: 'Node.js',
+            currentValue: '8.9.2',
+            datasource: 'npm',
+          },
+          {
+            depName: 'foo',
+            managerData: { parents: ['baz', 'bar'] },
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+          {
+            depName: 'foo2',
+            managerData: { parents: ['foo2'] },
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+          {
+            depName: 'bar2',
+            managerData: { parents: ['foo2'] },
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+        ],
+      });
+    });
   });
 
   describe('.extractAllPackageFiles()', () => {
     it('runs', async () => {
       fs.readLocalFile.mockResolvedValueOnce(input02Content);
-      const res = await npmExtract.extractAllPackageFiles(
-        defaultExtractConfig,
-        ['package.json'],
-      );
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        'package.json',
+      ]);
       expect(res).toEqual([
         {
           deps: [

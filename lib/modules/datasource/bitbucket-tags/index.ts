@@ -2,7 +2,8 @@ import { cache } from '../../../util/cache/package/decorator';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import { ensureTrailingSlash } from '../../../util/url';
-import type { PagedResult, RepoInfoBody } from '../../platform/bitbucket/types';
+import { RepoInfo } from '../../platform/bitbucket/schema';
+import type { PagedResult } from '../../platform/bitbucket/types';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import type { BitbucketCommit, BitbucketTag } from './types';
@@ -17,6 +18,13 @@ export class BitbucketTagsDatasource extends Datasource {
   static readonly registryStrategy = 'first';
 
   static readonly defaultRegistryUrls = ['https://bitbucket.org'];
+
+  static readonly releaseTimestampSupport = true;
+  static readonly releaseTimestampNote =
+    'The release timestamp is determined from the `date` field in the results.';
+  static readonly sourceUrlSupport = 'package';
+  static readonly sourceUrlNote =
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   static readonly cacheNamespace: PackageCacheNamespace = `datasource-${BitbucketTagsDatasource.id}`;
 
@@ -102,10 +110,8 @@ export class BitbucketTagsDatasource extends Datasource {
   })
   async getMainBranch(repo: string): Promise<string> {
     return (
-      await this.bitbucketHttp.getJson<RepoInfoBody>(
-        `/2.0/repositories/${repo}`,
-      )
-    ).body.mainbranch.name;
+      await this.bitbucketHttp.getJson(`/2.0/repositories/${repo}`, RepoInfo)
+    ).body.mainbranch;
   }
 
   // getDigest fetched the latest commit for repository main branch
