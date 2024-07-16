@@ -646,14 +646,14 @@ async function ignoreApprovals(pr: number): Promise<void> {
 
 async function tryPrAutomerge(
   pr: number,
-  platformOptions: PlatformPrOptions | undefined,
+  platformPrOptions: PlatformPrOptions | undefined,
 ): Promise<void> {
   try {
-    if (platformOptions?.gitLabIgnoreApprovals) {
+    if (platformPrOptions?.gitLabIgnoreApprovals) {
       await ignoreApprovals(pr);
     }
 
-    if (platformOptions?.usePlatformAutomerge) {
+    if (platformPrOptions?.usePlatformAutomerge) {
       // https://docs.gitlab.com/ee/api/merge_requests.html#merge-status
       const desiredDetailedMergeStatus = [
         'mergeable',
@@ -753,7 +753,7 @@ export async function createPr({
   prBody: rawDescription,
   draftPR,
   labels,
-  platformOptions,
+  platformPrOptions,
 }: CreatePRConfig): Promise<Pr> {
   let title = prTitle;
   if (draftPR) {
@@ -783,11 +783,11 @@ export async function createPr({
     config.prList.push(pr);
   }
 
-  if (platformOptions?.autoApprove) {
+  if (platformPrOptions?.autoApprove) {
     await approvePr(pr.iid);
   }
 
-  await tryPrAutomerge(pr.iid, platformOptions);
+  await tryPrAutomerge(pr.iid, platformPrOptions);
 
   return massagePr(pr);
 }
@@ -821,7 +821,7 @@ export async function updatePr({
   addLabels,
   removeLabels,
   state,
-  platformOptions,
+  platformPrOptions,
   targetBranch,
 }: UpdatePrConfig): Promise<void> {
   let title = prTitle;
@@ -856,16 +856,16 @@ export async function updatePr({
     { body },
   );
 
-  if (platformOptions?.autoApprove) {
+  if (platformPrOptions?.autoApprove) {
     await approvePr(iid);
   }
 }
 
 export async function reattemptPlatformAutomerge({
   number: iid,
-  platformOptions,
+  platformPrOptions,
 }: ReattemptPlatformAutomergeConfig): Promise<void> {
-  await tryPrAutomerge(iid, platformOptions);
+  await tryPrAutomerge(iid, platformPrOptions);
 
   logger.debug(`PR platform automerge re-attempted...prNo: ${iid}`);
 }

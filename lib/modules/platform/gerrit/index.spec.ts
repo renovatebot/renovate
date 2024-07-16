@@ -225,7 +225,7 @@ describe('modules/platform/gerrit/index', () => {
       await gerrit.updatePr({
         number: 123456,
         prTitle: 'subject',
-        platformOptions: {
+        platformPrOptions: {
           autoApprove: true,
         },
       });
@@ -338,7 +338,7 @@ describe('modules/platform/gerrit/index', () => {
         targetBranch: 'target',
         prTitle: 'title',
         prBody: 'body',
-        platformOptions: {
+        platformPrOptions: {
           autoApprove: false,
         },
       });
@@ -362,7 +362,7 @@ describe('modules/platform/gerrit/index', () => {
         targetBranch: 'target',
         prTitle: change.subject,
         prBody: 'body',
-        platformOptions: {
+        platformPrOptions: {
           autoApprove: true,
         },
       });
