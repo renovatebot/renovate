@@ -386,7 +386,7 @@ export async function ensurePr(
         number: existingPr.number,
         prTitle,
         prBody,
-        platformOptions: getPlatformPrOptions(config),
+        platformPrOptions: getPlatformPrOptions(config),
       };
       // PR must need updating
       if (existingPr?.targetBranch !== config.baseBranch) {
@@ -490,7 +490,7 @@ export async function ensurePr(
           prTitle,
           prBody,
           labels: prepareLabels(config),
-          platformOptions: getPlatformPrOptions(config),
+          platformPrOptions: getPlatformPrOptions(config),
           draftPR: !!config.draftPR,
           milestone: config.milestone,
         });
