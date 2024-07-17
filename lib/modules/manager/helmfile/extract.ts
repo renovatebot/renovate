@@ -12,7 +12,7 @@ import type {
   PackageFileContent,
 } from '../types';
 import type { Doc } from './schema';
-import {Doc as documentSchema, HelmRepository} from './schema';
+import { HelmRepository, Doc as documentSchema } from './schema';
 import {
   kustomizationsKeysUsed,
   localChartHasKustomizationsYaml,
@@ -57,7 +57,7 @@ export async function extractPackageFile(
     if (doc.repositories) {
       registryData = {};
       // used for printing only
-      let registryAliases: Record<string, string> = {};
+      const registryAliases: Record<string, string> = {};
       for (let i = 0; i < doc.repositories.length; i += 1) {
         registryData[doc.repositories[i].name] = doc.repositories[i];
         registryAliases[doc.repositories[i].name] = doc.repositories[i].url;
@@ -123,8 +123,7 @@ export async function extractPackageFile(
         res.packageName = repoName + '/' + depName;
       } else if (registryData[repoName]?.oci) {
         res.datasource = DockerDatasource.id;
-        res.packageName = registryData[repoName]?.url
-          + '/' + depName;
+        res.packageName = registryData[repoName]?.url + '/' + depName;
       }
 
       // By definition on helm the chart name should be lowercase letter + number + -
