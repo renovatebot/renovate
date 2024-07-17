@@ -1,8 +1,7 @@
 import pThrottle from 'p-throttle';
 import { logger } from '../../logger';
 import { parseUrl } from '../url';
-import { getDefaultThrottleIntervalMs } from './default-limits';
-import { getThrottleIntervalMs } from './host-rules';
+import { getThrottleIntervalMs } from './rate-limits';
 
 const hostThrottles = new Map<string, Throttle | null>();
 
@@ -34,11 +33,7 @@ export function getThrottle(url: string): Throttle | null {
   let throttle = hostThrottles.get(host);
   if (throttle === undefined) {
     throttle = null; // null represents "no throttle", as opposed to undefined
-    const hostThrottleMs = getThrottleIntervalMs(url);
-    const defaultThrottleMs = getDefaultThrottleIntervalMs(url);
-    const throttleMs = Math.max(
-      ...[hostThrottleMs, defaultThrottleMs].filter((x) => x !== null),
-    );
+    const throttleMs = getThrottleIntervalMs(url);
     if (throttleMs) {
       const intervalMs = throttleMs;
       logger.debug(`Using throttle ${intervalMs} intervalMs for host ${host}`);

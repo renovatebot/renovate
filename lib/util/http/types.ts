@@ -94,6 +94,6 @@ export type GotTask<T> = Task<HttpResponse<T>>;
 
 export interface RateLimitRule {
   matchHost: string;
-  throttleIntervalMs?: number;
-  maxConcurrentRequests?: number;
+  throttleMs?: number;
+  concurrency?: number;
 }
