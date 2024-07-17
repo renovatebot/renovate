@@ -36,14 +36,13 @@ export class GlobalConfig {
     'httpCacheTtlDays',
     'autodiscoverRepoSort',
     'autodiscoverRepoOrder',
-    'mergeConfidenceEndpoint',
-    'mergeConfidenceDatasources',
     'userAgent',
     'dockerMaxPages',
     'gitlabAutoMergeableCheckAttempts',
     'gitlabBranchStatusDelay',
     'gitlabMergeRequestDelay',
     'platformVersion',
+    'cachePrivatePackages',
   ];
 
   private static config: RepoGlobalConfig = {};

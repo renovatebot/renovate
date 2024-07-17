@@ -96,7 +96,7 @@ export const id = 'github';
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
 
-export const GitHubMaxPrBodyLen = 60000;
+const GitHubMaxPrBodyLen = 60000;
 
 export function resetConfigs(): void {
   config = {} as never;
@@ -1214,7 +1214,7 @@ async function getIssues(): Promise<Issue[]> {
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
-        user: config.renovateUsername,
+        ...(!config.ignorePrAuthor && { user: config.renovateUsername }),
       },
       readOnly: true,
     },
@@ -1659,9 +1659,9 @@ export async function ensureCommentRemoval(
 async function tryPrAutomerge(
   prNumber: number,
   prNodeId: string,
-  platformOptions: PlatformPrOptions | undefined,
+  platformPrOptions: PlatformPrOptions | undefined,
 ): Promise<void> {
-  if (!platformOptions?.usePlatformAutomerge) {
+  if (!platformPrOptions?.usePlatformAutomerge) {
     return;
   }
 
@@ -1718,7 +1718,7 @@ export async function createPr({
   prBody: rawBody,
   labels,
   draftPR = false,
-  platformOptions,
+  platformPrOptions,
   milestone,
 }: CreatePRConfig): Promise<GhPr | null> {
   const body = sanitize(rawBody);
@@ -1741,7 +1741,7 @@ export async function createPr({
     options.token = config.forkToken;
     options.body.maintainer_can_modify =
       !config.forkOrg &&
-      platformOptions?.forkModeDisallowMaintainerEdits !== true;
+      platformPrOptions?.forkModeDisallowMaintainerEdits !== true;
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
   const ghPr = (
@@ -1760,7 +1760,7 @@ export async function createPr({
 
   await addLabels(number, labels);
   await tryAddMilestone(number, milestone);
-  await tryPrAutomerge(number, node_id, platformOptions);
+  await tryPrAutomerge(number, node_id, platformPrOptions);
 
   cachePr(result);
   return result;
@@ -1824,13 +1824,13 @@ export async function updatePr({
 
 export async function reattemptPlatformAutomerge({
   number,
-  platformOptions,
+  platformPrOptions,
 }: ReattemptPlatformAutomergeConfig): Promise<void> {
   try {
     const result = (await getPr(number))!;
     const { node_id } = result;
 
-    await tryPrAutomerge(number, node_id, platformOptions);
+    await tryPrAutomerge(number, node_id, platformPrOptions);
 
     logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
   } catch (err) {
@@ -1938,7 +1938,7 @@ export async function mergePr({
 
 export function massageMarkdown(input: string): string {
   if (platformConfig.isGhe) {
-    return smartTruncate(input, GitHubMaxPrBodyLen);
+    return smartTruncate(input, maxBodyLength());
   }
   const massagedInput = massageMarkdownLinks(input)
     // to be safe, replace all github.com links with renovatebot redirector
@@ -1952,7 +1952,11 @@ export function massageMarkdown(input: string): string {
     .replace('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
     .replace('> ⚠️ **Warning**\n> \n', '> [!WARNING]\n')
     .replace('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
-  return smartTruncate(massagedInput, GitHubMaxPrBodyLen);
+  return smartTruncate(massagedInput, maxBodyLength());
+}
+
+export function maxBodyLength(): number {
+  return GitHubMaxPrBodyLen;
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

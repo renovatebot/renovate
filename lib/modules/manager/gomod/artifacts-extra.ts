@@ -94,8 +94,12 @@ export function getExtraDepsNotice(
   const goUpdated = extraDeps.some(({ depName }) => depName === 'go');
   const otherDepsCount = extraDeps.length - (goUpdated ? 1 : 0);
 
-  if (otherDepsCount > 0) {
+  if (otherDepsCount === 1) {
     noticeLines.push(`- ${otherDepsCount} additional dependency was updated`);
+  } else if (otherDepsCount > 1) {
+    noticeLines.push(
+      `- ${otherDepsCount} additional dependencies were updated`,
+    );
   }
 
   if (goUpdated) {
@@ -106,6 +110,7 @@ export function getExtraDepsNotice(
 
   noticeLines.push('\n');
   noticeLines.push('Details:');
+  noticeLines.push('\n');
   noticeLines.push(extraDepsTable(extraDeps));
 
   return noticeLines.join('\n');

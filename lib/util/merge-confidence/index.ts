@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../config/global';
 import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence';
-import type { UpdateType } from '../../config/types';
+import type { AllConfig, UpdateType } from '../../config/types';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../cache/package';
@@ -25,31 +24,19 @@ export const confidenceLevels: Record<MergeConfidence, number> = {
   'very high': 2,
 };
 
-export function initConfig(): void {
-  apiBaseUrl = getApiBaseUrl();
+export function initConfig({
+  mergeConfidenceEndpoint,
+  mergeConfidenceDatasources,
+}: AllConfig): void {
+  apiBaseUrl = getApiBaseUrl(mergeConfidenceEndpoint);
   token = getApiToken();
-  supportedDatasources = parseSupportedDatasourceString();
+
+  supportedDatasources =
+    mergeConfidenceDatasources ?? presetSupportedDatasources;
 
   if (!is.nullOrUndefined(token)) {
     logger.debug(`Merge confidence token found for ${apiBaseUrl}`);
   }
-}
-
-export function parseSupportedDatasourceString(): string[] {
-  const supportedDatasources = GlobalConfig.get(
-    'mergeConfidenceDatasources',
-    presetSupportedDatasources,
-  );
-
-  if (!is.array(supportedDatasources, is.string)) {
-    logger.warn(
-      { supportedDatasources },
-      `Expected a string array but got ${typeof supportedDatasources} - using default value instead`,
-    );
-    return presetSupportedDatasources;
-  }
-
-  return supportedDatasources;
 }
 
 export function resetConfig(): void {
@@ -205,8 +192,8 @@ async function queryApi(
  * authenticate with the API. If either the base URL or token is not defined, it will immediately return
  * without making a request.
  */
-export async function initMergeConfidence(): Promise<void> {
-  initConfig();
+export async function initMergeConfidence(config: AllConfig): Promise<void> {
+  initConfig(config);
 
   if (is.nullOrUndefined(apiBaseUrl) || is.nullOrUndefined(token)) {
     logger.trace('merge confidence API usage is disabled');
@@ -227,12 +214,9 @@ export async function initMergeConfidence(): Promise<void> {
   return;
 }
 
-function getApiBaseUrl(): string {
+function getApiBaseUrl(mergeConfidenceEndpoint: string | undefined): string {
   const defaultBaseUrl = 'https://developer.mend.io/';
-  const baseFromEnv = GlobalConfig.get(
-    'mergeConfidenceEndpoint',
-    defaultBaseUrl,
-  );
+  const baseFromEnv = mergeConfidenceEndpoint ?? defaultBaseUrl;
 
   try {
     const parsedBaseUrl = new URL(baseFromEnv).toString();

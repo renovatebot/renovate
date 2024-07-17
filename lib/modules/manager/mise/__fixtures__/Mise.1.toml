@@ -1,0 +1,19 @@
+[env]
+# supports arbitrary env vars so mise can be used like direnv/dotenv
+NODE_ENV = 'production'
+
+[tools]
+# specify single or multiple versions
+java = '21.0.2'
+erlang = ['23.3', '24.0']
+
+# supports everything you can do with .tool-versions currently
+node = ['16', 'prefix:20', 'ref:master', 'path:~/.nodes/14']
+
+[plugins]
+# specify a custom repo URL
+# note this will only be used if the plugin does not already exist
+python = 'https://github.com/asdf-community/asdf-python'
+
+[alias.node] # project-local aliases
+my_custom_node = '20'

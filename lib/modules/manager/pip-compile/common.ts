@@ -9,7 +9,7 @@ import { ensureLocalPath } from '../../../util/fs/util';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types';
-import type { PipCompileArgs } from './types';
+import type { PipCompileArgs, SupportedManagers } from './types';
 
 export function getPythonVersionConstraint(
   config: UpdateArtifactsConfig,
@@ -281,13 +281,17 @@ function cleanUrl(url: string): URL | null {
   }
 }
 
-export function getRegistryCredVarsFromPackageFile(
-  packageFile: PackageFileContent | null,
+export function getRegistryCredVarsFromPackageFiles(
+  packageFiles: PackageFileContent[],
 ): ExtraEnv<string> {
-  const urls = [
-    ...(packageFile?.registryUrls ?? []),
-    ...(packageFile?.additionalRegistryUrls ?? []),
-  ];
+  const urls: string[] = [];
+  for (const packageFile of packageFiles) {
+    urls.push(
+      ...(packageFile.registryUrls ?? []),
+      ...(packageFile.additionalRegistryUrls ?? []),
+    );
+  }
+  logger.debug(urls, 'Extracted registry URLs from package files');
 
   const uniqueHosts = new Set<URL>(
     urls.map(cleanUrl).filter(isNotNullOrUndefined),
@@ -303,4 +307,21 @@ export function getRegistryCredVarsFromPackageFile(
   }
 
   return allCreds;
+}
+
+export function matchManager(filename: string): SupportedManagers | 'unknown' {
+  if (filename.endsWith('setup.py')) {
+    return 'pip_setup';
+  }
+  if (filename.endsWith('setup.cfg')) {
+    return 'setup-cfg';
+  }
+  if (filename.endsWith('pyproject.toml')) {
+    return 'pep621';
+  }
+  // naive, could be improved, maybe use pip_requirements.fileMatch
+  if (filename.endsWith('.in') || filename.endsWith('.txt')) {
+    return 'pip_requirements';
+  }
+  return 'unknown';
 }

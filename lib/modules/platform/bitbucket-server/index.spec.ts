@@ -1486,7 +1486,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             targetBranch: 'master',
             prTitle: 'title',
             prBody: 'body',
-            platformOptions: {
+            platformPrOptions: {
               bbUseDefaultReviewers: true,
             },
           });
@@ -1513,7 +1513,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             prTitle: 'title',
             prBody: 'body',
             labels: null,
-            platformOptions: {
+            platformPrOptions: {
               bbUseDefaultReviewers: true,
             },
           });

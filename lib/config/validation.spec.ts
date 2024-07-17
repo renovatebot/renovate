@@ -208,6 +208,41 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
     });
 
+    it('validates matchBaseBranches', async () => {
+      const config = {
+        baseBranches: ['foo'],
+        packageRules: [
+          {
+            matchBaseBranches: ['foo'],
+            addLabels: ['foo'],
+          },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('catches invalid matchBaseBranches when baseBranches is not defined', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchBaseBranches: ['foo'],
+            addLabels: ['foo'],
+          },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
+    });
+
     it('catches invalid matchCurrentVersion regex', async () => {
       const config = {
         packageRules: [
@@ -1099,6 +1134,48 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('errors if invalid matchHost values in hostRules', async () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: '://',
+            token: 'token',
+          },
+          {
+            matchHost: '',
+            token: 'token',
+          },
+          {
+            matchHost: undefined,
+            token: 'token',
+          },
+          {
+            hostType: 'github',
+            token: 'token',
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Configuration option `hostRules[2].matchHost` should be a string',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid value for hostRules matchHost. It cannot be an empty string.',
+        },
+        {
+          topic: 'Configuration Error',
+          message: 'hostRules matchHost `://` is not a valid URL.',
+        },
+      ]);
+    });
+
     it('errors if forbidden header in hostRules', async () => {
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
 
@@ -1272,6 +1349,41 @@ describe('config/validation', () => {
       ]);
       expect(errors).toHaveLength(1);
       expect(warnings).toHaveLength(0);
+    });
+
+    it('catches when negative number is used for integer type', async () => {
+      const config = {
+        azureWorkItemId: -2,
+      };
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Configuration option `azureWorkItemId` should be a positive integer. Found negative value instead.',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
+    it('validates prPriority', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchDepNames: ['somedep'],
+            prPriority: -2,
+          },
+          {
+            matchDepNames: ['some-other-dep'],
+            prPriority: 2,
+          },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
     });
   });
 
@@ -1645,13 +1757,30 @@ describe('config/validation', () => {
       );
       expect(warnings).toMatchObject([
         {
+          topic: 'Configuration Error',
+          message:
+            'Configuration option `cacheTtlOverride.someField` should be an integer. Found: false (boolean).',
+        },
+        {
           message: 'Configuration option `secrets` should be a JSON object.',
           topic: 'Configuration Error',
         },
+      ]);
+    });
+
+    it('warns if negative number is used for integer type', async () => {
+      const config = {
+        prCommitsPerRunLimit: -2,
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toMatchObject([
         {
-          topic: 'Configuration Error',
           message:
-            'Invalid `cacheTtlOverride.someField` configuration: value must be an integer.',
+            'Configuration option `prCommitsPerRunLimit` should be a positive integer. Found negative value instead.',
+          topic: 'Configuration Error',
         },
       ]);
     });

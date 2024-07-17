@@ -91,7 +91,7 @@ describe('modules/manager/gomod/artifacts-extra', () => {
       expect(res).toBeNull();
     });
 
-    it('returns a notice when there are extra dependencies', () => {
+    it('returns a notice when there is an extra dependency', () => {
       const excludeDeps = ['go', 'github.com/foo/foo'];
 
       const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps);
@@ -105,8 +105,34 @@ describe('modules/manager/gomod/artifacts-extra', () => {
           '',
           '',
           'Details:',
+          '',
+          '',
           '| **Package**          | **Change**           |',
           '| :------------------- | :------------------- |',
+          '| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |',
+        ].join('\n'),
+      );
+    });
+
+    it('returns a notice when there are extra dependencies', () => {
+      const excludeDeps = ['go'];
+
+      const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps);
+
+      expect(res).toEqual(
+        [
+          'In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):',
+          '',
+          '',
+          '- 2 additional dependencies were updated',
+          '',
+          '',
+          'Details:',
+          '',
+          '',
+          '| **Package**          | **Change**           |',
+          '| :------------------- | :------------------- |',
+          '| `github.com/foo/foo` | `v1.0.0` -> `v1.1.1` |',
           '| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |',
         ].join('\n'),
       );
@@ -127,6 +153,8 @@ describe('modules/manager/gomod/artifacts-extra', () => {
           '',
           '',
           'Details:',
+          '',
+          '',
           '| **Package**          | **Change**           |',
           '| :------------------- | :------------------- |',
           '| `go`                 | `1.22.0` -> `1.22.2` |',

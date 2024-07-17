@@ -28,7 +28,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         enabled: false,
-        matchPackageNames: ['*'],
+        matchPackagePatterns: ['*'],
       },
     ],
     vulnerabilityAlerts: {
