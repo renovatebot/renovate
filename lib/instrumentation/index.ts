@@ -24,7 +24,7 @@ import {
 } from '@opentelemetry/sdk-trace-base';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { pkg } from '../expose.cjs';
+import pkg from '../../package.json';
 import {
   isTraceDebuggingEnabled,
   isTraceSendingEnabled,

@@ -3,6 +3,7 @@ import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import semver from 'semver';
 import upath from 'upath';
+import pkg from '../../../package.json';
 import * as configParser from '../../config';
 import { mergeChildConfig } from '../../config';
 import { GlobalConfig } from '../../config/global';
@@ -14,7 +15,6 @@ import type {
   RenovateRepository,
 } from '../../config/types';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
-import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
 import { exportStats, finalizeReport } from '../../instrumentation/reporting';
 import { getProblems, logger, setMeta } from '../../logger';
