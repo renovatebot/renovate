@@ -5,7 +5,7 @@ import type { Preset } from '../types';
 async function getMonorepoPresets(): Promise<Record<string, Preset>> {
   const presets: Record<string, Preset> = {};
   const groups = JSON.parse(
-    await fs.readFile('lib/data/monorepos.json', 'utf8'),
+    await fs.readFile('lib/data/monorepo.json', 'utf8'),
   );
 
   for (const [name, value] of Object.entries(groups.repoGroups ?? {})) {
