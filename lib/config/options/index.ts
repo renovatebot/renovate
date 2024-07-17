@@ -3158,6 +3158,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     supportedPlatforms: ['gitlab', 'bitbucket-server'],
   },
+  {
     name: 'cachePrivatePackages',
     description:
       'Cache private packages in the datasource cache. This is useful for self-hosted setups',
