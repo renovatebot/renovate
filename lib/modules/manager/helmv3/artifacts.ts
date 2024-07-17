@@ -32,21 +32,19 @@ async function helmCommands(
   repositories: Repository[],
 ): Promise<void> {
   const cmd: string[] = [];
-  // get OCI registries and detect host rules
+  // Get OCI registries and detect host rules
   const registries: RepositoryRule[] = repositories
     .filter(isOCIRegistry)
-    .map((value) => {
-      return {
-        ...value,
-        repository: removeOCIPrefix(value.repository),
-        hostRule: hostRules.find({
-          url: value.repository.replace('oci://', 'https://'), //TODO we need to replace this, as oci:// will not be accepted as protocol
-          hostType: DockerDatasource.id,
-        }),
-      };
-    });
+    .map((value) => ({
+      ...value,
+      repository: removeOCIPrefix(value.repository),
+      hostRule: hostRules.find({
+        url: value.repository.replace('oci://', 'https://'),
+        hostType: DockerDatasource.id,
+      }),
+    }));
 
-  // if credentials for the registry have been found, log into it
+  // Log into OCI registries if credentials are found
   await pMap(registries, async (value) => {
     const loginCmd = await generateLoginCmd(value, 'helm registry login');
     if (loginCmd) {
@@ -54,25 +52,22 @@ async function helmCommands(
     }
   });
 
-  // find classic Chart repositories and fitting host rules
+  // Find classic Chart repositories and fitting host rules
   const classicRepositories: RepositoryRule[] = repositories
     .filter((repository) => !isOCIRegistry(repository))
-    .map((value) => {
-      return {
-        ...value,
-        hostRule: hostRules.find({
-          url: value.repository,
-          hostType: HelmDatasource.id,
-        }),
-      };
-    });
+    .map((value) => ({
+      ...value,
+      hostRule: hostRules.find({
+        url: value.repository,
+        hostType: HelmDatasource.id,
+      }),
+    }));
 
-  // add helm repos if an alias or credentials for the url are defined
+  // Add helm repos if an alias or credentials for the URL are defined
   classicRepositories.forEach((value) => {
     const { username, password } = value.hostRule;
-    const parameters = [`${quote(value.repository)}`, `--force-update`];
-    const isPrivateRepo = username && password;
-    if (isPrivateRepo) {
+    const parameters = [`${quote(value.repository)}`, '--force-update'];
+    if (username && password) {
       parameters.push(`--username ${quote(username)}`);
       parameters.push(`--password ${quote(password)}`);
     }
@@ -100,7 +95,7 @@ export async function updateArtifacts({
 
   if (
     !isLockFileMaintenance &&
-    (updatedDeps === undefined || updatedDeps.length < 1)
+    (!updatedDeps || updatedDeps.length < 1)
   ) {
     logger.debug('No updated helmv3 deps - returning null');
     return null;
@@ -113,8 +108,7 @@ export async function updateArtifacts({
     return null;
   }
   try {
-    // get repositories and registries defined in the package file
-    // TODO: use schema (#9610)
+    // Get repositories and registries defined in the package file
     const packages = yaml.parseSingleYaml<ChartDefinition>(
       newPackageFileContent,
     );
@@ -123,7 +117,6 @@ export async function updateArtifacts({
       : { dependencies: [] };
 
     const chartDefinitions: ChartDefinition[] = [];
-    // prioritize registryAlias naming for Helm repositories
     if (config.registryAliases) {
       chartDefinitions.push({
         dependencies: aliasRecordToRepositories(config.registryAliases),
@@ -153,8 +146,7 @@ export async function updateArtifacts({
 
     if (is.truthy(existingLockFileContent)) {
       const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
-      const isLockFileChanged = existingLockFileContent !== newHelmLockContent;
-      if (isLockFileChanged) {
+      if (existingLockFileContent !== newHelmLockContent) {
         fileChanges.push({
           file: {
             type: 'addition',
@@ -167,15 +159,13 @@ export async function updateArtifacts({
       }
     }
 
-    // add modified helm chart archives to artifacts
-    if (is.truthy(isUpdateOptionAddChartArchives)) {
+    if (isUpdateOptionAddChartArchives) {
       const chartsPath = getSiblingFileName(packageFileName, 'charts');
       const status = await getRepoStatus();
       const chartsAddition = status.not_added ?? [];
       const chartsDeletion = status.deleted ?? [];
 
       for (const file of chartsAddition) {
-        // only add artifacts in the chart sub path
         if (!isFileInDir(chartsPath, file)) {
           continue;
         }
@@ -189,7 +179,6 @@ export async function updateArtifacts({
       }
 
       for (const file of chartsDeletion) {
-        // only add artifacts in the chart sub path
         if (!isFileInDir(chartsPath, file)) {
           continue;
         }
@@ -204,7 +193,6 @@ export async function updateArtifacts({
 
     return fileChanges.length > 0 ? fileChanges : null;
   } catch (err) {
-    // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
