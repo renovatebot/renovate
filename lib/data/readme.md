@@ -15,18 +15,18 @@ The `monorepo.json` file has all the monorepo presets.
 
 Monorepo presets group related packages, so they are updated with a single Renovate PR.
 
-We usually group packages that:
-
-- depend on each other, or
-- are in the same repository, or
-- are in the same organization
-
 ### Ways to group packages
 
 There are three ways to group packages:
 
-| I want to group based on | Method          |
+| Grouping Criteria        | Method          |
 | ------------------------ | --------------- |
 | Source repository URLs   | `repoGroups`    |
 | Organization URls        | `orgGroups`     |
-| Package name(s)          | `patternGroups` |
+| Package name patterns(s) | `patternGroups` |
+
+Each method allows you to group related packages based on different criteria:
+
+`repoGroups`: Group packages from the same source repository.
+`orgGroups`: Group packages from the same organization.
+`patternGroups`: Group packages based on name patterns or prefixes.
