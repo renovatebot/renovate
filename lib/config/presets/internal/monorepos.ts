@@ -4,23 +4,21 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {};
 
-for (const [name, value] of Object.entries(monorepoGroups.repoGroups ?? {})) {
+for (const [name, value] of Object.entries(monorepoGroups.repoGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
     matchSourceUrls: toArray(value),
   };
 }
 
-for (const [name, value] of Object.entries(monorepoGroups.orgGroups ?? {})) {
+for (const [name, value] of Object.entries(monorepoGroups.orgGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
     matchSourceUrlPrefixes: toArray(value),
   };
 }
 
-for (const [name, value] of Object.entries(
-  monorepoGroups.patternGroups ?? {},
-)) {
+for (const [name, value] of Object.entries(monorepoGroups.patternGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
     matchPackagePatterns: toArray(value),
