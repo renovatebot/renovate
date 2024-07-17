@@ -14,6 +14,12 @@ const defaults: RateLimitRule[] = [
   },
 ];
 
+let limits: RateLimitRule[] = [];
+
+export function setHttpRateLimits(rules: RateLimitRule[] = defaults): void {
+  limits = rules;
+}
+
 export function getConcurrentRequestsLimit(url: string): number | null {
   let result: number | null = null;
 
@@ -26,12 +32,8 @@ export function getConcurrentRequestsLimit(url: string): number | null {
     result = hostRuleLimit;
   }
 
-  for (const { matchHost, concurrency: limit } of defaults) {
-    if (!matchesHost(url, matchHost)) {
-      continue;
-    }
-
-    if (!is.number(limit)) {
+  for (const { matchHost, concurrency: limit } of limits) {
+    if (!matchesHost(url, matchHost) || !is.number(limit)) {
       continue;
     }
 
@@ -53,12 +55,8 @@ export function getThrottleIntervalMs(url: string): number | null {
     result = Math.ceil(1000 / maxRequestsPerSecond);
   }
 
-  for (const { matchHost, throttleMs: limit } of defaults) {
-    if (!matchesHost(url, matchHost)) {
-      continue;
-    }
-
-    if (!is.number(limit)) {
+  for (const { matchHost, throttleMs: limit } of limits) {
+    if (!matchesHost(url, matchHost) || !is.number(limit)) {
       continue;
     }
 

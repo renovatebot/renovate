@@ -12,6 +12,7 @@ import { validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { initMergeConfidence } from '../../util/merge-confidence';
 import { setMaxLimit } from './limits';
+import { setHttpRateLimits } from '../../util/http/rate-limits';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
   const config: AllConfig = { ...input };
@@ -79,6 +80,7 @@ export async function globalInitialize(
   config_: AllConfig,
 ): Promise<RenovateConfig> {
   let config = config_;
+  setHttpRateLimits();
   await checkVersions();
   setGlobalHostRules(config);
   config = await initPlatform(config);
