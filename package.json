@@ -4,8 +4,8 @@
   "version": "0.0.0-semantic-release",
   "type": "commonjs",
   "bin": {
-    "renovate": "dist/renovate.js",
-    "renovate-config-validator": "dist/config-validator.js"
+    "renovate": "dist/lib/renovate.js",
+    "renovate-config-validator": "dist/lib/config-validator.js"
   },
   "scripts": {
     "build": "run-s clean 'generate:*' 'compile:*' create-json-schema",
