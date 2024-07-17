@@ -35,9 +35,8 @@ export function getThrottle(url: string): Throttle | null {
     throttle = null; // null represents "no throttle", as opposed to undefined
     const throttleMs = getThrottleIntervalMs(url);
     if (throttleMs) {
-      const intervalMs = throttleMs;
-      logger.debug(`Using throttle ${intervalMs} intervalMs for host ${host}`);
-      throttle = new Throttle(intervalMs);
+      logger.debug(`Using throttle ${throttleMs} intervalMs for host ${host}`);
+      throttle = new Throttle(throttleMs);
     } else {
       logger.trace({ host }, 'No throttle');
     }
