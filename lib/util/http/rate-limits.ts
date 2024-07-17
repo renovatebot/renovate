@@ -56,6 +56,7 @@ export function getConcurrentRequestsLimit(url: string): number | null {
     }
 
     result = limit;
+    break;
   }
 
   return result;
@@ -79,6 +80,7 @@ export function getThrottleIntervalMs(url: string): number | null {
     }
 
     result = limit;
+    break;
   }
 
   return result;
