@@ -1,4 +1,4 @@
-import monorepoGroups from '../../../data/monorepo.json';
+import { monorepoGroups } from '../../../data';
 import { toArray } from '../../../util/array';
 import type { Preset } from '../types';
 
