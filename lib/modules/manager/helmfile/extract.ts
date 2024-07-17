@@ -12,7 +12,8 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import type { Doc, type HelmRepository, Doc as documentSchema } from './schema';
+import type { Doc, HelmRepository } from './schema';
+import { Doc as documentSchema } from './schema';
 import {
   kustomizationsKeysUsed,
   localChartHasKustomizationsYaml,
@@ -56,11 +57,10 @@ export async function extractPackageFile(
     // Always check for repositories in the current document and override the existing ones if any (as YAML does)
     if (doc.repositories) {
       registryData = {};
-
       for (let i = 0; i < doc.repositories.length; i += 1) {
         registryData[doc.repositories[i].name] = doc.repositories[i];
       }
-      logger.info(
+      logger.debug(
         { registryAliases: registryData, packageFile },
         `repositories discovered.`,
       );
@@ -121,8 +121,9 @@ export async function extractPackageFile(
         res.packageName = repoName + '/' + depName;
       } else if (registryData[repoName]?.oci) {
         res.datasource = DockerDatasource.id;
-        if (registryData[repoName]) {
-          res.packageName = urlJoin(registryData[repoName].url, depName);
+        const alias = registryData[repoName]?.url;
+        if (alias) {
+          res.packageName = urlJoin(alias, depName);
         }
       }
 
