@@ -5,10 +5,12 @@ import type { RateLimitRule } from './types';
 
 const defaults: RateLimitRule[] = [
   {
+    // https://guides.rubygems.org/rubygems-org-rate-limits/
     matchHost: 'rubygems.org',
     throttleMs: 125,
   },
   {
+    // https://crates.io/data-access#api
     matchHost: 'https://crates.io/api/',
     throttleMs: 1000,
   },
