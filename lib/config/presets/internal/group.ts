@@ -803,30 +803,25 @@ const staticGroups = {
 
 const config: any = { ...staticGroups };
 
-async function getGroupPresets(): Promise<Record<string, Preset>> {
-  const monorepoNames = [];
-  const monorepoPresets = await monorepos.presets;
-  for (const monorepo of Object.keys(monorepoPresets)) {
-    const name = `${monorepo}Monorepo`;
-    monorepoNames.push(`group:${name}`);
-    config[name] = {
-      packageRules: [
-        {
-          description: `Group packages from ${monorepo} monorepo together.`,
-          extends: [`monorepo:${monorepo}`],
-          groupName: `${monorepo} monorepo`,
-          matchUpdateTypes: nonPinUpdateTypes,
-        },
-      ],
-    };
-  }
-  config.monorepos = {
-    description: 'Group known monorepo packages together.',
-    extends: monorepoNames,
-    ignoreDeps: [], // Hack to improve onboarding PR description
+const monorepoNames = [];
+for (const monorepo of Object.keys(monorepos.presets)) {
+  const name = `${monorepo}Monorepo`;
+  monorepoNames.push(`group:${name}`);
+  config[name] = {
+    packageRules: [
+      {
+        description: `Group packages from ${monorepo} monorepo together.`,
+        extends: [`monorepo:${monorepo}`],
+        groupName: `${monorepo} monorepo`,
+        matchUpdateTypes: nonPinUpdateTypes,
+      },
+    ],
   };
-
-  return config;
 }
+config.monorepos = {
+  description: 'Group known monorepo packages together.',
+  extends: monorepoNames,
+  ignoreDeps: [], // Hack to improve onboarding PR description
+};
 
-export const presets = getGroupPresets();
+export const presets: Record<string, Preset> = config;
