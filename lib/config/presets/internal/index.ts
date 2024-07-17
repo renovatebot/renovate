@@ -17,7 +17,10 @@ import * as workaroundsPreset from './workarounds';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
-export const groups: Record<string, Record<string, Preset>> = {
+export const groups: Record<
+  string,
+  Record<string, Preset> | Promise<Record<string, Preset>>
+> = {
   config: configPreset.presets,
   customManagers: customManagersPreset.presets,
   default: defaultPreset.presets,
@@ -35,11 +38,10 @@ export const groups: Record<string, Record<string, Preset>> = {
   workarounds: workaroundsPreset.presets,
 };
 
-export function getPreset({
+export async function getPreset({
   repo,
   presetName,
-}: PresetConfig): Preset | undefined {
-  return groups[repo] && presetName
-    ? groups[repo][presetName]
-    : /* istanbul ignore next */ undefined;
+}: PresetConfig): Promise<Preset | undefined> {
+  const pres = await groups[repo];
+  return pres && presetName ? pres[presetName] : undefined;
 }

@@ -5,11 +5,9 @@ This readme explains what each file is used for.
 
 ## Summary
 
-| File                           | What is the file about?                  |
-| ------------------------------ | ---------------------------------------- |
-| `monorepo.json`                | Group related packages into a single PR. |
-| `replacements.json`            | Rename old packages to new replacement.  |
-| `filename-for-changelogs.json` | Tell Renovate where to find changelogs.  |
+| File            | What is the file about?                  |
+| --------------- | ---------------------------------------- |
+| `monorepo.json` | Group related packages into a single PR. |
 
 ## Group related packages (`monorepo.json`)
 
