@@ -51,15 +51,19 @@ export async function extractPackageFile(
     );
     return null;
   }
+
   for (const doc of docs) {
     // Always check for repositories in the current document and override the existing ones if any (as YAML does)
     if (doc.repositories) {
       registryData = {};
+      // used for printing only
+      let registryAliases: Record<string, string> = {};
       for (let i = 0; i < doc.repositories.length; i += 1) {
         registryData[doc.repositories[i].name] = doc.repositories[i];
+        registryAliases[doc.repositories[i].name] = doc.repositories[i].url;
       }
       logger.debug(
-        { registryAliases: registryData, packageFile },
+        { registryAliases, packageFile },
         `repositories discovered.`,
       );
     }
