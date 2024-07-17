@@ -32,6 +32,25 @@ Skipping the check will speed things up, but may result in versions being return
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
+## `RENOVATE_X_DELETE_CONFIG_FILE`
+
+If `true` Renovate tries to delete the self-hosted config file after reading it.
+You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE` environment variable.
+
+The process that runs Renovate must have the correct permissions to delete the config file.
+
+## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
+
+If set to any value, Renovate will skip attempting to get release labels (e.g. gitRef, sourceUrl) from manifest annotations for `https://index.docker.io`.
+
+Due to the missing label information like sourceUrl, Renovate will not be able to perform certain actions dependent on these information for the images.
+
+This includes the following:
+
+- Generating changelogs
+- Applying package rules dependent on the labels
+- Including the sourceUrls in PR bodies
+
 ## `RENOVATE_X_DOCKER_HUB_TAGS`
 
 If set to any value, Renovate will use the Docker Hub API (`https://hub.docker.com`) to fetch tags instead of the normal Docker API for images pulled from `https://index.docker.io`.

@@ -514,7 +514,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.7.0',
+    default: 'ghcr.io/containerbase/sidecar:10.15.5',
     globalOnly: true,
   },
   {
@@ -968,6 +968,7 @@ const options: RenovateOptions[] = [
     description: 'Set to `false` to disable lock file updating.',
     type: 'boolean',
     default: true,
+    supportedManagers: ['npm'],
   },
   {
     name: 'skipInstalls',
@@ -1563,6 +1564,23 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'sourceUrl',
+    description: 'The source URL of the package.',
+    type: 'string',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'sourceDirectory',
+    description:
+      'The source directory in which the package is present at its source.',
+    type: 'string',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchSourceUrlPrefixes',
     description:
       'A list of source URL prefixes to match against, commonly used to group monorepos or packages from the same organization.',
@@ -1686,7 +1704,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'customChangelogUrl',
+    name: 'changelogUrl',
     description:
       'If set, Renovate will use this URL to fetch changelogs for a matched dependency. Valid only within a `packageRules` object.',
     type: 'string',
@@ -2048,6 +2066,7 @@ const options: RenovateOptions[] = [
     description:
       'Set sorting priority for PR creation. PRs with higher priority are created first, negative priority last.',
     type: 'integer',
+    allowNegative: true,
     default: 0,
     parents: ['packageRules'],
     cli: false,
@@ -2489,6 +2508,7 @@ const options: RenovateOptions[] = [
       'gomodTidy1.17',
       'gomodTidyE',
       'gomodUpdateImportPaths',
+      'gomodSkipVendor',
       'helmUpdateSubChartArchives',
       'npmDedupe',
       'pnpmDedupe',
@@ -2648,6 +2668,8 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     experimental: true,
+    deprecationMsg:
+      'This option is deprecated and will be removed in a future release.',
   },
   {
     name: 'keepAlive',
@@ -2781,13 +2803,12 @@ const options: RenovateOptions[] = [
       'Options to suppress various types of warnings and other notifications.',
     type: 'array',
     subType: 'string',
-    default: ['deprecationWarningIssues'],
+    default: [],
     allowedValues: [
       'artifactErrors',
       'branchAutomergeFailure',
       'configErrorIssue',
       'dependencyLookupWarnings',
-      'deprecationWarningIssues',
       'lockFileErrors',
       'missingCredentialsError',
       'onboardingClose',
@@ -3116,6 +3137,14 @@ const options: RenovateOptions[] = [
     name: 's3PathStyle',
     description:
       'If set, Renovate will enable `forcePathStyle` when creating the AWS S3 client instance.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'cachePrivatePackages',
+    description:
+      'Cache private packages in the datasource cache. This is useful for self-hosted setups',
     type: 'boolean',
     default: false,
     globalOnly: true,

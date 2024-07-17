@@ -46,7 +46,7 @@ export interface RenovateSharedConfig {
   commitMessagePrefix?: string;
   commitMessageTopic?: string;
   confidential?: boolean;
-  customChangelogUrl?: string;
+  changelogUrl?: string;
   dependencyDashboardApproval?: boolean;
   draftPR?: boolean;
   enabled?: boolean;
@@ -169,6 +169,7 @@ export interface RepoGlobalConfig {
   deleteConfigFile?: boolean;
   s3Endpoint?: string;
   s3PathStyle?: boolean;
+  cachePrivatePackages?: boolean;
 }
 
 export interface LegacyAdminConfig {
@@ -459,6 +460,11 @@ export interface RenovateOptionBase {
    * For internal use only: add it to any config option that supports regex or glob matching
    */
   patternMatch?: boolean;
+
+  /**
+   * For internal use only: add it to any config option of type integer that supports negative integers
+   */
+  allowNegative?: boolean;
 }
 
 export interface RenovateArrayOption<

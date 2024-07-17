@@ -40,6 +40,7 @@ export class GlobalConfig {
     'deleteConfigFile',
     's3Endpoint',
     's3PathStyle',
+    'cachePrivatePackages',
   ];
 
   private static config: RepoGlobalConfig = {};

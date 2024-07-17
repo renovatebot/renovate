@@ -10,6 +10,7 @@ export const presets: Record<string, Preset> = {
   all: {
     description: 'Apply crowd-sourced package replacement rules.',
     extends: [
+      'replacements:airbnb-prop-types-to-prop-types-tools',
       'replacements:apollo-server-to-scoped',
       'replacements:babel-eslint-to-eslint-parser',
       'replacements:containerbase',
@@ -28,6 +29,7 @@ export const presets: Record<string, Preset> = {
       'replacements:middie-to-scoped',
       'replacements:now-to-vercel',
       'replacements:npm-run-all-to-maintenance-fork',
+      'replacements:opencost-registry-move',
       'replacements:parcel-css-to-lightningcss',
       'replacements:passport-saml',
       'replacements:react-query-devtools-to-scoped',
@@ -50,6 +52,20 @@ export const presets: Record<string, Preset> = {
       'replacements:zap',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
+  },
+  // eslint-disable-next-line sort-keys
+  'airbnb-prop-types-to-prop-types-tools': {
+    description:
+      '`airbnb-prop-types` was given to a new maintainer and renamed to `prop-types-tools`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^2',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['airbnb-prop-types'],
+        replacementName: 'prop-types-tools',
+        replacementVersion: '2.17.0',
+      },
+    ],
   },
   'apollo-server-to-scoped': {
     description: '`apollo-server` packages became scoped.',
@@ -725,6 +741,29 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['npm-run-all'],
         replacementName: 'npm-run-all2',
         replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'opencost-registry-move': {
+    description: 'Replace OpenCost registry from quay.io to ghcr.io.',
+    packageRules: [
+      {
+        description:
+          'Replace `quay.io/kubecost1/kubecost-cost-model` with `ghcr.io/opencost/opencost`.',
+        matchCurrentVersion: '1.108.0',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['quay.io/kubecost1/kubecost-cost-model'],
+        replacementName: 'ghcr.io/opencost/opencost',
+        replacementVersion: '1.109.0',
+      },
+      {
+        description:
+          'Replace `quay.io/kubecost1/opencost-ui` with `ghcr.io/opencost/opencost-ui`.',
+        matchCurrentVersion: '1.108.0',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['quay.io/kubecost1/opencost-ui'],
+        replacementName: 'ghcr.io/opencost/opencost-ui',
+        replacementVersion: '1.109.0',
       },
     ],
   },

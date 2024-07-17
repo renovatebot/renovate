@@ -463,8 +463,18 @@ name = "pypi"
 
 ### pip-compile
 
-The pip-compile manager extracts `--index-url` and `--extra-index-url` directives from its input file.
-Renovate will match those URLs with credentials from matching `hostRules` blocks in its configuration and pass them to `pip-compile` via environment variables.
+The pip-compile manager can extract these directives from the input file given to Renovate:
+
+- `--index-url`
+- `--extra-index-url`
+
+Renovate matches those URLs with credentials from matching `hostRules` blocks in the Renovate configuration.
+Then Renovate passes the information to `pip-compile` via environment variables.
+
+<!-- prettier-ignore -->
+!!! warning "Put directives in the .in file, avoid the lockfile"
+    You must put the `--[extra-]index-url` directive(s) in the `.in` file, for `pip-compile` to use during Renovate jobs.
+    Do _not_ put the directive(s) in the lockfile, as this is _not_ supported.
 
 ```title="requirements.in"
 --extra-index-url https://pypi.my.domain/simple
@@ -487,8 +497,21 @@ private-package==1.2.3
 }
 ```
 
-Renovate relies on `pip`'s integration with the python [keyring](https://pypi.org/project/keyring/) package along with the [keyrigs.envvars](https://pypi.org/project/keyrings.envvars/) backend for this.
-If you are self-hosting Renovate and are not running in a Containerbase environment or using the Docker sidecar container you will need to install those two packages.
+#### Packages that Renovate needs
+
+Renovate relies on `pip`'s integration with the Python [keyring](https://pypi.org/project/keyring/) package along with the [keyrigs.envvars](https://pypi.org/project/keyrings.envvars/) backend for this.
+
+##### Self-hosting Renovate
+
+This section only applies to users who self-host Renovate.
+If you self-host and use Containerbase, or our Docker sidecar container, then Renovate can already access the packages it needs.
+
+But if you are self-hosting Renovate and:
+
+- _not_ running Renovate in a Containerbase environment
+- or, _not_ using the Docker sidecar container
+
+Then you must install the Python keyring package and the keyrigs.envvars package into your self-hosted environment.
 
 ### poetry
 
