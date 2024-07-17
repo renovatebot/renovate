@@ -16,7 +16,7 @@ const defaults: RateLimitRule[] = [
   },
   {
     matchHost: '*',
-    concurrency: 10,
+    concurrency: 16,
   },
 ];
 
