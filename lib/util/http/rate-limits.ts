@@ -14,12 +14,24 @@ const defaults: RateLimitRule[] = [
     matchHost: 'https://crates.io/api/',
     throttleMs: 1000,
   },
+  {
+    matchHost: '*',
+    concurrency: 8,
+  },
 ];
 
 let limits: RateLimitRule[] = [];
 
 export function setHttpRateLimits(rules: RateLimitRule[] = defaults): void {
   limits = rules;
+}
+
+function matches(url: string, host: string): boolean {
+  if (host === '*') {
+    return true;
+  }
+
+  return matchesHost(url, host);
 }
 
 export function getConcurrentRequestsLimit(url: string): number | null {
@@ -35,7 +47,7 @@ export function getConcurrentRequestsLimit(url: string): number | null {
   }
 
   for (const { matchHost, concurrency: limit } of limits) {
-    if (!matchesHost(url, matchHost) || !is.number(limit)) {
+    if (!matches(url, matchHost) || !is.number(limit)) {
       continue;
     }
 
@@ -58,7 +70,7 @@ export function getThrottleIntervalMs(url: string): number | null {
   }
 
   for (const { matchHost, throttleMs: limit } of limits) {
-    if (!matchesHost(url, matchHost) || !is.number(limit)) {
+    if (!matches(url, matchHost) || !is.number(limit)) {
       continue;
     }
 
