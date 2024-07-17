@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import pkg from '../../../../../package.json';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import {
@@ -7,6 +6,7 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages';
+import { pkg } from '../../../../expose.cjs';
 import { logger } from '../../../../logger';
 import {
   PlatformPrOptions,

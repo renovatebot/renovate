@@ -1,5 +1,4 @@
 import fs from 'fs-extra';
-import pkg from '../../../package.json';
 import { GlobalConfig } from '../../config/global';
 import { applySecretsToConfig } from '../../config/secrets';
 import type { RenovateConfig } from '../../config/types';
@@ -8,6 +7,7 @@ import {
   REPOSITORY_FORKED,
   REPOSITORY_NO_CONFIG,
 } from '../../constants/error-messages';
+import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
 import { addExtractionStats } from '../../instrumentation/reporting';
 import { logger, setMeta } from '../../logger';
