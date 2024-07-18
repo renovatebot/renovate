@@ -1,6 +1,5 @@
 import * as fs from 'fs';
-import { ERROR } from 'bunyan';
-import { getProblems, logger } from '../lib/logger';
+import { logger } from '../lib/logger';
 import { exec } from './utils/exec';
 
 process.on('unhandledRejection', (err) => {
@@ -37,11 +36,7 @@ void (async () => {
     await generateHexProtos();
   } catch (err) {
     logger.error({ err }, 'Unexpected error');
-  } finally {
-    const loggerErrors = getProblems().filter((p) => p.level >= ERROR);
-    if (loggerErrors.length) {
-      process.exit(1);
-    }
+    process.exit(1);
   }
 })();
 
