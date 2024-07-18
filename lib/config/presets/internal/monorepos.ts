@@ -433,6 +433,7 @@ const repoGroups = {
   'playwright-dotnet': 'https://github.com/microsoft/playwright-dotnet',
   pnpjs: 'https://github.com/pnp/pnpjs',
   pollyjs: 'https://github.com/Netflix/pollyjs',
+  pothos: 'https://github.com/hayes/pothos',
   pouchdb: 'https://github.com/pouchdb/pouchdb',
   prisma: 'https://github.com/prisma/prisma',
   'prometheus-net': 'https://github.com/prometheus-net/prometheus-net',
