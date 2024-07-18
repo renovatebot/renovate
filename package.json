@@ -26,7 +26,7 @@
     "eslint-ci": "eslint . --cache --cache-strategy content --cache-location .cache/eslint --format gha",
     "generate": "run-s 'generate:*'",
     "generate:imports": "node tools/generate-imports.mjs",
-    "generate:protos": "ts-node tools/generate-protos.ts",
+    "generate:protos": "node tools/generate-protos.mjs",
     "git-check": "node tools/check-git-version.mjs",
     "jest": "GIT_ALLOW_PROTOCOL=file LOG_LEVEL=fatal node --experimental-vm-modules node_modules/jest/bin/jest.js --logHeapUsage",
     "lint": "run-s ls-lint type-check eslint prettier markdown-lint git-check doc-fence-check",
