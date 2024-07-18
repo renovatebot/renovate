@@ -240,13 +240,12 @@ export class NugetV3Api {
           { registryUrl, pkgName, pkgVersion: latestStable },
           `package manifest (.nuspec) not found`,
         );
-        return dep;
+      } else {
+        logger.debug(
+          { err, registryUrl, pkgName, pkgVersion: latestStable },
+          `Cannot obtain sourceUrl`,
+        );
       }
-      logger.debug(
-        { err, registryUrl, pkgName, pkgVersion: latestStable },
-        `Cannot obtain sourceUrl`,
-      );
-      return dep;
     }
 
     // istanbul ignore else: not easy testable
