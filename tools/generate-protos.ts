@@ -43,6 +43,10 @@ void (async () => {
 
 function generateProto(protos_path, file) {
   return new Promise((resolve, reject) => {
+    console.log(`Current directory: ${process.cwd()}`);
+    fs.readdirSync(process.cwd()).forEach((file) => {
+      console.log(file);
+    });
     const file_path = `${protos_path}/${file}`;
     const res = exec('pnpm', [
       'protoc',
