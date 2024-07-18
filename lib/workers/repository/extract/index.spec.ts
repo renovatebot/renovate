@@ -1,10 +1,12 @@
+import {mockDeep} from "jest-mock-extended";
 import { mocked, partial, scm } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import type { PackageFile } from '../../../modules/manager/types';
+import * as _managers from '../../../modules/manager'
+import type {ManagerApi, PackageFile} from '../../../modules/manager/types';
 import * as _managerFiles from './manager-files';
-import { extractAllDependencies } from '.';
+import {applyPreFlights, extractAllDependencies} from '.';
 
 jest.mock('./manager-files');
 jest.mock('../../../util/git');
@@ -68,4 +70,18 @@ describe('workers/repository/extract/index', () => {
       expect(Object.keys(res.packageFiles)).toContain('regex');
     });
   });
+
+  describe('applyPreFlights()', () => {
+    const baseConfig: RenovateConfig = {}
+
+    jest.mock('../../../modules/manager')
+    const managers = mocked(_managers)
+
+
+    it('should ', () => {
+      const a = jest.fn()
+      managers.get.mockReturnValue(a);
+      expect(applyPreFlights(baseConfig,["test"])).toEqual({})
+    });
+  })
 });
