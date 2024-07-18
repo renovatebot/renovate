@@ -23,12 +23,12 @@ describe('util/http/rate-limit', () => {
       expect(getConcurrentRequestsLimit('https://index.crates.io')).toBeNull();
     });
 
-    it('obtains the limit from the host rules', () => {
+    it('gets the limit from the host rules', () => {
       hostRules.add({ matchHost: 'example.com', concurrentRequestLimit: 123 });
       expect(getConcurrentRequestsLimit('https://example.com')).toBe(123);
     });
 
-    it('selects default value is host rule is greater', () => {
+    it('selects default value if host rule is greater', () => {
       setHttpRateLimits([{ matchHost: 'example.com', concurrency: 123 }]);
       hostRules.add({ matchHost: 'example.com', concurrentRequestLimit: 456 });
       expect(getConcurrentRequestsLimit('https://example.com')).toBe(123);
@@ -58,7 +58,7 @@ describe('util/http/rate-limit', () => {
       expect(getThrottleIntervalMs('https://index.crates.io')).toBeNull();
     });
 
-    it('obtains the limit from the host rules', () => {
+    it('gets the limit from the host rules', () => {
       hostRules.add({ matchHost: 'example.com', maxRequestsPerSecond: 8 });
       expect(getThrottleIntervalMs('https://example.com')).toBe(125);
     });
