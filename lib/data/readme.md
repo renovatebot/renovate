@@ -19,8 +19,8 @@ Monorepo presets group related packages, so they are updated with a single Renov
 
 There are three ways to group packages:
 
-| Method          | Group packages                      |
-| --------------- | ----------------------------------- |
-| `repoGroups`    | From the same source repository.    |
-| `orgGroups`     | From the same organization.         |
-| `patternGroups` | Based on name patterns or prefixes. |
+| Group packages                      | Method          |
+| ----------------------------------- | --------------- |
+| From the same source repository.    | `repoGroups`    |
+| From the same organization.         | `orgGroups`     |
+| Based on name patterns or prefixes. | `patternGroups` |
