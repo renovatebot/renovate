@@ -132,6 +132,7 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
+        updateType: 'lockfileUpdate',
       },
     ];
     expect(
@@ -162,7 +163,7 @@ describe('modules/manager/cargo/artifacts', () => {
 
   it('returns an artifact error when cargo update fails', async () => {
     const cmd =
-      'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace';
+      'cargo fetch --config net.git-fetch-with-cli=true --manifest-path Cargo.toml';
     const execError = new ExecError('Exec error', {
       cmd,
       stdout: '',
@@ -290,18 +291,21 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
+        updateType: 'lockfileUpdate',
       },
       {
         depName: 'dep2',
         packageName: 'dep2',
         lockedVersion: '1.0.0',
         newVersion: '1.0.2',
+        updateType: 'lockfileUpdate',
       },
       {
         depName: 'dep3',
         packageName: 'dep3',
         lockedVersion: '1.0.0',
         newVersion: '1.0.3',
+        updateType: 'lockfileUpdate',
       },
     ];
 
@@ -460,7 +464,7 @@ describe('modules/manager/cargo/artifacts', () => {
           'bash -l -c "' +
           'install-tool rust 1.65.0' +
           ' && ' +
-          'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace' +
+          'cargo fetch --config net.git-fetch-with-cli=true --manifest-path Cargo.toml' +
           '"',
         options: {
           cwd: '/tmp/github/some/repo',
@@ -538,7 +542,7 @@ describe('modules/manager/cargo/artifacts', () => {
           'bash -l -c "' +
           'install-tool rust 1.65.0' +
           ' && ' +
-          'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace' +
+          'cargo fetch --config net.git-fetch-with-cli=true --manifest-path Cargo.toml' +
           '"',
         options: {
           cwd: '/tmp/github/some/repo',
@@ -821,7 +825,7 @@ describe('modules/manager/cargo/artifacts', () => {
         },
       },
       {
-        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
+        cmd: 'cargo fetch --config net.git-fetch-with-cli=true --manifest-path Cargo.toml',
         options: {
           cwd: '/tmp/github/some/repo',
           env: {

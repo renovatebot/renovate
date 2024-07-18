@@ -72,6 +72,23 @@ async function cargoUpdatePrecise(
   await exec(cmds, execOptions);
 }
 
+async function cargoFetch(
+  manifestPath: string,
+  userConfiguredEnv: UserEnv,
+  constraint: string | undefined,
+): Promise<void> {
+  const cmd = `cargo fetch --config net.git-fetch-with-cli=true --manifest-path ${quote(
+    manifestPath,
+  )}`;
+  const execOptions: ExecOptions = {
+    userConfiguredEnv,
+    extraEnv: { ...getGitEnvironmentVariables(['cargo']) },
+    docker: {},
+    toolConstraints: [{ toolName: 'rust', constraint }],
+  };
+  await exec(cmd, execOptions);
+}
+
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
@@ -130,24 +147,35 @@ async function updateArtifactsImpl(
         config.constraints?.rust,
       );
     } else {
+      const anyNonLockfileUpdate = updatedDeps.some(
+        (dep) => dep.updateType !== 'lockfileUpdate',
+      );
       const missingDep = updatedDeps.find((dep) => !dep.lockedVersion);
       if (missingDep) {
         // If there is a dependency without a locked version then log a warning
-        // and perform a regular workspace lockfile update.
         logger.warn(
           `Missing locked version for dependency \`${missingDep.depName}\``,
         );
-        await cargoUpdate(
+      }
+      if (anyNonLockfileUpdate || missingDep) {
+        // Cargo fetch is safer to use for non-lockfile updates, because it
+        // has fewer issues with duplicate dependencies.
+        // Also use it in case of missing dependencies.
+        await cargoFetch(
           packageFileName,
-          false,
           config.env ?? {},
           config.constraints?.rust,
         );
-      } else {
-        // If all dependencies have locked versions then update them precisely.
+      }
+
+      // Cargo fetch should already have handled any non-lockfile updates and missing deps
+      const lockfileOnlyDeps = updatedDeps.filter(
+        (dep) => dep.updateType === 'lockfileUpdate' && dep.lockedVersion,
+      );
+      if (lockfileOnlyDeps) {
         await cargoUpdatePrecise(
           packageFileName,
-          updatedDeps,
+          lockfileOnlyDeps,
           config.env ?? {},
           config.constraints?.rust,
         );
