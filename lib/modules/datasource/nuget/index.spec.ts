@@ -714,7 +714,7 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res?.sourceUrl).toBeUndefined();
+      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('processes real data (v3) nuspec fetch 404 error', async () => {
@@ -732,7 +732,7 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res?.sourceUrl).toBeUndefined();
+      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('processes real data (v2)', async () => {
