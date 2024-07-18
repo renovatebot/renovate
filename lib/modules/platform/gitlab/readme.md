@@ -8,6 +8,7 @@ To start, create either:
 
 - a [Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account
 - or a [Group Access Token](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html#bot-users-for-groups) for the bot account
+- or a [Deploy Token](https://docs.gitlab.com/ee/user/project/deploy_tokens/index.html) for the bot account
 
 The bot account must have at least the Developer role in order to [create issues and merge requests](https://docs.gitlab.com/ee/user/permissions.html#project-members-permissions).
 If you are using automerge, the bot account must have the appropriate ["Allowed to merge" permission on the protected branch](https://docs.gitlab.com/ee/user/project/protected_branches.html#require-everyone-to-submit-merge-requests-for-a-protected-branch) of your projects.
