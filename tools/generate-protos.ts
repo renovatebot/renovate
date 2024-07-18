@@ -3,6 +3,8 @@ import { exec } from './utils/exec';
 
 process.on('unhandledRejection', (err) => {
   // Will print "unhandledRejection err is not defined"
+  console.log('unhandledRejection');
+  console.log(err);
   process.exit(-1);
 });
 
@@ -30,8 +32,11 @@ function moveFiles(sourceDir: string, destDir: string): void {
 void (async () => {
   try {
     // protobuf definitions
+    console.log('Generating protobufs');
     await generateHexProtos();
   } catch (err) {
+    console.log('Unexpected error');
+    console.log(err);
     process.exit(1);
   }
 })();
@@ -47,18 +52,25 @@ function generateProto(protos_path, file) {
     ]);
 
     if (res.signal) {
+      console.log(`Signal received: ${res.signal}`);
       reject('');
       process.exit(-1);
     } else if (res.status && res.status !== 0) {
+      console.log(`Error occured:\n${res.stderr || res.stdout}`);
       reject('');
       process.exit(res.status);
     } else {
+      console.log(
+        `Hex protos generation succeeded:\n${res.stdout || res.stderr}`,
+      );
       return resolve('');
     }
   });
 }
 
 async function generateHexProtos() {
+  console.log('Generating Hex protos ...');
+
   const protos_path = './lib/modules/datasource/hex/protos';
   await generateProto(protos_path, 'package.proto');
   await generateProto(protos_path, 'signed.proto');
