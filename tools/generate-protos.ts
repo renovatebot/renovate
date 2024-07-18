@@ -9,10 +9,10 @@ process.on('unhandledRejection', (err) => {
   process.exit(-1);
 });
 
-const moveFiles = async (sourceDir: string, destDir: string): Promise<void> => {
+function moveFiles(sourceDir: string, destDir: string): void {
   try {
     // Read all files in the source directory
-    const files: string[] = await fs.promises.readdir(sourceDir);
+    const files: string[] = fs.readdirSync(sourceDir);
 
     // find and move generated ts files
     const tsFiles: string[] = files.filter((file) => file.endsWith('.ts'));
@@ -21,14 +21,14 @@ const moveFiles = async (sourceDir: string, destDir: string): Promise<void> => {
       const sourcePath: string = `${sourceDir}/${file}`;
       const destPath: string = `${destDir}/${file}`;
 
-      await fs.promises.rename(sourcePath, destPath);
+      fs.renameSync(sourcePath, destPath);
     }
 
     console.log('All files have been moved successfully.');
   } catch (err) {
     console.error('Error moving files:', err);
   }
-};
+}
 
 void (async () => {
   try {
@@ -44,16 +44,6 @@ void (async () => {
     }
   }
 })();
-
-function istanbulIgnoreFile(file_path: string): string {
-  fs.appendFile(file_path, '\n// istanbul ignore file', function (err) {
-    if (err) {
-      throw err;
-    }
-  });
-
-  return '';
-}
 
 function generateProto(protos_path: string, file: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -88,8 +78,6 @@ async function generateHexProtos(): Promise<string> {
   const protos_path = './lib/modules/datasource/hex/protos';
   await generateProto(protos_path, 'package.proto');
   await generateProto(protos_path, 'signed.proto');
-  istanbulIgnoreFile(`${protos_path}/package.ts`);
-  istanbulIgnoreFile(`${protos_path}/signed.ts`);
   await moveFiles(
     `${process.cwd()}/lib/modules/datasource/hex/protos`,
     `${process.cwd()}/lib/modules/datasource/hex`,
