@@ -7,5 +7,6 @@ export const BitriseWorkflow = z.object({
 });
 
 export const BitriseFile = z.object({
+  default_step_lib_source: z.string().optional(),
   workflows: z.record(z.string(), BitriseWorkflow),
 });

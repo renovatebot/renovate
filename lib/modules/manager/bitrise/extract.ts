@@ -20,7 +20,7 @@ export function extractPackageFile(
     for (const workflow of workflows) {
       const steps = workflow.steps.flatMap((step) => Object.keys(step));
       for (const step of steps) {
-        const dep = parseStep(step);
+        const dep = parseStep(step, parsed.default_step_lib_source);
 
         if (!is.nullOrUndefined(dep)) {
           deps.push(dep);
