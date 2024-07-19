@@ -48,6 +48,7 @@ describe('modules/datasource/bitrise/index', () => {
           registryUrls: ['https://github.mycompany.com/foo/bar'],
         }),
       ).resolves.toEqual({
+        homepage: 'https://bitrise.io/integrations/steps/script',
         registryUrl: 'https://github.mycompany.com/foo/bar',
         releases: [
           {
@@ -113,6 +114,8 @@ describe('modules/datasource/bitrise/index', () => {
           packageName: 'activate-build-cache-for-bazel',
         }),
       ).resolves.toEqual({
+        homepage:
+          'https://bitrise.io/integrations/steps/activate-build-cache-for-bazel',
         registryUrl: 'https://github.com/bitrise-io/bitrise-steplib.git',
         releases: [
           {

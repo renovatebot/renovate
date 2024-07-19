@@ -125,6 +125,14 @@ export class BitriseDatasource extends Datasource {
       });
     }
 
-    return result;
+    // if we have no releases return null
+    if (!result.releases.length) {
+      return null;
+    }
+
+    return {
+      ...result,
+      homepage: `https://bitrise.io/integrations/steps/${packageName}`,
+    };
   }
 }
