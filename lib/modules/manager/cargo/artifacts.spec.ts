@@ -7,7 +7,7 @@ import {
 } from '../../../../test/exec-util';
 import { env, fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
+import type { RepoGlobalConfig, UpdateType } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import { ExecError } from '../../../util/exec/exec-error';
 import * as _hostRules from '../../../util/host-rules';
@@ -132,7 +132,7 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
-        updateType: 'lockfileUpdate',
+        updateType: 'lockfileUpdate' as UpdateType,
       },
     ];
     expect(
@@ -291,21 +291,21 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
-        updateType: 'lockfileUpdate',
+        updateType: 'lockfileUpdate' as UpdateType,
       },
       {
         depName: 'dep2',
         packageName: 'dep2',
         lockedVersion: '1.0.0',
         newVersion: '1.0.2',
-        updateType: 'lockfileUpdate',
+        updateType: 'lockfileUpdate' as UpdateType,
       },
       {
         depName: 'dep3',
         packageName: 'dep3',
         lockedVersion: '1.0.0',
         newVersion: '1.0.3',
-        updateType: 'lockfileUpdate',
+        updateType: 'lockfileUpdate' as UpdateType,
       },
     ];
 
