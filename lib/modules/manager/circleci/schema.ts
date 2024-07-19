@@ -10,6 +10,6 @@ export const CircleCiJob = z.object({
 
 export const CircleCiFile = z.object({
   aliases: z.array(CircleCiDocker).optional(),
-  jobs: z.record(z.string(), CircleCiJob),
+  jobs: z.record(z.string(), CircleCiJob).optional(),
   orbs: z.record(z.string()).optional(),
 });

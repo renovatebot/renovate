@@ -30,7 +30,7 @@ export function extractPackageFile(
       });
     }
 
-    for (const job of Object.values(parsed.jobs)) {
+    for (const job of Object.values(parsed.jobs ?? {})) {
       for (const dockerElement of coerceArray(job.docker)) {
         deps.push({
           ...getDep(dockerElement.image),

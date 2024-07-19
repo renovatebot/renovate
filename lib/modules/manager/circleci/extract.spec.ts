@@ -4,6 +4,7 @@ import { extractPackageFile } from '.';
 const file1 = Fixtures.get('config.yml');
 const file2 = Fixtures.get('config2.yml');
 const file3 = Fixtures.get('config3.yml');
+const file4 = Fixtures.get('config4.yml');
 
 describe('modules/manager/circleci/extract', () => {
   describe('extractPackageFile()', () => {
@@ -64,6 +65,18 @@ describe('modules/manager/circleci/extract', () => {
             '      image: android:202102-01',
         ),
       ).toBeNull();
+    });
+
+    it('extracts orbs without jobs', () => {
+      const res = extractPackageFile(file4);
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'nodejs',
+          currentValue: '5.2.0',
+          datasource: 'orb',
+          depType: 'orb',
+        },
+      ]);
     });
   });
 });
