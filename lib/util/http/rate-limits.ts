@@ -22,9 +22,8 @@ const defaults: RateLimitRule[] = [
 
 let limits: RateLimitRule[] = [];
 
-export function setHttpRateLimits(rules: RateLimitRule[] = defaults): void {
-  limits = rules;
-}
+export function setHttpRateLimits(rules?: RateLimitRule[]): void {
+  limits = rules ?? defaults;
 
 function matches(url: string, host: string): boolean {
   if (host === '*') {
