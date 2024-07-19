@@ -4,9 +4,10 @@ import { cache } from '../../../util/cache/package/decorator';
 import { detectPlatform } from '../../../util/common';
 import { parseGitUrl } from '../../../util/git/url';
 import { GithubHttp } from '../../../util/http/github';
+import { fromBase64 } from '../../../util/string';
 import { joinUrlParts } from '../../../util/url';
 import { parseSingleYaml } from '../../../util/yaml';
-import { GithubDirectoryResponse } from '../../platform/github/schema';
+import { GithubContentResponse } from '../../platform/github/schema';
 import semver from '../../versioning/semver';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -75,17 +76,42 @@ export class BitriseDatasource extends Datasource {
       massagedPackageName,
     );
 
-    const response = await this.http.getJson(
+    const { body: packageRaw } = await this.http.getJson(
       packageUrl,
-      GithubDirectoryResponse,
+      GithubContentResponse,
     );
 
-    for (const versionDir of response.body.filter((element) =>
+    if (!is.array(packageRaw)) {
+      logger.warn(
+        { data: packageRaw, url: packageUrl },
+        'Got unexpected response for Bitrise package location',
+      );
+      return null;
+    }
+
+    for (const versionDir of packageRaw.filter((element) =>
       semver.isValid(element.name),
     )) {
       const stepUrl = joinUrlParts(packageUrl, versionDir.name, 'step.yml');
-      const file = await this.http.getRawFile(stepUrl);
-      const { published_at, source_code_url } = parseSingleYaml(file.body, {
+      // TODO use getRawFile when ready #30155
+      const { body } = await this.http.getJson(stepUrl, GithubContentResponse);
+      if (!('content' in body)) {
+        logger.warn(
+          { data: body, url: stepUrl },
+          'Got unexpected response for Bitrise step location',
+        );
+        return null;
+      }
+      if (body.encoding !== 'base64') {
+        logger.warn(
+          { data: body, url: stepUrl },
+          `Got unexpected encoding for Bitrise step location '${body.encoding}'`,
+        );
+        return null;
+      }
+
+      const content = fromBase64(body.content);
+      const { published_at, source_code_url } = parseSingleYaml(content, {
         customSchema: BitriseStepFile,
       });
 
