@@ -82,6 +82,15 @@ const staticGroups = {
       },
     ],
   },
+  flyway: {
+    description: 'Group Java Flyway packages.',
+    packageRules: [
+      {
+        groupName: 'flyway',
+        matchPackagePrefixes: ['org.flywaydb:'],
+      },
+    ],
+  },
   fortawesome: {
     description: 'Group all packages by Font Awesome together.',
     packageRules: [
@@ -422,6 +431,7 @@ const staticGroups = {
       'group:nodeJs',
       'group:allApollographql',
       'group:codemirror',
+      'group:flyway',
       'group:fortawesome',
       'group:fusionjs',
       'group:githubArtifactActions',
