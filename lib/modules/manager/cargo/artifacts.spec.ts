@@ -473,27 +473,6 @@ describe('modules/manager/cargo/artifacts', () => {
           },
         },
       },
-      {},
-      {
-        cmd:
-          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/cache":"/tmp/cache" ' +
-          '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
-          'bash -l -c "' +
-          'install-tool rust 1.65.0' +
-          ' && ' +
-          'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace' +
-          '"',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          env: {
-            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
-          },
-        },
-      },
     ]);
   });
 
@@ -587,27 +566,6 @@ describe('modules/manager/cargo/artifacts', () => {
             GIT_CONFIG_VALUE_3: 'ssh://git@gitea.com/',
             GIT_CONFIG_VALUE_4: 'git@gitea.com:',
             GIT_CONFIG_VALUE_5: 'https://gitea.com/',
-          },
-        },
-      },
-      {},
-      {
-        cmd:
-          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/cache":"/tmp/cache" ' +
-          '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
-          'bash -l -c "' +
-          'install-tool rust 1.65.0' +
-          ' && ' +
-          'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace' +
-          '"',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          env: {
-            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
           },
         },
       },
@@ -856,25 +814,6 @@ describe('modules/manager/cargo/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'install-tool rust 1.65.0',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          encoding: 'utf-8',
-          env: {
-            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
-          },
-        },
-      },
-      {
-        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          env: {
-            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
-          },
-        },
-      },
       {
         cmd: 'install-tool rust 1.65.0',
         options: {

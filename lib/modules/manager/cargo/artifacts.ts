@@ -160,32 +160,33 @@ async function updateArtifactsImpl(
           config.env ?? {},
           config.constraints?.rust,
         );
-      }
+      } else {
 
-      const anyNonLockfileUpdate = updatedDeps.some(
-        (dep) => dep.updateType !== 'lockfileUpdate' && dep.lockedVersion,
-      );
-      if (anyNonLockfileUpdate) {
-        // Cargo fetch is safer to use for non-lockfile updates, because it
-        // has fewer issues with duplicate dependencies.
-        await cargoFetch(
-          packageFileName,
-          config.env ?? {},
-          config.constraints?.rust,
+        const anyNonLockfileUpdate = updatedDeps.some(
+          (dep) => dep.updateType !== 'lockfileUpdate',
         );
-      }
+        if (anyNonLockfileUpdate) {
+          // Cargo fetch is safer to use for non-lockfile updates, because it
+          // has fewer issues with duplicate dependencies.
+          await cargoFetch(
+            packageFileName,
+            config.env ?? {},
+            config.constraints?.rust,
+          );
+        }
 
-      // Cargo fetch should already have handled any non-lockfile updates and missing deps
-      const lockfileOnlyDeps = updatedDeps.filter(
-        (dep) => dep.updateType === 'lockfileUpdate' && dep.lockedVersion,
-      );
-      if (lockfileOnlyDeps) {
-        await cargoUpdatePrecise(
-          packageFileName,
-          lockfileOnlyDeps,
-          config.env ?? {},
-          config.constraints?.rust,
+        // Cargo fetch should already have handled any non-lockfile updates
+        const lockfileOnlyDeps = updatedDeps.filter(
+          (dep) => dep.updateType === 'lockfileUpdate',
         );
+        if (lockfileOnlyDeps) {
+          await cargoUpdatePrecise(
+            packageFileName,
+            lockfileOnlyDeps,
+            config.env ?? {},
+            config.constraints?.rust,
+          );
+        }
       }
     }
 
