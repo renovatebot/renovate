@@ -147,20 +147,27 @@ async function updateArtifactsImpl(
         config.constraints?.rust,
       );
     } else {
-      const anyNonLockfileUpdate = updatedDeps.some(
-        (dep) => dep.updateType !== 'lockfileUpdate',
-      );
       const missingDep = updatedDeps.find((dep) => !dep.lockedVersion);
       if (missingDep) {
         // If there is a dependency without a locked version then log a warning
+        // and perform a regular workspace lockfile update.
         logger.warn(
           `Missing locked version for dependency \`${missingDep.depName}\``,
         );
+        await cargoUpdate(
+          packageFileName,
+          false,
+          config.env ?? {},
+          config.constraints?.rust,
+        );
       }
-      if (anyNonLockfileUpdate || missingDep) {
+
+      const anyNonLockfileUpdate = updatedDeps.some(
+        (dep) => dep.updateType !== 'lockfileUpdate' && dep.lockedVersion,
+      );
+      if (anyNonLockfileUpdate) {
         // Cargo fetch is safer to use for non-lockfile updates, because it
         // has fewer issues with duplicate dependencies.
-        // Also use it in case of missing dependencies.
         await cargoFetch(
           packageFileName,
           config.env ?? {},
