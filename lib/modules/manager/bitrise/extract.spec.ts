@@ -1,16 +1,17 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from '../fvm';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
+import { BitriseDatasource } from '../../datasource/bitrise';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/bitrise/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null on an empty file', () => {
-      expect(extractPackageFile('')).toBeNull();
+      expect(extractPackageFile('', 'bitrise.yml')).toBeNull();
     });
 
     it('returns valid file', () => {
       expect(
-        extractPackageFile(codeBlock`
+        extractPackageFile(
+          codeBlock`
       format_version: 11
       default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
       project_type: android
@@ -25,22 +26,24 @@ describe('modules/manager/bitrise/extract', () => {
               - content: echo "Hello!"
           - restore-cache@1.1.2:
               foo: bar
-      `),
+      `,
+          'bitrise.yml',
+        ),
       ).toEqual({
         deps: [
           {
-            datasource: GithubReleasesDatasource.id,
-            depName: "script",
-            packageName: "bitrise-steplib/steps-script",
+            datasource: BitriseDatasource.id,
+            packageName: 'script',
             currentValue: '1.1.5',
+            replaceString: 'script@1.1.5',
           },
           {
-            datasource: GithubReleasesDatasource.id,
-            depName: "restore-cache",
-            packageName: "bitrise-steplib/steps-restore-cache",
+            datasource: BitriseDatasource.id,
+            packageName: 'restore-cache',
             currentValue: '1.1.2',
-          }
-        ]
+            replaceString: 'restore-cache@1.1.2',
+          },
+        ],
       });
     });
   });

@@ -1,3 +1,4 @@
+import { BitriseDatasource } from '../../datasource/bitrise';
 import { parseStep } from './utils';
 
 describe('modules/manager/bitrise/utils', () => {
@@ -8,20 +9,20 @@ describe('modules/manager/bitrise/utils', () => {
 
     it('returns dependency for step', () => {
       expect(parseStep('restore-gradle-cache@1.1.2')).toEqual({
-        "currentValue": "1.1.2",
-        "datasource": "github-releases",
-        "depName": "restore-gradle-cache",
-        "packageName": "bitrise-steplib/steps-restore-gradle-cache"
+        currentValue: '1.1.2',
+        datasource: BitriseDatasource.id,
+        packageName: 'restore-gradle-cache',
+        replaceString: 'restore-gradle-cache@1.1.2',
       });
-    })
+    });
 
-    it('returns legacy packageName ', () => {
-      expect(parseStep('share-pipeline-variable@2.1.2')).toEqual({
-        "currentValue": "2.1.2",
-        "datasource": "github-releases",
-        "depName": "restore-gradle-cache",
-        "packageName": "bitrise-steplib/bitrise-steps-restore-gradle-cache"
+    it('parses missing version', () => {
+      expect(parseStep('share-pipeline-variable')).toEqual({
+        datasource: BitriseDatasource.id,
+        packageName: 'share-pipeline-variable',
+        replaceString: 'share-pipeline-variable',
+        skipReason: 'unspecified-version',
       });
-    })
+    });
   });
 });

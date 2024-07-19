@@ -109,7 +109,7 @@ api.set('bazel-module', bazelModule);
 api.set('bazelisk', bazelisk);
 api.set('bicep', bicep);
 api.set('bitbucket-pipelines', bitbucketPipelines);
-api.set('bitrise', bitrise)
+api.set('bitrise', bitrise);
 api.set('buildkite', buildkite);
 api.set('bun', bun);
 api.set('bundler', bundler);
