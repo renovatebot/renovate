@@ -83,10 +83,14 @@ All available options:
 
 ### Debugging
 
-Renovate writes tracing log entries before transformation starts and after if Renovate finds an unexpected data format.
-To surface this data you can use `logLevelRemap` to surface this data on the App or run Renovate in dryRun mode and log level set to `trace` locally.
+Renovate writes tracing logs entries before transformation.
+If Renovate finds an unexpected dataformat, it also writes a tracing log _after_ transformation.
 
-```json
+#### Getting trace level logs on hosted app
+
+If you use the Mend Renovate app, use the [`logLevelRemap` config option](https://docs.renovatebot.com/configuration-options/#loglevelremap) to get the trace log.
+
+```json title="Getting trace logs from the Mend Renovate app"
 {
   "logLevelRemap": [
     {
@@ -96,6 +100,13 @@ To surface this data you can use `logLevelRemap` to surface this data on the App
   ]
 }
 ```
+
+#### Getting trace level logs when self-hosting
+
+If you self-host Renovate, follow these steps to get the trace logs:
+
+1. Set the [`logFileLevel` config option](https://docs.renovatebot.com/self-hosted-configuration/#logfilelevel) to `trace`
+1. Run Renovate in `[dryRun` mode](https://docs.renovatebot.com/self-hosted-configuration/#dryrun)
 
 ### Formats
 
