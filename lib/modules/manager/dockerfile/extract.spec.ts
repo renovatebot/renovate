@@ -330,6 +330,26 @@ describe('modules/manager/dockerfile/extract', () => {
       ]);
     });
 
+    it('extracts tags from Dockerfile which begins with a BOM marker', () => {
+      const res = extractPackageFile(
+        '\uFEFFFROM node:6.12.3 as frontend\n\n',
+        '',
+        {},
+      )?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '6.12.3',
+          datasource: 'docker',
+          depName: 'node',
+          depType: 'final',
+          replaceString: 'node:6.12.3',
+        },
+      ]);
+    });
+
     it('skips scratches', () => {
       const res = extractPackageFile('FROM scratch\nADD foo\n', '', {});
       expect(res).toBeNull();

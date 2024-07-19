@@ -6,10 +6,15 @@ const GithubResponseMetadata = z.object({
   path: z.string(),
 });
 
-export const GithubFile = GithubResponseMetadata.extend({
+export const GithubFileMeta = GithubResponseMetadata.extend({
   type: z.literal('file'),
 });
+export type GithubFileMeta = z.infer<typeof GithubFileMeta>;
 
+export const GithubFile = GithubFileMeta.extend({
+  content: z.string(),
+  encoding: z.string(),
+});
 export type GithubFile = z.infer<typeof GithubFile>;
 
 export const GithubDirectory = GithubResponseMetadata.extend({
@@ -24,8 +29,9 @@ export const GithubOtherContent = GithubResponseMetadata.extend({
 
 export type GithubOtherContent = z.infer<typeof GithubOtherContent>;
 
-export const GithubElement =
-  GithubFile.or(GithubDirectory).or(GithubOtherContent);
+export const GithubElement = GithubFile.or(GithubFileMeta)
+  .or(GithubDirectory)
+  .or(GithubOtherContent);
 export type GithubElement = z.infer<typeof GithubElement>;
 
-export const GithubDirectoryResponse = z.array(GithubElement);
+export const GithubContentResponse = z.array(GithubElement).or(GithubElement);
