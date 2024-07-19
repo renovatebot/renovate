@@ -14,9 +14,8 @@ export const categories: Category[] = ['js'];
 
 export function extractPackageFile(content: string): PackageFileContent {
   const dep: PackageDependency = {
-    depName: 'bun',
+    depName: 'Bun',
     packageName: 'oven-sh/bun',
-    commitMessageTopic: 'Bun',
     currentValue: content.trim(),
     datasource: GithubReleasesDatasource.id,
     versioning: semverVersioning.id,
