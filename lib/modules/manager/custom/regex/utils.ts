@@ -85,9 +85,9 @@ export function createDependency(
 export function regexMatchAll(
   regex: RegExp,
   content: string,
-): RegExpMatchArray[] {
-  const matches: RegExpMatchArray[] = [];
-  let matchResult: RegExpMatchArray | null;
+): RegExpExecArray[] {
+  const matches: RegExpExecArray[] = [];
+  let matchResult: RegExpExecArray | null;
   let iterations = 0;
   const maxIterations = 10000;
   do {
@@ -108,16 +108,6 @@ export function mergeGroups(
   secondGroup: Record<string, string>,
 ): Record<string, string> {
   return { ...mergedGroup, ...secondGroup };
-}
-
-export function mergeExtractionTemplate(
-  base: ExtractionTemplate,
-  addition: ExtractionTemplate,
-): ExtractionTemplate {
-  return {
-    groups: mergeGroups(base.groups, addition.groups),
-    replaceString: addition.replaceString ?? base.replaceString,
-  };
 }
 
 export function isValidDependency({
