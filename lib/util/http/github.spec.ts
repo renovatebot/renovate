@@ -786,24 +786,4 @@ describe('util/http/github', () => {
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
   });
-
-  describe('getRawFile()', () => {
-    it('add header and return', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get('/foo/bar/contents/lore/ipsum.txt')
-        .matchHeader(
-          'accept',
-          'application/vnd.github.raw+json, application/vnd.github.v3+json',
-        )
-        .reply(200, 'foo');
-      await expect(
-        githubApi.getRawFile(
-          `${githubApiHost}/foo/bar/contents/lore/ipsum.txt`,
-        ),
-      ).resolves.toMatchObject({
-        body: 'foo',
-      });
-    });
-  });
 });

@@ -493,12 +493,4 @@ export class GithubHttp extends Http<GithubHttpOptions> {
 
     return result;
   }
-
-  public getRawFile(url: string): Promise<HttpResponse> {
-    return this.get(url, {
-      headers: {
-        accept: 'application/vnd.github.raw+json',
-      },
-    });
-  }
 }
