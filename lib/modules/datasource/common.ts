@@ -66,11 +66,28 @@ export function applyVersionCompatibility(
   releaseResult.releases = filterMap(releaseResult.releases, (release) => {
     const regexResult = versionCompatibilityRegEx.exec(release.version);
     if (!regexResult?.groups?.version) {
+      logger.trace(
+        { releaseVersion: release.version, versionCompatibility },
+        'versionCompatibility: Does not match regex',
+      );
       return null;
     }
     if (regexResult?.groups?.compatibility !== currentCompatibility) {
+      logger.trace(
+        { releaseVersion: release.version, versionCompatibility },
+        'versionCompatibility: Does not match compatibility',
+      );
       return null;
     }
+    logger.trace(
+      {
+        releaseVersion: release.version,
+        versionCompatibility,
+        version: regexResult.groups.version,
+        compatibility: regexResult.groups.compatibility,
+      },
+      'versionCompatibility: matches',
+    );
     release.version = regexResult.groups.version;
     return release;
   });
