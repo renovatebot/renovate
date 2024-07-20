@@ -1,10 +1,14 @@
-This datasource allows to fetch Bitrise steps from Git repositories.
+Renovate uses this datasource to fetch Bitrise steps from GitHub repositories.
 
-**Currently only Github is support**
+| Renovate field | What value to use?                      |
+| -------------- | --------------------------------------- |
+| `packageName`  | Name of the Bitrise step                |
+| `registryUrl`  | GitHub HTTP Git URL, as used by Bitrise |
 
-As `packageName` the step name expected e.g. for the following snippet the `packageName` would be `script`.
+For example, in the YAML snippet below:
 
-`registryUrl` expects a GitHub HTTP Git Url as used below by Bitrise. See the `default_step_lib_source` field for an example.
+- `packageName` is `script`
+- `registryUrl` is `https://github.com/bitrise-io/bitrise-steplib.git`
 
 ```yaml
 format_version: 11

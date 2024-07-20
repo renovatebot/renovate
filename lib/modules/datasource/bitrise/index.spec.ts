@@ -16,7 +16,7 @@ describe('modules/datasource/bitrise/index', () => {
       ).resolves.toBeNull();
     });
 
-    it('support GHE api url', async () => {
+    it('support GitHub Enterprise API URL', async () => {
       httpMock
         .scope(
           'https://github.mycompany.com/api/v3/repos/foo/bar/contents/steps',
@@ -60,7 +60,7 @@ describe('modules/datasource/bitrise/index', () => {
       });
     });
 
-    it('returns version and filter out asset folder', async () => {
+    it('returns version and filters out the asset folder', async () => {
       httpMock
         .scope(
           'https://api.github.com/repos/bitrise-io/bitrise-steplib/contents/steps',
@@ -156,7 +156,7 @@ describe('modules/datasource/bitrise/index', () => {
       ).resolves.toBeNull();
     });
 
-    it('returns null if there is an unexpected format a package', async () => {
+    it('returns null if the package has an unexpected format', async () => {
       httpMock
         .scope(
           'https://api.github.com/repos/bitrise-io/bitrise-steplib/contents/steps',
