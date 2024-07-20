@@ -25,7 +25,7 @@ describe('modules/manager/gleam/extract', () => {
         currentValue: '~> 1.0',
         datasource: 'hex',
         depName: 'gleeunit',
-        depType: 'devDependencies',
+        depType: 'dev-dependencies',
       },
     ]);
   });
@@ -44,7 +44,7 @@ describe('modules/manager/gleam/extract', () => {
         currentValue: '~> 1.0',
         datasource: 'hex',
         depName: 'gleeunit',
-        depType: 'devDependencies',
+        depType: 'dev-dependencies',
       },
     ]);
   });
