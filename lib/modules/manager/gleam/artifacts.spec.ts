@@ -113,6 +113,17 @@ describe('modules/manager/gleam/artifacts', () => {
       );
     });
 
+    it('handles temporary error when reading the lock file', async () => {
+      updateArtifact.updatedDeps = [{ manager: 'gleam' }];
+      fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
+      fs.readLocalFile.mockImplementationOnce(() => {
+        throw new Error(TEMPORARY_ERROR);
+      });
+      await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
+        TEMPORARY_ERROR,
+      );
+    });
+
     it('handles full error', async () => {
       const execError = new ExecError('fake_gleam_failure', {
         cmd: '',

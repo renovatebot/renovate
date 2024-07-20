@@ -69,7 +69,6 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) {
-    /* istanbul ignore next reason: static analysis sufficient */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
