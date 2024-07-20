@@ -1390,9 +1390,6 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   logger.trace(`ensureIssueClosing(${title})`);
   // istanbul ignore if
   if (config.hasIssuesEnabled === false) {
-    logger.info(
-      'Cannot ensure issue because issues are disabled in this repository',
-    );
     return;
   }
   const issueList = await getIssueList();
