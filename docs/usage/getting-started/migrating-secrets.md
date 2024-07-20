@@ -5,7 +5,6 @@ Previously, you could encrypt a secret with the [Renovate encryption tool](https
 Going forward, all secrets must be stored in the App settings on the cloud.
 They can be referenced from the Renovate config files inside the repo using `{{ secrets.SECRET_NAME }}` notation.
 
-
 ```json title "Deprecated: example of encrypted secrets in Renovate config"
 {
   "hostRules": [
