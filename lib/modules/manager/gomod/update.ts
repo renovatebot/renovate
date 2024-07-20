@@ -19,9 +19,8 @@ export function updateDependency({
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
     const { depType } = upgrade;
     const currentName = upgrade.depName;
-    // newName will be available for replacement
     let newName = currentName;
-    // but if not, use the current dependency name
+    // newName will be available for replacement
     if (upgrade.newName) {
       newName = upgrade.newName;
     }
