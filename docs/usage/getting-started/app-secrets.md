@@ -80,4 +80,3 @@ The **Recent jobs** table means you are on your repository's page.
 Select the _Settings_ button to manage your repository secrets:
 
 ![repository settings button](../assets/images/app-settings/repo-settings-button.png)
-
