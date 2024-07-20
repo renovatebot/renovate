@@ -2,18 +2,20 @@ import { HexDatasource } from '../../datasource/hex';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { GleamToml } from './schema';
 
+const dependencySections = ['dependencies', 'dev-dependencies'] as const;
+
 function toPackageDep({
   name,
+  sectionKey,
   version,
-  dev,
 }: {
   name: string;
+  sectionKey: string;
   version: string;
-  dev?: boolean;
 }): PackageDependency {
   return {
     depName: name,
-    depType: dev ? 'devDependencies' : 'dependencies',
+    depType: sectionKey,
     datasource: HexDatasource.id,
     currentValue: version,
   };
@@ -21,24 +23,23 @@ function toPackageDep({
 
 function toPackageDeps({
   deps,
-  dev,
+  sectionKey,
 }: {
   deps?: Record<string, string>;
-  dev?: boolean;
+  sectionKey: string;
 }): PackageDependency[] {
   return Object.entries(deps ?? {}).map(([name, version]) =>
-    toPackageDep({ name, version, dev }),
+    toPackageDep({ name, sectionKey, version }),
   );
 }
 
 function extractGleamTomlDeps(gleamToml: GleamToml): PackageDependency[] {
-  return [
-    ...toPackageDeps({ deps: gleamToml.dependencies }),
-    ...toPackageDeps({
-      deps: gleamToml['dev-dependencies'],
-      dev: true,
+  return dependencySections.flatMap((sectionKey) =>
+    toPackageDeps({
+      deps: gleamToml[sectionKey],
+      sectionKey,
     }),
-  ];
+  );
 }
 
 export function extractPackageFile(content: string): PackageFileContent | null {
