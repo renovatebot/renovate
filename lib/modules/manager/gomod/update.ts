@@ -18,16 +18,16 @@ export function updateDependency({
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
     const { depType, updateType } = upgrade;
-    const currentDepName = upgrade.depName;
+    const currentName = upgrade.depName;
     if (updateType === 'replacement') {
       logger.warn('gomod manager does not support replacement updates yet');
       return null;
     }
     // istanbul ignore if: should never happen
-    if (!currentDepName || !upgrade.managerData) {
+    if (!currentName || !upgrade.managerData) {
       return null;
     }
-    const currentPackageNameNoVersion = getDepNameWithNoVersion(currentDepName);
+    const currentNameNoVersion = getDepNameWithNoVersion(currentName);
     const lines = fileContent.split(newlineRegex);
     // istanbul ignore if: hard to test
     if (lines.length <= upgrade.managerData.lineNumber) {
@@ -37,11 +37,11 @@ export function updateDependency({
     const lineToChange = lines[upgrade.managerData.lineNumber];
     logger.trace({ upgrade, lineToChange }, 'go.mod current line');
     if (
-      !lineToChange.includes(currentPackageNameNoVersion) &&
+      !lineToChange.includes(currentNameNoVersion) &&
       !lineToChange.includes('rethinkdb/rethinkdb-go.v5')
     ) {
       logger.debug(
-        { lineToChange, depName: currentDepName },
+        { lineToChange, depName: currentName },
         "go.mod current line doesn't contain dependency",
       );
       return null;
@@ -86,7 +86,7 @@ export function updateDependency({
         return fileContent;
       }
       logger.debug(
-        { depName: currentDepName, lineToChange, newDigestRightSized },
+        { depName: currentName, lineToChange, newDigestRightSized },
         'gomod: need to update digest',
       );
       newLine = lineToChange.replace(
@@ -102,9 +102,9 @@ export function updateDependency({
       );
     }
     if (upgrade.updateType === 'major') {
-      logger.debug(`gomod: major update for ${currentDepName}`);
-      if (currentDepName.startsWith('gopkg.in/')) {
-        const oldV = currentDepName.split('.').pop();
+      logger.debug(`gomod: major update for ${currentName}`);
+      if (currentName.startsWith('gopkg.in/')) {
+        const oldV = currentName.split('.').pop();
         newLine = newLine.replace(`.${oldV}`, `.v${upgrade.newMajor}`);
         // Package renames - I couldn't think of a better place to do this
         newLine = newLine.replace(
@@ -116,11 +116,11 @@ export function updateDependency({
         !newLine.includes(`/v${upgrade.newMajor}`) &&
         !upgrade.newValue!.endsWith('+incompatible')
       ) {
-        if (currentDepName === currentPackageNameNoVersion) {
+        if (currentName === currentNameNoVersion) {
           // If package currently has no version, pin to latest one.
           newLine = newLine.replace(
-            currentDepName,
-            `${currentDepName}/v${upgrade.newMajor}`,
+            currentName,
+            `${currentName}/v${upgrade.newMajor}`,
           );
         } else {
           // Replace version
