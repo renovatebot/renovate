@@ -585,17 +585,18 @@ The solution to this is that you should break your presets into public and priva
 It is strongly recommended that you avoid committing secrets to repositories, including private ones, and this includes secrets needed by Renovate to access private modules.
 The preferred approach to secrets is that the bot administrator configures them as `hostRules` which are then applied to all repositories which the bot accesses.
 
-> [!IMPORTANT]
->
-> Use of encrypted secrets in Renovate config has been deprecated in the Mend Renovate App. Secrets must now be stored in the App settings via the web UI.
->
-> For more information, see [Migrating Secrets from Repo Config to App Settings](migrating-secrets.md)
+<!-- prettier-ignore -->
+!!! warning "Store secrets for your Mend-hosted app via the web UI"
+    Mend no longer supports putting encrypted secrets in the Renovate config file on your repository.
+    Going forward, all secrets must be stored in the App settings via the web UI.
+    If you have encrypted secrets in your Renovate config, you must migrate them to the web UI.
+    Read [Migrating Secrets from Repo Config to App Settings](migrating-secrets.md) to learn how.
 
 If you need to provide credentials to the Mend Renovate App, please do this:
 
 1. Add each secret string in the Credentials section of Organisation or Repository settings in the web UI at [http://developer.mend.io](http://developer.mend.io).
 
-   ![Organisation and Repository secrets in Credentials settings page](../assets/images/app-settings/org-and-repo-secrets.png)
+   ![Organization and repository secrets on the credentials settings page](../assets/images/app-settings/org-and-repo-secrets.png)
 
 2. Reference secrets inside your Renovate config files with notation: `{{ secrets.YOUR_SECRET }}`.
 

@@ -1,21 +1,36 @@
-# Using Secrets with Mend Cloud Apps
+# Using secrets with Mend cloud Apps
 
-The Mend-hosted cloud apps - Renovate App on GitHub, Mend App on Bitbucket - have deprecated the use of encrypted secrets in Renovate config files stored in the repo.
-Instead, secrets for the cloud apps must be stored in the app settings using the web UI available at [developer.mend.io](http://developer.mend.io).
+The information on this page is for the Mend-hosted cloud apps:
 
-> [!NOTE]
->
-> Only users with admin rights can add secrets.
+- Renovate App on GitHub
+- Mend App on Bitbucket
 
-## How to use secrets in the Mend Hosted Cloud Apps
+If you self-host, you can skip reading this page.
 
-To use secrets in the Mend Cloud apps:
+## Migrate secrets in your Renovate config file!
 
-1. Add the secret in the **Credentials** section of the Org or Repo settings in the web UI at [http://developer.mend.io](http://developer.mend.io).
+The Mend-hosted cloud app will stop reading secrets from the Renovate config file in your repository on 01-Oct-2024.
+You must migrate any secrets you currently keep in the Renovate config file, and put them in the app settings page on [developer.mend.io](https://developer.mend.io).
+To add secrets you must have admin-level rights.
+
+Read [Migrating encrypted secrets from Repo Config to App Settings](migrating-secrets.md) to learn more.
+
+## Managing secrets for the Mend-hosted cloud apps
+
+This section explains how you manage secrets for the Mend-hosted cloud apps.
+If you self-host you do not need this section.
+
+### Adding a secret
+
+To add a secret for the Mend cloud app:
+
+1. Go to the web UI at [developer.mend.io](https://developer.mend.io).
+2. Open your organization/repository settings.
+3. Put the secret in the _Credentials_ section:
 
    ![Credentials settings page](../assets/images/app-settings/app-credentials.png)
 
-2. Reference the secret from Renovate config files inside the repo.
+4. Reference the secret from Renovate config files inside the repo.
 
    ```json
    {
@@ -28,30 +43,41 @@ To use secrets in the Mend Cloud apps:
    }
    ```
 
-## Org secrets versus Repo secrets
+## Organization secrets vs repository secrets
 
-When adding a secret in the web UI, check whether you are adding **Organization secrets** or **Repository secrets**.
+### Secret scope
 
-- Org-level secrets will be inherited by all repos in the org.
-- Repo-level secrets can be referenced by only the specific repo.
+Secrets can be scoped to your organization _or_ to your repository:
 
-![Org and Repo secrets](../assets/images/app-settings/org-and-repo-secrets.png)
+| Secret scoped to your | What will happen?                                              |
+| --------------------- | -------------------------------------------------------------- |
+| Organization          | Secrets are inherited by all repositories in your organization |
+| Repository            | Secrets are referenced by that repository only                 |
 
-This image shows credentials from the Repo settings page. It shows inherited Organisation Secrets, plus the specific Repository Secrets.
-Only the Repo settings can be edited here. Org settings must be edited in the Org settings page.
+### Make changes on the right page
 
-- **To access Org-level secrets**, press the `Settings` button on the Org page.
+The web UI has _two_ settings pages.
+One page is for the organization, and the other page is for the repository.
 
-_Tip: You know you are on the Org page if you see the **Installed Repositories** table._
+Make sure you're making the changes on the right page!
 
-![Org settings button](../assets/images/app-settings/org-settings-button.png)
+### Example
 
-- **To access Repo-level secrets**, press the `Settings` button on the Repo page.
+![Credentials from the repository settings page](../assets/images/app-settings/org-and-repo-secrets.png)
 
-_Tip: You know you are on a Repo page if you see the **Recent jobs** table._
+The screenshot shows inherited organization secrets and specific repository secrets.
 
-![Repo settings button](../assets/images/app-settings/repo-settings-button.png)
+### Managing organization-level secrets
 
-## Related links
+The **Installed Repositories** table means you are on your organization's page.
+Select the _Settings_ button to manage your organization secrets:
 
-- [Migrating encrypted secrets from Repo Config to App Settings](migrating-secrets.md)
+![organization settings button](../assets/images/app-settings/org-settings-button.png)
+
+### Managing repository-level secrets
+
+The **Recent jobs** table means you are on your repository's page.
+Select the _Settings_ button to manage your repository secrets:
+
+![repository settings button](../assets/images/app-settings/repo-settings-button.png)
+
