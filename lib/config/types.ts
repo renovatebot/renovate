@@ -4,6 +4,7 @@ import type { LogLevelRemap } from '../logger/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { RepoSortMethod, SortMethod } from '../modules/platform/types';
 import type { HostRule, SkipReason } from '../types';
+import type { StageName } from '../types/skip-reason';
 import type { GitNoVerifyOption } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
 
@@ -555,6 +556,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   currentVersionTimestamp?: string;
   enabled?: boolean;
   skipReason?: SkipReason;
+  skipStage?: StageName;
 }
 
 export interface ConfigMigration {

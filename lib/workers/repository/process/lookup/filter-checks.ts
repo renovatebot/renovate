@@ -52,7 +52,7 @@ export async function filterInternalChecks(
         releaseConfig[releaseConfig.updateType]!,
       );
       // Apply packageRules in case any apply to updateType
-      releaseConfig = applyPackageRules(releaseConfig);
+      releaseConfig = applyPackageRules(releaseConfig, 'update-type');
       // Now check for a minimumReleaseAge config
       const {
         minimumConfidence,
