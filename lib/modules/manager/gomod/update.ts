@@ -3,8 +3,8 @@ import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
 
-function getNameWithNoVersion(depName: string): string {
-  let nameNoVersion = depName.split('/').slice(0, 3).join('/');
+function getNameWithNoVersion(name: string): string {
+  let nameNoVersion = name.split('/').slice(0, 3).join('/');
   if (nameNoVersion.startsWith('gopkg.in')) {
     nameNoVersion = nameNoVersion.replace(regEx(/\.v\d+$/), '');
   }
