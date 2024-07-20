@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../../../logger';
 import * as hostRules from '../../../../util/host-rules';
 import { regEx } from '../../../../util/regex';
 import { toBase64 } from '../../../../util/string';
@@ -17,6 +18,7 @@ export function processHostRules(): HostRulesResult {
   const npmHostRules = hostRules.findAll({
     hostType: 'npm',
   });
+  logger.debug(`Found ${npmHostRules.length} npm host rule(s)`);
   for (const hostRule of npmHostRules) {
     if (hostRule.resolvedHost) {
       let uri = hostRule.matchHost;
@@ -27,6 +29,7 @@ export function processHostRules(): HostRulesResult {
             `//${uri}/`;
       if (hostRule.token) {
         const key = hostRule.authType === 'Basic' ? '_auth' : '_authToken';
+        logger.debug(`Adding npmrc entry for ${uri}:${key}`);
         additionalNpmrcContent.push(`${uri}:${key}=${hostRule.token}`);
         additionalYarnRcYml ||= { npmRegistries: {} };
         if (hostRule.authType === 'Basic') {
@@ -39,6 +42,7 @@ export function processHostRules(): HostRulesResult {
           };
         }
       } else if (is.string(hostRule.username) && is.string(hostRule.password)) {
+        logger.debug(`Adding npmrc entry for ${uri}:username and _password`);
         const password = toBase64(hostRule.password);
         additionalNpmrcContent.push(`${uri}:username=${hostRule.username}`);
         additionalNpmrcContent.push(`${uri}:_password=${password}`);
@@ -46,7 +50,13 @@ export function processHostRules(): HostRulesResult {
         additionalYarnRcYml.npmRegistries[uri] = {
           npmAuthIdent: `${hostRule.username}:${hostRule.password}`,
         };
+      } else {
+        logger.debug(
+          `Skipping host rule with no token or username/password for ${hostRule.matchHost}`,
+        );
       }
+    } else {
+      logger.debug(`Skipping host rule with no resolved host`);
     }
   }
   return { additionalNpmrcContent, additionalYarnRcYml };
