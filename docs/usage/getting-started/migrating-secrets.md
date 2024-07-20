@@ -18,7 +18,6 @@ They can be referenced from the Renovate config files inside the repo using `{{ 
 }
 ```
 
-
 ```json "Correct method: reference app secrets in the Renovate config"
 {
   "hostRules": [
