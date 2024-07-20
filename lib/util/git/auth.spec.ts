@@ -350,6 +350,27 @@ describe('util/git/auth', () => {
         GIT_CONFIG_VALUE_2: 'https://github.com:89/org/repo.git',
       });
     });
+
+    it('returns url with token for bitbucket-server', () => {
+      expect(
+        getGitAuthenticatedEnvironmentVariables('https://git.mycompany.com/', {
+          token: 'token1234',
+          hostType: 'bitbucket-server',
+          matchHost: 'git.mycompany.com',
+        }),
+      ).toStrictEqual({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0:
+          'url.https://ssh:token1234@git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://git:token1234@git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://token1234@git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@git.mycompany.com:7999/',
+        GIT_CONFIG_VALUE_1: 'ssh://git@git.mycompany.com:7999/',
+        GIT_CONFIG_VALUE_2: 'https://git.mycompany.com/scm/',
+      });
+    });
   });
 
   describe('getGitEnvironmentVariables()', () => {
@@ -537,6 +558,26 @@ describe('util/git/auth', () => {
         token: 'token123',
       });
       expect(getGitEnvironmentVariables(['custom'])).toStrictEqual({});
+    });
+
+    it('returns environment variables for bitbucket-server', () => {
+      add({
+        hostType: 'bitbucket-server',
+        matchHost: 'git.mycompany.com',
+        token: 'token123',
+      });
+      expect(getGitEnvironmentVariables()).toStrictEqual({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0:
+          'url.https://ssh:token123@git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://git:token123@git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://token123@git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@git.mycompany.com:7999/',
+        GIT_CONFIG_VALUE_1: 'ssh://git@git.mycompany.com:7999/',
+        GIT_CONFIG_VALUE_2: 'https://git.mycompany.com/scm/',
+      });
     });
   });
 });
