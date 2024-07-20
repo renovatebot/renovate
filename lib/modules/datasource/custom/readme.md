@@ -81,6 +81,22 @@ All available options:
 }
 ```
 
+### Debugging
+
+Renovate writes tracing log entries before transformation starts and after if Renovate finds an unexpected data format.
+To surface this data you can use `logLevelRemap` to surface this data on the App or run Renovate in dryRun mode and log level set to `trace` locally.
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/^Custom manager fetcher/",
+      "newLogLevel": "info"
+    }
+  ]
+}
+```
+
 ### Formats
 
 #### JSON

@@ -3722,11 +3722,22 @@ This feature works with the following managers:
 - [`terraform`](modules/manager/terraform/index.md)
 - [`woodpecker`](modules/manager/woodpecker/index.md)
 
-```json
+```json title="Setting generic aliases"
 {
   "registryAliases": {
     "jfrogecosystem": "some.jfrog.mirror",
     "jfrog.com": "some.jfrog.mirror"
+  }
+}
+```
+
+```json title="Setting aliases for a specific Renovate manager only"
+{
+  "gitlabci": {
+    "registryAliases": {
+      "$HARBOR_HOST/$HARBOR_PROJECT": "registry.example.com/proxy",
+      "$HARBOR_HOST/tools": "registry.example.com/tools"
+    }
   }
 }
 ```

@@ -1625,7 +1625,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       });
 
       expect(res).toMatchObject({
@@ -1653,7 +1653,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       });
 
       expect(res).toMatchObject({
@@ -1681,7 +1681,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       });
 
       expect(res).toMatchObject({
@@ -1707,7 +1707,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       });
 
       expect(res).toMatchObject({
@@ -1734,7 +1734,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       });
 
       expect(res).toMatchObject({
@@ -1763,7 +1763,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: {
+        platformPrOptions: {
           automergeStrategy: 'auto',
           usePlatformAutomerge: true,
         },
@@ -1802,7 +1802,7 @@ describe('modules/platform/gitea/index', () => {
           targetBranch: 'master',
           prTitle: mockNewPR.title,
           prBody: mockNewPR.body,
-          platformOptions: {
+          platformPrOptions: {
             automergeStrategy,
             usePlatformAutomerge: true,
           },
