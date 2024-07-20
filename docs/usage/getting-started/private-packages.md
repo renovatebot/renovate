@@ -585,30 +585,33 @@ The solution to this is that you should break your presets into public and priva
 It is strongly recommended that you avoid committing secrets to repositories, including private ones, and this includes secrets needed by Renovate to access private modules.
 The preferred approach to secrets is that the bot administrator configures them as `hostRules` which are then applied to all repositories which the bot accesses.
 
+<!-- prettier-ignore -->
+!!! warning "Store secrets for your Mend-hosted app via the web UI"
+    Mend no longer supports putting encrypted secrets in the Renovate config file on your repository.
+    Going forward, all secrets must be stored in the App settings via the web UI.
+    If you have encrypted secrets in your Renovate config, you must migrate them to the web UI.
+    Read [Migrating Secrets from Repo Config to App Settings](migrating-secrets.md) to learn how.
+
 If you need to provide credentials to the Mend Renovate App, please do this:
 
-- Encrypt each secret string using <https://app.renovatebot.com/encrypt>. Note: this encrypts using the app's public key fully in the browser and does not send the original secret to any server. You can download this file and perform the encryption fully offline if you like.
-- Wrap each secret field in an [encrypted](../configuration-options.md#encrypted) object and paste in the encrypted secret value instead. An example is shown below:
+1. Add each secret string in the Credentials section of Organisation or Repository settings in the web UI at [http://developer.mend.io](http://developer.mend.io).
 
-```json
-{
-  "hostRules": [
-    {
-      "matchHost": "registry.npmjs.org",
-      "encrypted": {
-        "token": "3f832f2983yf89hsd98ahadsjfasdfjaslf............"
-      }
-    },
-    {
-      "matchHost": "https://custom.registry.company.com/pypi/",
-      "username": "bot1",
-      "encrypted": {
-        "password": "p278djfdsi9832jnfdshufwji2r389fdskj........."
-      }
-    }
-  ]
-}
-```
+   ![Organization and repository secrets on the credentials settings page](../assets/images/app-settings/org-and-repo-secrets.png)
+
+2. Reference secrets inside your Renovate config files with notation: `{{ secrets.YOUR_SECRET }}`.
+
+   ```json
+   {
+     "hostRules": [
+       {
+         "matchHost": "github.com",
+         "token": "{{ secrets.GITHUB_COM_TOKEN }}"
+       }
+     ]
+   }
+   ```
+
+For more details, see [Using Secrets with Mend Cloud Apps](app-secrets.md).
 
 ### Access to GitHub Actions Secrets
 
