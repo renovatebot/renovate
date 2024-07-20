@@ -105,8 +105,8 @@ If you use the Mend Renovate app, use the [`logLevelRemap` config option](https:
 
 If you self-host Renovate, follow these steps to get the trace logs:
 
-1. Set the [`logFileLevel` config option](https://docs.renovatebot.com/self-hosted-configuration/#logfilelevel) to `trace`
-1. Run Renovate in `[dryRun` mode](https://docs.renovatebot.com/self-hosted-configuration/#dryrun)
+1. Set the [`logFileLevel` config option](../../../self-hosted-configuration.md#logfilelevel) to `trace`
+1. Run Renovate in [`dryRun` mode](../../../self-hosted-configuration.md#dryrun)
 
 ### Formats
 
