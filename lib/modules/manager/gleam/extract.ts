@@ -44,6 +44,5 @@ function extractGleamTomlDeps(gleamToml: GleamToml): PackageDependency[] {
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   const deps = extractGleamTomlDeps(GleamToml.parse(content));
-  /* istanbul ignore next reason: static analysis sufficient */
   return deps.length ? { deps } : null;
 }

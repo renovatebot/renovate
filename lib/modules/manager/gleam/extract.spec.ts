@@ -48,4 +48,16 @@ describe('modules/manager/gleam/extract', () => {
       },
     ]);
   });
+
+  it('should return null when no dependencies are found', () => {
+    const gleamTomlString = codeBlock`
+      name = "test_gleam_toml"
+      version = "1.0.0"
+
+      [unknown]
+      gleam_http = "~> 3.6.0"
+    `;
+    const extracted = gleamManager.extractPackageFile(gleamTomlString);
+    expect(extracted).toBeNull();
+  });
 });
