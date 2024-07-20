@@ -81,6 +81,15 @@ describe('modules/manager/gleam/artifacts', () => {
       ]);
     });
 
+    it('returns null if lockfile content unchanged', async () => {
+      updateArtifact.updatedDeps = [{ manager: 'gleam' }];
+      updateArtifact.config.updateType = 'lockFileMaintenance';
+      fs.readLocalFile.mockResolvedValueOnce('old');
+      fs.readLocalFile.mockResolvedValueOnce('old');
+      fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
+      expect(await updateArtifacts(updateArtifact)).toBeNull();
+    });
+
     it('handles temporary error', async () => {
       const execError = new ExecError(TEMPORARY_ERROR, {
         cmd: '',

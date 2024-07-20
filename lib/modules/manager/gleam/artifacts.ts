@@ -57,7 +57,6 @@ export async function updateArtifacts(
 
     await exec('gleam deps download', execOptions);
     const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
-    /* istanbul ignore next reason: static analysis sufficient */
     if (!newLockFileContent || oldLockFileContent === newLockFileContent) {
       return null;
     }
