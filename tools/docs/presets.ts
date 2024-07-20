@@ -17,6 +17,8 @@ function getEditUrl(name: string): string {
       return `${url}merge-confidence.ts`;
     case 'monorepo':
       return `${dataUrl}${name}.json`;
+    case 'replacements':
+      return `${dataUrl}${name}.json`;
     default:
       return `${url}${name}.ts`;
   }

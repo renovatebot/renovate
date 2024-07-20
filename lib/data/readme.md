@@ -24,3 +24,15 @@ There are three ways to group packages:
 | From the same source repository.    | `repoGroups`    |
 | From the same organization.         | `orgGroups`     |
 | Based on name patterns or prefixes. | `patternGroups` |
+
+## Rename old packages (`replacements.json`)
+
+The `replacements.json` file has all the replacement presets.
+
+When a package gets renamed, you need to tell Renovate:
+
+- the datasource of the package
+- the old package name
+- the new package name
+- the last version available for the old package name
+- the first version available for the new package name
