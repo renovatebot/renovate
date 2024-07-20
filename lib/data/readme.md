@@ -5,9 +5,10 @@ This readme explains what each file is used for.
 
 ## Summary
 
-| File            | What is the file about?                  |
-| --------------- | ---------------------------------------- |
-| `monorepo.json` | Group related packages into a single PR. |
+| File                | What is the file about?                  |
+| ------------------- | ---------------------------------------- |
+| `monorepo.json`     | Group related packages into a single PR. |
+| `replacements.json` | Rename old packages to new replacement.  |
 
 ## Group related packages (`monorepo.json`)
 
