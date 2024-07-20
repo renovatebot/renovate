@@ -1105,7 +1105,7 @@ describe('modules/platform/bitbucket/index', () => {
         targetBranch: 'master',
         prTitle: 'title',
         prBody: 'body',
-        platformOptions: {
+        platformPrOptions: {
           bbUseDefaultReviewers: true,
         },
       });
@@ -1188,7 +1188,7 @@ describe('modules/platform/bitbucket/index', () => {
         targetBranch: 'master',
         prTitle: 'title',
         prBody: 'body',
-        platformOptions: {
+        platformPrOptions: {
           bbUseDefaultReviewers: true,
         },
       });
@@ -1251,7 +1251,7 @@ describe('modules/platform/bitbucket/index', () => {
         targetBranch: 'master',
         prTitle: 'title',
         prBody: 'body',
-        platformOptions: {
+        platformPrOptions: {
           bbUseDefaultReviewers: true,
         },
       });
@@ -1297,7 +1297,7 @@ describe('modules/platform/bitbucket/index', () => {
           targetBranch: 'master',
           prTitle: 'title',
           prBody: 'body',
-          platformOptions: {
+          platformPrOptions: {
             bbUseDefaultReviewers: true,
           },
         }),
@@ -1352,7 +1352,7 @@ describe('modules/platform/bitbucket/index', () => {
         targetBranch: 'master',
         prTitle: 'title',
         prBody: 'body',
-        platformOptions: {
+        platformPrOptions: {
           bbUseDefaultReviewers: true,
         },
       });
@@ -1391,7 +1391,7 @@ describe('modules/platform/bitbucket/index', () => {
           targetBranch: 'master',
           prTitle: 'title',
           prBody: 'body',
-          platformOptions: {
+          platformPrOptions: {
             bbUseDefaultReviewers: true,
           },
         }),
@@ -1430,7 +1430,7 @@ describe('modules/platform/bitbucket/index', () => {
           targetBranch: 'master',
           prTitle: 'title',
           prBody: 'body',
-          platformOptions: {
+          platformPrOptions: {
             bbUseDefaultReviewers: true,
           },
         }),

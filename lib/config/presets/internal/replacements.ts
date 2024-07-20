@@ -29,6 +29,7 @@ export const presets: Record<string, Preset> = {
       'replacements:middie-to-scoped',
       'replacements:now-to-vercel',
       'replacements:npm-run-all-to-maintenance-fork',
+      'replacements:opencost-registry-move',
       'replacements:parcel-css-to-lightningcss',
       'replacements:passport-saml',
       'replacements:react-query-devtools-to-scoped',
@@ -740,6 +741,29 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['npm-run-all'],
         replacementName: 'npm-run-all2',
         replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'opencost-registry-move': {
+    description: 'Replace OpenCost registry from quay.io to ghcr.io.',
+    packageRules: [
+      {
+        description:
+          'Replace `quay.io/kubecost1/kubecost-cost-model` with `ghcr.io/opencost/opencost`.',
+        matchCurrentVersion: '1.108.0',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['quay.io/kubecost1/kubecost-cost-model'],
+        replacementName: 'ghcr.io/opencost/opencost',
+        replacementVersion: '1.109.0',
+      },
+      {
+        description:
+          'Replace `quay.io/kubecost1/opencost-ui` with `ghcr.io/opencost/opencost-ui`.',
+        matchCurrentVersion: '1.108.0',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['quay.io/kubecost1/opencost-ui'],
+        replacementName: 'ghcr.io/opencost/opencost-ui',
+        replacementVersion: '1.109.0',
       },
     ],
   },

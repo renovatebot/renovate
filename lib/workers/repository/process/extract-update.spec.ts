@@ -50,7 +50,6 @@ describe('workers/repository/process/extract-update', () => {
     it('runs with no baseBranches', async () => {
       const config = {
         repoIsOnboarded: true,
-        suppressNotifications: ['deprecationWarningIssues'],
       };
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
@@ -75,7 +74,6 @@ describe('workers/repository/process/extract-update', () => {
       const config = {
         baseBranches: ['master', 'dev'],
         repoIsOnboarded: true,
-        suppressNotifications: ['deprecationWarningIssues'],
         enabledManagers: ['npm'],
         javascript: {
           labels: ['js'],
@@ -94,7 +92,6 @@ describe('workers/repository/process/extract-update', () => {
       const packageFiles: Record<string, PackageFile[]> = {};
       const config = {
         repoIsOnboarded: true,
-        suppressNotifications: ['deprecationWarningIssues'],
         baseBranch: 'master',
       };
       repositoryCache.getCache.mockReturnValueOnce({
@@ -116,7 +113,6 @@ describe('workers/repository/process/extract-update', () => {
     it('fetches vulnerabilities', async () => {
       const config = {
         repoIsOnboarded: true,
-        suppressNotifications: ['deprecationWarningIssues'],
         osvVulnerabilityAlerts: true,
       };
       const appendVulnerabilityPackageRulesMock = jest.fn();
@@ -136,7 +132,6 @@ describe('workers/repository/process/extract-update', () => {
     it('handles exception when fetching vulnerabilities', async () => {
       const config = {
         repoIsOnboarded: true,
-        suppressNotifications: ['deprecationWarningIssues'],
         osvVulnerabilityAlerts: true,
       };
       createVulnerabilitiesMock.mockRejectedValueOnce(new Error());

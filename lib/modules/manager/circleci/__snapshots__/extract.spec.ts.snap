@@ -10,7 +10,6 @@ exports[`modules/manager/circleci/extract extractPackageFile() extracts multiple
     "depName": "node",
     "depType": "docker",
     "replaceString": "node",
-    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -20,7 +19,6 @@ exports[`modules/manager/circleci/extract extractPackageFile() extracts multiple
     "depName": "node",
     "depType": "docker",
     "replaceString": "node:4",
-    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -30,7 +28,6 @@ exports[`modules/manager/circleci/extract extractPackageFile() extracts multiple
     "depName": "node",
     "depType": "docker",
     "replaceString": "node:6",
-    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -40,7 +37,6 @@ exports[`modules/manager/circleci/extract extractPackageFile() extracts multiple
     "depName": "node",
     "depType": "docker",
     "replaceString": "node:8.9.0",
-    "versioning": "docker",
   },
 ]
 `;

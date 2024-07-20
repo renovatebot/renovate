@@ -168,7 +168,7 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
       TAG_PULL_REQUEST_BODY,
     );
   }
-  if (prConfig.platformOptions?.autoApprove) {
+  if (prConfig.platformPrOptions?.autoApprove) {
     await client.approveChange(prConfig.number);
   }
   if (prConfig.state && prConfig.state === 'closed') {
@@ -211,7 +211,7 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
     prConfig.prBody,
     TAG_PULL_REQUEST_BODY,
   );
-  if (prConfig.platformOptions?.autoApprove) {
+  if (prConfig.platformPrOptions?.autoApprove) {
     await client.approveChange(pr._number);
   }
   return getPr(pr._number);
@@ -396,7 +396,7 @@ export async function ensureComment(
 
 export function massageMarkdown(prBody: string): string {
   //TODO: do more Gerrit specific replacements?
-  return smartTruncate(readOnlyIssueBody(prBody), 16384) //TODO: check the real gerrit limit (max. chars)
+  return smartTruncate(readOnlyIssueBody(prBody), maxBodyLength())
     .replace(regEx(/Pull Request(s)?/g), 'Change-Request$1')
     .replace(regEx(/\bPR(s)?\b/g), 'Change-Request$1')
     .replace(regEx(/<\/?summary>/g), '**')
@@ -417,6 +417,10 @@ export function massageMarkdown(prBody: string): string {
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+}
+
+export function maxBodyLength(): number {
+  return 16384; //TODO: check the real gerrit limit (max. chars)
 }
 
 export function deleteLabel(number: number, label: string): Promise<void> {

@@ -70,13 +70,30 @@ All available options:
       "changelogUrl": "https://github.com/demo-org/demo/blob/main/CHANGELOG.md#v0710",
       "sourceUrl": "https://github.com/demo-org/demo",
       "sourceDirectory": "monorepo/folder",
-      "digest": "c667f758f9e46e1d8111698e8d3a181c0b10f430"
+      "digest": "c667f758f9e46e1d8111698e8d3a181c0b10f430",
+      "isStable": true
     }
   ],
   "sourceUrl": "https://github.com/demo-org/demo",
   "sourceDirectory": "monorepo/folder",
   "changelogUrl": "https://github.com/demo-org/demo/blob/main/CHANGELOG.md",
   "homepage": "https://demo.org"
+}
+```
+
+### Debugging
+
+Renovate writes tracing log entries before transformation starts and after if Renovate finds an unexpected data format.
+To surface this data you can use `logLevelRemap` to surface this data on the App or run Renovate in dryRun mode and log level set to `trace` locally.
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/^Custom manager fetcher/",
+      "newLogLevel": "info"
+    }
+  ]
 }
 ```
 

@@ -33,7 +33,7 @@ First you would set a custom manager in your `renovate.json` file for `Dockerfil
 
 Then you would put comments in your Dockerfile, to tell Renovate where to find the updates:
 
-```docker
+```dockerfile
 FROM alpine:3.12.0@sha256:a15790640a6690aa1730c38cf0a440e2aa44aaca9b0e8931a9f2b0d7cc90fd65
 
 # renovate: datasource=repology depName=alpine_3_12/gcc versioning=loose
