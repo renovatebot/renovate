@@ -2744,7 +2744,7 @@ describe('modules/platform/github/index', () => {
           prTitle: 'PR title',
           prBody: 'PR can be edited by maintainers.',
           labels: null,
-          platformOptions: {
+          platformPrOptions: {
             forkModeDisallowMaintainerEdits: false,
           },
         });
@@ -2789,7 +2789,7 @@ describe('modules/platform/github/index', () => {
           prTitle: 'PR title',
           prBody: 'PR *cannot* be edited by maintainers.',
           labels: null,
-          platformOptions: {
+          platformPrOptions: {
             forkModeDisallowMaintainerEdits: true,
           },
         });
@@ -2831,7 +2831,7 @@ describe('modules/platform/github/index', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       };
 
       const mockScope = async (repoOpts: any = {}): Promise<httpMock.Scope> => {
@@ -3412,7 +3412,7 @@ describe('modules/platform/github/index', () => {
     });
   });
 
-  describe('reattemptPlatformAutomerge(number, platformOptions)', () => {
+  describe('reattemptPlatformAutomerge(number, platformPrOptions)', () => {
     const getPrListResp = [
       {
         number: 1234,
@@ -3440,7 +3440,7 @@ describe('modules/platform/github/index', () => {
 
     const pr: ReattemptPlatformAutomergeConfig = {
       number: 123,
-      platformOptions: { usePlatformAutomerge: true },
+      platformPrOptions: { usePlatformAutomerge: true },
     };
 
     const mockScope = async (repoOpts: any = {}): Promise<httpMock.Scope> => {
