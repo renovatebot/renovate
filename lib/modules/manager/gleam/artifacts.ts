@@ -32,7 +32,6 @@ export async function updateArtifacts(
   }
 
   const oldLockFileContent = await readLocalFile(lockFileName, 'utf8');
-  /* istanbul ignore next reason: static analysis sufficient */
   if (!oldLockFileContent) {
     logger.debug(`No ${lockFileName} found`);
     return null;
