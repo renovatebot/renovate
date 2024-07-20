@@ -49,7 +49,7 @@ export function parseStepRef(
     };
   }
 
-  // handle git references
+  // handle Git references
   // https://devcenter.bitrise.io/en/references/steps-reference/step-reference-id-format.html
   if (ref.startsWith('git::')) {
     const [, packageName] = ref.split('::');

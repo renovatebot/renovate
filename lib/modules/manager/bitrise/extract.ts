@@ -28,7 +28,7 @@ export function extractPackageFile(
       }
     }
   } catch (err) {
-    logger.debug({ err, packageFile }, `Parsing Bitrise config YAML failed`);
+    logger.debug({ err, packageFile }, `Failed to parse Bitrise YAML config`);
   }
 
   if (!deps.length) {

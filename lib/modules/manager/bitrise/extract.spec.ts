@@ -8,7 +8,7 @@ describe('modules/manager/bitrise/extract', () => {
       expect(extractPackageFile('', 'bitrise.yml')).toBeNull();
     });
 
-    it('returns valid file', () => {
+    it('returns a valid file', () => {
       expect(
         extractPackageFile(
           codeBlock`
@@ -31,7 +31,7 @@ describe('modules/manager/bitrise/extract', () => {
       });
     });
 
-    it('returns valid file with custom default_step_lib_source', () => {
+    it('returns a valid file with custom default_step_lib_source', () => {
       expect(
         extractPackageFile(
           codeBlock`
@@ -72,7 +72,7 @@ describe('modules/manager/bitrise/extract', () => {
       });
     });
 
-    it('extract git and path prefixes', () => {
+    it('extracts git and path prefixes', () => {
       expect(
         extractPackageFile(
           codeBlock`
@@ -111,7 +111,7 @@ describe('modules/manager/bitrise/extract', () => {
       });
     });
 
-    it('extract bitrise library reference', () => {
+    it('extracts Bitrise library reference', () => {
       expect(
         extractPackageFile(
           codeBlock`
