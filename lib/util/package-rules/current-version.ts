@@ -48,7 +48,7 @@ export class CurrentVersionMatcher extends Matcher {
 
     const compareVersion = version.isVersion(currentValue)
       ? currentValue // it's a version so we can match against it
-      : lockedVersion ?? currentVersion; // need to match against this currentVersion, if available
+      : (lockedVersion ?? currentVersion); // need to match against this currentVersion, if available
     if (is.nullOrUndefined(compareVersion)) {
       return false;
     }

@@ -220,6 +220,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  gleam: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-gleam.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'gleam-lang/gleam',
+      extractVersion: '^v(?<version>.+)',
+    },
+  },
   gohugo: hugoDefinition,
   golang: {
     asdfPluginUrl: 'https://github.com/kennyp/asdf-golang',
