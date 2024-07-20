@@ -17,14 +17,16 @@ export function updateDependency({
 }: UpdateDependencyConfig): string | null {
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
-    const { depType, updateType } = upgrade;
+    const { depType } = upgrade;
     const currentName = upgrade.depName;
-    if (updateType === 'replacement') {
-      logger.warn('gomod manager does not support replacement updates yet');
-      return null;
+    // newName will be available for replacement
+    let newName = currentName;
+    // but if not, use the current dependency name
+    if (upgrade.newName) {
+      newName = upgrade.newName;
     }
     // istanbul ignore if: should never happen
-    if (!currentName || !upgrade.managerData) {
+    if (!currentName || !newName || !upgrade.managerData) {
       return null;
     }
     const currentNameNoVersion = getNameWithNoVersion(currentName);
@@ -111,13 +113,13 @@ export function updateDependency({
       newLine = lineToChange.replace(
         // TODO: can be undefined? (#22198)
         updateLineExp!,
-        `$<depPart>${quote}${toDepName}${quote}$<divider>${newDigestRightSized}`,
+        `$<depPart>${quote}${newName}${quote}$<divider>${newDigestRightSized}`,
       );
     } else {
       newLine = lineToChange.replace(
         // TODO: can be undefined? (#22198)
         updateLineExp!,
-        `$<depPart>${quote}${toDepName}${quote}$<divider>${upgrade.newValue}`,
+        `$<depPart>${quote}${newName}${quote}$<divider>${upgrade.newValue}`,
       );
     }
     if (upgrade.updateType === 'major') {
