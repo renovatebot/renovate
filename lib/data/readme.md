@@ -32,8 +32,24 @@ The `replacements.json` file has all the replacement presets.
 
 When a package gets renamed, you need to tell Renovate:
 
-- the datasource of the package
-- the old package name
-- the new package name
-- the last version available for the old package name
-- the first version available for the new package name
+- the datasource of the package -> `matchDatasources`
+- the old package name -> `matchPackageNames`
+- the new package name -> `replacementName`
+- the last version available for the old package name -> `matchCurrentVersion`
+- the first version available for the new package name -> `replacementVersion`
+
+Example:
+
+```javascript
+{
+        "matchCurrentVersion": ">=3.10.3",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": [
+          "apollo-server",
+          "apollo-server-core",
+          "apollo-server-express"
+        ],
+        "replacementName": "@apollo/server",
+        "replacementVersion": "4.0.0"
+}
+```
