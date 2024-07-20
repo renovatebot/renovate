@@ -3,12 +3,12 @@ import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
 
-function getDepNameWithNoVersion(depName: string): string {
-  let depNameNoVersion = depName.split('/').slice(0, 3).join('/');
-  if (depNameNoVersion.startsWith('gopkg.in')) {
-    depNameNoVersion = depNameNoVersion.replace(regEx(/\.v\d+$/), '');
+function getNameWithNoVersion(depName: string): string {
+  let nameNoVersion = depName.split('/').slice(0, 3).join('/');
+  if (nameNoVersion.startsWith('gopkg.in')) {
+    nameNoVersion = nameNoVersion.replace(regEx(/\.v\d+$/), '');
   }
-  return depNameNoVersion;
+  return nameNoVersion;
 }
 
 export function updateDependency({
@@ -27,7 +27,7 @@ export function updateDependency({
     if (!currentName || !upgrade.managerData) {
       return null;
     }
-    const currentNameNoVersion = getDepNameWithNoVersion(currentName);
+    const currentNameNoVersion = getNameWithNoVersion(currentName);
     const lines = fileContent.split(newlineRegex);
     // istanbul ignore if: hard to test
     if (lines.length <= upgrade.managerData.lineNumber) {
