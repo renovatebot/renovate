@@ -19,13 +19,8 @@ export function updateDependency({
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
     const { depType } = upgrade;
     const currentName = upgrade.depName;
-    let newName = currentName;
-    // newName will be available for replacement
-    if (upgrade.newName) {
-      newName = upgrade.newName;
-    }
     // istanbul ignore if: should never happen
-    if (!currentName || !newName || !upgrade.managerData) {
+    if (!currentName || !upgrade.managerData) {
       return null;
     }
     const currentNameNoVersion = getNameWithNoVersion(currentName);
@@ -93,6 +88,9 @@ export function updateDependency({
         quote = '"';
       }
     }
+
+    // newName will be available for replacement
+    const newName = upgrade.newName ?? currentName;
 
     if (
       upgrade.updateType === 'digest' ||
