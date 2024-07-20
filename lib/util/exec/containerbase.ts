@@ -186,6 +186,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'rust',
     versioning: semverVersioningId,
   },
+  uv: {
+    datasource: 'github-releases',
+    packageName: 'astral-sh/uv',
+    versioning: semverVersioningId,
+  },
   yarn: {
     datasource: 'npm',
     packageName: 'yarn',
