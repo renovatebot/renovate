@@ -40,7 +40,7 @@ When a package gets renamed, you need to tell Renovate:
 
 Example:
 
-```javascript
+```json
 {
         "matchCurrentVersion": ">=3.10.3",
         "matchDatasources": ["npm"],
