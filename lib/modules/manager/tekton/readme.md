@@ -17,7 +17,7 @@ Read the [Tekton Pipeline remote resolution docs](https://tekton.dev/docs/pipeli
 
 ### Using a PipelinesAsCode remote URL reference
 
-By specifying the annotation with a remote task or a remote pipeline based on the recommended way using [git based versioning](https://github.com/tektoncd/community/blob/main/teps/0115-tekton-catalog-git-based-versioning/index.md). How this can be used can be seen in the example below.
+By specifying the annotation with a remote task or a remote pipeline based on the recommended way using [git based versioning](https://github.com/tektoncd/community/blob/main/teps/0115-tekton-catalog-git-based-versioning.md). How this can be used can be seen in the example below.
 
 ```yaml title="How an annotation could look like in an pipeline-run.yaml"
 apiVersion: tekton.dev/v1

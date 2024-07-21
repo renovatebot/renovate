@@ -7,6 +7,7 @@ exclude = [
   "localhost",
   "codepen.io",
   "repology.org",
+  "https://github.com/foo/bar/raw/v0.0.1/tasks/task/task.yaml",
   "https://raw.githubusercontent.com/foo/bar/v0.0.1/tasks/task/task.yaml",
   "https://developer.mend.io/api/mc/badges",
   "https://hub.docker.com/r/renovate/renovate/",
