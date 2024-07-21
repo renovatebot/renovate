@@ -631,6 +631,10 @@ jobs:
           fail: true
           jobSummary: true
 
+      - name: Filter out 429 errors from the cache
+        if: always()
+        run: sed -i '' '/,429,/d' .lycheecache
+
       - name: Save lychee cache
         uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         if: always()
