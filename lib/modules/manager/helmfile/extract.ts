@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { joinUrlParts } from '../../../util/url';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
+import { joinUrlParts } from '../../../util/url';
 import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
