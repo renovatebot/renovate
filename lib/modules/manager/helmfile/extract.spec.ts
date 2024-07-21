@@ -364,16 +364,17 @@ describe('modules/manager/helmfile/extract', () => {
     });
 
     it('parses a chart with an oci repository with ---', async () => {
-      const content =
-        'repositories:\n' +
-        '  - name: oci-repo\n' +
-        '    url: ghcr.io/example/oci-repo\n' +
-        '    oci: true\n' +
-        '---\n' +
-        'releases:\n' +
-        '  - name: example\n' +
-        '    version: 0.1.0\n' +
-        '    chart: oci-repo/example';
+      const content = `
+repositories:
+  - name: oci-repo
+    url: ghcr.io/example/oci-repo
+    oci: true
+---
+releases:
+  - name: example
+    version: 0.1.0
+    chart: oci-repo/example
+`;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
         registryAliases: {
