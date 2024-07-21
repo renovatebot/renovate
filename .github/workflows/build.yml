@@ -596,6 +596,48 @@ jobs:
           name: docs
           path: tmp/docs/
 
+  check-doc-links:
+    needs: [build-docs]
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    if: github.event.pull_request.draft != true
+
+    steps:
+      - name: Checkout config
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          filter: blob:none # we don't need all blobs
+          sparse-checkout: .github/lychee.toml
+          show-progress: false
+
+      - name: Download docs
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: docs
+          path: tmp/docs
+
+      - name: Restore lychee cache
+        uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        with:
+          path: .lycheecache
+          key: lychee-cache-${{ github.ref }}
+
+      - name: Check links
+        uses: lycheeverse/lychee-action@2b973e86fc7b1f6b36a93795fe2c9c6ae1118621 # v1.10.0
+        with:
+          args: --config .github/lychee.toml --include-fragments tmp/docs
+          fail: true
+          jobSummary: true
+
+      - name: Save lychee cache
+        uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        if: always()
+        with:
+          path: .lycheecache
+          key: lychee-cache-${{ github.ref }}
+
   test-e2e:
     needs: [build]
     runs-on: 'ubuntu-latest'
@@ -640,6 +682,7 @@ jobs:
       - test-e2e
       - test-success
       - build-docs
+      - check-doc-links
       - codecov
       - coverage-threshold
 

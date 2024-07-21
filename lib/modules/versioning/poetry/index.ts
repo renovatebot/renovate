@@ -14,7 +14,9 @@ import {
 
 export const id = 'poetry';
 export const displayName = 'Poetry';
-export const urls = ['https://python-poetry.org/docs/versions/'];
+export const urls = [
+  'https://python-poetry.org/docs/dependency-specification/',
+];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',

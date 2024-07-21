@@ -1,0 +1,19 @@
+verbose = "info"
+no_progress = true
+
+user_agent = "https://github.com/renovatebot/renovate/tree/main/.github/lychee.toml"
+
+exclude = [
+  "localhost",
+  "codepen.io",
+  "repology.org",
+  "https://raw.githubusercontent.com/foo/bar/v0.0.1/tasks/task/task.yaml",
+  "https://developer.mend.io/api/mc/badges",
+  "https://hub.docker.com/r/renovate/renovate/",
+]
+insecure = true
+
+accept = ["200", "429"]
+
+cache = true
+max_cache_age = "1d"
