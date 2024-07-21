@@ -219,9 +219,28 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res = applyPackageRules(dep);
+    const res = applyPackageRules(dep, 'datasource-merge');
     expect(res.enabled).toBeFalse();
     expect(res.skipReason).toBe('package-rules');
+    expect(res.skipStage).toBe('datasource-merge');
+  });
+
+  it('unsets skipReason=package-rules if enabled=true', () => {
+    const dep: any = {
+      depName: 'foo',
+      packageRules: [
+        {
+          enabled: false,
+        },
+        {
+          enabled: true,
+        },
+      ],
+    };
+    const res = applyPackageRules(dep, 'datasource-merge');
+    expect(res.enabled).toBeTrue();
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
   });
 
   it('skips skipReason=package-rules if enabled=true', () => {
