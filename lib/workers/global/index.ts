@@ -71,7 +71,6 @@ function haveReachedLimits(): boolean {
 /* istanbul ignore next */
 function checkEnv(): void {
   const range = pkg.engines!.node!;
-  const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
     logger.warn(
       { release: process.release, versions: process.versions },
@@ -81,14 +80,6 @@ function checkEnv(): void {
     logger.error(
       { versions: process.versions, range },
       'Unsupported node environment detected. Please update your node version.',
-    );
-  } else if (
-    rangeNext &&
-    !semver.satisfies(process.versions?.node, rangeNext)
-  ) {
-    logger.warn(
-      { versions: process.versions },
-      `Please upgrade the version of Node.js used to run Renovate to satisfy "${rangeNext}". Support for your current version will be removed in Renovate's next major release.`,
     );
   }
 }
