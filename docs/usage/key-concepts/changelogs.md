@@ -36,7 +36,7 @@ Set to `branch` if you have an advanced use case where you're embedding changelo
 
 ### [`changelogUrl`](../configuration-options.md#changelogurl)
 
-This doesn't help with _fetching_ the changelogs, but if you configure it then Renovate will include a link to this URL in the PR body, so users can click through to read the changelog.
+Use this field to set or override the specific URL for fetching a package's changelog.
 
 ## Platforms that Renovate can fetch changelogs from
 
