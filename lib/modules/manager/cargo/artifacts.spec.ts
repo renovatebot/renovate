@@ -332,7 +332,7 @@ describe('modules/manager/cargo/artifacts', () => {
     ]);
   });
 
-  it('runs cargo fetch if there is any non-lockfile update', async () => {
+  it('runs cargo update precise only for lockfile update', async () => {
     fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
@@ -376,11 +376,6 @@ describe('modules/manager/cargo/artifacts', () => {
           'cargo update --config net.git-fetch-with-cli=true' +
           ' --manifest-path Cargo.toml' +
           ' --workspace',
-      },
-      {
-        cmd:
-          'cargo fetch --config net.git-fetch-with-cli=true' +
-          ' --manifest-path Cargo.toml',
       },
       {
         cmd:

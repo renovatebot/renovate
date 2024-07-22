@@ -51,20 +51,10 @@ async function cargoUpdatePrecise(
       ` --manifest-path ${quote(manifestPath)} --workspace`,
   ];
 
-  const anyNonLockfileUpdate = updatedDeps.some(
-    (dep) => dep.updateType !== 'lockfileUpdate',
-  );
-  if (anyNonLockfileUpdate) {
-    cmds.push(
-      `cargo fetch --config net.git-fetch-with-cli=true` +
-        ` --manifest-path ${quote(manifestPath)}`,
-    );
-  }
-
   // Update individual dependencies to their `newVersion`. Necessary when
   // using the `update-lockfile` rangeStrategy which doesn't touch Cargo.toml.
   for (const dep of updatedDeps) {
-    // Cargo fetch should already have handled any non-lockfile updates
+    // Cargo update should already have handled any non-lockfile updates
     if (dep.updateType !== 'lockfileUpdate') {
       continue;
     }
