@@ -88,7 +88,7 @@ If Renovate finds an unexpected dataformat, it also writes a tracing log _after_
 
 #### Getting trace level logs on hosted app
 
-If you use the Mend Renovate app, use the [`logLevelRemap` config option](https://docs.renovatebot.com/configuration-options/#loglevelremap) to get the trace log.
+If you use the Mend Renovate app, use the [`logLevelRemap` config option](../../../configuration-options.md#loglevelremap) to get the trace log.
 
 ```json title="Getting trace logs from the Mend Renovate app"
 {
