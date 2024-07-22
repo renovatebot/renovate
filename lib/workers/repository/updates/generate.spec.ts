@@ -1058,7 +1058,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('handles upgrades', () => {
-      const branch = [
+      const baseBranchesUpdates = [
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1066,8 +1066,14 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           newValue: '0.6.0',
           hasBaseBranches: true,
+          baseBranch: 'base-branch',
           fileReplacePosition: 5,
         },
+      ];
+      expect(generateBranchConfig(baseBranchesUpdates)).toMatchObject({
+        prTitle: 'some-title (base-branch)',
+      });
+      const separateMinorUpdates = [
         {
           ...requiredDefaultOptions,
           manager: 'some-manager',
@@ -1080,6 +1086,11 @@ describe('workers/repository/updates/generate', () => {
           updateType: 'minor' as UpdateType,
           fileReplacePosition: 1,
         },
+      ];
+      expect(generateBranchConfig(separateMinorUpdates)).toMatchObject({
+        prTitle: 'some-title (minor)',
+      });
+      const separateMajorUpdates = [
         {
           ...requiredDefaultOptions,
           manager: 'some-manager',
@@ -1092,6 +1103,11 @@ describe('workers/repository/updates/generate', () => {
           updateType: 'major' as UpdateType,
           fileReplacePosition: 2,
         },
+      ];
+      expect(generateBranchConfig(separateMajorUpdates)).toMatchObject({
+        prTitle: 'some-title (major)',
+      });
+      const separatePatchUpdates = [
         {
           ...requiredDefaultOptions,
           manager: 'some-manager',
@@ -1105,9 +1121,19 @@ describe('workers/repository/updates/generate', () => {
           updateType: 'patch' as UpdateType,
           fileReplacePosition: 0,
         },
+      ];
+      expect(generateBranchConfig(separatePatchUpdates)).toMatchObject({
+        prTitle: 'some-title (patch)',
+      });
+      const branch = [
+        ...baseBranchesUpdates,
+        ...separateMinorUpdates,
+        ...separateMajorUpdates,
+        ...separatePatchUpdates,
       ] satisfies BranchUpgradeConfig[];
-      const res = generateBranchConfig(branch);
-      expect(res.prTitle).toMatchSnapshot('some-title (patch)');
+      expect(generateBranchConfig(branch)).toMatchObject({
+        prTitle: 'some-title (patch)',
+      });
     });
 
     it('combines prBodyColumns', () => {
