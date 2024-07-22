@@ -10,7 +10,7 @@ They can be referenced from the Renovate config files inside the repo using `{{ 
 
 This method will stop working on 01-Oct-2024:
 
-```json "Put encrypted secret in Renovate config"
+```json title="Put encrypted secret in Renovate config"
 {
   "hostRules": [
     {
@@ -27,7 +27,7 @@ This method will stop working on 01-Oct-2024:
 
 This is the new method, that you should start using:
 
-```json "Reference the app secret in the Renovate config"
+```json title="Reference the app secret in the Renovate config"
 {
   "hostRules": [
     {
