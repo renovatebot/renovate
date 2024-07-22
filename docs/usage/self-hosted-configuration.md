@@ -1158,9 +1158,9 @@ If set, Renovate will use this string as the `endpoint` when creating the AWS S3
 
 If set, Renovate will enable `forcePathStyle` when creating the AWS S3 client instance.
 
-> Whether to force path-style URLs for S3 objects (e.g., `https://s3.amazonaws.com//` instead of `https://.s3.amazonaws.com/`)
+Quote from [AWS S3 documentation - Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html):
 
-Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html)
+> Whether to force path-style URLs for S3 objects (e.g., `https://s3.amazonaws.com//` instead of `https://.s3.amazonaws.com/`)
 
 ## secrets
 

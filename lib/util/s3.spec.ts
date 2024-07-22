@@ -26,7 +26,7 @@ describe('util/s3', () => {
     expect(client1).toBe(client2);
   });
 
-  it('uses user configured s3 values', async () => {
+  it('uses user-configured s3 values', async () => {
     const s3 = await import('./s3');
     const globalConfig = await import('../config/global');
     globalConfig.GlobalConfig.set({

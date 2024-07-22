@@ -113,7 +113,7 @@ export async function parseConfigs(
     config.forkProcessing = 'enabled';
   }
 
-  // Try deletion only if RENOVATE_CONFIG_FILE is specified
+  // Only try deletion if RENOVATE_CONFIG_FILE is set
   await fileParser.deleteNonDefaultConfig(env, !!config.deleteConfigFile);
 
   // Remove log file entries
