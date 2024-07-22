@@ -1706,7 +1706,7 @@ const options: RenovateOptions[] = [
   {
     name: 'changelogUrl',
     description:
-      'If set, Renovate will use this URL to fetch changelogs for a matched dependency. Valid only within a `packageRules` object.',
+      'Allows you to specify a custom URL for the changelog, which Renovate will include in PR descriptions for easy access.',
     type: 'string',
     stage: 'pr',
     parents: ['packageRules'],
