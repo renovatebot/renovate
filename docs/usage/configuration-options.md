@@ -3206,7 +3206,7 @@ Use the `replacementName` config option to set the name of a replacement package
 
 Can be used in combination with `replacementVersion`.
 
-You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
+You can suggest a new community package rule by editing [the `replacements.json` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/data/replacements.json) and opening a pull request.
 
 ### replacementNameTemplate
 
