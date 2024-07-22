@@ -67,7 +67,6 @@ describe('modules/platform/index', () => {
     expect(await platform.initPlatform(config)).toEqual({
       endpoint: 'https://api.bitbucket.org/',
       gitAuthor: 'user@domain.com',
-      gitIgnoredAuthors: [],
       hostRules: [
         {
           hostType: 'bitbucket',
@@ -102,7 +101,6 @@ describe('modules/platform/index', () => {
     expect(await platform.initPlatform(config)).toEqual({
       endpoint: 'https://ghe.renovatebot.com/',
       gitAuthor: 'user@domain.com',
-      gitIgnoredAuthors: [],
       hostRules: [
         {
           hostType: 'github',
@@ -143,7 +141,6 @@ describe('modules/platform/index', () => {
       expect(await platform.initPlatform(config)).toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'user@domain.com',
-        gitIgnoredAuthors: [],
         hostRules: [
           {
             hostType: 'docker',
@@ -204,7 +201,6 @@ describe('modules/platform/index', () => {
       expect(await platform.initPlatform(config)).toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'user@domain.com',
-        gitIgnoredAuthors: [],
         hostRules: [
           {
             hostType: 'docker',

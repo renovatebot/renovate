@@ -152,9 +152,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path initPlatf
 {
   "endpoint": "https://stash.renovatebot.com/",
   "gitAuthor": "Abc Def <abc@def.com>",
-  "gitIgnoredAuthors": [
-    "Renovate Bot <renovate@whitesourcesoftware.com>",
-  ],
 }
 `;
 
@@ -360,9 +357,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with path initPlatform
 {
   "endpoint": "https://stash.renovatebot.com/",
   "gitAuthor": "Abc Def <abc@def.com>",
-  "gitIgnoredAuthors": [
-    "Renovate Bot <renovate@whitesourcesoftware.com>",
-  ],
 }
 `;
 

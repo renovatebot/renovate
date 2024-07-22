@@ -9,7 +9,6 @@ import {
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
 import type * as _git from '../../../util/git';
-import { FALLBACK_GIT_AUTHOR } from '../../../util/git';
 import type { LongCommitSha } from '../../../util/git/types';
 import { ensureTrailingSlash } from '../../../util/url';
 import type { Platform } from '../types';
@@ -337,7 +336,6 @@ describe('modules/platform/bitbucket-server/index', () => {
             }),
           ).toEqual({
             endpoint: ensureTrailingSlash(url.href),
-            gitIgnoredAuthors: undefined,
           });
           expect(logger.debug).toHaveBeenCalledWith(
             expect.any(Object),
@@ -377,7 +375,6 @@ describe('modules/platform/bitbucket-server/index', () => {
             }),
           ).toEqual({
             endpoint: ensureTrailingSlash(url.href),
-            gitIgnoredAuthors: undefined,
           });
         });
 
@@ -394,7 +391,6 @@ describe('modules/platform/bitbucket-server/index', () => {
             }),
           ).toEqual({
             endpoint: ensureTrailingSlash(url.href),
-            gitIgnoredAuthors: undefined,
           });
         });
 
@@ -417,7 +413,6 @@ describe('modules/platform/bitbucket-server/index', () => {
           ).toEqual({
             endpoint: ensureTrailingSlash(url.href),
             gitAuthor: `${userInfo.displayName} <${userInfo.emailAddress}>`,
-            gitIgnoredAuthors: [FALLBACK_GIT_AUTHOR],
           });
         });
 

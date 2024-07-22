@@ -54,10 +54,6 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
       ...(platformInfo?.hostRules ?? []),
       ...(config.hostRules ?? []),
     ],
-    gitIgnoredAuthors: [
-      ...(platformInfo?.gitIgnoredAuthors ?? []),
-      ...(config.gitIgnoredAuthors ?? []),
-    ],
   };
   // istanbul ignore else
   if (config?.gitAuthor) {

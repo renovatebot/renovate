@@ -11,7 +11,7 @@ import type { BranchStatus } from '../../../types';
 import type { FileData } from '../../../types/platform/bitbucket-server';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
-import { FALLBACK_GIT_AUTHOR, deleteBranch } from '../../../util/git';
+import { deleteBranch } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import {
   BitbucketServerHttp,
@@ -157,7 +157,6 @@ export async function initPlatform({
       ).body;
 
       platformConfig.gitAuthor = `${displayName} <${emailAddress}>`;
-      platformConfig.gitIgnoredAuthors = [FALLBACK_GIT_AUTHOR];
 
       logger.debug(`Detected gitAuthor: ${platformConfig.gitAuthor}`);
     } catch (err) {
