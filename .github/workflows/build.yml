@@ -619,6 +619,7 @@ jobs:
           path: tmp/docs
 
       - name: Restore lychee cache
+        id: cache-restore
         uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: .lycheecache
@@ -634,6 +635,14 @@ jobs:
       - name: Filter out 429 errors from the cache
         if: always()
         run: sed -i '/,429,/d' .lycheecache
+
+      - name: Remove previous cache
+        if: always()
+        run: |
+          gh extension install actions/gh-actions-cache
+          gh actions-cache delete "lychee-cache-${{ github.ref }}" --confirm
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Save lychee cache
         uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
