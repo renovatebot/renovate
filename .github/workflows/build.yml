@@ -621,12 +621,17 @@ jobs:
           name: docs
           path: tmp/docs
 
+      - name: Calculate cache key
+        id: cache-key
+        run: |
+          echo "cache-key=lychee-cache-${{ github.ref }}" | sed 's/\//_/g' >> "$GITHUB_OUTPUT"
+
       - name: Restore lychee cache
         id: cache-restore
         uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: .lycheecache
-          key: lychee-cache-${{ github.ref }}
+          key: ${{ steps.cache-key.outputs.cache-key }}
 
       - name: Check links
         uses: lycheeverse/lychee-action@2b973e86fc7b1f6b36a93795fe2c9c6ae1118621 # v1.10.0
@@ -645,7 +650,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.event.repository.full_name }}
         run: |
-          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=lychee-cache-${{ github.ref }} ||
+          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=${{ steps.cache-key.outputs.cache-key }} ||
             echo "Cache not found"
 
       - name: Save lychee cache
@@ -653,7 +658,7 @@ jobs:
         if: always()
         with:
           path: .lycheecache
-          key: lychee-cache-${{ github.ref }}
+          key: ${{ steps.cache-key.outputs.cache-key }}
 
   test-e2e:
     needs: [build]
