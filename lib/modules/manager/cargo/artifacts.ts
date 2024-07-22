@@ -51,9 +51,23 @@ async function cargoUpdatePrecise(
       ` --manifest-path ${quote(manifestPath)} --workspace`,
   ];
 
+  const anyNonLockfileUpdate = updatedDeps.some(
+    (dep) => dep.updateType !== 'lockfileUpdate',
+  );
+  if (anyNonLockfileUpdate) {
+    cmds.push(
+      `cargo fetch --config net.git-fetch-with-cli=true` +
+        ` --manifest-path ${quote(manifestPath)}`,
+    );
+  }
+
   // Update individual dependencies to their `newVersion`. Necessary when
   // using the `update-lockfile` rangeStrategy which doesn't touch Cargo.toml.
   for (const dep of updatedDeps) {
+    // Cargo fetch should already have handled any non-lockfile updates
+    if (dep.updateType !== 'lockfileUpdate') {
+      continue;
+    }
     cmds.push(
       `cargo update --config net.git-fetch-with-cli=true` +
         ` --manifest-path ${quote(manifestPath)}` +
@@ -70,23 +84,6 @@ async function cargoUpdatePrecise(
   };
 
   await exec(cmds, execOptions);
-}
-
-async function cargoFetch(
-  manifestPath: string,
-  userConfiguredEnv: UserEnv,
-  constraint: string | undefined,
-): Promise<void> {
-  const cmd = `cargo fetch --config net.git-fetch-with-cli=true --manifest-path ${quote(
-    manifestPath,
-  )}`;
-  const execOptions: ExecOptions = {
-    userConfiguredEnv,
-    extraEnv: { ...getGitEnvironmentVariables(['cargo']) },
-    docker: {},
-    toolConstraints: [{ toolName: 'rust', constraint }],
-  };
-  await exec(cmd, execOptions);
 }
 
 export async function updateArtifacts(
@@ -161,32 +158,12 @@ async function updateArtifactsImpl(
           config.constraints?.rust,
         );
       } else {
-
-        const anyNonLockfileUpdate = updatedDeps.some(
-          (dep) => dep.updateType !== 'lockfileUpdate',
+        await cargoUpdatePrecise(
+          packageFileName,
+          updatedDeps,
+          config.env ?? {},
+          config.constraints?.rust,
         );
-        if (anyNonLockfileUpdate) {
-          // Cargo fetch is safer to use for non-lockfile updates, because it
-          // has fewer issues with duplicate dependencies.
-          await cargoFetch(
-            packageFileName,
-            config.env ?? {},
-            config.constraints?.rust,
-          );
-        }
-
-        // Cargo fetch should already have handled any non-lockfile updates
-        const lockfileOnlyDeps = updatedDeps.filter(
-          (dep) => dep.updateType === 'lockfileUpdate',
-        );
-        if (lockfileOnlyDeps) {
-          await cargoUpdatePrecise(
-            packageFileName,
-            lockfileOnlyDeps,
-            config.env ?? {},
-            config.constraints?.rust,
-          );
-        }
       }
     }
 

@@ -163,7 +163,7 @@ describe('modules/manager/cargo/artifacts', () => {
 
   it('returns an artifact error when cargo update fails', async () => {
     const cmd =
-      'cargo fetch --config net.git-fetch-with-cli=true --manifest-path Cargo.toml';
+      'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace';
     const execError = new ExecError('Exec error', {
       cmd,
       stdout: '',
@@ -329,6 +329,65 @@ describe('modules/manager/cargo/artifacts', () => {
     expect(execSnapshotsIter2).toMatchObject([
       { cmd: workspaceCmd },
       { cmd: packageDep3Cmd },
+    ]);
+  });
+
+  it('runs cargo fetch if there is any non-lockfile update', async () => {
+    fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll();
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+        updateType: 'minorUpdate' as UpdateType,
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.1',
+      },
+      {
+        depName: 'dep2',
+        packageName: 'dep2',
+        updateType: 'minorUpdate' as UpdateType,
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.2',
+      },
+      {
+        depName: 'dep3',
+        packageName: 'dep3',
+        updateType: 'lockfileUpdate' as UpdateType,
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.3',
+      },
+    ];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd:
+          'cargo update --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml' +
+          ' --workspace',
+      },
+      {
+        cmd:
+          'cargo fetch --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml',
+      },
+      {
+        cmd:
+          'cargo update --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml' +
+          ' --package dep3@1.0.0 --precise 1.0.3',
+      },
     ]);
   });
 
