@@ -635,9 +635,9 @@ jobs:
           fail: true
           jobSummary: true
 
-      - name: Filter out 429 errors from the cache
+      - name: Remove all non-200 items from the cache
         if: github.event_name == 'push'
-        run: sed -i '/,429,/d' .lycheecache
+        run: sed -i '/,200,/!d' .lycheecache
 
       - name: Remove cache
         if: github.event_name == 'push'
