@@ -1070,6 +1070,10 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     stage: 'repository',
+    default: [
+      'Renovate Bot <renovate@whitesourcesoftware.com>',
+      'Renovate Bot <bot@renovateapp.com>',
+    ],
   },
   {
     name: 'gitTimeout',
