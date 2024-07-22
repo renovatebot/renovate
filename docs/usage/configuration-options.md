@@ -2558,7 +2558,12 @@ You must use the `!/ /` syntax, like this:
 
 ### changelogUrl
 
-This doesn't help with _fetching_ the changelogs, but if you configure it then Renovate will include a link to this URL in the PR body, so users can click through to read the changelog.
+Sometimes Renovate does not show the correct changelog for a package.
+As a workaround for this problem, you can give Renovate the URL to the changelog with the `changelogUrl` config option.
+When set, Renovate will put a _link_ to the changelogs in the Renovate PR body.
+
+Renovate does _not_ show the complete changelogs from the `changelogUrl` in its PR body text, you only get the URL from Renovate.
+To read the changelogs you must use the link.
 
 ```json title="Setting the changelog URL for the dummy package"
 {
