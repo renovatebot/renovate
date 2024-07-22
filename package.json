@@ -134,7 +134,7 @@
   },
   "homepage": "https://renovatebot.com",
   "engines": {
-    "node": "^20.15.1 || >=22.5.1",
+    "node": "^20.15.1",
     "pnpm": "^9.0.0"
   },
   "dependencies": {
