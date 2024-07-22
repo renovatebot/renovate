@@ -1706,7 +1706,7 @@ const options: RenovateOptions[] = [
   {
     name: 'changelogUrl',
     description:
-      'Allows you to specify a custom URL for the changelog, which Renovate will include in PR descriptions for easy access.',
+      'Set a custom URL for the changelog. Renovate will put this URL in the PR body text.',
     type: 'string',
     stage: 'pr',
     parents: ['packageRules'],
