@@ -2558,8 +2558,7 @@ You must use the `!/ /` syntax, like this:
 
 ### changelogUrl
 
-Use this field to set the changelog URL for a package, including overriding any existing one.
-Using this field we can specify the exact URL to fetch changelogs from.
+This doesn't help with _fetching_ the changelogs, but if you configure it then Renovate will include a link to this URL in the PR body, so users can click through to read the changelog.
 
 ```json title="Setting the changelog URL for the dummy package"
 {
