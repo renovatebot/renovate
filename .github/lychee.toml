@@ -13,7 +13,6 @@ exclude = [
   "https://hub.docker.com/r/renovate/renovate/",
   "^https\\:\\/\\/github\\.com\\/renovatebot\\/renovate\\/issues\\?q\\=is\\:issue\\+is\\:open\\+sort\\:updated\\-desc\\+label\\:manager\\:pre\\-commit$",
 ]
-insecure = true
 
 accept = ["200", "429"]
 
