@@ -3,6 +3,7 @@ import slugify from 'slugify';
 import { mergeChildConfig } from '../../config';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
+import type { StageName } from '../../types/skip-reason';
 import matchers from './matchers';
 import { matcherOR } from './utils';
 
@@ -62,6 +63,7 @@ function matchesRule(
 
 export function applyPackageRules<T extends PackageRuleInputConfig>(
   inputConfig: T,
+  stageName?: StageName,
 ): T {
   let config = { ...inputConfig };
   const packageRules = config.packageRules ?? [];
@@ -82,6 +84,13 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
       }
       if (toApply.enabled === false && config.enabled !== false) {
         config.skipReason = 'package-rules';
+        if (stageName) {
+          config.skipStage = stageName;
+        }
+      }
+      if (toApply.enabled === true && config.enabled === false) {
+        delete config.skipReason;
+        delete config.skipStage;
       }
       config = mergeChildConfig(config, toApply);
     }

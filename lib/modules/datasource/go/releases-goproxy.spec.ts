@@ -1,9 +1,15 @@
 import { codeBlock } from 'common-tags';
+import { mockDeep } from 'jest-mock-extended';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { mocked } from '../../../../test/util';
+import * as _hostRules from '../../../util/host-rules';
 import { GithubReleasesDatasource } from '../github-releases';
 import { GithubTagsDatasource } from '../github-tags';
 import { GoProxyDatasource } from './releases-goproxy';
+
+const hostRules = mocked(_hostRules);
+jest.mock('../../../util/host-rules', () => mockDeep());
 
 const datasource = new GoProxyDatasource();
 
@@ -17,6 +23,10 @@ describe('modules/datasource/go/releases-goproxy', () => {
     GithubTagsDatasource.prototype,
     'getReleases',
   );
+
+  beforeEach(() => {
+    hostRules.find.mockReturnValue({});
+  });
 
   it('encodeCase', () => {
     expect(datasource.encodeCase('foo')).toBe('foo');
@@ -195,46 +205,54 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
     });
 
-    it('handles pipe fallback', async () => {
-      process.env.GOPROXY = `https://example.com|${baseUrl}`;
+    it.each<{ abortOnError: boolean }>`
+      abortOnError
+      ${true}
+      ${false}
+    `(
+      'handles pipe fallback when abortOnError is $abortOnError',
+      async ({ abortOnError }) => {
+        process.env.GOPROXY = `https://example.com|${baseUrl}`;
+        hostRules.find.mockReturnValue({ abortOnError });
 
-      httpMock
-        .scope('https://example.com/github.com/google/btree')
-        .get('/@v/list')
-        .replyWithError('unknown');
+        httpMock
+          .scope('https://example.com/github.com/google/btree')
+          .get('/@v/list')
+          .replyWithError('unknown');
 
-      httpMock
-        .scope(`${baseUrl}/github.com/google/btree`)
-        .get('/@v/list')
-        .reply(
-          200,
-          codeBlock`
+        httpMock
+          .scope(`${baseUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(
+            200,
+            codeBlock`
             v1.0.0
             v1.0.1
           `,
-        )
-        .get('/@v/v1.0.0.info')
-        .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
-        .get('/@v/v1.0.1.info')
-        .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' })
-        .get('/@latest')
-        .reply(200, { Version: 'v1.0.1' })
-        .get('/v2/@v/list')
-        .reply(404);
+          )
+          .get('/@v/v1.0.0.info')
+          .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
+          .get('/@v/v1.0.1.info')
+          .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' })
+          .get('/@latest')
+          .reply(200, { Version: 'v1.0.1' })
+          .get('/v2/@v/list')
+          .reply(404);
 
-      const res = await datasource.getReleases({
-        packageName: 'github.com/google/btree',
-      });
+        const res = await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
 
-      expect(res).toEqual({
-        releases: [
-          { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
-          { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
-        ],
-        sourceUrl: 'https://github.com/google/btree',
-        tags: { latest: 'v1.0.1' },
-      });
-    });
+        expect(res).toEqual({
+          releases: [
+            { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
+            { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
+          ],
+          sourceUrl: 'https://github.com/google/btree',
+          tags: { latest: 'v1.0.1' },
+        });
+      },
+    );
 
     it('handles comma fallback', async () => {
       process.env.GOPROXY = [
@@ -406,53 +424,61 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
     });
 
-    it('handles major releases', async () => {
-      process.env.GOPROXY = baseUrl;
+    it.each<{ abortOnError: boolean }>`
+      abortOnError
+      ${true}
+      ${false}
+    `(
+      'handles major releases with abortOnError is $abortOnError',
+      async ({ abortOnError }) => {
+        process.env.GOPROXY = baseUrl;
+        hostRules.find.mockReturnValue({ abortOnError });
 
-      httpMock
-        .scope(`${baseUrl}/github.com/google/btree`)
-        .get('/@v/list')
-        .reply(
-          200,
-          codeBlock`
+        httpMock
+          .scope(`${baseUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(
+            200,
+            codeBlock`
             v1.0.0
             v1.0.1
           `,
-        )
-        .get('/@v/v1.0.0.info')
-        .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
-        .get('/@v/v1.0.1.info')
-        .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' })
-        .get('/@latest')
-        .reply(200, { Version: 'v1.0.1' })
-        .get('/v2/@v/list')
-        .reply(
-          200,
-          codeBlock`
+          )
+          .get('/@v/v1.0.0.info')
+          .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
+          .get('/@v/v1.0.1.info')
+          .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' })
+          .get('/@latest')
+          .reply(200, { Version: 'v1.0.1' })
+          .get('/v2/@v/list')
+          .reply(
+            200,
+            codeBlock`
             v2.0.0
           `,
-        )
-        .get('/v2/@v/v2.0.0.info')
-        .reply(200, { Version: 'v2.0.0', Time: '2020-10-16T16:15:28Z' })
-        .get('/v2/@latest')
-        .reply(200, { Version: 'v2.0.0' })
-        .get('/v3/@v/list')
-        .reply(404);
+          )
+          .get('/v2/@v/v2.0.0.info')
+          .reply(200, { Version: 'v2.0.0', Time: '2020-10-16T16:15:28Z' })
+          .get('/v2/@latest')
+          .reply(200, { Version: 'v2.0.0' })
+          .get('/v3/@v/list')
+          .reply(404);
 
-      const res = await datasource.getReleases({
-        packageName: 'github.com/google/btree',
-      });
+        const res = await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
 
-      expect(res).toEqual({
-        releases: [
-          { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
-          { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
-          { releaseTimestamp: '2020-10-16T16:15:28Z', version: 'v2.0.0' },
-        ],
-        sourceUrl: 'https://github.com/google/btree',
-        tags: { latest: 'v2.0.0' },
-      });
-    });
+        expect(res).toEqual({
+          releases: [
+            { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
+            { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
+            { releaseTimestamp: '2020-10-16T16:15:28Z', version: 'v2.0.0' },
+          ],
+          sourceUrl: 'https://github.com/google/btree',
+          tags: { latest: 'v2.0.0' },
+        });
+      },
+    );
 
     it('handles gopkg.in major releases', async () => {
       process.env.GOPROXY = baseUrl;
