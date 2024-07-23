@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.9.0
+
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
@@ -30,13 +32,15 @@ RUN set -ex; \
   uname -a; \
   true
 
+# replace `amd64` with `x86_64` for `node`
+ENV ARCH=${TARGETARCH/amd64/x86_64}
+ENV ARCH=${ARCH/arm64/aarch64}
+
 # fetch static node binary
-# replace `amd64` with `x64` for `node`
 RUN set -ex; \
-  ver=$(node --version); \
-  arch=${TARGETARCH/amd64/x64}; \
+  ver=$(node --version); ver=${ver:1} \
   temp_dir="$(mktemp -d)"; \
-  curl -fsSL https://nodejs.org/dist/${ver}/node-${ver}-linux-${arch}.tar.xz -o ${temp_dir}/node.tar.xz; \
+  curl -fsSL "https://github.com/containerbase/node-prebuild/releases/download/${ver}/node-${ver}-${ARCH}.tar.xz" -o ${temp_dir}/node.tar.xz; \
   bsdtar --strip 1 -C ${temp_dir} -xf ${temp_dir}/node.tar.xz; \
   cp ${temp_dir}/bin/node ./node; \
   true
@@ -45,19 +49,21 @@ RUN set -ex; \
 ENV CI=1 npm_config_modules_cache_max_age=0 \
   npm_config_loglevel=info
 
-COPY pnpm-lock.yaml ./
 
 # replace `amd64` with `x64` for `node`
+ENV ARCH=${TARGETARCH/amd64/x64}
+
+COPY --link pnpm-lock.yaml ./
+
 # set `npm_config_arch` for `prebuild-install`
 # set `npm_config_platform_arch` for `install-artifact-from-github`
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN set -ex; \
-  arch=${TARGETARCH/amd64/x64}; \
-  export npm_config_arch=${arch} npm_config_platform_arch=${arch}; \
+  export npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}; \
   corepack pnpm fetch --prod; \
   true
 
-COPY . ./
+COPY --link . ./
 
 # install npm packages
 RUN set -ex; \
@@ -81,7 +87,7 @@ CMD ["renovate"]
 
 ARG RENOVATE_VERSION
 
-COPY --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
+COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
 # Compabillity, so `config.js` can access renovate and deps
 RUN set -ex; \
