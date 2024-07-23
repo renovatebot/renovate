@@ -2558,8 +2558,12 @@ You must use the `!/ /` syntax, like this:
 
 ### changelogUrl
 
-Use this field to set the changelog URL for a package, including overriding any existing one.
-Using this field we can specify the exact URL to fetch changelogs from.
+Sometimes Renovate does not show the correct changelog for a package.
+As a workaround for this problem, you can give Renovate the URL to the changelog with the `changelogUrl` config option.
+When set, Renovate will put a _link_ to the changelogs in the Renovate PR body.
+
+Renovate does _not_ show the complete changelogs from the `changelogUrl` in its PR body text, you only get the URL from Renovate.
+To read the changelogs you must use the link.
 
 ```json title="Setting the changelog URL for the dummy package"
 {
@@ -3206,7 +3210,7 @@ Use the `replacementName` config option to set the name of a replacement package
 
 Can be used in combination with `replacementVersion`.
 
-You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
+You can suggest a new community package rule by editing [the `replacements.json` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/data/replacements.json) and opening a pull request.
 
 ### replacementNameTemplate
 

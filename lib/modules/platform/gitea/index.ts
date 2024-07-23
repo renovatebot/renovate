@@ -867,9 +867,6 @@ const platform: Platform = {
   async ensureIssueClosing(title: string): Promise<void> {
     logger.debug(`ensureIssueClosing(${title})`);
     if (config.hasIssuesEnabled === false) {
-      logger.info(
-        'Cannot ensure issue because issues are disabled in this repository',
-      );
       return;
     }
     const issueList = await platform.getIssueList();

@@ -29,7 +29,7 @@ function envReplace(value: any, env = process.env): any {
       logger.warn('Failed to replace env in config: ' + match);
       throw new Error('env-replace');
     }
-    return env[envVarName]!;
+    return env[envVarName];
   });
 }
 
