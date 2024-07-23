@@ -15,19 +15,34 @@ FROM ghcr.io/renovatebot/base-image:2.28.0-full@sha256:0e3a859452ece1442faa693c7
 # --------------------------------------
 FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:2.28.0@sha256:0abd37cc5818199aad69b226537fade5047bae1ca1a987f855453d9eed19a795 AS build
 
+# We want a specific node version here
+# renovate: datasource=node-version
+RUN install-tool node 20.15.1
+
+WORKDIR /usr/local/renovate
+
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
+
+# trim `linux/` from TARGETPLATFORM
+# replace `amd64` with `x64` for `node`
+RUN set -ex; \
+  ver=$(node --version); \
+  arch=${TARGETPLATFORM:6}; \
+  temp_dir="$(mktemp -d)"; \
+  curl -fsSL https://nodejs.org/dist/${ver}/node-${ver}-linux-${arch/amd64/x64}.tar.xz -o ${temp_dir}/node.tar.xz; \
+  bsdtar --strip 1 -C ${temp_dir} -xf ${temp_dir}/node.tar.xz; \
+  cp ${temp_dir}/bin/node ./node; \
+  true
 
 RUN set -ex; \
   echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM"; \
   uname -a; \
   true
 
-WORKDIR /usr/local/renovate
 
 ENV CI=1 npm_config_modules_cache_max_age=0 \
-  npm_config_loglevel=info \
-  ARCH=arm64
+  npm_config_loglevel=info
 
 COPY pnpm-lock.yaml ./
 
@@ -44,18 +59,9 @@ RUN set -ex; \
 
 COPY . ./
 
-# install
+# install packages
 RUN set -ex; \
   corepack pnpm install --prod --offline --ignore-scripts; \
-  true
-
-# test
-COPY tools/docker/bin/ /usr/local/bin/
-# RE2 doesn't work on cross compile
-ENV RENOVATE_X_IGNORE_RE2=true
-RUN set -ex; \
-  renovate --version; \
-  renovate-config-validator; \
   true
 
 # --------------------------------------
@@ -87,7 +93,7 @@ RUN set -ex; \
 
 RUN set -ex; \
   renovate --version; \
-  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
+  /usr/local/renovate/node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
   true
 
 LABEL \
