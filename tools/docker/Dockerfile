@@ -22,6 +22,7 @@ RUN install-tool node 20.15.1
 WORKDIR /usr/local/renovate
 
 ARG TARGETPLATFORM
+ARG TARGETARCH
 ARG BUILDPLATFORM
 
 RUN set -ex; \
@@ -30,13 +31,12 @@ RUN set -ex; \
   true
 
 # fetch static node binary
-# trim `linux/` from TARGETPLATFORM
 # replace `amd64` with `x64` for `node`
 RUN set -ex; \
   ver=$(node --version); \
-  arch=${TARGETPLATFORM:6}; \
+  arch=${TARGETARCH/amd64/x64}; \
   temp_dir="$(mktemp -d)"; \
-  curl -fsSL https://nodejs.org/dist/${ver}/node-${ver}-linux-${arch/amd64/x64}.tar.xz -o ${temp_dir}/node.tar.xz; \
+  curl -fsSL https://nodejs.org/dist/${ver}/node-${ver}-linux-${arch}.tar.xz -o ${temp_dir}/node.tar.xz; \
   bsdtar --strip 1 -C ${temp_dir} -xf ${temp_dir}/node.tar.xz; \
   cp ${temp_dir}/bin/node ./node; \
   true
@@ -47,14 +47,13 @@ ENV CI=1 npm_config_modules_cache_max_age=0 \
 
 COPY pnpm-lock.yaml ./
 
-# trim `linux/` from TARGETPLATFORM
 # replace `amd64` with `x64` for `node`
 # set `npm_config_arch` for `prebuild-install`
 # set `npm_config_platform_arch` for `install-artifact-from-github`
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN set -ex; \
-  arch=${TARGETPLATFORM:6}; \
-  export npm_config_arch=${arch/amd64/x64} npm_config_platform_arch=${arch/amd64/x64}; \
+  arch=${TARGETARCH/amd64/x64}; \
+  export npm_config_arch=${arch} npm_config_platform_arch=${arch}; \
   corepack pnpm fetch --prod; \
   true
 
