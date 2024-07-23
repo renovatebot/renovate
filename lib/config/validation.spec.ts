@@ -1134,6 +1134,48 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('errors if invalid matchHost values in hostRules', async () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: '://',
+            token: 'token',
+          },
+          {
+            matchHost: '',
+            token: 'token',
+          },
+          {
+            matchHost: undefined,
+            token: 'token',
+          },
+          {
+            hostType: 'github',
+            token: 'token',
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Configuration option `hostRules[2].matchHost` should be a string',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid value for hostRules matchHost. It cannot be an empty string.',
+        },
+        {
+          topic: 'Configuration Error',
+          message: 'hostRules matchHost `://` is not a valid URL.',
+        },
+      ]);
+    });
+
     it('errors if forbidden header in hostRules', async () => {
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
 

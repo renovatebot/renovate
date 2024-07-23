@@ -358,6 +358,33 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBeNull();
     });
 
+    it('supports ECR authentication for private repositories', async () => {
+      httpMock
+        .scope(amazonUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/node/manifests/some-tag')
+        .matchHeader('authorization', 'Basic QVdTOnNvbWUtcGFzc3dvcmQ=')
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      hostRules.find.mockReturnValue({
+        username: 'AWS',
+        password: 'some-password',
+      });
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+        },
+        'some-tag',
+      );
+
+      expect(res).toBe('some-digest');
+    });
+
     it('supports Google ADC authentication for gcr', async () => {
       httpMock
         .scope(gcrUrl)
@@ -2662,6 +2689,89 @@ describe('modules/datasource/docker/index', () => {
         {
           'org.opencontainers.image.source':
             'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
+        },
+      );
+    });
+
+    it('uses annotations for docker hub', async () => {
+      httpMock
+        .scope('https://index.docker.io/v2')
+        .get('/')
+        .reply(200)
+        .get('/renovate/renovate/manifests/37.405.1-full')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest:
+              'sha256:a3e34dca3519abb558a58384414cc69b6afbbb80e3992064f3e1c24e069c9168',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
+          annotations: {
+            'org.opencontainers.image.source':
+              'https://github.com/renovatebot/renovate',
+            'org.opencontainers.image.revision':
+              'e11f9d9882395deaf5fbbb81b3327cb8c2ef069c',
+          },
+        });
+
+      expect(
+        await ds.getLabels(
+          'https://index.docker.io',
+          'renovate/renovate',
+          '37.405.1-full',
+        ),
+      ).toEqual({
+        'org.opencontainers.image.source':
+          'https://github.com/renovatebot/renovate',
+        'org.opencontainers.image.revision':
+          'e11f9d9882395deaf5fbbb81b3327cb8c2ef069c',
+      });
+    });
+
+    it('skips docker hub labels', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+
+      httpMock.scope('https://index.docker.io/v2');
+
+      expect(
+        await ds.getLabels(
+          'https://index.docker.io',
+          'renovate/renovate',
+          '37.405.1-full',
+        ),
+      ).toEqual({});
+    });
+
+    it('does not skip non docker hub registry labels', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+
+      httpMock
+        .scope('https://ghcr.io/v2')
+        .get('/')
+        .reply(200)
+        .get('/node/manifests/2-alpine')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
+          annotations: {
+            'org.opencontainers.image.source':
+              'https://github.com/renovatebot/renovate',
+            'org.opencontainers.image.revision':
+              'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
+          },
+        });
+
+      expect(await ds.getLabels('https://ghcr.io', 'node', '2-alpine')).toEqual(
+        {
+          'org.opencontainers.image.source':
+            'https://github.com/renovatebot/renovate',
+          'org.opencontainers.image.revision':
+            'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
         },
       );
     });

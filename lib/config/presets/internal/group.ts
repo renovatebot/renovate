@@ -27,7 +27,7 @@ const staticGroups = {
     description: 'Group all packages published by Apollo GraphQL together.',
     packageRules: [
       {
-        extends: 'packages:apollographql',
+        extends: ['packages:apollographql'],
         groupName: 'Apollo GraphQL packages',
       },
     ],
@@ -82,6 +82,15 @@ const staticGroups = {
       },
     ],
   },
+  flyway: {
+    description: 'Group Java Flyway packages.',
+    packageRules: [
+      {
+        groupName: 'flyway',
+        matchPackagePrefixes: ['org.flywaydb:'],
+      },
+    ],
+  },
   fortawesome: {
     description: 'Group all packages by Font Awesome together.',
     packageRules: [
@@ -130,7 +139,7 @@ const staticGroups = {
     description: 'Group `googleapis` packages together.',
     packageRules: [
       {
-        extends: 'packages:googleapis',
+        extends: ['packages:googleapis'],
         groupName: 'googleapis packages',
       },
     ],
@@ -228,7 +237,7 @@ const staticGroups = {
     description: 'Group JS test packages together.',
     packageRules: [
       {
-        extends: 'packages:jsTest',
+        extends: ['packages:jsTest'],
         groupName: 'JS test packages',
       },
     ],
@@ -237,7 +246,7 @@ const staticGroups = {
     description: 'Group non-major JS test package updates together.',
     packageRules: [
       {
-        extends: 'packages:jsTest',
+        extends: ['packages:jsTest'],
         groupName: 'JS test packages',
         matchUpdateTypes: ['minor', 'patch'],
       },
@@ -247,7 +256,7 @@ const staticGroups = {
     description: 'Group JavaScript unit test packages together.',
     packageRules: [
       {
-        extends: 'packages:jsUnitTest',
+        extends: ['packages:jsUnitTest'],
         groupName: 'JS unit test packages',
       },
     ],
@@ -257,7 +266,7 @@ const staticGroups = {
       'Group JavaScipt unit test packages together for non-major updates.',
     packageRules: [
       {
-        extends: 'packages:jsUnitTest',
+        extends: ['packages:jsUnitTest'],
         groupName: 'JS unit test packages',
         matchUpdateTypes: ['minor', 'patch'],
       },
@@ -316,7 +325,7 @@ const staticGroups = {
     description: 'Group various lint packages together.',
     packageRules: [
       {
-        extends: 'packages:linters',
+        extends: ['packages:linters'],
         groupName: 'linters',
       },
     ],
@@ -361,7 +370,7 @@ const staticGroups = {
     description: 'Group PostCSS packages together.',
     packageRules: [
       {
-        extends: 'packages:postcss',
+        extends: ['packages:postcss'],
         groupName: 'postcss packages',
       },
     ],
@@ -422,6 +431,7 @@ const staticGroups = {
       'group:nodeJs',
       'group:allApollographql',
       'group:codemirror',
+      'group:flyway',
       'group:fortawesome',
       'group:fusionjs',
       'group:githubArtifactActions',
@@ -756,7 +766,7 @@ const staticGroups = {
     description: 'Group all test packages together.',
     packageRules: [
       {
-        extends: 'packages:test',
+        extends: ['packages:test'],
         groupName: 'test packages',
       },
     ],
@@ -765,7 +775,7 @@ const staticGroups = {
     description: 'Group all non-major test package updates together.',
     packageRules: [
       {
-        extends: 'packages:test',
+        extends: ['packages:test'],
         groupName: 'test packages',
         matchUpdateTypes: ['minor', 'patch'],
       },
@@ -775,7 +785,7 @@ const staticGroups = {
     description: 'Group all unit test packages together.',
     packageRules: [
       {
-        extends: 'packages:unitTest',
+        extends: ['packages:unitTest'],
         groupName: 'unit test packages',
       },
     ],
@@ -784,7 +794,7 @@ const staticGroups = {
     description: 'Group all unit test packages together for non-major updates.',
     packageRules: [
       {
-        extends: 'packages:unitTest',
+        extends: ['packages:unitTest'],
         groupName: 'unit test packages',
         matchUpdateTypes: ['minor', 'patch'],
       },
@@ -794,7 +804,7 @@ const staticGroups = {
     description: 'Group all Vite related packages together.',
     packageRules: [
       {
-        extends: 'packages:vite',
+        extends: ['packages:vite'],
         groupName: 'Vite packages',
       },
     ],
@@ -811,7 +821,7 @@ for (const monorepo of Object.keys(monorepos.presets)) {
     packageRules: [
       {
         description: `Group packages from ${monorepo} monorepo together.`,
-        extends: `monorepo:${monorepo}`,
+        extends: [`monorepo:${monorepo}`],
         groupName: `${monorepo} monorepo`,
         matchUpdateTypes: nonPinUpdateTypes,
       },

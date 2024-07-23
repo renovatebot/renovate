@@ -121,15 +121,15 @@ target "build-full" {
 }
 
 target "push-slim" {
-  inherits = ["settings", "slim"]
+  inherits = ["build-slim"]
   output   = ["type=registry"]
   cache-to = [
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-full,mode=max,image-manifest=true,ignore-error=true",
+    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE},mode=max,image-manifest=true,ignore-error=true",
   ]
 }
 
 target "push-full" {
-  inherits = ["settings", "full"]
+  inherits = ["build-full"]
   output   = ["type=registry"]
   cache-to = [
     "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-full,mode=max,image-manifest=true,ignore-error=true",

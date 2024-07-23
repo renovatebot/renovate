@@ -4,22 +4,27 @@ import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
+import { MAVEN_REPO } from '../maven/common';
 import { downloadHttpProtocol } from '../maven/util';
 import { SbtPackageDatasource } from '../sbt-package';
 import { getLatestVersion, parseIndexDir } from '../sbt-package/util';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  GetReleasesConfig,
+  RegistryStrategy,
+  ReleaseResult,
+} from '../types';
 
 export const SBT_PLUGINS_REPO =
   'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases';
 
-export const defaultRegistryUrls = [SBT_PLUGINS_REPO];
+export const defaultRegistryUrls = [SBT_PLUGINS_REPO, MAVEN_REPO];
 
 export class SbtPluginDatasource extends SbtPackageDatasource {
   static override readonly id = 'sbt-plugin';
 
   override readonly defaultRegistryUrls = defaultRegistryUrls;
 
-  override readonly registryStrategy = 'hunt';
+  override readonly registryStrategy: RegistryStrategy = 'merge';
 
   override readonly defaultVersioning = ivyVersioning.id;
 
@@ -98,7 +103,9 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
     const repoRoot = ensureTrailingSlash(registryUrl);
     const searchRoots: string[] = [];
     // Optimize lookup order
-    searchRoots.push(`${repoRoot}${groupIdSplit.join('.')}`);
+    if (!registryUrl.startsWith(MAVEN_REPO)) {
+      searchRoots.push(`${repoRoot}${groupIdSplit.join('.')}`);
+    }
     searchRoots.push(`${repoRoot}${groupIdSplit.join('/')}`);
 
     for (let idx = 0; idx < searchRoots.length; idx += 1) {

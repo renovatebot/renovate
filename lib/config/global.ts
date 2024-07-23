@@ -37,6 +37,7 @@ export class GlobalConfig {
     'autodiscoverRepoSort',
     'autodiscoverRepoOrder',
     'userAgent',
+    'cachePrivatePackages',
   ];
 
   private static config: RepoGlobalConfig = {};
@@ -53,7 +54,9 @@ export class GlobalConfig {
     key?: Key,
     defaultValue?: RepoGlobalConfig[Key],
   ): RepoGlobalConfig | RepoGlobalConfig[Key] {
-    return key ? GlobalConfig.config[key] ?? defaultValue : GlobalConfig.config;
+    return key
+      ? (GlobalConfig.config[key] ?? defaultValue)
+      : GlobalConfig.config;
   }
 
   static set(config: RenovateConfig | RepoGlobalConfig): RenovateConfig {

@@ -207,6 +207,11 @@ const compileInputProxyHandler: ProxyHandler<CompileInput> = {
 
     const value = target[prop];
 
+    if (prop === 'prBodyDefinitions') {
+      // Expose all prBodyDefinitions.*
+      return value;
+    }
+
     if (is.array(value)) {
       return value.map((element) =>
         is.primitive(element)
@@ -248,6 +253,10 @@ export function compile(
         continue;
       }
       for (const varName of varNames) {
+        if (varName === 'prBodyDefinitions') {
+          // Allow all prBodyDefinitions.*
+          break;
+        }
         if (!allowedFieldsList.includes(varName)) {
           logger.info(
             { varName, template },
