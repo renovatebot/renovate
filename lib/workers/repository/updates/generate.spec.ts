@@ -1525,6 +1525,31 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('allows upgrades in commitMessage', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          branchName: 'dep1',
+          depName: 'dep1',
+          commitMessagePrefix:
+            '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
+          newVersion: '1.2.0',
+          newValue: '1.2.0',
+          updateType: 'minor' as UpdateType,
+          fileReplacePosition: 1,
+          prBodyDefinitions: {
+            Issue: 'I1',
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+
+      expect(generateBranchConfig(branch)).toMatchObject({
+        commitMessage: 'I1 Update dependency dep1 to 1.2.0',
+        prTitle: 'I1 Update dependency dep1 to 1.2.0',
+      });
+    });
+
+    it('allows upgrades in commitMessage (group)', () => {
       const commonOptions = {
         ...requiredDefaultOptions,
         manager: 'some-manager',
