@@ -1079,7 +1079,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
-    .replace(regEx('<!--.*?-->', 'gs'), '');
+    .replace(regEx(/<!--.*?-->/gs), '');
 }
 
 export function maxBodyLength(): number {
