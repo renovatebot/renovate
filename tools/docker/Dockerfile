@@ -24,6 +24,12 @@ WORKDIR /usr/local/renovate
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
+RUN set -ex; \
+  echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM"; \
+  uname -a; \
+  true
+
+# fetch static node binary
 # trim `linux/` from TARGETPLATFORM
 # replace `amd64` with `x64` for `node`
 RUN set -ex; \
@@ -35,12 +41,7 @@ RUN set -ex; \
   cp ${temp_dir}/bin/node ./node; \
   true
 
-RUN set -ex; \
-  echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM"; \
-  uname -a; \
-  true
-
-
+# fetch npm packages
 ENV CI=1 npm_config_modules_cache_max_age=0 \
   npm_config_loglevel=info
 
@@ -59,7 +60,7 @@ RUN set -ex; \
 
 COPY . ./
 
-# install packages
+# install npm packages
 RUN set -ex; \
   corepack pnpm install --prod --offline --ignore-scripts; \
   true
