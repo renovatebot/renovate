@@ -102,7 +102,7 @@ ${
         prTitle,
         prBody,
         labels,
-        platformOptions: getPlatformPrOptions({
+        platformPrOptions: getPlatformPrOptions({
           ...config,
           automerge: false,
         }),

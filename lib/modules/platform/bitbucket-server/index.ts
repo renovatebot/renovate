@@ -98,7 +98,7 @@ export async function initPlatform({
     );
   } else if (password && token) {
     throw new Error(
-      'Init: You must either configure a Bitbucket Server password or a HTTP access token',
+      'Init: You must configure either a Bitbucket Server password or a HTTP access token, not both',
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
@@ -865,15 +865,14 @@ export async function createPr({
   targetBranch,
   prTitle: title,
   prBody: rawDescription,
-  platformOptions,
+  platformPrOptions,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   logger.debug(`createPr(${sourceBranch}, title=${title})`);
   const base = targetBranch;
   let reviewers: BbsRestUserRef[] = [];
 
-  /* istanbul ignore else */
-  if (platformOptions?.bbUseDefaultReviewers) {
+  if (platformPrOptions?.bbUseDefaultReviewers) {
     logger.debug(`fetching default reviewers`);
     const { id } = (
       await bitbucketServerHttp.getJson<{ id: number }>(

@@ -594,14 +594,14 @@ export async function processBranch(
     }
 
     if (branchPr) {
-      const platformOptions = getPlatformPrOptions(config);
+      const platformPrOptions = getPlatformPrOptions(config);
       if (
-        platformOptions.usePlatformAutomerge &&
+        platformPrOptions.usePlatformAutomerge &&
         platform.reattemptPlatformAutomerge
       ) {
         await platform.reattemptPlatformAutomerge({
           number: branchPr.number,
-          platformOptions,
+          platformPrOptions,
         });
       }
       // istanbul ignore if

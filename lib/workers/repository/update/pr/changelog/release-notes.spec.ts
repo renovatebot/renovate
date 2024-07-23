@@ -28,12 +28,12 @@ jest.mock('../../../../../util/host-rules', () => mockDeep());
 
 const hostRules = mocked(_hostRules);
 
-const angularJsChangelogMd = Fixtures.get('angular-js.md', '..');
-const jestChangelogMd = Fixtures.get('jest.md', '..');
-const jsYamlChangelogMd = Fixtures.get('js-yaml.md', '..');
-const yargsChangelogMd = Fixtures.get('yargs.md', '..');
-const adapterutilsChangelogMd = Fixtures.get('adapter-utils.md', '..');
-const gitterWebappChangelogMd = Fixtures.get('gitter-webapp.md', '..');
+const angularJsChangelogMd = Fixtures.get('angular-js.md');
+const jestChangelogMd = Fixtures.get('jest.md');
+const jsYamlChangelogMd = Fixtures.get('js-yaml.md');
+const yargsChangelogMd = Fixtures.get('yargs.md');
+const adapterutilsChangelogMd = Fixtures.get('adapter-utils.md');
+const gitterWebappChangelogMd = Fixtures.get('gitter-webapp.md');
 
 const githubTreeResponse = {
   tree: [

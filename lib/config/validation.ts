@@ -693,7 +693,7 @@ export async function validateConfig(
             } else if (key === 'env') {
               const allowedEnvVars =
                 configType === 'global'
-                  ? (config.allowedEnv as string[]) ?? []
+                  ? ((config.allowedEnv as string[]) ?? [])
                   : GlobalConfig.get('allowedEnv', []);
               for (const [envVarName, envVarValue] of Object.entries(val)) {
                 if (!is.string(envVarValue)) {
@@ -811,7 +811,7 @@ export async function validateConfig(
     if (key === 'hostRules' && is.array(val)) {
       const allowedHeaders =
         configType === 'global'
-          ? (config.allowedHeaders as string[]) ?? []
+          ? ((config.allowedHeaders as string[]) ?? [])
           : GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
         if (is.nonEmptyString(rule.matchHost)) {
