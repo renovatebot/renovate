@@ -36,7 +36,6 @@ RUN set -ex; \
 ARG ARCH=${TARGETARCH/amd64/x64}
 
 # fetch static node binary
-# replace `amd64` with `x64` for `node`
 RUN set -ex; \
   ver=$(node --version); \
   temp_dir="$(mktemp -d)"; \
