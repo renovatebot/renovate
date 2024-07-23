@@ -8,7 +8,7 @@ This readme explains what each file is used for.
 | File                  | What is the file about?                   |
 | --------------------- | ----------------------------------------- |
 | `monorepo.json`       | Group related packages into a single PR.  |
-| `replacements.json` | Rename old packages to new replacement.  |
+| `replacements.json`   | Rename old packages to new replacement.   |
 | `changelog-urls.json` | Tell Renovate where to find changelogs.   |
 | `source-urls.json`    | Tell Renovate the source URL of packages. |
 
