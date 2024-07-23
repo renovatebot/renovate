@@ -32,14 +32,15 @@ RUN set -ex; \
   uname -a; \
   true
 
-# replace `amd64` with `x64` for `node`
-ARG ARCH=${TARGETARCH/amd64/x64}
+# replace `amd64` with `x86_64` for `node`
+ENV ARCH=${TARGETARCH/amd64/x86_64}
+ENV ARCH=${ARCH/arm64/aarch64}
 
 # fetch static node binary
 RUN set -ex; \
-  ver=$(node --version); \
+  ver=$(node --version); ver=${ver:1} \
   temp_dir="$(mktemp -d)"; \
-  curl -fsSL https://nodejs.org/dist/${ver}/node-${ver}-linux-${ARCH}.tar.xz -o ${temp_dir}/node.tar.xz; \
+  curl -fsSL "https://github.com/containerbase/node-prebuild/releases/download/${ver}/node-${ver}-${ARCH}.tar.xz" -o ${temp_dir}/node.tar.xz; \
   bsdtar --strip 1 -C ${temp_dir} -xf ${temp_dir}/node.tar.xz; \
   cp ${temp_dir}/bin/node ./node; \
   true
@@ -47,6 +48,10 @@ RUN set -ex; \
 # fetch npm packages
 ENV CI=1 npm_config_modules_cache_max_age=0 \
   npm_config_loglevel=info
+
+
+# replace `amd64` with `x64` for `node`
+ENV ARCH=${TARGETARCH/amd64/x64}
 
 COPY --link pnpm-lock.yaml ./
 
