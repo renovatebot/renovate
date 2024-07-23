@@ -1,12 +1,15 @@
 // TODO: types (#22198)
-import URL from 'node:url';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import * as hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
-import { trimLeadingSlash, trimTrailingSlash } from '../../../util/url';
+import {
+  parseUrl,
+  trimLeadingSlash,
+  trimTrailingSlash,
+} from '../../../util/url';
 import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
@@ -99,29 +102,40 @@ export class BaseGoDatasource {
   ): Promise<DataSource | null> {
     const goModuleUrl = goModule.replace(/\.git\/v2$/, '');
     const pkgUrl = `https://${goModuleUrl}?go-get=1`;
+    const { body: html } = await BaseGoDatasource.http.get(pkgUrl);
+
+    const goSourceHeader = BaseGoDatasource.goSourceHeader(html, goModule);
+    if (goSourceHeader) {
+      return goSourceHeader;
+    }
+
     // GitHub Enterprise only returns a go-import meta
-    const res = (await BaseGoDatasource.http.get(pkgUrl)).body;
-    return (
-      BaseGoDatasource.goSourceHeader(res, goModule) ??
-      BaseGoDatasource.goImportHeader(res, goModule)
-    );
+    const goImport = BaseGoDatasource.goImportHeader(html, goModule);
+    if (goImport) {
+      return goImport;
+    }
+
+    logger.trace({ goModule }, 'No go-source or go-import header found');
+    return null;
   }
 
   private static goSourceHeader(
-    res: string,
+    html: string,
     goModule: string,
   ): DataSource | null {
-    const sourceMatch = regEx(
-      `<meta\\s+name="?go-source"?\\s+content="([^\\s]+)\\s+([^\\s]+)`,
-    ).exec(res);
-    if (!sourceMatch) {
+    const sourceMatchGroups = regEx(
+      /<meta\s+name="?go-source"?\s+content="(?<prefix>[^"\s]+)\s+(?<goSourceUrl>[^"\s]+)/,
+    ).exec(html)?.groups;
+    if (!sourceMatchGroups) {
       return null;
     }
-    const [, prefix, goSourceUrl] = sourceMatch;
+    const { prefix, goSourceUrl } = sourceMatchGroups;
+
     if (!goModule.startsWith(prefix)) {
       logger.trace({ goModule }, 'go-source header prefix not match');
       return null;
     }
+
     logger.debug(`Go lookup source url ${goSourceUrl} for module ${goModule}`);
     return this.detectDatasource(goSourceUrl, goModule);
   }
@@ -130,7 +144,7 @@ export class BaseGoDatasource {
     goSourceUrl: string,
     goModule: string,
   ): DataSource | null {
-    if (goSourceUrl?.startsWith('https://github.com/')) {
+    if (goSourceUrl.startsWith('https://github.com/')) {
       return {
         datasource: GithubTagsDatasource.id,
         packageName: goSourceUrl
@@ -139,6 +153,7 @@ export class BaseGoDatasource {
         registryUrl: 'https://github.com',
       };
     }
+
     const gitlabUrl =
       BaseGoDatasource.gitlabHttpsRegExp.exec(goSourceUrl)?.groups
         ?.httpsRegExpUrl;
@@ -172,10 +187,12 @@ export class BaseGoDatasource {
     }
 
     if (hostRules.hostType({ url: goSourceUrl }) === 'gitlab') {
-      // get server base url from import url
-      const parsedUrl = URL.parse(goSourceUrl);
+      const parsedUrl = parseUrl(goSourceUrl);
+      if (!parsedUrl) {
+        logger.trace({ goModule }, 'Could not parse go-source URL');
+        return null;
+      }
 
-      // TODO: `parsedUrl.pathname` can be undefined
       let packageName = trimLeadingSlash(`${parsedUrl.pathname}`);
 
       const endpoint = GlobalConfig.get('endpoint')!;
@@ -221,19 +238,18 @@ export class BaseGoDatasource {
   }
 
   private static goImportHeader(
-    res: string,
+    html: string,
     goModule: string,
   ): DataSource | null {
-    const importMatch = regEx(
-      `<meta\\s+name="?go-import"?\\s+content="([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)"\\s*\\/?>`,
-    ).exec(res);
-
-    if (!importMatch) {
+    const importMatchGroups = regEx(
+      /<meta\s+name="?go-import"?\s+content="(?<prefix>[^"\s]+)\s+(?<proto>[^"\s]+)\s+(?<goImportURL>[^"\s]+)/,
+    ).exec(html)?.groups;
+    if (!importMatchGroups) {
       logger.trace({ goModule }, 'No go-source or go-import header found');
       return null;
     }
+    const { prefix, proto, goImportURL } = importMatchGroups;
 
-    const [, prefix, proto, goImportURL] = importMatch;
     if (!goModule.startsWith(prefix)) {
       logger.trace({ goModule }, 'go-import header prefix not match');
       return null;
@@ -244,9 +260,14 @@ export class BaseGoDatasource {
       return null;
     }
 
-    logger.debug(`Go module: ${goModule} lookup import url ${goImportURL}`);
     // get server base url from import url
-    const parsedUrl = URL.parse(goImportURL);
+    const parsedUrl = parseUrl(goImportURL);
+    if (!parsedUrl) {
+      logger.trace({ goModule }, 'Could not parse go-import URL');
+      return null;
+    }
+
+    logger.debug(`Go module: ${goModule} lookup import url ${goImportURL}`);
 
     const datasource = this.detectDatasource(
       goImportURL.replace(regEx(/\.git$/), ''),
