@@ -108,14 +108,12 @@ export function applyPreFlights(
 ): RenovateConfig {
   let result = config;
   for (const manager of managerList) {
-    const preflight = get(manager, 'preflight')?.();
+    const preflight = get(manager, 'preflight');
     if (!preflight) {
       continue;
     }
-    const preflightFuncs = is.array(preflight) ? preflight : [preflight];
-    for (const preflightFunc of preflightFuncs) {
-      result = preflightFunc(config);
-    }
+
+    result = preflight(result);
   }
 
   return result;

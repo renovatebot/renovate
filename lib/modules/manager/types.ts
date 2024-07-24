@@ -287,10 +287,8 @@ export interface ManagerApi extends ModuleApi {
     config: UpdateLockedConfig,
   ): Result<UpdateLockedResult>;
 
-  preflight?(): PreFlightFunc | PreFlightFunc[];
+  preflight?(config: RenovateConfig): RenovateConfig;
 }
-
-export type PreFlightFunc = (config: RenovateConfig) => RenovateConfig;
 
 // TODO: name and properties used by npm manager
 export interface PostUpdateConfig<T = Record<string, any>>

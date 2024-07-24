@@ -1,9 +1,9 @@
-import {mockDeep} from "jest-mock-extended";
+import { mockDeep} from "jest-mock-extended";
 import { mocked, partial, scm } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import * as _managers from '../../../modules/manager'
+import * as managers from '../../../modules/manager'
 import type {ManagerApi, PackageFile} from '../../../modules/manager/types';
 import * as _managerFiles from './manager-files';
 import {applyPreFlights, extractAllDependencies} from '.';
@@ -12,6 +12,7 @@ jest.mock('./manager-files');
 jest.mock('../../../util/git');
 
 const managerFiles = mocked(_managerFiles);
+
 
 describe('workers/repository/extract/index', () => {
   describe('extractAllDependencies()', () => {
@@ -72,16 +73,30 @@ describe('workers/repository/extract/index', () => {
   });
 
   describe('applyPreFlights()', () => {
-    const baseConfig: RenovateConfig = {}
+    const mockedManager = mockDeep<ManagerApi>()
+    const getFunction = jest.spyOn(managers, 'get')
+    getFunction.mockImplementation((manager, name) => mockedManager[name])
+    const baseConfig: RenovateConfig = {
+      foo: "bar"
+    }
 
-    jest.mock('../../../modules/manager')
-    const managers = mocked(_managers)
+    it('should return same config for unknown manager', () => {
+      expect(applyPreFlights(baseConfig,["test"])).toEqual({
+        foo: "bar"
+      })
+    });
 
+    it('should return modified config for manager', () => {
+      mockedManager.preflight = (config: RenovateConfig) => {
+        return {
+          ...config,
+          foo: "foo"
+        }
+      }
 
-    it('should ', () => {
-      const a = jest.fn()
-      managers.get.mockReturnValue(a);
-      expect(applyPreFlights(baseConfig,["test"])).toEqual({})
+      expect(applyPreFlights(baseConfig,["test"])).toEqual({
+        foo: "foo"
+      })
     });
   })
 });
