@@ -107,6 +107,20 @@ describe('modules/platform/scm-manager/utils', () => {
       ).toThrow('MISSING_SSH_LINK');
     });
 
+    it('should throw error because protocol links are not an array', () => {
+      expect(() =>
+        getRepoUrl(
+          {
+            ...repo,
+            _links: { protocol: { name: 'http', href: gitHttpEndpoint }},
+          },
+          'ssh',
+          username,
+          password,
+        ),
+      ).toThrow('Expected protocol links to be an array of links.');
+    });
+
     it('should use the provided ssh link', () => {
       expect(
         getRepoUrl(
