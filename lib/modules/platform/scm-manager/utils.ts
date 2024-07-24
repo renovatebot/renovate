@@ -51,7 +51,7 @@ export function getRepoUrl(
   username: string,
   password: string,
 ): string {
-  const protocolLinks = repo._links.protocol as Link[] | undefined;
+  const protocolLinks = repo._links.protocol;
   if (!protocolLinks) {
     throw new Error('Missing protocol links.');
   }
