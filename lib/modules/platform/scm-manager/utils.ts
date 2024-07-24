@@ -58,7 +58,7 @@ export function getRepoUrl(
   }
 
   if (!Array.isArray(protocolLinks)) {
-    throw new Error('Expected protocol links to be an array of links.')
+    throw new Error('Expected protocol links to be an array of links.');
   }
 
   if (gitUrl === 'ssh') {

@@ -90,9 +90,9 @@ describe('util/http/scm-manager', () => {
         .get(`/repositories/${repo.namespace}/${repo.name}`)
         .reply(200, repo);
 
-      expect(await scmManagerHttp.getRepo(`${repo.namespace}/${repo.name}`)).toEqual(
-        repo,
-      );
+      expect(
+        await scmManagerHttp.getRepo(`${repo.namespace}/${repo.name}`),
+      ).toEqual(repo);
     });
 
     it.each([[401], [403], [404], [500]])(
@@ -319,12 +319,16 @@ describe('util/http/scm-manager', () => {
           .reply(response);
 
         await expect(
-          scmManagerHttp.updatePr(`${repo.namespace}/${repo.name}`, expectedPrId, {
-            title: 'Test Title',
-            description: 'PR description',
-            assignees: ['Test assignee'],
-            status: 'OPEN',
-          }),
+          scmManagerHttp.updatePr(
+            `${repo.namespace}/${repo.name}`,
+            expectedPrId,
+            {
+              title: 'Test Title',
+              description: 'PR description',
+              assignees: ['Test assignee'],
+              status: 'OPEN',
+            },
+          ),
         ).rejects.toThrow();
       },
     );

@@ -2,6 +2,7 @@ import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import ScmManagerHttp from '../../../util/http/scm-manager';
 import { sanitize } from '../../../util/sanitize';
 import type {
   BranchStatusConfig,
@@ -23,7 +24,6 @@ import type {
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { mapPrFromScmToRenovate } from './mapper';
-import ScmManagerHttp from '../../../util/http/scm-manager';
 import { getRepoUrl, mapPrState, matchPrState, smartLinks } from './utils';
 
 interface SCMMRepoConfig {
@@ -170,9 +170,9 @@ export async function getPr(number: number): Promise<Pr | null> {
 export async function getPrList(): Promise<Pr[]> {
   if (config.prList === null) {
     try {
-      config.prList = (await scmManagerHttp.getAllRepoPrs(config.repository)).map(
-        (pr) => mapPrFromScmToRenovate(pr),
-      );
+      config.prList = (
+        await scmManagerHttp.getAllRepoPrs(config.repository)
+      ).map((pr) => mapPrFromScmToRenovate(pr));
     } catch (error) {
       logger.error(error);
     }

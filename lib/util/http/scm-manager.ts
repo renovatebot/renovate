@@ -10,11 +10,7 @@ import type {
   User,
 } from '../../modules/platform/scm-manager/types';
 import { resolveBaseUrl } from '../url';
-import type {
-  HttpOptions,
-  HttpResponse,
-  InternalHttpOptions,
-} from './types';
+import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
 import { Http } from './index';
 
 const URLS = {
