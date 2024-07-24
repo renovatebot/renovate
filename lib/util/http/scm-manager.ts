@@ -1,12 +1,13 @@
+import {
+  PagedPullRequestSchema,
+  PagedRepoSchema,
+} from '../../modules/platform/scm-manager/schema';
 import type {
   Link,
-  Page,
   PullRequest,
   PullRequestCreateParams,
-  PullRequestPage,
   PullRequestUpdateParams,
   Repo,
-  RepoPage,
   User,
 } from '../../modules/platform/scm-manager/types';
 import { resolveBaseUrl } from '../url';
@@ -78,9 +79,13 @@ export default class ScmManagerHttp extends Http<ScmManagerHttpOptions> {
   }
 
   public async getAllRepos(): Promise<Repo[]> {
-    const response = await this.getJson<Page<RepoPage>>(URLS.ALL_REPOS, {
-      scmmContentType: CONTENT_TYPES.REPOSITORIES,
-    });
+    const response = await this.getJson(
+      URLS.ALL_REPOS,
+      {
+        scmmContentType: CONTENT_TYPES.REPOSITORIES,
+      },
+      PagedRepoSchema,
+    );
 
     return response.body._embedded.repositories;
   }
@@ -98,11 +103,12 @@ export default class ScmManagerHttp extends Http<ScmManagerHttpOptions> {
   }
 
   public async getAllRepoPrs(repoPath: string): Promise<PullRequest[]> {
-    const response = await this.getJson<Page<PullRequestPage>>(
+    const response = await this.getJson(
       URLS.PULLREQUESTS_WITH_PAGINATION(repoPath),
       {
         scmmContentType: CONTENT_TYPES.PULLREQUESTS,
       },
+      PagedPullRequestSchema,
     );
     return response.body._embedded.pullRequests;
   }

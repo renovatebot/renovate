@@ -1,9 +1,3 @@
-export type Page<T> = {
-  page: number;
-  pageTotal: number;
-  _embedded: T;
-};
-
 export interface Links {
   [link: string]: Link | Link[] | undefined;
 }
@@ -12,10 +6,6 @@ export interface Link {
   href: string;
   name?: string;
   templated?: boolean;
-}
-
-export interface PullRequestPage {
-  pullRequests: PullRequest[];
 }
 
 export interface PullRequestCreateParams extends PullRequestUpdateParams {
@@ -93,10 +83,6 @@ export type CommitStatusType =
   | 'failure'
   | 'warning'
   | 'unknown';
-
-export interface RepoPage {
-  repositories: Repo[];
-}
 
 export interface Repo {
   contact: string;
