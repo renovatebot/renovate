@@ -307,7 +307,7 @@ export function ensureCommentRemoval(
 }
 
 export function massageMarkdown(prBody: string): string {
-  return smartTruncate(smartLinks(prBody), 10000);
+  return smartTruncate(smartLinks(prBody), maxBodyLength());
 }
 
 export function getRepoForceRebase(): Promise<boolean> {
@@ -330,6 +330,10 @@ export function getJsonFile(
 ): Promise<any> {
   logger.debug('Not implemented getJsonFile');
   return Promise.resolve(undefined);
+}
+
+export function maxBodyLength(): number {
+  return 200000;
 }
 
 /* istanbul ignore next */

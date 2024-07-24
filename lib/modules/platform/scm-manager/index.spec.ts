@@ -28,7 +28,7 @@ import {
   initPlatform,
   initRepo,
   invalidatePrCache,
-  massageMarkdown,
+  massageMarkdown, maxBodyLength,
   mergePr,
   setBranchStatus,
   updatePr,
@@ -634,4 +634,10 @@ describe('modules/platform/scm-manager/index', () => {
       expect(result).toBeUndefined();
     });
   });
+
+  describe(maxBodyLength, () => {
+   it('should return the max body length allowed for an SCM-Manager request body', () => {
+     expect(maxBodyLength()).toBe(200000);
+   })
+  })
 });
