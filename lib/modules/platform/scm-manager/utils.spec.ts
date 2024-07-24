@@ -112,7 +112,7 @@ describe('modules/platform/scm-manager/utils', () => {
         getRepoUrl(
           {
             ...repo,
-            _links: { protocol: { name: 'http', href: gitHttpEndpoint }},
+            _links: { protocol: { name: 'http', href: gitHttpEndpoint } },
           },
           'ssh',
           username,
