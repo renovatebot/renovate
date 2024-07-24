@@ -3,6 +3,7 @@ import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
+import { GlobalConfig } from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -81,7 +82,6 @@ let config: {
   mergeMethod: MergeMethod;
   defaultBranch: string;
   cloneSubmodules: boolean | undefined;
-  ignorePrAuthor: boolean | undefined;
   squash: boolean;
 } = {} as any;
 
@@ -302,7 +302,6 @@ function getRepoUrl(
 export async function initRepo({
   repository,
   cloneSubmodules,
-  ignorePrAuthor,
   gitUrl,
   endpoint,
   includeMirrors,
@@ -310,7 +309,6 @@ export async function initRepo({
   config = {} as any;
   config.repository = urlEscape(repository);
   config.cloneSubmodules = cloneSubmodules;
-  config.ignorePrAuthor = ignorePrAuthor;
 
   let res: HttpResponse<RepoResponse>;
   try {
@@ -551,7 +549,7 @@ async function fetchPrList(): Promise<Pr[]> {
     per_page: '100',
   } as any;
   // istanbul ignore if
-  if (!config.ignorePrAuthor) {
+  if (!GlobalConfig.get('ignorePrAuthor', false)) {
     searchParams.scope = 'created_by_me';
   }
   const query = getQueryString(searchParams);
@@ -1073,7 +1071,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
       per_page: '100',
       state: 'opened',
     };
-    if (!config.ignorePrAuthor) {
+    if (!GlobalConfig.get('ignorePrAuthor', false)) {
       searchParams.scope = 'created_by_me';
     }
     const query = getQueryString(searchParams);

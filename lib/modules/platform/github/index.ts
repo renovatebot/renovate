@@ -447,14 +447,12 @@ export async function initRepo({
   forkToken,
   renovateUsername,
   cloneSubmodules,
-  ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
   config = {
     repository,
     cloneSubmodules,
-    ignorePrAuthor,
   } as any;
   // istanbul ignore if
   if (endpoint) {
@@ -830,7 +828,9 @@ export async function getPrList(): Promise<GhPr[]> {
   if (!config.prList) {
     const repo = config.parentRepo ?? config.repository;
     const username =
-      !config.forkToken && !config.ignorePrAuthor && config.renovateUsername
+      !config.forkToken &&
+      !GlobalConfig.get('ignorePrAuthor', false) &&
+      config.renovateUsername
         ? config.renovateUsername
         : null;
     // TODO: check null `repo` (#22198)
@@ -1219,7 +1219,9 @@ async function getIssues(): Promise<Issue[]> {
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
-        ...(!config.ignorePrAuthor && { user: config.renovateUsername }),
+        ...(!GlobalConfig.get('ignorePrAuthor', false) && {
+          user: config.renovateUsername,
+        }),
       },
       readOnly: true,
     },

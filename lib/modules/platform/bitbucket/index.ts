@@ -185,7 +185,6 @@ export async function getJsonFile(
 export async function initRepo({
   repository,
   cloneSubmodules,
-  ignorePrAuthor,
   bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
@@ -195,7 +194,6 @@ export async function initRepo({
   });
   config = {
     repository,
-    ignorePrAuthor,
   } as Config;
   let info: RepoInfo;
   let mainBranch: string;

@@ -166,6 +166,7 @@ export interface RepoGlobalConfig {
   autodiscoverRepoOrder?: SortMethod;
   userAgent?: string;
   cachePrivatePackages?: boolean;
+  ignorePrAuthor?: boolean;
 }
 
 export interface LegacyAdminConfig {

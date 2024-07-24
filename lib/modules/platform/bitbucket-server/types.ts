@@ -12,7 +12,6 @@ export interface BbsConfig {
   repositorySlug: string;
 
   prVersions: Map<number, number>;
-  ignorePrAuthor: boolean;
   username: string;
 }
 
