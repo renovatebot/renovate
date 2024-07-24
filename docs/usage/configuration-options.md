@@ -2412,7 +2412,7 @@ The matching process for a package rule:
 - Multiple values within a single matcher will be evaluated independently (they're OR-ed together).
 - Combining multiple matchers will restrict the resulting matches (they're AND-ed together):
   `matchCurrentVersion`, `matchCurrentValue`, `matchNewValue`, `matchConfidence`, `matchCurrentAge`,
-  `matchManagers`, `matchDatasources`, `matchCategories`, `matchDepTypes`, `matchUpdateTypes`,
+  `matchManagers`, `matchDatasources`, `matchCategories`, `matchDepTypes`, `matchUpdateTypes`, `matchReleaseAge`,
   `matchRepositories`/`excludeRepositories`, `matchBaseBranches`, `matchFileNames`
 - Two special groups of matchers provide alternatives (they're OR-ed within their respective groups, and AND-ed with others):
   - Source URL: `matchSourceUrls`, `matchSourceUrlPrefixes`
@@ -3076,6 +3076,32 @@ Like the earlier `matchPackagePatterns` example, the above will configure `range
     `matchPackagePrefixes` will try matching `packageName` first and then fall back to matching `depName`.
     If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
     Use `matchDepPatterns` instead.
+
+### matchReleaseAge
+
+Use this field if you want to match packages based on the age of the _new_ (released) version.
+
+For example, if you want to group updates for dependencies where the new version is more than 1 month old:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchReleaseAge": "> 1 month",
+      "groupName": "overdue dependencies"
+    }
+  ]
+}
+```
+
+The `matchReleaseAge` string must start with one of `>`, `>=`, `<` or `<=`.
+
+Only _one_ date part is supported, so you _cannot_ do `> 1 year 1 month`.
+Instead you should do `> 13 months`.
+
+<!-- prettier-ignore -->
+!!! note
+    We recommend you only use the words hour(s), day(s), week(s), month(s) and year(s) in your time ranges.
 
 ### matchRepositories
 

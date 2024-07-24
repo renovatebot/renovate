@@ -385,6 +385,7 @@ export interface PackageRule
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
   matchPackagePrefixes?: string[];
+  matchReleaseAge?: string;
   matchRepositories?: string[];
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];

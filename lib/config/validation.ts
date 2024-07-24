@@ -451,6 +451,7 @@ export async function validateConfig(
               'matchUpdateTypes',
               'matchConfidence',
               'matchCurrentAge',
+              'matchReleaseAge',
               'matchRepositories',
               'matchNewValue',
             ];
