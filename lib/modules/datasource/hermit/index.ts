@@ -30,6 +30,10 @@ export class HermitDatasource extends Datasource {
     'https://github.com/cashapp/hermit-packages',
   ];
 
+  override readonly sourceUrlSupport = 'release';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `Repository` field in the results.';
+
   pathRegex: RegExp;
 
   constructor() {

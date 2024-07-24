@@ -327,6 +327,10 @@ Results which are soft expired are reused in the following manner:
 - The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
 - If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
 
+## cachePrivatePackages
+
+In the self-hosted setup, use option to enable caching of private packages to improve performance.
+
 ## cacheTtlOverride
 
 Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
@@ -553,6 +557,12 @@ You can choose from the following behaviors for the `dryRun` config option:
 
 Information provided mainly in debug log level.
 
+## encryptedWarning
+
+Use this if you want to stop supporting `encrypted` configuration capabilities but want to warn users first to migrate.
+
+If set to a string value, Renovate will log warnings with the `encryptedWarning` text, meaning the message will be visible to users such as on the Dependency Dashboard.
+
 ## endpoint
 
 ## executionTimeout
@@ -755,6 +765,39 @@ If left as default (null), a random short ID will be selected.
 
 ## logFileLevel
 
+## mergeConfidenceDatasources
+
+This feature is applicable only if you have an access token for Mend's Merge Confidence API.
+
+If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
+Otherwise, it queries all the supported datasources (check default value).
+
+Example:
+
+```js
+modules.exports = {
+  mergeConfidenceDatasources: ['npm'],
+};
+```
+
+## mergeConfidenceEndpoint
+
+This feature is applicable only if you have an access token for Mend's Merge Confidence API.
+
+If set, Renovate will retrieve Merge Confidence data by querying this API.
+Otherwise, it will use the default URL, which is <https://developer.mend.io/>.
+
+If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
+
+- have a static merge confidence token that you set via `MEND_RNV_MC_TOKEN`
+- _or_ set `MEND_RNV_MC_TOKEN` to `auto`
+
+Then you must set this variable at the _server_ and the _workers_.
+
+But if you have specified the token as a [`matchConfidence`](configuration-options.md#matchconfidence) `hostRule`, you only need to set this variable at the _workers_.
+
+This feature is in private beta.
+
 ## migratePresets
 
 Use this if you have repositories that extend from a particular preset, which has now been renamed or removed.
@@ -927,6 +970,36 @@ pub   rsa4096 2021-09-10 [SC]
       794B820F34B34A8DF32AADB20649CEXAMPLEONLY
 uid                      Renovate Bot <renovate@whitesourcesoftware.com>
 sub   rsa4096 2021-09-10 [E]
+```
+
+</details>
+
+<!-- prettier-ignore -->
+!!! note
+    If you use GnuPG `v2.4` (or newer) to generate the key, then you must disable `AEAD` preferences.
+    This is needed to allow Renovate to decrypt the encrypted values.
+
+<details><summary>key edit log</summary>
+
+```bash
+❯ gpg --edit-key renovate@whitesourcesoftware.com
+gpg> showpref
+[ultimate] (1). Renovate Bot <renovate@whitesourcesoftware.com>
+     Cipher: AES256, AES192, AES, 3DES
+     AEAD: OCB, EAX
+     Digest: SHA512, SHA384, SHA256, SHA224, SHA1
+     Compression: ZLIB, BZIP2, ZIP, Uncompressed
+     Features: MDC, AEAD, Keyserver no-modify
+
+gpg> setpref AES256 AES192 AES 3DES SHA512 SHA384 SHA256 SHA224 SHA1 ZLIB BZIP2 ZIP
+Set preference list to:
+     Cipher: AES256, AES192, AES, 3DES
+     AEAD:
+     Digest: SHA512, SHA384, SHA256, SHA224, SHA1
+     Compression: ZLIB, BZIP2, ZIP, Uncompressed
+     Features: MDC, Keyserver no-modify
+Really update the preferences? (y/N) y
+gpg> save
 ```
 
 </details>

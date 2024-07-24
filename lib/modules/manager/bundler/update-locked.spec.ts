@@ -53,7 +53,7 @@ describe('modules/manager/bundler/update-locked', () => {
     expect(updateLockedDependency(config).status).toBe('unsupported');
   });
 
-  it('returns update-falied incase of errors', () => {
+  it('returns update-failed in case of errors', () => {
     const config: UpdateLockedConfig = {
       packageFile: 'Gemfile',
       lockFile: 'Gemfile.lock',

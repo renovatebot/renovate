@@ -602,4 +602,60 @@ describe('modules/manager/pip-compile/extract', () => {
       ['dash_r.txt'],
     ]);
   });
+
+  it('handles -r dependency on file with relative path same dir', async () => {
+    fs.readLocalFile.mockImplementation((name): any => {
+      if (name === 'dir/1.in') {
+        return 'foo';
+      } else if (name === 'dir/2.in') {
+        return '-r 1.in\nbar';
+      } else if (name === 'dir/1.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=1.txt 1.in',
+          ['foo==1.0.1'],
+        );
+      } else if (name === 'dir/2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=2.txt 2.in',
+          ['foo==1.0.1', 'bar==2.0.0'],
+        );
+      }
+      return null;
+    });
+
+    const lockFiles = ['dir/1.txt', 'dir/2.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toMatchObject([
+      { packageFile: 'dir/1.in', lockFiles: ['dir/1.txt', 'dir/2.txt'] },
+      { packageFile: 'dir/2.in', lockFiles: ['dir/2.txt'] },
+    ]);
+  });
+
+  it('handles -r dependency on file with relative path above', async () => {
+    fs.readLocalFile.mockImplementation((name): any => {
+      if (name === 'common/1.in') {
+        return 'foo';
+      } else if (name === 'dir/2.in') {
+        return '-r ../common/1.in\nbar';
+      } else if (name === 'common/1.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=1.txt 1.in',
+          ['foo==1.0.1'],
+        );
+      } else if (name === 'dir/2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=2.txt 2.in',
+          ['foo==1.0.1', 'bar==2.0.0'],
+        );
+      }
+      return null;
+    });
+
+    const lockFiles = ['common/1.txt', 'dir/2.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toMatchObject([
+      { packageFile: 'common/1.in', lockFiles: ['common/1.txt', 'dir/2.txt'] },
+      { packageFile: 'dir/2.in', lockFiles: ['dir/2.txt'] },
+    ]);
+  });
 });

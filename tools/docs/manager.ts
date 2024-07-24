@@ -41,6 +41,7 @@ export const CategoryNames: Record<Category, string> = {
   c: 'C and C++',
   cd: 'Continuous Delivery',
   ci: 'Continuous Integration',
+  custom: 'Custom Managers',
   dart: 'Dart',
   docker: 'Docker',
   dotnet: '.NET',

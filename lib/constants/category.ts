@@ -6,6 +6,7 @@ const Categories = [
   'c',
   'cd',
   'ci',
+  'custom',
   'dart',
   'docker',
   'dotnet',

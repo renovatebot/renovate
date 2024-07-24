@@ -767,7 +767,13 @@ export async function isBranchConflicted(
 export async function deleteBranch(branchName: string): Promise<void> {
   await syncGit();
   try {
-    await gitRetry(() => git.raw(['push', '--delete', 'origin', branchName]));
+    const deleteCommand = ['push', '--delete', 'origin', branchName];
+
+    if (getNoVerify().includes('push')) {
+      deleteCommand.push('--no-verify');
+    }
+
+    await gitRetry(() => git.raw(deleteCommand));
     logger.debug(`Deleted remote branch: ${branchName}`);
   } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);

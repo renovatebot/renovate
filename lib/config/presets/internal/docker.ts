@@ -42,6 +42,10 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['docker'],
         pinDigests: true,
       },
+      {
+        matchManagers: ['devcontainer', 'pyenv'],
+        pinDigests: false,
+      },
     ],
   },
 };

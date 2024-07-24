@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import {
   fs,
   git,
@@ -103,6 +104,7 @@ describe('workers/repository/update/branch/index', () => {
       updatedPackageFiles: [],
       artifactErrors: [],
       updatedArtifacts: [],
+      artifactNotices: [],
     };
 
     beforeEach(() => {
@@ -895,6 +897,40 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
 
+    it('ensures PR and comments notice', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+          artifactNotices: [{ file: 'go.mod', message: 'some notice' }],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
+        pr: partial<Pr>({ number: 123 }),
+      });
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      await branchWorker.processBranch({ ...config, automerge: true });
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
+      expect(platform.ensureComment).toHaveBeenCalledWith({
+        content: codeBlock`
+          ##### File name: go.mod
+
+          some notice
+        `,
+        number: 123,
+        topic: 'ℹ Artifact update notice',
+      });
+    });
+
     it('ensures PR and tries automerge', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
@@ -1274,6 +1310,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [partial<FileChange>()],
         updatedArtifacts: [partial<FileChange>()],
         artifactErrors: [{}],
+        artifactNotices: [],
       });
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -1546,6 +1583,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [updatedPackageFile],
         artifactErrors: [],
         updatedArtifacts: [],
+        artifactNotices: [],
       });
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -1643,6 +1681,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [updatedPackageFile],
         artifactErrors: [],
         updatedArtifacts: [],
+        artifactNotices: [],
       } satisfies PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -1727,6 +1766,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [updatedPackageFile],
         artifactErrors: [],
         updatedArtifacts: [],
+        artifactNotices: [],
       });
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],

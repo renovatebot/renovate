@@ -38,7 +38,7 @@ exports[`config/validation validateConfig(config) catches invalid templates 1`] 
 exports[`config/validation validateConfig(config) errors for all types 1`] = `
 [
   {
-    "message": "Configuration option \`azureWorkItemId\` should be an integer. Found: false (boolean)",
+    "message": "Configuration option \`azureWorkItemId\` should be an integer. Found: false (boolean).",
     "topic": "Configuration Error",
   },
   {

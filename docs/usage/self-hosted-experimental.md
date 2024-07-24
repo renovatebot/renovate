@@ -39,6 +39,18 @@ You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE`
 
 The process that runs Renovate must have the correct permissions to delete the config file.
 
+## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
+
+If set to any value, Renovate will skip attempting to get release labels (e.g. gitRef, sourceUrl) from manifest annotations for `https://index.docker.io`.
+
+Due to the missing label information like sourceUrl, Renovate will not be able to perform certain actions dependent on these information for the images.
+
+This includes the following:
+
+- Generating changelogs
+- Applying package rules dependent on the labels
+- Including the sourceUrls in PR bodies
+
 ## `RENOVATE_X_DOCKER_HUB_TAGS`
 
 If set to any value, Renovate will use the Docker Hub API (`https://hub.docker.com`) to fetch tags instead of the normal Docker API for images pulled from `https://index.docker.io`.
@@ -82,33 +94,9 @@ Default value: `250` (milliseconds).
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
 See [issue 8660](https://github.com/renovatebot/renovate/issues/8660) for background on why this was created.
 
-## `RENOVATE_X_IGNORE_NODE_WARN`
-
-Suppress the default warning when a deprecated version of Node.js is used to run Renovate.
-
 ## `RENOVATE_X_IGNORE_RE2`
 
 Skip initializing `RE2` for regular expressions and instead use Node-native `RegExp` instead.
-
-## `RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL`
-
-If set, Renovate will query this API for Merge Confidence data.
-
-If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
-
-- have a static merge confidence token that you set via `MEND_RNV_MC_TOKEN`
-- _or_ set `MEND_RNV_MC_TOKEN` to `auto`
-
-Then you must set this variable at the _server_ and the _workers_.
-
-But if you have specified the token as a [`matchConfidence`](configuration-options.md#matchconfidence) `hostRule`, you only need to set this variable at the _workers_.
-
-This feature is in private beta.
-
-## `RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES`
-
-If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
-The expected value for this environment variable is a JSON array of strings.
 
 ## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
 

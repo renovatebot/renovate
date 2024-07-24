@@ -12,6 +12,7 @@ export function getHttpUrl(url: string, token?: string): string {
   const parsedUrl = parseGitUrl(url);
 
   let { protocol } = parsedUrl;
+  const origProtocol = protocol;
 
   // Convert non-https URLs to https and strip port
   if (!regEx(/^https?$/).test(protocol)) {
@@ -22,19 +23,30 @@ export function getHttpUrl(url: string, token?: string): string {
   parsedUrl.user = '';
   parsedUrl.token = token ?? '';
 
-  if (token) {
-    switch (detectPlatform(parsedUrl.toString(protocol))) {
-      case 'gitlab':
+  switch (detectPlatform(parsedUrl.toString(protocol))) {
+    case 'gitlab':
+      if (token) {
         parsedUrl.token = token.includes(':')
           ? token
           : `gitlab-ci-token:${token}`;
-        break;
-      case 'github':
+      }
+      break;
+    case 'github':
+      if (token) {
         parsedUrl.token = token.includes(':')
           ? token
           : `x-access-token:${token}`;
-        break;
-    }
+      }
+      break;
+    case 'bitbucket-server':
+      // SSH URLs look like ssh://git@git.my.com:7999/project/repo.git
+      // HTTPS URLs look like https://git.my.com/scm/project/repo.git
+      // git-url-parse can't detect bitbucket-server from SSH URL
+      // and thus doesn't know it should insert '/scm/'
+      if (origProtocol === 'ssh') {
+        parsedUrl.source = 'bitbucket-server';
+      }
+      break;
   }
 
   return new URL(parsedUrl.toString(protocol)).href;

@@ -129,6 +129,18 @@ export function getNewValue({
     return null;
   }
 
+  // return early if newVersion is excluded from range
+  if (
+    ranges.some(
+      (range) => range.operator === '!=' && range.version === newVersion,
+    )
+  ) {
+    logger.debug(
+      `Cannot calculate new value as the newVersion:\`${newVersion}\` is excluded from range: \`${currentValue}\``,
+    );
+    return null;
+  }
+
   switch (rangeStrategy) {
     case 'auto':
     case 'replace':
@@ -191,6 +203,7 @@ export function getNewValue({
     newVersion,
   );
 
+  // istanbul ignore if
   if (!satisfies(newVersion, checkedResult)) {
     // we failed at creating the range
     logger.warn(

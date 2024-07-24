@@ -41,7 +41,7 @@ export const getIssuesQuery = `
 query(
   $owner: String!,
   $name: String!,
-  $user: String!,
+  $user: String,
   $count: Int,
   $cursor: String
 ) {

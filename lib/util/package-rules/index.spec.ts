@@ -210,6 +210,53 @@ describe('util/package-rules/index', () => {
     expect(res2.automerge).toBeFalse();
   });
 
+  it('sets skipReason=package-rules if enabled=false', () => {
+    const dep: any = {
+      depName: 'foo',
+      packageRules: [
+        {
+          enabled: false,
+        },
+      ],
+    };
+    const res = applyPackageRules(dep, 'datasource-merge');
+    expect(res.enabled).toBeFalse();
+    expect(res.skipReason).toBe('package-rules');
+    expect(res.skipStage).toBe('datasource-merge');
+  });
+
+  it('unsets skipReason=package-rules if enabled=true', () => {
+    const dep: any = {
+      depName: 'foo',
+      packageRules: [
+        {
+          enabled: false,
+        },
+        {
+          enabled: true,
+        },
+      ],
+    };
+    const res = applyPackageRules(dep, 'datasource-merge');
+    expect(res.enabled).toBeTrue();
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
+  });
+
+  it('skips skipReason=package-rules if enabled=true', () => {
+    const dep: any = {
+      enabled: false,
+      depName: 'foo',
+      packageRules: [
+        {
+          enabled: false,
+        },
+      ],
+    };
+    const res = applyPackageRules(dep);
+    expect(res.skipReason).toBeUndefined();
+  });
+
   it('matches anything if missing inclusive rules', () => {
     const config: TestConfig = {
       packageRules: [

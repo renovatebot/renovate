@@ -42,3 +42,5 @@ export const BITBUCKET_API_USING_HOST_TYPES = [
   'bitbucket-changelog',
   'bitbucket-tags',
 ];
+
+export const BITBUCKET_SERVER_API_USING_HOST_TYPES = ['bitbucket-server'];

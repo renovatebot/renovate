@@ -19,6 +19,25 @@ describe('documentation', () => {
   });
 
   describe('website-documentation', () => {
+    function getConfigOptionSubHeaders(
+      file: string,
+      configOption: string,
+    ): string[] {
+      const subHeadings = [];
+      const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
+      const reg = regEx(`##\\s${configOption}[\\s\\S]+?\n##\\s`);
+      const match = reg.exec(content);
+      const subHeadersMatch = match?.[0]?.matchAll(/\n###\s(?<child>\w+)\n/g);
+      if (subHeadersMatch) {
+        for (const subHeaderStr of subHeadersMatch) {
+          if (subHeaderStr?.groups?.child) {
+            subHeadings.push(subHeaderStr.groups.child);
+          }
+        }
+      }
+      return subHeadings;
+    }
+
     describe('docs/usage/configuration-options.md', () => {
       function getConfigHeaders(file: string): string[] {
         const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
@@ -64,11 +83,42 @@ describe('documentation', () => {
           .sort();
       }
 
+      function getParentNames(): Set<string> {
+        const childrens = options
+          .filter((option) => option.stage !== 'global')
+          .filter((option) => !option.globalOnly)
+          .filter((option) => option.parents);
+
+        const parentNames = new Set<string>();
+        for (const children of childrens) {
+          const parents = children.parents ?? [];
+          for (const parent of parents) {
+            parentNames.add(parent);
+          }
+        }
+
+        return parentNames;
+      }
+
       it('has headers for every required sub-option', () => {
         expect(getConfigSubHeaders('configuration-options.md')).toEqual(
           getRequiredConfigSubOptions(),
         );
       });
+
+      it.each([...getParentNames()])(
+        '%s has sub-headers sorted alphabetically',
+        (parentName: string) => {
+          expect(
+            getConfigOptionSubHeaders('configuration-options.md', parentName),
+          ).toEqual(
+            getConfigOptionSubHeaders(
+              'configuration-options.md',
+              parentName,
+            ).sort(),
+          );
+        },
+      );
     });
 
     describe('docs/usage/self-hosted-configuration.md', () => {

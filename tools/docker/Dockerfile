@@ -1,42 +1,73 @@
+# syntax=docker/dockerfile:1.9.0@sha256:fe40cf4e92cd0c467be2cfc30657a680ae2398318afd50b0c80585784c604f28
+
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:2.10.2@sha256:cd98562e79e36229912c51e78d144cdeb6e174e49b4dbf79b13882e093ca80dd AS slim-base
+FROM ghcr.io/renovatebot/base-image:2.28.0@sha256:0abd37cc5818199aad69b226537fade5047bae1ca1a987f855453d9eed19a795 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:2.10.2-full@sha256:0ac44b9ee252267a64eb0814fbcdfadc4600930e0384857771f29afa2080e273 AS full-base
+FROM ghcr.io/renovatebot/base-image:2.28.0-full@sha256:0e3a859452ece1442faa693c71f02481bb7a3c8addbc704b24dcafa9bcfb4fd8 AS full-base
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM slim-base as build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:2.28.0@sha256:0abd37cc5818199aad69b226537fade5047bae1ca1a987f855453d9eed19a795 AS build
+
+# We want a specific node version here
+# renovate: datasource=node-version
+RUN install-tool node 20.15.1
 
 WORKDIR /usr/local/renovate
 
-ENV CI=1 npm_config_modules_cache_max_age=0
+ARG TARGETPLATFORM
+ARG TARGETARCH
+ARG BUILDPLATFORM
 
-COPY pnpm-lock.yaml ./
-
-# only fetch deps from lockfile https://pnpm.io/cli/fetch
-RUN corepack pnpm fetch --prod
-
-COPY . ./
-
-# install
 RUN set -ex; \
-  corepack pnpm install --prod --offline --ignore-scripts; \
+  echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM"; \
+  uname -a; \
   true
 
-# test
-COPY tools/docker/bin/ /usr/local/bin/
+# replace `amd64` with `x86_64` for `node`
+ENV ARCH=${TARGETARCH/amd64/x86_64}
+ENV ARCH=${ARCH/arm64/aarch64}
+
+# fetch static node binary
 RUN set -ex; \
-  renovate --version; \
-  renovate-config-validator; \
-  node -e "new require('re2')('.*').exec('test')"; \
+  ver=$(node --version); ver=${ver:1} \
+  temp_dir="$(mktemp -d)"; \
+  curl -fsSL "https://github.com/containerbase/node-prebuild/releases/download/${ver}/node-${ver}-${ARCH}.tar.xz" -o ${temp_dir}/node.tar.xz; \
+  bsdtar --strip 1 -C ${temp_dir} -xf ${temp_dir}/node.tar.xz; \
+  cp ${temp_dir}/bin/node ./node; \
+  true
+
+# fetch npm packages
+ENV CI=1 npm_config_modules_cache_max_age=0 \
+  npm_config_loglevel=info
+
+
+# replace `amd64` with `x64` for `node`
+ENV ARCH=${TARGETARCH/amd64/x64}
+
+COPY --link pnpm-lock.yaml ./
+
+# set `npm_config_arch` for `prebuild-install`
+# set `npm_config_platform_arch` for `install-artifact-from-github`
+# only fetch deps from lockfile https://pnpm.io/cli/fetch
+RUN set -ex; \
+  export npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}; \
+  corepack pnpm fetch --prod; \
+  true
+
+COPY --link . ./
+
+# install npm packages
+RUN set -ex; \
+  corepack pnpm install --prod --offline --ignore-scripts; \
   true
 
 # --------------------------------------
@@ -51,14 +82,12 @@ LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate" 
 
 WORKDIR /usr/src/app
 
-ENV RENOVATE_X_IGNORE_NODE_WARN=true
-
 COPY tools/docker/bin/ /usr/local/bin/
 CMD ["renovate"]
 
 ARG RENOVATE_VERSION
 
-COPY --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
+COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
 # Compabillity, so `config.js` can access renovate and deps
 RUN set -ex; \
@@ -70,8 +99,7 @@ RUN set -ex; \
 
 RUN set -ex; \
   renovate --version; \
-  renovate-config-validator; \
-  node -e "new require('re2')('.*').exec('test')"; \
+  /usr/local/renovate/node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
   true
 
 LABEL \

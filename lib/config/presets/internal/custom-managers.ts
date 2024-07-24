@@ -18,6 +18,18 @@ export const presets: Record<string, Preset> = {
     description:
       'Update `$schema` version in `biome.json` configuration files.',
   },
+  bitbucketPipelinesVersions: {
+    customManagers: [
+      {
+        customType: 'regex',
+        fileMatch: ['(^|/)bitbucket-pipelines\\.ya?ml$'],
+        matchStrings: [
+          '# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+.*\\s+[A-Za-z0-9_]+?_VERSION[ =:]\\s?["\']?(?<currentValue>.+?)["\']?\\s',
+        ],
+      },
+    ],
+    description: 'Update `_VERSION` variables in Bitbucket Pipelines',
+  },
   dockerfileVersions: {
     customManagers: [
       {
@@ -27,7 +39,7 @@ export const presets: Record<string, Preset> = {
           '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$',
         ],
         matchStrings: [
-          '# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s(?:ENV|ARG) .+?_VERSION[ =]"?(?<currentValue>.+?)"?\\s',
+          '# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s(?:ENV|ARG)\\s+[A-Za-z0-9_]+?_VERSION[ =]["\']?(?<currentValue>.+?)["\']?\\s',
         ],
       },
     ],
@@ -74,6 +86,23 @@ export const presets: Record<string, Preset> = {
       },
     ],
     description: 'Update `appVersion` value in Helm chart `Chart.yaml`.',
+  },
+  makefileVersions: {
+    customManagers: [
+      {
+        customType: 'regex',
+        fileMatch: [
+          '(^|/)Makefile$',
+          '(^|/)makefile$',
+          '(^|/)GNUMakefile$',
+          '\\.mk$',
+        ],
+        matchStrings: [
+          '# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:*\\??=\\s*["\']?(?<currentValue>.+?)["\']?\\s',
+        ],
+      },
+    ],
+    description: 'Update `_VERSION` variables in Makefiles.',
   },
   mavenPropertyVersions: {
     customManagers: [

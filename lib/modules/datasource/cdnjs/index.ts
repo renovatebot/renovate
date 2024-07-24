@@ -28,6 +28,10 @@ export class CdnJsDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = ['https://api.cdnjs.com/'];
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `repository` field in the results.';
+
   @cache({
     namespace: `datasource-${CdnJsDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName.split('/')[0],

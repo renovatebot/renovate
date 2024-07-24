@@ -17,7 +17,7 @@ import { PdmLockfileSchema, type PyProject } from '../schema';
 import { depTypes, parseDependencyGroupRecord } from '../utils';
 import type { PyProjectProcessor } from './types';
 
-const pdmUpdateCMD = 'pdm update --no-sync';
+const pdmUpdateCMD = 'pdm update --no-sync --update-eager';
 
 export class PdmProcessor implements PyProjectProcessor {
   process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
@@ -187,6 +187,10 @@ function generateCMDs(updatedDeps: Upgrade[]): string[] {
         );
         break;
       }
+      case depTypes.buildSystemRequires:
+        // build requirements are not locked in the lock files, no need to update.
+        // Reference: https://github.com/pdm-project/pdm/discussions/2869
+        break;
       default: {
         addPackageToCMDRecord(packagesByCMD, pdmUpdateCMD, dep.packageName!);
       }

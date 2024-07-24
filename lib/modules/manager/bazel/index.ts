@@ -9,7 +9,7 @@ import { extractPackageFile } from './extract';
 export { extractPackageFile, updateArtifacts };
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)WORKSPACE(|\\.bazel)$', '\\.bzl$'],
+  fileMatch: ['(^|/)WORKSPACE(|\\.bazel|\\.bzlmod)$', '\\.bzl$'],
 };
 
 export const categories: Category[] = ['bazel'];

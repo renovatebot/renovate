@@ -50,7 +50,7 @@ export function replaceContent(content: string, txt: string): string {
 
 export function formatUrls(urls: string[] | null | undefined): string {
   if (Array.isArray(urls) && urls.length) {
-    return `**References**:\n\n${urls
+    return `## References\n\n${urls
       .map((url) => ` - [${url}](${url})`)
       .join('\n')}\n\n`;
   }
@@ -65,7 +65,7 @@ export async function formatDescription(
   if (!content) {
     return '';
   }
-  return `**Description**:\n\n${content}\n`;
+  return `## Description\n\n${content}\n`;
 }
 
 export function getModuleLink(module: string, title?: string): string {

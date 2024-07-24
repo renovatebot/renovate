@@ -424,6 +424,30 @@ describe('util/git/index', () => {
       const branches = await Git(origin.path).branch({});
       expect(branches.all).not.toContain('renovate/past_branch');
     });
+
+    it('should add no verify flag', async () => {
+      const rawSpy = jest.spyOn(SimpleGit.prototype, 'raw');
+      await git.deleteBranch('renovate/something');
+      expect(rawSpy).toHaveBeenCalledWith([
+        'push',
+        '--delete',
+        'origin',
+        'renovate/something',
+      ]);
+    });
+
+    it('should not add no verify flag', async () => {
+      const rawSpy = jest.spyOn(SimpleGit.prototype, 'raw');
+      setNoVerify(['push']);
+      await git.deleteBranch('renovate/something');
+      expect(rawSpy).toHaveBeenCalledWith([
+        'push',
+        '--delete',
+        'origin',
+        'renovate/something',
+        '--no-verify',
+      ]);
+    });
   });
 
   describe('getBranchLastCommitTime', () => {
