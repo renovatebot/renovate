@@ -682,27 +682,6 @@ By default, Renovate logs and displays a warning when the `GITHUB_COM_TOKEN` is 
 By setting `githubTokenWarn` to `false`, Renovate suppresses these warnings on Pull Requests, etc.
 Disabling the warning is helpful for self-hosted environments that can't access the `github.com` domain, because the warning is useless in these environments.
 
-## gitlabAutoMergeableCheckAttempts
-
-If set to a positive integer, Renovate tries this many times to check if a Merge Request on GitLab is mergeable, before trying to automerge.
-Renovate calculates the delay between attempts with this formula: `gitlabAutoMergeableCheckAttempts * attempt * attempt` milliseconds.
-
-Default value: `5` (attempts results in max. 13.75 seconds timeout).
-
-## gitlabBranchStatusDelay
-
-Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.
-
-Can be useful for slow-running, self-hosted GitLab instances that do not react fast enough for the default delay to help.
-
-Default value: `1000` (milliseconds).
-
-## gitlabMergeRequestDelay
-
-If set, Renovate will use this as a delay to proceed with an automerge.
-
-Default value: `250` (milliseconds).
-
 ## globalExtends
 
 Unlike the `extends` field, which is passed through unresolved to be part of repository config, any presets in `globalExtends` are resolved immediately as part of global config.
