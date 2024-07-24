@@ -52,8 +52,13 @@ export function getRepoUrl(
   password: string,
 ): string {
   const protocolLinks = repo._links.protocol;
+
   if (!protocolLinks) {
     throw new Error('Missing protocol links.');
+  }
+
+  if (!Array.isArray(protocolLinks)) {
+    throw new Error('Expected protocol links to be an array of links.')
   }
 
   if (gitUrl === 'ssh') {
