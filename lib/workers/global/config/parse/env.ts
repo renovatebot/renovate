@@ -39,7 +39,6 @@ const renameKeys = {
   aliases: 'registryAliases',
   azureAutoComplete: 'platformAutomerge', // migrate: azureAutoComplete
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
-  gitlabAutoMergeableCheckAttemps: 'gitlabAutoMergeableCheckAttempts', // accounting for typo in RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS
   mergeConfidenceApiBaseUrl: 'mergeConfidenceEndpoint',
   mergeConfidenceSupportedDatasources: 'mergeConfidenceDatasources',
 };
@@ -91,9 +90,6 @@ const convertedExperimentalEnvVars = [
   'RENOVATE_X_AUTODISCOVER_REPO_SORT',
   'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
   'RENOVATE_X_DOCKER_MAX_PAGES',
-  'RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS',
-  'RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY',
-  'RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY',
   'RENOVATE_X_PLATFORM_VERSION',
   'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
   'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',

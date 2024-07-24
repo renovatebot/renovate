@@ -38,9 +38,6 @@ export class GlobalConfig {
     'autodiscoverRepoOrder',
     'userAgent',
     'dockerMaxPages',
-    'gitlabAutoMergeableCheckAttempts',
-    'gitlabBranchStatusDelay',
-    'gitlabMergeRequestDelay',
     'platformVersion',
     'cachePrivatePackages',
   ];
