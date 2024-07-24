@@ -45,7 +45,7 @@ const token = 'TEST_TOKEN';
 const user: User = {
   mail: 'test@user.de',
   displayName: 'Test User',
-  username: 'testUser1337',
+  name: 'testUser1337',
 };
 
 const repo: Repo = {
@@ -71,7 +71,7 @@ const repo: Repo = {
 
 const pullRequest: PullRequest = {
   id: '1',
-  author: { displayName: 'Thomas Zerr', username: 'tzerr' },
+  author: { displayName: 'Thomas Zerr', id: 'tzerr' },
   source: 'feature/test',
   target: 'develop',
   title: 'The PullRequest',
@@ -94,7 +94,7 @@ const renovatePr: Pr = mapPrFromScmToRenovate(pullRequest);
 describe('modules/platform/scm-manager/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    hostRules.add({ token, username: user.username });
+    hostRules.add({ token, username: user.name });
     invalidatePrCache();
   });
 
@@ -146,7 +146,7 @@ describe('modules/platform/scm-manager/index', () => {
       });
 
       expect(git.initRepo).toHaveBeenCalledWith({
-        url: `https://${user.username}:${token}@localhost:8080/scm/default/repo`,
+        url: `https://${user.name}:${token}@localhost:8080/scm/default/repo`,
         repository,
         defaultBranch: expectedDefaultBranch,
       });
@@ -161,7 +161,7 @@ describe('modules/platform/scm-manager/index', () => {
 
     it('should throw error, because token is not provided in host rules', async () => {
       hostRules.clear();
-      hostRules.add({ username: user.username });
+      hostRules.add({ username: user.name });
       await expect(
         initRepo({ repository: `${repo.namespace}/${repo.name}` }),
       ).rejects.toThrow('Token is not provided');

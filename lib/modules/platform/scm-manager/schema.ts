@@ -1,81 +1,92 @@
 import { z } from 'zod';
 
-const UserSchema = z.object({
-  mail: z.string().optional(),
+export const UserSchema = z.object({
+  mail: z.string().optional().nullable(),
   displayName: z.string(),
-  username: z.string(),
+  name: z.string(),
 });
 
-const ReviserSchema = z.object({
-  id: z.string().optional(),
-  displayName: z.string().optional(),
+export const DefaultBranchSchema = z.object({
+  defaultBranch: z.string(),
 });
 
-const PrStateSchema = z.enum(['DRAFT', 'OPEN', 'REJECTED', 'MERGED']);
-
-const ReviewerSchema = z.object({
-  id: z.string(),
-  displayName: z.string(),
-  mail: z.string().optional(),
-  approved: z.boolean(),
-});
-
-const TasksSchema = z.object({
-  todo: z.number(),
-  done: z.number(),
-});
-
-const LinkSchema = z.object({
+export const LinkSchema = z.object({
   href: z.string(),
-  name: z.string().optional(),
-  templated: z.boolean().optional(),
+  name: z.string().optional().nullable(),
+  templated: z.boolean().optional().nullable(),
 });
 
-const LinksSchema = z.record(
+export const LinksSchema = z.record(
   z.string(),
   z.union([LinkSchema, z.array(LinkSchema)]),
 );
 
-const PrMergeMethodSchema = z.enum([
+export const PrStateSchema = z.enum(['DRAFT', 'OPEN', 'REJECTED', 'MERGED']);
+
+export const PrMergeMethodSchema = z.enum([
   'MERGE_COMMIT',
   'REBASE',
   'FAST_FORWARD_IF_POSSIBLE',
   'SQUASH',
 ]);
 
-const PrConfigSchema = z.object({
-  defaultConfig: z.object({
-    mergeStrategy: PrMergeMethodSchema,
-    deleteBranchOnMerge: z.boolean(),
-  }),
-});
-
-const PullRequestSchema = z.object({
+export const PullRequestSchema = z.object({
   id: z.string(),
-  author: z.optional(UserSchema),
-  reviser: z.optional(ReviserSchema),
-  closeDate: z.string().optional(),
+  author: z
+    .object({
+      mail: z.string().optional().nullable(),
+      displayName: z.string(),
+      id: z.string(),
+    })
+    .optional()
+    .nullable(),
+  reviser: z
+    .object({
+      id: z.string().optional().nullable(),
+      displayName: z.string().optional().nullable(),
+    })
+    .optional()
+    .nullable(),
+  closeDate: z.string().optional().nullable(),
   source: z.string(),
   target: z.string(),
   title: z.string(),
   description: z.string(),
   creationDate: z.string(),
-  lastModified: z.string().optional(),
+  lastModified: z.string().optional().nullable(),
   status: PrStateSchema,
-  reviewer: z.array(ReviewerSchema).optional(),
+  reviewer: z
+    .array(
+      z.object({
+        id: z.string(),
+        displayName: z.string(),
+        mail: z.string().optional().nullable(),
+        approved: z.boolean(),
+      }),
+    )
+    .optional()
+    .nullable(),
   labels: z.string().array(),
-  tasks: TasksSchema,
+  tasks: z.object({
+    todo: z.number(),
+    done: z.number(),
+  }),
   _links: LinksSchema,
-  _embedded: PrConfigSchema,
+  _embedded: z.object({
+    defaultConfig: z.object({
+      mergeStrategy: PrMergeMethodSchema,
+      deleteBranchOnMerge: z.boolean(),
+    }),
+  }),
 });
 
 const RepoTypeSchema = z.enum(['git', 'svn', 'hg']);
 
-const RepoSchema = z.object({
+export const RepoSchema = z.object({
   contact: z.string(),
   creationDate: z.string(),
   description: z.string(),
-  lastModified: z.string().optional(),
+  lastModified: z.string().optional().nullable(),
   namespace: z.string(),
   name: z.string(),
   type: RepoTypeSchema,

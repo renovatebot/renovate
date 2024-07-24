@@ -3,7 +3,7 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import type { GitUrlOption, Pr } from '../types';
-import type { PRMergeMethod, PrFilterByState, Repo } from './types';
+import type { PrFilterByState, PrMergeMethod, Repo } from './types';
 
 export function mapPrState(
   state: 'open' | 'closed' | undefined,
@@ -90,7 +90,7 @@ export function getRepoUrl(
 
 export function getMergeMethod(
   strategy: MergeStrategy | undefined,
-): PRMergeMethod | null {
+): PrMergeMethod | null {
   switch (strategy) {
     case 'fast-forward':
       return 'FAST_FORWARD_IF_POSSIBLE';

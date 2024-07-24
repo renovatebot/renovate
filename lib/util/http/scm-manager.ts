@@ -1,6 +1,10 @@
 import {
+  DefaultBranchSchema,
   PagedPullRequestSchema,
   PagedRepoSchema,
+  PullRequestSchema,
+  RepoSchema,
+  UserSchema,
 } from '../../modules/platform/scm-manager/schema';
 import type {
   Link,
@@ -65,16 +69,24 @@ export default class ScmManagerHttp extends Http<ScmManagerHttpOptions> {
   }
 
   public async getCurrentUser(): Promise<User> {
-    const response = await this.getJson<User>(URLS.ME, {
-      scmmContentType: CONTENT_TYPES.ME,
-    });
+    const response = await this.getJson(
+      URLS.ME,
+      {
+        scmmContentType: CONTENT_TYPES.ME,
+      },
+      UserSchema,
+    );
     return response.body;
   }
 
   public async getRepo(repoPath: string): Promise<Repo> {
-    const response = await this.getJson<Repo>(URLS.REPO(repoPath), {
-      scmmContentType: CONTENT_TYPES.REPOSITORY,
-    });
+    const response = await this.getJson(
+      URLS.REPO(repoPath),
+      {
+        scmmContentType: CONTENT_TYPES.REPOSITORY,
+      },
+      RepoSchema,
+    );
     return response.body;
   }
 
@@ -92,11 +104,12 @@ export default class ScmManagerHttp extends Http<ScmManagerHttpOptions> {
 
   public async getDefaultBranch(repo: Repo): Promise<string> {
     const defaultBranchUrl = repo._links['defaultBranch'] as Link;
-    const response = await this.getJson<{ defaultBranch: string }>(
+    const response = await this.getJson(
       defaultBranchUrl.href,
       {
         scmmContentType: CONTENT_TYPES.GIT_CONFIG,
       },
+      DefaultBranchSchema,
     );
 
     return response.body.defaultBranch;
@@ -114,11 +127,12 @@ export default class ScmManagerHttp extends Http<ScmManagerHttpOptions> {
   }
 
   public async getRepoPr(repoPath: string, id: number): Promise<PullRequest> {
-    const response = await this.getJson<PullRequest>(
+    const response = await this.getJson(
       URLS.PULLREQUEST_BY_ID(repoPath, id),
       {
         scmmContentType: CONTENT_TYPES.PULLREQUEST,
       },
+      PullRequestSchema,
     );
 
     return response.body;
@@ -136,12 +150,13 @@ export default class ScmManagerHttp extends Http<ScmManagerHttpOptions> {
       },
     });
 
-    const getCreatedPrResponse = await this.getJson<PullRequest>(
+    const getCreatedPrResponse = await this.getJson(
       /* istanbul ignore next: Just to please the compiler, location would never be undefined */
       createPrResponse.headers.location ?? '',
       {
         scmmContentType: CONTENT_TYPES.PULLREQUEST,
       },
+      PullRequestSchema,
     );
 
     return getCreatedPrResponse.body;

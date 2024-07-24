@@ -37,7 +37,7 @@ describe('util/http/scm-manager', () => {
 
   const pullRequest: PullRequest = {
     id: '1337',
-    author: { displayName: 'Thomas Zerr', username: 'tzerr' },
+    author: { displayName: 'Thomas Zerr', id: 'tzerr' },
     source: 'feature/test',
     target: 'develop',
     title: 'The PullRequest',
@@ -66,7 +66,7 @@ describe('util/http/scm-manager', () => {
       const expectedUser: User = {
         mail: 'test@test.de',
         displayName: 'Test User',
-        username: 'test',
+        name: 'test',
       };
 
       httpMock.scope(endpoint).get('/me').reply(200, expectedUser);
