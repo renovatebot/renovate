@@ -1,14 +1,8 @@
-import type { HttpOptions } from '../../../util/http/types';
-
 export type Page<T> = {
   page: number;
   pageTotal: number;
   _embedded: T;
 };
-
-export interface ScmmHttpOptions extends HttpOptions {
-  scmmContentType?: string;
-}
 
 export interface Links {
   [link: string]: Link | Link[] | undefined;

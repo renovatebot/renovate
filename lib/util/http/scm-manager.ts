@@ -1,9 +1,3 @@
-import { Http } from '../../../util/http';
-import type {
-  HttpResponse,
-  InternalHttpOptions,
-} from '../../../util/http/types';
-import { resolveBaseUrl } from '../../../util/url';
 import type {
   Link,
   Page,
@@ -13,9 +7,15 @@ import type {
   PullRequestUpdateParams,
   Repo,
   RepoPage,
-  ScmmHttpOptions,
   User,
+} from '../../modules/platform/scm-manager/types';
+import { resolveBaseUrl } from '../url';
+import type {
+  HttpOptions,
+  HttpResponse,
+  InternalHttpOptions,
 } from './types';
+import { Http } from './index';
 
 const URLS = {
   ME: 'me',
@@ -37,7 +37,11 @@ const CONTENT_TYPES = {
   PULLREQUESTS: 'application/vnd.scmm-pullRequestCollection+json;v=2',
 };
 
-export default class ScmClient extends Http<ScmmHttpOptions> {
+export interface ScmManagerHttpOptions extends HttpOptions {
+  scmmContentType?: string;
+}
+
+export default class ScmManagerHttp extends Http<ScmManagerHttpOptions> {
   private readonly endpoint: string;
 
   constructor(endpoint: string, token: string) {
@@ -47,7 +51,7 @@ export default class ScmClient extends Http<ScmmHttpOptions> {
 
   protected override async request<T>(
     requestUrl: string | URL,
-    options?: InternalHttpOptions & ScmmHttpOptions,
+    options?: InternalHttpOptions & ScmManagerHttpOptions,
   ): Promise<HttpResponse<T>> {
     const opts = {
       ...options,

@@ -3,7 +3,7 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import type { GitUrlOption, Pr } from '../types';
-import type { Link, PRMergeMethod, PrFilterByState, Repo } from './types';
+import type { PRMergeMethod, PrFilterByState, Repo } from './types';
 
 export function mapPrState(
   state: 'open' | 'closed' | undefined,

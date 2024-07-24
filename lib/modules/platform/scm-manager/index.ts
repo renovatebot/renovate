@@ -23,7 +23,7 @@ import type {
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { mapPrFromScmToRenovate } from './mapper';
-import ScmClient from './scm-client';
+import ScmManagerHttp from '../../../util/http/scm-manager';
 import { getRepoUrl, mapPrState, matchPrState, smartLinks } from './utils';
 
 interface SCMMRepoConfig {
@@ -35,7 +35,7 @@ interface SCMMRepoConfig {
 export const id = 'scm-manager';
 
 let config: SCMMRepoConfig = {} as any;
-let scmmClient: ScmClient;
+let scmManagerHttp: ScmManagerHttp;
 
 export async function initPlatform({
   endpoint,
@@ -49,9 +49,9 @@ export async function initPlatform({
     throw new Error('SCM-Manager API token not configured');
   }
 
-  scmmClient = new ScmClient(endpoint, token);
+  scmManagerHttp = new ScmManagerHttp(endpoint, token);
 
-  const me = await scmmClient.getCurrentUser();
+  const me = await scmManagerHttp.getCurrentUser();
   const gitAuthor = `${me.displayName} <${me.mail}>`;
   const result = { endpoint, gitAuthor };
 
@@ -66,7 +66,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   const hostOptions = hostRules.find({
     hostType: id,
-    url: scmmClient.getEndpoint(),
+    url: scmManagerHttp.getEndpoint(),
   });
 
   if (!hostOptions.username) {
@@ -77,8 +77,8 @@ export async function initRepo({
     throw new Error('Token is not provided');
   }
 
-  const repo = await scmmClient.getRepo(repository);
-  const defaultBranch = await scmmClient.getDefaultBranch(repo);
+  const repo = await scmManagerHttp.getRepo(repository);
+  const defaultBranch = await scmManagerHttp.getDefaultBranch(repo);
   const url = getRepoUrl(repo, gitUrl, hostOptions.username, hostOptions.token);
 
   config = {} as any;
@@ -98,7 +98,7 @@ export async function initRepo({
     isFork: false,
     repoFingerprint: repoFingerprint(
       config.repository,
-      scmmClient.getEndpoint(),
+      scmManagerHttp.getEndpoint(),
     ),
   };
 
@@ -108,7 +108,7 @@ export async function initRepo({
 }
 
 export async function getRepos(): Promise<string[]> {
-  const repos = (await scmmClient.getAllRepos()).filter(
+  const repos = (await scmManagerHttp.getAllRepos()).filter(
     (repo) => repo.type === 'git',
   );
   const result = repos.map((repo) => `${repo.namespace}/${repo.name}`);
@@ -158,7 +158,7 @@ export async function getPr(number: number): Promise<Pr | null> {
   }
 
   try {
-    const result = await scmmClient.getRepoPr(config.repository, number);
+    const result = await scmManagerHttp.getRepoPr(config.repository, number);
     logger.info('Returning PR from API');
     return mapPrFromScmToRenovate(result);
   } catch (error) {
@@ -170,7 +170,7 @@ export async function getPr(number: number): Promise<Pr | null> {
 export async function getPrList(): Promise<Pr[]> {
   if (config.prList === null) {
     try {
-      config.prList = (await scmmClient.getAllRepoPrs(config.repository)).map(
+      config.prList = (await scmManagerHttp.getAllRepoPrs(config.repository)).map(
         (pr) => mapPrFromScmToRenovate(pr),
       );
     } catch (error) {
@@ -188,7 +188,7 @@ export async function createPr({
   prBody,
   draftPR,
 }: CreatePRConfig): Promise<Pr> {
-  const createdPr = await scmmClient.createPr(config.repository, {
+  const createdPr = await scmManagerHttp.createPr(config.repository, {
     source: sourceBranch,
     target: targetBranch,
     title: prTitle,
@@ -210,7 +210,7 @@ export async function updatePr({
   state,
   targetBranch,
 }: UpdatePrConfig): Promise<void> {
-  await scmmClient.updatePr(config.repository, number, {
+  await scmManagerHttp.updatePr(config.repository, number, {
     title: prTitle,
     description: sanitize(prBody) ?? undefined,
     target: targetBranch,

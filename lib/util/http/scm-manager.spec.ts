@@ -1,18 +1,18 @@
-import * as httpMock from '../../../../test/http-mock';
-import ScmClient from './scm-client';
+import * as httpMock from '../../../test/http-mock';
 import type {
   PullRequest,
   PullRequestCreateParams,
   PullRequestUpdateParams,
   Repo,
   User,
-} from './types';
+} from '../../modules/platform/scm-manager/types';
+import ScmManagerHttp from './scm-manager';
 
-describe('modules/platform/scm-manager/scm-client', () => {
+describe('util/http/scm-manager', () => {
   const endpoint = 'http://localhost:8080/scm/api/v2';
   const token = 'validApiToken';
 
-  const scmClient = new ScmClient(endpoint, token);
+  const scmManagerHttp = new ScmManagerHttp(endpoint, token);
 
   const repo: Repo = {
     contact: 'test@test.com',
@@ -55,13 +55,13 @@ describe('modules/platform/scm-manager/scm-client', () => {
     },
   };
 
-  describe(scmClient.getEndpoint, () => {
+  describe(scmManagerHttp.getEndpoint, () => {
     it('should return the endpoint', () => {
-      expect(scmClient.getEndpoint()).toEqual(endpoint);
+      expect(scmManagerHttp.getEndpoint()).toEqual(endpoint);
     });
   });
 
-  describe(scmClient.getCurrentUser, () => {
+  describe(scmManagerHttp.getCurrentUser, () => {
     it('should return the current user', async () => {
       const expectedUser: User = {
         mail: 'test@test.de',
@@ -71,26 +71,26 @@ describe('modules/platform/scm-manager/scm-client', () => {
 
       httpMock.scope(endpoint).get('/me').reply(200, expectedUser);
 
-      expect(await scmClient.getCurrentUser()).toEqual(expectedUser);
+      expect(await scmManagerHttp.getCurrentUser()).toEqual(expectedUser);
     });
 
     it.each([[401, 500]])(
       'should throw %p response',
       async (response: number) => {
         httpMock.scope(endpoint).get('/me').reply(response);
-        await expect(scmClient.getCurrentUser()).rejects.toThrow();
+        await expect(scmManagerHttp.getCurrentUser()).rejects.toThrow();
       },
     );
   });
 
-  describe(scmClient.getRepo, () => {
+  describe(scmManagerHttp.getRepo, () => {
     it('should return the repo', async () => {
       httpMock
         .scope(endpoint)
         .get(`/repositories/${repo.namespace}/${repo.name}`)
         .reply(200, repo);
 
-      expect(await scmClient.getRepo(`${repo.namespace}/${repo.name}`)).toEqual(
+      expect(await scmManagerHttp.getRepo(`${repo.namespace}/${repo.name}`)).toEqual(
         repo,
       );
     });
@@ -104,13 +104,13 @@ describe('modules/platform/scm-manager/scm-client', () => {
           .reply(response);
 
         await expect(
-          scmClient.getRepo(`${repo.namespace}/${repo.name}`),
+          scmManagerHttp.getRepo(`${repo.namespace}/${repo.name}`),
         ).rejects.toThrow();
       },
     );
   });
 
-  describe(scmClient.getAllRepos, () => {
+  describe(scmManagerHttp.getAllRepos, () => {
     it('should return all repos', async () => {
       httpMock
         .scope(endpoint)
@@ -121,7 +121,7 @@ describe('modules/platform/scm-manager/scm-client', () => {
           _embedded: { repositories: [repo] },
         });
 
-      expect(await scmClient.getAllRepos()).toEqual([repo]);
+      expect(await scmManagerHttp.getAllRepos()).toEqual([repo]);
     });
 
     it.each([[401], [403], [500]])(
@@ -132,12 +132,12 @@ describe('modules/platform/scm-manager/scm-client', () => {
           .get('/repositories?pageSize=1000000')
           .reply(response);
 
-        await expect(scmClient.getAllRepos()).rejects.toThrow();
+        await expect(scmManagerHttp.getAllRepos()).rejects.toThrow();
       },
     );
   });
 
-  describe(scmClient.getDefaultBranch, () => {
+  describe(scmManagerHttp.getDefaultBranch, () => {
     it('should return the default branch', async () => {
       httpMock
         .scope(endpoint)
@@ -146,7 +146,7 @@ describe('modules/platform/scm-manager/scm-client', () => {
           defaultBranch: 'develop',
         });
 
-      expect(await scmClient.getDefaultBranch(repo)).toBe('develop');
+      expect(await scmManagerHttp.getDefaultBranch(repo)).toBe('develop');
     });
 
     it.each([[401], [403], [404], [500]])(
@@ -157,12 +157,12 @@ describe('modules/platform/scm-manager/scm-client', () => {
           .get('/config/git/default/repo/default-branch')
           .reply(response);
 
-        await expect(scmClient.getDefaultBranch(repo)).rejects.toThrow();
+        await expect(scmManagerHttp.getDefaultBranch(repo)).rejects.toThrow();
       },
     );
   });
 
-  describe(scmClient.getAllRepoPrs, () => {
+  describe(scmManagerHttp.getAllRepoPrs, () => {
     it('should return all repo PRs', async () => {
       httpMock
         .scope(endpoint)
@@ -178,7 +178,7 @@ describe('modules/platform/scm-manager/scm-client', () => {
         });
 
       expect(
-        await scmClient.getAllRepoPrs(`${repo.namespace}/${repo.name}`),
+        await scmManagerHttp.getAllRepoPrs(`${repo.namespace}/${repo.name}`),
       ).toEqual([pullRequest]);
     });
 
@@ -193,13 +193,13 @@ describe('modules/platform/scm-manager/scm-client', () => {
           .reply(response);
 
         await expect(
-          scmClient.getAllRepoPrs(`${repo.namespace}/${repo.name}`),
+          scmManagerHttp.getAllRepoPrs(`${repo.namespace}/${repo.name}`),
         ).rejects.toThrow();
       },
     );
   });
 
-  describe(scmClient.getRepoPr, () => {
+  describe(scmManagerHttp.getRepoPr, () => {
     it('should return the repo PR', async () => {
       httpMock
         .scope(endpoint)
@@ -207,7 +207,7 @@ describe('modules/platform/scm-manager/scm-client', () => {
         .reply(200, pullRequest);
 
       expect(
-        await scmClient.getRepoPr(`${repo.namespace}/${repo.name}`, 1337),
+        await scmManagerHttp.getRepoPr(`${repo.namespace}/${repo.name}`, 1337),
       ).toEqual(pullRequest);
     });
 
@@ -222,13 +222,13 @@ describe('modules/platform/scm-manager/scm-client', () => {
           .reply(response);
 
         await expect(
-          scmClient.getRepoPr(`${repo.namespace}/${repo.name}`, 1337),
+          scmManagerHttp.getRepoPr(`${repo.namespace}/${repo.name}`, 1337),
         ).rejects.toThrow();
       },
     );
   });
 
-  describe(scmClient.createPr, () => {
+  describe(scmManagerHttp.createPr, () => {
     it('should create PR for a repo', async () => {
       const expectedCreateParams: PullRequestCreateParams = {
         source: 'feature/test',
@@ -254,7 +254,7 @@ describe('modules/platform/scm-manager/scm-client', () => {
         .reply(200, pullRequest);
 
       expect(
-        await scmClient.createPr(
+        await scmManagerHttp.createPr(
           `${repo.namespace}/${repo.name}`,
           expectedCreateParams,
         ),
@@ -270,7 +270,7 @@ describe('modules/platform/scm-manager/scm-client', () => {
           .reply(response);
 
         await expect(
-          scmClient.createPr(`${repo.namespace}/${repo.name}`, {
+          scmManagerHttp.createPr(`${repo.namespace}/${repo.name}`, {
             source: 'feature/test',
             target: 'develop',
             title: 'Test Title',
@@ -283,7 +283,7 @@ describe('modules/platform/scm-manager/scm-client', () => {
     );
   });
 
-  describe(scmClient.updatePr, () => {
+  describe(scmManagerHttp.updatePr, () => {
     it('should update PR for a repo', async () => {
       const expectedUpdateParams: PullRequestUpdateParams = {
         title: 'Test Title',
@@ -300,7 +300,7 @@ describe('modules/platform/scm-manager/scm-client', () => {
         .reply(204);
 
       await expect(
-        scmClient.updatePr(
+        scmManagerHttp.updatePr(
           `${repo.namespace}/${repo.name}`,
           expectedPrId,
           expectedUpdateParams,
@@ -319,7 +319,7 @@ describe('modules/platform/scm-manager/scm-client', () => {
           .reply(response);
 
         await expect(
-          scmClient.updatePr(`${repo.namespace}/${repo.name}`, expectedPrId, {
+          scmManagerHttp.updatePr(`${repo.namespace}/${repo.name}`, expectedPrId, {
             title: 'Test Title',
             description: 'PR description',
             assignees: ['Test assignee'],
