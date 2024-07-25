@@ -21,9 +21,6 @@ export class BaseGoDatasource {
   private static readonly gitlabHttpsRegExp = regEx(
     /^(?<httpsRegExpUrl>https:\/\/[^/]*gitlab\.[^/]*)\/(?<httpsRegExpName>.+?)(?:\/v\d+)?[/]?$/,
   );
-  private static readonly gitlabRegExp = regEx(
-    /^(?<regExpUrl>gitlab\.[^/]*)\/(?<regExpPath>.+?)(?:\/v\d+)?[/]?$/,
-  );
   private static readonly gitVcsRegexp = regEx(
     /^(?:[^/]+)\/(?<module>.*)\.git(?:$|\/)/,
   );
