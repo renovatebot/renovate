@@ -111,7 +111,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
       if (isHttpUrl(value)) {
         rules.packageRules?.push({
           matchDatasources,
-          matchPackagePrefixes: [scope + '/'],
+          matchPackageNames: [`${scope}/**`],
           registryUrls: [value],
         });
       } else {
@@ -168,10 +168,10 @@ export function setNpmrc(input?: string): void {
 export function resolveRegistryUrl(packageName: string): string {
   let registryUrl = defaultRegistryUrls[0];
   for (const rule of packageRules) {
-    const { matchPackagePrefixes, registryUrls } = rule;
+    const { matchPackageNames, registryUrls } = rule;
     if (
-      !matchPackagePrefixes ||
-      packageName.startsWith(matchPackagePrefixes[0])
+      !matchPackageNames ||
+      packageName.startsWith(matchPackageNames[0].replace(regEx(/\*\*$/), ''))
     ) {
       // TODO: fix types #22198
       registryUrl = registryUrls![0];
