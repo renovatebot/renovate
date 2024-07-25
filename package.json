@@ -134,12 +134,8 @@
   },
   "homepage": "https://renovatebot.com",
   "engines": {
-    "node": "^18.12.0 || >=20.0.0",
+    "node": "^20.15.1",
     "pnpm": "^9.0.0"
-  },
-  "engines-next": {
-    "description": "Versions other than the below are deprecated and a warning will be logged",
-    "node": "^18.12.0 || >=20.0.0"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.606.0",
@@ -175,7 +171,6 @@
     "azure-devops-node-api": "14.0.1",
     "bunyan": "1.8.15",
     "cacache": "18.0.4",
-    "cacheable-lookup": "5.0.4",
     "chalk": "4.1.2",
     "changelog-filename-regex": "2.0.1",
     "clean-git-ref": "2.0.1",
@@ -213,7 +208,6 @@
     "jsonata": "2.0.5",
     "jsonc-parser": "3.3.1",
     "klona": "2.0.6",
-    "lru-cache": "10.4.3",
     "luxon": "3.4.4",
     "markdown-it": "14.1.0",
     "markdown-table": "2.0.0",
@@ -265,7 +259,7 @@
     "@openpgp/web-stream-tools": "0.0.14",
     "@renovate/eslint-plugin": "file:tools/eslint",
     "@semantic-release/exec": "6.0.3",
-    "@swc/core": "1.6.13",
+    "@swc/core": "1.7.1",
     "@types/auth-header": "1.0.6",
     "@types/aws4": "1.11.6",
     "@types/better-sqlite3": "7.6.11",
@@ -295,7 +289,7 @@
     "@types/mdast": "3.0.15",
     "@types/moo": "0.5.9",
     "@types/ms": "0.7.34",
-    "@types/node": "18.19.42",
+    "@types/node": "20.14.12",
     "@types/parse-link-header": "2.0.3",
     "@types/semver": "7.5.8",
     "@types/semver-stable": "3.0.2",
@@ -341,7 +335,7 @@
     "semantic-release": "24.0.0",
     "tar": "6.2.1",
     "tmp-promise": "3.0.3",
-    "ts-jest": "29.2.2",
+    "ts-jest": "29.2.3",
     "ts-node": "10.9.2",
     "type-fest": "4.23.0",
     "typescript": "5.5.4",

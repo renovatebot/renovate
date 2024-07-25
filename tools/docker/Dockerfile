@@ -5,21 +5,21 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:2.28.1@sha256:c87903de86aa290a22ea0a0e068398117c9d5b54fc3353bd1599d4ea5b9ab583 AS slim-base
+FROM ghcr.io/renovatebot/base-image:7.1.0@sha256:1f3ed8b413ee6ce0be5b85a7faf85c40f06a774726aeb9bd5967936b4d551a43 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:2.28.1-full@sha256:80f23a28005b54c676e40b21548146c91e670ed6c65f1842af2c63be41667b91 AS full-base
+FROM ghcr.io/renovatebot/base-image:7.1.0-full@sha256:0cf0dd9a5432ee071095a3bbdaeab26d57d22766a267f19dda3944d3c77886f3 AS full-base
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:2.28.1@sha256:c87903de86aa290a22ea0a0e068398117c9d5b54fc3353bd1599d4ea5b9ab583 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:7.1.0@sha256:1f3ed8b413ee6ce0be5b85a7faf85c40f06a774726aeb9bd5967936b4d551a43 AS build
 
 # We want a specific node version here
 # renovate: datasource=node-version
-RUN install-tool node 20.15.1
+RUN install-tool node 20.16.0
 
 WORKDIR /usr/local/renovate
 
@@ -82,24 +82,19 @@ LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate" 
 
 WORKDIR /usr/src/app
 
-COPY tools/docker/bin/ /usr/local/bin/
+COPY tools/docker/bin/ /usr/local/sbin/
+ENTRYPOINT ["/usr/local/sbin/renovate-entrypoint.sh"]
 CMD ["renovate"]
 
 ARG RENOVATE_VERSION
 
 COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
-# Compabillity, so `config.js` can access renovate and deps
-RUN set -ex; \
-  mkdir /opt/containerbase/tools/renovate; \
-  echo "${RENOVATE_VERSION}" > /opt/containerbase/versions/renovate; \
-  ln -sf /usr/local/renovate /opt/containerbase/tools/renovate/${RENOVATE_VERSION}; \
-  ln -sf /usr/local/renovate/node_modules ./node_modules; \
-  true
-
+# test
 RUN set -ex; \
   renovate --version; \
-  /usr/local/renovate/node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
+  pushd /usr/local/renovate/; \
+  ./node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
   true
 
 LABEL \
