@@ -21,7 +21,10 @@ export function fixShortHours(input: string): string {
 
 let optionTypes: Record<string, RenovateOptions['type']>;
 // Returns a migrated config
-export function migrateConfig(config: RenovateConfig): MigratedConfig {
+export function migrateConfig(
+  config: RenovateConfig,
+  parentKey?: string,
+): MigratedConfig {
   try {
     if (!optionTypes) {
       optionTypes = {};
@@ -29,7 +32,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         optionTypes[option.name] = option.type;
       });
     }
-    const newConfig = MigrationsService.run(config);
+    const newConfig = MigrationsService.run(config, parentKey);
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
 
     for (const [key, val] of Object.entries(newConfig)) {
@@ -81,7 +84,10 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           migratedConfig[key] = newArray;
         }
       } else if (is.object(val)) {
-        const subMigrate = migrateConfig(migratedConfig[key] as RenovateConfig);
+        const subMigrate = migrateConfig(
+          migratedConfig[key] as RenovateConfig,
+          key,
+        );
         if (subMigrate.isMigrated) {
           migratedConfig[key] = subMigrate.migratedConfig;
         }
