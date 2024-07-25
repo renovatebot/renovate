@@ -7,10 +7,6 @@ describe('config/presets/npm/index', () => {
     GlobalConfig.reset();
   });
 
-  afterEach(() => {
-    delete process.env.RENOVATE_CACHE_NPM_MINUTES;
-  });
-
   it('should throw if no package', async () => {
     httpMock.scope('https://registry.npmjs.org').get('/nopackage').reply(404);
     await expect(
