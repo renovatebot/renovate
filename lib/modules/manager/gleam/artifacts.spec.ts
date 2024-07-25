@@ -48,6 +48,14 @@ describe('modules/manager/gleam/artifacts', () => {
       expect(await updateArtifacts(updateArtifact)).toBeNull();
     });
 
+    it('returns null if cannot read new lock file', async () => {
+      updateArtifact.updatedDeps = [{ manager: 'gleam' }];
+      fs.readLocalFile.mockResolvedValueOnce('old');
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
+      expect(await updateArtifacts(updateArtifact)).toBeNull();
+    });
+
     it('returns null if lock content unchanged', async () => {
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
       fs.readLocalFile.mockResolvedValueOnce('old');
