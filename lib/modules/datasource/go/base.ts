@@ -187,7 +187,7 @@ export class BaseGoDatasource {
         logger.trace({ goModule }, 'Could not parse go-source URL');
         return null;
       }
-      
+
       const endpoint = GlobalConfig.get('endpoint', '');
       const endpointPrefix = regEx(
         /https:\/\/[^/]+\/(?<prefix>.*?\/)(?:api\/v4\/?)?/,
