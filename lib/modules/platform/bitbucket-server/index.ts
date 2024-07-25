@@ -98,7 +98,7 @@ export async function initPlatform({
     );
   } else if (password && token) {
     throw new Error(
-      'Init: You must either configure a Bitbucket Server password or a HTTP access token',
+      'Init: You must configure either a Bitbucket Server password or a HTTP access token, not both',
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
@@ -1079,7 +1079,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
-    .replace(regEx('<!--.*?-->', 'g'), '');
+    .replace(regEx(/<!--.*?-->/gs), '');
 }
 
 export function maxBodyLength(): number {

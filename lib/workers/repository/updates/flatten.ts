@@ -113,7 +113,7 @@ export async function flattenUpdates(
               depConfig.datasource,
             );
             updateConfig = mergeChildConfig(updateConfig, datasourceConfig);
-            updateConfig = applyPackageRules(updateConfig);
+            updateConfig = applyPackageRules(updateConfig, 'datasource-merge');
             // apply major/minor/patch/pin/digest
             updateConfig = mergeChildConfig(
               updateConfig,
@@ -123,7 +123,7 @@ export async function flattenUpdates(
               delete updateConfig[updateType];
             }
             // Apply again in case any were added by the updateType config
-            updateConfig = applyPackageRules(updateConfig);
+            updateConfig = applyPackageRules(updateConfig, 'update-type-merge');
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
             update.branchName = updateConfig.branchName;
@@ -143,13 +143,19 @@ export async function flattenUpdates(
         );
         lockFileConfig.updateType = 'lockFileMaintenance';
         lockFileConfig.isLockFileMaintenance = true;
-        lockFileConfig = applyPackageRules(lockFileConfig);
+        lockFileConfig = applyPackageRules(
+          lockFileConfig,
+          'lock-file-maintenance-merge',
+        );
         // Apply lockFileMaintenance and packageRules again
         lockFileConfig = mergeChildConfig(
           lockFileConfig,
           lockFileConfig.lockFileMaintenance,
         );
-        lockFileConfig = applyPackageRules(lockFileConfig);
+        lockFileConfig = applyPackageRules(
+          lockFileConfig,
+          'lock-file-maintenance-merge-2',
+        );
         // Remove unnecessary objects
         for (const updateType of updateTypes) {
           delete lockFileConfig[updateType];

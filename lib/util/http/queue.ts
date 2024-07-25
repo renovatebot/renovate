@@ -1,7 +1,7 @@
 import PQueue from 'p-queue';
 import { logger } from '../../logger';
 import { parseUrl } from '../url';
-import { getConcurrentRequestsLimit } from './host-rules';
+import { getConcurrentRequestsLimit } from './rate-limits';
 
 const hostQueues = new Map<string, PQueue | null>();
 
