@@ -154,19 +154,17 @@ export class BaseGoDatasource {
       };
     }
 
-    const gitlabUrl =
-      BaseGoDatasource.gitlabHttpsRegExp.exec(metadataUrl)?.groups
-        ?.httpsRegExpUrl;
-    const gitlabUrlName =
-      BaseGoDatasource.gitlabHttpsRegExp.exec(metadataUrl)?.groups
-        ?.httpsRegExpName;
     const vcsIndicatedModule =
       BaseGoDatasource.gitVcsRegexp.exec(goModule)?.groups?.module;
-    if (gitlabUrl && gitlabUrlName) {
-      const packageName = vcsIndicatedModule ?? gitlabUrlName;
+
+    const metadataUrlMatchGroups =
+      BaseGoDatasource.gitlabHttpsRegExp.exec(metadataUrl)?.groups;
+    if (metadataUrlMatchGroups) {
+      const { httpsRegExpUrl, httpsRegExpName } = metadataUrlMatchGroups;
+      const packageName = vcsIndicatedModule ?? httpsRegExpName;
       return {
         datasource: GitlabTagsDatasource.id,
-        registryUrl: gitlabUrl,
+        registryUrl: httpsRegExpUrl,
         packageName,
       };
     }
