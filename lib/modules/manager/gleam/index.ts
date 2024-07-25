@@ -9,7 +9,7 @@ export { updateArtifacts } from './artifacts';
 export { getRangeStrategy } from './range';
 
 export const defaultConfig = {
-  fileMatch: ['^gleam.toml$'],
+  fileMatch: ['(^|/)gleam.toml$'],
   versioning: hexVersioning.id,
 };
 
