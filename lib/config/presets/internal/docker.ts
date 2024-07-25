@@ -43,7 +43,7 @@ export const presets: Record<string, Preset> = {
         pinDigests: true,
       },
       {
-        matchManagers: ['devcontainer'],
+        matchManagers: ['devcontainer', 'pyenv'],
         pinDigests: false,
       },
     ],
