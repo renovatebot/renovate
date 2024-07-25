@@ -141,13 +141,13 @@ export class BaseGoDatasource {
   }
 
   private static detectDatasource(
-    goSourceUrl: string,
+    metadataUrl: string,
     goModule: string,
   ): DataSource | null {
-    if (goSourceUrl.startsWith('https://github.com/')) {
+    if (metadataUrl.startsWith('https://github.com/')) {
       return {
         datasource: GithubTagsDatasource.id,
-        packageName: goSourceUrl
+        packageName: metadataUrl
           .replace('https://github.com/', '')
           .replace(regEx(/\/$/), ''),
         registryUrl: 'https://github.com',
@@ -155,10 +155,10 @@ export class BaseGoDatasource {
     }
 
     const gitlabUrl =
-      BaseGoDatasource.gitlabHttpsRegExp.exec(goSourceUrl)?.groups
+      BaseGoDatasource.gitlabHttpsRegExp.exec(metadataUrl)?.groups
         ?.httpsRegExpUrl;
     const gitlabUrlName =
-      BaseGoDatasource.gitlabHttpsRegExp.exec(goSourceUrl)?.groups
+      BaseGoDatasource.gitlabHttpsRegExp.exec(metadataUrl)?.groups
         ?.httpsRegExpName;
     const gitlabModuleName =
       BaseGoDatasource.gitlabRegExp.exec(goModule)?.groups?.regExpPath;
@@ -181,8 +181,8 @@ export class BaseGoDatasource {
       };
     }
 
-    if (hostRules.hostType({ url: goSourceUrl }) === 'gitlab') {
-      const parsedUrl = parseUrl(goSourceUrl);
+    if (hostRules.hostType({ url: metadataUrl }) === 'gitlab') {
+      const parsedUrl = parseUrl(metadataUrl);
       if (!parsedUrl) {
         logger.trace({ goModule }, 'Could not parse go-source URL');
         return null;
