@@ -68,6 +68,7 @@ flutter 3.7.6-stable
 flux2 0.41.2
 gauche 0.9.12
 github-cli 2.32.1
+gleam 1.3.1
 gohugo extended_0.104.3
 golang 1.19.2
 golangci-lint 1.52.2
@@ -283,6 +284,13 @@ dummy 1.2.3
             packageName: 'cli/cli',
             depName: 'github-cli',
             extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.3.1',
+            datasource: 'github-tags',
+            packageName: 'gleam-lang/gleam',
+            depName: 'gleam',
+            extractVersion: '^v(?<version>.+)',
           },
           {
             currentValue: '0.104.3',
