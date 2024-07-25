@@ -2,7 +2,6 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { ensureLocalPath } from '../../../util/fs/util';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 import type {
@@ -165,9 +164,7 @@ export async function extractAllPackageFiles(
         }
         for (const dep of packageFileContent.deps) {
           const lockedVersion = lockedDeps?.find(
-            (lockedDep) =>
-              normalizePythonDepName(lockedDep.depName!) ===
-              normalizePythonDepName(dep.depName!),
+            (lockedDep) => lockedDep.packageName! === dep.packageName!,
           )?.currentVersion;
           if (lockedVersion) {
             dep.lockedVersion = lockedVersion;
@@ -246,9 +243,7 @@ function extendWithIndirectDeps(
   for (const lockedDep of lockedDeps) {
     if (
       !packageFileContent.deps.find(
-        (dep) =>
-          normalizePythonDepName(lockedDep.depName!) ===
-          normalizePythonDepName(dep.depName!),
+        (dep) => lockedDep.packageName! === dep.packageName!,
       )
     ) {
       packageFileContent.deps.push(indirectDep(lockedDep));

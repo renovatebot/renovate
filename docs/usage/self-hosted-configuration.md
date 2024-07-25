@@ -761,10 +761,6 @@ When you set `inheritConfigStrict=true` then Renovate will abort the run and rai
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
 If left as default (null), a random short ID will be selected.
 
-## logFile
-
-## logFileLevel
-
 ## mergeConfidenceDatasources
 
 This feature is applicable only if you have an access token for Mend's Merge Confidence API.
@@ -850,8 +846,12 @@ Falls back to `renovate.json` if the name provided is not valid.
 
 ## onboardingNoDeps
 
-Set this to `true` if you want Renovate to create an onboarding PR even if no dependencies are found.
-Otherwise, Renovate skips onboarding a repository if it finds no dependencies in it.
+The default `auto` setting is converted to `disabled` if `autodiscoverRepositories` is `true`, or converted to `enabled` if false.
+
+In other words, the default behavior is:
+
+- If you run Renovate on discovered repositories then it will skip onboarding those without dependencies detected, but
+- If you run Renovate on _specific_ repositories then Renovate will onboard all such repositories even if no dependencies are found
 
 ## onboardingPrTitle
 
