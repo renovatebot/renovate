@@ -159,7 +159,7 @@ describe('config/migrations/custom/package-rules-migration', () => {
         packageRules: [
           {
             automerge: true,
-            matchPackageNames: ['/.*/'],
+            matchPackageNames: ['*'],
           },
           {
             automerge: true,

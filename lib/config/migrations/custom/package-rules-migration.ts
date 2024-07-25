@@ -80,11 +80,10 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
         newPackageRule.matchPackageNames ??= [];
         newPackageRule.matchPackageNames.push(
           ...patterns.map((v) => {
-            let value = v;
-            if (value === '*') {
-              value = '.*';
+            if (v === '*') {
+              return '*';
             }
-            return `/${value}/`;
+            return `/${v}/`;
           }),
         );
       }
