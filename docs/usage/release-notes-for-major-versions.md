@@ -7,6 +7,36 @@ The most recent versions are always at the top of the page.
 This is because recent versions may revert changes made in an older version.
 You also don't have to scroll to the bottom of the page to find the latest release notes.
 
+## Version 38
+
+### Breaking changes for 38
+
+- **bitbucket-server:** autodetect gitAuthor if possible ([#29525](https://github.com/renovatebot/renovate/pull/29525))
+- require node v20 ([#30291](https://github.com/renovatebot/renovate/pull/30291))
+- **http:** dnsCache is now removed
+- **github:** platformCommit will be automatically enabled if running as a GitHub app
+- **npm:** remove RENOVATE_CACHE_NPM_MINUTES ([#28715](https://github.com/renovatebot/renovate/pull/28715))
+- **git:** determine branch modification based on all branch commits ([#28225](https://github.com/renovatebot/renovate/pull/28225))
+- **packageRules:** matchPackageNames exact matches are now case-insensitive
+- **datasource/docker: **Docker Hub lookups prefer hub.docker.com over index.docker.io. Set RENOVATE_X_DOCKER_HUB_TAGS_DISABLE=true in env to revert behavior.
+- **package-rules:** matchPackageNames and related functions no longer fall back to checking depName.
+- **logging:** File logging must now be set via env and not in config.js
+- **config:** onboardingNoDeps changes from boolean to enum. Repositories with no dependencies will be onboarded unless in autodiscover mode.
+- **npm:** Transitive remediation for npm <7 is no longer supported.
+- **config:** Branch names for remediation will be sanitized to exclude special characters, potentially resulting in some autoclosing/replacing of existing PRs.
+- Renovate docker images no longer have -slim tags. Drop the -slim prefix as this is now the default behavior.
+- **gitea:** Gitea platfor authentication will now be done using Bearer auth instead of token auth.
+- **manager/pep621:** depName for pep621 dependencies changes, which will lead to branch name changes, which will lead to some autoclosing and reopening of PRs.
+- **config:** order of globalExtends resolution is changed so that it is applied first and remaining global config takes precedence.
+
+### Commentary for 38
+
+For maintainers to fill out.
+
+### Link to release notes for 38
+
+[Release notes for `v38` on GitHub](https://github.com/renovatebot/renovate/releases/tag/38.0.0).
+
 ## Version 37
 
 ### Breaking changes for 37
