@@ -77,7 +77,7 @@ export interface HostRuleSearch {
   readOnly?: boolean;
 }
 
-function matchesHost(url: string, matchHost: string): boolean {
+export function matchesHost(url: string, matchHost: string): boolean {
   if (isHttpUrl(url) && isHttpUrl(matchHost)) {
     return url.startsWith(matchHost);
   }

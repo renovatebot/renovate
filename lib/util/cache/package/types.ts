@@ -33,6 +33,7 @@ export type PackageCacheNamespace =
   | 'datasource-azure-pipelines-tasks'
   | 'datasource-bazel'
   | 'datasource-bitbucket-tags'
+  | 'datasource-bitrise'
   | 'datasource-cdnjs-digest'
   | 'datasource-cdnjs'
   | 'datasource-conan-revisions'

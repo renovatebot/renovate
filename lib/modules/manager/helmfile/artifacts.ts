@@ -13,7 +13,7 @@ import {
 import { getFile } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { Result } from '../../../util/result';
-import { Yaml } from '../../../util/schema-utils';
+import { parseSingleYaml } from '../../../util/yaml';
 import { generateHelmEnvs } from '../helmv3/common';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { Doc, LockVersion } from './schema';
@@ -70,10 +70,10 @@ export async function updateArtifacts({
     }
 
     const cmd: string[] = [];
-    const doc = Result.parse(
-      newPackageFileContent,
-      Yaml.pipe(Doc),
-    ).unwrapOrThrow();
+    const doc = parseSingleYaml(newPackageFileContent, {
+      removeTemplates: true,
+      customSchema: Doc,
+    });
 
     for (const value of coerceArray(doc.repositories).filter(isOCIRegistry)) {
       const loginCmd = await generateRegistryLoginCmd(
