@@ -61,7 +61,7 @@ async function lookup(
   const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource!);
   depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
-  depConfig = applyPackageRules(depConfig);
+  depConfig = applyPackageRules(depConfig, 'pre-lookup');
   depConfig.packageName ??= depConfig.depName;
 
   if (depConfig.ignoreDeps!.includes(depName!)) {

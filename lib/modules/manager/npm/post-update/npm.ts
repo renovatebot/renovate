@@ -234,7 +234,7 @@ export async function generateLockFile(
           if (
             lockFileParsed.packages?.['']?.[depType]?.[lockUpdate.packageName!]
           ) {
-            lockFileParsed.packages[''][depType]![lockUpdate.packageName!] =
+            lockFileParsed.packages[''][depType][lockUpdate.packageName!] =
               lockUpdate.newValue!;
           }
         });

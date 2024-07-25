@@ -1497,6 +1497,7 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) nus
       "version": "3.12.0",
     },
   ],
+  "sourceUrl": "https://nunit.org/",
 }
 `;
 
@@ -1686,6 +1687,7 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) nus
       "version": "3.12.0",
     },
   ],
+  "sourceUrl": "https://nunit.org/",
 }
 `;
 

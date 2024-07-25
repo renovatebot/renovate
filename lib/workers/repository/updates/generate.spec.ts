@@ -1058,7 +1058,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('handles upgrades', () => {
-      const branch = [
+      const baseBranchesUpdates = [
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1066,8 +1066,14 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           newValue: '0.6.0',
           hasBaseBranches: true,
+          baseBranch: 'base-branch',
           fileReplacePosition: 5,
         },
+      ];
+      expect(generateBranchConfig(baseBranchesUpdates)).toMatchObject({
+        prTitle: 'some-title (base-branch)',
+      });
+      const separateMinorUpdates = [
         {
           ...requiredDefaultOptions,
           manager: 'some-manager',
@@ -1080,6 +1086,11 @@ describe('workers/repository/updates/generate', () => {
           updateType: 'minor' as UpdateType,
           fileReplacePosition: 1,
         },
+      ];
+      expect(generateBranchConfig(separateMinorUpdates)).toMatchObject({
+        prTitle: 'some-title (minor)',
+      });
+      const separateMajorUpdates = [
         {
           ...requiredDefaultOptions,
           manager: 'some-manager',
@@ -1092,6 +1103,11 @@ describe('workers/repository/updates/generate', () => {
           updateType: 'major' as UpdateType,
           fileReplacePosition: 2,
         },
+      ];
+      expect(generateBranchConfig(separateMajorUpdates)).toMatchObject({
+        prTitle: 'some-title (major)',
+      });
+      const separatePatchUpdates = [
         {
           ...requiredDefaultOptions,
           manager: 'some-manager',
@@ -1105,9 +1121,19 @@ describe('workers/repository/updates/generate', () => {
           updateType: 'patch' as UpdateType,
           fileReplacePosition: 0,
         },
+      ];
+      expect(generateBranchConfig(separatePatchUpdates)).toMatchObject({
+        prTitle: 'some-title (patch)',
+      });
+      const branch = [
+        ...baseBranchesUpdates,
+        ...separateMinorUpdates,
+        ...separateMajorUpdates,
+        ...separatePatchUpdates,
       ] satisfies BranchUpgradeConfig[];
-      const res = generateBranchConfig(branch);
-      expect(res.prTitle).toMatchSnapshot('some-title (patch)');
+      expect(generateBranchConfig(branch)).toMatchObject({
+        prTitle: 'some-title (patch)',
+      });
     });
 
     it('combines prBodyColumns', () => {
@@ -1496,6 +1522,86 @@ describe('workers/repository/updates/generate', () => {
       for (const upgrade of res.upgrades) {
         expect(upgrade.depTypes).toEqual(res.depTypes);
       }
+    });
+
+    it('allows upgrades in commitMessage', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          branchName: 'dep1',
+          depName: 'dep1',
+          commitMessagePrefix:
+            '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
+          newVersion: '1.2.0',
+          newValue: '1.2.0',
+          updateType: 'minor' as UpdateType,
+          fileReplacePosition: 1,
+          prBodyDefinitions: {
+            Issue: 'I1',
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+
+      expect(generateBranchConfig(branch)).toMatchObject({
+        commitMessage: 'I1 Update dependency dep1 to 1.2.0',
+        prTitle: 'I1 Update dependency dep1 to 1.2.0',
+      });
+    });
+
+    it('allows upgrades in commitMessage (group)', () => {
+      const commonOptions = {
+        ...requiredDefaultOptions,
+        manager: 'some-manager',
+        branchName: 'deps',
+        groupName: 'deps',
+        group: {
+          commitMessageTopic: '{{{groupName}}}',
+          commitMessagePrefix:
+            '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
+        },
+      };
+
+      const branch = [
+        {
+          ...commonOptions,
+          depName: 'dep1',
+          newVersion: '1.2.0',
+          newValue: '1.2.0',
+          updateType: 'minor' as UpdateType,
+          fileReplacePosition: 1,
+          prBodyDefinitions: {
+            Issue: 'I1',
+          },
+        },
+        {
+          ...commonOptions,
+          depName: 'dep2',
+          newVersion: '1.0.0',
+          newValue: '1.0.0',
+          updateType: 'major' as UpdateType,
+          fileReplacePosition: 2,
+          prBodyDefinitions: {
+            Issue: 'I2',
+          },
+        },
+        {
+          ...commonOptions,
+          depName: 'dep3',
+          newVersion: '1.2.3',
+          newValue: '1.2.3',
+          updateType: 'patch' as UpdateType,
+          fileReplacePosition: 0,
+          prBodyDefinitions: {
+            Issue: 'I3',
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res).toMatchObject({
+        commitMessage: 'I3 I2 I1 Update deps',
+        prTitle: 'I3 I2 I1 Update deps',
+      });
     });
   });
 });

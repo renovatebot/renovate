@@ -3,65 +3,32 @@ import slugify from 'slugify';
 import { mergeChildConfig } from '../../config';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
+import type { StageName } from '../../types/skip-reason';
 import matchers from './matchers';
-import { matcherOR } from './utils';
 
 function matchesRule(
   inputConfig: PackageRuleInputConfig,
   packageRule: PackageRule,
 ): boolean {
-  let positiveMatch = true;
-  let matchApplied = false;
-  // matches
-  for (const groupMatchers of matchers) {
-    const isMatch = matcherOR(
-      'matches',
-      groupMatchers,
-      inputConfig,
-      packageRule,
-    );
+  for (const matcher of matchers) {
+    const isMatch = matcher.matches(inputConfig, packageRule);
 
     // no rules are defined
     if (is.nullOrUndefined(isMatch)) {
       continue;
     }
 
-    matchApplied = true;
-
     if (!is.truthy(isMatch)) {
       return false;
     }
   }
 
-  // not a single match rule is defined --> assume to match everything
-  if (!matchApplied) {
-    positiveMatch = true;
-  }
-
-  // excludes
-  for (const groupExcludes of matchers) {
-    const isExclude = matcherOR(
-      'excludes',
-      groupExcludes,
-      inputConfig,
-      packageRule,
-    );
-
-    // no rules are defined
-    if (is.nullOrUndefined(isExclude)) {
-      continue;
-    }
-
-    if (isExclude) {
-      return false;
-    }
-  }
-
-  return positiveMatch;
+  return true;
 }
 
 export function applyPackageRules<T extends PackageRuleInputConfig>(
   inputConfig: T,
+  stageName?: StageName,
 ): T {
   let config = { ...inputConfig };
   const packageRules = config.packageRules ?? [];
@@ -82,6 +49,13 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
       }
       if (toApply.enabled === false && config.enabled !== false) {
         config.skipReason = 'package-rules';
+        if (stageName) {
+          config.skipStage = stageName;
+        }
+      }
+      if (toApply.enabled === true && config.enabled === false) {
+        delete config.skipReason;
+        delete config.skipStage;
       }
       config = mergeChildConfig(config, toApply);
     }

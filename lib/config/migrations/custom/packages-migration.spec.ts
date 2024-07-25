@@ -4,10 +4,10 @@ describe('config/migrations/custom/packages-migration', () => {
   it('should migrate to package rules', () => {
     expect(PackagesMigration).toMigrate(
       {
-        packages: [{ matchPackagePatterns: ['*'] }],
+        packages: [{ matchPackageNames: ['*'] }],
       },
       {
-        packageRules: [{ matchPackagePatterns: ['*'] }],
+        packageRules: [{ matchPackageNames: ['*'] }],
       },
     );
   });
@@ -15,14 +15,11 @@ describe('config/migrations/custom/packages-migration', () => {
   it('should concat with existing package rules', () => {
     expect(PackagesMigration).toMigrate(
       {
-        packages: [{ matchPackagePatterns: ['*'] }],
+        packages: [{ matchPackageNames: ['*'] }],
         packageRules: [{ matchPackageNames: [] }],
       },
       {
-        packageRules: [
-          { matchPackageNames: [] },
-          { matchPackagePatterns: ['*'] },
-        ],
+        packageRules: [{ matchPackageNames: [] }, { matchPackageNames: ['*'] }],
       },
     );
   });
@@ -30,7 +27,7 @@ describe('config/migrations/custom/packages-migration', () => {
   it('should ignore non array value', () => {
     expect(PackagesMigration).toMigrate(
       {
-        packages: { matchPackagePatterns: ['*'] },
+        packages: { matchPackageNames: ['*'] },
         packageRules: [{ matchPackageNames: [] }],
       },
       {
