@@ -354,7 +354,9 @@ export async function cloneSubmodules(shouldClone: boolean): Promise<void> {
   for (const submodule of submodules) {
     try {
       logger.debug(`Cloning git submodule at ${submodule}`);
-      await gitRetry(() => git.submoduleUpdate(['--init', submodule]));
+      await gitRetry(() =>
+        git.submoduleUpdate(['--init', '--recursive', submodule]),
+      );
     } catch (err) {
       logger.warn(
         { err },
