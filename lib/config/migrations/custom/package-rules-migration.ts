@@ -78,7 +78,15 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       const patterns = is.string(val) ? [val] : val;
       if (is.array(patterns, is.string)) {
         newPackageRule.matchPackageNames ??= [];
-        newPackageRule.matchPackageNames.push(...patterns.map((v) => `/${v}/`));
+        newPackageRule.matchPackageNames.push(
+          ...patterns.map((v) => {
+            let value = v;
+            if (value === '*') {
+              value = '.*';
+            }
+            return `/${value}/`;
+          }),
+        );
       }
       delete newPackageRule.matchPackagePatterns;
     }

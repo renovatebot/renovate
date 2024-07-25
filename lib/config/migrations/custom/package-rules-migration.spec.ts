@@ -141,6 +141,10 @@ describe('config/migrations/custom/package-rules-migration', () => {
       {
         packageRules: [
           {
+            matchPackagePatterns: ['*'],
+            automerge: true,
+          },
+          {
             matchPackagePatterns: ['foo', 'bar'],
             automerge: true,
           },
@@ -153,6 +157,10 @@ describe('config/migrations/custom/package-rules-migration', () => {
       },
       {
         packageRules: [
+          {
+            automerge: true,
+            matchPackageNames: ['/.*/'],
+          },
           {
             automerge: true,
             matchPackageNames: ['/foo/', '/bar/'],
