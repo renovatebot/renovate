@@ -26,11 +26,6 @@ export async function updateArtifacts(
 
   const lockFileName = getSiblingFileName(packageFileName, 'manifest.toml');
 
-  if (!lockFileName) {
-    logger.debug(`No ${lockFileName} found`);
-    return null;
-  }
-
   const oldLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!oldLockFileContent) {
     logger.debug(`No ${lockFileName} found`);
