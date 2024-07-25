@@ -254,14 +254,14 @@ describe('config/migration', () => {
             groupName: ['angular packages'],
           },
         ],
-      };
+      } as unknown as RenovateConfig;
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
       expect(isMigrated).toBeTrue();
       expect(migratedConfig).toEqual({
         packageRules: [
           {
-            matchPackagePatterns: '^(@angular|typescript)',
+            matchPackageNames: ['/^(@angular|typescript)/'],
             groupName: 'angular packages',
           },
         ],
@@ -505,27 +505,6 @@ describe('config/migration', () => {
       });
     });
 
-    it('migrates combinations of packageRules', () => {
-      let config: TestRenovateConfig;
-      let res: MigratedConfig;
-
-      config = {
-        packages: [{ matchPackagePatterns: ['*'] }],
-        packageRules: [{ matchPackageNames: [] }],
-      } as never;
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig.packageRules).toHaveLength(2);
-
-      config = {
-        packageRules: [{ matchPpackageNames: [] }],
-        packages: [{ matchPackagePatterns: ['*'] }],
-      } as never;
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig.packageRules).toHaveLength(2);
-    });
-
     it('it migrates packageRules', () => {
       const config: TestRenovateConfig = {
         packageRules: [
@@ -540,6 +519,7 @@ describe('config/migration', () => {
             packagePatterns: ['^bar'],
             excludePackageNames: ['baz'],
             excludePackagePatterns: ['^baz'],
+            excludeRepositories: ['abc/def'],
             sourceUrlPrefixes: ['https://github.com/lodash'],
             updateTypes: ['major'],
           },
@@ -551,17 +531,15 @@ describe('config/migration', () => {
       expect(migratedConfig).toEqual({
         packageRules: [
           {
-            excludePackageNames: ['baz'],
-            excludePackagePatterns: ['^baz'],
             matchBaseBranches: ['master'],
             matchDatasources: ['orb'],
             matchDepTypes: ['peerDependencies'],
             matchCategories: ['python'],
             matchManagers: ['dockerfile'],
-            matchPackageNames: ['foo'],
-            matchPackagePatterns: ['^bar'],
+            matchPackageNames: ['foo', '/^bar/', '!baz', '!/^baz/'],
+            matchRepositories: ['!abc/def'],
             matchFileNames: ['package.json'],
-            matchSourceUrlPrefixes: ['https://github.com/lodash'],
+            matchSourceUrls: ['https://github.com/lodash**'],
             matchUpdateTypes: ['major'],
           },
         ],
@@ -610,7 +588,7 @@ describe('config/migration', () => {
           packageRules: [
             {
               groupName: 'definitelyTyped',
-              matchPackagePrefixes: ['@types/'],
+              matchPackageNames: ['@types/**'],
             },
             {
               matchDepTypes: ['dependencies'],

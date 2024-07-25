@@ -30,8 +30,7 @@ concurrency:
 
 env:
   DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-  NODE_VERSION_TEST: 18
-  NODE_VERSION_BUILD: 20
+  NODE_VERSION: 20
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -106,13 +105,13 @@ jobs:
         with:
           repo: ${{ github.event.repository.full_name }}
           token: ${{ github.token }}
-          node-version: ${{ env.NODE_VERSION_TEST }}
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Prefetch test modules for `ubuntu-latest`
         id: setup-node
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_TEST }}
+          node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
           save-cache: true
 
@@ -129,7 +128,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      node-version: ${{ env.NODE_VERSION_BUILD }}
+      node-version: ${{ env.NODE_VERSION }}
 
     steps:
       - name: Checkout code
@@ -142,7 +141,7 @@ jobs:
       - name: Prefetch build modules for `ubuntu-latest`
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_BUILD }}
+          node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
           save-cache: true
 
@@ -182,7 +181,7 @@ jobs:
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_TEST }}
+          node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
           save-cache: true
 
@@ -362,7 +361,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_TEST }}
+          node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
       - name: Cache jest
@@ -373,7 +372,7 @@ jobs:
             jest-cache-${{
               runner.os
             }}-${{
-              env.NODE_VERSION_TEST
+              env.NODE_VERSION
             }}-${{
               hashFiles('pnpm-lock.yaml')
             }}-${{
@@ -617,7 +616,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
-          node-version: ${{ env.NODE_VERSION_TEST }}
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Download package
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8

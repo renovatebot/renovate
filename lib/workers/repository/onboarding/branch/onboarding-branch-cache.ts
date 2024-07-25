@@ -61,6 +61,7 @@ export function hasOnboardingBranchChanged(onboardingBranch: string): boolean {
 // once set to true it stays true as we do not rebase onboarding branches anymore (this feature will be added in future though)
 export async function isOnboardingBranchModified(
   onboardingBranch: string,
+  defaultBranch: string,
 ): Promise<boolean> {
   const cache = getCache();
   const onboardingCache = cache.onboardingBranchCache;
@@ -74,7 +75,7 @@ export async function isOnboardingBranchModified(
   ) {
     return onboardingCache.isModified;
   } else {
-    isModified = await scm.isBranchModified(onboardingBranch);
+    isModified = await scm.isBranchModified(onboardingBranch, defaultBranch);
   }
 
   return isModified;
