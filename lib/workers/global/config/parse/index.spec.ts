@@ -1,13 +1,12 @@
 import upath from 'upath';
 import { mocked } from '../../../../../test/util';
-import { readSystemFile } from '../../../../util/fs';
+import { getParentDir, readSystemFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 import * as _hostRulesFromEnv from './host-rules-from-env';
 
 jest.mock('../../../../modules/datasource/npm');
 jest.mock('../../../../util/fs');
 jest.mock('./host-rules-from-env');
-jest.mock('../../config.js', () => ({}), { virtual: true });
 
 const { hostRulesFromEnv } = mocked(_hostRulesFromEnv);
 
@@ -172,6 +171,29 @@ describe('workers/global/config/parse/index', () => {
       defaultArgv = defaultArgv.concat(['--dry-run=false']);
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed).toContainEntries([['dryRun', null]]);
+    });
+
+    it('only initializes the file when the env var LOG_FILE is properly set', async () => {
+      jest.doMock('../../../../../config.js', () => ({}), {
+        virtual: true,
+      });
+      const env: NodeJS.ProcessEnv = {};
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).not.toContain([['logFile', 'someFile']]);
+      expect(getParentDir).not.toHaveBeenCalled();
+    });
+
+    it('massage onboardingNoDeps when autodiscover is false', async () => {
+      jest.doMock(
+        '../../../../../config.js',
+        () => ({ onboardingNoDeps: 'auto', autodiscover: false }),
+        {
+          virtual: true,
+        },
+      );
+      const env: NodeJS.ProcessEnv = {};
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toContainEntries([['onboardingNoDeps', 'enabled']]);
     });
   });
 });

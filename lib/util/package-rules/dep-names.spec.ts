@@ -16,18 +16,4 @@ describe('util/package-rules/dep-names', () => {
       expect(result).toBeFalse();
     });
   });
-
-  describe('exclude', () => {
-    it('should return false if packageFile is not defined', () => {
-      const result = depNameMatcher.excludes(
-        {
-          depName: undefined,
-        },
-        {
-          excludeDepNames: ['@opentelemetry/http'],
-        },
-      );
-      expect(result).toBeFalse();
-    });
-  });
 });

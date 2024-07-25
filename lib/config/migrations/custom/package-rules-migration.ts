@@ -27,6 +27,102 @@ function renameKeys(packageRule: PackageRule): PackageRule {
   return newPackageRule;
 }
 
+function mergeMatchers(packageRule: PackageRule): PackageRule {
+  const newPackageRule: PackageRule = { ...packageRule };
+  for (const [key, val] of Object.entries(packageRule)) {
+    // depName
+    if (key === 'matchDepPrefixes') {
+      if (is.array(val, is.string)) {
+        newPackageRule.matchDepNames ??= [];
+        newPackageRule.matchDepNames.push(...val.map((v) => `${v}**`));
+      }
+      delete newPackageRule.matchDepPrefixes;
+    }
+    if (key === 'matchDepPatterns') {
+      if (is.array(val, is.string)) {
+        newPackageRule.matchDepNames ??= [];
+        newPackageRule.matchDepNames.push(...val.map((v) => `/${v}/`));
+      }
+      delete newPackageRule.matchDepPatterns;
+    }
+    if (key === 'excludeDepNames') {
+      if (is.array(val, is.string)) {
+        newPackageRule.matchDepNames ??= [];
+        newPackageRule.matchDepNames.push(...val.map((v) => `!${v}`));
+      }
+      delete newPackageRule.excludeDepNames;
+    }
+    if (key === 'excludeDepPrefixes') {
+      if (is.array(val, is.string)) {
+        newPackageRule.matchDepNames ??= [];
+        newPackageRule.matchDepNames.push(...val.map((v) => `!${v}**`));
+      }
+      delete newPackageRule.excludeDepPrefixes;
+    }
+    if (key === 'excludeDepPatterns') {
+      if (is.array(val, is.string)) {
+        newPackageRule.matchDepNames ??= [];
+        newPackageRule.matchDepNames.push(...val.map((v) => `!/${v}/`));
+      }
+      delete newPackageRule.excludeDepPatterns;
+    }
+    // packageName
+    if (key === 'matchPackagePrefixes') {
+      if (is.array(val, is.string)) {
+        newPackageRule.matchPackageNames ??= [];
+        newPackageRule.matchPackageNames.push(...val.map((v) => `${v}**`));
+      }
+      delete newPackageRule.matchPackagePrefixes;
+    }
+    if (key === 'matchPackagePatterns') {
+      const patterns = is.string(val) ? [val] : val;
+      if (is.array(patterns, is.string)) {
+        newPackageRule.matchPackageNames ??= [];
+        newPackageRule.matchPackageNames.push(...patterns.map((v) => `/${v}/`));
+      }
+      delete newPackageRule.matchPackagePatterns;
+    }
+    if (key === 'excludePackageNames') {
+      if (is.array(val, is.string)) {
+        newPackageRule.matchPackageNames ??= [];
+        newPackageRule.matchPackageNames.push(...val.map((v) => `!${v}`));
+      }
+      delete newPackageRule.excludePackageNames;
+    }
+    if (key === 'excludePackagePrefixes') {
+      if (is.array(val, is.string)) {
+        newPackageRule.matchPackageNames ??= [];
+        newPackageRule.matchPackageNames.push(...val.map((v) => `!${v}**`));
+      }
+      delete newPackageRule.excludePackagePrefixes;
+    }
+    if (key === 'excludePackagePatterns') {
+      if (is.array(val, is.string)) {
+        newPackageRule.matchPackageNames ??= [];
+        newPackageRule.matchPackageNames.push(...val.map((v) => `!/${v}/`));
+      }
+      delete newPackageRule.excludePackagePatterns;
+    }
+    // sourceUrl
+    if (key === 'matchSourceUrlPrefixes') {
+      if (is.array(val, is.string)) {
+        newPackageRule.matchSourceUrls ??= [];
+        newPackageRule.matchSourceUrls.push(...val.map((v) => `${v}**`));
+      }
+      delete newPackageRule.matchSourceUrlPrefixes;
+    }
+    // repository
+    if (key === 'excludeRepositories') {
+      if (is.array(val, is.string)) {
+        newPackageRule.matchRepositories ??= [];
+        newPackageRule.matchRepositories.push(...val.map((v) => `!${v}`));
+      }
+      delete newPackageRule.excludeRepositories;
+    }
+  }
+  return newPackageRule;
+}
+
 export class PackageRulesMigration extends AbstractMigration {
   override readonly propertyName = 'packageRules';
 
@@ -34,7 +130,7 @@ export class PackageRulesMigration extends AbstractMigration {
     let packageRules = this.get('packageRules') as PackageRule[];
     if (is.nonEmptyArray(packageRules)) {
       packageRules = packageRules.map(renameKeys);
-
+      packageRules = packageRules.map(mergeMatchers);
       this.rewrite(packageRules);
     }
   }
