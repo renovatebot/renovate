@@ -20,18 +20,18 @@ Specific:
 
 - **bitbucket-server:** autodetect `gitAuthor`, if possible ([#29525](https://github.com/renovatebot/renovate/pull/29525))
 - **config:** `onboardingNoDeps` changes from `boolean` to `enum`. Repositories with no dependencies will be onboarded unless in `autodiscover` mode
-- **config:** Branch names for remediation will be sanitized to exclude special characters, potentially resulting in some autoclosing/replacing of existing PRs
+- **config:** sanitize special characters from branch names for remediation type PRs, this may cause Renovate to autoclose/replace existing PRs
 - **config:** order of `globalExtends` resolution is changed so that it is applied first and remaining global config takes precedence
 - **datasource/docker:** Docker Hub lookups prefer `hub.docker.com` over `index.docker.io`. Set `RENOVATE_X_DOCKER_HUB_TAGS_DISABLE=true` in env to revert behavior
 - **git:** determine branch modification based on all branch commits ([#28225](https://github.com/renovatebot/renovate/pull/28225))
-- **gitea:** Gitea platform authentication will now be done with "Bearer auth" instead of "token auth"
-- **github:** `platformCommit` will be automatically enabled if running as a GitHub app
-- **http:** `dnsCache` is now removed
-- **logging:** File logging must now be set via env, and not in `config.js`
-- **manager/pep621:** `depName` for `pep621` dependencies changes, which will lead to branch name changes, which will lead to autoclosing and re-opening of some PRs
-- **npm:** Transitive remediation for npm <7 is no longer supported
+- **gitea:** use "bearer auth" instead of "token auth" to authenticate to the Gitea platform
+- **github:** if you run Renovate as a GitHub app then `platformCommit` is automatically enabled
+- **http:** remove `dnsCache`
+- **logging:** you must set file logging via env, not in `config.js`
+- **manager/pep621:** change `depName` for `pep621` dependencies, this leads to branch name changes, which leads to Renovate autoclosing and re-opening some PRs
+- **npm:** drop support for transitive remediation for npm <7
 - **npm:** remove `RENOVATE_CACHE_NPM_MINUTES` ([#28715](https://github.com/renovatebot/renovate/pull/28715))
-- **package-rules:** `matchPackageNames` and related functions no longer fall back to checking `depName`
+- **packageRules:** `matchPackageNames` and related functions no longer fall back to checking `depName`
 - **packageRules:** `matchPackageNames` exact matches are now case-insensitive
 
 ### Commentary for 38
