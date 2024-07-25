@@ -160,24 +160,14 @@ export class BaseGoDatasource {
     const gitlabUrlName =
       BaseGoDatasource.gitlabHttpsRegExp.exec(metadataUrl)?.groups
         ?.httpsRegExpName;
-    const gitlabModuleName =
-      BaseGoDatasource.gitlabRegExp.exec(goModule)?.groups?.regExpPath;
     const vcsIndicatedModule =
       BaseGoDatasource.gitVcsRegexp.exec(goModule)?.groups?.module;
     if (gitlabUrl && gitlabUrlName) {
-      if (gitlabModuleName?.startsWith(gitlabUrlName)) {
-        const packageName = vcsIndicatedModule ?? gitlabModuleName;
-        return {
-          datasource: GitlabTagsDatasource.id,
-          registryUrl: gitlabUrl,
-          packageName,
-        };
-      }
-
+      const packageName = vcsIndicatedModule ?? gitlabUrlName;
       return {
         datasource: GitlabTagsDatasource.id,
         registryUrl: gitlabUrl,
-        packageName: gitlabUrlName,
+        packageName,
       };
     }
 
