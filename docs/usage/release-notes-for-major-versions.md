@@ -13,30 +13,38 @@ You also don't have to scroll to the bottom of the page to find the latest relea
 
 General:
 
-- require node v20 ([#30291](https://github.com/renovatebot/renovate/pull/30291))
-- Renovate Docker images no longer have `-slim` tags. Drop the `-slim` prefix, as this is now the default behavior.
+- Require Node.js 20 ([#30291](https://github.com/renovatebot/renovate/pull/30291))
+- The Renovate Docker images no longer have `-slim` tags. You must stop using the `-slim` prefix. Renovate now defaults to the `-slim` tag type behavior.
 
 Specific:
 
 - **bitbucket-server:** autodetect `gitAuthor`, if possible ([#29525](https://github.com/renovatebot/renovate/pull/29525))
-- **config:** `onboardingNoDeps` changes from `boolean` to `enum`. Repositories with no dependencies will be onboarded unless in `autodiscover` mode
-- **config:** sanitize special characters from branch names for remediation type PRs, this may cause Renovate to autoclose/replace existing PRs
-- **config:** order of `globalExtends` resolution is changed so that it is applied first and remaining global config takes precedence
-- **datasource/docker:** Docker Hub lookups prefer `hub.docker.com` over `index.docker.io`. Set `RENOVATE_X_DOCKER_HUB_TAGS_DISABLE=true` in env to revert behavior
-- **git:** determine branch modification based on all branch commits ([#28225](https://github.com/renovatebot/renovate/pull/28225))
+- **config:** change from `boolean` to `enum` for `onboardingNoDeps`. Renovate now onboards repositories with no dependencies, with one exception: if you run Renovate in `autodiscover` mode then you must manually onboard Renovate for repos with no dependencies
+- **config:** sanitize special characters from branch names for vulnerability type PRs. This may cause Renovate to autoclose/replace existing PRs
+- **config:** change the order of `globalExtends` resolution, it is applied _first_ and remaining global config takes precedence
+- **datasource/docker:** Docker Hub lookups prefers `hub.docker.com` over `index.docker.io`. To revert to the old behavior: set `RENOVATE_X_DOCKER_HUB_TAGS_DISABLE=true` in your env
+- **git:** check _all_ commits on the branch to decide if the branch was modified ([#28225](https://github.com/renovatebot/renovate/pull/28225))
 - **gitea:** use "bearer auth" instead of "token auth" to authenticate to the Gitea platform
 - **github:** if you run Renovate as a GitHub app then `platformCommit` is automatically enabled
 - **http:** remove `dnsCache`
 - **logging:** you must set file logging via env, not in `config.js`
-- **manager/pep621:** change `depName` for `pep621` dependencies, this leads to branch name changes, which leads to Renovate autoclosing and re-opening some PRs
-- **npm:** drop support for transitive remediation for npm <7
+- **manager/pep621:** change `depName` for `pep621` dependencies. This also changes the branch name for `pep621` updates, which may cause Renovate to autoclose and re-open some `pep621` PRs
+- **npm:** for npm versions lower than 7, drop support for remediating vulnerabilities in _transitive_ dependencies
 - **npm:** remove `RENOVATE_CACHE_NPM_MINUTES` ([#28715](https://github.com/renovatebot/renovate/pull/28715))
-- **packageRules:** `matchPackageNames` and related functions no longer fall back to checking `depName`
+- **packageRules:** `matchPackageNames` (and related functions) no longer fall back to checking `depName`
 - **packageRules:** `matchPackageNames` exact matches are now case-insensitive
 
 ### Commentary for 38
 
 For maintainers to fill out.
+You should probably explain:
+
+- The Node.js 20 change
+- The Docker `-slim` tags change
+- Why you dropped support for vulnerability PRs for `npm <7` for transitive dependencies (I think because it did not work reliably?)
+- Why you set `platformCommit` for GitHub app users?
+- Why logging must be set in env, not in `config.js`?
+- Why the changes to `matchPackageNames`?
 
 ### Link to release notes for 38
 
