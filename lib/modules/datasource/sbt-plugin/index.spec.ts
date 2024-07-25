@@ -1,3 +1,4 @@
+import { codeBlock, html } from 'common-tags';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
@@ -37,10 +38,12 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/maven2/org/scalatest/')
         .reply(
           200,
-          '<a href="scalatest/" title=\'scalatest/\'>scalatest_2.12/</a>\n' +
-            '<a href="scalatest_2.12/" title=\'scalatest_2.12/\'>scalatest_2.12/</a>\n' +
-            "<a href='scalatest_sjs2.12/'>scalatest_2.12/</a>" +
-            "<a href='scalatest_native2.12/'>scalatest_2.12/</a>",
+          html`
+            <a href="scalatest/">scalatest/</a>
+            <a href="scalatest_2.12/">scalatest_2.12/</a>
+            <a href="scalatest_sjs2.12/">scalatest_sjs2.12/</a>
+            <a href="scalatest_native2.12/">scalatest_native2.12/</a>
+          `,
         );
       httpMock
         .scope('https://repo.maven.apache.org')
@@ -52,53 +55,46 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .reply(200, "<a href='1.2.3/'>4.5.6/</a>");
 
       httpMock
-        .scope('https://repo.scala-sbt.org')
-        .get('/scalasbt/sbt-plugin-releases/com.github.gseitz/')
-        .reply(200, '');
-      httpMock
-        .scope('https://repo.scala-sbt.org')
-        .get('/scalasbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/')
+        .scope('https://repo.maven.apache.org')
+        .get('/maven2/org/foundweekends/sbt-bintray/')
         .reply(
           200,
-          '<html>\n' +
-            '<head>\n' +
-            '</head>\n' +
-            '<body>\n' +
-            '<pre><a href="scala_2.12/">scala_2.12/</a></pre>\n' +
-            '</body>\n' +
-            '</html>',
+          html`
+            <html>
+              <head> </head>
+              <body>
+                <pre><a href="scala_2.12/">scala_2.12/</a></pre>
+              </body>
+            </html>
+          `,
         );
       httpMock
-        .scope('https://repo.scala-sbt.org')
-        .get(
-          '/scalasbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/',
-        )
+        .scope('https://repo.maven.apache.org')
+        .get('/maven2/org/foundweekends/sbt-bintray/scala_2.12/')
         .reply(
           200,
-          '\n' +
-            '<html>\n' +
-            '<head>\n' +
-            '</head>\n' +
-            '<body>\n' +
-            '<pre><a href="sbt_1.0/">sbt_1.0/</a></pre>\n' +
-            '</body>\n' +
-            '</html>\n',
+          html`
+            <html>
+              <head> </head>
+              <body>
+                <pre><a href="sbt_1.0/">sbt_1.0/</a></pre>
+              </body>
+            </html>
+          `,
         );
       httpMock
-        .scope('https://repo.scala-sbt.org')
-        .get(
-          '/scalasbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/sbt_1.0/',
-        )
+        .scope('https://repo.maven.apache.org')
+        .get('/maven2/org/foundweekends/sbt-bintray/scala_2.12/sbt_1.0/')
         .reply(
           200,
-          '\n' +
-            '<html>\n' +
-            '<head>\n' +
-            '</head>\n' +
-            '<body>\n' +
-            '<pre><a href="0.5.5/">0.5.5/</a></pre>\n' +
-            '</body>\n' +
-            '</html>\n',
+          html`
+            <html>
+              <head> </head>
+              <body>
+                <pre><a href="0.5.5/">0.5.5/</a></pre>
+              </body>
+            </html>
+          `,
         );
 
       httpMock
@@ -106,20 +102,28 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/maven2/io/get-coursier/')
         .reply(
           200,
-          '<a href="sbt-coursier_2.10_0.13/">sbt-coursier_2.10_0.13/</a>\n' +
-            '<a href="sbt-coursier_2.12_1.0/">sbt-coursier_2.12_1.0/</a>\n' +
-            '<a href="sbt-coursier_2.12_1.0.0-M5/">sbt-coursier_2.12_1.0.0-M5/</a>\n' +
-            '<a href="sbt-coursier_2.12_1.0.0-M6/">sbt-coursier_2.12_1.0.0-M6/</a>\n',
+          html`
+            <a href="sbt-coursier_2.10_0.13/">sbt-coursier_2.10_0.13/</a>
+            <a href="sbt-coursier_2.12_1.0/">sbt-coursier_2.12_1.0/</a>
+            <a href="sbt-coursier_2.12_1.0.0-M5/"
+              >sbt-coursier_2.12_1.0.0-M5/</a
+            >
+            <a href="sbt-coursier_2.12_1.0.0-M6/"
+              >sbt-coursier_2.12_1.0.0-M6/</a
+            >
+          `,
         );
       httpMock
         .scope('https://repo.maven.apache.org')
         .get('/maven2/io/get-coursier/sbt-coursier_2.12_1.0/')
         .reply(
           200,
-          '<a href="2.0.0-RC2/">2.0.0-RC2/</a>\n' +
-            '<a href="2.0.0-RC6-1/">2.0.0-RC6-1/</a>\n' +
-            '<a href="2.0.0-RC6-2/">2.0.0-RC6-2/</a>\n' +
-            '<a href="2.0.0-RC6-6/">2.0.0-RC6-6/</a>\n',
+          html`
+            <a href="2.0.0-RC2/">2.0.0-RC2/</a>
+            <a href="2.0.0-RC6-1/">2.0.0-RC6-1/</a>
+            <a href="2.0.0-RC6-2/">2.0.0-RC6-2/</a>
+            <a href="2.0.0-RC6-6/">2.0.0-RC6-6/</a>
+          `,
         );
       httpMock
         .scope('https://repo.maven.apache.org')
@@ -128,12 +132,14 @@ describe('modules/datasource/sbt-plugin/index', () => {
         )
         .reply(
           200,
-          '<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">\n' +
-            '<url>https://get-coursier.io/</url>\n' +
-            '<scm>\n' +
-            '<url>https://github.com/coursier/sbt-coursier</url>\n' +
-            '</scm>\n' +
-            '</project>\n',
+          codeBlock`
+            <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+              <url>https://get-coursier.io/</url>
+              <scm>
+                <url>https://github.com/coursier/sbt-coursier</url>
+              </scm>
+            </project>
+          `,
         );
     });
 
@@ -169,8 +175,8 @@ describe('modules/datasource/sbt-plugin/index', () => {
         }),
       ).toEqual({
         dependencyUrl:
-          'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/org.foundweekends/sbt-bintray',
-        registryUrl: 'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
+          'https://repo.maven.apache.org/maven2/org/foundweekends/sbt-bintray',
+        registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '0.5.5' }],
       });
     });
@@ -185,8 +191,8 @@ describe('modules/datasource/sbt-plugin/index', () => {
         }),
       ).toEqual({
         dependencyUrl:
-          'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/org.foundweekends/sbt-bintray',
-        registryUrl: 'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
+          'https://repo.maven.apache.org/maven2/org/foundweekends/sbt-bintray',
+        registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '0.5.5' }],
       });
     });

@@ -32,6 +32,7 @@ nav:
       - 'Noise Reduction': 'noise-reduction.md'
       - 'Upgrade best practices': 'upgrade-best-practices.md'
   - Included Presets:
+      - 'Custom Manager Presets': 'presets-customManagers.md'
       - 'Default Presets': 'presets-default.md'
       - 'Docker Presets': 'presets-docker.md'
       - 'Full Config Presets': 'presets-config.md'
@@ -41,7 +42,6 @@ nav:
       - 'npm Presets': 'presets-npm.md'
       - 'Package Presets': 'presets-packages.md'
       - 'Preview Presets': 'presets-preview.md'
-      - 'Regex Manager Presets': 'presets-regexManagers.md'
       - 'Replacement Presets': 'presets-replacements.md'
       - 'Schedule Presets': 'presets-schedule.md'
       - 'Security Presets': 'presets-security.md'
@@ -57,5 +57,6 @@ nav:
       - 'Known Limitations': 'known-limitations.md'
       - 'Release notes for major versions': 'release-notes-for-major-versions.md'
       - Bot comparison: 'bot-comparison.md'
+      - 'Logo and brand guidelines': 'logo-brand-guidelines.md'
   - About Us: 'about-us.md'
   - Contributing to Renovate: 'contributing-to-renovate.md'

@@ -38,6 +38,10 @@ export class ConanDatasource extends Datasource {
 
   githubHttp: GithubHttp;
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is supported only if the package is served from the Artifactory servers. In which case we determine it from the `properties[conan.package.url]` field in the results.';
+
   constructor(id = ConanDatasource.id) {
     super(id);
     this.githubHttp = new GithubHttp(id);

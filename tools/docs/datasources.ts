@@ -24,6 +24,10 @@ export async function generateDatasources(
       defaultConfig,
       customRegistrySupport,
       defaultVersioning,
+      releaseTimestampSupport,
+      releaseTimestampNote,
+      sourceUrlSupport,
+      sourceUrlNote,
     } = definition;
     const displayName = getDisplayName(datasource, definition);
     datasourceContent += `* ${getModuleLink(
@@ -39,24 +43,30 @@ export async function generateDatasources(
       # ${displayName} Datasource
       `;
     md += '\n\n';
-    md += `**Identifier**: \`${id}\`\n\n`;
+
+    let tableContent = '## Table of values\n\n';
+
+    tableContent += '| Name | Value | Notes |\n';
+    tableContent += '| :-- | :-- | :-- |\n';
+
+    tableContent += `| Identifier | \`${id}\` | \n`;
     if (defaultVersioning) {
-      md += `**Default versioning**: \`${defaultVersioning}\`\n\n`;
+      tableContent += `| Default versioning | \`${defaultVersioning}\` | \n`;
     } else {
-      md += `**Default versioning**: no default versioning\n\n`;
+      tableContent += `| Default versioning | No default versioning | \n`;
     }
+
+    tableContent += `| Custom registry support | ${customRegistrySupport ? 'Yes' : 'No'} | \n`;
+    tableContent += `| Release timestamp support | ${releaseTimestampSupport ? 'Yes' : 'No'} | ${releaseTimestampNote ?? ''} |\n`;
+    tableContent += `| Source URL support | ${sourceUrlSupport === 'none' ? 'No' : 'Yes'} | ${sourceUrlNote ?? ''} |\n`;
+
+    md += tableContent + '\n';
     md += formatUrls(urls);
-    md += `**Custom registry support**: \n\n`;
-    if (customRegistrySupport) {
-      md += `✅ Custom registries are supported.\n\n`;
-    } else {
-      md += `❌ No custom registry support.\n\n`;
-    }
     md += await formatDescription('datasource', datasource);
 
     if (defaultConfig) {
       md +=
-        '**Default configuration**:\n\n```json\n' +
+        '## Default configuration\n\n```json\n' +
         JSON.stringify(defaultConfig, undefined, 2) +
         '\n```\n';
     }

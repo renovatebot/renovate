@@ -86,6 +86,7 @@ export interface LookupUpdate {
   newDigest?: string;
   newMajor?: number;
   newMinor?: number;
+  newPatch?: number;
   newName?: string;
   newValue?: string;
   semanticCommitType?: string;
@@ -182,6 +183,11 @@ export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   replaceString?: string;
 }
 
+export interface ArtifactNotice {
+  file: string;
+  message: string;
+}
+
 export interface ArtifactError {
   lockFile?: string;
   stderr?: string;
@@ -190,10 +196,12 @@ export interface ArtifactError {
 export type UpdateArtifactsResult =
   | {
       file?: FileChange;
+      notice?: ArtifactNotice;
       artifactError?: undefined;
     }
   | {
       file?: undefined;
+      notice?: undefined;
       artifactError?: ArtifactError;
     };
 

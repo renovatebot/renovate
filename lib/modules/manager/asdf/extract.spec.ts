@@ -45,6 +45,7 @@ describe('modules/manager/asdf/extract', () => {
       const res = extractPackageFile(
         codeBlock`
 act 0.2.54
+actionlint 0.7.0
 adr-tools 3.0.0
 argocd 2.5.4
 asdf-plugin-manager 1.1.1
@@ -67,6 +68,7 @@ flutter 3.7.6-stable
 flux2 0.41.2
 gauche 0.9.12
 github-cli 2.32.1
+gleam 1.3.1
 gohugo extended_0.104.3
 golang 1.19.2
 golangci-lint 1.52.2
@@ -87,6 +89,7 @@ kustomize 4.5.7
 lua 5.4.4
 maven 3.9.6
 mimirtool 2.11.0
+minikube 1.33.1
 nim 1.6.8
 nodejs 18.12.0
 ocaml 4.14.0
@@ -98,6 +101,7 @@ poetry 1.3.2
 pre-commit 3.3.1
 pulumi 3.57.1
 python 3.11.0
+rebar 3.23.0
 ruby 3.1.2
 rust 1.64.0
 sbt 1.9.7
@@ -129,6 +133,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'nektos/act',
             depName: 'act',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.7.0',
+            datasource: 'github-releases',
+            packageName: 'rhysd/actionlint',
+            depName: 'actionlint',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -275,6 +286,13 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '1.3.1',
+            datasource: 'github-tags',
+            packageName: 'gleam-lang/gleam',
+            depName: 'gleam',
+            extractVersion: '^v(?<version>.+)',
+          },
+          {
             currentValue: '0.104.3',
             datasource: 'github-releases',
             packageName: 'gohugoio/hugo',
@@ -412,6 +430,13 @@ dummy 1.2.3
             extractVersion: '^mimir-(?<version>\\S+)',
           },
           {
+            currentValue: '1.33.1',
+            datasource: 'github-releases',
+            packageName: 'kubernetes/minikube',
+            depName: 'minikube',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.6.8',
             datasource: 'github-tags',
             packageName: 'nim-lang/Nim',
@@ -483,6 +508,12 @@ dummy 1.2.3
             packageName: 'python/cpython',
             depName: 'python',
             extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '3.23.0',
+            datasource: 'github-tags',
+            packageName: 'erlang/rebar3',
+            depName: 'rebar',
           },
           {
             currentValue: '3.1.2',

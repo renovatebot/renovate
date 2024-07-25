@@ -74,6 +74,7 @@ function extractApis(
     doc = parseYaml(content, null, {
       filename: packageFile,
       removeTemplates: true,
+      json: true,
     });
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Kubernetes manifest.');

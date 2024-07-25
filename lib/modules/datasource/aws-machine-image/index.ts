@@ -18,6 +18,10 @@ export class AwsMachineImageDataSource extends Datasource {
 
   override readonly caching = true;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `CreationDate` field in the results.';
+
   override readonly defaultConfig = {
     // Because AMIs don't follow any versioning scheme, we override commitMessageExtra to remove the 'v'
     commitMessageExtra: 'to {{{newVersion}}}',

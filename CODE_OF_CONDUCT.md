@@ -50,8 +50,8 @@ We quickly deal with rudeness in the community with:
 If you keep breaking the rules or challenge our guidelines openly, you will be blocked.
 For example: if you keep spamming the maintainers with `@mentions` or challenge our rules openly, you will be blocked.
 
-We generally do not argue about these decisions, but we are willing to reverse a block if a you show that you understand and respect the rules, or if there was a misunderstanding.
-Please reach out to the project's lead maintainer Rhys Arkins by email if so (the shorter the better).
+We generally do not argue about these decisions, but we are willing to reverse a block if you show that you understand and respect the rules, or if there was a misunderstanding.
+To reverse a block, or to clear up a misunderstanding, write a _short_ email to Renovate's lead maintainer Rhys Arkins.
 
 Simply put: we block and unblock swiftly, what matters is how you follow the rules going forward.
 

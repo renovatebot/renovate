@@ -147,6 +147,7 @@ exports[`modules/platform/azure/index getJsonFile() supports fetch from another 
     undefined,
     undefined,
     undefined,
+    true,
   ],
 ]
 `;
@@ -202,7 +203,7 @@ exports[`modules/platform/azure/index initRepo should initialise the config for 
 }
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOptions) should close the PR 1`] = `
+exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOptions) should close the PR 1`] = `
 [
   [
     {
@@ -216,9 +217,9 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOption
 ]
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOptions) should re-approve the PR 1`] = `undefined`;
+exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOptions) should re-approve the PR 1`] = `undefined`;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOptions) should reopen the PR 1`] = `
+exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOptions) should reopen the PR 1`] = `
 [
   [
     {
@@ -238,7 +239,7 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOption
 ]
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOptions) should update the PR 1`] = `
+exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOptions) should update the PR 1`] = `
 [
   [
     {
@@ -252,7 +253,7 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOption
 ]
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOptions) should update the PR without description 1`] = `
+exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOptions) should update the PR without description 1`] = `
 [
   [
     {

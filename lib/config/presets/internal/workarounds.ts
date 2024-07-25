@@ -21,8 +21,26 @@ export const presets: Record<string, Preset> = {
       'workarounds:disableEclipseLifecycleMapping',
       'workarounds:disableMavenParentRoot',
       'workarounds:containerbase',
+      'workarounds:bitnamiDockerImageVersioning',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
+  },
+  bitnamiDockerImageVersioning: {
+    description: 'Use custom regex versioning for bitnami images',
+    packageRules: [
+      {
+        matchCurrentValue:
+          '/^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?$/',
+        matchDatasources: ['docker'],
+        matchPackageNames: [
+          'bitnami/**',
+          'docker.io/bitnami/**',
+          'gcr.io/bitnami-containers/**',
+        ],
+        versioning:
+          'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?(:?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?)?$',
+      },
+    ],
   },
   containerbase: {
     description: 'Add some containerbase overrides.',
@@ -31,8 +49,8 @@ export const presets: Record<string, Preset> = {
         description:
           'Use node versioning for `(containerbase|renovate)/node` images',
         matchDatasources: ['docker'],
-        matchPackagePatterns: [
-          '^(?:(?:docker|ghcr)\\.io/)?(?:containerbase|renovate)/node$',
+        matchPackageNames: [
+          '/^(?:(?:docker|ghcr)\\.io/)?(?:containerbase|renovate)/node$/',
         ],
         versioning: 'node',
       },
@@ -82,7 +100,7 @@ export const presets: Record<string, Preset> = {
       {
         allowedVersions: `!/^1\\.0-\\d+-[a-fA-F0-9]{7}$/`,
         matchManagers: ['sbt'],
-        matchPackagePrefixes: ['org.http4s:'],
+        matchPackageNames: ['org.http4s:**'],
       },
     ],
   },
@@ -124,11 +142,9 @@ export const presets: Record<string, Preset> = {
           'java',
           'java-jre',
           'sapmachine',
-        ],
-        matchPackagePatterns: [
-          '^azul/zulu-openjdk',
-          '^bellsoft/liberica-openj(dk|re)-',
-          '^cimg/openjdk',
+          '/^azul/zulu-openjdk/',
+          '/^bellsoft/liberica-openj(dk|re)-/',
+          '/^cimg/openjdk/',
         ],
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
@@ -158,7 +174,7 @@ export const presets: Record<string, Preset> = {
       {
         allowedVersions: '!/^200\\d{5}(\\.\\d+)?/',
         matchDatasources: ['maven', 'sbt-package'],
-        matchPackagePrefixes: ['commons-'],
+        matchPackageNames: ['commons-**'],
       },
     ],
   },
@@ -195,18 +211,16 @@ export const presets: Record<string, Preset> = {
           'registry.access.redhat.com/rhel-atomic',
           'registry.access.redhat.com/rhel-init',
           'registry.access.redhat.com/rhel-minimal',
-        ],
-        matchPackagePrefixes: [
-          'registry.access.redhat.com/rhceph/',
-          'registry.access.redhat.com/rhgs3/',
-          'registry.access.redhat.com/rhel7',
-          'registry.access.redhat.com/rhel8/',
-          'registry.access.redhat.com/rhel9/',
-          'registry.access.redhat.com/rhscl/',
-          'registry.access.redhat.com/ubi7',
-          'registry.access.redhat.com/ubi8',
-          'registry.access.redhat.com/ubi9',
-          'redhat/',
+          'registry.access.redhat.com/rhceph/**',
+          'registry.access.redhat.com/rhgs3/**',
+          'registry.access.redhat.com/rhel7**',
+          'registry.access.redhat.com/rhel8/**',
+          'registry.access.redhat.com/rhel9/**',
+          'registry.access.redhat.com/rhscl/**',
+          'registry.access.redhat.com/ubi7**',
+          'registry.access.redhat.com/ubi8**',
+          'registry.access.redhat.com/ubi9**',
+          'redhat/**',
         ],
         versioning: 'redhat',
       },

@@ -2,14 +2,13 @@ import { Marshal } from '@qnighy/marshal';
 import type { ZodError } from 'zod';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
-import { HttpError } from '../../../util/http';
+import { Http, HttpError } from '../../../util/http';
 import { AsyncResult, Result } from '../../../util/result';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { getV1Releases } from './common';
-import { RubygemsHttp } from './http';
 import { MetadataCache } from './metadata-cache';
 import { GemInfo, MarshalledVersionInfo } from './schema';
 import { VersionsEndpointCache } from './versions-endpoint-cache';
@@ -34,7 +33,7 @@ export class RubyGemsDatasource extends Datasource {
 
   constructor() {
     super(RubyGemsDatasource.id);
-    this.http = new RubygemsHttp(RubyGemsDatasource.id);
+    this.http = new Http(RubyGemsDatasource.id);
     this.versionsEndpointCache = new VersionsEndpointCache(this.http);
     this.metadataCache = new MetadataCache(this.http);
   }
@@ -46,6 +45,13 @@ export class RubyGemsDatasource extends Datasource {
   override readonly registryStrategy = 'hunt';
 
   private readonly versionsEndpointCache: VersionsEndpointCache;
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `created_at` field in the results.';
+  override readonly sourceUrlSupport = 'release';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `source_code_uri` field in the results.';
 
   @cache({
     namespace: `datasource-${RubyGemsDatasource.id}`,

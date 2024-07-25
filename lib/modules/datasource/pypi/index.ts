@@ -31,6 +31,12 @@ export class PypiDatasource extends Datasource {
 
   override readonly registryStrategy = 'merge';
 
+  override readonly releaseTimestampNote =
+    'The relase timestamp is determined from the `upload_time` field in the results.';
+  override readonly sourceUrlSupport = 'release';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `homepage` field if it is a github repository, else we use the `project_urls` field.';
+
   async getReleases({
     packageName,
     registryUrl,
@@ -176,9 +182,18 @@ export class PypiDatasource extends Datasource {
     // source packages
     const srcText = PypiDatasource.normalizeName(text);
     const srcPrefix = `${packageName}-`;
-    const srcSuffix = '.tar.gz';
-    if (srcText.startsWith(srcPrefix) && srcText.endsWith(srcSuffix)) {
-      return srcText.replace(srcPrefix, '').replace(regEx(/\.tar\.gz$/), '');
+    const srcSuffixes = ['.tar.gz', '.tar.bz2', '.tar.xz', '.zip', '.tgz'];
+    if (
+      srcText.startsWith(srcPrefix) &&
+      srcSuffixes.some((srcSuffix) => srcText.endsWith(srcSuffix))
+    ) {
+      const res = srcText.replace(srcPrefix, '');
+      for (const suffix of srcSuffixes) {
+        if (res.endsWith(suffix)) {
+          // strip off the suffix using character length
+          return res.slice(0, -suffix.length);
+        }
+      }
     }
 
     // pep-0427 wheel packages

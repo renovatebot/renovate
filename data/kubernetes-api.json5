@@ -130,17 +130,25 @@
   HelmChart: [
     'source.toolkit.fluxcd.io/v1alpha1',
     'source.toolkit.fluxcd.io/v1beta1',
+    'source.toolkit.fluxcd.io/v1',
   ],
   HelmRelease: [
     'helm.toolkit.fluxcd.io/v2beta1',
     'helm.toolkit.fluxcd.io/v2beta2',
+    'helm.toolkit.fluxcd.io/v2',
   ],
   HelmRepository: [
     'source.toolkit.fluxcd.io/v1alpha1',
     'source.toolkit.fluxcd.io/v1beta1',
     'source.toolkit.fluxcd.io/v1beta2',
+    'source.toolkit.fluxcd.io/v1',
   ],
+  ImagePolicy: ['image.toolkit.fluxcd.io/v1beta2'],
   ImageRepository: ['image.toolkit.fluxcd.io/v1beta2'],
+  ImageUpdateAutomation: [
+    'image.toolkit.fluxcd.io/v1beta1',
+    'image.toolkit.fluxcd.io/v1beta2'
+    ],
   OCIRepository: ['source.toolkit.fluxcd.io/v1beta2'],
   Provider: [
     'notification.toolkit.fluxcd.io/v1beta2',
