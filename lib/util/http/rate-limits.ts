@@ -6,6 +6,10 @@ import type { ConcurrencyLimitRule, ThrottleLimitRule } from './types';
 // The first match wins
 const concurrencyDefaults: ConcurrencyLimitRule[] = [
   {
+    matchHost: 'registry.npmjs.org',
+    concurrency: 999,
+  },
+  {
     matchHost: '*',
     concurrency: 16,
   },
