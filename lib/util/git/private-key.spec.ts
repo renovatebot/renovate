@@ -77,7 +77,7 @@ describe('util/git/private-key', () => {
     });
 
     it('throws error if the private SSH key has a passphrase', async () => {
-      const privateKeyFile = '/tmp/git-private-ssh.key';
+      const privateKeyFile = upath.join(os.tmpdir() + '/git-private-ssh.key');
       exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
       exec.exec
         .calledWith(`ssh-keygen -y -P "" -f ${privateKeyFile}`)
@@ -99,7 +99,7 @@ some-private-key with-passphrase
 some-private-key
 some-private-key
 -----END OPENSSH PRIVATE KEY-----`;
-      const privateKeyFile = '/tmp/git-private-ssh.key';
+      const privateKeyFile = upath.join(os.tmpdir() + '/git-private-ssh.key');
       const publicKeyFile = `${privateKeyFile}.pub`;
       const publicKey = 'some-public-key';
       const repoDir = '/tmp/some-repo';
