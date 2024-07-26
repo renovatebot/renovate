@@ -91,3 +91,9 @@ export interface HttpResponse<T = string> {
 
 export type Task<T> = () => Promise<T>;
 export type GotTask<T> = Task<HttpResponse<T>>;
+
+export interface RateLimitRule {
+  matchHost: string;
+  throttleMs?: number;
+  concurrency?: number;
+}

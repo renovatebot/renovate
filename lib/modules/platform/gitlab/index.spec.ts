@@ -1884,7 +1884,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             usePlatformAutomerge: true,
           },
         }),
@@ -1928,7 +1928,7 @@ describe('modules/platform/gitlab/index', () => {
         targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
-        platformOptions: {
+        platformPrOptions: {
           usePlatformAutomerge: true,
         },
       });
@@ -1983,7 +1983,7 @@ describe('modules/platform/gitlab/index', () => {
         targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
-        platformOptions: {
+        platformPrOptions: {
           usePlatformAutomerge: true,
         },
       });
@@ -2037,7 +2037,7 @@ describe('modules/platform/gitlab/index', () => {
         targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
-        platformOptions: {
+        platformPrOptions: {
           usePlatformAutomerge: true,
         },
       });
@@ -2099,7 +2099,7 @@ describe('modules/platform/gitlab/index', () => {
         targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
-        platformOptions: {
+        platformPrOptions: {
           usePlatformAutomerge: true,
         },
       });
@@ -2212,7 +2212,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
@@ -2257,7 +2257,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             usePlatformAutomerge: false,
             gitLabIgnoreApprovals: true,
           },
@@ -2314,7 +2314,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
@@ -2382,7 +2382,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
@@ -2460,7 +2460,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
@@ -2509,7 +2509,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
@@ -2560,7 +2560,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
@@ -2595,7 +2595,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             autoApprove: true,
           },
         }),
@@ -2627,7 +2627,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             autoApprove: true,
           },
         }),
@@ -2917,7 +2917,7 @@ describe('modules/platform/gitlab/index', () => {
           number: 1,
           prTitle: 'title',
           prBody: 'body',
-          platformOptions: {
+          platformPrOptions: {
             autoApprove: true,
           },
         }),
@@ -2981,10 +2981,10 @@ describe('modules/platform/gitlab/index', () => {
     });
   });
 
-  describe('reattemptPlatformAutomerge(number, platformOptions)', () => {
+  describe('reattemptPlatformAutomerge(number, platformPrOptions)', () => {
     const pr = {
       number: 12345,
-      platformOptions: {
+      platformPrOptions: {
         usePlatformAutomerge: true,
       },
     };
