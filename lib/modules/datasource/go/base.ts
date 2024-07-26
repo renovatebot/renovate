@@ -141,13 +141,13 @@ export class BaseGoDatasource {
   }
 
   private static detectDatasource(
-    goSourceUrl: string,
+    metadataUrl: string,
     goModule: string,
   ): DataSource | null {
-    if (goSourceUrl.startsWith('https://github.com/')) {
+    if (metadataUrl.startsWith('https://github.com/')) {
       return {
         datasource: GithubTagsDatasource.id,
-        packageName: goSourceUrl
+        packageName: metadataUrl
           .replace('https://github.com/', '')
           .replace(regEx(/\/$/), ''),
         registryUrl: 'https://github.com',
@@ -155,27 +155,22 @@ export class BaseGoDatasource {
     }
 
     const gitlabUrl =
-      BaseGoDatasource.gitlabHttpsRegExp.exec(goSourceUrl)?.groups
+      BaseGoDatasource.gitlabHttpsRegExp.exec(metadataUrl)?.groups
         ?.httpsRegExpUrl;
     const gitlabUrlName =
-      BaseGoDatasource.gitlabHttpsRegExp.exec(goSourceUrl)?.groups
+      BaseGoDatasource.gitlabHttpsRegExp.exec(metadataUrl)?.groups
         ?.httpsRegExpName;
     const gitlabModuleName =
       BaseGoDatasource.gitlabRegExp.exec(goModule)?.groups?.regExpPath;
+    const vcsIndicatedModule =
+      BaseGoDatasource.gitVcsRegexp.exec(goModule)?.groups?.module;
     if (gitlabUrl && gitlabUrlName) {
       if (gitlabModuleName?.startsWith(gitlabUrlName)) {
-        const vcsIndicatedModule = BaseGoDatasource.gitVcsRegexp.exec(goModule);
-        if (vcsIndicatedModule?.groups?.module) {
-          return {
-            datasource: GitlabTagsDatasource.id,
-            registryUrl: gitlabUrl,
-            packageName: vcsIndicatedModule.groups?.module,
-          };
-        }
+        const packageName = vcsIndicatedModule ?? gitlabModuleName;
         return {
           datasource: GitlabTagsDatasource.id,
           registryUrl: gitlabUrl,
-          packageName: gitlabModuleName,
+          packageName,
         };
       }
 
@@ -186,46 +181,28 @@ export class BaseGoDatasource {
       };
     }
 
-    if (hostRules.hostType({ url: goSourceUrl }) === 'gitlab') {
-      const parsedUrl = parseUrl(goSourceUrl);
+    if (hostRules.hostType({ url: metadataUrl }) === 'gitlab') {
+      const parsedUrl = parseUrl(metadataUrl);
       if (!parsedUrl) {
         logger.trace({ goModule }, 'Could not parse go-source URL');
         return null;
       }
 
-      let packageName = trimLeadingSlash(`${parsedUrl.pathname}`);
+      const endpoint = GlobalConfig.get('endpoint', '');
+      const endpointPrefix = regEx(
+        /https:\/\/[^/]+\/(?<prefix>.*?\/)(?:api\/v4\/?)?/,
+      ).exec(endpoint)?.groups?.prefix;
 
-      const endpoint = GlobalConfig.get('endpoint')!;
-
-      const endpointPrefix = regEx('https://[^/]*/(.*?/)(api/v4/?)?').exec(
-        endpoint,
-      );
-
-      if (endpointPrefix && endpointPrefix[1] !== 'api/') {
-        packageName = packageName.replace(endpointPrefix[1], '');
+      let packageName =
+        // a .git path indicates a concrete git repository, which can be different from metadata returned by gitlab
+        vcsIndicatedModule ?? trimLeadingSlash(parsedUrl.pathname);
+      if (endpointPrefix && endpointPrefix !== 'api/') {
+        packageName = packageName.replace(endpointPrefix, '');
       }
 
       const registryUrl = endpointPrefix
-        ? endpoint.replace(regEx('api/v4/?$'), '')
+        ? endpoint.replace(regEx(/\/api\/v4\/?$/), '/')
         : `${parsedUrl.protocol}//${parsedUrl.host}`;
-
-      // a .git path indicates a concrete git repository, which can be different from metadata returned by gitlab
-      const vcsIndicatedModule = BaseGoDatasource.gitVcsRegexp.exec(goModule);
-      if (vcsIndicatedModule?.groups?.module) {
-        if (endpointPrefix) {
-          packageName = vcsIndicatedModule.groups?.module.replace(
-            endpointPrefix[1],
-            '',
-          );
-        } else {
-          packageName = vcsIndicatedModule.groups?.module;
-        }
-        return {
-          datasource: GitlabTagsDatasource.id,
-          registryUrl,
-          packageName,
-        };
-      }
 
       return {
         datasource: GitlabTagsDatasource.id,
