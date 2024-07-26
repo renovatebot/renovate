@@ -19,10 +19,6 @@ We will try to keep breakage to a minimum, but make no guarantees that an experi
 If set, Renovate will export OpenTelemetry data to the supplied endpoint.
 For more information see [the OpenTelemetry docs](opentelemetry.md).
 
-## `RENOVATE_CACHE_NPM_MINUTES`
-
-If set to any integer, Renovate will use this integer instead of the default npm cache time (15 minutes) for the npm datasource.
-
 ## `RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK`
 
 If set to any value, Renovate will skip its default artifacts filter check in the Maven datasource.
@@ -39,18 +35,26 @@ You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE`
 
 The process that runs Renovate must have the correct permissions to delete the config file.
 
-## `RENOVATE_X_DOCKER_HUB_TAGS`
+## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
 
-If set to any value, Renovate will use the Docker Hub API (`https://hub.docker.com`) to fetch tags instead of the normal Docker API for images pulled from `https://index.docker.io`.
+If set to any value, Renovate will skip attempting to get release labels (e.g. gitRef, sourceUrl) from manifest annotations for `https://index.docker.io`.
+
+Due to the missing label information like sourceUrl, Renovate will not be able to perform certain actions dependent on these information for the images.
+
+This includes the following:
+
+- Generating changelogs
+- Applying package rules dependent on the labels
+- Including the sourceUrls in PR bodies
+
+## `RENOVATE_X_DOCKER_HUB_TAGS_DISABLE`
+
+If set to any value, Renovate will stop using the Docker Hub API (`https://hub.docker.com`) to fetch tags and instead use the normal Docker API for images pulled from `https://index.docker.io`.
 
 ## `RENOVATE_X_DOCKER_MAX_PAGES`
 
 If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
 This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
-
-## `RENOVATE_X_EAGER_GLOBAL_EXTENDS`
-
-Resolve and merge `globalExtends` presets before other global config, instead of after.
 
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 
@@ -81,10 +85,6 @@ Default value: `250` (milliseconds).
 
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
 See [issue 8660](https://github.com/renovatebot/renovate/issues/8660) for background on why this was created.
-
-## `RENOVATE_X_IGNORE_NODE_WARN`
-
-Suppress the default warning when a deprecated version of Node.js is used to run Renovate.
 
 ## `RENOVATE_X_IGNORE_RE2`
 

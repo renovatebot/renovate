@@ -1,6 +1,7 @@
 import * as npmVersioning from '../../versioning/npm';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { defaultRegistryUrls as npmDefaultRegistryUrl } from './common';
 import { getDependency } from './get';
 
 export { setNpmrc } from './npmrc';
@@ -13,6 +14,8 @@ export class NpmDatasource extends Datasource {
   override readonly registryStrategy = 'first';
 
   override readonly defaultVersioning = npmVersioning.id;
+
+  override readonly defaultRegistryUrls = npmDefaultRegistryUrl;
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =

@@ -322,6 +322,13 @@ export function massageMarkdown(input: string): string {
     );
 }
 
+/**
+ * Unsed, no Dashboard
+ */
+export function maxBodyLength(): number {
+  return Infinity;
+}
+
 export async function getJsonFile(
   fileName: string,
   repoName?: string,

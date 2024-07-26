@@ -6,6 +6,15 @@ We may ask you to create a "minimal reproduction" repository.
 
 A minimal reproduction is a repository with the _least_ amount of code and config that still triggers missing or wrong behavior.
 
+### Example of a perfect reproduction
+
+The [`renovate-reproductions/12260` repository](https://github.com/renovate-reproductions/12260) shows a perfect reproduction, because it:
+
+- Only has the files/config needed to trigger the bug
+- Explains the current behavior and the expected behavior in the `readme.md`
+- Links to the Renovate Issue, or Discussion in the `readme.md`
+- Uses headings to organize information
+
 ## Creating a minimal reproduction
 
 Please read this section in full _before_ starting on your minimal reproduction.
@@ -14,13 +23,13 @@ Please read this section in full _before_ starting on your minimal reproduction.
 
 There are two methods to create a reproduction, see the table for a comparison.
 
-| Start point          | Method                  | Benefits                          | Drawbacks                                  |
-| :------------------- | :---------------------- | :-------------------------------- | :----------------------------------------- |
-| Empty repo           | Copy files and config   | Minimal start point               | Crafting the bad config/setup from scratch |
-| Fork production repo | Remove files and config | Start with known bad config/setup | May need to edit/delete many files         |
+| Start point                                                                                       | Method                  | Benefits                          | Drawbacks                                  |
+| :------------------------------------------------------------------------------------------------ | :---------------------- | :-------------------------------- | :----------------------------------------- |
+| [our minimal reproduction template](https://github.com/renovatebot/minimal-reproduction-template) | Copy files and config   | Minimal start point               | Crafting the bad config/setup from scratch |
+| Fork production repo                                                                              | Remove files and config | Start with known bad config/setup | May need to edit/delete many files         |
 
 Either method will work.
-We recommend you start from an empty repository.
+We recommend you start from [our minimal reproduction template](https://github.com/renovatebot/minimal-reproduction-template).
 
 ### General steps
 
@@ -30,7 +39,10 @@ _Always_ follow these steps:
 1. Use the fewest number of repository files and dependencies
 1. Reduce your Renovate config to a minimum
 1. Remove private or secret information
-1. Create a `readme.md` file that explains the _current behavior_ and _expected behavior_
+1. Create a `readme.md` file (or edit the template `readme.md`) and:
+   - Explain the _Current behavior_ and _Expected behavior_
+   - Link to the Renovate Issue or Discussion
+   - Use headings to organize the information
 1. Set the repository visibility to `public`
 1. Give us the link to the repository
 

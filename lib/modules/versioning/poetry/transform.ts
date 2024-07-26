@@ -78,7 +78,7 @@ export function poetry2semver(
     parts.push(`-${dev.letter}.${dev.number}`);
   }
 
-  return parts.join('');
+  return semver.valid(parts.join(''));
 }
 
 /** Reverse normalizations applied by poetry2semver */

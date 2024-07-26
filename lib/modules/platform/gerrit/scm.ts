@@ -109,7 +109,7 @@ export class GerritScm extends DefaultGitScm {
       typeof commit.message === 'string' ? [commit.message] : commit.message;
     commit.message = [
       ...origMsg,
-      `Change-Id: ${existingChange?.change_id ?? generateChangeId()}`,
+      `Renovate-Branch: ${commit.branchName}\nChange-Id: ${existingChange?.change_id ?? generateChangeId()}`,
     ];
     const commitResult = await git.prepareCommit({ ...commit, force: true });
     if (commitResult) {
@@ -123,9 +123,7 @@ export class GerritScm extends DefaultGitScm {
       if (hasChanges || commit.force) {
         const pushResult = await git.pushCommit({
           sourceRef: commit.branchName,
-          targetRef: `refs/for/${commit.baseBranch!}%t=sourceBranch-${
-            commit.branchName
-          }`,
+          targetRef: `refs/for/${commit.baseBranch!}`,
           files: commit.files,
         });
         if (pushResult) {

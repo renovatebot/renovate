@@ -12,6 +12,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'widen',
   'pin',
   'replace',
+  'update-lockfile',
 ];
 
 function hex2npm(input: string): string {

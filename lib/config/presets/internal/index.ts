@@ -6,7 +6,7 @@ import * as dockerPreset from './docker';
 import * as groupPreset from './group';
 import * as helpersPreset from './helpers';
 import * as mergeConfidence from './merge-confidence';
-import * as monorepoPreset from './monorepo';
+import * as monorepoPreset from './monorepos';
 import * as npm from './npm';
 import * as packagesPreset from './packages';
 import * as previewPreset from './preview';

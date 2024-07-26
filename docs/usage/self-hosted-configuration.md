@@ -327,6 +327,10 @@ Results which are soft expired are reused in the following manner:
 - The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
 - If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
 
+## cachePrivatePackages
+
+In the self-hosted setup, use option to enable caching of private packages to improve performance.
+
 ## cacheTtlOverride
 
 Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
@@ -757,10 +761,6 @@ When you set `inheritConfigStrict=true` then Renovate will abort the run and rai
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
 If left as default (null), a random short ID will be selected.
 
-## logFile
-
-## logFileLevel
-
 ## mergeConfidenceDatasources
 
 This feature is applicable only if you have an access token for Mend's Merge Confidence API.
@@ -846,8 +846,12 @@ Falls back to `renovate.json` if the name provided is not valid.
 
 ## onboardingNoDeps
 
-Set this to `true` if you want Renovate to create an onboarding PR even if no dependencies are found.
-Otherwise, Renovate skips onboarding a repository if it finds no dependencies in it.
+The default `auto` setting is converted to `disabled` if `autodiscoverRepositories` is `true`, or converted to `enabled` if false.
+
+In other words, the default behavior is:
+
+- If you run Renovate on discovered repositories then it will skip onboarding those without dependencies detected, but
+- If you run Renovate on _specific_ repositories then Renovate will onboard all such repositories even if no dependencies are found
 
 ## onboardingPrTitle
 
@@ -968,10 +972,14 @@ uid                      Renovate Bot <renovate@whitesourcesoftware.com>
 sub   rsa4096 2021-09-10 [E]
 ```
 
+</details>
+
 <!-- prettier-ignore -->
 !!! note
     If you use GnuPG `v2.4` (or newer) to generate the key, then you must disable `AEAD` preferences.
-    This is needed to allow  Renovate to decrypt the encrypted values.
+    This is needed to allow Renovate to decrypt the encrypted values.
+
+<details><summary>key edit log</summary>
 
 ```bash
 ❯ gpg --edit-key renovate@whitesourcesoftware.com

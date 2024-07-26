@@ -121,11 +121,11 @@ export const allowedFields = {
   newDigestShort:
     'A shorted version of newDigest, for use when the full digest is too long to be conveniently displayed',
   newMajor:
-    'The major version of the new version. e.g. "3" if the new version if "3.1.0"',
+    'The major version of the new version. e.g. "3" if the new version is "3.1.0"',
   newMinor:
-    'The minor version of the new version. e.g. "1" if the new version if "3.1.0"',
+    'The minor version of the new version. e.g. "1" if the new version is "3.1.0"',
   newPatch:
-    'The patch version of the new version. e.g. "0" if the new version if "3.1.0"',
+    'The patch version of the new version. e.g. "0" if the new version is "3.1.0"',
   newName:
     'The name of the new dependency that replaces the current deprecated dependency',
   newValue:
@@ -207,6 +207,11 @@ const compileInputProxyHandler: ProxyHandler<CompileInput> = {
 
     const value = target[prop];
 
+    if (prop === 'prBodyDefinitions') {
+      // Expose all prBodyDefinitions.*
+      return value;
+    }
+
     if (is.array(value)) {
       return value.map((element) =>
         is.primitive(element)
@@ -248,6 +253,10 @@ export function compile(
         continue;
       }
       for (const varName of varNames) {
+        if (varName === 'prBodyDefinitions') {
+          // Allow all prBodyDefinitions.*
+          break;
+        }
         if (!allowedFieldsList.includes(varName)) {
           logger.info(
             { varName, template },

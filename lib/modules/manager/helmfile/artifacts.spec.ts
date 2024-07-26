@@ -40,6 +40,9 @@ releases:
   - name: backstage
     chart: backstage/backstage
     version: 0.12.0
+{{- if eq .Environment.Name "test" }}
+    installed: false
+{{- end }}
   - name: oauth-proxy
     chart: oauth2-proxy/oauth2-proxy
     version: 6.8.0

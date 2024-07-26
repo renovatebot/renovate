@@ -22,7 +22,6 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { streamToString } from '../../../util/streams';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   BranchStatusConfig,
@@ -146,20 +145,20 @@ export async function getRawFile(
       version: branchOrTag,
     } satisfies GitVersionDescriptor;
 
-    const buf = await azureApiGit.getItemContent(
-      repoId,
-      fileName,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      branchOrTag ? versionDescriptor : undefined,
+    const item = await azureApiGit.getItem(
+      repoId, // repositoryId
+      fileName, // path
+      undefined, // project
+      undefined, // scopePath
+      undefined, // recursionLevel
+      undefined, // includeContentMetadata
+      undefined, // latestProcessedChange
+      undefined, // download
+      branchOrTag ? versionDescriptor : undefined, // versionDescriptor
+      true, // includeContent
     );
 
-    const str = await streamToString(buf);
-    return str;
+    return item?.content ?? null;
   } catch (err) /* istanbul ignore next */ {
     if (
       err.message?.includes('<title>Azure DevOps Services Unavailable</title>')
@@ -466,7 +465,7 @@ export async function createPr({
   prBody: body,
   labels,
   draftPR = false,
-  platformOptions,
+  platformPrOptions,
 }: CreatePRConfig): Promise<Pr> {
   const sourceRefName = getNewBranchName(sourceBranch);
   const targetRefName = getNewBranchName(targetBranch);
@@ -474,7 +473,7 @@ export async function createPr({
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
-      id: platformOptions?.azureWorkItemId?.toString(),
+      id: platformPrOptions?.azureWorkItemId?.toString(),
     },
   ];
   let pr: GitPullRequest = await azureApiGit.createPullRequest(
@@ -488,11 +487,11 @@ export async function createPr({
     },
     config.repoId,
   );
-  if (platformOptions?.usePlatformAutomerge) {
+  if (platformPrOptions?.usePlatformAutomerge) {
     const mergeStrategy =
-      platformOptions.automergeStrategy === 'auto'
+      platformPrOptions.automergeStrategy === 'auto'
         ? await getMergeStrategy(pr.targetRefName!)
-        : mapMergeStrategy(platformOptions.automergeStrategy);
+        : mapMergeStrategy(platformPrOptions.automergeStrategy);
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
@@ -510,7 +509,7 @@ export async function createPr({
       pr.pullRequestId!,
     );
   }
-  if (platformOptions?.autoApprove) {
+  if (platformPrOptions?.autoApprove) {
     await azureApiGit.createPullRequestReviewer(
       {
         reviewerUrl: pr.createdBy!.url,
@@ -544,7 +543,7 @@ export async function updatePr({
   prTitle: title,
   prBody: body,
   state,
-  platformOptions,
+  platformPrOptions,
   targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
@@ -573,7 +572,7 @@ export async function updatePr({
   } else if (state === 'closed') {
     objToUpdate.status = PullRequestStatus.Abandoned;
   }
-  if (platformOptions?.autoApprove) {
+  if (platformPrOptions?.autoApprove) {
     const pr = await azureApiGit.getPullRequestById(prNo, config.project);
     await azureApiGit.createPullRequestReviewer(
       {
@@ -809,7 +808,7 @@ export async function mergePr({
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
-  return smartTruncate(input, 4000)
+  return smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"',
@@ -820,6 +819,10 @@ export function massageMarkdown(input: string): string {
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+}
+
+export function maxBodyLength(): number {
+  return 4000;
 }
 
 /* istanbul ignore next */

@@ -47,6 +47,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  actionlint: {
+    asdfPluginUrl: 'https://github.com/crazy-matt/asdf-actionlint',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'rhysd/actionlint',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   'adr-tools': {
     asdfPluginUrl: 'https://gitlab.com/td7x/asdf/adr-tools.git',
     config: {
@@ -210,6 +218,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
       packageName: 'cli/cli',
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  gleam: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-gleam.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'gleam-lang/gleam',
+      extractVersion: '^v(?<version>.+)',
     },
   },
   gohugo: hugoDefinition,

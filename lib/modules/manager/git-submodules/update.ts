@@ -2,6 +2,7 @@ import Git from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
+import { readLocalFile } from '../../../util/fs';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import type { UpdateDependencyConfig } from '../types';
 
@@ -26,6 +27,19 @@ export default async function updateDependency({
   try {
     await git.submoduleUpdate(['--init', upgrade.depName!]);
     await submoduleGit.checkout([upgrade.newDigest!]);
+    if (upgrade.newValue && upgrade.currentValue !== upgrade.newValue) {
+      await git.subModule([
+        'set-branch',
+        '--branch',
+        upgrade.newValue,
+        upgrade.depName!,
+      ]);
+      const updatedPackageContent = await readLocalFile(
+        upgrade.packageFile!,
+        'utf8',
+      );
+      return updatedPackageContent!;
+    }
     return fileContent;
   } catch (err) {
     logger.debug({ err }, 'submodule checkout error');

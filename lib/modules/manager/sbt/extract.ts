@@ -5,6 +5,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { MavenDatasource } from '../../datasource/maven';
+import { MAVEN_REPO } from '../../datasource/maven/common';
 import { SbtPackageDatasource } from '../../datasource/sbt-package';
 import {
   SBT_PLUGINS_REPO,
@@ -19,7 +20,7 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types';
-import { normalizeScalaVersion } from './util';
+import { normalizeScalaVersion, sortPackageFiles } from './util';
 
 type Vars = Record<string, string>;
 
@@ -40,8 +41,6 @@ interface Ctx {
   useScalaVersion?: boolean;
   variableName?: string;
 }
-
-const SBT_MVN_REPO = 'https://repo1.maven.org/maven2';
 
 const scala = lang.createLang('scala');
 
@@ -201,16 +200,12 @@ function depHandler(ctx: Ctx): Ctx {
   delete ctx.variableName;
 
   const depName = `${groupId!}:${artifactId!}`;
-  const isScala3 = scalaVersion?.[0] === '3';
-  const scalaVersionForPackageName = isScala3 ? '3' : scalaVersion;
 
   const dep: PackageDependency = {
     datasource: SbtPackageDatasource.id,
     depName,
     packageName:
-      scalaVersionForPackageName && useScalaVersion
-        ? `${depName}_${scalaVersionForPackageName}`
-        : depName,
+      scalaVersion && useScalaVersion ? `${depName}_${scalaVersion}` : depName,
     currentValue,
   };
 
@@ -312,7 +307,7 @@ export function extractProxyUrls(
     if (extraction?.groups?.proxy) {
       extractedProxyUrls.push(extraction.groups.proxy);
     } else if (line.trim() === 'maven-central') {
-      extractedProxyUrls.push(SBT_MVN_REPO);
+      extractedProxyUrls.push(MAVEN_REPO);
     }
   }
   return extractedProxyUrls;
@@ -321,6 +316,14 @@ export function extractProxyUrls(
 export function extractPackageFile(
   content: string,
   packageFile: string,
+): PackageFileContent | null {
+  return extractPackageFileInternal(content, packageFile);
+}
+
+function extractPackageFileInternal(
+  content: string,
+  packageFile: string,
+  ctxScalaVersion?: string,
 ): PackageFileContent | null {
   if (
     packageFile === 'project/build.properties' ||
@@ -356,6 +359,7 @@ export function extractPackageFile(
       vars: {},
       deps: [],
       registryUrls: [],
+      scalaVersion: ctxScalaVersion,
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, packageFile }, 'Sbt parsing error');
@@ -365,13 +369,13 @@ export function extractPackageFile(
     return null;
   }
 
-  const { deps, packageFileVersion } = parsedResult;
+  const { deps, scalaVersion, packageFileVersion } = parsedResult;
 
   if (!deps.length) {
     return null;
   }
 
-  return { deps, packageFileVersion };
+  return { deps, packageFileVersion, managerData: { scalaVersion } };
 }
 
 export async function extractAllPackageFiles(
@@ -380,8 +384,11 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
   const proxyUrls: string[] = [];
+  let ctxScalaVersion: string | undefined;
 
-  for (const packageFile of packageFiles) {
+  const sortedPackageFiles = sortPackageFiles(packageFiles);
+
+  for (const packageFile of sortedPackageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (!content) {
       logger.debug({ packageFile }, 'packageFile has no content');
@@ -391,9 +398,16 @@ export async function extractAllPackageFiles(
       const urls = extractProxyUrls(content, packageFile);
       proxyUrls.push(...urls);
     } else {
-      const pkg = extractPackageFile(content, packageFile);
+      const pkg = extractPackageFileInternal(
+        content,
+        packageFile,
+        ctxScalaVersion,
+      );
       if (pkg) {
         packages.push({ deps: pkg.deps, packageFile });
+        if (pkg.managerData?.scalaVersion) {
+          ctxScalaVersion = pkg.managerData.scalaVersion;
+        }
       }
     }
   }
@@ -403,9 +417,9 @@ export async function extractAllPackageFiles(
         if (proxyUrls.length > 0) {
           dep.registryUrls!.unshift(...proxyUrls);
         } else if (dep.depType === 'plugin') {
-          dep.registryUrls!.unshift(SBT_PLUGINS_REPO, SBT_MVN_REPO);
+          dep.registryUrls!.unshift(SBT_PLUGINS_REPO, MAVEN_REPO);
         } else {
-          dep.registryUrls!.unshift(SBT_MVN_REPO);
+          dep.registryUrls!.unshift(MAVEN_REPO);
         }
       }
     }
