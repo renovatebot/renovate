@@ -244,6 +244,7 @@ export function extractPackageFile(
   _packageFile: string,
   config: ExtractConfig,
 ): PackageFileContent | null {
+  const sanitizedContent = content.replace(regEx(/^\uFEFF/), ''); // remove bom marker
   const deps: PackageDependency[] = [];
   const stageNames: string[] = [];
   const args: Record<string, string> = {};
@@ -253,8 +254,8 @@ export function extractPackageFile(
   let lookForEscapeChar = true;
   let lookForSyntaxDirective = true;
 
-  const lineFeed = content.indexOf('\r\n') >= 0 ? '\r\n' : '\n';
-  const lines = content.split(newlineRegex);
+  const lineFeed = sanitizedContent.indexOf('\r\n') >= 0 ? '\r\n' : '\n';
+  const lines = sanitizedContent.split(newlineRegex);
   for (let lineNumber = 0; lineNumber < lines.length; ) {
     const lineNumberInstrStart = lineNumber;
     let instruction = lines[lineNumber];

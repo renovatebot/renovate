@@ -81,6 +81,33 @@ All available options:
 }
 ```
 
+### Debugging
+
+Renovate writes tracing logs entries before transformation.
+If Renovate finds an unexpected dataformat, it also writes a tracing log _after_ transformation.
+
+#### Getting trace level logs on hosted app
+
+If you use the Mend Renovate app, use the [`logLevelRemap` config option](../../../configuration-options.md#loglevelremap) to get the trace log.
+
+```json title="Getting trace logs from the Mend Renovate app"
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/^Custom manager fetcher/",
+      "newLogLevel": "info"
+    }
+  ]
+}
+```
+
+#### Getting trace level logs when self-hosting
+
+If you self-host Renovate, follow these steps to get the trace logs:
+
+1. Set the [`LOG_FILE_LEVEL` env var](../../../config-overview.md#logging-variables) to `trace`
+1. Run Renovate in [`dryRun` mode](../../../self-hosted-configuration.md#dryrun)
+
 ### Formats
 
 #### JSON
