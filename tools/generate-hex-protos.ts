@@ -41,7 +41,7 @@ void (async () => {
   }
 })();
 
-function generateProto(protos_path, file) {
+function generateProto(protos_path: string, file: string): Promise<string> {
   return new Promise((resolve, reject) => {
     console.log(`Current directory: ${process.cwd()}`);
     fs.readdirSync(process.cwd()).forEach((file) => {
@@ -72,13 +72,13 @@ function generateProto(protos_path, file) {
   });
 }
 
-async function generateHexProtos() {
+async function generateHexProtos(): Promise<string> {
   console.log('Generating Hex protos ...');
 
   const protos_path = './lib/modules/datasource/hex/protos';
   await generateProto(protos_path, 'package.proto');
   await generateProto(protos_path, 'signed.proto');
-  await moveFiles(
+  moveFiles(
     `${process.cwd()}/lib/modules/datasource/hex/protos`,
     `${process.cwd()}/lib/modules/datasource/hex`,
   );
