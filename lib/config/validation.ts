@@ -15,6 +15,7 @@ import {
   matchRegexOrGlobList,
 } from '../util/string-match';
 import * as template from '../util/template';
+import { parseUrl } from '../util/url';
 import {
   hasValidSchedule,
   hasValidTimezone,
@@ -431,21 +432,9 @@ export async function validateConfig(
               'matchDatasources',
               'matchDepTypes',
               'matchDepNames',
-              'matchDepPatterns',
-              'matchDepPrefixes',
               'matchPackageNames',
-              'matchPackagePatterns',
-              'matchPackagePrefixes',
-              'excludeDepNames',
-              'excludeDepPatterns',
-              'excludeDepPrefixes',
-              'excludePackageNames',
-              'excludePackagePatterns',
-              'excludePackagePrefixes',
-              'excludeRepositories',
               'matchCurrentValue',
               'matchCurrentVersion',
-              'matchSourceUrlPrefixes',
               'matchSourceUrls',
               'matchUpdateTypes',
               'matchConfidence',
@@ -603,18 +592,14 @@ export async function validateConfig(
                 }
               }
             }
-            if (
-              [
-                'matchPackagePatterns',
-                'excludePackagePatterns',
-                'matchDepPatterns',
-                'excludeDepPatterns',
-              ].includes(key)
-            ) {
+            if (['matchPackageNames', 'matchDepNames'].includes(key)) {
+              const startPattern = regEx(/!?\//);
+              const endPattern = regEx(/\/g?i?$/);
               for (const pattern of val as string[]) {
-                if (pattern !== '*') {
+                if (startPattern.test(pattern) && endPattern.test(pattern)) {
                   try {
-                    regEx(pattern);
+                    // regEx isn't aware of our !/ prefix but can handle the suffix
+                    regEx(pattern.replace(startPattern, '/'));
                   } catch (e) {
                     errors.push({
                       topic: 'Configuration Error',
@@ -692,7 +677,7 @@ export async function validateConfig(
             } else if (key === 'env') {
               const allowedEnvVars =
                 configType === 'global'
-                  ? (config.allowedEnv as string[]) ?? []
+                  ? ((config.allowedEnv as string[]) ?? [])
                   : GlobalConfig.get('allowedEnv', []);
               for (const [envVarName, envVarValue] of Object.entries(val)) {
                 if (!is.string(envVarValue)) {
@@ -810,9 +795,26 @@ export async function validateConfig(
     if (key === 'hostRules' && is.array(val)) {
       const allowedHeaders =
         configType === 'global'
-          ? (config.allowedHeaders as string[]) ?? []
+          ? ((config.allowedHeaders as string[]) ?? [])
           : GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
+        if (is.nonEmptyString(rule.matchHost)) {
+          if (rule.matchHost.includes('://')) {
+            if (parseUrl(rule.matchHost) === null) {
+              errors.push({
+                topic: 'Configuration Error',
+                message: `hostRules matchHost \`${rule.matchHost}\` is not a valid URL.`,
+              });
+            }
+          }
+        } else if (is.emptyString(rule.matchHost)) {
+          errors.push({
+            topic: 'Configuration Error',
+            message:
+              'Invalid value for hostRules matchHost. It cannot be an empty string.',
+          });
+        }
+
         if (!rule.headers) {
           continue;
         }
@@ -919,6 +921,13 @@ async function validateGlobalConfig(
   currentPath: string | undefined,
   config: RenovateConfig,
 ): Promise<void> {
+  // istanbul ignore if
+  if (getDeprecationMessage(key)) {
+    warnings.push({
+      topic: 'Deprecation Warning',
+      message: getDeprecationMessage(key)!,
+    });
+  }
   if (val !== null) {
     if (type === 'string') {
       if (is.string(val)) {

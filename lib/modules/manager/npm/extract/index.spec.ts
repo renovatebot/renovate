@@ -594,6 +594,8 @@ describe('modules/manager/npm/extract/index', () => {
           n: 'git+https://github.com/owner/n#v2.0.0',
           o: 'git@github.com:owner/o.git#v2.0.0',
           p: 'Owner/P.git#v2.0.0',
+          q: 'github:owner/q#semver:1.1.0',
+          r: 'github:owner/r#semver:^1.0.0',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -690,6 +692,18 @@ describe('modules/manager/npm/extract/index', () => {
             currentValue: 'v2.0.0',
             datasource: 'github-tags',
             sourceUrl: 'https://github.com/Owner/P',
+          },
+          {
+            depName: 'q',
+            currentValue: '1.1.0',
+            datasource: 'github-tags',
+            sourceUrl: 'https://github.com/owner/q',
+          },
+          {
+            depName: 'r',
+            currentValue: '^1.0.0',
+            datasource: 'github-tags',
+            sourceUrl: 'https://github.com/owner/r',
           },
         ],
       });

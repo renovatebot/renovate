@@ -192,6 +192,19 @@ export async function getConfig(
               config[option.name] = 'optional';
             }
           }
+          if (option.name === 'platformCommit') {
+            if ((config[option.name] as string) === 'true') {
+              logger.warn(
+                'env config platformCommit property has been changed to enabled',
+              );
+              config[option.name] = 'enabled';
+            } else if ((config[option.name] as string) === 'false') {
+              logger.warn(
+                'env config platformCommit property has been changed to disabled',
+              );
+              config[option.name] = 'disabled';
+            }
+          }
         }
       }
     }

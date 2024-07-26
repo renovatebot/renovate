@@ -19,6 +19,7 @@ import {
 } from '../../../../modules/datasource/common';
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
+import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { assignKeys } from '../../../../util/assign-keys';
 import { applyPackageRules } from '../../../../util/package-rules';
@@ -199,7 +200,10 @@ export async function lookupUpdates(
         }
       }
       // Reapply package rules in case we missed something from sourceUrl
-      config = applyPackageRules({ ...config, sourceUrl: res.sourceUrl });
+      config = applyPackageRules(
+        { ...config, sourceUrl: res.sourceUrl },
+        'source-url',
+      );
       if (config.followTag) {
         const taggedVersion = dependency.tags?.[config.followTag];
         if (!taggedVersion) {
@@ -312,7 +316,10 @@ export async function lookupUpdates(
           )
         ) {
           // Reapply package rules to check matches for matchCurrentAge
-          config = applyPackageRules({ ...config, currentVersionTimestamp });
+          config = applyPackageRules(
+            { ...config, currentVersionTimestamp },
+            'current-timestamp',
+          );
         }
       }
 
@@ -363,6 +370,10 @@ export async function lookupUpdates(
       );
       if (config.isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
+        logger.debug(
+          { filteredReleases },
+          'Vulnerability alert found: limiting results to a single release',
+        );
       }
       const buckets: Record<string, [Release]> = {};
       for (const release of filteredReleases) {
@@ -450,7 +461,31 @@ export async function lookupUpdates(
         res.isSingleVersion ??=
           is.string(update.newValue) &&
           versioning.isSingleVersion(update.newValue);
-        res.updates.push(update);
+        // istanbul ignore if
+        if (
+          config.versioning === dockerVersioningId &&
+          update.updateType !== 'rollback' &&
+          update.newValue &&
+          versioning.isVersion(update.newValue) &&
+          compareValue &&
+          versioning.isVersion(compareValue) &&
+          versioning.isGreaterThan(compareValue, update.newValue)
+        ) {
+          logger.warn(
+            {
+              packageName: config.packageName,
+              currentValue: config.currentValue,
+              compareValue,
+              currentVersion: config.currentVersion,
+              update,
+              allVersionsLength: allVersions.length,
+              filteredReleaseVersions: filteredReleases.map((r) => r.version),
+            },
+            'Unexpected downgrade detected: skipping',
+          );
+        } else {
+          res.updates.push(update);
+        }
       }
     } else if (compareValue) {
       logger.debug(

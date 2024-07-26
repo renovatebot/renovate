@@ -140,6 +140,30 @@ describe('modules/platform/gitea/index', () => {
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
+    partial<MockPr>({
+      number: 4,
+      title: 'Merged PR',
+      body: 'other random merged pull request',
+      state: 'closed',
+      diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/4.diff',
+      created_at: '2011-08-18T22:30:38Z',
+      closed_at: '2016-01-09T10:03:21Z',
+      updated_at: '2016-01-09T10:03:21Z',
+      mergeable: true,
+      merged: true,
+      base: { ref: 'other-base-branch' },
+      head: {
+        label: 'merged-head-branch',
+        sha: 'merged-head-sha' as LongCommitSha,
+        repo: partial<Repo>({ full_name: mockRepo.full_name }),
+      },
+      labels: [
+        {
+          id: 1,
+          name: 'bug',
+        },
+      ],
+    }),
   ];
 
   const mockIssues: Issue[] = [
@@ -1145,6 +1169,7 @@ describe('modules/platform/gitea/index', () => {
         { number: 1, title: 'Some PR' },
         { number: 2, title: 'Other PR' },
         { number: 3, title: 'Draft PR' },
+        { number: 4, title: 'Merged PR' },
       ]);
     });
 
@@ -1187,6 +1212,7 @@ describe('modules/platform/gitea/index', () => {
         { number: 1, title: 'Some PR' },
         { number: 2, title: 'Other PR' },
         { number: 3, title: 'Draft PR' },
+        { number: 4, title: 'Merged PR' },
       ]);
     });
 
@@ -1223,7 +1249,12 @@ describe('modules/platform/gitea/index', () => {
       memCache.set('gitea-pr-cache-synced', false);
 
       const res2 = await gitea.getPrList();
-      expect(res2).toMatchObject([{ number: 1 }, { number: 2 }, { number: 3 }]);
+      expect(res2).toMatchObject([
+        { number: 1 },
+        { number: 2 },
+        { number: 3 },
+        { number: 4 },
+      ]);
     });
   });
 
@@ -1400,6 +1431,24 @@ describe('modules/platform/gitea/index', () => {
         number: 3,
         title: 'Draft PR',
         isDraft: true,
+      });
+    });
+
+    it('should find merged pull request', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get('/repos/some/repo/pulls')
+        .query({ state: 'all', sort: 'recentupdate' })
+        .reply(200, mockPRs);
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+
+      const res = await gitea.findPr({ branchName: 'merged-head-branch' });
+
+      expect(res).toMatchObject({
+        number: 4,
+        sourceBranch: 'merged-head-branch',
+        state: 'merged',
       });
     });
 
@@ -1625,7 +1674,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       });
 
       expect(res).toMatchObject({
@@ -1653,7 +1702,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       });
 
       expect(res).toMatchObject({
@@ -1681,7 +1730,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       });
 
       expect(res).toMatchObject({
@@ -1707,7 +1756,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       });
 
       expect(res).toMatchObject({
@@ -1734,7 +1783,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       });
 
       expect(res).toMatchObject({
@@ -1763,7 +1812,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: {
+        platformPrOptions: {
           automergeStrategy: 'auto',
           usePlatformAutomerge: true,
         },
@@ -1802,7 +1851,7 @@ describe('modules/platform/gitea/index', () => {
           targetBranch: 'master',
           prTitle: mockNewPR.title,
           prBody: mockNewPR.body,
-          platformOptions: {
+          platformPrOptions: {
             automergeStrategy,
             usePlatformAutomerge: true,
           },
@@ -2832,6 +2881,10 @@ describe('modules/platform/gitea/index', () => {
         '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)',
       );
     });
+  });
+
+  it('maxBodyLength', () => {
+    expect(gitea.maxBodyLength()).toBe(1000000);
   });
 
   describe('getJsonFile()', () => {

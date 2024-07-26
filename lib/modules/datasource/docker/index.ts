@@ -455,6 +455,16 @@ export class DockerDatasource extends Datasource {
     tag: string,
   ): Promise<Record<string, string> | undefined> {
     logger.debug(`getLabels(${registryHost}, ${dockerRepository}, ${tag})`);
+    // Skip Docker Hub image if RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP is set
+    if (
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP &&
+      registryHost === 'https://index.docker.io'
+    ) {
+      logger.debug(
+        'Docker Hub image - skipping label lookup due to RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP',
+      );
+      return {};
+    }
     // Docker Hub library images don't have labels we need
     if (
       registryHost === 'https://index.docker.io' &&
@@ -1066,7 +1076,7 @@ export class DockerDatasource extends Datasource {
 
     const tagsResult =
       registryHost === 'https://index.docker.io' &&
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS
+      !process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE
         ? getDockerHubTags()
         : getTags();
 
@@ -1089,7 +1099,7 @@ export class DockerDatasource extends Datasource {
     const tags = releases.map((release) => release.version);
     const latestTag = tags.includes('latest')
       ? 'latest'
-      : findLatestStable(tags) ?? tags[tags.length - 1];
+      : (findLatestStable(tags) ?? tags[tags.length - 1]);
 
     // istanbul ignore if: needs test
     if (!latestTag) {
