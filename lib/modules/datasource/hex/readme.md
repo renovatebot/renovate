@@ -1,7 +1,7 @@
 ## Hex Datasource
 
 Hex registries use protobuf encoding for packages in all registries. An HTTP API
-such as that exposed by https://hex.pm is not a requirement for running a registry.
+such as that exposed by [hex.pm](https://hex.pm) is not a requirement for running a registry.
 Therefore, all registries have the protobuf encoded endpoint exposed but not all
 registries expose a HTTP API exposing additional metadata.
 
