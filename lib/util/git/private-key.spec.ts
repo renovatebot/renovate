@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import os from 'node:os';
+import fs from 'fs-extra';
 import { any, mockDeep } from 'jest-mock-extended';
 import upath from 'upath';
 import { Fixtures } from '../../../test/fixtures';
