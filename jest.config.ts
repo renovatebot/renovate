@@ -450,9 +450,10 @@ process.stderr.write(`Host stats:
 function getCoverageIgnorePatterns(): string[] | undefined {
   const patterns = [
     '/node_modules/',
+    '<rootdir>/lib/modules/datasource/hex/protos/package.ts',
+    '<rootdir>/lib/modules/datasource/hex/protos/signed.ts',
     '<rootDir>/test/',
     '<rootDir>/tools/',
-    '<rootdir>/lib/modules/datasource/hex/protos/',
   ];
 
   if (env.TEST_LEGACY_DECRYPTION !== 'true') {
