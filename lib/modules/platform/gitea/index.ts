@@ -523,7 +523,7 @@ const platform: Platform = {
     prTitle,
     prBody: rawBody,
     labels: labelNames,
-    platformOptions,
+    platformPrOptions,
     draftPR,
   }: CreatePRConfig): Promise<Pr> {
     let title = prTitle;
@@ -547,12 +547,12 @@ const platform: Platform = {
         labels: labels.filter(is.number),
       });
 
-      if (platformOptions?.usePlatformAutomerge) {
+      if (platformPrOptions?.usePlatformAutomerge) {
         if (semver.gte(defaults.version, '1.17.0')) {
           try {
             await helper.mergePR(config.repository, gpr.number, {
               Do:
-                getMergeMethod(platformOptions?.automergeStrategy) ??
+                getMergeMethod(platformPrOptions?.automergeStrategy) ??
                 config.mergeMethod,
               merge_when_checks_succeed: true,
             });
@@ -867,9 +867,6 @@ const platform: Platform = {
   async ensureIssueClosing(title: string): Promise<void> {
     logger.debug(`ensureIssueClosing(${title})`);
     if (config.hasIssuesEnabled === false) {
-      logger.info(
-        'Cannot ensure issue because issues are disabled in this repository',
-      );
       return;
     }
     const issueList = await platform.getIssueList();
@@ -1001,9 +998,15 @@ const platform: Platform = {
   },
 
   massageMarkdown(prBody: string): string {
-    return smartTruncate(smartLinks(prBody), 1000000);
+    return smartTruncate(smartLinks(prBody), maxBodyLength());
   },
+
+  maxBodyLength,
 };
+
+export function maxBodyLength(): number {
+  return 1000000;
+}
 
 /* eslint-disable @typescript-eslint/unbound-method */
 export const {

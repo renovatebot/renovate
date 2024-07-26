@@ -354,7 +354,9 @@ export async function cloneSubmodules(shouldClone: boolean): Promise<void> {
   for (const submodule of submodules) {
     try {
       logger.debug(`Cloning git submodule at ${submodule}`);
-      await gitRetry(() => git.submoduleUpdate(['--init', submodule]));
+      await gitRetry(() =>
+        git.submoduleUpdate(['--init', '--recursive', submodule]),
+      );
     } catch (err) {
       logger.warn(
         { err },
@@ -628,7 +630,10 @@ export async function isBranchBehindBase(
   }
 }
 
-export async function isBranchModified(branchName: string): Promise<boolean> {
+export async function isBranchModified(
+  branchName: string,
+  baseBranch: string,
+): Promise<boolean> {
   if (!branchExists(branchName)) {
     logger.debug('branch.isModified(): no cache');
     return false;
@@ -651,18 +656,15 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   logger.debug('branch.isModified(): using git to calculate');
 
   await syncGit();
-  // Retrieve the author of the most recent commit
-  let lastAuthor: string | undefined;
+  const committedAuthors = new Set<string>();
   try {
-    lastAuthor = (
-      await git.raw([
-        'log',
-        '-1',
-        '--pretty=format:%ae',
-        `origin/${branchName}`,
-        '--',
-      ])
-    ).trim();
+    const commits = await git.log([
+      `origin/${baseBranch}..origin/${branchName}`,
+    ]);
+
+    for (const commit of commits.all) {
+      committedAuthors.add(commit.author_email);
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err.message?.includes('fatal: bad revision')) {
       logger.debug(
@@ -673,21 +675,48 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     }
     logger.warn({ err }, 'Error checking last author for isBranchModified');
   }
-  const { gitAuthorEmail } = config;
-  if (
-    lastAuthor === gitAuthorEmail ||
-    config.ignoredAuthors.some((ignoredAuthor) => lastAuthor === ignoredAuthor)
-  ) {
-    // author matches - branch has not been modified
+  const { gitAuthorEmail, ignoredAuthors } = config;
+
+  const includedAuthors = new Set(committedAuthors);
+
+  if (gitAuthorEmail) {
+    includedAuthors.delete(gitAuthorEmail);
+  }
+
+  for (const ignoredAuthor of ignoredAuthors) {
+    includedAuthors.delete(ignoredAuthor);
+  }
+
+  if (includedAuthors.size === 0) {
+    // authors all match - branch has not been modified
+    logger.trace(
+      {
+        branchName,
+        baseBranch,
+        committedAuthors: [...committedAuthors],
+        includedAuthors: [...includedAuthors],
+        gitAuthorEmail,
+        ignoredAuthors,
+      },
+      'branch.isModified() = false',
+    );
     logger.debug('branch.isModified() = false');
     config.branchIsModified[branchName] = false;
     setCachedModifiedResult(branchName, false);
     return false;
   }
-  logger.debug(
-    { branchName, lastAuthor, gitAuthorEmail },
+  logger.trace(
+    {
+      branchName,
+      baseBranch,
+      committedAuthors: [...committedAuthors],
+      includedAuthors: [...includedAuthors],
+      gitAuthorEmail,
+      ignoredAuthors,
+    },
     'branch.isModified() = true',
   );
+  logger.debug('branch.isModified() = true');
   config.branchIsModified[branchName] = true;
   setCachedModifiedResult(branchName, true);
   return true;
