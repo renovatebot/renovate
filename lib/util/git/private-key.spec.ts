@@ -1,5 +1,7 @@
 import fs from 'fs-extra';
+import os from 'node:os';
 import { any, mockDeep } from 'jest-mock-extended';
+import upath from 'upath';
 import { Fixtures } from '../../../test/fixtures';
 import { mockedExtended } from '../../../test/util';
 import * as exec_ from '../exec';
@@ -32,7 +34,9 @@ describe('util/git/private-key', () => {
       setPrivateKey('some-key');
       exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
       exec.exec
-        .calledWith('gpg --import /tmp/git-private-gpg.key')
+        .calledWith(
+          `gpg --import ${upath.join(os.tmpdir() + '/git-private-gpg.key')}`,
+        )
         .mockRejectedValueOnce({
           stderr: `something wrong`,
           stdout: '',
@@ -45,7 +49,9 @@ describe('util/git/private-key', () => {
       const repoDir = '/tmp/some-repo';
       exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
       exec.exec
-        .calledWith(`gpg --import /tmp/git-private-gpg.key`)
+        .calledWith(
+          `gpg --import ${upath.join(os.tmpdir() + '/git-private-gpg.key')}`,
+        )
         .mockResolvedValueOnce({
           stderr: `gpg: key ${publicKey}: secret key imported\nfoo\n`,
           stdout: '',

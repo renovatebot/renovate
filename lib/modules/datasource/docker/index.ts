@@ -1076,7 +1076,7 @@ export class DockerDatasource extends Datasource {
 
     const tagsResult =
       registryHost === 'https://index.docker.io' &&
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS
+      !process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE
         ? getDockerHubTags()
         : getTags();
 
@@ -1099,7 +1099,7 @@ export class DockerDatasource extends Datasource {
     const tags = releases.map((release) => release.version);
     const latestTag = tags.includes('latest')
       ? 'latest'
-      : findLatestStable(tags) ?? tags[tags.length - 1];
+      : (findLatestStable(tags) ?? tags[tags.length - 1]);
 
     // istanbul ignore if: needs test
     if (!latestTag) {

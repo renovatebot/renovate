@@ -9,7 +9,7 @@ import { BitbucketChangeLogSource } from './source';
 const baseUrl = 'https://bitbucket.org/';
 const apiBaseUrl = 'https://api.bitbucket.org/';
 
-const changelogMd = Fixtures.get('jest.md', '../..');
+const changelogMd = Fixtures.get('jest.md', '..');
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',

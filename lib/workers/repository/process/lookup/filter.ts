@@ -9,6 +9,18 @@ import * as poetryVersioning from '../../../../modules/versioning/poetry';
 import { getRegexPredicate } from '../../../../util/string-match';
 import type { FilterConfig } from './types';
 
+function isReleaseStable(release: Release, versioning: VersioningApi): boolean {
+  if (!versioning.isStable(release.version)) {
+    return false;
+  }
+
+  if (release.isStable === false) {
+    return false;
+  }
+
+  return true;
+}
+
 export function filterVersions(
   config: FilterConfig,
   currentVersion: string,
@@ -18,42 +30,34 @@ export function filterVersions(
 ): Release[] {
   const { ignoreUnstable, ignoreDeprecated, respectLatest, allowedVersions } =
     config;
-  function isVersionStable(version: string): boolean {
-    if (!versioning.isStable(version)) {
-      return false;
-    }
-    // Check if the datasource returned isStable = false
-    const release = releases.find((r) => r.version === version);
-    if (release?.isStable === false) {
-      return false;
-    }
-    return true;
-  }
+
   // istanbul ignore if: shouldn't happen
   if (!currentVersion) {
     return [];
   }
 
   // Leave only versions greater than current
-  let filteredVersions = releases.filter(
-    (v) =>
-      versioning.isVersion(v.version) &&
-      versioning.isGreaterThan(v.version, currentVersion),
+  let filteredReleases = releases.filter(
+    (r) =>
+      versioning.isVersion(r.version) &&
+      versioning.isGreaterThan(r.version, currentVersion),
+  );
+
+  const currentRelease = releases.find(
+    (r) =>
+      versioning.isValid(r.version) &&
+      versioning.isVersion(r.version) &&
+      versioning.isValid(currentVersion) &&
+      versioning.isVersion(currentVersion) &&
+      versioning.equals(r.version, currentVersion),
   );
 
   // Don't upgrade from non-deprecated to deprecated
-  const fromRelease = releases.find(
-    (release) => release.version === currentVersion,
-  );
-  if (ignoreDeprecated && fromRelease && !fromRelease.isDeprecated) {
-    filteredVersions = filteredVersions.filter((v) => {
-      const versionRelease = releases.find(
-        (release) => release.version === v.version,
-      );
-      // TODO: types (#22198)
-      if (versionRelease!.isDeprecated) {
+  if (ignoreDeprecated && currentRelease && !currentRelease.isDeprecated) {
+    filteredReleases = filteredReleases.filter((r) => {
+      if (r.isDeprecated) {
         logger.trace(
-          `Skipping ${config.depName!}@${v.version} because it is deprecated`,
+          `Skipping ${config.depName!}@${r.version} because it is deprecated`,
         );
         return false;
       }
@@ -64,12 +68,12 @@ export function filterVersions(
   if (allowedVersions) {
     const isAllowedPred = getRegexPredicate(allowedVersions);
     if (isAllowedPred) {
-      filteredVersions = filteredVersions.filter(({ version }) =>
+      filteredReleases = filteredReleases.filter(({ version }) =>
         isAllowedPred(version),
       );
     } else if (versioning.isValid(allowedVersions)) {
-      filteredVersions = filteredVersions.filter((v) =>
-        versioning.matches(v.version, allowedVersions),
+      filteredReleases = filteredReleases.filter((r) =>
+        versioning.matches(r.version, allowedVersions),
       );
     } else if (
       config.versioning !== npmVersioning.id &&
@@ -79,9 +83,13 @@ export function filterVersions(
         { depName: config.depName },
         'Falling back to npm semver syntax for allowedVersions',
       );
-      filteredVersions = filteredVersions.filter((v) =>
+      filteredReleases = filteredReleases.filter((r) =>
         semver.satisfies(
-          semver.valid(v.version) ? v.version : semver.coerce(v.version)!,
+          semver.valid(r.version)
+            ? r.version
+            : /* istanbul ignore next: not reachable, but it's safer to preserve it */ semver.coerce(
+                r.version,
+              )!,
           allowedVersions,
         ),
       );
@@ -93,8 +101,8 @@ export function filterVersions(
         { depName: config.depName },
         'Falling back to pypi syntax for allowedVersions',
       );
-      filteredVersions = filteredVersions.filter((v) =>
-        pep440.matches(v.version, allowedVersions),
+      filteredReleases = filteredReleases.filter((r) =>
+        pep440.matches(r.version, allowedVersions),
       );
     } else {
       const error = new Error(CONFIG_VALIDATION);
@@ -108,7 +116,7 @@ export function filterVersions(
   }
 
   if (config.followTag) {
-    return filteredVersions;
+    return filteredReleases;
   }
 
   if (
@@ -116,37 +124,41 @@ export function filterVersions(
     latestVersion &&
     !versioning.isGreaterThan(currentVersion, latestVersion)
   ) {
-    filteredVersions = filteredVersions.filter(
-      (v) => !versioning.isGreaterThan(v.version, latestVersion),
+    filteredReleases = filteredReleases.filter(
+      (r) => !versioning.isGreaterThan(r.version, latestVersion),
     );
   }
 
   if (!ignoreUnstable) {
-    return filteredVersions;
+    return filteredReleases;
   }
 
-  if (isVersionStable(currentVersion)) {
-    return filteredVersions.filter((v) => isVersionStable(v.version));
+  if (currentRelease && isReleaseStable(currentRelease, versioning)) {
+    return filteredReleases.filter((r) => isReleaseStable(r, versioning));
   }
 
-  // if current is unstable then allow unstable in the current major only
-  // Allow unstable only in current major
-  return filteredVersions.filter((v) => {
-    if (isVersionStable(v.version)) {
+  const currentMajor = versioning.getMajor(currentVersion);
+  const currentMinor = versioning.getMinor(currentVersion);
+  const currentPatch = versioning.getPatch(currentVersion);
+
+  return filteredReleases.filter((r) => {
+    if (isReleaseStable(r, versioning)) {
       return true;
     }
-    if (
-      versioning.getMajor(v.version) !== versioning.getMajor(currentVersion)
-    ) {
+
+    const major = versioning.getMajor(r.version);
+
+    if (major !== currentMajor) {
       return false;
     }
-    // istanbul ignore if: test passes without touching this
+
     if (versioning.allowUnstableMajorUpgrades) {
       return true;
     }
-    return (
-      versioning.getMinor(v.version) === versioning.getMinor(currentVersion) &&
-      versioning.getPatch(v.version) === versioning.getPatch(currentVersion)
-    );
+
+    const minor = versioning.getMinor(r.version);
+    const patch = versioning.getPatch(r.version);
+
+    return minor === currentMinor && patch === currentPatch;
   });
 }

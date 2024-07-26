@@ -490,7 +490,7 @@ describe('modules/manager/sbt/extract', () => {
               registryUrls: [
                 'http://example.org/repo',
                 'https://example.org/ivy-repo/',
-                'https://repo1.maven.org/maven2',
+                'https://repo.maven.apache.org/maven2',
               ],
             },
             {
@@ -499,7 +499,7 @@ describe('modules/manager/sbt/extract', () => {
               registryUrls: [
                 'http://example.org/repo',
                 'https://example.org/ivy-repo/',
-                'https://repo1.maven.org/maven2',
+                'https://repo.maven.apache.org/maven2',
               ],
             },
             {
@@ -508,7 +508,7 @@ describe('modules/manager/sbt/extract', () => {
               registryUrls: [
                 'http://example.org/repo',
                 'https://example.org/ivy-repo/',
-                'https://repo1.maven.org/maven2',
+                'https://repo.maven.apache.org/maven2',
               ],
             },
             {
@@ -517,7 +517,7 @@ describe('modules/manager/sbt/extract', () => {
               registryUrls: [
                 'http://example.org/repo',
                 'https://example.org/ivy-repo/',
-                'https://repo1.maven.org/maven2',
+                'https://repo.maven.apache.org/maven2',
               ],
             },
             {
@@ -526,7 +526,7 @@ describe('modules/manager/sbt/extract', () => {
               registryUrls: [
                 'http://example.org/repo',
                 'https://example.org/ivy-repo/',
-                'https://repo1.maven.org/maven2',
+                'https://repo.maven.apache.org/maven2',
               ],
             },
             {
@@ -535,7 +535,7 @@ describe('modules/manager/sbt/extract', () => {
               registryUrls: [
                 'http://example.org/repo',
                 'https://example.org/ivy-repo/',
-                'https://repo1.maven.org/maven2',
+                'https://repo.maven.apache.org/maven2',
               ],
             },
           ],
@@ -551,7 +551,7 @@ describe('modules/manager/sbt/extract', () => {
         for (const dep of pkg.deps.filter((d) => d.depType === 'plugin')) {
           expect(dep.registryUrls).toStrictEqual([
             'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
-            'https://repo1.maven.org/maven2',
+            'https://repo.maven.apache.org/maven2',
             'https://example.com/repos/1/',
             'https://example.com/repos/2/',
             'https://example.com/repos/3/',
@@ -563,7 +563,7 @@ describe('modules/manager/sbt/extract', () => {
       for (const pkg of packages) {
         for (const dep of pkg.deps.filter((d) => d.depType !== 'plugin')) {
           expect(dep.registryUrls).toStrictEqual([
-            'https://repo1.maven.org/maven2',
+            'https://repo.maven.apache.org/maven2',
             'https://example.com/repos/1/',
             'https://example.com/repos/2/',
             'https://example.com/repos/3/',

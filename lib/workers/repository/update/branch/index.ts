@@ -255,7 +255,10 @@ export async function processBranch(
       }
 
       logger.debug('Checking if PR has been edited');
-      const branchIsModified = await scm.isBranchModified(config.branchName);
+      const branchIsModified = await scm.isBranchModified(
+        config.branchName,
+        config.baseBranch,
+      );
       if (branchPr) {
         logger.debug('Found existing branch PR');
         if (branchPr.state !== 'open') {
@@ -594,14 +597,14 @@ export async function processBranch(
     }
 
     if (branchPr) {
-      const platformOptions = getPlatformPrOptions(config);
+      const platformPrOptions = getPlatformPrOptions(config);
       if (
-        platformOptions.usePlatformAutomerge &&
+        platformPrOptions.usePlatformAutomerge &&
         platform.reattemptPlatformAutomerge
       ) {
         await platform.reattemptPlatformAutomerge({
           number: branchPr.number,
-          platformOptions,
+          platformPrOptions,
         });
       }
       // istanbul ignore if

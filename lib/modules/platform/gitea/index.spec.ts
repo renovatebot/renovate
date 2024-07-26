@@ -1625,7 +1625,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       });
 
       expect(res).toMatchObject({
@@ -1653,7 +1653,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       });
 
       expect(res).toMatchObject({
@@ -1681,7 +1681,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       });
 
       expect(res).toMatchObject({
@@ -1707,7 +1707,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       });
 
       expect(res).toMatchObject({
@@ -1734,7 +1734,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       });
 
       expect(res).toMatchObject({
@@ -1763,7 +1763,7 @@ describe('modules/platform/gitea/index', () => {
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        platformOptions: {
+        platformPrOptions: {
           automergeStrategy: 'auto',
           usePlatformAutomerge: true,
         },
@@ -1802,7 +1802,7 @@ describe('modules/platform/gitea/index', () => {
           targetBranch: 'master',
           prTitle: mockNewPR.title,
           prBody: mockNewPR.body,
-          platformOptions: {
+          platformPrOptions: {
             automergeStrategy,
             usePlatformAutomerge: true,
           },
@@ -2832,6 +2832,10 @@ describe('modules/platform/gitea/index', () => {
         '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)',
       );
     });
+  });
+
+  it('maxBodyLength', () => {
+    expect(gitea.maxBodyLength()).toBe(1000000);
   });
 
   describe('getJsonFile()', () => {

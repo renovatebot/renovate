@@ -102,9 +102,9 @@ export interface DatasourceApi extends ModuleApi {
 
   /**
    * Strategy to use when multiple registryUrls are available to the datasource.
-   * first: only the first registryUrl will be tried and others ignored
-   * hunt: registryUrls will be tried in order until one returns a result
-   * merge: all registryUrls will be tried and the results merged if more than one returns a result
+   * - `first`: only the first registryUrl will be tried and others ignored
+   * - `hunt`: registryUrls will be tried in order until one returns a result
+   * - `merge`: all registryUrls will be tried and the results merged if more than one returns a result
    */
   registryStrategy?: RegistryStrategy | undefined;
 
