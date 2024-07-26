@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
+import { joinUrlParts } from '../../../util/url';
 import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
@@ -11,7 +12,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import type { Doc } from './schema';
+import type { Doc, HelmRepository } from './schema';
 import { Doc as documentSchema } from './schema';
 import {
   kustomizationsKeysUsed,
@@ -34,7 +35,7 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   const deps: PackageDependency[] = [];
   let docs: Doc[];
-  let registryAliases: Record<string, string> = {};
+  let registryData: Record<string, HelmRepository> = {};
   // Record kustomization usage for all deps, since updating artifacts is run on the helmfile.yaml as a whole.
   let needKustomize = false;
   try {
@@ -51,15 +52,16 @@ export async function extractPackageFile(
     );
     return null;
   }
+
   for (const doc of docs) {
     // Always check for repositories in the current document and override the existing ones if any (as YAML does)
     if (doc.repositories) {
-      registryAliases = {};
+      registryData = {};
       for (let i = 0; i < doc.repositories.length; i += 1) {
-        registryAliases[doc.repositories[i].name] = doc.repositories[i].url;
+        registryData[doc.repositories[i].name] = doc.repositories[i];
       }
       logger.debug(
-        { registryAliases, packageFile },
+        { registryAliases: registryData, packageFile },
         `repositories discovered.`,
       );
     }
@@ -106,23 +108,23 @@ export async function extractPackageFile(
       const res: PackageDependency = {
         depName,
         currentValue: dep.version,
-        registryUrls: [registryAliases[repoName]]
+        registryUrls: [registryData[repoName]?.url]
           .concat([config.registryAliases?.[repoName]] as string[])
           .filter(is.string),
       };
       if (kustomizationsKeysUsed(dep)) {
         needKustomize = true;
       }
-      // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
-      const repository = doc.repositories?.find(
-        (repo) => repo.name === repoName,
-      );
+
       if (isOCIRegistry(dep.chart)) {
         res.datasource = DockerDatasource.id;
-        res.packageName = repoName + '/' + depName;
-      } else if (repository?.oci) {
+        res.packageName = joinUrlParts(repoName, depName);
+      } else if (registryData[repoName]?.oci) {
         res.datasource = DockerDatasource.id;
-        res.packageName = registryAliases[repoName] + '/' + depName;
+        const alias = registryData[repoName]?.url;
+        if (alias) {
+          res.packageName = joinUrlParts(alias, depName);
+        }
       }
 
       // By definition on helm the chart name should be lowercase letter + number + -

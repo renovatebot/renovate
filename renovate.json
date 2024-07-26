@@ -39,6 +39,18 @@
       "matchDepNames": ["ghcr.io/renovatebot/base-image"],
       "matchUpdateTypes": ["major", "minor"],
       "semanticCommitType": "feat"
+    },
+    {
+      "description": "set build scope for node updates",
+      "matchPackageNames": ["node"],
+      "matchFileNames": [".nvmrc", "tools/docker/Dockerfile"],
+      "semanticCommitType": "build"
+    },
+    {
+      "description": "set branch prefix for node major updates to split from minor updates",
+      "matchPackageNames": ["node"],
+      "matchUpdateTypes": ["major"],
+      "additionalBranchPrefix": "major"
     }
   ],
   "customManagers": [
