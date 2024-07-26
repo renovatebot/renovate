@@ -448,13 +448,7 @@ process.stderr.write(`Host stats:
     HeapLimit: ${(stats.heap_size_limit / 1024 / 1024 / 1024).toFixed(2)} GB
   `);
 function getCoverageIgnorePatterns(): string[] | undefined {
-  const patterns = [
-    '/node_modules/',
-    '<rootdir>/lib/modules/datasource/hex/protos/package.ts',
-    '<rootdir>/lib/modules/datasource/hex/protos/signed.ts',
-    '<rootDir>/test/',
-    '<rootDir>/tools/',
-  ];
+  const patterns = ['/node_modules/', '<rootDir>/test/', '<rootDir>/tools/'];
 
   if (env.TEST_LEGACY_DECRYPTION !== 'true') {
     patterns.push('<rootDir>/lib/config/decrypt/legacy.ts');

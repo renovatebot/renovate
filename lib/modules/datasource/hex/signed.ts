@@ -4,6 +4,7 @@
 //   protoc               v5.27.2
 // source: signed.proto
 
+// istanbul ignore file
 /* eslint-disable */
 import * as _m0 from 'protobufjs/minimal';
 
