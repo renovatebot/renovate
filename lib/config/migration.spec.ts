@@ -539,7 +539,7 @@ describe('config/migration', () => {
             matchPackageNames: ['foo', '/^bar/', '!baz', '!/^baz/'],
             matchRepositories: ['!abc/def'],
             matchFileNames: ['package.json'],
-            matchSourceUrls: ['https://github.com/lodash**'],
+            matchSourceUrls: ['https://github.com/lodash{/,}**'],
             matchUpdateTypes: ['major'],
           },
         ],
