@@ -1,4 +1,3 @@
-import type { LogLevel } from 'bunyan';
 import type { PlatformId } from '../constants';
 import type { LogLevelRemap } from '../logger/types';
 import type { CustomManager } from '../modules/manager/custom/types';
@@ -28,6 +27,7 @@ export interface GroupConfig extends Record<string, unknown> {
 }
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
+export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 // TODO: Proper typings
 export interface RenovateSharedConfig {
   $schema?: string;
@@ -71,7 +71,7 @@ export interface RenovateSharedConfig {
   milestone?: number;
   npmrc?: string;
   npmrcMerge?: boolean;
-  platformCommit?: boolean;
+  platformCommit?: PlatformCommitOptions;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
@@ -115,8 +115,6 @@ export interface GlobalOnlyConfig {
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
   globalExtends?: string[];
-  logFile?: string;
-  logFileLevel?: LogLevel;
   mergeConfidenceDatasources?: string[];
   mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
@@ -178,7 +176,7 @@ export interface LegacyAdminConfig {
   onboarding?: boolean;
   onboardingBranch?: string;
   onboardingCommitMessage?: string;
-  onboardingNoDeps?: boolean;
+  onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingRebaseCheckbox?: boolean;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
@@ -360,13 +358,6 @@ export interface PackageRule
     UpdateConfig,
     Record<string, unknown> {
   description?: string | string[];
-  excludeDepNames?: string[];
-  excludeDepPatterns?: string[];
-  excludeDepPrefixes?: string[];
-  excludePackageNames?: string[];
-  excludePackagePatterns?: string[];
-  excludePackagePrefixes?: string[];
-  excludeRepositories?: string[];
   isVulnerabilityAlert?: boolean;
   matchBaseBranches?: string[];
   matchCategories?: string[];
@@ -376,17 +367,12 @@ export interface PackageRule
   matchCurrentVersion?: string;
   matchDatasources?: string[];
   matchDepNames?: string[];
-  matchDepPatterns?: string[];
-  matchDepPrefixes?: string[];
   matchDepTypes?: string[];
   matchFileNames?: string[];
   matchManagers?: string[];
   matchNewValue?: string;
   matchPackageNames?: string[];
-  matchPackagePatterns?: string[];
-  matchPackagePrefixes?: string[];
   matchRepositories?: string[];
-  matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
   registryUrls?: string[] | null;

@@ -46,7 +46,7 @@ export async function generateDatasources(
 
     let tableContent = '## Table of values\n\n';
 
-    tableContent += '| Name | Vaue | Notes |\n';
+    tableContent += '| Name | Value | Notes |\n';
     tableContent += '| :-- | :-- | :-- |\n';
 
     tableContent += `| Identifier | \`${id}\` | \n`;
