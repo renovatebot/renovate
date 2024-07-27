@@ -16,6 +16,16 @@ describe('util/minimatch', () => {
       expect(minimatch('foo')).not.toBe(minimatch('foo', undefined, false));
       expect(minimatch('foo', { dot: true })).not.toBe(minimatch('foo'));
     });
+
+    it('matches', () => {
+      const matcher = minimatch('@opentelemetry{/,}**');
+      expect(matcher.match('@opentelemetry-http')).toBeTrue();
+      expect(matcher.match('@opentelemetry/http')).toBeTrue();
+      expect(matcher.match('@opentelemetry/http/client')).toBeTrue();
+      expect(
+        minimatch('@opentelemetry**').match('@opentelemetry/http'),
+      ).toBeFalse();
+    });
   });
 
   describe('minimatchFilter', () => {

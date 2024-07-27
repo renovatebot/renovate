@@ -117,7 +117,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
             },
           ],
           message: `Migrate config ${filename}`,
-          platformCommit: false,
+          platformCommit: 'auto',
           baseBranch: 'dev',
         });
       },
