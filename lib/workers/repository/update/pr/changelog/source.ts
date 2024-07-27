@@ -192,10 +192,10 @@ export abstract class ChangeLogSource {
     depNewVersion: string,
     tags: string[],
   ): string | undefined {
-    const releaseNameRegexPrefix = `(?:${depName}|${packageName}|release)[@_-]`;
-    const regex = regEx(releaseNameRegexPrefix, undefined, false);
+    const releaseRegexPrefix = `(?:${depName}|${packageName}|release)[@_-]v?`;
+    const regex = regEx(releaseRegexPrefix, undefined, false);
     const exactReleaseRegex = regEx(
-      `${releaseNameRegexPrefix}v?${depNewVersion}`,
+      `${releaseRegexPrefix}${depNewVersion}`,
     );
     const exactTagsList = tags.filter((tag) => {
       return exactReleaseRegex.test(tag);
