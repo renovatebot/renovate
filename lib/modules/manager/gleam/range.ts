@@ -19,8 +19,5 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   if (rangeStrategy !== 'auto') {
     return rangeStrategy;
   }
-  if (isComplexRange) {
-    return 'widen';
-  }
-  return 'update-lockfile';
+  return 'widen';
 }
