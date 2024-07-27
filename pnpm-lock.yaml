@@ -531,8 +531,8 @@ importers:
         specifier: 3.1.0
         version: 3.1.0(eslint@8.57.0)
       eslint-plugin-promise:
-        specifier: 6.4.0
-        version: 6.4.0(eslint@8.57.0)
+        specifier: 6.5.1
+        version: 6.5.1(eslint@8.57.0)
       eslint-plugin-typescript-enum:
         specifier: 2.1.0
         version: 2.1.0(eslint@8.57.0)(typescript@5.5.4)
@@ -3167,8 +3167,8 @@ packages:
       jest:
         optional: true
 
-  eslint-plugin-promise@6.4.0:
-    resolution: {integrity: sha512-/KWWRaD3fGkVCZsdR0RU53PSthFmoHVhZl+y9+6DqeDLSikLdlUVpVEAmI6iCRR5QyOjBYBqHZV/bdv4DJ4Gtw==}
+  eslint-plugin-promise@6.5.1:
+    resolution: {integrity: sha512-KEYBjj9nCynXAquwKrYEnIJ1zK+e+O5jqwn/9Aln/FhdOXm6WwsmCVatDM6OAxkEzbigsyD79Fi3DUWWqulTEA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
       eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
@@ -9790,7 +9790,7 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-promise@6.4.0(eslint@8.57.0):
+  eslint-plugin-promise@6.5.1(eslint@8.57.0):
     dependencies:
       eslint: 8.57.0
 
