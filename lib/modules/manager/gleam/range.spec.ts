@@ -7,15 +7,6 @@ describe('modules/manager/gleam/range', () => {
     expect(getRangeStrategy(config)).toBe('widen');
   });
 
-  it('widens complex ranges', () => {
-    const config: RangeConfig = {
-      rangeStrategy: 'auto',
-      depType: 'dependencies',
-      currentValue: '>= 1.6.0 and < 2.0.0',
-    };
-    expect(getRangeStrategy(config)).toBe('widen');
-  });
-
   it('widens complex bump', () => {
     const config: RangeConfig = {
       rangeStrategy: 'bump',
@@ -25,11 +16,11 @@ describe('modules/manager/gleam/range', () => {
     expect(getRangeStrategy(config)).toBe('widen');
   });
 
-  it('defaults to update-lockfile', () => {
+  it('defaults to widen', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
       depType: 'dependencies',
     };
-    expect(getRangeStrategy(config)).toBe('update-lockfile');
+    expect(getRangeStrategy(config)).toBe('widen');
   });
 });
