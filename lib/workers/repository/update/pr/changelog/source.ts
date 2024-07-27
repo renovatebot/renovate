@@ -194,9 +194,7 @@ export abstract class ChangeLogSource {
   ): string | undefined {
     const releaseRegexPrefix = `(?:${depName}|${packageName}|release)[@_-]v?`;
     const regex = regEx(releaseRegexPrefix, undefined, false);
-    const exactReleaseRegex = regEx(
-      `${releaseRegexPrefix}${depNewVersion}`,
-    );
+    const exactReleaseRegex = regEx(`${releaseRegexPrefix}${depNewVersion}`);
     const exactTagsList = tags.filter((tag) => {
       return exactReleaseRegex.test(tag);
     });
