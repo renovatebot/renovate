@@ -218,7 +218,7 @@ export class MavenDatasource extends Datasource {
   ): Promise<ReleaseMap> {
     const releaseMap = { ...inputReleaseMap };
 
-    if (process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK) {
+    if (process.env.RENOVATE_EXPERIMENTAL_MAVEN_POM_CHECK !== 'true') {
       return releaseMap;
     }
 

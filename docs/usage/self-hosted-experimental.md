@@ -19,10 +19,10 @@ We will try to keep breakage to a minimum, but make no guarantees that an experi
 If set, Renovate will export OpenTelemetry data to the supplied endpoint.
 For more information see [the OpenTelemetry docs](opentelemetry.md).
 
-## `RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK`
+## `RENOVATE_EXPERIMENTAL_MAVEN_POM_CHECK`
 
-If set to any value, Renovate will skip its default artifacts filter check in the Maven datasource.
-Skipping the check will speed things up, but may result in versions being returned which don't properly exist on the server.
+If set to any `"true"`, Renovate will perform an artifacts filter check in the Maven datasource.
+Skipping the check speeds things up, but may result in versions being returned which don't properly exist on the server.
 
 ## `RENOVATE_PAGINATE_ALL`
 
