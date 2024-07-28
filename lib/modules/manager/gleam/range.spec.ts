@@ -3,8 +3,8 @@ import { getRangeStrategy } from '.';
 
 describe('modules/manager/gleam/range', () => {
   it('returns same if not auto', () => {
-    const config: RangeConfig = { rangeStrategy: 'widen' };
-    expect(getRangeStrategy(config)).toBe('widen');
+    const config: RangeConfig = { rangeStrategy: 'pin' };
+    expect(getRangeStrategy(config)).toBe('pin');
   });
 
   it('widens complex bump', () => {
