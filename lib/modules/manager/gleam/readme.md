@@ -21,3 +21,8 @@ Renovate's `"auto"` strategy defaults to `"widen"` and works like this for `glea
    - Example: `<= 0.38.0` becomes `<= 0.39.0` for a new `0.39.0` version.
 1. For exact version constraints, Renovate replaces the version with the new one.
    - Example: `== 0.12.0` becomes `== 0.13.0` for a new `0.13.0` version.
+
+<!-- prettier-ignore -->
+!!! warning
+    The `gleam` manager does not support the `"update-lockfile"` or `"in-range-only"` strategies.
+    If used, the `gleam` manager will default to the `"widen"` strategy instead.
