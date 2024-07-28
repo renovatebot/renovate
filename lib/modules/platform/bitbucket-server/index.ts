@@ -17,7 +17,7 @@ import {
   BitbucketServerHttp,
   setBaseUrl,
 } from '../../../util/http/bitbucket-server';
-import type { HttpResponse } from '../../../util/http/types';
+import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../../util/url';
@@ -40,6 +40,7 @@ import type {
 } from '../types';
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
+import { UserSchema } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -88,6 +89,7 @@ export async function initPlatform({
   token,
   username,
   password,
+  gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
@@ -98,7 +100,7 @@ export async function initPlatform({
     );
   } else if (password && token) {
     throw new Error(
-      'Init: You must either configure a Bitbucket Server password or a HTTP access token',
+      'Init: You must configure either a Bitbucket Server password or a HTTP access token, not both',
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
@@ -130,6 +132,39 @@ export async function initPlatform({
       { err },
       'Error authenticating with Bitbucket. Check that your token includes "api" permissions',
     );
+  }
+
+  if (!gitAuthor && username) {
+    logger.debug(`Attempting to confirm gitAuthor from username`);
+    const options: HttpOptions = {
+      memCache: false,
+    };
+
+    if (token) {
+      options.token = token;
+    } else {
+      options.username = username;
+      options.password = password;
+    }
+
+    try {
+      const { displayName, emailAddress } = (
+        await bitbucketServerHttp.getJson(
+          `./rest/api/1.0/users/${username}`,
+          options,
+          UserSchema,
+        )
+      ).body;
+
+      platformConfig.gitAuthor = `${displayName} <${emailAddress}>`;
+
+      logger.debug(`Detected gitAuthor: ${platformConfig.gitAuthor}`);
+    } catch (err) {
+      logger.debug(
+        { err },
+        'Failed to get user info, fallback gitAuthor will be used',
+      );
+    }
   }
 
   return platformConfig;
@@ -1079,7 +1114,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
-    .replace(regEx('<!--.*?-->', 'g'), '');
+    .replace(regEx(/<!--.*?-->/gs), '');
 }
 
 export function maxBodyLength(): number {
