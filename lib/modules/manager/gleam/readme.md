@@ -10,7 +10,7 @@ The `gleam` manager, however, uses `gleam` itself to keep `manifest.toml` up-to-
 
 <!-- prettier-ignore -->
 !!! note
-    To ensure that all your dependencies, including those with in-range updates, are kept up-to-date, we strongly recommend enabling [`lockFileMaintenance`](https://docs.renovatebot.com/configuration-options/#lockfilemaintenance) in your Renovate configuration.
+    To ensure that all your dependencies, including those with in-range updates, are kept up-to-date, we strongly recommend enabling [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance) in your Renovate configuration.
     This feature will periodically refresh your `manifest.toml`, ensuring all dependencies are updated to their latest allowed versions.
 
 Renovate's `"auto"` strategy defaults to `"widen"` and works like this for `gleam`:
