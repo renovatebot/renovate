@@ -19,7 +19,7 @@ export interface NugetVersion {
  *
  * Invalid range: `1.2.*-foo`
  */
-export type NugetFloatingRange = {
+export interface NugetFloatingRange {
   type: 'nuget-floating-range';
   major: number;
   minor?: number;
@@ -27,7 +27,7 @@ export type NugetFloatingRange = {
   revision?: number;
   floating?: 'major' | 'minor' | 'patch' | 'revision';
   prerelease?: `${string}*`; // Prerelease of floating versions must end with an asterisk
-};
+}
 
 export interface NugetExactRange {
   type: 'nuget-exact-range';
