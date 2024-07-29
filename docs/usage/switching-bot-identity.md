@@ -4,7 +4,7 @@ Renovate uses its bot identity to know:
 
 - if a PR is authored by Renovate bot
 - if you, or some other bot, pushed commits into the PR branch
-- list other things Renovate uses the bot id for here
+- Editor note: list other things Renovate uses the bot id for here
 
 ## Reasons to switch bot identity
 
@@ -44,8 +44,9 @@ Looks like the steps are:
 1. Set `ignorePrAuthor` to `true`
 1. Let the "new" bot take over from the "old bot"
 
-Questions:
+## Questions from the editor
 
 - Is the `gitAuthor` field the bot identity?
 - What's `gitIgnoredAuthors` for? It looks like you can ignore commits from the old bot with it?
 - We also have `ignorePrAuthor` which if set to `true` fetches the _whole_ list of PRs, instead of just fetching Renovate PRs. The docs say this is the one to use to ignore old bot names. But the description of `ignorePrAuthor` only mentions the full list fetching, nothing about the name/id of the bot.
+- It's easy to confuse `gitIgnoredAuthors` and `ignorePrAuthor` they have similar names, but do different things.
