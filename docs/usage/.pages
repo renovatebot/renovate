@@ -9,6 +9,7 @@ nav:
       - 'Self-hosted': 'self-hosted-configuration.md'
       - 'Presets': 'config-presets.md'
       - 'Validation': 'config-validation.md'
+      - 'Switching bot identity': 'switching-bot-identity.md'
   - ... | key-concepts
   - ... | modules
   - Language Support:
