@@ -36,15 +36,22 @@ Specific:
 
 ### Commentary for 38
 
-For maintainers to fill out.
-You should probably explain:
+If you're self-hosting using Renovate's Docker `-slim` images, you need to now drop that suffix - Renovate's default tags such as `38.0.0` are "slim" by default.
+There's no change if you're using the `-full` images.
 
-- The Node.js 20 change
-- The Docker `-slim` tags change
-- Why you dropped support for vulnerability PRs for `npm <7` for transitive dependencies (I think because it did not work reliably?)
-- Why you set `platformCommit` for GitHub app users?
-- Why logging must be set in env, not in `config.js`?
-- Why the changes to `matchPackageNames`?
+If you're self-hosting without Renovate's Docker images (e.g. building your own image, or running from the `renovate` npm package), then note that Renovate now requires Node.js `^20.15.1` to run.
+We dropped Node.js 18 and do not yet support Node.js 22 as it's non-LTS and not recommended for production.
+We decided to require the current non-vulnerable Node.js release (`20.15.1`) or above although do not plan to bump this minimum Node.js v20 required version in any non-major releases.
+Please ensure you are running the a secure version of Node.js v20 in future as sometimes Node.js vulnerabilities can impact Renovate.
+
+We recommend all users running as a GitHub App utilize `platformCommit` so have refactored it to default to enabled whenever a GitHub App token is detected.
+For PATs, it's still recommend to use regular commits.
+
+File-based logging must be configured using environment variables (e.g. `LOG_FILE`) now and not in file or CLI (such as `logFile`).
+This to ensure that logging can begin at the start of Renovate execution and captures the parsing of configs too.
+
+Finally, we have consolidated may `matchPackage*` and `excludePackage*` options into `matchPackageNames` by enabling patterns.
+You can now do like `"matchPackageNames": "/^com.renovatebot/"` (regex) or `"matchPackageNames": "@renovate/*"` (glob) in addition to exact name matching.
 
 ### Link to release notes for 38
 
