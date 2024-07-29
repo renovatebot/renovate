@@ -76,7 +76,7 @@ export function getRetryAfter(err: unknown): number | null {
   }
 
   if (err.response.statusCode < 400 || err.response.statusCode >= 500) {
-    logger.warn(
+    logger.debug(
       { url: err.response.url },
       `Retry-After: unexpected status code ${err.response.statusCode}`,
     );
