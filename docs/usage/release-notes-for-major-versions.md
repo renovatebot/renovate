@@ -28,7 +28,7 @@ Specific:
 - **github:** if you run Renovate as a GitHub app then `platformCommit` is automatically enabled
 - **http:** remove `dnsCache`
 - **logging:** you must set file logging via env, not in `config.js`
-- **manager/pep621:** change `depName` for `pep621` dependencies. This also changes the branch name for `pep621` updates, which may cause Renovate to autoclose and re-open some `pep621` PRs
+- **manager/pep621:** change `depName` for `pep621` dependencies. This also changes the branch name for `pep621` updates, which may cause Renovate to autoclose and re-open some `pep621` PRs. Further this roll changes into a single PR which have not been grouped before. 
 - **npm:** for npm versions lower than 7, drop support for remediating vulnerabilities in _transitive_ dependencies
 - **npm:** remove `RENOVATE_CACHE_NPM_MINUTES` ([#28715](https://github.com/renovatebot/renovate/pull/28715))
 - **packageRules:** `matchPackageNames` (and related functions) no longer fall back to checking `depName`
