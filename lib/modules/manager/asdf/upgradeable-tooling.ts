@@ -157,7 +157,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     asdfPluginUrl: 'https://github.com/emersonsoares/asdf-dotnet-core',
     config: {
       datasource: DotnetVersionDatasource.id,
-      packageName: 'dotnet-runtime',
+      packageName: 'dotnet-sdk',
     },
   },
   dprint: {

@@ -231,7 +231,7 @@ dummy 1.2.3
           {
             currentValue: '8.0.303',
             datasource: 'dotnet-version',
-            packageName: 'dotnet-runtime',
+            packageName: 'dotnet-sdk',
             depName: 'dotnet-core',
           },
           {
