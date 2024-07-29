@@ -45,7 +45,7 @@ If you're on a version of Lerna before v7, you should prioritize upgrading to v7
 - **automerge:** Platform automerge will now be chosen by default whenever automerge is enabled
 - Post upgrade templating is now allowed by default, as long as the post upgrade task command is itself already allowed
 - Official Renovate Docker images now use the "slim" approach with `binarySource=install` by default. e.g. `renovate/renovate:latest` is the slim image, not full
-- The "full" image is now available via the tag `full`, e.g. `renovate/renovate:37-full`, and defaults to `binarySource=global` (no dynamic installs)
+- The "full" image is now available via the tag `full`, e.g. `renovate/renovate:38-full`, and defaults to `binarySource=global` (no dynamic installs)
 - Third party tools in the full image have been updated to latest/LTS major version
 
 ### Commentary for 36
