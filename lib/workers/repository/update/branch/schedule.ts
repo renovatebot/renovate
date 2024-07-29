@@ -12,7 +12,7 @@ import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-
+import cronstrue from 'cronstrue';
 const minutesChar = '*';
 
 const scheduleMappings: Record<string, string> = {
@@ -25,6 +25,8 @@ function parseCron(
   timezone?: string,
 ): CronExpression | undefined {
   try {
+    const cronScheduleSummary = cronstrue.toString(scheduleText);
+    logger.debug(`Human-readable summary for cron:: ${cronScheduleSummary}`);
     return parseExpression(scheduleText, { tz: timezone });
   } catch (err) {
     return undefined;
