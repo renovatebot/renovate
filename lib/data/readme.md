@@ -78,7 +78,7 @@ To locate the changelogs, Renovate requires:
 - the URL to the changelog file (`changelogUrl`)
 
 Example:
-For the `zone.js` package, the changelog URL is https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md.
+For the `zone.js` package, the changelog URL is <https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md>.
 This will be added to the `npm` group in the `changelog-urls.json` file since the package's datasource is `npm`.
 
 ## Tell Renovate where to find source urls (`source-urls.json`)
@@ -104,5 +104,5 @@ To locate the source repository, Renovate requires:
 - the URL to the source repository (`sourceUrl`)
 
 Example:
-The source URL for the repository `cypress-io/cypress` is https://github.com/cypress-io/cypress.
+The source URL for the repository `cypress-io/cypress` is <https://github.com/cypress-io/cypress>.
 This will be added to the `orb` group in the `source-urls.json` file since the package's datasource is `orb`.
