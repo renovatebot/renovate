@@ -169,7 +169,10 @@
         "description": "Replace `renovate` `slim` docker tag with `latest`.",
         "matchCurrentValue": "/^slim$/",
         "matchDatasources": ["docker"],
-        "matchPackageNames": ["ghcr.io/renovatebot/renovate", "/^(?:docker\\.io/)?renovate/renovate$/"],
+        "matchPackageNames": [
+          "ghcr.io/renovatebot/renovate",
+          "/^(?:docker\\.io/)?renovate/renovate$/"
+        ],
         "replacementVersion": "latest"
       },
       {
@@ -177,7 +180,10 @@
         "extractVersion": "^(?<version>.+)-slim$",
         "matchCurrentValue": "/-slim$/",
         "matchDatasources": ["docker"],
-        "matchPackageNames": ["ghcr.io/renovatebot/renovate", "/^(?:docker\\.io/)?renovate/renovate$/"],
+        "matchPackageNames": [
+          "ghcr.io/renovatebot/renovate",
+          "/^(?:docker\\.io/)?renovate/renovate$/"
+        ],
         "versioning": "semver"
       }
     ]
