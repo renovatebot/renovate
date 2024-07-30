@@ -25,7 +25,7 @@ function parseCron(
   timezone?: string,
 ): CronExpression | undefined {
   try {
-    const cronScheduleSummary = cronstrue.toString(scheduleText);
+    const cronScheduleSummary = cronstrue.toString(scheduleText, { throwExceptionOnParseError: false });
     logger.debug(`Human-readable summary for cron:: ${cronScheduleSummary}`);
     return parseExpression(scheduleText, { tz: timezone });
   } catch (err) {
