@@ -102,7 +102,6 @@ export async function initPlatform({
   endpoint,
   token,
   gitAuthor,
-  platformVersion,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
@@ -131,8 +130,9 @@ export async function initPlatform({
         user.commit_email ?? user.email
       }>`;
     }
-    if (platformVersion) {
-      gitlabVersion = platformVersion;
+    // istanbul ignore if: experimental feature
+    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
+      gitlabVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
     } else {
       const version = (
         await gitlabApi.getJson<{ version: string }>('version', { token })

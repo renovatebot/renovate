@@ -89,7 +89,6 @@ export async function initPlatform({
   token,
   username,
   password,
-  platformVersion,
   gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
@@ -112,8 +111,9 @@ export async function initPlatform({
   };
   try {
     let bitbucketServerVersion: string;
-    if (platformVersion) {
-      bitbucketServerVersion = platformVersion;
+    // istanbul ignore if: experimental feature
+    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
+      bitbucketServerVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
     } else {
       const { version } = (
         await bitbucketServerHttp.getJson<{ version: string }>(

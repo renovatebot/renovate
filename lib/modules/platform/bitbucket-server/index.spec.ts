@@ -344,6 +344,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         });
 
         it('should skip api call to fetch version when platform version is set in environment', async () => {
+          process.env.RENOVATE_X_PLATFORM_VERSION = '8.0.0';
           httpMock
             .scope('https://stash.renovatebot.com')
             .get(`/rest/api/1.0/users/${username}`)
@@ -354,9 +355,9 @@ describe('modules/platform/bitbucket-server/index', () => {
               endpoint: 'https://stash.renovatebot.com',
               username: 'abc',
               password: '123',
-              platformVersion: '8.0.0',
             }),
           ).toResolve();
+          delete process.env.RENOVATE_X_PLATFORM_VERSION;
         });
 
         it('should skip users api call when gitAuthor is configured', async () => {

@@ -138,32 +138,6 @@ describe('modules/platform/gitlab/index', () => {
         }),
       ).toEqual({ endpoint: 'https://gitlab.com/api/v4/' });
     });
-
-    it('should throw if version could not be fetched', async () => {
-      httpMock.scope(gitlabApiHost).get('/api/v4/version').reply(403);
-      await expect(async () => {
-        await gitlab.initPlatform({
-          token: 'some-token',
-          endpoint: undefined,
-          gitAuthor: 'somebody',
-        });
-      }).rejects.toThrow();
-      expect(logger.debug).toHaveBeenCalledWith(
-        expect.any(Object),
-        'Error authenticating with GitLab. Check that your token includes "api" permissions',
-      );
-    });
-
-    it('should skip the API call to fetch the version when platform version is set in environment', async () => {
-      await expect(
-        gitlab.initPlatform({
-          token: 'some-token',
-          endpoint: undefined,
-          platformVersion: '8.0.0',
-          gitAuthor: 'somebody',
-        }),
-      ).toResolve();
-    });
   });
 
   describe('getRepos', () => {

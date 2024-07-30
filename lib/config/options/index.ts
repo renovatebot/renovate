@@ -2942,14 +2942,6 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'platformVersion',
-    description:
-      'Set a version string here to let Renovate skip the API call to fetch the platform version.',
-    type: 'string',
-    globalOnly: true,
-    supportedPlatforms: ['gitlab', 'bitbucket-server'],
-  },
-  {
     name: 'cachePrivatePackages',
     description:
       'Cache private packages in the datasource cache. This is useful for self-hosted setups',

@@ -16,7 +16,6 @@ export interface PlatformParams {
   username?: string;
   password?: string;
   gitAuthor?: string;
-  platformVersion?: string;
 }
 
 export interface PlatformResult {

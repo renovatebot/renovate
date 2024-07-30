@@ -38,7 +38,6 @@ export class GlobalConfig {
     'autodiscoverRepoOrder',
     'userAgent',
     'dockerMaxPages',
-    'platformVersion',
     'cachePrivatePackages',
   ];
 
