@@ -294,7 +294,7 @@ export function divideWorkspaceAndRootDeps(
       const workspaceDir = trimSlashes(
         packageFileDir.startsWith(lockFileDir)
           ? packageFileDir.slice(lockFileDir.length)
-          : packageFileDir
+          : packageFileDir,
       );
 
       if (is.nonEmptyString(workspaceDir)) {
