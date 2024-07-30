@@ -408,6 +408,7 @@ describe('workers/repository/update/branch/schedule', () => {
       });
     });
   });
+
   describe('cronstrue', () => {
     it('should correctly convert "0 22 4 * *" to human-readable format', () => {
       const result = cronstrue.toString('0 22 4 * *');
