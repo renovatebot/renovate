@@ -3,7 +3,6 @@
 <!-- prettier-ignore -->
 !!! warning "This feature is flagged as experimental"
     Experimental features might be changed or even removed at any time.
-    Subscribe to [GitHub issue #2868](https://github.com/renovatebot/renovate/issues/2868) to be notified of any changes.
 
 ## Authentication
 
