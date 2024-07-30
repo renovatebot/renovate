@@ -37,7 +37,6 @@ export class GlobalConfig {
     'autodiscoverRepoSort',
     'autodiscoverRepoOrder',
     'userAgent',
-    'deleteConfigFile',
     's3Endpoint',
     's3PathStyle',
     'cachePrivatePackages',

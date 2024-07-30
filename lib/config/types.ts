@@ -125,6 +125,7 @@ export interface GlobalOnlyConfig {
   redisUrl?: string;
   repositories?: RenovateRepository[];
   useCloudMetadataServices?: boolean;
+  deleteConfigFile?: boolean;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -165,7 +166,6 @@ export interface RepoGlobalConfig {
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;
   userAgent?: string;
-  deleteConfigFile?: boolean;
   s3Endpoint?: string;
   s3PathStyle?: boolean;
   cachePrivatePackages?: boolean;
