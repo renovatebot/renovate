@@ -8,6 +8,7 @@
       "replacements:containerbase",
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
+      "replacements:docker-compose",
       "replacements:eslint-config-standard-with-typescript-to-eslint-config-love",
       "replacements:eslint-plugin-node-to-maintained-fork",
       "replacements:fakerjs-to-scoped",
@@ -203,6 +204,17 @@
         "matchPackageNames": ["cucumber"],
         "replacementName": "@cucumber/cucumber",
         "replacementVersion": "7.0.0"
+      }
+    ]
+  },
+  "docker-compose": {
+    "description": "Compose has been integrated in the official Docker image.",
+    "packageRules": [
+      {
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["docker/compose"],
+        "replacementName": "docker",
+        "replacementVersion": "27.1.1-cli"
       }
     ]
   },
