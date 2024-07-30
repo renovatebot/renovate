@@ -24,3 +24,7 @@ workflows:
           inputs:
             - content: echo "Hello ${MY_NAME}!"
 ```
+
+### Authorizing Renovate to access Bitrise steps for self-hosted
+
+Renovate will use

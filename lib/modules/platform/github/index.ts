@@ -43,7 +43,7 @@ import { coerceObject } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { coerceString, fromBase64, looseEquals } from '../../../util/string';
-import { ensureTrailingSlash } from '../../../util/url';
+import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import type {
   AggregatedVulnerabilities,
   AutodiscoverConfig,
@@ -213,36 +213,53 @@ export async function initPlatform({
     renovateUsername,
     token,
   };
-  if (
-    process.env.RENOVATE_X_GITHUB_HOST_RULES &&
-    platformResult.endpoint === 'https://api.github.com/'
-  ) {
-    logger.debug('Adding GitHub token as GHCR password');
-    platformResult.hostRules = [
-      {
+  if (platformResult.endpoint === 'https://api.github.com/') {
+    platformResult.hostRules ??= [];
+    // allow accessing the central bitrise repo via renovate token
+    logger.debug(
+      `Converting GITHUB_COM_TOKEN into a central bitrise repo host rule`,
+    );
+    platformResult.hostRules.push({
+      hostType: 'bitrise',
+      matchHost: ensureTrailingSlash(
+        joinUrlParts(
+          platformResult.endpoint,
+          'repos',
+          'bitrise-io',
+          'bitrise-steplib',
+          'contents',
+        ),
+      ),
+      token: token.replace(/^x-access-token:/, ''),
+    });
+
+    // allow accessing Github hosted package managers
+    if (process.env.RENOVATE_X_GITHUB_HOST_RULES) {
+      logger.debug('Adding GitHub token as GHCR password');
+      platformResult.hostRules.push({
         matchHost: 'ghcr.io',
         hostType: 'docker',
         username: 'USERNAME',
         password: token.replace(/^x-access-token:/, ''),
-      },
-    ];
-    logger.debug('Adding GitHub token as npm.pkg.github.com Basic token');
-    platformResult.hostRules.push({
-      matchHost: 'npm.pkg.github.com',
-      hostType: 'npm',
-      token: token.replace(/^x-access-token:/, ''),
-    });
-    const usernamePasswordHostTypes = ['rubygems', 'maven', 'nuget'];
-    for (const hostType of usernamePasswordHostTypes) {
-      logger.debug(
-        `Adding GitHub token as ${hostType}.pkg.github.com password`,
-      );
-      platformResult.hostRules.push({
-        hostType,
-        matchHost: `${hostType}.pkg.github.com`,
-        username: renovateUsername,
-        password: token.replace(/^x-access-token:/, ''),
       });
+      logger.debug('Adding GitHub token as npm.pkg.github.com Basic token');
+      platformResult.hostRules.push({
+        matchHost: 'npm.pkg.github.com',
+        hostType: 'npm',
+        token: token.replace(/^x-access-token:/, ''),
+      });
+      const usernamePasswordHostTypes = ['rubygems', 'maven', 'nuget'];
+      for (const hostType of usernamePasswordHostTypes) {
+        logger.debug(
+          `Adding GitHub token as ${hostType}.pkg.github.com password`,
+        );
+        platformResult.hostRules.push({
+          hostType,
+          matchHost: `${hostType}.pkg.github.com`,
+          username: renovateUsername,
+          password: token.replace(/^x-access-token:/, ''),
+        });
+      }
     }
   }
   return platformResult;

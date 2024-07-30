@@ -209,11 +209,11 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 - [github.com and GitHub Enterprise Server](../modules/platform/github/index.md)
 - [GitLab](../modules/platform/gitlab/index.md)
 
-### GitHub.com token for changelogs
+### GitHub.com token for meta data
 
 If you are running on any platform except github.com, you should also set the environment variable `GITHUB_COM_TOKEN` and put the Personal Access Token for github.com in it.
 This account can be _any_ account on GitHub, and needs only `read-only` access.
-It's used when fetching changelogs for repositories in order to increase the hourly API limit.
+It's used to increase the hourly API limit when fetching changelogs or other contents from repositories.
 It's also OK to configure the same as a host rule instead, if you prefer that.
 
 <!-- prettier-ignore -->

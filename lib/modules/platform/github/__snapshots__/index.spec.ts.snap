@@ -31,6 +31,13 @@ exports[`modules/platform/github/index initPlatform() should support default end
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
+  "hostRules": [
+    {
+      "hostType": "bitrise",
+      "matchHost": "https://api.github.com/repos/bitrise-io/bitrise-steplib/contents/",
+      "token": "123test",
+    },
+  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -40,6 +47,13 @@ exports[`modules/platform/github/index initPlatform() should support default end
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
+  "hostRules": [
+    {
+      "hostType": "bitrise",
+      "matchHost": "https://api.github.com/repos/bitrise-io/bitrise-steplib/contents/",
+      "token": "123test",
+    },
+  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -49,6 +63,13 @@ exports[`modules/platform/github/index initPlatform() should support default end
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "undefined <user@domain.com>",
+  "hostRules": [
+    {
+      "hostType": "bitrise",
+      "matchHost": "https://api.github.com/repos/bitrise-io/bitrise-steplib/contents/",
+      "token": "123test",
+    },
+  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -58,6 +79,13 @@ exports[`modules/platform/github/index initPlatform() should support gitAuthor a
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "renovate@whitesourcesoftware.com",
+  "hostRules": [
+    {
+      "hostType": "bitrise",
+      "matchHost": "https://api.github.com/repos/bitrise-io/bitrise-steplib/contents/",
+      "token": "123test",
+    },
+  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }

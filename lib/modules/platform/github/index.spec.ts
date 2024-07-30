@@ -189,6 +189,12 @@ describe('modules/platform/github/index', () => {
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
         hostRules: [
           {
+            hostType: 'bitrise',
+            matchHost:
+              'https://api.github.com/repos/bitrise-io/bitrise-steplib/contents/',
+            token: 'ghs_123test',
+          },
+          {
             hostType: 'docker',
             matchHost: 'ghcr.io',
             password: 'ghs_123test',
@@ -225,6 +231,12 @@ describe('modules/platform/github/index', () => {
         endpoint: 'https://api.github.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
         hostRules: [
+          {
+            hostType: 'bitrise',
+            matchHost:
+              'https://api.github.com/repos/bitrise-io/bitrise-steplib/contents/',
+            token: 'ghs_123test',
+          },
           {
             hostType: 'docker',
             matchHost: 'ghcr.io',
