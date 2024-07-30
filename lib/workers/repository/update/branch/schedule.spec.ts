@@ -1,3 +1,4 @@
+import cronstrue from 'cronstrue';
 import type { RenovateConfig } from '../../../../config/types';
 import * as schedule from './schedule';
 
@@ -405,6 +406,23 @@ describe('workers/repository/update/branch/schedule', () => {
         jest.setSystemTime(new Date(datetime));
         expect(schedule.isScheduledNow(config)).toBe(expected);
       });
+    });
+  });
+
+  describe('cronstrue', () => {
+    it('should correctly convert "0 22 4 * *" to human-readable format', () => {
+      const result = cronstrue.toString("0 22 4 * *");
+      expect(result).toBe("At 10:00 PM, on day 4 of the month");
+    });
+
+    it('should correctly convert "*/2 * * * *" to human-readable format', () => {
+      const result = cronstrue.toString("*/2 * * * *");
+      expect(result).toBe("Every 2 minutes");
+    });
+
+    it('should correctly convert "0 23 * * *" to human-readable format', () => {
+      const result = cronstrue.toString("0 23 * * *");
+      expect(result).toBe("At 11:00 PM");
     });
   });
 });

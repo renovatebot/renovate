@@ -8,11 +8,11 @@ import {
   MonthRange,
   parseExpression,
 } from 'cron-parser';
+import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import cronstrue from 'cronstrue';
 const minutesChar = '*';
 
 const scheduleMappings: Record<string, string> = {
