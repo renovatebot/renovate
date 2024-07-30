@@ -12,6 +12,7 @@ const cacheNamespace = 'datasource-docker-hub-cache';
 
 export class DockerHubCache {
   private isChanged = false;
+  private reconciledIds = new Set<number>();
 
   private constructor(
     private dockerRepository: string,
@@ -40,11 +41,9 @@ export class DockerHubCache {
     let { updatedAt } = this.cache;
     let latestDate = updatedAt ? DateTime.fromISO(updatedAt) : null;
 
-    const ids = new Set<number>();
-
     for (const newItem of items) {
       const id = newItem.id;
-      ids.add(id);
+      this.reconciledIds.add(id);
 
       const oldItem = this.cache.items[id];
 
@@ -77,17 +76,21 @@ export class DockerHubCache {
 
         const itemDate = DateTime.fromISO(item.last_updated);
 
-        if (itemDate < earliestDate || itemDate > latestDate || ids.has(id)) {
+        if (
+          itemDate < earliestDate ||
+          itemDate > latestDate ||
+          this.reconciledIds.has(id)
+        ) {
           continue;
         }
 
         delete this.cache.items[id];
         this.isChanged = true;
       }
-    }
 
-    if (Object.keys(this.cache.items).length > expectedCount) {
-      return true;
+      if (Object.keys(this.cache.items).length > expectedCount) {
+        return true;
+      }
     }
 
     return needNextPage;

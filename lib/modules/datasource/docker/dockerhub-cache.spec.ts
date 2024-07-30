@@ -76,6 +76,7 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
         updatedAt: null,
       },
       isChanged: false,
+      reconciledIds: new Set(),
     });
   });
 
@@ -89,6 +90,7 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
       dockerRepository,
       cache: oldCache,
       isChanged: false,
+      reconciledIds: new Set(),
     });
   });
 
@@ -107,6 +109,7 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
       cache: newCache,
       dockerRepository: 'foo/bar',
       isChanged: true,
+      reconciledIds: new Set([4]),
     });
 
     const res = cache.getItems();
@@ -135,6 +138,7 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
       cache: oldCache,
       dockerRepository: 'foo/bar',
       isChanged: false,
+      reconciledIds: new Set([1, 2, 3]),
     });
 
     const res = cache.getItems();
@@ -151,13 +155,14 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
     const cache = await DockerHubCache.init(dockerRepository);
     const items: DockerHubTag[] = Object.values(oldCache.items);
 
-    const needNextPage = cache.reconcile(items, 10);
+    const needNextPage = cache.reconcile(items, 0);
 
     expect(needNextPage).toBe(true);
     expect(cache).toEqual({
       cache: oldCache,
       dockerRepository: 'foo/bar',
       isChanged: false,
+      reconciledIds: new Set([1, 2, 3]),
     });
 
     const res = cache.getItems();
@@ -201,6 +206,7 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
       cache: expectedCache,
       dockerRepository: 'foo/bar',
       isChanged: true,
+      reconciledIds: new Set([4]),
     });
 
     const res = cache.getItems();
