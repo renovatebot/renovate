@@ -11,10 +11,10 @@ export function getS3Client(
   s3PathStyle?: boolean,
 ): S3Client {
   if (!s3Instance) {
-    const endpoint = GlobalConfig.get('s3Endpoint') ?? s3Endpoint;
-    const forcePathStyle = is.undefined(GlobalConfig.get('s3PathStyle'))
-      ? s3PathStyle
-      : !!GlobalConfig.get('s3PathStyle');
+    const endpoint = s3Endpoint ?? GlobalConfig.get('s3Endpoint');
+    const forcePathStyle = is.undefined(s3PathStyle)
+      ? !!GlobalConfig.get('s3PathStyle')
+      : s3PathStyle;
     s3Instance = new S3Client({
       ...(endpoint && { endpoint }),
       ...(forcePathStyle && { forcePathStyle: true }),

@@ -101,10 +101,6 @@ export async function parseConfigs(
   // Only try deletion if RENOVATE_CONFIG_FILE is set
   await fileParser.deleteNonDefaultConfig(env, !!config.deleteConfigFile);
 
-  // Remove log file entries
-  delete config.logFile;
-  delete config.logFileLevel;
-
   // Massage onboardingNoDeps
   if (!config.autodiscover && config.onboardingNoDeps !== 'disabled') {
     logger.debug('Enabling onboardingNoDeps while in non-autodiscover mode');
