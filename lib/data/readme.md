@@ -62,11 +62,6 @@ The `changelog-urls.json` has all the changelog information.
 
 Renovate nearly always finds, and displays, the changelog for a package update automatically.
 
-To find the changelog, Renovate needs the:
-
-- Name of the package
-- URL to the changelog file
-
 Usually, the API for the package to be updated gives Renovate the correct info.
 If this does not happen, for whatever reason, Renovate can not show the changelog.
 
@@ -76,6 +71,16 @@ You can use these config options to let Renovate find the correct changelog:
 
 Read the [Renovate docs, key concepts page for changelogs](https://docs.renovatebot.com/key-concepts/changelogs/) to learn more about how Renovate fetches and displays changelogs.
 
+To locate the changelogs, Renovate requires:
+
+- the name of the package (`packageName`)
+- the datasource of the package
+- the URL to the changelog file (`changelogUrl`)
+
+Example:
+For the `zone.js` package, the changelog URL is https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md.
+This will be added to the `npm` group in the `changelog-urls.json` file since the package's datasource is `npm`.
+
 ## Tell Renovate where to find source urls (`source-urls.json`)
 
 The `source-urls.json` has the information on source URL of multiple packages.
@@ -84,11 +89,6 @@ Renovate nearly always finds, and displays, the source for a package update auto
 Usually, the API for the package to be updated gives Renovate the correct info.
 If this does not happen, for whatever reason, Renovate can not link to the source of the package and might not be able to lookup changelogs.
 
-To find the source URL, Renovate needs the:
-
-- Name of the package
-- URL to the source
-
 To check if Renovate can find the source URLs for your package:
 
 1. Find the datasource for your package.
@@ -96,3 +96,13 @@ To check if Renovate can find the source URLs for your package:
 1. Look for a table in the docs that shows if the datasource returns source URLs.
 
 If Renovate does not find the right source URls automatically: use the [`sourceUrl` config option](https://docs.renovatebot.com/configuration-options/#sourceurl).
+
+To locate the source repository, Renovate requires:
+
+- the name of the package (`packageName`)
+- the datasource of the package
+- the URL to the source repository (`sourceUrl`)
+
+Example:
+The source URL for the repository `cypress-io/cypress` is https://github.com/cypress-io/cypress.
+This will be added to the `orb` group in the `source-urls.json` file since the package's datasource is `orb`.
