@@ -2780,7 +2780,6 @@ const options: RenovateOptions[] = [
     allowedValues: ['off', 'branch', 'pr'],
     default: 'pr',
     cli: false,
-    env: false,
   },
   {
     name: 'cloneSubmodules',
@@ -2831,7 +2830,6 @@ const options: RenovateOptions[] = [
     description: 'Writes discovered repositories to a JSON file and then exit.',
     type: 'string',
     globalOnly: true,
-    env: false,
   },
   {
     name: 'platformAutomerge',
