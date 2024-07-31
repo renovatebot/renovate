@@ -45,6 +45,16 @@ function newItem(): DockerHubTag {
   };
 }
 
+function brokenItem(): DockerHubTag {
+  return {
+    id: 5,
+    last_updated: 'invalid date',
+    name: '5',
+    tag_last_pushed: '2022-01-04',
+    digest: 'sha256:555',
+  };
+}
+
 function newCacheData(): DockerHubCacheData {
   const { items } = oldCacheData();
   const item = newItem();
@@ -98,7 +108,7 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
 
     packageCache.get.mockResolvedValue(oldCache);
     const cache = await DockerHubCache.init(dockerRepository);
-    const newItems: DockerHubTag[] = [newItem()];
+    const newItems: DockerHubTag[] = [newItem(), brokenItem()];
 
     const needNextPage = cache.reconcile(newItems);
 

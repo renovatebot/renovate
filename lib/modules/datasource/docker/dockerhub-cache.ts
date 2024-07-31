@@ -10,6 +10,8 @@ export interface DockerHubCacheData {
 
 const cacheNamespace = 'datasource-docker-hub-cache';
 
+const MaybeDateTime = UtcDate.nullable().catch(null);
+
 export class DockerHubCache {
   private isChanged = false;
 
@@ -36,9 +38,14 @@ export class DockerHubCache {
     let needNextPage = true;
 
     let { updatedAt } = this.cache;
-    let latestDate = UtcDate.nullable().catch(null).parse(updatedAt);
+    let latestDate = MaybeDateTime.parse(updatedAt);
 
     for (const newItem of items) {
+      const newItemDate = MaybeDateTime.parse(newItem.last_updated);
+      if (!newItemDate) {
+        continue;
+      }
+
       const id = newItem.id;
       const oldItem = this.cache.items[id];
 
@@ -48,7 +55,6 @@ export class DockerHubCache {
       }
 
       this.cache.items[newItem.id] = newItem;
-      const newItemDate = UtcDate.parse(newItem.last_updated);
       if (!latestDate || latestDate < newItemDate) {
         updatedAt = newItem.last_updated;
         latestDate = newItemDate;
