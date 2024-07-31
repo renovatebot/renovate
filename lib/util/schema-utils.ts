@@ -227,14 +227,25 @@ export const Jsonc = z.string().transform((str, ctx): JsonValue => {
 });
 
 export const UtcDate = z
-  .string({ description: 'ISO 8601 string' })
-  .transform((str, ctx): DateTime => {
+  .string({ description: 'ISO 8601 string parsed to DateTime' })
+  .transform((str, ctx): DateTime<true> => {
     const date = DateTime.fromISO(str, { zone: 'utc' });
     if (!date.isValid) {
       ctx.addIssue({ code: 'custom', message: 'Invalid date' });
       return z.NEVER;
     }
     return date;
+  });
+
+export const UtcDateString = z
+  .string({ description: 'ISO 8601 string parsed into UTC time zone' })
+  .transform((str, ctx): string => {
+    const date = DateTime.fromISO(str, { zone: 'utc' });
+    if (!date.isValid) {
+      ctx.addIssue({ code: 'custom', message: 'Invalid date' });
+      return z.NEVER;
+    }
+    return date.toISO();
   });
 
 export const Yaml = z.string().transform((str, ctx): JsonValue => {

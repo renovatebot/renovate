@@ -9,6 +9,7 @@ import {
   MultidocYaml,
   Toml,
   UtcDate,
+  UtcDateString,
   Yaml,
 } from './schema-utils';
 
@@ -345,6 +346,18 @@ describe('util/schema-utils', () => {
 
     it('rejects invalid date', () => {
       expect(() => UtcDate.parse('foobar')).toThrow();
+    });
+  });
+
+  describe('UtcDateString', () => {
+    it('parses date', () => {
+      expect(UtcDateString.parse('2020-04-04')).toBe(
+        '2020-04-04T00:00:00.000Z',
+      );
+    });
+
+    it('rejects invalid date', () => {
+      expect(() => UtcDateString.parse('foobar')).toThrow();
     });
   });
 
