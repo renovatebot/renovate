@@ -49,6 +49,7 @@ Our Docker images already use the correct version of Node.js.
 
 But if you self-host _without_ using our Docker image, then you must update the version of Node.js.
 You must update manually, if for example: you build your own image, or run the `renovate` npm package.
+
 ##### Why we picked Node 20
 
 We dropped Node.js 18, and do not yet support Node.js 22 as it's non-LTS and not recommended for production.
