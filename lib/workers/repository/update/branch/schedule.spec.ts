@@ -426,10 +426,12 @@ describe('workers/repository/update/branch/schedule', () => {
     });
 
     it('should throw an error for an invalid cron expression "* * */2 6#1"', () => {
-      const result = cronstrue.toString("* * */2 6#1", {
+      const result = cronstrue.toString('* * */2 6#1', {
         throwExceptionOnParseError: false,
       });
-      expect(result).toBe("An error occured when generating the expression description.  Check the cron expression syntax.");
+      expect(result).toBe(
+        'An error occured when generating the expression description.  Check the cron expression syntax.',
+      );
     });
   });
 });
