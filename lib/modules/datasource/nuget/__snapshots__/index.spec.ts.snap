@@ -407,9 +407,9 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) fee
 exports[`modules/datasource/nuget/index getReleases processes real data (v3) feed is not a nuget.org 1`] = `
 {
   "datasourceProvidedReleaseNotes": "This package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need
-        to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to
-        execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.
-      ",
+      to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to
+      execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.
+    ",
   "registryUrl": "https://myprivatefeed/index.json",
   "releases": [
     {
