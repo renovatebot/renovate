@@ -211,6 +211,10 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v2) 1`]
 
 exports[`modules/datasource/nuget/index getReleases processes real data (v3) feed is a nuget.org 1`] = `
 {
+  "datasourceProvidedReleaseNotes": "This package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need
+      to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to
+      execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.
+    ",
   "homepage": "https://nunit.org/",
   "registryUrl": "https://api.nuget.org/v3/index.json",
   "releases": [
@@ -402,6 +406,10 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) fee
 
 exports[`modules/datasource/nuget/index getReleases processes real data (v3) feed is not a nuget.org 1`] = `
 {
+  "datasourceProvidedReleaseNotes": "This package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need
+        to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to
+        execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.
+      ",
   "registryUrl": "https://myprivatefeed/index.json",
   "releases": [
     {
@@ -591,6 +599,33 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) fee
 
 exports[`modules/datasource/nuget/index getReleases processes real data (v3) for several catalog pages 1`] = `
 {
+  "datasourceProvidedReleaseNotes": "## Features
+           - Allow to change the RuleName of a LoggingRule (#4017) (@304NotModified)
+           - logging of AggregrateException.Data to prevent it from losing it after Flatten call (#3974) (@chaos0307)
+
+           ## Bugfixes
+           - LocalIpAddressLayoutRenderer - IsDnsEligible and PrefixOrigin throws PlatformNotSupportedException on Linux
+           (#4011) (@snakefoot)
+
+           ## Improvements
+           - ObjectReflectionCache - Reduce noise from properties that throws exceptions like Stream.ReadTimeout (#4057)
+           (@snakefoot)
+           - MessageTemplates - Changed Literal.Skip to be Int32 to support message templates longer than short.MaxValue
+           (#4053) (@snakefoot)
+           - ObjectReflectionCache - Skip reflection for Stream objects (#4043) (@snakefoot)
+           - LogFactory Shutdown is public so it can be used from NLogLoggerProvider (#3999) (@snakefoot)
+           - Editor config with File header template (#3972) (@304NotModified)
+
+           ## Performance
+           - FileTarget - Skip delegate capture in GetFileCreationTimeSource. Fallback only necessary when appender has been
+           closed. (#4058) (@snakefoot)
+           - ObjectReflectionCache - Reduce initial memory allocation until needed (#4021) (@snakefoot)
+           - FilteringTargetWrapper - Remove delegate allocation (#3977) (@snakefoot)
+
+           Full changelog: https://github.com/NLog/NLog/blob/master/CHANGELOG.md
+
+           For all config options and platform support, check https://nlog-project.org/config/
+         ",
   "homepage": "https://nlog-project.org/",
   "registryUrl": "https://api.nuget.org/v3/index.json",
   "releases": [
@@ -1848,6 +1883,10 @@ exports[`modules/datasource/nuget/index getReleases processes real data without 
 
 exports[`modules/datasource/nuget/index getReleases returns deduplicated results 1`] = `
 {
+  "datasourceProvidedReleaseNotes": "This package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need
+      to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to
+      execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.
+    ",
   "homepage": "https://nunit.org/",
   "releases": [
     {
