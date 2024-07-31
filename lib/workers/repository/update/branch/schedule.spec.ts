@@ -423,5 +423,12 @@ describe('workers/repository/update/branch/schedule', () => {
       const result = cronstrue.toString("0 23 * * *");
       expect(result).toBe("At 11:00 PM");
     });
+    
+    it('should throw an error for an invalid cron expression "* * */2 6#1"', () => {
+      expect(() => {
+        cronstrue.toString("* * */2 6#1");
+      }).toThrow("Error: Expression has only 4 parts. At least 5 parts are required.");
+    });
+    
   });
 });
