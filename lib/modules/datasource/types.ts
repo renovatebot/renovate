@@ -69,7 +69,6 @@ export interface Release {
   sourceUrl?: string | undefined;
   sourceDirectory?: string;
   currentAge?: string;
-  datasourceProvidedReleaseNotes?: string | undefined;
 }
 
 export interface ReleaseResult {
@@ -89,6 +88,7 @@ export interface ReleaseResult {
   replacementVersion?: string;
   lookupName?: string;
   packageScope?: string;
+  datasourceProvidedReleaseNotes?: string | undefined;
 }
 
 export type RegistryStrategy = 'first' | 'hunt' | 'merge';
