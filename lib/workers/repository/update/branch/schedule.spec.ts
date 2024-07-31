@@ -408,20 +408,21 @@ describe('workers/repository/update/branch/schedule', () => {
       });
     });
   });
+
   describe('cronstrue', () => {
     it('should correctly convert "0 22 4 * *" to human-readable format', () => {
-      const result = cronstrue.toString("0 22 4 * *");
-      expect(result).toBe("At 10:00 PM, on day 4 of the month");
+      const result = cronstrue.toString('0 22 4 * *');
+      expect(result).toBe('At 10:00 PM, on day 4 of the month');
     });
 
     it('should correctly convert "*/2 * * * *" to human-readable format', () => {
-      const result = cronstrue.toString("*/2 * * * *");
-      expect(result).toBe("Every 2 minutes");
+      const result = cronstrue.toString('*/2 * * * *');
+      expect(result).toBe('Every 2 minutes');
     });
 
     it('should correctly convert "0 23 * * *" to human-readable format', () => {
-      const result = cronstrue.toString("0 23 * * *");
-      expect(result).toBe("At 11:00 PM");
+      const result = cronstrue.toString('0 23 * * *');
+      expect(result).toBe('At 11:00 PM');
     });
     
     it('should throw an error for an invalid cron expression "* * */2 6#1"', () => {
