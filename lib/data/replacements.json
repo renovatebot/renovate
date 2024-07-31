@@ -38,6 +38,7 @@
       "replacements:semantic-release-replace-plugin-to-unscoped",
       "replacements:spectre-cli-to-spectre-console-cli",
       "replacements:standard-version-to-commit-and-tag",
+      "replacements:typeorm-seeding-to-scoped",
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
       "replacements:xmldom-to-scoped",
@@ -169,8 +170,10 @@
         "description": "Replace `renovate` `slim` docker tag with `latest`.",
         "matchCurrentValue": "/^slim$/",
         "matchDatasources": ["docker"],
-        "matchPackageNames": ["ghcr.io/renovatebot/renovate"],
-        "matchPackageNames": ["/^(?:docker\\.io/)?renovate/renovate$/"],
+        "matchPackageNames": [
+          "ghcr.io/renovatebot/renovate",
+          "/^(?:docker\\.io/)?renovate/renovate$/"
+        ],
         "replacementVersion": "latest"
       },
       {
@@ -178,8 +181,10 @@
         "extractVersion": "^(?<version>.+)-slim$",
         "matchCurrentValue": "/-slim$/",
         "matchDatasources": ["docker"],
-        "matchPackageNames": ["ghcr.io/renovatebot/renovate"],
-        "matchPackageNames": ["/^(?:docker\\.io/)?renovate/renovate$/"],
+        "matchPackageNames": [
+          "ghcr.io/renovatebot/renovate",
+          "/^(?:docker\\.io/)?renovate/renovate$/"
+        ],
         "versioning": "semver"
       }
     ]
@@ -927,6 +932,18 @@
         "matchPackageNames": ["standard-version"],
         "replacementName": "commit-and-tag-version",
         "replacementVersion": "9.5.0"
+      }
+    ]
+  },
+  "typeorm-seeding-to-scoped": {
+    "description": "`typeorm-seeding` is now maintained as scoped package.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "1.6.1",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["typeorm-seeding"],
+        "replacementName": "@jorgebodega/typeorm-seeding",
+        "replacementVersion": "2.0.0"
       }
     ]
   },

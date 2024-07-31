@@ -177,6 +177,7 @@
     "commander": "12.1.0",
     "conventional-commits-detector": "1.0.3",
     "cron-parser": "4.9.0",
+    "cronstrue": "2.50.0",
     "deepmerge": "4.3.1",
     "dequal": "2.0.3",
     "detect-indent": "6.1.0",
@@ -326,7 +327,7 @@
     "jest-mock-extended": "3.0.7",
     "jest-snapshot": "29.7.0",
     "markdownlint-cli2": "0.13.0",
-    "memfs": "4.9.3",
+    "memfs": "4.11.0",
     "nock": "13.5.4",
     "npm-run-all2": "6.2.2",
     "nyc": "17.0.0",
@@ -347,7 +348,12 @@
     "renovate-schema.json"
   ],
   "pnpm": {
-    "ignoredOptionalDependencies": ["dtrace-provider", "moment", "mv", "safe-json-stringify"],
+    "ignoredOptionalDependencies": [
+      "dtrace-provider",
+      "moment",
+      "mv",
+      "safe-json-stringify"
+    ],
     "overrides": {
       "@semantic-release/github>@octokit/plugin-paginate-rest": "11.3.0",
       "@types/linkify-it": "<5.0.0"
