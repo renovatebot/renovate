@@ -157,7 +157,7 @@ export const ManifestJson = Json.pipe(Manifest);
 
 export const DockerHubTag = z.object({
   id: z.number(),
-  last_updated: UtcDateString,
+  last_updated: z.string(),
   name: z.string(),
   tag_last_pushed: z.string().datetime().nullable().catch(null),
   digest: z.string().nullable().catch(null),
