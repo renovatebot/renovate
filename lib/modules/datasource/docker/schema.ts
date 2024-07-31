@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { logger } from '../../../logger';
-import { Json, LooseArray } from '../../../util/schema-utils';
+import { Json, LooseArray, UtcDateString } from '../../../util/schema-utils';
 
 // OCI manifests
 
@@ -157,7 +157,7 @@ export const ManifestJson = Json.pipe(Manifest);
 
 export const DockerHubTag = z.object({
   id: z.number(),
-  last_updated: z.string().datetime(),
+  last_updated: UtcDateString,
   name: z.string(),
   tag_last_pushed: z.string().datetime().nullable().catch(null),
   digest: z.string().nullable().catch(null),

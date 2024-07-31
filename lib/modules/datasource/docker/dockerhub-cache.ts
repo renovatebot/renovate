@@ -1,6 +1,6 @@
 import { dequal } from 'dequal';
-import { DateTime } from 'luxon';
 import * as packageCache from '../../../util/cache/package';
+import { UtcDate } from '../../../util/schema-utils';
 import type { DockerHubTag } from './schema';
 
 export interface DockerHubCacheData {
@@ -36,7 +36,7 @@ export class DockerHubCache {
     let needNextPage = true;
 
     let { updatedAt } = this.cache;
-    let latestDate = updatedAt ? DateTime.fromISO(updatedAt) : null;
+    let latestDate = UtcDate.nullable().catch(null).parse(updatedAt);
 
     for (const newItem of items) {
       const id = newItem.id;
@@ -48,7 +48,7 @@ export class DockerHubCache {
       }
 
       this.cache.items[newItem.id] = newItem;
-      const newItemDate = DateTime.fromISO(newItem.last_updated);
+      const newItemDate = UtcDate.parse(newItem.last_updated);
       if (!latestDate || latestDate < newItemDate) {
         updatedAt = newItem.last_updated;
         latestDate = newItemDate;
