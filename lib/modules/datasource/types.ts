@@ -69,6 +69,7 @@ export interface Release {
   sourceUrl?: string | undefined;
   sourceDirectory?: string;
   currentAge?: string;
+  datasourceProvidedReleaseNotes?: string | undefined;
 }
 
 export interface ReleaseResult {
