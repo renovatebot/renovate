@@ -191,47 +191,4 @@ describe('modules/manager/npm/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([{ cmd: updateInputCmd }]);
   });
-
-  it('uses node from config', async () => {
-    GlobalConfig.set(dockerAdminConfig);
-    const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce('some new content');
-
-    const res = await updateArtifacts({
-      packageFileName: 'flake.nix',
-      updatedDeps: [{ depName: 'nixpkgs' }],
-      newPackageFileContent: 'some new content',
-      config: {
-        ...config,
-        constraints: { nix: '2.10.0' },
-      },
-    });
-
-    expect(res).toEqual([
-      {
-        file: {
-          path: 'flake.lock',
-          type: 'addition',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
-      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
-      {
-        cmd:
-          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
-          '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
-          'bash -l -c "' +
-          'install-tool nix 2.10.0 ' +
-          '&& ' +
-          updateInputCmd +
-          '"',
-      },
-    ]);
-  });
 });
