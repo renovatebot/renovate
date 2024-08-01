@@ -91,6 +91,7 @@ import type {
   PlatformConfig,
 } from './types';
 import { getAppDetails, getUserDetails, getUserEmail } from './user';
+import { incLimitedValue } from '../../../workers/global/limits';
 
 export const id = 'github';
 
@@ -2052,6 +2053,7 @@ async function pushFiles(
       `/repos/${config.repository}/git/commits`,
       { body: { message, tree: treeSha, parents: [parentCommitSha] } },
     );
+    incLimitedValue('Commits')
     const remoteCommitSha = commitRes.body.sha as LongCommitSha;
     await ensureBranchSha(branchName, remoteCommitSha);
     return remoteCommitSha;
