@@ -44,16 +44,9 @@ export async function updateArtifacts({
   };
 
   try {
-    // eslint-disable-next-line
-    console.log('exec start', packageFileName);
     await exec(cmd, execOptions);
-    // eslint-disable-next-line
-    console.log('exec done');
-    // eslint-disable-next-line
-    console.log('update file reading start', packageFileName);
+
     const newPackageFileContent = await readLocalFile(packageFileName, 'utf8');
-    // eslint-disable-next-line
-    console.log('update file reading done', packageFileName);
     if (
       !newPackageFileContent ||
       existingPackageFileContent === newPackageFileContent
@@ -61,12 +54,6 @@ export async function updateArtifacts({
       return null;
     }
     logger.debug('Returning updated package.json');
-    // eslint-disable-next-line
-    console.log({
-      type: 'addition',
-      path: packageFileName,
-      contents: newPackageFileContent,
-    });
     return [
       {
         file: {
@@ -81,7 +68,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: packageFileName,
+          fileName: packageFileName,
           stderr: err.message,
         },
       },
