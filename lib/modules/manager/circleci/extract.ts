@@ -39,6 +39,15 @@ export function extractPackageFile(
       }
     }
 
+    for (const executor of Object.values(parsed.executors ?? {})) {
+      for (const dockerElement of coerceArray(executor.docker)) {
+        deps.push({
+          ...getDep(dockerElement.image),
+          depType: 'docker',
+        });
+      }
+    }
+
     for (const alias of coerceArray(parsed.aliases)) {
       deps.push({
         ...getDep(alias.image),
