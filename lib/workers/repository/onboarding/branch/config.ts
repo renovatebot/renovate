@@ -14,6 +14,7 @@ async function getOnboardingConfig(
 ): Promise<RenovateSharedConfig | undefined> {
   let onboardingConfig = clone(config.onboardingConfig);
 
+  // TODO #22198 fix types
   const foundPreset = await searchDefaultOnboardingPreset(config.repository!);
 
   if (foundPreset) {
@@ -39,7 +40,6 @@ async function searchDefaultOnboardingPreset(
   let foundPreset: string | undefined;
   logger.debug('Checking for a default Renovate preset which can be used.');
 
-  // TODO #22198
   const repoPathParts = repository.split('/');
 
   for (
