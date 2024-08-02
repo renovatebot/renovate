@@ -5,6 +5,7 @@ const file1 = Fixtures.get('config.yml');
 const file2 = Fixtures.get('config2.yml');
 const file3 = Fixtures.get('config3.yml');
 const file4 = Fixtures.get('config4.yml');
+const file5 = Fixtures.get('config5.yml');
 
 describe('modules/manager/circleci/extract', () => {
   describe('extractPackageFile()', () => {
@@ -76,6 +77,15 @@ describe('modules/manager/circleci/extract', () => {
           datasource: 'orb',
           depType: 'orb',
         },
+      ]);
+    });
+
+    it('extracts images from executors', () => {
+      const res = extractPackageFile(file5);
+      expect(res?.deps).toMatchObject([
+        { currentValue: '14.8.0', depName: 'cimg/node' },
+        { currentValue: '14.8.0', depName: 'cimg/node' },
+        { currentValue: '15.7', depName: 'postgres' },
       ]);
     });
   });

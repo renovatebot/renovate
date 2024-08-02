@@ -1,0 +1,28 @@
+version: 2.1
+
+executors:
+  simple-executor:
+    docker:
+    - image: cimg/node:14.8.0
+  complex-executor:
+    docker:
+      - name: node
+        image: cimg/node:14.8.0
+      - name: database
+        image: postgres:15.7
+
+jobs:
+  simple-job:
+    executor: simple-executor
+    steps:
+      - checkout
+
+  complex-job:
+    executor: complex-executor
+    steps:
+      - checkout
+      - setup-env
+      - run: yarn build:runtime
+
+
+
