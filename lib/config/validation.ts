@@ -432,21 +432,9 @@ export async function validateConfig(
               'matchDatasources',
               'matchDepTypes',
               'matchDepNames',
-              'matchDepPatterns',
-              'matchDepPrefixes',
               'matchPackageNames',
-              'matchPackagePatterns',
-              'matchPackagePrefixes',
-              'excludeDepNames',
-              'excludeDepPatterns',
-              'excludeDepPrefixes',
-              'excludePackageNames',
-              'excludePackagePatterns',
-              'excludePackagePrefixes',
-              'excludeRepositories',
               'matchCurrentValue',
               'matchCurrentVersion',
-              'matchSourceUrlPrefixes',
               'matchSourceUrls',
               'matchUpdateTypes',
               'matchConfidence',
@@ -604,18 +592,14 @@ export async function validateConfig(
                 }
               }
             }
-            if (
-              [
-                'matchPackagePatterns',
-                'excludePackagePatterns',
-                'matchDepPatterns',
-                'excludeDepPatterns',
-              ].includes(key)
-            ) {
+            if (['matchPackageNames', 'matchDepNames'].includes(key)) {
+              const startPattern = regEx(/!?\//);
+              const endPattern = regEx(/\/g?i?$/);
               for (const pattern of val as string[]) {
-                if (pattern !== '*') {
+                if (startPattern.test(pattern) && endPattern.test(pattern)) {
                   try {
-                    regEx(pattern);
+                    // regEx isn't aware of our !/ prefix but can handle the suffix
+                    regEx(pattern.replace(startPattern, '/'));
                   } catch (e) {
                     errors.push({
                       topic: 'Configuration Error',
@@ -937,6 +921,13 @@ async function validateGlobalConfig(
   currentPath: string | undefined,
   config: RenovateConfig,
 ): Promise<void> {
+  // istanbul ignore if
+  if (getDeprecationMessage(key)) {
+    warnings.push({
+      topic: 'Deprecation Warning',
+      message: getDeprecationMessage(key)!,
+    });
+  }
   if (val !== null) {
     if (type === 'string') {
       if (is.string(val)) {
