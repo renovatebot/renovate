@@ -213,7 +213,7 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 
 If you are running on any platform except github.com, you should also set the environment variable `GITHUB_COM_TOKEN` and put the Personal Access Token for github.com in it.
 This account can be _any_ account on GitHub, and needs only `read-only` access.
-It's used to increase the hourly API limit when fetching changelogs or other contents from repositories and in required in some cases because GitHub does not permit anonymous GraphQL queries.
+It's used to increase the hourly API limit when fetching changelogs or other contents from repositories and is required in some cases because GitHub does not permit anonymous GraphQL queries.
 It's also OK to configure the same as a host rule instead, if you prefer that.
 
 <!-- prettier-ignore -->
