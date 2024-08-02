@@ -14,12 +14,33 @@ async function getOnboardingConfig(
 ): Promise<RenovateSharedConfig | undefined> {
   let onboardingConfig = clone(config.onboardingConfig);
 
-  let foundPreset: string | undefined;
+  // TODO #22198 fix types
+  const foundPreset = await searchDefaultOnboardingPreset(config.repository!);
 
+  if (foundPreset) {
+    logger.debug(`Found preset ${foundPreset} - using it in onboarding config`);
+    onboardingConfig = {
+      $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+      extends: [foundPreset],
+    };
+  } else {
+    // Organization preset did not exist
+    logger.debug(
+      'No default org/owner preset found, so the default onboarding config will be used instead.',
+    );
+  }
+
+  logger.debug({ config: onboardingConfig }, 'onboarding config');
+  return onboardingConfig;
+}
+
+async function searchDefaultOnboardingPreset(
+  repository: string,
+): Promise<string | undefined> {
+  let foundPreset: string | undefined;
   logger.debug('Checking for a default Renovate preset which can be used.');
 
-  // TODO #22198
-  const repoPathParts = config.repository!.split('/');
+  const repoPathParts = repository.split('/');
 
   for (
     let index = repoPathParts.length - 1;
@@ -77,21 +98,7 @@ async function getOnboardingConfig(
     }
   }
 
-  if (foundPreset) {
-    logger.debug(`Found preset ${foundPreset} - using it in onboarding config`);
-    onboardingConfig = {
-      $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-      extends: [foundPreset],
-    };
-  } else {
-    // Organization preset did not exist
-    logger.debug(
-      'No default org/owner preset found, so the default onboarding config will be used instead.',
-    );
-  }
-
-  logger.debug({ config: onboardingConfig }, 'onboarding config');
-  return onboardingConfig;
+  return foundPreset;
 }
 
 async function getOnboardingConfigContents(
