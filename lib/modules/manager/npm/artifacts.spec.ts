@@ -8,7 +8,7 @@ import { env, fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
-import type { UpdateArtifactsConfig } from '../types';
+import type { UpdateArtifactsConfig, Upgrade } from '../types';
 import { updateArtifacts } from '.';
 
 jest.mock('../../../util/exec/env');
@@ -30,6 +30,14 @@ process.env.CONTAINERBASE = 'true';
 
 const config: UpdateArtifactsConfig = {};
 const updateInputCmd = `corepack use pnpm@8.15.6`;
+const validDepUpdate = {
+  depName: 'pnpm',
+  depType: 'packageManager',
+  currentValue:
+    '8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589',
+  rangeStrategy: 'pin',
+  newVersion: '8.15.6',
+} satisfies Upgrade<Record<string, unknown>>;
 
 describe('modules/manager/npm/artifacts', () => {
   beforeEach(() => {
@@ -45,7 +53,31 @@ describe('modules/manager/npm/artifacts', () => {
   it('returns null if no packageManager updates present', async () => {
     const res = await updateArtifacts({
       packageFileName: 'flake.nix',
-      updatedDeps: [{ depName: 'xmldoc', depType: 'patch' }],
+      updatedDeps: [{ ...validDepUpdate, depName: 'xmldoc', depType: 'patch' }],
+      newPackageFileContent: 'some new content',
+      config,
+    });
+
+    expect(res).toBeNull();
+  });
+
+  it('returns null if currentValue is undefined', async () => {
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ ...validDepUpdate, currentValue: undefined }],
+      newPackageFileContent: 'some new content',
+      config,
+    });
+
+    expect(res).toBeNull();
+  });
+
+  it('returns null if currentValue has no hash and rangeStrategy is not pin', async () => {
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [
+        { ...validDepUpdate, currentValue: '8.15.5', rangeStrategy: 'auto' },
+      ],
       newPackageFileContent: 'some new content',
       config,
     });
@@ -59,9 +91,7 @@ describe('modules/manager/npm/artifacts', () => {
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
-      updatedDeps: [
-        { depName: 'pnpm', depType: 'packageManager', newVersion: '8.15.6' },
-      ],
+      updatedDeps: [validDepUpdate],
       newPackageFileContent: 'some content',
       config: { ...config },
     });
@@ -76,9 +106,7 @@ describe('modules/manager/npm/artifacts', () => {
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
-      updatedDeps: [
-        { depName: 'pnpm', depType: 'packageManager', newVersion: '8.15.6' },
-      ],
+      updatedDeps: [validDepUpdate],
       newPackageFileContent: 'some content',
       config: { ...config },
     });
@@ -102,9 +130,7 @@ describe('modules/manager/npm/artifacts', () => {
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
-      updatedDeps: [
-        { depName: 'pnpm', depType: 'packageManager', newVersion: '8.15.6' },
-      ],
+      updatedDeps: [validDepUpdate],
       newPackageFileContent: 'some content',
       config: { ...config, constraints: { node: '20.1.0' } },
     });
@@ -146,9 +172,7 @@ describe('modules/manager/npm/artifacts', () => {
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
-      updatedDeps: [
-        { depName: 'pnpm', depType: 'packageManager', newVersion: '8.15.6' },
-      ],
+      updatedDeps: [validDepUpdate],
       newPackageFileContent: 'some content',
       config: { ...config, constraints: { node: '20.1.0' } },
     });
@@ -177,9 +201,7 @@ describe('modules/manager/npm/artifacts', () => {
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
-      updatedDeps: [
-        { depName: 'pnpm', depType: 'packageManager', newVersion: '8.15.6' },
-      ],
+      updatedDeps: [validDepUpdate],
       newPackageFileContent: 'some content',
       config,
     });
