@@ -24,6 +24,7 @@ import {
   extractEnvironmentVariableName,
   getMatchingHostRule,
 } from './artifacts';
+import { PipfileLock } from './types';
 import { updateArtifacts } from '.';
 
 const datasource = mocked(_datasource);
@@ -134,7 +135,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         _meta: {
           requires: { python_full_version: '3.7.6' },
         },
-      }),
+      } satisfies PipfileLock),
     });
     const execSnapshots = mockExecAll();
 
@@ -181,7 +182,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         _meta: {
           requires: { python_full_version: '3.7.6' },
         },
-      }),
+      } satisfies PipfileLock),
     });
 
     fsExtra.ensureDir.mockResolvedValue(undefined as never);
@@ -232,7 +233,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         _meta: {
           requires: { python_full_version: '3.7.6' },
         },
-      }),
+      } satisfies PipfileLock),
     });
 
     fsExtra.ensureDir.mockResolvedValue(undefined as never);
@@ -478,7 +479,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     const pipFileLock = JSON.stringify({
       _meta: { requires: { python_version: '3.7' } },
-    });
+    } satisfies PipfileLock);
     mockFiles({
       '/Pipfile.lock': [pipFileLock, pipFileLock, 'new lock'],
     });
@@ -556,7 +557,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     const pipFileLock = JSON.stringify({
       _meta: { requires: { python_version: '3.6' } },
-    });
+    } satisfies PipfileLock);
     mockFiles({
       '/Pipfile.lock': [pipFileLock, 'new lock'],
     });
@@ -745,7 +746,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     const oldLock = JSON.stringify({
       default: { pipenv: { version: '==2020.8.13' } },
-    });
+    } satisfies PipfileLock);
     mockFiles({
       '/Pipfile.lock': [oldLock, oldLock, 'new lock'],
     });
@@ -819,7 +820,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     const oldLock = JSON.stringify({
       develop: { pipenv: { version: '==2020.8.13' } },
-    }) as never;
+    } satisfies PipfileLock) as never;
     mockFiles({
       '/Pipfile.lock': [oldLock, oldLock, 'new lock'],
     });
@@ -892,7 +893,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     const oldLock = JSON.stringify({
       default: { pipenv: { version: '==2020.8.13' } },
-    }) as never;
+    } satisfies PipfileLock) as never;
     mockFiles({
       '/Pipfile.lock': [oldLock, 'new lock'],
     });
