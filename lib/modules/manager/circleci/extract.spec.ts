@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
@@ -75,6 +76,25 @@ describe('modules/manager/circleci/extract', () => {
           currentValue: '5.2.0',
           datasource: 'orb',
           depType: 'orb',
+        },
+      ]);
+    });
+
+    it('extracts executors', () => {
+      const res = extractPackageFile(codeBlock`
+      executors:
+        my-executor:
+          docker:
+            - image: cimg/ruby:3.0.3-browsers`);
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '3.0.3-browsers',
+          datasource: 'docker',
+          depName: 'cimg/ruby',
+          depType: 'docker',
+          replaceString: 'cimg/ruby:3.0.3-browsers',
         },
       ]);
     });
