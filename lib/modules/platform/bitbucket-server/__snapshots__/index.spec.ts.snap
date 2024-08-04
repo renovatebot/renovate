@@ -151,6 +151,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path getPrList
 exports[`modules/platform/bitbucket-server/index endpoint with no path initPlatform() should init 1`] = `
 {
   "endpoint": "https://stash.renovatebot.com/",
+  "gitAuthor": "Abc Def <abc@def.com>",
 }
 `;
 
@@ -355,6 +356,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with path getPrList() 
 exports[`modules/platform/bitbucket-server/index endpoint with path initPlatform() should init 1`] = `
 {
   "endpoint": "https://stash.renovatebot.com/",
+  "gitAuthor": "Abc Def <abc@def.com>",
 }
 `;
 

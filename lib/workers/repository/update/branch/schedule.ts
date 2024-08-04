@@ -8,6 +8,7 @@ import {
   MonthRange,
   parseExpression,
 } from 'cron-parser';
+import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
 import type { RenovateConfig } from '../../../../config/types';
@@ -25,6 +26,10 @@ function parseCron(
   timezone?: string,
 ): CronExpression | undefined {
   try {
+    const cronScheduleSummary = cronstrue.toString(scheduleText, {
+      throwExceptionOnParseError: false,
+    });
+    logger.debug(`Human-readable summary for cron:: ${cronScheduleSummary}`);
     return parseExpression(scheduleText, { tz: timezone });
   } catch (err) {
     return undefined;

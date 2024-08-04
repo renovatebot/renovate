@@ -30,8 +30,7 @@ concurrency:
 
 env:
   DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-  NODE_VERSION_TEST: 18
-  NODE_VERSION_BUILD: 20
+  NODE_VERSION: 20
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -106,13 +105,13 @@ jobs:
         with:
           repo: ${{ github.event.repository.full_name }}
           token: ${{ github.token }}
-          node-version: ${{ env.NODE_VERSION_TEST }}
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Prefetch test modules for `ubuntu-latest`
         id: setup-node
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_TEST }}
+          node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
           save-cache: true
 
@@ -129,7 +128,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      node-version: ${{ env.NODE_VERSION_BUILD }}
+      node-version: ${{ env.NODE_VERSION }}
 
     steps:
       - name: Checkout code
@@ -142,7 +141,7 @@ jobs:
       - name: Prefetch build modules for `ubuntu-latest`
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_BUILD }}
+          node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
           save-cache: true
 
@@ -182,7 +181,7 @@ jobs:
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_TEST }}
+          node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
           save-cache: true
 
@@ -362,7 +361,7 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION_TEST }}
+          node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
       - name: Cache jest
@@ -373,7 +372,7 @@ jobs:
             jest-cache-${{
               runner.os
             }}-${{
-              env.NODE_VERSION_TEST
+              env.NODE_VERSION
             }}-${{
               hashFiles('pnpm-lock.yaml')
             }}-${{
@@ -404,7 +403,7 @@ jobs:
 
       - name: Save coverage artifacts
         if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
+        uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029 # v4.3.5
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
@@ -560,7 +559,7 @@ jobs:
         run: pnpm test-e2e:pack
 
       - name: Upload
-        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
+        uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029 # v4.3.5
         with:
           name: renovate-package
           path: renovate-0.0.0-semantic-release.tgz
@@ -591,7 +590,7 @@ jobs:
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
+        uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029 # v4.3.5
         with:
           name: docs
           path: tmp/docs/
@@ -617,7 +616,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
-          node-version: ${{ env.NODE_VERSION_TEST }}
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Download package
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
@@ -661,7 +660,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@8742b8dcf85319ab1b06576afb3a5827e61cddde # v3.3.10
+        uses: containerbase/internal-tools@c93a92a6d7c698ca2030b1067b25c0c25bac45a2 # v3.3.13
         with:
           command: docker-config
 
