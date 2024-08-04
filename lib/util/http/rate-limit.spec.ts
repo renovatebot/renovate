@@ -8,7 +8,7 @@ import {
 describe('util/http/rate-limit', () => {
   beforeEach(() => {
     hostRules.clear();
-    setHttpRateLimits([]);
+    setHttpRateLimits([], []);
   });
 
   describe('getConcurrentRequestsLimit', () => {
@@ -17,9 +17,10 @@ describe('util/http/rate-limit', () => {
     });
 
     it('returns null if host does not match', () => {
-      setHttpRateLimits([
-        { matchHost: 'https://crates.io/api/', throttleMs: 1000 },
-      ]);
+      setHttpRateLimits(
+        [{ matchHost: 'https://crates.io/api/', concurrency: 42 }],
+        undefined,
+      );
       expect(getConcurrentRequestsLimit('https://index.crates.io')).toBeNull();
     });
 
@@ -29,19 +30,25 @@ describe('util/http/rate-limit', () => {
     });
 
     it('selects default value if host rule is greater', () => {
-      setHttpRateLimits([{ matchHost: 'example.com', concurrency: 123 }]);
+      setHttpRateLimits(
+        [{ matchHost: 'example.com', concurrency: 123 }],
+        undefined,
+      );
       hostRules.add({ matchHost: 'example.com', concurrentRequestLimit: 456 });
       expect(getConcurrentRequestsLimit('https://example.com')).toBe(123);
     });
 
     it('selects host rule value if default is greater', () => {
-      setHttpRateLimits([{ matchHost: 'example.com', concurrency: 456 }]);
+      setHttpRateLimits(
+        [{ matchHost: 'example.com', concurrency: 456 }],
+        undefined,
+      );
       hostRules.add({ matchHost: 'example.com', concurrentRequestLimit: 123 });
       expect(getConcurrentRequestsLimit('https://example.com')).toBe(123);
     });
 
     it('matches wildcard host', () => {
-      setHttpRateLimits([{ matchHost: '*', concurrency: 123 }]);
+      setHttpRateLimits([{ matchHost: '*', concurrency: 123 }], undefined);
       expect(getConcurrentRequestsLimit('https://example.com')).toBe(123);
     });
   });
@@ -52,9 +59,10 @@ describe('util/http/rate-limit', () => {
     });
 
     it('returns null if host does not match', () => {
-      setHttpRateLimits([
-        { matchHost: 'https://crates.io/api/', concurrency: 123 },
-      ]);
+      setHttpRateLimits(
+        [{ matchHost: 'https://crates.io/api/', concurrency: 123 }],
+        undefined,
+      );
       expect(getThrottleIntervalMs('https://index.crates.io')).toBeNull();
     });
 
@@ -64,19 +72,23 @@ describe('util/http/rate-limit', () => {
     });
 
     it('selects maximum throttle when default is greater', () => {
-      setHttpRateLimits([{ matchHost: 'example.com', throttleMs: 500 }]);
+      setHttpRateLimits(undefined, [
+        { matchHost: 'example.com', throttleMs: 500 },
+      ]);
       hostRules.add({ matchHost: 'example.com', maxRequestsPerSecond: 8 });
       expect(getThrottleIntervalMs('https://example.com')).toBe(500);
     });
 
     it('selects maximum throttle when host rule is greater', () => {
-      setHttpRateLimits([{ matchHost: 'example.com', throttleMs: 125 }]);
+      setHttpRateLimits(undefined, [
+        { matchHost: 'example.com', throttleMs: 125 },
+      ]);
       hostRules.add({ matchHost: 'example.com', maxRequestsPerSecond: 2 });
       expect(getThrottleIntervalMs('https://example.com')).toBe(500);
     });
 
     it('matches wildcard host', () => {
-      setHttpRateLimits([{ matchHost: '*', throttleMs: 123 }]);
+      setHttpRateLimits(undefined, [{ matchHost: '*', throttleMs: 123 }]);
       expect(getThrottleIntervalMs('https://example.com')).toBe(123);
     });
   });

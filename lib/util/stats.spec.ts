@@ -380,7 +380,7 @@ describe('util/stats', () => {
 
       HttpStats.report();
 
-      expect(logger.logger.trace).toHaveBeenCalledTimes(1);
+      expect(logger.logger.trace).toHaveBeenCalledTimes(2);
       const [traceData, traceMsg] = logger.logger.trace.mock.calls[0];
       expect(traceMsg).toBe('HTTP full statistics');
       expect(traceData).toEqual({
@@ -424,6 +424,24 @@ describe('util/stats', () => {
         },
       });
 
+      const [trace2Data, trace2Msg] = logger.logger.trace.mock.calls[1];
+      expect(trace2Msg).toBe('HTTP URL statistics');
+      expect(trace2Data).toEqual({
+        urls: {
+          'https://example.com/bar': {
+            GET: {
+              '200': 1,
+            },
+          },
+          'https://example.com/foo': {
+            GET: {
+              '200': 2,
+              '404': 1,
+            },
+          },
+        },
+      });
+
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
       const [debugData, debugMsg] = logger.logger.debug.mock.calls[0];
       expect(debugMsg).toBe('HTTP statistics');
@@ -440,19 +458,6 @@ describe('util/stats', () => {
           },
         },
         requests: 4,
-        urls: {
-          'https://example.com/bar': {
-            GET: {
-              '200': 1,
-            },
-          },
-          'https://example.com/foo': {
-            GET: {
-              '200': 2,
-              '404': 1,
-            },
-          },
-        },
       });
     });
   });

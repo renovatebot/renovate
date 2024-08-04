@@ -15,5 +15,64 @@ describe('util/package-rules/dep-names', () => {
       );
       expect(result).toBeFalse();
     });
+
+    it('should return false if depName is excluded prefix', () => {
+      expect(
+        depNameMatcher.matches(
+          {
+            depName: '@opentelemetry/http',
+          },
+          {
+            matchDepNames: ['!/^@opentelemetry/'],
+          },
+        ),
+      ).toBeFalse();
+      expect(
+        depNameMatcher.matches(
+          {
+            depName: '@opentelemetry/http',
+          },
+          {
+            matchDepNames: ['!@opentelemetry{/,}**'],
+          },
+        ),
+      ).toBeFalse();
+    });
+
+    it('should return true if depName is included prefix', () => {
+      expect(
+        depNameMatcher.matches(
+          {
+            depName: '@opentelemetry/http',
+          },
+          {
+            matchDepNames: ['/^@opentelemetry/'],
+          },
+        ),
+      ).toBeTrue();
+      expect(
+        depNameMatcher.matches(
+          {
+            depName: '@opentelemetry/http',
+          },
+          {
+            matchDepNames: ['@opentelemetry{/,}**'],
+          },
+        ),
+      ).toBeTrue();
+    });
+
+    it('should return false if for wrong prefix', () => {
+      expect(
+        depNameMatcher.matches(
+          {
+            depName: '@opentelemetry/http',
+          },
+          {
+            matchDepNames: ['@opentelemetry**'],
+          },
+        ),
+      ).toBeFalse();
+    });
   });
 });
