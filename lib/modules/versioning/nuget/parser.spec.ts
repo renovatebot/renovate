@@ -1,13 +1,12 @@
 import {
-  getFloatingRangeLowerBound,
   parseBracketRange,
   parseExactRange,
   parseFloatingRange,
   parseRange,
   parseVersion,
-  rangeToString,
-  versionToString,
 } from './parser';
+import { getFloatingRangeLowerBound, rangeToString } from './range';
+import { versionToString } from './version';
 
 describe('modules/versioning/nuget/parser', () => {
   describe('parseVersion', () => {
@@ -34,6 +33,7 @@ describe('modules/versioning/nuget/parser', () => {
       expect(parseFloatingRange('!@#')).toBeNull();
       expect(parseFloatingRange('abc')).toBeNull();
       expect(parseFloatingRange('1.2.*-foo')).toBeNull();
+      expect(parseFloatingRange('1.2.3')).toBeNull();
     });
 
     test.each`

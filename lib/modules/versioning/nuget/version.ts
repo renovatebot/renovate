@@ -66,3 +66,29 @@ export function compare(x: NugetVersion, y: NugetVersion): number {
 
   return 0;
 }
+
+export function versionToString(version: NugetVersion): string {
+  let res = `${version.major}`;
+
+  if (version.minor !== undefined) {
+    res += `.${version.minor}`;
+  }
+
+  if (version.patch !== undefined) {
+    res += `.${version.patch}`;
+  }
+
+  if (version.revision !== undefined) {
+    res += `.${version.revision}`;
+  }
+
+  if (version.prerelease) {
+    res += `-${version.prerelease}`;
+  }
+
+  if (version.metadata) {
+    res += `+${version.metadata}`;
+  }
+
+  return res;
+}

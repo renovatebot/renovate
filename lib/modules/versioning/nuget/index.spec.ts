@@ -407,7 +407,7 @@ describe('modules/versioning/nuget/index', () => {
       ${['1.0.0', '2.0.0']}                                                       | ${'[2.0.0, )'}      | ${'2.0.0'}
       ${['1.0.0']}                                                                | ${'[2.0.0, )'}      | ${null}
       ${['1.0.1-beta.1', '1.0.1']}                                                | ${'1.0.0-*'}        | ${'1.0.1'}
-      ${['1.0.1-beta.1', '1.0.1']}                                                | ${'1.0.0'}          | ${'1.0.1'}
+      ${['foobar', '0.9.0', '1.0.1-beta.1', '1.0.1']}                             | ${'1.0.0'}          | ${'1.0.1'}
     `(
       'getSatisfyingVersion($versions, $range) === "$expected"',
       ({ versions, range, expected }) => {
@@ -423,6 +423,7 @@ describe('modules/versioning/nuget/index', () => {
       ${['foobar']}                                   | ${'[1,2)'}  | ${null}
       ${['1', '2', '3']}                              | ${'foobar'} | ${null}
       ${['0.1', '1-beta', '1', '1.1', '2-beta', '2']} | ${'[1,2)'}  | ${'1'}
+      ${['foobar', '0.9.0', '1.0.0', '1.0.1']}        | ${'1.0.0'}  | ${'1.0.0'}
     `(
       'minSatisfyingVersion($versions, $range) === $expected',
       ({ versions, range, expected }) => {

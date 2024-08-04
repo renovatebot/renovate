@@ -61,11 +61,6 @@ function parseFloatingComponent(input: string): number {
   return int ? 10 * Number.parseInt(int, 10) : 0;
 }
 
-function floatingComponentToString(component: number): string {
-  const int = component / 10;
-  return int === 0 ? '*' : `${int}*`;
-}
-
 export function parseFloatingRange(input: string): NugetFloatingRange | null {
   const groups = floatingRangeRegex.exec(input)?.groups;
   if (!groups) {
@@ -145,34 +140,11 @@ export function parseFloatingRange(input: string): NugetFloatingRange | null {
     res = { ...res, revision: Number.parseInt(revision, 10) };
   }
 
-  return res;
-}
-
-export function getFloatingRangeLowerBound(
-  range: NugetFloatingRange,
-): NugetVersion {
-  const { major, minor = 0, patch = 0, revision = 0, prerelease } = range;
-  const res: NugetVersion = {
-    type: 'nuget-version',
-    major,
-    minor,
-    patch,
-    revision,
-  };
-
-  if (prerelease) {
-    const parts = prerelease.split('.');
-    const lastIdx = parts.length - 1;
-    const last = parts[lastIdx];
-    if (last === '*') {
-      parts[lastIdx] = '0';
-    } else {
-      parts[lastIdx] = last.replace(/\*$/, '');
-    }
-    res.prerelease = parts.join('.');
+  if (res.prerelease) {
+    return res;
   }
 
-  return res;
+  return null;
 }
 
 const exactRangeRegex = regEx(/^\s*\[\s*(?<version>[^,]+)\s*\]\s*$/);
@@ -273,92 +245,4 @@ export function parseRange(input: string): NugetRange | null {
     parseBracketRange(input) ??
     parseFloatingRange(input)
   );
-}
-
-export function versionToString(version: NugetVersion): string {
-  let res = `${version.major}`;
-
-  if (version.minor !== undefined) {
-    res += `.${version.minor}`;
-  }
-
-  if (version.patch !== undefined) {
-    res += `.${version.patch}`;
-  }
-
-  if (version.revision !== undefined) {
-    res += `.${version.revision}`;
-  }
-
-  if (version.prerelease) {
-    res += `-${version.prerelease}`;
-  }
-
-  if (version.metadata) {
-    res += `+${version.metadata}`;
-  }
-
-  return res;
-}
-
-export function rangeToString(range: NugetRange): string {
-  if (range.type === 'nuget-exact-range') {
-    return `[${versionToString(range.version)}]`;
-  }
-
-  if (range.type === 'nuget-floating-range') {
-    const { major, minor, patch, revision, floating, prerelease } = range;
-    let res = '';
-
-    if (prerelease) {
-      res = `-${prerelease}`;
-    }
-
-    if (revision !== undefined) {
-      const revisionPart =
-        floating === 'revision'
-          ? floatingComponentToString(revision)
-          : `${revision}`;
-      res = `.${revisionPart}${res}`;
-    }
-
-    if (patch !== undefined) {
-      const patchPart =
-        floating === 'patch' ? floatingComponentToString(patch) : `${patch}`;
-      res = `.${patchPart}${res}`;
-    }
-
-    if (minor !== undefined) {
-      const minorPart =
-        floating === 'minor' ? floatingComponentToString(minor) : `${minor}`;
-      res = `.${minorPart}${res}`;
-    }
-
-    if (major !== undefined) {
-      const majorPart =
-        floating === 'major' ? floatingComponentToString(major) : `${major}`;
-      res = `${majorPart}${res}`;
-    }
-
-    return res;
-  }
-
-  const { min, max, minInclusive, maxInclusive } = range;
-  const leftBracket = minInclusive ? '[' : '(';
-  const rightBracket = maxInclusive ? ']' : ')';
-  if (min && max) {
-    const minStr =
-      min.type === 'nuget-version' ? versionToString(min) : rangeToString(min);
-    const maxStr = versionToString(max);
-    return `${leftBracket}${minStr},${maxStr}${rightBracket}`;
-  }
-
-  if (min) {
-    const minStr =
-      min.type === 'nuget-version' ? versionToString(min) : rangeToString(min);
-    return `${leftBracket}${minStr},${rightBracket}`;
-  }
-
-  const maxStr = versionToString(max);
-  return `${leftBracket},${maxStr}${rightBracket}`;
 }
