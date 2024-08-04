@@ -1,6 +1,12 @@
 import type { NewValueConfig, VersioningApi } from '../types';
 import { parseRange, parseVersion } from './parser';
-import { getFloatingRangeLowerBound, matches, rangeToString } from './range';
+import {
+  coerceFloatingComponent,
+  getFloatingRangeLowerBound,
+  matches,
+  rangeToString,
+  tryBump,
+} from './range';
 import type {
   NugetBracketRange,
   NugetFloatingRange,
@@ -295,34 +301,26 @@ class NugetVersioningApi implements VersioningApi {
 
       const res: NugetFloatingRange = { ...r };
 
-      const prepareResult = (): string => {
-        const newRange = rangeToString(res);
-        return matches(v, res) ? newRange : currentValue;
-      };
-
-      const prepareComponent = (component: number | undefined): number =>
-        component ? Math.floor(component / 10) * 10 : 0;
-
       if (floating === 'major') {
-        res.major = prepareComponent(v.major);
-        return prepareResult();
+        res.major = coerceFloatingComponent(v.major);
+        return tryBump(res, v, currentValue);
       }
       res.major = v.major;
 
       if (floating === 'minor') {
-        res.minor = prepareComponent(v.minor);
-        return prepareResult();
+        res.minor = coerceFloatingComponent(v.minor);
+        return tryBump(res, v, currentValue);
       }
       res.minor = v.minor ?? 0;
 
       if (floating === 'patch') {
-        res.patch = prepareComponent(v.patch);
-        return prepareResult();
+        res.patch = coerceFloatingComponent(v.patch);
+        return tryBump(res, v, currentValue);
       }
       res.patch = v.patch ?? 0;
 
-      res.revision = prepareComponent(v.revision);
-      return prepareResult();
+      res.revision = coerceFloatingComponent(v.revision);
+      return tryBump(res, v, currentValue);
     }
 
     const res: NugetBracketRange = { ...r };

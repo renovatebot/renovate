@@ -73,6 +73,10 @@ function floatingComponentToString(component: number): string {
   return int === 0 ? '*' : `${int}*`;
 }
 
+export function coerceFloatingComponent(component: number | undefined): number {
+  return component ? Math.floor(component / 10) * 10 : 0;
+}
+
 export function rangeToString(range: NugetRange): string {
   if (range.type === 'nuget-exact-range') {
     return `[${versionToString(range.version)}]`;
@@ -133,4 +137,8 @@ export function rangeToString(range: NugetRange): string {
 
   const maxStr = versionToString(max);
   return `${leftBracket},${maxStr}${rightBracket}`;
+}
+
+export function tryBump(r: NugetRange, v: NugetVersion, x: string): string {
+  return matches(v, r) ? rangeToString(r) : x;
 }
