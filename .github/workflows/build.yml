@@ -596,7 +596,8 @@ jobs:
           path: tmp/docs/
 
   check-doc-links:
-    needs: [build-docs]
+    needs:
+      - build-docs
 
     runs-on: ubuntu-latest
     timeout-minutes: 2
@@ -655,7 +656,8 @@ jobs:
           key: lychee-cache-main
 
   test-e2e:
-    needs: [build]
+    needs:
+      - build
     runs-on: 'ubuntu-latest'
     timeout-minutes: 7
 
@@ -698,7 +700,6 @@ jobs:
       - test-e2e
       - test-success
       - build-docs
-      - check-doc-links
       - codecov
       - coverage-threshold
 
