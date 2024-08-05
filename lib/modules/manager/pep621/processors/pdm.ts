@@ -48,7 +48,7 @@ export class PdmProcessor implements PyProjectProcessor {
       registryUrls.push(source.url);
     }
     for (const dep of deps) {
-      dep.registryUrls = registryUrls;
+      dep.registryUrls = [...registryUrls];
     }
 
     return deps;
