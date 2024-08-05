@@ -18,6 +18,7 @@ export const id = 'nuget';
 export const displayName = 'NuGet';
 export const urls = [
   'https://docs.microsoft.com/en-us/nuget/concepts/package-versioning',
+  'https://nugettools.azurewebsites.net/',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['pin', 'bump'];
