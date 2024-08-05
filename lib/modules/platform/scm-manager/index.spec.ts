@@ -609,7 +609,7 @@ describe('modules/platform/scm-manager/index', () => {
   });
 
   describe(massageMarkdown, () => {
-    it('should adjust smart link for pull requests', () => {
+    it('should adjust smart link for Pull Requests', () => {
       const result = massageMarkdown('[PR](../pull/1)');
       expect(result).toBe('[PR](pulls/1)');
     });
