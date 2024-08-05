@@ -208,7 +208,7 @@ describe('modules/platform/scm-manager/index', () => {
       expect(await getPrList()).toIncludeAllMembers([]);
     });
 
-    it('should return empty array, because api request failed', async () => {
+    it('should return empty array, because API request failed', async () => {
       httpMock
         .scope(endpoint)
         .get(
