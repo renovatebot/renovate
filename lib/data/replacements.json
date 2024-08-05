@@ -215,7 +215,7 @@
         "matchPackageNames": ["docker/compose"],
         "matchCurrentValue": "/^((debian|alpine)-)?1\\.29\\.2$/",
         "replacementName": "docker",
-        "replacementVersion": "27.1.1-cli"
+        "replacementVersion": "23.0.0-cli"
       }
     ]
   },
