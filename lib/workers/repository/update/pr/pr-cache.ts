@@ -3,7 +3,7 @@ import { getCache } from '../../../../util/cache/repository';
 import type { PrCache } from '../../../../util/cache/repository/types';
 
 export function getPrCache(branchName: string): PrCache | null {
-  logger.debug(`getPrCache()`);
+  logger.trace(`getPrCache()`);
   const cache = getCache();
   const branch = cache.branches?.find(
     (branch) => branchName === branch.branchName,
