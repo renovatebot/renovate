@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import { readLocalFile } from '../../../util/fs';
@@ -158,11 +157,28 @@ export async function updateArtifacts({
     }
     res.push(fileRes);
   }
-  for (const f of coerceArray(status.deleted)) {
+  for (const f of status.deleted) {
     res.push({
       file: {
         type: 'deletion',
         path: f,
+      },
+    });
+  }
+  // `git status` might detect a rename, which is then not contained
+  // in not_added/deleted. Ensure we respect renames as well if they happen.
+  for (const f of status.renamed) {
+    res.push({
+      file: {
+        type: 'deletion',
+        path: f.from,
+      },
+    });
+    res.push({
+      file: {
+        type: 'addition',
+        path: f.to,
+        contents: await readLocalFile(f.to),
       },
     });
   }

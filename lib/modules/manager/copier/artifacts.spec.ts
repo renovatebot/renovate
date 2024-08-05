@@ -48,6 +48,7 @@ describe('modules/manager/copier/artifacts', () => {
         modified: ['.copier-answers.yml'],
         not_added: [],
         deleted: [],
+        renamed: [],
       }),
     );
   });
@@ -238,6 +239,7 @@ describe('modules/manager/copier/artifacts', () => {
           modified: [],
           not_added: ['new_file.py'],
           deleted: ['old_file.py'],
+          renamed: [],
         }),
       );
 
@@ -260,6 +262,7 @@ describe('modules/manager/copier/artifacts', () => {
           modified: ['.copier-answers.yml'],
           not_added: ['new_file.py'],
           deleted: ['old_file.py'],
+          renamed: [{ from: 'renamed_old.py', to: 'renamed_new.py' }],
         }),
       );
 
@@ -267,6 +270,7 @@ describe('modules/manager/copier/artifacts', () => {
         '_src: https://github.com/foo/bar\n_commit: 1.1.0',
       );
       fs.readLocalFile.mockResolvedValueOnce('new file contents');
+      fs.readLocalFile.mockResolvedValueOnce('renamed file contents');
 
       const result = await updateArtifacts({
         packageFileName: '.copier-answers.yml',
@@ -296,6 +300,19 @@ describe('modules/manager/copier/artifacts', () => {
             path: 'old_file.py',
           },
         },
+        {
+          file: {
+            type: 'deletion',
+            path: 'renamed_old.py',
+          },
+        },
+        {
+          file: {
+            type: 'addition',
+            path: 'renamed_new.py',
+            contents: 'renamed file contents',
+          },
+        },
       ]);
     });
 
@@ -308,6 +325,7 @@ describe('modules/manager/copier/artifacts', () => {
           modified: ['.copier-answers.yml'],
           not_added: ['new_file.py'],
           deleted: ['old_file.py'],
+          renamed: [],
         }),
       );
 
