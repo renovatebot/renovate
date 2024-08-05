@@ -3249,12 +3249,7 @@ Example:
 
 Currently the following options are available:
 
-### platformVersion
-
-Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
-Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to reduce API calls.
-
-Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
+1. [platformVersion](./self-hosted-configuration.md#platformversion)
 
 ## postUpdateOptions
 

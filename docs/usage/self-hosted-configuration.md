@@ -895,6 +895,17 @@ It also may mean that ignored directories like `node_modules` can be preserved a
 
 ## platform
 
+## platformVersion
+
+Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
+Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to reduce API calls.
+
+Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
+
+<!-- prettier-ignore -->
+!!! note
+    Only valid within [platformOptions](configuration-options.md#platformoptions) object.
+
 ## prCommitsPerRunLimit
 
 Parameter to reduce CI load.
