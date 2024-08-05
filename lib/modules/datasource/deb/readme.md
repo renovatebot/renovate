@@ -36,14 +36,6 @@ First you would set a custom manager in your `renovate.json` file for `Dockerfil
       ],
       "datasourceTemplate": "deb"
     }
-  ],
-  "packageRules": [
-    {
-      "matchDatasources": ["deb"],
-      "registryUrls": [
-        "https://ftp.debian.org/debian?suite=stable&components=main,contrib,non-free&binaryArch=amd64"
-      ]
-    }
   ]
 }
 ```
