@@ -329,7 +329,7 @@ export class DebDatasource extends Datasource {
           }
         }
       } catch (error) {
-        logger.warn(
+        logger.debug(
           { componentUrl, error },
           'Skipping component due to an error',
         );
