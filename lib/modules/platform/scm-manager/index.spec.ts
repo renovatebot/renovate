@@ -380,7 +380,7 @@ describe('modules/platform/scm-manager/index', () => {
       expect(await getPr(1)).toBeNull();
     });
 
-    it('should return pr from cache', async () => {
+    it('should return PR from cache', async () => {
       httpMock
         .scope(endpoint)
         .get(
