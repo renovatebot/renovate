@@ -55,8 +55,6 @@ export class DebDatasource extends Datasource {
     'https://ftp.debian.org/debian?suite=stable&components=main,contrib,non-free&binaryArch=amd64',
   ];
 
-  override readonly caching = true;
-
   /**
    * Not all Debian packages follow Semver, so it's wise to keep this loose but make sure to
    * have enough tests in your application.
