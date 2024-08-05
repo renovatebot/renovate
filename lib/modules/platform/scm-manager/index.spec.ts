@@ -256,7 +256,7 @@ describe('modules/platform/scm-manager/index', () => {
   });
 
   describe(findPr, () => {
-    it('search in pull request without explicitly setting the state as argument', async () => {
+    it('search in Pull Request without explicitly setting the state as argument', async () => {
       httpMock
         .scope(endpoint)
         .get(
