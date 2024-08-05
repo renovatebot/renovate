@@ -1507,13 +1507,6 @@ Example:
 }
 ```
 
-## gitLabIgnoreApprovals
-
-Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
-Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
-This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
-Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
-
 ## goGetDirs
 
 By default, Renovate will run `go get -d -t ./...` to update the `go.sum`.
@@ -3242,14 +3235,30 @@ Example:
 ```json
 {
   "platformOptions": {
+    "gitLabIgnoreApprovals": true,
     "platformVersion": "8.0.0"
   }
 }
 ```
 
+<!-- prettier-ignore -->
+!!! note
+    The supported options can be of self-hosted or repo config type, make sure to use the sub-options in correct config.
+
 Currently the following options are available:
 
+Self-hosted config options:
+
 1. [platformVersion](./self-hosted-configuration.md#platformversion)
+
+Repository config options:
+
+### gitLabIgnoreApprovals
+
+Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
+Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
+This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
+Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
 ## postUpdateOptions
 

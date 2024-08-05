@@ -2650,6 +2650,7 @@ const options: RenovateOptions[] = [
     description: `Ignore approval rules for MRs created by Renovate, which is useful for automerge.`,
     type: 'boolean',
     default: false,
+    parents: ['platformOptions'],
   },
   {
     name: 'customManagers',

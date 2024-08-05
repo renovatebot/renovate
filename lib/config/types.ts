@@ -303,6 +303,7 @@ export interface RenovateConfig
 }
 
 export interface PlatformOptions {
+  gitLabIgnoreApprovals?: boolean;
   platformVersion?: string;
 }
 

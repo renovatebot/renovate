@@ -1018,6 +1018,24 @@ describe('config/validation', () => {
       expect(warnings).toMatchSnapshot();
     });
 
+    it('warns if children inside wrong parent', async () => {
+      const config: RenovateConfig = {
+        gitLabIgnoreApprovals: true,
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
+      expect(warnings).toMatchObject([
+        {
+          message:
+            'gitLabIgnoreApprovals should only be configured within one of "platformOptions" objects. Was found in .',
+        },
+      ]);
+    });
+
     it('errors if manager objects are nested', async () => {
       const config = {
         pyenv: {
