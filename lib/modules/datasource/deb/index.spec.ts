@@ -266,12 +266,14 @@ describe('modules/datasource/deb/index', () => {
  * @param arch - The architecture name (e.g., 'amd64', 'i386').
  * @returns The complete URL to the component directory.
  */
-const getComponentUrl = (
+function getComponentUrl(
   baseUrl: string,
   release: string,
   component: string,
   arch: string,
-) => `${baseUrl}/debian/dists/${release}/${component}/binary-${arch}`;
+): string {
+  return `${baseUrl}/debian/dists/${release}/${component}/binary-${arch}`;
+}
 
 /**
  * Constructs a URL for accessing the Packages.gz file for a specific component, release, and architecture.
@@ -282,12 +284,14 @@ const getComponentUrl = (
  * @param arch - The architecture name (e.g., 'amd64', 'i386').
  * @returns The complete URL to the Packages.gz file.
  */
-const getPackageUrl = (
+function getPackageUrl(
   baseUrl: string,
   release: string,
   component: string,
   arch: string,
-) => `${getComponentUrl(baseUrl, release, component, arch)}/Packages.gz`;
+) {
+  return `${getComponentUrl(baseUrl, release, component, arch)}/Packages.gz`;
+}
 
 /**
  * Constructs a URL used generating the component url with specific release, components, and architecture.
@@ -298,10 +302,11 @@ const getPackageUrl = (
  * @param arch - The architecture name (e.g., 'amd64', 'i386').
  * @returns The complete URL to the package registry.
  */
-const getRegistryUrl = (
+function getRegistryUrl(
   baseUrl: string,
   release: string,
   components: string[],
   arch: string,
-) =>
-  `${baseUrl}/debian?suite=${release}&components=${components.join(',')}&binaryArch=${arch}`;
+) {
+  return `${baseUrl}/debian?suite=${release}&components=${components.join(',')}&binaryArch=${arch}`;
+}
