@@ -94,13 +94,6 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 
 If set to any value, Renovate will download `nupkg` files for determining package metadata.
 
-## `RENOVATE_X_PLATFORM_VERSION`
-
-Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
-Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to reduce API calls for Bitbucket.
-
-Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
-
 ## `RENOVATE_X_REBASE_PAGINATION_LINKS`
 
 If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to use the `endpoint` URL from the Renovate config.

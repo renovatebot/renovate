@@ -273,7 +273,8 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES: '["docker"]', // converted
         RENOVATE_X_AUTODISCOVER_REPO_SORT: 'alpha',
         RENOVATE_X_DOCKER_MAX_PAGES: '10',
-        RENOVATE_AUTODISCOVER_REPO_ORDER: 'desc',
+        RENOVATE_X_AUTODISCOVER_REPO_ORDER: 'desc',
+        RENOVATE_X_PLATFORM_VERSION: '8.0.0',
       };
       const config = await env.getConfig(envParam);
       expect(config).toMatchObject({
@@ -281,6 +282,10 @@ describe('workers/global/config/parse/env', () => {
         mergeConfidenceDatasources: ['docker'],
         autodiscoverRepoSort: 'alpha',
         autodiscoverRepoOrder: 'desc',
+        // platformVersion: '8.0.0',
+        platformOptions: {
+          platformVersion: '8.0.0',
+        },
       });
     });
 

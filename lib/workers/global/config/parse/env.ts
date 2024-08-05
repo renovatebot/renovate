@@ -90,6 +90,7 @@ const convertedExperimentalEnvVars = [
   'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
   'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
   'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',
+  'RENOVATE_X_PLATFORM_VERSION',
 ];
 
 /**
@@ -233,6 +234,26 @@ export async function getConfig(
   ];
 
   unsupportedEnv.forEach((val) => delete env[val]);
+
+  config = migratePlatformOptions(config);
+  return config;
+}
+
+function migratePlatformOptions(config: AllConfig): AllConfig {
+  const platformOptionsKeys = ['platformVersion'];
+  const platformOptions: Record<string, unknown> = {};
+  let updated = false;
+  for (const key of platformOptionsKeys) {
+    if (!is.undefined(config[key])) {
+      updated = true;
+      platformOptions[key] = config[key];
+      delete config[key];
+    }
+  }
+
+  if (updated) {
+    config.platformOptions = platformOptions;
+  }
 
   return config;
 }

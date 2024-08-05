@@ -37,15 +37,21 @@ describe('config/validation', () => {
       const config = {
         binarySource: 'something',
         username: 'user',
+        platformOptions: {
+          platformVersion: '8.0.0',
+        },
       };
       const { warnings } = await configValidation.validateConfig(
         'repo',
         config,
       );
-      expect(warnings).toHaveLength(2);
+      expect(warnings).toHaveLength(3);
       expect(warnings).toMatchObject([
         {
           message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+        },
+        {
+          message: `The "platformVersion" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
         {
           message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
@@ -1402,6 +1408,25 @@ describe('config/validation', () => {
   });
 
   describe('validateConfig() -> globaOnly options', () => {
+    // eslint-disable-next-line
+    it.only('warns if children inside wrong parent', async () => {
+      const config: RenovateConfig = {
+        platformVersion: '8.0.0',
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(1);
+      expect(warnings).toMatchObject([
+        {
+          message:
+            'platformVersion should only be configured within one of "platformOptions" objects. Was found in .',
+        },
+      ]);
+    });
+
     it('returns errors for invalid options', async () => {
       const config = {
         logFile: 'something',

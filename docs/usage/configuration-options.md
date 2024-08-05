@@ -3233,6 +3233,29 @@ It does not apply when you use a Personal Access Token as credential.
 When `platformCommit` is enabled, Renovate will create commits with GitHub's API instead of using `git` directly.
 This way Renovate can use GitHub's [Commit signing support for bots and other GitHub Apps](https://github.blog/2019-08-15-commit-signing-support-for-bots-and-other-github-apps/) feature.
 
+## platformOptions
+
+Use this option to configure the platform specific configuration options provided by renovate.
+
+Example:
+
+```json
+{
+  "platformOptions": {
+    "platformVersion": "8.0.0"
+  }
+}
+```
+
+Currently the following options are available:
+
+### platformVersion
+
+Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
+Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to reduce API calls.
+
+Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
+
 ## postUpdateOptions
 
 Table with options:

@@ -138,6 +138,19 @@ describe('modules/platform/gitlab/index', () => {
         }),
       ).toEqual({ endpoint: 'https://gitlab.com/api/v4/' });
     });
+
+    it('should skip api call to fetch version when platform version is defined', async () => {
+      expect(
+        await gitlab.initPlatform({
+          token: 'some-token',
+          endpoint: undefined,
+          gitAuthor: 'somebody',
+          platformOptions: {
+            platformVersion: '13.3.6-ee',
+          },
+        }),
+      ).toEqual({ endpoint: 'https://gitlab.com/api/v4/' });
+    });
   });
 
   describe('getRepos', () => {

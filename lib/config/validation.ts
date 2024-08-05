@@ -226,6 +226,22 @@ export async function validateConfig(
       });
     }
 
+    const parentName = getParentName(parentPath);
+    if (
+      !isPreset &&
+      optionParents[key] &&
+      !optionParents[key].includes(parentName as AllowedParents)
+    ) {
+      // TODO: types (#22198)
+      const message = `${key} should only be configured within one of "${optionParents[
+        key
+      ]?.join(' or ')}" objects. Was found in ${parentName}`;
+      warnings.push({
+        topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
+        message,
+      });
+    }
+
     if (isGlobalOption(key)) {
       if (configType === 'global') {
         await validateGlobalConfig(
@@ -304,21 +320,6 @@ export async function validateConfig(
             message: `Invalid template in config path: ${currentPath}`,
           });
         }
-      }
-      const parentName = getParentName(parentPath);
-      if (
-        !isPreset &&
-        optionParents[key] &&
-        !optionParents[key].includes(parentName as AllowedParents)
-      ) {
-        // TODO: types (#22198)
-        const message = `${key} should only be configured within one of "${optionParents[
-          key
-        ]?.join(' or ')}" objects. Was found in ${parentName}`;
-        warnings.push({
-          topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
-          message,
-        });
       }
       if (!optionTypes[key]) {
         errors.push({

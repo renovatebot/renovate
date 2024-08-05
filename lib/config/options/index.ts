@@ -2939,6 +2939,23 @@ const options: RenovateOptions[] = [
     default: false,
     globalOnly: true,
   },
+  {
+    name: 'platformOptions',
+    description:
+      'Used to set platform specific config options, to control platform behaviour.',
+    type: 'object',
+    default: {},
+    mergeable: true,
+  },
+  {
+    name: 'platformVersion',
+    description:
+      'Set a version string here to let Renovate skip the API call to fetch the platform version.',
+    type: 'string',
+    globalOnly: true,
+    supportedPlatforms: ['gitlab', 'bitbucket-server'],
+    parents: ['platformOptions'],
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {
