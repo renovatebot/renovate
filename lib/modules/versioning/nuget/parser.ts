@@ -19,7 +19,7 @@ export function parseVersion(input: string): NugetVersion | null {
 
   const { major, minor, patch, revision, prerelease, metadata } = groups;
 
-  // istanbul ignore next: never happens by design
+  // istanbul ignore if: never happens by design
   if (!major) {
     return null;
   }
