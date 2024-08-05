@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
@@ -11,6 +10,10 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
+import {
+  getCopierVersionConstraint,
+  getPythonVersionConstraint,
+} from './utils';
 
 const DEFAULT_COMMAND_OPTIONS = ['--skip-answered', '--defaults'];
 
@@ -46,32 +49,6 @@ function artifactError(
   ];
 }
 
-function getPythonVersionConstraint(
-  config: UpdateArtifactsConfig,
-): string | undefined | null {
-  const { constraints = {} } = config;
-  const { python } = constraints;
-
-  if (python) {
-    logger.debug('Using python constraint from config');
-    return python;
-  }
-
-  return undefined;
-}
-
-function getCopierVersionConstraint(config: UpdateArtifactsConfig): string {
-  const { constraints = {} } = config;
-  const { copier } = constraints;
-
-  if (is.string(copier)) {
-    logger.debug('Using copier constraint from config');
-    return copier;
-  }
-
-  return '';
-}
-
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -94,19 +71,17 @@ export async function updateArtifacts({
   }
 
   const command = buildCommand(config, packageFileName, newVersion);
-  const pythonConstraint = getPythonVersionConstraint(config);
-  const copierConstraint = getCopierVersionConstraint(config);
   const execOptions: ExecOptions = {
     docker: {},
     userConfiguredEnv: config.env,
     toolConstraints: [
       {
         toolName: 'python',
-        constraint: pythonConstraint,
+        constraint: getPythonVersionConstraint(config),
       },
       {
         toolName: 'copier',
-        constraint: copierConstraint,
+        constraint: getCopierVersionConstraint(config),
       },
     ],
   };
