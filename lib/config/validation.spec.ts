@@ -1408,8 +1408,7 @@ describe('config/validation', () => {
   });
 
   describe('validateConfig() -> globaOnly options', () => {
-    // eslint-disable-next-line
-    it.only('warns if children inside wrong parent', async () => {
+    it('warns if children inside wrong parent', async () => {
       const config: RenovateConfig = {
         platformVersion: '8.0.0',
       };
