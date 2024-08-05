@@ -54,7 +54,6 @@ describe('modules/manager/copier/artifacts', () => {
   });
 
   afterEach(() => {
-    GlobalConfig.reset();
     fs.readLocalFile.mockClear();
     git.getRepoStatus.mockClear();
   });
@@ -82,7 +81,7 @@ describe('modules/manager/copier/artifacts', () => {
           },
         },
       ]);
-      expect(execSnapshots).toMatchObject([]);
+      expect(execSnapshots).toEqual([]);
     });
 
     it('reports an error if no upgrade is specified', async () => {
@@ -103,7 +102,7 @@ describe('modules/manager/copier/artifacts', () => {
           },
         },
       ]);
-      expect(execSnapshots).toMatchObject([]);
+      expect(execSnapshots).toEqual([]);
     });
 
     it('invokes copier update with the correct options by default', async () => {
@@ -123,14 +122,15 @@ describe('modules/manager/copier/artifacts', () => {
       ]);
     });
 
-    it.each([
-      [null, null],
-      ['3.11.3', null],
-      [null, '9.1.0'],
-      ['3.11.3', '9.1.0'],
-    ])(
-      'supports dynamic install with constraints python=%o copier=%o',
-      async (pythonConstraint, copierConstraint) => {
+    it.each`
+      pythonConstraint | copierConstraint
+      ${null}          | ${null}
+      ${'3.11.3'}      | ${null}
+      ${null}          | ${'9.1.0'}
+      ${'3.11.3'}      | ${'9.1.0'}
+    `(
+      `supports dynamic install with constraints python=$pythonConstraint copier=$copierConstraint`,
+      async ({ pythonConstraint, copierConstraint }) => {
         GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
         const constraintConfig = {
           python: pythonConstraint ?? '',
@@ -161,8 +161,8 @@ describe('modules/manager/copier/artifacts', () => {
         ).not.toBeNull();
 
         expect(execSnapshots).toMatchObject([
-          { cmd: 'install-tool python ' + (pythonConstraint ?? '3.12.4') },
-          { cmd: 'install-tool copier ' + (copierConstraint ?? '9.2.0') },
+          { cmd: `install-tool python ${pythonConstraint ?? '3.12.4'}` },
+          { cmd: `install-tool copier ${copierConstraint ?? '9.2.0'}` },
           {
             cmd: 'copier update --skip-answered --defaults --answers-file .copier-answers.yml --vcs-ref 1.1.0',
           },
