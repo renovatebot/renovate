@@ -248,6 +248,7 @@ describe('config/presets/index', () => {
               '@eslint/**',
               '@types/eslint__**',
               '@typescript-eslint/**',
+              'typescript-eslint',
               'eslint**',
             ],
           },
@@ -259,14 +260,14 @@ describe('config/presets/index', () => {
       config.extends = ['packages:eslint'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.matchPackageNames).toHaveLength(7);
+      expect(res.matchPackageNames).toHaveLength(8);
     });
 
     it('resolves linters', async () => {
       config.extends = ['packages:linters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.matchPackageNames).toHaveLength(17);
+      expect(res.matchPackageNames).toHaveLength(18);
     });
 
     it('resolves nested groups', async () => {
@@ -275,7 +276,7 @@ describe('config/presets/index', () => {
       expect(res).toMatchSnapshot();
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(17);
+      expect(rule.matchPackageNames).toHaveLength(18);
     });
 
     it('migrates automerge in presets', async () => {
