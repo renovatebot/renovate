@@ -116,6 +116,28 @@ Returns `true` if the value is included on the list given.
 
 `{{#if (includes labels 'dependencies')}}Production Dependencies{{else}}Not Production Dependencies{{/if}}`
 
+### lookupArray
+
+Similar to the built-in [`lookup`](https://handlebarsjs.com/guide/builtin-helpers.html#lookup)
+helper, but performs lookups in every element of an array, instead of just one object.
+
+For example:
+
+`{{#each (lookupArray upgrades "prBodyDefinitions")}} {{{Issue}}}{{/each}}`
+
+will produce the same output as:
+
+`{{#each upgrades}}{{#with prBodyDefinitions}} {{{Issue}}}{{/with}}{{/each}}`.
+
+The return value of `lookupArray` can be passed to other helpers - for example,
+to `distinct`.
+
+### distinct
+
+Removes duplicate elements from an array.
+
+`{{#each (distinct (lookupArray (lookupArray upgrades "prBodyDefinitions") "Issue"))}} {{{.}}}{{/each}}`
+
 ## Environment variables
 
 By default, you can only access a handful of basic environment variables like `HOME` or `PATH`.

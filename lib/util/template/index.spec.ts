@@ -338,4 +338,60 @@ describe('util/template/index', () => {
       expect(output).toBe('notProduction');
     });
   });
+
+  describe('lookupArray', () => {
+    it('performs lookup for every array element', () => {
+      const output = template.compile(
+        '{{#each (lookupArray upgrades "prBodyDefinitions")}} {{{Issue}}}{{/each}}',
+        {
+          upgrades: [
+            {
+              prBodyDefinitions: {
+                Issue: 'ABC-123',
+              },
+            },
+            {},
+            {
+              prBodyDefinitions: {
+                Issue: 'DEF-456',
+              },
+            },
+            null,
+            undefined,
+          ],
+        },
+      );
+
+      expect(output).toBe(' ABC-123 DEF-456');
+    });
+  });
+
+  describe('distinct', () => {
+    it('skips duplicate values', () => {
+      const output = template.compile(
+        '{{#each (distinct (lookupArray (lookupArray upgrades "prBodyDefinitions") "Issue"))}} {{{.}}}{{/each}}',
+        {
+          upgrades: [
+            {
+              prBodyDefinitions: {
+                Issue: 'ABC-123',
+              },
+            },
+            {
+              prBodyDefinitions: {
+                Issue: 'DEF-456',
+              },
+            },
+            {
+              prBodyDefinitions: {
+                Issue: 'ABC-123',
+              },
+            },
+          ],
+        },
+      );
+
+      expect(output).toBe(' ABC-123 DEF-456');
+    });
+  });
 });
