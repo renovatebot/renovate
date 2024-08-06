@@ -2101,7 +2101,7 @@ In the case that a user is automatically added as reviewer (such as Renovate App
 
 ## ignoreScripts
 
-Applicable for npm and Composer only for now. Set this to `true` if running scripts causes problems.
+Applicable for npm, Composer and Copier only for now. Set this to `true` if running scripts causes problems.
 
 ## ignoreTests
 
