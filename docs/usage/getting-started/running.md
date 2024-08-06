@@ -2,9 +2,9 @@
 
 As end user, you can choose from these ways to run Renovate:
 
-- You use the Mend Renovate App
-- You self-administer/host your own Renovate instance
-- Someone else is hosting Renovate, and you install/configure it for the repositories you choose
+-   You use the Mend Renovate App
+-   You self-administer/host your own Renovate instance
+-   Someone else is hosting Renovate, and you install/configure it for the repositories you choose
 
 If you're using the Mend Renovate App, or if someone else is hosting Renovate for you, skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
 
@@ -12,10 +12,10 @@ If you're using the Mend Renovate App, or if someone else is hosting Renovate fo
 
 When self-hosting Renovate you're the "administrator" of the bot, this means you:
 
-- provide the infrastructure that Renovate runs on,
-- provision Renovate's global config,
-- make sure Renovate bot runs regularly,
-- make sure Renovate bot itself is updated
+-   provide the infrastructure that Renovate runs on,
+-   provision Renovate's global config,
+-   make sure Renovate bot runs regularly,
+-   make sure Renovate bot itself is updated
 
 If you're self-hosting Renovate on Windows, read [Self-hosting on Windows](./installing-onboarding.md#self-hosting-on-windows) to prevent line endings from confusing Renovate bot.
 
@@ -44,8 +44,8 @@ In general, you can run Renovate natively on Windows as long as you have all too
 
 There are two Docker image flavors:
 
-- The default image, which installs required tools at runtime (default for `latest` tag),
-- The `-full` image, which comes with latest or very recent versions of every tool pre-installed
+-   The default image, which installs required tools at runtime (default for `latest` tag),
+-   The `-full` image, which comes with latest or very recent versions of every tool pre-installed
 
 ##### The default image (formerly `slim`)
 
@@ -69,8 +69,8 @@ Update your Docker images regularly to keep the pre-installed tools up-to-date.
 The full image is for users who don't want to download or install things at runtime.
 This image has some downsides, because it:
 
-- Comes pre-installed with _one_ version of each language/manager - usually the latest
-- Weighs several gigabytes
+-   Comes pre-installed with _one_ version of each language/manager - usually the latest
+-   Weighs several gigabytes
 
 #### GitHub Action
 
@@ -89,17 +89,17 @@ Mend Renovate Community Edition (Renovate CE) and Enterprise Edition (Renovate E
 Renovate CE and Renovate EE have support for GitHub (both `github.com` and GitHub Enterprise Server) as well as GitLab self-hosted.
 It is built similarly to the default "full" Renovate image described above, but with these differences:
 
-- It is a stateful app and does not exit after processing all repositories
-- It is installed as an App on GitHub, and behaves similarly on GitLab - for example responding to webhooks
-- It includes a priority job queue which prioritizes events like merged PRs over scheduled jobs
-- It is released every 1-2 months in a slower, more stable cadence than Renovate OSS, which releases on every commit
-- It's licensed using an end-user license agreement (EULA) and not the Affero General Public License (AGPL)
+-   It is a stateful app and does not exit after processing all repositories
+-   It is installed as an App on GitHub, and behaves similarly on GitLab - for example responding to webhooks
+-   It includes a priority job queue which prioritizes events like merged PRs over scheduled jobs
+-   It is released every 1-2 months in a slower, more stable cadence than Renovate OSS, which releases on every commit
+-   It's licensed using an end-user license agreement (EULA) and not the Affero General Public License (AGPL)
 
 Plus, the Enterprise Edition has:
 
-- Horizontal scaling to run multiple 'worker' containers
-- Dedicated support from Mend.io
-- Premium features, including Smart Merge Control
+-   Horizontal scaling to run multiple 'worker' containers
+-   Dedicated support from Mend.io
+-   Premium features, including Smart Merge Control
 
 Go to the Mend.io website to learn more about [Renovate Enterprise Edition](https://www.mend.io/renovate-enterprise/).
 
@@ -128,8 +128,8 @@ Forking Renovate needs only `read` level access to the code of any repository it
 
 If you use Forking Renovate, you'll miss out on these features of the regular Renovate app:
 
-- Automerge
-- The `baseBranches` config option
+-   Automerge
+-   The `baseBranches` config option
 
 ### Hosting Renovate
 
@@ -147,9 +147,9 @@ Mend Renovate On-Premises and Mend Remediate both run as long-lived containers, 
 
 Renovate's server-side/admin config is referred to as its "global" config, and can be set by using either:
 
-- a config file, or
-- environment variables, or
-- CLI parameters
+-   a config file, or
+-   environment variables, or
+-   CLI parameters
 
 By default Renovate checks if a file named `config.js` is present.
 Any other (`*.js`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is supported, when you reference it with the `RENOVATE_CONFIG_FILE` environment variable (for example: `RENOVATE_CONFIG_FILE=config.yaml`).
@@ -162,8 +162,8 @@ This way the Renovate end users can see as much of the bot's configuration as po
 
 If you are configuring Renovate using environment variables, there are two possibilities:
 
-- Upper-cased, camel-cased, `RENOVATE_`-prefixed single config options like `RENOVATE_TOKEN=abc123` or `RENOVATE_GIT_AUTHOR=a@b.com`
-- Set `RENOVATE_CONFIG` to a [stringified](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) version of the full JSON config, for example: `RENOVATE_CONFIG='{"token":"abc123","gitAuthor":"a@b.com"}'`
+-   Upper-cased, camel-cased, `RENOVATE_`-prefixed single config options like `RENOVATE_TOKEN=abc123` or `RENOVATE_GIT_AUTHOR=a@b.com`
+-   Set `RENOVATE_CONFIG` to a [stringified](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) version of the full JSON config, for example: `RENOVATE_CONFIG='{"token":"abc123","gitAuthor":"a@b.com"}'`
 
 If you combine both of the above then any single config option in the environment variable will override what's in `RENOVATE_CONFIG`.
 
@@ -179,7 +179,7 @@ The value can be either a plain JavaScript object like in this example where `co
 
 ```javascript
 module.exports = {
-  token: 'abcdefg',
+    token: 'abcdefg',
 };
 ```
 
@@ -202,12 +202,12 @@ We also recommend you configure `config.gitAuthor` with the same identity as you
 
 Read the platform-specific docs to learn how to setup authentication on your platform:
 
-- [Azure DevOps](../modules/platform/azure/index.md)
-- [Bitbucket Cloud](../modules/platform/bitbucket/index.md)
-- [Bitbucket Server](../modules/platform/bitbucket-server/index.md)
-- [Gitea and Forgejo](../modules/platform/gitea/index.md)
-- [github.com and GitHub Enterprise Server](../modules/platform/github/index.md)
-- [GitLab](../modules/platform/gitlab/index.md)
+-   [Azure DevOps](../modules/platform/azure/index.md)
+-   [Bitbucket Cloud](../modules/platform/bitbucket/index.md)
+-   [Bitbucket Server](../modules/platform/bitbucket-server/index.md)
+-   [Gitea and Forgejo](../modules/platform/gitea/index.md)
+-   [github.com and GitHub Enterprise Server](../modules/platform/github/index.md)
+-   [GitLab](../modules/platform/gitlab/index.md)
 
 ### GitHub.com token for changelogs
 

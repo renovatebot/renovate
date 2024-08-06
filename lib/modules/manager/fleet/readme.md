@@ -5,6 +5,6 @@ To enable GitRepo updates you have to extend your [`fileMatch`](../../../configu
 
 ```json
 {
-  "fileMatch": ["'(^|/)fleet.ya?ml", "myGitRepoManifests\\.yaml"]
+    "fileMatch": ["'(^|/)fleet.ya?ml", "myGitRepoManifests\\.yaml"]
 }
 ```

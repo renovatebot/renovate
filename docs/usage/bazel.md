@@ -26,10 +26,10 @@ If no registries are found, Renovate defaults to the [Bazel Central Registry](ht
 Here are some important points about Renovate's Bazel registry searches.
 Renovate:
 
-- uses _all_ `--registry` values found in a workspace's `.bazelrc` file
-- uses any files that are transitively imported by a `.bazelrc` file
-- only uses `--registry` values that are not associated with [a configuration](https://bazel.build/run/bazelrc#config)
-- queries the registries in the order that they are found in the `.bazelrc` file
+-   uses _all_ `--registry` values found in a workspace's `.bazelrc` file
+-   uses any files that are transitively imported by a `.bazelrc` file
+-   only uses `--registry` values that are not associated with [a configuration](https://bazel.build/run/bazelrc#config)
+-   queries the registries in the order that they are found in the `.bazelrc` file
 
 #### Example: multiple `.bazelrc` files
 
@@ -149,13 +149,13 @@ Renovate ignores [`multiple_version_override`](https://bazel.build/rules/lib/glo
 
 Renovate extracts dependencies from the following repository rules:
 
-- `container_pull`
-- `oci_pull`
-- `git_repository`
-- `go_repository`
-- `maven_install`
-- `http_archive`
-- `http_file`
+-   `container_pull`
+-   `oci_pull`
+-   `git_repository`
+-   `go_repository`
+-   `maven_install`
+-   `http_archive`
+-   `http_file`
 
 It also recognizes when these repository rule names are prefixed with an underscore.
 For example, `_http_archive` is treated the same as `http_archive`.
@@ -207,13 +207,13 @@ To change it, configure `packageRules` like this:
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchManagers": ["bazel"],
-      "matchDatasources": ["maven"],
-      "versioning": "maven"
-    }
-  ]
+    "packageRules": [
+        {
+            "matchManagers": ["bazel"],
+            "matchDatasources": ["maven"],
+            "versioning": "maven"
+        }
+    ]
 }
 ```
 

@@ -21,8 +21,8 @@ If you want to manage other Kotlin Script files, you may use the `fileMatch` con
 
 ```json
 {
-  "kotlin-script": {
-    "fileMatch": ["^.*\\.kts$"]
-  }
+    "kotlin-script": {
+        "fileMatch": ["^.*\\.kts$"]
+    }
 }
 ```

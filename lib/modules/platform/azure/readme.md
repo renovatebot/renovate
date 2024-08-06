@@ -5,9 +5,9 @@
 First, [create a Personal Access Token](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page) for the bot account.
 Let Renovate use your PAT by doing _one_ of the following:
 
-- Set your PAT as a `token` in your `config.js` file
-- Set your PAT as an environment variable `RENOVATE_TOKEN`
-- Set your PAT when you run Renovate in the CLI with `--token=`
+-   Set your PAT as a `token` in your `config.js` file
+-   Set your PAT as an environment variable `RENOVATE_TOKEN`
+-   Set your PAT when you run Renovate in the CLI with `--token=`
 
 Permissions for your PAT should be at minimum:
 
@@ -34,30 +34,30 @@ Replace _all_ content in the starter pipeline with:
 
 ```yaml
 schedules:
-  - cron: '0 3 * * *'
-    displayName: 'Every day at 3am (UTC)'
-    branches:
-      include: [main]
-    always: true
+    - cron: '0 3 * * *'
+      displayName: 'Every day at 3am (UTC)'
+      branches:
+          include: [main]
+      always: true
 
 trigger: none
 
 pool:
-  vmImage: ubuntu-latest
+    vmImage: ubuntu-latest
 
 steps:
-  - task: npmAuthenticate@0
-    inputs:
-      workingFile: .npmrc
+    - task: npmAuthenticate@0
+      inputs:
+          workingFile: .npmrc
 
-  - bash: |
-      git config --global user.email 'bot@renovateapp.com'
-      git config --global user.name 'Renovate Bot'
-      npx --userconfig .npmrc renovate
-    env:
-      RENOVATE_PLATFORM: azure
-      RENOVATE_ENDPOINT: $(System.CollectionUri)
-      RENOVATE_TOKEN: $(System.AccessToken)
+    - bash: |
+          git config --global user.email 'bot@renovateapp.com'
+          git config --global user.name 'Renovate Bot'
+          npx --userconfig .npmrc renovate
+      env:
+          RENOVATE_PLATFORM: azure
+          RENOVATE_ENDPOINT: $(System.CollectionUri)
+          RENOVATE_TOKEN: $(System.AccessToken)
 ```
 
 ### Create a .npmrc file
@@ -77,15 +77,15 @@ Create a `config.js` file in your repository:
 
 ```javascript
 module.exports = {
-  hostRules: [
-    {
-      hostType: 'npm',
-      matchHost: 'pkgs.dev.azure.com',
-      username: 'apikey',
-      password: process.env.RENOVATE_TOKEN,
-    },
-  ],
-  repositories: ['YOUR-PROJECT/YOUR-REPO'],
+    hostRules: [
+        {
+            hostType: 'npm',
+            matchHost: 'pkgs.dev.azure.com',
+            username: 'apikey',
+            password: process.env.RENOVATE_TOKEN,
+        },
+    ],
+    repositories: ['YOUR-PROJECT/YOUR-REPO'],
 };
 ```
 
@@ -98,20 +98,20 @@ Use the `matchHost` config option to specify the full path to the registry.
 
 ```javascript
 module.exports = {
-  platform: 'azure',
-  hostRules: [
-    {
-      matchHost:
-        'https://myorg.pkgs.visualstudio.com/_packaging/myorg/npm/registry/',
-      token: process.env.RENOVATE_TOKEN,
-      hostType: 'npm',
-    },
-    {
-      matchHost: 'github.com',
-      token: process.env.GITHUB_COM_TOKEN,
-    },
-  ],
-  repositories: ['YOUR-PROJECT/YOUR-REPO'],
+    platform: 'azure',
+    hostRules: [
+        {
+            matchHost:
+                'https://myorg.pkgs.visualstudio.com/_packaging/myorg/npm/registry/',
+            token: process.env.RENOVATE_TOKEN,
+            hostType: 'npm',
+        },
+        {
+            matchHost: 'github.com',
+            token: process.env.GITHUB_COM_TOKEN,
+        },
+    ],
+    repositories: ['YOUR-PROJECT/YOUR-REPO'],
 };
 ```
 
@@ -134,22 +134,22 @@ If you want to use a single Renovate pipeline to update multiple repositories yo
 Add the names of the repositories to `config.js`.
 Make sure that the "Project Collection Build Service (YOUR-PROJECT)" user has the following permissions on the repositories:
 
-- Contribute
-- Contribute to pull requests
-- Create branch
-- Read
+-   Contribute
+-   Contribute to pull requests
+-   Create branch
+-   Read
 
 The user must have the following permission at Project-level:
 
-- View project-level information
+-   View project-level information
 
 ### Linking a work item to the Pull Requests
 
 If you want Renovate to automatically link an existing work item to the Pull Requests, you can set the `azureWorkItemId` configuration.
 Make sure the user has the following permissions on the work item's _area path_:
 
-- Edit work items in this node
-- View work items in this node
+-   Edit work items in this node
+-   View work items in this node
 
 If the user does not have these permissions, Renovate still creates a PR but it won't have a link to the work item.
 
@@ -158,6 +158,6 @@ If the user does not have these permissions, Renovate still creates a PR but it 
 Tags can be added to Pull Requests using the `labels` or `addLabels` configurations.
 If the tag does not exist in the DevOps project, it will be created automatically during creation of the Pull Request as long as the user has the permissions at Project-level:
 
-- Create tag definition
+-   Create tag definition
 
 Otherwise, when a tag does not exist and the user does not have permission to create it, Renovate will output an error during creation of the Pull Request.

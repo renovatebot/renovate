@@ -4,11 +4,11 @@
 
 Read the [Security and Permissions](../security-and-permissions.md) page to learn more about:
 
-- Renovate's security stance
-- What do if you need to use certificed software
-- The security/disclosure process
-- Permissions
-- Privacy
+-   Renovate's security stance
+-   What do if you need to use certificed software
+-   The security/disclosure process
+-   Permissions
+-   Privacy
 
 ## Repository installation
 
@@ -18,8 +18,8 @@ If the administrator has configured a fixed list of repositories then the only w
 
 Otherwise, the process for adding new repositories to a Renovate installation can vary:
 
-- Most commonly, you run Renovate as a dedicated "bot user" with global config option `autodiscover` set to `true`, meaning that it will run on every repository which it's been granted access to
-- If using a GitHub App (including the Mend Renovate App) then you can install the app into a user or organization account and select either "All repositories", or "Select repositories" and pick them manually
+-   Most commonly, you run Renovate as a dedicated "bot user" with global config option `autodiscover` set to `true`, meaning that it will run on every repository which it's been granted access to
+-   If using a GitHub App (including the Mend Renovate App) then you can install the app into a user or organization account and select either "All repositories", or "Select repositories" and pick them manually
 
 ### Hosted GitHub.com App
 
@@ -84,15 +84,15 @@ Warnings and errors should be fixed on the base branch (e.g. `main`) so that Ren
 The "Configure Renovate" PR will include a `renovate.json` file in the root directory, with suggested default settings.
 If you don't want a `renovate.json` file in your repository you can use one of the following files instead:
 
-- `renovate.json5`
-- `.github/renovate.json`
-- `.github/renovate.json5`
-- `.gitlab/renovate.json`
-- `.gitlab/renovate.json5`
-- `.renovaterc`
-- `.renovaterc.json`
-- `.renovaterc.json5`
-- `package.json` (deprecated)
+-   `renovate.json5`
+-   `.github/renovate.json`
+-   `.github/renovate.json5`
+-   `.gitlab/renovate.json`
+-   `.gitlab/renovate.json5`
+-   `.renovaterc`
+-   `.renovaterc.json`
+-   `.renovaterc.json5`
+-   `package.json` (deprecated)
 
 #### package.json
 
@@ -110,17 +110,17 @@ The configuration in your `package.json` will apply to the whole project (this i
 Renovate provides a `renovate.json` file, with default settings that will work for most cases.
 Sometimes Renovate detects that an override to these defaults is needed, and will add this override automatically, such as:
 
-- Automatically enabling Angular-style semantic commits if your repository uses them
-- Determining whether to use dependency range pinning depending on the detected project type (app vs library)
+-   Automatically enabling Angular-style semantic commits if your repository uses them
+-   Determining whether to use dependency range pinning depending on the detected project type (app vs library)
 
 ### Common overrides
 
 Please check the docs on this website for an exhaustive Configuration Reference.
 To help you get started, here are some of the most commonly changed (overridden) configuration settings:
 
-- **rangeStrategy**: By default (with zero config) it's `"replace"` but the `"config:recommended"` preset overrides it to `"auto"`. Some prefer `"bump"`.
-- **labels**: Labels to assign to Pull Requests
-- **assignees**: GitHub user(s) to assign the Pull Requests to
+-   **rangeStrategy**: By default (with zero config) it's `"replace"` but the `"config:recommended"` preset overrides it to `"auto"`. Some prefer `"bump"`.
+-   **labels**: Labels to assign to Pull Requests
+-   **assignees**: GitHub user(s) to assign the Pull Requests to
 
 Renovate will update your PR description each time it finds changes.
 
@@ -133,8 +133,8 @@ Once you're done checking and configuring in your Configure Renovate PR, it's ti
 There will be times when you need to change your Renovate config.
 There are two recommended approaches:
 
-- Reconfigure via PR
-- Nuke the config and re-onboard
+-   Reconfigure via PR
+-   Nuke the config and re-onboard
 
 ### Reconfigure via PR
 

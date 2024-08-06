@@ -12,13 +12,13 @@ But you may use datasources in a `packageRules` array to configure Renovate's be
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchDatasources": ["npm"],
-      "matchPackageNames": ["lodash"],
-      "automerge": true
-    }
-  ]
+    "packageRules": [
+        {
+            "matchDatasources": ["npm"],
+            "matchPackageNames": ["lodash"],
+            "automerge": true
+        }
+    ]
 }
 ```
 

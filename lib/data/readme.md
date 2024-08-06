@@ -34,25 +34,25 @@ The `replacements.json` file has all the replacement presets.
 
 When a package gets renamed, you need to tell Renovate:
 
-- the datasource of the package -> `matchDatasources`
-- the old package name -> `matchPackageNames`
-- the new package name -> `replacementName`
-- the last version available for the old package name -> `matchCurrentVersion`
-- the first version available for the new package name -> `replacementVersion`
+-   the datasource of the package -> `matchDatasources`
+-   the old package name -> `matchPackageNames`
+-   the new package name -> `replacementName`
+-   the last version available for the old package name -> `matchCurrentVersion`
+-   the first version available for the new package name -> `replacementVersion`
 
 Example:
 
 ```json
 {
-  "matchCurrentVersion": ">=3.10.3",
-  "matchDatasources": ["npm"],
-  "matchPackageNames": [
-    "apollo-server",
-    "apollo-server-core",
-    "apollo-server-express"
-  ],
-  "replacementName": "@apollo/server",
-  "replacementVersion": "4.0.0"
+    "matchCurrentVersion": ">=3.10.3",
+    "matchDatasources": ["npm"],
+    "matchPackageNames": [
+        "apollo-server",
+        "apollo-server-core",
+        "apollo-server-express"
+    ],
+    "replacementName": "@apollo/server",
+    "replacementVersion": "4.0.0"
 }
 ```
 
@@ -67,15 +67,15 @@ If this does not happen, for whatever reason, Renovate can not show the changelo
 
 You can use these config options to let Renovate find the correct changelog:
 
-- [`changelogUrl`](https://docs.renovatebot.com/configuration-options/#changelogurl)
+-   [`changelogUrl`](https://docs.renovatebot.com/configuration-options/#changelogurl)
 
 Read the [Renovate docs, key concepts page for changelogs](https://docs.renovatebot.com/key-concepts/changelogs/) to learn more about how Renovate fetches and displays changelogs.
 
 To locate the changelogs, Renovate requires:
 
-- the name of the package (`packageName`)
-- the datasource of the package
-- the URL to the changelog file (`changelogUrl`)
+-   the name of the package (`packageName`)
+-   the datasource of the package
+-   the URL to the changelog file (`changelogUrl`)
 
 Example:
 For the `zone.js` package, the changelog URL is <https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md>.
@@ -99,9 +99,9 @@ If Renovate does not find the right source URls automatically: use the [`sourceU
 
 To locate the source repository, Renovate requires:
 
-- the name of the package (`packageName`)
-- the datasource of the package
-- the URL to the source repository (`sourceUrl`)
+-   the name of the package (`packageName`)
+-   the datasource of the package
+-   the URL to the source repository (`sourceUrl`)
 
 Example:
 The source URL for the repository `cypress-io/cypress` is <https://github.com/cypress-io/cypress>.

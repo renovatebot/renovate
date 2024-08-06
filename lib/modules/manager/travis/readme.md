@@ -17,10 +17,10 @@ Here's how to enable major updates in your Renovate config:
 
 ```json
 {
-  "travis": {
-    "major": {
-      "enabled": true
+    "travis": {
+        "major": {
+            "enabled": true
+        }
     }
-  }
 }
 ```

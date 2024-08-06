@@ -9,9 +9,9 @@ To enable the `helmsman` manager, provide a valid `fileMatch` yourself, for exam
 
 ```json
 {
-  "helmsman": {
-    "fileMatch": ["(^|/)desired_state\\.yaml$"]
-  }
+    "helmsman": {
+        "fileMatch": ["(^|/)desired_state\\.yaml$"]
+    }
 }
 ```
 

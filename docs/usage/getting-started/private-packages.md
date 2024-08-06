@@ -5,8 +5,8 @@ This page describes Renovate's approach to authentication.
 
 First, a quick note on terminology:
 
-- The terms `module`, `package` and `dependency` can mostly be used interchangeably below
-- The terms `credentials`, `secrets` and `authentication` are also used interchangeably
+-   The terms `module`, `package` and `dependency` can mostly be used interchangeably below
+-   The terms `credentials`, `secrets` and `authentication` are also used interchangeably
 
 ## When does Renovate need credentials?
 
@@ -18,10 +18,10 @@ Any time you need Renovate to access such registries with credentials then you w
 
 There are four times in Renovate's behavior when it may need credentials:
 
-- Resolving private config presets
-- Looking up dependency versions
-- Looking up changelogs
-- Passing to package managers when updating lock files or checksums
+-   Resolving private config presets
+-   Looking up dependency versions
+-   Looking up changelogs
+-   Passing to package managers when updating lock files or checksums
 
 <!-- prettier-ignore -->
 !!! note
@@ -43,9 +43,9 @@ If your preset doesn't have secrets then you should make it public, while if it 
 
 In summary, the recommended approach to private presets is:
 
-- Host the presets on the same server/platform as other repositories
-- Make sure you install Renovate into the preset repository so that it has credentials to access it from other private repos
-- Use `local>....` syntax to refer to private presets
+-   Host the presets on the same server/platform as other repositories
+-   Make sure you install Renovate into the preset repository so that it has credentials to access it from other private repos
+-   Use `local>....` syntax to refer to private presets
 
 ## Dependency Version Lookups
 
@@ -69,17 +69,17 @@ Other credential terms are not supported yet.
 
 ```json title="Example host rules"
 {
-  "hostRules": [
-    {
-      "matchHost": "registry.npmjs.org",
-      "token": "abc123"
-    },
-    {
-      "matchHost": "https://registry.company.com/pypi-simple/",
-      "username": "engineering",
-      "password": "abc123"
-    }
-  ]
+    "hostRules": [
+        {
+            "matchHost": "registry.npmjs.org",
+            "token": "abc123"
+        },
+        {
+            "matchHost": "https://registry.company.com/pypi-simple/",
+            "username": "engineering",
+            "password": "abc123"
+        }
+    ]
 }
 ```
 
@@ -92,16 +92,16 @@ If you need to use different credentials for a specific GitHub repo, then you ca
 
 ```json
 {
-  "hostRules": [
-    {
-      "matchHost": "https://api.github.com/repos/org/repo",
-      "token": "abc123"
-    },
-    {
-      "matchHost": "https://github.domain.com/api/v3/repos/org/repo",
-      "token": "abc123"
-    }
-  ]
+    "hostRules": [
+        {
+            "matchHost": "https://api.github.com/repos/org/repo",
+            "token": "abc123"
+        },
+        {
+            "matchHost": "https://github.domain.com/api/v3/repos/org/repo",
+            "token": "abc123"
+        }
+    ]
 }
 ```
 
@@ -114,31 +114,31 @@ Assume this config is used on the `github.com/some-other-org` repo:
 
 ```json
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "dependencyDashboard": true,
-  "hostRules": [
-    {
-      "matchHost": "https://gitlab.com",
-      "token": "glpat-token_for_different_git_platform",
-      "hostType": "gitlab"
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "dependencyDashboard": true,
+    "hostRules": [
+        {
+            "matchHost": "https://gitlab.com",
+            "token": "glpat-token_for_different_git_platform",
+            "hostType": "gitlab"
+        },
+        {
+            "matchHost": "https://github.com/some-org",
+            "token": "ghp_token_for_different_org",
+            "hostType": "go"
+        },
+        {
+            "matchHost": "https://api.github.com/repos/some-org",
+            "token": "ghp_token_for_different_org",
+            "hostType": "github"
+        }
+    ],
+    "customEnvVariables": {
+        "GOPRIVATE": "github.com/some-org,github.com/some-other-org,gitlab.com/some-org",
+        "GONOSUMDB": "github.com/some-org,github.com/some-other-org,gitlab.com/some-org",
+        "GONOPROXY": "github.com/some-org,github.com/some-other-org,gitlab.com/some-org"
     },
-    {
-      "matchHost": "https://github.com/some-org",
-      "token": "ghp_token_for_different_org",
-      "hostType": "go"
-    },
-    {
-      "matchHost": "https://api.github.com/repos/some-org",
-      "token": "ghp_token_for_different_org",
-      "hostType": "github"
-    }
-  ],
-  "customEnvVariables": {
-    "GOPRIVATE": "github.com/some-org,github.com/some-other-org,gitlab.com/some-org",
-    "GONOSUMDB": "github.com/some-org,github.com/some-other-org,gitlab.com/some-org",
-    "GONOPROXY": "github.com/some-org,github.com/some-other-org,gitlab.com/some-org"
-  },
-  "postUpdateOptions": ["gomodTidy"]
+    "postUpdateOptions": ["gomodTidy"]
 }
 ```
 
@@ -153,8 +153,8 @@ It can be confusing for people who host their own source code privately to be as
 
 Currently the preferred way to configure `github.com` credentials for self-hosted Renovate is:
 
-- Create a read-only Personal Access Token (PAT) for a `github.com` account. This can be any GitHub account, but we recommend you create an "empty" account for this purpose.
-- Add the PAT to Renovate using the environment variable `GITHUB_COM_TOKEN`
+-   Create a read-only Personal Access Token (PAT) for a `github.com` account. This can be any GitHub account, but we recommend you create an "empty" account for this purpose.
+-   Add the PAT to Renovate using the environment variable `GITHUB_COM_TOKEN`
 
 ## Package Manager Credentials for Artifact Updating
 
@@ -180,20 +180,20 @@ Any `hostRules` with `hostType=packagist` are also included.
 For dependencies on `github.com` without a Packagist server: use a Personal Access Token for `hostRule` with `hostType=git-tags`, do not use an application token.
 Avoid adding a `hostRule` with `hostType=github` because:
 
-- it overrides the default Renovate application token for everything else
-- it causes unwanted side effects
+-   it overrides the default Renovate application token for everything else
+-   it causes unwanted side effects
 
 The repository in `composer.json` should have the `vcs` type with a `https` URL.
 For example:
 
 ```json
 {
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/organization/private-repository"
-    }
-  ]
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/organization/private-repository"
+        }
+    ]
 }
 ```
 
@@ -210,14 +210,14 @@ This is how you connect to a private Helm repository:
 
 ```js title="Connecting to a private Helm repository"
 module.exports = {
-  hostRules: [
-    {
-      matchHost: 'your.host.io',
-      hostType: 'helm',
-      username: '<your-username>',
-      password: process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD,
-    },
-  ],
+    hostRules: [
+        {
+            matchHost: 'your.host.io',
+            hostType: 'helm',
+            username: '<your-username>',
+            password: process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD,
+        },
+    ],
 };
 ```
 
@@ -239,28 +239,29 @@ Define `hostRules` like this:
 
 ```js
 module.exports = {
-  hostRules: [
-    {
-      hostType: 'npm',
-      matchHost: 'registry.npmjs.org',
-      token: process.env.NPMJS_TOKEN,
-    },
-    {
-      hostType: 'npm',
-      matchHost:
-        'https://pkgs.dev.azure.com/{organization}/{project}/_packaging/{feed}/npm/registry/',
-      username: 'VssSessionToken',
-      password: process.env.AZURE_NPM_TOKEN,
-    },
-    {
-      // https://www.jfrog.com/confluence/display/JFROG/npm+Registry
-      // Will be passed as `//artifactory.my-company.com/artifactory/api/npm/npm:_auth=<TOKEN>` to `.npmrc`
-      hostType: 'npm',
-      matchHost: 'https://artifactory.my-company.com/artifactory/api/npm/npm/',
-      token: process.env.ARTIFACTORY_NPM_TOKEN,
-      authType: 'Basic',
-    },
-  ],
+    hostRules: [
+        {
+            hostType: 'npm',
+            matchHost: 'registry.npmjs.org',
+            token: process.env.NPMJS_TOKEN,
+        },
+        {
+            hostType: 'npm',
+            matchHost:
+                'https://pkgs.dev.azure.com/{organization}/{project}/_packaging/{feed}/npm/registry/',
+            username: 'VssSessionToken',
+            password: process.env.AZURE_NPM_TOKEN,
+        },
+        {
+            // https://www.jfrog.com/confluence/display/JFROG/npm+Registry
+            // Will be passed as `//artifactory.my-company.com/artifactory/api/npm/npm:_auth=<TOKEN>` to `.npmrc`
+            hostType: 'npm',
+            matchHost:
+                'https://artifactory.my-company.com/artifactory/api/npm/npm/',
+            token: process.env.ARTIFACTORY_NPM_TOKEN,
+            authType: 'Basic',
+        },
+    ],
 };
 ```
 
@@ -274,7 +275,7 @@ You can add an `.npmrc` authentication line to your Renovate config under the fi
 
 ```json
 {
-  "npmrc": "//some.registry.com/:_authToken=abcdefghi-1234-jklmno-aac6-12345567889"
+    "npmrc": "//some.registry.com/:_authToken=abcdefghi-1234-jklmno-aac6-12345567889"
 }
 ```
 
@@ -288,7 +289,7 @@ If you are using the main npmjs registry then you can configure only the `npmTok
 
 ```json
 {
-  "npmToken": "abcdefghi-1234-jklmno-aac6-12345567889"
+    "npmToken": "abcdefghi-1234-jklmno-aac6-12345567889"
 }
 ```
 
@@ -302,9 +303,9 @@ Paste the encrypted result inside an `encrypted` object like this:
 
 ```json
 {
-  "encrypted": {
-    "npmToken": "xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA=="
-  }
+    "encrypted": {
+        "npmToken": "xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA=="
+    }
 }
 ```
 
@@ -313,10 +314,10 @@ If instead you use an alternative registry or need an `.npmrc` file for some oth
 
 ```json
 {
-  "encrypted": {
-    "npmToken": "xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA=="
-  },
-  "npmrc": "registry=https://my.custom.registry/npm\n//my.custom.registry/npm:_authToken=${NPM_TOKEN}"
+    "encrypted": {
+        "npmToken": "xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA=="
+    },
+    "npmrc": "registry=https://my.custom.registry/npm\n//my.custom.registry/npm:_authToken=${NPM_TOKEN}"
 }
 ```
 
@@ -335,9 +336,9 @@ The end-result looks like this:
 
 ```json
 {
-  "encrypted": {
-    "npmrc": "WOTWu+jliBtXYz3CU2eI7dDyMIvSJKS2N5PEHZmLB3XKT3vLaaYTGCU6m92Q9FgdaM/q2wLYun2JrTP4GPaW8eGZ3iiG1cm7lgOR5xPnkCzz0DUmSf6Cc/6geeVeSFdJ0zqlEAhdNMyJ4pUW6iQxC3WJKgM/ADvFtme077Acvc0fhCXv0XvbNSbtUwHF/gD6OJ0r2qlIzUMGJk/eI254xo5SwWVctc1iZS9LW+L0/CKjqhWh4SbyglP3lKE5shg3q7mzWDZepa/nJmAnNmXdoVO2aPPeQCG3BKqCtCfvLUUU/0LvnJ2SbQ1obyzL7vhh2OF/VsATS5cxbHvoX/hxWQ=="
-  }
+    "encrypted": {
+        "npmrc": "WOTWu+jliBtXYz3CU2eI7dDyMIvSJKS2N5PEHZmLB3XKT3vLaaYTGCU6m92Q9FgdaM/q2wLYun2JrTP4GPaW8eGZ3iiG1cm7lgOR5xPnkCzz0DUmSf6Cc/6geeVeSFdJ0zqlEAhdNMyJ4pUW6iQxC3WJKgM/ADvFtme077Acvc0fhCXv0XvbNSbtUwHF/gD6OJ0r2qlIzUMGJk/eI254xo5SwWVctc1iZS9LW+L0/CKjqhWh4SbyglP3lKE5shg3q7mzWDZepa/nJmAnNmXdoVO2aPPeQCG3BKqCtCfvLUUU/0LvnJ2SbQ1obyzL7vhh2OF/VsATS5cxbHvoX/hxWQ=="
+    }
 }
 ```
 
@@ -345,16 +346,16 @@ The end-result looks like this:
 
 ```json
 {
-  "hostRules": [
-    {
-      "matchHost": "https://npm.pkg.github.com/",
-      "hostType": "npm",
-      "encrypted": {
-        "token": "<Encrypted PAT Token>"
-      }
-    }
-  ],
-  "npmrc": "@organizationName:registry=https://npm.pkg.github.com/"
+    "hostRules": [
+        {
+            "matchHost": "https://npm.pkg.github.com/",
+            "hostType": "npm",
+            "encrypted": {
+                "token": "<Encrypted PAT Token>"
+            }
+        }
+    ],
+    "npmrc": "@organizationName:registry=https://npm.pkg.github.com/"
 }
 ```
 
@@ -368,15 +369,15 @@ For example, the Renovate configuration:
 
 ```json
 {
-  "hostRules": [
-    {
-      "matchHost": "https://npm.pkg.github.com/",
-      "hostType": "npm",
-      "encrypted": {
-        "token": "<Encrypted PAT Token>"
-      }
-    }
-  ]
+    "hostRules": [
+        {
+            "matchHost": "https://npm.pkg.github.com/",
+            "hostType": "npm",
+            "encrypted": {
+                "token": "<Encrypted PAT Token>"
+            }
+        }
+    ]
 }
 ```
 
@@ -386,16 +387,16 @@ If no registry currently set
 
 ```yaml
 npmRegistries:
-  //npm.pkg.github.com/:
-    npmAuthToken: <Decrypted PAT Token>
+    //npm.pkg.github.com/:
+        npmAuthToken: <Decrypted PAT Token>
 ```
 
 If current registry key has protocol set:
 
 ```yaml
 npmRegistries:
-  https://npm.pkg.github.com:
-    npmAuthToken: <Decrypted PAT Token>
+    https://npm.pkg.github.com:
+        npmAuthToken: <Decrypted PAT Token>
 ```
 
 ### maven
@@ -405,11 +406,11 @@ In GitLab Pipelines authorization can be achieved using following config:
 
 ```js
 hostRules: [
-  {
-    hostType: 'maven',
-    matchHost: 'https://gitlab.host.com/api/v4',
-    token: process.env.CI_JOB_TOKEN,
-  },
+    {
+        hostType: 'maven',
+        matchHost: 'https://gitlab.host.com/api/v4',
+        token: process.env.CI_JOB_TOKEN,
+    },
 ];
 ```
 
@@ -420,12 +421,12 @@ For those found, a command like the following is run: `dotnet nuget add source $
 
 ```js
 hostRules: [
-  {
-    matchHost: 'https://pkgs.dev.azure.com/<org>/',
-    hostType: 'nuget',
-    username: 'user', // doesn't matter for azure
-    password: '<PAT>',
-  },
+    {
+        matchHost: 'https://pkgs.dev.azure.com/<org>/',
+        hostType: 'nuget',
+        username: 'user', // doesn't matter for azure
+        password: '<PAT>',
+    },
 ];
 ```
 
@@ -439,12 +440,12 @@ For example:
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchManagers": ["pip_requirements"],
-      "registryUrls": ["https://docker.mycompany.domain"]
-    }
-  ]
+    "packageRules": [
+        {
+            "matchManagers": ["pip_requirements"],
+            "registryUrls": ["https://docker.mycompany.domain"]
+        }
+    ]
 }
 ```
 
@@ -465,8 +466,8 @@ name = "pypi"
 
 The pip-compile manager can extract these directives from the input file given to Renovate:
 
-- `--index-url`
-- `--extra-index-url`
+-   `--index-url`
+-   `--extra-index-url`
 
 Renovate matches those URLs with credentials from matching `hostRules` blocks in the Renovate configuration.
 Then Renovate passes the information to `pip-compile` via environment variables.
@@ -484,16 +485,16 @@ private-package==1.2.3
 
 ```json
 {
-  "pip-compile": {
-    "fileMatch": ["requirements.in"]
-  },
-  "hostRules": [
-    {
-      "matchHost": "pypi.my.domain",
-      "username": "myuser",
-      "password": "mypassword"
-    }
-  ]
+    "pip-compile": {
+        "fileMatch": ["requirements.in"]
+    },
+    "hostRules": [
+        {
+            "matchHost": "pypi.my.domain",
+            "username": "myuser",
+            "password": "mypassword"
+        }
+    ]
 }
 ```
 
@@ -508,8 +509,8 @@ If you self-host and use Containerbase, or our Docker sidecar container, then Re
 
 But if you are self-hosting Renovate and:
 
-- _not_ running Renovate in a Containerbase environment
-- or, _not_ using the Docker sidecar container
+-   _not_ running Renovate in a Containerbase environment
+-   or, _not_ using the Docker sidecar container
 
 Then you must install the Python keyring package and the keyrigs.envvars package into your self-hosted environment.
 
@@ -519,14 +520,14 @@ For every Poetry source, a `hostRules` search is done and then any found credent
 
 ```js
 module.exports = {
-  hostRules: [
-    {
-      matchHost: 'pypi.example.com',
-      hostType: 'pypi',
-      username: process.env.PYPI_USERNAME,
-      password: process.env.PYPI_PASSWORD,
-    },
-  ],
+    hostRules: [
+        {
+            matchHost: 'pypi.example.com',
+            hostType: 'pypi',
+            username: process.env.PYPI_USERNAME,
+            password: process.env.PYPI_PASSWORD,
+        },
+    ],
 };
 ```
 
@@ -534,14 +535,14 @@ If you're self-hosting Renovate via the [GitLab Runner](../getting-started/runni
 
 ```js
 module.exports = {
-  hostRules: [
-    {
-      matchHost: 'gitlab.example.com',
-      hostType: 'pypi',
-      username: 'gitlab-ci-token',
-      password: process.env.CI_JOB_TOKEN,
-    },
-  ],
+    hostRules: [
+        {
+            matchHost: 'gitlab.example.com',
+            hostType: 'pypi',
+            username: 'gitlab-ci-token',
+            password: process.env.CI_JOB_TOKEN,
+        },
+    ],
 };
 ```
 
@@ -557,13 +558,13 @@ For example:
 
 ```json
 {
-  "hostRules": [
-    {
-      "matchHost": "npm.pkg.github.com",
-      "hostType": "npm",
-      "token": "some-personal-access-token"
-    }
-  ]
+    "hostRules": [
+        {
+            "matchHost": "npm.pkg.github.com",
+            "hostType": "npm",
+            "token": "some-personal-access-token"
+        }
+    ]
 }
 ```
 
@@ -596,20 +597,20 @@ If you need to provide credentials to the Mend Renovate App, please do this:
 
 1. Add each secret string in the Credentials section of Organisation or Repository settings in the web UI at [http://developer.mend.io](http://developer.mend.io).
 
-   ![Organization and repository secrets on the credentials settings page](../assets/images/app-settings/org-and-repo-secrets.png)
+    ![Organization and repository secrets on the credentials settings page](../assets/images/app-settings/org-and-repo-secrets.png)
 
 2. Reference secrets inside your Renovate config files with notation: `{{ secrets.YOUR_SECRET }}`.
 
-   ```json
-   {
-     "hostRules": [
-       {
-         "matchHost": "github.com",
-         "token": "{{ secrets.GITHUB_COM_TOKEN }}"
-       }
-     ]
-   }
-   ```
+    ```json
+    {
+        "hostRules": [
+            {
+                "matchHost": "github.com",
+                "token": "{{ secrets.GITHUB_COM_TOKEN }}"
+            }
+        ]
+    }
+    ```
 
 For more details, see [Using Secrets with Mend Cloud Apps](app-secrets.md).
 
@@ -617,8 +618,8 @@ For more details, see [Using Secrets with Mend Cloud Apps](app-secrets.md).
 
 The Mend Renovate App does not run using GitHub Actions, but such secrets would be a bad fit for the app anyway for the following reasons:
 
-- The app would be granted access to _all_ the repository/org secrets, not just the ones you want
-- If Renovate wants access to such secrets, it would need to ask for them from every user, not just the ones who want to use this approach (GitHub does not support the concept of optional permissions for Apps, so people do not have the option to decline)
+-   The app would be granted access to _all_ the repository/org secrets, not just the ones you want
+-   If Renovate wants access to such secrets, it would need to ask for them from every user, not just the ones who want to use this approach (GitHub does not support the concept of optional permissions for Apps, so people do not have the option to decline)
 
 ## Admin/Bot config vs User/Repository config for Self-hosted users
 
@@ -630,11 +631,11 @@ If there is a need to supply custom rules for certain repository, it can still b
 If per-repository config must be done within the repository, it is still recommended against committing secrets directly (including e.g. `.npmrc` files with tokens) and instead encrypting them with a custom public key first.
 For instructions on this, see the above section on encrypting secrets for the Mend Renovate App but instead:
 
-- Save a copy of the <https://app.renovatebot.com/encrypt> HTML file locally, or host it locally
-- Generate a public/private key pair for the app using the instructions in [privateKey](../self-hosted-configuration.md#privatekey)
-- Replace the existing public key in the HTML with the public key you generated in the step prior
-- Use the resulting HTML encrypt page to encrypt secrets for your app before adding them to user/repository config
-- Configure the app to run with `privateKey` set to the private key you generated above
+-   Save a copy of the <https://app.renovatebot.com/encrypt> HTML file locally, or host it locally
+-   Generate a public/private key pair for the app using the instructions in [privateKey](../self-hosted-configuration.md#privatekey)
+-   Replace the existing public key in the HTML with the public key you generated in the step prior
+-   Use the resulting HTML encrypt page to encrypt secrets for your app before adding them to user/repository config
+-   Configure the app to run with `privateKey` set to the private key you generated above
 
 <!-- prettier-ignore -->
 !!! note

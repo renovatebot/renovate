@@ -11,10 +11,10 @@ For example:
 
 ```json
 {
-  "sdk": {
-    "version": "6.0.300",
-    "rollForward": "major"
-  }
+    "sdk": {
+        "version": "6.0.300",
+        "rollForward": "major"
+    }
 }
 ```
 

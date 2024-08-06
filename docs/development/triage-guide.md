@@ -35,19 +35,19 @@ In short: users create discussions, and when it's clear what we need to do, the 
 
 ### Special labels for issues
 
-- If it's an easy issue for somebody new to Renovate to help us with: apply the `good first issue` label
-- If we need outside help on the issue, apply the `help wanted` label
+-   If it's an easy issue for somebody new to Renovate to help us with: apply the `good first issue` label
+-   If we need outside help on the issue, apply the `help wanted` label
 
 ## What a triagist is allowed to do
 
 If you've been given triage rights, you are allowed to do the following things:
 
-- Apply labels to issues/discussions
-- Close, reopen, and assign all issues and pull requests
-- Mark duplicate issues and pull requests
-- Request pull request reviews
-- Lock and unlock discussions
-- Individually convert issues to discussions (do _not_ bulk convert issues)
+-   Apply labels to issues/discussions
+-   Close, reopen, and assign all issues and pull requests
+-   Mark duplicate issues and pull requests
+-   Request pull request reviews
+-   Lock and unlock discussions
+-   Individually convert issues to discussions (do _not_ bulk convert issues)
 
 **Note:** We don't use milestones or project boards.
 
@@ -68,8 +68,8 @@ In general, make a good-faith effort to label issues correctly.
 
 You can close an issue yourself if it's:
 
-- Spam
-- Obviously fixed
+-   Spam
+-   Obviously fixed
 
 For really old issues, it's a good idea to ask the maintainers to decide if they want to keep or close the issue.
 
@@ -90,8 +90,8 @@ Otherwise, ask the user to open a new issue if it seems like it is different.
 You can assign an issue to yourself, or to somebody else, so that others know who's going to work on the issue.
 GitHub allows issues to be assigned to:
 
-- any project collaborator, or
-- to any non-collaborator who has _created_ or _commented_ on the issue
+-   any project collaborator, or
+-   to any non-collaborator who has _created_ or _commented_ on the issue
 
 You can assign whoever makes sense.
 

@@ -4,9 +4,9 @@ The `helm-requirements` manager defines this default registryAlias:
 
 ```json
 {
-  "registryAliases": {
-    "stable": "https://charts.helm.sh/stable"
-  }
+    "registryAliases": {
+        "stable": "https://charts.helm.sh/stable"
+    }
 }
 ```
 

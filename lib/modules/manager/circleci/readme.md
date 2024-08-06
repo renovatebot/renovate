@@ -14,15 +14,15 @@ The end-result should look like this:
 
 ```json
 {
-  "hostRules": [
-    {
-      "matchHost": "circleci.com",
-      "authType": "Token-Only",
-      "encrypted": {
-        "token": "****"
-      }
-    }
-  ]
+    "hostRules": [
+        {
+            "matchHost": "circleci.com",
+            "authType": "Token-Only",
+            "encrypted": {
+                "token": "****"
+            }
+        }
+    ]
 }
 ```
 

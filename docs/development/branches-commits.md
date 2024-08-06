@@ -5,8 +5,8 @@
 Renovate can, and should, update multiple files in the same branch/PR.
 For example:
 
-- update the `package.json` and the `yarn.lock` file
-- update multiple package files in a monorepo, including different package managers
+-   update the `package.json` and the `yarn.lock` file
+-   update multiple package files in a monorepo, including different package managers
 
 ## One commit per branch
 

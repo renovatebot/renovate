@@ -4,10 +4,10 @@ You can customize the per-submodule checks of the git-submodules manager like th
 
 ```json
 {
-  "ignoreDeps": ["path/to/submodule", "path/to/submodule2"],
-  "git-submodules": {
-    "enabled": true
-  }
+    "ignoreDeps": ["path/to/submodule", "path/to/submodule2"],
+    "git-submodules": {
+        "enabled": true
+    }
 }
 ```
 
@@ -39,6 +39,6 @@ Next, all `hostRules` with both a token or username/password and `matchHost` wil
 
 Rules from this list are converted to environment variable directives if they match _any_ of the following characteristics:
 
-- No `hostType` is defined, or
-- `hostType` is `git-tags` or `git-refs`, or
-- `hostType` is a platform (`github`, `gitlab`, `azure`, etc.)
+-   No `hostType` is defined, or
+-   `hostType` is `git-tags` or `git-refs`, or
+-   `hostType` is a platform (`github`, `gitlab`, `azure`, etc.)

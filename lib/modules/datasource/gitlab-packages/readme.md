@@ -9,8 +9,8 @@ An example would be `https://gitlab.company.com`.
 
 If you are using a self-hosted GitLab instance, please note the following requirements:
 
-- If you are on the `Free` edition, this datasource requires at least GitLab 13.3
-- If you are on the `Premium` or the `Ultimate` edition, this datasource requires at least GitLab 11.8, but GitLab 12.9 or more is recommended if you have a lot of packages with different names in the same project
+-   If you are on the `Free` edition, this datasource requires at least GitLab 13.3
+-   If you are on the `Premium` or the `Ultimate` edition, this datasource requires at least GitLab 11.8, but GitLab 12.9 or more is recommended if you have a lot of packages with different names in the same project
 
 **Usage Example**
 
@@ -19,16 +19,16 @@ This can be achieved by configuring a custom manager in `renovate.json` for file
 
 ```json
 {
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": ["^versions.ini$"],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VERSION=(?<currentValue>.*)\\s"
-      ],
-      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
-    }
-  ]
+    "customManagers": [
+        {
+            "customType": "regex",
+            "fileMatch": ["^versions.ini$"],
+            "matchStrings": [
+                "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VERSION=(?<currentValue>.*)\\s"
+            ],
+            "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+        }
+    ]
 }
 ```
 

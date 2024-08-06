@@ -38,10 +38,10 @@ When Renovate performs lock file maintenance, it leaves the project dependency d
 
 ```json title="Example of automerging lock file maintenance"
 {
-  "lockFileMaintenance": {
-    "enabled": true,
-    "automerge": true
-  }
+    "lockFileMaintenance": {
+        "enabled": true,
+        "automerge": true
+    }
 }
 ```
 
@@ -53,13 +53,13 @@ But in many cases the new version(s) will pass tests, and if so then there's rea
 
 ```json title="Example of automerging lint and Prettier development packages"
 {
-  "packageRules": [
-    {
-      "matchDepTypes": ["devDependencies"],
-      "matchPackageNames": ["lint", "prettier"],
-      "automerge": true
-    }
-  ]
+    "packageRules": [
+        {
+            "matchDepTypes": ["devDependencies"],
+            "matchPackageNames": ["lint", "prettier"],
+            "automerge": true
+        }
+    ]
 }
 ```
 
@@ -69,13 +69,13 @@ Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they 
 
 ```json title="Example of automerging non-major updates in SemVer ecosystem"
 {
-  "packageRules": [
-    {
-      "matchUpdateTypes": ["minor", "patch"],
-      "matchCurrentVersion": "!/^0/",
-      "automerge": true
-    }
-  ]
+    "packageRules": [
+        {
+            "matchUpdateTypes": ["minor", "patch"],
+            "matchCurrentVersion": "!/^0/",
+            "automerge": true
+        }
+    ]
 }
 ```
 
@@ -87,13 +87,13 @@ Say you want to automerge `patch` and `minor` updates for packages in the `group
 
 ```json title="Example of automerging patch and minor updates in a group from a preset"
 {
-  "packageRules": [
-    {
-      "extends": ["monorepo:ionic-native"],
-      "matchUpdateTypes": ["patch", "minor"],
-      "automerge": true
-    }
-  ]
+    "packageRules": [
+        {
+            "extends": ["monorepo:ionic-native"],
+            "matchUpdateTypes": ["patch", "minor"],
+            "automerge": true
+        }
+    ]
 }
 ```
 
@@ -104,12 +104,12 @@ If you don't want Renovate to use the platform-native automerge, then set `platf
 
 ```json title="Example of disabling platform-native automerge"
 {
-  "lockFileMaintenance": {
-    "enabled": true,
-    "automerge": true,
-    "automergeType": "pr",
-    "platformAutomerge": false
-  }
+    "lockFileMaintenance": {
+        "enabled": true,
+        "automerge": true,
+        "automergeType": "pr",
+        "platformAutomerge": false
+    }
 }
 ```
 
@@ -137,8 +137,8 @@ Add the `on.merge_group` event to your GitHub Action `.yaml` files, for example:
 
 ```yaml
 on:
-  pull_request:
-  merge_group:
+    pull_request:
+    merge_group:
 ```
 
 On `github.com`, go to your repository's "homepage", click on Settings, scroll down to the Pull Requests section and [enable the "Allow auto-merge" checkbox](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository#managing-auto-merge).
@@ -150,13 +150,13 @@ Finally, allow Renovate to automerge by setting `automerge=true` in your Renovat
 
 ```json
 {
-  "packageRules": [
-    {
-      "description": "Automerge non-major updates",
-      "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true
-    }
-  ]
+    "packageRules": [
+        {
+            "description": "Automerge non-major updates",
+            "matchUpdateTypes": ["minor", "patch"],
+            "automerge": true
+        }
+    ]
 }
 ```
 
@@ -178,12 +178,12 @@ Automerging is particularly beneficial if you have configured a schedule, becaus
 And this is especially so if your repository needs rebasing, like when you use lock files.
 Let's say you have dependencies `abc` and `xyz` with upgrades, and you use a `yarn.lock` file.
 
-- At the start of the schedule, `Renovate` will create branches for `abc` and `xyz` upgrades, including `yarn.lock` updates
-- After `abc` passes tests, `Renovate` will automerge it into the base branch
-- The `xyz` branch has a `yarn.lock` conflict now
-- Renovate will immediately check all other branches and rebase them
-- The change to `xyz` branch will trigger another round of CI tests
-- After the updated `xyz` branch passes, Renovate will automerge it too
+-   At the start of the schedule, `Renovate` will create branches for `abc` and `xyz` upgrades, including `yarn.lock` updates
+-   After `abc` passes tests, `Renovate` will automerge it into the base branch
+-   The `xyz` branch has a `yarn.lock` conflict now
+-   Renovate will immediately check all other branches and rebase them
+-   The change to `xyz` branch will trigger another round of CI tests
+-   After the updated `xyz` branch passes, Renovate will automerge it too
 
 This is a lot better than you waking up to two PRs and then having to deal with conflicts yourself after you merge the first one.
 
@@ -192,9 +192,9 @@ This is a lot better than you waking up to two PRs and then having to deal with 
 Even if you automerge PRs, you are likely to still get notification noise - one when the PR is created and another when it is merged.
 For this reason we recommend you consider setting `automergeType=branch` which will mean:
 
-- Renovate first creates a branch and no PR
-- If tests pass, Renovate pushes a commit directly to the base branch without PR
-- If tests fail, Renovate raises a PR for you to review
+-   Renovate first creates a branch and no PR
+-   If tests pass, Renovate pushes a commit directly to the base branch without PR
+-   If tests fail, Renovate raises a PR for you to review
 
 Add the `renovate/**` branch to your testing workflow files, or Renovate will not work properly with the `automergeType=branch` setting.
 
@@ -259,13 +259,13 @@ To turn off automerge for all dependencies of a selected repository, you need to
 
 ```json
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>org-name/.github:renovate-config"],
-  "packageRules": [
-    {
-      "matchPackageNames": ["*"],
-      "automerge": false
-    }
-  ]
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": ["local>org-name/.github:renovate-config"],
+    "packageRules": [
+        {
+            "matchPackageNames": ["*"],
+            "automerge": false
+        }
+    ]
 }
 ```

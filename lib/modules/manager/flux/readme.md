@@ -66,9 +66,9 @@ If most `.yaml` files in your repository are Flux manifests, then you could add 
 
 ```json
 {
-  "flux": {
-    "fileMatch": ["\\.yaml$"]
-  }
+    "flux": {
+        "fileMatch": ["\\.yaml$"]
+    }
 }
 ```
 
@@ -76,9 +76,9 @@ If instead you have all your Flux manifests inside a `flux/` directory, you woul
 
 ```json
 {
-  "flux": {
-    "fileMatch": ["flux/.+\\.yaml$"]
-  }
+    "flux": {
+        "fileMatch": ["flux/.+\\.yaml$"]
+    }
 }
 ```
 

@@ -2,9 +2,9 @@
 
 This document describes the correct style for user-facing text in the:
 
-- Documentation
-- Error and debug messages
-- Texts created by the bot in issues and pull requests
+-   Documentation
+-   Error and debug messages
+-   Texts created by the bot in issues and pull requests
 
 ## Use American English
 
@@ -12,8 +12,8 @@ Set your spell checker to the correct language.
 
 Guidelines:
 
-- Use `ize` instead of `ise` in words like customize and analyze
-- Drop the British `u` in words like behavior
+-   Use `ize` instead of `ise` in words like customize and analyze
+-   Drop the British `u` in words like behavior
 
 ## One sentence per line
 
@@ -76,7 +76,7 @@ In Markdown files, avoid punctuation at the end of a list item.
 Like this:
 
 ```markdown
-- List item, no punctuation at the end
+-   List item, no punctuation at the end
 ```
 
 ## Use plain language

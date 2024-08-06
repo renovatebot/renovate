@@ -21,8 +21,8 @@ Due to this design, it is possible to stop the script at any time without riskin
 The script processes repositories and branches within them synchronously.
 This has the following benefits:
 
-- Greatly reduces the chance of hitting simultaneous API rate limits
-- Simplifies logging
+-   Greatly reduces the chance of hitting simultaneous API rate limits
+-   Simplifies logging
 
 ## Cascading Configuration
 
@@ -61,9 +61,9 @@ For example, if the current example is 1.6.0 and upgrades to 1.7.0 and 2.0.0 exi
 
 Our reasons for separating minor and major PRs:
 
-- It's often the case that projects can't upgrade major dependency versions immediately
-- It's also often the case that previous major versions continue receiving Minor or Patch updates
-- Projects should get Minor and Patch updates for their current Major release even if a new Major release exists
+-   It's often the case that projects can't upgrade major dependency versions immediately
+-   It's also often the case that previous major versions continue receiving Minor or Patch updates
+-   Projects should get Minor and Patch updates for their current Major release even if a new Major release exists
 
 This behavior can be overridden via the config option `separateMajorMinor`.
 
@@ -73,8 +73,8 @@ Branches have names like `renovate/webpack-1.x` instead of `renovate/webpack-1.2
 
 We do this because:
 
-- Branches often get updates (e.g. new patches) before they're merged
-- Naming the branch like `1.x` means its name still makes sense if a `1.2.1` release happens
+-   Branches often get updates (e.g. new patches) before they're merged
+-   Naming the branch like `1.x` means its name still makes sense if a `1.2.1` release happens
 
 Note: You can configure the branch names by using the string template `branchName` and/or its sub-templates `branchPrefix` and `branchTopic`.
 
@@ -107,6 +107,6 @@ Alternatively, consider using a Configuration File.
 
 Renovate uses the following convention for log levels:
 
-- logger.error should only be used for problems that are likely to be a Renovate bug or require Renovate improvements. These are the types of errors that Renovate administrators should be alerted to immediately
-- logger.warn should be used for problems that might be a Renovate problem so should be checked periodically in batches
-- For _user_ problems (e.g. configuration errors), these should not warn or error on the server side and instead use logger.info
+-   logger.error should only be used for problems that are likely to be a Renovate bug or require Renovate improvements. These are the types of errors that Renovate administrators should be alerted to immediately
+-   logger.warn should be used for problems that might be a Renovate problem so should be checked periodically in batches
+-   For _user_ problems (e.g. configuration errors), these should not warn or error on the server side and instead use logger.info

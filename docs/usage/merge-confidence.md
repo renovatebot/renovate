@@ -2,8 +2,8 @@
 
 Look at the Merge Confidence badges before merging to:
 
-- Prevent updates which break in production
-- See at a glance if you should update
+-   Prevent updates which break in production
+-   See at a glance if you should update
 
 Merge Confidence finds and flags undeclared breaking releases.
 It analyzes test and release adoption data from the Mend Renovate App users.
@@ -14,10 +14,10 @@ It analyzes test and release adoption data from the Mend Renovate App users.
 
 Merge Confidence adds the following badges to your pull requests:
 
-- **Age**: The age of the package
-- **Adoption**: The percentage of this package's users (within Renovate) which are using this release
-- **Passing**: The percentage of updates which have passing tests for this package
-- **Confidence**: The confidence level for this update
+-   **Age**: The age of the package
+-   **Adoption**: The percentage of this package's users (within Renovate) which are using this release
+-   **Passing**: The percentage of updates which have passing tests for this package
+-   **Confidence**: The confidence level for this update
 
 ## Supported platforms
 
@@ -47,7 +47,7 @@ If you're self-hosting Renovate, you can enable the badges by adding the `mergeC
 
 ```json
 {
-  "extends": ["mergeConfidence:all-badges"]
+    "extends": ["mergeConfidence:all-badges"]
 }
 ```
 
@@ -59,7 +59,7 @@ If you want to disable the badges in the Mend Renovate App, add the `mergeConfid
 
 ```json
 {
-  "ignorePresets": ["mergeConfidence:all-badges"]
+    "ignorePresets": ["mergeConfidence:all-badges"]
 }
 ```
 
@@ -67,10 +67,10 @@ If you want to disable the badges in the Mend Renovate App, add the `mergeConfid
 
 Merge Confidence uses the following confidence levels:
 
-- **Low**: We think the update contains breaking changes. Often this is expected because it's a `major` version update, but updates can have unknown breaking changes
-- **Neutral**: We don't have enough data about the update, or we can't decide if the update should be Low or High confidence
-- **High**: We rank updates as High confidence when the combination of `Age`, `Adoption` and `Passing` tests means there's a very low chance of breaking changes
-- **Very High**: We only use this for updates which are months old and have either high `Adoption` or have very high test `Passing` scores
+-   **Low**: We think the update contains breaking changes. Often this is expected because it's a `major` version update, but updates can have unknown breaking changes
+-   **Neutral**: We don't have enough data about the update, or we can't decide if the update should be Low or High confidence
+-   **High**: We rank updates as High confidence when the combination of `Age`, `Adoption` and `Passing` tests means there's a very low chance of breaking changes
+-   **Very High**: We only use this for updates which are months old and have either high `Adoption` or have very high test `Passing` scores
 
 ## How it works
 

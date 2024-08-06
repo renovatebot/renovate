@@ -14,32 +14,32 @@ Multi-platform and multi-language.
 
 ## Why Use Renovate?
 
-- Get automated Pull Requests to update your dependencies
-- Reduce noise by running Renovate on a schedule, for example:
-  - on weekends
-  - outside of working hours
-  - each week
-  - each month
-- Relevant package files are discovered automatically
-- Supports monorepo architectures with workspaces with no extra configuration
-- Bot behavior is customizable via configuration files (config as code)
-- Use ESLint-like shared config presets for ease of use and simplifying configuration (JSON format only)
-- Lock files are supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
-- Get replacement PRs to migrate from a deprecated dependency to the community suggested replacement, works with _most_ managers, see [issue 14149](https://github.com/renovatebot/renovate/issues/14149) for exceptions
-- Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via the Mend Renovate App
+-   Get automated Pull Requests to update your dependencies
+-   Reduce noise by running Renovate on a schedule, for example:
+    -   on weekends
+    -   outside of working hours
+    -   each week
+    -   each month
+-   Relevant package files are discovered automatically
+-   Supports monorepo architectures with workspaces with no extra configuration
+-   Bot behavior is customizable via configuration files (config as code)
+-   Use ESLint-like shared config presets for ease of use and simplifying configuration (JSON format only)
+-   Lock files are supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
+-   Get replacement PRs to migrate from a deprecated dependency to the community suggested replacement, works with _most_ managers, see [issue 14149](https://github.com/renovatebot/renovate/issues/14149) for exceptions
+-   Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via the Mend Renovate App
 
 ## Supported Platforms
 
 Renovate works on these platforms:
 
-- [GitHub (.com and Enterprise Server)](https://docs.renovatebot.com/modules/platform/github/)
-- [GitLab (.com and CE/EE)](https://docs.renovatebot.com/modules/platform/gitlab/)
-- [Bitbucket Cloud](https://docs.renovatebot.com/modules/platform/bitbucket/)
-- [Bitbucket Server](https://docs.renovatebot.com/modules/platform/bitbucket-server/)
-- [Azure DevOps](https://docs.renovatebot.com/modules/platform/azure/)
-- [AWS CodeCommit](https://docs.renovatebot.com/modules/platform/codecommit/)
-- [Gitea and Forgejo](https://docs.renovatebot.com/modules/platform/gitea/)
-- [Gerrit (experimental)](https://docs.renovatebot.com/modules/platform/gerrit/)
+-   [GitHub (.com and Enterprise Server)](https://docs.renovatebot.com/modules/platform/github/)
+-   [GitLab (.com and CE/EE)](https://docs.renovatebot.com/modules/platform/gitlab/)
+-   [Bitbucket Cloud](https://docs.renovatebot.com/modules/platform/bitbucket/)
+-   [Bitbucket Server](https://docs.renovatebot.com/modules/platform/bitbucket-server/)
+-   [Azure DevOps](https://docs.renovatebot.com/modules/platform/azure/)
+-   [AWS CodeCommit](https://docs.renovatebot.com/modules/platform/codecommit/)
+-   [Gitea and Forgejo](https://docs.renovatebot.com/modules/platform/gitea/)
+-   [Gerrit (experimental)](https://docs.renovatebot.com/modules/platform/gerrit/)
 
 ## Who Uses Renovate?
 
@@ -50,26 +50,26 @@ Renovate is widely used in the developer community:
 <details>
 <summary>List of companies and projects that use Renovate</summary>
 
-- Prisma
-- Netlify
-- Envoy
-- Condé Nast
-- Microsoft
-- Atlassian
-- Sourcegraph
-- Mozilla
-- Deloitte
-- Telus
-- Yarn
-- HashiCorp
-- Automattic
-- Algolia
-- eBay
-- Cypress
-- Red Hat
-- Financial Times
-- Uber
-- Buildkite
+-   Prisma
+-   Netlify
+-   Envoy
+-   Condé Nast
+-   Microsoft
+-   Atlassian
+-   Sourcegraph
+-   Mozilla
+-   Deloitte
+-   Telus
+-   Yarn
+-   HashiCorp
+-   Automattic
+-   Algolia
+-   eBay
+-   Cypress
+-   Red Hat
+-   Financial Times
+-   Uber
+-   Buildkite
 
 </details>
 
@@ -87,9 +87,9 @@ Information about our contributors and community can be found on [OSS Insight](h
 We believe everyone benefits from automation, whether it's a little or a lot.
 This means that Renovate:
 
-- Adapts to your workflow
-- Allows you to configure its behavior
-- Will autodetect settings where possible
+-   Adapts to your workflow
+-   Allows you to configure its behavior
+-   Will autodetect settings where possible
 
 ## Using Renovate
 
@@ -105,8 +105,8 @@ Install [the Mend Renovate App](https://github.com/apps/renovate) now.
 
 There are two ways to run Renovate on Azure DevOps:
 
-- Renovate Me extension
-- Custom pipeline
+-   Renovate Me extension
+-   Custom pipeline
 
 #### Renovate Me extension
 
@@ -136,9 +136,9 @@ To get help with your configuration, go to the [discussions tab in the Renovate 
 
 To run your own instance of Renovate you have several options:
 
-- Install the `renovate` CLI tool from npmjs, run it on a schedule (e.g. using `cron`)
-- Run the `renovate/renovate:full` Docker Hub image (same content/versions as the CLI tool), run it on a schedule
-- Run the `renovate/renovate:latest` Docker Hub image if you only use package managers that don't need third-party binaries (e.g. JavaScript, Docker, NuGet, pip)
+-   Install the `renovate` CLI tool from npmjs, run it on a schedule (e.g. using `cron`)
+-   Run the `renovate/renovate:full` Docker Hub image (same content/versions as the CLI tool), run it on a schedule
+-   Run the `renovate/renovate:latest` Docker Hub image if you only use package managers that don't need third-party binaries (e.g. JavaScript, Docker, NuGet, pip)
 
 [More details on the self-hosting development](https://github.com/renovatebot/renovate/blob/main/docs/usage/getting-started/running.md).
 

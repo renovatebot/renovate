@@ -50,29 +50,29 @@ The following is an example manifest of running Renovate against a GitHub Enterp
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: renovate
+    name: renovate
 spec:
-  schedule: '@hourly'
-  concurrencyPolicy: Forbid
-  jobTemplate:
-    spec:
-      template:
+    schedule: '@hourly'
+    concurrencyPolicy: Forbid
+    jobTemplate:
         spec:
-          containers:
-            - name: renovate
-              # Update this to the latest available and then enable Renovate on
-              # the manifest
-              image: renovate/renovate:35.14.4
-              args:
-                - user/repo
-              # Environment Variables
-              env:
-                - name: LOG_LEVEL
-                  value: debug
-              envFrom:
-                - secretRef:
-                    name: renovate-env
-          restartPolicy: Never
+            template:
+                spec:
+                    containers:
+                        - name: renovate
+                          # Update this to the latest available and then enable Renovate on
+                          # the manifest
+                          image: renovate/renovate:35.14.4
+                          args:
+                              - user/repo
+                          # Environment Variables
+                          env:
+                              - name: LOG_LEVEL
+                                value: debug
+                          envFrom:
+                              - secretRef:
+                                    name: renovate-env
+                    restartPolicy: Never
 ```
 
 And the `secret.yaml` that goes with it:
@@ -81,16 +81,16 @@ And the `secret.yaml` that goes with it:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: renovate-env
+    name: renovate-env
 type: Opaque
 stringData:
-  GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
-  # You can set RENOVATE_AUTODISCOVER to true to run Renovate on all repos you have push access to
-  RENOVATE_AUTODISCOVER: 'false'
-  RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
-  RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
-  RENOVATE_PLATFORM: 'github'
-  RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
+    GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
+    # You can set RENOVATE_AUTODISCOVER to true to run Renovate on all repos you have push access to
+    RENOVATE_AUTODISCOVER: 'false'
+    RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
+    RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
+    RENOVATE_PLATFORM: 'github'
+    RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ```
 
 A `config.json` file can be added to the manifest using a `ConfigMap` as shown in the following example (using a "dry run" in github.com):
@@ -100,54 +100,54 @@ A `config.json` file can be added to the manifest using a `ConfigMap` as shown i
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: renovate-config
+    name: renovate-config
 data:
-  config.json: |-
-    {
-      "repositories": ["orgname/repo","username/repo"],
-      "dryRun" : "full"
-    }
+    config.json: |-
+        {
+          "repositories": ["orgname/repo","username/repo"],
+          "dryRun" : "full"
+        }
 
 ---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: renovate-bot
+    name: renovate-bot
 spec:
-  schedule: '@hourly'
-  concurrencyPolicy: Forbid
-  jobTemplate:
-    spec:
-      template:
+    schedule: '@hourly'
+    concurrencyPolicy: Forbid
+    jobTemplate:
         spec:
-          containers:
-            - image: renovate/renovate:35.14.4
-              name: renovate-bot
-              env: # For illustration purposes, please use secrets.
-                - name: RENOVATE_PLATFORM
-                  value: 'github'
-                - name: RENOVATE_TOKEN
-                  value: 'some-token'
-                - name: RENOVATE_AUTODISCOVER
-                  value: 'false'
-                - name: RENOVATE_BASE_DIR
-                  value: '/tmp/renovate/'
-                - name: RENOVATE_CONFIG_FILE
-                  value: '/opt/renovate/config.json'
-                - name: LOG_LEVEL
-                  value: debug
-              volumeMounts:
-                - name: config-volume
-                  mountPath: /opt/renovate/
-                - name: work-volume
-                  mountPath: /tmp/renovate/
-          restartPolicy: Never
-          volumes:
-            - name: config-volume
-              configMap:
-                name: renovate-config
-            - name: work-volume
-              emptyDir: {}
+            template:
+                spec:
+                    containers:
+                        - image: renovate/renovate:35.14.4
+                          name: renovate-bot
+                          env: # For illustration purposes, please use secrets.
+                              - name: RENOVATE_PLATFORM
+                                value: 'github'
+                              - name: RENOVATE_TOKEN
+                                value: 'some-token'
+                              - name: RENOVATE_AUTODISCOVER
+                                value: 'false'
+                              - name: RENOVATE_BASE_DIR
+                                value: '/tmp/renovate/'
+                              - name: RENOVATE_CONFIG_FILE
+                                value: '/opt/renovate/config.json'
+                              - name: LOG_LEVEL
+                                value: debug
+                          volumeMounts:
+                              - name: config-volume
+                                mountPath: /opt/renovate/
+                              - name: work-volume
+                                mountPath: /tmp/renovate/
+                    restartPolicy: Never
+                    volumes:
+                        - name: config-volume
+                          configMap:
+                              name: renovate-config
+                        - name: work-volume
+                          emptyDir: {}
 ```
 
 ### CircleCI
@@ -170,20 +170,20 @@ To share environment variables across projects, use [CircleCI Contexts](https://
 ```yml title="This runs Renovate hourly, and looks for the self-hosted config file at renovate-config.js"
 version: '2.1'
 orbs:
-  renovate: daniel-shuy/renovate@2.2.0
+    renovate: daniel-shuy/renovate@2.2.0
 workflows:
-  renovate:
-    jobs:
-      - renovate/self-hosted:
-          config_file_path: renovate-config.js
-    nightly:
-      triggers:
-        - schedule:
-            cron: 0 * * * *
-            filters:
-              branches:
-                only:
-                  - main
+    renovate:
+        jobs:
+            - renovate/self-hosted:
+                  config_file_path: renovate-config.js
+        nightly:
+            triggers:
+                - schedule:
+                      cron: 0 * * * *
+                      filters:
+                          branches:
+                              only:
+                                  - main
 ```
 
 #### Renovate config file validation when using CircleCI
@@ -191,11 +191,11 @@ workflows:
 ```yml title="Validate your config as part of your workflow"
 version: '2.1'
 orbs:
-  renovate: daniel-shuy/renovate@2.2.0
+    renovate: daniel-shuy/renovate@2.2.0
 workflows:
-  lint:
-    jobs:
-      - renovate/validate-config
+    lint:
+        jobs:
+            - renovate/validate-config
 ```
 
 ### GitLab CI/CD pipeline
@@ -218,9 +218,9 @@ Renovate's cache, and the caches(s) for npm, Yarn, Composer, and so on, are stor
 
 If you don't want to use the default `tmp/renovate` directory you can:
 
-- Set a value for `baseDir` in `config.js`
-- Use an environment variable `RENOVATE_BASE_DIR`
-- Use the CLI to pass a base directory: `--base-dir=`
+-   Set a value for `baseDir` in `config.js`
+-   Use an environment variable `RENOVATE_BASE_DIR`
+-   Use the CLI to pass a base directory: `--base-dir=`
 
 ### Overriding the default cache directory
 
@@ -238,13 +238,13 @@ Create a Renovate config file, for example:
 
 ```js
 module.exports = {
-  endpoint: 'https://self-hosted.gitlab/api/v4/',
-  token: '**gitlab_token**',
-  platform: 'gitlab',
-  onboardingConfig: {
-    extends: ['config:recommended'],
-  },
-  repositories: ['username/repo', 'orgname/repo'],
+    endpoint: 'https://self-hosted.gitlab/api/v4/',
+    token: '**gitlab_token**',
+    platform: 'gitlab',
+    onboardingConfig: {
+        extends: ['config:recommended'],
+    },
+    repositories: ['username/repo', 'orgname/repo'],
 };
 ```
 
@@ -304,13 +304,13 @@ It creates something like this:
 ```yml
 apiVersion: v1
 data:
-  config: aG9zdCBnaXRsYWIuY29tCiAgSG9zdE5hbWUgZ2l0bGFiLmNvbQogIFN0cmljdEhvc3RLZXlDaGVja2luZyBubwogIElkZW50aXR5RmlsZSB+Ly5zc2gvaWRfcnNhCiAgVXNlciBnaXQ=
-  id_rsa: <base64String>
-  id_rsa.pub: <base64String>
+    config: aG9zdCBnaXRsYWIuY29tCiAgSG9zdE5hbWUgZ2l0bGFiLmNvbQogIFN0cmljdEhvc3RLZXlDaGVja2luZyBubwogIElkZW50aXR5RmlsZSB+Ly5zc2gvaWRfcnNhCiAgVXNlciBnaXQ=
+    id_rsa: <base64String>
+    id_rsa.pub: <base64String>
 kind: Secret
 metadata:
-  name: ssh-key-secret
-  namespace: <namespace>
+    name: ssh-key-secret
+    namespace: <namespace>
 ```
 
 Then you need to add a Git author, and configure the mount volumes.
@@ -321,64 +321,64 @@ The final configuration should look something like this:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: <namespace, for example renovate>
+    name: <namespace, for example renovate>
 
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: renovate-env
-  namespace: <namespace>
+    name: renovate-env
+    namespace: <namespace>
 type: Opaque
 stringData:
-  GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
-  RENOVATE_AUTODISCOVER: 'false'
-  RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
-  RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
-  RENOVATE_PLATFORM: 'github'
-  RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
+    GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
+    RENOVATE_AUTODISCOVER: 'false'
+    RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
+    RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
+    RENOVATE_PLATFORM: 'github'
+    RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ---
 apiVersion: v1
 data:
-  config: aG9zdCBnaXRsYWIuY29tCiAgSG9zdE5hbWUgZ2l0bGFiLmNvbQogIFN0cmljdEhvc3RLZXlDaGVja2luZyBubwogIElkZW50aXR5RmlsZSB+Ly5zc2gvaWRfcnNhCiAgVXNlciBnaXQ=
-  id_rsa: <base64String>
-  id_rsa.pub: <base64String>
+    config: aG9zdCBnaXRsYWIuY29tCiAgSG9zdE5hbWUgZ2l0bGFiLmNvbQogIFN0cmljdEhvc3RLZXlDaGVja2luZyBubwogIElkZW50aXR5RmlsZSB+Ly5zc2gvaWRfcnNhCiAgVXNlciBnaXQ=
+    id_rsa: <base64String>
+    id_rsa.pub: <base64String>
 kind: Secret
 metadata:
-  name: ssh-key-secret
-  namespace: <namespace>
+    name: ssh-key-secret
+    namespace: <namespace>
 ---
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: renovate
-  namespace: <namespace>
+    name: renovate
+    namespace: <namespace>
 spec:
-  schedule: '@hourly'
-  concurrencyPolicy: Forbid
-  jobTemplate:
-    spec:
-      template:
+    schedule: '@hourly'
+    concurrencyPolicy: Forbid
+    jobTemplate:
         spec:
-          volumes:
-            - name: ssh-key-volume
-              secret:
-                secretName: ssh-key-secret
-          containers:
-            - name: renovate
-              # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:35.14.4
-              volumeMounts:
-                - name: ssh-key-volume
-                  readOnly: true
-                  mountPath: '/home/ubuntu/.ssh'
-              args:
-                - <repository>
-              # Environment Variables
-              envFrom:
-                - secretRef:
-                    name: renovate-env
-          restartPolicy: Never
+            template:
+                spec:
+                    volumes:
+                        - name: ssh-key-volume
+                          secret:
+                              secretName: ssh-key-secret
+                    containers:
+                        - name: renovate
+                          # Update this to the latest available and then enable Renovate on the manifest
+                          image: renovate/renovate:35.14.4
+                          volumeMounts:
+                              - name: ssh-key-volume
+                                readOnly: true
+                                mountPath: '/home/ubuntu/.ssh'
+                          args:
+                              - <repository>
+                          # Environment Variables
+                          envFrom:
+                              - secretRef:
+                                    name: renovate-env
+                    restartPolicy: Never
 ```
 
 ## Logging

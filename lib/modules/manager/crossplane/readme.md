@@ -4,9 +4,9 @@ By setting your own `fileMatch` Renovate avoids having to check each `*.yaml` fi
 
 The `crossplane` manager supports these `depType`s:
 
-- `configuration`
-- `function`
-- `provider`
+-   `configuration`
+-   `function`
+-   `provider`
 
 You can use these `depType`'s to control which dependencies Renovate will upgrade.
 
@@ -16,24 +16,24 @@ Some configuration examples:
 
 ```json title="If most .yaml files are for Crossplane"
 {
-  "crossplane": {
-    "fileMatch": ["\\.yaml$"]
-  }
+    "crossplane": {
+        "fileMatch": ["\\.yaml$"]
+    }
 }
 ```
 
 ```json title="For Crossplane files in a packages/ directory"
 {
-  "crossplane": {
-    "fileMatch": ["packages/.+\\.yaml$"]
-  }
+    "crossplane": {
+        "fileMatch": ["packages/.+\\.yaml$"]
+    }
 }
 ```
 
 ```json title="For a single Crossplane file"
 {
-  "crossplane": {
-    "fileMatch": ["^config/provider\\.yaml$"]
-  }
+    "crossplane": {
+        "fileMatch": ["^config/provider\\.yaml$"]
+    }
 }
 ```

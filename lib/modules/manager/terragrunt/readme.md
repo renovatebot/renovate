@@ -5,9 +5,9 @@ For example, if you want to reference a tag like `module-v1.2.5`, a block like t
 
 ```json
 {
-  "terragrunt": {
-    "versioning": "regex:^((?<compatibility>.*)-v|v*)(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
-  }
+    "terragrunt": {
+        "versioning": "regex:^((?<compatibility>.*)-v|v*)(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+    }
 }
 ```
 

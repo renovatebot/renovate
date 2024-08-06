@@ -32,8 +32,8 @@ The manager's `index.ts` file supports the following values or functions:
 Use this function to allow version bumps of updated packages.
 For example:
 
-- to increase the version of a Maven module if a package has been updated
-- to bump the Helm chart version, if a subchart version has been updated
+-   to increase the version of a Maven module if a package has been updated
+-   to bump the Helm chart version, if a subchart version has been updated
 
 ### `extractPackageFile(content, packageFile, config)` (async, semi-mandatory)
 
@@ -41,10 +41,10 @@ This function is mandatory, unless you use `extractAllPackageFiles` instead.
 It takes as arguments the file's content and optionally the file's full file pathname and config.
 The function returns an array of detected or extracted dependencies, including the:
 
-- dependency name
-- dependency type (dependencies, devDependencies, etc)
-- currentValue
-- versioning used (like SemVer, PEP 440)
+-   dependency name
+-   dependency type (dependencies, devDependencies, etc)
+-   currentValue
+-   versioning used (like SemVer, PEP 440)
 
 The `extractPackageFile` function doesn't need to fully _understand_ the file or syntax that it gets.
 It needs to understand enough to extract a correct list of dependencies.
@@ -95,15 +95,15 @@ To _directly_ update dependencies in lock files: use `updateLockedDependency` in
 
 `updateArtifacts` gets triggered:
 
-- after a dependency update (for a package file), or
-- during `lockfileMaintenance`
+-   after a dependency update (for a package file), or
+-   during `lockfileMaintenance`
 
 ### `updateDependency` (optional)
 
 Use `updateDependency` if _both_ conditions apply:
 
-- the manager can't be updated to use the standard replacing mechanism
-- a custom replacement has to be provided
+-   the manager can't be updated to use the standard replacing mechanism
+-   a custom replacement has to be provided
 
 ### `updateLockedDependency` (optional)
 

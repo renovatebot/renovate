@@ -18,18 +18,18 @@ You'll use the same code editor and have the same config as all other developers
 
 ### Benefits
 
-- You only need a browser and internet
-- You don't need to install development dependencies on your computer
-- Start work in a fresh environment every time
-- Reproducible development environment
-- Similar config for all developers
-- Use VS Code in the browser
+-   You only need a browser and internet
+-   You don't need to install development dependencies on your computer
+-   Start work in a fresh environment every time
+-   Reproducible development environment
+-   Similar config for all developers
+-   Use VS Code in the browser
 
 ### Drawbacks
 
-- Waiting for the remote container to start
-- If your internet is down you can't work
-- If Codespaces is down you can't work
+-   Waiting for the remote container to start
+-   If your internet is down you can't work
+-   If Codespaces is down you can't work
 
 ## GitHub Codespaces
 

@@ -8,9 +8,9 @@ In addition, AWS may pull existing versions if serious problems arise during the
 Since the datasource uses the AWS SDK for JavaScript, you can configure it like other AWS Tools.
 You can use common AWS configuration options, for example:
 
-- Set the region via the `AWS_REGION` environment variable or your `~/.aws/config` file
-- Provide credentials via the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables or your `~/.aws/credentials` file
-- Select the profile to use via `AWS_PROFILE` environment variable
+-   Set the region via the `AWS_REGION` environment variable or your `~/.aws/config` file
+-   Provide credentials via the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables or your `~/.aws/credentials` file
+-   Select the profile to use via `AWS_PROFILE` environment variable
 
 Read the [AWS Developer Guide - Configuring the SDK for JavaScript](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for more information on these configuration options.
 
@@ -18,10 +18,10 @@ The minimal IAM privileges required for this datasource are:
 
 ```json
 {
-  "Sid": "AllowDBEngineVersionLookup",
-  "Effect": "Allow",
-  "Action": ["rds:DescribeDBEngineVersions"],
-  "Resource": "*"
+    "Sid": "AllowDBEngineVersionLookup",
+    "Effect": "Allow",
+    "Action": ["rds:DescribeDBEngineVersions"],
+    "Resource": "*"
 }
 ```
 
@@ -57,16 +57,16 @@ Here's an example of using the custom manager to configure this datasource:
 
 ```json
 {
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": ["\\.yaml$"],
-      "matchStrings": [
-        ".*amiFilter=(?<lookupName>.+?)[ ]*\n[ ]*(?<depName>[a-zA-Z0-9-_:]*)[ ]*?:[ ]*?[\"|']?(?<currentValue>[.\\d]+)[\"|']?.*"
-      ],
-      "datasourceTemplate": "aws-rds"
-    }
-  ]
+    "customManagers": [
+        {
+            "customType": "regex",
+            "fileMatch": ["\\.yaml$"],
+            "matchStrings": [
+                ".*amiFilter=(?<lookupName>.+?)[ ]*\n[ ]*(?<depName>[a-zA-Z0-9-_:]*)[ ]*?:[ ]*?[\"|']?(?<currentValue>[.\\d]+)[\"|']?.*"
+            ],
+            "datasourceTemplate": "aws-rds"
+        }
+    ]
 }
 ```
 
@@ -74,6 +74,6 @@ The configuration above matches every YAML file, and recognizes these lines:
 
 ```yaml
 spec:
-  # amiFilter=[{"Name":"engine","Values":["mysql"]},{"Name":"engine-version","Values":["5.7"]}]
-  engineVersion: 5.7.34
+    # amiFilter=[{"Name":"engine","Values":["mysql"]},{"Name":"engine-version","Values":["5.7"]}]
+    engineVersion: 5.7.34
 ```

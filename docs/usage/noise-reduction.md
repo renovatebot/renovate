@@ -29,12 +29,12 @@ In that case you might create a config like this:
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchPackageNames": ["/eslint/"],
-      "groupName": "eslint"
-    }
-  ]
+    "packageRules": [
+        {
+            "matchPackageNames": ["/eslint/"],
+            "groupName": "eslint"
+        }
+    ]
 }
 ```
 
@@ -47,10 +47,10 @@ Sometimes you're better off getting a single PR per dependency!
 
 Grouping dependencies versus single PRs:
 
-- Grouping dependencies increases the chance that the branch has an error ("break" your build)
-- When you upgrade multiple dependencies in one PR, it takes longer to find out which package broke the build
-- If a group PR "breaks", you'll have to wait upgrading your other dependencies until _all_ updates in the PR pass
-- You will have less flexibility when one (or more) dependencies in the group have a major upgrade, but the other dependencies are good to go
+-   Grouping dependencies increases the chance that the branch has an error ("break" your build)
+-   When you upgrade multiple dependencies in one PR, it takes longer to find out which package broke the build
+-   If a group PR "breaks", you'll have to wait upgrading your other dependencies until _all_ updates in the PR pass
+-   You will have less flexibility when one (or more) dependencies in the group have a major upgrade, but the other dependencies are good to go
 
 ## Scheduling Renovate
 
@@ -89,13 +89,13 @@ You don't want to get too far behind, so how about we update `eslint` packages o
 
 ```json title="Update ESLint packages once a month"
 {
-  "packageRules": [
-    {
-      "matchPackageNames": ["/eslint/"],
-      "groupName": "eslint",
-      "schedule": ["on the first day of the month"]
-    }
-  ]
+    "packageRules": [
+        {
+            "matchPackageNames": ["/eslint/"],
+            "groupName": "eslint",
+            "schedule": ["on the first day of the month"]
+        }
+    ]
 }
 ```
 
@@ -103,13 +103,13 @@ Or perhaps at least weekly:
 
 ```json title="Update ESLint packages weekly"
 {
-  "packageRules": [
-    {
-      "matchPackageNames": ["/eslint/"],
-      "groupName": "eslint",
-      "schedule": ["before 4am on monday"]
-    }
-  ]
+    "packageRules": [
+        {
+            "matchPackageNames": ["/eslint/"],
+            "groupName": "eslint",
+            "schedule": ["before 4am on monday"]
+        }
+    ]
 }
 ```
 
@@ -138,9 +138,9 @@ If you have an API with 100% test coverage and `express` is updated: automerge i
 Those of you familiar with GitHub might note that even if you automerge PRs, you are still going to get notifications (noise) anyway - one when the PR is created and another when it is merged.
 For this reason we recommend you consider setting `automergeType=branch` which will mean:
 
-- Renovate first creates a branch and no PR
-- If tests pass, Renovate pushes a commit directly to the base branch without PR
-- If tests fail, Renovate raises a PR for you to review
+-   Renovate first creates a branch and no PR
+-   If tests pass, Renovate pushes a commit directly to the base branch without PR
+-   If tests fail, Renovate raises a PR for you to review
 
 The result is that passing updates are essentially "silent" - the only sign of them are the commits to your base branch.
 
@@ -149,12 +149,12 @@ The result is that passing updates are essentially "silent" - the only sign of t
 Automerging is particularly beneficial if you have configured a schedule, because Renovate on its own may be able to automerge the majority of your updates.
 And this is especially so if your repository needs rebasing, e.g. because you use lock files. e.g. let's say you have dependencies `abc` and `xyz` with upgrades, and you use a `yarn.lock` file.
 
-- At the start of the schedule, `Renovate` will create branches for `abc` and `xyz` upgrades, including `yarn.lock` updates
-- After `abc` passes tests, `Renovate` will automerge it to your base branch
-- The `xyz` branch probably now has `yarn.lock` conflicts
-- Renovate will immediately check all other branches and rebase them
-- The change to `xyz` branch will trigger another round of CI tests
-- After the updated `xyz` branch passes, Renovate will automerge it too
+-   At the start of the schedule, `Renovate` will create branches for `abc` and `xyz` upgrades, including `yarn.lock` updates
+-   After `abc` passes tests, `Renovate` will automerge it to your base branch
+-   The `xyz` branch probably now has `yarn.lock` conflicts
+-   Renovate will immediately check all other branches and rebase them
+-   The change to `xyz` branch will trigger another round of CI tests
+-   After the updated `xyz` branch passes, Renovate will automerge it too
 
 This is a lot better than you waking up to two PRs and then having to deal with conflicts yourself after you merge the first one.
 
@@ -163,15 +163,15 @@ Let's automerge it if all the linting updates pass:
 
 ```json title="Automerge ESLint packages"
 {
-  "packageRules": [
-    {
-      "matchPackageNames": ["/eslint/"],
-      "groupName": "eslint",
-      "schedule": ["before 4am on monday"],
-      "automerge": true,
-      "automergeType": "branch"
-    }
-  ]
+    "packageRules": [
+        {
+            "matchPackageNames": ["/eslint/"],
+            "groupName": "eslint",
+            "schedule": ["before 4am on monday"],
+            "automerge": true,
+            "automergeType": "branch"
+        }
+    ]
 }
 ```
 

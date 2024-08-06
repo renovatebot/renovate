@@ -6,9 +6,9 @@ Here's a configuration example:
 
 ```json title="If your builder files are named like foo-builder.yml or builder.yaml"
 {
-  "ocb": {
-    "fileMatch": ["builder.ya?ml$"]
-  }
+    "ocb": {
+        "fileMatch": ["builder.ya?ml$"]
+    }
 }
 ```
 

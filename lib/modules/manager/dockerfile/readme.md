@@ -9,13 +9,13 @@ For example, if you know that an image follows SemVer, you can tell Renovate to 
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["whitesource/renovate"],
-      "versioning": "semver"
-    }
-  ]
+    "packageRules": [
+        {
+            "matchDatasources": ["docker"],
+            "matchPackageNames": ["whitesource/renovate"],
+            "versioning": "semver"
+        }
+    ]
 }
 ```
 

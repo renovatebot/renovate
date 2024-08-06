@@ -5,8 +5,8 @@ For example, the package `acme/foo` would need an entry in [repositories](https:
 
 ```json
 {
-  "name": "acme/foo",
-  "type": "vcs",
-  "url": "http://vcs-of-acme.org/acme/foo.git"
+    "name": "acme/foo",
+    "type": "vcs",
+    "url": "http://vcs-of-acme.org/acme/foo.git"
 }
 ```

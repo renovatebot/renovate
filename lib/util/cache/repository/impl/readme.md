@@ -6,11 +6,11 @@ Suppose you have data:
 
 ```json
 {
-  "fingerprint": "0123456789abcdef",
-  "hash": "756a22cbd28854a64687fa5e458eb1da5b51958d7b329094f4a152dc4dc533dd26213f97fdc10f2480784aa667382ef671d820c1625bb694542a99f8a709be45",
-  "payload": "Gx0A8EVPlvpLVKVkJggn0ExJYlEsqcMErTZdm8wdCOAB",
-  "repository": "some/repo",
-  "revision": 13
+    "fingerprint": "0123456789abcdef",
+    "hash": "756a22cbd28854a64687fa5e458eb1da5b51958d7b329094f4a152dc4dc533dd26213f97fdc10f2480784aa667382ef671d820c1625bb694542a99f8a709be45",
+    "payload": "Gx0A8EVPlvpLVKVkJggn0ExJYlEsqcMErTZdm8wdCOAB",
+    "repository": "some/repo",
+    "revision": 13
 }
 ```
 

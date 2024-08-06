@@ -3,7 +3,7 @@
 You might be interested in the following `postUpdateOptions`:
 
 1. `gomodTidy` - if you'd like Renovate to run `go mod tidy` after every update before raising the PR
-   1. This is implicitly enabled for major updates if the user has enabled the option `gomodUpdateImportPaths`
+    1. This is implicitly enabled for major updates if the user has enabled the option `gomodUpdateImportPaths`
 1. `gomodTidy1.17` - if you'd like Renovate to run `go mod tidy -compat=1.17` after every update before raising the PR
 1. `gomodTidyE` - if you'd like Renovate to run `go mod tidy -e` after every update before raising the PR
 1. `gomodUpdateImportPaths` - if you'd like Renovate to update your source import paths on major updates before raising the PR
@@ -16,13 +16,13 @@ Indirect updates are disabled by default. To enable them, add a package rule suc
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchManagers": ["gomod"],
-      "matchDepTypes": ["indirect"],
-      "enabled": true
-    }
-  ]
+    "packageRules": [
+        {
+            "matchManagers": ["gomod"],
+            "matchDepTypes": ["indirect"],
+            "enabled": true
+        }
+    ]
 }
 ```
 
@@ -39,6 +39,6 @@ Next, all `hostRules` with both a token or username/password and `matchHost` wil
 
 Rules from this list are converted to environment variable directives if they match _any_ of the following characteristics:
 
-- No `hostType` is defined, or
-- `hostType` is `go`, or
-- `hostType` is a platform (`github`, `gitlab`, `azure`, etc.)
+-   No `hostType` is defined, or
+-   `hostType` is `go`, or
+-   `hostType` is a platform (`github`, `gitlab`, `azure`, etc.)

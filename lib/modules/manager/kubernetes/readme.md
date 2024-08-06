@@ -5,9 +5,9 @@ If most `.yaml` files in your repository are Kubernetes ones, then you could add
 
 ```json
 {
-  "kubernetes": {
-    "fileMatch": ["\\.yaml$"]
-  }
+    "kubernetes": {
+        "fileMatch": ["\\.yaml$"]
+    }
 }
 ```
 
@@ -15,9 +15,9 @@ If instead you have them all inside a `k8s/` directory, you would add this:
 
 ```json
 {
-  "kubernetes": {
-    "fileMatch": ["k8s/.+\\.yaml$"]
-  }
+    "kubernetes": {
+        "fileMatch": ["k8s/.+\\.yaml$"]
+    }
 }
 ```
 
@@ -25,9 +25,9 @@ Or if it's only a single file then something like this:
 
 ```json
 {
-  "kubernetes": {
-    "fileMatch": ["^config/k8s\\.yaml$"]
-  }
+    "kubernetes": {
+        "fileMatch": ["^config/k8s\\.yaml$"]
+    }
 }
 ```
 

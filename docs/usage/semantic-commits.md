@@ -12,15 +12,15 @@ Renovate can only find Angular-style conventional commits, it does not "understa
 
 When Renovate finds Angular-style commits, Renovate creates commit messages and PR titles like this:
 
-- chore(deps): update eslint to v7.30.0
+-   chore(deps): update eslint to v7.30.0
 
 By default, Renovate uses the `chore` prefix.
 
 If you extend from `config:recommended` then Renovate uses the `chore` prefix for nearly all updates.
 There are some exceptions:
 
-- if the `depType` is a known "production dependency" type (e.g. `dependencies` or `require`), then Renovate uses the `fix` prefix
-- if an update uses the `maven` datasource _and_ `matchDepTypes` is a known production type (e.g. `compile`, `provided`, `runtime`, `system`, `import` or `parent`) then Renovate uses the `fix` prefix
+-   if the `depType` is a known "production dependency" type (e.g. `dependencies` or `require`), then Renovate uses the `fix` prefix
+-   if an update uses the `maven` datasource _and_ `matchDepTypes` is a known production type (e.g. `compile`, `provided`, `runtime`, `system`, `import` or `parent`) then Renovate uses the `fix` prefix
 
 ## Manually enabling or disabling semantic commits
 
@@ -28,13 +28,13 @@ You can override the default settings, and disable or enable Semantic Commits.
 
 ```json title="If you want Renovate to use Semantic Commits"
 {
-  "extends": [":semanticCommits"]
+    "extends": [":semanticCommits"]
 }
 ```
 
 ```json title="If you want Renovate to stop using Semantic Commits"
 {
-  "extends": [":semanticCommitsDisabled"]
+    "extends": [":semanticCommitsDisabled"]
 }
 ```
 
@@ -43,25 +43,25 @@ You can override the default settings, and disable or enable Semantic Commits.
 You can change the Semantic Commit type that Renovate uses.
 For example:
 
-- If you want Renovate to use the "chore" type for every PR, add `":semanticCommitTypeAll(chore)"` to your `extends` array:
+-   If you want Renovate to use the "chore" type for every PR, add `":semanticCommitTypeAll(chore)"` to your `extends` array:
 
-  ```json
-  {
-    "extends": [":semanticCommitTypeAll(chore)"]
-  }
-  ```
+    ```json
+    {
+        "extends": [":semanticCommitTypeAll(chore)"]
+    }
+    ```
 
-  PR titles and commit messages start with `chore(deps):`.
+    PR titles and commit messages start with `chore(deps):`.
 
-- If you want Renovate to use the "ci" type for every PR, add `":semanticCommitTypeAll(ci)"` to your `extends` array:
+-   If you want Renovate to use the "ci" type for every PR, add `":semanticCommitTypeAll(ci)"` to your `extends` array:
 
-  ```json
-  {
-    "extends": [":semanticCommitTypeAll(ci)"]
-  }
-  ```
+    ```json
+    {
+        "extends": [":semanticCommitTypeAll(ci)"]
+    }
+    ```
 
-  PR titles and commit messages start with `ci(deps):`.
+    PR titles and commit messages start with `ci(deps):`.
 
 ## Changing the Semantic Commit scope
 
@@ -70,7 +70,7 @@ For example, to set the scope to "package", add the preset `":semanticCommitScop
 
 ```json
 {
-  "extends": [":semanticCommitScope(package)"]
+    "extends": [":semanticCommitScope(package)"]
 }
 ```
 
@@ -78,6 +78,6 @@ To _remove_ the Semantic Commit scope, so Renovate uses `chore:` instead of `cho
 
 ```json
 {
-  "extends": [":semanticCommitScopeDisabled"]
+    "extends": [":semanticCommitScopeDisabled"]
 }
 ```

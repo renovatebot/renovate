@@ -2,10 +2,10 @@
 
 The following environment variables are "experimental" because they:
 
-- are not commonly needed
-- are typically an effort to work around some other service's or platform's problem
-- can be removed at any time
-- are variables for Renovate's internal use to validate they work as intended
+-   are not commonly needed
+-   are typically an effort to work around some other service's or platform's problem
+-   can be removed at any time
+-   are variables for Renovate's internal use to validate they work as intended
 
 Experimental variables which are commonly used and for which there is no external solution in sight can be converted to an official configuration option by the Renovate bot developers.
 
@@ -43,9 +43,9 @@ Due to the missing label information like sourceUrl, Renovate will not be able t
 
 This includes the following:
 
-- Generating changelogs
-- Applying package rules dependent on the labels
-- Including the sourceUrls in PR bodies
+-   Generating changelogs
+-   Applying package rules dependent on the labels
+-   Including the sourceUrls in PR bodies
 
 ## `RENOVATE_X_DOCKER_HUB_TAGS_DISABLE`
 

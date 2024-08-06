@@ -28,9 +28,9 @@ In such a case, the manager will be disabled until you create a `fileMatch` regu
 
 ```json
 {
-  "kubernetes": {
-    "fileMatch": ["^config/.*\\.yaml$"]
-  }
+    "kubernetes": {
+        "fileMatch": ["^config/.*\\.yaml$"]
+    }
 }
 ```
 
@@ -40,9 +40,9 @@ If the default `fileMatch` regular expression for a manager does not match again
 
 ```json
 {
-  "dockerfile": {
-    "fileMatch": ["does-not-look-like-a-docker-file"]
-  }
+    "dockerfile": {
+        "fileMatch": ["does-not-look-like-a-docker-file"]
+    }
 }
 ```
 
@@ -64,9 +64,9 @@ If there was a manager called `some-new-manager` you would enable it like this:
 
 ```json
 {
-  "some-new-manager": {
-    "enabled": true
-  }
+    "some-new-manager": {
+        "enabled": true
+    }
 }
 ```
 
@@ -74,9 +74,9 @@ If there was a manager called `some-new-manager` you would enable it like this:
 
 ```json title="Example of disabling a specific manager (gradle)"
 {
-  "gradle": {
-    "enabled": false
-  }
+    "gradle": {
+        "enabled": false
+    }
 }
 ```
 
@@ -89,7 +89,7 @@ You can use the `enabledManagers` array, to list the managers you want to use (`
 
 ```json
 {
-  "enabledManagers": ["npm", "dockerfile"]
+    "enabledManagers": ["npm", "dockerfile"]
 }
 ```
 

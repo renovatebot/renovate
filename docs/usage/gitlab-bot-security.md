@@ -16,8 +16,8 @@ The concept of `CI_JOB_TOKEN` permissions was [overhauled in GitLab release 8.12
 For security reasons the token was limited to read-only permissions and a limited set of API endpoints, but it’s been extended to allow [write access to the GitLab Package Registry](https://docs.gitlab.com/ee/api/index.html#gitlab-ci-job-token).
 Any pipeline triggered by a user account thus has permissions to:
 
-- read any repository which that account has access to
-- publish packages to them
+-   read any repository which that account has access to
+-   publish packages to them
 
 With the current GitLab CI permissions model, you should only commit to a project which you trust completely.
 Because that project could maliciously steal repository data, publish fake releases, or spam releases.
@@ -32,8 +32,8 @@ This was a useful feature to leverage for a shared service.
 
 If you are running a self-hosted Renovate service, we recommend you:
 
-- Run a shared service only within projects which have shared visibility/security within the users, or which have a low risk that a user would try to gain access to a private project they don't otherwise have access to
-- If running with `autodiscover`, also configure a value for `autodiscoverFilter` so that the bot can't be invited to projects or groups you don't intend
+-   Run a shared service only within projects which have shared visibility/security within the users, or which have a low risk that a user would try to gain access to a private project they don't otherwise have access to
+-   If running with `autodiscover`, also configure a value for `autodiscoverFilter` so that the bot can't be invited to projects or groups you don't intend
 
 ## Security solutions and workarounds
 
@@ -52,10 +52,10 @@ But you _can't stop users_ from inviting the bot into _private_ projects by acci
 [Project Access Tokens](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html) (PATs) are a recently added feature for GitLab.
 The main downsides to using PATs for a shared bot service are:
 
-- You can not [provision PATs through the API](https://gitlab.com/gitlab-org/gitlab/-/issues/238991), so project maintainers would need to provision a project bot account and then save it to Renovate manually and per-project
-- PATs are a paid-only feature for gitlab.com, which prevents users on the free plan from using them
-- At the time of writing, there are still some issues with getting PATs to trigger and authenticate CI
-- Any service using PATs would get MRs from a user like `@project_123_bot` instead of `@renovate-bot`
+-   You can not [provision PATs through the API](https://gitlab.com/gitlab-org/gitlab/-/issues/238991), so project maintainers would need to provision a project bot account and then save it to Renovate manually and per-project
+-   PATs are a paid-only feature for gitlab.com, which prevents users on the free plan from using them
+-   At the time of writing, there are still some issues with getting PATs to trigger and authenticate CI
+-   Any service using PATs would get MRs from a user like `@project_123_bot` instead of `@renovate-bot`
 
 The big benefit of PATs is their limited scope: users with write access to one project cannot read/write to other projects.
 

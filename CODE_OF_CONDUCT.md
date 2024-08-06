@@ -2,10 +2,10 @@
 
 To help us deliver great features and support the Renovate Open Source project we ask that you:
 
-- are polite
-- pay attention to details
-- keep in mind that most maintainers are volunteers
-- are respectful of the time and effort of the maintainers
+-   are polite
+-   pay attention to details
+-   keep in mind that most maintainers are volunteers
+-   are respectful of the time and effort of the maintainers
 
 ## Our priorities
 
@@ -43,9 +43,9 @@ Remember, most of the support provided by our team, including the Mend.io staff,
 
 We quickly deal with rudeness in the community with:
 
-- automated comments
-- temporary blocks
-- permanent bans
+-   automated comments
+-   temporary blocks
+-   permanent bans
 
 If you keep breaking the rules or challenge our guidelines openly, you will be blocked.
 For example: if you keep spamming the maintainers with `@mentions` or challenge our rules openly, you will be blocked.
@@ -59,11 +59,11 @@ Simply put: we block and unblock swiftly, what matters is how you follow the rul
 
 Renovate's core contributors and maintainers focus on work that:
 
-- Helps a lot of users, or
-- Fixes regressions (errors introduced by recent changes), or
-- Is required by a customer of Mend.io, or
-- Is sponsored by third parties after independent validation, or
-- We personally need or want to implement
+-   Helps a lot of users, or
+-   Fixes regressions (errors introduced by recent changes), or
+-   Is required by a customer of Mend.io, or
+-   Is sponsored by third parties after independent validation, or
+-   We personally need or want to implement
 
 You may be disappointed when we focus on other work ahead of your feature or bug, but you should understand and accept this.
 

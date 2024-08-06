@@ -8,15 +8,15 @@ To get Renovate to find your private packages, follow these steps:
 1. setup a CI pipeline to repeat step 1 & 2 on new commits to the private packages repository.
 1. Add a package rule for the Hermit manager, so that Renovate knows where to find your private packages:
 
-   ```json
-   {
-     "packageRules": [
-       {
-         "matchManagers": ["hermit"],
-         "defaultRegistryUrls": [
-           "https://github.com/your/private-hermit-packages"
-         ]
-       }
-     ]
-   }
-   ```
+    ```json
+    {
+        "packageRules": [
+            {
+                "matchManagers": ["hermit"],
+                "defaultRegistryUrls": [
+                    "https://github.com/your/private-hermit-packages"
+                ]
+            }
+        ]
+    }
+    ```

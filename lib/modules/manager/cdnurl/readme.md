@@ -3,9 +3,9 @@ For example:
 
 ```json
 {
-  "cdnurl": {
-    "fileMatch": ["\\.html?$"]
-  }
+    "cdnurl": {
+        "fileMatch": ["\\.html?$"]
+    }
 }
 ```
 

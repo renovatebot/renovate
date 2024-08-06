@@ -4,9 +4,9 @@
 
 Renovate global config can be defined via any of these methods:
 
-- Configuration file
-- Environment variables
-- CLI parameters
+-   Configuration file
+-   Environment variables
+-   CLI parameters
 
 The above are listed in **_reverse order_** of preference. e.g. CLI values will override environment values if they conflict.
 
@@ -33,10 +33,10 @@ e.g. apply one set of labels for `backend/package.json` and a different set of l
 
 ```javascript
 module.exports = {
-  npmrc: '//registry.npmjs.org/:_authToken=abc123',
-  baseDir: '/tmp/renovate',
-  forkProcessing: 'enabled',
-  gradle: { enabled: false },
+    npmrc: '//registry.npmjs.org/:_authToken=abc123',
+    baseDir: '/tmp/renovate',
+    forkProcessing: 'enabled',
+    gradle: { enabled: false },
 };
 ```
 
@@ -61,9 +61,9 @@ If you add configuration options to your `package.json` then these will override
 
 ```json
 {
-  "renovate": {
-    "labels": ["upgrade", "bot"]
-  }
+    "renovate": {
+        "labels": ["upgrade", "bot"]
+    }
 }
 ```
 

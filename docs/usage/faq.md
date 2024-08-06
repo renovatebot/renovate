@@ -9,22 +9,22 @@ description: Frequently Asked Questions for Renovate Configuration
 
 Renovate will:
 
-- Look for configuration options in a configuration file (e.g. `renovate.json`) and in each `package.json` file
-- Find and process all package files (e.g. `package.json`, `composer.json`, `Dockerfile`, etc) in each repository
-- Use separate branches/PR for each dependency
-- Use separate branches for each _major_ version of each dependency
-- Pin devDependencies to a single version, rather than use ranges
-- Pin dependencies to a single version if it appears not to be a library
-- Update `yarn.lock` or `package-lock.json` files, if found
-- Create Pull Requests immediately after branch creation
+-   Look for configuration options in a configuration file (e.g. `renovate.json`) and in each `package.json` file
+-   Find and process all package files (e.g. `package.json`, `composer.json`, `Dockerfile`, etc) in each repository
+-   Use separate branches/PR for each dependency
+-   Use separate branches for each _major_ version of each dependency
+-   Pin devDependencies to a single version, rather than use ranges
+-   Pin dependencies to a single version if it appears not to be a library
+-   Update `yarn.lock` or `package-lock.json` files, if found
+-   Create Pull Requests immediately after branch creation
 
 ## Which Renovate versions are officially supported?
 
 Only the latest version of Renovate is supported by the Renovate maintainers.
 The Renovate team only fixes bugs in an older version if:
 
-- the Mend Renovate App needs to stay on that older major version for a short time, or
-- some critical bug needs to be fixed and the new major is blocked
+-   the Mend Renovate App needs to stay on that older major version for a short time, or
+-   some critical bug needs to be fixed and the new major is blocked
 
 If you're using the Mend Renovate App, you don't need to do anything, as the Renovate maintainers update it regularly.
 If you're self hosting Renovate, use the latest release if possible.
@@ -48,12 +48,12 @@ Follow these steps to see which version the Mend Renovate app is on:
 1. Select the _Info_ Log Level from the dropdown menu
 1. You should see something like this:
 
-   ```
-   INFO: Repository started
-   {
-     "renovateVersion": "37.356.1"
-   }
-   ```
+    ```
+    INFO: Repository started
+    {
+      "renovateVersion": "37.356.1"
+    }
+    ```
 
 <!-- prettier-ignore -->
 !!! tip
@@ -106,25 +106,25 @@ The basic idea is that you create a new `packageRules` entry and describe what k
 
 ```json title="Manually approve all major npm package manager updates"
 {
-  "packageRules": [
-    {
-      "matchUpdateTypes": ["major"],
-      "matchManagers": ["npm"],
-      "dependencyDashboardApproval": true
-    }
-  ]
+    "packageRules": [
+        {
+            "matchUpdateTypes": ["major"],
+            "matchManagers": ["npm"],
+            "dependencyDashboardApproval": true
+        }
+    ]
 }
 ```
 
 ```json title="Manually approve all major Jest updates"
 {
-  "packageRules": [
-    {
-      "matchPackageNames": ["jest"],
-      "matchUpdateTypes": ["major"],
-      "dependencyDashboardApproval": true
-    }
-  ]
+    "packageRules": [
+        {
+            "matchPackageNames": ["jest"],
+            "matchUpdateTypes": ["major"],
+            "dependencyDashboardApproval": true
+        }
+    ]
 }
 ```
 
@@ -133,7 +133,7 @@ The `dependencyDashboardApproval` config option is outside of a `packageRules` a
 
 ```json
 {
-  "dependencyDashboardApproval": true
+    "dependencyDashboardApproval": true
 }
 ```
 
@@ -148,7 +148,7 @@ Add this line to the `renovate.json` file that's in the _default_ branch (`main`
 
 ```json
 {
-  "baseBranches": ["next"]
+    "baseBranches": ["next"]
 }
 ```
 
@@ -212,12 +212,12 @@ e.g.
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchPackageNames": ["abc"],
-      "assignees": ["importantreviewer"]
-    }
-  ]
+    "packageRules": [
+        {
+            "matchPackageNames": ["abc"],
+            "assignees": ["importantreviewer"]
+        }
+    ]
 }
 ```
 
@@ -227,12 +227,12 @@ Do the same as above, but instead of an exact match, use a glob prefix:
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchPackageNames": "abc**",
-      "assignees": ["importantreviewer"]
-    }
-  ]
+    "packageRules": [
+        {
+            "matchPackageNames": "abc**",
+            "assignees": ["importantreviewer"]
+        }
+    ]
 }
 ```
 
@@ -242,12 +242,12 @@ As above, but apply a `groupName`:
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchPackageNames": "abc**",
-      "groupName": ["abc packages"]
-    }
-  ]
+    "packageRules": [
+        {
+            "matchPackageNames": "abc**",
+            "groupName": ["abc packages"]
+        }
+    ]
 }
 ```
 
@@ -271,14 +271,14 @@ Here's an example:
 Say you're using version `0.8.0` of the `foo` package.
 The `foo` maintainers release the following versions:
 
-- `0.8.1` (patch)
-- `0.9.0` (minor)
-- `1.0.0` (major)
+-   `0.8.1` (patch)
+-   `0.9.0` (minor)
+-   `1.0.0` (major)
 
 Renovate creates the following PRs:
 
-- Update dependency `foo` to `0.9.0` (minor)
-- Update dependency `foo` to `1.0.0` (major)
+-   Update dependency `foo` to `0.9.0` (minor)
+-   Update dependency `foo` to `1.0.0` (major)
 
 Renovate groups the patch and minor versions into one PR.
 This means you only get a PR for the minor version, `0.9.0`.
@@ -294,14 +294,14 @@ You can tell Renovate to create a separate PR for the patch release by setting `
 
 In both cases, Renovate will open 3 PRs:
 
-- Update dependency `foo` to `0.8.1` (patch)
-- Update dependency `foo` to `0.9.0` (minor)
-- Update dependency `foo` to `1.0.0` (major)
+-   Update dependency `foo` to `0.8.1` (patch)
+-   Update dependency `foo` to `0.9.0` (minor)
+-   Update dependency `foo` to `1.0.0` (major)
 
 Usually you don't want more PRs though.
 It can be nice to get patch PRs when you're using automerge:
 
-- Get daily patch updates which are automerged once tests pass
-- Get weekly updates for minor and major updates
+-   Get daily patch updates which are automerged once tests pass
+-   Get weekly updates for minor and major updates
 
 This means you barely notice Renovate during the week, while you still get the benefits of patch level updates.

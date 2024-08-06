@@ -23,9 +23,9 @@ This means changes without metadata in the commit message footer will be "forgot
 
 Let Renovate use your HTTP access token by doing _one_ of the following:
 
-- Set your HTTP access token as a `password` in your `config.js` file, or
-- Set your HTTP access token as an environment variable `RENOVATE_PASSWORD`, or
-- Set your HTTP access token when you run Renovate in the CLI with `--password=`
+-   Set your HTTP access token as a `password` in your `config.js` file, or
+-   Set your HTTP access token as an environment variable `RENOVATE_PASSWORD`, or
+-   Set your HTTP access token when you run Renovate in the CLI with `--password=`
 
 The Gerrit user account must be allowed to assign the Code-Review label with "+2" to their own changes for "automerge" to work.
 
@@ -51,16 +51,16 @@ For example, if you want to use the [Merge Confidence](../../../merge-confidence
 
 ```json
 {
-  "statusCheckNames": {
-    "mergeConfidence": "Renovate-Merge-Confidence"
-  }
+    "statusCheckNames": {
+        "mergeConfidence": "Renovate-Merge-Confidence"
+    }
 }
 ```
 
 ## Unsupported platform features/concepts
 
-- Creating issues (not a Gerrit concept)
-- Dependency Dashboard (needs issues first)
+-   Creating issues (not a Gerrit concept)
+-   Dependency Dashboard (needs issues first)
 
 ## Known problems
 
@@ -69,7 +69,7 @@ For example, if you want to use the [Merge Confidence](../../../merge-confidence
 Sometimes the PR title passed to the Gerrit platform code is different from the first line of the commit message.
 For example:
 
-- Commit-Message=`Update keycloak.version to v21`
-- Pull-Request-Title=`Update keycloak.version to v21 (major)`
+-   Commit-Message=`Update keycloak.version to v21`
+-   Pull-Request-Title=`Update keycloak.version to v21 (major)`
 
 In this case the Gerrit-Platform implementation tries to detect this and change the commit-message in a second patch-set.

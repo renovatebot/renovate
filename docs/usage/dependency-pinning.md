@@ -113,10 +113,10 @@ In that case if the `pg` package has a minor or patch update and passes all test
 In the above suggestion of Pull Request automerging, you might still find it annoying if you get GitHub Notifications for every PR that is created and merged.
 In that case, you could set `automergeType` to `branch`, which means Renovate will:
 
-- Create a new branch for testing
-- Wait until after tests have completed
-- Push the commit directly to `main` if tests pass, or
-- Raise a PR only if tests failed
+-   Create a new branch for testing
+-   Wait until after tests have completed
+-   Push the commit directly to `main` if tests pass, or
+-   Raise a PR only if tests failed
 
 With this approach, updates will be essentially "silent" - causing no notifications - but you will be able to see each commit on `main` of course.
 
@@ -127,8 +127,8 @@ And worse still, npm package versions that are less than 24 hours [can be unpubl
 
 So to reduce the interruptions of automated dependency updates, consider putting Renovate on a schedule, such as:
 
-- Update only on weekends? This way you update packages at most once per week, _and_ your CI build runners are likely to be idle anyway
-- Update daily, but between midnight and 5am? This way developers aren't bothered by notifications when they're working, _and_ you're keeping the build machines free for the developers
+-   Update only on weekends? This way you update packages at most once per week, _and_ your CI build runners are likely to be idle anyway
+-   Update daily, but between midnight and 5am? This way developers aren't bothered by notifications when they're working, _and_ you're keeping the build machines free for the developers
 
 To learn all about controlling Renovate's schedule, read the [key concepts, scheduling](./key-concepts/scheduling.md) docs.
 

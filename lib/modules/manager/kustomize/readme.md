@@ -15,15 +15,15 @@ Renovate can manage these parts of the `kustomization.yaml` file:
 
 This manager uses three `depType`s to allow fine-grained control of which dependencies are upgraded:
 
-- Component
-- Kustomization
-- HelmChart
-- OCIChart
+-   Component
+-   Kustomization
+-   HelmChart
+-   OCIChart
 
 **Limitations**
 
-- Using HTTPS to fetch the repositories is not tested
-- The keys for the image tags can be in any order
+-   Using HTTPS to fetch the repositories is not tested
+-   The keys for the image tags can be in any order
 
 ```yaml
 - name: image/name
@@ -33,7 +33,7 @@ This manager uses three `depType`s to allow fine-grained control of which depend
   name: image/name
 ```
 
-- Digests can be pinned in `newTag` or `digest`:
+-   Digests can be pinned in `newTag` or `digest`:
 
 ```yaml
 - name: image/name
@@ -43,7 +43,7 @@ This manager uses three `depType`s to allow fine-grained control of which depend
   digest: sha256:3eeba3e2caa30d2aba0fd78a34c1bbeebaa1b96c7aa3c95ec9bac44163c5ca4f
 ```
 
-- The image's repository can be changed with `newName`:
+-   The image's repository can be changed with `newName`:
 
 ```yaml
 - name: image/name
@@ -60,7 +60,7 @@ This manager uses three `depType`s to allow fine-grained control of which depend
   digest: sha256:3eeba3e2caa30d2aba0fd78a34c1bbeebaa1b96c7aa3c95ec9bac44163c5ca4f
 ```
 
-- Images with values ignored by Kustomize will be skipped to avoid ambiguity:
+-   Images with values ignored by Kustomize will be skipped to avoid ambiguity:
 
 ```yaml
 # bad: skipped because newTag: is ignored when digest: is set

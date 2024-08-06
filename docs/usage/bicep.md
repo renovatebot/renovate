@@ -37,9 +37,9 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
 
 ## Future work
 
-- Support [versioned nested resource](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/child-resource-name-type#within-parent-resource) API version upgrades.
-- Support [module](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/modules) version upgrades.
-  - [Public registry](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/modules#public-module-registry) module references.
-  - [Private registry](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/modules#private-module-registry) module references.
-  - [Template spec](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/modules#file-in-template-spec) module references.
-  - [Module aliases](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/bicep-config-modules#aliases-for-modules) support.
+-   Support [versioned nested resource](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/child-resource-name-type#within-parent-resource) API version upgrades.
+-   Support [module](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/modules) version upgrades.
+    -   [Public registry](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/modules#public-module-registry) module references.
+    -   [Private registry](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/modules#private-module-registry) module references.
+    -   [Template spec](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/modules#file-in-template-spec) module references.
+    -   [Module aliases](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/bicep-config-modules#aliases-for-modules) support.

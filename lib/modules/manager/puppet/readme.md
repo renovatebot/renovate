@@ -16,11 +16,11 @@ Finally, if the source repository has a "changelog" file _or_ uses GitHub releas
 The `puppet` manager extracts the dependencies from one Puppetfile.
 You can define a forge in your `puppetfile` in these ways:
 
-- No forge
-- One forge
-- Multiple forges
-- GitHub-based forge
-- Git-based forge
+-   No forge
+-   One forge
+-   Multiple forges
+-   GitHub-based forge
+-   Git-based forge
 
 For example:
 

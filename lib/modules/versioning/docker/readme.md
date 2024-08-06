@@ -22,13 +22,13 @@ For example:
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["badly-versioned-docker-image"],
-      "versioning": "loose"
-    }
-  ]
+    "packageRules": [
+        {
+            "matchDatasources": ["docker"],
+            "matchPackageNames": ["badly-versioned-docker-image"],
+            "versioning": "loose"
+        }
+    ]
 }
 ```
 

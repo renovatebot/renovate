@@ -2,8 +2,8 @@
 
 The information on this page is for the Mend-hosted cloud apps:
 
-- Renovate App on GitHub
-- Mend App on Bitbucket
+-   Renovate App on GitHub
+-   Mend App on Bitbucket
 
 If you self-host, you can skip reading this page.
 
@@ -28,20 +28,20 @@ To add a secret for the Mend cloud app:
 2. Open your organization/repository settings.
 3. Put the secret in the _Credentials_ section:
 
-   ![Credentials settings page](../assets/images/app-settings/app-credentials.png)
+    ![Credentials settings page](../assets/images/app-settings/app-credentials.png)
 
 4. Reference the secret from Renovate config files inside the repo.
 
-   ```json
-   {
-     "hostRules": [
-       {
-         "matchHost": "github.com",
-         "token": "{{ secrets.MY-ORG-SECRET-1 }}"
-       }
-     ]
-   }
-   ```
+    ```json
+    {
+        "hostRules": [
+            {
+                "matchHost": "github.com",
+                "token": "{{ secrets.MY-ORG-SECRET-1 }}"
+            }
+        ]
+    }
+    ```
 
 ## Organization secrets vs repository secrets
 

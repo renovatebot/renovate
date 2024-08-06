@@ -27,7 +27,7 @@ Let's look at an example of configuring packages with existing Angular migration
 
 ```javascript
 module.exports = {
-  allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
+    allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
 };
 ```
 
@@ -37,17 +37,17 @@ The command to install dependencies (`npm ci --ignore-scripts`) is needed becaus
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchPackageNames": ["@angular/core"],
-      "postUpgradeTasks": {
-        "commands": [
-          "npm ci --ignore-scripts",
-          "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrate-only --allow-dirty --force"
-        ]
-      }
-    }
-  ]
+    "packageRules": [
+        {
+            "matchPackageNames": ["@angular/core"],
+            "postUpgradeTasks": {
+                "commands": [
+                    "npm ci --ignore-scripts",
+                    "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrate-only --allow-dirty --force"
+                ]
+            }
+        }
+    ]
 }
 ```
 
@@ -72,10 +72,10 @@ Examples:
 
 ```json title="renovate.json"
 {
-  "env": {
-    "SOME_ENV_VARIABLE": "some_value",
-    "EXTRA_ENV_NAME": "value"
-  }
+    "env": {
+        "SOME_ENV_VARIABLE": "some_value",
+        "EXTRA_ENV_NAME": "value"
+    }
 }
 ```
 
@@ -83,7 +83,7 @@ The above would require `allowedEnv` to be configured similar to the following:
 
 ```js title="config.js"
 module.exports = {
-  allowedEnv: ['SOME_ENV_*', 'EXTRA_ENV_NAME'],
+    allowedEnv: ['SOME_ENV_*', 'EXTRA_ENV_NAME'],
 };
 ```
 
@@ -110,14 +110,14 @@ Examples:
 
 ```json
 {
-  "hostRules": [
-    {
-      "matchHost": "https://domain.com/all-versions",
-      "headers": {
-        "X-Auth-Token": "secret"
-      }
-    }
-  ]
+    "hostRules": [
+        {
+            "matchHost": "https://domain.com/all-versions",
+            "headers": {
+                "X-Auth-Token": "secret"
+            }
+        }
+    ]
 }
 ```
 
@@ -125,7 +125,7 @@ Or with custom `allowedHeaders`:
 
 ```js title="config.js"
 module.exports = {
-  allowedHeaders: ['custom-header'],
+    allowedHeaders: ['custom-header'],
 };
 ```
 
@@ -138,7 +138,7 @@ For example:
 
 ```json
 {
-  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
+    "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
 }
 ```
 
@@ -173,7 +173,7 @@ The configuration:
 
 ```json
 {
-  "autodiscoverFilter": ["my-org/*"]
+    "autodiscoverFilter": ["my-org/*"]
 }
 ```
 
@@ -185,7 +185,7 @@ All text inside the start and end `/` will be treated as a regular expression.
 
 ```json
 {
-  "autodiscoverFilter": ["/project/.*/"]
+    "autodiscoverFilter": ["/project/.*/"]
 }
 ```
 
@@ -195,7 +195,7 @@ If using negations, all repositories except those who match the regex are added 
 
 ```json
 {
-  "autodiscoverFilter": ["!/project/.*/"]
+    "autodiscoverFilter": ["!/project/.*/"]
 }
 ```
 
@@ -208,8 +208,8 @@ For example:
 
 ```json
 {
-  "platform": "gitlab",
-  "autodiscoverNamespaces": ["a-group", "another-group/some-subgroup"]
+    "platform": "gitlab",
+    "autodiscoverNamespaces": ["a-group", "another-group/some-subgroup"]
 }
 ```
 
@@ -225,8 +225,8 @@ This feature is useful for users who want Renovate to only work on repositories 
 
 ```json title="Example for Bitbucket"
 {
-  "platform": "bitbucket",
-  "autodiscoverProjects": ["a-group", "!another-group/some-subgroup"]
+    "platform": "bitbucket",
+    "autodiscoverProjects": ["a-group", "!another-group/some-subgroup"]
 }
 ```
 
@@ -254,7 +254,7 @@ For example:
 
 ```json
 {
-  "autodiscoverTopics": ["managed-by-renovate"]
+    "autodiscoverTopics": ["managed-by-renovate"]
 }
 ```
 
@@ -267,7 +267,7 @@ For example:
 
 ```json
 {
-  "baseDir": "/my-own-different-temporary-folder"
+    "baseDir": "/my-own-different-temporary-folder"
 }
 ```
 
@@ -285,10 +285,10 @@ Renovate often needs to use third-party tools in its PRs, like `npm` to update `
 
 Renovate supports four possible ways to access those tools:
 
-- `global`: Uses pre-installed tools, e.g. `npm` installed via `npm install -g npm`.
-- `install` (default): Downloads and installs tools at runtime if running in a [Containerbase](https://github.com/containerbase/base) environment, otherwise falls back to `global`
-- `docker`: Runs tools inside Docker "sidecar" containers using `docker run`.
-- `hermit`: Uses the [Hermit](https://github.com/cashapp/hermit) tool installation approach.
+-   `global`: Uses pre-installed tools, e.g. `npm` installed via `npm install -g npm`.
+-   `install` (default): Downloads and installs tools at runtime if running in a [Containerbase](https://github.com/containerbase/base) environment, otherwise falls back to `global`
+-   `docker`: Runs tools inside Docker "sidecar" containers using `docker run`.
+-   `hermit`: Uses the [Hermit](https://github.com/cashapp/hermit) tool installation approach.
 
 Starting in v36, Renovate's default Docker image (previously referred to as the "slim" image) uses `binarySource=install` while the "full" Docker image uses `binarySource=global`.
 If you are running Renovate in an environment where runtime download and install of tools is not possible then you should use the "full" image.
@@ -311,8 +311,8 @@ For example:
 
 ```json
 {
-  "baseDir": "/my-own-different-temporary-folder",
-  "cacheDir": "/my-own-different-cache-folder"
+    "baseDir": "/my-own-different-temporary-folder",
+    "cacheDir": "/my-own-different-cache-folder"
 }
 ```
 
@@ -324,8 +324,8 @@ It should be set to a non-zero value, recommended to be at least 60 (i.e. one ho
 When this value is set, the `npm` datasource will use the `cacheHardTtlMinutes` value for cache expiry, instead of its default expiry of 15 minutes, which becomes the "soft" expiry value.
 Results which are soft expired are reused in the following manner:
 
-- The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
-- If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
+-   The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
+-   If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
 
 ## cachePrivatePackages
 
@@ -338,9 +338,9 @@ For example, to override the default TTL of 60 minutes for the `docker` datasour
 
 ```json
 {
-  "cacheTtlOverride": {
-    "datasource-docker-tags": 120
-  }
+    "cacheTtlOverride": {
+        "datasource-docker-tags": 120
+    }
 }
 ```
 
@@ -401,11 +401,11 @@ If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set t
 
 The format of the environment variables must follow:
 
-- Datasource name (e.g. `NPM`, `PYPI`) or Platform name (only `GITHUB`)
-- Underscore (`_`)
-- `matchHost`
-- Underscore (`_`)
-- Field name (`TOKEN`, `USERNAME`, `PASSWORD`, `HTTPSPRIVATEKEY`, `HTTPSCERTIFICATE`, `HTTPSCERTIFICATEAUTHORITY`)
+-   Datasource name (e.g. `NPM`, `PYPI`) or Platform name (only `GITHUB`)
+-   Underscore (`_`)
+-   `matchHost`
+-   Underscore (`_`)
+-   Field name (`TOKEN`, `USERNAME`, `PASSWORD`, `HTTPSPRIVATEKEY`, `HTTPSCERTIFICATE`, `HTTPSCERTIFICATEAUTHORITY`)
 
 Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
 Periods (`.`) in host names must be replaced with a single underscore (`_`).
@@ -421,13 +421,13 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
 ```json
 {
-  "hostRules": [
-    {
-      "hostType": "npm",
-      "matchHost": "registry.npmjs.org",
-      "token": "abc123"
-    }
-  ]
+    "hostRules": [
+        {
+            "hostType": "npm",
+            "matchHost": "registry.npmjs.org",
+            "token": "abc123"
+        }
+    ]
 }
 ```
 
@@ -437,14 +437,14 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
 ```json
 {
-  "hostRules": [
-    {
-      "hostType": "gitlab-tags",
-      "matchHost": "code-host.company.com",
-      "username": "bot",
-      "password": "botpass123"
-    }
-  ]
+    "hostRules": [
+        {
+            "hostType": "gitlab-tags",
+            "matchHost": "code-host.company.com",
+            "username": "bot",
+            "password": "botpass123"
+        }
+    ]
 }
 ```
 
@@ -456,13 +456,13 @@ You can skip the host part, and use only the datasource and credentials.
 
 ```json
 {
-  "hostRules": [
-    {
-      "hostType": "docker",
-      "username": "bot",
-      "password": "botpass123"
-    }
-  ]
+    "hostRules": [
+        {
+            "hostType": "docker",
+            "username": "bot",
+            "password": "botpass123"
+        }
+    ]
 }
 ```
 
@@ -472,15 +472,15 @@ You can skip the host part, and use only the datasource and credentials.
 
 ```json
 {
-  "hostRules": [
-    {
-      "hostType": "github",
-      "matchHost": "some.github-enterprise.host",
-      "httpsPrivateKey": "private-key",
-      "httpsCertificate": "certificate",
-      "httpsCertificateAuthority": "certificate-authority"
-    }
-  ]
+    "hostRules": [
+        {
+            "hostType": "github",
+            "matchHost": "some.github-enterprise.host",
+            "httpsPrivateKey": "private-key",
+            "httpsCertificate": "certificate",
+            "httpsCertificateAuthority": "certificate-authority"
+        }
+    ]
 }
 ```
 
@@ -490,8 +490,8 @@ Adds a custom prefix to the default Renovate sidecar Docker containers name and 
 
 For example, if you set `dockerChildPrefix=myprefix_` then the final container created from the `containerbase/sidecar` is:
 
-- called `myprefix_sidecar` instead of `renovate_sidecar`
-- labeled `myprefix_child` instead of `renovate_child`
+-   called `myprefix_sidecar` instead of `renovate_sidecar`
+-   labeled `myprefix_child` instead of `renovate_child`
 
 <!-- prettier-ignore -->
 !!! note
@@ -515,7 +515,7 @@ You would put this in your configuration file:
 
 ```json
 {
-  "dockerSidecarImage": "ghcr.io/your_company/sidecar"
+    "dockerSidecarImage": "ghcr.io/your_company/sidecar"
 }
 ```
 
@@ -531,7 +531,7 @@ Set this to `1001:1002` to use UID 1001 and GID 1002.
 
 ```json title="Setting UID to 1001 and GID to 1002"
 {
-  "dockerUser": "1001:1002"
+    "dockerUser": "1001:1002"
 }
 ```
 
@@ -550,10 +550,10 @@ Use `dryRun` to preview the behavior of Renovate in logs, without making any cha
 
 You can choose from the following behaviors for the `dryRun` config option:
 
-- `null`: Default behavior - Performs a regular Renovate run including creating/updating/deleting branches and PRs
-- `"extract"`: Performs a very quick package file scan to identify the extracted dependencies
-- `"lookup"`: Performs a package file scan to identify the extracted dependencies and updates available
-- `"full"`: Performs a dry run by logging messages instead of creating/updating/deleting branches and PRs
+-   `null`: Default behavior - Performs a regular Renovate run including creating/updating/deleting branches and PRs
+-   `"extract"`: Performs a very quick package file scan to identify the extracted dependencies
+-   `"lookup"`: Performs a package file scan to identify the extracted dependencies and updates available
+-   `"full"`: Performs a dry run by logging messages instead of creating/updating/deleting branches and PRs
 
 Information provided mainly in debug log level.
 
@@ -620,8 +620,8 @@ If you've set a `forkOrg` then Renovate will:
 
 If this value is configured then Renovate:
 
-- forks the target repository into the account that owns the PAT
-- keep this fork's default branch up-to-date with the target
+-   forks the target repository into the account that owns the PAT
+-   keep this fork's default branch up-to-date with the target
 
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
 
@@ -665,9 +665,9 @@ Currently works for Bitbucket Server and GitLab only.
 
 Possible values:
 
-- `default`: use HTTPS URLs provided by the platform for Git
-- `ssh`: use SSH URLs provided by the platform for Git
-- `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
+-   `default`: use HTTPS URLs provided by the platform for Git
+-   `ssh`: use SSH URLs provided by the platform for Git
+-   `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
 
 ## githubTokenWarn
 
@@ -715,16 +715,16 @@ If the file exists but cannot be parsed, then Renovate will raise a config warni
 
 The inherited config may include all valid repository config and these config options:
 
-- `bbUseDevelopmentBranch`
-- `onboarding`
-- `onboardingBranch`
-- `onboardingCommitMessage`
-- `onboardingConfig`
-- `onboardingConfigFileName`
-- `onboardingNoDeps`
-- `onboardingPrTitle`
-- `onboardingRebaseCheckbox`
-- `requireConfig`
+-   `bbUseDevelopmentBranch`
+-   `onboarding`
+-   `onboardingBranch`
+-   `onboardingCommitMessage`
+-   `onboardingConfig`
+-   `onboardingConfigFileName`
+-   `onboardingNoDeps`
+-   `onboardingPrTitle`
+-   `onboardingRebaseCheckbox`
+-   `requireConfig`
 
 <!-- prettier-ignore -->
 !!! note
@@ -772,7 +772,7 @@ Example:
 
 ```js
 modules.exports = {
-  mergeConfidenceDatasources: ['npm'],
+    mergeConfidenceDatasources: ['npm'],
 };
 ```
 
@@ -785,8 +785,8 @@ Otherwise, it will use the default URL, which is <https://developer.mend.io/>.
 
 If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
 
-- have a static merge confidence token that you set via `MEND_RNV_MC_TOKEN`
-- _or_ set `MEND_RNV_MC_TOKEN` to `auto`
+-   have a static merge confidence token that you set via `MEND_RNV_MC_TOKEN`
+-   _or_ set `MEND_RNV_MC_TOKEN` to `auto`
 
 Then you must set this variable at the _server_ and the _workers_.
 
@@ -804,9 +804,9 @@ Example:
 
 ```js
 modules.exports = {
-  migratePresets: {
-    '@company': 'local>org/renovate-config',
-  },
+    migratePresets: {
+        '@company': 'local>org/renovate-config',
+    },
 };
 ```
 
@@ -820,9 +820,9 @@ In the above example any reference to the `@company` preset will be replaced wit
 
 Only set this to `false` if all three statements are true:
 
-- You've configured Renovate entirely on the bot side (e.g. empty `renovate.json` in repositories)
-- You want to run Renovate on every repository the bot has access to
-- You want to skip all onboarding PRs
+-   You've configured Renovate entirely on the bot side (e.g. empty `renovate.json` in repositories)
+-   You want to run Renovate on every repository the bot has access to
+-   You want to skip all onboarding PRs
 
 ## onboardingBranch
 
@@ -850,8 +850,8 @@ The default `auto` setting is converted to `disabled` if `autodiscoverRepositori
 
 In other words, the default behavior is:
 
-- If you run Renovate on discovered repositories then it will skip onboarding those without dependencies detected, but
-- If you run Renovate on _specific_ repositories then Renovate will onboard all such repositories even if no dependencies are found
+-   If you run Renovate on discovered repositories then it will skip onboarding those without dependencies detected, but
+-   If you run Renovate on _specific_ repositories then Renovate will onboard all such repositories even if no dependencies are found
 
 ## onboardingPrTitle
 
@@ -878,9 +878,9 @@ Otherwise, it will continue as normal.
 A second, advanced, use also exists when the bot global config has `extends: [":disableRenovate"]`.
 In that case, Renovate searches the repository config file for any of these configurations:
 
-- `extends: [":enableRenovate"]`
-- `ignorePresets: [":disableRenovate"]`
-- `enabled: true`
+-   `extends: [":enableRenovate"]`
+-   `ignorePresets: [":disableRenovate"]`
+-   `enabled: true`
 
 If Renovate finds any of the above configurations, it continues initializing the repository.
 If not, then Renovate skips the repository without cloning it.
@@ -922,7 +922,7 @@ If you want a UI to encrypt values you can put the public key in a HTML page sim
 
 To create the PGP key pair with GPG use the following commands:
 
-- `gpg --full-generate-key` and follow the prompts to generate a key. Name and email are not important to Renovate, and do not configure a passphrase. Use a 4096bit key.
+-   `gpg --full-generate-key` and follow the prompts to generate a key. Name and email are not important to Renovate, and do not configure a passphrase. Use a 4096bit key.
 
 <details><summary>key generation log</summary>
 
@@ -1004,9 +1004,9 @@ gpg> save
 
 </details>
 
-- Copy the key ID from the output (`794B820F34B34A8DF32AADB20649CEXAMPLEONLY` in the above example) or run `gpg --list-secret-keys` if you forgot to take a copy
-- Run `gpg --armor --export-secret-keys YOUR_NEW_KEY_ID > renovate-private-key.asc` to generate an armored (text-based) private key file
-- Run `gpg --armor --export YOUR_NEW_KEY_ID > renovate-public-key.asc` to generate an armored (text-based) public key file
+-   Copy the key ID from the output (`794B820F34B34A8DF32AADB20649CEXAMPLEONLY` in the above example) or run `gpg --list-secret-keys` if you forgot to take a copy
+-   Run `gpg --armor --export-secret-keys YOUR_NEW_KEY_ID > renovate-private-key.asc` to generate an armored (text-based) private key file
+-   Run `gpg --armor --export YOUR_NEW_KEY_ID > renovate-public-key.asc` to generate an armored (text-based) public key file
 
 The private key should then be added to your Renovate Bot global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
 The public key can be used to replace the existing key in <https://app.renovatebot.com/encrypt> for your own use.
@@ -1079,10 +1079,10 @@ For example: `s3://bucket-name/key-name`.
 
 Defines how the report is exposed:
 
-- `<unset>` If unset, no report will be provided, though the debug logs will still have partial information of the report
-- `logging` The report will be printed as part of the log messages on `INFO` level
-- `file` The report will be written to a path provided by [`reportPath`](#reportpath)
-- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`RENOVATE_X_S3_ENDPOINT`](./self-hosted-experimental.md#renovate_x_s3_endpoint) and [`RENOVATE_X_S3_PATH_STYLE`](./self-hosted-experimental.md#renovate_x_s3_path_style)
+-   `<unset>` If unset, no report will be provided, though the debug logs will still have partial information of the report
+-   `logging` The report will be printed as part of the log messages on `INFO` level
+-   `file` The report will be written to a path provided by [`reportPath`](#reportpath)
+-   `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`RENOVATE_X_S3_ENDPOINT`](./self-hosted-experimental.md#renovate_x_s3_endpoint) and [`RENOVATE_X_S3_PATH_STYLE`](./self-hosted-experimental.md#renovate_x_s3_path_style)
 
 ## repositories
 
@@ -1090,7 +1090,7 @@ Elements in the `repositories` array can be an object if you wish to define more
 
 ```js
 {
-  repositories: [{ repository: 'g/r1', bumpVersion: true }, 'g/r2'];
+    repositories: [{ repository: 'g/r1', bumpVersion: true }, 'g/r2'];
 }
 ```
 
@@ -1104,7 +1104,7 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 ```ts title="Set repositoryCacheType to an S3 URI to enable S3 backed repository cache"
 {
-  repositoryCacheType: 's3://bucket-name';
+    repositoryCacheType: 's3://bucket-name';
 }
 ```
 
@@ -1127,9 +1127,9 @@ By default, Renovate needs a Renovate config file in each repository where it ru
 
 You can choose any of these settings:
 
-- `"required"` (default): a repository config file must be present
-- `"optional"`: if a config file exists, Renovate will use it when it runs
-- `"ignored"`: config files in the repo will be ignored, and have no effect
+-   `"required"` (default): a repository config file must be present
+-   `"optional"`: if a config file exists, Renovate will use it when it runs
+-   `"ignored"`: config files in the repo will be ignored, and have no effect
 
 This feature is closely related to the `onboarding` config option.
 The combinations of `requireConfig` and `onboarding` are:
@@ -1147,9 +1147,9 @@ For example, to configure a `GOOGLE_TOKEN` to be accessible by all repositories:
 
 ```js
 module.exports = {
-  secrets: {
-    GOOGLE_TOKEN: 'abc123',
-  },
+    secrets: {
+        GOOGLE_TOKEN: 'abc123',
+    },
 };
 ```
 
@@ -1157,14 +1157,14 @@ They can also be configured per repository, e.g.
 
 ```js
 module.exports = {
-  repositories: [
-    {
-      repository: 'abc/def',
-      secrets: {
-        GOOGLE_TOKEN: 'abc123',
-      },
-    },
-  ],
+    repositories: [
+        {
+            repository: 'abc/def',
+            secrets: {
+                GOOGLE_TOKEN: 'abc123',
+            },
+        },
+    ],
 };
 ```
 
@@ -1172,12 +1172,12 @@ It could then be used in a repository config or preset like so:
 
 ```json
 {
-  "hostRules": [
-    {
-      "matchHost": "google.com",
-      "token": "{{ secrets.GOOGLE_TOKEN }}"
-    }
-  ]
+    "hostRules": [
+        {
+            "matchHost": "google.com",
+            "token": "{{ secrets.GOOGLE_TOKEN }}"
+        }
+    ]
 }
 ```
 
@@ -1204,8 +1204,8 @@ Otherwise, it will default to `RenovateBot/${renovateVersion} (https://github.co
 
 You may need to set a `username` if you:
 
-- use the Bitbucket platform, or
-- use a self-hosted GitHub App with CLI (required)
+-   use the Bitbucket platform, or
+-   use a self-hosted GitHub App with CLI (required)
 
 If you're using a Personal Access Token (PAT) to authenticate then you should not set a `username`.
 

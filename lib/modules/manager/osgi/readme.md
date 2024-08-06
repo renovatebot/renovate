@@ -6,5 +6,5 @@ For the definition of artifact list extensions, read [section 159.7.3 of the OSG
 
 References:
 
-- [OSGi compendium release 8, Feature Service Specification](https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.feature.html)
-- [The Sling implementation of the feature model](https://sling.apache.org/documentation/development/feature-model.html)
+-   [OSGi compendium release 8, Feature Service Specification](https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.feature.html)
+-   [The Sling implementation of the feature model](https://sling.apache.org/documentation/development/feature-model.html)
