@@ -41,9 +41,9 @@ export async function updateArtifacts({
     return null;
   }
 
-  let cmd = `corepack use `;
+  const cmd = ['corepack enable'];
 
-  cmd += `${depName}@${newVersion}`;
+  cmd.push(`corepack use ${depName}@${newVersion}`);
 
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
