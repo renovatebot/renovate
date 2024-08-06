@@ -13,9 +13,9 @@ Package files are managed by a "package manager".
 
 Example package files include:
 
-- `package.json`, managed by npm or Yarn
-- `Gemfile`, managed by Bundler
-- `go.mod`, managed by `go` modules
+-   `package.json`, managed by npm or Yarn
+-   `Gemfile`, managed by Bundler
+-   `go.mod`, managed by `go` modules
 
 #### How Renovate updates a package file
 
@@ -29,8 +29,8 @@ The Pull Requests patch the package files directly, and include changelogs for t
 
 By default:
 
-- You'll get separate Pull Requests for each dependency
-- Major updates are kept separate from non-major updates
+-   You'll get separate Pull Requests for each dependency
+-   Major updates are kept separate from non-major updates
 
 ### Package managers with lock files
 
@@ -55,15 +55,15 @@ Renovate supports 90+ types of package files.
 By default, Renovate finds most dependencies, but there are exceptions.
 This can be because:
 
-- The package manager/file format is not supported, or
-- The file format is not a standard or is proprietary
+-   The package manager/file format is not supported, or
+-   The file format is not a standard or is proprietary
 
 If your dependencies are not found by default, you can use our `custom` manager to set your own custom patterns to extract dependencies.
 You configure the custom manager by telling it:
 
-- Which file pattern(s) to match
-- How to find the dependency name and version from within the file
-- Which datasource (e.g. Docker registry, npm registry, etc) to use to look up new versions
+-   Which file pattern(s) to match
+-   How to find the dependency name and version from within the file
+-   Which datasource (e.g. Docker registry, npm registry, etc) to use to look up new versions
 
 The end result is that Renovate can keep dependencies in custom file formats up-to-date as long as the dependency datasource is known to Renovate.
 
@@ -88,13 +88,13 @@ Renovate finds these IaC files and then searches Docker registries to see if the
 An example of tag-based updating are `node` images from Docker Hub.
 The `node` images use these tag formats:
 
-- `14.17.4`
-- `14.17.4-alpine3.11`
+-   `14.17.4`
+-   `14.17.4-alpine3.11`
 
 Renovate understands both formats and raises updates like these:
 
-- From `14.17.4` to `14.17.5`
-- From `14.17.4-alpine3.11` to `14.17.5-alpine3.11`
+-   From `14.17.4` to `14.17.5`
+-   From `14.17.4-alpine3.11` to `14.17.5-alpine3.11`
 
 #### Docker digests
 
@@ -111,8 +111,8 @@ Your company typically has dozens of repositories, if not hundreds or thousands.
 These repositories often rely on other repositories and may have upstream or downstream internal dependencies.
 In such cases, it is best practice to:
 
-- Update downstream links as soon as possible, and
-- Keep internal version use as consistent as possible
+-   Update downstream links as soon as possible, and
+-   Keep internal version use as consistent as possible
 
 You can use Renovate to follow this best practice.
 Renovate finds and updates internal dependencies just like external or Open Source dependencies.
@@ -127,9 +127,9 @@ To learn more about "automerge" read the [key concepts, automerge](../key-concep
 
 We use these Renovate features to automerge an internal dependency:
 
-- [Git submodule support](../modules/manager/git-submodules/index.md)
-- [`automerge`](../configuration-options.md#automerge) set to `true`
-- [`automergeType`](../configuration-options.md#automergetype) set to `branch`
+-   [Git submodule support](../modules/manager/git-submodules/index.md)
+-   [`automerge`](../configuration-options.md#automerge) set to `true`
+-   [`automergeType`](../configuration-options.md#automergetype) set to `branch`
 
 ##### Background information
 
@@ -149,8 +149,8 @@ We split our work over two repositories:
 
 The way we've set things up means we avoid:
 
-- reviewing PRs
-- manually merging PRs
+-   reviewing PRs
+-   manually merging PRs
 
 In fact we don't even get the update PR anymore!
 
@@ -178,9 +178,9 @@ You can set the time ranges during which Renovate creates updates in the `schedu
 
 You can use Renovate's "Dependency Dashboard" on platforms which support dynamic Markdown checkboxes:
 
-- Gitea and Forgejo
-- GitHub
-- GitLab
+-   Gitea and Forgejo
+-   GitHub
+-   GitLab
 
 When you enable the Dependency Dashboard, Renovate creates a "Dependency Dashboard" issue.
 This issue lists all updates which are pending, in progress, or were previously closed ignored.
@@ -194,15 +194,15 @@ We call this the "Dependency Dashboard Approval" workflow.
 
 Here's how it works:
 
-- You tell Renovate which package updates need "Dashboard Approval" by setting a custom `packageRule`
-- Renovate only raises updates for packages that need "Dashboard Approval" after you select the corresponding checkbox on the dashboard
+-   You tell Renovate which package updates need "Dashboard Approval" by setting a custom `packageRule`
+-   Renovate only raises updates for packages that need "Dashboard Approval" after you select the corresponding checkbox on the dashboard
 
 #### Benefits of using Dependency Dashboard Approval
 
 Benefits of using Dependency Dashboard Approval:
 
-- By not raising PRs automatically, it allows you to request updates on-demand when you're ready, and
-- It offers you an alternative to permanently ignoring/disabling certain types of updates, like major updates
+-   By not raising PRs automatically, it allows you to request updates on-demand when you're ready, and
+-   It offers you an alternative to permanently ignoring/disabling certain types of updates, like major updates
 
 When you use the Dependency Dashboard Approval workflow you have full visibility and control over your updates.
 
@@ -217,8 +217,8 @@ Renovate includes over 100 built-in presets, like the default recommended `confi
 
 The typical workflow for a company is:
 
-- Create a dedicated repository to store the company's default Renovate settings
-- Set that repository as the default `extends` value when onboarding new repositories
+-   Create a dedicated repository to store the company's default Renovate settings
+-   Set that repository as the default `extends` value when onboarding new repositories
 
 This means that repositories get the centralized config by default, and any changes made to the centralized config repository are propagated to other repositories immediately.
 

@@ -17,20 +17,20 @@ FROM image-python${PYTHON_VERSION}-builder:1.0.0
 
 ```json
 {
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": ["^Dockerfile$"],
-      "matchStringsStrategy": "any",
-      "matchStrings": [
-        "ARG PYTHON_VERSION=\"?(?<currentValue>3(?<minor>\\d+))\"?\\s"
-      ],
-      "autoReplaceStringTemplate": "ARG PYTHON_VERSION={{{replace '\\.' '' newValue}}}\n",
-      "currentValueTemplate": "3.{{{minor}}}",
-      "datasourceTemplate": "python-version",
-      "versioningTemplate": "python",
-      "depNameTemplate": "python"
-    }
-  ]
+    "customManagers": [
+        {
+            "customType": "regex",
+            "fileMatch": ["^Dockerfile$"],
+            "matchStringsStrategy": "any",
+            "matchStrings": [
+                "ARG PYTHON_VERSION=\"?(?<currentValue>3(?<minor>\\d+))\"?\\s"
+            ],
+            "autoReplaceStringTemplate": "ARG PYTHON_VERSION={{{replace '\\.' '' newValue}}}\n",
+            "currentValueTemplate": "3.{{{minor}}}",
+            "datasourceTemplate": "python-version",
+            "versioningTemplate": "python",
+            "depNameTemplate": "python"
+        }
+    ]
 }
 ```

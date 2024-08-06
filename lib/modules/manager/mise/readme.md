@@ -26,7 +26,7 @@ Renovate will update `"23.3"` (the primary version) but will not touch `"22.0"` 
 
 To maintain consistency and reliability, Renovate opts to only manage the _first_ listed version.
 
-- Fallback versions can often be older versions of a tool that are known to work and are there as a backup.
+-   Fallback versions can often be older versions of a tool that are known to work and are there as a backup.
 
 This follows the same workflow that Renovate's `asdf` manager uses.
 
@@ -34,8 +34,8 @@ This follows the same workflow that Renovate's `asdf` manager uses.
 
 Renovate uses:
 
-- [mise's plugins](https://github.com/jdx/mise/tree/main/src/plugins/core)
-- [asdf's plugins](https://mise.jdx.dev/registry.html)
+-   [mise's plugins](https://github.com/jdx/mise/tree/main/src/plugins/core)
+-   [asdf's plugins](https://mise.jdx.dev/registry.html)
 
 to understand and manage tool versioning.
 
@@ -45,8 +45,8 @@ Support for new tools/plugins needs to be _manually_ added to Renovate's logic.
 
 There are 2 ways to integrate versioning for a new tool:
 
-- Renovate's `mise` manager: ensure upstream `mise` supports the tool, then add support to the `mise` manager in Renovate
-- Renovate's `asdf` manager: improve the `asdf` manager in Renovate, which automatically extends support to `mise`
+-   Renovate's `mise` manager: ensure upstream `mise` supports the tool, then add support to the `mise` manager in Renovate
+-   Renovate's `asdf` manager: improve the `asdf` manager in Renovate, which automatically extends support to `mise`
 
 If `mise` adds support for more tools via its own [core plugins](https://mise.jdx.dev/plugins.html#core-plugins), you can create a PR to extend Renovate's `mise` manager to add support for the new tooling.
 

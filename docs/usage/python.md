@@ -37,10 +37,10 @@ By default Renovate checks for upgrades on the `pypi.org` registry.
 If you want, you can set alternative index URLs.
 There are three ways to do this:
 
-- index-url in `requirements.txt`
-- sources in `Pipfile`
-- sources in `pyproject.toml`
-- set URL in Renovate configuration
+-   index-url in `requirements.txt`
+-   sources in `Pipfile`
+-   sources in `pyproject.toml`
+-   set URL in Renovate configuration
 
 ### index-url in `requirements.txt`
 
@@ -65,12 +65,12 @@ Fill the array with alternate index URL(s).
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchDatasources": ["pypi"],
-      "registryUrls": ["http://example.com/private-pypi/"]
-    }
-  ]
+    "packageRules": [
+        {
+            "matchDatasources": ["pypi"],
+            "registryUrls": ["http://example.com/private-pypi/"]
+        }
+    ]
 }
 ```
 
@@ -84,9 +84,9 @@ Fill the array with alternate index URL(s).
 
 ```json title="Disabling all managers where language is set to Python"
 {
-  "python": {
-    "enabled": false
-  }
+    "python": {
+        "enabled": false
+    }
 }
 ```
 
@@ -94,6 +94,6 @@ Alternatively, you can use `enabledManagers` to tell Renovate what package manag
 
 ```json title="Only use Renovate's npm package manager"
 {
-  "enabledManagers": ["npm"]
+    "enabledManagers": ["npm"]
 }
 ```

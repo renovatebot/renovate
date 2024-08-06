@@ -15,29 +15,29 @@ Options:
 
 Available template variables:
 
-- `packageName`
-- `currentValue`
+-   `packageName`
+-   `currentValue`
 
 ```json
 {
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": ["k3s.version"],
-      "matchStrings": ["(?<currentValue>\\S+)"],
-      "depNameTemplate": "k3s",
-      "versioningTemplate": "semver-coerced",
-      "datasourceTemplate": "custom.k3s"
+    "customManagers": [
+        {
+            "customType": "regex",
+            "fileMatch": ["k3s.version"],
+            "matchStrings": ["(?<currentValue>\\S+)"],
+            "depNameTemplate": "k3s",
+            "versioningTemplate": "semver-coerced",
+            "datasourceTemplate": "custom.k3s"
+        }
+    ],
+    "customDatasources": {
+        "k3s": {
+            "defaultRegistryUrlTemplate": "https://update.k3s.io/v1-release/channels",
+            "transformTemplates": [
+                "{\"releases\":[{\"version\": $$.(data[id = 'stable'].latest),\"sourceUrl\":\"https://github.com/k3s-io/k3s\",\"changelogUrl\":$join([\"https://github.com/k3s-io/k3s/releases/tag/\",data[id = 'stable'].latest])}],\"sourceUrl\": \"https://github.com/k3s-io/k3s\",\"homepage\": \"https://k3s.io/\"}"
+            ]
+        }
     }
-  ],
-  "customDatasources": {
-    "k3s": {
-      "defaultRegistryUrlTemplate": "https://update.k3s.io/v1-release/channels",
-      "transformTemplates": [
-        "{\"releases\":[{\"version\": $$.(data[id = 'stable'].latest),\"sourceUrl\":\"https://github.com/k3s-io/k3s\",\"changelogUrl\":$join([\"https://github.com/k3s-io/k3s/releases/tag/\",data[id = 'stable'].latest])}],\"sourceUrl\": \"https://github.com/k3s-io/k3s\",\"homepage\": \"https://k3s.io/\"}"
-      ]
-    }
-  }
 }
 ```
 
@@ -47,14 +47,14 @@ Minimal-supported object:
 
 ```json
 {
-  "releases": [
-    {
-      "version": "v1.1.0"
-    },
-    {
-      "version": "v1.2.0"
-    }
-  ]
+    "releases": [
+        {
+            "version": "v1.1.0"
+        },
+        {
+            "version": "v1.2.0"
+        }
+    ]
 }
 ```
 
@@ -62,22 +62,22 @@ All available options:
 
 ```json
 {
-  "releases": [
-    {
-      "version": "v1.0.0",
-      "isDeprecated": true,
-      "releaseTimestamp": "2022-12-24T18:21Z",
-      "changelogUrl": "https://github.com/demo-org/demo/blob/main/CHANGELOG.md#v0710",
-      "sourceUrl": "https://github.com/demo-org/demo",
-      "sourceDirectory": "monorepo/folder",
-      "digest": "c667f758f9e46e1d8111698e8d3a181c0b10f430",
-      "isStable": true
-    }
-  ],
-  "sourceUrl": "https://github.com/demo-org/demo",
-  "sourceDirectory": "monorepo/folder",
-  "changelogUrl": "https://github.com/demo-org/demo/blob/main/CHANGELOG.md",
-  "homepage": "https://demo.org"
+    "releases": [
+        {
+            "version": "v1.0.0",
+            "isDeprecated": true,
+            "releaseTimestamp": "2022-12-24T18:21Z",
+            "changelogUrl": "https://github.com/demo-org/demo/blob/main/CHANGELOG.md#v0710",
+            "sourceUrl": "https://github.com/demo-org/demo",
+            "sourceDirectory": "monorepo/folder",
+            "digest": "c667f758f9e46e1d8111698e8d3a181c0b10f430",
+            "isStable": true
+        }
+    ],
+    "sourceUrl": "https://github.com/demo-org/demo",
+    "sourceDirectory": "monorepo/folder",
+    "changelogUrl": "https://github.com/demo-org/demo/blob/main/CHANGELOG.md",
+    "homepage": "https://demo.org"
 }
 ```
 
@@ -92,12 +92,12 @@ If you use the Mend Renovate app, use the [`logLevelRemap` config option](../../
 
 ```json title="Getting trace logs from the Mend Renovate app"
 {
-  "logLevelRemap": [
-    {
-      "matchMessage": "/^Custom manager fetcher/",
-      "newLogLevel": "info"
-    }
-  ]
+    "logLevelRemap": [
+        {
+            "matchMessage": "/^Custom manager fetcher/",
+            "newLogLevel": "info"
+        }
+    ]
 }
 ```
 
@@ -132,17 +132,17 @@ When Renovate receives this response with the `plain` format, it will convert it
 
 ```json
 {
-  "releases": [
-    {
-      "version": "1.0.0"
-    },
-    {
-      "version": "2.0.0"
-    },
-    {
-      "version": "3.0.0"
-    }
-  ]
+    "releases": [
+        {
+            "version": "1.0.0"
+        },
+        {
+            "version": "2.0.0"
+        },
+        {
+            "version": "3.0.0"
+        }
+    ]
 }
 ```
 
@@ -156,26 +156,26 @@ Suppose the body of the HTTP response is as follows:
 
 ```yaml
 releases:
-  - version: 1.0.0
-  - version: 2.0.0
-  - version: 3.0.0
+    - version: 1.0.0
+    - version: 2.0.0
+    - version: 3.0.0
 ```
 
 When Renovate receives this response with the `yaml` format, it will convert it into the following:
 
 ```json
 {
-  "releases": [
-    {
-      "version": "1.0.0"
-    },
-    {
-      "version": "2.0.0"
-    },
-    {
-      "version": "3.0.0"
-    }
-  ]
+    "releases": [
+        {
+            "version": "1.0.0"
+        },
+        {
+            "version": "2.0.0"
+        },
+        {
+            "version": "3.0.0"
+        }
+    ]
 }
 ```
 
@@ -190,10 +190,10 @@ For the following HTML document:
 
 ```html
 <html>
-  <body>
-    <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
-    <a href="package-2.0.tar.gz">package-2.0.tar.gz</a>
-  </body>
+    <body>
+        <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+        <a href="package-2.0.tar.gz">package-2.0.tar.gz</a>
+    </body>
 </html>
 ```
 
@@ -201,14 +201,14 @@ The following JSON will be generated:
 
 ```json
 {
-  "releases": [
-    {
-      "version": "package-1.0.tar.gz"
-    },
-    {
-      "version": "package-1.0.tar.gz"
-    }
-  ]
+    "releases": [
+        {
+            "version": "package-1.0.tar.gz"
+        },
+        {
+            "version": "package-1.0.tar.gz"
+        }
+    ]
 }
 ```
 
@@ -224,14 +224,14 @@ You can use this configuration to request the newest version available to [K3s](
 
 ```json
 {
-  "customDatasources": {
-    "k3s": {
-      "defaultRegistryUrlTemplate": "https://update.k3s.io/v1-release/channels",
-      "transformTemplates": [
-        "{\"releases\":[{\"version\": $$.(data[id = 'stable'].latest),\"sourceUrl\":\"https://github.com/k3s-io/k3s\",\"changelogUrl\":$join([\"https://github.com/k3s-io/k3s/releases/tag/\",data[id = 'stable'].latest])}],\"sourceUrl\": \"https://github.com/k3s-io/k3s\",\"homepage\": \"https://k3s.io/\"}"
-      ]
+    "customDatasources": {
+        "k3s": {
+            "defaultRegistryUrlTemplate": "https://update.k3s.io/v1-release/channels",
+            "transformTemplates": [
+                "{\"releases\":[{\"version\": $$.(data[id = 'stable'].latest),\"sourceUrl\":\"https://github.com/k3s-io/k3s\",\"changelogUrl\":$join([\"https://github.com/k3s-io/k3s/releases/tag/\",data[id = 'stable'].latest])}],\"sourceUrl\": \"https://github.com/k3s-io/k3s\",\"homepage\": \"https://k3s.io/\"}"
+            ]
+        }
     }
-  }
 }
 ```
 
@@ -241,25 +241,25 @@ You can use this configuration to request the newest versions of the Hashicorp p
 
 ```json
 {
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": ["\\.yml$"],
-      "datasourceTemplate": "custom.hashicorp",
-      "matchStrings": [
-        "#\\s*renovate:\\s*(datasource=(?<datasource>.*?) )?depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s*\\w*:\\s*(?<currentValue>.*)\\s"
-      ],
-      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    "customManagers": [
+        {
+            "customType": "regex",
+            "fileMatch": ["\\.yml$"],
+            "datasourceTemplate": "custom.hashicorp",
+            "matchStrings": [
+                "#\\s*renovate:\\s*(datasource=(?<datasource>.*?) )?depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s*\\w*:\\s*(?<currentValue>.*)\\s"
+            ],
+            "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+        }
+    ],
+    "customDatasources": {
+        "hashicorp": {
+            "defaultRegistryUrlTemplate": "https://api.releases.hashicorp.com/v1/releases/{{packageName}}?license_class=oss",
+            "transformTemplates": [
+                "{ \"releases\": $map($, function($v) { { \"version\": $v.version, \"releaseTimestamp\": $v.timestamp_created, \"changelogUrl\": $v.url_changelog, \"sourceUrl\": $v.url_source_repository } }), \"homepage\": $[0].url_project_website, \"sourceUrl\": $[0].url_source_repository }"
+            ]
+        }
     }
-  ],
-  "customDatasources": {
-    "hashicorp": {
-      "defaultRegistryUrlTemplate": "https://api.releases.hashicorp.com/v1/releases/{{packageName}}?license_class=oss",
-      "transformTemplates": [
-        "{ \"releases\": $map($, function($v) { { \"version\": $v.version, \"releaseTimestamp\": $v.timestamp_created, \"changelogUrl\": $v.url_changelog, \"sourceUrl\": $v.url_source_repository } }), \"homepage\": $[0].url_project_website, \"sourceUrl\": $[0].url_source_repository }"
-      ]
-    }
-  }
 }
 ```
 
@@ -276,26 +276,26 @@ You can use the following configuration to upgrade the Grafana Dashboards versio
 
 ```json
 {
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": ["\\.yml$"],
-      "matchStrings": [
-        "#\\s+renovate:\\s+depName=\"(?<depName>.*)\"\\n\\s+gnetId:\\s+(?<packageName>.*?)\\n\\s+revision:\\s+(?<currentValue>.*)"
-      ],
-      "versioningTemplate": "regex:^(?<major>\\d+)$",
-      "datasourceTemplate": "custom.grafana-dashboards"
+    "customManagers": [
+        {
+            "customType": "regex",
+            "fileMatch": ["\\.yml$"],
+            "matchStrings": [
+                "#\\s+renovate:\\s+depName=\"(?<depName>.*)\"\\n\\s+gnetId:\\s+(?<packageName>.*?)\\n\\s+revision:\\s+(?<currentValue>.*)"
+            ],
+            "versioningTemplate": "regex:^(?<major>\\d+)$",
+            "datasourceTemplate": "custom.grafana-dashboards"
+        }
+    ],
+    "customDatasources": {
+        "grafana-dashboards": {
+            "defaultRegistryUrlTemplate": "https://grafana.com/api/dashboards/{{packageName}}",
+            "format": "json",
+            "transformTemplates": [
+                "{\"releases\":[{\"version\": $string(revision)}]}"
+            ]
+        }
     }
-  ],
-  "customDatasources": {
-    "grafana-dashboards": {
-      "defaultRegistryUrlTemplate": "https://grafana.com/api/dashboards/{{packageName}}",
-      "format": "json",
-      "transformTemplates": [
-        "{\"releases\":[{\"version\": $string(revision)}]}"
-      ]
-    }
-  }
 }
 ```
 
@@ -303,17 +303,17 @@ Grafana Helm chart `values.yaml` snippet:
 
 ```yml
 dashboards:
-  default:
-    1860-node-exporter-full:
-      # renovate: depName="Node Exporter Full"
-      gnetId: 1860
-      revision: 31
-      datasource: Prometheus
-    15760-kubernetes-views-pods:
-      # renovate: depName="Kubernetes / Views / Pods"
-      gnetId: 15760
-      revision: 20
-      datasource: Prometheus
+    default:
+        1860-node-exporter-full:
+            # renovate: depName="Node Exporter Full"
+            gnetId: 1860
+            revision: 31
+            datasource: Prometheus
+        15760-kubernetes-views-pods:
+            # renovate: depName="Kubernetes / Views / Pods"
+            gnetId: 15760
+            revision: 20
+            datasource: Prometheus
 ```
 
 ### Custom offline dependencies
@@ -325,12 +325,12 @@ For example, imagine the following file `versiontracker.json` for the software `
 
 ```json
 [
-  {
-    "version": "77"
-  },
-  {
-    "version": "76"
-  }
+    {
+        "version": "77"
+    },
+    {
+        "version": "76"
+    }
 ]
 ```
 
@@ -339,14 +339,14 @@ This example uses Nexus as the webserver.
 
 ```json
 {
-  "customDatasources": {
-    "nexus_generic": {
-      "defaultRegistryUrlTemplate": "https://nexus.example.com/repository/versiontrackers/{{packageName}}/versiontracker.json",
-      "transformTemplates": [
-        "{ \"releases\": $map($, function($v) { { \"version\": $v.version, \"sourceUrl\": $v.filelink } }) }"
-      ]
+    "customDatasources": {
+        "nexus_generic": {
+            "defaultRegistryUrlTemplate": "https://nexus.example.com/repository/versiontrackers/{{packageName}}/versiontracker.json",
+            "transformTemplates": [
+                "{ \"releases\": $map($, function($v) { { \"version\": $v.version, \"sourceUrl\": $v.filelink } }) }"
+            ]
+        }
     }
-  }
 }
 ```
 
@@ -362,17 +362,17 @@ And the following custom manager:
 
 ```json
 {
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": ["\\.yml$"],
-      "datasourceTemplate": "custom.nexus_generic",
-      "matchStrings": [
-        "#\\s*renovate:\\s*(datasource=(?<datasource>.*?)\\s*)?depName=(?<depName>.*?)(\\s*versioning=(?<versioning>.*?))?\\s*\\w*:\\s*[\"']?(?<currentValue>.+?)[\"']?\\s"
-      ],
-      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
-    }
-  ]
+    "customManagers": [
+        {
+            "customType": "regex",
+            "fileMatch": ["\\.yml$"],
+            "datasourceTemplate": "custom.nexus_generic",
+            "matchStrings": [
+                "#\\s*renovate:\\s*(datasource=(?<datasource>.*?)\\s*)?depName=(?<depName>.*?)(\\s*versioning=(?<versioning>.*?))?\\s*\\w*:\\s*[\"']?(?<currentValue>.+?)[\"']?\\s"
+            ],
+            "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+        }
+    ]
 }
 ```
 
@@ -380,14 +380,14 @@ Or if you have the datasource locally, you can also define your local registry b
 
 ```json
 {
-  "customDatasources": {
-    "local_generic": {
-      "defaultRegistryUrlTemplate": "file://dependencies/{{packageName}}/versiontracker.json",
-      "transformTemplates": [
-        "{ \"releases\": $map($, function($v) { { \"version\": $v.version, \"sourceUrl\": $v.filelink } }) }"
-      ]
+    "customDatasources": {
+        "local_generic": {
+            "defaultRegistryUrlTemplate": "file://dependencies/{{packageName}}/versiontracker.json",
+            "transformTemplates": [
+                "{ \"releases\": $map($, function($v) { { \"version\": $v.version, \"sourceUrl\": $v.filelink } }) }"
+            ]
+        }
     }
-  }
 }
 ```
 
@@ -401,18 +401,18 @@ Let's use nginx itself as an example:
 
 ```json
 {
-  "customDatasources": {
-    "nginx": {
-      "defaultRegistryUrlTemplate": "https://nginx.org/download",
-      "format": "html"
-    }
-  },
-  "packageRules": [
-    {
-      "matchDatasources": ["custom.nginx"],
-      "extractVersion": "^nginx-(?<version>.+)\\.tar\\.gz$"
-    }
-  ]
+    "customDatasources": {
+        "nginx": {
+            "defaultRegistryUrlTemplate": "https://nginx.org/download",
+            "format": "html"
+        }
+    },
+    "packageRules": [
+        {
+            "matchDatasources": ["custom.nginx"],
+            "extractVersion": "^nginx-(?<version>.+)\\.tar\\.gz$"
+        }
+    ]
 }
 ```
 
@@ -422,17 +422,17 @@ You can use the `html` format to extract versions from a typical "Downloads" pag
 
 ```json
 {
-  "customDatasources": {
-    "curl": {
-      "defaultRegistryUrlTemplate": "https://curl.se/download.html",
-      "format": "html"
-    }
-  },
-  "packageRules": [
-    {
-      "matchDatasources": ["custom.curl"],
-      "extractVersion": "/curl-(?<version>.+)\\.tar\\.gz$"
-    }
-  ]
+    "customDatasources": {
+        "curl": {
+            "defaultRegistryUrlTemplate": "https://curl.se/download.html",
+            "format": "html"
+        }
+    },
+    "packageRules": [
+        {
+            "matchDatasources": ["custom.curl"],
+            "extractVersion": "/curl-(?<version>.+)\\.tar\\.gz$"
+        }
+    ]
 }
 ```

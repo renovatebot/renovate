@@ -6,13 +6,13 @@ If you need Bundler to authenticate with a private registry - and it's not the s
 
 ```json
 {
-  "hostRules": [
-    {
-      "matchHost": "private-registry.company.com",
-      "hostType": "rubygems",
-      "token": "abc123"
-    }
-  ]
+    "hostRules": [
+        {
+            "matchHost": "private-registry.company.com",
+            "hostType": "rubygems",
+            "token": "abc123"
+        }
+    ]
 }
 ```
 
@@ -28,5 +28,5 @@ Instead of `token`, you may also supply `username` and `password` instead.
 
 If you don't want to commit raw secrets to your repository, either:
 
-- If self hosting, add the `hostRules` to your bot's configuration file rather than the repository's configuration file, or
-- If using the Mend Renovate App, make use of the [`encrypted`](../../../configuration-options.md#encrypted) capability
+-   If self hosting, add the `hostRules` to your bot's configuration file rather than the repository's configuration file, or
+-   If using the Mend Renovate App, make use of the [`encrypted`](../../../configuration-options.md#encrypted) capability

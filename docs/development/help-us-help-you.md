@@ -36,9 +36,9 @@ In other words, if someone's taking the time to help you, "don't be lazy".
 
 If someone's helped you get some functionality working, or successfully troubleshoot a problem, please try to do this:
 
-- Let us know which advice fixed your problem, if it's unclear
-- If you're feeling polite, thank the person who helped you
-- If you're feeling helpful, submit a Pull Request to improve the relevant documentation
+-   Let us know which advice fixed your problem, if it's unclear
+-   If you're feeling polite, thank the person who helped you
+-   If you're feeling helpful, submit a Pull Request to improve the relevant documentation
 
 Please don't ruin a successful result with a criticism or complaint about the quality of the documentation.
 If you feel frustrated because better documentation would have prevented you from making the mistake in the first place then improve it with a PR for those who come after you!

@@ -16,13 +16,13 @@ For example:
 
 ```json
 {
-  "batect": {
-    "fileMatch": [
-      "(^|/)batect(-bundle)?\\.yml$",
-      "(^|/)my-other-batect-file\\.yml$",
-      "^a-directory/[^/]*\\.yml$"
-    ]
-  }
+    "batect": {
+        "fileMatch": [
+            "(^|/)batect(-bundle)?\\.yml$",
+            "(^|/)my-other-batect-file\\.yml$",
+            "^a-directory/[^/]*\\.yml$"
+        ]
+    }
 }
 ```
 

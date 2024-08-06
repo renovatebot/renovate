@@ -16,17 +16,17 @@ The minimum exported interface for a datasource is a function called `getRelease
 
 The config has:
 
-- `packageName`: the package's full name including scope if present (e.g. `@foo/bar`)
-- `registryUrls`: an array of registry URLs to try
+-   `packageName`: the package's full name including scope if present (e.g. `@foo/bar`)
+-   `registryUrls`: an array of registry URLs to try
 
 `getReleases` should return an object having:
 
-- `releases`: an array of strings of matched versions. This is the only mandatory field
-- `deprecationMessage`: a string description of the package's deprecation notice, if applicable
-- `sourceUrl`: a HTTP URL pointing to the source code (for example on GitHub)
-- `homepage`: a HTTP URL for the package's homepage. Ideally should be empty if the homepage and `sourceUrl` are the same
-- `changelogUrl`: a URL pointing to the package's changelog (could be a Markdown file, for example). If not present then Renovate will search the `sourceUrl` for a changelog file
-- `tags`: an object mapping tag -> version, for example `tags: { latest: '3.0.0' }`. This is only used by the `followTags` function
+-   `releases`: an array of strings of matched versions. This is the only mandatory field
+-   `deprecationMessage`: a string description of the package's deprecation notice, if applicable
+-   `sourceUrl`: a HTTP URL pointing to the source code (for example on GitHub)
+-   `homepage`: a HTTP URL for the package's homepage. Ideally should be empty if the homepage and `sourceUrl` are the same
+-   `changelogUrl`: a URL pointing to the package's changelog (could be a Markdown file, for example). If not present then Renovate will search the `sourceUrl` for a changelog file
+-   `tags`: an object mapping tag -> version, for example `tags: { latest: '3.0.0' }`. This is only used by the `followTags` function
 
 ## getDigest
 
@@ -34,8 +34,8 @@ Datasources that support digests (like Docker digests and Git commit hashes) can
 
 The `getDigest` function has two inputs:
 
-- `config`: the Renovate config for the package being updated, has the same fields as `getReleases`
-- `newValue`: the version or value to retrieve the digest for
+-   `config`: the Renovate config for the package being updated, has the same fields as `getReleases`
+-   `newValue`: the version or value to retrieve the digest for
 
 The `getDigest` function returns a string output representing the digest value.
 If no digest is found, the `getDigest` function should return `null`.

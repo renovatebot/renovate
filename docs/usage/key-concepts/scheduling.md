@@ -17,8 +17,8 @@ You can override the default timezone by setting your own `timezone` config opti
 
 When we talk about scheduling Renovate, there are 2 senses in which you can schedule Renovate:
 
-- A global sense: when the bot is allowed to do work at all. This is determined by the bot admin using tools such as `cron`
-- A specific sense: when Renovate is allowed to look for updates to a specific dependency
+-   A global sense: when the bot is allowed to do work at all. This is determined by the bot admin using tools such as `cron`
+-   A specific sense: when Renovate is allowed to look for updates to a specific dependency
 
 While as an end user you may think of scheduling in terms of when you allow it to raise updates, it's important to remember that such updates can only occur if the bot gets the opportunity to run within the schedule window you provide.
 
@@ -31,9 +31,9 @@ You may want to update certain repositories less often, or you may even want to 
 
 Some common reasons to schedule when Renovate runs:
 
-- Make Renovate run outside office hours, to free up continuous integration resources for developers during the day
-- Get updates for certain packages on a regular interval instead of right away
-- Reduce Renovate bot PR notifications during the day
+-   Make Renovate run outside office hours, to free up continuous integration resources for developers during the day
+-   Get updates for certain packages on a regular interval instead of right away
+-   Reduce Renovate bot PR notifications during the day
 
 ## Customizing the schedule
 
@@ -54,7 +54,7 @@ The timezone must be a valid [IANA time zone](https://en.wikipedia.org/wiki/List
 
 ```json title="Setting a specific timezone in your local config file"
 {
-  "timezone": "America/Los_Angeles"
+    "timezone": "America/Los_Angeles"
 }
 ```
 
@@ -93,17 +93,17 @@ Some config examples:
 
 ```json title="Renovate should run each day before 4 am"
 {
-  "schedule": ["before 4am"]
+    "schedule": ["before 4am"]
 }
 ```
 
 ```json title="Renovate should run outside of common office hours"
 {
-  "schedule": [
-    "after 10pm every weekday",
-    "before 5am every weekday",
-    "every weekend"
-  ]
+    "schedule": [
+        "after 10pm every weekday",
+        "before 5am every weekday",
+        "every weekend"
+    ]
 }
 ```
 
@@ -119,12 +119,12 @@ The scheduling feature can be very useful for "noisy" packages that are updated 
 
 ```json title="Restrict aws-sdk to weekly updates"
 {
-  "packageRules": [
-    {
-      "matchPackageNames": ["aws-sdk"],
-      "schedule": ["after 9pm on sunday"]
-    }
-  ]
+    "packageRules": [
+        {
+            "matchPackageNames": ["aws-sdk"],
+            "schedule": ["after 9pm on sunday"]
+        }
+    ]
 }
 ```
 

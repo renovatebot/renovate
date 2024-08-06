@@ -11,8 +11,8 @@ Maintainers may close bug reports that lack the extra information, for example w
 
 We only create issues in this repository when we:
 
-- consider them to be actionable
-- are in a state where someone could work on it
+-   consider them to be actionable
+-   are in a state where someone could work on it
 
 We often need a minimal reproduction or logs, or even _both_, to pinpoint the exact problem.
 Because we need enough information for a actionable bug report, we may close Discussions that lack the needed info, even if it's highly likely the behavior is buggy.
@@ -54,8 +54,8 @@ We are not interested in debating you, we prefer to spend our time helping users
 We are open to improve our approach to bugs, or this document, in good spirit.
 Please do _not_ post comments like these:
 
-- "How dare you block users from creating Issues?!"
-- "If the behavior was unexpected to me then that means it's a bug."
+-   "How dare you block users from creating Issues?!"
+-   "If the behavior was unexpected to me then that means it's a bug."
 
 Users who want to make our life difficult as maintainers will be blocked.
 Read our [Code of Conduct](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md) to learn more.

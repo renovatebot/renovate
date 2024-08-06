@@ -10,10 +10,10 @@ For example, if you think anything is unclear, or you think something needs to b
 
 You need the following dependencies for local development:
 
-- Git `>=2.45.1`
-- Node.js `^20.15.1`
-- pnpm `^9.0.0` (use corepack)
-- C++ compiler
+-   Git `>=2.45.1`
+-   Node.js `^20.15.1`
+-   pnpm `^9.0.0` (use corepack)
+-   C++ compiler
 
 We recommend you use the version of Node.js defined in the repository's `.nvmrc`.
 
@@ -37,26 +37,26 @@ To enter a development shell with the necessary packages, run `nix-shell --packa
 Follow these steps to set up your development environment on Windows 10.
 If you already installed a part, skip the corresponding step.
 
-- Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
-- Install [Node.js LTS](https://nodejs.org/en/download/)
-- In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --debug install --global windows-build-tools`
-- Enable corepack with: `corepack enable`
+-   Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
+-   Install [Node.js LTS](https://nodejs.org/en/download/)
+-   In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --debug install --global windows-build-tools`
+-   Enable corepack with: `corepack enable`
 
-  You can see what versions you're using like this:
+    You can see what versions you're using like this:
 
-  ```powershell
-  PS C:\Windows\system32> git --version
-  PS C:\Windows\system32> node --version
-  PS C:\Windows\system32> pnpm --version
-  ```
+    ```powershell
+    PS C:\Windows\system32> git --version
+    PS C:\Windows\system32> node --version
+    PS C:\Windows\system32> pnpm --version
+    ```
 
 #### VS Code Dev Containers
 
 If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/devcontainers/containers) instead.
 
-- Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements)
-- Open the repository folder in VS Code
-- Choose "Reopen in Container" via the command palette or the small button in the lower left corner
+-   Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements)
+-   Open the repository folder in VS Code
+-   Choose "Reopen in Container" via the command palette or the small button in the lower left corner
 
 The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run more commands.
 
@@ -180,8 +180,8 @@ First of all, never commit to the `main` branch of your fork - always use a "fea
 Make sure your fork is up-to-date with the Renovate `main` branch, check this each time before you create a new branch.
 To do this, see these GitHub guides:
 
-- [Configuring a remote for a fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/)
-- [Syncing a fork](https://help.github.com/articles/syncing-a-fork/)
+-   [Configuring a remote for a fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/)
+-   [Syncing a fork](https://help.github.com/articles/syncing-a-fork/)
 
 ## Tips and tricks
 
@@ -229,8 +229,8 @@ Here's an example:
 
 ```javascript
 module.exports = {
-  token: 'xxxxxxxx',
-  repositories: ['r4harry/testrepo1'],
+    token: 'xxxxxxxx',
+    repositories: ['r4harry/testrepo1'],
 };
 ```
 

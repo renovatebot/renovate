@@ -23,10 +23,10 @@ By specifying the annotation with a remote task or a remote pipeline based on th
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  name: main
-  annotations:
-    pipelinesascode.tekton.dev/task: 'https://github.com/foo/bar/raw/v0.0.1/task/my-task/my-task.yaml'
-    pipelinesascode.tekton.dev/pipeline: 'https://github.com/foo/bar/raw/v0.0.1/pipeline/my-pipeline/my-pipeline.yaml'
+    name: main
+    annotations:
+        pipelinesascode.tekton.dev/task: 'https://github.com/foo/bar/raw/v0.0.1/task/my-task/my-task.yaml'
+        pipelinesascode.tekton.dev/pipeline: 'https://github.com/foo/bar/raw/v0.0.1/pipeline/my-pipeline/my-pipeline.yaml'
 ```
 
 Supported URLs:
@@ -72,9 +72,9 @@ As an example, the following config matches all the YAML files in a repository:
 
 ```json
 {
-  "tekton": {
-    "fileMatch": ["\\.yaml$", "\\.yml$"]
-  }
+    "tekton": {
+        "fileMatch": ["\\.yaml$", "\\.yml$"]
+    }
 }
 ```
 

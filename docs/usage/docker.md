@@ -7,12 +7,12 @@ description: Docker Package Manager Support in Renovate
 
 Renovate supports upgrading dependencies in various types of Docker definition files:
 
-- Docker's `Dockerfile` files
-- Docker Compose `docker-compose.yml`, `compose.yml` files
-- Visual Studio Code dev containers and GitHub Codespaces images and features
-- CircleCI config files
-- Kubernetes manifest files
-- Ansible configuration files
+-   Docker's `Dockerfile` files
+-   Docker Compose `docker-compose.yml`, `compose.yml` files
+-   Visual Studio Code dev containers and GitHub Codespaces images and features
+-   CircleCI config files
+-   Kubernetes manifest files
+-   Ansible configuration files
 
 ## How It Works
 
@@ -41,13 +41,13 @@ You could then use this `packageRules` array, to tell Renovate to use `semver` v
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["foo/bar"],
-      "versioning": "semver"
-    }
-  ]
+    "packageRules": [
+        {
+            "matchDatasources": ["docker"],
+            "matchPackageNames": ["foo/bar"],
+            "versioning": "semver"
+        }
+    ]
 }
 ```
 
@@ -55,13 +55,13 @@ Another example is the official `python` image, which follows `pep440` versionin
 
 ```json title="Telling Renovate to use the pep440 versioning scheme"
 {
-  "packageRules": [
-    {
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["python"],
-      "versioning": "pep440"
-    }
-  ]
+    "packageRules": [
+        {
+            "matchDatasources": ["docker"],
+            "matchPackageNames": ["python"],
+            "versioning": "pep440"
+        }
+    ]
 }
 ```
 
@@ -154,11 +154,11 @@ For example, to disable digest updates for Docker Compose only but leave them fo
 
 ```json
 {
-  "docker-compose": {
-    "digest": {
-      "enabled": false
+    "docker-compose": {
+        "digest": {
+            "enabled": false
+        }
     }
-  }
 }
 ```
 
@@ -174,8 +174,8 @@ Add all paths to ignore into the `ignorePaths` configuration field. e.g.
 
 ```json
 {
-  "extends": ["config:recommended"],
-  "ignorePaths": ["docker/old-files/"]
+    "extends": ["config:recommended"],
+    "ignorePaths": ["docker/old-files/"]
 }
 ```
 
@@ -204,13 +204,13 @@ The Docker Hub password is stored in a process environment variable.
 
 ```js title="config.js"
 module.exports = {
-  hostRules: [
-    {
-      hostType: 'docker',
-      username: '<your-username>',
-      password: process.env.DOCKER_HUB_PASSWORD,
-    },
-  ],
+    hostRules: [
+        {
+            hostType: 'docker',
+            username: '<your-username>',
+            password: process.env.DOCKER_HUB_PASSWORD,
+        },
+    ],
 };
 ```
 
@@ -224,14 +224,14 @@ In this example you would configure a specific Docker host like this:
 
 ```js
 module.exports = {
-  hostRules: [
-    {
-      hostType: 'docker',
-      matchHost: 'your.host.io',
-      username: '<your-username>',
-      password: process.env.SELF_HOSTED_DOCKER_IMAGES_PASSWORD,
-    },
-  ],
+    hostRules: [
+        {
+            hostType: 'docker',
+            matchHost: 'your.host.io',
+            username: '<your-username>',
+            password: process.env.SELF_HOSTED_DOCKER_IMAGES_PASSWORD,
+        },
+    ],
 };
 ```
 
@@ -243,16 +243,16 @@ Renovate can authenticate with AWS ECR using AWS access key id & secret as the u
 
 ```json
 {
-  "hostRules": [
-    {
-      "hostType": "docker",
-      "matchHost": "12345612312.dkr.ecr.us-east-1.amazonaws.com",
-      "username": "AKIAABCDEFGHIJKLMNOPQ",
-      "encrypted": {
-        "password": "w...A"
-      }
-    }
-  ]
+    "hostRules": [
+        {
+            "hostType": "docker",
+            "matchHost": "12345612312.dkr.ecr.us-east-1.amazonaws.com",
+            "username": "AKIAABCDEFGHIJKLMNOPQ",
+            "encrypted": {
+                "password": "w...A"
+            }
+        }
+    ]
 }
 ```
 
@@ -264,16 +264,16 @@ To make use of this authentication mechanism, specify the username as `AWS`:
 
 ```json
 {
-  "hostRules": [
-    {
-      "hostType": "docker",
-      "matchHost": "12345612312.dkr.ecr.us-east-1.amazonaws.com",
-      "username": "AWS",
-      "encrypted": {
-        "password": "w...A"
-      }
-    }
-  ]
+    "hostRules": [
+        {
+            "hostType": "docker",
+            "matchHost": "12345612312.dkr.ecr.us-east-1.amazonaws.com",
+            "username": "AWS",
+            "encrypted": {
+                "password": "w...A"
+            }
+        }
+    ]
 }
 ```
 
@@ -290,8 +290,8 @@ google-auth-library.
 
 To access the Google Container Registry (deprecated) or the Google Artifact Registry, use the JSON service account with `Basic` authentication, and use the:
 
-- `_json_key` as username
-- full Google Cloud Platform service account JSON as password
+-   `_json_key` as username
+-   full Google Cloud Platform service account JSON as password
 
 To avoid JSON-in-JSON wrapping, which can cause problems, encode the JSON service account beforehand.
 
@@ -303,88 +303,88 @@ If all your dependencies are on the Google Artifact Registry, you can base64 enc
 1. Base64 encode the service account credentials by running `cat service-account.json | base64`
 1. Add the encoded service account to your configuration file
 
-   1. If you want to add it to your self-hosted configuration file:
+    1. If you want to add it to your self-hosted configuration file:
 
-      ```json
-      {
-        "hostRules": [
-          {
-            "matchHost": "europe-docker.pkg.dev",
-            "username": "_json_key_base64",
-            "password": "<base64 service account>"
-          }
-        ]
-      }
-      ```
+        ```json
+        {
+            "hostRules": [
+                {
+                    "matchHost": "europe-docker.pkg.dev",
+                    "username": "_json_key_base64",
+                    "password": "<base64 service account>"
+                }
+            ]
+        }
+        ```
 
-   1. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
+    1. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
 
-      ```json
-      {
-        "hostRules": [
-          {
-            "matchHost": "europe-docker.pkg.dev",
-            "username": "_json_key_base64",
-            "encrypted": {
-              "password": "<encrypted base64 service account>"
-            }
-          }
-        ]
-      }
-      ```
+        ```json
+        {
+            "hostRules": [
+                {
+                    "matchHost": "europe-docker.pkg.dev",
+                    "username": "_json_key_base64",
+                    "encrypted": {
+                        "password": "<encrypted base64 service account>"
+                    }
+                }
+            ]
+        }
+        ```
 
 If you have dependencies on Google Container Registry (and Artifact Registry) you need to use `_json_key` and a slightly different encoding:
 
 1. Download your JSON service account and store it on your machine. Make sure that the service account has `read` (and only `read`) permissions to your artifacts
 1. Open the file and prefix the content with `_json_key:`. The file should look like this:
 
-   ```
-   _json_key:{
-     "type": "service_account",
-     "project_id": "sample-project",
-     "private_key_id": "5786ff7e615522b932a2a37b4a6f9645c4316dbd",
-     "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDaOkxZut9uDUHV\n...\n/PWs0Wa2z5+IawMD7nO63+b6\n-----END PRIVATE KEY-----\n",
-     "client_email": "renovate-lookup@sample-project.iam.gserviceaccount.com",
-     "client_id": "115429165445403928973",
-     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-     "token_uri": "https://oauth2.googleapis.com/token",
-     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-     "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/renovate-lookup%40sample-project.iam.gserviceaccount.com"
-   }
-   ```
+    ```
+    _json_key:{
+      "type": "service_account",
+      "project_id": "sample-project",
+      "private_key_id": "5786ff7e615522b932a2a37b4a6f9645c4316dbd",
+      "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDaOkxZut9uDUHV\n...\n/PWs0Wa2z5+IawMD7nO63+b6\n-----END PRIVATE KEY-----\n",
+      "client_email": "renovate-lookup@sample-project.iam.gserviceaccount.com",
+      "client_id": "115429165445403928973",
+      "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+      "token_uri": "https://oauth2.googleapis.com/token",
+      "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+      "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/renovate-lookup%40sample-project.iam.gserviceaccount.com"
+    }
+    ```
 
 1. Base64 encode the prefixed service account credentials by running `cat prefixed-service-account.json | base64`
 1. Add the prefixed and encoded service account to your configuration file
 
-   1. If you want to add it to your self-hosted configuration file:
+    1. If you want to add it to your self-hosted configuration file:
 
-      ```json
-      {
-        "hostRules": [
-          {
-            "matchHost": "europe-docker.pkg.dev",
-            "authType": "Basic",
-            "token": "<base64 prefixed service account>"
-          }
-        ]
-      }
-      ```
+        ```json
+        {
+            "hostRules": [
+                {
+                    "matchHost": "europe-docker.pkg.dev",
+                    "authType": "Basic",
+                    "token": "<base64 prefixed service account>"
+                }
+            ]
+        }
+        ```
 
-   1. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
+    1. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
 
-      ```json
-      {
-        "hostRules": [
-          {
-            "matchHost": "europe-docker.pkg.dev",
-            "authType": "Basic",
-            "encrypted": {
-              "token": "<encrypted base64 prefixed service account>"
-            }
-          }
-        ]
-      }
-      ```
+        ```json
+        {
+            "hostRules": [
+                {
+                    "matchHost": "europe-docker.pkg.dev",
+                    "authType": "Basic",
+                    "encrypted": {
+                        "token": "<encrypted base64 prefixed service account>"
+                    }
+                }
+            ]
+        }
+        ```
 
 ##### Using short-lived access tokens
 
@@ -418,10 +418,10 @@ The configuration fragment to do that looks something like this:
 
 ```js
 hostRules: [
-  {
-    matchHost: 'eu.gcr.io',
-    token: 'MyReallySecretTokenThatExpiresAfter60Minutes',
-  },
+    {
+        matchHost: 'eu.gcr.io',
+        token: 'MyReallySecretTokenThatExpiresAfter60Minutes',
+    },
 ];
 ```
 
@@ -429,6 +429,6 @@ One way to provide the short-lived Google Access Token to Renovate is by generat
 
 ```yaml
 script:
-  - 'echo "module.exports = { hostRules: [ { matchHost: ''eu.gcr.io'', token: ''"$(gcloud auth print-access-token)"'' } ] };" > config.js'
-  - renovate $RENOVATE_EXTRA_FLAGS
+    - 'echo "module.exports = { hostRules: [ { matchHost: ''eu.gcr.io'', token: ''"$(gcloud auth print-access-token)"'' } ] };" > config.js'
+    - renovate $RENOVATE_EXTRA_FLAGS
 ```

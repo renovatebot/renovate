@@ -25,19 +25,19 @@ If you are using a [privately hosted Composer package](https://getcomposer.org/d
 
 ```json
 {
-  "hostRules": [
-    {
-      "matchHost": "some.vendor.com",
-      "hostType": "packagist",
-      "username": "<your-username>",
-      "password": "<your-password>"
-    },
-    {
-      "matchHost": "bearer-auth.for.vendor.com",
-      "hostType": "packagist",
-      "token": "abcdef0123456789"
-    }
-  ]
+    "hostRules": [
+        {
+            "matchHost": "some.vendor.com",
+            "hostType": "packagist",
+            "username": "<your-username>",
+            "password": "<your-password>"
+        },
+        {
+            "matchHost": "bearer-auth.for.vendor.com",
+            "hostType": "packagist",
+            "token": "abcdef0123456789"
+        }
+    ]
 }
 ```
 
@@ -49,22 +49,22 @@ You may encrypt your `password` only, but you can encrypt your `username` as wel
 
 ```json
 {
-  "hostRules": [
-    {
-      "matchHost": "some.vendor.com",
-      "hostType": "packagist",
-      "encrypted": {
-        "username": "<your-encrypted-username>",
-        "password": "<your-encrypted-password>"
-      }
-    },
-    {
-      "matchHost": "bearer-auth.for.vendor.com",
-      "hostType": "packagist",
-      "encrypted": {
-        "token": "<your-encrypted-token>"
-      }
-    }
-  ]
+    "hostRules": [
+        {
+            "matchHost": "some.vendor.com",
+            "hostType": "packagist",
+            "encrypted": {
+                "username": "<your-encrypted-username>",
+                "password": "<your-encrypted-password>"
+            }
+        },
+        {
+            "matchHost": "bearer-auth.for.vendor.com",
+            "hostType": "packagist",
+            "encrypted": {
+                "token": "<your-encrypted-token>"
+            }
+        }
+    ]
 }
 ```

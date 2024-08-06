@@ -7,9 +7,9 @@ Most of the information on this page is meant for users who want to self-host Re
 For most users, the easiest way to get started is to install [the Mend app for Bitbucket](https://marketplace.atlassian.com/apps/1232072/mend?tab=overview&hosting=cloud) and use the free Renovate plan.
 When you use the app, Mend will:
 
-- authenticate the app to Bitbucket Cloud
-- keep the tokens safe
-- maintain and update the Renovate version used
+-   authenticate the app to Bitbucket Cloud
+-   keep the tokens safe
+-   maintain and update the Renovate version used
 
 If you self-host Renovate you must do the things listed above yourself.
 Self-hosting is meant for users with advanced use cases, or who want to be in full control of the bot and the environment it runs in.
@@ -35,16 +35,16 @@ The bot also needs to validate the workspace membership status of pull-request r
 
 Let Renovate use your app password by doing _one_ of the following:
 
-- Set your app password as a `password` in your `config.js` file
-- Set your app password as an environment variable `RENOVATE_PASSWORD`
-- Set your app password when you run Renovate in the CLI with `--password=`
+-   Set your app password as a `password` in your `config.js` file
+-   Set your app password as an environment variable `RENOVATE_PASSWORD`
+-   Set your app password when you run Renovate in the CLI with `--password=`
 
 Remember to:
 
-- Set the `username` for the bot account (which is _not_ your email address). You can find your username through "Personal Bitbucket settings" on the "Account settings" page for your account
-- Set `platform=bitbucket` somewhere in your Renovate config file
+-   Set the `username` for the bot account (which is _not_ your email address). You can find your username through "Personal Bitbucket settings" on the "Account settings" page for your account
+-   Set `platform=bitbucket` somewhere in your Renovate config file
 
 ## Unsupported platform features/concepts
 
-- Adding assignees to PRs not supported (does not seem to be a Bitbucket concept)
-- `automergeStrategy=rebase` not supported by Bitbucket Cloud, see [Jira issue BCLOUD-16610](https://jira.atlassian.com/browse/BCLOUD-16610)
+-   Adding assignees to PRs not supported (does not seem to be a Bitbucket concept)
+-   `automergeStrategy=rebase` not supported by Bitbucket Cloud, see [Jira issue BCLOUD-16610](https://jira.atlassian.com/browse/BCLOUD-16610)

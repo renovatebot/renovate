@@ -37,34 +37,34 @@ Pull Requests can only be merged once all status checks are green, which means `
 
 Use these commands to help run your tests:
 
-- To run a single test folder, specify the path
+-   To run a single test folder, specify the path
 
-  ```bash
-  pnpm jest platform/gitlab
-  ```
+    ```bash
+    pnpm jest platform/gitlab
+    ```
 
-- To run against a single test file, specify down to the filename (suffix is not necessary)
+-   To run against a single test file, specify down to the filename (suffix is not necessary)
 
-  ```bash
-  pnpm jest platform/gitlab/index
-  ```
+    ```bash
+    pnpm jest platform/gitlab/index
+    ```
 
-- To run a single test batch, the `-t` value must be part of the `describe` value of the test batch
+-   To run a single test batch, the `-t` value must be part of the `describe` value of the test batch
 
-  ```bash
-  pnpm jest platform/gitlab/index -t "getJsonFile"
-  ```
+    ```bash
+    pnpm jest platform/gitlab/index -t "getJsonFile"
+    ```
 
-- To run a single test, the `-t` value must be part of the `it` value of the test batch
+-   To run a single test, the `-t` value must be part of the `it` value of the test batch
 
-  ```bash
-  pnpm jest platform/gitlab/index -t "returns file content from given repo"
-  ```
+    ```bash
+    pnpm jest platform/gitlab/index -t "returns file content from given repo"
+    ```
 
 And some options:
 
-- `--verbose=false` to avoid the test list
-- `--collectCoverage=false` to avoid collecting coverage, faster for the part you need the test to pass
+-   `--verbose=false` to avoid the test list
+-   `--collectCoverage=false` to avoid collecting coverage, faster for the part you need the test to pass
 
 ## Do not force push to your pull request branch
 
@@ -78,8 +78,8 @@ This is the "Update with merge commit" option in the dropdown.
 
 Force pushing a PR, or using the "Update with rebase" button is OK when you:
 
-- make large changes on a PR which require a full review anyway
-- bring the branch up-to-date with the target branch and incorporating the changes is more work than to create a new PR
+-   make large changes on a PR which require a full review anyway
+-   bring the branch up-to-date with the target branch and incorporating the changes is more work than to create a new PR
 
 ## Apply maintainer provided review suggestions
 

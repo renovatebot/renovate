@@ -8,24 +8,24 @@ Some configuration examples:
 
 ```json title="If most .yaml files in your repository are for Argo CD"
 {
-  "argocd": {
-    "fileMatch": ["\\.yaml$"]
-  }
+    "argocd": {
+        "fileMatch": ["\\.yaml$"]
+    }
 }
 ```
 
 ```json title="Argo CD YAML files are in a argocd/ directory"
 {
-  "argocd": {
-    "fileMatch": ["argocd/.+\\.yaml$"]
-  }
+    "argocd": {
+        "fileMatch": ["argocd/.+\\.yaml$"]
+    }
 }
 ```
 
 ```json title="One Argo CD file in a directory"
 {
-  "argocd": {
-    "fileMatch": ["^config/applications\\.yaml$"]
-  }
+    "argocd": {
+        "fileMatch": ["^config/applications\\.yaml$"]
+    }
 }
 ```

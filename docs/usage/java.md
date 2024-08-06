@@ -17,8 +17,8 @@ If you want Renovate to offer all `major` Java updates then add `workarounds:jav
 
 ```json
 {
-  "extends": ["config:recommended"],
-  "ignorePresets": ["workarounds:javaLTSVersions"]
+    "extends": ["config:recommended"],
+    "ignorePresets": ["workarounds:javaLTSVersions"]
 }
 ```
 
@@ -30,21 +30,21 @@ Renovate detects versions that are specified in a string `'group:artifact:versio
 
 Renovate can update:
 
-- `*.gradle`/`*.gradle.kts` files
-- Dependencies with version definitions in `gradle.properties` files
-- Gradle lockfiles stored in `*.lockfile` files
-- `*.versions.toml` files in any directory or `*.toml` files inside the `gradle`
-  directory ([Gradle Version Catalogs docs](https://docs.gradle.org/current/userguide/platforms.html))
-- `versions.props` and `versions.lock` from the [gradle-consistent-versions](https://github.com/palantir/gradle-consistent-versions) plugin
+-   `*.gradle`/`*.gradle.kts` files
+-   Dependencies with version definitions in `gradle.properties` files
+-   Gradle lockfiles stored in `*.lockfile` files
+-   `*.versions.toml` files in any directory or `*.toml` files inside the `gradle`
+    directory ([Gradle Version Catalogs docs](https://docs.gradle.org/current/userguide/platforms.html))
+-   `versions.props` and `versions.lock` from the [gradle-consistent-versions](https://github.com/palantir/gradle-consistent-versions) plugin
 
 Renovate does not support:
 
-- Android projects that require extra configuration to run (e.g. setting the Android SDK)
-- Catalogs with version ranges
-- Catalog versions using `reject`, and `rejectAll` constraints
-- Catalog versions using more than one of `require`, `strictly`, `prefer` in a single declaration
-- Catalogs with custom names that do not end in `.toml`
-- Catalogs outside the `gradle` folder whose names do not end in `.versions.toml` (unless overridden via [`fileMatch`](./configuration-options.md#filematch) configuration)
+-   Android projects that require extra configuration to run (e.g. setting the Android SDK)
+-   Catalogs with version ranges
+-   Catalog versions using `reject`, and `rejectAll` constraints
+-   Catalog versions using more than one of `require`, `strictly`, `prefer` in a single declaration
+-   Catalogs with custom names that do not end in `.toml`
+-   Catalogs outside the `gradle` folder whose names do not end in `.versions.toml` (unless overridden via [`fileMatch`](./configuration-options.md#filematch) configuration)
 
 ## Gradle Wrapper
 
@@ -71,14 +71,14 @@ In case the available versions at the defined source differ from those available
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchDatasources": ["gradle-version"],
-      "registryUrls": [
-        "https://domain.tld/repository/custom-gradle-wrapper/versions.json"
-      ]
-    }
-  ]
+    "packageRules": [
+        {
+            "matchDatasources": ["gradle-version"],
+            "registryUrls": [
+                "https://domain.tld/repository/custom-gradle-wrapper/versions.json"
+            ]
+        }
+    ]
 }
 ```
 
@@ -92,9 +92,9 @@ Renovate will search repositories for all `pom.xml` files and processes them ind
 
 Renovate will also parse `settings.xml` files in the following locations:
 
-- `.mvn/settings.xml`
-- `.m2/settings.xml`
-- `settings.xml`
+-   `.mvn/settings.xml`
+-   `.m2/settings.xml`
+-   `settings.xml`
 
 Any repository URLs found within will be added as `registryUrls` to extracted dependencies.
 
@@ -108,14 +108,14 @@ We're using environment variables to pass the Artifactory username and password 
 
 ```js title="config.js"
 module.exports = {
-  hostRules: [
-    {
-      hostType: 'maven',
-      matchHost: 'https://artifactory.yourcompany.com/',
-      username: process.env.ARTIFACTORY_USERNAME,
-      password: process.env.ARTIFACTORY_PASSWORD,
-    },
-  ],
+    hostRules: [
+        {
+            hostType: 'maven',
+            matchHost: 'https://artifactory.yourcompany.com/',
+            username: process.env.ARTIFACTORY_USERNAME,
+            password: process.env.ARTIFACTORY_PASSWORD,
+        },
+    ],
 };
 ```
 
@@ -123,12 +123,15 @@ You can overwrite the repositories to use for version lookup through configurati
 
 ```js
 module.exports = {
-  packageRules: [
-    {
-      matchDatasources: ['maven'],
-      registryUrls: ['https://repo-a.tld/repo', 'https://repo-b.tld/repo'],
-    },
-  ],
+    packageRules: [
+        {
+            matchDatasources: ['maven'],
+            registryUrls: [
+                'https://repo-a.tld/repo',
+                'https://repo-b.tld/repo',
+            ],
+        },
+    ],
 };
 ```
 
@@ -145,8 +148,8 @@ Renovate will automatically retrieve the credentials using the `google-auth-libr
 
 To access the Google Artifact Registry, use the JSON service account with `Basic` authentication, and use the:
 
-- `_json_key_base64` as username
-- full Google Cloud Platform service account JSON as password
+-   `_json_key_base64` as username
+-   full Google Cloud Platform service account JSON as password
 
 To avoid JSON-in-JSON wrapping, which can cause problems, encode the JSON service account beforehand.
 
@@ -154,43 +157,43 @@ To avoid JSON-in-JSON wrapping, which can cause problems, encode the JSON servic
 2. Base64 encode the service account credentials by running `cat service-account.json | base64`
 3. Add the encoded service account to your configuration file
 
-   1. If you want to add it to your self-hosted configuration file:
+    1. If you want to add it to your self-hosted configuration file:
 
-      ```json
-      {
-        "hostRules": [
-          {
-            "matchHost": "europe-maven.pkg.dev",
-            "username": "_json_key_base64",
-            "password": "<base64 service account>"
-          }
-        ]
-      }
-      ```
+        ```json
+        {
+            "hostRules": [
+                {
+                    "matchHost": "europe-maven.pkg.dev",
+                    "username": "_json_key_base64",
+                    "password": "<base64 service account>"
+                }
+            ]
+        }
+        ```
 
-   2. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
+    2. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
 
-      ```json
-      {
-        "hostRules": [
-          {
-            "matchHost": "europe-maven.pkg.dev",
-            "username": "_json_key_base64",
-            "encrypted": {
-              "password": "<encrypted base64 service account>"
-            }
-          }
-        ]
-      }
-      ```
+        ```json
+        {
+            "hostRules": [
+                {
+                    "matchHost": "europe-maven.pkg.dev",
+                    "username": "_json_key_base64",
+                    "encrypted": {
+                        "password": "<encrypted base64 service account>"
+                    }
+                }
+            ]
+        }
+        ```
 
 4. Add the following to the `packageRules` in your repository Renovate configuration file:
 
-   ```json
-   {
-     "matchManagers": ["maven", "gradle"],
-     "registryUrls": [
-       "https://europe-maven.pkg.dev/<my-gcp-project>/<my-repository>"
-     ]
-   }
-   ```
+    ```json
+    {
+        "matchManagers": ["maven", "gradle"],
+        "registryUrls": [
+            "https://europe-maven.pkg.dev/<my-gcp-project>/<my-repository>"
+        ]
+    }
+    ```

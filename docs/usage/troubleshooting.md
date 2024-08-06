@@ -40,11 +40,11 @@ This can be achieved by adding `LOG_FORMAT=json` to your environment variables b
 There are different severity levels for the log output.
 From least severe to most severe:
 
-- `DEBUG`
-- `INFO`
-- `WARN`
-- `ERROR`
-- `FATAL`
+-   `DEBUG`
+-   `INFO`
+-   `WARN`
+-   `ERROR`
+-   `FATAL`
 
 To check for problems, look for `WARN` or `ERROR` logs (level 40 or 50 if in JSON format).
 To troubleshoot further, you usually need to look at `DEBUG` logs.

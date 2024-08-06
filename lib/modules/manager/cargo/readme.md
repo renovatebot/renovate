@@ -2,8 +2,8 @@ Extracts dependencies from `Cargo.toml` files, and also updates `Cargo.lock` fil
 
 When using the default rangeStrategy=auto:
 
-- If a "less than" instruction is found (e.g. `<2`) then `rangeStrategy=widen` will be selected,
-- Otherwise, `rangeStrategy=update-lockfile` will be selected.
+-   If a "less than" instruction is found (e.g. `<2`) then `rangeStrategy=widen` will be selected,
+-   Otherwise, `rangeStrategy=update-lockfile` will be selected.
 
 The `update-lockfile` default means that most upgrades will update `Cargo.lock` files without the need to change the value in `Cargo.toml`.
 
@@ -20,6 +20,6 @@ Next, all `hostRules` with both a token or username/password and `matchHost` wil
 
 Rules from this list are converted to environment variable directives if they match _any_ of these characteristics:
 
-- No `hostType` is defined, or
-- `hostType` is `cargo`, or
-- `hostType` is a platform (`github`, `gitlab`, `azure`, etc.)
+-   No `hostType` is defined, or
+-   `hostType` is `cargo`, or
+-   `hostType` is a platform (`github`, `gitlab`, `azure`, etc.)

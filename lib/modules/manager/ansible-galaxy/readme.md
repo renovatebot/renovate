@@ -2,5 +2,5 @@ Extracts Ansible Galaxy dependencies from configuration files used by the `ansib
 
 This manager uses two `depType`s to allow a fine-grained control of which dependencies are upgraded:
 
-- collection
-- role
+-   collection
+-   role

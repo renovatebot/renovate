@@ -3,9 +3,9 @@ This datasource returns releases from the [Adoptium](https://adoptium.net/) API.
 It uses `image_type=<jre|jdk>&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC` as filter parameters.
 This means that the datasource finds:
 
-- JRE or JDK images
-- with a JDK project
-- which have the General Availability status
+-   JRE or JDK images
+-   with a JDK project
+-   which have the General Availability status
 
 And finally, the results are sorted in descending order.
 

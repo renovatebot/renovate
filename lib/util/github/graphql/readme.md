@@ -32,12 +32,12 @@ The datasource-fetcher.ts file contains the core component that implements the l
 This class is meant to be instantiated every time we need to paginate over GraphQL results.
 It is responsible for handling several aspects of the fetch process, including:
 
-- Making HTTP requests to the `/graphql` endpoint
-- Handling and aggregating errors that may occur during the fetch process
-- Dynamically adjusting the page size and retrying in the event of server errors
-- Enforcing a maximum limit on the number of queries that can be made
-- Detecting whether a package is private or public, and selecting the right cache strategy (in-memory or long-term) accordingly
-- Ensuring proper concurrency when querying the same package simultaneously.
+-   Making HTTP requests to the `/graphql` endpoint
+-   Handling and aggregating errors that may occur during the fetch process
+-   Dynamically adjusting the page size and retrying in the event of server errors
+-   Enforcing a maximum limit on the number of queries that can be made
+-   Detecting whether a package is private or public, and selecting the right cache strategy (in-memory or long-term) accordingly
+-   Ensuring proper concurrency when querying the same package simultaneously.
 
 The `cache-strategies/` directory is responsible for caching implementation.
 The core function is `reconcile()` which updates the cache data structure with pages of items one-by-one.

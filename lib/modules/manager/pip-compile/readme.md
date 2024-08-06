@@ -11,9 +11,9 @@ You can "activate" the manager by specifying a `fileMatch` pattern such as:
 
 ```json
 {
-  "pip-compile": {
-    "fileMatch": ["(^|/)requirements\\.txt$"]
-  }
+    "pip-compile": {
+        "fileMatch": ["(^|/)requirements\\.txt$"]
+    }
 }
 ```
 
@@ -24,8 +24,8 @@ You can "activate" the manager by specifying a `fileMatch` pattern such as:
 As Renovate matches a `pip-compile` output file it will extract original command that was used to create it from header in this file.
 Because of that `pip-compile` manager poses restrictions on how this file is generated:
 
-- Use default header generation, don't use `--no-header` option.
-- Pass all source files explicitly.
+-   Use default header generation, don't use `--no-header` option.
+-   Pass all source files explicitly.
 
 In turn `pip-compile` manager will find all source files and parse them as package files using their respective managers.
 
@@ -53,12 +53,12 @@ Because `pip-compile` will update source files with their associated manager you
 
 ```json
 {
-  "pip_requirements": {
-    "enabled": false
-  },
-  "pip_setup": {
-    "enabled": false
-  }
+    "pip_requirements": {
+        "enabled": false
+    },
+    "pip_setup": {
+        "enabled": false
+    }
 }
 ```
 
@@ -69,9 +69,9 @@ To get Renovate to use another version of Python, add a constraints` rule to the
 
 ```json
 {
-  "constraints": {
-    "python": "==3.7"
-  }
+    "constraints": {
+        "python": "==3.7"
+    }
 }
 ```
 
@@ -79,8 +79,8 @@ To get Renovate to use another version of Python, add a constraints` rule to the
 
 Renovate reads the `requirements.txt` file and extracts these `pip-compile` arguments:
 
-- source files as positional arguments
-- `--output-file`
+-   source files as positional arguments
+-   `--output-file`
 
 All other allowed `pip-compile` arguments will be passed over without modification.
 

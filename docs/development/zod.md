@@ -1,20 +1,20 @@
 ### Table of Contents
 
-- [Zod schema guideline](#zod-schema-guideline)
-  - [When and where to use Zod](#when-and-where-to-use-zod)
-  - [Technical guide](#technical-guide)
-    - [Use `schema.ts` files for Zod schemas](#use-schemats-files-for-zod-schemas)
-    - [Name schemas without any `Schema` suffix](#name-schemas-without-any-schema-suffix)
-    - [Inferred types](#inferred-types)
-    - [Specify only necessary fields](#specify-only-necessary-fields)
-    - [Use `Json`, `Yaml` and `Toml` for string parsing](#use-json-yaml-and-toml-for-string-parsing)
-    - [Use `.transform()` method to process validated data](#use-transform-method-to-process-validated-data)
-      - [Rename and move fields at the top level transform](#rename-and-move-fields-at-the-top-level-transform)
-    - [Stick to permissive behavior when possible](#stick-to-permissive-behavior-when-possible)
-      - [Use `.catch()` to force default values](#use-catch-to-force-default-values)
-      - [Use `LooseArray` and `LooseRecord` to filter out incorrect values from collections](#use-loosearray-and-looserecord-to-filter-out-incorrect-values-from-collections)
-    - [Combining with `Result` class](#combining-with-result-class)
-    - [Combining with `Http` class](#combining-with-http-class)
+-   [Zod schema guideline](#zod-schema-guideline)
+    -   [When and where to use Zod](#when-and-where-to-use-zod)
+    -   [Technical guide](#technical-guide)
+        -   [Use `schema.ts` files for Zod schemas](#use-schemats-files-for-zod-schemas)
+        -   [Name schemas without any `Schema` suffix](#name-schemas-without-any-schema-suffix)
+        -   [Inferred types](#inferred-types)
+        -   [Specify only necessary fields](#specify-only-necessary-fields)
+        -   [Use `Json`, `Yaml` and `Toml` for string parsing](#use-json-yaml-and-toml-for-string-parsing)
+        -   [Use `.transform()` method to process validated data](#use-transform-method-to-process-validated-data)
+            -   [Rename and move fields at the top level transform](#rename-and-move-fields-at-the-top-level-transform)
+        -   [Stick to permissive behavior when possible](#stick-to-permissive-behavior-when-possible)
+            -   [Use `.catch()` to force default values](#use-catch-to-force-default-values)
+            -   [Use `LooseArray` and `LooseRecord` to filter out incorrect values from collections](#use-loosearray-and-looserecord-to-filter-out-incorrect-values-from-collections)
+        -   [Combining with `Result` class](#combining-with-result-class)
+        -   [Combining with `Http` class](#combining-with-http-class)
 
 # Zod schema guideline
 
@@ -32,8 +32,8 @@ For example: if Renovate assumes an _optional_ field from a public registry will
 
 You should use Zod to validate:
 
-- Data received from external APIs and data sources, particularly the `lib/modules/datasource/*` section of Renovate
-- Data parsed from files in the repository, particularly the `lib/modules/manager/*` section of Renovate
+-   Data received from external APIs and data sources, particularly the `lib/modules/datasource/*` section of Renovate
+-   Data parsed from files in the repository, particularly the `lib/modules/manager/*` section of Renovate
 
 [The `cdnjs` datasource](https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/cdnjs/index.ts) is a good example of using Zod schema validations on API responses from external sources.
 
@@ -56,8 +56,8 @@ Schema names must start with a capital letter:
 
 ```ts
 const ComplexNumber = z.object({
-  re: z.number(),
-  im: z.number(),
+    re: z.number(),
+    im: z.number(),
 });
 ```
 
@@ -75,8 +75,8 @@ Example:
 
 ```ts
 export const User = z.object({
-  firstName: z.string(),
-  lastName: z.string(),
+    firstName: z.string(),
+    lastName: z.string(),
 });
 export type User = z.infer<typeof User>;
 ```
@@ -112,9 +112,9 @@ Here's the **correct** code:
 
 ```ts
 const Box = z.object({
-  width: z.number(),
-  height: z.number(),
-  length: z.number(),
+    width: z.number(),
+    height: z.number(),
+    length: z.number(),
 });
 
 const { width, height, length } = Box.parse(input);
@@ -130,19 +130,19 @@ The **wrong** way to parse from string:
 
 ```ts
 const ApiResults = z.array(
-  z.object({
-    id: z.number(),
-    value: z.string(),
-  }),
+    z.object({
+        id: z.number(),
+        value: z.string(),
+    }),
 );
 type ApiResults = z.infer<typeof ApiResults>;
 
 let results: ApiResults | null = null;
 try {
-  const json = JSON.parse(input);
-  results = ApiResults.parse(json);
+    const json = JSON.parse(input);
+    results = ApiResults.parse(json);
 } catch (e) {
-  results = null;
+    results = null;
 }
 ```
 
@@ -150,12 +150,12 @@ The **correct** way to parse from string:
 
 ```ts
 const ApiResults = Json.pipe(
-  z.array(
-    z.object({
-      id: z.number(),
-      value: z.string(),
-    }),
-  ),
+    z.array(
+        z.object({
+            id: z.number(),
+            value: z.string(),
+        }),
+    ),
 );
 
 const results = ApiResults.parse(input);
@@ -171,9 +171,9 @@ This is an example of **undesired** data transformation:
 
 ```ts
 const Box = z.object({
-  width: z.number(),
-  height: z.number(),
-  length: z.number(),
+    width: z.number(),
+    height: z.number(),
+    length: z.number(),
 });
 
 const { width, height, length } = Box.parse(input);
@@ -184,17 +184,17 @@ Instead, use the idiomatic `.transform()` method:
 
 ```ts
 const BoxVolume = z
-  .object({
-    width: z.number(),
-    height: z.number(),
-    length: z.number(),
-  })
-  .transform(({ width, height, length }) => width * height * length);
+    .object({
+        width: z.number(),
+        height: z.number(),
+        length: z.number(),
+    })
+    .transform(({ width, height, length }) => width * height * length);
 
 const volume = BoxVolume.parse({
-  width: 10,
-  height: 20,
-  length: 125,
+    width: 10,
+    height: 20,
+    length: 125,
 }); // => 25000
 ```
 
@@ -206,30 +206,30 @@ The **wrong** way is to make cascading transformations:
 
 ```ts
 const SourceUrl = z
-  .object({
-    meta: z
-      .object({
-        links: z.object({
-          Github: z.string().url(),
-        }),
-      })
-      .transform(({ links }) => links.Github),
-  })
-  .transform(({ meta: sourceUrl }) => sourceUrl);
+    .object({
+        meta: z
+            .object({
+                links: z.object({
+                    Github: z.string().url(),
+                }),
+            })
+            .transform(({ links }) => links.Github),
+    })
+    .transform(({ meta: sourceUrl }) => sourceUrl);
 ```
 
 The **correct** way is to rename at the top-level:
 
 ```ts
 const SourceUrl = z
-  .object({
-    meta: z.object({
-      links: z.object({
-        Github: z.string().url(),
-      }),
-    }),
-  })
-  .transform(({ meta }) => meta.links.Github);
+    .object({
+        meta: z.object({
+            links: z.object({
+                Github: z.string().url(),
+            }),
+        }),
+    })
+    .transform(({ meta }) => meta.links.Github);
 ```
 
 ### Stick to permissive behavior when possible
@@ -246,8 +246,8 @@ Here are some techniques to make Zod more permissive about the input data.
 
 ```ts
 const Box = z.object({
-  width: z.number().catch(10),
-  height: z.number().catch(10),
+    width: z.number().catch(10),
+    height: z.number().catch(10),
 });
 
 const box = Box.parse({ width: 20, height: null });
@@ -262,17 +262,17 @@ If you only use methods from the `zod` library, you would need to write somethin
 
 ```ts
 const Versions = z
-  .array(
-    z
-      .object({
-        version: z.string(),
-      })
-      .nullable()
-      .catch(null),
-  )
-  .transform((releases) =>
-    releases.filter((x): x is { version: string } => x !== null),
-  );
+    .array(
+        z
+            .object({
+                version: z.string(),
+            })
+            .nullable()
+            .catch(null),
+    )
+    .transform((releases) =>
+        releases.filter((x): x is { version: string } => x !== null),
+    );
 ```
 
 When trying to achieve permissive behavior, this pattern will emerge quite frequently, but filtering part of the code is not very readable.
@@ -281,9 +281,9 @@ Instead, you should use the `LooseArray` and `LooseRecord` helpers from `schema-
 
 ```ts
 const Versions = LooseArray(
-  z.object({
-    version: z.string(),
-  }),
+    z.object({
+        version: z.string(),
+    }),
 );
 ```
 
@@ -301,23 +301,23 @@ You can wrap the schema parsing result into the `Result` class:
 
 ```ts
 const { val, err } = Result.parse(url, z.string().url())
-  .transform((url) => http.get(url))
-  .onError((err) => {
-    logger.warn({ err }, 'Failed to fetch something important');
-  })
-  .transform((res) => res.body);
+    .transform((url) => http.get(url))
+    .onError((err) => {
+        logger.warn({ err }, 'Failed to fetch something important');
+    })
+    .transform((res) => res.body);
 ```
 
 You can use schema parsing in the middle of the `Result` transform chain:
 
 ```ts
 const UserConfig = z.object({
-  /* ... */
+    /* ... */
 });
 
 const config = await Result.wrap(readLocalFile('config.json'))
-  .transform((content) => Json.pipe(UserConfig).safeParse(content))
-  .unwrapOrThrow();
+    .transform((content) => Json.pipe(UserConfig).safeParse(content))
+    .unwrapOrThrow();
 ```
 
 ### Combining with `Http` class
@@ -329,16 +329,16 @@ Provide schema in the last argument of the method:
 
 ```ts
 const Users = z.object({
-  users: z.object({
-    id: z.number(),
-    firstName: z.string(),
-    lastName: z.string(),
-  }),
+    users: z.object({
+        id: z.number(),
+        firstName: z.string(),
+        lastName: z.string(),
+    }),
 });
 
 const { body: users } = await http.getJson(
-  'https://dummyjson.com/users',
-  LooseArray(User),
+    'https://dummyjson.com/users',
+    LooseArray(User),
 );
 ```
 
@@ -346,9 +346,9 @@ For GET requests, use the `.getJsonSafe()` method which returns a `Result` insta
 
 ```ts
 const users = await http
-  .getJsonSafe('https://dummyjson.com/users', LooseArray(User))
-  .onError((err) => {
-    logger.warn({ err }, 'Failed to fetch users');
-  })
-  .unwrapOrElse([]);
+    .getJsonSafe('https://dummyjson.com/users', LooseArray(User))
+    .onError((err) => {
+        logger.warn({ err }, 'Failed to fetch users');
+    })
+    .unwrapOrElse([]);
 ```

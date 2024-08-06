@@ -7,11 +7,11 @@ description: Learn how Renovate works
 
 Renovate usually performs these steps:
 
-- Cloning the repository
-- Scanning package files to extract dependencies
-- Looking up registries to check for updates
-- Applying any grouping rules defined
-- Pushing branches and raising Pull Requests
+-   Cloning the repository
+-   Scanning package files to extract dependencies
+-   Looking up registries to check for updates
+-   Applying any grouping rules defined
+-   Pushing branches and raising Pull Requests
 
 Because Renovate must support a lot of dependency naming and versioning conventions, it has modules for each known convention.
 You can contribute your own modules, if you want.
@@ -20,10 +20,10 @@ You can contribute your own modules, if you want.
 
 Renovate's modules are:
 
-- [datasource](../modules/datasource/index.md)
-- [manager](../modules/manager/index.md)
-- [platform](../modules/platform/index.md)
-- [versioning](../modules/versioning/index.md)
+-   [datasource](../modules/datasource/index.md)
+-   [manager](../modules/manager/index.md)
+-   [platform](../modules/platform/index.md)
+-   [versioning](../modules/versioning/index.md)
 
 Renovate uses these modules in order:
 

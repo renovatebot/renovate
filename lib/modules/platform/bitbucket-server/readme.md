@@ -5,9 +5,9 @@
 First, create a [HTTP access token](https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html) for the bot account.
 Let Renovate use your HTTP access token by doing _one_ of the following:
 
-- Set your HTTP access token as a `token` in your `config.js` file
-- Set your HTTP access token as an environment variable `RENOVATE_TOKEN`
-- Set your HTTP access token when you run Renovate in the CLI with `--token=`
+-   Set your HTTP access token as a `token` in your `config.js` file
+-   Set your HTTP access token as an environment variable `RENOVATE_TOKEN`
+-   Set your HTTP access token when you run Renovate in the CLI with `--token=`
 
 If you use project or repository based HTTP access tokens, it can only be used as `token`.
 
@@ -19,13 +19,13 @@ If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the global
 
 ## Unsupported platform features/concepts
 
-- Adding assignees to PRs not supported (does not seem to be a Bitbucket concept)
-- Adding/removing labels (Bitbucket limitation)
+-   Adding assignees to PRs not supported (does not seem to be a Bitbucket concept)
+-   Adding/removing labels (Bitbucket limitation)
 
 ## Features awaiting implementation
 
-- Creating issues not implemented yet, used to alert users when there is a config error
-- The `automergeStrategy` configuration option has not been implemented for this platform, and all values behave as if the value `auto` was used. Renovate will implicitly use the merge strategy configured as 'default' in the Bitbucket Server repository itself, and this cannot be overridden yet
+-   Creating issues not implemented yet, used to alert users when there is a config error
+-   The `automergeStrategy` configuration option has not been implemented for this platform, and all values behave as if the value `auto` was used. Renovate will implicitly use the merge strategy configured as 'default' in the Bitbucket Server repository itself, and this cannot be overridden yet
 
 ## Testing
 

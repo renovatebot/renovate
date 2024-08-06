@@ -7,9 +7,9 @@ Most of the information on this page is meant for users who want to self-host Re
 For users on GitHub Cloud (`github.com`), the easiest way to get started is to install [the Mend Renovate app](https://github.com/marketplace/renovate) from the GitHub marketplace.
 When you use the app, Mend will:
 
-- authenticate the Renovate app to GitHub
-- keep the tokens safe
-- maintain and update the Renovate version used
+-   authenticate the Renovate app to GitHub
+-   keep the tokens safe
+-   maintain and update the Renovate version used
 
 If you self-host Renovate you must do the things listed above yourself.
 Self-hosting is meant for users with advanced use cases, or who want to be in full control of the bot and the environment it runs in.
@@ -29,18 +29,18 @@ Read the [GitHub Docs, about Personal Access Tokens](https://docs.github.com/en/
 
 Let Renovate use your PAT by doing _one_ of the following:
 
-- Set your PAT as a `token` in your `config.js` file
-- Set your PAT as an environment variable `RENOVATE_TOKEN`
-- Set your PAT when you run Renovate in the CLI with `--token=`
+-   Set your PAT as a `token` in your `config.js` file
+-   Set your PAT as an environment variable `RENOVATE_TOKEN`
+-   Set your PAT when you run Renovate in the CLI with `--token=`
 
 Remember to set `platform=github` somewhere in your Renovate config file.
 
 If you use GitHub Enterprise Server then `endpoint` must point to `https://github-enterprise.example.com/api/v3/`.
 You can choose where you want to set `endpoint`:
 
-- In your `config.js` file
-- In a environment variable
-- In a CLI parameter
+-   In your `config.js` file
+-   In a environment variable
+-   In a CLI parameter
 
 <!-- prettier-ignore -->
 !!! tip "Labels and forking mode"
@@ -131,11 +131,11 @@ A way to get the user id of a GitHub app is to [query the user API](https://docs
 
 When Renovate runs against repositories on `github.com`, and the environment variable `RENOVATE_X_GITHUB_HOST_RULES` is set, then Renovate automatically provisions `hostRules` for these GitHub Packages registries using the platform token:
 
-- `ghcr.io`
-- `maven.pkg.github.com`
-- `npm.pkg.github.com`
-- `nuget.pkg.github.com`
-- `rubygems.pkg.github.com`
+-   `ghcr.io`
+-   `maven.pkg.github.com`
+-   `npm.pkg.github.com`
+-   `nuget.pkg.github.com`
+-   `rubygems.pkg.github.com`
 
 <!-- prettier-ignore -->
 !!! warning
@@ -143,4 +143,4 @@ When Renovate runs against repositories on `github.com`, and the environment var
 
 ## Features awaiting implementation
 
-- The `automergeStrategy` configuration option has not been implemented for this platform, and all values behave as if the value `auto` was used. Renovate will use the merge strategy configured in the GitHub repository itself, and this cannot be overridden yet
+-   The `automergeStrategy` configuration option has not been implemented for this platform, and all values behave as if the value `auto` was used. Renovate will use the merge strategy configured in the GitHub repository itself, and this cannot be overridden yet

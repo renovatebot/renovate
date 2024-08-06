@@ -9,13 +9,13 @@ We explain why you should update often, and how to nudge your team to update the
 
 In general, you should:
 
-- Run Renovate on _every_ repository
-- Use the `config:best-practices` preset instead of `config:recommended`
-- Use the Dependency Dashboard issue (it's on by default)
-- Update your dependencies often
-- Read the changelogs for the updates
-- Update to new `major` versions in good time
-- Talk with your team about the update strategy
+-   Run Renovate on _every_ repository
+-   Use the `config:best-practices` preset instead of `config:recommended`
+-   Use the Dependency Dashboard issue (it's on by default)
+-   Update your dependencies often
+-   Read the changelogs for the updates
+-   Update to new `major` versions in good time
+-   Talk with your team about the update strategy
 
 If Renovate is too noisy for you, read the [noise reduction docs](./noise-reduction.md).
 
@@ -28,7 +28,7 @@ You should extend from the `config:best-practices` preset:
 
 ```json
 {
-  "extends": ["config:best-practices"]
+    "extends": ["config:best-practices"]
 }
 ```
 
@@ -45,13 +45,13 @@ The [`config:best-practices` preset](./presets-config.md#configbest-practices) h
 
 ```json
 {
-  "configMigration": true,
-  "extends": [
-    "config:recommended",
-    "docker:pinDigests",
-    "helpers:pinGitHubActionDigests",
-    ":pinDevDependencies"
-  ]
+    "configMigration": true,
+    "extends": [
+        "config:recommended",
+        "docker:pinDigests",
+        "helpers:pinGitHubActionDigests",
+        ":pinDevDependencies"
+    ]
 }
 ```
 
@@ -93,10 +93,10 @@ Debugging faulty versions of your tools is easier, because you can use Git to ch
 You may think that updating takes too much time.
 But updating regularly actually _saves_ you time, because:
 
-- Regular updates tend to be small
-- Applying `major` updates is easier
-- You'll be ready for CVE patches
-- You'll look for ways to automate the updates
+-   Regular updates tend to be small
+-   Applying `major` updates is easier
+-   You'll be ready for CVE patches
+-   You'll look for ways to automate the updates
 
 #### Regular updates tend to be small
 
@@ -110,9 +110,9 @@ Because you're reading the changelogs regularly, you'll get a feel for the direc
 Secondly, when you're current with upstream, `major` updates are easier.
 This is because you already:
 
-- follow the latest best practices of upstream
-- use the latest names for features/variables
-- read the previous changelogs
+-   follow the latest best practices of upstream
+-   use the latest names for features/variables
+-   read the previous changelogs
 
 #### You'll be ready for CVE patches
 
@@ -163,8 +163,8 @@ Now you're up to date, you should think how to make updating a regular habit.
 Let's assume your Dependency Dashboard lists more than 50 updates, and you have a few `major` version updates pending.
 If your project is this badly behind on updates, you have two problems:
 
-- Updating your dependencies
-- Improving your update process
+-   Updating your dependencies
+-   Improving your update process
 
 ### Focus on critical updates first
 
@@ -216,13 +216,13 @@ Let's assume most developers _want_ a project that's up to date.
 So why are your developers avoiding updates?
 Some common reasons:
 
-- Developers get blamed when things break in production
-- There are no tests, so merging updates is scary
-- The test suite is slow
-- Releasing a new version of the project must be done by hand
-- Updating must be done by hand
-- The company doesn't allow developer time for updates
-- The company has complex rules about updates
+-   Developers get blamed when things break in production
+-   There are no tests, so merging updates is scary
+-   The test suite is slow
+-   Releasing a new version of the project must be done by hand
+-   Updating must be done by hand
+-   The company doesn't allow developer time for updates
+-   The company has complex rules about updates
 
 If updating is painful, or takes a lot of time, developers tend to avoid it.
 Make it easy and fast to update dependencies.
@@ -236,32 +236,32 @@ Then fix each problem as best as you can.
 
 Respect your developer's time and brains:
 
-- Run Renovate on _all_ projects
-- Use Renovate to propose updates
-- Building the project _must_ be as fast as possible
-- Have automated tests for the critical path of your project
-- Run the automated tests on _every_ pull request
-- If you're on GitHub: use [GitHub's Merge Queue](./key-concepts/automerge.md#github-merge-queue) to speed up merges
-- Follow SemVer versioning
-- Use the [`semantic-release` bot](https://github.com/semantic-release/semantic-release) to automate the release process
-- Refactor existing code to make future changes easier
+-   Run Renovate on _all_ projects
+-   Use Renovate to propose updates
+-   Building the project _must_ be as fast as possible
+-   Have automated tests for the critical path of your project
+-   Run the automated tests on _every_ pull request
+-   If you're on GitHub: use [GitHub's Merge Queue](./key-concepts/automerge.md#github-merge-queue) to speed up merges
+-   Follow SemVer versioning
+-   Use the [`semantic-release` bot](https://github.com/semantic-release/semantic-release) to automate the release process
+-   Refactor existing code to make future changes easier
 
 #### Ground rules
 
 As a starting point:
 
-- Avoid long lived branches that diverge from `main` over time
-- Dig beyond "developer error" when things go wrong, again: focus on the process
-- Ensure company policy allows frequent updates
+-   Avoid long lived branches that diverge from `main` over time
+-   Dig beyond "developer error" when things go wrong, again: focus on the process
+-   Ensure company policy allows frequent updates
 
 ## How we use Renovate
 
-- We run Renovate on all repositories
-- Most of our repositories have automated tests for the critical path of the application
-- We automerge some dependencies, but request `major` updates from the Dependency Dashboard
-- When a developer merges a breaking change, we revert to a known-good version, and try again later
-- We automated the release with the [`semantic-release`](https://github.com/semantic-release/semantic-release) bot
-- We spend time to make our build and automated tests as fast as possible
+-   We run Renovate on all repositories
+-   Most of our repositories have automated tests for the critical path of the application
+-   We automerge some dependencies, but request `major` updates from the Dependency Dashboard
+-   When a developer merges a breaking change, we revert to a known-good version, and try again later
+-   We automated the release with the [`semantic-release`](https://github.com/semantic-release/semantic-release) bot
+-   We spend time to make our build and automated tests as fast as possible
 
 ## How others use Renovate
 
@@ -273,8 +273,8 @@ There's a lot of good information out there, so we can only highlight a few reso
 
 Martin Fowler has two great resources:
 
-- The free page [Patterns for Managing Source Code Branches](https://martinfowler.com/articles/branching-patterns.html) to help you decide what Git branch pattern to use
-- The book [Refactoring, Improving the Design of Existing Code](https://martinfowler.com/books/refactoring.html) to help your developers gradually refactor to clean, modular and easy to read code
+-   The free page [Patterns for Managing Source Code Branches](https://martinfowler.com/articles/branching-patterns.html) to help you decide what Git branch pattern to use
+-   The book [Refactoring, Improving the Design of Existing Code](https://martinfowler.com/books/refactoring.html) to help your developers gradually refactor to clean, modular and easy to read code
 
 The `git bisect` command can help you find out which commit introduced a bug, or other behavior change.
 Read the [ProGit 2 book, section on binary search](https://git-scm.com/book/en/v2/Git-Tools-Debugging-with-Git#_binary_search) to learn more.

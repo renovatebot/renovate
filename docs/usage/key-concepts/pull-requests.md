@@ -12,8 +12,8 @@ Instead, it uses the code platform's APIs to search and find such PRs.
 
 Renovate finds existing PRs (open or closed) by matching both:
 
-- the branch name, for example: `renovate/lodash-4.x`,
-- _and_ the Pull Request title, for example: `Update lodash to v4.17.21`
+-   the branch name, for example: `renovate/lodash-4.x`,
+-   _and_ the Pull Request title, for example: `Update lodash to v4.17.21`
 
 In cases like the above, there is typically one existing PR with a matching branch name and PR title.
 But if you group PRs and use titles like "All non-major updates", then multiple past PRs may match.

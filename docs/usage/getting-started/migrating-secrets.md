@@ -12,14 +12,14 @@ This method will stop working on 01-Oct-2024:
 
 ```json title="Put encrypted secret in Renovate config"
 {
-  "hostRules": [
-    {
-      "matchHost": "github.com",
-      "encrypted": {
-        "token": "drsMDVf6M2hTZCN......+gQm/0Rpw"
-      }
-    }
-  ]
+    "hostRules": [
+        {
+            "matchHost": "github.com",
+            "encrypted": {
+                "token": "drsMDVf6M2hTZCN......+gQm/0Rpw"
+            }
+        }
+    ]
 }
 ```
 
@@ -29,12 +29,12 @@ This is the new method, that you should start using:
 
 ```json title="Reference the app secret in the Renovate config"
 {
-  "hostRules": [
-    {
-      "matchHost": "github.com",
-      "token": "{{ secrets.GITHUB_COM_TOKEN }}"
-    }
-  ]
+    "hostRules": [
+        {
+            "matchHost": "github.com",
+            "token": "{{ secrets.GITHUB_COM_TOKEN }}"
+        }
+    ]
 }
 ```
 
@@ -66,9 +66,9 @@ Mend recommends the first way.
 3. On the **Credentials** page, select `ADD SECRET` to add the encrypted secret.
 4. Give a value for `Secret name`, paste the encrypted secret into the `Secret Value` field, and select `SAVE`.
 5. When you migrate a secret from a repository, make sure you are adding the secret to the _same_ organization or repository for which you generated the secret!
-   - A secret generated for a specific repository can only be added to that _same_ repository.
-   - A secret generated for a specific repository can only be added to the repository settings for the matching repository. This secret can _not_ be added to the organization's settings.
-   - A secret generated without a specific repository _can_ be added into the organization _or_ into the repository settings under that organization.
+    - A secret generated for a specific repository can only be added to that _same_ repository.
+    - A secret generated for a specific repository can only be added to the repository settings for the matching repository. This secret can _not_ be added to the organization's settings.
+    - A secret generated without a specific repository _can_ be added into the organization _or_ into the repository settings under that organization.
 6. If you see the confirmation box with the text: **“Successfully migrated secret”**, your secret is now stored in the correct organization or repository.
    ![Successfully migrated secret](../assets/images/app-settings/stored-secret-encrypted.png)
 
@@ -102,4 +102,4 @@ If you were expecting to import a secret originally encrypted by Renovate:
 
 ## Related links
 
-- [Using Secrets with Mend Cloud Apps](app-secrets.md)
+-   [Using Secrets with Mend Cloud Apps](app-secrets.md)

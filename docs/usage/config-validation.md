@@ -12,8 +12,8 @@ All [`renovate` distributions](getting-started/running.md#available-distribution
 
 When you run `renovate-config-validator` with no arguments it will check:
 
-- all [default locations](configuration-options.md) (if files exist)
-- the `RENOVATE_CONFIG_FILE` environment variable
+-   all [default locations](configuration-options.md) (if files exist)
+-   the `RENOVATE_CONFIG_FILE` environment variable
 
 For example:
 

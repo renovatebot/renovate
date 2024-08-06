@@ -124,7 +124,7 @@ A typical onboarding `renovate.json` looks like this:
 
 ```json
 {
-  "extends": ["config:recommended"]
+    "extends": ["config:recommended"]
 }
 ```
 
@@ -135,7 +135,7 @@ You put `schedule:nonOfficeHours` in the `extends` array of your `renovate.json`
 
 ```json
 {
-  "extends": ["config:recommended", "schedule:nonOfficeHours"]
+    "extends": ["config:recommended", "schedule:nonOfficeHours"]
 }
 ```
 
@@ -145,14 +145,14 @@ If you browse the "default" presets, you will see some that have parameters, e.g
 
 ```json
 {
-  "labels": {
-    "description": "Apply labels <code>{{arg0}}</code> and <code>{{arg1}}</code> to PRs",
-    "labels": ["{{arg0}}", "{{arg1}}"]
-  },
-  "assignee": {
-    "description": "Assign PRs to <code>{{arg0}}</code>",
-    "assignees": ["{{arg0}}"]
-  }
+    "labels": {
+        "description": "Apply labels <code>{{arg0}}</code> and <code>{{arg1}}</code> to PRs",
+        "labels": ["{{arg0}}", "{{arg1}}"]
+    },
+    "assignee": {
+        "description": "Assign PRs to <code>{{arg0}}</code>",
+        "assignees": ["{{arg0}}"]
+    }
 }
 ```
 
@@ -160,7 +160,7 @@ Here is how you would use these in your Renovate config:
 
 ```json
 {
-  "extends": [":labels(dependencies,devops)", ":assignee(rarkins)"]
+    "extends": [":labels(dependencies,devops)", ":assignee(rarkins)"]
 }
 ```
 
@@ -174,15 +174,15 @@ Or if you think your preset would be valuable for others, please contribute a PR
 
 To host your preset config on GitHub:
 
-- Create a new repository. Normally you'd call it `renovate-config` but it can be named anything
-- Add configuration files to this new repo for any presets you want to share. For the default preset, `default.json` will be checked. For named presets, `<preset-name>.json` will be loaded. For example, loading preset `library` would load `library.json`. No other files are necessary.
-- In other repos, reference it in an extends array like "github>owner/name", for example:
+-   Create a new repository. Normally you'd call it `renovate-config` but it can be named anything
+-   Add configuration files to this new repo for any presets you want to share. For the default preset, `default.json` will be checked. For named presets, `<preset-name>.json` will be loaded. For example, loading preset `library` would load `library.json`. No other files are necessary.
+-   In other repos, reference it in an extends array like "github>owner/name", for example:
 
-  ```json
-  {
-    "extends": ["github>rarkins/renovate-config"]
-  }
-  ```
+    ```json
+    {
+        "extends": ["github>rarkins/renovate-config"]
+    }
+    ```
 
 From then on Renovate will use the Renovate config from the preset repo's default branch.
 You do not need to add it as a devDependency or add any other files to the preset repo.
@@ -193,17 +193,17 @@ For a private GitLab repository Renovate requires at least `Reporter` level acce
 
 To host your preset config on GitLab:
 
-- Create a new repository on GitLab. Normally you'd call it `renovate-config` but it can be named anything
-- Add a `default.json` to this new repo containing the preset config. No other files are necessary
-- In other repos, reference it in an extends array like "gitlab>owner/name", e.g. "gitlab>rarkins/renovate-config"
+-   Create a new repository on GitLab. Normally you'd call it `renovate-config` but it can be named anything
+-   Add a `default.json` to this new repo containing the preset config. No other files are necessary
+-   In other repos, reference it in an extends array like "gitlab>owner/name", e.g. "gitlab>rarkins/renovate-config"
 
 ## Gitea-hosted Presets
 
 To host your preset config on Gitea:
 
-- Create a new repository on Gitea. Normally you'd call it `renovate-config` but you can use any name you want
-- Add a `default.json` to this new repository containing the preset config. No other files are necessary
-- In other repositories, reference it in an extends array like `"gitea>owner/name"`, e.g. `"gitea>rarkins/renovate-config"`
+-   Create a new repository on Gitea. Normally you'd call it `renovate-config` but you can use any name you want
+-   Add a `default.json` to this new repository containing the preset config. No other files are necessary
+-   In other repositories, reference it in an extends array like `"gitea>owner/name"`, e.g. `"gitea>rarkins/renovate-config"`
 
 ## Local presets
 
@@ -218,9 +218,9 @@ If your desired platform is not yet supported, or if you want presets to work wh
 
 ```json
 {
-  "extends": [
-    "http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain"
-  ]
+    "extends": [
+        "http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain"
+    ]
 }
 ```
 
@@ -228,9 +228,9 @@ Parameters are supported similar to other methods:
 
 ```json
 {
-  "extends": [
-    "http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain(param)"
-  ]
+    "extends": [
+        "http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain(param)"
+    ]
 }
 ```
 
@@ -251,7 +251,7 @@ The following example shows a self-hosted Renovate preset located in a GitLab re
 
 ```json
 {
-  "extends": ["local>renovate/presets"]
+    "extends": ["local>renovate/presets"]
 }
 ```
 
@@ -261,10 +261,10 @@ Here is an example of how you can use templating to validate and load the preset
 ```javascript
 // config.js
 module.exports = {
-  customEnvVariables: {
-    GITLAB_REF: process.env.CI_COMMIT_REF_NAME || 'main',
-  },
-  extends: ['local>renovate/presets#{{ env.GITLAB_REF }}'],
+    customEnvVariables: {
+        GITLAB_REF: process.env.CI_COMMIT_REF_NAME || 'main',
+    },
+    extends: ['local>renovate/presets#{{ env.GITLAB_REF }}'],
 };
 ```
 
@@ -289,8 +289,8 @@ For example the result may be:
 
 ```json
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>myorgname/.github:renovate-config"]
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": ["local>myorgname/.github:renovate-config"]
 }
 ```
 
@@ -312,13 +312,13 @@ For example:
 
 ```json
 {
-  "name": "renovate-config-fastcore",
-  "version": "0.0.1",
-  "renovate-config": {
-    "default": {
-      "extends": ["config:recommended", "schedule:nonOfficeHours"]
+    "name": "renovate-config-fastcore",
+    "version": "0.0.1",
+    "renovate-config": {
+        "default": {
+            "extends": ["config:recommended", "schedule:nonOfficeHours"]
+        }
     }
-  }
 }
 ```
 
@@ -326,7 +326,7 @@ Then in each of your repositories you can add your Renovate config like:
 
 ```json
 {
-  "extends": ["fastcore"]
+    "extends": ["fastcore"]
 }
 ```
 
@@ -336,6 +336,6 @@ If you prefer to publish using the namespace `@fastcore/renovate-config` then yo
 
 ```json
 {
-  "extends": ["@fastcore"]
+    "extends": ["@fastcore"]
 }
 ```

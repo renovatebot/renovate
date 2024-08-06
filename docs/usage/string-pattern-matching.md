@@ -2,8 +2,8 @@
 
 Renovate string matching syntax for some configuration options allows you, as user, to choose between:
 
-- [`minimatch`](https://github.com/isaacs/minimatch) glob patterns, including exact strings matches
-- regular expression (regex) patterns
+-   [`minimatch`](https://github.com/isaacs/minimatch) glob patterns, including exact strings matches
+-   regular expression (regex) patterns
 
 In cases where there are potentially multiple _inputs_, e.g. managers can have multiple categories, then the matcher will return `true` if _any_ of them match.
 
@@ -14,19 +14,19 @@ It is not valid to combine `*` with any other positive or negative match.
 
 ```json title="Example of valid wildcard use"
 {
-  "allowedEnv": ["*"]
+    "allowedEnv": ["*"]
 }
 ```
 
 ```json title="Example of invalid wildcard use with additional match"
 {
-  "allowedEnv": ["*", "ABC"]
+    "allowedEnv": ["*", "ABC"]
 }
 ```
 
 ```json title="Example of invalid wildcard use with negation"
 {
-  "allowedEnv": ["*", "!ABC"]
+    "allowedEnv": ["*", "!ABC"]
 }
 ```
 
@@ -95,13 +95,13 @@ Renovate has a specific approach to negative matching strings.
 
 For an array of patterns to match, the following must be true:
 
-- If any _positive_ matches are included, at least _one_ must match
-- If any _negative_ matches are included, _none_ must match
+-   If any _positive_ matches are included, at least _one_ must match
+-   If any _negative_ matches are included, _none_ must match
 
 For example, the pattern `["/^abc/", "!/^abcd/", "!/abce/"]`:
 
-- matches `"abc"` and `"abcf"`
-- does _not_ match `"foo"`, `"abcd"`, `"abce"`, or `"abcdef"`
+-   matches `"abc"` and `"abcf"`
+-   does _not_ match `"foo"`, `"abcd"`, `"abce"`, or `"abcdef"`
 
 If you find yourself in a situation where you need to positive-match a string which starts with `!`, then you need to do so using a regular expression pattern.
 For example, `["/^!abc$/"]` will positively match against the string `"!abc"`.

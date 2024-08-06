@@ -9,10 +9,10 @@ name: build
 on: [push]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
 ```
 
 Renovate will update the commit SHA according to the GitHub tag you specified.
@@ -28,7 +28,7 @@ If you want to automatically pin action digests add the `helpers:pinGitHubAction
 
 ```json
 {
-  "extends": ["helpers:pinGitHubActionDigests"]
+    "extends": ["helpers:pinGitHubActionDigests"]
 }
 ```
 
@@ -40,16 +40,16 @@ name: build
 on: [push]
 
 env:
-  RUNNER: ubuntu-22.04
+    RUNNER: ubuntu-22.04
 
 jobs:
-  build:
-    runs-on: ${{ env.RUNNER }}
+    build:
+        runs-on: ${{ env.RUNNER }}
 ```
 
 The `github-action` manager understands `ratchet` comments, like `# ratchet:actions/checkout@v2.1.0`.
 This means that Renovate will:
 
-- update the version of a _pinned_ Ratchet version if needed
-- not delete Ratchet comments after parsing them
-- keep `# ratchet:exclude` comments
+-   update the version of a _pinned_ Ratchet version if needed
+-   not delete Ratchet comments after parsing them
+-   keep `# ratchet:exclude` comments

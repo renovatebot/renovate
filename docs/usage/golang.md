@@ -9,10 +9,10 @@ Renovate supports upgrading dependencies in `go.mod` files and associated `go.su
 
 If you're self-hosting Renovate, you may use these environment variables:
 
-- `GOPROXY`
-- `GONOPROXY`
-- `GOPRIVATE`
-- `GOINSECURE`
+-   `GOPROXY`
+-   `GONOPROXY`
+-   `GOPRIVATE`
+-   `GOINSECURE`
 
 To learn what these variables do, read the [Go Modules Reference about the`GOPROXY` protocol](https://go.dev/ref/mod#module-proxy).
 
@@ -69,9 +69,9 @@ You can force Renovate to use a specific version of Go by setting a constraint.
 
 ```json title="Getting Renovate to use the latest patch version of the 1.16 Go binary"
 {
-  "constraints": {
-    "go": "1.16"
-  }
+    "constraints": {
+        "go": "1.16"
+    }
 }
 ```
 
@@ -85,16 +85,16 @@ All token `hostRules` with a `hostType` (e.g. `github`, `gitlab`, `bitbucket`, .
 
 ```js
 module.exports = {
-  hostRules: [
-    {
-      matchHost: 'github.enterprise.com',
-      token: process.env.GO_GITHUB_TOKEN,
-      hostType: 'github',
-    },
-    {
-      matchHost: 'someGitHost.enterprise.com',
-      token: process.env.GO_GIT_TOKEN,
-    },
-  ],
+    hostRules: [
+        {
+            matchHost: 'github.enterprise.com',
+            token: process.env.GO_GITHUB_TOKEN,
+            hostType: 'github',
+        },
+        {
+            matchHost: 'someGitHost.enterprise.com',
+            token: process.env.GO_GIT_TOKEN,
+        },
+    ],
 };
 ```

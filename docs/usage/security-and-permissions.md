@@ -78,8 +78,8 @@ This also means the process has the same level of access to information and reso
 All self-hosted Renovate instances must operate under a trust relationship with the developers of the monitored repositories.
 This has the following implications:
 
-- Access to information
-- Execution of code
+-   Access to information
+-   Execution of code
 
 Keep reading to learn more.
 
@@ -93,8 +93,8 @@ This includes sensitive data that may be stored within the environment where Ren
 In certain scenarios, code from the monitored repository is executed as part of the update process.
 This is particularly true during, for example:
 
-- `postUpgradeTasks`, where scripts specified by the repository are run
-- when a wrapper within the repository is called, like `gradlew`
+-   `postUpgradeTasks`, where scripts specified by the repository are run
+-   when a wrapper within the repository is called, like `gradlew`
 
 These scripts can contain arbitrary code.
 This may pose a significant security risk if the repository's integrity is compromised, or if the repository maintainers have malicious intentions.
@@ -116,10 +116,10 @@ The Renovate maintainers recommend you follow these guidelines.
 _Before_ integrating a repository with your self-hosted Renovate instance, thoroughly vet the repository for security and trustworthiness.
 This means that you should review the:
 
-- repository's ownership
-- contribution history
-- open issues
-- open pull requests
+-   repository's ownership
+-   contribution history
+-   open issues
+-   open pull requests
 
 ###### Limit permissions
 
@@ -147,9 +147,9 @@ This makes sure that sensitive data is not exposed as plain text.
 Ensure that the logging infrastructure is configured to handle logs as sensitive data.
 This includes measures like:
 
-- log encryption
-- access controls to restrict log viewing to authorized personnel only
-- secure storage and transmission of log data
+-   log encryption
+-   access controls to restrict log viewing to authorized personnel only
+-   secure storage and transmission of log data
 
 ###### Log review and redaction processes
 

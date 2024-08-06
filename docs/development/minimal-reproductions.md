@@ -10,10 +10,10 @@ A minimal reproduction is a repository with the _least_ amount of code and confi
 
 The [`renovate-reproductions/12260` repository](https://github.com/renovate-reproductions/12260) shows a perfect reproduction, because it:
 
-- Only has the files/config needed to trigger the bug
-- Explains the current behavior and the expected behavior in the `readme.md`
-- Links to the Renovate Issue, or Discussion in the `readme.md`
-- Uses headings to organize information
+-   Only has the files/config needed to trigger the bug
+-   Explains the current behavior and the expected behavior in the `readme.md`
+-   Links to the Renovate Issue, or Discussion in the `readme.md`
+-   Uses headings to organize information
 
 ## Creating a minimal reproduction
 
@@ -40,9 +40,9 @@ _Always_ follow these steps:
 1. Reduce your Renovate config to a minimum
 1. Remove private or secret information
 1. Create a `readme.md` file (or edit the template `readme.md`) and:
-   - Explain the _Current behavior_ and _Expected behavior_
-   - Link to the Renovate Issue or Discussion
-   - Use headings to organize the information
+    - Explain the _Current behavior_ and _Expected behavior_
+    - Link to the Renovate Issue or Discussion
+    - Use headings to organize the information
 1. Set the repository visibility to `public`
 1. Give us the link to the repository
 
@@ -63,14 +63,14 @@ Then set a high `minimumReleaseAge` for that dependency, for example:
 
 ```json
 {
-  "extends": ["config:best-practices"],
-  "packageRules": [
-    {
-      "description": "Force lots of pending updates for the Prettier package",
-      "matchPackageNames": ["prettier"],
-      "minimumReleaseAge": "365 days"
-    }
-  ]
+    "extends": ["config:best-practices"],
+    "packageRules": [
+        {
+            "description": "Force lots of pending updates for the Prettier package",
+            "matchPackageNames": ["prettier"],
+            "minimumReleaseAge": "365 days"
+        }
+    ]
 }
 ```
 
@@ -80,13 +80,13 @@ You'll get a lot of pending updates, which you can see on the Dependency Dashboa
 
 A minimal reproduction helps the Renovate developers:
 
-- confirm the problem is with Renovate, and _not_ with your environment, or your configuration settings
-- see where the bug or missing feature is
-- verify that the new code solves the problem, or correctly adds a feature
-- identify the root cause, or narrow down the possible causes
-- suggest workarounds for the problem
-- find where to look in our code to help you
-- step through the code with a debugger
+-   confirm the problem is with Renovate, and _not_ with your environment, or your configuration settings
+-   see where the bug or missing feature is
+-   verify that the new code solves the problem, or correctly adds a feature
+-   identify the root cause, or narrow down the possible causes
+-   suggest workarounds for the problem
+-   find where to look in our code to help you
+-   step through the code with a debugger
 
 ## Why we will not use your production repository to debug
 
@@ -98,9 +98,9 @@ You may think:
 
 This is because a production repository often has:
 
-- many dependencies
-- many custom rules in the Renovate configuration file
-- many files that are not relevant
+-   many dependencies
+-   many custom rules in the Renovate configuration file
+-   many files that are not relevant
 
 Lots of "moving parts" makes it hard to debug, as debug break points can trigger hundreds of times.
 

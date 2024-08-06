@@ -4,9 +4,9 @@ The `helmfile` manager defines this default registryAlias:
 
 ```json
 {
-  "registryAliases": {
-    "stable": "https://charts.helm.sh/stable"
-  }
+    "registryAliases": {
+        "stable": "https://charts.helm.sh/stable"
+    }
 }
 ```
 
@@ -23,23 +23,23 @@ For this you use a custom `hostRules` array.
 
 ```json5
 {
-  hostRules: [
-    {
-      // global login
-      matchHost: 'ghcr.io',
-      hostType: 'docker',
-      username: '<some-username>',
-      password: '<some-password>',
-    },
-    {
-      // login with encrypted password
-      matchHost: 'https://ghci.io',
-      hostType: 'docker',
-      username: '<some-username>',
-      encrypted: {
-        password: 'some-encrypted-password',
-      },
-    },
-  ],
+    hostRules: [
+        {
+            // global login
+            matchHost: 'ghcr.io',
+            hostType: 'docker',
+            username: '<some-username>',
+            password: '<some-password>',
+        },
+        {
+            // login with encrypted password
+            matchHost: 'https://ghci.io',
+            hostType: 'docker',
+            username: '<some-username>',
+            encrypted: {
+                password: 'some-encrypted-password',
+            },
+        },
+    ],
 }
 ```

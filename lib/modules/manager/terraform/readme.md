@@ -7,12 +7,12 @@ You can override this default with your own `packageRules`, for example:
 
 ```json title="Prefer releases from OpenTofu"
 {
-  "packageRules": [
-    {
-      "matchDatasources": ["terraform-provider"],
-      "registryUrls": ["https://registry.opentofu.org"]
-    }
-  ]
+    "packageRules": [
+        {
+            "matchDatasources": ["terraform-provider"],
+            "registryUrls": ["https://registry.opentofu.org"]
+        }
+    ]
 }
 ```
 

@@ -79,17 +79,17 @@ There is a chance you need to know how each library works, and your present and 
 
 Which of these two would you prefer to start with:
 
-- A project that is fairly up-to-date where you can bump the dependency, run the deployment pipeline and go back to your day
-- A project that wasn’t touched in years; every dependency is outdated and Continuous Integration is red on all branches, if running at all
+-   A project that is fairly up-to-date where you can bump the dependency, run the deployment pipeline and go back to your day
+-   A project that wasn’t touched in years; every dependency is outdated and Continuous Integration is red on all branches, if running at all
 
 Am I exaggerating with my examples?
 Maybe a little, but I have seen cases very close to those.
 
 Let me ask you some questions about your projects:
 
-- How many times did you create a project and never upgrade its dependencies?
-- How many times did you have to get back to an old project, and had to use a new library but couldn’t because there is another library at an old version that isn’t compatible?
-- How fast can you upgrade a single dependency on all your applications?
+-   How many times did you create a project and never upgrade its dependencies?
+-   How many times did you have to get back to an old project, and had to use a new library but couldn’t because there is another library at an old version that isn’t compatible?
+-   How fast can you upgrade a single dependency on all your applications?
 
 As time goes forward, projects come and go, you will most likely have decade-old, and recent ones.
 Some might be using the latest version of Java with the latest Spring, some with slightly outdated libraries and others might be using Stripes and libraries that have had no release in 7 years.
@@ -150,18 +150,18 @@ We received 700 Pull Requests in the first month, it was a never ending Pull Req
 The awesome thing with Renovate is that it’s very configurable, and this configuration can be shared.
 Very early on we created a shared configuration for our team with some custom policies, here are a few things we decided to do:
 
-- Group PRs for `minor` and `patch` dependencies
-- Internal dependencies could create a PR anytime of the day
-- Third party dependencies could create PRs only during the weekend
+-   Group PRs for `minor` and `patch` dependencies
+-   Internal dependencies could create a PR anytime of the day
+-   Third party dependencies could create PRs only during the weekend
 
 This helped a lot to reduce the noise in PRs, the second month we got 400 Pull Requests, and on the third month only 200.
 
 ## What we learned from automating dependencies updates
 
-- You need to be confident that your code coverage will warn you in case of updates. At the beginning we missed quite a few breaking updates because the build was green but the application broke as soon as it was deployed
-- Once you’re confident enough, auto-merge is a must have. In our team we enabled Renovate on about 100 of our repositories and generally spend 1–2 hours per week to stay up-to-date
-- “On the bleeding edge it’s not the edge that’s bleeding; it’s you”. When updating to a new major version as soon as it’s released you might encounter some surprises. It happened to us a few times that a patch version breaks the library. Usually a fix came out the next day, but we still spent a few hours debugging why the update broke our applications. We’ve opened quite a few Issues and sent some PRs to fix issues like this
-- Updating dependencies is one thing, but when should you release them? As our team mostly provides libraries, we don’t want to release them on every dependency upgrade (as this would create PRs downstream and create noise for them). We’ve decided to release right after critical upgrades or contributions and a dashboard informs us when a repository hasn’t been released for 30 days
+-   You need to be confident that your code coverage will warn you in case of updates. At the beginning we missed quite a few breaking updates because the build was green but the application broke as soon as it was deployed
+-   Once you’re confident enough, auto-merge is a must have. In our team we enabled Renovate on about 100 of our repositories and generally spend 1–2 hours per week to stay up-to-date
+-   “On the bleeding edge it’s not the edge that’s bleeding; it’s you”. When updating to a new major version as soon as it’s released you might encounter some surprises. It happened to us a few times that a patch version breaks the library. Usually a fix came out the next day, but we still spent a few hours debugging why the update broke our applications. We’ve opened quite a few Issues and sent some PRs to fix issues like this
+-   Updating dependencies is one thing, but when should you release them? As our team mostly provides libraries, we don’t want to release them on every dependency upgrade (as this would create PRs downstream and create noise for them). We’ve decided to release right after critical upgrades or contributions and a dashboard informs us when a repository hasn’t been released for 30 days
 
 ### A word on Renovate
 
@@ -172,12 +172,12 @@ But what confirmed our choice is the insane crazy amount of features and [config
 
 Some features and options we enjoy:
 
-- [Shared configurations (presets)](../key-concepts/presets.md), we have a Swissquote default configuration we set for all repositories, each team can extend it with their own practices
-- [Integration with GitHub’s Dependabot alerts](../configuration-options.md#vulnerabilityalerts) to raise the priority and send security remediation PRs as soon as possible
-- Each rule can be customized either globally [or specified per package](../configuration-options.md#packagerules)
-- Works with your [private package registry](../getting-started/private-packages.md)
-- Supports more than 70 [languages and package managers](../modules/manager/index.md#supported-managers): Maven, Docker, npm, Docker Compose, Python
-- If you are using dependencies in a custom way, [there is a `customManagers` option](../configuration-options.md#custommanagers) that allows you to transform patterns into dependencies
+-   [Shared configurations (presets)](../key-concepts/presets.md), we have a Swissquote default configuration we set for all repositories, each team can extend it with their own practices
+-   [Integration with GitHub’s Dependabot alerts](../configuration-options.md#vulnerabilityalerts) to raise the priority and send security remediation PRs as soon as possible
+-   Each rule can be customized either globally [or specified per package](../configuration-options.md#packagerules)
+-   Works with your [private package registry](../getting-started/private-packages.md)
+-   Supports more than 70 [languages and package managers](../modules/manager/index.md#supported-managers): Maven, Docker, npm, Docker Compose, Python
+-   If you are using dependencies in a custom way, [there is a `customManagers` option](../configuration-options.md#custommanagers) that allows you to transform patterns into dependencies
 
 There is an [on-premise option](https://www.mend.io/free-developer-tools/renovate/on-premises/), but you can also use [the Mend Renovate App](https://github.com/marketplace/renovate).
 On our side, we’re not using the on-premise but rather a custom scheduler using the open source Docker image.
@@ -206,10 +206,10 @@ We don’t force any team to use Renovate, each team can decide to opt-in and do
 
 Some statistics:
 
-- 857 repositories enabled out of about 2000 active repositories
-- 11000 PRs were merged since we installed Renovate
-- 239 PRs were merged last month
-- 2 SSDs died on our Renovate machine with the number of projects to clone again and again
+-   857 repositories enabled out of about 2000 active repositories
+-   11000 PRs were merged since we installed Renovate
+-   239 PRs were merged last month
+-   2 SSDs died on our Renovate machine with the number of projects to clone again and again
 
 ### How does the scheduler work?
 
@@ -264,10 +264,10 @@ We were so quick to do it, in fact, that we had to do that three times with the 
 
 Keep in mind that keeping your dependencies up-to-date is not just about the tooling, it’s also about having a process:
 
-- When will you merge this PR?
-- How will you handle the PR that doesn’t build?
-- The new major version of an external library that’s not yet compatible with the rest of your libraries?
-- When will you release this constant flow of library updates?
-- Do you want PRs during the day? During the night? Or on weekends only?
+-   When will you merge this PR?
+-   How will you handle the PR that doesn’t build?
+-   The new major version of an external library that’s not yet compatible with the rest of your libraries?
+-   When will you release this constant flow of library updates?
+-   Do you want PRs during the day? During the night? Or on weekends only?
 
 We know the answers for our situation, we’ll let you decide what the answers are for you. :smile:

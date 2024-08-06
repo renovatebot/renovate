@@ -18,8 +18,8 @@ Additionally, the Renovate admin may have put the bot on its own schedule, or th
 
 For scheduled action to take place, both these need to happen:
 
-- The bot needs to run against your repository
-- The current time needs to fall within your repository's configured schedule
+-   The bot needs to run against your repository
+-   The current time needs to fall within your repository's configured schedule
 
 ### The Mend Renovate app and scheduled jobs
 
@@ -30,10 +30,10 @@ This makes it likely that Renovate bot checks your repository at least once duri
 
 ## Automerge limitations
 
-- Renovate automerges at most one branch/PR per run
-- If an automerge happened, the repository run will be restarted at most once. The second run can also potentially automerge, so it may appear as like two automerges in one run.
-- Renovate will only automerge a branch when it is up-to-date with the target branch
-- Renovate may not be able to automerge as many branches as you expect, especially if your base branch is receiving regular commits at the same time
+-   Renovate automerges at most one branch/PR per run
+-   If an automerge happened, the repository run will be restarted at most once. The second run can also potentially automerge, so it may appear as like two automerges in one run.
+-   Renovate will only automerge a branch when it is up-to-date with the target branch
+-   Renovate may not be able to automerge as many branches as you expect, especially if your base branch is receiving regular commits at the same time
 
 The limitation to only merge one branch per run is because Renovate's dependency and branch state is based on what was present in the base branch at the start of the run.
 If a branch is merged into the base branch during Renovate's run - including by other users - it means that remaining Renovate branches may have Git conflicts.
@@ -41,8 +41,8 @@ It also means that Renovate's knowledge about dependencies in the base branch is
 
 The limitation to only automerge branches which are up-to-date is a decision due to this example:
 
-- Two dependencies are in use: `alice@1.0.0` and `bob@1.0.0`
-- PRs exist for `alice@2.0.0` and `bob@2.0.0` and both pass tests
-- The PR for `alice@2.0.0` is automerged
-- The PR for `bob@2.0.0` remains open, does not have conflicts, and has all tests passing
-- But `alice@2.0.0` and `bob@2.0.0` are incompatible so merging the PR without rebasing and retesting it first would result in a broken base branch
+-   Two dependencies are in use: `alice@1.0.0` and `bob@1.0.0`
+-   PRs exist for `alice@2.0.0` and `bob@2.0.0` and both pass tests
+-   The PR for `alice@2.0.0` is automerged
+-   The PR for `bob@2.0.0` remains open, does not have conflicts, and has all tests passing
+-   But `alice@2.0.0` and `bob@2.0.0` are incompatible so merging the PR without rebasing and retesting it first would result in a broken base branch

@@ -9,19 +9,19 @@ Updates are performed if the files follow the conventional format used in typica
 
 ```yaml
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v1.0.0
-    hooks:
-      - id: some-hook-id
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v1.0.0
+      hooks:
+          - id: some-hook-id
 ```
 
 To enable the `pre-commit` manager, add the following config:
 
 ```json
 {
-  "pre-commit": {
-    "enabled": true
-  }
+    "pre-commit": {
+        "enabled": true
+    }
 }
 ```
 

@@ -5,9 +5,9 @@ To opt into running it, set the following:
 
 ```json
 {
-  "azure-pipelines": {
-    "enabled": true
-  }
+    "azure-pipelines": {
+        "enabled": true
+    }
 }
 ```
 
@@ -18,12 +18,12 @@ To use the standard convention for Azure Pipelines, add:
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchDatasources": ["azure-pipelines-tasks"],
-      "extractVersion": "^(?<version>\\d+)"
-    }
-  ]
+    "packageRules": [
+        {
+            "matchDatasources": ["azure-pipelines-tasks"],
+            "extractVersion": "^(?<version>\\d+)"
+        }
+    ]
 }
 ```
 
@@ -33,42 +33,42 @@ For example:
 
 ```yaml
 resources:
-  repositories:
-    - type: github
-      name: renovate/renovate
-      ref: refs/heads/main
-    - type: github
-      name: user/repo
-      ref: refs/tags/v0.5.1
-  containers:
-    - container: linux
-      image: ubuntu:24.04
-    - container: python
-      image: python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077
+    repositories:
+        - type: github
+          name: renovate/renovate
+          ref: refs/heads/main
+        - type: github
+          name: user/repo
+          ref: refs/tags/v0.5.1
+    containers:
+        - container: linux
+          image: ubuntu:24.04
+        - container: python
+          image: python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077
 
 stages:
-  - stage: StageOne
-    jobs:
-      - job: JobOne
-        steps:
-          - task: Bash@3
-            inputs:
-              script: 'echo Hello World'
+    - stage: StageOne
+      jobs:
+          - job: JobOne
+            steps:
+                - task: Bash@3
+                  inputs:
+                      script: 'echo Hello World'
 ```
 
 Read the [resources block][resources-docs] and the [tasks block][tasks-docs] Azure Pipelines documentation for more information.
 
 The `azure-pipelines` manager can process these files:
 
-- `.azure-pipelines/**/*.yaml`
-- `.azure-pipelines.yaml`
-- `.azure-pipelines.yml`
-- `azure-pipelines/**/*.yaml`
-- `azure-pipelines.yaml`
-- `azure-pipelines.yml`
-- `azure-pipeline/**/*.yaml`
-- `azure-pipeline.yaml`
-- `azure-pipeline.yml`
+-   `.azure-pipelines/**/*.yaml`
+-   `.azure-pipelines.yaml`
+-   `.azure-pipelines.yml`
+-   `azure-pipelines/**/*.yaml`
+-   `azure-pipelines.yaml`
+-   `azure-pipelines.yml`
+-   `azure-pipeline/**/*.yaml`
+-   `azure-pipeline.yaml`
+-   `azure-pipeline.yml`
 
 <!-- prettier-ignore -->
 !!! warning

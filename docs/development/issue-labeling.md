@@ -5,11 +5,11 @@ Any repository collaborator can apply labels according to the below guidelines.
 
 The general idea is that we have:
 
-- manager (`manager:`)
-- versioning (`versioning:`)
-- datasource (`datasource:`)
-- platform (`platform:`)
-- core functionality (`core:`)
+-   manager (`manager:`)
+-   versioning (`versioning:`)
+-   datasource (`datasource:`)
+-   platform (`platform:`)
+-   core functionality (`core:`)
 
 The majority of issues should have at least one of those labels.
 These labels should also map approximately to our Conventional Commit scopes.
@@ -18,10 +18,10 @@ These labels should also map approximately to our Conventional Commit scopes.
 
 You should know about platforms, package managers, datasources and versioning to label issues effectively.
 
-- To learn about platforms, read the [Renovate docs on Platforms](https://docs.renovatebot.com/modules/platform/)
-- To learn about managers, read the [Renovate docs on Managers](https://docs.renovatebot.com/modules/manager/)
-- To learn about datasources, read the [Renovate docs on Datasources](https://docs.renovatebot.com/modules/datasource/)
-- To learn more about versioning, read the [Renovate docs on Versioning](https://docs.renovatebot.com/modules/versioning/)
+-   To learn about platforms, read the [Renovate docs on Platforms](https://docs.renovatebot.com/modules/platform/)
+-   To learn about managers, read the [Renovate docs on Managers](https://docs.renovatebot.com/modules/manager/)
+-   To learn about datasources, read the [Renovate docs on Datasources](https://docs.renovatebot.com/modules/datasource/)
+-   To learn more about versioning, read the [Renovate docs on Versioning](https://docs.renovatebot.com/modules/versioning/)
 
 Most issues should have a label relating to either a platform, manager, datasource, versioning or worker topic.
 

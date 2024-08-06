@@ -6,9 +6,9 @@ Renovate uses the `uhop/node-re2` package that provides bindings for [`google/re
 Read about [`uhop/node-re2`'s limitations in their readme](https://github.com/uhop/node-re2#limitations-things-re2-does-not-support).
 The `regex` manager is unique in Renovate because:
 
-- It is configurable via regex named capture groups
-- It can extract any `datasource`
-- By using the `customManagers` config, you can create multiple "regex managers" for the same repository
+-   It is configurable via regex named capture groups
+-   It can extract any `datasource`
+-   By using the `customManagers` config, you can create multiple "regex managers" for the same repository
 
 We have [additional Handlebars helpers](../../../templates.md#additional-handlebars-helpers) to help you perform common transformations on the regex manager's template fields.
 Also read the documentation for the [`customManagers` config option](../../../configuration-options.md#custommanagers).
@@ -17,26 +17,26 @@ Also read the documentation for the [`customManagers` config option](../../../co
 
 The first two required fields are `fileMatch` and `matchStrings`:
 
-- `fileMatch` works the same as any manager
-- `matchStrings` is a `regex` custom manager concept and is used for configuring a regular expression with named capture groups
+-   `fileMatch` works the same as any manager
+-   `matchStrings` is a `regex` custom manager concept and is used for configuring a regular expression with named capture groups
 
 Before Renovate can look up a dependency and decide about updates, it needs this information about each dependency:
 
-- The dependency's name
-- Which `datasource` to use: npm, Docker, GitHub tags, and so on. For how to format this references see [datasource overview](../../datasource/index.md#supported-datasources)
-- Which version scheme to use: defaults to `semver-coerced`, but you may set another value like `pep440`. Supported versioning schemes can be found in the [versioning overview](../../versioning/index.md#supported-versioning)
+-   The dependency's name
+-   Which `datasource` to use: npm, Docker, GitHub tags, and so on. For how to format this references see [datasource overview](../../datasource/index.md#supported-datasources)
+-   Which version scheme to use: defaults to `semver-coerced`, but you may set another value like `pep440`. Supported versioning schemes can be found in the [versioning overview](../../versioning/index.md#supported-versioning)
 
 Configuration-wise, it works like this:
 
-- You must capture the `currentValue` of the dependency in a named capture group
-- You must have either a `depName` or `packageName` capture group, or use on of the respective template fields ( `depNameTemplate` and `packageNameTemplate` )
-- You must have either a `datasource` capture group or a `datasourceTemplate` config field
-- You can optionally have a `depType` capture group or a `depTypeTemplate` config field
-- You can optionally have a `versioning` capture group or a `versioningTemplate` config field. If neither are present, Renovate will use `semver-coerced` as the default
-- You can optionally have an `extractVersion` capture group or an `extractVersionTemplate` config field
-- You can optionally have a `currentDigest` capture group
-- You can optionally have a `registryUrl` capture group or a `registryUrlTemplate` config field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array
-- You can optionally have an `indentation` capture group. It must be either empty or whitespace only, otherwise it will be reset to an empty string
+-   You must capture the `currentValue` of the dependency in a named capture group
+-   You must have either a `depName` or `packageName` capture group, or use on of the respective template fields ( `depNameTemplate` and `packageNameTemplate` )
+-   You must have either a `datasource` capture group or a `datasourceTemplate` config field
+-   You can optionally have a `depType` capture group or a `depTypeTemplate` config field
+-   You can optionally have a `versioning` capture group or a `versioningTemplate` config field. If neither are present, Renovate will use `semver-coerced` as the default
+-   You can optionally have an `extractVersion` capture group or an `extractVersionTemplate` config field
+-   You can optionally have a `currentDigest` capture group
+-   You can optionally have a `registryUrl` capture group or a `registryUrlTemplate` config field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array
+-   You can optionally have an `indentation` capture group. It must be either empty or whitespace only, otherwise it will be reset to an empty string
 
 ### Regular Expression Capture Groups
 
@@ -68,15 +68,15 @@ Continuing the above example with Yarn, here is the full Renovate config:
 
 ```json
 {
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": ["^Dockerfile$"],
-      "matchStrings": ["ENV YARN_VERSION=(?<currentValue>.*?)\\n"],
-      "depNameTemplate": "yarn",
-      "datasourceTemplate": "npm"
-    }
-  ]
+    "customManagers": [
+        {
+            "customType": "regex",
+            "fileMatch": ["^Dockerfile$"],
+            "matchStrings": ["ENV YARN_VERSION=(?<currentValue>.*?)\\n"],
+            "depNameTemplate": "yarn",
+            "datasourceTemplate": "npm"
+        }
+    ]
 }
 ```
 
@@ -103,16 +103,16 @@ You could configure Renovate to update the `Dockerfile` like this:
 
 ```json
 {
-  "customManagers": [
-    {
-      "customType": "regex",
-      "description": "Update _VERSION variables in Dockerfiles",
-      "fileMatch": ["(^|/|\\.)Dockerfile$", "(^|/)Dockerfile\\.[^/]*$"],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? packageName=(?<packageName>.+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s(?:ENV|ARG) .+?_VERSION=(?<currentValue>.+?)\\s"
-      ]
-    }
-  ]
+    "customManagers": [
+        {
+            "customType": "regex",
+            "description": "Update _VERSION variables in Dockerfiles",
+            "fileMatch": ["(^|/|\\.)Dockerfile$", "(^|/)Dockerfile\\.[^/]*$"],
+            "matchStrings": [
+                "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? packageName=(?<packageName>.+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s(?:ENV|ARG) .+?_VERSION=(?<currentValue>.+?)\\s"
+            ]
+        }
+    ]
 }
 ```
 
@@ -146,16 +146,16 @@ Using the `customManagers` below, Renovate looks for available Docker tags of th
 
 ```json
 {
-  "customManagers": [
-    {
-      "customType": "regex",
-      "datasourceTemplate": "docker",
-      "fileMatch": ["(^|/)Chart\\.yaml$"],
-      "matchStrings": [
-        "#\\s?renovate: image=(?<depName>.*?)\\s?appVersion:\\s?\\\"?(?<currentValue>[\\w+\\.\\-]*)\""
-      ]
-    }
-  ]
+    "customManagers": [
+        {
+            "customType": "regex",
+            "datasourceTemplate": "docker",
+            "fileMatch": ["(^|/)Chart\\.yaml$"],
+            "matchStrings": [
+                "#\\s?renovate: image=(?<depName>.*?)\\s?appVersion:\\s?\\\"?(?<currentValue>[\\w+\\.\\-]*)\""
+            ]
+        }
+    ]
 }
 ```
 
@@ -171,21 +171,21 @@ For example:
 
 ```json
 {
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": [".*y[a]?ml$"],
-      "matchStringsStrategy": "combination",
-      "matchStrings": [
-        "['\"]?(?<depName>/pipeline-fragments/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?",
-        "['\"]?(?<depName>pipeline-solutions/gitlab/fragments/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?"
-      ],
-      "depNameTemplate": "pipeline-solutions/gitlab/fragments/fragment-version-check",
-      "autoReplaceStringTemplate": "'{{{depName}}}'\n    ref: {{{newValue}}}",
-      "datasourceTemplate": "gitlab-tags",
-      "versioningTemplate": "gitlab-tags"
-    }
-  ]
+    "customManagers": [
+        {
+            "customType": "regex",
+            "fileMatch": [".*y[a]?ml$"],
+            "matchStringsStrategy": "combination",
+            "matchStrings": [
+                "['\"]?(?<depName>/pipeline-fragments/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?",
+                "['\"]?(?<depName>pipeline-solutions/gitlab/fragments/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?"
+            ],
+            "depNameTemplate": "pipeline-solutions/gitlab/fragments/fragment-version-check",
+            "autoReplaceStringTemplate": "'{{{depName}}}'\n    ref: {{{newValue}}}",
+            "datasourceTemplate": "gitlab-tags",
+            "versioningTemplate": "gitlab-tags"
+        }
+    ]
 }
 ```
 

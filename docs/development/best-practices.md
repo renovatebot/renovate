@@ -11,10 +11,10 @@ Finally, describe the changes in the branch in a few words.
 
 Some good branch names:
 
-- `feat/13732-cacache-cleanup`
-- `fix/15431-gitea-automerge-strategy`
-- `refactor/jest-reset-mocks`
-- `docs/rewrite-packageRules-section`
+-   `feat/13732-cacache-cleanup`
+-   `fix/15431-gitea-automerge-strategy`
+-   `refactor/jest-reset-mocks`
+-   `docs/rewrite-packageRules-section`
 
 Avoid branch names like `patch-1`.
 
@@ -25,15 +25,15 @@ Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositorie
 
 ## General
 
-- Prefer full function declarations for readability and better stack traces, so avoid `const func = ():void => {}`
-- Prefer `interface` over `type` for TypeScript type declarations
-- Avoid [Enums](https://github.com/renovatebot/renovate/issues/13743), use unions or [immutable objects](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/pep440/range.ts#L8-L20) instead
-- Always add unit tests for full code coverage
-  - Only use `istanbul` comments for unreachable code coverage that is needed for `codecov` completion
-  - Use descriptive `istanbul` comments
-- Avoid cast or prefer `x as T` instead of `<T>x` cast
-- Prefer `satisfies` operator over `as`, read the [TypeScript release notes for `satisfies` operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator) to learn more
-- Avoid `Boolean` instead use `is` functions from `@sindresorhus/is` package, for example: `is.string`
+-   Prefer full function declarations for readability and better stack traces, so avoid `const func = ():void => {}`
+-   Prefer `interface` over `type` for TypeScript type declarations
+-   Avoid [Enums](https://github.com/renovatebot/renovate/issues/13743), use unions or [immutable objects](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/pep440/range.ts#L8-L20) instead
+-   Always add unit tests for full code coverage
+    -   Only use `istanbul` comments for unreachable code coverage that is needed for `codecov` completion
+    -   Use descriptive `istanbul` comments
+-   Avoid cast or prefer `x as T` instead of `<T>x` cast
+-   Prefer `satisfies` operator over `as`, read the [TypeScript release notes for `satisfies` operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator) to learn more
+-   Avoid `Boolean` instead use `is` functions from `@sindresorhus/is` package, for example: `is.string`
 
 ```ts
 // istanbul ignore next: can never happen
@@ -41,11 +41,11 @@ Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositorie
 
 ### Functions
 
-- Use `function foo(){...}` to declare named functions
-- Use function declaration instead of assigning function expression into local variables (`const f = function(){...}`) (TypeScript already prevents rebinding functions)
-  - Exception: if the function accesses the outer scope's `this` then use arrow functions assigned to variables instead of function declarations
-- Regular functions _should not_ access `this`, but arrow functions and methods may access `this`
-- Only use nested functions when the [lexical scope](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures) is used
+-   Use `function foo(){...}` to declare named functions
+-   Use function declaration instead of assigning function expression into local variables (`const f = function(){...}`) (TypeScript already prevents rebinding functions)
+    -   Exception: if the function accesses the outer scope's `this` then use arrow functions assigned to variables instead of function declarations
+-   Regular functions _should not_ access `this`, but arrow functions and methods may access `this`
+-   Only use nested functions when the [lexical scope](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures) is used
 
 #### Use arrow functions in expressions
 
@@ -59,7 +59,7 @@ Use:
 
 ```ts
 bar(() => {
-  this.doSomething();
+    this.doSomething();
 });
 ```
 
@@ -116,15 +116,15 @@ Nested code logic is hard to read and prone to logic mistakes.
 
 ```ts
 function foo(str: string): boolean {
-  let result = false;
-  if (condition(str)) {
-    const x = extractData(str);
-    if (x) {
-      // do something
-      result = true;
+    let result = false;
+    if (condition(str)) {
+        const x = extractData(str);
+        if (x) {
+            // do something
+            result = true;
+        }
     }
-  }
-  return result;
+    return result;
 }
 ```
 
@@ -132,17 +132,17 @@ Simplified code:
 
 ```ts
 function foo(str: string): boolean {
-  if (!condition(str)) {
-    return false;
-  }
+    if (!condition(str)) {
+        return false;
+    }
 
-  const x = extractData(str);
-  if (!x) {
-    return false;
-  }
+    const x = extractData(str);
+    if (!x) {
+        return false;
+    }
 
-  // do something
-  return true;
+    // do something
+    return true;
 }
 ```
 
@@ -203,9 +203,9 @@ Array.from<number>({ length: 5 }).fill(0);
 
 Use `for ( ... of ...)` loops instead of `[Array|Set|Map].prototype.forEach` and `for ( ... in ...)`.
 
-- Using `for ( ... in ...)` for objects is error-prone. It will include enumerable properties from the prototype chain
-- Using `for ( ... in ...)` to iterate over arrays, will counterintuitively return the array's indices
-- Avoid `[Array|Set|Map].prototype.forEach`. It makes code harder to debug and defeats some useful compiler checks like reachability
+-   Using `for ( ... in ...)` for objects is error-prone. It will include enumerable properties from the prototype chain
+-   Using `for ( ... in ...)` to iterate over arrays, will counterintuitively return the array's indices
+-   Avoid `[Array|Set|Map].prototype.forEach`. It makes code harder to debug and defeats some useful compiler checks like reachability
 
 Only use `Array.prototype.map()` when the return value is used, otherwise use `for ( ... of ...)`.
 
@@ -270,30 +270,30 @@ Use `UTC` to be time zone independent.
 
 ```ts
 if (end) {
-  const now = DateTime.now().toUTC();
-  const eol = DateTime.fromISO(end, { zone: 'utc' });
-  return eol < now;
+    const now = DateTime.now().toUTC();
+    const eol = DateTime.fromISO(end, { zone: 'utc' });
+    return eol < now;
 }
 ```
 
 ## Unit testing
 
-- Separate the _Arrange_, _Act_ and _Assert_ phases with newlines
-- Use `it.each` rather than `test.each`
-- Prefer [Tagged Template Literal](https://jestjs.io/docs/api#2-testeachtablename-fn-timeout) style for `it.each`, Prettier will help with formatting
-  - See [Example](https://github.com/renovatebot/renovate/blob/768e178419437a98f5ce4996bafd23f169e530b4/lib/modules/platform/util.spec.ts#L8-L18)
-- Mock Date/Time when testing a Date/Time dependent module
-  - For `Luxon` mocking see [Example](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/distro.spec.ts#L7-L10)
-- Prefer `jest.spyOn` for mocking single functions, or mock entire modules
-  - Avoid overwriting functions, for example: (`func = jest.fn();`)
-- Prefer `toEqual`
-- Use `toMatchObject` for huge objects when only parts need to be tested
-- Avoid `toMatchSnapshot`, only use it for:
-  - huge strings like the Renovate PR body text
-  - huge complex objects where you only need to test parts
-- Avoid exporting functions purely for the purpose of testing unless you really need to
-- Avoid cast or prefer `x as T` instead of `<T>x` cast
-  - Use `partial<T>()` from `test/util` if only a partial object is required
+-   Separate the _Arrange_, _Act_ and _Assert_ phases with newlines
+-   Use `it.each` rather than `test.each`
+-   Prefer [Tagged Template Literal](https://jestjs.io/docs/api#2-testeachtablename-fn-timeout) style for `it.each`, Prettier will help with formatting
+    -   See [Example](https://github.com/renovatebot/renovate/blob/768e178419437a98f5ce4996bafd23f169e530b4/lib/modules/platform/util.spec.ts#L8-L18)
+-   Mock Date/Time when testing a Date/Time dependent module
+    -   For `Luxon` mocking see [Example](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/distro.spec.ts#L7-L10)
+-   Prefer `jest.spyOn` for mocking single functions, or mock entire modules
+    -   Avoid overwriting functions, for example: (`func = jest.fn();`)
+-   Prefer `toEqual`
+-   Use `toMatchObject` for huge objects when only parts need to be tested
+-   Avoid `toMatchSnapshot`, only use it for:
+    -   huge strings like the Renovate PR body text
+    -   huge complex objects where you only need to test parts
+-   Avoid exporting functions purely for the purpose of testing unless you really need to
+-   Avoid cast or prefer `x as T` instead of `<T>x` cast
+    -   Use `partial<T>()` from `test/util` if only a partial object is required
 
 ## Fixtures
 
@@ -314,16 +314,16 @@ Declare types and function prototypes with [JSDoc](https://jsdoc.app/index.html)
 
 ## Classes
 
-- Use [Typescript getter setters (Accessors) when needed](https://google.github.io/styleguide/tsguide.html#properties-used-outside-of-class-lexical-scope).
-  The getter must be a `pure function` i.e.
-  - The function return values are identical for identical arguments
-  - The function has no side effects
+-   Use [Typescript getter setters (Accessors) when needed](https://google.github.io/styleguide/tsguide.html#properties-used-outside-of-class-lexical-scope).
+    The getter must be a `pure function` i.e.
+    -   The function return values are identical for identical arguments
+    -   The function has no side effects
 
 [Source](https://en.wikipedia.org/wiki/Pure_function)
 
-- Omit constructors when defining Static classes
-- [No `#private` fields](https://google.github.io/styleguide/tsguide.html#private-fields), use TypeScript's visibility annotations instead
-- Avoid underscore suffixes or prefixes like `_prop`, instead use [whole words](https://google.github.io/styleguide/tsguide.html#properties-used-outside-of-class-lexical-scope) as the suffix or prefix like `internalProp`
+-   Omit constructors when defining Static classes
+-   [No `#private` fields](https://google.github.io/styleguide/tsguide.html#private-fields), use TypeScript's visibility annotations instead
+-   Avoid underscore suffixes or prefixes like `_prop`, instead use [whole words](https://google.github.io/styleguide/tsguide.html#properties-used-outside-of-class-lexical-scope) as the suffix or prefix like `internalProp`
 
 ## regex
 

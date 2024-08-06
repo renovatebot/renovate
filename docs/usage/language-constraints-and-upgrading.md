@@ -7,8 +7,8 @@ For example, a npm package may support Node.js 18 and 20 in its `v1` releases an
 
 In an ideal scenario:
 
-- Package files allow a project to show its supported language constraints, and
-- Package registries allow packages to show the supported language constraints per release
+-   Package files allow a project to show its supported language constraints, and
+-   Package registries allow packages to show the supported language constraints per release
 
 ## Restricting upgrades to compatible releases
 
@@ -22,8 +22,8 @@ For other ecosystems Renovate's default behavior may seem _wrong_.
 As a Renovate user, you can opt into strict compatibility filtering by setting `constraintsFiltering=strict`.
 Before you set `constraintsFiltering=strict`, you should:
 
-- understand the limitations of this setting
-- understand why `constraintsFiltering=strict` is _not_ the default behavior
+-   understand the limitations of this setting
+-   understand why `constraintsFiltering=strict` is _not_ the default behavior
 
 Please keep reading to learn more.
 
@@ -56,8 +56,8 @@ What if the project _already_ used a current version of this library "in a way t
 
 A second problem is that if:
 
-- Renovate can _not_ update the language constraints, or
-- a user _ignores_ or does not see the language upgrade
+-   Renovate can _not_ update the language constraints, or
+-   a user _ignores_ or does not see the language upgrade
 
 Then the user may not know that many dependencies are out of date, because Renovate is not creating PRs.
 For example: a project may have 10 dependencies, and 8 of those have updates.
@@ -81,17 +81,17 @@ For example:
 
 ```json title="Renovate config with Node.js constraints"
 {
-  "constraints": {
-    "node": "^18.0.0 || >=20.0.0"
-  }
+    "constraints": {
+        "node": "^18.0.0 || >=20.0.0"
+    }
 }
 ```
 
 You may need to set constraints in the Renovate config when:
 
-- The package manager of the project does not support constraints declarations, or
-- The project has not declared any constraints, or
-- You want Renovate to use _different_ constraints to what's declared in the _project_
+-   The package manager of the project does not support constraints declarations, or
+-   The project has not declared any constraints, or
+-   You want Renovate to use _different_ constraints to what's declared in the _project_
 
 Renovate will _not_ create "update" PRs to update any of these versions once they become outdated, so you must update those by hand.
 For this reason, setting constraints manually in the Renovate config is _undesirable_.
@@ -102,5 +102,5 @@ We prefer to fix problems in Renovate itself, instead of you setting constraints
 Please start, or join, a GitHub Discussion if you are interested in this topic.
 Subtopics include:
 
-- Improving language constraints update automation in package files
-- Improving versioning calculations of "subset" (is range A a subset of range B)
+-   Improving language constraints update automation in package files
+-   Improving versioning calculations of "subset" (is range A a subset of range B)

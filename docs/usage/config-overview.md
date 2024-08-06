@@ -2,11 +2,11 @@
 
 When Renovate runs on a repository, the final config used is derived from the:
 
-- Default config
-- Global config
-- Inherited config
-- Repository config
-- Resolved presets referenced in config
+-   Default config
+-   Global config
+-   Inherited config
+-   Repository config
+-   Resolved presets referenced in config
 
 ## Types of config
 
@@ -18,8 +18,8 @@ You can find the default values on the Renovate docs website.
 
 For example:
 
-- The default value for `onboarding` is `true`
-- The option `labels` lacks a default value, which means that no labels will be added to Renovate's PRs
+-   The default value for `onboarding` is `true`
+-   The option `labels` lacks a default value, which means that no labels will be added to Renovate's PRs
 
 The default config is loaded first, and may be superseded/overridden by the configuration types listed below.
 
@@ -73,25 +73,25 @@ Any additional Environment config variables take precedence over values in `RENO
 
 Boolean:
 
-- `RENOVATE_ONBOARDING=true`
+-   `RENOVATE_ONBOARDING=true`
 
 String:
 
-- `RENOVATE_BASE_DIR=/tmp/something`
-- `RENOVATE_BASE_DIR="/tmp/some thing"`
+-   `RENOVATE_BASE_DIR=/tmp/something`
+-   `RENOVATE_BASE_DIR="/tmp/some thing"`
 
 Number:
 
-- `RENOVATE_PR_HOURLY_LIMIT=1`
+-   `RENOVATE_PR_HOURLY_LIMIT=1`
 
 List with numbers or strings:
 
-- `RENOVATE_LABELS="abc,def,label with space"`
+-   `RENOVATE_LABELS="abc,def,label with space"`
 
 Objects, or lists with objects:
 
-- `RENOVATE_CONFIG="{platform\":\"gitlab\",\"onboarding\":false}"`
-- `RENOVATE_PACKAGE_RULES="[{matchHost:\"gitlab\",token:\"$SOME_TOKEN\"}]"`
+-   `RENOVATE_CONFIG="{platform\":\"gitlab\",\"onboarding\":false}"`
+-   `RENOVATE_PACKAGE_RULES="[{matchHost:\"gitlab\",token:\"$SOME_TOKEN\"}]"`
 
 <!-- prettier-ignore -->
 !!! tip
@@ -107,11 +107,11 @@ Read the [Self-hosted experimental environment variables](./self-hosted-experime
 
 Finally, there are some special environment variables that are loaded _before_ configuration parsing because they are used during logging initialization:
 
-- `LOG_CONTEXT`: a unique identifier used in each log message to track context
-- `LOG_FILE`: used to enable file logging and specify the log file path
-- `LOG_FILE_LEVEL`: log file logging level, defaults to `debug`
-- `LOG_FORMAT`: defaults to a "pretty" human-readable output, but can be changed to "json"
-- `LOG_LEVEL`: most commonly used to change from the default `info` to `debug` logging
+-   `LOG_CONTEXT`: a unique identifier used in each log message to track context
+-   `LOG_FILE`: used to enable file logging and specify the log file path
+-   `LOG_FILE_LEVEL`: log file logging level, defaults to `debug`
+-   `LOG_FORMAT`: defaults to a "pretty" human-readable output, but can be changed to "json"
+-   `LOG_LEVEL`: most commonly used to change from the default `info` to `debug` logging
 
 #### CLI config
 
@@ -123,8 +123,8 @@ For example, if you configure conflicting values in Environment, File config and
 
 It is important that you:
 
-- Always provide a value, even if the field is boolean (e.g. `--onboarding=true` and _not_ `--onboarding`), and
-- Prefer `=` notation over spaces, e.g. `--onboarding=true` instead of `--onboarding true`
+-   Always provide a value, even if the field is boolean (e.g. `--onboarding=true` and _not_ `--onboarding`), and
+-   Prefer `=` notation over spaces, e.g. `--onboarding=true` instead of `--onboarding true`
 
 ### Inherited config
 
@@ -133,14 +133,14 @@ It is important that you:
 The primary purpose of Inherited config is to allow for default settings of an organization/group.
 Two main use cases for Inherited config are:
 
-- Controlling onboarding settings within an org (e.g. disabling onboarding, making config optional)
-- Defining default config settings for repos within an org
+-   Controlling onboarding settings within an org (e.g. disabling onboarding, making config optional)
+-   Defining default config settings for repos within an org
 
 We recommend that organizations use shared presets instead of Inherited config, if possible.
 But default settings through Inherited config are useful if:
 
-- You want to avoid setting Repository config in each repo, or
-- You onboarded many repos prior to having a shared org config, and don't want to retrospectively edit each repo's config
+-   You want to avoid setting Repository config in each repo, or
+-   You onboarded many repos prior to having a shared org config, and don't want to retrospectively edit each repo's config
 
 #### How it's found
 
@@ -218,21 +218,21 @@ In such cases, use `globalExtends` instead of `extends` so that it is resolved i
 If you use `extends` within Global config then it's important to note that these are _not_ resolved/expanded during Global config processing and instead are passed through unresolved to be part of Repository config.
 Passing `extends` through to be part of Repository config has two major consequences:
 
-- It allows repository users to be able to use `ignorePresets` to ignore all or part of the `extends` presets, and
-- Presets defined within `extends` in Global config will take _higher_ precedence that "regular" Global config, because it's resolved later
+-   It allows repository users to be able to use `ignorePresets` to ignore all or part of the `extends` presets, and
+-   Presets defined within `extends` in Global config will take _higher_ precedence that "regular" Global config, because it's resolved later
 
 ### Using a centralized config
 
 Using "centralized" configs through Renovate presets is important in order to be able to:
 
-- Save time by not repeating yourself in every repo with the same config, and
-- Being able to change settings across an entire Organization or groups of repositories in one place
+-   Save time by not repeating yourself in every repo with the same config, and
+-   Being able to change settings across an entire Organization or groups of repositories in one place
 
 Once you've created a centralized preset config, there are multiple ways you can pass it through to repositories:
 
-- Defining it in Global config (either `globalExtends` or `extends`)
-- Using it as your Inherited config, or referencing it from Inherited config using `extends`
-- Ensuring it's referenced in Onboarding config so that it's committed as part of the Repository config
+-   Defining it in Global config (either `globalExtends` or `extends`)
+-   Using it as your Inherited config, or referencing it from Inherited config using `extends`
+-   Ensuring it's referenced in Onboarding config so that it's committed as part of the Repository config
 
 The above possibilities go from least to most transparent when it comes to end users.
 
@@ -244,8 +244,8 @@ Inherited config is visible to developers (it's within a repository they can see
 The recommended approach for using a centralized preset is to explicitly "extend" it from every repository, which can be achieved easily if it's part of your `onboardingConfig`.
 By having your centralized preset part of each Repository config `extends`, it has these two benefits:
 
-- You still have the ability to change shared settings in a single location
-- Any user viewing the repo can see the preset being extended and trace it back to understand which config is applied
+-   You still have the ability to change shared settings in a single location
+-   Any user viewing the repo can see the preset being extended and trace it back to understand which config is applied
 
 ## Mend Renovate App Config
 
@@ -260,13 +260,13 @@ Importantly, logs for all Renovate jobs by the Mend Renovate App are available t
 If an Organization installed Renovate with "All repositories" (instead of "Selected repositories"), then Renovate will default to "Silent" mode (`dryRun=lookup`).
 We chose this behavior because:
 
-- Too often an account or org administrator selects the "All repositories" option and accidentally onboards hundreds of repositories, and
-- By offering this option, it means that org administrators _can_ install Renovate into "All repositories" without worrying about the noise, and let individual repository admins decide if/when to start onboarding
+-   Too often an account or org administrator selects the "All repositories" option and accidentally onboards hundreds of repositories, and
+-   By offering this option, it means that org administrators _can_ install Renovate into "All repositories" without worrying about the noise, and let individual repository admins decide if/when to start onboarding
 
 ##### Why we call this silent mode
 
-- It's not just no PRs, it's also no Issues
-- It's a common term across other Mend capabilities, such as OSS security and SAST security, where status checks also use silent/non-silent
+-   It's not just no PRs, it's also no Issues
+-   It's a common term across other Mend capabilities, such as OSS security and SAST security, where status checks also use silent/non-silent
 
 #### Get onboarding PRs from Renovate by getting out of silent mode
 

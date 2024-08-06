@@ -20,24 +20,24 @@ Given the above `.tfvars` file, you put this in your `renovate.json`:
 
 ```json
 {
-  "customManagers": [
-    {
-      "customType": "regex",
-      "description": "Update Kubernetes version for Amazon EKS in tfvars files",
-      "fileMatch": [".+\\.tfvars$"],
-      "matchStrings": [
-        "#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s.*?_version\\s*=\\s*\"(?<currentValue>.*)\""
-      ],
-      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{/if}}"
-    }
-  ],
-  "packageRules": [
-    {
-      "matchDatasources": ["endoflife-date"],
-      "matchPackageNames": ["amazon-eks"],
-      "extractVersion": "^(?<version>.*)-eks.+$"
-    }
-  ]
+    "customManagers": [
+        {
+            "customType": "regex",
+            "description": "Update Kubernetes version for Amazon EKS in tfvars files",
+            "fileMatch": [".+\\.tfvars$"],
+            "matchStrings": [
+                "#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s.*?_version\\s*=\\s*\"(?<currentValue>.*)\""
+            ],
+            "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{/if}}"
+        }
+    ],
+    "packageRules": [
+        {
+            "matchDatasources": ["endoflife-date"],
+            "matchPackageNames": ["amazon-eks"],
+            "extractVersion": "^(?<version>.*)-eks.+$"
+        }
+    ]
 }
 ```
 

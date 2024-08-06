@@ -20,9 +20,9 @@ Renovate detects and populates changelogs by:
 
 For private packages, the algorithm is mostly the same as described above, with the additional considerations:
 
-- Renovate must be able to access the private package in the first place
-- The private registry must include the source URL in its response
-- Renovate must be able to detect and authenticate with whatever private repository corresponds to the source URL
+-   Renovate must be able to access the private package in the first place
+-   The private registry must include the source URL in its response
+-   Renovate must be able to detect and authenticate with whatever private repository corresponds to the source URL
 
 For more details, see [Private packages, looking up changelogs](../getting-started/private-packages.md#looking-up-changelogs).
 
@@ -56,17 +56,17 @@ Read [Running Renovate, GitHub.com token for changelogs](../getting-started/runn
 Follow these steps to find out why Renovate does not find a changelog:
 
 1. The datasource for this package does not support sourceUrls.
-   - If the registry fundamentally does not provide this data, then the only possibility is for it to be manually populated through PRs to Renovate's source code
-   - If the registry provides source URLs in its response but Renovate does not understand the required fields, then raise a feature request with examples, or better yet a Pull Request to implement support for the source URL parsing/mapping yourself
-   - Sometimes self-hosted versions of registries don't include the full metadata compared to what the public registries do
+    - If the registry fundamentally does not provide this data, then the only possibility is for it to be manually populated through PRs to Renovate's source code
+    - If the registry provides source URLs in its response but Renovate does not understand the required fields, then raise a feature request with examples, or better yet a Pull Request to implement support for the source URL parsing/mapping yourself
+    - Sometimes self-hosted versions of registries don't include the full metadata compared to what the public registries do
 1. The package was published without source URL information being included.
-   - For example, occasionally `npm` packages don't have `repository` fields included
-   - For example, Docker images regularly do not have the required `LABEL` entry
+    - For example, occasionally `npm` packages don't have `repository` fields included
+    - For example, Docker images regularly do not have the required `LABEL` entry
 1. Renovate cannot access the source repository
-   - This is typically a concern for private repositories only
-   - Check if the token Renovate uses has access rights to the repository you need it to access
+    - This is typically a concern for private repositories only
+    - Check if the token Renovate uses has access rights to the repository you need it to access
 1. Renovate cannot detect the file names or release name convention within the repository
-   - In this case an enhancement to Renovate might be needed to better detect the releases/formats, assuming the package/repository has a reasonable convention to follow
+    - In this case an enhancement to Renovate might be needed to better detect the releases/formats, assuming the package/repository has a reasonable convention to follow
 
 If none of this helps, search the Renovate issues and discussions to see if this is a known problem.
 
@@ -83,13 +83,13 @@ For example, we have seen cases where the `repository` field in npm's `package.j
 
 In general, Renovate can understand your versions and changelogs best when you:
 
-- Use SemVer versioning, so `major.minor.patch`
-- Use the [`semantic-release` bot](https://github.com/semantic-release/semantic-release) to automate the release process
+-   Use SemVer versioning, so `major.minor.patch`
+-   Use the [`semantic-release` bot](https://github.com/semantic-release/semantic-release) to automate the release process
 
 Try to avoid things like:
 
-- Stripping out the trailing `.0` unnecessarily (e.g. having a package `3.1.0` on a registry but using only `3.1` in your changelogs)
-- Using "Release names" in a way which makes the actual version hard to discern (e.g. instead of `3.0.0` you title your release notes `Big news! v3 is here`
+-   Stripping out the trailing `.0` unnecessarily (e.g. having a package `3.1.0` on a registry but using only `3.1` in your changelogs)
+-   Using "Release names" in a way which makes the actual version hard to discern (e.g. instead of `3.0.0` you title your release notes `Big news! v3 is here`
 
 ### npm package maintainers
 

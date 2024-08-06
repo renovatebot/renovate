@@ -11,10 +11,10 @@ To learn how to create your own presets, how to host them, and how to extend fro
 
 Use presets to:
 
-- Set up the bot with good default settings
-- Reduce duplication of your configuration
-- Share your configuration with others
-- Use somebody else's configuration and extend it with your own rules
+-   Set up the bot with good default settings
+-   Reduce duplication of your configuration
+-   Share your configuration with others
+-   Use somebody else's configuration and extend it with your own rules
 
 ## How to use presets
 
@@ -24,7 +24,7 @@ You find the the `helpers:pinGitHubActionDigests` preset and add it to the `exte
 
 ```json
 {
-  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"]
+    "extends": ["config:recommended", "helpers:pinGitHubActionDigests"]
 }
 ```
 
@@ -58,5 +58,5 @@ Read [Contributing to presets](../config-presets.md#contributing-to-presets) to 
 
 In short:
 
-- Browse [Renovate's default presets](../presets-default.md) to find any that are useful to you
-- Publish your own if you wish to reuse them across repositories
+-   Browse [Renovate's default presets](../presets-default.md) to find any that are useful to you
+-   Publish your own if you wish to reuse them across repositories

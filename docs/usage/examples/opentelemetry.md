@@ -2,7 +2,7 @@
 
 Requirements:
 
-- docker-compose
+-   docker-compose
 
 ## Prepare setup
 
@@ -11,73 +11,73 @@ Create a `docker-compose.yaml` and `otel-collector-config.yml` file as seen belo
 ```yaml title="docker-compose.yaml"
 version: '3'
 services:
-  # Jaeger
-  jaeger:
-    image: jaegertracing/all-in-one:1
-    ports:
-      - '16686:16686'
-      - '4317'
+    # Jaeger
+    jaeger:
+        image: jaegertracing/all-in-one:1
+        ports:
+            - '16686:16686'
+            - '4317'
 
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.88.0
-    command: ['--config=/etc/otel-collector-config.yml']
-    volumes:
-      - ./otel-collector-config.yml:/etc/otel-collector-config.yml
-    ports:
-      - '1888:1888' # pprof extension
-      - '13133:13133' # health_check extension
-      - '55679:55679' # zpages extension
-      - '4318:4318' # OTLP HTTP
-      - '4317:4317' # OTLP GRPC
-      - '9123:9123' # Prometheus exporter
-    depends_on:
-      - jaeger
+    otel-collector:
+        image: otel/opentelemetry-collector-contrib:0.88.0
+        command: ['--config=/etc/otel-collector-config.yml']
+        volumes:
+            - ./otel-collector-config.yml:/etc/otel-collector-config.yml
+        ports:
+            - '1888:1888' # pprof extension
+            - '13133:13133' # health_check extension
+            - '55679:55679' # zpages extension
+            - '4318:4318' # OTLP HTTP
+            - '4317:4317' # OTLP GRPC
+            - '9123:9123' # Prometheus exporter
+        depends_on:
+            - jaeger
 ```
 
 ```yaml title="otel-collector-config.yml"
 receivers:
-  otlp:
-    protocols:
-      grpc:
-      http:
+    otlp:
+        protocols:
+            grpc:
+            http:
 
 exporters:
-  otlp/jaeger:
-    endpoint: jaeger:4317
-    tls:
-      insecure: true
-  logging:
-  prometheus:
-    endpoint: '0.0.0.0:9123'
+    otlp/jaeger:
+        endpoint: jaeger:4317
+        tls:
+            insecure: true
+    logging:
+    prometheus:
+        endpoint: '0.0.0.0:9123'
 
 processors:
-  batch:
-  spanmetrics:
-    metrics_exporter: prometheus
-    latency_histogram_buckets: [10ms, 100ms, 250ms, 1s, 30s, 1m, 5m]
-    dimensions:
-      - name: http.method
-      - name: http.status_code
-      - name: http.host
-    dimensions_cache_size: 1000
-    aggregation_temporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE'
+    batch:
+    spanmetrics:
+        metrics_exporter: prometheus
+        latency_histogram_buckets: [10ms, 100ms, 250ms, 1s, 30s, 1m, 5m]
+        dimensions:
+            - name: http.method
+            - name: http.status_code
+            - name: http.host
+        dimensions_cache_size: 1000
+        aggregation_temporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE'
 
 extensions:
-  health_check:
-  pprof:
-  zpages:
+    health_check:
+    pprof:
+    zpages:
 
 service:
-  extensions: [pprof, zpages, health_check]
-  pipelines:
-    traces:
-      receivers: [otlp]
-      exporters: [otlp/jaeger, logging]
-      processors: [spanmetrics, batch]
+    extensions: [pprof, zpages, health_check]
+    pipelines:
+        traces:
+            receivers: [otlp]
+            exporters: [otlp/jaeger, logging]
+            processors: [spanmetrics, batch]
 
-    metrics:
-      receivers: [otlp]
-      exporters: [prometheus]
+        metrics:
+            receivers: [otlp]
+            exporters: [prometheus]
 ```
 
 Start setup using this command inside the folder containing the files created in the earlier steps:

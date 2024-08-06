@@ -63,14 +63,14 @@ Multi-platform and multi-language.
 
 Renovate works on these platforms:
 
-- [GitHub (.com and Enterprise Server)](./modules/platform/github/index.md)
-- [GitLab (.com and CE/EE)](./modules/platform/gitlab/index.md)
-- [Bitbucket Cloud](./modules/platform/bitbucket/index.md)
-- [Bitbucket Server](./modules/platform/bitbucket-server/index.md)
-- [Azure DevOps](./modules/platform/azure/index.md)
-- [AWS CodeCommit](./modules/platform/codecommit/index.md)
-- [Gitea and Forgejo](./modules/platform/gitea/index.md)
-- [Gerrit (experimental)](./modules/platform/gerrit/index.md)
+-   [GitHub (.com and Enterprise Server)](./modules/platform/github/index.md)
+-   [GitLab (.com and CE/EE)](./modules/platform/gitlab/index.md)
+-   [Bitbucket Cloud](./modules/platform/bitbucket/index.md)
+-   [Bitbucket Server](./modules/platform/bitbucket-server/index.md)
+-   [Azure DevOps](./modules/platform/azure/index.md)
+-   [AWS CodeCommit](./modules/platform/codecommit/index.md)
+-   [Gitea and Forgejo](./modules/platform/gitea/index.md)
+-   [Gerrit (experimental)](./modules/platform/gerrit/index.md)
 
 ## Who Uses Renovate?
 
@@ -108,8 +108,8 @@ Renovate is used by:
 
 You can run Renovate as:
 
-- an [Open Source npm package](https://www.npmjs.com/package/renovate)
-- a [pre-built Open Source image on Docker Hub](https://hub.docker.com/r/renovate/renovate)
+-   an [Open Source npm package](https://www.npmjs.com/package/renovate)
+-   a [pre-built Open Source image on Docker Hub](https://hub.docker.com/r/renovate/renovate)
 
 Or you can use [the Mend Renovate App](https://github.com/marketplace/renovate) which is hosted by [Mend](https://www.mend.io/).
 

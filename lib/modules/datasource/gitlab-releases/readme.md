@@ -9,7 +9,7 @@ An example would be `https://gitlab.company.com`.
 
 Please note the following requirements:
 
-- This datasource requires at least GitLab 11.7
+-   This datasource requires at least GitLab 11.7
 
 **Usage Example**
 
@@ -18,16 +18,16 @@ This can be achieved by configuring a custom manager in `renovate.json` for file
 
 ```json
 {
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": ["^versions.ini$"],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VERSION=(?<currentValue>.*)\\s"
-      ],
-      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
-    }
-  ]
+    "customManagers": [
+        {
+            "customType": "regex",
+            "fileMatch": ["^versions.ini$"],
+            "matchStrings": [
+                "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VERSION=(?<currentValue>.*)\\s"
+            ],
+            "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+        }
+    ]
 }
 ```
 

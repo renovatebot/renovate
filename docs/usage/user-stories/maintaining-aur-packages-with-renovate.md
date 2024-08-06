@@ -43,24 +43,24 @@ I can create a `renovate.json` configuration with the following custom manager c
 
 ```json title="renovate.json"
 {
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": ["(^|/)PKGBUILD$"],
-      "matchStrings": [
-        "pkgver=(?<currentValue>.*) # renovate: datasource=(?<datasource>.*) depName=(?<depName>.*)"
-      ],
-      "extractVersionTemplate": "^v?(?<version>.*)$"
-    }
-  ]
+    "customManagers": [
+        {
+            "customType": "regex",
+            "fileMatch": ["(^|/)PKGBUILD$"],
+            "matchStrings": [
+                "pkgver=(?<currentValue>.*) # renovate: datasource=(?<datasource>.*) depName=(?<depName>.*)"
+            ],
+            "extractVersionTemplate": "^v?(?<version>.*)$"
+        }
+    ]
 }
 ```
 
 Breaking that down:
 
-- The `fileMatch` setting tells Renovate to look for any `PKGBUILD` files in a repository
-- The `matchStrings` is the regex format to extract the version, datasource, and dependency name from the `PKGBUILD`
-- The `extractVersionTemplate` is to handle a “v” in front of any version number that is sometimes added to Git tags
+-   The `fileMatch` setting tells Renovate to look for any `PKGBUILD` files in a repository
+-   The `matchStrings` is the regex format to extract the version, datasource, and dependency name from the `PKGBUILD`
+-   The `extractVersionTemplate` is to handle a “v” in front of any version number that is sometimes added to Git tags
 
 And here’s an extract from the PKGBUILD for the [bicep-bin](https://aur.archlinux.org/packages/bicep-bin) AUR package that I maintain:
 
@@ -86,26 +86,26 @@ First, I only want to run this workflow on pull requests targeting the `main` br
 
 ```yaml
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-    branches:
-      - main
+    pull_request:
+        types:
+            - opened
+            - synchronize
+        branches:
+            - main
 ```
 
 Next, I’m going to need to check out the entire history of the repository, so I can compare the files changed in the latest commit with the Git history.
 
 ```yaml
 jobs:
-  updpkgsums:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
-        with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
+    updpkgsums:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
+              with:
+                  fetch-depth: 0
+                  ref: ${{ github.ref }}
 ```
 
 Getting the package that changed in a pull request requires a little bit of shell magic.
@@ -113,10 +113,10 @@ Getting the package that changed in a pull request requires a little bit of shel
 ```yaml
 - name: Find updated package
   run: |
-    #!/usr/bin/env bash
-    set -euxo pipefail
+      #!/usr/bin/env bash
+      set -euxo pipefail
 
-    echo "pkgbuild=$(git diff --name-only origin/main origin/${GITHUB_HEAD_REF} "*PKGBUILD" | head -1 | xargs dirname)" >> $GITHUB_ENV
+      echo "pkgbuild=$(git diff --name-only origin/main origin/${GITHUB_HEAD_REF} "*PKGBUILD" | head -1 | xargs dirname)" >> $GITHUB_ENV
 ```
 
 Now I’ve found the package that changed in the Renovate pull request, I can update the files.
@@ -130,8 +130,8 @@ You can [check out the full code on GitHub](https://github.com/JamieMagee/aur-pa
   if: ${{ env.pkgbuild != '' }}
   uses: ./.github/actions/aur
   with:
-    action: 'updpkgsums'
-    pkgname: ${{ env.pkgbuild }}
+      action: 'updpkgsums'
+      pkgname: ${{ env.pkgbuild }}
 ```
 
 Finally, once the `PKGBUILD` and `.SRCINFO` are updated I need to commit that change back to the pull request.
@@ -141,7 +141,7 @@ Finally, once the `PKGBUILD` and `.SRCINFO` are updated I need to commit that ch
   if: ${{ env.pkgbuild != '' }}
   uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a # v4.16.0
   with:
-    file_pattern: '*/PKGBUILD */.SRCINFO'
+      file_pattern: '*/PKGBUILD */.SRCINFO'
 ```
 
 Check out [this pull request for `bicep-bin`](https://github.com/JamieMagee/aur-packages/pull/62) where Renovate opened a pull request, and my GitHub Actions workflow updated the `b2sums` in the `PKGBUILD` and updated the `.SRCINFO`.
@@ -163,11 +163,11 @@ Then all I need to do is to use the `github-actions-deploy-aur` GitHub Action:
   uses: KSXGitHub/github-actions-deploy-aur@065b6056b25bdd43830d5a3f01899d0ff7169819 # v2.6.0
   if: ${{ env.pkgbuild != '' }}
   with:
-    pkgname: ${{ env.pkgbuild }}
-    pkgbuild: ${{ env.pkgbuild }}/PKGBUILD
-    commit_username: ${{ secrets.AUR_USERNAME }}
-    commit_email: ${{ secrets.AUR_EMAIL }}
-    ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+      pkgname: ${{ env.pkgbuild }}
+      pkgbuild: ${{ env.pkgbuild }}/PKGBUILD
+      commit_username: ${{ secrets.AUR_USERNAME }}
+      commit_email: ${{ secrets.AUR_EMAIL }}
+      ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
 ```
 
 ### All together now

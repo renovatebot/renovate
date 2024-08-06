@@ -13,16 +13,16 @@ You would configure a custom manager in your Renovate config file for files name
 
 ```json
 {
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": ["^versions.ini$"],
-      "matchStrings": ["GOOGLE_API_VERSION=(?<currentDigest>.*?)\\n"],
-      "currentValueTemplate": "master",
-      "depNameTemplate": "googleapis",
-      "packageNameTemplate": "https://github.com/googleapis/googleapis",
-      "datasourceTemplate": "git-refs"
-    }
-  ]
+    "customManagers": [
+        {
+            "customType": "regex",
+            "fileMatch": ["^versions.ini$"],
+            "matchStrings": ["GOOGLE_API_VERSION=(?<currentDigest>.*?)\\n"],
+            "currentValueTemplate": "master",
+            "depNameTemplate": "googleapis",
+            "packageNameTemplate": "https://github.com/googleapis/googleapis",
+            "datasourceTemplate": "git-refs"
+        }
+    ]
 }
 ```

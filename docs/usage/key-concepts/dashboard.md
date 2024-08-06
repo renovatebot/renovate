@@ -23,7 +23,7 @@ To turn on the Dashboard manually, add the `:dependencyDashboard` preset to your
 
 ```json
 {
-  "extends": ["config:recommended", ":dependencyDashboard"]
+    "extends": ["config:recommended", ":dependencyDashboard"]
 }
 ```
 
@@ -31,7 +31,7 @@ Or set `dependencyDashboard` to `true`:
 
 ```json
 {
-  "dependencyDashboard": true
+    "dependencyDashboard": true
 }
 ```
 
@@ -41,7 +41,7 @@ To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard
 
 ```json
 {
-  "extends": ["config:recommended", ":disableDependencyDashboard"]
+    "extends": ["config:recommended", ":disableDependencyDashboard"]
 }
 ```
 
@@ -53,8 +53,8 @@ This section explains some common use cases where having the Dependency Dashboar
 
 If Renovate finds:
 
-- packages flagged as deprecated on their registry, or
-- packages that have a community-sourced replacement PR available
+-   packages flagged as deprecated on their registry, or
+-   packages that have a community-sourced replacement PR available
 
 Then Renovate adds a prominent warning about these packages near the top of the Dependency Dashboard.
 Here is an example of how this can look:
@@ -80,9 +80,9 @@ You can customize this "wait for approval" behavior however you like best.
 
 At a high level the options are:
 
-- Require approval for _all_ updates
-- Require approval for a type of updates (`major` for example)
-- Require approval for specific packages
+-   Require approval for _all_ updates
+-   Require approval for a type of updates (`major` for example)
+-   Require approval for specific packages
 
 You can mix and match these options as well.
 
@@ -103,7 +103,7 @@ To require manual approval for _all updates_, add the `:dependencyDashboardAppro
 
 ```json
 {
-  "extends": ["config:recommended", ":dependencyDashboardApproval"]
+    "extends": ["config:recommended", ":dependencyDashboardApproval"]
 }
 ```
 
@@ -118,9 +118,9 @@ If you want to require approval for major updates, set `dependencyDashboardAppro
 
 ```json
 {
-  "major": {
-    "dependencyDashboardApproval": true
-  }
+    "major": {
+        "dependencyDashboardApproval": true
+    }
 }
 ```
 
@@ -136,11 +136,11 @@ If you want to approve specific packages, set `dependencyDashboardApproval` to `
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchPackageName": ["@somescope/**"],
-      "dependencyDashboardApproval": true
-    }
-  ]
+    "packageRules": [
+        {
+            "matchPackageName": ["@somescope/**"],
+            "dependencyDashboardApproval": true
+        }
+    ]
 }
 ```
