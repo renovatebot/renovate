@@ -149,7 +149,7 @@ export class DebDatasource extends Datasource {
 
       if (!lastTimestamp) {
         //extracting went wrong
-        break;
+        continue;
       }
 
       return { extractedFile, lastTimestamp };
