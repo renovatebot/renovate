@@ -230,6 +230,18 @@ export class DatasourceCacheStats {
 
     return result;
   }
+
+  static report(): void {
+    const { long, short } = this.getReport();
+
+    if (Object.keys(short).length > 0) {
+      logger.debug(short, 'Datasource cache statistics');
+    }
+
+    if (Object.keys(long).length > 0) {
+      logger.trace(long, 'Datasource cache detailed statistics');
+    }
+  }
 }
 
 export interface HttpRequestStatsDataPoint {

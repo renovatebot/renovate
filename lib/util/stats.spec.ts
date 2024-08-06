@@ -232,7 +232,7 @@ describe('util/stats', () => {
   });
 
   describe('DatasourceCacheStats', () => {
-    it('works', () => {
+    it('collects data points', () => {
       DatasourceCacheStats.hit('crate', 'https://foo.example.com', 'foo');
       DatasourceCacheStats.miss('maven', 'https://bar.example.com', 'bar');
       DatasourceCacheStats.set('npm', 'https://baz.example.com', 'baz');
@@ -270,6 +270,18 @@ describe('util/stats', () => {
           },
         },
       });
+    });
+
+    it('reports', () => {
+      DatasourceCacheStats.hit('crate', 'https://foo.example.com', 'foo');
+      DatasourceCacheStats.miss('maven', 'https://bar.example.com', 'bar');
+      DatasourceCacheStats.set('npm', 'https://baz.example.com', 'baz');
+      DatasourceCacheStats.skip('rubygems', 'https://qux.example.com', 'qux');
+
+      DatasourceCacheStats.report();
+
+      expect(logger.logger.trace).toHaveBeenCalledTimes(1);
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
   });
 
