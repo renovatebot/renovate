@@ -2940,7 +2940,7 @@ The above will configure `rangeStrategy` to `pin` only for the npm package `angu
 {
   "packageRules": [
     {
-      "matchPackageNames": ["^angular", "!@angular/abc"],
+      "matchPackageNames": ["@angular/**", "!@angular/abc"],
       "rangeStrategy": "replace"
     }
   ]
