@@ -168,6 +168,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     expect(fsExtra.readFile.mock.calls).toEqual([
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
@@ -219,7 +220,9 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
-      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
     ]);
   });
 
@@ -270,7 +273,9 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
-      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
     ]);
   });
 
@@ -319,6 +324,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/.python-version')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
@@ -367,6 +373,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/.python-version')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
@@ -413,6 +420,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/.python-version')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
   });
@@ -468,6 +476,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       [expect.toEndWith(join('/tmp/renovate/cache/others/virtualenvs'))],
     ]);
     expect(fsExtra.readFile.mock.calls).toEqual([
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
@@ -546,6 +555,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     expect(fsExtra.readFile.mock.calls).toEqual([
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
@@ -608,6 +618,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     expect(fsExtra.readFile.mock.calls).toEqual([
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
@@ -667,6 +678,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/.python-version')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
@@ -807,6 +819,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/.python-version')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
@@ -881,6 +894,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/.python-version')), 'utf8'],
+      [expect.toEndWith(join('/tmp/github/some/repo/Pipfile')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
       [expect.toEndWith(join('/tmp/github/some/repo/Pipfile.lock')), 'utf8'],
     ]);
