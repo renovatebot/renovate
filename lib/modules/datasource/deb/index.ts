@@ -8,9 +8,10 @@ import * as fs from '../../../util/fs';
 import type { HttpOptions } from '../../../util/http/types';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { computeFileChecksum, parseChecksumsFromInRelease } from './checksum';
 import { formatReleaseResult, releaseMetaInformationMatches } from './release';
 import type { PackageDescription } from './types';
-import { constructComponentUrls } from './url';
+import { constructComponentUrls, getBaseReleaseUrl } from './url';
 
 export class DebDatasource extends Datasource {
   static readonly id = 'deb';
@@ -119,12 +120,27 @@ export class DebDatasource extends Datasource {
         `${packageUrlHash}.${compression}`,
       );
 
-      const wasUpdated = await this.downloadPackageFile(
-        componentUrl,
-        compression,
-        compressedFile,
-        lastTimestamp,
-      );
+      let wasUpdated = false;
+
+      try {
+        wasUpdated = await this.downloadPackageFile(
+          componentUrl,
+          compression,
+          compressedFile,
+          lastTimestamp,
+        );
+      } catch (error) {
+        logger.error(
+          {
+            compression,
+            error: error.message,
+          },
+          `Failed to download package file from ${componentUrl}`,
+        );
+
+        continue;
+      }
+
       if (wasUpdated || !lastTimestamp) {
         try {
           await DebDatasource.extract(
@@ -173,6 +189,7 @@ export class DebDatasource extends Datasource {
     compressedFile: string,
     lastDownloadTimestamp?: Date,
   ): Promise<boolean> {
+    const baseReleaseUrl = getBaseReleaseUrl(basePackageUrl);
     const packageUrl = `${basePackageUrl}/Packages.${compression}`;
     let needsToDownload = true;
 
@@ -184,25 +201,52 @@ export class DebDatasource extends Datasource {
     }
 
     if (needsToDownload) {
-      try {
-        const readStream = this.http.stream(packageUrl);
-        const writeStream = fs.createCacheWriteStream(compressedFile);
-        await fs.pipeline(readStream, writeStream);
-        logger.debug(
-          { url: packageUrl, targetFile: compressedFile },
-          'Downloading Debian package file',
-        );
-      } catch (error) {
-        logger.error(
-          `Failed to download package file from ${packageUrl}: ${error.message}`,
-        );
-        needsToDownload = false;
+      const inReleaseContent = await this.fetchInReleaseFile(baseReleaseUrl);
+      const expectedChecksum = parseChecksumsFromInRelease(
+        inReleaseContent,
+        // path to the Package.gz file
+        packageUrl.replace(`${baseReleaseUrl}/`, ''),
+      );
+
+      const readStream = this.http.stream(packageUrl);
+      const writeStream = fs.createCacheWriteStream(compressedFile);
+      await fs.pipeline(readStream, writeStream);
+      logger.debug(
+        { url: packageUrl, targetFile: compressedFile },
+        'Downloading Debian package file',
+      );
+
+      const actualChecksum = await computeFileChecksum(compressedFile);
+
+      if (actualChecksum !== expectedChecksum) {
+        await fs.rmCache(compressedFile);
+        throw new Error('SHA256 checksum validation failed');
       }
     } else {
       logger.debug(`No need to download ${packageUrl}, file is up to date.`);
     }
 
     return needsToDownload;
+  }
+
+  /**
+   * Fetches the content of the InRelease file from the given base release URL.
+   *
+   * @param baseReleaseUrl - The base URL of the release (e.g., 'https://ftp.debian.org/debian/dists/bullseye').
+   * @returns resolves to the content of the InRelease file.
+   * @throws An error if the InRelease file could not be downloaded.
+   */
+  async fetchInReleaseFile(baseReleaseUrl: string): Promise<string> {
+    const inReleaseUrl = `${baseReleaseUrl}/InRelease`;
+    try {
+      const response = await this.http.get(inReleaseUrl);
+      return response.body;
+    } catch (error) {
+      logger.error(
+        `Failed to download InRelease file from ${inReleaseUrl}: ${error.message}`,
+      );
+      throw new Error('InRelease download failed');
+    }
   }
 
   /**

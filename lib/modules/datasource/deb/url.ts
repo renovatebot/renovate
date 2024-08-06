@@ -1,6 +1,21 @@
 import { joinUrlParts } from '../../../util/url';
 
 /**
+ * Extracts the base release URL from a package URL by removing the last two path segments.
+ *
+ * @param basePackageUrl - The base URL of the package.
+ * @returns The base release URL.
+ *
+ * @example
+ * // Returns 'https://ftp.debian.org/debian/dists/bullseye'
+ * getBaseReleaseUrl('https://ftp.debian.org/debian/dists/bullseye/main/binary-amd64');
+ */
+export function getBaseReleaseUrl(basePackageUrl: string): string {
+  const urlParts = basePackageUrl.split('/');
+  return urlParts.slice(0, urlParts.length - 2).join('/');
+}
+
+/**
  * Constructs the component URLs from the given registry URL.
  *
  * @param registryUrl - The base URL of the registry.

@@ -1,4 +1,4 @@
-import { constructComponentUrls } from './url';
+import { constructComponentUrls, getBaseReleaseUrl } from './url';
 
 describe('modules/datasource/deb/url', () => {
   it('constructs URLs correctly from registry URL with suite', () => {
@@ -28,5 +28,13 @@ describe('modules/datasource/deb/url', () => {
     expect(() => constructComponentUrls(registryUrl)).toThrow(
       'Missing required query parameter',
     );
+  });
+
+  it('returns the correct release url', () => {
+    const basePackageUrl =
+      'https://ftp.debian.org/debian/dists/bullseye/main/binary-amd64';
+    const expectedUrl = 'https://ftp.debian.org/debian/dists/bullseye';
+
+    expect(getBaseReleaseUrl(basePackageUrl)).toBe(expectedUrl);
   });
 });

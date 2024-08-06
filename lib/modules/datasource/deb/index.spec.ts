@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import { createReadStream } from 'fs';
 import { copyFile, stat } from 'fs-extra';
 import { DirectoryResult, dir } from 'tmp-promise';
 import upath from 'upath';
@@ -8,6 +9,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { GetPkgReleasesConfig } from '../types';
+import { getBaseReleaseUrl } from './url';
 import { DebDatasource } from '.';
 
 const debBaseUrl = 'http://ftp.debian.org';
@@ -22,6 +24,8 @@ describe('modules/datasource/deb/index', () => {
   let cfg: GetPkgReleasesConfig;
   let extractionFolder: string;
   let extractedPackageFile: string;
+  let fixturePackagesArchiveHash: string;
+  let fixturePackagesArchiveHash2: string;
 
   beforeEach(async () => {
     jest.resetAllMocks();
@@ -44,6 +48,13 @@ describe('modules/datasource/deb/index', () => {
         getRegistryUrl(debBaseUrl, 'stable', ['non-free'], 'amd64'),
       ],
     };
+
+    fixturePackagesArchiveHash = await computeFileChecksum(
+      fixturePackagesArchivePath,
+    );
+    fixturePackagesArchiveHash2 = await computeFileChecksum(
+      fixturePackagesArchivePath2,
+    );
   });
 
   describe('getReleases', () => {
@@ -98,6 +109,13 @@ describe('modules/datasource/deb/index', () => {
           .scope(debBaseUrl)
           .get(getPackageUrl('', 'stable', 'non-free', 'amd64'))
           .replyWithFile(200, fixturePackagesArchivePath);
+
+        mockFetchInReleaseContent(
+          fixturePackagesArchiveHash,
+          'stable',
+          'non-free',
+          'amd64',
+        );
       });
 
       it('returns a valid version for the package `album`', async () => {
@@ -127,6 +145,13 @@ describe('modules/datasource/deb/index', () => {
             .scope(debBaseUrl)
             .get(getPackageUrl('', 'stable', 'non-free-second', 'amd64'))
             .replyWithFile(200, fixturePackagesArchivePath2);
+
+          mockFetchInReleaseContent(
+            fixturePackagesArchiveHash2,
+            'stable',
+            'non-free-second',
+            'amd64',
+          );
 
           cfg.registryUrls = [
             getRegistryUrl(
@@ -158,6 +183,13 @@ describe('modules/datasource/deb/index', () => {
           .scope(debBaseUrl)
           .get(getPackageUrl('', 'stable', 'non-free', 'amd64'))
           .reply(404);
+
+        mockFetchInReleaseContent(
+          fixturePackagesArchiveHash,
+          'stable',
+          'non-free',
+          'riscv',
+        );
       });
 
       it('returns null for the package', async () => {
@@ -172,6 +204,13 @@ describe('modules/datasource/deb/index', () => {
         .scope(debBaseUrl)
         .get(getPackageUrl('', 'stable', 'non-free', 'riscv'))
         .replyWithFile(200, fixturePackagesArchivePath);
+
+      mockFetchInReleaseContent(
+        fixturePackagesArchiveHash,
+        'stable',
+        'non-free',
+        'riscv',
+      );
 
       cfg.registryUrls = [
         getRegistryUrl(debBaseUrl, 'stable', ['non-free'], 'riscv'),
@@ -214,14 +253,47 @@ describe('modules/datasource/deb/index', () => {
   });
 
   describe('downloadAndExtractPackage', () => {
-    beforeEach(() => {
+    it('should throw error when fetching the InRelease content fails', async () => {
+      mockFetchInReleaseContent(
+        'wrong-hash',
+        'bullseye',
+        'main',
+        'amd64',
+        true,
+      );
+      await expect(
+        debDatasource.downloadAndExtractPackage(
+          getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
+        ),
+      ).rejects.toThrow(`No compression standard worked for `);
+    });
+
+    it('should throw error when checksum validation fails', async () => {
       httpMock
         .scope(debBaseUrl)
         .get(getPackageUrl('', 'bullseye', 'main', 'amd64'))
         .replyWithFile(200, fixturePackagesArchivePath2);
+      mockFetchInReleaseContent('wrong-hash', 'bullseye', 'main', 'amd64');
+
+      await expect(
+        debDatasource.downloadAndExtractPackage(
+          getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
+        ),
+      ).rejects.toThrow(`No compression standard worked for `);
     });
 
     it('should throw error for unsupported compression', async () => {
+      httpMock
+        .scope(debBaseUrl)
+        .get(getPackageUrl('', 'bullseye', 'main', 'amd64'))
+        .replyWithFile(200, fixturePackagesArchivePath2);
+      mockFetchInReleaseContent(
+        fixturePackagesArchiveHash2,
+        'bullseye',
+        'main',
+        'amd64',
+      );
+
       DebDatasource.extract = jest.fn().mockRejectedValueOnce(new Error());
       await expect(
         debDatasource.downloadAndExtractPackage(
@@ -261,6 +333,46 @@ describe('modules/datasource/deb/index', () => {
     });
   });
 });
+
+/**
+ * Mocks the response for fetching the InRelease file content.
+ *
+ * This function sets up a mock HTTP response for a specific InRelease file request. The content includes a SHA256 checksum
+ * entry for a package index file. It allows simulating both successful and error responses.
+ *
+ * @param packageIndexHash - The SHA256 checksum hash of the package index file.
+ * @param release - The release name (e.g., 'bullseye').
+ * @param component - The component name (e.g., 'main').
+ * @param arch - The architecture (e.g., 'amd64').
+ * @param error - Optional flag to simulate an error response (default is false).
+ */
+function mockFetchInReleaseContent(
+  packageIndexHash: string,
+  release: string,
+  component: string,
+  arch: string,
+  error: boolean = false,
+) {
+  const packageIndexPath = `${component}/binary-${arch}/Packages.gz`;
+
+  const content = `SHA256:
+ 3957f28db16e3f28c7b34ae84f1c929c567de6970f3f1b95dac9b498dd80fe63   738242 contrib/Contents-all
+ ${packageIndexHash} 1234 ${packageIndexPath}
+`;
+
+  const mockCall = httpMock
+    .scope(debBaseUrl)
+    .get(
+      getBaseReleaseUrl(getComponentUrl('', release, component, arch)) +
+        '/InRelease',
+    );
+
+  if (error) {
+    mockCall.replyWithError('Unexpected Error');
+  } else {
+    mockCall.reply(200, content);
+  }
+}
 
 /**
  * Constructs a URL for accessing the component directory for a specific release and architecture.
@@ -314,4 +426,21 @@ function getRegistryUrl(
   arch: string,
 ) {
   return `${baseUrl}/debian?suite=${release}&components=${components.join(',')}&binaryArch=${arch}`;
+}
+
+/**
+ * Computes the SHA256 checksum of a specified file.
+ *
+ * @param filePath - path of the file
+ * @returns resolves to the SHA256 checksum
+ */
+function computeFileChecksum(filePath: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const hash = createHash('sha256');
+    const stream = createReadStream(filePath);
+
+    stream.on('data', (data) => hash.update(data));
+    stream.on('end', () => resolve(hash.digest('hex')));
+    stream.on('error', (error) => reject(error));
+  });
 }
