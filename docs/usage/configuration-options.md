@@ -2688,7 +2688,7 @@ This option is matched against the `currentValue` field of a dependency.
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchCurrentValue": "1.*",
       "automerge": true
     }
@@ -2877,7 +2877,7 @@ This option is matched against the `newValue` field of a dependency.
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchNewValue": "1.*",
       "automerge": true
     }
@@ -2940,7 +2940,7 @@ The above will configure `rangeStrategy` to `pin` only for the npm package `angu
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["^angular", "!@angular/abc"],
+      "matchPackageNames": ["@angular/**", "!@angular/abc"],
       "rangeStrategy": "replace"
     }
   ]
