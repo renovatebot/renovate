@@ -136,15 +136,24 @@ export interface DatasourceCacheReport {
 }
 
 export class DatasourceCacheStats {
+  private static getData(): DatasourceCacheDataPoint[] {
+    return (
+      memCache.get<DatasourceCacheDataPoint[]>('datasource-cache-stats') ?? []
+    );
+  }
+
+  private static setData(data: DatasourceCacheDataPoint[]): void {
+    memCache.set('datasource-cache-stats', data);
+  }
+
   static hit(
     datasource: string,
     registryUrl: string,
     packageName: string,
   ): void {
-    const data =
-      memCache.get<DatasourceCacheDataPoint[]>('datasource-cache-stats') ?? [];
+    const data = this.getData();
     data.push({ datasource, registryUrl, packageName, action: 'hit' });
-    memCache.set('datasource-cache-stats', data);
+    this.setData(data);
   }
 
   static miss(
@@ -152,10 +161,9 @@ export class DatasourceCacheStats {
     registryUrl: string,
     packageName: string,
   ): void {
-    const data =
-      memCache.get<DatasourceCacheDataPoint[]>('datasource-cache-stats') ?? [];
+    const data = this.getData();
     data.push({ datasource, registryUrl, packageName, action: 'miss' });
-    memCache.set('datasource-cache-stats', data);
+    this.setData(data);
   }
 
   static set(
@@ -163,10 +171,9 @@ export class DatasourceCacheStats {
     registryUrl: string,
     packageName: string,
   ): void {
-    const data =
-      memCache.get<DatasourceCacheDataPoint[]>('datasource-cache-stats') ?? [];
+    const data = this.getData();
     data.push({ datasource, registryUrl, packageName, action: 'set' });
-    memCache.set('datasource-cache-stats', data);
+    this.setData(data);
   }
 
   static skip(
@@ -174,15 +181,13 @@ export class DatasourceCacheStats {
     registryUrl: string,
     packageName: string,
   ): void {
-    const data =
-      memCache.get<DatasourceCacheDataPoint[]>('datasource-cache-stats') ?? [];
+    const data = this.getData();
     data.push({ datasource, registryUrl, packageName, action: 'skip' });
-    memCache.set('datasource-cache-stats', data);
+    this.setData(data);
   }
 
   static getReport(): DatasourceCacheReport {
-    const data =
-      memCache.get<DatasourceCacheDataPoint[]>('datasource-cache-stats') ?? [];
+    const data = this.getData();
     const result: DatasourceCacheReport = { long: {}, short: {} };
     for (const { datasource, registryUrl, packageName, action } of data) {
       result.long[datasource] ??= {};

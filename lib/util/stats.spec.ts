@@ -1,6 +1,7 @@
 import { logger } from '../../test/util';
 import * as memCache from './cache/memory';
 import {
+  DatasourceCacheStats,
   HttpCacheStats,
   HttpStats,
   LookupStats,
@@ -225,6 +226,48 @@ describe('util/stats', () => {
           maxMs: 1000,
           medianMs: 1000,
           totalMs: 1000,
+        },
+      });
+    });
+  });
+
+  describe('DatasourceCacheStats', () => {
+    it('works', () => {
+      DatasourceCacheStats.hit('crate', 'https://foo.example.com', 'foo');
+      DatasourceCacheStats.miss('maven', 'https://bar.example.com', 'bar');
+      DatasourceCacheStats.set('npm', 'https://baz.example.com', 'baz');
+      DatasourceCacheStats.skip('rubygems', 'https://qux.example.com', 'qux');
+
+      const report = DatasourceCacheStats.getReport();
+
+      expect(report).toEqual({
+        long: {
+          crate: {
+            'https://foo.example.com': { foo: { read: 'hit' } },
+          },
+          maven: {
+            'https://bar.example.com': { bar: { read: 'miss' } },
+          },
+          npm: {
+            'https://baz.example.com': { baz: { write: 'set' } },
+          },
+          rubygems: {
+            'https://qux.example.com': { qux: { write: 'skip' } },
+          },
+        },
+        short: {
+          crate: {
+            'https://foo.example.com': { hit: 1, miss: 0, set: 0, skip: 0 },
+          },
+          maven: {
+            'https://bar.example.com': { hit: 0, miss: 1, set: 0, skip: 0 },
+          },
+          npm: {
+            'https://baz.example.com': { hit: 0, miss: 0, set: 1, skip: 0 },
+          },
+          rubygems: {
+            'https://qux.example.com': { hit: 0, miss: 0, set: 0, skip: 1 },
+          },
         },
       });
     });
