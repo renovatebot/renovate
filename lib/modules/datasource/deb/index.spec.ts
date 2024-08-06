@@ -183,16 +183,21 @@ describe('modules/datasource/deb/index', () => {
     });
   });
 
-  describe('parseExtractedPackage', () => {
-    it('should parse the last package', async () => {
+  describe('parseExtractedPackageIndex', () => {
+    it('should parse the extracted package', async () => {
       await copyFile(fixturePackagesPath, extractedPackageFile);
 
-      const release = await debDatasource.parseExtractedPackage(
+      const parsedPackages = await debDatasource.parseExtractedPackageIndex(
         extractedPackageFile,
-        'alien-arena-data',
         new Date(),
       );
-      expect(release?.releases?.[0]?.version).toBe('7.71.3+ds-1');
+
+      const firstPackage = parsedPackages.find((p) => p.Package === 'album');
+      const lastPackage = parsedPackages.find(
+        (p) => p.Package === 'alien-arena-data',
+      );
+      expect(firstPackage?.Version).toBe('4.15-1');
+      expect(lastPackage?.Version).toBe('7.71.3+ds-1');
     });
   });
 

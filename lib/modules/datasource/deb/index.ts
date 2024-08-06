@@ -235,24 +235,22 @@ export class DebDatasource extends Datasource {
   }
 
   /**
-   * Parses the extracted package file to find the specified package.
+   * Parses the extracted package index file.
    *
    * @param extractedFile - The path to the extracted package file.
-   * @param packageName - The name of the package to find.
    * @param lastTimestamp - The timestamp of the last modification.
-   * @returns The release result if found, otherwise null.
+   * @returns a list of packages with minimal Metadata.
    */
   @cache({
     namespace: `datasource-${DebDatasource.id}-package`,
-    key: (extractedFile: string, packageName: string, lastTimestamp: Date) =>
-      `${extractedFile}:${packageName}:${lastTimestamp.getTime()}`,
+    key: (extractedFile: string, lastTimestamp: Date) =>
+      `${extractedFile}:${lastTimestamp.getTime()}`,
     ttlMinutes: 24 * 60,
   })
-  async parseExtractedPackage(
+  async parseExtractedPackageIndex(
     extractedFile: string,
-    packageName: string,
     lastTimestamp: Date,
-  ): Promise<ReleaseResult | null> {
+  ): Promise<PackageDescription[]> {
     // read line by line to avoid high memory consumption as the extracted Packages
     // files can be multiple MBs in size
     const rl = readline.createInterface({
@@ -261,14 +259,15 @@ export class DebDatasource extends Datasource {
     });
 
     let currentPackage: PackageDescription = {};
+    const allPackages: PackageDescription[] = [];
 
     for await (const line of rl) {
       if (line === '') {
-        // All information of the package are available, early return possible
-        if (currentPackage.Package === packageName) {
-          return formatReleaseResult(currentPackage);
+        // All information of the package are available, add to the list of packages
+        if (Object.keys(currentPackage).length > 0) {
+          allPackages.push(currentPackage);
+          currentPackage = {};
         }
-        currentPackage = {};
       } else {
         for (const key of DebDatasource.requiredPackageKeys) {
           if (line.startsWith(`${key}:`)) {
@@ -280,11 +279,11 @@ export class DebDatasource extends Datasource {
     }
 
     // Check the last package after file reading is complete
-    if (currentPackage.Package === packageName) {
-      return formatReleaseResult(currentPackage);
+    if (Object.keys(currentPackage).length > 0) {
+      allPackages.push(currentPackage);
     }
 
-    return null;
+    return allPackages;
   }
 
   /**
@@ -309,13 +308,16 @@ export class DebDatasource extends Datasource {
       try {
         const { extractedFile, lastTimestamp } =
           await this.downloadAndExtractPackage(componentUrl);
-        const newRelease = await this.parseExtractedPackage(
+        const parsedPackages = await this.parseExtractedPackageIndex(
           extractedFile,
-          packageName,
           lastTimestamp,
         );
+        const parsedPackage = parsedPackages.find(
+          (p) => p.Package === packageName,
+        );
 
-        if (newRelease) {
+        if (parsedPackage) {
+          const newRelease = formatReleaseResult(parsedPackage);
           if (aggregatedRelease === null) {
             aggregatedRelease = newRelease;
           } else {
