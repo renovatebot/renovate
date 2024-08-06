@@ -176,6 +176,11 @@ export function createCacheWriteStream(path: string): fs.WriteStream {
   return fs.createWriteStream(fullPath);
 }
 
+export function createCacheReadStream(path: string): fs.ReadStream {
+  const fullPath = ensureCachePath(path);
+  return fs.createReadStream(fullPath);
+}
+
 export async function localPathIsFile(pathName: string): Promise<boolean> {
   const path = ensureLocalPath(pathName);
   try {
@@ -244,6 +249,17 @@ export async function statLocalFile(
   const fullFileName = ensureLocalPath(fileName);
   try {
     return await fs.stat(fullFileName);
+  } catch (_) {
+    return null;
+  }
+}
+
+export async function statCacheFile(
+  pathName: string,
+): Promise<fs.Stats | null> {
+  const path = ensureCachePath(pathName);
+  try {
+    return await fs.stat(path);
   } catch (_) {
     return null;
   }
