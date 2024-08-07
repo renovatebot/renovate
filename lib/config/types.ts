@@ -165,6 +165,7 @@ export interface RepoGlobalConfig {
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;
   userAgent?: string;
+  dockerMaxPages?: number;
   cachePrivatePackages?: boolean;
 }
 

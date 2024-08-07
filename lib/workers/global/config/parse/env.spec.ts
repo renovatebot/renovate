@@ -281,6 +281,7 @@ describe('workers/global/config/parse/env', () => {
         mergeConfidenceDatasources: ['docker'],
         autodiscoverRepoSort: 'alpha',
         autodiscoverRepoOrder: 'desc',
+        dockerMaxPages: 10,
       });
     });
 
