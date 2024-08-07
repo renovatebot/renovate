@@ -1,4 +1,4 @@
-import type { PlatformId } from '../../constants/platforms';
+import { PLATFORM_HOST_TYPES } from '../../constants/platforms';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
 import { detectPlatform } from '../common';
@@ -14,16 +14,6 @@ const githubApiUrls = new Set([
   'https://api.github.com',
   'https://api.github.com/',
 ]);
-
-const standardGitAllowedHostTypes = [
-  // All known git platforms
-  'azure',
-  'bitbucket',
-  'bitbucket-server',
-  'gitea',
-  'github',
-  'gitlab',
-] satisfies PlatformId[];
 
 /**
  * Add authorization to a Git Url and returns a new environment variables object
@@ -194,7 +184,7 @@ export function getGitEnvironmentVariables(
   // construct the Set of allowed hostTypes consisting of the standard Git provides
   // plus additionalHostTypes, which are provided as parameter
   const gitAllowedHostTypes = new Set<string>([
-    ...standardGitAllowedHostTypes,
+    ...PLATFORM_HOST_TYPES,
     ...additionalHostTypes,
   ]);
 
