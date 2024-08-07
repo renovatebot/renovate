@@ -1,5 +1,4 @@
 export const PLATFORM_HOST_TYPES = [
-  // All known git platforms
   'azure',
   'bitbucket',
   'bitbucket-server',
