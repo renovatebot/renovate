@@ -90,6 +90,7 @@ const convertedExperimentalEnvVars = [
   'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
   'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
   'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',
+  'RENOVATE_X_PLATFORM_VERSION',
 ];
 
 /**
@@ -233,6 +234,29 @@ export async function getConfig(
   ];
 
   unsupportedEnv.forEach((val) => delete env[val]);
+
+  config = migratePlatformOptions(config, env);
+  return config;
+}
+
+function migratePlatformOptions(
+  config: AllConfig,
+  env: NodeJS.ProcessEnv,
+): AllConfig {
+  const platformOptionsKeys = ['platformVersion', 'gitLabIgnoreApprovals'];
+  const platformOptions: Record<string, unknown> = {};
+  let updated = false;
+  for (const key of platformOptionsKeys) {
+    const envKey = getEnvName({ name: key });
+    if (!is.undefined(env[envKey])) {
+      updated = true;
+      platformOptions[key] = env[envKey];
+    }
+  }
+
+  if (updated) {
+    config.platformOptions = { ...config.platformOptions, ...platformOptions };
+  }
 
   return config;
 }
