@@ -247,15 +247,15 @@ function migratePlatformOptions(
   const platformOptions: Record<string, unknown> = {};
   let updated = false;
   for (const key of platformOptionsKeys) {
-    const envName = getEnvName({ name: key });
-    if (!is.undefined(env[envName])) {
+    const envKey = getEnvName({ name: key });
+    if (!is.undefined(env[envKey])) {
       updated = true;
-      platformOptions[key] = env[envName];
+      platformOptions[key] = env[envKey];
     }
   }
 
   if (updated) {
-    config.platformOptions = platformOptions;
+    config.platformOptions = { ...config.platformOptions, ...platformOptions };
   }
 
   return config;

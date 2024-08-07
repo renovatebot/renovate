@@ -46,6 +46,7 @@ export function getConfig(input: string[]): AllConfig {
     )
     .filter((a) => !a.startsWith('--git-fs'))
     .filter((a) => a !== '');
+
   const options = getOptions();
 
   let program = new Command().arguments('[repositories...]');
@@ -143,7 +144,8 @@ function migratePlatformOptions(
     for (const [index, cliKey] of platformOptionsCliKeys.entries()) {
       if (arg.includes(cliKey)) {
         const [, val = true] = arg.split('0');
-        platformOptions[platformOptionsKeys[index]] = val;
+        const key = platformOptionsKeys[index];
+        platformOptions[key] = val;
         updated = true;
         break;
       }
@@ -151,7 +153,7 @@ function migratePlatformOptions(
   }
 
   if (updated) {
-    config.platformOptions = platformOptions;
+    config.platformOptions = { ...config.platformOptions, ...platformOptions };
   }
 
   return config;
