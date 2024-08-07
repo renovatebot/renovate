@@ -29,7 +29,6 @@ const dockerAdminConfig = {
 process.env.CONTAINERBASE = 'true';
 
 const config: UpdateArtifactsConfig = {};
-const updateInputCmd = `corepack use pnpm@8.15.6`;
 const validDepUpdate = {
   depName: 'pnpm',
   depType: 'packageManager',
@@ -97,7 +96,10 @@ describe('modules/manager/npm/artifacts', () => {
     });
 
     expect(res).toBeNull();
-    expect(execSnapshots).toMatchObject([{ cmd: updateInputCmd }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'corepack enable' },
+      { cmd: 'corepack use pnpm@8.15.6' },
+    ]);
   });
 
   it('returns updated package.json', async () => {
@@ -120,7 +122,10 @@ describe('modules/manager/npm/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: updateInputCmd }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'corepack enable' },
+      { cmd: 'corepack use pnpm@8.15.6' },
+    ]);
   });
 
   it('supports docker mode', async () => {
@@ -159,7 +164,9 @@ describe('modules/manager/npm/artifacts', () => {
           'bash -l -c "' +
           'install-tool node 20.1.0 ' +
           '&& ' +
-          updateInputCmd +
+          'corepack enable ' +
+          '&& ' +
+          'corepack use pnpm@8.15.6' +
           '"',
       },
     ]);
@@ -190,7 +197,11 @@ describe('modules/manager/npm/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool node 20.1.0' },
       {
-        cmd: updateInputCmd,
+        cmd: 'corepack enable',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'corepack use pnpm@8.15.6',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -211,6 +222,9 @@ describe('modules/manager/npm/artifacts', () => {
         artifactError: { fileName: 'package.json', stderr: 'exec error' },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: updateInputCmd }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'corepack enable', options: { cwd: '/tmp/github/some/repo' } },
+      // { cmd: 'corepack use pnpm@8.15.6' },
+    ]);
   });
 });
