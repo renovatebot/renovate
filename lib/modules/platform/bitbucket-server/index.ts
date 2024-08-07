@@ -112,8 +112,7 @@ export async function initPlatform({
   };
   try {
     let bitbucketServerVersion: string;
-    // eslint-disable-next-line
-    console.log('bbs-platform-version', platformOptions?.platformVersion);
+platformOptions?.platformVersion);
     if (platformOptions?.platformVersion) {
       bitbucketServerVersion = platformOptions?.platformVersion;
     } else {

@@ -131,8 +131,7 @@ export async function initPlatform({
         user.commit_email ?? user.email
       }>`;
     }
-    // eslint-disable-next-line
-    console.log('gitlab-platform-version', platformOptions?.platformVersion);
+platformOptions?.platformVersion);
     if (platformOptions?.platformVersion) {
       gitlabVersion = platformOptions?.platformVersion;
     } else {

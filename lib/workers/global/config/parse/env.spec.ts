@@ -282,7 +282,6 @@ describe('workers/global/config/parse/env', () => {
         mergeConfidenceDatasources: ['docker'],
         autodiscoverRepoSort: 'alpha',
         autodiscoverRepoOrder: 'desc',
-        // platformVersion: '8.0.0',
         platformOptions: {
           platformVersion: '8.0.0',
         },
