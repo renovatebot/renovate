@@ -1,4 +1,5 @@
 import {
+  anyMatchRegexOrGlobList,
   getRegexPredicate,
   matchRegexOrGlob,
   matchRegexOrGlobList,
@@ -12,6 +13,10 @@ describe('util/string-match', () => {
 
     it('returns false if no match', () => {
       expect(matchRegexOrGlobList('test', ['/test2/'])).toBeFalse();
+    });
+
+    it('returns true if star', () => {
+      expect(matchRegexOrGlobList('&&&', ['*'])).toBeTrue();
     });
 
     it('returns true if any match', () => {
@@ -52,6 +57,28 @@ describe('util/string-match', () => {
 
     it('returns false if not matching every negative pattern (glob)', () => {
       expect(matchRegexOrGlobList('test', ['!test3', '!te*'])).toBeFalse();
+    });
+  });
+
+  describe('anyMatchRegexOrGlobList()', () => {
+    it('returns false if empty patterns', () => {
+      expect(anyMatchRegexOrGlobList(['test'], [])).toBeFalse();
+    });
+
+    it('returns false if empty inputs', () => {
+      expect(anyMatchRegexOrGlobList([], ['/test2/'])).toBeFalse();
+    });
+
+    it('returns true if both empty', () => {
+      expect(anyMatchRegexOrGlobList([], [])).toBeFalse();
+    });
+
+    it('returns true if any match with positive', () => {
+      expect(anyMatchRegexOrGlobList(['a', 'b'], ['b'])).toBeTrue();
+    });
+
+    it('returns true if any match with negative', () => {
+      expect(anyMatchRegexOrGlobList(['a', 'b'], ['!b'])).toBeTrue();
     });
   });
 

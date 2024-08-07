@@ -43,6 +43,8 @@ export class CustomDatasource extends Datasource {
       return null;
     }
 
+    logger.trace({ data }, `Custom manager fetcher '${format}' returned data.`);
+
     for (const transformTemplate of transformTemplates) {
       const expression = jsonata(transformTemplate);
       data = await expression.evaluate(data);

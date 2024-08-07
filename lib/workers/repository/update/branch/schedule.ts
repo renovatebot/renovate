@@ -8,6 +8,7 @@ import {
   MonthRange,
   parseExpression,
 } from 'cron-parser';
+import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
 import type { RenovateConfig } from '../../../../config/types';
@@ -198,6 +199,10 @@ export function isScheduledNow(
   const isWithinSchedule = configSchedule.some((scheduleText) => {
     const cronSchedule = parseCron(scheduleText);
     if (cronSchedule) {
+      const cronScheduleSummary = cronstrue.toString(scheduleText, {
+        throwExceptionOnParseError: false,
+      });
+      logger.debug(`Human-readable summary for cron:: ${cronScheduleSummary}`);
       // We have Cron syntax
       if (cronMatches(scheduleText, now, config.timezone)) {
         logger.debug(`Matches schedule ${scheduleText}`);
