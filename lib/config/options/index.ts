@@ -2647,6 +2647,8 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'gitLabIgnoreApprovals',
+    cli: false,
+    env: false,
     description: `Ignore approval rules for MRs created by Renovate, which is useful for automerge.`,
     type: 'boolean',
     default: false,
@@ -2950,6 +2952,8 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'platformVersion',
+    cli: false,
+    env: false,
     description:
       'Set a version string here to let Renovate skip the API call to fetch the platform version.',
     type: 'string',

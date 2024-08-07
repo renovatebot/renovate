@@ -16,6 +16,9 @@ export function getCliName(option: ParseConfigOptions): string {
 }
 
 export function getConfig(input: string[]): AllConfig {
+  let config: Record<string, any> = {};
+  config = migratePlatformOptions(input, config);
+
   // massage migrated configuration keys
   const argv = input
     .map((a) =>
@@ -36,12 +39,14 @@ export function getConfig(input: string[]): AllConfig {
         .replace('--include-forks', '--fork-processing=enabled')
         .replace('--recreate-closed=false', '--recreate-when=auto')
         .replace('--recreate-closed=true', '--recreate-when=always')
-        .replace('--recreate-closed', '--recreate-when=always'),
+        .replace('--recreate-closed', '--recreate-when=always')
+        .replace('--git-lab-ignore-approvals=false', '')
+        .replace('--git-lab-ignore-approvals=true', '')
+        .replace('--git-lab-ignore-approvals', ''),
     )
-    .filter((a) => !a.startsWith('--git-fs'));
+    .filter((a) => !a.startsWith('--git-fs'))
+    .filter((a) => a !== '');
   const options = getOptions();
-
-  const config: Record<string, any> = {};
 
   let program = new Command().arguments('[repositories...]');
 
@@ -118,6 +123,36 @@ export function getConfig(input: string[]): AllConfig {
       }
     })
     .parse(argv);
+
+  return config;
+}
+
+function migratePlatformOptions(
+  argv: string[],
+  config: Record<string, any>,
+): Record<string, any> {
+  const platformOptionsKeys = ['platformVersion', 'gitLabIgnoreApprovals'];
+  const platformOptionsCliKeys = platformOptionsKeys.map((option) =>
+    getCliName({ name: option }),
+  );
+  const platformOptions: Record<string, unknown> = {};
+
+  let updated = false;
+
+  for (const arg of argv) {
+    for (const [index, cliKey] of platformOptionsCliKeys.entries()) {
+      if (arg.includes(cliKey)) {
+        const [, val = true] = arg.split('0');
+        platformOptions[platformOptionsKeys[index]] = val;
+        updated = true;
+        break;
+      }
+    }
+  }
+
+  if (updated) {
+    config.platformOptions = platformOptions;
+  }
 
   return config;
 }

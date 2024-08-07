@@ -235,19 +235,22 @@ export async function getConfig(
 
   unsupportedEnv.forEach((val) => delete env[val]);
 
-  config = migratePlatformOptions(config);
+  config = migratePlatformOptions(config, env);
   return config;
 }
 
-function migratePlatformOptions(config: AllConfig): AllConfig {
-  const platformOptionsKeys = ['platformVersion'];
+function migratePlatformOptions(
+  config: AllConfig,
+  env: NodeJS.ProcessEnv,
+): AllConfig {
+  const platformOptionsKeys = ['platformVersion', 'gitLabIgnoreApprovals'];
   const platformOptions: Record<string, unknown> = {};
   let updated = false;
   for (const key of platformOptionsKeys) {
-    if (!is.undefined(config[key])) {
+    const envName = getEnvName({ name: key });
+    if (!is.undefined(env[envName])) {
       updated = true;
-      platformOptions[key] = config[key];
-      delete config[key];
+      platformOptions[key] = env[envName];
     }
   }
 
