@@ -1,9 +1,12 @@
+import upath from 'upath';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { getNodeToolConstraint } from './post-update/node-version';
+import { lazyLoadPackageJson } from './post-update/utils';
 
 // eg. 8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589
 const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
@@ -41,6 +44,10 @@ export async function updateArtifacts({
     return null;
   }
 
+  // asuuming that corepack only modified the root package.json
+  // as it should not be normal practice to have different package maangers in different workspaces
+  const pkgFileDir = upath.dirname(packageFileName);
+  const lazyPkgJson = lazyLoadPackageJson(pkgFileDir);
   const cmd = ['corepack enable'];
 
   cmd.push(`corepack use ${depName}@${newVersion}`);
@@ -48,10 +55,7 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     toolConstraints: [
-      {
-        toolName: 'node',
-        constraint: config.constraints?.node,
-      },
+      await getNodeToolConstraint(config, updatedDeps, pkgFileDir, lazyPkgJson),
     ],
     docker: {},
     userConfiguredEnv: config.env,
