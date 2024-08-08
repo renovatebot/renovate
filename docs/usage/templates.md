@@ -47,7 +47,7 @@ If you want to convert an object to a JSON string, you can use the built-in func
 
 ### toObject
 
-If you want to convert key-value pairs to a object, use `toObject`, e.g.,
+If you want to convert key-value pairs to an object, use `toObject`, e.g.,
 
 `{{{ toJSON (toObject 'key1' 'value1' 'key2' 'value2') }}}` will render `{"key1":"value1","key2":"value2"}`.
 
