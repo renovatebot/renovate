@@ -235,8 +235,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       minimatch:
-        specifier: 9.0.5
-        version: 9.0.5
+        specifier: 10.0.1
+        version: 10.0.1
       moo:
         specifier: 0.5.2
         version: 0.5.2
