@@ -45,11 +45,18 @@ If you want to convert an object to a JSON string, you can use the built-in func
 
 `{{{ toJSON upgrades }}}`
 
-#### Generate complex JSON string
+### toObject
 
-You can generate a complex JSON string using `toJSON`, `toObject` and `toArray` functions, e.g.,
+If you want to convert key-value pairs to a object, use `toObject`, e.g.,
 
-`{{{ toJSON (toObject 'key' 'value' 'array' (toArray 'foo' 'bar')) }}}` will render `{"key":"value","array":["foo","bar"]}`.
+`{{{ toJSON (toObject 'key1' 'value1' 'key2' 'value2') }}}` will render `{"key1":"value1","key2":"value2"}`.
+
+### toArray
+
+If you want to convert elements to an array, use `toArray`, e.g.,
+
+`{{{ toJSON (toArray 'value1' 'value2' 'value3') }}}` will render `["value1","value2","value3"]`.
+
 
 ### encodeURIComponent
 
