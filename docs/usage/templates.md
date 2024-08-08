@@ -57,7 +57,6 @@ If you want to convert elements to an array, use `toArray`, e.g.,
 
 `{{{ toJSON (toArray 'value1' 'value2' 'value3') }}}` will render `["value1","value2","value3"]`.
 
-
 ### encodeURIComponent
 
 If you want to convert a string to a valid URI, use the built-in function `encodeURIComponent` like this:
