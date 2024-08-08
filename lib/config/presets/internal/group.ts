@@ -354,7 +354,12 @@ const staticGroups = {
       {
         groupName: 'PHPStan packages',
         matchDatasources: ['packagist'],
-        matchPackageNames: ['phpstan/phpstan', '//phpstan-/', '//larastan/', 'phpstan/extension-installer'],
+        matchPackageNames: [
+          'phpstan/phpstan',
+          '//phpstan-/',
+          '//larastan/',
+          'phpstan/extension-installer',
+        ],
       },
     ],
   },
