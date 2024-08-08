@@ -123,6 +123,12 @@ describe('util/template/index', () => {
     expect(JSON.parse(output)).toEqual({});
   });
 
+  it('to Object passing illegal number of elements', () => {
+    const userTemplate = "{{{ toJSON (toObject 'foo') }}}";
+    const outputFunc = () => template.compile(userTemplate, {});
+    expect(outputFunc).toThrow();
+  });
+
   it('build complex json', () => {
     const userTemplate =
       "{{{ toJSON (toObject 'upgrades' upgrades 'array' (toArray platform isMajor 'foo')) }}}";
