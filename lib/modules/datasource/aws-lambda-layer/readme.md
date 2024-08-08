@@ -1,4 +1,4 @@
-This datasource returns releases from a AWM Lambda Layer.
+This datasource returns releases from a AWS Lambda Layer.
 
 **AWS API configuration**
 
