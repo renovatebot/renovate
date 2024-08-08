@@ -27,7 +27,7 @@ handlebars.registerHelper('toArray', (...args: unknown[]): unknown[] => {
   return args;
 });
 
-handlebars.registerHelper('toObject', (...args: unknown[]): unknown=> {
+handlebars.registerHelper('toObject', (...args: unknown[]): unknown => {
   // Need to remove the 'options', as last parameter
   // https://handlebarsjs.com/api-reference/helpers.html
   args.pop();
