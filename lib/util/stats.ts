@@ -232,7 +232,8 @@ export class HttpStats {
     const { urls, rawRequests, hostRequests, hosts, requests } =
       HttpStats.getReport();
     logger.trace({ rawRequests, hostRequests }, 'HTTP full statistics');
-    logger.debug({ urls, hosts, requests }, 'HTTP statistics');
+    logger.debug({ hosts, requests }, 'HTTP statistics');
+    logger.trace({ urls }, 'HTTP URL statistics');
   }
 }
 

@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
+import { GlobalConfig } from '../../config/global';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -79,10 +80,16 @@ async function getRegistryReleases(
     res.registryUrl ??= registryUrl;
   }
   // cache non-null responses unless marked as private
-  if (datasource.caching && res && !res.isPrivate) {
-    logger.trace({ cacheKey }, 'Caching datasource response');
-    const cacheMinutes = 15;
-    await packageCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
+  if (datasource.caching && res) {
+    const cachePrivatePackages = GlobalConfig.get(
+      'cachePrivatePackages',
+      false,
+    );
+    if (cachePrivatePackages || !res.isPrivate) {
+      logger.trace({ cacheKey }, 'Caching datasource response');
+      const cacheMinutes = 15;
+      await packageCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
+    }
   }
   return res;
 }
@@ -220,7 +227,7 @@ function resolveRegistryUrls(
     }
     return is.function_(datasource.defaultRegistryUrls)
       ? datasource.defaultRegistryUrls()
-      : datasource.defaultRegistryUrls ?? [];
+      : (datasource.defaultRegistryUrls ?? []);
   }
   const customUrls = registryUrls?.filter(Boolean);
   let resolvedUrls: string[] = [];

@@ -101,6 +101,25 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
     });
 
+    it('does not warn for valid platformConfig', async () => {
+      const config = {
+        platformConfig: 'auto',
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('warns for invalid platformConfig', async () => {
+      const config = {
+        platformConfig: 'invalid',
+      };
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toHaveLength(1);
+    });
+
     it('catches invalid templates', async () => {
       const config = {
         commitMessage: '{{{something}}',
@@ -369,8 +388,11 @@ describe('config/validation', () => {
         timezone: 'Asia/Singapore',
         packageRules: [
           {
-            matchPackagePatterns: ['*'],
-            excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
+            matchPackageNames: [
+              '*',
+              '/abc ([a-z]+) ([a-z]+))/',
+              '!/abc ([a-z]+) ([a-z]+))/',
+            ],
             enabled: true,
           },
         ],
@@ -384,7 +406,7 @@ describe('config/validation', () => {
         config,
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(3);
+      expect(errors).toHaveLength(4);
       expect(errors).toMatchSnapshot();
     });
 
@@ -477,18 +499,12 @@ describe('config/validation', () => {
         extends: [':timezone(Europe/Brussel)'],
         packageRules: [
           {
-            excludePackageNames: ['foo'],
-            enabled: true,
-          },
-          {
             foo: 1,
           },
           'what?' as any,
           {
-            matchDepPatterns: 'abc ([a-z]+) ([a-z]+))',
-            matchPackagePatterns: 'abc ([a-z]+) ([a-z]+))',
-            excludeDepPatterns: ['abc ([a-z]+) ([a-z]+))'],
-            excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
+            matchPackageNames: '/abc ([a-z]+) ([a-z]+))/',
+            matchDepNames: ['abc ([a-z]+) ([a-z]+))'],
             enabled: false,
           },
         ],
@@ -500,7 +516,7 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(15);
+      expect(errors).toHaveLength(12);
     });
 
     it('selectors outside packageRules array trigger errors', async () => {
@@ -1044,9 +1060,7 @@ describe('config/validation', () => {
 
     it('warns if only selectors in packageRules', async () => {
       const config = {
-        packageRules: [
-          { matchDepTypes: ['foo'], excludePackageNames: ['bar'] },
-        ],
+        packageRules: [{ matchDepTypes: ['foo'], matchPackageNames: ['bar'] }],
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
@@ -1388,6 +1402,27 @@ describe('config/validation', () => {
   });
 
   describe('validateConfig() -> globaOnly options', () => {
+    it('returns errors for invalid options', async () => {
+      const config = {
+        logFile: 'something',
+        logFileLevel: 'DEBUG',
+      };
+      const { errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toMatchObject([
+        {
+          message: 'Invalid configuration option: logFile',
+          topic: 'Configuration Error',
+        },
+        {
+          message: 'Invalid configuration option: logFileLevel',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
     it('validates hostRules.headers', async () => {
       const config = {
         hostRules: [
@@ -1501,6 +1536,23 @@ describe('config/validation', () => {
   });
 
   describe('validate globalOptions()', () => {
+    it('binarySource', async () => {
+      const config = {
+        binarySource: 'invalid' as never,
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          message:
+            'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit.',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
     describe('validates string type options', () => {
       it('binarySource', async () => {
         const config = {

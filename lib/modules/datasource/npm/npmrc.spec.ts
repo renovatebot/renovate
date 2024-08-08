@@ -136,8 +136,8 @@ describe('modules/datasource/npm/npmrc', () => {
               "matchDatasources": [
                 "npm",
               ],
-              "matchPackagePrefixes": [
-                "@fontawesome/",
+              "matchPackageNames": [
+                "@fontawesome/**",
               ],
               "registryUrls": [
                 "https://npm.fontawesome.com/",
