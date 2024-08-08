@@ -1,18 +1,17 @@
 import {
+  type Architecture,
   LambdaClient,
   LayerVersionsListItem,
-  ListLayerVersionsCommand,
+  ListLayerVersionsCommand, Runtime,
 } from '@aws-sdk/client-lambda';
+import { ZodError } from 'zod';
+import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { Lazy } from '../../../util/lazy';
+import { Result } from '../../../util/result';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-
-export interface AwsLambdaLayerFilter {
-  name: string;
-  runtime: string;
-  architecture: string;
-}
+import { AwsLambdaLayerFilterMetadata } from './schema';
 
 export class AwsLambdaLayerDataSource extends Datasource {
   static readonly id = 'aws-lambda-layer';
@@ -28,16 +27,16 @@ export class AwsLambdaLayerDataSource extends Datasource {
 
   @cache({
     namespace: `datasource-${AwsLambdaLayerDataSource.id}`,
-    key: (serializedLayerFilter: string) =>
-      `getSortedLambdaLayerVersions:${serializedLayerFilter}`,
+    key: (name: string, runtime: string, architecture: string) =>
+      `sorted-versions:${name}-${runtime}-${architecture}`,
   })
   async getSortedLambdaLayerVersions(
-    filter: AwsLambdaLayerFilter
+    name: string, runtime: string, architecture: string
   ): Promise<LayerVersionsListItem[]> {
     const cmd = new ListLayerVersionsCommand({
-      LayerName: filter.name,
-      CompatibleArchitecture: filter.architecture,
-      CompatibleRuntime: filter.runtime,
+      LayerName: name,
+      CompatibleArchitecture: architecture as Architecture,
+      CompatibleRuntime: runtime as Runtime,
     });
 
     const matchingLayerVersions = await this.lambda.getValue().send(cmd);
@@ -47,28 +46,37 @@ export class AwsLambdaLayerDataSource extends Datasource {
 
   @cache({
     namespace: `datasource-${AwsLambdaLayerDataSource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
+    key: ({ packageName }: GetReleasesConfig) => `get-release:${packageName}`,
   })
-  async getReleases({
-    packageName: serializedLambdaLayerFilter,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const filter: AwsLambdaLayerFilter = JSON.parse(
-      serializedLambdaLayerFilter
-    );
+  async getReleases({packageName: serializedLambdaLayerFilter}: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const result = Result.parse(serializedLambdaLayerFilter, AwsLambdaLayerFilterMetadata)
+      .transform(({name, runtime, architecture}) => {
+        return this.getSortedLambdaLayerVersions(name, runtime, architecture);
+      })
+      .transform((layerVersions): ReleaseResult => {
+        const res: ReleaseResult = { releases: [] };
 
-    const lambdaLayerVersions = await this.getSortedLambdaLayerVersions(filter);
+        res.releases = layerVersions.map((layer) => ({
+          version: layer.Version?.toString() ?? '0',
+          releaseTimestamp: layer.CreatedDate,
+          newDigest: layer.LayerVersionArn,
+          isDeprecated: false,
+        }))
 
-    if (lambdaLayerVersions.length === 0) {
+        return res;
+      });
+
+    const {val, err} = await result.unwrap();
+
+    if (err instanceof ZodError) {
+      logger.debug({ err }, 'aws-lambda-layer: validation error');
       return null;
     }
 
-    return {
-      releases: lambdaLayerVersions.map((layer) => ({
-        version: layer.Version?.toString() ?? '0',
-        releaseTimestamp: layer.CreatedDate,
-        newDigest: layer.LayerVersionArn,
-        isDeprecated: false,
-      })),
-    };
+    if (err) {
+      this.handleGenericErrors(err);
+    }
+
+    return val
   }
 }
