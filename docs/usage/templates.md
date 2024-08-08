@@ -134,6 +134,14 @@ Returns `true` if the value is included on the list given.
 
 `{{#if (includes labels 'dependencies')}}Production Dependencies{{else}}Not Production Dependencies{{/if}}`
 
+### split
+
+Splits a string into an array of substrings.
+
+This example splits a package name by `-` and gets the second part:
+`{{ lookup (split packageName '-') 1 }}`
+An input of `foo-bar-test` therefor would return `bar`.
+
 ## Environment variables
 
 By default, you can only access a handful of basic environment variables like `HOME` or `PATH`.
