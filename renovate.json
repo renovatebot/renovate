@@ -56,7 +56,7 @@
     },
     {
       "description": "set branch prefix for eslint v9 major update to split from other updates",
-      "matchPackageNames": ["eslint"],
+      "matchPackageNames": ["eslint", "@types/eslint"],
       "matchUpdateTypes": ["major"],
       "matchCurrentVersion": "^8.0.0",
       "matchNewValue": "/^9.\\d+.\\d+$/",
