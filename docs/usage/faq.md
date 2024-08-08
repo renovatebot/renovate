@@ -236,7 +236,7 @@ Do the same as above, but instead of an exact match, use a glob prefix:
 }
 ```
 
-For more examples, see [String Pattern Matching, example glob patterns](../string-pattern-matching.md#example-glob-patterns).
+For more examples, see [String Pattern Matching, example glob patterns](./string-pattern-matching.md#example-glob-patterns).
 
 ### Group all packages starting with `abc` together in one PR
 
