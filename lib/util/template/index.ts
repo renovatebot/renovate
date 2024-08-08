@@ -20,7 +20,7 @@ handlebars.registerHelper('toJSON', (input: unknown): string =>
   JSON.stringify(input),
 );
 
-handlebars.registerHelper('toArray', (...args: any[]): any[] => {
+handlebars.registerHelper('toArray', (...args: unknown[]): unknown[] => {
   // Need to remove the 'options', as last parameter
   // https://handlebarsjs.com/api-reference/helpers.html
   args.pop();
