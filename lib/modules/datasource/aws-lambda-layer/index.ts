@@ -27,14 +27,14 @@ export class AwsLambdaLayerDataSource extends Datasource {
 
   @cache({
     namespace: `datasource-${AwsLambdaLayerDataSource.id}`,
-    key: (name: string, runtime: string, architecture: string) =>
-      `sorted-versions:${name}-${runtime}-${architecture}`,
+    key: (arn: string, runtime: string, architecture: string) =>
+      `sorted-versions:${arn}-${runtime}-${architecture}`,
   })
   async getSortedLambdaLayerVersions(
-    name: string, runtime: string, architecture: string
+    arn: string, runtime: string, architecture: string
   ): Promise<LayerVersionsListItem[]> {
     const cmd = new ListLayerVersionsCommand({
-      LayerName: name,
+      LayerName: arn,
       CompatibleArchitecture: architecture as Architecture,
       CompatibleRuntime: runtime as Runtime,
     });
@@ -49,9 +49,9 @@ export class AwsLambdaLayerDataSource extends Datasource {
     key: ({ packageName }: GetReleasesConfig) => `get-release:${packageName}`,
   })
   async getReleases({packageName: serializedLambdaLayerFilter}: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const result = Result.parse(serializedLambdaLayerFilter, AwsLambdaLayerFilterMetadata)
-      .transform(({name, runtime, architecture}) => {
-        return this.getSortedLambdaLayerVersions(name, runtime, architecture);
+    const result = Result.parse(JSON.parse(serializedLambdaLayerFilter), AwsLambdaLayerFilterMetadata)
+      .transform(({arn, runtime, architecture}) => {
+        return this.getSortedLambdaLayerVersions(arn, runtime, architecture);
       })
       .transform((layerVersions): ReleaseResult => {
         const res: ReleaseResult = { releases: [] };

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const AwsLambdaLayerFilterMetadata = z.object({
-  name: z.string(),
+  arn: z.string(),
   runtime: z.string(),
   architecture: z.string(),
 });

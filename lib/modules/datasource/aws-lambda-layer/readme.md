@@ -55,14 +55,14 @@ resource "aws_lambda_function" "example" {
 
 data "aws_lambda_layer_version" "datadog_extension" {
   layer_name = "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension"
-  # renovate: datasource=aws-lambda-layer filter={"name": "my-layer", "architecture": "x86_64", "runtime": "python3.7"}
+  # renovate: datasource=aws-lambda-layer filter={"arn": "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension", "architecture": "x86_64", "runtime": "python3.7"}
   version = 37
 }
 ```
 
 **3rd party lambda layers**
 
-In case you are referring to a 3rd party lambda layer, you need to add the necessary permissions to the layer version.
+In case you are referring to a 3rd party lambda layer, they need to add the necessary permissions to the layer version.
 This is done by the 3rd party by running the following command:
 
 ```shell

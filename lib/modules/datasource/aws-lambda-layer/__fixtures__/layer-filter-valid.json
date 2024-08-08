@@ -1,5 +1,5 @@
 {
   "runtime": "nodejs14.x",
   "architecture": "x86_64",
-  "name": "aws-lambda-layer"
+  "arn": "aws-lambda-layer"
 }

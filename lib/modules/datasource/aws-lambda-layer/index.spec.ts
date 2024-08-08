@@ -6,7 +6,7 @@ import {
 } from '@aws-sdk/client-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getPkgReleases } from '..';
-import { AwsLambdaLayerDataSource, AwsLambdaLayerFilter } from './index';
+import { AwsLambdaLayerDataSource } from './index';
 
 const datasource = AwsLambdaLayerDataSource.id;
 
@@ -47,12 +47,6 @@ const mockEmpty: ListLayerVersionsCommandOutput = {
   $metadata: {},
 };
 
-const lambdaFilter: AwsLambdaLayerFilter = {
-  name: '',
-  architecture: '',
-  runtime: '',
-};
-
 const lambdaClientMock = mockClient(LambdaClient);
 
 function mockListLayerVersionsCommandOutput(
@@ -68,7 +62,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       mockListLayerVersionsCommandOutput(mockEmpty);
       const lamdbaLayerDatasource = new AwsLambdaLayerDataSource();
       const res = await lamdbaLayerDatasource.getSortedLambdaLayerVersions(
-        lambdaFilter
+        "xy", "arm64", "python3.8"
       );
 
       expect(res).toEqual([]);
@@ -78,7 +72,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       mockListLayerVersionsCommandOutput(mock1Layer);
       const lamdbaLayerDatasource = new AwsLambdaLayerDataSource();
       const res = await lamdbaLayerDatasource.getSortedLambdaLayerVersions(
-        lambdaFilter
+        "not-relevant", "not-relevant", "not-relevant"
       );
 
       expect(res).toEqual([layer3]);
@@ -88,7 +82,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       mockListLayerVersionsCommandOutput(mock3Layers);
       const lamdbaLayerDatasource = new AwsLambdaLayerDataSource();
       const res = await lamdbaLayerDatasource.getSortedLambdaLayerVersions(
-        lambdaFilter
+        "not-relevant", "not-relevant", "not-relevant"
       );
 
       expect(res).toEqual([layer1, layer2, layer3]);
@@ -98,11 +92,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       mockListLayerVersionsCommandOutput(mock3Layers);
       const lambdaLayerDatasource = new AwsLambdaLayerDataSource();
 
-      await lambdaLayerDatasource.getSortedLambdaLayerVersions({
-        name: 'arn',
-        runtime: 'runtime',
-        architecture: 'architecture',
-      });
+      await lambdaLayerDatasource.getSortedLambdaLayerVersions('arn', 'runtime', 'architecture');
 
       expect(lambdaClientMock.calls()).toHaveLength(1);
 
@@ -121,7 +111,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
 
         const res = await getPkgReleases({
           datasource,
-          depName:
+          packageName:
             '{"arn": "arn:aws:lambda:us-east-1:123456789012:layer:my-layer", "runtime": "python37", "architecture": "x86_64"}',
         });
 
@@ -133,7 +123,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
 
         const res = await getPkgReleases({
           datasource,
-          depName:
+          packageName:
             '{"arn": "arn:aws:lambda:us-east-1:123456789012:layer:my-layer", "runtime": "python37", "architecture": "x86_64"}',
         });
 
@@ -141,7 +131,9 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
           releases: [
             {
               isDeprecated: false,
-              version: layer1.Version,
+              version: layer3.Version?.toFixed(0),
+              newDigest: layer3.LayerVersionArn,
+              releaseTimestamp: layer3.CreatedDate,
             },
           ],
         });
@@ -152,7 +144,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
 
         const res = await getPkgReleases({
           datasource,
-          depName:
+          packageName:
             '{"arn": "arn:aws:lambda:us-east-1:123456789012:layer:my-layer", "runtime": "python37", "architecture": "x86_64"}',
         });
 
@@ -160,15 +152,21 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
           releases: [
             {
               isDeprecated: false,
-              version: layer1.Version,
+              version: layer1.Version?.toFixed(0),
+              newDigest: layer1.LayerVersionArn,
+              releaseTimestamp: layer1.CreatedDate,
             },
             {
               isDeprecated: false,
-              version: layer2.Version,
+              version: layer2.Version?.toFixed(0),
+              newDigest: layer2.LayerVersionArn,
+              releaseTimestamp: layer2.CreatedDate,
             },
             {
               isDeprecated: false,
-              version: layer3.Version,
+              version: layer3.Version?.toFixed(0),
+              newDigest: layer3.LayerVersionArn,
+              releaseTimestamp: layer3.CreatedDate,
             },
           ],
         });
