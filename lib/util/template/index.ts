@@ -16,7 +16,7 @@ handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
   JSON.stringify(JSON.parse(input), null, 2),
 );
 
-handlebars.registerHelper('toJSON', (input: any): string =>
+handlebars.registerHelper('toJSON', (input: unknown): string =>
   JSON.stringify(input),
 );
 
