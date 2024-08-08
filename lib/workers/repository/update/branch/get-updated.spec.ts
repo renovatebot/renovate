@@ -1,9 +1,11 @@
+import { mockDeep } from 'jest-mock-extended';
 import { git, mocked } from '../../../../../test/util';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import * as _batectWrapper from '../../../../modules/manager/batect-wrapper';
 import * as _bundler from '../../../../modules/manager/bundler';
 import * as _composer from '../../../../modules/manager/composer';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules';
+import * as _gomod from '../../../../modules/manager/gomod';
 import * as _helmv3 from '../../../../modules/manager/helmv3';
 import * as _npm from '../../../../modules/manager/npm';
 import * as _pep621 from '../../../../modules/manager/pep621';
@@ -16,6 +18,7 @@ import { getUpdatedPackageFiles } from './get-updated';
 const bundler = mocked(_bundler);
 const composer = mocked(_composer);
 const gitSubmodules = mocked(_gitSubmodules);
+const gomod = mocked(_gomod);
 const helmv3 = mocked(_helmv3);
 const npm = mocked(_npm);
 const batectWrapper = mocked(_batectWrapper);
@@ -28,6 +31,7 @@ jest.mock('../../../../modules/manager/composer');
 jest.mock('../../../../modules/manager/helmv3');
 jest.mock('../../../../modules/manager/npm');
 jest.mock('../../../../modules/manager/git-submodules');
+jest.mock('../../../../modules/manager/gomod', () => mockDeep());
 jest.mock('../../../../modules/manager/batect-wrapper');
 jest.mock('../../../../modules/manager/pep621');
 jest.mock('../../../../modules/manager/poetry');
@@ -77,6 +81,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         reuseExistingBranch: undefined,
         updatedArtifacts: [],
         updatedPackageFiles: [],
+        artifactNotices: [],
       });
     });
 
@@ -110,6 +115,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         reuseExistingBranch: undefined,
         updatedArtifacts: [],
         updatedPackageFiles: [],
+        artifactNotices: [],
       });
     });
 
@@ -173,6 +179,54 @@ describe('workers/repository/update/branch/get-updated', () => {
             type: 'addition',
             path: 'composer.json',
             contents: 'some new content',
+          },
+        ],
+      });
+    });
+
+    it('handles artifact notices', async () => {
+      config.reuseExistingBranch = true;
+      config.upgrades.push({
+        packageFile: 'go.mod',
+        manager: 'gomod',
+        branchName: 'foo/bar',
+      });
+      gomod.updateDependency.mockReturnValue('some new content');
+      gomod.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            type: 'addition',
+            path: 'go.mod',
+            contents: 'some content',
+          },
+          notice: {
+            file: 'go.mod',
+            message: 'some notice',
+          },
+        },
+      ]);
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [
+          {
+            file: 'go.mod',
+            message: 'some notice',
+          },
+        ],
+        reuseExistingBranch: false,
+        updatedArtifacts: [
+          {
+            contents: 'some content',
+            path: 'go.mod',
+            type: 'addition',
+          },
+        ],
+        updatedPackageFiles: [
+          {
+            contents: 'some new content',
+            path: 'go.mod',
+            type: 'addition',
           },
         ],
       });
@@ -353,6 +407,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(res).toMatchInlineSnapshot(`
         {
           "artifactErrors": [],
+          "artifactNotices": [],
           "reuseExistingBranch": undefined,
           "updatedArtifacts": [],
           "updatedPackageFiles": [],
@@ -533,6 +588,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(res).toMatchInlineSnapshot(`
         {
           "artifactErrors": [],
+          "artifactNotices": [],
           "reuseExistingBranch": undefined,
           "updatedArtifacts": [],
           "updatedPackageFiles": [],
@@ -556,6 +612,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(res).toMatchInlineSnapshot(`
         {
           "artifactErrors": [],
+          "artifactNotices": [],
           "reuseExistingBranch": false,
           "updatedArtifacts": [],
           "updatedPackageFiles": [],
@@ -581,6 +638,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(res).toMatchInlineSnapshot(`
         {
           "artifactErrors": [],
+          "artifactNotices": [],
           "reuseExistingBranch": false,
           "updatedArtifacts": [],
           "updatedPackageFiles": [],

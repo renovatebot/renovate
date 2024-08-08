@@ -7,6 +7,7 @@ import { generateDatasources } from './datasources';
 import { getOpenGitHubItems } from './github-query-items';
 import { generateManagers } from './manager';
 import { generateManagerAsdfSupportedPlugins } from './manager-asdf-supported-plugins';
+import { generateManagerMiseSupportedPlugins } from './manager-mise-supported-plugins';
 import { generatePlatforms } from './platforms';
 import { generatePresets } from './presets';
 import { generateSchema } from './schema';
@@ -32,7 +33,7 @@ export async function generateDocs(): Promise<void> {
 
     // versionings
     logger.info('* versionings');
-    await generateVersioning(dist);
+    await generateVersioning(dist, openItems.versionings);
 
     // datasources
     logger.info('* datasources');
@@ -45,6 +46,10 @@ export async function generateDocs(): Promise<void> {
     // managers/asdf supported plugins
     logger.info('* managers/asdf/supported-plugins');
     await generateManagerAsdfSupportedPlugins(dist);
+
+    // managers/mise supported plugins
+    logger.info('* managers/mise/supported-plugins');
+    await generateManagerMiseSupportedPlugins(dist);
 
     // presets
     logger.info('* presets');

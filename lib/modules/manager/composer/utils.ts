@@ -2,7 +2,7 @@
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import type { HostRuleSearchResult } from '../../../types';
+import type { CombinedHostRule } from '../../../types';
 import type { ToolConstraint } from '../../../util/exec/types';
 import { coerceNumber } from '../../../util/number';
 import { api, id as composerVersioningId } from '../../versioning/composer';
@@ -113,6 +113,6 @@ export function extractConstraints(
   return res;
 }
 
-export function isArtifactAuthEnabled(rule: HostRuleSearchResult): boolean {
+export function isArtifactAuthEnabled(rule: CombinedHostRule): boolean {
   return !rule.artifactAuth || rule.artifactAuth.includes('composer');
 }

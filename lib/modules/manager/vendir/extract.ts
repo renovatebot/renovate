@@ -5,7 +5,7 @@ import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
-import { isOCIRegistry } from '../helmv3/utils';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -25,7 +25,7 @@ export function extractHelmChart(
 ): PackageDependency | null {
   if (isOCIRegistry(helmChart.repository.url)) {
     const dep = getDep(
-      `${helmChart.repository.url.replace('oci://', '')}/${helmChart.name}:${helmChart.version}`,
+      `${removeOCIPrefix(helmChart.repository.url)}/${helmChart.name}:${helmChart.version}`,
       false,
       aliases,
     );

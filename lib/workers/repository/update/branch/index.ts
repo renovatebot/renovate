@@ -147,6 +147,9 @@ export async function processBranch(
   }
   const keepUpdatedLabel = config.keepUpdatedLabel;
   const artifactErrorTopic = emojify(':warning: Artifact update problem');
+  const artifactNoticeTopic = emojify(
+    ':information_source: Artifact update notice',
+  );
   try {
     // Check if branch already existed
     const existingPr =
@@ -183,12 +186,21 @@ export async function processBranch(
         result: 'pending',
       };
     }
-    // istanbul ignore if
-    if (!branchExists && config.dependencyDashboardApproval) {
-      if (dependencyDashboardCheck) {
-        logger.debug(`Branch ${config.branchName} is approved for creation`);
-      } else {
-        logger.debug(`Branch ${config.branchName} needs approval`);
+    if (!branchExists) {
+      if (config.mode === 'silent' && !dependencyDashboardCheck) {
+        logger.debug(
+          `Branch ${config.branchName} creation is disabled because mode=silent`,
+        );
+        return {
+          branchExists,
+          prNo: branchPr?.number,
+          result: 'needs-approval',
+        };
+      }
+      if (config.dependencyDashboardApproval && !dependencyDashboardCheck) {
+        logger.debug(
+          `Branch ${config.branchName} creation is disabled because dependencyDashboardApproval=true`,
+        );
         return {
           branchExists,
           prNo: branchPr?.number,
@@ -243,7 +255,10 @@ export async function processBranch(
       }
 
       logger.debug('Checking if PR has been edited');
-      const branchIsModified = await scm.isBranchModified(config.branchName);
+      const branchIsModified = await scm.isBranchModified(
+        config.branchName,
+        config.baseBranch,
+      );
       if (branchPr) {
         logger.debug('Found existing branch PR');
         if (branchPr.state !== 'open') {
@@ -542,6 +557,14 @@ export async function processBranch(
             number: branchPr.number,
             topic: artifactErrorTopic,
           });
+
+          if (!config.artifactNotices?.length) {
+            await ensureCommentRemoval({
+              type: 'by-topic',
+              number: branchPr.number,
+              topic: artifactNoticeTopic,
+            });
+          }
         }
       }
       const forcedManually = userRebaseRequested || !branchExists;
@@ -574,14 +597,14 @@ export async function processBranch(
     }
 
     if (branchPr) {
-      const platformOptions = getPlatformPrOptions(config);
+      const platformPrOptions = getPlatformPrOptions(config);
       if (
-        platformOptions.usePlatformAutomerge &&
+        platformPrOptions.usePlatformAutomerge &&
         platform.reattemptPlatformAutomerge
       ) {
         await platform.reattemptPlatformAutomerge({
           number: branchPr.number,
-          platformOptions,
+          platformPrOptions,
         });
       }
       // istanbul ignore if
@@ -865,22 +888,38 @@ export async function processBranch(
             });
           }
         }
-      } else if (config.automerge) {
-        logger.debug('PR is configured for automerge');
-        // skip automerge if there is a new commit since status checks aren't done yet
-        if (config.ignoreTests === true || !commitSha) {
-          logger.debug('checking auto-merge');
-          const prAutomergeResult = await checkAutoMerge(pr, config);
-          if (prAutomergeResult?.automerged) {
-            return {
-              branchExists,
-              result: 'automerged',
-              commitSha,
-            };
-          }
-        }
       } else {
-        logger.debug('PR is not configured for automerge');
+        if (config.artifactNotices?.length) {
+          const contentLines: string[] = [];
+          for (const notice of config.artifactNotices) {
+            contentLines.push(`##### File name: ${notice.file}`);
+            contentLines.push(notice.message);
+          }
+          const content = contentLines.join('\n\n');
+          await ensureComment({
+            number: pr.number,
+            topic: artifactNoticeTopic,
+            content,
+          });
+        }
+
+        if (config.automerge) {
+          logger.debug('PR is configured for automerge');
+          // skip automerge if there is a new commit since status checks aren't done yet
+          if (config.ignoreTests === true || !commitSha) {
+            logger.debug('checking auto-merge');
+            const prAutomergeResult = await checkAutoMerge(pr, config);
+            if (prAutomergeResult?.automerged) {
+              return {
+                branchExists,
+                result: 'automerged',
+                commitSha,
+              };
+            }
+          }
+        } else {
+          logger.debug('PR is not configured for automerge');
+        }
       }
     }
   } catch (err) /* istanbul ignore next */ {

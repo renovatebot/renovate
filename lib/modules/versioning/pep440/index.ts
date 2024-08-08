@@ -16,7 +16,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
 
 const {
   compare: sortVersions,
-  satisfies: matches,
+  satisfies,
   valid,
   validRange,
   explain,
@@ -73,6 +73,10 @@ export { isVersion, matches };
 
 const equals = (version1: string, version2: string): boolean =>
   isVersion(version1) && isVersion(version2) && eq(version1, version2);
+
+function matches(version: string, range: string): boolean {
+  return isVersion(version) && isValid(range) && satisfies(version, range);
+}
 
 export const api: VersioningApi = {
   equals,

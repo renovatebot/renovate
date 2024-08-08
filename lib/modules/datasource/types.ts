@@ -91,7 +91,7 @@ export interface ReleaseResult {
 }
 
 export type RegistryStrategy = 'first' | 'hunt' | 'merge';
-
+export type SourceUrlSupport = 'package' | 'release' | 'none';
 export interface DatasourceApi extends ModuleApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
@@ -102,9 +102,9 @@ export interface DatasourceApi extends ModuleApi {
 
   /**
    * Strategy to use when multiple registryUrls are available to the datasource.
-   * first: only the first registryUrl will be tried and others ignored
-   * hunt: registryUrls will be tried in order until one returns a result
-   * merge: all registryUrls will be tried and the results merged if more than one returns a result
+   * - `first`: only the first registryUrl will be tried and others ignored
+   * - `hunt`: registryUrls will be tried in order until one returns a result
+   * - `merge`: all registryUrls will be tried and the results merged if more than one returns a result
    */
   registryStrategy?: RegistryStrategy | undefined;
 
@@ -112,6 +112,24 @@ export interface DatasourceApi extends ModuleApi {
    * Whether custom registryUrls are allowed.
    */
   customRegistrySupport: boolean;
+
+  /**
+   * Whether release timestamp can be returned.
+   */
+  releaseTimestampSupport: boolean;
+  /**
+   * Notes on how release timestamp is determined.
+   */
+  releaseTimestampNote?: string;
+
+  /**
+   * Whether sourceURL can be returned.
+   */
+  sourceUrlSupport: SourceUrlSupport;
+  /**
+   * Notes on how sourceURL is determined.
+   */
+  sourceUrlNote?: string;
 
   /**
    * Whether to perform caching in the datasource index/wrapper or not.

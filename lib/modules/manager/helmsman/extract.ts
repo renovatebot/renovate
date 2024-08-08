@@ -4,6 +4,7 @@ import { regEx } from '../../../util/regex';
 import { parseSingleYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -33,10 +34,9 @@ function createDep(
   dep.currentValue = anApp.version;
 
   // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
-  const isOci = anApp.chart?.startsWith('oci://');
-  if (isOci) {
+  if (isOCIRegistry(anApp.chart)) {
     dep.datasource = DockerDatasource.id;
-    dep.packageName = anApp.chart!.replace('oci://', '');
+    dep.packageName = removeOCIPrefix(anApp.chart!);
     return dep;
   }
 

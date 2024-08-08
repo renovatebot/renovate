@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import semver, { ReleaseType } from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
@@ -78,7 +79,31 @@ export function bumpPackageVersion(
     const startTagPosition = versionNode.startTagPosition;
     const versionPosition = content.indexOf(versionNode.val, startTagPosition);
 
-    const newPomVersion = semver.inc(currentValue, bumpVersion);
+    let newPomVersion: string | null = null;
+    const currentPrereleaseValue = semver.prerelease(currentValue);
+    if (isSnapshot(currentPrereleaseValue)) {
+      // It is already a SNAPSHOT version.
+      // Therefore the same qualifier (prerelease) will be used as before.
+      let releaseType = bumpVersion;
+      if (!bumpVersion.startsWith('pre')) {
+        releaseType = `pre${bumpVersion}` as ReleaseType;
+      }
+      newPomVersion = semver.inc(
+        currentValue,
+        releaseType,
+        currentPrereleaseValue!.join('.'),
+        false,
+      );
+    } else if (currentPrereleaseValue) {
+      // Some qualifier which is not a SNAPSHOT is present.
+      // The expected behaviour in this case is unclear and the standard increase will be used.
+      newPomVersion = semver.inc(currentValue, bumpVersion);
+    } else {
+      // A release version without any qualifier is present.
+      // Therefore the SNAPSHOT qualifier will be added if a prerelease is requested.
+      // This will do a normal increment, ignoring SNAPSHOT, if a non-prerelease bumpVersion is configured
+      newPomVersion = semver.inc(currentValue, bumpVersion, 'SNAPSHOT', false);
+    }
     if (!newPomVersion) {
       throw new Error('semver inc failed');
     }
@@ -107,4 +132,11 @@ export function bumpPackageVersion(
     );
   }
   return { bumpedContent };
+}
+
+function isSnapshot(
+  prerelease: ReadonlyArray<string | number> | null,
+): boolean {
+  const lastPart = prerelease?.at(-1);
+  return is.string(lastPart) && lastPart.endsWith('SNAPSHOT');
 }

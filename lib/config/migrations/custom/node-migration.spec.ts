@@ -12,7 +12,7 @@ describe('config/migrations/custom/node-migration', () => {
     );
   });
 
-  it('should not delete node incase it has more than one property', () => {
+  it('should not delete node in case it has more than one property', () => {
     expect(NodeMigration).toMigrate(
       {
         node: { enabled: true, automerge: false },

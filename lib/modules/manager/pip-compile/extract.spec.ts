@@ -384,6 +384,7 @@ describe('modules/manager/pip-compile/extract', () => {
       datasource: 'pypi',
       depType: 'indirect',
       depName: 'bards-friend',
+      packageName: 'bards-friend',
       lockedVersion: '1.0.0',
       enabled: false,
     });
@@ -495,5 +496,167 @@ describe('modules/manager/pip-compile/extract', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       'pip-compile: 1.in references unmanaged-file.txt which does not appear to be a requirements file managed by pip-compile',
     );
+  });
+
+  it('handles duplicate -r dependencies', async () => {
+    fs.readLocalFile.mockImplementation((name): any => {
+      if (name === '1.in') {
+        return 'foo';
+      } else if (name === '1.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=1.txt 1.in',
+          ['foo==1.0.1'],
+        );
+      } else if (name === '2.in') {
+        return '-r 1.txt\nbar';
+      } else if (name === '2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=2.txt 2.in',
+          ['foo==1.0.1', 'bar==2.0.0'],
+        );
+      } else if (name === '3.in') {
+        return '-r 1.txt\nbaz';
+      } else if (name === '3.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=3.txt 3.in',
+          ['foo==1.0.1', 'baz==2.0.0'],
+        );
+      } else if (name === '4.in') {
+        return '-r 2.txt\n-r 3.txt\nqux';
+      } else if (name === '4.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=4.txt 4.in',
+          ['foo==1.0.1', 'bar==2.0.0', 'baz==2.0.0', 'qux==1.2.3'],
+        );
+      }
+      return null;
+    });
+
+    const lockFiles = ['1.txt', '2.txt', '3.txt', '4.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles?.map((p) => p.lockFiles)).toEqual([
+      ['1.txt', '2.txt', '3.txt', '4.txt'],
+      ['3.txt', '4.txt'],
+      ['2.txt', '4.txt'],
+      ['4.txt'],
+    ]);
+  });
+
+  it('handles -r dependency on lock file with multiple input files', async () => {
+    fs.readLocalFile.mockImplementation((name): any => {
+      if (name === '1.in') {
+        return 'foo';
+      } else if (name === '2.in') {
+        return 'bar';
+      } else if (name === 'multi_input.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=multi_input.txt 1.in 2.in',
+          ['foo==1.0.1', 'bar==2.0.0'],
+        );
+      } else if (name === '3.in') {
+        return '-r multi_input.txt\nbaz';
+      } else if (name === 'dash_r.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=dash_r.txt 3.in',
+          ['foo==1.0.1', 'bar==2.0.0', 'baz==2.0.0'],
+        );
+      }
+      return null;
+    });
+
+    const lockFiles = ['multi_input.txt', 'dash_r.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles?.map((p) => p.lockFiles)).toEqual([
+      ['multi_input.txt', 'dash_r.txt'],
+      ['multi_input.txt', 'dash_r.txt'],
+      ['dash_r.txt'],
+    ]);
+  });
+
+  it('handles -r dependency on input file that is also used to generate lock file with multiple inputs', async () => {
+    fs.readLocalFile.mockImplementation((name): any => {
+      if (name === '1.in') {
+        return 'foo';
+      } else if (name === '2.in') {
+        return 'bar';
+      } else if (name === 'multi_input.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=multi_input.txt 1.in 2.in',
+          ['foo==1.0.1', 'bar==2.0.0'],
+        );
+      } else if (name === '3.in') {
+        return '-r 1.in\nbaz';
+      } else if (name === 'dash_r.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=dash_r.txt 3.in',
+          ['foo==1.0.1', 'baz==2.0.0'],
+        );
+      }
+      return null;
+    });
+
+    const lockFiles = ['multi_input.txt', 'dash_r.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles?.map((p) => p.lockFiles)).toEqual([
+      ['multi_input.txt'],
+      ['multi_input.txt', 'dash_r.txt'],
+      ['dash_r.txt'],
+    ]);
+  });
+
+  it('handles -r dependency on file with relative path same dir', async () => {
+    fs.readLocalFile.mockImplementation((name): any => {
+      if (name === 'dir/1.in') {
+        return 'foo';
+      } else if (name === 'dir/2.in') {
+        return '-r 1.in\nbar';
+      } else if (name === 'dir/1.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=1.txt 1.in',
+          ['foo==1.0.1'],
+        );
+      } else if (name === 'dir/2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=2.txt 2.in',
+          ['foo==1.0.1', 'bar==2.0.0'],
+        );
+      }
+      return null;
+    });
+
+    const lockFiles = ['dir/1.txt', 'dir/2.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toMatchObject([
+      { packageFile: 'dir/1.in', lockFiles: ['dir/1.txt', 'dir/2.txt'] },
+      { packageFile: 'dir/2.in', lockFiles: ['dir/2.txt'] },
+    ]);
+  });
+
+  it('handles -r dependency on file with relative path above', async () => {
+    fs.readLocalFile.mockImplementation((name): any => {
+      if (name === 'common/1.in') {
+        return 'foo';
+      } else if (name === 'dir/2.in') {
+        return '-r ../common/1.in\nbar';
+      } else if (name === 'common/1.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=1.txt 1.in',
+          ['foo==1.0.1'],
+        );
+      } else if (name === 'dir/2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=2.txt 2.in',
+          ['foo==1.0.1', 'bar==2.0.0'],
+        );
+      }
+      return null;
+    });
+
+    const lockFiles = ['common/1.txt', 'dir/2.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toMatchObject([
+      { packageFile: 'common/1.in', lockFiles: ['common/1.txt', 'dir/2.txt'] },
+      { packageFile: 'dir/2.in', lockFiles: ['dir/2.txt'] },
+    ]);
   });
 });

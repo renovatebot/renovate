@@ -2,12 +2,12 @@ import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import JSON5 from 'json5';
 import upath from 'upath';
-import { migrateConfig } from '../../../../config/migration';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
 import { readSystemFile } from '../../../../util/fs';
 import { parseSingleYaml } from '../../../../util/yaml';
+import { migrateAndValidateConfig } from './util';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
   if (upath.basename(file) === '.renovaterc') {
@@ -79,21 +79,12 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     logger.debug('No config file found on disk - skipping');
   }
 
-  await deleteNonDefaultConfig(env); // Try deletion only if RENOVATE_CONFIG_FILE is specified
-
-  const { isMigrated, migratedConfig } = migrateConfig(config);
-  if (isMigrated) {
-    logger.warn(
-      { originalConfig: config, migratedConfig },
-      'Config needs migrating',
-    );
-    config = migratedConfig;
-  }
-  return config;
+  return migrateAndValidateConfig(config, configFile);
 }
 
 export async function deleteNonDefaultConfig(
   env: NodeJS.ProcessEnv,
+  deleteConfigFile: boolean,
 ): Promise<void> {
   const configFile = env.RENOVATE_CONFIG_FILE;
 
@@ -101,7 +92,7 @@ export async function deleteNonDefaultConfig(
     return;
   }
 
-  if (env.RENOVATE_X_DELETE_CONFIG_FILE !== 'true') {
+  if (!deleteConfigFile) {
     return;
   }
 

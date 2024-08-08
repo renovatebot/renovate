@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import jsonata from 'jsonata';
 import { logger } from '../../../logger';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { fetchers } from './formats';
 import { ReleaseResultZodSchema } from './schema';
 import { getCustomConfig } from './utils';
@@ -43,6 +43,8 @@ export class CustomDatasource extends Datasource {
       return null;
     }
 
+    logger.trace({ data }, `Custom manager fetcher '${format}' returned data.`);
+
     for (const transformTemplate of transformTemplates) {
       const expression = jsonata(transformTemplate);
       data = await expression.evaluate(data);
@@ -56,5 +58,13 @@ export class CustomDatasource extends Datasource {
       logger.trace({ data }, 'Response that has failed validation');
       return null;
     }
+  }
+
+  override getDigest(
+    { packageName }: DigestConfig,
+    newValue?: string,
+  ): Promise<string | null> {
+    // Return null here to support setting a digest: value can be provided digest in getReleases
+    return Promise.resolve(null);
   }
 }

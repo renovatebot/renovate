@@ -63,6 +63,12 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   logger.debug('isOnboarded()');
   const title = `Action required: Add a Renovate config`;
 
+  // Repo is onboarded if in silent mode
+  if (config.mode === 'silent') {
+    logger.debug('Silent mode enabled so repo is considered onboarded');
+    return true;
+  }
+
   // Repo is onboarded if global config is bypassing onboarding and does not require a
   // configuration file.
   // The repo is considered "not onboarded" if:

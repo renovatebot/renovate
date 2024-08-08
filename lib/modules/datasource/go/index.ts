@@ -31,6 +31,13 @@ export class GoDatasource extends Datasource {
 
   override readonly customRegistrySupport = false;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'If the release timestamp is not returned from the respective datasoure used to fetch the releases, then Renovate uses the `Time` field in the results instead.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `packageName` and `registryUrl`.';
+
   readonly goproxy = new GoProxyDatasource();
   readonly direct = new GoDirectDatasource();
 
@@ -51,7 +58,7 @@ export class GoDatasource extends Datasource {
    * go.getDigest
    *
    * This datasource resolves a go module URL into its source repository
-   *  and then fetches the digest it if it is on GitHub.
+   *  and then fetches the digest if it is on GitHub.
    *
    * This function will:
    *  - Determine the source URL for the module

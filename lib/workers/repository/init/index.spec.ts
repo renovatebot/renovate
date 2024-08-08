@@ -38,7 +38,7 @@ describe('workers/repository/init/index', () => {
     it('runs', async () => {
       apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
       onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
-      config.getRepoConfig.mockResolvedValueOnce({});
+      config.getRepoConfig.mockResolvedValueOnce({ mode: 'silent' });
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsToConfig.mockReturnValueOnce(
         partial<RenovateConfig>(),

@@ -90,7 +90,7 @@ export function extractPackageJson(
               if (is.string(overridesVal)) {
                 dep = {
                   depName: overridesKey,
-                  depType: 'overrides',
+                  depType: 'pnpm.overrides',
                   ...extractDependency(depName, overridesKey, overridesVal),
                 };
                 setNodeCommitTopic(dep);

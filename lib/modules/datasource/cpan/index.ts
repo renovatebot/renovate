@@ -18,6 +18,10 @@ export class CpanDatasource extends Datasource {
 
   override readonly defaultVersioning = perlVersioning.id;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `date` field in the results.';
+
   @cache({
     namespace: `datasource-${CpanDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => `${packageName}`,

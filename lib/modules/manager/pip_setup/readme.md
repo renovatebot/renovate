@@ -1,1 +1,1 @@
-`setup.py` files are parsed by calling out to `python` and then using a mock to detect imported modules.
+Renovate uses a JavaScript-based parser to process the `pip_setup` files.

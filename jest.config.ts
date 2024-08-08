@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import os from 'node:os';
+import { env } from 'node:process';
 import v8 from 'node:v8';
 import { minimatch } from 'minimatch';
 import type { JestConfigWithTsJest } from 'ts-jest';
@@ -205,11 +206,7 @@ const config: JestConfig = {
     '!lib/**/{__fixtures__,__mocks__,__testutil__,test}/**/*.{js,ts}',
     '!lib/**/types.ts',
   ],
-  coveragePathIgnorePatterns: [
-    '/node_modules/',
-    '<rootDir>/test/',
-    '<rootDir>/tools/',
-  ],
+  coveragePathIgnorePatterns: getCoverageIgnorePatterns(),
   cacheDirectory: '.cache/jest',
   collectCoverage: true,
   coverageReporters: ci
@@ -450,3 +447,12 @@ process.stderr.write(`Host stats:
     Memory:    ${(mem / 1024 / 1024 / 1024).toFixed(2)} GB
     HeapLimit: ${(stats.heap_size_limit / 1024 / 1024 / 1024).toFixed(2)} GB
   `);
+function getCoverageIgnorePatterns(): string[] | undefined {
+  const patterns = ['/node_modules/', '<rootDir>/test/', '<rootDir>/tools/'];
+
+  if (env.TEST_LEGACY_DECRYPTION !== 'true') {
+    patterns.push('<rootDir>/lib/config/decrypt/legacy.ts');
+  }
+
+  return patterns;
+}

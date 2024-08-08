@@ -14,4 +14,14 @@ helm:
   releaseName: logging-operator
   version: 3.17.7
   values:
-
+---
+defaultNamespace: monitoring
+helm:
+  repo: https://prometheus-community.github.io/helm-charts
+  chart: prometheus
+  version: 25.19.1
+---
+defaultNamespace: external-dns
+helm:
+  chart: oci://registry-1.docker.io/bitnamicharts/external-dns
+  version: 7.1.2

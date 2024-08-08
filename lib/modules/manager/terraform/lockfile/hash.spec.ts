@@ -1,5 +1,6 @@
 import { createReadStream } from 'node:fs';
 import { DirectoryResult, dir } from 'tmp-promise';
+import upath from 'upath';
 import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
 import { getFixturePath, logger } from '../../../../../test/util';
@@ -425,5 +426,18 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
     ]);
+  });
+
+  describe('hashOfZipContent', () => {
+    const zipWithFolderPath = Fixtures.getPath('test_with_folder.zip');
+
+    it('return hash for content with subfolders', async () => {
+      await expect(
+        TerraformProviderHash.hashOfZipContent(
+          zipWithFolderPath,
+          upath.join(cacheDir.path, 'test'),
+        ),
+      ).resolves.toBe('g92f/mR2hlVmeWBlplxxJyP2H3fdyPwYccr7uJhcRz8=');
+    });
   });
 });

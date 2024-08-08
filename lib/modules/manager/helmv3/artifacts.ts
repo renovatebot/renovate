@@ -18,12 +18,12 @@ import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { generateHelmEnvs, generateLoginCmd } from './common';
+import { isOCIRegistry, removeOCIPrefix } from './oci';
 import type { ChartDefinition, Repository, RepositoryRule } from './types';
 import {
   aliasRecordToRepositories,
   getRepositories,
   isFileInDir,
-  isOCIRegistry,
 } from './utils';
 
 async function helmCommands(
@@ -38,7 +38,7 @@ async function helmCommands(
     .map((value) => {
       return {
         ...value,
-        repository: value.repository.replace('oci://', ''),
+        repository: removeOCIPrefix(value.repository),
         hostRule: hostRules.find({
           url: value.repository.replace('oci://', 'https://'), //TODO we need to replace this, as oci:// will not be accepted as protocol
           hostType: DockerDatasource.id,

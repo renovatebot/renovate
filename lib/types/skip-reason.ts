@@ -26,6 +26,7 @@ export type SkipReason =
   | 'no-source'
   | 'non-hex-dep-types'
   | 'not-a-version'
+  | 'package-rules'
   | 'path-dependency'
   | 'placeholder-url'
   | 'unknown-engines'
@@ -45,3 +46,13 @@ export type SkipReason =
   | 'recursive-placeholder'
   | 'github-token-required'
   | 'inherited-dependency';
+
+export type StageName =
+  | 'current-timestamp'
+  | 'datasource-merge'
+  | 'lock-file-maintenance-merge'
+  | 'lock-file-maintenance-merge-2'
+  | 'pre-lookup'
+  | 'source-url'
+  | 'update-type'
+  | 'update-type-merge';

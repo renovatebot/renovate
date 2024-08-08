@@ -146,40 +146,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
       );
       expect(res).toStrictEqual([image1, image2, image3]);
       expect(ec2Mock.calls()).toHaveLength(1);
-      expect(ec2Mock.calls()[0].args).toMatchInlineSnapshot(`
-        [
-          DescribeImagesCommand {
-            "input": {
-              "Filters": [
-                {
-                  "Name": "owner-id",
-                  "Values": [
-                    "602401143452",
-                  ],
-                },
-                {
-                  "Name": "name",
-                  "Values": [
-                    "3images",
-                  ],
-                },
-              ],
-            },
-            "middlewareStack": {
-              "add": [Function],
-              "addRelativeTo": [Function],
-              "applyToStack": [Function],
-              "clone": [Function],
-              "concat": [Function],
-              "identify": [Function],
-              "remove": [Function],
-              "removeByTag": [Function],
-              "resolve": [Function],
-              "use": [Function],
-            },
-          },
-        ]
-      `);
+      expect(ec2Mock.calls()[0].args).toMatchSnapshot();
     });
 
     it('with 1 returned image', async () => {
@@ -190,40 +157,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
       );
       expect(res).toStrictEqual([image3]);
       expect(ec2Mock.calls()).toHaveLength(1);
-      expect(ec2Mock.calls()[0].args).toMatchInlineSnapshot(`
-        [
-          DescribeImagesCommand {
-            "input": {
-              "Filters": [
-                {
-                  "Name": "owner-id",
-                  "Values": [
-                    "602401143452",
-                  ],
-                },
-                {
-                  "Name": "name",
-                  "Values": [
-                    "1image",
-                  ],
-                },
-              ],
-            },
-            "middlewareStack": {
-              "add": [Function],
-              "addRelativeTo": [Function],
-              "applyToStack": [Function],
-              "clone": [Function],
-              "concat": [Function],
-              "identify": [Function],
-              "remove": [Function],
-              "removeByTag": [Function],
-              "resolve": [Function],
-              "use": [Function],
-            },
-          },
-        ]
-      `);
+      expect(ec2Mock.calls()[0].args).toMatchSnapshot();
     });
 
     it('without returned images', async () => {
@@ -234,40 +168,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
       );
       expect(res).toStrictEqual([]);
       expect(ec2Mock.calls()).toHaveLength(1);
-      expect(ec2Mock.calls()[0].args).toMatchInlineSnapshot(`
-        [
-          DescribeImagesCommand {
-            "input": {
-              "Filters": [
-                {
-                  "Name": "owner-id",
-                  "Values": [
-                    "602401143452",
-                  ],
-                },
-                {
-                  "Name": "name",
-                  "Values": [
-                    "noiamge",
-                  ],
-                },
-              ],
-            },
-            "middlewareStack": {
-              "add": [Function],
-              "addRelativeTo": [Function],
-              "applyToStack": [Function],
-              "clone": [Function],
-              "concat": [Function],
-              "identify": [Function],
-              "remove": [Function],
-              "removeByTag": [Function],
-              "resolve": [Function],
-              "use": [Function],
-            },
-          },
-        ]
-      `);
+      expect(ec2Mock.calls()[0].args).toMatchSnapshot();
     });
   });
 

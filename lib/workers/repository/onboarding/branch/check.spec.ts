@@ -25,6 +25,11 @@ describe('workers/repository/onboarding/branch/check', () => {
     onboarding: true,
   });
 
+  it('returns true if in silent mode', async () => {
+    const res = await isOnboarded({ ...config, mode: 'silent' });
+    expect(res).toBeTrue();
+  });
+
   it('skips normal onboarding check if onboardingCache is valid', async () => {
     cache.getCache.mockReturnValueOnce({
       onboardingBranchCache: {

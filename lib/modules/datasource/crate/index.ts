@@ -35,6 +35,10 @@ export class CrateDatasource extends Datasource {
 
   static readonly CRATES_IO_API_BASE_URL = 'https://crates.io/api/v1/';
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `repository` field in the results.';
+
   @cache({
     namespace: `datasource-${CrateDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>

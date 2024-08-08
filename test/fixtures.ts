@@ -27,6 +27,16 @@ export class Fixtures {
   }
 
   /**
+   *  Returns path to fixture file in __fixtures__ folder
+   * @param name name of the fixture file
+   * @param [fixturesRoot] - Where to find the fixtures, uses the current test folder by default
+   * @return path to the fixture
+   */
+  static getPath(name: string, fixturesRoot = '.'): string {
+    return upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name);
+  }
+
+  /**
    * Returns content from fixture file from __fixtures__ folder as `Buffer`
    * @param name name of the fixture file
    * @param [fixturesRoot] - Where to find the fixtures, uses the current test folder by default

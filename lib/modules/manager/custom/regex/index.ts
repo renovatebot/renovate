@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import type { Category } from '../../../../constants';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -8,6 +9,8 @@ import type {
 import { handleAny, handleCombination, handleRecursive } from './strategies';
 import type { RegexManagerConfig, RegexManagerTemplates } from './types';
 import { validMatchFields } from './utils';
+
+export const categories: Category[] = ['custom'];
 
 export const defaultConfig = {
   pinDigests: false,

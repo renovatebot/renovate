@@ -17,7 +17,6 @@ beforeEach(() => {
   // default values
   config = partial<RenovateConfig>({
     onboardingBranch: 'configure/renovate',
-    suppressNotifications: ['deprecationWarningIssues'],
     configWarningReuseIssue: true,
     confidential: false,
   });
@@ -27,6 +26,20 @@ describe('workers/repository/error-config', () => {
   describe('raiseConfigWarningIssue()', () => {
     beforeEach(() => {
       GlobalConfig.reset();
+    });
+
+    it('returns if mode is silent', async () => {
+      config.mode = 'silent';
+
+      const res = await raiseConfigWarningIssue(
+        config,
+        new Error(CONFIG_VALIDATION),
+      );
+
+      expect(res).toBeUndefined();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Config warning issues are not created, updated or closed when mode=silent',
+      );
     });
 
     it('creates issues', async () => {
@@ -113,7 +126,6 @@ Message: some-message
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
-      // config.suppressNotifications = ['deprecationWarningIssues']
       config.suppressNotifications = [notificationName];
       platform.getBranchPr.mockResolvedValueOnce({
         ...mock<Pr>(),

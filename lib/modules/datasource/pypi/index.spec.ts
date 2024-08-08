@@ -18,6 +18,7 @@ const withWhitespacesResponse = Fixtures.get(
   'versions-html-with-whitespaces.html',
 );
 const hyphensResponse = Fixtures.get('versions-html-hyphens.html');
+const zipResponse = Fixtures.get('versions-archives.html');
 
 const baseUrl = 'https://pypi.org/pypi';
 const datasource = PypiDatasource.id;
@@ -352,6 +353,25 @@ describe('modules/datasource/pypi/index', () => {
         { version: '2.0.0' },
         { version: '2.0.1' },
         { version: '2.0.2' },
+      ]);
+    });
+
+    it('process data from simple endpoint with zip archives', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/company-aws-sso-client/')
+        .reply(200, zipResponse);
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'company-aws-sso-client',
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '0.11.7' },
+        { version: '0.11.8' },
       ]);
     });
 

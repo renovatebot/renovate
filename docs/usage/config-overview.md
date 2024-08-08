@@ -108,6 +108,8 @@ Read the [Self-hosted experimental environment variables](./self-hosted-experime
 Finally, there are some special environment variables that are loaded _before_ configuration parsing because they are used during logging initialization:
 
 - `LOG_CONTEXT`: a unique identifier used in each log message to track context
+- `LOG_FILE`: used to enable file logging and specify the log file path
+- `LOG_FILE_LEVEL`: log file logging level, defaults to `debug`
 - `LOG_FORMAT`: defaults to a "pretty" human-readable output, but can be changed to "json"
 - `LOG_LEVEL`: most commonly used to change from the default `info` to `debug` logging
 
@@ -253,15 +255,27 @@ Importantly, logs for all Renovate jobs by the Mend Renovate App are available t
 
 ### Onboarding behavior
 
+#### Installing Renovate into all repositories leads to silent mode
+
 If an Organization installed Renovate with "All repositories" (instead of "Selected repositories"), then Renovate will default to "Silent" mode (`dryRun=lookup`).
 We chose this behavior because:
 
 - Too often an account or org administrator selects the "All repositories" option and accidentally onboards hundreds of repositories, and
-- By offering this option, it means that org administrators _can_ install Renovate into "All repositories" without worrying about the noise, and then let individual Repository admins decide if/when to start onboarding
+- By offering this option, it means that org administrators _can_ install Renovate into "All repositories" without worrying about the noise, and let individual repository admins decide if/when to start onboarding
 
-If Renovate is installed, and you can see a job log, but Renovate is not onboarding your repository, look for `dryRun` in the logs to confirm you are in Silent mode and then change to Interactive mode either at the Repository level or Organization level.
+##### Why we call this silent mode
 
-Additionally, if an Organization is installed with "Selected repositories" then the app will change `onboardingNoDeps` to `true` so that an Onboarding PR is created even if no dependencies are detected.
+- It's not just no PRs, it's also no Issues
+- It's a common term across other Mend capabilities, such as OSS security and SAST security, where status checks also use silent/non-silent
+
+#### Get onboarding PRs from Renovate by getting out of silent mode
+
+If Renovate is installed, _and_ you can see a job log, but Renovate is _not_ onboarding your repository: look for `dryRun` in the logs to confirm you are in Silent mode.
+To get a onboarding PR from Renovate, change to Interactive mode either at the Repository level or Organization level.
+
+#### Installing Renovate into selected repositories always leads to onboarding PRs
+
+Additionally, if an Organization is installed with "Selected repositories" then the app will change `onboardingNoDeps` to `"enabled"` so that an Onboarding PR is created even if no dependencies are detected.
 
 ### Fork Processing
 

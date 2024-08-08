@@ -48,6 +48,7 @@ export interface GraphqlOptions {
   cursor?: string | null;
   acceptHeader?: string;
   token?: string;
+  readOnly?: boolean;
 }
 
 export interface HttpOptions {
@@ -67,6 +68,7 @@ export interface HttpOptions {
   token?: string;
   memCache?: boolean;
   cacheProvider?: HttpCacheProvider;
+  readOnly?: boolean;
 }
 
 export interface InternalHttpOptions extends HttpOptions {
@@ -89,3 +91,13 @@ export interface HttpResponse<T = string> {
 
 export type Task<T> = () => Promise<T>;
 export type GotTask<T> = Task<HttpResponse<T>>;
+
+export interface ThrottleLimitRule {
+  matchHost: string;
+  throttleMs: number;
+}
+
+export interface ConcurrencyLimitRule {
+  matchHost: string;
+  concurrency: number;
+}

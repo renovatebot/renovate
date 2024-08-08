@@ -38,6 +38,8 @@ export async function autodiscoverRepositories(
   // Autodiscover list of repositories
   let discovered = await platform.getRepos({
     topics: config.autodiscoverTopics,
+    sort: config.autodiscoverRepoSort,
+    order: config.autodiscoverRepoOrder,
     includeMirrors: config.includeMirrors,
     namespaces: config.autodiscoverNamespaces,
     projects: config.autodiscoverProjects,

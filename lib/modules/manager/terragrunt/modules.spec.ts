@@ -24,7 +24,7 @@ describe('modules/manager/terragrunt/modules', () => {
   });
 
   describe('gitTagsRefMatchRegex', () => {
-    it('should split project and tag from source', () => {
+    it('should split host, path and tag from source', () => {
       const http = gitTagsRefMatchRegex.exec(
         'http://github.com/hashicorp/example?ref=v1.0.0',
       )?.groups;
@@ -36,15 +36,18 @@ describe('modules/manager/terragrunt/modules', () => {
       )?.groups;
 
       expect(http).toMatchObject({
-        project: 'hashicorp/example',
+        host: 'github.com',
+        path: 'hashicorp/example',
         tag: 'v1.0.0',
       });
       expect(https).toMatchObject({
-        project: 'hashicorp/example',
+        host: 'github.com',
+        path: 'hashicorp/example',
         tag: 'v1.0.0',
       });
       expect(ssh).toMatchObject({
-        project: 'hashicorp/example',
+        host: 'github.com',
+        path: 'hashicorp/example',
         tag: 'v1.0.0',
       });
     });
@@ -61,15 +64,15 @@ describe('modules/manager/terragrunt/modules', () => {
       )?.groups;
 
       expect(http).toMatchObject({
-        project: 'hashicorp/example.repo-123',
+        path: 'hashicorp/example.repo-123',
         tag: 'v1.0.0',
       });
       expect(https).toMatchObject({
-        project: 'hashicorp/example.repo-123',
+        path: 'hashicorp/example.repo-123',
         tag: 'v1.0.0',
       });
       expect(ssh).toMatchObject({
-        project: 'hashicorp/example.repo-123',
+        path: 'hashicorp/example.repo-123',
         tag: 'v1.0.0',
       });
     });

@@ -9,6 +9,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 
 - Docker's `Dockerfile` files
 - Docker Compose `docker-compose.yml`, `compose.yml` files
+- Visual Studio Code dev containers and GitHub Codespaces images and features
 - CircleCI config files
 - Kubernetes manifest files
 - Ansible configuration files
@@ -120,13 +121,13 @@ For example:
 Renovate understands [Ubuntu release code names](https://wiki.ubuntu.com/Releases) and will offer upgrades to the latest LTS release.
 
 You must only use the _first_ term of the code name in _lowercase_.
-So use `jammy` for the Jammy Jellyfish release.
+So use `noble` for the Noble Numbat release.
 
 For example, Renovate will offer to upgrade the following `Dockerfile` layer:
 
 ```diff
-- FROM ubuntu:focal
-+ FROM ubuntu:jammy
+- FROM ubuntu:jammy
++ FROM ubuntu:noble
 ```
 
 ### Debian codenames
@@ -236,6 +237,8 @@ module.exports = {
 
 #### AWS ECR (Amazon Web Services Elastic Container Registry)
 
+#### Using access key id & secret
+
 Renovate can authenticate with AWS ECR using AWS access key id & secret as the username & password, for example:
 
 ```json
@@ -245,6 +248,27 @@ Renovate can authenticate with AWS ECR using AWS access key id & secret as the u
       "hostType": "docker",
       "matchHost": "12345612312.dkr.ecr.us-east-1.amazonaws.com",
       "username": "AKIAABCDEFGHIJKLMNOPQ",
+      "encrypted": {
+        "password": "w...A"
+      }
+    }
+  ]
+}
+```
+
+##### Using `get-login-password`
+
+Renovate can also authenticate with AWS ECR using the output from the `aws ecr get-login-password` command as outlined in
+the [AWS documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/registry_auth.html#registry-auth-token).
+To make use of this authentication mechanism, specify the username as `AWS`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "matchHost": "12345612312.dkr.ecr.us-east-1.amazonaws.com",
+      "username": "AWS",
       "encrypted": {
         "password": "w...A"
       }
@@ -383,7 +407,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:37.280.0
+FROM renovate/renovate:38.18.12
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

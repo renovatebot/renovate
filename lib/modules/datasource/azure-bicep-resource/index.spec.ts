@@ -28,7 +28,7 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
     expect(result).toBeNull();
   });
 
-  it('should return versions when package is a function', async () => {
+  it('should return null when package is a function', async () => {
     httpMock
       .scope(gitHubHost)
       .get(indexPath)
@@ -57,23 +57,10 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
 
     const azureBicepResourceDatasource = new AzureBicepResourceDatasource();
     const result = await azureBicepResourceDatasource.getReleases({
-      packageName: 'Microsoft.Billing/billingAccounts',
+      packageName: 'unknown',
     });
 
-    expect(result).toEqual({
-      releases: [
-        {
-          version: '2019-10-01-preview',
-          changelogUrl:
-            'https://learn.microsoft.com/en-us/azure/templates/microsoft.billing/change-log/billingaccounts#2019-10-01-preview',
-        },
-        {
-          version: '2020-05-01',
-          changelogUrl:
-            'https://learn.microsoft.com/en-us/azure/templates/microsoft.billing/change-log/billingaccounts#2020-05-01',
-        },
-      ],
-    });
+    expect(result).toBeNull();
   });
 
   it('should return versions when package is a resource', async () => {
@@ -113,6 +100,48 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
           version: '2018-02-01',
           changelogUrl:
             'https://learn.microsoft.com/en-us/azure/templates/microsoft.storage/change-log/storageaccounts#2018-02-01',
+        },
+      ],
+    });
+  });
+
+  it('should return versions when package is a resource and a function', async () => {
+    httpMock
+      .scope(gitHubHost)
+      .get(indexPath)
+      .reply(
+        200,
+        codeBlock`
+          {
+            "resources": {
+              "Microsoft.OperationalInsights/workspaces@2023-09-01": {
+                "$ref": "operationalinsights/microsoft.operationalinsights/2023-09-01/types.json#/31"
+              }
+            },
+            "resourceFunctions": {
+              "microsoft.operationalinsights/workspaces": {
+                "2015-03-20": [
+                  {
+                    "$ref": "operationalinsights/workspaces/2015-03-20/types.json#/304"
+                  }
+                ]
+              }
+            }
+          }
+        `,
+      );
+
+    const azureBicepResourceDatasource = new AzureBicepResourceDatasource();
+    const result = await azureBicepResourceDatasource.getReleases({
+      packageName: 'Microsoft.OperationalInsights/workspaces',
+    });
+
+    expect(result).toEqual({
+      releases: [
+        {
+          version: '2023-09-01',
+          changelogUrl:
+            'https://learn.microsoft.com/en-us/azure/templates/microsoft.operationalinsights/change-log/workspaces#2023-09-01',
         },
       ],
     });

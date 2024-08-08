@@ -1,6 +1,6 @@
 Extracts Docker dependencies from `gitlab-ci.yml` files.
 
-If you need to change the versioning format, read the [versioning](../../versioning.md) documentation to learn more.
+If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.
 
 If you use Gitlab Dependency Proxy then you can use these predefined variables as prefixes for your image:
 

@@ -28,7 +28,7 @@ export async function prepareGradleCommand(
   if (gradlewStat?.isFile() === true) {
     // if the file is not executable by others
     if (os.platform() !== 'win32' && (gradlewStat.mode & 0o1) === 0) {
-      logger.warn('Gradle wrapper is missing the executable bit');
+      logger.debug('Gradle wrapper is missing the executable bit');
       // add the execution permission to the owner, group and others
       await chmodLocalFile(gradlewFile, gradlewStat.mode | 0o111);
     }

@@ -4,7 +4,7 @@ import is from '@sindresorhus/is';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
-import type { GitProtocol } from '../../../types/git';
+import type { GitOptions, GitProtocol } from '../../../types/git';
 import * as git from '../../../util/git';
 import { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
@@ -174,9 +174,10 @@ function injectAuth(url: string, opts: HostRule): string {
     logger.debug(`Invalid url: ${url}`);
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
   }
-  // TODO: null checks (#22198)
-  repoUrl.username = opts.username!;
-  repoUrl.password = opts.password!;
+  if (!opts.token && opts.username && opts.password) {
+    repoUrl.username = opts.username;
+    repoUrl.password = opts.password;
+  }
   return repoUrl.toString();
 }
 
@@ -207,4 +208,13 @@ export function getRepoGitUrl(
   }
   // SSH urls can be used directly
   return cloneUrl.href;
+}
+
+export function getExtraCloneOpts(opts: HostRule): GitOptions {
+  if (opts.token) {
+    return {
+      '-c': `http.extraheader=Authorization: Bearer ${opts.token}`,
+    };
+  }
+  return {};
 }

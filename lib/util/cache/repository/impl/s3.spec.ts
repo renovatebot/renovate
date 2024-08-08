@@ -8,13 +8,15 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
-import { partial } from '../../../../../test/util';
+import { fs, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { parseS3Url } from '../../../s3';
 import type { RepoCacheRecord } from '../schema';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheS3 } from './s3';
+
+jest.mock('../../../fs');
 
 function createGetObjectCommandInput(
   repository: string,
@@ -57,7 +59,7 @@ describe('util/cache/repository/impl/s3', () => {
   let s3Cache: RepoCacheS3;
 
   beforeEach(() => {
-    GlobalConfig.set({ platform: 'github' });
+    GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
     s3Mock.reset();
     s3Cache = new RepoCacheS3(repository, '0123456789abcdef', url);
     getObjectCommandInput = createGetObjectCommandInput(repository, url);
@@ -195,5 +197,20 @@ describe('util/cache/repository/impl/s3', () => {
   it('creates an S3 client using the cache factory', () => {
     const cache = CacheFactory.get(repository, '0123456789abcdef', url);
     expect(cache instanceof RepoCacheS3).toBeTrue();
+  });
+
+  it('should persists data locally after uploading to s3', async () => {
+    process.env.RENOVATE_X_REPO_CACHE_FORCE_LOCAL = 'true';
+    const putObjectCommandOutput: PutObjectCommandOutput = {
+      $metadata: { attempts: 1, httpStatusCode: 200, totalRetryDelay: 0 },
+    };
+    s3Mock
+      .on(PutObjectCommand, putObjectCommandInput)
+      .resolvesOnce(putObjectCommandOutput);
+    await s3Cache.write(repoCache);
+    expect(fs.outputCacheFile).toHaveBeenCalledWith(
+      'renovate/repository/github/org/repo.json',
+      JSON.stringify(repoCache),
+    );
   });
 });

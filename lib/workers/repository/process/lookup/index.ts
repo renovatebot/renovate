@@ -19,6 +19,7 @@ import {
 } from '../../../../modules/datasource/common';
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
+import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { assignKeys } from '../../../../util/assign-keys';
 import { applyPackageRules } from '../../../../util/package-rules';
@@ -35,6 +36,17 @@ import {
   addReplacementUpdateIfValid,
   isReplacementRulesConfigured,
 } from './utils';
+
+function getTimestamp(
+  versions: Release[],
+  version: string,
+  versioning: allVersioning.VersioningApi,
+): string | null | undefined {
+  return versions.find(
+    (v) =>
+      versioning.isValid(v.version) && versioning.equals(v.version, version),
+  )?.releaseTimestamp;
+}
 
 export async function lookupUpdates(
   inconfig: LookupUpdateConfig,
@@ -176,7 +188,7 @@ export async function lookupUpdates(
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
-        logger.debug(
+        logger.info(
           {
             dependency: config.packageName,
             result: dependency,
@@ -188,7 +200,10 @@ export async function lookupUpdates(
         }
       }
       // Reapply package rules in case we missed something from sourceUrl
-      config = applyPackageRules({ ...config, sourceUrl: res.sourceUrl });
+      config = applyPackageRules(
+        { ...config, sourceUrl: res.sourceUrl },
+        'source-url',
+      );
       if (config.followTag) {
         const taggedVersion = dependency.tags?.[config.followTag];
         if (!taggedVersion) {
@@ -287,21 +302,25 @@ export async function lookupUpdates(
       }
 
       res.currentVersion = currentVersion!;
-      const currentVersionTimestamp = allVersions.find(
-        (v) =>
-          versioning.isValid(v.version) &&
-          versioning.equals(v.version, currentVersion),
-      )?.releaseTimestamp;
+      const currentVersionTimestamp = getTimestamp(
+        allVersions,
+        currentVersion,
+        versioning,
+      );
 
-      if (
-        is.nonEmptyString(currentVersionTimestamp) &&
-        config.packageRules?.some((rules) =>
-          is.nonEmptyString(rules.matchCurrentAge),
-        )
-      ) {
+      if (is.nonEmptyString(currentVersionTimestamp)) {
         res.currentVersionTimestamp = currentVersionTimestamp;
-        // Reapply package rules to check matches for matchCurrentAge
-        config = applyPackageRules({ ...config, currentVersionTimestamp });
+        if (
+          config.packageRules?.some((rules) =>
+            is.nonEmptyString(rules.matchCurrentAge),
+          )
+        ) {
+          // Reapply package rules to check matches for matchCurrentAge
+          config = applyPackageRules(
+            { ...config, currentVersionTimestamp },
+            'current-timestamp',
+          );
+        }
       }
 
       if (
@@ -349,8 +368,12 @@ export async function lookupUpdates(
           unconstrainedValue ||
           versioning.isCompatible(v.version, compareValue),
       );
-      if (config.isVulnerabilityAlert && !config.osvVulnerabilityAlerts) {
+      if (config.isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
+        logger.debug(
+          { filteredReleases },
+          'Vulnerability alert found: limiting results to a single release',
+        );
       }
       const buckets: Record<string, [Release]> = {};
       for (const release of filteredReleases) {
@@ -397,6 +420,17 @@ export async function lookupUpdates(
           bucket,
           release,
         );
+
+        // #29034
+        if (
+          config.manager === 'gomod' &&
+          compareValue?.startsWith('v0.0.0-') &&
+          update.newValue?.startsWith('v0.0.0-') &&
+          config.currentDigest !== update.newDigest
+        ) {
+          update.updateType = 'digest';
+        }
+
         if (pendingChecks) {
           update.pendingChecks = pendingChecks;
         }
@@ -427,7 +461,31 @@ export async function lookupUpdates(
         res.isSingleVersion ??=
           is.string(update.newValue) &&
           versioning.isSingleVersion(update.newValue);
-        res.updates.push(update);
+        // istanbul ignore if
+        if (
+          config.versioning === dockerVersioningId &&
+          update.updateType !== 'rollback' &&
+          update.newValue &&
+          versioning.isVersion(update.newValue) &&
+          compareValue &&
+          versioning.isVersion(compareValue) &&
+          versioning.isGreaterThan(compareValue, update.newValue)
+        ) {
+          logger.warn(
+            {
+              packageName: config.packageName,
+              currentValue: config.currentValue,
+              compareValue,
+              currentVersion: config.currentVersion,
+              update,
+              allVersionsLength: allVersions.length,
+              filteredReleaseVersions: filteredReleases.map((r) => r.version),
+            },
+            'Unexpected downgrade detected: skipping',
+          );
+        } else {
+          res.updates.push(update);
+        }
       }
     } else if (compareValue) {
       logger.debug(
@@ -516,6 +574,21 @@ export async function lookupUpdates(
             registryUrl: update.registryUrl ?? res.registryUrl,
             lookupName: res.lookupName,
           };
+
+          // #20304 only pass it for replacement updates, otherwise we get wrong or invalid digest
+          if (update.updateType !== 'replacement') {
+            delete getDigestConfig.replacementName;
+          }
+
+          // #20304 don't use lookupName and currentDigest when we replace image name
+          if (
+            update.updateType === 'replacement' &&
+            update.newName !== config.packageName
+          ) {
+            delete getDigestConfig.lookupName;
+            delete getDigestConfig.currentDigest;
+          }
+
           // TODO #22198
           update.newDigest ??=
             dependency?.releases.find((r) => r.version === update.newValue)

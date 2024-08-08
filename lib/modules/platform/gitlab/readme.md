@@ -2,39 +2,47 @@
 
 ## Authentication
 
-First, [create a Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account.
+You can authenticate Renovate to GitLab, with a Personal Access Token, or Group Access Token.
 
-If you are using a Group access token, the token must have Developer role or higher permissions in order to create issues and merge requests.
-The token must have Maintainer permissions in order to perform Automerge.
+To start, create either:
 
-For real runs, give the PAT these scopes:
+- a [Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account
+- or a [Group Access Token](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html#bot-users-for-groups) for the bot account
+- or a [Deploy Token](https://docs.gitlab.com/ee/user/project/deploy_tokens/index.html) for the bot account
 
-- `read_user`
+The bot account must have at least the Developer role in order to [create issues and merge requests](https://docs.gitlab.com/ee/user/permissions.html#project-members-permissions).
+If you are using automerge, the bot account must have the appropriate ["Allowed to merge" permission on the protected branch](https://docs.gitlab.com/ee/user/project/protected_branches.html#require-everyone-to-submit-merge-requests-for-a-protected-branch) of your projects.
+If merging is restricted to Maintainers, the bot account must have the Maintainer role.
+
+If you are using a group access token, to keep using the same GitLab-generated bot user you must [rotate/refresh the Group Access Token](https://docs.gitlab.com/ee/api/group_access_tokens.html#rotate-a-group-access-token) _before_ the token's expiry date.
+
+We refer to personal access tokens and group access tokens as _access tokens_ in the instructions that follow.
+
+For real runs, give the access token these scopes:
+
 - `api`
 - `write_repository`
 - `read_registry` (only if Renovate needs to access the [GitLab Container registry](https://docs.gitlab.com/ee/user/packages/container_registry/))
 
-For dry runs, give the PAT these scopes:
+For dry runs, give the access token these scopes:
 
-- `read_user`
 - `read_api`
 - `read_repository`
-- `write_repository` (when using autodiscover)
 - `read_registry` (only if Renovate needs to access the [GitLab Container registry](https://docs.gitlab.com/ee/user/packages/container_registry/))
 
-Let Renovate use your PAT by doing _one_ of the following:
+Let Renovate use your access token by doing _one_ of the following:
 
-- Set your PAT as a `token` in your `config.js` file
-- Set your PAT as an environment variable `RENOVATE_TOKEN`
-- Set your PAT when you run Renovate in the CLI with `--token=`
+- Set your access token as a `token` in your `config.js` file
+- Set your access token as an environment variable `RENOVATE_TOKEN`
+- Set your access token when you run Renovate in the CLI with `--token=`
 
 Remember to set `platform=gitlab` somewhere in your Renovate config file.
 
 If you're using a private [GitLab container registry](https://docs.gitlab.com/ee/user/packages/container_registry/), you must:
 
 - Set the `RENOVATE_HOST_RULES` CI variable to `[{"matchHost": "${CI_REGISTRY}","username": "${GITLAB_USER_NAME}","password": "${RENOVATE_TOKEN}", "hostType": "docker"}]`.
-- Make sure the user that owns the `RENOVATE_TOKEN` PAT is a member of the corresponding GitLab projects/groups with the right permissions.
-- Make sure the `RENOVATE_TOKEN` PAT has the `read_registry` scope.
+- Make sure the user that owns the access token is a member of the corresponding GitLab projects/groups with the right permissions.
+- Make sure the access token has the `read_registry` scope.
 
 You may want to set `FORCE_COLOR: 3` or `TERM: ansi` to the job, in order to get colored output.
 [GitLab Runner runs the container’s shell in non-interactive mode, so the shell’s `TERM` environment variable is set to `dumb`.](https://docs.gitlab.com/ee/ci/yaml/script.html#job-log-output-is-not-formatted-as-expected-or-contains-unexpected-characters)
