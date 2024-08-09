@@ -1403,6 +1403,9 @@ export async function ensureComment({
       }
     });
   }
+  
+  body = smartTruncate(body, maxBodyLength());
+
   if (!commentId) {
     await addComment(number, body);
     logger.debug(
