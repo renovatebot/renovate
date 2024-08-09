@@ -50,13 +50,19 @@ export class GalaxyDatasource extends Datasource {
       throw this.handleGenericErrors(err);
     }
 
-    // istanbul ignore if
     if (body.results.length > 1) {
-      logger.warn(
-        { dependency: packageName },
-        `Received multiple results from ${galaxyAPIUrl}`,
-      );
-      return null;
+      const githubUsernames = body.results.map((result) => result.github_user);
+      if (githubUsernames.includes(userName)) {
+        body.results = body.results.filter(
+          (result) => result.github_user === userName,
+        );
+      } else {
+        logger.warn(
+          { dependency: packageName, githubUsernames },
+          `Multiple results from galaxy for ${packageName}, none match`,
+        );
+        return null;
+      }
     }
     if (body.results.length === 0) {
       logger.info(
