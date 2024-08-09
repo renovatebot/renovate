@@ -54,6 +54,10 @@ async function cargoUpdatePrecise(
   // Update individual dependencies to their `newVersion`. Necessary when
   // using the `update-lockfile` rangeStrategy which doesn't touch Cargo.toml.
   for (const dep of updatedDeps) {
+    // Cargo update should already have handled any non-lockfile updates
+    if (dep.updateType !== 'lockfileUpdate') {
+      continue;
+    }
     cmds.push(
       `cargo update --config net.git-fetch-with-cli=true` +
         ` --manifest-path ${quote(manifestPath)}` +
@@ -144,7 +148,6 @@ async function updateArtifactsImpl(
           config.constraints?.rust,
         );
       } else {
-        // If all dependencies have locked versions then update them precisely.
         await cargoUpdatePrecise(
           packageFileName,
           updatedDeps,
