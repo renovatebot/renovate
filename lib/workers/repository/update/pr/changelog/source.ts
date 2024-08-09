@@ -74,6 +74,7 @@ export abstract class ChangeLogSource {
     const newVersion = config.newVersion!;
     const sourceUrl = config.sourceUrl!;
     const packageName = config.packageName!;
+    const depName = config.depName!;
     const sourceDirectory = config.sourceDirectory;
     const version = allVersioning.get(versioning);
 
@@ -111,7 +112,9 @@ export abstract class ChangeLogSource {
       .sort((a, b) => version.sortVersions(a.version, b.version));
 
     if (validReleases.length < 2) {
-      logger.debug(`Not enough valid releases for dep ${packageName}`);
+      logger.debug(
+        `Not enough valid releases for dep ${depName} (${packageName})`,
+      );
       return null;
     }
 
@@ -143,8 +146,8 @@ export abstract class ChangeLogSource {
           compare: {},
         };
         const tags = await getTags();
-        const prevHead = this.getRef(version, packageName, prev, tags);
-        const nextHead = this.getRef(version, packageName, next, tags);
+        const prevHead = this.getRef(version, packageName, depName, prev, tags);
+        const nextHead = this.getRef(version, packageName, depName, next, tags);
         if (is.nonEmptyString(prevHead) && is.nonEmptyString(nextHead)) {
           release.compare.url = this.getCompareURL(
             baseUrl,
@@ -185,11 +188,13 @@ export abstract class ChangeLogSource {
   private findTagOfRelease(
     version: allVersioning.VersioningApi,
     packageName: string,
+    depName: string,
     depNewVersion: string,
     tags: string[],
   ): string | undefined {
-    const regex = regEx(`(?:${packageName}|release)[@-]`, undefined, false);
-    const exactReleaseRegex = regEx(`${packageName}[@\\-_]v?${depNewVersion}`);
+    const releaseRegexPrefix = `^(?:${packageName}|${depName}|release)[@_-]v?`;
+    const regex = regEx(releaseRegexPrefix, undefined, false);
+    const exactReleaseRegex = regEx(`${releaseRegexPrefix}${depNewVersion}`);
     const exactTagsList = tags.filter((tag) => {
       return exactReleaseRegex.test(tag);
     });
@@ -202,12 +207,14 @@ export abstract class ChangeLogSource {
   private getRef(
     version: allVersioning.VersioningApi,
     packageName: string,
+    depName: string,
     release: Release,
     tags: string[],
   ): string | null {
     const tagName = this.findTagOfRelease(
       version,
       packageName,
+      depName,
       release.version,
       tags,
     );
