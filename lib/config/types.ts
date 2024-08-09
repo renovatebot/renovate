@@ -390,6 +390,7 @@ export interface ValidationMessage {
 }
 
 export type AllowedParents =
+  | '.' // Root
   | 'customManagers'
   | 'customDatasources'
   | 'hostRules'

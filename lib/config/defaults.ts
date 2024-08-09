@@ -1,4 +1,4 @@
-import { getOptions } from './options';
+import { getOptions, isTopLevelOnlyOption } from './options';
 import type { AllConfig, RenovateOptions } from './types';
 
 // Use functions instead of direct values to avoid introducing global references.
@@ -23,7 +23,7 @@ export function getConfig(): AllConfig {
   const options = getOptions();
   const config: AllConfig = {};
   options.forEach((option) => {
-    if (!option.parents) {
+    if (!option.parents || isTopLevelOnlyOption(option)) {
       config[option.name] = getDefault(option);
     }
   });
