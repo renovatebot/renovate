@@ -55,6 +55,12 @@ In the example above `depName` is the string you want to decode.
 
 Read the [MDN Web Docs, decodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent) to learn more.
 
+### distinct
+
+Removes duplicate elements from an array.
+
+`{{#each (distinct (lookupArray (lookupArray upgrades "prBodyDefinitions") "Issue"))}} {{{.}}}{{/each}}`
+
 ### encodeBase64
 
 If you want to convert a string to Base64, use the built-in function `encodeBase64` like this:
@@ -78,6 +84,22 @@ Read the [MDN Web Docs, encodeURIComponent()](https://developer.mozilla.org/en-U
 Returns `true` if two values equals (checks strict equality, i.e. `===`).
 
 `{{#if (equals datasource 'git-refs')}}git-refs{{else}}Other{{/if}}`
+
+### lookupArray
+
+Similar to the built-in [`lookup`](https://handlebarsjs.com/guide/builtin-helpers.html#lookup)
+helper, but performs lookups in every element of an array, instead of just one object.
+
+For example:
+
+`{{#each (lookupArray upgrades "prBodyDefinitions")}} {{{Issue}}}{{/each}}`
+
+will produce the same output as:
+
+`{{#each upgrades}}{{#with prBodyDefinitions}} {{{Issue}}}{{/with}}{{/each}}`.
+
+The return value of `lookupArray` can be passed to other helpers - for example,
+to `distinct`.
 
 ### lowercase
 
