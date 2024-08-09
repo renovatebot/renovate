@@ -441,8 +441,8 @@ importers:
         specifier: 3.4.2
         version: 3.4.2
       '@types/markdown-it':
-        specifier: 14.0.1
-        version: 14.0.1
+        specifier: 14.1.2
+        version: 14.1.2
       '@types/markdown-table':
         specifier: 2.0.0
         version: 2.0.0
@@ -2065,8 +2065,8 @@ packages:
   '@types/luxon@3.4.2':
     resolution: {integrity: sha512-TifLZlFudklWlMBfhubvgqTXRzLDI5pCbGa4P8a3wPyUQSW+1xQ5eDsreP9DWHX3tjq1ke96uYG/nwundroWcA==}
 
-  '@types/markdown-it@14.0.1':
-    resolution: {integrity: sha512-6WfOG3jXR78DW8L5cTYCVVGAsIFZskRHCDo5tbqa+qtKVt4oDRVH7hyIWu1SpDQJlmIoEivNQZ5h+AGAOrgOtQ==}
+  '@types/markdown-it@14.1.2':
+    resolution: {integrity: sha512-promo4eFwuiW+TfGxhi+0x3czqTYJkG8qB17ZUJiVF10Xm7NLVRSLUsfRTU/6h1e24VvRnXCx+hG7li58lkzog==}
 
   '@types/markdown-table@2.0.0':
     resolution: {integrity: sha512-fVZN/DRjZvjuk+lo7ovlI/ZycS51gpYU5vw5EcFeqkcX6lucQ+UWgEOH2O4KJHkSck4DHAY7D7CkVLD0wzc5qw==}
@@ -8540,7 +8540,7 @@ snapshots:
 
   '@types/luxon@3.4.2': {}
 
-  '@types/markdown-it@14.0.1':
+  '@types/markdown-it@14.1.2':
     dependencies:
       '@types/linkify-it': 3.0.5
       '@types/mdurl': 2.0.0
