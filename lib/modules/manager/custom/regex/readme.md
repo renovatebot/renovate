@@ -51,7 +51,7 @@ ENV YARN_VERSION=1.19.1
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
 ```
 
-You would need to capture the `currentValue` with a named capture group, like this: `ENV YARN_VERSION=(?<currentValue>.*?)\\n`.
+You would need to capture the `currentValue` with a named capture group, like this: `ENV YARN_VERSION=(?<currentValue>.*?)\\n`. If you need to update a version string multiple times in a line you need to have multiple `matchStrings`, one for each occurence.
 
 If you're looking for an online regex testing tool that supports capture groups, try [regex101.com](<https://regex101.com/?flavor=javascript&flags=g&regex=ENV%20YARN_VERSION%3D(%3F%3CcurrentValue%3E.*%3F)%5Cn&testString=FROM%20node%3A12%0AENV%20YARN_VERSION%3D1.19.1%0ARUN%20curl%20-o-%20-L%20https%3A%2F%2Fyarnpkg.com%2Finstall.sh%20%7C%20bash%20-s%20--%20--version%20%24%7BYARN_VERSION%7D>).
 You must select the `ECMAScript (JavaScript)` flavor of regex.
