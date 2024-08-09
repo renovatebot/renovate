@@ -64,7 +64,7 @@ handlebars.registerHelper('includes', (arg1: string[], arg2: string) => {
 
 handlebars.registerHelper(
   'split',
-  (str: string, separator: string): string[] => {
+  (str: unknown, separator: unknown): string[] => {
     if (is.string(str) && is.string(separator)) {
       return str.split(separator);
     }
