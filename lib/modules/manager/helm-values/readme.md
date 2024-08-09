@@ -11,6 +11,10 @@ image:
   repository: 'some-docker/dependency'
   version: v1.0.0
 
+image:
+  image: 'some-docker/dependency'
+  version: v1.0.0
+
 coreImage:
   registry: docker.io
   repository: bitnami/harbor-core

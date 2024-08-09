@@ -11,6 +11,10 @@ const helmMultiAndNestedImageValues = Fixtures.get(
   'multi_and_nested_image_values.yaml',
 );
 
+const helmImageInsteadOfRepository = Fixtures.get(
+  'values_with_image_instead_of_repo.yaml',
+);
+
 const config = partial<ExtractConfig>({});
 
 const configAliases = partial<ExtractConfig>({
@@ -107,6 +111,15 @@ describe('modules/manager/helm-values/extract', () => {
           },
         ],
       });
+    });
+
+    it('return null if image and repo are not defined', () => {
+      const result = extractPackageFile(
+        helmImageInsteadOfRepository,
+        packageFile,
+        config,
+      );
+      expect(result).toBeNull();
     });
   });
 });
