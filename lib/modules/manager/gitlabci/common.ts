@@ -37,5 +37,5 @@ export function isGitlabIncludeLocal(
 export function isGitlabIncludeComponent(
   include: GitlabInclude,
 ): include is GitlabIncludeComponent {
-  return !is.undefined((include as GitlabIncludeComponent).component);
+  return is.string((include as GitlabIncludeComponent).component);
 }
