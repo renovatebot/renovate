@@ -15,12 +15,13 @@ The `gleam` manager, however, uses `gleam` itself to keep `manifest.toml` up-to-
 
 Renovate's `"auto"` strategy defaults to `"widen"` and works like this for `gleam`:
 
+<!-- prettier-ignore -->
 1. If an existing range is a complex range (contains multiple range specifications), Renovate widens it to include the new version.
-   - Example: `>= 0.14.0 and < 0.15.0` becomes `>= 0.14.0 and < 0.16.1` for a new `0.16.0` version.
+    - Example: `>= 0.14.0 and < 0.15.0` becomes `>= 0.14.0 and < 0.16.1` for a new `0.16.0` version.
 1. For simple ranges, if the update is outside the existing range, Renovate widens the range to include the new version.
-   - Example: `<= 0.38.0` becomes `<= 0.39.0` for a new `0.39.0` version.
+    - Example: `<= 0.38.0` becomes `<= 0.39.0` for a new `0.39.0` version.
 1. For exact version constraints, Renovate replaces the version with the new one.
-   - Example: `== 0.12.0` becomes `== 0.13.0` for a new `0.13.0` version.
+    - Example: `== 0.12.0` becomes `== 0.13.0` for a new `0.13.0` version.
 
 <!-- prettier-ignore -->
 !!! warning
