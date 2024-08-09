@@ -130,7 +130,7 @@ You should be able to see now the full trace view which shows each HTTP request 
 ### Metrics
 
 Additional to the received traces some metrics are calculated.
-This is achieved using the [spanmetricsprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/spanmetricsprocessor).
+This is achieved using the [spanmetricsprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/3cd5b15466fe4065ef76ea5c557dab435a7d7318/processor/spanmetricsprocessor).
 The previous implemented setup will produce following metrics, which are exposed under [http://localhost:9123/metrics](http://localhost:9123/metrics):
 
 ```
@@ -167,7 +167,7 @@ latency_sum{http_host="api.github.com:443",http_method="POST",http_status_code="
 latency_count{http_host="api.github.com:443",http_method="POST",http_status_code="200",operation="HTTPS POST",service_name="renovate",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_UNSET"} 9
 ```
 
-The [spanmetricsprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/spanmetricsprocessor) creates two sets of metrics.
+The [spanmetricsprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/3cd5b15466fe4065ef76ea5c557dab435a7d7318/processor/spanmetricsprocessor) creates two sets of metrics.
 
 #### Calls metric
 

@@ -1,0 +1,20 @@
+verbose = "info"
+no_progress = true
+
+user_agent = "https://github.com/renovatebot/renovate/tree/main/.github/lychee.toml"
+
+exclude = [
+  "localhost",
+  "codepen.io",
+  "repology.org",
+  "https://github.com/foo/bar/",
+  "https://raw.githubusercontent.com/foo/bar/",
+  "https://developer.mend.io/api/mc/badges",
+  "https://hub.docker.com/r/renovate/renovate/",
+  "^https\\:\\/\\/github\\.com\\/renovatebot\\/renovate\\/issues\\?q\\=is\\:issue\\+is\\:open\\+sort\\:updated\\-desc\\+label\\:manager\\:pre\\-commit$",
+]
+
+accept = ["200", "429"]
+
+cache = true
+max_cache_age = "1d"
