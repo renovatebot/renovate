@@ -222,5 +222,45 @@ describe('workers/repository/update/branch/reuse', () => {
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeTrue();
     });
+
+    it('converts rebaseWhen=auto to behind-base-branch if automerge', async () => {
+      config.rebaseWhen = 'auto';
+      config.automerge = true;
+      scm.branchExists.mockResolvedValueOnce(true);
+      scm.isBranchBehindBase.mockResolvedValueOnce(false);
+      const result = await shouldReuseExistingBranch(config);
+      expect(config.rebaseWhen).toBe('auto');
+      expect(result.rebaseWhen).toBe('behind-base-branch');
+    });
+
+    it('converts rebaseWhen=auto to behind-base-branch if getBranchForceRebase', async () => {
+      config.rebaseWhen = 'auto';
+      platform.getBranchForceRebase.mockResolvedValueOnce(true);
+      scm.branchExists.mockResolvedValueOnce(true);
+      scm.isBranchBehindBase.mockResolvedValueOnce(false);
+      const result = await shouldReuseExistingBranch(config);
+      expect(config.rebaseWhen).toBe('auto');
+      expect(result.rebaseWhen).toBe('behind-base-branch');
+    });
+
+    it('converts rebaseWhen=auto to behind-base-branch if keepUpdatedLabel', async () => {
+      config.rebaseWhen = 'auto';
+      config.keepUpdatedLabel = 'keep-updated';
+      platform.getBranchPr.mockResolvedValue(pr);
+      scm.branchExists.mockResolvedValueOnce(true);
+      scm.isBranchBehindBase.mockResolvedValueOnce(false);
+      const result = await shouldReuseExistingBranch(config);
+      expect(config.rebaseWhen).toBe('auto');
+      expect(result.rebaseWhen).toBe('behind-base-branch');
+    });
+
+    it('converts rebaseWhen=auto to conflicted', async () => {
+      config.rebaseWhen = 'auto';
+      scm.branchExists.mockResolvedValueOnce(true);
+      scm.isBranchBehindBase.mockResolvedValueOnce(false);
+      const result = await shouldReuseExistingBranch(config);
+      expect(config.rebaseWhen).toBe('auto');
+      expect(result.rebaseWhen).toBe('conflicted');
+    });
   });
 });

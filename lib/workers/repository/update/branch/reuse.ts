@@ -4,12 +4,6 @@ import { scm } from '../../../../modules/platform/scm';
 import type { RangeStrategy } from '../../../../types';
 import type { BranchConfig } from '../../../types';
 
-type ParentBranch = {
-  reuseExistingBranch: boolean;
-  isModified?: boolean;
-  isConflicted?: boolean;
-};
-
 async function shouldKeepUpdated(
   config: BranchConfig,
   baseBranch: string,
@@ -34,21 +28,42 @@ async function shouldKeepUpdated(
 
 export async function shouldReuseExistingBranch(
   config: BranchConfig,
-): Promise<ParentBranch> {
+): Promise<BranchConfig> {
   const { baseBranch, branchName } = config;
-  const result: ParentBranch = { reuseExistingBranch: false };
+  const result: BranchConfig = { ...config, reuseExistingBranch: false };
   // Check if branch exists
   if (!(await scm.branchExists(branchName))) {
     logger.debug(`Branch needs creating`);
     return result;
   }
   logger.debug(`Branch already exists`);
+  if (result.rebaseWhen === 'auto') {
+    if (result.automerge === true) {
+      logger.debug(
+        'Converting rebaseWhen=auto to rebaseWhen=behind-base-branch because automerge=true',
+      );
+      result.rebaseWhen = 'behind-base-branch';
+    } else if (await platform.getBranchForceRebase?.(result.baseBranch)) {
+      logger.debug(
+        'Converting rebaseWhen=auto to rebaseWhen=behind-base-branch because platform is configured to require up-to-date branches',
+      );
+      result.rebaseWhen = 'behind-base-branch';
+    } else if (await shouldKeepUpdated(result, baseBranch, branchName)) {
+      logger.debug(
+        'Converting rebaseWhen=auto to rebaseWhen=behind-base-branch because keep-updated label is set',
+      );
+      result.rebaseWhen = 'behind-base-branch';
+    }
+  }
+  if (result.rebaseWhen === 'auto') {
+    logger.debug(
+      'Converting rebaseWhen=auto to rebaseWhen=conflicted because no rule for converting to rebaseWhen=behind-base-branch applies',
+    );
+    result.rebaseWhen = 'conflicted';
+  }
   if (
-    config.rebaseWhen === 'behind-base-branch' ||
-    (await shouldKeepUpdated(config, baseBranch, branchName)) ||
-    (config.rebaseWhen === 'auto' &&
-      (config.automerge === true ||
-        (await platform.getBranchForceRebase?.(config.baseBranch))))
+    result.rebaseWhen === 'behind-base-branch' ||
+    (await shouldKeepUpdated(result, baseBranch, branchName))
   ) {
     if (await scm.isBranchBehindBase(branchName, baseBranch)) {
       logger.debug(`Branch is behind base branch and needs rebasing`);
@@ -65,7 +80,7 @@ export async function shouldReuseExistingBranch(
     logger.debug('Branch is up-to-date');
   } else {
     logger.debug(
-      `Skipping behind base branch check due to rebaseWhen=${config.rebaseWhen!}`,
+      `Skipping behind base branch check due to rebaseWhen=${result.rebaseWhen!}`,
     );
   }
 
@@ -77,8 +92,8 @@ export async function shouldReuseExistingBranch(
     if ((await scm.isBranchModified(branchName, baseBranch)) === false) {
       logger.debug(`Branch is not mergeable and needs rebasing`);
       if (
-        config.rebaseWhen === 'never' &&
-        !(await shouldKeepUpdated(config, baseBranch, branchName))
+        result.rebaseWhen === 'never' &&
+        !(await shouldKeepUpdated(result, baseBranch, branchName))
       ) {
         logger.debug('Rebasing disabled by config');
         result.reuseExistingBranch = true;
@@ -99,7 +114,7 @@ export async function shouldReuseExistingBranch(
   // along with the changes to the package.json. Thus ending up with an incomplete branch update
   // This is why we are skipping branch reuse in this case (#10050)
   const groupedByPackageFile: Record<string, Set<RangeStrategy>> = {};
-  for (const upgrade of config.upgrades) {
+  for (const upgrade of result.upgrades) {
     const packageFile = upgrade.packageFile!;
     groupedByPackageFile[packageFile] ??= new Set();
     groupedByPackageFile[packageFile].add(upgrade.rangeStrategy!);

@@ -109,6 +109,10 @@ describe('workers/repository/update/branch/index', () => {
 
     beforeEach(() => {
       scm.branchExists.mockResolvedValue(false);
+      reuse.shouldReuseExistingBranch.mockImplementation(
+        // eslint-disable-next-line require-await, @typescript-eslint/require-await
+        async (config) => config,
+      );
       prWorker.ensurePr = jest.fn();
       prWorker.getPlatformPrOptions = jest.fn();
       prAutomerge.checkAutoMerge = jest.fn();
