@@ -31,23 +31,19 @@ Some are configuration options passed through, while others are generated as par
 
 ## Additional Handlebars helpers
 
-### stringToPrettyJSON
+### and
 
-If you want to print pretty JSON with Handlebars you can use the built-in function `stringToPrettyJSON` like this:
+Returns `true` only if all expressions are `true`.
 
-`{{{stringToPrettyJSON myvar}}}`
+`{{#if (and isMajor hasReleaseNotes)}}Backwards Incompatible release! Check out the Release notes.{{/if}}`
 
-In the example above `myvar` is a variable/field, that has valid JSON.
+In the example above, it will only show a text if `isMajor=true` and `hasReleaseNotes=true`.
 
-### encodeURIComponent
+### containsString
 
-If you want to convert a string to a valid URI, use the built-in function `encodeURIComponent` like this:
+Returns `true` if a given string is a substring.
 
-`{{{encodeURIComponent baseDir}}}`
-
-In the example above `baseDir` is the string you want to transform into a valid URI.
-
-Read the [MDN Web Docs, encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent) to learn more.
+`{{#if (containsString depName 'python')}}Python{{else}}Other{{/if}}`
 
 ### decodeURIComponent
 
@@ -73,16 +69,21 @@ If you want to convert a string to Base64, use the built-in function `encodeBase
 
 In the example above `body` is the string you want to transform into a Base64-encoded value.
 
-### replace
+### encodeURIComponent
 
-The `replace` helper replaces _all_ found strings matching the given regex with the replacement string.
-If you want to replace some characters in a string, use the built-in function `replace` like this:
+If you want to convert a string to a valid URI, use the built-in function `encodeURIComponent` like this:
 
-`{{{replace '[a-z]+\.github\.com' 'ghc' depName}}}`
+`{{{encodeURIComponent baseDir}}}`
 
-In the example above all matches of the regex `[a-z]+\.github\.com` will be replaced by `ghc` in `depName`.
+In the example above `baseDir` is the string you want to transform into a valid URI.
 
-Read the [MDN Web Docs, String.prototype.replace()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace) to learn more.
+Read the [MDN Web Docs, encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent) to learn more.
+
+### equals
+
+Returns `true` if two values equals (checks strict equality, i.e. `===`).
+
+`{{#if (equals datasource 'git-refs')}}git-refs{{else}}Other{{/if}}`
 
 ### lookupArray
 
@@ -106,37 +107,48 @@ The `lowercase` helper converts a given string to lower case.
 
 `{{{ lowercase depName }}}`
 
-### containsString
-
-Returns `true` if a given string is a substring.
-
-`{{#if (containsString depName 'python')}}Python{{else}}Other{{/if}}`
-
-### equals
-
-Returns `true` if two values equals (checks strict equality, i.e. `===`).
-
-`{{#if (equals datasource 'git-refs')}}git-refs{{else}}Other{{/if}}`
-
-### and
-
-Returns `true` only if all expressions are `true`.
-
-`{{#if (and isMajor hasReleaseNotes)}}Backwards Incompatible release! Check out the Release notes.{{/if}}`
-
-In the example above, it will only show a text if `isMajor=true` and `hasReleaseNotes=true`.
-
 ### or
 
 Returns `true` if at least one expression is `true`.
 
 `{{#if (or isPatch isSingleVersion}}Small update, safer to merge and release.{{else}}Check out the changelog for all versions before merging!{{/if}}`
 
-### includes
+### replace
 
-Returns `true` if the value is included on the list given.
+The `replace` helper replaces _all_ found strings matching the given regex with the replacement string.
+If you want to replace some characters in a string, use the built-in function `replace` like this:
 
-`{{#if (includes labels 'dependencies')}}Production Dependencies{{else}}Not Production Dependencies{{/if}}`
+`{{{replace '[a-z]+\.github\.com' 'ghc' depName}}}`
+
+In the example above all matches of the regex `[a-z]+\.github\.com` will be replaced by `ghc` in `depName`.
+
+Read the [MDN Web Docs, String.prototype.replace()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace) to learn more.
+
+### stringToPrettyJSON
+
+If you want to print pretty JSON with Handlebars you can use the built-in function `stringToPrettyJSON` like this:
+
+`{{{stringToPrettyJSON myvar}}}`
+
+In the example above `myvar` is a variable/field, that has valid JSON.
+
+### toArray
+
+If you want to convert elements to an array, use `toArray`, e.g.,
+
+`{{{ toJSON (toArray 'value1' 'value2' 'value3') }}}` will render `["value1","value2","value3"]`.
+
+### toJSON
+
+If you want to convert an object to a JSON string, you can use the built-in function `toJSON` like this:
+
+`{{{ toJSON upgrades }}}`
+
+### toObject
+
+If you want to convert key-value pairs to an object, use `toObject`, e.g.,
+
+`{{{ toJSON (toObject 'key1' 'value1' 'key2' 'value2') }}}` will render `{"key1":"value1","key2":"value2"}`.
 
 ## Environment variables
 

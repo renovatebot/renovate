@@ -235,8 +235,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       minimatch:
-        specifier: 9.0.5
-        version: 9.0.5
+        specifier: 10.0.1
+        version: 10.0.1
       moo:
         specifier: 0.5.2
         version: 0.5.2
@@ -525,14 +525,14 @@ importers:
         specifier: 2.29.1
         version: 2.29.1(@typescript-eslint/parser@7.17.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0)
       eslint-plugin-jest:
-        specifier: 27.9.0
-        version: 27.9.0(@typescript-eslint/eslint-plugin@7.17.0(@typescript-eslint/parser@7.17.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(jest@29.7.0(@types/node@20.14.14)(ts-node@10.9.2(@swc/core@1.7.4)(@types/node@20.14.14)(typescript@5.5.4)))(typescript@5.5.4)
+        specifier: 28.6.0
+        version: 28.6.0(@typescript-eslint/eslint-plugin@7.17.0(@typescript-eslint/parser@7.17.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(jest@29.7.0(@types/node@20.14.14)(ts-node@10.9.2(@swc/core@1.7.4)(@types/node@20.14.14)(typescript@5.5.4)))(typescript@5.5.4)
       eslint-plugin-jest-formatting:
         specifier: 3.1.0
         version: 3.1.0(eslint@8.57.0)
       eslint-plugin-promise:
-        specifier: 6.6.0
-        version: 6.6.0(eslint@8.57.0)
+        specifier: 7.0.0
+        version: 7.0.0(eslint@8.57.0)
       eslint-plugin-typescript-enum:
         specifier: 2.1.0
         version: 2.1.0(eslint@8.57.0)(typescript@5.5.4)
@@ -567,8 +567,8 @@ importers:
         specifier: 0.13.0
         version: 0.13.0
       memfs:
-        specifier: 4.11.0
-        version: 4.11.0
+        specifier: 4.11.1
+        version: 4.11.1
       nock:
         specifier: 13.5.4
         version: 13.5.4
@@ -594,8 +594,8 @@ importers:
         specifier: 3.0.3
         version: 3.0.3
       ts-jest:
-        specifier: 29.2.3
-        version: 29.2.3(@babel/core@7.24.9)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.24.9))(jest@29.7.0(@types/node@20.14.14)(ts-node@10.9.2(@swc/core@1.7.4)(@types/node@20.14.14)(typescript@5.5.4)))(typescript@5.5.4)
+        specifier: 29.2.4
+        version: 29.2.4(@babel/core@7.24.9)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.24.9))(jest@29.7.0(@types/node@20.14.14)(ts-node@10.9.2(@swc/core@1.7.4)(@types/node@20.14.14)(typescript@5.5.4)))(typescript@5.5.4)
       ts-node:
         specifier: 10.9.2
         version: 10.9.2(@swc/core@1.7.4)(@types/node@20.14.14)(typescript@5.5.4)
@@ -3155,12 +3155,12 @@ packages:
     peerDependencies:
       eslint: '>=0.8.0'
 
-  eslint-plugin-jest@27.9.0:
-    resolution: {integrity: sha512-QIT7FH7fNmd9n4se7FFKHbsLKGQiw885Ds6Y/sxKgCZ6natwCsXdgPOADnYVxN2QrRweF0FZWbJ6S7Rsn7llug==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
+  eslint-plugin-jest@28.6.0:
+    resolution: {integrity: sha512-YG28E1/MIKwnz+e2H7VwYPzHUYU4aMa19w0yGcwXnnmJH6EfgHahTJ2un3IyraUxNfnz/KUhJAFXNNwWPo12tg==}
+    engines: {node: ^16.10.0 || ^18.12.0 || >=20.0.0}
     peerDependencies:
-      '@typescript-eslint/eslint-plugin': ^5.0.0 || ^6.0.0 || ^7.0.0
-      eslint: ^7.0.0 || ^8.0.0
+      '@typescript-eslint/eslint-plugin': ^6.0.0 || ^7.0.0
+      eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
       jest: '*'
     peerDependenciesMeta:
       '@typescript-eslint/eslint-plugin':
@@ -3168,9 +3168,9 @@ packages:
       jest:
         optional: true
 
-  eslint-plugin-promise@6.6.0:
-    resolution: {integrity: sha512-57Zzfw8G6+Gq7axm2Pdo3gW/Rx3h9Yywgn61uE/3elTCOePEHVrn2i5CdfBwA1BLK0Q0WqctICIUSqXZW/VprQ==}
-    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+  eslint-plugin-promise@7.0.0:
+    resolution: {integrity: sha512-wb1ECT+b90ndBdAujhIdAU8oQ3Vt5gKqP/t78KOmg0ifynrvc2jGR9f6ndbOVNFpKf6jLUBlBBDF3H3Wk0JICg==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
 
@@ -4436,8 +4436,8 @@ packages:
   mdurl@2.0.0:
     resolution: {integrity: sha512-Lf+9+2r+Tdp5wXDXC4PcIBjTDtq4UKjCPMQhKIuzpJNW0b96kVqSwW0bT7FhRSfmAiFYgP+SCRvdrDozfh0U5w==}
 
-  memfs@4.11.0:
-    resolution: {integrity: sha512-+6kz90/YQoZuHvg3rn1CGPMZfEMaU5xe7xIavZMNiom2RNesiI8S37p9O9n+PlIUnUgretjLdM6HnqpZYl3X2g==}
+  memfs@4.11.1:
+    resolution: {integrity: sha512-LZcMTBAgqUUKNXZagcZxvXXfgF1bHX7Y7nQ0QyEiNbRJgE29GhgPd8Yna1VQcLlPiHt/5RFJMWYN9Uv/VPNvjQ==}
     engines: {node: '>= 4.0.0'}
 
   memorystream@0.3.1:
@@ -5729,8 +5729,8 @@ packages:
       typescript:
         optional: true
 
-  ts-jest@29.2.3:
-    resolution: {integrity: sha512-yCcfVdiBFngVz9/keHin9EnsrQtQtEu3nRykNy9RVp+FiPFFbPJ3Sg6Qg4+TkmH0vMP5qsTKgXSsk80HRwvdgQ==}
+  ts-jest@29.2.4:
+    resolution: {integrity: sha512-3d6tgDyhCI29HlpwIq87sNuI+3Q6GLTTCeYRHCs7vDz+/3GCMwEtV9jezLyl4ZtnBgx00I7hm8PCP8cTksMGrw==}
     engines: {node: ^14.15.0 || ^16.10.0 || ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -9802,9 +9802,9 @@ snapshots:
     dependencies:
       eslint: 8.57.0
 
-  eslint-plugin-jest@27.9.0(@typescript-eslint/eslint-plugin@7.17.0(@typescript-eslint/parser@7.17.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(jest@29.7.0(@types/node@20.14.14)(ts-node@10.9.2(@swc/core@1.7.4)(@types/node@20.14.14)(typescript@5.5.4)))(typescript@5.5.4):
+  eslint-plugin-jest@28.6.0(@typescript-eslint/eslint-plugin@7.17.0(@typescript-eslint/parser@7.17.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(jest@29.7.0(@types/node@20.14.14)(ts-node@10.9.2(@swc/core@1.7.4)(@types/node@20.14.14)(typescript@5.5.4)))(typescript@5.5.4):
     dependencies:
-      '@typescript-eslint/utils': 5.62.0(eslint@8.57.0)(typescript@5.5.4)
+      '@typescript-eslint/utils': 7.17.0(eslint@8.57.0)(typescript@5.5.4)
       eslint: 8.57.0
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 7.17.0(@typescript-eslint/parser@7.17.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)
@@ -9813,7 +9813,7 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-promise@6.6.0(eslint@8.57.0):
+  eslint-plugin-promise@7.0.0(eslint@8.57.0):
     dependencies:
       eslint: 8.57.0
 
@@ -11391,7 +11391,7 @@ snapshots:
 
   mdurl@2.0.0: {}
 
-  memfs@4.11.0:
+  memfs@4.11.1:
     dependencies:
       '@jsonjoy.com/json-pack': 1.0.4(tslib@2.6.3)
       '@jsonjoy.com/util': 1.3.0(tslib@2.6.3)
@@ -12749,7 +12749,7 @@ snapshots:
     optionalDependencies:
       typescript: 5.5.4
 
-  ts-jest@29.2.3(@babel/core@7.24.9)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.24.9))(jest@29.7.0(@types/node@20.14.14)(ts-node@10.9.2(@swc/core@1.7.4)(@types/node@20.14.14)(typescript@5.5.4)))(typescript@5.5.4):
+  ts-jest@29.2.4(@babel/core@7.24.9)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.24.9))(jest@29.7.0(@types/node@20.14.14)(ts-node@10.9.2(@swc/core@1.7.4)(@types/node@20.14.14)(typescript@5.5.4)))(typescript@5.5.4):
     dependencies:
       bs-logger: 0.2.6
       ejs: 3.1.10

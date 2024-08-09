@@ -5,6 +5,8 @@
   "semanticCommitScope": "deps",
   "automergeType": "pr",
   "prCreation": "immediate",
+  "ignorePresets": [":ignoreModulesAndTests"],
+  "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
   "dockerfile": {
     "semanticCommitType": "build"
   },
