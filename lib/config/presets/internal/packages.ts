@@ -29,6 +29,7 @@ export const presets: Record<string, Preset> = {
       '@eslint/**',
       '@types/eslint__**',
       '@typescript-eslint/**',
+      'typescript-eslint',
       'eslint**',
     ],
   },

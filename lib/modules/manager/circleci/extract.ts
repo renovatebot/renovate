@@ -5,7 +5,7 @@ import { OrbDatasource } from '../../datasource/orb';
 import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
-import { CircleCiFile } from './schema';
+import { CircleCiFile, type CircleCiJob } from './schema';
 
 export function extractPackageFile(
   content: string,
@@ -30,7 +30,12 @@ export function extractPackageFile(
       });
     }
 
-    for (const job of Object.values(parsed.jobs ?? {})) {
+    // extract environments
+    const environments: CircleCiJob[] = [
+      Object.values(parsed.executors ?? {}),
+      Object.values(parsed.jobs ?? {}),
+    ].flat();
+    for (const job of environments) {
       for (const dockerElement of coerceArray(job.docker)) {
         deps.push({
           ...getDep(dockerElement.image),
