@@ -127,8 +127,16 @@ describe('modules/datasource/deb/index', () => {
 
       it('returns a valid version for the package `album`', async () => {
         const res = await getPkgReleases(cfg);
-        expect(res).toBeObject();
-        expect(res!.releases).toHaveLength(1);
+        expect(res).toEqual({
+          homepage: 'http://marginalhacks.com/Hacks/album',
+          registryUrl:
+            'http://ftp.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
+          releases: [
+            {
+              version: '4.15-1',
+            },
+          ],
+        });
       });
 
       it('returns a valid version for the package `album` if release is used in the registryUrl', async () => {
