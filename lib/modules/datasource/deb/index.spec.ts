@@ -144,8 +144,16 @@ describe('modules/datasource/deb/index', () => {
           getRegistryUrl(debBaseUrl, 'stable', ['non-free'], 'amd64'),
         ];
         const res = await getPkgReleases(cfg);
-        expect(res).toBeObject();
-        expect(res!.releases).toHaveLength(1);
+        expect(res).toEqual({
+          homepage: 'http://marginalhacks.com/Hacks/album',
+          registryUrl:
+            'http://ftp.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
+          releases: [
+            {
+              version: '4.15-1',
+            },
+          ],
+        });
       });
 
       it('returns null for an unknown package', async () => {
