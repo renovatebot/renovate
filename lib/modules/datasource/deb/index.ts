@@ -308,7 +308,7 @@ export class DebDatasource extends Datasource {
     for await (const line of rl) {
       if (line === '') {
         // All information of the package are available, add to the list of packages
-        if (Object.keys(currentPackage).length > 0) {
+        if (!DebDatasource.requiredPackageKeys.some((key) => !(key in currentPackage))) {
           allPackages[currentPackage.Package!] = currentPackage;
           currentPackage = {};
         }
@@ -364,15 +364,8 @@ export class DebDatasource extends Datasource {
 
     for (const componentUrl of componentUrls) {
       try {
-        const { extractedFile, lastTimestamp } =
-          await this.downloadAndExtractPackage(componentUrl);
-        const parsedPackages = await this.parseExtractedPackageIndex(
-          extractedFile,
-          lastTimestamp,
-        );
-        const parsedPackage = parsedPackages.find(
-          (p) => p.Package === packageName,
-        );
+        const packageIndex = await this.getPackageIndex(componentUrl)
+        const parsedPackage = packageIndex[packageName];
 
         if (parsedPackage) {
           const newRelease = formatReleaseResult(parsedPackage);
