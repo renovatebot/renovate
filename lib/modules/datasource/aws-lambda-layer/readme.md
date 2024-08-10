@@ -35,8 +35,9 @@ Here's an example of using the regex manager to configure this datasource:
   "regexManagers": [
     {
       "fileMatch": ["\\.tf$"],
+      "matchStringsStrategy": "combination",
       "matchStrings": [
-        ".*renovate: datasource=(?<datasource>.*) filter=(?<packageName>.*)\\s+.* = \"(?<depName>.*):(?<currentValue>\\d+)\""
+        ".*renovate: datasource=(?<datasource>.*) filter=(?<packageName>.*)\\n\\s*layer_name\\s*=\\s*\"(?<depName>.*)\"\\n\\s*version\\s*=\\s*(?<currentValue>\\d+)"
       ],
       "versioningTemplate": "loose"
     }
@@ -44,7 +45,7 @@ Here's an example of using the regex manager to configure this datasource:
 }
 ```
 
-The configuration above matches every Terraform file, and recognizes these line:
+The configuration above matches every Terraform file, and recognizes the following data source:
 
 ```hcl
 resource "aws_lambda_function" "example" {
@@ -54,11 +55,13 @@ resource "aws_lambda_function" "example" {
 }
 
 data "aws_lambda_layer_version" "datadog_extension" {
-  layer_name = "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension"
   # renovate: datasource=aws-lambda-layer filter={"arn": "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension", "architecture": "x86_64", "runtime": "python3.7"}
+  layer_name = "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension"
   version = 37
 }
 ```
+
+`architecture` and `runtime` are optional filters that can be used to further narrow down the layer version to be updated (in case there are multiple versions of the same layer for different architectures or runtimes).
 
 **3rd party lambda layers**
 
