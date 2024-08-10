@@ -303,12 +303,16 @@ export class DebDatasource extends Datasource {
     });
 
     let currentPackage: PackageDescription = {};
-    const allPackages: Record<string, PackageDescription> = {}
+    const allPackages: Record<string, PackageDescription> = {};
 
     for await (const line of rl) {
       if (line === '') {
         // All information of the package are available, add to the list of packages
-        if (!DebDatasource.requiredPackageKeys.some((key) => !(key in currentPackage))) {
+        if (
+          !DebDatasource.requiredPackageKeys.some(
+            (key) => !(key in currentPackage),
+          )
+        ) {
           allPackages[currentPackage.Package!] = currentPackage;
           currentPackage = {};
         }
@@ -334,15 +338,13 @@ export class DebDatasource extends Datasource {
     namespace: `datasource-${DebDatasource.id}-package`,
     key: (componentUrl: string) => componentUrl,
   })
-  async getPackageIndex(componentUrl: string): Promise<Record<string, PackageDescription>> {
+  async getPackageIndex(
+    componentUrl: string,
+  ): Promise<Record<string, PackageDescription>> {
     const { extractedFile, lastTimestamp } =
       await this.downloadAndExtractPackage(componentUrl);
-    return await this.parseExtractedPackageIndex(
-      extractedFile,
-      lastTimestamp,
-    );
+    return await this.parseExtractedPackageIndex(extractedFile, lastTimestamp);
   }
-}
 
   /**
    * Fetches the release information for a given package from the registry URL.
@@ -364,7 +366,7 @@ export class DebDatasource extends Datasource {
 
     for (const componentUrl of componentUrls) {
       try {
-        const packageIndex = await this.getPackageIndex(componentUrl)
+        const packageIndex = await this.getPackageIndex(componentUrl);
         const parsedPackage = packageIndex[packageName];
 
         if (parsedPackage) {

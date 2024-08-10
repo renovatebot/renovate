@@ -30,7 +30,7 @@ describe('modules/datasource/deb/checksum', () => {
           fixtureInRelease,
           'non-existing/binary-amd64/Packages.gz',
         ),
-      ).toBeUndefined();
+      ).toBeNull();
     });
   });
 
