@@ -69,12 +69,19 @@ describe('modules/datasource/deb/index', () => {
         .reply(304);
 
       const res = await getPkgReleases(cfg);
-      expect(res).toBeObject();
-      expect(res!.releases).toHaveLength(1);
+      expect(res).toEqual({
+        homepage: 'http://marginalhacks.com/Hacks/album',
+        registryUrl:
+          'http://ftp.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
+        releases: [
+          {
+            version: '4.15-1',
+          },
+        ],
+      });
 
       const modifiedTs = httpMock.getTrace()[0].headers['if-modified-since'];
-      expect(modifiedTs).toBeDefined();
-      expect(modifiedTs).toEqual(ts.toUTCString());
+      expect(modifiedTs).toBe(ts.toUTCString());
     });
 
     describe('parsing of registry url', () => {
