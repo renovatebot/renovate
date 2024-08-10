@@ -226,8 +226,8 @@ importers:
         specifier: 2.0.6
         version: 2.0.6
       luxon:
-        specifier: 3.4.4
-        version: 3.4.4
+        specifier: 3.5.0
+        version: 3.5.0
       markdown-it:
         specifier: 14.1.0
         version: 14.1.0
@@ -4351,10 +4351,6 @@ packages:
   lru-cache@6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
-
-  luxon@3.4.4:
-    resolution: {integrity: sha512-zobTr7akeGHnv7eBOXcRgMeCP6+uyYsczwmeRCauvpvaAltgNyTbLH/+VaEAPUeWBT+1GuNmz4wC/6jtQzbbVA==}
-    engines: {node: '>=12'}
 
   luxon@3.5.0:
     resolution: {integrity: sha512-rh+Zjr6DNfUYR3bPwJEnuwDdqMbxZW7LOQfUN4B54+Cl+0o5zaU9RJ6bcidfDtC1cWCZXQ+nvX8bf6bAji37QQ==}
@@ -9388,7 +9384,7 @@ snapshots:
 
   cron-parser@4.9.0:
     dependencies:
-      luxon: 3.4.4
+      luxon: 3.5.0
 
   cronstrue@2.50.0: {}
 
@@ -11282,8 +11278,6 @@ snapshots:
   lru-cache@6.0.0:
     dependencies:
       yallist: 4.0.0
-
-  luxon@3.4.4: {}
 
   luxon@3.5.0: {}
 
