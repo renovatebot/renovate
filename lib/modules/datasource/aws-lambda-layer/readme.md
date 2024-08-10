@@ -34,6 +34,7 @@ Here's an example of using the regex manager to configure this datasource:
 {
   "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["\\.tf$"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
