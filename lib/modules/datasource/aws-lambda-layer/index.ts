@@ -76,13 +76,9 @@ export class AwsLambdaLayerDataSource extends Datasource {
 
     const { val, err } = await result.unwrap();
 
-    if (err instanceof ZodError) {
-      logger.debug({ err }, 'aws-lambda-layer: validation error');
-      return null;
-    }
-
     if (err) {
-      this.handleGenericErrors(err);
+      logger.debug({ err }, 'aws-lambda-layer: filter validation error');
+      return null;
     }
 
     return val;

@@ -113,7 +113,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       });
     });
   });
-
+  
   describe('getReleases', () => {
     it('should return null if the filter criteria does not match the schema', async () => {
       const lambdaLayerDatasource = new AwsLambdaLayerDataSource();
