@@ -31,7 +31,7 @@ export class AwsLambdaLayerDataSource extends Datasource {
       `sorted-versions:${arn}-${runtime}-${architecture}`,
   })
   async getSortedLambdaLayerVersions(
-    arn: string, runtime: string, architecture: string
+    arn: string, runtime: string|undefined, architecture: string|undefined
   ): Promise<LayerVersionsListItem[]> {
     const cmd = new ListLayerVersionsCommand({
       LayerName: arn,
