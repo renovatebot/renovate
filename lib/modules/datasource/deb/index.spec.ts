@@ -285,12 +285,23 @@ describe('modules/datasource/deb/index', () => {
         new Date(),
       );
 
-      const firstPackage = parsedPackages.find((p) => p.Package === 'album');
-      const lastPackage = parsedPackages.find(
-        (p) => p.Package === 'alien-arena-data',
-      );
-      expect(firstPackage?.Version).toBe('4.15-1');
-      expect(lastPackage?.Version).toBe('7.71.3+ds-1');
+      expect(parsedPackages).toEqual({
+        album: {
+          Homepage: 'http://marginalhacks.com/Hacks/album',
+          Package: 'album',
+          Version: '4.15-1',
+        },
+        'album-data': {
+          Homepage: 'http://marginalhacks.com/Hacks/album',
+          Package: 'album-data',
+          Version: '4.05-7.2',
+        },
+        'alien-arena-data': {
+          Homepage: 'https://martianbackup.com',
+          Package: 'alien-arena-data',
+          Version: '7.71.3+ds-1',
+        },
+      });
     });
   });
 
