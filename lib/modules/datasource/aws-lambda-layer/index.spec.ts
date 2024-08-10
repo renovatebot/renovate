@@ -104,6 +104,17 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
     });
   });
 
+  describe('getReleases', () => {
+    it('should return null if the filter criteria does not match the schema', async () => {
+      const lambdaLayerDatasource = new AwsLambdaLayerDataSource();
+      const res = await lambdaLayerDatasource.getReleases({
+        packageName: '{"invalid": "json"}',
+      });
+
+      expect(res).toBeNull();
+    })
+  })
+
   describe('integration', () => {
     describe('getPkgReleases', () => {
       it('should return null if no releases found', async () => {
