@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { createCacheReadStream } from '../../../util/fs';
-import { escapeRegExp } from '../../../util/regex';
+import { escapeRegExp, regEx } from '../../../util/regex';
 
 /**
  * Parses the SHA256 checksum for a specified package path from the InRelease content.
@@ -12,9 +12,9 @@ import { escapeRegExp } from '../../../util/regex';
 export function parseChecksumsFromInRelease(
   inReleaseContent: string,
   packagePath: string,
-): string | undefined {
+): string | null {
   const lines = inReleaseContent.split('\n');
-  const regex = new RegExp(
+  const regex = regEx(
     `([a-f0-9]{64})\\s+\\d+\\s+${escapeRegExp(packagePath)}$`,
   );
 
@@ -25,7 +25,7 @@ export function parseChecksumsFromInRelease(
     }
   }
 
-  return undefined;
+  return null;
 }
 
 /**

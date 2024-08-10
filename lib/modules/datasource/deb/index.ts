@@ -294,7 +294,7 @@ export class DebDatasource extends Datasource {
   async parseExtractedPackageIndex(
     extractedFile: string,
     lastTimestamp: Date,
-  ): Promise<PackageDescription[]> {
+  ): Promise<Record<string, PackageDescription>> {
     // read line by line to avoid high memory consumption as the extracted Packages
     // files can be multiple MBs in size
     const rl = readline.createInterface({
@@ -303,13 +303,13 @@ export class DebDatasource extends Datasource {
     });
 
     let currentPackage: PackageDescription = {};
-    const allPackages: PackageDescription[] = [];
+    const allPackages: Record<string, PackageDescription> = {}
 
     for await (const line of rl) {
       if (line === '') {
         // All information of the package are available, add to the list of packages
         if (Object.keys(currentPackage).length > 0) {
-          allPackages.push(currentPackage);
+          allPackages[currentPackage.Package!] = currentPackage;
           currentPackage = {};
         }
       } else {
@@ -324,11 +324,25 @@ export class DebDatasource extends Datasource {
 
     // Check the last package after file reading is complete
     if (Object.keys(currentPackage).length > 0) {
-      allPackages.push(currentPackage);
+      allPackages[currentPackage.Package!] = currentPackage;
     }
 
     return allPackages;
   }
+
+  @cache({
+    namespace: `datasource-${DebDatasource.id}-package`,
+    key: (componentUrl: string) => componentUrl,
+  })
+  async getPackageIndex(componentUrl: string): Promise<Record<string, PackageDescription>> {
+    const { extractedFile, lastTimestamp } =
+      await this.downloadAndExtractPackage(componentUrl);
+    return await this.parseExtractedPackageIndex(
+      extractedFile,
+      lastTimestamp,
+    );
+  }
+}
 
   /**
    * Fetches the release information for a given package from the registry URL.
