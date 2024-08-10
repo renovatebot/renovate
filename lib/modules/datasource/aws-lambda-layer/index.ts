@@ -5,7 +5,6 @@ import {
   ListLayerVersionsCommand,
   Runtime,
 } from '@aws-sdk/client-lambda';
-import { ZodError } from 'zod';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { Lazy } from '../../../util/lazy';
