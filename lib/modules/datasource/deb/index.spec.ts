@@ -188,8 +188,19 @@ describe('modules/datasource/deb/index', () => {
 
         it('returns two releases for `album` which is the same across the components', async () => {
           const res = await getPkgReleases(cfg);
-          expect(res).toBeObject();
-          expect(res!.releases).toHaveLength(2);
+          expect(res).toEqual({
+            homepage: 'http://marginalhacks.com/Hacks/album',
+            registryUrl:
+              'http://ftp.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
+            releases: [
+              {
+                version: '4.14-1',
+              },
+              {
+                version: '4.15-1',
+              },
+            ],
+          });
         });
 
         it('returns two releases for `album` which has different metadata across the components', async () => {
