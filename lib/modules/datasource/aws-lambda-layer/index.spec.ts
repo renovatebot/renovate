@@ -50,7 +50,7 @@ const mockEmpty: ListLayerVersionsCommandOutput = {
 const lambdaClientMock = mockClient(LambdaClient);
 
 function mockListLayerVersionsCommandOutput(
-  result: ListLayerVersionsCommandOutput
+  result: ListLayerVersionsCommandOutput,
 ): void {
   lambdaClientMock.reset();
   lambdaClientMock.on(ListLayerVersionsCommand).resolves(result);
@@ -62,7 +62,9 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       mockListLayerVersionsCommandOutput(mockEmpty);
       const lamdbaLayerDatasource = new AwsLambdaLayerDataSource();
       const res = await lamdbaLayerDatasource.getSortedLambdaLayerVersions(
-        "xy", "arm64", "python3.8"
+        'xy',
+        'arm64',
+        'python3.8',
       );
 
       expect(res).toEqual([]);
@@ -72,7 +74,9 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       mockListLayerVersionsCommandOutput(mock1Layer);
       const lamdbaLayerDatasource = new AwsLambdaLayerDataSource();
       const res = await lamdbaLayerDatasource.getSortedLambdaLayerVersions(
-        "not-relevant", "not-relevant", "not-relevant"
+        'not-relevant',
+        'not-relevant',
+        'not-relevant',
       );
 
       expect(res).toEqual([layer3]);
@@ -82,7 +86,9 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       mockListLayerVersionsCommandOutput(mock3Layers);
       const lamdbaLayerDatasource = new AwsLambdaLayerDataSource();
       const res = await lamdbaLayerDatasource.getSortedLambdaLayerVersions(
-        "not-relevant", "not-relevant", "not-relevant"
+        'not-relevant',
+        'not-relevant',
+        'not-relevant',
       );
 
       expect(res).toEqual([layer1, layer2, layer3]);
@@ -92,7 +98,11 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       mockListLayerVersionsCommandOutput(mock3Layers);
       const lambdaLayerDatasource = new AwsLambdaLayerDataSource();
 
-      await lambdaLayerDatasource.getSortedLambdaLayerVersions('arn', 'runtime', 'architecture');
+      await lambdaLayerDatasource.getSortedLambdaLayerVersions(
+        'arn',
+        'runtime',
+        'architecture',
+      );
 
       expect(lambdaClientMock.calls()).toHaveLength(1);
 
@@ -112,8 +122,8 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       });
 
       expect(res).toBeNull();
-    })
-  })
+    });
+  });
 
   describe('integration', () => {
     describe('getPkgReleases', () => {

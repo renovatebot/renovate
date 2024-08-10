@@ -2,7 +2,8 @@ import {
   type Architecture,
   LambdaClient,
   LayerVersionsListItem,
-  ListLayerVersionsCommand, Runtime,
+  ListLayerVersionsCommand,
+  Runtime,
 } from '@aws-sdk/client-lambda';
 import { ZodError } from 'zod';
 import { logger } from '../../../logger';
@@ -31,7 +32,9 @@ export class AwsLambdaLayerDataSource extends Datasource {
       `sorted-versions:${arn}-${runtime}-${architecture}`,
   })
   async getSortedLambdaLayerVersions(
-    arn: string, runtime: string|undefined, architecture: string|undefined
+    arn: string,
+    runtime: string | undefined,
+    architecture: string | undefined,
   ): Promise<LayerVersionsListItem[]> {
     const cmd = new ListLayerVersionsCommand({
       LayerName: arn,
@@ -48,9 +51,14 @@ export class AwsLambdaLayerDataSource extends Datasource {
     namespace: `datasource-${AwsLambdaLayerDataSource.id}`,
     key: ({ packageName }: GetReleasesConfig) => `get-release:${packageName}`,
   })
-  async getReleases({packageName: serializedLambdaLayerFilter}: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const result = Result.parse(JSON.parse(serializedLambdaLayerFilter), AwsLambdaLayerFilterMetadata)
-      .transform(({arn, runtime, architecture}) => {
+  async getReleases({
+    packageName: serializedLambdaLayerFilter,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const result = Result.parse(
+      JSON.parse(serializedLambdaLayerFilter),
+      AwsLambdaLayerFilterMetadata,
+    )
+      .transform(({ arn, runtime, architecture }) => {
         return this.getSortedLambdaLayerVersions(arn, runtime, architecture);
       })
       .transform((layerVersions): ReleaseResult => {
@@ -61,12 +69,12 @@ export class AwsLambdaLayerDataSource extends Datasource {
           releaseTimestamp: layer.CreatedDate,
           newDigest: layer.LayerVersionArn,
           isDeprecated: false,
-        }))
+        }));
 
         return res;
       });
 
-    const {val, err} = await result.unwrap();
+    const { val, err } = await result.unwrap();
 
     if (err instanceof ZodError) {
       logger.debug({ err }, 'aws-lambda-layer: validation error');
@@ -77,6 +85,6 @@ export class AwsLambdaLayerDataSource extends Datasource {
       this.handleGenericErrors(err);
     }
 
-    return val
+    return val;
   }
 }
