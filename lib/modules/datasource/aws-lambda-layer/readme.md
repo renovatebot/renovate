@@ -32,7 +32,7 @@ Here's an example of using the regex manager to configure this datasource:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
       "fileMatch": ["\\.tf$"],
       "matchStringsStrategy": "combination",
