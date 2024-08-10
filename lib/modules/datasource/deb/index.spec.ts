@@ -263,8 +263,16 @@ describe('modules/datasource/deb/index', () => {
       ];
 
       const res = await getPkgReleases(cfg);
-      expect(res).toBeObject();
-      expect(res!.releases).toHaveLength(1);
+      expect(res).toEqual({
+        homepage: 'http://marginalhacks.com/Hacks/album',
+        registryUrl:
+          'http://ftp.debian.org/debian?suite=stable&components=non-free&binaryArch=riscv',
+        releases: [
+          {
+            version: '4.15-1',
+          },
+        ],
+      });
     });
   });
 
