@@ -37,7 +37,7 @@ Here's an example of using the regex manager to configure this datasource:
       "fileMatch": ["\\.tf$"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
-        ".*renovate: datasource=(?<datasource>.*) filter=(?<packageName>.*)\\n\\s*layer_name\\s*=\\s*\"(?<depName>.*)\"\\n\\s*version\\s*=\\s*(?<currentValue>\\d+)"
+        ".*renovate: datasource=(?<datasource>.*) filter=(?<packageName>.*)\\n\\s*version\\s*=\\s*(?<currentValue>\\d+)"
       ],
       "versioningTemplate": "loose"
     }
@@ -55,8 +55,8 @@ resource "aws_lambda_function" "example" {
 }
 
 data "aws_lambda_layer_version" "datadog_extension" {
-  # renovate: datasource=aws-lambda-layer filter={"arn": "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension", "architecture": "x86_64", "runtime": "python3.7"}
   layer_name = "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension"
+  # renovate: datasource=aws-lambda-layer filter={"arn": "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension", "architecture": "x86_64", "runtime": "python3.7"}
   version = 37
 }
 ```
