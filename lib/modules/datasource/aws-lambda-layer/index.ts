@@ -65,7 +65,9 @@ export class AwsLambdaLayerDataSource extends Datasource {
 
         res.releases = layerVersions.map((layer) => {
           if (layer.Version === undefined) {
-            throw new Error('Version is not set in AWS response for ListLayerVersionsCommand');
+            throw new Error(
+              'Version is not set in AWS response for ListLayerVersionsCommand',
+            );
           }
 
           return {
@@ -73,7 +75,7 @@ export class AwsLambdaLayerDataSource extends Datasource {
             releaseTimestamp: layer.CreatedDate,
             newDigest: layer.LayerVersionArn,
             isDeprecated: false,
-          }
+          };
         });
 
         return res;
