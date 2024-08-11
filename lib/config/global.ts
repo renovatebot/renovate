@@ -37,6 +37,8 @@ export class GlobalConfig {
     'autodiscoverRepoSort',
     'autodiscoverRepoOrder',
     'userAgent',
+    's3Endpoint',
+    's3PathStyle',
     'cachePrivatePackages',
   ];
 
