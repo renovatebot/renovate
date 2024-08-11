@@ -58,10 +58,25 @@ function mockListLayerVersionsCommandOutput(
 
 describe('modules/datasource/aws-lambda-layer/index', () => {
   describe('getSortedLambdaLayerVersions', () => {
-    it('should return empty array if no layers found', async () => {
+    it('should return empty array if no layers are found', async () => {
       mockListLayerVersionsCommandOutput(mockEmpty);
       const lamdbaLayerDatasource = new AwsLambdaLayerDataSource();
       const res = await lamdbaLayerDatasource.getSortedLambdaLayerVersions(
+        'xy',
+        'arm64',
+        'python3.8',
+      );
+
+      expect(res).toEqual([]);
+    });
+
+    it('should return an empty array if AWS response does not contain LayerVersions', async () => {
+      const lambdaLayerDatasource = new AwsLambdaLayerDataSource();
+      lambdaClientMock.on(ListLayerVersionsCommand).resolves({
+        $metadata: {},
+      });
+
+      const res = await lambdaLayerDatasource.getSortedLambdaLayerVersions(
         'xy',
         'arm64',
         'python3.8',
@@ -94,7 +109,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       expect(res).toEqual([layer1, layer2, layer3]);
     });
 
-    it('should have the filters for listLayerVersions set calling the AWS API', async () => {
+    it('should pass the filters for listLayerVersions when calling the AWS API', async () => {
       mockListLayerVersionsCommandOutput(mock3Layers);
       const lambdaLayerDatasource = new AwsLambdaLayerDataSource();
 
@@ -124,7 +139,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       expect(res).toBeNull();
     });
 
-    it('should throw an exception return 0 as version if version is not set in AWS response', async () => {
+    it('should throw an exception if version is not set in AWS response', async () => {
       mockListLayerVersionsCommandOutput({
         LayerVersions: [
           {
