@@ -390,4 +390,37 @@ describe('util/template/index', () => {
       expect(output).toBe('notProduction');
     });
   });
+
+  describe('split', () => {
+    it('should return empty array on non string input', () => {
+      const output = template.compile("test {{ split labels '-' }}", {
+        labels: 123,
+      });
+      expect(output).toBe('test ');
+    });
+
+    it('should return empty array on missing parameter', () => {
+      const output = template.compile('test {{ split labels }}', {
+        labels: 'foo-bar',
+      });
+      expect(output).toBe('test ');
+    });
+
+    it('should return array on success', () => {
+      const output = template.compile("{{ split labels '-' }}", {
+        labels: 'foo-bar',
+      });
+      expect(output).toBe('foo,bar');
+    });
+
+    it('should return array element', () => {
+      const output = template.compile(
+        "{{ lookup (split packageName '-') 1 }}",
+        {
+          packageName: 'foo-bar-test',
+        },
+      );
+      expect(output).toBe('bar');
+    });
+  });
 });
