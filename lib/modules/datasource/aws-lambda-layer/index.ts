@@ -63,12 +63,18 @@ export class AwsLambdaLayerDataSource extends Datasource {
       .transform((layerVersions): ReleaseResult => {
         const res: ReleaseResult = { releases: [] };
 
-        res.releases = layerVersions.map((layer) => ({
-          version: layer.Version?.toString() ?? '0',
-          releaseTimestamp: layer.CreatedDate,
-          newDigest: layer.LayerVersionArn,
-          isDeprecated: false,
-        }));
+        res.releases = layerVersions.map((layer) => {
+          if (layer.Version === undefined) {
+            throw new Error('Version is not set in AWS response for ListLayerVersionsCommand');
+          }
+
+          return {
+            version: layer.Version.toString(),
+            releaseTimestamp: layer.CreatedDate,
+            newDigest: layer.LayerVersionArn,
+            isDeprecated: false,
+          }
+        });
 
         return res;
       });

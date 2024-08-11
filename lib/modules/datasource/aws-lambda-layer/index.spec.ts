@@ -123,6 +123,24 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
 
       expect(res).toBeNull();
     });
+
+    it('should throw an exception return 0 as version if version is not set in AWS response', async () => {
+      mockListLayerVersionsCommandOutput({
+        LayerVersions: [
+          {
+            CreatedDate: '2021-01-10T00:00:00.000Z',
+            LayerVersionArn: 'arn:aws:lambda:us-east-1:123456789012:layer:my-layer:3',
+          },
+        ],
+        $metadata: {},
+      });
+      const lambdaLayerDatasource = new AwsLambdaLayerDataSource();
+
+      await expect(() => lambdaLayerDatasource.getReleases({
+        packageName:
+          '{"arn": "arn:aws:lambda:us-east-1:123456789012:layer:my-layer", "runtime": "python37", "architecture": "x86_64"}',
+      })).rejects.toThrow('Version is not set in AWS response for ListLayerVersionsCommand');
+    });
   });
 
   describe('integration', () => {
