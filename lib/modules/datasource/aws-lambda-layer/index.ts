@@ -2,7 +2,7 @@ import {
   type Architecture,
   LambdaClient,
   LayerVersionsListItem,
-  ListLayerVersionsCommand, type ListLayerVersionsCommandOutput,
+  ListLayerVersionsCommand,
   Runtime,
 } from '@aws-sdk/client-lambda';
 import { logger } from '../../../logger';
