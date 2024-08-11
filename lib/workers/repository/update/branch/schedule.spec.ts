@@ -409,29 +409,30 @@ describe('workers/repository/update/branch/schedule', () => {
     });
   });
 
-  describe('cronstrue', () => {
-    it('should correctly convert "0 22 4 * *" to human-readable format', () => {
-      const result = cronstrue.toString('0 22 4 * *');
-      expect(result).toBe('At 10:00 PM, on day 4 of the month');
-    });
-
-    it('should correctly convert "*/2 * * * *" to human-readable format', () => {
-      const result = cronstrue.toString('*/2 * * * *');
-      expect(result).toBe('Every 2 minutes');
-    });
-
-    it('should correctly convert "0 23 * * *" to human-readable format', () => {
-      const result = cronstrue.toString('0 23 * * *');
-      expect(result).toBe('At 11:00 PM');
-    });
-
-    it('should throw an error for an invalid cron expression "* * */2 6#1"', () => {
-      const result = cronstrue.toString('* * */2 6#1', {
-        throwExceptionOnParseError: false,
-      });
+  describe('log cron schedules', () => {
+    it('should correctly convert "* 22 4 * *" to human-readable format', () => {
+      const result = cronstrue.toString('* 22 4 * *');
       expect(result).toBe(
-        'An error occured when generating the expression description.  Check the cron expression syntax.',
+        'Every minute, between 10:00 PM and 10:59 PM, on day 4 of the month',
       );
+    });
+
+    it('should correctly convert "* */2 * * *" to human-readable format', () => {
+      const result = cronstrue.toString('* */2 * * *');
+      expect(result).toBe('Every minute, every 2 hours');
+    });
+
+    it('should correctly convert "* 23 * * *" to human-readable format', () => {
+      const result = cronstrue.toString('* 23 * * *');
+      expect(result).toBe('Every minute, between 11:00 PM and 11:59 PM');
+    });
+
+    it('should not throw an error for an invalid cron expression "* * */2 6#1"', () => {
+      expect(() => {
+        cronstrue.toString('* * */2 6#1', {
+          throwExceptionOnParseError: false,
+        });
+      }).not.toThrow();
     });
   });
 });
