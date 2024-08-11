@@ -76,8 +76,8 @@ importers:
         specifier: 3.0.1
         version: 3.0.1
       '@renovatebot/osv-offline':
-        specifier: 1.5.7
-        version: 1.5.7(encoding@0.1.13)
+        specifier: 1.5.8
+        version: 1.5.8(encoding@0.1.13)
       '@renovatebot/pep440':
         specifier: 3.0.20
         version: 3.0.20
@@ -229,8 +229,8 @@ importers:
         specifier: 2.0.6
         version: 2.0.6
       luxon:
-        specifier: 3.4.4
-        version: 3.4.4
+        specifier: 3.5.0
+        version: 3.5.0
       markdown-it:
         specifier: 14.1.0
         version: 14.1.0
@@ -1536,8 +1536,8 @@ packages:
   '@renovatebot/osv-offline-db@1.6.0':
     resolution: {integrity: sha512-cEOCTyd3+/7gPDmBn0pyJtF01+f9e/dJ1mOoML+v5AsP8GIPAzhtQUuIB5FiCxS4IsbP0qm34anYUZHGJldNJA==}
 
-  '@renovatebot/osv-offline@1.5.7':
-    resolution: {integrity: sha512-w44ydBUa4bPzfRLeKal8pgZSfP0K2nji9G2dPf/yk0gm5oPZa0OxVea2Ku1hhgYN6UMj0Qqyx8y8ssAOH8u0tg==}
+  '@renovatebot/osv-offline@1.5.8':
+    resolution: {integrity: sha512-3a9h+7q4dCOp/zM2/ijY+JvyWHiBmwqdN2GA+i3qddXgc5clxEaXQOSD8ycxSTgajE9qr2UmUmajgJoiJfCIDA==}
 
   '@renovatebot/pep440@3.0.20':
     resolution: {integrity: sha512-Jw8jzHh2r1LAPTrjQlIwh/+8J3N2MqXZgPuTt6HdNeJIBjJskV8bsEfGs9rBzXi/omeHob3BXnvlECu2rCCUYw==}
@@ -4358,8 +4358,8 @@ packages:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
 
-  luxon@3.4.4:
-    resolution: {integrity: sha512-zobTr7akeGHnv7eBOXcRgMeCP6+uyYsczwmeRCauvpvaAltgNyTbLH/+VaEAPUeWBT+1GuNmz4wC/6jtQzbbVA==}
+  luxon@3.5.0:
+    resolution: {integrity: sha512-rh+Zjr6DNfUYR3bPwJEnuwDdqMbxZW7LOQfUN4B54+Cl+0o5zaU9RJ6bcidfDtC1cWCZXQ+nvX8bf6bAji37QQ==}
     engines: {node: '>=12'}
 
   make-dir@3.1.0:
@@ -7902,14 +7902,14 @@ snapshots:
     dependencies:
       '@seald-io/nedb': 4.0.4
 
-  '@renovatebot/osv-offline@1.5.7(encoding@0.1.13)':
+  '@renovatebot/osv-offline@1.5.8(encoding@0.1.13)':
     dependencies:
       '@octokit/rest': 20.1.1
       '@renovatebot/osv-offline-db': 1.6.0
       adm-zip: 0.5.14
       fs-extra: 11.2.0
       got: 11.8.6
-      luxon: 3.4.4
+      luxon: 3.5.0
       node-fetch: 2.7.0(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
@@ -9441,7 +9441,7 @@ snapshots:
 
   cron-parser@4.9.0:
     dependencies:
-      luxon: 3.4.4
+      luxon: 3.5.0
 
   cronstrue@2.50.0: {}
 
@@ -11336,7 +11336,7 @@ snapshots:
     dependencies:
       yallist: 4.0.0
 
-  luxon@3.4.4: {}
+  luxon@3.5.0: {}
 
   make-dir@3.1.0:
     dependencies:
