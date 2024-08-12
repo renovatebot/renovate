@@ -46,7 +46,7 @@ export class PypiDatasource extends Datasource {
     const hostUrl = ensureTrailingSlash(
       registryUrl!.replace('https://pypi.org/simple', 'https://pypi.org/pypi'),
     );
-    const normalizedLookupName = PypiDatasource.normalizeName(packageName);
+    const normalizedLookupName = normalizePythonDepName(packageName);
 
     // not all simple indexes use this identifier, but most do
     if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
@@ -80,10 +80,6 @@ export class PypiDatasource extends Datasource {
       }
     }
     return dependency;
-  }
-
-  private static normalizeName(input: string): string {
-    return input.toLowerCase().replace(regEx(/_/g), '-');
   }
 
   private async getDependency(
@@ -180,20 +176,24 @@ export class PypiDatasource extends Datasource {
     packageName: string,
   ): string | null {
     // source packages
-    const srcText = PypiDatasource.normalizeName(text);
+    const lcText = text.toLowerCase();
+    const normalizedSrcText = normalizePythonDepName(text);
     const srcPrefix = `${packageName}-`;
+    if (!normalizedSrcText.startsWith(srcPrefix)) {
+      return null;
+    }
+
+    // strip off the prefix using the prefix length as we have may have normalized the srcPrefix/packageName
+    // We assume that neither the version nor the suffix contains multiple `-` like `0.1.2---rc1.tar.gz`
+    // and use the difference in length to strip off the prefix in case the name contains double `--` characters
+    const normalizedLengthDiff = lcText.length - normalizedSrcText.length;
+    const res = lcText.slice(srcPrefix.length + normalizedLengthDiff);
+
     const srcSuffixes = ['.tar.gz', '.tar.bz2', '.tar.xz', '.zip', '.tgz'];
-    if (
-      srcText.startsWith(srcPrefix) &&
-      srcSuffixes.some((srcSuffix) => srcText.endsWith(srcSuffix))
-    ) {
-      const res = srcText.replace(srcPrefix, '');
-      for (const suffix of srcSuffixes) {
-        if (res.endsWith(suffix)) {
-          // strip off the suffix using character length
-          return res.slice(0, -suffix.length);
-        }
-      }
+    const srcSuffix = srcSuffixes.find((suffix) => lcText.endsWith(suffix));
+    if (srcSuffix) {
+      // strip off the suffix using character length
+      return res.slice(0, -srcSuffix.length);
     }
 
     // pep-0427 wheel packages
@@ -201,21 +201,10 @@ export class PypiDatasource extends Datasource {
     // Also match the current wheel spec
     // https://packaging.python.org/en/latest/specifications/binary-distribution-format/#escaping-and-unicode
     // where any of -_. characters in {distribution} are replaced with _
-    const wheelText = text.toLowerCase();
-    const wheelPrefixWithPeriod =
-      packageName.replace(regEx(/[^\w\d.]+/g), '_') + '-';
-    const wheelPrefixWithoutPeriod =
-      packageName.replace(regEx(/[^\w\d]+/g), '_') + '-';
     const wheelSuffix = '.whl';
-    if (
-      (wheelText.startsWith(wheelPrefixWithPeriod) ||
-        wheelText.startsWith(wheelPrefixWithoutPeriod)) &&
-      wheelText.endsWith(wheelSuffix) &&
-      wheelText.split('-').length > 2
-    ) {
-      return wheelText.split('-')[1];
+    if (lcText.endsWith(wheelSuffix) && lcText.split('-').length > 2) {
+      return res.split('-')[0];
     }
-
     return null;
   }
 
