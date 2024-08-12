@@ -26,12 +26,29 @@ function buildCommand(
   if (GlobalConfig.get('allowScripts') && !config.ignoreScripts) {
     command.push('--trust');
   }
+  let destination: string;
+  let answersFile: string;
+  // Check if there is a separator in packageFileName
+  const lastSeparatorIndex = packageFileName.lastIndexOf('/');
+  if (lastSeparatorIndex === -1) {
+    // No separator found
+    destination = "";
+    answersFile = packageFileName;
+  } else {
+    // Separator found, split into destination and answersFile
+    destination = packageFileName.slice(0, lastSeparatorIndex);
+    answersFile = packageFileName.slice(lastSeparatorIndex + 1);
+  }
   command.push(
     '--answers-file',
-    quote(packageFileName),
+    quote(answersFile),
     '--vcs-ref',
-    quote(newVersion),
+    quote(newVersion)
   );
+  // Only push destination if it is not an empty string
+  if (destination) {
+    command.push(quote(destination));
+  }
   return command.join(' ');
 }
 
