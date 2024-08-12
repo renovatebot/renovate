@@ -897,14 +897,19 @@ It also may mean that ignored directories like `node_modules` can be preserved a
 
 ## platformVersion
 
-Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
-Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to reduce API calls.
+When you set a `platformVersion` string, Renovate skips a API call to GitLab/Bitbucket.
+Instead of fetching the version from the API, Renovate uses the version in the `platformVersion` string.
 
-Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
+Setting a `platformVersion` manually is handy when you:
+
+- use GitLab's `CI_JOB_TOKEN` to authenticate Renovate, or
+- want to reduce the number of API calls
+
+Read [platform details](modules/platform/gitlab/index.md) to learn why Renovate must know the GitLab server version.
 
 <!-- prettier-ignore -->
 !!! note
-    Only valid within [platformOptions](configuration-options.md#platformoptions) object.
+    You must put the `platformVersion` config option in the [`platformOptions`](configuration-options.md#platformoptions) object.
 
 ## prCommitsPerRunLimit
 

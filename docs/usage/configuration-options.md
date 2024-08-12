@@ -3228,7 +3228,7 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## platformOptions
 
-Use this option to configure the platform specific configuration options provided by renovate.
+Use `platformOptions` to set platform-specific configuration options provided by Renovate.
 
 Example:
 
@@ -3243,22 +3243,27 @@ Example:
 
 <!-- prettier-ignore -->
 !!! note
-    The supported options can be of self-hosted or repo config type, make sure to use the sub-options in correct config.
+    There are two kinds of config options: self-hosted config option or repository config options. Make sure you're using the correct kind. And check if it's in the correct config.
+    For Example: `platformVersion` is a self-hosted option. If you want to use it then you need to place it in the `platformOptions` object in the file config ie.`config.js`.
 
-Currently the following options are available:
+You can use these options:
 
 Self-hosted config options:
 
-1. [platformVersion](./self-hosted-configuration.md#platformversion)
+1. [`platformVersion`](./self-hosted-configuration.md#platformversion)
 
 Repository config options:
 
 ### gitLabIgnoreApprovals
 
-Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
-Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
-This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
-Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
+Ignore the default project level approval(s).
+This lets Renovate automerge its Merge Requests, without needing approval(s).
+How it works: Renovate creates a MR-level approval rule where `approvals_required` is set to `0`.
+This option works only when:
+
+- `automerge=true`
+- and either `automergeType=pr` or `automergeType=branch`
+  Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
 ## postUpdateOptions
 

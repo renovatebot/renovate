@@ -343,7 +343,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           );
         });
 
-        it('should skip api call to fetch version when platform version defined', async () => {
+        it('should skip API call to fetch version when platform version defined', async () => {
           httpMock
             .scope('https://stash.renovatebot.com')
             .get(`/rest/api/1.0/users/${username}`)
