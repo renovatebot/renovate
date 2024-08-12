@@ -17,6 +17,9 @@ const withPeriodsResponse = Fixtures.get('versions-html-with-periods.html');
 const nonNormalizedResposne = Fixtures.get(
   'versions-html-with-non-normalized-name.html',
 );
+const snowflakeLegacyResponse = Fixtures.get(
+  'versions-html-snowflake-legacy.html',
+);
 const withWhitespacesResponse = Fixtures.get(
   'versions-html-with-whitespaces.html',
 );
@@ -476,6 +479,32 @@ describe('modules/datasource/pypi/index', () => {
       ]);
     });
 
+    it('process data from simple endpoint for snowflake-legacy', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/snowflake-legacy/')
+        .reply(200, snowflakeLegacyResponse);
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'snowflake-legacy',
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '0.3.0' },
+        { version: '0.4.0' },
+        { version: '0.5.0' },
+        { version: '0.7.0' },
+        { version: '0.8.0' },
+        { version: '0.8.1' },
+        { version: '0.9.0' },
+        { version: '0.10.0' },
+        { version: '0.11.0' },
+      ]);
+    });
+
     it('process data from simple endpoint with non normalized name', async () => {
       httpMock
         .scope('https://some.registry.org/simple/')
@@ -493,6 +522,8 @@ describe('modules/datasource/pypi/index', () => {
         { version: '2.0.0' },
         { version: '2.0.1' },
         { version: '2.0.2' },
+        { version: '2.0.5' },
+        { version: '2.0.6' },
       ]);
     });
 

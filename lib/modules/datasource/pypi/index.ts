@@ -179,6 +179,12 @@ export class PypiDatasource extends Datasource {
     const lcText = text.toLowerCase();
     const normalizedSrcText = normalizePythonDepName(text);
     const srcPrefix = `${packageName}-`;
+
+    // source distribution format: `{name}-{version}.tar.gz` (https://packaging.python.org/en/latest/specifications/source-distribution-format/#source-distribution-file-name)
+    // binary distribution: `{distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}.whl` (https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention)
+    // officially both `name` and `distribution` should be normalized and then the - replaced with _, but in reality this is not the case
+    // We therefore normalize the name we have (replacing `_-.` with -) and then check if the text starts with the normalized name
+
     if (!normalizedSrcText.startsWith(srcPrefix)) {
       return null;
     }
@@ -189,6 +195,7 @@ export class PypiDatasource extends Datasource {
     const normalizedLengthDiff = lcText.length - normalizedSrcText.length;
     const res = lcText.slice(srcPrefix.length + normalizedLengthDiff);
 
+    // source distribution
     const srcSuffixes = ['.tar.gz', '.tar.bz2', '.tar.xz', '.zip', '.tgz'];
     const srcSuffix = srcSuffixes.find((suffix) => lcText.endsWith(suffix));
     if (srcSuffix) {
@@ -196,11 +203,8 @@ export class PypiDatasource extends Datasource {
       return res.slice(0, -srcSuffix.length);
     }
 
-    // pep-0427 wheel packages
-    //  {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}.whl.
-    // Also match the current wheel spec
-    // https://packaging.python.org/en/latest/specifications/binary-distribution-format/#escaping-and-unicode
-    // where any of -_. characters in {distribution} are replaced with _
+    // binary distribution
+    // for binary distributions the version is the first part after the removed distribution name
     const wheelSuffix = '.whl';
     if (lcText.endsWith(wheelSuffix) && lcText.split('-').length > 2) {
       return res.split('-')[0];
