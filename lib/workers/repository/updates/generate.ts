@@ -302,9 +302,6 @@ export function generateBranchConfig(
     } else if (semver.valid(toVersions[0])) {
       upgrade.isRange = false;
     }
-    // Use templates to generate strings
-    const commitMessage = compileCommitMessage(upgrade);
-    compilePrTitle(upgrade, commitMessage);
     config.upgrades.push(upgrade);
     if (upgrade.releaseTimestamp) {
       if (releaseTimestamp!) {
@@ -357,6 +354,11 @@ export function generateBranchConfig(
     ...config.upgrades[0],
     releaseTimestamp: releaseTimestamp!,
   }; // TODO: fixme (#9666)
+
+  // Use templates to generate strings
+  const commitMessage = compileCommitMessage(config);
+  compilePrTitle(config, commitMessage);
+
   config.dependencyDashboardApproval = config.upgrades.some(
     (upgrade) => upgrade.dependencyDashboardApproval,
   );

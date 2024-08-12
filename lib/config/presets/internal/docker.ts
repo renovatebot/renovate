@@ -43,7 +43,7 @@ export const presets: Record<string, Preset> = {
         pinDigests: true,
       },
       {
-        matchManagers: ['devcontainer'],
+        matchManagers: ['argocd', 'devcontainer', 'helmv3', 'pyenv'],
         pinDigests: false,
       },
     ],

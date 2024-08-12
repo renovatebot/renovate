@@ -7,7 +7,7 @@ The information on this page is for the Mend-hosted cloud apps:
 
 If you self-host, you can skip reading this page.
 
-## Migrate secrets in your Renovate config file!
+## :warning: Migrate secrets in your Renovate config file :warning:
 
 The Mend-hosted cloud app will stop reading secrets from the Renovate config file in your repository on 01-Oct-2024.
 You must migrate any secrets you currently keep in the Renovate config file, and put them in the app settings page on [developer.mend.io](https://developer.mend.io).

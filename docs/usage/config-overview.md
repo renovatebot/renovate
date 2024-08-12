@@ -108,6 +108,8 @@ Read the [Self-hosted experimental environment variables](./self-hosted-experime
 Finally, there are some special environment variables that are loaded _before_ configuration parsing because they are used during logging initialization:
 
 - `LOG_CONTEXT`: a unique identifier used in each log message to track context
+- `LOG_FILE`: used to enable file logging and specify the log file path
+- `LOG_FILE_LEVEL`: log file logging level, defaults to `debug`
 - `LOG_FORMAT`: defaults to a "pretty" human-readable output, but can be changed to "json"
 - `LOG_LEVEL`: most commonly used to change from the default `info` to `debug` logging
 
@@ -273,7 +275,7 @@ To get a onboarding PR from Renovate, change to Interactive mode either at the R
 
 #### Installing Renovate into selected repositories always leads to onboarding PRs
 
-Additionally, if an Organization is installed with "Selected repositories" then the app will change `onboardingNoDeps` to `true` so that an Onboarding PR is created even if no dependencies are detected.
+Additionally, if an Organization is installed with "Selected repositories" then the app will change `onboardingNoDeps` to `"enabled"` so that an Onboarding PR is created even if no dependencies are detected.
 
 ### Fork Processing
 

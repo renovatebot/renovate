@@ -2,11 +2,13 @@ import { mock } from 'jest-mock-extended';
 import { SimpleGit, simpleGit } from 'simple-git';
 import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
+import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as hostRules from '../../../util/host-rules';
 import type { Upgrade } from '../types';
 import { updateDependency } from '.';
+jest.mock('../../../util/fs');
 
 jest.mock('simple-git');
 const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
@@ -86,6 +88,51 @@ describe('modules/manager/git-submodules/update', () => {
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
       });
+    });
+
+    it('update gitmodule branch value if value changed', async () => {
+      gitMock.submoduleUpdate.mockResolvedValue('');
+      gitMock.checkout.mockResolvedValue('');
+      const updatedGitModules = `[submodule "renovate"]
+      path = deps/renovate
+      url = https://github.com/renovatebot/renovate.git
+      branch = v0.0.2`;
+      fs.readLocalFile.mockResolvedValueOnce(updatedGitModules);
+
+      upgrade = {
+        depName: 'renovate',
+        currentValue: 'v0.0.1',
+        newValue: 'v0.0.2',
+        packageFile: '.gitmodules',
+      };
+      const update = await updateDependency({
+        fileContent: '',
+        upgrade,
+      });
+      expect(update).toBe(updatedGitModules);
+      expect(gitMock.subModule).toHaveBeenCalledWith([
+        'set-branch',
+        '--branch',
+        'v0.0.2',
+        'renovate',
+      ]);
+    });
+
+    it('do not update gitmodule branch value if value not changed', async () => {
+      gitMock.submoduleUpdate.mockResolvedValue('');
+      gitMock.checkout.mockResolvedValue('');
+      upgrade = {
+        depName: 'renovate',
+        currentValue: 'main',
+        newValue: 'main',
+        packageFile: '.gitmodules',
+      };
+      const update = await updateDependency({
+        fileContent: '',
+        upgrade,
+      });
+      expect(update).toBe('');
+      expect(gitMock.subModule).toHaveBeenCalledTimes(0);
     });
 
     it('returns content on update and uses git environment variables for git-tags/git-refs', async () => {
