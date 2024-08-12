@@ -43,19 +43,17 @@ export async function updateArtifacts({
   const lazyPkgJson = lazyLoadPackageJson(pkgFileDir);
   const cmd = `corepack use ${depName}@${newVersion}`;
 
+  const nodeConstraints = await getNodeToolConstraint(
+    config,
+    updatedDeps,
+    pkgFileDir,
+    lazyPkgJson,
+  );
+
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
-    // test if this is working as expected
     toolConstraints: [
-      {
-        ...(await getNodeToolConstraint(
-          config,
-          updatedDeps,
-          pkgFileDir,
-          lazyPkgJson,
-        )),
-      },
-      // test if this is working as expected
+      nodeConstraints,
       {
         toolName: 'corepack',
         constraint: config.constraints?.corepack,

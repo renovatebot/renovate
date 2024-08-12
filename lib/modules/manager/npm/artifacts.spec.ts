@@ -34,7 +34,6 @@ const validDepUpdate = {
   depType: 'packageManager',
   currentValue:
     '8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589',
-  rangeStrategy: 'pin',
   newVersion: '8.15.6',
 } satisfies Upgrade<Record<string, unknown>>;
 
@@ -71,12 +70,10 @@ describe('modules/manager/npm/artifacts', () => {
     expect(res).toBeNull();
   });
 
-  it('returns null if currentValue has no hash and rangeStrategy is not pin', async () => {
+  it('returns null if currentValue has no hash', async () => {
     const res = await updateArtifacts({
       packageFileName: 'flake.nix',
-      updatedDeps: [
-        { ...validDepUpdate, currentValue: '8.15.5', rangeStrategy: 'auto' },
-      ],
+      updatedDeps: [{ ...validDepUpdate, currentValue: '8.15.5' }],
       newPackageFileContent: 'some new content',
       config,
     });
@@ -96,14 +93,13 @@ describe('modules/manager/npm/artifacts', () => {
     });
 
     expect(res).toBeNull();
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'corepack enable' },
-      { cmd: 'corepack use pnpm@8.15.6' },
-    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
   });
 
   it('returns updated package.json', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('some new content');
+    fs.readLocalFile
+      .mockResolvedValueOnce('{}') // for node constraints
+      .mockResolvedValue('some new content'); // for updated package.json
     const execSnapshots = mockExecAll();
 
     const res = await updateArtifacts({
@@ -122,10 +118,7 @@ describe('modules/manager/npm/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'corepack enable' },
-      { cmd: 'corepack use pnpm@8.15.6' },
-    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
   });
 
   it('supports docker mode', async () => {
@@ -137,7 +130,10 @@ describe('modules/manager/npm/artifacts', () => {
       packageFileName: 'package.json',
       updatedDeps: [validDepUpdate],
       newPackageFileContent: 'some content',
-      config: { ...config, constraints: { node: '20.1.0' } },
+      config: {
+        ...config,
+        constraints: { node: '20.1.0', corepack: '0.29.3' },
+      },
     });
 
     expect(res).toEqual([
@@ -164,7 +160,7 @@ describe('modules/manager/npm/artifacts', () => {
           'bash -l -c "' +
           'install-tool node 20.1.0 ' +
           '&& ' +
-          'corepack enable ' +
+          'install-tool corepack 0.29.3 ' +
           '&& ' +
           'corepack use pnpm@8.15.6' +
           '"',
@@ -181,7 +177,10 @@ describe('modules/manager/npm/artifacts', () => {
       packageFileName: 'package.json',
       updatedDeps: [validDepUpdate],
       newPackageFileContent: 'some content',
-      config: { ...config, constraints: { node: '20.1.0' } },
+      config: {
+        ...config,
+        constraints: { node: '20.1.0', corepack: '0.29.3' },
+      },
     });
 
     expect(res).toEqual([
@@ -195,11 +194,12 @@ describe('modules/manager/npm/artifacts', () => {
     ]);
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool node 20.1.0' },
       {
-        cmd: 'corepack enable',
+        cmd: 'install-tool node 20.1.0',
         options: { cwd: '/tmp/github/some/repo' },
       },
+      { cmd: 'install-tool corepack 0.29.3' },
+
       {
         cmd: 'corepack use pnpm@8.15.6',
         options: { cwd: '/tmp/github/some/repo' },
@@ -214,7 +214,10 @@ describe('modules/manager/npm/artifacts', () => {
       packageFileName: 'package.json',
       updatedDeps: [validDepUpdate],
       newPackageFileContent: 'some content',
-      config,
+      config: {
+        ...config,
+        constraints: { node: '20.1.0', corepack: '0.29.3' },
+      },
     });
 
     expect(res).toEqual([
@@ -222,9 +225,6 @@ describe('modules/manager/npm/artifacts', () => {
         artifactError: { fileName: 'package.json', stderr: 'exec error' },
       },
     ]);
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'corepack enable', options: { cwd: '/tmp/github/some/repo' } },
-      // { cmd: 'corepack use pnpm@8.15.6' },
-    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
   });
 });
