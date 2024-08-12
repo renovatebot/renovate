@@ -20,6 +20,7 @@ import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import {
+  DatasourceCacheStats,
   HttpCacheStats,
   HttpStats,
   LookupStats,
@@ -134,6 +135,7 @@ export async function renovateRepository(
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
   PackageCacheStats.report();
+  DatasourceCacheStats.report();
   HttpStats.report();
   HttpCacheStats.report();
   LookupStats.report();

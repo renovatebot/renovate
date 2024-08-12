@@ -38,6 +38,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'composer/composer',
     versioning: composerVersioningId,
   },
+  copier: {
+    datasource: 'pypi',
+    packageName: 'copier',
+    versioning: pep440VersioningId,
+  },
   corepack: {
     datasource: 'npm',
     packageName: 'corepack',

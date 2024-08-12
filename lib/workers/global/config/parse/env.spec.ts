@@ -275,8 +275,12 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_DOCKER_MAX_PAGES: '10',
         RENOVATE_X_AUTODISCOVER_REPO_ORDER: 'desc',
         RENOVATE_X_PLATFORM_VERSION: '8.0.0',
+        RENOVATE_X_DELETE_CONFIG_FILE: 'true',
+        RENOVATE_X_S3_ENDPOINT: 'endpoint',
+        RENOVATE_X_S3_PATH_STYLE: 'true',
       };
       const config = await env.getConfig(envParam);
+      expect(config.dockerMaxPages).toBeUndefined();
       expect(config).toMatchObject({
         mergeConfidenceEndpoint: 'some-url',
         mergeConfidenceDatasources: ['docker'],
@@ -285,6 +289,9 @@ describe('workers/global/config/parse/env', () => {
         platformOptions: {
           platformVersion: '8.0.0',
         },
+        deleteConfigFile: true,
+        s3Endpoint: 'endpoint',
+        s3PathStyle: true,
       });
     });
 
