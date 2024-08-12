@@ -9,7 +9,7 @@ import { delimiters, extractRubyVersion, getLockFilePath } from './common';
 import { extractLockFileEntries } from './locked-version';
 
 function formatContent(input: string): string {
-  return input.replace(regEx(/^ {2}/), '') + '\n'; //remove leading witespace and add a new line at the end
+  return input.replace(regEx(/^ {2}/), '') + '\n'; //remove leading whitespace and add a new line at the end
 }
 
 export async function extractPackageFile(

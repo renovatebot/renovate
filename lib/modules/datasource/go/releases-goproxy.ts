@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { filterMap } from '../../../util/filter-map';
 import { HttpError } from '../../../util/http';
@@ -88,7 +89,9 @@ export class GoProxyDatasource extends Datasource {
           break;
         }
       } catch (err) {
-        const statusCode = err?.response?.statusCode;
+        const potentialHttpError =
+          err instanceof ExternalHostError ? err.err : err;
+        const statusCode = potentialHttpError?.response?.statusCode;
         const canFallback =
           fallback === '|' ? true : statusCode === 404 || statusCode === 410;
         const msg = canFallback
@@ -213,9 +216,11 @@ export class GoProxyDatasource extends Datasource {
         });
         result.releases.push(...releases);
       } catch (err) {
+        const potentialHttpError =
+          err instanceof ExternalHostError ? err.err : err;
         if (
-          err instanceof HttpError &&
-          err.response?.statusCode === 404 &&
+          potentialHttpError instanceof HttpError &&
+          potentialHttpError.response?.statusCode === 404 &&
           major !== packageMajor
         ) {
           break;
