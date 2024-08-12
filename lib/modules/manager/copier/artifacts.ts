@@ -45,7 +45,7 @@ function buildCommand(
     '--vcs-ref',
     quote(newVersion)
   );
-  // Only push destination if it is not an empty string
+  // Only push to destination if the string has content
   if (destination) {
     command.push(quote(destination));
   }
