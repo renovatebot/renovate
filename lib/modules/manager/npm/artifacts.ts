@@ -30,32 +30,36 @@ export async function updateArtifacts({
     return null;
   }
 
-  const { currentValue, depName, newVersion, rangeStrategy } =
-    packageManagerUpdate;
+  const { currentValue, depName, newVersion } = packageManagerUpdate;
 
-  // Execute 'corepack use' command only if:
-  // 1. The package manager version is pinned in the project, or
-  // 2. The package manager version already has a hash appended
-  if (
-    !currentValue ||
-    (rangeStrategy !== 'pin' &&
-      !regEx(versionWithHashRegString).test(currentValue))
-  ) {
+  // Execute 'corepack use' command only if the currentValue already has hash in it
+  if (!currentValue || !regEx(versionWithHashRegString).test(currentValue)) {
     return null;
   }
 
-  // asuuming that corepack only modified the root package.json
-  // as it should not be normal practice to have different package maangers in different workspaces
+  // Asumming that corepack only needs to modify the package.json file in the root folder
+  // As it should not be regular practice to have different package managers in different workspaces
   const pkgFileDir = upath.dirname(packageFileName);
   const lazyPkgJson = lazyLoadPackageJson(pkgFileDir);
-  const cmd = ['corepack enable'];
-
-  cmd.push(`corepack use ${depName}@${newVersion}`);
+  const cmd = `corepack use ${depName}@${newVersion}`;
 
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
+    // test if this is working as expected
     toolConstraints: [
-      await getNodeToolConstraint(config, updatedDeps, pkgFileDir, lazyPkgJson),
+      {
+        ...(await getNodeToolConstraint(
+          config,
+          updatedDeps,
+          pkgFileDir,
+          lazyPkgJson,
+        )),
+      },
+      // test if this is working as expected
+      {
+        toolName: 'corepack',
+        constraint: config.constraints?.corepack,
+      },
     ],
     docker: {},
     userConfiguredEnv: config.env,
