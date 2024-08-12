@@ -112,7 +112,6 @@ export async function initPlatform({
   };
   try {
     let bitbucketServerVersion: string;
-platformOptions?.platformVersion);
     if (platformOptions?.platformVersion) {
       bitbucketServerVersion = platformOptions?.platformVersion;
     } else {

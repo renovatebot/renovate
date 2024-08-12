@@ -131,7 +131,6 @@ export async function initPlatform({
         user.commit_email ?? user.email
       }>`;
     }
-platformOptions?.platformVersion);
     if (platformOptions?.platformVersion) {
       gitlabVersion = platformOptions?.platformVersion;
     } else {
