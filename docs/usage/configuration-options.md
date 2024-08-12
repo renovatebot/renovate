@@ -3571,6 +3571,7 @@ Only change this setting if you really need to.
 ## registryAliases
 
 You can use the `registryAliases` object to set registry aliases.
+Renovate applies _all_ `registryAliases` objects, from top to bottom.
 
 This feature works with the following managers:
 

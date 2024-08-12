@@ -63,6 +63,16 @@ handlebars.registerHelper('includes', (arg1: string[], arg2: string) => {
   return false;
 });
 
+handlebars.registerHelper(
+  'split',
+  (str: unknown, separator: unknown): string[] => {
+    if (is.string(str) && is.string(separator)) {
+      return str.split(separator);
+    }
+    return [];
+  },
+);
+
 handlebars.registerHelper({
   and(...args) {
     // Need to remove the 'options', as last parameter

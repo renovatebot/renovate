@@ -124,6 +124,14 @@ In the example above all matches of the regex `[a-z]+\.github\.com` will be repl
 
 Read the [MDN Web Docs, String.prototype.replace()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace) to learn more.
 
+### split
+
+Splits a string into an array of substrings.
+
+This example splits a package name by `-` and gets the second part:
+`{{ lookup (split packageName '-') 1 }}`
+An input of `foo-bar-test` therefor would return `bar`.
+
 ### stringToPrettyJSON
 
 If you want to print pretty JSON with Handlebars you can use the built-in function `stringToPrettyJSON` like this:
