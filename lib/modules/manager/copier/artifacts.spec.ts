@@ -122,6 +122,23 @@ describe('modules/manager/copier/artifacts', () => {
       ]);
     });
 
+    it('invokes copier update with nested destination and answer file', async () => {
+      const execSnapshots = mockExecAll();
+
+      await updateArtifacts({
+        packageFileName: 'apps/my-app/.copier-answers.yml',
+        updatedDeps: upgrades,
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'copier update --skip-answered --defaults --answers-file .copier-answers.yml --vcs-ref 1.1.0 apps/my-app',
+        },
+      ]);
+    });
+
     it.each`
       pythonConstraint | copierConstraint
       ${null}          | ${null}
