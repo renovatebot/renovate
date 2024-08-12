@@ -488,7 +488,7 @@ describe('modules/datasource/pypi/index', () => {
       ]);
     });
 
-    it('reply with only valid valid version', async () => {
+    it('ignores invalid distribution file name formats', async () => {
       httpMock
         .scope('https://some.registry.org/simple/')
         .get('/invalid-version/')
