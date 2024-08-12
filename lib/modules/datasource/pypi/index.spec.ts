@@ -14,7 +14,9 @@ const dataRequiresPythonResponse = Fixtures.get(
 const mixedHyphensResponse = Fixtures.get('versions-html-mixed-hyphens.html');
 const mixedCaseResponse = Fixtures.get('versions-html-mixed-case.html');
 const withPeriodsResponse = Fixtures.get('versions-html-with-periods.html');
-const nonNormalizedResposne = Fixtures.get('versions-html-with-non-normalized-name.html');
+const nonNormalizedResposne = Fixtures.get(
+  'versions-html-with-non-normalized-name.html',
+);
 const withWhitespacesResponse = Fixtures.get(
   'versions-html-with-whitespaces.html',
 );
