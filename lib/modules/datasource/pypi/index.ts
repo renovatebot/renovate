@@ -189,7 +189,7 @@ export class PypiDatasource extends Datasource {
       return null;
     }
 
-    // strip off the prefix using the prefix length as we have may have normalized the srcPrefix/packageName
+    // strip off the prefix using the prefix length as we may have normalized the srcPrefix/packageName
     // We assume that neither the version nor the suffix contains multiple `-` like `0.1.2---rc1.tar.gz`
     // and use the difference in length to strip off the prefix in case the name contains double `--` characters
     const normalizedLengthDiff = lcText.length - normalizedSrcText.length;
