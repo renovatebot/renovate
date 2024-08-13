@@ -609,9 +609,7 @@ jobs:
           path: tmp/docs/
 
       - name: Build mkdocs
-        run: pnpm build:mkdocs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm build:mkdocs --build=false
 
   test-e2e:
     needs: [build]
