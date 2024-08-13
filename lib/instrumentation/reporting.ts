@@ -89,7 +89,7 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
         ContentType: 'application/json',
       };
 
-      const client = getS3Client();
+      const client = getS3Client(config.s3Endpoint, config.s3PathStyle);
       const command = new PutObjectCommand(s3Params);
       await client.send(command);
     }

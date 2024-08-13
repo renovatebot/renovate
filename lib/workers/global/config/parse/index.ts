@@ -98,6 +98,9 @@ export async function parseConfigs(
     config.forkProcessing = 'enabled';
   }
 
+  // Only try deletion if RENOVATE_CONFIG_FILE is set
+  await fileParser.deleteNonDefaultConfig(env, !!config.deleteConfigFile);
+
   // Massage onboardingNoDeps
   if (!config.autodiscover && config.onboardingNoDeps !== 'disabled') {
     logger.debug('Enabling onboardingNoDeps while in non-autodiscover mode');

@@ -1,5 +1,6 @@
 import { DartVersionDatasource } from '../../datasource/dart-version';
 import { DockerDatasource } from '../../datasource/docker';
+import { DotnetVersionDatasource } from '../../datasource/dotnet-version';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -21,6 +22,7 @@ export const defaultConfig = {
 export const supportedDatasources = [
   DartVersionDatasource.id,
   DockerDatasource.id,
+  DotnetVersionDatasource.id,
   FlutterVersionDatasource.id,
   GithubReleasesDatasource.id,
   GithubTagsDatasource.id,
