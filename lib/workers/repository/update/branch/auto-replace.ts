@@ -91,6 +91,7 @@ export async function confirmIfDepUpdated(
   if (upgrade.newValue && upgrade.newValue !== newUpgrade.currentValue) {
     logger.debug(
       {
+        depName: upgrade.depName,
         manager,
         packageFile,
         expectedValue: upgrade.newValue,
@@ -108,6 +109,7 @@ export async function confirmIfDepUpdated(
   ) {
     logger.debug(
       {
+        depName: upgrade.depName,
         manager,
         packageFile,
         expectedValue: upgrade.newDigest,
