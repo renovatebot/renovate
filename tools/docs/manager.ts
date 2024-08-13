@@ -140,10 +140,7 @@ export async function generateManagers(
         )
         .join(', ');
       md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;
-
-      if (urls?.length) {
-        md += formatUrls(urls);
-      }
+      md += formatUrls(urls);
       md += '## Default config\n\n';
       md += '```json\n';
       md += JSON.stringify(definition.defaultConfig, null, 2) + '\n';
