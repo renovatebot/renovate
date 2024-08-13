@@ -229,13 +229,6 @@ describe('modules/datasource/deb/index', () => {
           .scope(debBaseUrl)
           .get(getPackageUrl('', 'stable', 'non-free', 'amd64'))
           .reply(404);
-
-        mockFetchInReleaseContent(
-          fixturePackagesArchiveHash,
-          'stable',
-          'non-free',
-          'riscv',
-        );
       });
 
       it('returns null for the package', async () => {
@@ -318,19 +311,29 @@ describe('modules/datasource/deb/index', () => {
   });
 
   describe('downloadAndExtractPackage', () => {
-    it('should throw error when fetching the InRelease content fails', async () => {
-      mockFetchInReleaseContent(
-        'wrong-hash',
-        'bullseye',
-        'main',
+    it('should ignore error when fetching the InRelease content fails', async () => {
+      const packageArgs: [release: string, component: string, arch: string] = [
+        'stable',
+        'non-free',
         'amd64',
-        true,
-      );
+      ];
+
+      httpMock
+        .scope(debBaseUrl)
+        .get(getPackageUrl('', ...packageArgs))
+        .replyWithFile(200, fixturePackagesArchivePath2);
+      mockFetchInReleaseContent('wrong-hash', ...packageArgs, true);
+
       await expect(
         debDatasource.downloadAndExtractPackage(
-          getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
+          getComponentUrl(debBaseUrl, ...packageArgs),
         ),
-      ).rejects.toThrow(`No compression standard worked for `);
+      ).resolves.toEqual(
+        expect.objectContaining({
+          extractedFile: extractedPackageFile,
+          lastTimestamp: expect.anything(),
+        }),
+      );
     });
 
     it('should throw error when checksum validation fails', async () => {

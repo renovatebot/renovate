@@ -6,6 +6,7 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import * as fs from '../../../util/fs';
 import type { HttpOptions } from '../../../util/http/types';
+import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { computeFileChecksum, parseChecksumsFromInRelease } from './checksum';
@@ -204,34 +205,37 @@ export class DebDatasource extends Datasource {
       logger.debug(`No need to download ${packageUrl}, file is up to date.`);
       return false;
     }
-      const readStream = this.http.stream(packageUrl);
-      const writeStream = fs.createCacheWriteStream(compressedFile);
-      await fs.pipeline(readStream, writeStream);
-      logger.debug(
-        { url: packageUrl, targetFile: compressedFile },
-        'Downloading Debian package file',
+    const readStream = this.http.stream(packageUrl);
+    const writeStream = fs.createCacheWriteStream(compressedFile);
+    await fs.pipeline(readStream, writeStream);
+    logger.debug(
+      { url: packageUrl, targetFile: compressedFile },
+      'Downloading Debian package file',
+    );
+
+    const actualChecksum = await computeFileChecksum(compressedFile);
+
+    let inReleaseContent = '';
+
+    try {
+      inReleaseContent = await this.fetchInReleaseFile(baseReleaseUrl);
+    } catch (error) {
+      // This is expected to fail for Artifactory if GPG verification is not enabled
+      logger.debug({ url: baseReleaseUrl }, 'Could not fetch InRelease file');
+    }
+
+    if (inReleaseContent) {
+      const expectedChecksum = parseChecksumsFromInRelease(
+        inReleaseContent,
+        // path to the Package.gz file
+        packageUrl.replace(`${baseReleaseUrl}/`, ''),
       );
-
-      const actualChecksum = await computeFileChecksum(compressedFile);
-
-      try {
-        const inReleaseContent = await this.fetchInReleaseFile(baseReleaseUrl);
-        const expectedChecksum = parseChecksumsFromInRelease(
-          inReleaseContent,
-          // path to the Package.gz file
-          packageUrl.replace(`${baseReleaseUrl}/`, ''),
-        );
-        if (actualChecksum !== expectedChecksum) {
-          logger.debug(
-            { url: baseReleaseUrl },
-            'SHA256 checksum validation failed',
-          );
-          return false;
-        }
-      } catch (error) {
-        // This is expected to fail for Artifactory if GPG verification is not enabled
-        logger.debug({ url: baseReleaseUrl }, 'Could not fetch InRelease file');
+      if (actualChecksum !== expectedChecksum) {
+        await fs.rmCache(compressedFile);
+        throw new Error('SHA256 checksum validation failed');
       }
+    }
+
     return needsToDownload;
   }
 
