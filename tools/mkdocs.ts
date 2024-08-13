@@ -24,7 +24,7 @@ void (async () => {
     logger.info('* generate docs');
     await generateDocs('tools/mkdocs', false);
   } else {
-    logger.info('* using prebuild docs');
+    logger.info('* using prebuild docs from build step');
     await fs.copy('tmp/docs', 'tools/mkdocs/docs');
   }
   logger.info('* running mkdocs build');
