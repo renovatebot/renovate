@@ -76,8 +76,8 @@ importers:
         specifier: 3.0.1
         version: 3.0.1
       '@renovatebot/osv-offline':
-        specifier: 1.5.8
-        version: 1.5.8(encoding@0.1.13)
+        specifier: 1.5.9
+        version: 1.5.9(encoding@0.1.13)
       '@renovatebot/pep440':
         specifier: 3.0.20
         version: 3.0.20
@@ -103,8 +103,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       aws4:
-        specifier: 1.13.0
-        version: 1.13.0
+        specifier: 1.13.1
+        version: 1.13.1
       azure-devops-node-api:
         specifier: 14.0.1
         version: 14.0.1
@@ -1520,8 +1520,8 @@ packages:
   '@renovatebot/osv-offline-db@1.6.0':
     resolution: {integrity: sha512-cEOCTyd3+/7gPDmBn0pyJtF01+f9e/dJ1mOoML+v5AsP8GIPAzhtQUuIB5FiCxS4IsbP0qm34anYUZHGJldNJA==}
 
-  '@renovatebot/osv-offline@1.5.8':
-    resolution: {integrity: sha512-3a9h+7q4dCOp/zM2/ijY+JvyWHiBmwqdN2GA+i3qddXgc5clxEaXQOSD8ycxSTgajE9qr2UmUmajgJoiJfCIDA==}
+  '@renovatebot/osv-offline@1.5.9':
+    resolution: {integrity: sha512-8C3XXtYu9QY+CEXzDrBnHNj6dvShvlKXkZAu40NoFQffAh2wbOz+owrThgaZuUHBcGX5IHYcyx5u++TCXlQHtA==}
 
   '@renovatebot/pep440@3.0.20':
     resolution: {integrity: sha512-Jw8jzHh2r1LAPTrjQlIwh/+8J3N2MqXZgPuTt6HdNeJIBjJskV8bsEfGs9rBzXi/omeHob3BXnvlECu2rCCUYw==}
@@ -2444,8 +2444,8 @@ packages:
   aws-sdk-client-mock@4.0.1:
     resolution: {integrity: sha512-yD2mmgy73Xce097G5hIpr1k7j50qzvJ49/+6osGZiCyk4m6cwhb+2x7kKFY1gEMwTzaS8+m8fXv9SB29SkRYyQ==}
 
-  aws4@1.13.0:
-    resolution: {integrity: sha512-3AungXC4I8kKsS9PuS4JH2nc+0bVY/mjgrephHTIi8fpEeGsTHBUJeosp0Wc1myYMElmD0B3Oc4XL/HVJ4PV2g==}
+  aws4@1.13.1:
+    resolution: {integrity: sha512-u5w79Rd7SU4JaIlA/zFqG+gOiuq25q5VLyZ8E+ijJeILuTxVzZgp2CaGw/UTw6pXYN9XMO9yiqj/nEHmhTG5CA==}
 
   azure-devops-node-api@14.0.1:
     resolution: {integrity: sha512-oVnFfTNmergd3JU852EpGY64d1nAxW8lCyzZqFDPhfQVZkdApBeK/ZMN7yoFiq/C50Ru304X1L/+BFblh2SRJw==}
@@ -7896,7 +7896,7 @@ snapshots:
     dependencies:
       '@seald-io/nedb': 4.0.4
 
-  '@renovatebot/osv-offline@1.5.8(encoding@0.1.13)':
+  '@renovatebot/osv-offline@1.5.9(encoding@0.1.13)':
     dependencies:
       '@octokit/rest': 20.1.1
       '@renovatebot/osv-offline-db': 1.6.0
@@ -9074,7 +9074,7 @@ snapshots:
       sinon: 16.1.3
       tslib: 2.6.3
 
-  aws4@1.13.0: {}
+  aws4@1.13.1: {}
 
   azure-devops-node-api@14.0.1:
     dependencies:
