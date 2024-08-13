@@ -59,6 +59,7 @@ crystal 1.6.1
 dart 2.19.3
 deno 1.26.2
 direnv 2.32.1
+dotnet-core 8.0.303
 dprint 0.32.2
 ecspresso 2.1.0
 elixir 1.14.1
@@ -226,6 +227,12 @@ dummy 1.2.3
             packageName: 'direnv/direnv',
             depName: 'direnv',
             extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '8.0.303',
+            datasource: 'dotnet-version',
+            packageName: 'dotnet-sdk',
+            depName: 'dotnet-core',
           },
           {
             currentValue: '0.32.2',

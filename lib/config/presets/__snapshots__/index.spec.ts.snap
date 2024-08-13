@@ -123,6 +123,7 @@ exports[`config/presets/index resolvePreset resolves eslint 1`] = `
     "@eslint/**",
     "@types/eslint__**",
     "@typescript-eslint/**",
+    "typescript-eslint",
     "eslint**",
   ],
 }
@@ -141,6 +142,7 @@ exports[`config/presets/index resolvePreset resolves linters 1`] = `
     "@eslint/**",
     "@types/eslint__**",
     "@typescript-eslint/**",
+    "typescript-eslint",
     "eslint**",
     "friendsofphp/php-cs-fixer",
     "squizlabs/php_codesniffer",
@@ -174,6 +176,7 @@ exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
         "@eslint/**",
         "@types/eslint__**",
         "@typescript-eslint/**",
+        "typescript-eslint",
         "eslint**",
         "friendsofphp/php-cs-fixer",
         "squizlabs/php_codesniffer",

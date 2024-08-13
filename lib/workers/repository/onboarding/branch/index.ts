@@ -2,15 +2,13 @@ import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
-import {
-  REPOSITORY_FORKED,
-  REPOSITORY_NO_PACKAGE_FILES,
-} from '../../../../constants/error-messages';
+import { REPOSITORY_NO_PACKAGE_FILES } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { type Pr, platform } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
 import { getBranchCommit, setGitAuthor } from '../../../../util/git';
+import { checkIfConfigured } from '../../configured';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
 import { OnboardingState } from '../common';
@@ -43,9 +41,8 @@ export async function checkOnboardingBranch(
     deleteOnboardingCache();
     return { ...config, repoIsOnboarded };
   }
-  if (config.isFork && config.forkProcessing !== 'enabled') {
-    throw new Error(REPOSITORY_FORKED);
-  }
+  checkIfConfigured(config);
+
   logger.debug('Repo is not onboarded');
   // global gitAuthor will need to be used
   setGitAuthor(config.gitAuthor);

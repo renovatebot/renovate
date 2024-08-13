@@ -35,6 +35,7 @@
       "https://github.com/AutoMapper/AutoMapper",
       "https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection"
     ],
+    "avalonia": "https://github.com/AvaloniaUI/Avalonia",
     "aws-cdk": "https://github.com/aws/aws-cdk",
     "aws-lambda-powertools-typescript": [
       "https://github.com/awslabs/aws-lambda-powertools-typescript",
@@ -309,6 +310,7 @@
     "istanbuljs": "https://github.com/istanbuljs/istanbuljs",
     "jackson": [
       "https://github.com/FasterXML/jackson",
+      "https://github.com/FasterXML/jackson-databind",
       "https://github.com/FasterXML/jackson-dataformats-binary",
       "https://github.com/FasterXML/jackson-dataformats-text"
     ],
@@ -442,6 +444,7 @@
     "rust-futures": "https://github.com/rust-lang/futures-rs",
     "rust-wasm-bindgen": "https://github.com/rustwasm/wasm-bindgen",
     "sanity": "https://github.com/sanity-io/sanity",
+    "serilog-ui": "https://github.com/serilog-contrib/serilog-ui",
     "scaffdog": "https://github.com/scaffdog/scaffdog",
     "secretlint": "https://github.com/secretlint/secretlint",
     "sendgrid-nodejs": "https://github.com/sendgrid/sendgrid-nodejs",
