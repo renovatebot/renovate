@@ -134,9 +134,10 @@ describe('modules/manager/copier/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'copier update --skip-answered --defaults --answers-file .copier-answers.yml --vcs-ref 1.1.0 apps/my-app',
+          cmd: 'copier update --skip-answered --defaults --answers-file .copier-answers.yml --vcs-ref 1.1.0',
         },
       ]);
+      // test the cwd where the command was executed
     });
 
     it.each`

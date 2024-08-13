@@ -1,4 +1,5 @@
 import { quote } from 'shlex';
+import { basename, dirname } from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -26,29 +27,12 @@ function buildCommand(
   if (GlobalConfig.get('allowScripts') && !config.ignoreScripts) {
     command.push('--trust');
   }
-  let destination: string;
-  let answersFile: string;
-  // Check if there is a separator in packageFileName
-  const lastSeparatorIndex = packageFileName.lastIndexOf('/');
-  if (lastSeparatorIndex === -1) {
-    // No separator found
-    destination = "";
-    answersFile = packageFileName;
-  } else {
-    // Separator found, split into destination and answersFile
-    destination = packageFileName.slice(0, lastSeparatorIndex);
-    answersFile = packageFileName.slice(lastSeparatorIndex + 1);
-  }
   command.push(
     '--answers-file',
-    quote(answersFile),
+    quote(basename(packageFileName)),
     '--vcs-ref',
     quote(newVersion)
   );
-  // Only push to destination if the string has content
-  if (destination) {
-    command.push(quote(destination));
-  }
   return command.join(' ');
 }
 
@@ -89,6 +73,7 @@ export async function updateArtifacts({
 
   const command = buildCommand(config, packageFileName, newVersion);
   const execOptions: ExecOptions = {
+    cwd: dirname(packageFileName),
     docker: {},
     userConfiguredEnv: config.env,
     toolConstraints: [
