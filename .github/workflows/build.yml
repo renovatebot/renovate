@@ -596,6 +596,8 @@ jobs:
 
       - name: Build
         run: pnpm build:docs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Test docs
         run: pnpm test:docs
@@ -608,6 +610,8 @@ jobs:
 
       - name: Build mkdocs
         run: pnpm build:mkdocs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   test-e2e:
     needs: [build]
