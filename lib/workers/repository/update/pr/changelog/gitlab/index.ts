@@ -69,9 +69,27 @@ export async function getReleaseList(
   const urlEncodedRepo = encodeURIComponent(repository);
   const apiUrl = `${apiBaseUrl}projects/${urlEncodedRepo}/releases`;
 
-  const res = await http.getJson<GitlabRelease[]>(`${apiUrl}?per_page=100`, {
-    paginate: true,
-  });
+  // collect all releases
+  const res = await http.getJson<GitlabRelease[]>(
+    `${apiUrl}?per_page=100&page=1`,
+    {
+      paginate: true,
+    },
+  );
+  const totalPages = Number(res.headers['x-total-pages']);
+
+  if (totalPages > 1) {
+    for (let page = 2; page <= totalPages; page++) {
+      const nextPageRes = await http.getJson<GitlabRelease[]>(
+        `${apiUrl}?per_page=100&page=${page}`,
+        {
+          paginate: true,
+        },
+      );
+      res.body.push(...nextPageRes.body);
+    }
+  }
+
   return res.body.map((release) => ({
     url: `${project.baseUrl}${repository}/-/releases/${release.tag_name}`,
     notesSourceUrl: apiUrl,
