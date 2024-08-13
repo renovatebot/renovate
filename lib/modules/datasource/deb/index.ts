@@ -190,7 +190,7 @@ export class DebDatasource extends Datasource {
     lastDownloadTimestamp?: Date,
   ): Promise<boolean> {
     const baseReleaseUrl = getBaseReleaseUrl(basePackageUrl);
-    const packageUrl = `${basePackageUrl}/Packages.${compression}`;
+    const packageUrl = joinUrlParts(basePackageUrl, `Packages.${compression}`);
     let needsToDownload = true;
 
     if (lastDownloadTimestamp) {
@@ -200,14 +200,10 @@ export class DebDatasource extends Datasource {
       );
     }
 
-    if (needsToDownload) {
-      const inReleaseContent = await this.fetchInReleaseFile(baseReleaseUrl);
-      const expectedChecksum = parseChecksumsFromInRelease(
-        inReleaseContent,
-        // path to the Package.gz file
-        packageUrl.replace(`${baseReleaseUrl}/`, ''),
-      );
-
+    if (!needsToDownload) {
+      logger.debug(`No need to download ${packageUrl}, file is up to date.`);
+      return false;
+    }
       const readStream = this.http.stream(packageUrl);
       const writeStream = fs.createCacheWriteStream(compressedFile);
       await fs.pipeline(readStream, writeStream);
@@ -218,14 +214,24 @@ export class DebDatasource extends Datasource {
 
       const actualChecksum = await computeFileChecksum(compressedFile);
 
-      if (actualChecksum !== expectedChecksum) {
-        await fs.rmCache(compressedFile);
-        throw new Error('SHA256 checksum validation failed');
+      try {
+        const inReleaseContent = await this.fetchInReleaseFile(baseReleaseUrl);
+        const expectedChecksum = parseChecksumsFromInRelease(
+          inReleaseContent,
+          // path to the Package.gz file
+          packageUrl.replace(`${baseReleaseUrl}/`, ''),
+        );
+        if (actualChecksum !== expectedChecksum) {
+          logger.debug(
+            { url: baseReleaseUrl },
+            'SHA256 checksum validation failed',
+          );
+          return false;
+        }
+      } catch (error) {
+        // This is expected to fail for Artifactory if GPG verification is not enabled
+        logger.debug({ url: baseReleaseUrl }, 'Could not fetch InRelease file');
       }
-    } else {
-      logger.debug(`No need to download ${packageUrl}, file is up to date.`);
-    }
-
     return needsToDownload;
   }
 
@@ -237,16 +243,9 @@ export class DebDatasource extends Datasource {
    * @throws An error if the InRelease file could not be downloaded.
    */
   async fetchInReleaseFile(baseReleaseUrl: string): Promise<string> {
-    const inReleaseUrl = `${baseReleaseUrl}/InRelease`;
-    try {
-      const response = await this.http.get(inReleaseUrl);
-      return response.body;
-    } catch (error) {
-      logger.error(
-        `Failed to download InRelease file from ${inReleaseUrl}: ${error.message}`,
-      );
-      throw new Error('InRelease download failed');
-    }
+    const inReleaseUrl = joinUrlParts(baseReleaseUrl, 'InRelease');
+    const response = await this.http.get(inReleaseUrl);
+    return response.body;
   }
 
   /**
