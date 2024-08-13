@@ -73,7 +73,7 @@ theme:
   # https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/
 
   palette:
-    - media: "(prefers-color-scheme)"
+    - media: '(prefers-color-scheme)'
       toggle:
         icon: material/brightness-auto
         name: Switch to light mode
