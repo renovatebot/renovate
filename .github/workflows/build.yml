@@ -296,16 +296,6 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@568ddd69406b30de1774ec0044b73ae06e716aa4 # v4.1
-        with:
-          python-version-file: .python-version
-          version: ${{ env.PDM_VERSION }}
-          cache: true
-
-      - name: Install pdm deps
-        run: pdm install
-
       - name: Lint markdown
         uses: DavidAnson/markdownlint-cli2-action@b4c9feab76d8025d1e83c653fa3990936df0e6c8 # v16.0.0
 
@@ -317,9 +307,6 @@ jobs:
 
       - name: Markdown lint
         run: pnpm markdown-lint
-
-      - name: mkdocs build
-        run: pnpm test:validate-docs
 
   lint-other:
     needs:
@@ -597,6 +584,16 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@568ddd69406b30de1774ec0044b73ae06e716aa4 # v4.1
+        with:
+          python-version-file: .python-version
+          version: ${{ env.PDM_VERSION }}
+          cache: true
+
+      - name: Install pdm deps
+        run: pdm install
+
       - name: Build
         run: pnpm build:docs
 
@@ -608,6 +605,9 @@ jobs:
         with:
           name: docs
           path: tmp/docs/
+
+      - name: Build mkdocs
+        run: pnpm test:validate-docs
 
   test-e2e:
     needs: [build]
