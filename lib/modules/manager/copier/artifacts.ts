@@ -31,7 +31,7 @@ function buildCommand(
     '--answers-file',
     quote(basename(packageFileName)),
     '--vcs-ref',
-    quote(newVersion)
+    quote(newVersion),
   );
   return command.join(' ');
 }
