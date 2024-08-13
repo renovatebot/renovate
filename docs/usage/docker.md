@@ -281,16 +281,17 @@ To make use of this authentication mechanism, specify the username as `AWS`:
 
 ##### Using Workload Identity
 
-[Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) has to be configured and the Service Account needs `artifactregistry.repositories.downloadArtifacts` permission.
+[Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) must be configured and the Service Account must have the `artifactregistry.repositories.downloadArtifacts` permission.
 
 ###### With Application Default Credentials (Self-Hosted only)
 
-Just configure [ADC](https://cloud.google.com/docs/authentication/provide-credentials-adc) as normal and _don't_ provide a username, password or token.
-Renovate will automatically retrieve the credentials using the google-auth-library.
+Configure [ADC](https://cloud.google.com/docs/authentication/provide-credentials-adc) as normal.
+Do not provide a username, password or token.
+Renovate will get the credentials with the [`google-auth-library`](https://www.npmjs.com/package/google-auth-library).
 
 ###### With short-lived access token / GitHub Actions (Self-hosted only)
 
-Below you find the example configuration for both Workload Identity and the Renovate Host rules. For a full GitHub Workflow example see [renovatebot/github-action](https://github.com/renovatebot/github-action) repo.
+Example configuration for Workload Identity and Renovate's host rules:
 
 ```yaml
 - name: authenticate to google cloud
@@ -317,6 +318,8 @@ Below you find the example configuration for both Workload Identity and the Reno
     token: ${{ secrets.RENOVATE_TOKEN }}
     configurationFile: .github/renovate.json5
 ```
+
+You can find a full GitHub Workflow example on the [renovatebot/github-action](https://github.com/renovatebot/github-action) repository.
 
 ##### Using long-lived service account credentials
 
