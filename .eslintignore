@@ -18,3 +18,7 @@ coverage
 /tools/dist
 /patches
 tmp/
+
+# generated mkdocs files
+tools/mkdocs/docs
+tools/mkdocs/site

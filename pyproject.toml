@@ -1,0 +1,12 @@
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+mkdocs-material = "==9.5.31"
+mkdocs-awesome-pages-plugin = "==2.9.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

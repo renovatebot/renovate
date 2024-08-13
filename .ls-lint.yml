@@ -19,3 +19,6 @@ ignore:
   - SECURITY.md
   - test/e2e/node_modules
   - tmp
+  - tools/mkdocs/docs
+  - tools/mkdocs/site
+  - tools/mkdocs/.cache

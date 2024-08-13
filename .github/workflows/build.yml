@@ -31,6 +31,7 @@ concurrency:
 env:
   DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
   NODE_VERSION: 20
+  POETRY_VERSION: 1.8.3 # renovate: datasource=pypi depName=poetry
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -295,6 +296,22 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
+      - name: Install poetry
+        run: pipx install poetry==${{ env.POETRY_VERSION }}
+
+      - name: Set up Python
+        uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v5.1.1
+        with:
+          python-version-file: .python-version
+          cache: 'poetry'
+
+        # install again to use newer python version
+      - name: Install poetry
+        run: pipx install poetry==${{ env.POETRY_VERSION }}
+
+      - name: Install poetry deps
+        run: poetry install
+
       - name: Lint markdown
         uses: DavidAnson/markdownlint-cli2-action@b4c9feab76d8025d1e83c653fa3990936df0e6c8 # v16.0.0
 
@@ -306,6 +323,9 @@ jobs:
 
       - name: Markdown lint
         run: pnpm markdown-lint
+
+      - name: mkdocs build
+        run: pnpm test:validate-docs
 
   lint-other:
     needs:

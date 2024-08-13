@@ -19,3 +19,5 @@ package.json
 /tools/dist
 /patches
 **/tmp/
+/tools/mkdocs/docs
+/tools/mkdocs/site
