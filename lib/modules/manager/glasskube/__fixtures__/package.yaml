@@ -1,0 +1,9 @@
+apiVersion: packages.glasskube.dev/v1alpha1
+kind: ClusterPackage
+metadata:
+  name: argo-cd
+spec:
+  packageInfo:
+    name: argo-cd
+    repositoryName: glasskube
+    version: v2.11.7+1
