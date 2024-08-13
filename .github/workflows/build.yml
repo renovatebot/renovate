@@ -31,7 +31,7 @@ concurrency:
 env:
   DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
   NODE_VERSION: 20
-  POETRY_VERSION: 1.8.3 # renovate: datasource=pypi depName=poetry
+  PDM_VERSION: 2.17.3 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -296,21 +296,15 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - name: Install poetry
-        run: pipx install poetry==${{ env.POETRY_VERSION }}
-
-      - name: Set up Python
-        uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v5.1.1
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@568ddd69406b30de1774ec0044b73ae06e716aa4 # v4.1
         with:
           python-version-file: .python-version
-          cache: 'poetry'
+          version: ${{ env.PDM_VERSION }}
+          cache: true
 
-        # install again to use newer python version
-      - name: Install poetry
-        run: pipx install poetry==${{ env.POETRY_VERSION }}
-
-      - name: Install poetry deps
-        run: poetry install
+      - name: Install pdm deps
+        run: pdm install
 
       - name: Lint markdown
         uses: DavidAnson/markdownlint-cli2-action@b4c9feab76d8025d1e83c653fa3990936df0e6c8 # v16.0.0

@@ -12,6 +12,7 @@ ignore:
   - .git
   - .github/ISSUE_TEMPLATE
   - .github/pull_request_template.md
+  - .venv
   - CODE_OF_CONDUCT.md
   - dist
   - jest.config.ts

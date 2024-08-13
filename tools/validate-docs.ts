@@ -13,7 +13,7 @@ void (async () => {
   logger.info('* generate docs');
   await generateDocs('tools/mkdocs', false);
   logger.info('* running mkdocs');
-  const res = exec('poetry', ['run', 'mkdocs', 'build'], {
+  const res = exec('pdm', ['run', 'mkdocs', 'build'], {
     cwd: 'tools/mkdocs',
   });
   if (res.signal) {

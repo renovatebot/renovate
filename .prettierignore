@@ -20,8 +20,9 @@ package.json
 /tools/dist
 /patches
 **/tmp/
+/.venv/
 
-poetry.lock
+pdm.lock
 pnpm-lock.yaml
 
 # Ignore the mkdocs.yml file, as Prettier moves some comments around
