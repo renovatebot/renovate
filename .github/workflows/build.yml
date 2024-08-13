@@ -607,7 +607,7 @@ jobs:
           path: tmp/docs/
 
       - name: Build mkdocs
-        run: pnpm test:validate-docs
+        run: pnpm build:mkdocs
 
   test-e2e:
     needs: [build]
