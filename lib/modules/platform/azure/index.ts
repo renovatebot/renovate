@@ -828,12 +828,14 @@ export function maxBodyLength(): number {
 /* istanbul ignore next */
 export function findIssue(): Promise<Issue | null> {
   // TODO: Needs implementation (#9592)
+  logger.debug(`findIssue() is not implemented`);
   return Promise.resolve(null);
 }
 
 /* istanbul ignore next */
 export function ensureIssue(): Promise<EnsureIssueResult | null> {
   // TODO: Needs implementation (#9592)
+  logger.debug(`ensureIssue() is not implemented`);
   return Promise.resolve(null);
 }
 
