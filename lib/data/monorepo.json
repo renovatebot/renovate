@@ -35,6 +35,7 @@
       "https://github.com/AutoMapper/AutoMapper",
       "https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection"
     ],
+    "avalonia": "https://github.com/AvaloniaUI/Avalonia",
     "aws-cdk": "https://github.com/aws/aws-cdk",
     "aws-lambda-powertools-typescript": [
       "https://github.com/awslabs/aws-lambda-powertools-typescript",
