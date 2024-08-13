@@ -38,6 +38,6 @@ void (async () => {
     logger.error(`Error occured:\n${res.stderr || res.stdout}`);
     process.exit(res.status);
   } else {
-    logger.debug(`Build succeeded:\n${res.stdout || res.stderr}`);
+    logger.debug(`Build completed:\n${res.stdout || res.stderr}`);
   }
 })();
