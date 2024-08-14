@@ -120,7 +120,7 @@ describe('modules/manager/copier/artifacts', () => {
           cmd: 'copier update --skip-answered --defaults --answers-file .copier-answers.yml --vcs-ref 1.1.0',
         },
       ]);
-      expect(execSnapshots[0].options?.cwd).toBe('.');
+      expect(execSnapshots[0].options?.cwd).toBe('/tmp/github/some/repo');
     });
 
     it('invokes copier update with nested destination and answer file', async () => {
@@ -138,7 +138,9 @@ describe('modules/manager/copier/artifacts', () => {
           cmd: 'copier update --skip-answered --defaults --answers-file .copier-answers.yml --vcs-ref 1.1.0',
         },
       ]);
-      expect(execSnapshots[0].options?.cwd).toBe('apps/my-app');
+      expect(execSnapshots[0].options?.cwd).toBe(
+        '/tmp/github/some/repo/apps/my-app',
+      );
     });
 
     it.each`

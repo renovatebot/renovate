@@ -73,7 +73,7 @@ export async function updateArtifacts({
 
   const command = buildCommand(config, packageFileName, newVersion);
   const execOptions: ExecOptions = {
-    cwd: upath.dirname(packageFileName),
+    cwdFile: packageFileName,
     docker: {},
     userConfiguredEnv: config.env,
     toolConstraints: [
