@@ -449,6 +449,50 @@ describe('util/template/index', () => {
 
       expect(output).toBe(' ABC-123 DEF-456');
     });
+
+    it('handles null input array', () => {
+      const output = template.compile(
+        '{{#each (lookupArray testArray "prBodyDefinitions")}} {{{Issue}}}{{/each}}',
+        {
+          testArray: null,
+        },
+        false,
+      );
+
+      expect(output).toBe('');
+    });
+
+    it('handles empty string key', () => {
+      const output = template.compile(
+        '{{#each (lookupArray testArray "")}} {{{.}}}{{/each}}',
+        {
+          testArray: [
+            {
+              '': 'ABC-123',
+            },
+          ],
+        },
+        false,
+      );
+
+      expect(output).toBe(' ABC-123');
+    });
+
+    it('handles null key', () => {
+      const output = template.compile(
+        '{{#each (lookupArray testArray null)}} {{{.}}}{{/each}}',
+        {
+          testArray: [
+            {
+              null: 'ABC-123',
+            },
+          ],
+        },
+        false,
+      );
+
+      expect(output).toBe(' ABC-123');
+    });
   });
 
   describe('distinct', () => {
