@@ -128,6 +128,7 @@ describe('modules/manager/bundler/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.readLocalFile.mockResolvedValueOnce(null); // .ruby-version
       fs.readLocalFile.mockResolvedValueOnce(null); // .tool-versions
+      fs.localPathExists.mockResolvedValueOnce(true); // Gemfile.lock
       fs.readLocalFile.mockResolvedValueOnce(null); // Gemfile.lock
       const execSnapshots = mockExecAll();
       git.getRepoStatus.mockResolvedValueOnce(
@@ -154,6 +155,7 @@ describe('modules/manager/bundler/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.readLocalFile.mockResolvedValueOnce(null); // .ruby-version
       fs.readLocalFile.mockResolvedValueOnce(null); // .tool-versions
+      fs.localPathExists.mockResolvedValueOnce(true); // Gemfile.lock
       fs.readLocalFile.mockResolvedValueOnce(null); // Gemfile.lock
       const execSnapshots = mockExecAll();
       git.getRepoStatus.mockResolvedValueOnce(
@@ -179,6 +181,7 @@ describe('modules/manager/bundler/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.readLocalFile.mockResolvedValueOnce(null); // .ruby-version
       fs.readLocalFile.mockResolvedValueOnce(null); // .tool-versions
+      fs.localPathExists.mockResolvedValueOnce(true); // Gemfile.lock
       fs.readLocalFile.mockResolvedValueOnce(null); // Gemfile.lock
       const execSnapshots = mockExecAll();
       git.getRepoStatus.mockResolvedValueOnce(
