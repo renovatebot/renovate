@@ -609,7 +609,7 @@ jobs:
           path: tmp/docs/
 
       - name: Build mkdocs
-        run: pnpm build:mkdocs --build=false
+        run: pnpm build:mkdocs build --no-build
 
   test-e2e:
     needs: [build]

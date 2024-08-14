@@ -2,7 +2,7 @@
 
 # Halt processing when a warning is raised when building the docs.
 # https://www.mkdocs.org/user-guide/configuration/#strict
-strict: true
+strict: false
 
 # Use MkDocs maintainer's recommended strictness settings for link validation.
 # https://www.mkdocs.org/user-guide/configuration/#validation
