@@ -11,6 +11,7 @@
     "build": "run-s clean 'generate:*' 'compile:*' create-json-schema",
     "build:docker": "ts-node tools/docker.ts",
     "build:docs": "ts-node tools/generate-docs.ts",
+    "build:mkdocs": "ts-node tools/mkdocs.ts",
     "clean": "rimraf dist tmp",
     "clean-cache": "node tools/clean-cache.mjs",
     "compile:ts": "tsc -p tsconfig.app.json",
