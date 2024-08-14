@@ -1,5 +1,5 @@
 import { quote } from 'shlex';
-import { basename, dirname } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -29,7 +29,7 @@ function buildCommand(
   }
   command.push(
     '--answers-file',
-    quote(basename(packageFileName)),
+    quote(upath.basename(packageFileName)),
     '--vcs-ref',
     quote(newVersion),
   );
@@ -73,7 +73,7 @@ export async function updateArtifacts({
 
   const command = buildCommand(config, packageFileName, newVersion);
   const execOptions: ExecOptions = {
-    cwd: dirname(packageFileName),
+    cwd: upath.dirname(packageFileName),
     docker: {},
     userConfiguredEnv: config.env,
     toolConstraints: [
