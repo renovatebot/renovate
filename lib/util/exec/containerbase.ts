@@ -187,9 +187,9 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: semverVersioningId,
   },
   uv: {
-    datasource: 'github-releases',
-    packageName: 'astral-sh/uv',
-    versioning: semverVersioningId,
+    datasource: 'pypi',
+    packageName: 'uv',
+    versioning: pep440VersioningId,
   },
   yarn: {
     datasource: 'npm',
