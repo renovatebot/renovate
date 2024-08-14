@@ -2,21 +2,24 @@
 
 ## Authentication
 
-You can authenticate Renovate to GitLab, with a Personal Access Token, or Group Access Token.
+You can authenticate Renovate to GitLab, with a [Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html), [Project Access Token](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html) or [Group Access Token](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html).
 
 To start, create either:
 
-- a [Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account
-- or a [Group Access Token](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html#bot-users-for-groups) for the bot account
-- or a [Deploy Token](https://docs.gitlab.com/ee/user/project/deploy_tokens/index.html) for the bot account
+- a [Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token) for the bot account
+- or a [Project Access Token](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html#create-a-project-access-token) to the project Renovate will be working on
+- or a [Group Access Token](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html#create-a-group-access-token-using-ui) to the group Renovate will be working on
 
-The bot account must have at least the Developer role in order to [create issues and merge requests](https://docs.gitlab.com/ee/user/permissions.html#project-members-permissions).
-If you are using automerge, the bot account must have the appropriate ["Allowed to merge" permission on the protected branch](https://docs.gitlab.com/ee/user/project/protected_branches.html#require-everyone-to-submit-merge-requests-for-a-protected-branch) of your projects.
-If merging is restricted to Maintainers, the bot account must have the Maintainer role.
+The bot account or token must have at least the Developer role in order to [create issues and merge requests](https://docs.gitlab.com/ee/user/permissions.html#project-members-permissions).
+If you are using automerge, the bot account or token must have the appropriate ["Allowed to merge" permission on the protected branch](https://docs.gitlab.com/ee/user/project/protected_branches.html#require-everyone-to-submit-merge-requests-for-a-protected-branch) of your projects.
+If merging is restricted to Maintainers, the bot account or token must have the Maintainer role.
 
-If you are using a group access token, to keep using the same GitLab-generated bot user you must [rotate/refresh the Group Access Token](https://docs.gitlab.com/ee/api/group_access_tokens.html#rotate-a-group-access-token) _before_ the token's expiry date.
+If you are using a project access token or a group access token, GitLab creates an [internal](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html#bot-users-for-projects) [bot](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html#bot-users-for-groups) user for you.
+This bot user is the one that will be used to create merge requests and issues.
+For group access tokens, an expiration date is required, unlike project access tokens where it is optional.
+To keep using the same GitLab-generated bot account you must [rotate/refresh the Group Access Token](https://docs.gitlab.com/ee/api/group_access_tokens.html#rotate-a-group-access-token) _before_ the token's expiry date.
 
-We refer to personal access tokens and group access tokens as _access tokens_ in the instructions that follow.
+We refer to personal access tokens, project access tokens and group access tokens as _access tokens_ in the instructions that follow.
 
 For real runs, give the access token these scopes:
 
@@ -43,6 +46,8 @@ If you're using a private [GitLab container registry](https://docs.gitlab.com/ee
 - Set the `RENOVATE_HOST_RULES` CI variable to `[{"matchHost": "${CI_REGISTRY}","username": "${GITLAB_USER_NAME}","password": "${RENOVATE_TOKEN}", "hostType": "docker"}]`.
 - Make sure the user that owns the access token is a member of the corresponding GitLab projects/groups with the right permissions.
 - Make sure the access token has the `read_registry` scope.
+
+You may also use a dedicated [Deploy Token](https://docs.gitlab.com/ee/user/project/deploy_tokens/) instead of using `RENOVATE_TOKEN` as the password in the above host rule example.
 
 You may want to set `FORCE_COLOR: 3` or `TERM: ansi` to the job, in order to get colored output.
 [GitLab Runner runs the container’s shell in non-interactive mode, so the shell’s `TERM` environment variable is set to `dumb`.](https://docs.gitlab.com/ee/ci/yaml/script.html#job-log-output-is-not-formatted-as-expected-or-contains-unexpected-characters)
