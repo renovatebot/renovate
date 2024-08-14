@@ -6,6 +6,7 @@ import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
+import { PyProjectSchema } from '../schema';
 import { UvProcessor } from './uv';
 
 jest.mock('../../../../util/fs');
@@ -23,8 +24,48 @@ const adminConfig: RepoGlobalConfig = {
 const processor = new UvProcessor();
 
 describe('modules/manager/pep621/processors/uv', () => {
+  describe('process()', () => {
+    it('returns initial dependencies if there is no tool.uv section', () => {
+      const pyproject = {tool: {}};
+      const dependencies = [{ packageName: 'dep1' }];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual(dependencies);
+    });
+
+    it('includes uv dev dependencies if there is a tool.uv section', () => {
+      const pyproject = {tool: {uv: {'dev-dependencies': ['dep2==1.2.3', 'dep3==2.3.4']}}};
+      const dependencies = [{ packageName: 'dep1' }];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual(
+        [
+          { packageName: 'dep1' },
+          {
+            currentValue: '==1.2.3',
+            currentVersion: '1.2.3',
+            datasource: 'pypi',
+            depName: 'dep2',
+            depType: 'tool.uv.dev-dependencies',
+            packageName: 'dep2',
+          },
+          {
+            currentValue: '==2.3.4',
+            currentVersion: '2.3.4',
+            datasource: 'pypi',
+            depName: 'dep3',
+            depType: 'tool.uv.dev-dependencies',
+            packageName: 'dep3',
+          },
+        ],
+      );
+    });
+  })
+
   describe('updateArtifacts()', () => {
-    it('return null if there is no lock file', async () => {
+    it('returns null if there is no lock file', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
       const updatedDeps = [{ packageName: 'dep1' }];
       const result = await processor.updateArtifacts(
@@ -39,7 +80,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       expect(result).toBeNull();
     });
 
-    it('return null if the lock file is unchanged', async () => {
+    it('returns null if the lock file is unchanged', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set({
         ...adminConfig,
