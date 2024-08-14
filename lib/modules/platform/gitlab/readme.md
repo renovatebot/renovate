@@ -16,6 +16,7 @@ If merging is restricted to Maintainers, the bot account or token must have the 
 
 If you are using a project access token or a group access token, GitLab creates an [internal](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html#bot-users-for-projects) [bot](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html#bot-users-for-groups) user for you.
 This bot user is the one that will be used to create merge requests and issues.
+Use the name and email of this bot user to configure Renovate when [verifing users using push rules](#verifying-users-using-push-rules).
 For group access tokens, an expiration date is required, unlike project access tokens where it is optional.
 To keep using the same GitLab-generated bot account you must [rotate/refresh the Group Access Token](https://docs.gitlab.com/ee/api/group_access_tokens.html#rotate-a-group-access-token) _before_ the token's expiry date.
 
@@ -70,3 +71,7 @@ By setting the server version yourself, you save a API call that fetches the ser
 
 Due to licensing restrictions [multiple assignees](https://docs.gitlab.com/ee/user/project/issues/multiple_assignees_for_issues.html) are only available in GitLab Premium self-managed, GitLab Premium SaaS, and higher tiers.
 Because of a safeguard in [GitLab's API](https://github.com/renovatebot/renovate/pull/14212#issuecomment-1040189712) if multiple assignees are set, but not available to the project, only the first assignee will be applied.
+
+## Verifying users using push rules
+
+When verifying users using [push rules](https://docs.gitlab.com/ee/user/project/repository/push_rules.html#verify-users), you must use the name and email of the bot user for `gitAuthor`.
