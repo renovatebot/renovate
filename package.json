@@ -169,7 +169,7 @@
     "aggregate-error": "3.1.0",
     "auth-header": "1.0.0",
     "aws4": "1.13.1",
-    "azure-devops-node-api": "14.0.1",
+    "azure-devops-node-api": "14.0.2",
     "bunyan": "1.8.15",
     "cacache": "18.0.4",
     "chalk": "4.1.2",
