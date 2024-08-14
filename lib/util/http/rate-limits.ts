@@ -27,6 +27,11 @@ const throttleDefaults: ThrottleLimitRule[] = [
     matchHost: 'https://crates.io/api/',
     throttleMs: 1000,
   },
+  {
+    // https://github.com/renovatebot/renovate/discussions/27018#discussioncomment-10336270
+    matchHost: 'https://plugins.gradle.org',
+    throttleMs: 2,
+  },
 ];
 
 let throttleLimits: ThrottleLimitRule[] = [];
