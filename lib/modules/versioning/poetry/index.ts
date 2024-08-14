@@ -70,7 +70,7 @@ export function isValid(input: string): boolean {
 
   try {
     return npm.isValid(poetry2npm(input, true));
-  } catch (err) {
+  } catch {
     logger.once.debug(
       { version: input },
       'Poetry version or range is not supported by current implementation',

@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
+/* eslint-disable @typescript-eslint/only-throw-error */
+// TODO: fix, should only allow `Error` type
+
 import { z } from 'zod';
 import { logger } from '../../test/util';
 import { AsyncResult, Result } from './result';
