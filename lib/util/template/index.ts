@@ -1,10 +1,15 @@
 import is from '@sindresorhus/is';
-import handlebars from 'handlebars';
+import handlebars, { type HelperOptions } from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { toArray } from '../array';
 import { getChildEnv } from '../exec/utils';
 import { regEx } from '../regex';
+
+// Missing in handlebars
+type Options = HelperOptions & {
+  lookupProperty: (element: unknown, key: unknown) => unknown;
+};
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
@@ -88,7 +93,9 @@ handlebars.registerHelper({
   },
 });
 
-handlebars.registerHelper('lookupArray', (obj, key, options) => {
+handlebars.registerHelper(
+  'lookupArray',
+  (obj: unknown, key: unknown, options: Options) => {
   return (
     toArray(obj)
       // skip elements like #with does
@@ -98,8 +105,8 @@ handlebars.registerHelper('lookupArray', (obj, key, options) => {
   );
 });
 
-handlebars.registerHelper('distinct', (obj) => {
-  const seen = new Set();
+handlebars.registerHelper('distinct', (obj: unknown) => {
+  const seen = new Set<string>();
 
   return toArray(obj).filter((value) => {
     const str = JSON.stringify(value);
