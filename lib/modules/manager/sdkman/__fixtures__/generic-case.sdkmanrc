@@ -1,0 +1,6 @@
+# Enable auto-env through the sdkman_auto_env config
+# Add key=value pairs of SDKs to use below
+java=21.0.3-tem
+gradle =8.10
+maven= 3.9.8
+sbt = 1.10.1
