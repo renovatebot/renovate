@@ -95,7 +95,7 @@ handlebars.registerHelper({
 
 handlebars.registerHelper(
   'lookupArray',
-  (obj: unknown, key: unknown, options: Options) => {
+  (obj: unknown, key: unknown, options: Options): unknown[] => {
     return (
       toArray(obj)
         // skip elements like #with does
@@ -106,7 +106,7 @@ handlebars.registerHelper(
   },
 );
 
-handlebars.registerHelper('distinct', (obj: unknown) => {
+handlebars.registerHelper('distinct', (obj: unknown): unknown[] => {
   const seen = new Set<string>();
 
   return toArray(obj).filter((value) => {
