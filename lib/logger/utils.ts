@@ -98,9 +98,7 @@ export function prepareZodError(err: ZodError): Record<string, unknown> {
   // istanbul ignore next
   Object.defineProperty(err, 'message', {
     get: () => 'Schema error',
-    set: (_) => {
-      _;
-    },
+    set: () => {},
   });
 
   return {

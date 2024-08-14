@@ -21,7 +21,7 @@ const getDefaultConfigFile = (config: RenovateConfig): string =>
 async function getJsonFile(file: string): Promise<RenovateConfig | null> {
   try {
     return await platform.getJsonFile(file);
-  } catch (err) {
+  } catch {
     return null;
   }
 }
