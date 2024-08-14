@@ -96,14 +96,15 @@ handlebars.registerHelper({
 handlebars.registerHelper(
   'lookupArray',
   (obj: unknown, key: unknown, options: Options) => {
-  return (
-    toArray(obj)
-      // skip elements like #with does
-      .filter((element) => !handlebars.Utils.isEmpty(element))
-      .map((element) => options.lookupProperty(element, key))
-      .filter((value) => value !== undefined)
-  );
-});
+    return (
+      toArray(obj)
+        // skip elements like #with does
+        .filter((element) => !handlebars.Utils.isEmpty(element))
+        .map((element) => options.lookupProperty(element, key))
+        .filter((value) => value !== undefined)
+    );
+  },
+);
 
 handlebars.registerHelper('distinct', (obj: unknown) => {
   const seen = new Set<string>();
