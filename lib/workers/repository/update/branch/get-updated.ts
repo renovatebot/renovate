@@ -49,8 +49,10 @@ function hasAny(set: Set<string>, targets: Iterable<string>): boolean {
   return false;
 }
 
+type FilePath = Pick<FileChange, 'path'>;
+
 function getManagersForPackageFiles(
-  packageFiles: FileAddition[],
+  packageFiles: FilePath[],
   managerPackageFiles: Record<string, Set<string>>,
 ): Set<string> {
   const packageFileNames = packageFiles.map((packageFile) => packageFile.path);
@@ -62,7 +64,7 @@ function getManagersForPackageFiles(
 }
 
 function getPackageFilesForManager(
-  packageFiles: FileAddition[],
+  packageFiles: FilePath[],
   managerPackageFiles: Set<string>,
 ): FileAddition[] {
   return packageFiles.filter((packageFile) =>
@@ -400,9 +402,7 @@ export async function getUpdatedPackageFiles(
   if (!reuseExistingBranch) {
     const lockFileMaintenancePackageFiles: FileAddition[] =
       lockFileMaintenanceFiles.map((name) => ({
-        type: 'addition',
         path: name,
-        contents: null,
       }));
     // Only perform lock file maintenance if it's a fresh commit
     if (is.nonEmptyArray(lockFileMaintenanceFiles)) {
