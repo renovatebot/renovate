@@ -298,7 +298,7 @@ export async function validateConfig(
           let res = template.compile((val as string).toString(), config, false);
           res = template.compile(res, config, false);
           template.compile(res, config, false);
-        } catch (err) {
+        } catch {
           errors.push({
             topic: 'Configuration Error',
             message: `Invalid template in config path: ${currentPath}`,
@@ -600,7 +600,7 @@ export async function validateConfig(
                   try {
                     // regEx isn't aware of our !/ prefix but can handle the suffix
                     regEx(pattern.replace(startPattern, '/'));
-                  } catch (e) {
+                  } catch {
                     errors.push({
                       topic: 'Configuration Error',
                       message: `Invalid regExp for ${currentPath}: \`${pattern}\``,
@@ -613,7 +613,7 @@ export async function validateConfig(
               for (const fileMatch of val as string[]) {
                 try {
                   regEx(fileMatch);
-                } catch (e) {
+                } catch {
                   errors.push({
                     topic: 'Configuration Error',
                     message: `Invalid regExp for ${currentPath}: \`${fileMatch}\``,

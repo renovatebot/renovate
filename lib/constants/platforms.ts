@@ -1,14 +1,17 @@
-export type PlatformId =
-  | 'azure'
-  | 'codecommit'
-  | 'bitbucket'
-  | 'bitbucket-server'
-  | 'gerrit'
-  | 'gitea'
-  | 'github'
-  | 'gitlab'
-  | 'local'
-  | 'scm-manager';
+export const PLATFORM_HOST_TYPES = [
+  'azure',
+  'bitbucket',
+  'bitbucket-server',
+  'codecommit',
+  'gerrit',
+  'gitea',
+  'github',
+  'gitlab',
+  'local',
+  'scm-manager'
+] as const;
+
+export type PlatformId = (typeof PLATFORM_HOST_TYPES)[number];
 
 export const GITEA_API_USING_HOST_TYPES = [
   'gitea',

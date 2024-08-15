@@ -827,13 +827,15 @@ export function maxBodyLength(): number {
 
 /* istanbul ignore next */
 export function findIssue(): Promise<Issue | null> {
-  logger.warn(`findIssue() is not implemented`);
+  // TODO: Needs implementation (#9592)
+  logger.debug(`findIssue() is not implemented`);
   return Promise.resolve(null);
 }
 
 /* istanbul ignore next */
 export function ensureIssue(): Promise<EnsureIssueResult | null> {
-  logger.warn(`ensureIssue() is not implemented`);
+  // TODO: Needs implementation (#9592)
+  logger.debug(`ensureIssue() is not implemented`);
   return Promise.resolve(null);
 }
 

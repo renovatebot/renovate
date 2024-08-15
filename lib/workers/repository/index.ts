@@ -20,6 +20,7 @@ import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import {
+  DatasourceCacheStats,
   HttpCacheStats,
   HttpStats,
   LookupStats,
@@ -27,6 +28,7 @@ import {
 } from '../../util/stats';
 import { setBranchCache } from './cache';
 import { extractRepoProblems } from './common';
+import { configMigration } from './config-migration';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finalizeRepo } from './finalize';
@@ -99,6 +101,7 @@ export async function renovateRepository(
         }
         logger.debug(`Automerged but already retried once`);
       } else {
+        await configMigration(config, branchList);
         await ensureDependencyDashboard(config, branches, packageFiles);
       }
       await finalizeRepo(config, branchList);
@@ -134,6 +137,7 @@ export async function renovateRepository(
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
   PackageCacheStats.report();
+  DatasourceCacheStats.report();
   HttpStats.report();
   HttpCacheStats.report();
   LookupStats.report();
