@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { exec } from '../../../../util/exec';
@@ -142,5 +143,5 @@ function generateCMD(updatedDeps: Upgrade[]): string {
     }
   }
 
-  return `${uvUpdateCMD} ${deps.map((dep) => `--upgrade-package ${dep}`).join(' ')}`;
+  return `${uvUpdateCMD} ${deps.map((dep) => `--upgrade-package ${quote(dep)}`).join(' ')}`;
 }
