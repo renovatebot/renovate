@@ -161,7 +161,7 @@ export async function getPr(number: number): Promise<Pr | null> {
   const cachedPr = inProgressPrs.find((pr) => pr.number === number);
 
   if (cachedPr) {
-    logger.info('Returning from cached PRs');
+    logger.trace('Returning from cached PRs');
     return cachedPr;
   }
 
