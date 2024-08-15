@@ -1135,7 +1135,7 @@ const options: RenovateOptions[] = [
     supportedManagers: [
       'ansible',
       'bitbucket-pipelines',
-      'cnb-project-descriptor',
+      'buildpacks',
       'crossplane',
       'devcontainer',
       'docker-compose',
