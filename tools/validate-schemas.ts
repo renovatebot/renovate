@@ -1,34 +1,35 @@
 import fs from 'fs-extra';
 import upath from 'upath';
+import { logger } from '../lib/logger';
+import { capitalize } from './docs/utils';
 import * as Schemas from './schemas/schema';
 
 void (async () => {
-  // Specify the path to the 'schemas' directory
-  const jsonFileDir = 'lib/data';
+  logger.debug('Validating lib/data JSOn files against their schemas.');
+  const dataFileDir = 'lib/data';
   const schemaDir = 'tools/schemas';
 
   try {
     const schemaFiles = (await fs.readdir(schemaDir)).filter(
       (file) => upath.extname(file) === '.json',
     );
-    // Collect errors in an array
+
     const validationErrors = [];
 
     for (const schemaFile of schemaFiles) {
       try {
-        // get the schema for the file
         const dataFileName = schemaFile.replace('-schema', '');
         const schemaName = `${schemaFile
           .replace('.json', '')
           .split('-')
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .map(capitalize)
           .join('')}` as keyof typeof Schemas;
-        // Load the JSON data to validate
+
         const data = JSON.parse(
-          await fs.readFile(upath.join(jsonFileDir, dataFileName), 'utf8'),
+          await fs.readFile(upath.join(dataFileDir, dataFileName), 'utf8'),
         );
 
-        // Validate the data
+        // validate the data
         // eslint-disable-next-line import/namespace
         const result = Schemas[schemaName].safeParse(data);
 
@@ -50,19 +51,21 @@ void (async () => {
       }
     }
 
-    // Print errors after processing all files
+    // print errors after processing all files
     validationErrors.forEach(({ file, errors }) => {
-      console.error(`\n${file}: JSON does not satisfy its schema:`, errors);
+      logger.error({ errors, file }, `JSON does not satisfy its schema`);
     });
 
-    // Exit with an error code if there are validation errors
     if (validationErrors.length > 0) {
       process.exit(1);
     } else {
-      console.log('\nValidation completed successfully.');
+      logger.info('All JSON files satisfy their schemas.');
     }
   } catch (error) {
-    console.error('\nError during validation:', error.message);
+    logger.error(
+      { message: error.message },
+      'Error during schema validation of json files.',
+    );
     process.exit(1);
   }
 })();
