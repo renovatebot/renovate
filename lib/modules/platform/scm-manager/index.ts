@@ -120,7 +120,7 @@ export async function getRepos(): Promise<string[]> {
     (repo) => repo.type === 'git',
   );
   const result = repos.map((repo) => `${repo.namespace}/${repo.name}`);
-  logger.info(`Discovered ${repos.length} repos`);
+  logger.debug(`Discovered ${repos.length} repos`);
 
   return result;
 }
