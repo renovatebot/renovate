@@ -147,7 +147,7 @@ export async function findPr({
     return result;
   }
 
-  logger.debug(
+  logger.trace(
     `Could not find PR with source branch ${branchName} and title ${
       prTitle ?? ''
     } and state ${state}`,
