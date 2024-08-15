@@ -334,7 +334,7 @@
     "pretty-format": "29.7.0",
     "rimraf": "6.0.1",
     "semantic-release": "24.0.0",
-    "tar": "6.2.1",
+    "tar": "7.4.3",
     "tmp-promise": "3.0.3",
     "ts-jest": "29.2.4",
     "ts-node": "10.9.2",
