@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/cnb-project-descriptor/extract extractPackageFile() extracts builder and buildpack images 1`] = `
+exports[`modules/manager/buildpacks/extract extractPackageFile() extracts builder and buildpack images 1`] = `
 [
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
