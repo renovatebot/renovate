@@ -369,7 +369,9 @@ describe('modules/manager/cargo/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       }),
-    ).not.toBeNull();
+    ).toEqual([
+      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
+    ]);
     expect(execSnapshots).toMatchObject([
       {
         cmd:
