@@ -167,7 +167,7 @@ export async function getPr(number: number): Promise<Pr | null> {
 
   try {
     const result = await scmManagerHttp.getRepoPr(config.repository, number);
-    logger.info('Returning PR from API');
+    logger.trace('Returning PR from API');
     return mapPrFromScmToRenovate(result);
   } catch (error) {
     logger.error(`Can not find a PR with id ${number}`);
