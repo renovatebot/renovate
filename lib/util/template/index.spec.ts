@@ -96,6 +96,58 @@ describe('util/template/index', () => {
     expect(output).toMatchSnapshot();
   });
 
+  it('to JSON', () => {
+    const userTemplate = '{{{ toJSON upgrades }}}';
+    const input = {
+      upgrades: [
+        {
+          depName: 'foo-lib',
+          currentVersion: '1.0.0',
+          newVersion: '1.0.1',
+        },
+      ],
+    };
+    const output = template.compile(userTemplate, input);
+    expect(JSON.parse(output)).toEqual(input.upgrades);
+  });
+
+  it('to JSON empty array', () => {
+    const userTemplate = '{{{ toJSON (toArray) }}}';
+    const output = template.compile(userTemplate, {});
+    expect(JSON.parse(output)).toEqual([]);
+  });
+
+  it('to JSON empty object', () => {
+    const userTemplate = '{{{ toJSON (toObject) }}}';
+    const output = template.compile(userTemplate, {});
+    expect(JSON.parse(output)).toEqual({});
+  });
+
+  it('to Object passing illegal number of elements', () => {
+    const userTemplate = "{{{ toJSON (toObject 'foo') }}}";
+    const outputFunc = () => template.compile(userTemplate, {});
+    expect(outputFunc).toThrow();
+  });
+
+  it('build complex json', () => {
+    const userTemplate =
+      "{{{ toJSON (toObject 'upgrades' upgrades 'array' (toArray platform isMajor 'foo')) }}}";
+    const input = {
+      platform: 'github',
+      isMajor: true,
+      upgrades: [
+        {
+          depName: 'foo-lib',
+        },
+      ],
+    };
+    const output = template.compile(userTemplate, input);
+    expect(JSON.parse(output)).toEqual({
+      upgrades: input.upgrades,
+      array: [input.platform, input.isMajor, 'foo'],
+    });
+  });
+
   it('lowercase', () => {
     const userTemplate = "{{{ lowercase 'FOO'}}}";
     const output = template.compile(userTemplate, undefined as never);
@@ -336,6 +388,39 @@ describe('util/template/index', () => {
       );
 
       expect(output).toBe('notProduction');
+    });
+  });
+
+  describe('split', () => {
+    it('should return empty array on non string input', () => {
+      const output = template.compile("test {{ split labels '-' }}", {
+        labels: 123,
+      });
+      expect(output).toBe('test ');
+    });
+
+    it('should return empty array on missing parameter', () => {
+      const output = template.compile('test {{ split labels }}', {
+        labels: 'foo-bar',
+      });
+      expect(output).toBe('test ');
+    });
+
+    it('should return array on success', () => {
+      const output = template.compile("{{ split labels '-' }}", {
+        labels: 'foo-bar',
+      });
+      expect(output).toBe('foo,bar');
+    });
+
+    it('should return array element', () => {
+      const output = template.compile(
+        "{{ lookup (split packageName '-') 1 }}",
+        {
+          packageName: 'foo-bar-test',
+        },
+      );
+      expect(output).toBe('bar');
     });
   });
 });

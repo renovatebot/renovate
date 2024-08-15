@@ -27,6 +27,7 @@ export type ChangeLogPlatform = 'bitbucket' | 'gitea' | 'github' | 'gitlab';
 
 export interface ChangeLogProject {
   packageName?: string;
+  depName?: string;
   type: ChangeLogPlatform;
   apiBaseUrl: string;
   baseUrl: string;
