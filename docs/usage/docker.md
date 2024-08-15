@@ -281,19 +281,23 @@ To make use of this authentication mechanism, specify the username as `AWS`:
 
 ##### Using Workload Identity
 
-[Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) must be configured and the Service Account must have the `artifactregistry.repositories.downloadArtifacts` permission.
+To let Renovate authenticate with [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity), you must:
 
-###### With Application Default Credentials (Self-Hosted only)
+- Configure Workload Identity
+- Give the Service Account the `artifactregistry.repositories.downloadArtifacts` permission
 
-Configure [ADC](https://cloud.google.com/docs/authentication/provide-credentials-adc) as normal.
-Do not provide a username, password or token.
+###### With Application Default Credentials (self-hosted only)
+
+To let Renovate authenticate with [ADC](https://cloud.google.com/docs/authentication/provide-credentials-adc), you must:
+
+- Configure ADC as normal
+- _Not_ provide a username, password or token
+
 Renovate will get the credentials with the [`google-auth-library`](https://www.npmjs.com/package/google-auth-library).
 
-###### With short-lived access token / GitHub Actions (Self-hosted only)
+###### With short-lived access token / GitHub Actions (self-hosted only)
 
-Example configuration for Workload Identity and Renovate's host rules:
-
-```yaml
+```yaml title="Example for Workload Identity plus Renovate host rules"
 - name: authenticate to google cloud
   id: auth
   uses: google-github-actions/auth@v2.1.3
