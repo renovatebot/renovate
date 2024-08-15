@@ -8,5 +8,5 @@ export const defaultConfig = {
   pinDigests: false,
 };
 
-export const categories: Category[] = ['docker', 'buildpacks'];
+export const categories: Category[] = ['docker'];
 export const supportedDatasources = [DockerDatasource.id];
