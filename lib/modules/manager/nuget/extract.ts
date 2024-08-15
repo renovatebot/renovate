@@ -122,7 +122,7 @@ export async function extractPackageFile(
 
     try {
       manifest = JSON.parse(content);
-    } catch (err) {
+    } catch {
       logger.debug({ packageFile }, `Invalid JSON`);
       return null;
     }

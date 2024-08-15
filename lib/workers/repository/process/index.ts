@@ -47,7 +47,7 @@ async function getBaseBranchConfig(
         baseBranch,
       );
       logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
-    } catch (err) {
+    } catch {
       logger.error(
         { configFileName, baseBranch },
         `Error fetching config file from base branch - possible config name mismatch between branches?`,

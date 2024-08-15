@@ -35,6 +35,7 @@
       "https://github.com/AutoMapper/AutoMapper",
       "https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection"
     ],
+    "avalonia": "https://github.com/AvaloniaUI/Avalonia",
     "aws-cdk": "https://github.com/aws/aws-cdk",
     "aws-lambda-powertools-typescript": [
       "https://github.com/awslabs/aws-lambda-powertools-typescript",
@@ -301,6 +302,7 @@
     "groovy": "https://github.com/apache/groovy",
     "grpc-dotnet": "https://github.com/grpc/grpc-dotnet",
     "grpc-java": "https://github.com/grpc/grpc-java",
+    "gstreamer-rust": "https://gitlab.freedesktop.org/gstreamer/gstreamer-rs",
     "guava": "https://github.com/google/guava",
     "Hangfire": "https://github.com/HangfireIO/Hangfire",
     "hickory-dns": "https://github.com/hickory-dns/hickory-dns",
@@ -440,9 +442,11 @@
     "retrofit": "https://github.com/square/retrofit",
     "rjsf": "https://github.com/rjsf-team/react-jsonschema-form",
     "router5": "https://github.com/router5/router5",
+    "rust-analyzer": "https://github.com/rust-lang/rust-analyzer",
     "rust-futures": "https://github.com/rust-lang/futures-rs",
     "rust-wasm-bindgen": "https://github.com/rustwasm/wasm-bindgen",
     "sanity": "https://github.com/sanity-io/sanity",
+    "serilog-ui": "https://github.com/serilog-contrib/serilog-ui",
     "scaffdog": "https://github.com/scaffdog/scaffdog",
     "secretlint": "https://github.com/secretlint/secretlint",
     "sendgrid-nodejs": "https://github.com/sendgrid/sendgrid-nodejs",

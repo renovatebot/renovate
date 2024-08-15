@@ -36,7 +36,7 @@ async function packageJsonConfigExists(): Promise<boolean> {
     if (pJson.renovate) {
       return true;
     }
-  } catch (err) {
+  } catch {
     // Do nothing
   }
   return false;
@@ -119,7 +119,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
           return true;
         }
       }
-    } catch (err) {
+    } catch {
       // probably file doesn't exist
     }
     logger.debug('Existing config file no longer exists');

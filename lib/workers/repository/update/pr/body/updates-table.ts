@@ -130,7 +130,11 @@ function compareTableValues(
     }
 
     if (a[header] !== b[header]) {
-      a[header].length < b[header].length ? score++ : score--;
+      if (a[header].length < b[header].length) {
+        score++;
+      } else {
+        score--;
+      }
     }
   }
   return score > 0 ? b : a;
