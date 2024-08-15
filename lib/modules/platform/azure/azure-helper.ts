@@ -95,7 +95,7 @@ export async function getFile(
           return null;
         }
       }
-    } catch (error) {
+    } catch {
       // it 's not a JSON, so I send the content directly with the line under
     }
 
@@ -175,7 +175,7 @@ export async function getMergeMethod(
           ] as never as GitPullRequestMergeStrategy,
       )
       .find((p) => p)!;
-  } catch (err) {
+  } catch {
     return GitPullRequestMergeStrategy.NoFastForward;
   }
 }

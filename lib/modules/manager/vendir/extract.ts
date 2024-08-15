@@ -83,7 +83,7 @@ export function parseVendir(
       customSchema: Vendir,
       removeTemplates: true,
     });
-  } catch (e) {
+  } catch {
     logger.debug({ packageFile }, 'Error parsing vendir.yml file');
     return null;
   }

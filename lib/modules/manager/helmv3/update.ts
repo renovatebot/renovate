@@ -30,7 +30,7 @@ export function bumpPackageVersion(
     } else {
       logger.debug('Bumped Chart.yaml version');
     }
-  } catch (err) {
+  } catch {
     logger.warn(
       {
         content,
