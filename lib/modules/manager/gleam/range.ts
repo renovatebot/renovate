@@ -20,6 +20,6 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
     return rangeStrategy;
   }
 
-  logger.debug('Defaulting to update-lockfile strategy');
+  logger.debug('Defaulting to widen strategy');
   return 'widen';
 }
