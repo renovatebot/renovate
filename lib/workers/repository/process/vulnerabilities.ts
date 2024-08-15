@@ -521,7 +521,7 @@ export class Vulnerabilities {
       const severityLevel = parsedCvss.cvss3OverallSeverityText;
 
       return [parsedCvss.baseScore.toFixed(1), severityLevel];
-    } catch (err) {
+    } catch {
       logger.debug(`Error processing CVSS vector ${vector}`);
     }
 

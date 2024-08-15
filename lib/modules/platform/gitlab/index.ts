@@ -1127,7 +1127,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
       return null;
     }
     return await getIssue(issue.iid);
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     logger.warn('Error finding issue');
     return null;
   }
@@ -1274,7 +1274,7 @@ export async function addReviewers(
         newReviewers.map((r) => async () => {
           try {
             return [await getUserID(r)];
-          } catch (err) {
+          } catch {
             // Unable to fetch userId, try resolve as a group
             return getMemberUserIDs(r);
           }

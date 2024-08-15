@@ -159,7 +159,7 @@ export async function getConfig(
                 'Could not parse object array',
               );
             }
-          } catch (err) {
+          } catch {
             logger.debug(
               { val: envVal, envName },
               'Could not parse environment variable',

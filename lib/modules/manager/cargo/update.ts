@@ -40,7 +40,7 @@ export function bumpPackageVersion(
     } else {
       logger.debug('Bumped Cargo.toml version');
     }
-  } catch (err) {
+  } catch {
     logger.warn(
       {
         content,

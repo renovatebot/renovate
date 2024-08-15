@@ -41,7 +41,7 @@ export async function extractPackageFile(
   let packageJson: NpmPackage;
   try {
     packageJson = JSON.parse(content);
-  } catch (err) {
+  } catch {
     logger.debug({ packageFile }, `Invalid JSON`);
     return null;
   }

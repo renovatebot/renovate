@@ -27,7 +27,7 @@ function parseCron(
 ): CronExpression | undefined {
   try {
     return parseExpression(scheduleText, { tz: timezone });
-  } catch (err) {
+  } catch {
     return undefined;
   }
 }

@@ -64,7 +64,7 @@ describe('workers/repository/process/limits', () => {
                 state: 'open',
               }),
             )
-          : Promise.reject('some error'),
+          : Promise.reject(new Error('some error')),
       );
       const branches: BranchConfig[] = [
         { branchName: 'test' },

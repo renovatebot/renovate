@@ -109,8 +109,6 @@ class RpmVersioningApi extends GenericVersioningApi {
       upstreamVersion = remainingVersion;
     }
 
-    upstreamVersion;
-
     const release = [...remainingVersion.matchAll(regEx(/\d+/g))].map((m) =>
       parseInt(m[0], 10),
     );
