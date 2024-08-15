@@ -1,5 +1,6 @@
 import type { MergeStrategy } from '../../../config/types';
 import { logger } from '../../../logger';
+import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import type { GitUrlOption, Pr } from '../types';
@@ -48,8 +49,7 @@ export function smartLinks(body: string): string {
 export function getRepoUrl(
   repo: Repo,
   gitUrl: GitUrlOption | undefined,
-  username: string,
-  password: string,
+  endpoint: string,
 ): string {
   const protocolLinks = repo._links.protocol;
 
@@ -83,8 +83,14 @@ export function getRepoUrl(
     throw new Error('MALFORMED_HTTP_LINK');
   }
 
-  repoUrl.username = username;
-  repoUrl.password = password;
+  const hostOptions = hostRules.find({
+    hostType: 'scm-manager',
+    url: endpoint,
+  });
+
+  repoUrl.username = hostOptions.username ?? '';
+  repoUrl.password = hostOptions.token ?? '';
+
   return repoUrl.toString();
 }
 

@@ -1,7 +1,6 @@
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
 import ScmManagerHttp from '../../../util/http/scm-manager';
 import { sanitize } from '../../../util/sanitize';
 import type {
@@ -72,22 +71,9 @@ export async function initRepo({
   repository,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
-  const hostOptions = hostRules.find({
-    hostType: id,
-    url: scmManagerHttp.getEndpoint(),
-  });
-
-  if (!hostOptions.username) {
-    throw new Error('Username is not provided');
-  }
-
-  if (!hostOptions.token) {
-    throw new Error('Token is not provided');
-  }
-
   const repo = await scmManagerHttp.getRepo(repository);
   const defaultBranch = await scmManagerHttp.getDefaultBranch(repo);
-  const url = getRepoUrl(repo, gitUrl, hostOptions.username, hostOptions.token);
+  const url = getRepoUrl(repo, gitUrl, scmManagerHttp.getEndpoint());
 
   config = {} as any;
   config.repository = repository;

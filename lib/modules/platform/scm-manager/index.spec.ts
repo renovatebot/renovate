@@ -159,21 +159,6 @@ describe('modules/platform/scm-manager/index', () => {
         defaultBranch: expectedDefaultBranch,
       });
     });
-
-    it('should throw error, because username is not provided in host rules', async () => {
-      hostRules.clear();
-      await expect(
-        initRepo({ repository: `${repo.namespace}/${repo.name}` }),
-      ).rejects.toThrow('Username is not provided');
-    });
-
-    it('should throw error, because token is not provided in host rules', async () => {
-      hostRules.clear();
-      hostRules.add({ username: user.name });
-      await expect(
-        initRepo({ repository: `${repo.namespace}/${repo.name}` }),
-      ).rejects.toThrow('Token is not provided');
-    });
   });
 
   describe(getRepos, () => {

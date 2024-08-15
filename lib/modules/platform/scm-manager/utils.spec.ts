@@ -1,7 +1,9 @@
 import type { MergeStrategy } from '../../../config/types';
+import * as hostRules from '../../../util/host-rules';
 import type { GitUrlOption, Pr } from '../types';
 import type { PrFilterByState, Repo } from './types';
 import { getMergeMethod, getRepoUrl, matchPrState, smartLinks } from './utils';
+import { invalidatePrCache } from './index';
 
 describe('modules/platform/scm-manager/utils', () => {
   describe(getMergeMethod, () => {
@@ -79,16 +81,20 @@ describe('modules/platform/scm-manager/utils', () => {
       _links: {},
     };
 
-    const username = 'tzerr';
-    const password = 'password';
+    const endpoint = 'http://localhost:8081/scm/api/v2';
     const gitHttpEndpoint = 'http://localhost:8081/scm/repo/default/repo';
     const gitSshEndpoint = 'ssh://localhost:2222/scm/repo/default/repo';
+
+    beforeEach(() => {
+      hostRules.add({ token: 'token', username: 'tzerr' });
+      invalidatePrCache();
+    });
 
     it.each([['ssh'], ['default'], ['endpoint'], [undefined]])(
       'should throw error for option %p, because protocol links are missing',
       (gitUrl: string | undefined) => {
         expect(() =>
-          getRepoUrl(repo, gitUrl as GitUrlOption, username, password),
+          getRepoUrl(repo, gitUrl as GitUrlOption, endpoint),
         ).toThrow('Missing protocol links.');
       },
     );
@@ -101,8 +107,7 @@ describe('modules/platform/scm-manager/utils', () => {
             _links: { protocol: [{ name: 'http', href: gitHttpEndpoint }] },
           },
           'ssh',
-          username,
-          password,
+          endpoint,
         ),
       ).toThrow('MISSING_SSH_LINK');
     });
@@ -115,8 +120,7 @@ describe('modules/platform/scm-manager/utils', () => {
             _links: { protocol: { name: 'http', href: gitHttpEndpoint } },
           },
           'ssh',
-          username,
-          password,
+          endpoint,
         ),
       ).toThrow('Expected protocol links to be an array of links.');
     });
@@ -129,8 +133,7 @@ describe('modules/platform/scm-manager/utils', () => {
             _links: { protocol: [{ name: 'ssh', href: gitSshEndpoint }] },
           },
           'ssh',
-          username,
-          password,
+          endpoint,
         ),
       ).toEqual(gitSshEndpoint);
     });
@@ -145,8 +148,7 @@ describe('modules/platform/scm-manager/utils', () => {
               _links: { protocol: [{ name: 'ssh', href: gitSshEndpoint }] },
             },
             gitUrl as GitUrlOption | undefined,
-            username,
-            password,
+            endpoint,
           ),
         ).toThrow('MISSING_HTTP_LINK');
       },
@@ -162,10 +164,44 @@ describe('modules/platform/scm-manager/utils', () => {
               _links: { protocol: [{ name: 'http', href: 'invalid url' }] },
             },
             gitUrl as GitUrlOption | undefined,
-            username,
-            password,
+            endpoint,
           ),
         ).toThrow('MALFORMED_HTTP_LINK');
+      },
+    );
+
+    it.each([['endpoint'], ['default'], [undefined]])(
+      'should use empty string, because username was not provided. With option %p',
+      (gitUrl: string | undefined) => {
+        hostRules.clear();
+        expect(
+          getRepoUrl(
+            {
+              ...repo,
+              _links: { protocol: [{ name: 'http', href: gitHttpEndpoint }] },
+            },
+            gitUrl as GitUrlOption | undefined,
+            endpoint,
+          ),
+        ).toBe('http://localhost:8081/scm/repo/default/repo');
+      },
+    );
+
+    it.each([['endpoint'], ['default'], [undefined]])(
+      'should use empty string, because token was not provided. With option %p',
+      (gitUrl: string | undefined) => {
+        hostRules.clear();
+        hostRules.add({ username: 'tzerr' });
+        expect(
+          getRepoUrl(
+            {
+              ...repo,
+              _links: { protocol: [{ name: 'http', href: gitHttpEndpoint }] },
+            },
+            gitUrl as GitUrlOption | undefined,
+            endpoint,
+          ),
+        ).toBe('http://tzerr@localhost:8081/scm/repo/default/repo');
       },
     );
 
@@ -179,10 +215,9 @@ describe('modules/platform/scm-manager/utils', () => {
               _links: { protocol: [{ name: 'http', href: gitHttpEndpoint }] },
             },
             gitUrl as GitUrlOption | undefined,
-            username,
-            password,
+            endpoint,
           ),
-        ).toBe('http://tzerr:password@localhost:8081/scm/repo/default/repo');
+        ).toBe('http://tzerr:token@localhost:8081/scm/repo/default/repo');
       },
     );
   });
