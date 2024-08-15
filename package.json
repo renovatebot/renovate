@@ -338,7 +338,7 @@
     "tmp-promise": "3.0.3",
     "ts-jest": "29.2.4",
     "ts-node": "10.9.2",
-    "type-fest": "4.23.0",
+    "type-fest": "4.24.0",
     "typescript": "5.5.4",
     "unified": "9.2.2"
   },
