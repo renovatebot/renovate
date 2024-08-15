@@ -146,7 +146,7 @@ export async function checkBranchDepsMatchBaseDeps(
     )!;
     const branchDeps = res!.deps;
     return getDepsSignature(baseDeps!) === getDepsSignature(branchDeps);
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     logger.info(
       { manager, packageFile },
       'Failed to parse branchContent - rebasing',

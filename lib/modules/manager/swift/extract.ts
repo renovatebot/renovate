@@ -132,7 +132,7 @@ function getDepName(url: string | null): string | null {
         .replace(regEx(/\/$/), '');
     }
     return url;
-  } catch (e) {
+  } catch {
     return null;
   }
 }

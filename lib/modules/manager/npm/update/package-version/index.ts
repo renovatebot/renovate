@@ -51,7 +51,7 @@ export function bumpPackageVersion(
     } else {
       logger.debug('Bumped package.json version');
     }
-  } catch (err) {
+  } catch {
     logger.warn(
       {
         content,

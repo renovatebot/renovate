@@ -430,7 +430,7 @@ export async function updatePr({
   if (cachedPr?.state !== prStatusInput) {
     try {
       await client.updatePrStatus(`${prNo}`, prStatusInput);
-    } catch (err) {
+    } catch {
       // safety check
       // do nothing, it's ok to fail sometimes when trying to update from open to open or from closed to closed.
     }
