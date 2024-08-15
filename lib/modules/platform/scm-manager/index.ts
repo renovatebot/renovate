@@ -51,13 +51,21 @@ export async function initPlatform({
 
   scmManagerHttp = new ScmManagerHttp(endpoint, token);
 
-  const me = await scmManagerHttp.getCurrentUser();
-  const gitAuthor = `${me.displayName} <${me.mail}>`;
-  const result = { endpoint, gitAuthor };
+  try {
+    const me = await scmManagerHttp.getCurrentUser();
+    const gitAuthor = `${me.displayName} <${me.mail}>`;
+    const result = { endpoint, gitAuthor };
 
-  logger.info(`Plattform initialized ${JSON.stringify(result)}`);
+    logger.info(`Plattform initialized ${JSON.stringify(result)}`);
 
-  return result;
+    return result;
+  } catch (err) {
+    logger.debug(
+      { err },
+      'Error authenticating with SCM-Manager. Check your token',
+    );
+    throw new Error('Init: Authentication failure');
+  }
 }
 
 export async function initRepo({

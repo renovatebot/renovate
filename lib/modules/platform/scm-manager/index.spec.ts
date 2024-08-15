@@ -111,6 +111,14 @@ describe('modules/platform/scm-manager/index', () => {
       );
     });
 
+    it('should throw error, when token is invalid', async () => {
+      httpMock.scope(endpoint).get(`/me`).reply(401);
+
+      await expect(
+        initPlatform({ endpoint, token: 'invalid' }),
+      ).rejects.toThrow('Init: Authentication failure');
+    });
+
     it('should init platform', async () => {
       httpMock.scope(endpoint).get('/me').reply(200, user);
       expect(await initPlatform({ endpoint, token })).toEqual({
