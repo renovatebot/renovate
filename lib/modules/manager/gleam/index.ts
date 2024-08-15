@@ -7,6 +7,7 @@ export const url = 'https://gleam.run/';
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 export { getRangeStrategy } from './range';
+export { updateLockedDependency } from './update-locked';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)gleam.toml$'],

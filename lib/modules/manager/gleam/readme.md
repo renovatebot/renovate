@@ -22,7 +22,10 @@ Renovate's `"auto"` strategy defaults to `"widen"` and works like this for `glea
 1. For exact version constraints, Renovate replaces the version with the new one.
    - Example: `== 0.12.0` becomes `== 0.13.0` for a new `0.13.0` version.
 
+If Renovate updates `gleam.toml`, then the command `gleam deps update` is used to ensure `manifest.toml` remains up-to-date as well.
+
 <!-- prettier-ignore -->
-!!! warning
-    The `gleam` manager does not support the `"update-lockfile"` or `"in-range-only"` strategies.
-    If used, the `gleam` manager will default to the `"widen"` strategy instead.
+!!! note
+  For applications, it is generally [recommended to pin dependencies](../../../dependency-pinning.md), and `gleam` projects are no exception.
+  To pin your dependencies in apps, use the `"pin"` strategy.
+  However, for libraries, it's typically better to use the `"widen"` strategy to allow better compatibility.
