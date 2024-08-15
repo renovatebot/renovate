@@ -143,7 +143,7 @@ export async function findPr({
   );
 
   if (result) {
-    logger.info(`Found PR ${JSON.stringify(result)}`);
+    logger.trace({ result }, `Found PR`);
     return result;
   }
 
