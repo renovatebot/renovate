@@ -26,12 +26,11 @@ interface YamlOptionsMultiple<
 
 export function parseYaml<ResT = unknown>(
   content: string,
-  iterator?: null | undefined,
   options?: YamlOptionsMultiple<ResT>,
 ): ResT[] {
   const massagedContent = massageContent(content, options);
 
-  const rawDocuments = multiple(massagedContent, iterator, options);
+  const rawDocuments = multiple(massagedContent, null, options);
 
   const schema = options?.customSchema;
   if (!schema) {
