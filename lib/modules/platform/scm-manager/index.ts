@@ -110,7 +110,7 @@ export async function initRepo({
     ),
   };
 
-  logger.info(`Repo initialized: ${JSON.stringify(result)}`);
+  logger.trace({ result }, `Repo initialized`);
 
   return result;
 }
