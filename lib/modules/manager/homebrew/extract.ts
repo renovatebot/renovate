@@ -93,7 +93,7 @@ export function parseUrlPath(
       return null;
     }
     return { currentValue, ownerName, repoName };
-  } catch (_) {
+  } catch {
     return null;
   }
 }

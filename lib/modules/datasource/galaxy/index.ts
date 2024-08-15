@@ -47,7 +47,7 @@ export class GalaxyDatasource extends Datasource {
       const raw = await this.http.getJson(galaxyAPIUrl, GalaxyV1);
       body = raw.body;
     } catch (err) {
-      throw this.handleGenericErrors(err);
+      this.handleGenericErrors(err);
     }
 
     // istanbul ignore if

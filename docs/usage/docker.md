@@ -237,7 +237,7 @@ module.exports = {
 
 #### AWS ECR (Amazon Web Services Elastic Container Registry)
 
-#### Using access key id & secret
+##### Using access key id & secret
 
 Renovate can authenticate with AWS ECR using AWS access key id & secret as the username & password, for example:
 

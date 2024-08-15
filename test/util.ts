@@ -86,7 +86,7 @@ function getCallerFileName(): string | null {
         break;
       }
     }
-  } catch (e) {
+  } catch {
     // no-op
   }
 

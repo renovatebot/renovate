@@ -61,7 +61,7 @@ export function bumpPackageVersion(
       currentValue,
       newProjVersion,
     );
-  } catch (err) {
+  } catch {
     logger.warn(
       {
         content,
