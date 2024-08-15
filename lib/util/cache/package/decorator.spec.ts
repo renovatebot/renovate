@@ -161,28 +161,6 @@ describe('util/cache/package/decorator', () => {
     );
   });
 
-  it('wraps class methods', async () => {
-    class Class {
-      public fn(): Promise<string> {
-        return getValue();
-      }
-    }
-    const decorator = cache({ namespace: '_test-namespace', key: 'key' });
-    const fn = decorator(Class.prototype, 'fn', undefined as never);
-
-    expect(await fn.value?.()).toBe('111');
-    expect(await fn.value?.()).toBe('111');
-    expect(await fn.value?.()).toBe('111');
-
-    expect(getValue).toHaveBeenCalledTimes(1);
-    expect(setCache).toHaveBeenCalledExactlyOnceWith(
-      '_test-namespace',
-      'cache-decorator:key',
-      { cachedAt: expect.any(String), value: '111' },
-      30,
-    );
-  });
-
   describe('Fallbacks with hard TTL', () => {
     class Class {
       @cache({

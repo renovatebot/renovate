@@ -19,8 +19,10 @@ import type {
   RegistryInfo,
 } from './types';
 
+const id = 'crate';
+
 export class CrateDatasource extends Datasource {
-  static readonly id = 'crate';
+  static readonly id = id;
 
   constructor() {
     super(CrateDatasource.id);
@@ -40,7 +42,7 @@ export class CrateDatasource extends Datasource {
     'The source URL is determined from the `repository` field in the results.';
 
   @cache({
-    namespace: `datasource-${CrateDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       // TODO: types (#22198)
       `${registryUrl}/${packageName}`,
@@ -122,7 +124,7 @@ export class CrateDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${CrateDatasource.id}-metadata`,
+    namespace: `datasource-${id}-metadata`,
     key: (info: RegistryInfo, packageName: string) =>
       `${info.rawUrl}/${packageName}`,
     cacheable: (info: RegistryInfo) =>

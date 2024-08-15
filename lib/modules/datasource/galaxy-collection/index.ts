@@ -13,8 +13,10 @@ const repositoryRegex = regEx(
   /^\S+\/api\/galaxy\/content\/(?<repository>[^/]+)/,
 );
 
+const id = 'galaxy-collection';
+
 export class GalaxyCollectionDatasource extends Datasource {
-  static readonly id = 'galaxy-collection';
+  static readonly id = id;
 
   constructor() {
     super(GalaxyCollectionDatasource.id);
@@ -38,7 +40,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     'The `sourceUrl` is determined from the `repository` field in the results.';
 
   @cache({
-    namespace: `datasource-${GalaxyCollectionDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getReleases({
@@ -119,8 +121,9 @@ export class GalaxyCollectionDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${GalaxyCollectionDatasource.id}-detailed-version`,
-    key: (versionsUrl, basicRelease: Release) => basicRelease.version,
+    namespace: `datasource-${id}-detailed-version`,
+    key: (packageName: string, versionUrl: string, basicRelease: Release) =>
+      basicRelease.version,
     ttlMinutes: 10080, // 1 week
   })
   async getVersionDetails(

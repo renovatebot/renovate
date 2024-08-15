@@ -13,8 +13,10 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { BitriseStepFile } from './schema';
 
+const id = 'bitrise';
+
 export class BitriseDatasource extends Datasource {
-  static readonly id = 'bitrise';
+  static readonly id = id;
 
   override readonly http: GithubHttp;
 
@@ -38,7 +40,7 @@ export class BitriseDatasource extends Datasource {
     'The source URL is determined from the `source_code_url` field of the release object in the results.';
 
   @cache({
-    namespace: `datasource-${BitriseDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
       `${registryUrl}/${packageName}`,
   })

@@ -8,8 +8,10 @@ import type { RawRefs } from './types';
 // git will prompt for known hosts or passwords, unless we activate BatchMode
 process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
 
+const id = 'git-refs';
+
 export class GitRefsDatasource extends GitDatasource {
-  static override readonly id = 'git-refs';
+  static override readonly id = id;
 
   constructor() {
     super(GitRefsDatasource.id);
@@ -22,7 +24,7 @@ export class GitRefsDatasource extends GitDatasource {
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   @cache({
-    namespace: `datasource-${GitRefsDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   override async getReleases({

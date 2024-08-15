@@ -5,6 +5,8 @@ import * as Unity3dVersioning from '../../versioning/unity3d';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
+const id = 'unity3d';
+
 export class Unity3dDatasource extends Datasource {
   static readonly homepage = 'https://unity.com/';
   static readonly streams: Record<string, string> = {
@@ -13,7 +15,7 @@ export class Unity3dDatasource extends Datasource {
     beta: `${Unity3dDatasource.homepage}releases/editor/beta/latest.xml`,
   };
 
-  static readonly id = 'unity3d';
+  static readonly id = id;
 
   override readonly defaultRegistryUrls = [
     Unity3dDatasource.streams.stable,
@@ -80,7 +82,7 @@ export class Unity3dDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${Unity3dDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       `${registryUrl}:${packageName}`,
   })

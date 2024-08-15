@@ -11,8 +11,10 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { AwsClientConfig, ParsedConfig } from './types';
 
+const id = 'aws-machine-image';
+
 export class AwsMachineImageDataSource extends Datasource {
-  static readonly id = 'aws-machine-image';
+  static readonly id = id;
 
   override readonly defaultVersioning = amazonMachineImageVersioning.id;
 
@@ -81,7 +83,7 @@ export class AwsMachineImageDataSource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AwsMachineImageDataSource.id}`,
+    namespace: `datasource-${id}`,
     key: (serializedAmiFilter: string) =>
       `getSortedAwsMachineImages:${serializedAmiFilter}`,
   })
@@ -106,7 +108,7 @@ export class AwsMachineImageDataSource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AwsMachineImageDataSource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ packageName }: GetReleasesConfig, newValue: string) =>
       `getDigest:${packageName}:${newValue ?? ''}`,
   })
@@ -136,7 +138,7 @@ export class AwsMachineImageDataSource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AwsMachineImageDataSource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
   })
   async getReleases({

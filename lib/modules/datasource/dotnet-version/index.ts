@@ -8,8 +8,10 @@ import {
   ReleasesIndex,
 } from './schema';
 
+const id = 'dotnet-version';
+
 export class DotnetVersionDatasource extends Datasource {
-  static readonly id = 'dotnet-version';
+  static readonly id = id;
 
   constructor() {
     super(DotnetVersionDatasource.id);
@@ -31,7 +33,7 @@ export class DotnetVersionDatasource extends Datasource {
     'We use the URL https://github.com/dotnet/sdk for the `dotnet-sdk` package and, the https://github.com/dotnet/runtime URL for the `dotnet-runtime` package.';
 
   @cache({
-    namespace: `datasource-${DotnetVersionDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
     ttlMinutes: 1440,
   })
@@ -68,7 +70,7 @@ export class DotnetVersionDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${DotnetVersionDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: (releaseUrl: string, packageName: string) =>
       `${releaseUrl}:${packageName}`,
     ttlMinutes: 1440,

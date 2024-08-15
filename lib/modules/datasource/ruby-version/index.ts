@@ -7,8 +7,10 @@ import { isVersion, id as rubyVersioningId } from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
+const id = 'ruby-version';
+
 export class RubyVersionDatasource extends Datasource {
-  static readonly id = 'ruby-version';
+  static readonly id = id;
 
   constructor() {
     super(RubyVersionDatasource.id);
@@ -27,7 +29,7 @@ export class RubyVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/ruby/ruby.';
 
-  @cache({ namespace: `datasource-${RubyVersionDatasource.id}`, key: 'all' })
+  @cache({ namespace: `datasource-${id}`, key: 'all' })
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {

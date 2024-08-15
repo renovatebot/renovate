@@ -23,8 +23,10 @@ import type {
   ServicesIndexRaw,
 } from './types';
 
+const cacheNamespace = 'datasource-nuget';
+
 export class NugetV3Api {
-  static readonly cacheNamespace = 'datasource-nuget';
+  static readonly cacheNamespace = cacheNamespace;
 
   async getResourceUrl(
     http: Http,
@@ -259,7 +261,7 @@ export class NugetV3Api {
   }
 
   @cache({
-    namespace: NugetV3Api.cacheNamespace,
+    namespace: cacheNamespace,
     key: (
       _http: Http,
       registryUrl: string,

@@ -19,8 +19,10 @@ import {
   parsePackagesResponses,
 } from './schema';
 
+const id = 'packagist';
+
 export class PackagistDatasource extends Datasource {
-  static readonly id = 'packagist';
+  static readonly id = id;
 
   constructor() {
     super(PackagistDatasource.id);
@@ -59,7 +61,7 @@ export class PackagistDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${PackagistDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: (regUrl: string) => `getRegistryMeta:${regUrl}`,
   })
   async getRegistryMeta(regUrl: string): Promise<RegistryMeta> {
@@ -86,7 +88,7 @@ export class PackagistDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${PackagistDatasource.id}-public-files`,
+    namespace: `datasource-${id}-public-files`,
     key: (regUrl: string, regFile: RegistryFile) =>
       PackagistDatasource.getPackagistFileUrl(regUrl, regFile),
     cacheable: (regUrl: string) =>
@@ -125,7 +127,7 @@ export class PackagistDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${PackagistDatasource.id}-org`,
+    namespace: `datasource-${id}-org`,
     key: (registryUrl: string, metadataUrl: string, packageName: string) =>
       `${registryUrl}:${metadataUrl}:${packageName}`,
     ttlMinutes: 10,

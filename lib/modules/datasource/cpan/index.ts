@@ -5,8 +5,10 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type { MetaCpanApiFile, MetaCpanApiFileSearchResult } from './types';
 
+const id = 'cpan';
+
 export class CpanDatasource extends Datasource {
-  static readonly id = 'cpan';
+  static readonly id = id;
 
   constructor() {
     super(CpanDatasource.id);
@@ -23,7 +25,7 @@ export class CpanDatasource extends Datasource {
     'The release timestamp is determined from the `date` field in the results.';
 
   @cache({
-    namespace: `datasource-${CpanDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ packageName }: GetReleasesConfig) => `${packageName}`,
   })
   override async getReleases({

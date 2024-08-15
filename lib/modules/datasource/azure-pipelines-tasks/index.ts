@@ -8,8 +8,10 @@ const TASKS_URL_BASE =
 const BUILT_IN_TASKS_URL = `${TASKS_URL_BASE}/azure-pipelines-builtin-tasks.json`;
 const MARKETPLACE_TASKS_URL = `${TASKS_URL_BASE}/azure-pipelines-marketplace-tasks.json`;
 
+const id = 'azure-pipelines-tasks';
+
 export class AzurePipelinesTasksDatasource extends Datasource {
-  static readonly id = 'azure-pipelines-tasks';
+  static readonly id = id;
 
   constructor() {
     super(AzurePipelinesTasksDatasource.id);
@@ -35,7 +37,7 @@ export class AzurePipelinesTasksDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AzurePipelinesTasksDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: (url: string) => url,
     ttlMinutes: 24 * 60,
   })

@@ -6,8 +6,10 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { HexRelease } from './schema';
 
+const id = 'hex';
+
 export class HexDatasource extends Datasource {
-  static readonly id = 'hex';
+  static readonly id = id;
 
   constructor() {
     super(HexDatasource.id);
@@ -25,7 +27,7 @@ export class HexDatasource extends Datasource {
     'The source URL is determined from the `Github` field in the results.';
 
   @cache({
-    namespace: `datasource-${HexDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getReleases({

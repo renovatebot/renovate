@@ -56,8 +56,10 @@ function filterByPrefix(packageName: string, releases: Release[]): Release[] {
   return releases.filter((release) => release.version.startsWith('v'));
 }
 
+const id = 'go-direct';
+
 export class GoDirectDatasource extends Datasource {
-  static readonly id = 'go-direct';
+  static readonly id = id;
 
   git: GitTagsDatasource;
   github: GithubTagsDatasource;
@@ -84,7 +86,7 @@ export class GoDirectDatasource extends Datasource {
    *  - Filter module tags according to the module path
    */
   @cache({
-    namespace: `datasource-${GoDirectDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {

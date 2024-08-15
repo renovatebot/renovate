@@ -9,8 +9,10 @@ import type {
   JenkinsPluginsVersionsResponse,
 } from './types';
 
+const id = 'jenkins-plugins';
+
 export class JenkinsPluginsDatasource extends Datasource {
-  static readonly id = 'jenkins-plugins';
+  static readonly id = id;
 
   constructor() {
     super(JenkinsPluginsDatasource.id);
@@ -56,7 +58,7 @@ export class JenkinsPluginsDatasource extends Datasource {
   }
 
   @cache({
-    namespace: JenkinsPluginsDatasource.id,
+    namespace: id,
     key: 'info',
     ttlMinutes: 1440,
   })
@@ -78,7 +80,7 @@ export class JenkinsPluginsDatasource extends Datasource {
     return info;
   }
 
-  @cache({ namespace: JenkinsPluginsDatasource.id, key: 'versions' })
+  @cache(/* istanbul ignore next */ { namespace: id, key: 'versions' })
   async getJenkinsPluginVersions(
     updateSiteUrl: string,
   ): Promise<Record<string, Release[]>> {

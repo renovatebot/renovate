@@ -15,12 +15,14 @@ import * as p from '../../../../util/promises';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import type { TerraformBuild } from '../../../datasource/terraform-provider/types';
 
+const hashCacheTTL = 10080; // in minutes == 1 week
+
 export class TerraformProviderHash {
   static http = new Http(TerraformProviderDatasource.id);
 
   static terraformDatasource = new TerraformProviderDatasource();
 
-  static hashCacheTTL = 10080; // in minutes == 1 week
+  static hashCacheTTL = hashCacheTTL;
 
   private static async hashElementList(
     basePath: string,
@@ -108,8 +110,8 @@ export class TerraformProviderHash {
 
   @cache({
     namespace: `datasource-${TerraformProviderDatasource.id}-build-hashes`,
-    key: (build: TerraformBuild) => build.url,
-    ttlMinutes: TerraformProviderHash.hashCacheTTL,
+    key: (build: TerraformBuild, _) => build.url,
+    ttlMinutes: hashCacheTTL,
   })
   static async calculateSingleHash(
     build: TerraformBuild,

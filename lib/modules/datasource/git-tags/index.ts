@@ -3,8 +3,10 @@ import { regEx } from '../../../util/regex';
 import { GitDatasource } from '../git-refs/base';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 
+const id = 'git-tags';
+
 export class GitTagsDatasource extends GitDatasource {
-  static override readonly id = 'git-tags';
+  static override readonly id = id;
 
   constructor() {
     super(GitTagsDatasource.id);
@@ -16,7 +18,7 @@ export class GitTagsDatasource extends GitDatasource {
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   @cache({
-    namespace: `datasource-${GitTagsDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getReleases({
