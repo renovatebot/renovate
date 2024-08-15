@@ -8,7 +8,7 @@ export const PLATFORM_HOST_TYPES = [
   'github',
   'gitlab',
   'local',
-  'scm-manager'
+  'scm-manager',
 ] as const;
 
 export type PlatformId = (typeof PLATFORM_HOST_TYPES)[number];
