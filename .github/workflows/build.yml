@@ -598,6 +598,7 @@ jobs:
         run: pnpm build:docs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SKIP_GITHUB_ISSUES: ${{ github.event_name == 'pull_request' && 'true' || '' }}
 
       - name: Test docs
         run: pnpm test:docs
