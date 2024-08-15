@@ -12,4 +12,5 @@ Available `depType`s:
 - `project.optional-dependencies`
 - `build-system.requires`
 - `tool.pdm.dev-dependencies`
+- `tool.uv.dev-dependencies`
 - `tool.hatch.envs.<env-name>`
