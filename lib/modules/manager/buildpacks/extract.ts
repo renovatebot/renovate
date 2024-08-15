@@ -1,15 +1,24 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { parse as parseToml } from '../../../util/toml';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import type { ProjectDescriptor } from './types';
+import { type ProjectDescriptor, ProjectDescriptorToml } from './schema';
 
 const dockerPrefix = /^docker:\/\//;
+
+function parseProjectToml(content: string): ProjectDescriptor | null {
+  let res = ProjectDescriptorToml.safeParse(content);
+
+  if (res.success) {
+    return res.data;
+  }
+
+  return null;
+}
 
 export function extractPackageFile(
   content: string,
@@ -18,7 +27,11 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
-    const descriptor = parseToml(content) as ProjectDescriptor;
+    const descriptor = parseProjectToml(content);
+    if (!descriptor) {
+      return null;
+    }
+
     if (
       descriptor.io.buildpacks?.builder &&
       !descriptor.io.buildpacks.builder.startsWith('file://')
