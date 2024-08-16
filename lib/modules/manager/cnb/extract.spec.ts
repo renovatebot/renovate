@@ -2,7 +2,7 @@ import { Fixtures } from '../../../../test/fixtures';
 
 import { extractPackageFile } from '.';
 
-describe('modules/manager/buildpacks/extract', () => {
+describe('modules/manager/cnb/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for invalid files', () => {
       expect(extractPackageFile('not a project toml', '', {})).toBeNull();
