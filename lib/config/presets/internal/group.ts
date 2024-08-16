@@ -538,7 +538,7 @@ const staticGroups = {
           'railties',
           'rails',
           '@rails/actioncable',
-          '@rails/acttiontext',
+          '@rails/actiontext',
           '@rails/activestorage',
         ],
       },
