@@ -38,7 +38,7 @@ export function extractPackageFile(
 
   let definitions: ApplicationDefinition[];
   try {
-    definitions = parseYaml(content, null, {
+    definitions = parseYaml(content, {
       customSchema: ApplicationDefinition,
       failureBehaviour: 'filter',
       removeTemplates: true,
