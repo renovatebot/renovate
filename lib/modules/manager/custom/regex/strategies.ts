@@ -16,6 +16,16 @@ export function handleAny(
   packageFile: string,
   config: RegexManagerConfig,
 ): PackageDependency[] {
+  if (config.matchStringsArray) {
+    // join to a single array and append them to matchStrings
+    config.matchStrings = config.matchStrings.concat(
+      config.matchStringsArray.flatMap((arr) => arr),
+    );
+    logger.trace(
+      { matchStringsArray: config.matchStringsArray.flatMap((arr) => arr) },
+      'Merged matchStrings and matchStringsArray in handleAny()',
+    );
+  }
   return config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)) // match all regex to content, get all matches, reduce to single array
@@ -41,6 +51,16 @@ export function handleCombination(
   packageFile: string,
   config: RegexManagerConfig,
 ): PackageDependency[] {
+  if (config.matchStringsArray) {
+    // join to a single array and append them to matchStrings
+    config.matchStrings = config.matchStrings.concat(
+      config.matchStringsArray.flatMap((arr) => arr),
+    );
+    logger.trace(
+      { matchStringsArray: config.matchStringsArray.flatMap((arr) => arr) },
+      'Merged matchStrings and matchStringsArray in handleCombination()',
+    );
+  }
   const matches = config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)); // match all regex to content, get all matches, reduce to single array

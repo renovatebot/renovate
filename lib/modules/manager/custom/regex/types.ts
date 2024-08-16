@@ -19,6 +19,7 @@ export interface RegexManagerTemplates {
 
 export interface RegexManagerConfig extends RegexManagerTemplates {
   matchStrings: string[];
+  matchStringsArray?: string[][];
   matchStringsStrategy?: MatchStringsStrategy;
   autoReplaceStringTemplate?: string;
 }

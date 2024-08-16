@@ -28,6 +28,7 @@ function getCustomManagerFields(
   return {
     autoReplaceStringTemplate: config.autoReplaceStringTemplate,
     matchStrings: config.matchStrings,
+    matchStringsArray: config.matchStringsArray,
     matchStringsStrategy: config.matchStringsStrategy,
     ...regexFields,
   };

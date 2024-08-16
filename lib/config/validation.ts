@@ -528,6 +528,7 @@ export async function validateConfig(
                 'description',
                 'fileMatch',
                 'matchStrings',
+                'matchStringsArray',
                 'matchStringsStrategy',
                 'depNameTemplate',
                 'packageNameTemplate',
@@ -863,31 +864,82 @@ function hasField(
   );
 }
 
+function validateRegexManagerMatchStringArray(
+  customManager: Partial<RegexManagerConfig>,
+  currentPath: string,
+  errors: ValidationMessage[],
+): void {
+  for (const matchStringsArray of customManager.matchStringsArray) {
+    if (is.nonEmptyArray(matchStringsArray)) {
+      const joinedMatchstring = matchStringsArray.join();
+      try {
+        regEx(joinedMatchstring);
+      } catch (err) {
+        logger.debug(
+          { err },
+          'customManager.matchStringsArray regEx validation error',
+        );
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid regExp for ${currentPath}: \`${matchStringsArray}\``,
+        });
+      }
+    }
+  }
+}
+
 function validateRegexManagerFields(
   customManager: Partial<RegexManagerConfig>,
   currentPath: string,
   errors: ValidationMessage[],
 ): void {
-  if (is.nonEmptyArray(customManager.matchStrings)) {
-    for (const matchString of customManager.matchStrings) {
-      try {
-        regEx(matchString);
-      } catch (err) {
-        logger.debug(
-          { err },
-          'customManager.matchStrings regEx validation error',
-        );
-        errors.push({
-          topic: 'Configuration Error',
-          message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
-        });
-      }
+  // check if matchStrings or matchStringsArray contain valid regex
+
+  function checkMatchStringsArrayHasContent(
+    matchStringsArray: string[][] | undefined,
+  ): boolean {
+    if (matchStringsArray === undefined) {
+      return false;
     }
-  } else {
+    // check if any of the arrays in customManager.matchStringsArray contain an array with a string
+    if (is.nonEmptyArray(matchStringsArray)) {
+      return matchStringsArray.some((matchStrings) =>
+        is.nonEmptyArray(matchStrings),
+      );
+    } else {
+      return false;
+    }
+  }
+
+  if (
+    !is.nonEmptyArray(customManager.matchStrings) &&
+    !checkMatchStringsArrayHasContent(customManager.matchStringsArray)
+  ) {
     errors.push({
       topic: 'Configuration Error',
-      message: `Each Custom Manager must contain a non-empty matchStrings array`,
+      message: `Each Custom Manager must contain a non-empty matchStrings OR matchStringsArray array`,
     });
+  } else {
+    if (is.nonEmptyArray(customManager.matchStringsArray)) {
+      validateRegexManagerMatchStringArray(customManager, currentPath, errors);
+    }
+
+    if (is.nonEmptyArray(customManager.matchStrings)) {
+      for (const matchString of customManager.matchStrings) {
+        try {
+          regEx(matchString);
+        } catch (err) {
+          logger.debug(
+            { err },
+            'customManager.matchStrings regEx validation error',
+          );
+          errors.push({
+            topic: 'Configuration Error',
+            message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
+          });
+        }
+      }
+    }
   }
 
   const mandatoryFields = ['currentValue', 'datasource'];

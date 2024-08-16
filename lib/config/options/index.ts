@@ -2683,6 +2683,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchStringsArray',
+    description:
+      'List of regex capture rules to use. Valid only within a `customManagers` object.',
+    type: 'array',
+    subType: 'object',
+    parents: ['customManagers'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchStringsStrategy',
     description: 'Strategy how to interpret matchStrings.',
     type: 'string',
