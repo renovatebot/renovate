@@ -37,7 +37,7 @@ export async function getRubyConstraint(
     for (const file of ['.ruby-version', '.tool-versions']) {
       const rubyVersion = (
         await readLocalFile(getSiblingFileName(packageFileName, file), 'utf8')
-      )?.match(/^(?:ruby(?:-|\s+))?(\d[\d.]*)/m)?.[1];
+      )?.match(regEx(/^(?:ruby(?:-|\s+))?(\d[\d.]*)/m))?.[1];
       if (rubyVersion) {
         logger.debug(`Using ruby version specified in ${file}`);
         return rubyVersion;
