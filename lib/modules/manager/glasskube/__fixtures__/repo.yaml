@@ -1,8 +1,0 @@
-apiVersion: packages.glasskube.dev/v1alpha1
-kind: PackageRepository
-metadata:
-  annotations:
-    packages.glasskube.dev/default-repository: "true"
-  name: glasskube
-spec:
-  url: https://packages.dl.glasskube.dev/packages

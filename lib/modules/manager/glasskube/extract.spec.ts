@@ -1,4 +1,6 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
+import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { RepoGlobalConfig } from '../../../config/types';
 import { GlasskubePackagesDatasource } from '../../datasource/glasskube-packages';
@@ -7,6 +9,51 @@ import { extractAllPackageFiles, extractPackageFile } from './extract';
 
 const config: ExtractConfig = {};
 const adminConfig: RepoGlobalConfig = { localDir: '' };
+
+const packageWithRepoName = codeBlock`
+apiVersion: packages.glasskube.dev/v1alpha1
+kind: ClusterPackage
+metadata:
+  name: argo-cd
+spec:
+  packageInfo:
+    name: argo-cd
+    repositoryName: glasskube
+    version: v2.11.7+1
+`;
+const packageWithEmptyReponame = codeBlock`
+apiVersion: packages.glasskube.dev/v1alpha1
+kind: ClusterPackage
+metadata:
+  name: argo-cd
+spec:
+  packageInfo:
+    name: argo-cd
+    version: v2.11.7+1
+    repositoryName: ""
+`;
+const packageWithMissingReponame = codeBlock`
+apiVersion: packages.glasskube.dev/v1alpha1
+kind: ClusterPackage
+metadata:
+  name: argo-cd
+spec:
+  packageInfo:
+    name: argo-cd
+    version: v2.11.7+1
+`;
+const repository = codeBlock`
+apiVersion: packages.glasskube.dev/v1alpha1
+kind: PackageRepository
+metadata:
+  annotations:
+    packages.glasskube.dev/default-repository: "true"
+  name: glasskube
+spec:
+  url: https://packages.dl.glasskube.dev/packages
+`;
+
+jest.mock('../../../util/fs');
 
 describe('modules/manager/glasskube/extract', () => {
   beforeEach(() => {
@@ -34,13 +81,11 @@ describe('modules/manager/glasskube/extract', () => {
 
   describe('extractAllPackageFiles()', () => {
     it('should skip package with non-existing repo', async () => {
-      const deps = await extractAllPackageFiles(config, [
-        'lib/modules/manager/glasskube/__fixtures__/package.yaml',
-      ]);
+      fs.readLocalFile.mockResolvedValueOnce(packageWithRepoName);
+      const deps = await extractAllPackageFiles(config, ['package.yaml']);
       expect(deps).toEqual([
         {
-          packageFile:
-            'lib/modules/manager/glasskube/__fixtures__/package.yaml',
+          packageFile: 'package.yaml',
           deps: [
             {
               depName: 'argo-cd',
@@ -54,14 +99,15 @@ describe('modules/manager/glasskube/extract', () => {
     });
 
     it('should extract registryUrl from repo in other file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(packageWithRepoName);
+      fs.readLocalFile.mockResolvedValueOnce(repository);
       const deps = await extractAllPackageFiles(config, [
-        'lib/modules/manager/glasskube/__fixtures__/package.yaml',
-        'lib/modules/manager/glasskube/__fixtures__/repo.yaml',
+        'package.yaml',
+        'repo.yaml',
       ]);
       expect(deps).toEqual([
         {
-          packageFile:
-            'lib/modules/manager/glasskube/__fixtures__/package.yaml',
+          packageFile: 'package.yaml',
           deps: [
             {
               depName: 'argo-cd',
@@ -75,15 +121,17 @@ describe('modules/manager/glasskube/extract', () => {
     });
 
     it('should extract registryUrl from default repo in other file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(packageWithEmptyReponame);
+      fs.readLocalFile.mockResolvedValueOnce(packageWithMissingReponame);
+      fs.readLocalFile.mockResolvedValueOnce(repository);
       const deps = await extractAllPackageFiles(config, [
-        'lib/modules/manager/glasskube/__fixtures__/package-with-empty-reponame.yaml',
-        'lib/modules/manager/glasskube/__fixtures__/package-with-missing-reponame.yaml',
-        'lib/modules/manager/glasskube/__fixtures__/repo.yaml',
+        'package-with-empty-reponame.yaml',
+        'package-with-missing-reponame.yaml',
+        'repo.yaml',
       ]);
       expect(deps).toEqual([
         {
-          packageFile:
-            'lib/modules/manager/glasskube/__fixtures__/package-with-empty-reponame.yaml',
+          packageFile: 'package-with-empty-reponame.yaml',
           deps: [
             {
               depName: 'argo-cd',
@@ -94,8 +142,7 @@ describe('modules/manager/glasskube/extract', () => {
           ],
         },
         {
-          packageFile:
-            'lib/modules/manager/glasskube/__fixtures__/package-with-missing-reponame.yaml',
+          packageFile: 'package-with-missing-reponame.yaml',
           deps: [
             {
               depName: 'argo-cd',
