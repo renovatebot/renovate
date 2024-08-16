@@ -252,6 +252,7 @@
       "https://github.com/dotnet/efcore",
       "https://github.com/dotnet/extensions",
       "https://github.com/dotnet/maui",
+      "https://github.com/dotnet/roslyn",
       "https://github.com/dotnet/runtime",
       "https://github.com/dotnet/scaffolding",
       "https://github.com/dotnet/sdk"
