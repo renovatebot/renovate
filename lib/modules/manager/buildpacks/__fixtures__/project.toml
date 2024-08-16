@@ -12,3 +12,6 @@ uri = "buildpacks/nodejs:3.3.3"
 
 [[io.buildpacks.group]]
 uri = "file://local.oci"
+
+[[io.buildpacks.group]]
+uri = "foo://fake.oci"

@@ -10,8 +10,17 @@ import { type ProjectDescriptor, ProjectDescriptorToml } from './schema';
 
 const dockerPrefix = /^docker:\/\//;
 
+function isDockerRef(ref: string): boolean {
+  const schemaMatch = ref.match(/^([a-z0-9]+):\/\//);
+  if (schemaMatch && !schemaMatch[0].match(dockerPrefix)) {
+    return false;
+  }
+
+  return true;
+}
+
 function parseProjectToml(content: string): ProjectDescriptor | null {
-  let res = ProjectDescriptorToml.safeParse(content);
+  const res = ProjectDescriptorToml.safeParse(content);
   if (res.success) {
     return res.data;
   }
@@ -23,7 +32,7 @@ function parseProjectToml(content: string): ProjectDescriptor | null {
 
 export function extractPackageFile(
   content: string,
-  packageFile: string,
+  _packageFile: string,
   config: ExtractConfig,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
@@ -35,7 +44,7 @@ export function extractPackageFile(
 
   if (
     descriptor.io.buildpacks?.builder &&
-    !descriptor.io.buildpacks.builder.startsWith('file://')
+    isDockerRef(descriptor.io.buildpacks.builder)
   ) {
     const dep = getDep(
       descriptor.io.buildpacks.builder.replace(dockerPrefix, ''),
@@ -59,7 +68,7 @@ export function extractPackageFile(
     is.array(descriptor.io.buildpacks.group)
   ) {
     for (const group of descriptor.io.buildpacks.group) {
-      if (group.uri && !group.uri.startsWith('file://')) {
+      if (group.uri && isDockerRef(group.uri)) {
         const dep = getDep(
           group.uri.replace(dockerPrefix, ''),
           true,
