@@ -14,8 +14,8 @@ describe('modules/manager/buildpacks/extract', () => {
         'project.toml',
         {},
       );
-      expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(3);
+      expect(res?.deps).toMatchSnapshot();
     });
   });
 });

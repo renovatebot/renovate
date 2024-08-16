@@ -12,10 +12,11 @@ const dockerPrefix = /^docker:\/\//;
 
 function parseProjectToml(content: string): ProjectDescriptor | null {
   let res = ProjectDescriptorToml.safeParse(content);
-
   if (res.success) {
     return res.data;
   }
+
+  logger.debug(res.error, 'Failed to parse buildpacks project descriptor TOML');
 
   return null;
 }
@@ -26,63 +27,56 @@ export function extractPackageFile(
   config: ExtractConfig,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
-  try {
-    const descriptor = parseProjectToml(content);
-    if (!descriptor) {
-      return null;
-    }
 
-    if (
-      descriptor.io.buildpacks?.builder &&
-      !descriptor.io.buildpacks.builder.startsWith('file://')
-    ) {
-      const dep = getDep(
-        descriptor.io.buildpacks.builder.replace(dockerPrefix, ''),
-        true,
-        config.registryAliases,
-      );
-      logger.trace(
-        {
-          depName: dep.depName,
-          currentValue: dep.currentValue,
-          currentDigest: dep.currentDigest,
-        },
-        'Cloud Native Buildpacks builder',
-      );
+  const descriptor = parseProjectToml(content);
+  if (!descriptor) {
+    return null;
+  }
 
-      deps.push(dep);
-    }
+  if (
+    descriptor.io.buildpacks?.builder &&
+    !descriptor.io.buildpacks.builder.startsWith('file://')
+  ) {
+    const dep = getDep(
+      descriptor.io.buildpacks.builder.replace(dockerPrefix, ''),
+      true,
+      config.registryAliases,
+    );
+    logger.trace(
+      {
+        depName: dep.depName,
+        currentValue: dep.currentValue,
+        currentDigest: dep.currentDigest,
+      },
+      'Cloud Native Buildpacks builder',
+    );
 
-    if (
-      descriptor.io.buildpacks?.group &&
-      is.array(descriptor.io.buildpacks.group)
-    ) {
-      for (const group of descriptor.io.buildpacks.group) {
-        if (group.uri && !group.uri.startsWith('file://')) {
-          const dep = getDep(
-            group.uri.replace(dockerPrefix, ''),
-            true,
-            config.registryAliases,
-          );
-          logger.trace(
-            {
-              depName: dep.depName,
-              currentValue: dep.currentValue,
-              currentDigest: dep.currentDigest,
-            },
-            'Cloud Native Buildpack',
-          );
+    deps.push(dep);
+  }
 
-          deps.push(dep);
-        }
+  if (
+    descriptor.io.buildpacks?.group &&
+    is.array(descriptor.io.buildpacks.group)
+  ) {
+    for (const group of descriptor.io.buildpacks.group) {
+      if (group.uri && !group.uri.startsWith('file://')) {
+        const dep = getDep(
+          group.uri.replace(dockerPrefix, ''),
+          true,
+          config.registryAliases,
+        );
+        logger.trace(
+          {
+            depName: dep.depName,
+            currentValue: dep.currentValue,
+            currentDigest: dep.currentDigest,
+          },
+          'Cloud Native Buildpack',
+        );
+
+        deps.push(dep);
       }
     }
-  } catch (err) {
-    logger.debug(
-      { err, packageFile },
-      'Failed to parse buildpacks project descriptor TOML',
-    );
-    return null;
   }
 
   if (!deps.length) {
