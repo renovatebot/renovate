@@ -75,7 +75,7 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
 
 function createSchemaForParentConfigs(): void {
   for (const option of options) {
-    if (!option.parents) {
+    if (!option.parents || option.parents.includes('.')) {
       properties[option.name] = createSingleConfig(option);
     }
   }
@@ -85,6 +85,9 @@ function addChildrenArrayInParents(): void {
   for (const option of options) {
     if (option.parents) {
       for (const parent of option.parents) {
+        if (parent === '.') {
+          continue;
+        }
         properties[parent].items = {
           allOf: [
             {
@@ -120,6 +123,9 @@ function createSchemaForChildConfigs(): void {
   for (const option of options) {
     if (option.parents) {
       for (const parent of option.parents) {
+        if (parent === '.') {
+          continue;
+        }
         properties[parent].items.allOf[0].properties[option.name] =
           createSingleConfig(option);
       }
