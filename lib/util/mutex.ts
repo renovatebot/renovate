@@ -1,4 +1,4 @@
-import { Mutex, MutexInterface, withTimeout } from 'async-mutex';
+import { Mutex, type MutexInterface, withTimeout } from 'async-mutex';
 
 const DEFAULT_NAMESPACE = 'default';
 const mutexes: Record<string, Record<string, MutexInterface>> = {};
