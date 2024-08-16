@@ -1,8 +1,10 @@
 import is from '@sindresorhus/is';
 import merge from 'deepmerge';
-import got, { Options, RequestError, RetryObject } from 'got';
+import type { Options, RetryObject } from 'got';
+import got, { RequestError } from 'got';
 import type { SetRequired } from 'type-fest';
-import { infer as Infer, type ZodError, ZodType } from 'zod';
+import type { infer as Infer, ZodError } from 'zod';
+import { ZodType } from 'zod';
 import { GlobalConfig } from '../../config/global';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';

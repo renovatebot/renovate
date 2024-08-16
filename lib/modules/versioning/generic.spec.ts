@@ -1,5 +1,6 @@
 import { partial } from '../../../test/util';
-import { GenericVersion, GenericVersioningApi } from './generic';
+import type { GenericVersion } from './generic';
+import { GenericVersioningApi } from './generic';
 import type { NewValueConfig } from './types';
 
 describe('modules/versioning/generic', () => {

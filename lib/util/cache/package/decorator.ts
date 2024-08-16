@@ -2,7 +2,8 @@ import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import { Decorator, decorate } from '../../decorator';
+import type { Decorator } from '../../decorator';
+import { decorate } from '../../decorator';
 import type { DecoratorCachedRecord, PackageCacheNamespace } from './types';
 import * as packageCache from '.';
 

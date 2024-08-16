@@ -1,5 +1,6 @@
 // TODO #22198
-import { Ecosystem, Osv, OsvOffline } from '@renovatebot/osv-offline';
+import type { Ecosystem, Osv } from '@renovatebot/osv-offline';
+import { OsvOffline } from '@renovatebot/osv-offline';
 import is from '@sindresorhus/is';
 import type { CvssScore } from 'vuln-vects';
 import { parseCvssVector } from 'vuln-vects';
@@ -11,10 +12,8 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../../../modules/manager/types';
-import {
-  VersioningApi,
-  get as getVersioning,
-} from '../../../modules/versioning';
+import type { VersioningApi } from '../../../modules/versioning';
+import { get as getVersioning } from '../../../modules/versioning';
 import { findGithubToken } from '../../../util/check-token';
 import { find } from '../../../util/host-rules';
 import { sanitizeMarkdown } from '../../../util/markdown';
