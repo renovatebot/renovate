@@ -17,7 +17,7 @@ export const PackageRepository = z.object({
   kind: z.literal('PackageRepository'),
   metadata: z.object({
     name: z.string(),
-    annotations: z.object({}).catchall(z.string()).optional(),
+    annotations: z.record(z.string(), z.string()).optional(),
   }),
   spec: z.object({
     url: z.string(),
