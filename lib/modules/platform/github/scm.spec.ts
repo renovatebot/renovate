@@ -78,14 +78,14 @@ describe('modules/platform/github/scm', () => {
     it('single string', async () => {
       await githubScm.commitAndPush({
         ...commitObj,
-        message: 'Use @octokit to access @octocat',
+        message: 'Use @octokit to irritate @octocat',
         platformCommit: 'enabled',
       });
 
       expect(git.commitFiles).not.toHaveBeenCalled();
       expect(github.commitFiles).toHaveBeenCalledWith({
         ...commitObj,
-        message: 'Use @\u{8203}octokit to access @\u{8203}octocat',
+        message: 'Use @\u{8203}octokit to irritate @\u{8203}octocat',
         platformCommit: 'enabled',
       });
     });
@@ -93,10 +93,7 @@ describe('modules/platform/github/scm', () => {
     it('array of string', async () => {
       await githubScm.commitAndPush({
         ...commitObj,
-        message: [
-          'Use @octokit',
-          'It heps to access @octocat programmatically',
-        ],
+        message: ['Use @octokit', 'It automates the way we irritate @octocat'],
         platformCommit: 'enabled',
       });
 
@@ -105,7 +102,7 @@ describe('modules/platform/github/scm', () => {
         ...commitObj,
         message: [
           'Use @\u{8203}octokit',
-          'It heps to access @\u{8203}octocat programmatically',
+          'It automates the way we irritate @\u{8203}octocat',
         ],
         platformCommit: 'enabled',
       });
