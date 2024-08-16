@@ -522,7 +522,7 @@ const staticGroups = {
     packageRules: [
       {
         groupName: 'Ruby on Rails packages',
-        matchDatasources: ['rubygems'],
+        matchDatasources: ['rubygems', 'npm'],
         matchPackageNames: [
           'actioncable',
           'actionmailbox',
@@ -537,6 +537,9 @@ const staticGroups = {
           'activesupport',
           'railties',
           'rails',
+          '@rails/actioncable',
+          '@rails/acttiontext',
+          '@rails/activestorage',
         ],
       },
     ],
