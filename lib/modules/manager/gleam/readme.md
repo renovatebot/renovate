@@ -28,4 +28,4 @@ If Renovate updates `gleam.toml`, then the command `gleam deps update` is used t
 !!! note
     For applications, it is generally [recommended to pin dependencies](../../../dependency-pinning.md), and `gleam` projects are no exception.
     To pin your dependencies in apps, use the `"pin"` strategy.
-    However, for libraries, it's typically better to use the `"widen"` strategy to allow better compatibility.
+    However, for libraries, it's typically better to use version ranges along with the `"widen"` strategy to allow greater compatibility.
