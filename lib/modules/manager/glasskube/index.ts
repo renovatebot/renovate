@@ -6,5 +6,5 @@ export { extractAllPackageFiles, extractPackageFile } from './extract';
 export const defaultConfig = {
   versioning: GlasskubeVersioning.id,
 };
-export const categories: Category[] = ['kubernetes'];
+export const categories: Category[] = ['kubernetes', 'cd'];
 export const supportedDatasources = [GlasskubePackagesDatasource.id];
