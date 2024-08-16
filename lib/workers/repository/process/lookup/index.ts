@@ -200,7 +200,10 @@ export async function lookupUpdates(
         }
       }
       // Reapply package rules in case we missed something from sourceUrl
-      config = applyPackageRules({ ...config, sourceUrl: res.sourceUrl });
+      config = applyPackageRules(
+        { ...config, sourceUrl: res.sourceUrl },
+        'source-url',
+      );
       if (config.followTag) {
         const taggedVersion = dependency.tags?.[config.followTag];
         if (!taggedVersion) {
@@ -313,7 +316,10 @@ export async function lookupUpdates(
           )
         ) {
           // Reapply package rules to check matches for matchCurrentAge
-          config = applyPackageRules({ ...config, currentVersionTimestamp });
+          config = applyPackageRules(
+            { ...config, currentVersionTimestamp },
+            'current-timestamp',
+          );
         }
       }
 
@@ -362,8 +368,10 @@ export async function lookupUpdates(
           unconstrainedValue ||
           versioning.isCompatible(v.version, compareValue),
       );
+      let shrinkedViaVulnerability = false;
       if (config.isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
+        shrinkedViaVulnerability = true;
         logger.debug(
           { filteredReleases },
           'Vulnerability alert found: limiting results to a single release',
@@ -474,6 +482,7 @@ export async function lookupUpdates(
               update,
               allVersionsLength: allVersions.length,
               filteredReleaseVersions: filteredReleases.map((r) => r.version),
+              shrinkedViaVulnerability,
             },
             'Unexpected downgrade detected: skipping',
           );

@@ -11,6 +11,7 @@ import { configFileNames } from '../../../../config/app-strings';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import {
+  REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
@@ -59,7 +60,7 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it("doesn't throw if there are no package files and onboardingNoDeps config option is set", async () => {
-      config.onboardingNoDeps = true;
+      config.onboardingNoDeps = 'enabled';
       await expect(checkOnboardingBranch(config)).resolves.not.toThrow(
         REPOSITORY_NO_PACKAGE_FILES,
       );
@@ -69,6 +70,13 @@ describe('workers/repository/onboarding/branch/index', () => {
       config.isFork = true;
       await expect(checkOnboardingBranch(config)).rejects.toThrow(
         REPOSITORY_FORKED,
+      );
+    });
+
+    it('throws if bot disabled', async () => {
+      config.enabled = false;
+      await expect(checkOnboardingBranch(config)).rejects.toThrow(
+        REPOSITORY_DISABLED_BY_CONFIG,
       );
     });
 

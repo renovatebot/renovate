@@ -83,7 +83,7 @@ export async function getPythonConstraint(
       logger.debug(`Using python version ${pythonVersion} from Pipfile.lock`);
       return `== ${pythonVersion}.*`;
     }
-  } catch (err) {
+  } catch {
     // Do nothing
   }
 
@@ -108,7 +108,7 @@ export async function getPythonConstraint(
       );
       return pythonVersionConstraint;
     }
-  } catch (err) {
+  } catch {
     // Do nothing
   }
 
@@ -165,7 +165,7 @@ export function getPipenvConstraint(
         return '< 2022.10.9';
       }
     }
-  } catch (err) {
+  } catch {
     // Do nothing
   }
   return '';

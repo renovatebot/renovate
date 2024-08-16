@@ -121,7 +121,10 @@ function genTable(obj: [string, string][], type: string, def: any): string {
         el[1] = `<code>${el[1]}</code>`;
       }
       // objects and arrays should be printed in JSON notation
-      if ((type === 'object' || type === 'array') && el[0] === 'default') {
+      if (
+        (type === 'object' || type === 'array') &&
+        (el[0] === 'default' || el[0] === 'additionalProperties')
+      ) {
         // only show array and object defaults if they are not null and are not empty
         if (Object.keys(el[1] ?? []).length === 0) {
           return;

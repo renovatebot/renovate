@@ -41,14 +41,14 @@ export class CurrentVersionMatcher extends Matcher {
             version.matches(matchCurrentVersionStr, currentValue)
           )
         );
-      } catch (err) {
+      } catch {
         return false;
       }
     }
 
     const compareVersion = version.isVersion(currentValue)
       ? currentValue // it's a version so we can match against it
-      : lockedVersion ?? currentVersion; // need to match against this currentVersion, if available
+      : (lockedVersion ?? currentVersion); // need to match against this currentVersion, if available
     if (is.nullOrUndefined(compareVersion)) {
       return false;
     }

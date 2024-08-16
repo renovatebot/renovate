@@ -121,7 +121,7 @@ export function bumpPackageVersion(
     } else {
       logger.debug('pom.xml version bumped');
     }
-  } catch (err) {
+  } catch {
     logger.warn(
       {
         content,

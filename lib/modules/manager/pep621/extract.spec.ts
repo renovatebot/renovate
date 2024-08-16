@@ -134,14 +134,14 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'project.optional-dependencies',
           currentValue: '>12',
-          depName: 'pytest/pytest',
+          depName: 'pytest',
         },
         {
           packageName: 'pytest-mock',
           datasource: 'pypi',
           depType: 'project.optional-dependencies',
           skipReason: 'unspecified-version',
-          depName: 'pytest/pytest-mock',
+          depName: 'pytest-mock',
         },
       ]);
 
@@ -154,28 +154,28 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           skipReason: 'unspecified-version',
-          depName: 'test/pdm',
+          depName: 'pdm',
         },
         {
           packageName: 'pytest-rerunfailures',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           currentValue: '>=10.2',
-          depName: 'test/pytest-rerunfailures',
+          depName: 'pytest-rerunfailures',
         },
         {
           packageName: 'tox',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           skipReason: 'unspecified-version',
-          depName: 'tox/tox',
+          depName: 'tox',
         },
         {
           packageName: 'tox-pdm',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           currentValue: '>=0.5',
-          depName: 'tox/tox-pdm',
+          depName: 'tox-pdm',
         },
       ]);
     });
@@ -214,7 +214,7 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'project.optional-dependencies',
           currentValue: '>12',
-          depName: 'pytest/pytest',
+          depName: 'pytest',
           registryUrls: [
             'https://private-site.org/pypi/simple',
             'https://private.pypi.org/simple',
@@ -225,7 +225,7 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           currentValue: '>=10.2',
-          depName: 'test/pytest-rerunfailures',
+          depName: 'pytest-rerunfailures',
           registryUrls: [
             'https://private-site.org/pypi/simple',
             'https://private.pypi.org/simple',
@@ -236,7 +236,7 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           currentValue: '>=0.5',
-          depName: 'tox/tox-pdm',
+          depName: 'tox-pdm',
           registryUrls: [
             'https://private-site.org/pypi/simple',
             'https://private.pypi.org/simple',
