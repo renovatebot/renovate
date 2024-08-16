@@ -249,8 +249,8 @@ importers:
         specifier: 3.3.7
         version: 3.3.7
       neotraverse:
-        specifier: 0.6.15
-        version: 0.6.15
+        specifier: 0.6.17
+        version: 0.6.17
       node-html-parser:
         specifier: 6.1.13
         version: 6.1.13
@@ -4624,8 +4624,8 @@ packages:
   neo-async@2.6.2:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
 
-  neotraverse@0.6.15:
-    resolution: {integrity: sha512-HZpdkco+JeXq0G+WWpMJ4NsX3pqb5O7eR9uGz3FfoFt+LYzU8iRWp49nJtud6hsDoywM8tIrDo3gjgmOqJA8LA==}
+  neotraverse@0.6.17:
+    resolution: {integrity: sha512-ElUg5iDI8rMW3yt3wlKXV+RtDigwJ0kvFFpmLlK5QOxteVPqm7S+tsno+Jk1WDTeHrF/iSX5FhuPncQd+MtpIg==}
     engines: {node: '>= 10'}
 
   nerf-dart@1.0.0:
@@ -11598,7 +11598,7 @@ snapshots:
 
   neo-async@2.6.2: {}
 
-  neotraverse@0.6.15: {}
+  neotraverse@0.6.17: {}
 
   nerf-dart@1.0.0: {}
 
