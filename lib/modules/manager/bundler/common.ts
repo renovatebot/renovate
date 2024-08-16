@@ -46,7 +46,7 @@ export async function getRubyConstraint(
     const lockFile = await getLockFilePath(packageFileName);
     if (lockFile) {
       const rubyVersion = (await readLocalFile(lockFile, 'utf8'))?.match(
-        /^ {3}ruby (\d[\d.]*)(?:[a-z]|\s|$)/m,
+        regEx(/^ {3}ruby (\d[\d.]*)(?:[a-z]|\s|$)/m),
       )?.[1];
       if (rubyVersion) {
         logger.debug(`Using ruby version specified in lock file`);
