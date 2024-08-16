@@ -66,7 +66,7 @@ export async function extractPackageFile(
   try {
     gleamToml = GleamToml.parse(content);
   } catch (err) {
-    logger.debug('Error parsing package file content');
+    logger.debug({ err }, 'Error parsing package file content');
     return null;
   }
 
