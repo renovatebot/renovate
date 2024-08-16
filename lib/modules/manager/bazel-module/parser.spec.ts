@@ -72,6 +72,16 @@ describe('modules/manager/bazel-module/parser', () => {
             commit: fragments.string(
               '6a2c2e22849b3e6b33d5ea9aa72222d4803a986a',
             ),
+            patches: fragments.array(
+              [
+                {
+                  type: 'string',
+                  value: '//:rules_foo.patch',
+                  isComplete: true,
+                },
+              ],
+              true,
+            ),
           },
           true,
         ),
@@ -102,6 +112,16 @@ describe('modules/manager/bazel-module/parser', () => {
           {
             rule: fragments.string('archive_override'),
             module_name: fragments.string('rules_foo'),
+            urls: fragments.array(
+              [
+                {
+                  type: 'string',
+                  value: 'https://example.com/archive.tar.gz',
+                  isComplete: true,
+                },
+              ],
+              true,
+            ),
           },
           true,
         ),
@@ -162,6 +182,117 @@ describe('modules/manager/bazel-module/parser', () => {
             module_name: fragments.string('rules_foo'),
             version: fragments.string('1.2.3'),
             registry: fragments.string('https://example.com/custom_registry'),
+          },
+          true,
+        ),
+      ]);
+    });
+
+    it('finds maven.artifact', () => {
+      const input = codeBlock`
+        maven.artifact(
+            artifact = "core.specs.alpha",
+            exclusions = ["org.clojure:clojure"],
+            group = "org.clojure",
+            version = "0.2.56",
+        )
+
+        maven.artifact(
+            artifact = "core.specs.alpha1",
+            group = "org.clojure1",
+            version = "0.2.561",
+        )
+      `;
+      const res = parse(input);
+      expect(res).toEqual([
+        fragments.record(
+          {
+            rule: fragments.string('maven_artifact'),
+            group: fragments.string('org.clojure'),
+            artifact: fragments.string('core.specs.alpha'),
+            version: fragments.string('0.2.56'),
+            exclusions: fragments.array(
+              [
+                {
+                  type: 'string',
+                  value: 'org.clojure:clojure',
+                  isComplete: true,
+                },
+              ],
+              true,
+            ),
+          },
+          true,
+        ),
+        fragments.record(
+          {
+            rule: fragments.string('maven_artifact'),
+            group: fragments.string('org.clojure1'),
+            artifact: fragments.string('core.specs.alpha1'),
+            version: fragments.string('0.2.561'),
+          },
+          true,
+        ),
+      ]);
+    });
+
+    it('finds maven.install and maven.artifact', () => {
+      const input = codeBlock`
+        maven.install(
+            artifacts = [
+                "junit:junit:4.13.2",
+                "com.google.guava:guava:31.1-jre",
+            ],
+            repositories = [
+                "https://repo1.maven.org/maven2/"
+            ]
+        )
+
+        maven.artifact(
+            artifact = "core.specs.alpha",
+            group = "org.clojure",
+            version = "0.2.56",
+        )
+      `;
+      const res = parse(input);
+      expect(res).toEqual([
+        fragments.record(
+          {
+            rule: fragments.string('maven_install'),
+            artifacts: fragments.array(
+              [
+                {
+                  type: 'string',
+                  value: 'junit:junit:4.13.2',
+                  isComplete: true,
+                },
+                {
+                  type: 'string',
+                  value: 'com.google.guava:guava:31.1-jre',
+                  isComplete: true,
+                },
+              ],
+              true,
+            ),
+            repositories: fragments.array(
+              [
+                {
+                  type: 'string',
+                  value: 'https://repo1.maven.org/maven2/',
+                  isComplete: true,
+                },
+              ],
+              true,
+            ),
+          },
+          true,
+        ),
+        fragments.record(
+          {
+            rule: fragments.string('maven_artifact'),
+            group: fragments.string('org.clojure'),
+            artifact: fragments.string('core.specs.alpha'),
+            version: fragments.string('0.2.56'),
           },
           true,
         ),
