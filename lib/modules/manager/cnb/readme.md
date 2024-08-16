@@ -3,7 +3,7 @@ Updates are performed if the `project.toml` file is found and it conforms to the
 
 __Note__: buildpacks in the `io.buildpacks.group` array must be configured with the docker reference (`uri`) for this manager to work.
 
-```toml
+```toml title="Example of a `project.toml` file with Docker reference URIs"
 [_]
 schema-version = "0.2"
 
