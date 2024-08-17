@@ -17,6 +17,8 @@ const debBaseUrl = 'http://deb.debian.org';
 const fixturePackagesArchivePath = Fixtures.getPath(`Packages.gz`);
 const fixturePackagesArchivePath2 = Fixtures.getPath(`Packages2.gz`);
 const fixturePackagesPath = Fixtures.getPath(`Packages`);
+let fixturePackagesArchiveHash: string;
+let fixturePackagesArchiveHash2: string;
 
 describe('modules/datasource/deb/index', () => {
   let debDatasource: DebDatasource;
@@ -24,8 +26,6 @@ describe('modules/datasource/deb/index', () => {
   let cfg: GetPkgReleasesConfig;
   let extractionFolder: string;
   let extractedPackageFile: string;
-  let fixturePackagesArchiveHash: string;
-  let fixturePackagesArchiveHash2: string;
 
   beforeEach(async () => {
     jest.resetAllMocks();
@@ -112,17 +112,7 @@ describe('modules/datasource/deb/index', () => {
 
     describe('without local version', () => {
       beforeEach(() => {
-        httpMock
-          .scope(debBaseUrl)
-          .get(getPackageUrl('', 'stable', 'non-free', 'amd64'))
-          .replyWithFile(200, fixturePackagesArchivePath);
-
-        mockFetchInReleaseContent(
-          fixturePackagesArchiveHash,
-          'stable',
-          'non-free',
-          'amd64',
-        );
+        mockHttpCalls('stable', 'non-free', 'amd64', false);
       });
 
       it('returns a valid version for the package `album`', async () => {
@@ -267,6 +257,33 @@ describe('modules/datasource/deb/index', () => {
         ],
       });
     });
+
+    it('should not lead to a race condition on parallel lookups', async () => {
+      const packages = [
+        'album',
+        'album-data',
+        'alien-arena-data',
+        'amiwm',
+        'arb',
+        'arb-common',
+        'libfaac-dev',
+        'amoeba-data',
+      ];
+
+      for (let i = 0; i < packages.length; i++) {
+        // first call doesn't include a http head call, since the file doesn't exists locally yet
+        // the package index is downloaded every time since the http head call returns 200
+        mockHttpCalls('stable', 'non-free', 'amd64', !!i);
+      }
+
+      const results = await Promise.all(
+        packages.map((packageName) => getPkgReleases({ ...cfg, packageName })),
+      );
+
+      for (const result of results) {
+        expect(result?.releases?.length).toBe(1);
+      }
+    });
   });
 
   describe('parseExtractedPackageIndex', () => {
@@ -401,6 +418,44 @@ describe('modules/datasource/deb/index', () => {
     });
   });
 });
+
+/**
+ * Mocks several http calls for the in parallel lookup test
+ *
+ * - Mocks the http get call for the Package Index file
+ * - Mocks the http get call for the InRelease file
+ * - Mocks the http head call for Package Index file (returns 200)
+ *
+ * @param release - The release name (e.g., 'bullseye').
+ * @param component - The component name (e.g., 'main').
+ * @param arch - The architecture (e.g., 'amd64').
+ * @param checkIfModified - whether it should mock the http head call of the Package Index file
+ */
+function mockHttpCalls(
+  release: string,
+  component: string,
+  arch: string,
+  checkIfModified: boolean,
+) {
+  httpMock
+    .scope(debBaseUrl)
+    .get(getPackageUrl('', release, component, arch))
+    .replyWithFile(200, fixturePackagesArchivePath);
+
+  mockFetchInReleaseContent(
+    fixturePackagesArchiveHash,
+    release,
+    component,
+    arch,
+  );
+
+  if (checkIfModified) {
+    httpMock
+      .scope(debBaseUrl)
+      .head(getPackageUrl('', release, component, arch))
+      .reply(200);
+  }
+}
 
 /**
  * Mocks the response for fetching the InRelease file content.

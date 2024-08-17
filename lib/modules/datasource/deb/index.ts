@@ -13,6 +13,7 @@ import { computeFileChecksum, parseChecksumsFromInRelease } from './checksum';
 import { formatReleaseResult, releaseMetaInformationMatches } from './release';
 import type { PackageDescription } from './types';
 import { constructComponentUrls, getBaseReleaseUrl } from './url';
+import { nanoid } from 'nanoid';
 
 export class DebDatasource extends Datasource {
   static readonly id = 'deb';
@@ -62,6 +63,10 @@ export class DebDatasource extends Datasource {
   static requiredPackageKeys: Array<keyof PackageDescription> = [
     'Package',
     'Version',
+  ];
+
+  static packagesKeys: Array<keyof PackageDescription> = [
+    ...DebDatasource.requiredPackageKeys,
     'Homepage',
   ];
 
@@ -118,7 +123,7 @@ export class DebDatasource extends Datasource {
     for (const compression of DebDatasource.compressions) {
       const compressedFile = upath.join(
         fullCacheDir,
-        `${packageUrlHash}.${compression}`,
+        `${nanoid()}_${packageUrlHash}.${compression}`,
       );
 
       let wasUpdated = false;
@@ -221,7 +226,10 @@ export class DebDatasource extends Datasource {
       inReleaseContent = await this.fetchInReleaseFile(baseReleaseUrl);
     } catch (error) {
       // This is expected to fail for Artifactory if GPG verification is not enabled
-      logger.debug({ url: baseReleaseUrl }, 'Could not fetch InRelease file');
+      logger.debug(
+        { url: baseReleaseUrl, error },
+        'Could not fetch InRelease file',
+      );
     }
 
     if (inReleaseContent) {
@@ -312,15 +320,15 @@ export class DebDatasource extends Datasource {
       if (line === '') {
         // All information of the package are available, add to the list of packages
         if (
-          !DebDatasource.requiredPackageKeys.some(
-            (key) => !(key in currentPackage),
+          DebDatasource.requiredPackageKeys.every(
+            (key) => key in currentPackage,
           )
         ) {
           allPackages[currentPackage.Package!] = currentPackage;
           currentPackage = {};
         }
       } else {
-        for (const key of DebDatasource.requiredPackageKeys) {
+        for (const key of DebDatasource.packagesKeys) {
           if (line.startsWith(`${key}:`)) {
             currentPackage[key] = line.substring(key.length + 1).trim();
             break;
