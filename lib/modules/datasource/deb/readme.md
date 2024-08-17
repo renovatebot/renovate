@@ -12,7 +12,7 @@ To use a Debian repository with the datasource, you need a properly formatted UR
 **Example**:
 
 ```
-https://ftp.debian.org/debian?suite=stable&components=main,contrib,non-free&binaryArch=amd64
+https://deb.debian.org/debian?suite=stable&components=main,contrib,non-free&binaryArch=amd64
 ```
 
 This URL points to the `stable` suite of the Debian repository for `amd64` architecture, including `main`, `contrib`, and `non-free` components.

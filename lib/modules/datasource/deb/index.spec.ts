@@ -12,7 +12,7 @@ import type { GetPkgReleasesConfig } from '../types';
 import { getBaseReleaseUrl } from './url';
 import { DebDatasource } from '.';
 
-const debBaseUrl = 'http://ftp.debian.org';
+const debBaseUrl = 'http://deb.debian.org';
 
 const fixturePackagesArchivePath = Fixtures.getPath(`Packages.gz`);
 const fixturePackagesArchivePath2 = Fixtures.getPath(`Packages2.gz`);
@@ -72,7 +72,7 @@ describe('modules/datasource/deb/index', () => {
       expect(res).toEqual({
         homepage: 'http://marginalhacks.com/Hacks/album',
         registryUrl:
-          'http://ftp.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
+          'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
         releases: [
           {
             version: '4.15-1',
@@ -130,7 +130,7 @@ describe('modules/datasource/deb/index', () => {
         expect(res).toEqual({
           homepage: 'http://marginalhacks.com/Hacks/album',
           registryUrl:
-            'http://ftp.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
+            'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
           releases: [
             {
               version: '4.15-1',
@@ -147,7 +147,7 @@ describe('modules/datasource/deb/index', () => {
         expect(res).toEqual({
           homepage: 'http://marginalhacks.com/Hacks/album',
           registryUrl:
-            'http://ftp.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
+            'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
           releases: [
             {
               version: '4.15-1',
@@ -191,7 +191,7 @@ describe('modules/datasource/deb/index', () => {
           expect(res).toEqual({
             homepage: 'http://marginalhacks.com/Hacks/album',
             registryUrl:
-              'http://ftp.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
+              'http://deb.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
             releases: [
               {
                 version: '4.14-1',
@@ -209,7 +209,7 @@ describe('modules/datasource/deb/index', () => {
           expect(res).toEqual({
             homepage: 'http://marginalhacks.com/Hacks/album',
             registryUrl:
-              'http://ftp.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
+              'http://deb.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
             releases: [
               {
                 version: '4.14-1',
@@ -259,7 +259,7 @@ describe('modules/datasource/deb/index', () => {
       expect(res).toEqual({
         homepage: 'http://marginalhacks.com/Hacks/album',
         registryUrl:
-          'http://ftp.debian.org/debian?suite=stable&components=non-free&binaryArch=riscv',
+          'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=riscv',
         releases: [
           {
             version: '4.15-1',

@@ -51,10 +51,10 @@ export class DebDatasource extends Datasource {
    * - components: comma separated list of components
    * - suite: stable, oldstable or other alias for a release, either this or release must be given
    * - release: buster, etc.
-   * - binaryArch: e.g. amd64 resolves to http://ftp.debian.org/debian/dists/stable/non-free/binary-amd64/
+   * - binaryArch: e.g. amd64 resolves to http://deb.debian.org/debian/dists/stable/non-free/binary-amd64/
    */
   override readonly defaultRegistryUrls = [
-    'https://ftp.debian.org/debian?suite=stable&components=main,contrib,non-free&binaryArch=amd64',
+    'https://deb.debian.org/debian?suite=stable&components=main,contrib,non-free&binaryArch=amd64',
   ];
 
   override readonly defaultVersioning = 'deb';
@@ -242,7 +242,7 @@ export class DebDatasource extends Datasource {
   /**
    * Fetches the content of the InRelease file from the given base release URL.
    *
-   * @param baseReleaseUrl - The base URL of the release (e.g., 'https://ftp.debian.org/debian/dists/bullseye').
+   * @param baseReleaseUrl - The base URL of the release (e.g., 'https://deb.debian.org/debian/dists/bullseye').
    * @returns resolves to the content of the InRelease file.
    * @throws An error if the InRelease file could not be downloaded.
    */

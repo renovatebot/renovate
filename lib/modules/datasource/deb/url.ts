@@ -7,8 +7,8 @@ import { joinUrlParts } from '../../../util/url';
  * @returns The base release URL.
  *
  * @example
- * // Returns 'https://ftp.debian.org/debian/dists/bullseye'
- * getBaseReleaseUrl('https://ftp.debian.org/debian/dists/bullseye/main/binary-amd64');
+ * // Returns 'https://deb.debian.org/debian/dists/bullseye'
+ * getBaseReleaseUrl('https://deb.debian.org/debian/dists/bullseye/main/binary-amd64');
  */
 export function getBaseReleaseUrl(basePackageUrl: string): string {
   const urlParts = basePackageUrl.split('/');
