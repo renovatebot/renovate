@@ -1,6 +1,7 @@
 import { createHash } from 'crypto';
 import readline from 'readline';
 import { createUnzip } from 'zlib';
+import { nanoid } from 'nanoid';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
@@ -13,7 +14,6 @@ import { computeFileChecksum, parseChecksumsFromInRelease } from './checksum';
 import { formatReleaseResult, releaseMetaInformationMatches } from './release';
 import type { PackageDescription } from './types';
 import { constructComponentUrls, getBaseReleaseUrl } from './url';
-import { nanoid } from 'nanoid';
 
 export class DebDatasource extends Datasource {
   static readonly id = 'deb';
