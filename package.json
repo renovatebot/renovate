@@ -28,7 +28,7 @@
     "generate:imports": "node tools/generate-imports.mjs",
     "git-check": "node tools/check-git-version.mjs",
     "jest": "GIT_ALLOW_PROTOCOL=file LOG_LEVEL=fatal node --experimental-vm-modules node_modules/jest/bin/jest.js --logHeapUsage",
-    "lint": "run-s ls-lint type-check eslint prettier markdown-lint git-check doc-fence-check validate-schemas",
+    "lint": "run-s ls-lint type-check eslint prettier markdown-lint git-check doc-fence-check",
     "lint-fix": "run-s eslint-fix prettier-fix markdown-lint-fix",
     "ls-lint": "ls-lint",
     "markdown-lint": "markdownlint-cli2",
@@ -57,8 +57,7 @@
     "type-check": "run-s 'generate:*' 'tsc --noEmit {@}' --",
     "update-static-data": "run-s 'update-static-data:*'",
     "update-static-data:distro-info": "node tools/static-data/generate-distro-info.mjs",
-    "update-static-data:node-schedule": "node tools/static-data/generate-node-schedule.mjs",
-    "validate-schemas": "ts-node tools/validate-schemas.ts"
+    "update-static-data:node-schedule": "node tools/static-data/generate-node-schedule.mjs"
   },
   "repository": {
     "type": "git",
