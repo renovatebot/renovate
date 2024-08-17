@@ -28,6 +28,7 @@ import {
 } from '../../util/stats';
 import { setBranchCache } from './cache';
 import { extractRepoProblems } from './common';
+import { configMigration } from './config-migration';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finalizeRepo } from './finalize';
@@ -100,6 +101,7 @@ export async function renovateRepository(
         }
         logger.debug(`Automerged but already retried once`);
       } else {
+        await configMigration(config, branchList);
         await ensureDependencyDashboard(config, branches, packageFiles);
       }
       await finalizeRepo(config, branchList);
