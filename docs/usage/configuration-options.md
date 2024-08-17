@@ -3235,24 +3235,12 @@ Example:
 ```json
 {
   "platformOptions": {
-    "gitLabIgnoreApprovals": true,
-    "platformVersion": "8.0.0"
+    "gitLabIgnoreApprovals": true
   }
 }
 ```
 
-<!-- prettier-ignore -->
-!!! note
-    There are two kinds of config options: self-hosted config option or repository config options. Make sure you're using the correct kind. And check if it's in the correct config.
-    For Example: `platformVersion` is a self-hosted option. If you want to use it then you need to place it in the `platformOptions` object in the file config ie.`config.js`.
-
 You can use these options:
-
-Self-hosted config options:
-
-1. [`platformVersion`](./self-hosted-configuration.md#platformversion)
-
-Repository config options:
 
 ### gitLabIgnoreApprovals
 

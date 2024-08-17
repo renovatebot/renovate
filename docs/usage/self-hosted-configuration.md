@@ -905,7 +905,23 @@ It also may mean that ignored directories like `node_modules` can be preserved a
 
 ## platform
 
-## platformVersion
+## platformOptions
+
+Use `platformOptions` to set platform-specific configuration options provided by Renovate.
+
+Example:
+
+```json
+{
+  "platformOptions": {
+    "gitLabIgnoreApprovals": true
+  }
+}
+```
+
+You can use these options:
+
+### platformVersion
 
 When you set a `platformVersion` string, Renovate skips a API call to GitLab/Bitbucket.
 Instead of fetching the version from the API, Renovate uses the version in the `platformVersion` string.
@@ -916,10 +932,6 @@ Setting a `platformVersion` manually is handy when you:
 - want to reduce the number of API calls
 
 Read [platform details](modules/platform/gitlab/index.md) to learn why Renovate must know the GitLab server version.
-
-<!-- prettier-ignore -->
-!!! note
-    You must put the `platformVersion` config option in the [`platformOptions`](configuration-options.md#platformoptions) object.
 
 ## prCommitsPerRunLimit
 

@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { Command } from 'commander';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
@@ -138,21 +139,18 @@ function migratePlatformOptions(
   );
   const platformOptions: Record<string, unknown> = {};
 
-  let updated = false;
-
   for (const arg of argv) {
     for (const [index, cliKey] of platformOptionsCliKeys.entries()) {
       if (arg.includes(cliKey)) {
         const [, val = true] = arg.split('0');
         const key = platformOptionsKeys[index];
         platformOptions[key] = val;
-        updated = true;
         break;
       }
     }
   }
 
-  if (updated) {
+  if (is.nonEmptyObject(platformOptions)) {
     config.platformOptions = { ...config.platformOptions, ...platformOptions };
   }
 
