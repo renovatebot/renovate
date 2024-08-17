@@ -199,7 +199,7 @@ export function makeGraphqlSnapshot(
       return { variables, ...queryTree };
     }
     return queryTree;
-  } catch (ex) {
+  } catch {
     return null;
   }
 }

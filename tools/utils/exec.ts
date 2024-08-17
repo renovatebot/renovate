@@ -1,4 +1,8 @@
-import { type SpawnSyncReturns, spawnSync } from 'node:child_process';
+import {
+  type SpawnSyncOptions,
+  type SpawnSyncReturns,
+  spawnSync,
+} from 'node:child_process';
 
 const maxBuffer = 20 * 1024 * 1024;
 
@@ -10,7 +14,8 @@ const maxBuffer = 20 * 1024 * 1024;
 export function exec(
   cmd: string,
   args: string[] = [],
+  opts: SpawnSyncOptions = {},
 ): SpawnSyncReturns<string> {
   // args from shelljs
-  return spawnSync(cmd, args, { maxBuffer, encoding: 'utf8' });
+  return spawnSync(cmd, args, { ...opts, maxBuffer, encoding: 'utf8' });
 }

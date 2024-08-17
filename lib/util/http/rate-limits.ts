@@ -27,6 +27,14 @@ const throttleDefaults: ThrottleLimitRule[] = [
     matchHost: 'https://crates.io/api/',
     throttleMs: 1000,
   },
+  {
+    // The rate limit is 100 per second, according this comment:
+    // https://github.com/renovatebot/renovate/discussions/27018#discussioncomment-10336270
+    //
+    // We stick to 20 per second just in case.
+    matchHost: 'https://plugins.gradle.org',
+    throttleMs: 50,
+  },
 ];
 
 let throttleLimits: ThrottleLimitRule[] = [];
