@@ -1,13 +1,7 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "$schema": {
-      "type": "string",
-      "oneOf": [
-        { "format": "uri" },
-        { "pattern": "^(\\.\\.?/)*[\\w.-]+(/[\\w.-]+)*\\.json$" }
-      ]
-    },
     "repoGroups": {
       "type": "object",
       "patternProperties": {
