@@ -368,8 +368,10 @@ export async function lookupUpdates(
           unconstrainedValue ||
           versioning.isCompatible(v.version, compareValue),
       );
+      let shrinkedViaVulnerability = false;
       if (config.isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
+        shrinkedViaVulnerability = true;
         logger.debug(
           { filteredReleases },
           'Vulnerability alert found: limiting results to a single release',
@@ -480,6 +482,7 @@ export async function lookupUpdates(
               update,
               allVersionsLength: allVersions.length,
               filteredReleaseVersions: filteredReleases.map((r) => r.version),
+              shrinkedViaVulnerability,
             },
             'Unexpected downgrade detected: skipping',
           );
