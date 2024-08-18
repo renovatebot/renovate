@@ -51,40 +51,6 @@ export interface CacheParameters<Args extends any[]> {
   ttlMinutes?: number;
 }
 
-export function cache<
-  This,
-  Args extends any[],
-  Return extends PromiseLike<unknown>,
->({
-  namespace,
-  key,
-  cacheable = () => true,
-  ttlMinutes = 30,
-}: CacheParameters<Args>) {
-  return function decorator(
-    target: Method<This, Args, Return>,
-    context: Context<This, Args, Return>,
-  ) {
-    return function decorated(this: This, ...args: Args) {
-      const callback = target;
-      const methodName = context.name;
-
-      const res = executeDecorator(
-        this,
-        args,
-        cacheable,
-        callback,
-        namespace,
-        key,
-        ttlMinutes,
-        methodName,
-      );
-
-      return res as unknown as Return;
-    };
-  };
-}
-
 async function executeDecorator<
   This,
   Args extends any[],
@@ -198,4 +164,38 @@ export function getTtlOverride(namespace: string): number | undefined {
     return ttl;
   }
   return undefined;
+}
+
+export function cache<
+  This,
+  Args extends any[],
+  Return extends PromiseLike<unknown>,
+>({
+  namespace,
+  key,
+  cacheable = () => true,
+  ttlMinutes = 30,
+}: CacheParameters<Args>) {
+  return function decorator(
+    target: Method<This, Args, Return>,
+    context: Context<This, Args, Return>,
+  ) {
+    return function decorated(this: This, ...args: Args) {
+      const callback = target;
+      const methodName = context.name;
+
+      const res = executeDecorator(
+        this,
+        args,
+        cacheable,
+        callback,
+        namespace,
+        key,
+        ttlMinutes,
+        methodName,
+      );
+
+      return res as unknown as Return;
+    };
+  };
 }
