@@ -51,7 +51,7 @@ function readManifest(
     const manifest: FluxManifest = {
       kind: 'resource',
       file: packageFile,
-      resources: parseYaml(content, null, {
+      resources: parseYaml(content, {
         json: true,
         customSchema: FluxResource,
         failureBehaviour: 'filter',

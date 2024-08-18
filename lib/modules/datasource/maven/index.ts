@@ -64,6 +64,8 @@ export const defaultRegistryUrls = [MAVEN_REPO];
 export class MavenDatasource extends Datasource {
   static id = 'maven';
 
+  override readonly caching = true;
+
   override readonly defaultRegistryUrls = defaultRegistryUrls;
 
   override readonly defaultVersioning: string = mavenVersioning.id;
