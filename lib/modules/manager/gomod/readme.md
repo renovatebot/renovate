@@ -2,8 +2,14 @@
 
 You might be interested in the following `postUpdateOptions`:
 
+<!--
+  TODO: remove ignore
+  prettier & markdownlint conflicting nested list format
+  see: https://github.com/renovatebot/renovate/pull/30608
+-->
+<!-- prettier-ignore -->
 1. `gomodTidy` - if you'd like Renovate to run `go mod tidy` after every update before raising the PR
-   1. This is implicitly enabled for major updates if the user has enabled the option `gomodUpdateImportPaths`
+    1. This is implicitly enabled for major updates if the user has enabled the option `gomodUpdateImportPaths`
 1. `gomodTidy1.17` - if you'd like Renovate to run `go mod tidy -compat=1.17` after every update before raising the PR
 1. `gomodTidyE` - if you'd like Renovate to run `go mod tidy -e` after every update before raising the PR
 1. `gomodUpdateImportPaths` - if you'd like Renovate to update your source import paths on major updates before raising the PR

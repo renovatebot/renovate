@@ -16,11 +16,16 @@
 
 #### Machine pre-requisites
 
+<!--
+  TODO: remove ignore
+  prettier & markdownlint conflicting nested list format
+  see: https://github.com/renovatebot/renovate/pull/30608
+-->
+<!-- prettier-ignore -->
 1. Install the `aws-cli` program on the machine.
 2. Set up the environment with the `git-credentials-helper`:
-
-   - For EC2 or Linux: [EC2 codecommit git integration](https://aws.amazon.com/premiumsupport/knowledge-center/codecommit-git-repositories-ec2/).
-   - For Windows: [windows codecommit git integration](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-https-windows.html).
+    - For EC2 or Linux: [EC2 codecommit git integration](https://aws.amazon.com/premiumsupport/knowledge-center/codecommit-git-repositories-ec2/).
+    - For Windows: [windows codecommit git integration](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-https-windows.html).
 
 3. Set the environment variable `AWS_REGION`.
 
