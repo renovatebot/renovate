@@ -1,6 +1,6 @@
 import { ArtifactoryDatasource } from './artifactory';
-import { AwsMachineImageDataSource } from './aws-machine-image';
-import { AwsRdsDataSource } from './aws-rds';
+import { AwsMachineImageDatasource } from './aws-machine-image';
+import { AwsRdsDatasource } from './aws-rds';
 import { AzureBicepResourceDatasource } from './azure-bicep-resource';
 import { AzurePipelinesTasksDatasource } from './azure-pipelines-tasks';
 import { BazelDatasource } from './bazel';
@@ -68,8 +68,8 @@ const api = new Map<string, DatasourceApi>();
 export default api;
 
 api.set(ArtifactoryDatasource.id, new ArtifactoryDatasource());
-api.set(AwsMachineImageDataSource.id, new AwsMachineImageDataSource());
-api.set(AwsRdsDataSource.id, new AwsRdsDataSource());
+api.set(AwsMachineImageDatasource.id, new AwsMachineImageDatasource());
+api.set(AwsRdsDatasource.id, new AwsRdsDatasource());
 api.set(AzureBicepResourceDatasource.id, new AzureBicepResourceDatasource());
 api.set(AzurePipelinesTasksDatasource.id, new AzurePipelinesTasksDatasource());
 api.set(BazelDatasource.id, new BazelDatasource());
