@@ -6,6 +6,17 @@ import { acquireLock } from '../../mutex';
 import type { DecoratorCachedRecord, PackageCacheNamespace } from './types';
 import * as packageCache from '.';
 
+type Method<This, Args extends any[], Return extends PromiseLike<unknown>> = (
+  this: This,
+  ...args: Args
+) => Return;
+
+type Context<
+  This,
+  Args extends any[],
+  Return extends PromiseLike<unknown>,
+> = ClassMethodDecoratorContext<This, Method<This, Args, Return>>;
+
 type BooleanFunction<Args extends any[]> = (...args: Args) => boolean;
 type StringFunction<Args extends any[]> = (...args: Args) => string;
 type NamespaceStringFunction<Args extends any[]> = (
@@ -39,17 +50,6 @@ export interface CacheParameters<Args extends any[]> {
    */
   ttlMinutes?: number;
 }
-
-type Method<This, Args extends any[], Return extends PromiseLike<unknown>> = (
-  this: This,
-  ...args: Args
-) => Return;
-
-type Context<
-  This,
-  Args extends any[],
-  Return extends PromiseLike<unknown>,
-> = ClassMethodDecoratorContext<This, Method<This, Args, Return>>;
 
 export function cache<
   This,
