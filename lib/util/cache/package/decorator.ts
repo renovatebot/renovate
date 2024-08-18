@@ -8,21 +8,12 @@ import type { DecoratorCachedRecord, PackageCacheNamespace } from './types';
 import * as packageCache from '.';
 
 type HashFunction<T extends any[] = any[]> = (...args: T) => string;
-type NamespaceFunction<T extends any[] = any[]> = (
-  ...args: T
-) => PackageCacheNamespace;
 type BooleanFunction<T extends any[] = any[]> = (...args: T) => boolean;
 
 /**
  * The cache decorator parameters.
  */
 interface CacheParameters {
-  /**
-   * The cache namespace
-   * Either a string or a hash function that generates a string
-   */
-  namespace: PackageCacheNamespace | NamespaceFunction;
-
   /**
    * The cache key
    * Either a string or a hash function that generates a string
@@ -41,11 +32,75 @@ interface CacheParameters {
   ttlMinutes?: number;
 }
 
+function getClassName(instance: unknown): string | null {
+  if (!is.object(instance)) {
+    return null;
+  }
+
+  return instance.constructor.name;
+}
+
+const namespaceMapping: Record<string, PackageCacheNamespace> = {
+  ArtifactoryDatasource: 'datasource-artifactory',
+  AwsMachineImageDataSource: 'datasource-aws-machine-image',
+  AwsRdsDataSource: 'datasource-aws-rds',
+  AzureBicepResourceDatasource: 'datasource-azure-bicep-resource',
+  AzurePipelinesTasksDatasource: 'datasource-azure-pipelines-tasks',
+  BazelDatasource: 'datasource-bazel',
+  BitbucketTagsDatasource: 'datasource-bitbucket-tags',
+  BitriseDatasource: 'datasource-bitrise',
+  CdnJsDatasource: 'datasource-cdnjs',
+  ConanDatasource: 'datasource-conan',
+  CondaDatasource: 'datasource-conda',
+  CpanDatasource: 'datasource-cpan',
+  CrateDatasource: 'datasource-crate',
+  DenoDatasource: 'datasource-deno',
+  DockerDatasource: 'datasource-docker',
+  DotnetVersionDatasource: 'datasource-dotnet-version',
+  EndoflifeDatePackagesource: 'datasource-endoflife-date',
+  GalaxyDatasource: 'datasource-galaxy',
+  GalaxyCollectionDatasource: 'datasource-galaxy-collection',
+  GitRefsDatasource: 'datasource-git-refs',
+  GitTagsDatasource: 'datasource-git-tags',
+  GiteaReleasesDatasource: 'datasource-gitea-releases',
+  GiteaTagsDatasource: 'datasource-gitea-tags',
+  GithubReleaseAttachmentsDatasource: 'datasource-github-releases',
+  GitlabPackagesDatasource: 'datasource-gitlab-packages',
+  GitlabReleasesDatasource: 'datasource-gitlab-releases',
+  GitlabTagsDatasource: 'datasource-gitlab-tags',
+  GlasskubePackagesDatasource: 'datasource-glasskube-packages',
+  GoDatasource: 'datasource-go',
+  GoDirectDatasource: 'datasource-go-direct',
+  GoProxyDatasource: 'datasource-go-proxy',
+  GolangVersionDatasource: 'datasource-golang-version',
+  GradleVersionDatasource: 'datasource-gradle-version',
+  HelmDatasource: 'datasource-helm',
+  HermitDatasource: 'datasource-hermit',
+  HexDatasource: 'datasource-hex',
+  HexpmBobDatasource: 'datasource-hexpm-bob',
+  JavaVersionDatasource: 'datasource-java-version',
+  JenkinsPluginsDatasource: 'jenkins-plugins',
+  NodeVersionDatasource: 'datasource-node-version',
+  NugetV3Api: 'datasource-nuget',
+  OrbDatasource: 'datasource-orb',
+  PackagistDatasource: 'datasource-packagist',
+  PodDatasource: 'datasource-pod',
+  PythonVersionDatasource: 'datasource-python-version',
+  RepologyDatasource: 'datasource-repology-list',
+  RubyVersionDatasource: 'datasource-ruby-version',
+  RubyGemsDatasource: 'datasource-rubygems',
+  TerraformDatasource: 'datasource-terraform',
+  TerraformModuleDatasource: 'datasource-terraform-module',
+  TerraformProviderDatasource: 'datasource-terraform-provider',
+  TerraformProviderHash: 'datasource-terraform-provider-build-hashes',
+  Unity3dDatasource: 'datasource-unity3d',
+  GitDatasource: 'datasource-git',
+} satisfies Record<string, PackageCacheNamespace>;
+
 /**
  * caches the result of a decorated method.
  */
 export function cache<T>({
-  namespace,
   key,
   cacheable = () => true,
   ttlMinutes = 30,
@@ -60,11 +115,10 @@ export function cache<T>({
       return callback();
     }
 
+    const className = getClassName(instance);
     let finalNamespace: PackageCacheNamespace | undefined;
-    if (is.string(namespace)) {
-      finalNamespace = namespace;
-    } else if (is.function_(namespace)) {
-      finalNamespace = namespace.apply(instance, args);
+    if (is.string(className)) {
+      finalNamespace = namespaceMapping[className];
     }
 
     let finalKey: string | undefined;
@@ -79,7 +133,7 @@ export function cache<T>({
       return callback();
     }
 
-    finalKey = `cache-decorator:${finalKey}`;
+    finalKey = `${packageCache.decoratorKeyPrefix}:${finalKey}`;
 
     // prevent concurrent processing and cache writes
     const releaseLock = await acquireLock(finalKey, finalNamespace);

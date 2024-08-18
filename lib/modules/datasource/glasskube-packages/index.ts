@@ -25,7 +25,6 @@ export class GlasskubePackagesDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${GlasskubePackagesDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       `${registryUrl}:${packageName}`,
   })

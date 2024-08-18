@@ -53,7 +53,6 @@ export class GoProxyDatasource extends Datasource {
   readonly direct = new GoDirectDatasource();
 
   @cache({
-    namespace: `datasource-${GoProxyDatasource.id}`,
     key: (config: GetReleasesConfig) => GoProxyDatasource.getCacheKey(config),
   })
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {

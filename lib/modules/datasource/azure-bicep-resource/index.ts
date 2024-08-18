@@ -33,7 +33,6 @@ export class AzureBicepResourceDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AzureBicepResourceDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => `getReleases-${packageName}`,
   })
   async getReleases(
@@ -55,7 +54,6 @@ export class AzureBicepResourceDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AzureBicepResourceDatasource.id}`,
     key: 'getResourceVersionIndex',
     ttlMinutes: 24 * 60,
   })

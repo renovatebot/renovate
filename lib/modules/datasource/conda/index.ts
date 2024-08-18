@@ -28,7 +28,6 @@ export class CondaDatasource extends Datasource {
     'The source URL is determined from the `dev_url` field in the results.';
 
   @cache({
-    namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       // TODO: types (#22198)
       `${registryUrl}:${packageName}`,

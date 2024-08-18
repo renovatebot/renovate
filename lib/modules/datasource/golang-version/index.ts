@@ -39,7 +39,7 @@ export class GolangVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/golang/go.';
 
-  @cache({ namespace: `datasource-${GolangVersionDatasource.id}`, key: 'all' })
+  @cache({ key: 'all' })
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {

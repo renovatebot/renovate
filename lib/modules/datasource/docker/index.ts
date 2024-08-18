@@ -176,12 +176,11 @@ export class DockerDatasource extends Datasource {
   }
 
   @cache({
-    namespace: 'datasource-docker-imageconfig',
     key: (
       registryHost: string,
       dockerRepository: string,
       configDigest: string,
-    ) => `${registryHost}:${dockerRepository}@${configDigest}`,
+    ) => `imageconfig|>${registryHost}:${dockerRepository}@${configDigest}`,
     ttlMinutes: 1440 * 28,
   })
   async getImageConfig(
@@ -221,12 +220,11 @@ export class DockerDatasource extends Datasource {
   }
 
   @cache({
-    namespace: 'datasource-docker-imageconfig',
     key: (
       registryHost: string,
       dockerRepository: string,
       configDigest: string,
-    ) => `${registryHost}:${dockerRepository}@${configDigest}`,
+    ) => `imageconfig|>${registryHost}:${dockerRepository}@${configDigest}`,
     ttlMinutes: 1440 * 28,
   })
   async getHelmConfig(
@@ -343,12 +341,11 @@ export class DockerDatasource extends Datasource {
   }
 
   @cache({
-    namespace: 'datasource-docker-architecture',
     key: (
       registryHost: string,
       dockerRepository: string,
       currentDigest: string,
-    ) => `${registryHost}:${dockerRepository}@${currentDigest}`,
+    ) => `architecture|>${registryHost}:${dockerRepository}@${currentDigest}`,
     ttlMinutes: 1440 * 28,
   })
   async getImageArchitecture(
@@ -444,9 +441,8 @@ export class DockerDatasource extends Datasource {
    *  - Return the labels for the requested image
    */
   @cache({
-    namespace: 'datasource-docker-labels',
     key: (registryHost: string, dockerRepository: string, tag: string) =>
-      `${registryHost}:${dockerRepository}:${tag}`,
+      `labels|>${registryHost}:${dockerRepository}:${tag}`,
     ttlMinutes: 24 * 60,
   })
   async getLabels(
@@ -708,9 +704,8 @@ export class DockerDatasource extends Datasource {
   }
 
   @cache({
-    namespace: 'datasource-docker-tags',
     key: (registryHost: string, dockerRepository: string) =>
-      `${registryHost}:${dockerRepository}`,
+      `tags|>${registryHost}:${dockerRepository}`,
   })
   async getTags(
     registryHost: string,
@@ -798,7 +793,6 @@ export class DockerDatasource extends Datasource {
    *  - Return the digest as a string
    */
   @cache({
-    namespace: 'datasource-docker-digest',
     key: (
       { registryUrl, packageName, currentDigest }: DigestConfig,
       newValue?: string,
@@ -809,7 +803,7 @@ export class DockerDatasource extends Datasource {
         registryUrl!,
       );
       const digest = currentDigest ? `@${currentDigest}` : '';
-      return `${registryHost}:${dockerRepository}:${newTag}${digest}`;
+      return `digest|>${registryHost}:${dockerRepository}:${newTag}${digest}`;
     },
   })
   override async getDigest(
@@ -970,8 +964,7 @@ export class DockerDatasource extends Datasource {
   }
 
   @cache({
-    namespace: 'datasource-docker-hub-tags',
-    key: (dockerRepository: string) => `${dockerRepository}`,
+    key: (dockerRepository: string) => `hub-tags|>${dockerRepository}`,
   })
   async getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
     let url = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
@@ -1035,13 +1028,12 @@ export class DockerDatasource extends Datasource {
    * This function will filter only tags that contain a semver version
    */
   @cache({
-    namespace: 'datasource-docker-releases-v2',
     key: ({ registryUrl, packageName }: GetReleasesConfig) => {
       const { registryHost, dockerRepository } = getRegistryRepository(
         packageName,
         registryUrl!,
       );
-      return `${registryHost}:${dockerRepository}`;
+      return `releases-v2|>${registryHost}:${dockerRepository}`;
     },
     cacheable: ({ registryUrl, packageName }: GetReleasesConfig) => {
       const { registryHost } = getRegistryRepository(packageName, registryUrl!);

@@ -40,7 +40,6 @@ export class CrateDatasource extends Datasource {
     'The source URL is determined from the `repository` field in the results.';
 
   @cache({
-    namespace: `datasource-${CrateDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       // TODO: types (#22198)
       `${registryUrl}/${packageName}`,
@@ -122,9 +121,8 @@ export class CrateDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${CrateDatasource.id}-metadata`,
     key: (info: RegistryInfo, packageName: string) =>
-      `${info.rawUrl}/${packageName}`,
+      `metadata|>${info.rawUrl}/${packageName}`,
     cacheable: (info: RegistryInfo) =>
       CrateDatasource.areReleasesCacheable(info.rawUrl),
     ttlMinutes: 24 * 60, // 24 hours

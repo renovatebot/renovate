@@ -259,7 +259,6 @@ export class NugetV3Api {
   }
 
   @cache({
-    namespace: NugetV3Api.cacheNamespace,
     key: (
       _http: Http,
       registryUrl: string,

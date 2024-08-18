@@ -54,7 +54,6 @@ export class RubyGemsDatasource extends Datasource {
     'The source URL is determined from the `source_code_uri` field in the results.';
 
   @cache({
-    namespace: `datasource-${RubyGemsDatasource.id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
       // TODO: types (#22198)
       `releases:${registryUrl!}:${packageName}`,

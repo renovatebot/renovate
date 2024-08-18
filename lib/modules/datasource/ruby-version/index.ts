@@ -27,7 +27,7 @@ export class RubyVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/ruby/ruby.';
 
-  @cache({ namespace: `datasource-${RubyVersionDatasource.id}`, key: 'all' })
+  @cache({ key: 'all' })
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {

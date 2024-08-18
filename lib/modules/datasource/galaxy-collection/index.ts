@@ -38,7 +38,6 @@ export class GalaxyCollectionDatasource extends Datasource {
     'The `sourceUrl` is determined from the `repository` field in the results.';
 
   @cache({
-    namespace: `datasource-${GalaxyCollectionDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getReleases({
@@ -119,8 +118,8 @@ export class GalaxyCollectionDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${GalaxyCollectionDatasource.id}-detailed-version`,
-    key: (versionsUrl, basicRelease: Release) => basicRelease.version,
+    key: (versionsUrl, basicRelease: Release) =>
+      `detailed-version|>${basicRelease.version}`,
     ttlMinutes: 10080, // 1 week
   })
   async getVersionDetails(

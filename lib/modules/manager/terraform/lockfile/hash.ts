@@ -107,7 +107,6 @@ export class TerraformProviderHash {
   }
 
   @cache({
-    namespace: `datasource-${TerraformProviderDatasource.id}-build-hashes`,
     key: (build: TerraformBuild) => build.url,
     ttlMinutes: TerraformProviderHash.hashCacheTTL,
   })

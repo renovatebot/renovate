@@ -22,7 +22,6 @@ export class GitRefsDatasource extends GitDatasource {
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   @cache({
-    namespace: `datasource-${GitRefsDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   override async getReleases({

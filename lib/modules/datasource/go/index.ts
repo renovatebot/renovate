@@ -46,9 +46,9 @@ export class GoDatasource extends Datasource {
     /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/,
   );
   @cache({
-    namespace: `datasource-${GoDatasource.id}`,
     // TODO: types (#22198)
-    key: ({ packageName }: Partial<DigestConfig>) => `${packageName}-digest`,
+    key: ({ packageName }: Partial<DigestConfig>) =>
+      `getReleases:${packageName}`,
   })
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.goproxy.getReleases(config);
@@ -65,8 +65,7 @@ export class GoDatasource extends Datasource {
    *  - Call the respective getDigest in github to retrieve the commit hash
    */
   @cache({
-    namespace: GoDatasource.id,
-    key: ({ packageName }: DigestConfig) => `${packageName}-digest`,
+    key: ({ packageName }: DigestConfig) => `getDigest:${packageName}`,
   })
   override async getDigest(
     { packageName }: DigestConfig,

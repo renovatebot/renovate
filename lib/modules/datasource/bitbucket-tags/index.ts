@@ -55,7 +55,6 @@ export class BitbucketTagsDatasource extends Datasource {
 
   // getReleases fetches list of tags for the repository
   @cache({
-    namespace: BitbucketTagsDatasource.cacheNamespace,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       BitbucketTagsDatasource.getCacheKey(registryUrl, packageName, 'tags'),
   })
@@ -85,7 +84,6 @@ export class BitbucketTagsDatasource extends Datasource {
 
   // getTagCommit fetched the commit has for specified tag
   @cache({
-    namespace: BitbucketTagsDatasource.cacheNamespace,
     key: (registryUrl: string | undefined, repo: string, tag: string): string =>
       BitbucketTagsDatasource.getCacheKey(registryUrl, repo, `tag-${tag}`),
   })
@@ -103,7 +101,6 @@ export class BitbucketTagsDatasource extends Datasource {
   }
 
   @cache({
-    namespace: BitbucketTagsDatasource.cacheNamespace,
     key: (registryUrl: string, repo: string) =>
       BitbucketTagsDatasource.getCacheKey(registryUrl, repo, 'mainbranch'),
     ttlMinutes: 60,
@@ -117,7 +114,6 @@ export class BitbucketTagsDatasource extends Datasource {
   // getDigest fetched the latest commit for repository main branch
   // however, if newValue is provided, then getTagCommit is called
   @cache({
-    namespace: BitbucketTagsDatasource.cacheNamespace,
     key: ({ registryUrl, packageName }: DigestConfig) =>
       BitbucketTagsDatasource.getCacheKey(registryUrl, packageName, 'digest'),
   })

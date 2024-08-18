@@ -23,7 +23,6 @@ export class EndoflifeDatePackagesource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       // TODO: types (#22198)
       `${registryUrl!}:${packageName}`,

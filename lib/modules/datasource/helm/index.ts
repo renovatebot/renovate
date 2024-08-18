@@ -33,7 +33,6 @@ export class HelmDatasource extends Datasource {
     'The source URL is determined from the `home` field or the `sources` field in the results.';
 
   @cache({
-    namespace: `datasource-${HelmDatasource.id}`,
     key: (helmRepository: string) => helmRepository,
   })
   async getRepositoryData(

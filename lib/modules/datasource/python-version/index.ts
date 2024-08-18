@@ -42,7 +42,6 @@ export class PythonVersionDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${datasource}`,
     key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
   })
   async getReleases({

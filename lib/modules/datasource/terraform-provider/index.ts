@@ -50,11 +50,11 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     'The source URL is determined from the the `source` field in the results.';
 
   @cache({
-    namespace: `datasource-${TerraformProviderDatasource.id}`,
-    key: (getReleasesConfig: GetReleasesConfig) =>
-      `${
-        getReleasesConfig.registryUrl
-      }/${TerraformProviderDatasource.getRepository(getReleasesConfig)}`,
+    key: (getReleasesConfig: GetReleasesConfig) => {
+      const { registryUrl } = getReleasesConfig;
+      const repo = TerraformProviderDatasource.getRepository(getReleasesConfig);
+      return `${registryUrl}/${repo}`;
+    },
   })
   async getReleases({
     packageName,
@@ -186,9 +186,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   }
 
   @cache({
-    namespace: `datasource-${TerraformProviderDatasource.id}-builds`,
     key: (registryURL: string, repository: string, version: string) =>
-      `${registryURL}/${repository}/${version}`,
+      `build|>${registryURL}/${repository}/${version}`,
   })
   async getBuilds(
     registryURL: string,
@@ -288,8 +287,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   }
 
   @cache({
-    namespace: `datasource-${TerraformProviderDatasource.id}-zip-hashes`,
-    key: (zipHashUrl: string) => zipHashUrl,
+    key: (zipHashUrl: string) => `zip-hashes|>${zipHashUrl}`,
   })
   async getZipHashes(zipHashUrl: string): Promise<string[] | undefined> {
     // The hashes are formatted as the result of sha256sum in plain text, each line: <hash>\t<filename>
@@ -315,9 +313,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   }
 
   @cache({
-    namespace: `datasource-${TerraformProviderDatasource.id}-releaseBackendIndex`,
     key: (backendLookUpName: string, version: string) =>
-      `${backendLookUpName}/${version}`,
+      `releaseBackendIndex|>${backendLookUpName}/${version}`,
   })
   async getReleaseBackendIndex(
     backendLookUpName: string,

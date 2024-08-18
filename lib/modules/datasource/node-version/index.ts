@@ -27,7 +27,6 @@ export class NodeVersionDatasource extends Datasource {
     'We use the URL: https://github.com/nodejs/node';
 
   @cache({
-    namespace: `datasource-${datasource}`,
     // TODO: types (#22198)
     key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
   })

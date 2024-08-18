@@ -27,7 +27,6 @@ export class GalaxyDatasource extends Datasource {
     'The source URL is determined from the `github_user` and `github_repo` fields in the results.';
 
   @cache({
-    namespace: 'datasource-galaxy',
     key: (getReleasesConfig: GetReleasesConfig) =>
       getReleasesConfig.packageName,
   })

@@ -26,7 +26,6 @@ export class ArtifactoryDatasource extends Datasource {
     'The release timestamp is determined from the date-like text, next to the version hyperlink tag in the results.';
 
   @cache({
-    namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       // TODO: types (#22198)
       `${registryUrl}:${packageName}`,

@@ -53,7 +53,6 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
 
   @cache({
     ttlMinutes: 1440,
-    namespace: 'datasource-github-releases',
     key: (release: GithubRestRelease, digest: string) =>
       `${release.html_url}:${digest}`,
   })
@@ -83,7 +82,6 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
 
   @cache({
     ttlMinutes: 1440,
-    namespace: 'datasource-github-releases',
     key: (asset: GithubRestAsset, algorithm: string) =>
       `${asset.browser_download_url}:${algorithm}:assetDigest`,
   })

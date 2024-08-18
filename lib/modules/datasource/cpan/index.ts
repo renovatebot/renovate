@@ -23,7 +23,6 @@ export class CpanDatasource extends Datasource {
     'The release timestamp is determined from the `date` field in the results.';
 
   @cache({
-    namespace: `datasource-${CpanDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => `${packageName}`,
   })
   override async getReleases({

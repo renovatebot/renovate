@@ -59,7 +59,6 @@ export class PackagistDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${PackagistDatasource.id}`,
     key: (regUrl: string) => `getRegistryMeta:${regUrl}`,
   })
   async getRegistryMeta(regUrl: string): Promise<RegistryMeta> {
@@ -86,9 +85,8 @@ export class PackagistDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${PackagistDatasource.id}-public-files`,
     key: (regUrl: string, regFile: RegistryFile) =>
-      PackagistDatasource.getPackagistFileUrl(regUrl, regFile),
+      `public-files|>${PackagistDatasource.getPackagistFileUrl(regUrl, regFile)}`,
     cacheable: (regUrl: string) =>
       !PackagistDatasource.isPrivatePackage(regUrl),
     ttlMinutes: 1440,
@@ -125,9 +123,8 @@ export class PackagistDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${PackagistDatasource.id}-org`,
     key: (registryUrl: string, metadataUrl: string, packageName: string) =>
-      `${registryUrl}:${metadataUrl}:${packageName}`,
+      `org|>${registryUrl}:${metadataUrl}:${packageName}`,
     ttlMinutes: 10,
   })
   async packagistV2Lookup(

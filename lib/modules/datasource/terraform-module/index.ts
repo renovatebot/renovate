@@ -43,7 +43,6 @@ export class TerraformModuleDatasource extends TerraformDatasource {
    *  - `homepage` is set to the Terraform registry's page if it's on the official main registry
    */
   @cache({
-    namespace: `datasource-${TerraformModuleDatasource.id}`,
     key: (getReleasesConfig: GetReleasesConfig) =>
       TerraformModuleDatasource.getCacheKey(getReleasesConfig),
   })

@@ -204,7 +204,6 @@ export class PodDatasource extends Datasource {
 
   @cache({
     ttlMinutes: 30,
-    namespace: `datasource-${PodDatasource.id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
       // TODO: types (#22198)
       `${registryUrl}:${packageName}`,

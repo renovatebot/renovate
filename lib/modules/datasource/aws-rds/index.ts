@@ -20,7 +20,6 @@ export class AwsRdsDataSource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AwsRdsDataSource.id}`,
     key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
   })
   async getReleases({

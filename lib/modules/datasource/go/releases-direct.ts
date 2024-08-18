@@ -84,7 +84,6 @@ export class GoDirectDatasource extends Datasource {
    *  - Filter module tags according to the module path
    */
   @cache({
-    namespace: `datasource-${GoDirectDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {

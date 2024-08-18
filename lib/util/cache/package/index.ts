@@ -8,7 +8,26 @@ import type { PackageCache, PackageCacheNamespace } from './types';
 
 let cacheProxy: PackageCache | undefined;
 
+export const decoratorKeyPrefix = 'cache-decorator';
+export const decoratorKeyManglingSeparator = '|>';
+
 function getGlobalKey(namespace: string, key: string): string {
+  if (key.startsWith(decoratorKeyPrefix)) {
+    const rawKey = key.slice(decoratorKeyPrefix.length + 1);
+    const splitIndex = rawKey.indexOf(decoratorKeyManglingSeparator);
+    if (splitIndex !== -1) {
+      const namespaceSuffix = rawKey.slice(0, splitIndex);
+      const legacyKey = rawKey.slice(
+        splitIndex + decoratorKeyManglingSeparator.length,
+      );
+      return [
+        'global',
+        `${namespace}-${namespaceSuffix}`,
+        `${decoratorKeyPrefix}:${legacyKey}`,
+      ].join('%%');
+    }
+  }
+
   return `global%%${namespace}%%${key}`;
 }
 

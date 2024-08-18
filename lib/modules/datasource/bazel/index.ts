@@ -30,7 +30,6 @@ export class BazelDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${BazelDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       `${registryUrl!}:${packageName}`,
   })

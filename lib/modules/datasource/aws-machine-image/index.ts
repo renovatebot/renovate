@@ -81,7 +81,6 @@ export class AwsMachineImageDataSource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AwsMachineImageDataSource.id}`,
     key: (serializedAmiFilter: string) =>
       `getSortedAwsMachineImages:${serializedAmiFilter}`,
   })
@@ -106,7 +105,6 @@ export class AwsMachineImageDataSource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AwsMachineImageDataSource.id}`,
     key: ({ packageName }: GetReleasesConfig, newValue: string) =>
       `getDigest:${packageName}:${newValue ?? ''}`,
   })
@@ -136,7 +134,6 @@ export class AwsMachineImageDataSource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AwsMachineImageDataSource.id}`,
     key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
   })
   async getReleases({

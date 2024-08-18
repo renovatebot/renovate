@@ -16,7 +16,6 @@ export class GitTagsDatasource extends GitDatasource {
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   @cache({
-    namespace: `datasource-${GitTagsDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getReleases({

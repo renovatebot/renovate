@@ -25,7 +25,6 @@ export class HexDatasource extends Datasource {
     'The source URL is determined from the `Github` field in the results.';
 
   @cache({
-    namespace: `datasource-${HexDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getReleases({

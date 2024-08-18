@@ -43,9 +43,8 @@ export class HermitDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-hermit-package`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl ?? ''}-${packageName}`,
+      `package|>${registryUrl ?? ''}-${packageName}`,
   })
   async getReleases({
     packageName,
@@ -106,13 +105,14 @@ export class HermitDatasource extends Datasource {
    * named index, parses it and returned the parsed JSON result
    */
   @cache({
-    namespace: `datasource-hermit-search-manifest`,
-    key: (u) => u.toString(),
+    key: (url: URL) => `search-manifest|>${url.toString()}`,
   })
-  async getHermitSearchManifest(u: URL): Promise<HermitSearchResult[] | null> {
-    const registryUrl = u.toString();
-    const host = coerceString(u.host);
-    const groups = this.pathRegex.exec(coerceString(u.pathname))?.groups;
+  async getHermitSearchManifest(
+    url: URL,
+  ): Promise<HermitSearchResult[] | null> {
+    const registryUrl = url.toString();
+    const host = coerceString(url.host);
+    const groups = this.pathRegex.exec(coerceString(url.pathname))?.groups;
     if (!groups) {
       logger.warn(
         { registryUrl },

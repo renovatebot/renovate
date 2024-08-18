@@ -34,7 +34,6 @@ export class OrbDatasource extends Datasource {
     'The release timestamp is determined from the `createdAt` field in the results.';
 
   @cache({
-    namespace: `datasource-${OrbDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getReleases({

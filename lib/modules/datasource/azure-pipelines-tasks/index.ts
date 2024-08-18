@@ -35,7 +35,6 @@ export class AzurePipelinesTasksDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AzurePipelinesTasksDatasource.id}`,
     key: (url: string) => url,
     ttlMinutes: 24 * 60,
   })

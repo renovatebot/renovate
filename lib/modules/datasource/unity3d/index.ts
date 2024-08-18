@@ -80,7 +80,6 @@ export class Unity3dDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${Unity3dDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       `${registryUrl}:${packageName}`,
   })
