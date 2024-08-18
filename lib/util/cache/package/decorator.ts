@@ -180,12 +180,12 @@ export function cache<
     target: Method<This, Args, Return>,
     context: Context<This, Args, Return>,
   ) {
-    return function decorated(this: This, ...args: Args) {
+    return function decorated(instance: This, ...args: Args) {
       const callback = target;
       const methodName = context.name;
 
       const res = executeDecorator(
-        this,
+        instance,
         args,
         cacheable,
         callback,
