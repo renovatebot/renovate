@@ -10,7 +10,7 @@ function isExternalHostError(err: any): err is ExternalHostError {
   return err instanceof ExternalHostError;
 }
 
-function handleMultipleErrors(errors: Error[]): never {
+export function handleMultipleErrors(errors: Error[]): never {
   const hostError = errors.find(isExternalHostError);
   if (hostError) {
     throw hostError;

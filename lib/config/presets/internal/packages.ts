@@ -27,6 +27,8 @@ export const presets: Record<string, Preset> = {
       'babel-eslint',
       '@babel/eslint-parser',
       '@eslint/**',
+      '@eslint-community/**',
+      '@stylistic/eslint-plugin**',
       '@types/eslint__**',
       '@typescript-eslint/**',
       'typescript-eslint',

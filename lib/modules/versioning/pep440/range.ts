@@ -245,7 +245,7 @@ export function isLessThanRange(input: string, range: string): boolean {
     const result = results.every((res) => res === true);
 
     return invertResult ? !result : result;
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     return false;
   }
 }
