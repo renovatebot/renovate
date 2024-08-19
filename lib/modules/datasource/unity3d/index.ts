@@ -1,4 +1,5 @@
-import { XmlDocument, XmlElement } from 'xmldoc';
+import type { XmlElement } from 'xmldoc';
+import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import * as Unity3dVersioning from '../../versioning/unity3d';

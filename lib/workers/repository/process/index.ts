@@ -15,7 +15,8 @@ import { addSplit } from '../../../util/split';
 import { getRegexPredicate } from '../../../util/string-match';
 import type { BranchConfig } from '../../types';
 import { readDashboardBody } from '../dependency-dashboard';
-import { ExtractResult, extract, lookup, update } from './extract-update';
+import type { ExtractResult } from './extract-update';
+import { extract, lookup, update } from './extract-update';
 import type { WriteUpdateResult } from './write';
 
 async function getBaseBranchConfig(

@@ -3,10 +3,12 @@ import { mergeChildConfig } from '../../../../config';
 import type { ValidationMessage } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import {
+import type {
   GetDigestInputConfig,
   Release,
   ReleaseResult,
+} from '../../../../modules/datasource';
+import {
   applyDatasourceFilters,
   getDigest,
   getRawPkgReleases,

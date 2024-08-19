@@ -1,8 +1,8 @@
 import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
+import type { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import {
-  GitPullRequest,
   GitPullRequestMergeStrategy,
   GitStatusState,
   PullRequestStatus,

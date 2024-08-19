@@ -1,6 +1,7 @@
 import { mocked } from '../../../../test/util';
 import * as _packageCache from '../../../util/cache/package';
-import { DockerHubCache, DockerHubCacheData } from './dockerhub-cache';
+import type { DockerHubCacheData } from './dockerhub-cache';
+import { DockerHubCache } from './dockerhub-cache';
 import type { DockerHubTag } from './schema';
 
 jest.mock('../../../util/cache/package');

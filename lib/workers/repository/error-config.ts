@@ -2,7 +2,8 @@
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
-import { Pr, platform } from '../../modules/platform';
+import type { Pr } from '../../modules/platform';
+import { platform } from '../../modules/platform';
 
 export function raiseConfigWarningIssue(
   config: RenovateConfig,

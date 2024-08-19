@@ -2,12 +2,8 @@ import type { Indent } from 'detect-indent';
 import type { RequestError, Response } from 'got';
 import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
-import {
-  RenovateConfig,
-  partial,
-  platform,
-  scm,
-} from '../../../../../test/util';
+import type { RenovateConfig } from '../../../../../test/util';
+import { partial, platform, scm } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';

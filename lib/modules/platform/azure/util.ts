@@ -1,8 +1,10 @@
-import {
+import type {
   GitPullRequest,
-  GitPullRequestMergeStrategy,
   GitRepository,
   GitStatusContext,
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import {
+  GitPullRequestMergeStrategy,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import type { MergeStrategy } from '../../../config/types';
