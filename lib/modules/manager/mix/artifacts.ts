@@ -53,7 +53,7 @@ export async function updateArtifacts({
     return null;
   }
 
-  let preCommands = new Array<string>();
+  const preCommands: string[] = [];
 
   // auth organizations
   const organizations = new Set<string>();
