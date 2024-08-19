@@ -6,9 +6,8 @@ describe('modules/manager/bun-version/index', () => {
       const res = extractPackageFile('1.1.15\n');
       expect(res.deps).toEqual([
         {
-          depName: 'bun',
+          depName: 'Bun',
           packageName: 'oven-sh/bun',
-          commitMessageTopic: 'Bun',
           currentValue: '1.1.15',
           datasource: 'github-releases',
           extractVersion: '^bun-v(?<version>\\S+)',
@@ -21,9 +20,8 @@ describe('modules/manager/bun-version/index', () => {
       const res = extractPackageFile('1.0\n');
       expect(res.deps).toEqual([
         {
-          depName: 'bun',
+          depName: 'Bun',
           packageName: 'oven-sh/bun',
-          commitMessageTopic: 'Bun',
           currentValue: '1.0',
           datasource: 'github-releases',
           extractVersion: '^bun-v(?<version>\\S+)',
