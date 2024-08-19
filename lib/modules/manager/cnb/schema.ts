@@ -16,7 +16,7 @@ export const ProjectDescriptor = z.object({
   }),
   io: z.object({
     buildpacks: IoBuildpacks.optional(),
-  }),
+  }).optional(),
 });
 
 export type ProjectDescriptor = z.infer<typeof ProjectDescriptor>;

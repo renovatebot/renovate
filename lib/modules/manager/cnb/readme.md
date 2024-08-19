@@ -7,7 +7,7 @@ Renovate can update a `project.toml` file if:
 
 If you use buildpacks in the `io.buildpacks.group` array, then you _must_ configure the Docker reference (`uri`) for Renovate to work.
 
-```toml title="Example of a `project.toml` file with Docker reference URIs"
+```toml title="Example of a project.toml file with Docker reference URIs"
 [_]
 schema-version = "0.2"
 
