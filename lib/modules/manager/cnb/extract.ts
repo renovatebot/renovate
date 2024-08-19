@@ -20,25 +20,31 @@ function isDockerRef(ref: string): boolean {
   return true;
 }
 
-function parseProjectToml(content: string): ProjectDescriptor | null {
+function parseProjectToml(
+  content: string,
+  packageFile: string,
+): ProjectDescriptor | null {
   const res = ProjectDescriptorToml.safeParse(content);
   if (res.success) {
     return res.data;
   }
 
-  logger.debug(res.error, 'Failed to parse buildpacks project descriptor TOML');
+  logger.debug(
+    { packageFile, err: res.error },
+    'Failed to parse buildpacks project descriptor TOML',
+  );
 
   return null;
 }
 
 export function extractPackageFile(
   content: string,
-  _packageFile: string,
+  packageFile: string,
   config: ExtractConfig,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
-  const descriptor = parseProjectToml(content);
+  const descriptor = parseProjectToml(content, packageFile);
   if (!descriptor) {
     return null;
   }
