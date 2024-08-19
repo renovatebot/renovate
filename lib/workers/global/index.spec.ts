@@ -1,6 +1,7 @@
 import { ERROR, WARN } from 'bunyan';
 import fs from 'fs-extra';
-import { RenovateConfig, logger, mocked } from '../../../test/util';
+import type { RenovateConfig } from '../../../test/util';
+import { logger, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import * as _presets from '../../config/presets';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';

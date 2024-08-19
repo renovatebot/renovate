@@ -92,7 +92,7 @@ export async function extractAllPackageFiles(
       );
       try {
         ensureLocalPath(packageFile);
-      } catch (error) {
+      } catch {
         logger.warn(
           { fileMatch, packageFile },
           'pip-compile: Source file path outside of repository',

@@ -415,11 +415,11 @@ describe('modules/platform/gerrit/client', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get(
-          '/a/projects/test%2Frepo/branches/main/files/renovate.json/content',
+          '/a/projects/test%2Frepo/branches/base%2Fbranch/files/renovate.json/content',
         )
         .reply(200, gerritFileResponse('{}'));
       await expect(
-        client.getFile('test/repo', 'main', 'renovate.json'),
+        client.getFile('test/repo', 'base/branch', 'renovate.json'),
       ).resolves.toBe('{}');
     });
   });
