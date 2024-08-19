@@ -1,4 +1,4 @@
-import { CombinedKey, PackageCacheNamespace } from './types';
+import type { CombinedKey, PackageCacheNamespace } from './types';
 
 /**
  * Returns the key used by underlying storage implementations
