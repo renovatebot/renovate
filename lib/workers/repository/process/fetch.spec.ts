@@ -1,8 +1,10 @@
-import { RenovateConfig, mocked } from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { MavenDatasource } from '../../../modules/datasource/maven';
 import type { PackageFile } from '../../../modules/manager/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { Result } from '../../../util/result';
 import { fetchUpdates } from './fetch';
 import * as lookup from './lookup';
 
@@ -155,7 +157,7 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       };
-      lookupUpdates.mockRejectedValueOnce(new Error('some error'));
+      lookupUpdates.mockResolvedValueOnce(Result.err(new Error('some error')));
 
       await expect(
         fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles),
@@ -172,7 +174,7 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       };
-      lookupUpdates.mockRejectedValueOnce(new Error('some error'));
+      lookupUpdates.mockResolvedValueOnce(Result.err(new Error('some error')));
 
       await expect(
         fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles),

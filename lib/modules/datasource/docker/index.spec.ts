@@ -1,8 +1,5 @@
-import {
-  ECRClient,
-  GetAuthorizationTokenCommand,
-  GetAuthorizationTokenCommandOutput,
-} from '@aws-sdk/client-ecr';
+import type { GetAuthorizationTokenCommandOutput } from '@aws-sdk/client-ecr';
+import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import * as _googleAuth from 'google-auth-library';
 import { mockDeep } from 'jest-mock-extended';
@@ -10,6 +7,7 @@ import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
 import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '.';
@@ -41,33 +39,17 @@ function mockEcrAuthReject(msg: string) {
 
 describe('modules/datasource/docker/index', () => {
   beforeEach(() => {
+    GlobalConfig.reset();
     ecrMock.reset();
     hostRules.find.mockReturnValue({
       username: 'some-username',
       password: 'some-password',
     });
     hostRules.hosts.mockReturnValue([]);
-    delete process.env.RENOVATE_X_DOCKER_MAX_PAGES;
-    delete process.env.RENOVATE_X_DOCKER_HUB_TAGS;
+    delete process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE;
   });
 
   describe('getDigest', () => {
-    it('returns null if no token', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get('/', undefined, { badheaders: ['authorization'] })
-        .reply(200, '', {})
-        .head('/library/some-dep/manifests/some-new-value', undefined, {
-          badheaders: ['authorization'],
-        })
-        .reply(401);
-      const res = await getDigest(
-        { datasource: 'docker', packageName: 'some-dep' },
-        'some-new-value',
-      );
-      expect(res).toBeNull();
-    });
-
     it('returns null if errored', async () => {
       httpMock
         .scope(baseUrl)
@@ -1344,6 +1326,7 @@ describe('modules/datasource/docker/index', () => {
 
   describe('getReleases', () => {
     it('returns null if no token', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
@@ -1390,7 +1373,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('uses custom max pages', async () => {
-      process.env.RENOVATE_X_DOCKER_MAX_PAGES = '2';
+      GlobalConfig.set({ dockerMaxPages: 2 });
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
@@ -1897,11 +1881,11 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('Uses Docker Hub tags for registry-1.docker.io', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS = 'true';
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
         .reply(200, {
+          count: 2,
           next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
           results: [
             {
@@ -1915,6 +1899,7 @@ describe('modules/datasource/docker/index', () => {
         })
         .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
         .reply(200, {
+          count: 2,
           results: [
             {
               id: 1,
@@ -1942,7 +1927,6 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS = 'true';
       const tags = ['1.0.0'];
       httpMock
         .scope(dockerHubUrl)
@@ -1971,12 +1955,12 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (explicit)', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS = 'true';
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
         .reply(200, {
           next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
+          count: 2,
           results: [
             {
               id: 2,
@@ -1989,6 +1973,7 @@ describe('modules/datasource/docker/index', () => {
         })
         .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
         .reply(200, {
+          count: 2,
           results: [
             {
               id: 1,
@@ -2042,6 +2027,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('returns null on error', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
       httpMock
         .scope(baseUrl)
         .get('/my/node/tags/list?n=10000')
@@ -2056,6 +2042,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('strips trailing slash from registry', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
       httpMock
         .scope(baseUrl)
         .get('/my/node/tags/list?n=10000')
@@ -2082,6 +2069,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('returns null if no auth', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
       hostRules.find.mockReturnValue({});
       httpMock
         .scope(baseUrl)

@@ -1,7 +1,8 @@
 import { codeBlock } from 'common-tags';
 import { getDatasources } from '../../lib/modules/datasource';
 import { readFile, updateFile } from '../utils';
-import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
+import type { OpenItems } from './github-query-items';
+import { generateFeatureAndBugMarkdown } from './github-query-items';
 import {
   formatDescription,
   formatUrls,
@@ -46,7 +47,7 @@ export async function generateDatasources(
 
     let tableContent = '## Table of values\n\n';
 
-    tableContent += '| Name | Vaue | Notes |\n';
+    tableContent += '| Name | Value | Notes |\n';
     tableContent += '| :-- | :-- | :-- |\n';
 
     tableContent += `| Identifier | \`${id}\` | \n`;

@@ -1,9 +1,15 @@
 import is from '@sindresorhus/is';
-import handlebars from 'handlebars';
+import handlebars, { type HelperOptions } from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
+import { toArray } from '../array';
 import { getChildEnv } from '../exec/utils';
 import { regEx } from '../regex';
+
+// Missing in handlebars
+type Options = HelperOptions & {
+  lookupProperty: (element: unknown, key: unknown) => unknown;
+};
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
@@ -15,6 +21,32 @@ handlebars.registerHelper('encodeBase64', (str: string) =>
 handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
   JSON.stringify(JSON.parse(input), null, 2),
 );
+
+handlebars.registerHelper('toJSON', (input: unknown): string =>
+  JSON.stringify(input),
+);
+
+handlebars.registerHelper('toArray', (...args: unknown[]): unknown[] => {
+  // Need to remove the 'options', as last parameter
+  // https://handlebarsjs.com/api-reference/helpers.html
+  args.pop();
+  return args;
+});
+
+handlebars.registerHelper('toObject', (...args: unknown[]): unknown => {
+  // Need to remove the 'options', as last parameter
+  // https://handlebarsjs.com/api-reference/helpers.html
+  args.pop();
+
+  if (args.length % 2 !== 0) {
+    throw new Error(`Must contain an even number of elements`);
+  }
+
+  const keys = args.filter((_, index) => index % 2 === 0);
+  const values = args.filter((_, index) => index % 2 === 1);
+
+  return Object.fromEntries(keys.map((key, index) => [key, values[index]]));
+});
 
 handlebars.registerHelper('replace', (find, replace, context) =>
   (context ?? '').replace(regEx(find, 'g'), replace),
@@ -36,6 +68,16 @@ handlebars.registerHelper('includes', (arg1: string[], arg2: string) => {
   return false;
 });
 
+handlebars.registerHelper(
+  'split',
+  (str: unknown, separator: unknown): string[] => {
+    if (is.string(str) && is.string(separator)) {
+      return str.split(separator);
+    }
+    return [];
+  },
+);
+
 handlebars.registerHelper({
   and(...args) {
     // Need to remove the 'options', as last parameter
@@ -49,6 +91,34 @@ handlebars.registerHelper({
     args.pop();
     return args.some(Boolean);
   },
+});
+
+handlebars.registerHelper(
+  'lookupArray',
+  (obj: unknown, key: unknown, options: Options): unknown[] => {
+    return (
+      toArray(obj)
+        // skip elements like #with does
+        .filter((element) => !handlebars.Utils.isEmpty(element))
+        .map((element) => options.lookupProperty(element, key))
+        .filter((value) => value !== undefined)
+    );
+  },
+);
+
+handlebars.registerHelper('distinct', (obj: unknown): unknown[] => {
+  const seen = new Set<string>();
+
+  return toArray(obj).filter((value) => {
+    const str = JSON.stringify(value);
+
+    if (seen.has(str)) {
+      return false;
+    }
+
+    seen.add(str);
+    return true;
+  });
 });
 
 export const exposedConfigOptions = [

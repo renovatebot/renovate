@@ -8,13 +8,13 @@ import {
 } from '../../../../constants/error-messages';
 import { pkg } from '../../../../expose.cjs';
 import { logger } from '../../../../logger';
-import {
+import type {
   PlatformPrOptions,
   Pr,
   PrDebugData,
   UpdatePrConfig,
-  platform,
 } from '../../../../modules/platform';
+import { platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import {
   getPrBodyStruct,

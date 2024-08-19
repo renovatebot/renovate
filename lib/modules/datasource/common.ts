@@ -179,6 +179,7 @@ export function applyConstraintsFiltering<
 
   const configConstraints = config.constraints;
   const filteredReleases: string[] = [];
+  const startingLength = releaseResult.releases.length;
   releaseResult.releases = filterMap(releaseResult.releases, (release) => {
     const releaseConstraints = release.constraints;
     delete release.constraints;
@@ -189,6 +190,14 @@ export function applyConstraintsFiltering<
 
     for (const [name, configConstraint] of Object.entries(configConstraints)) {
       if (!versioning.isValid(configConstraint)) {
+        logger.once.warn(
+          {
+            packageName: config.packageName,
+            constraint: configConstraint,
+            versioning: versioningName,
+          },
+          'Invalid constraint used with strict constraintsFiltering',
+        );
         continue;
       }
 
@@ -255,7 +264,7 @@ export function applyConstraintsFiltering<
     const packageName = config.packageName;
     const releases = filteredReleases.join(', ');
     logger.debug(
-      `Filtered ${count} releases for ${packageName} due to constraintsFiltering=strict: ${releases}`,
+      `Filtered out ${count} non-matching releases out of ${startingLength} total for ${packageName} due to constraintsFiltering=strict: ${releases}`,
     );
   }
 

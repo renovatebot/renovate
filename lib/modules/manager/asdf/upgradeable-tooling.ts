@@ -1,6 +1,7 @@
 import { regEx } from '../../../util/regex';
 import { DartVersionDatasource } from '../../datasource/dart-version';
 import { DockerDatasource } from '../../datasource/docker';
+import { DotnetVersionDatasource } from '../../datasource/dotnet-version';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -115,6 +116,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       versioning: `${regexVersioning.id}:^(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+)\\.(?<build>\\d+)$`,
     },
   },
+  cookiecutter: {
+    asdfPluginUrl: 'https://github.com/shawon-crosen/asdf-cookiecutter',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'cookiecutter/cookiecutter',
+      versioning: semverVersioning.id,
+    },
+  },
   cosign: {
     asdfPluginUrl: 'https://gitlab.com/wt0f/asdf-cosign',
     config: {
@@ -150,6 +159,13 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
       packageName: 'direnv/direnv',
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  'dotnet-core': {
+    asdfPluginUrl: 'https://github.com/emersonsoares/asdf-dotnet-core',
+    config: {
+      datasource: DotnetVersionDatasource.id,
+      packageName: 'dotnet-sdk',
     },
   },
   dprint: {
@@ -292,6 +308,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubTagsDatasource.id,
       packageName: 'idris-lang/Idris-dev',
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  istioctl: {
+    asdfPluginUrl: 'https://github.com/virtualstaticvoid/asdf-istioctl',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'istio/istio',
+      versioning: semverVersioning.id,
     },
   },
   java: {

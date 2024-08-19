@@ -58,21 +58,19 @@ exports[`config/migration it migrates nested packageRules 1`] = `
     },
     {
       "automerge": true,
-      "excludePackageNames": [
-        "@types/react-table",
-      ],
       "groupName": "definitelyTyped",
-      "matchPackagePrefixes": [
-        "@types/",
+      "matchPackageNames": [
+        "!@types/react-table",
+        "@types/**",
       ],
     },
     {
       "automerge": false,
-      "excludePackageNames": [
-        "@types/react-table",
-      ],
       "matchDepTypes": [
         "dependencies",
+      ],
+      "matchPackageNames": [
+        "!@types/react-table",
       ],
     },
   ],
@@ -190,23 +188,22 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`
       ],
     },
     {
-      "excludePackageNames": "foo",
       "groupName": "angular packages",
-      "matchPackagePatterns": "^(@angular|typescript)",
+      "matchPackageNames": [
+        "/^(@angular|typescript)/",
+      ],
     },
     {
       "groupName": "foo",
-      "matchPackagePatterns": [
-        "^foo",
+      "matchPackageNames": [
+        "/^foo/",
       ],
     },
     {
       "enabled": false,
       "matchPackageNames": [
         "angular",
-      ],
-      "matchPackagePatterns": [
-        "ang",
+        "/ang/",
       ],
     },
     {
@@ -398,7 +395,9 @@ exports[`config/migration migrateConfig(config, parentConfig) overrides existing
       "major": {
         "automerge": false,
       },
-      "matchPackagePatterns": "^(@angular|typescript)",
+      "matchPackageNames": [
+        "/^(@angular|typescript)/",
+      ],
       "minor": {
         "automerge": false,
       },

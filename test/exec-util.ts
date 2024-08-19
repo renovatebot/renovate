@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import traverse from 'traverse';
+import traverse from 'neotraverse/legacy';
 import upath from 'upath';
 import { rawExec as _exec } from '../lib/util/exec/common';
 import type { RawExecOptions } from '../lib/util/exec/types';

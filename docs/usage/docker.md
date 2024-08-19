@@ -237,7 +237,7 @@ module.exports = {
 
 #### AWS ECR (Amazon Web Services Elastic Container Registry)
 
-#### Using access key id & secret
+##### Using access key id & secret
 
 Renovate can authenticate with AWS ECR using AWS access key id & secret as the username & password, for example:
 
@@ -407,7 +407,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:37.431.4
+FROM renovate/renovate:38.39.6
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...
