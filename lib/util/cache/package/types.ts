@@ -64,6 +64,7 @@ export type PackageCacheNamespace =
   | 'datasource-gitea-releases'
   | 'datasource-gitea-tags'
   | 'datasource-github-releases'
+  | 'datasource-github-release-attachments'
   | 'datasource-gitlab-packages'
   | 'datasource-gitlab-releases'
   | 'datasource-gitlab-tags-commit'
