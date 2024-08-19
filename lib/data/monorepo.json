@@ -252,6 +252,7 @@
       "https://github.com/dotnet/efcore",
       "https://github.com/dotnet/extensions",
       "https://github.com/dotnet/maui",
+      "https://github.com/dotnet/roslyn",
       "https://github.com/dotnet/runtime",
       "https://github.com/dotnet/scaffolding",
       "https://github.com/dotnet/sdk"
@@ -496,7 +497,10 @@
     "trpc": "https://github.com/trpc/trpc",
     "trust-dns": "https://github.com/bluejekyll/trust-dns",
     "tsoa": "https://github.com/lukeautry/tsoa",
-    "turbo": "https://github.com/vercel/turbo",
+    "turbo": [
+      "https://github.com/vercel/turbo",
+      "https://github.com/vercel/turborepo"
+    ],
     "turf": "https://github.com/Turfjs/turf",
     "typed-signalr": "https://github.com/nenoNaninu/TypedSignalR.Client.TypeScript",
     "typefaces": "https://github.com/KyleAMathews/typefaces",
