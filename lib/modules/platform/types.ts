@@ -101,6 +101,7 @@ export type PlatformPrOptions = {
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
+  bbAutoCompletePrTasks?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;

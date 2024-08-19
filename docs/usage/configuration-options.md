@@ -337,6 +337,10 @@ You can also use the special `"$default"` string to denote the repository's defa
     Do _not_ use the `baseBranches` config option when you've set a `forkToken`.
     You may need a `forkToken` when you're using the Forking Renovate app.
 
+## bbAutoCompletePrTask
+
+Configuring this to `true` means that Renovate will mark all PR Tasks as complete.
+
 ## bbUseDefaultReviewers
 
 Configuring this to `true` means that Renovate will detect and apply the default reviewers rules to PRs (Bitbucket only).
