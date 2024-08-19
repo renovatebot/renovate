@@ -90,6 +90,10 @@ module.exports = {
       'error',
       { assertionStyle: 'as', objectLiteralTypeAssertions: 'allow' },
     ],
+    '@typescript-eslint/consistent-type-imports': [
+      'error',
+      { disallowTypeAnnotations: false },
+    ],
 
     // Makes no sense to allow type inference for expression parameters, but require typing the response
     '@typescript-eslint/explicit-function-return-type': [
@@ -137,7 +141,10 @@ module.exports = {
     ],
 
     '@typescript-eslint/unbound-method': [2, { ignoreStatic: true }],
-    '@typescript-eslint/ban-types': 2,
+    '@typescript-eslint/no-empty-object-type': [
+      2,
+      { allowInterfaces: 'with-single-extends' },
+    ],
     '@renovate/jest-root-describe': 2,
 
     'typescript-enum/no-const-enum': 2,

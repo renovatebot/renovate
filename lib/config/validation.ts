@@ -7,7 +7,7 @@ import type {
   RegexManagerTemplates,
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
-import type { HostRule } from '../types/host-rules';
+import type { HostRule } from '../types';
 import { regEx } from '../util/regex';
 import {
   getRegexPredicate,
@@ -26,15 +26,15 @@ import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import { supportedDatasources } from './presets/internal/merge-confidence';
-import {
+import type {
   AllowedParents,
-  type RenovateConfig,
-  type RenovateOptions,
-  type StatusCheckKey,
-  type ValidationMessage,
-  type ValidationResult,
-  allowedStatusCheckStrings,
+  RenovateConfig,
+  RenovateOptions,
+  StatusCheckKey,
+  ValidationMessage,
+  ValidationResult,
 } from './types';
+import { allowedStatusCheckStrings } from './types';
 import * as managerValidator from './validation-helpers/managers';
 import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches';
 import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
@@ -298,7 +298,7 @@ export async function validateConfig(
           let res = template.compile((val as string).toString(), config, false);
           res = template.compile(res, config, false);
           template.compile(res, config, false);
-        } catch (err) {
+        } catch {
           errors.push({
             topic: 'Configuration Error',
             message: `Invalid template in config path: ${currentPath}`,
@@ -600,7 +600,7 @@ export async function validateConfig(
                   try {
                     // regEx isn't aware of our !/ prefix but can handle the suffix
                     regEx(pattern.replace(startPattern, '/'));
-                  } catch (e) {
+                  } catch {
                     errors.push({
                       topic: 'Configuration Error',
                       message: `Invalid regExp for ${currentPath}: \`${pattern}\``,
@@ -613,7 +613,7 @@ export async function validateConfig(
               for (const fileMatch of val as string[]) {
                 try {
                   regEx(fileMatch);
-                } catch (e) {
+                } catch {
                   errors.push({
                     topic: 'Configuration Error',
                     message: `Invalid regExp for ${currentPath}: \`${fileMatch}\``,

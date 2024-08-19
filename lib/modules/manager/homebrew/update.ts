@@ -164,7 +164,7 @@ export async function updateDependency({
       upgrade.newValue
     }/${repoName}-${String(semver.coerce(upgrade.newValue))}.tar.gz`;
     newSha256 = await hashStream(http.stream(newUrl), 'sha256');
-  } catch (errOuter) {
+  } catch {
     logger.debug(
       `Failed to download release download for ${upgrade.depName} - trying archive instead`,
     );
@@ -173,7 +173,7 @@ export async function updateDependency({
       const repoName = String(upgrade.managerData.repoName);
       newUrl = `https://github.com/${ownerName}/${repoName}/archive/refs/tags/${upgrade.newValue}.tar.gz`;
       newSha256 = await hashStream(http.stream(newUrl), 'sha256');
-    } catch (errInner) {
+    } catch {
       logger.debug(
         `Failed to download archive download for ${upgrade.depName} - update failed`,
       );

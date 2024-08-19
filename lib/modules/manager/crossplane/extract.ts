@@ -21,7 +21,7 @@ export function extractPackageFile(
 
   let list: XPKG[] = [];
   try {
-    list = parseYaml(content, null, {
+    list = parseYaml(content, {
       customSchema: XPKGSchema,
       failureBehaviour: 'filter',
     });

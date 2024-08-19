@@ -39,13 +39,12 @@ import {
 } from './common';
 import { DockerHubCache } from './dockerhub-cache';
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr';
+import type { DistributionManifest, OciImageManifest } from './schema';
 import {
-  DistributionManifest,
   DockerHubTagsPage,
   ManifestJson,
   OciHelmConfig,
   OciImageConfig,
-  OciImageManifest,
 } from './schema';
 
 const defaultConfig = {
@@ -988,9 +987,9 @@ export class DockerDatasource extends Datasource {
         return null;
       }
 
-      const { results, next } = val;
+      const { results, next, count } = val;
 
-      needNextPage = cache.reconcile(results);
+      needNextPage = cache.reconcile(results, count);
 
       if (!next) {
         break;

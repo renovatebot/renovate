@@ -31,6 +31,7 @@ concurrency:
 env:
   DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
   NODE_VERSION: 20
+  PDM_VERSION: 2.18.1 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -259,7 +260,13 @@ jobs:
           key: prettier-main-cache
 
       - name: Lint
-        run: pnpm prettier --cache-location .cache/prettier
+        run: |
+          pnpm prettier --write --cache-location .cache/prettier
+          git diff --quiet || {
+            echo "[ERROR] Please apply the changes prettier suggests:"
+            git diff --color=always
+            exit 1
+          }
 
       - name: Remove cache
         if: github.event_name == 'push'
@@ -403,7 +410,7 @@ jobs:
 
       - name: Save coverage artifacts
         if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029 # v4.3.5
+        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
@@ -559,7 +566,7 @@ jobs:
         run: pnpm test-e2e:pack
 
       - name: Upload
-        uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029 # v4.3.5
+        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
         with:
           name: renovate-package
           path: renovate-0.0.0-semantic-release.tgz
@@ -583,17 +590,33 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@568ddd69406b30de1774ec0044b73ae06e716aa4 # v4.1
+        with:
+          python-version-file: .python-version
+          version: ${{ env.PDM_VERSION }}
+          cache: true
+
+      - name: Install pdm dependencies
+        run: pdm install
+
       - name: Build
         run: pnpm build:docs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SKIP_GITHUB_ISSUES: ${{ github.event_name == 'pull_request' && 'true' || '' }}
 
       - name: Test docs
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029 # v4.3.5
+        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
         with:
           name: docs
           path: tmp/docs/
+
+      - name: Build mkdocs
+        run: pnpm mkdocs build --no-build
 
   test-e2e:
     needs: [build]
@@ -660,7 +683,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@c93a92a6d7c698ca2030b1067b25c0c25bac45a2 # v3.3.13
+        uses: containerbase/internal-tools@c7fd9c98b79b3ae16e46dd33610327507e33275c # v3.4.6
         with:
           command: docker-config
 
@@ -670,7 +693,7 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
+      - uses: sigstore/cosign-installer@4959ce089c160fddf62f7b42464195ba1a56d382 # v3.6.0
 
       - name: Docker registry login
         run: |
