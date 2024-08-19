@@ -5,6 +5,7 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { BazelDatasource } from '../../datasource/bazel';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { MavenDatasource } from '../../datasource/maven';
 import * as parser from './parser';
 import { extractPackageFile } from '.';
 
@@ -232,6 +233,59 @@ describe('modules/manager/bazel-module/extract', () => {
           depName: 'rules_foo',
           currentValue: '1.2.3',
           registryUrls: ['https://example.com/custom_registry'],
+        },
+      ]);
+    });
+
+    it('returns maven.install and maven.artifact dependencies', async () => {
+      const input = codeBlock`
+        maven.artifact(
+            artifact = "core.specs.alpha",
+            exclusions = ["org.clojure:clojure"],
+            group = "org.clojure",
+            version = "0.2.56",
+        )
+
+        maven.install(
+            artifacts = [
+                "junit:junit:4.13.2",
+                "com.google.guava:guava:31.1-jre",
+            ],
+            lock_file = "//:maven_install.json",
+            repositories = [
+                "https://repo1.maven.org/maven2/",
+            ],
+            version_conflict_policy = "pinned",
+        )
+      `;
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+      if (!result) {
+        throw new Error('Expected a result.');
+      }
+      expect(result.deps).toEqual([
+        {
+          datasource: MavenDatasource.id,
+          depType: 'maven_install',
+          depName: 'junit:junit',
+          currentValue: '4.13.2',
+          registryUrls: ['https://repo1.maven.org/maven2/'],
+          versioning: 'gradle',
+        },
+        {
+          datasource: MavenDatasource.id,
+          depType: 'maven_install',
+          depName: 'com.google.guava:guava',
+          currentValue: '31.1-jre',
+          registryUrls: ['https://repo1.maven.org/maven2/'],
+          versioning: 'gradle',
+        },
+        {
+          datasource: MavenDatasource.id,
+          depType: 'maven_install',
+          depName: 'org.clojure:core.specs.alpha',
+          currentValue: '0.2.56',
+          registryUrls: ['https://repo1.maven.org/maven2/'],
+          versioning: 'gradle',
         },
       ]);
     });
