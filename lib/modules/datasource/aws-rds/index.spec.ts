@@ -6,7 +6,7 @@ import {
 } from '@aws-sdk/client-rds';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getPkgReleases } from '..';
-import { AwsRdsDataSource } from '.';
+import { AwsRdsDatasource } from '.';
 
 const rdsMock = mockClient(RDSClient);
 
@@ -104,7 +104,7 @@ describe('modules/datasource/aws-rds/index', () => {
         $metadata: {},
       });
       const res = await getPkgReleases({
-        datasource: AwsRdsDataSource.id,
+        datasource: AwsRdsDatasource.id,
         packageName: '[{"Name":"engine","Values":["mysql"]}]',
       });
       expect(res).toBeNull();
@@ -116,7 +116,7 @@ describe('modules/datasource/aws-rds/index', () => {
         DBEngineVersions: [version2],
       });
       const res = await getPkgReleases({
-        datasource: AwsRdsDataSource.id,
+        datasource: AwsRdsDatasource.id,
         packageName: '[{"Name":"engine","Values":["mysql"]}]',
       });
       expect(res).toEqual({
@@ -135,7 +135,7 @@ describe('modules/datasource/aws-rds/index', () => {
         DBEngineVersions: [version1, version2, version3],
       });
       const res = await getPkgReleases({
-        datasource: AwsRdsDataSource.id,
+        datasource: AwsRdsDatasource.id,
         packageName: '[{"Name":"engine","Values":["mysql"]}]',
       });
       expect(res).toEqual({

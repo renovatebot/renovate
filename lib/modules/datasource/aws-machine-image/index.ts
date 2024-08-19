@@ -11,7 +11,7 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { AwsClientConfig, ParsedConfig } from './types';
 
-export class AwsMachineImageDataSource extends Datasource {
+export class AwsMachineImageDatasource extends Datasource {
   static readonly id = 'aws-machine-image';
 
   override readonly defaultVersioning = amazonMachineImageVersioning.id;
@@ -42,7 +42,7 @@ export class AwsMachineImageDataSource extends Datasource {
   private readonly now: number;
 
   constructor() {
-    super(AwsMachineImageDataSource.id);
+    super(AwsMachineImageDatasource.id);
     this.now = Date.now();
   }
 

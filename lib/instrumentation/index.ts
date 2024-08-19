@@ -125,16 +125,16 @@ function getTracer(): Tracer {
   return getTracerProvider().getTracer('renovate');
 }
 
-export function instrument<F extends (span: Span) => ReturnType<F>>(
+export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
 ): ReturnType<F>;
-export function instrument<F extends (span: Span) => ReturnType<F>>(
+export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
   options: SpanOptions,
 ): ReturnType<F>;
-export function instrument<F extends (span: Span) => ReturnType<F>>(
+export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
   options: SpanOptions = {},
@@ -142,7 +142,7 @@ export function instrument<F extends (span: Span) => ReturnType<F>>(
 ): ReturnType<F> {
   return getTracer().startActiveSpan(name, options, context, (span: Span) => {
     try {
-      const ret = fn(span);
+      const ret = fn();
       if (ret instanceof Promise) {
         return ret
           .catch((e) => {

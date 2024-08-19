@@ -118,7 +118,7 @@ export class GalaxyCollectionDatasource extends Datasource {
   }
 
   @cache({
-    key: (versionsUrl, basicRelease: Release) =>
+    key: (_packageName: string, _versionsUrl: string, basicRelease: Release) =>
       `detailed-version|>${basicRelease.version}`,
     ttlMinutes: 10080, // 1 week
   })

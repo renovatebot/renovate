@@ -17,11 +17,11 @@ import {
   CdnjsAPIVersionResponseSchema,
 } from './schema';
 
-export class CdnJsDatasource extends Datasource {
+export class CdnjsDatasource extends Datasource {
   static readonly id = 'cdnjs';
 
   constructor() {
-    super(CdnJsDatasource.id);
+    super(CdnjsDatasource.id);
   }
 
   override readonly customRegistrySupport = false;
