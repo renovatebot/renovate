@@ -7,7 +7,7 @@ import { Lazy } from '../../../util/lazy';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
-export class AwsRdsDataSource extends Datasource {
+export class AwsRdsDatasource extends Datasource {
   static readonly id = 'aws-rds';
 
   override readonly caching = true;
@@ -15,12 +15,12 @@ export class AwsRdsDataSource extends Datasource {
   private readonly rds: Lazy<RDSClient>;
 
   constructor() {
-    super(AwsRdsDataSource.id);
+    super(AwsRdsDatasource.id);
     this.rds = new Lazy(() => new RDSClient({}));
   }
 
   @cache({
-    namespace: `datasource-${AwsRdsDataSource.id}`,
+    namespace: `datasource-${AwsRdsDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
   })
   async getReleases({
