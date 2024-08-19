@@ -9,6 +9,7 @@ import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { clone } from '../../util/clone';
 import { AsyncResult, Result } from '../../util/result';
+import { DatasourceCacheStats } from '../../util/stats';
 import { trimTrailingSlash } from '../../util/url';
 import datasources from './api';
 import {
@@ -69,16 +70,22 @@ async function getRegistryReleases(
       cacheNamespace,
       cacheKey,
     );
+
     // istanbul ignore if
     if (cachedResult) {
       logger.trace({ cacheKey }, 'Returning cached datasource response');
+      DatasourceCacheStats.hit(datasource.id, registryUrl, config.packageName);
       return cachedResult;
     }
+
+    DatasourceCacheStats.miss(datasource.id, registryUrl, config.packageName);
   }
+
   const res = await datasource.getReleases({ ...config, registryUrl });
   if (res?.releases.length) {
     res.registryUrl ??= registryUrl;
   }
+
   // cache non-null responses unless marked as private
   if (datasource.caching && res) {
     const cachePrivatePackages = GlobalConfig.get(
@@ -89,8 +96,12 @@ async function getRegistryReleases(
       logger.trace({ cacheKey }, 'Caching datasource response');
       const cacheMinutes = 15;
       await packageCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
+      DatasourceCacheStats.set(datasource.id, registryUrl, config.packageName);
+    } else {
+      DatasourceCacheStats.skip(datasource.id, registryUrl, config.packageName);
     }
   }
+
   return res;
 }
 
@@ -227,7 +238,7 @@ function resolveRegistryUrls(
     }
     return is.function_(datasource.defaultRegistryUrls)
       ? datasource.defaultRegistryUrls()
-      : datasource.defaultRegistryUrls ?? [];
+      : (datasource.defaultRegistryUrls ?? []);
   }
   const customUrls = registryUrls?.filter(Boolean);
   let resolvedUrls: string[] = [];

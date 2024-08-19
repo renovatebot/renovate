@@ -98,7 +98,7 @@ export function parseJsonWithFallback(
 
   try {
     parsedJson = JSON.parse(content);
-  } catch (err) {
+  } catch {
     parsedJson = JSON5.parse(content);
     logger.warn(
       { context },

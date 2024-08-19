@@ -1,12 +1,14 @@
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import {
+import type {
   GitPullRequest,
   GitPullRequestCommentThread,
-  GitPullRequestMergeStrategy,
   GitStatus,
-  GitStatusState,
   GitVersionDescriptor,
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import {
+  GitPullRequestMergeStrategy,
+  GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import {
@@ -43,7 +45,8 @@ import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
-import { AzurePr, AzurePrVote } from './types';
+import type { AzurePr } from './types';
+import { AzurePrVote } from './types';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
@@ -465,7 +468,7 @@ export async function createPr({
   prBody: body,
   labels,
   draftPR = false,
-  platformOptions,
+  platformPrOptions,
 }: CreatePRConfig): Promise<Pr> {
   const sourceRefName = getNewBranchName(sourceBranch);
   const targetRefName = getNewBranchName(targetBranch);
@@ -473,7 +476,7 @@ export async function createPr({
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
-      id: platformOptions?.azureWorkItemId?.toString(),
+      id: platformPrOptions?.azureWorkItemId?.toString(),
     },
   ];
   let pr: GitPullRequest = await azureApiGit.createPullRequest(
@@ -487,11 +490,11 @@ export async function createPr({
     },
     config.repoId,
   );
-  if (platformOptions?.usePlatformAutomerge) {
+  if (platformPrOptions?.usePlatformAutomerge) {
     const mergeStrategy =
-      platformOptions.automergeStrategy === 'auto'
+      platformPrOptions.automergeStrategy === 'auto'
         ? await getMergeStrategy(pr.targetRefName!)
-        : mapMergeStrategy(platformOptions.automergeStrategy);
+        : mapMergeStrategy(platformPrOptions.automergeStrategy);
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
@@ -509,7 +512,7 @@ export async function createPr({
       pr.pullRequestId!,
     );
   }
-  if (platformOptions?.autoApprove) {
+  if (platformPrOptions?.autoApprove) {
     await azureApiGit.createPullRequestReviewer(
       {
         reviewerUrl: pr.createdBy!.url,
@@ -543,7 +546,7 @@ export async function updatePr({
   prTitle: title,
   prBody: body,
   state,
-  platformOptions,
+  platformPrOptions,
   targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
@@ -572,7 +575,7 @@ export async function updatePr({
   } else if (state === 'closed') {
     objToUpdate.status = PullRequestStatus.Abandoned;
   }
-  if (platformOptions?.autoApprove) {
+  if (platformPrOptions?.autoApprove) {
     const pr = await azureApiGit.getPullRequestById(prNo, config.project);
     await azureApiGit.createPullRequestReviewer(
       {
@@ -827,13 +830,15 @@ export function maxBodyLength(): number {
 
 /* istanbul ignore next */
 export function findIssue(): Promise<Issue | null> {
-  logger.warn(`findIssue() is not implemented`);
+  // TODO: Needs implementation (#9592)
+  logger.debug(`findIssue() is not implemented`);
   return Promise.resolve(null);
 }
 
 /* istanbul ignore next */
 export function ensureIssue(): Promise<EnsureIssueResult | null> {
-  logger.warn(`ensureIssue() is not implemented`);
+  // TODO: Needs implementation (#9592)
+  logger.debug(`ensureIssue() is not implemented`);
   return Promise.resolve(null);
 }
 

@@ -52,7 +52,7 @@ function parseDependencyLine(line: string): PackageDependency | null {
     }
 
     return result;
-  } catch (err) {
+  } catch {
     return null;
   }
 }

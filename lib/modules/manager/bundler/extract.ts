@@ -3,13 +3,13 @@ import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import { RubyGemsDatasource } from '../../datasource/rubygems';
+import { RubygemsDatasource } from '../../datasource/rubygems';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { delimiters, extractRubyVersion, getLockFilePath } from './common';
 import { extractLockFileEntries } from './locked-version';
 
 function formatContent(input: string): string {
-  return input.replace(regEx(/^ {2}/), '') + '\n'; //remove leading witespace and add a new line at the end
+  return input.replace(regEx(/^ {2}/), '') + '\n'; //remove leading whitespace and add a new line at the end
 }
 
 export async function extractPackageFile(
@@ -116,7 +116,7 @@ export async function extractPackageFile(
         const currentValue = gemMatch.groups.currentValue;
         dep.currentValue = currentValue;
       }
-      dep.datasource = RubyGemsDatasource.id;
+      dep.datasource = RubygemsDatasource.id;
       res.deps.push(dep);
     }
 

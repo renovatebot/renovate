@@ -1,8 +1,8 @@
 import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
+import type { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import {
-  GitPullRequest,
   GitPullRequestMergeStrategy,
   GitStatusState,
   PullRequestStatus,
@@ -925,7 +925,7 @@ describe('modules/platform/azure/index', () => {
           prTitle: 'The Title',
           prBody: 'Hello world',
           labels: ['deps', 'renovate'],
-          platformOptions: { usePlatformAutomerge: true },
+          platformPrOptions: { usePlatformAutomerge: true },
         });
         expect(updateFn).toHaveBeenCalled();
         expect(pr).toMatchSnapshot();
@@ -996,7 +996,7 @@ describe('modules/platform/azure/index', () => {
           prTitle: 'The Title',
           prBody: 'Hello world',
           labels: ['deps', 'renovate'],
-          platformOptions: {
+          platformPrOptions: {
             automergeStrategy: 'auto',
             usePlatformAutomerge: true,
           },
@@ -1008,7 +1008,7 @@ describe('modules/platform/azure/index', () => {
           prTitle: 'The Second Title',
           prBody: 'Hello world',
           labels: ['deps', 'renovate'],
-          platformOptions: {
+          platformPrOptions: {
             automergeStrategy: 'auto',
             usePlatformAutomerge: true,
           },
@@ -1061,7 +1061,7 @@ describe('modules/platform/azure/index', () => {
             prTitle: 'The Title',
             prBody: 'Hello world',
             labels: ['deps', 'renovate'],
-            platformOptions: {
+            platformPrOptions: {
               automergeStrategy,
               usePlatformAutomerge: true,
             },
@@ -1113,7 +1113,7 @@ describe('modules/platform/azure/index', () => {
             prTitle: 'The Title',
             prBody: 'Hello world',
             labels: ['deps', 'renovate'],
-            platformOptions: {
+            platformPrOptions: {
               automergeStrategy,
               usePlatformAutomerge: true,
             },
@@ -1163,14 +1163,14 @@ describe('modules/platform/azure/index', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        platformOptions: { autoApprove: true },
+        platformPrOptions: { autoApprove: true },
       });
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();
     });
   });
 
-  describe('updatePr(prNo, title, body, platformOptions)', () => {
+  describe('updatePr(prNo, title, body, platformPrOptions)', () => {
     it('should update the PR', async () => {
       await initRepo({ repository: 'some/repo' });
       const updatePullRequest = jest.fn();
@@ -1272,7 +1272,7 @@ describe('modules/platform/azure/index', () => {
         number: prResult.pullRequestId,
         prTitle: 'The Title',
         prBody: 'Hello world',
-        platformOptions: { autoApprove: true },
+        platformPrOptions: { autoApprove: true },
       });
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();

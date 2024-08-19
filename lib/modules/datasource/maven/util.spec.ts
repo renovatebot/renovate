@@ -40,7 +40,10 @@ describe('modules/datasource/maven/util', () => {
   describe('downloadHttpProtocol', () => {
     it('returns empty for HOST_DISABLED error', async () => {
       const http = partial<Http>({
-        get: () => Promise.reject({ message: HOST_DISABLED }),
+        get: () =>
+          Promise.reject(
+            Object.assign(new Error(), { message: HOST_DISABLED }),
+          ),
       });
       const res = await downloadHttpProtocol(http, 'some://');
       expect(res).toStrictEqual({});
@@ -48,7 +51,8 @@ describe('modules/datasource/maven/util', () => {
 
     it('returns empty for host error', async () => {
       const http = partial<Http>({
-        get: () => Promise.reject({ code: 'ETIMEDOUT' }),
+        get: () =>
+          Promise.reject(Object.assign(new Error(), { code: 'ETIMEDOUT' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
       expect(res).toStrictEqual({});
@@ -56,7 +60,8 @@ describe('modules/datasource/maven/util', () => {
 
     it('returns empty for temporal error', async () => {
       const http = partial<Http>({
-        get: () => Promise.reject({ code: 'ECONNRESET' }),
+        get: () =>
+          Promise.reject(Object.assign(new Error(), { code: 'ECONNRESET' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
       expect(res).toStrictEqual({});
@@ -64,7 +69,8 @@ describe('modules/datasource/maven/util', () => {
 
     it('returns empty for connection error', async () => {
       const http = partial<Http>({
-        get: () => Promise.reject({ code: 'ECONNREFUSED' }),
+        get: () =>
+          Promise.reject(Object.assign(new Error(), { code: 'ECONNREFUSED' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
       expect(res).toStrictEqual({});
@@ -72,7 +78,10 @@ describe('modules/datasource/maven/util', () => {
 
     it('returns empty for unsupported error', async () => {
       const http = partial<Http>({
-        get: () => Promise.reject({ name: 'UnsupportedProtocolError' }),
+        get: () =>
+          Promise.reject(
+            Object.assign(new Error(), { name: 'UnsupportedProtocolError' }),
+          ),
       });
       const res = await downloadHttpProtocol(http, 'some://');
       expect(res).toStrictEqual({});

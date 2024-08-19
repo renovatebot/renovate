@@ -1,6 +1,7 @@
 import { logger } from '../../test/util';
 import * as memCache from './cache/memory';
 import {
+  DatasourceCacheStats,
   HttpCacheStats,
   HttpStats,
   LookupStats,
@@ -230,6 +231,60 @@ describe('util/stats', () => {
     });
   });
 
+  describe('DatasourceCacheStats', () => {
+    it('collects data points', () => {
+      DatasourceCacheStats.hit('crate', 'https://foo.example.com', 'foo');
+      DatasourceCacheStats.miss('maven', 'https://bar.example.com', 'bar');
+      DatasourceCacheStats.set('npm', 'https://baz.example.com', 'baz');
+      DatasourceCacheStats.skip('rubygems', 'https://qux.example.com', 'qux');
+
+      const report = DatasourceCacheStats.getReport();
+
+      expect(report).toEqual({
+        long: {
+          crate: {
+            'https://foo.example.com': { foo: { read: 'hit' } },
+          },
+          maven: {
+            'https://bar.example.com': { bar: { read: 'miss' } },
+          },
+          npm: {
+            'https://baz.example.com': { baz: { write: 'set' } },
+          },
+          rubygems: {
+            'https://qux.example.com': { qux: { write: 'skip' } },
+          },
+        },
+        short: {
+          crate: {
+            'https://foo.example.com': { hit: 1, miss: 0, set: 0, skip: 0 },
+          },
+          maven: {
+            'https://bar.example.com': { hit: 0, miss: 1, set: 0, skip: 0 },
+          },
+          npm: {
+            'https://baz.example.com': { hit: 0, miss: 0, set: 1, skip: 0 },
+          },
+          rubygems: {
+            'https://qux.example.com': { hit: 0, miss: 0, set: 0, skip: 1 },
+          },
+        },
+      });
+    });
+
+    it('reports', () => {
+      DatasourceCacheStats.hit('crate', 'https://foo.example.com', 'foo');
+      DatasourceCacheStats.miss('maven', 'https://bar.example.com', 'bar');
+      DatasourceCacheStats.set('npm', 'https://baz.example.com', 'baz');
+      DatasourceCacheStats.skip('rubygems', 'https://qux.example.com', 'qux');
+
+      DatasourceCacheStats.report();
+
+      expect(logger.logger.trace).toHaveBeenCalledTimes(1);
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('HttpStats', () => {
     it('returns empty report', () => {
       const res = HttpStats.getReport();
@@ -380,7 +435,7 @@ describe('util/stats', () => {
 
       HttpStats.report();
 
-      expect(logger.logger.trace).toHaveBeenCalledTimes(1);
+      expect(logger.logger.trace).toHaveBeenCalledTimes(2);
       const [traceData, traceMsg] = logger.logger.trace.mock.calls[0];
       expect(traceMsg).toBe('HTTP full statistics');
       expect(traceData).toEqual({
@@ -424,6 +479,24 @@ describe('util/stats', () => {
         },
       });
 
+      const [trace2Data, trace2Msg] = logger.logger.trace.mock.calls[1];
+      expect(trace2Msg).toBe('HTTP URL statistics');
+      expect(trace2Data).toEqual({
+        urls: {
+          'https://example.com/bar': {
+            GET: {
+              '200': 1,
+            },
+          },
+          'https://example.com/foo': {
+            GET: {
+              '200': 2,
+              '404': 1,
+            },
+          },
+        },
+      });
+
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
       const [debugData, debugMsg] = logger.logger.debug.mock.calls[0];
       expect(debugMsg).toBe('HTTP statistics');
@@ -440,19 +513,6 @@ describe('util/stats', () => {
           },
         },
         requests: 4,
-        urls: {
-          'https://example.com/bar': {
-            GET: {
-              '200': 1,
-            },
-          },
-          'https://example.com/foo': {
-            GET: {
-              '200': 2,
-              '404': 1,
-            },
-          },
-        },
       });
     });
   });

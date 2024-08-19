@@ -39,13 +39,12 @@ import {
 } from './common';
 import { DockerHubCache } from './dockerhub-cache';
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr';
+import type { DistributionManifest, OciImageManifest } from './schema';
 import {
-  DistributionManifest,
   DockerHubTagsPage,
   ManifestJson,
   OciHelmConfig,
   OciImageConfig,
-  OciImageManifest,
 } from './schema';
 
 const defaultConfig = {
@@ -988,9 +987,9 @@ export class DockerDatasource extends Datasource {
         return null;
       }
 
-      const { results, next } = val;
+      const { results, next, count } = val;
 
-      needNextPage = cache.reconcile(results);
+      needNextPage = cache.reconcile(results, count);
 
       if (!next) {
         break;
@@ -1076,7 +1075,7 @@ export class DockerDatasource extends Datasource {
 
     const tagsResult =
       registryHost === 'https://index.docker.io' &&
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS
+      !process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE
         ? getDockerHubTags()
         : getTags();
 
@@ -1099,7 +1098,7 @@ export class DockerDatasource extends Datasource {
     const tags = releases.map((release) => release.version);
     const latestTag = tags.includes('latest')
       ? 'latest'
-      : findLatestStable(tags) ?? tags[tags.length - 1];
+      : (findLatestStable(tags) ?? tags[tags.length - 1]);
 
     // istanbul ignore if: needs test
     if (!latestTag) {
