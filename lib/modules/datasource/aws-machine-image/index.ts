@@ -1,9 +1,5 @@
-import {
-  DescribeImagesCommand,
-  EC2Client,
-  Filter,
-  Image,
-} from '@aws-sdk/client-ec2';
+import type { Filter, Image } from '@aws-sdk/client-ec2';
+import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { cache } from '../../../util/cache/package/decorator';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image';

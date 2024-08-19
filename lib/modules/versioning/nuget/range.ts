@@ -1,4 +1,4 @@
-import { NugetFloatingRange, NugetRange, NugetVersion } from './types';
+import type { NugetFloatingRange, NugetRange, NugetVersion } from './types';
 import { compare, versionToString } from './version';
 
 export function getFloatingRangeLowerBound(

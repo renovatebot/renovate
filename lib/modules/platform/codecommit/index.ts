@@ -1,9 +1,9 @@
 import { Buffer } from 'node:buffer';
-import {
+import type {
   GetCommentsForPullRequestOutput,
   ListRepositoriesOutput,
-  PullRequestStatusEnum,
 } from '@aws-sdk/client-codecommit';
+import { PullRequestStatusEnum } from '@aws-sdk/client-codecommit';
 import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,

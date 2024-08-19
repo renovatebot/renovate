@@ -100,7 +100,7 @@ export type PackageCacheNamespace =
   | 'datasource-ruby-version'
   | 'datasource-rubygems'
   | 'datasource-terraform-module'
-  | 'datasource-terraform-provider-build-hashes'
+  | 'datasource-terraform-provider-hash'
   | 'datasource-terraform-provider-builds'
   | 'datasource-terraform-provider-releaseBackendIndex'
   | 'datasource-terraform-provider-zip-hashes'

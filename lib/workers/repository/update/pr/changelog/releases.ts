@@ -1,11 +1,12 @@
 // TODO #22198
 import { logger } from '../../../../../logger';
+import type { Release } from '../../../../../modules/datasource';
 import {
-  Release,
   getPkgReleases,
   isGetPkgReleasesConfig,
 } from '../../../../../modules/datasource';
-import { VersioningApi, get } from '../../../../../modules/versioning';
+import type { VersioningApi } from '../../../../../modules/versioning';
+import { get } from '../../../../../modules/versioning';
 import { coerceArray } from '../../../../../util/array';
 import type { BranchUpgradeConfig } from '../../../../types';
 

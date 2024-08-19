@@ -1,9 +1,5 @@
-import {
-  DescribeImagesCommand,
-  DescribeImagesResult,
-  EC2Client,
-  Image,
-} from '@aws-sdk/client-ec2';
+import type { DescribeImagesResult, Image } from '@aws-sdk/client-ec2';
+import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getDigest, getPkgReleases } from '..';
 import { AwsMachineImageDatasource } from '.';

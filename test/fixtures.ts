@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import type { PathLike, Stats } from 'node:fs';
 import callsite from 'callsite';
-import { DirectoryJSON, fs as memfs, vol } from 'memfs';
+import type { DirectoryJSON } from 'memfs';
+import { fs as memfs, vol } from 'memfs';
 import type { TDataOut } from 'memfs/lib/encoding';
 import upath from 'upath';
 

@@ -1,6 +1,8 @@
 import { mock } from 'jest-mock-extended';
-import { SimpleGit, simpleGit } from 'simple-git';
-import { DirectoryResult, dir } from 'tmp-promise';
+import type { SimpleGit } from 'simple-git';
+import { simpleGit } from 'simple-git';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import { join } from 'upath';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';

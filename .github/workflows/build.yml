@@ -260,7 +260,13 @@ jobs:
           key: prettier-main-cache
 
       - name: Lint
-        run: pnpm prettier --cache-location .cache/prettier
+        run: |
+          pnpm prettier --write --cache-location .cache/prettier
+          git diff --quiet || {
+            echo "[ERROR] Please apply the changes prettier suggests:"
+            git diff --color=always
+            exit 1
+          }
 
       - name: Remove cache
         if: github.event_name == 'push'
