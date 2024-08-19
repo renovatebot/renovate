@@ -1,4 +1,5 @@
-import { KnownProps, parse } from 'editorconfig';
+import type { KnownProps } from 'editorconfig';
+import { parse } from 'editorconfig';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';

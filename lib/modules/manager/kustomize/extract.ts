@@ -179,7 +179,7 @@ export function parseKustomize(
   try {
     // TODO: use schema (#9610)
     pkg = parseSingleYaml(content, { json: true });
-  } catch (e) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     logger.debug({ packageFile }, 'Error parsing kustomize file');
     return null;
   }

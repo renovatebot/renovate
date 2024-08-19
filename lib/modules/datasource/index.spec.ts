@@ -750,19 +750,19 @@ describe('modules/datasource/index', () => {
         it('returns null if no releases are found', async () => {
           const registries: RegistriesMock = {
             'https://reg1.com': () => {
-              throw { statusCode: '404' };
+              throw Object.assign(new Error(), { statusCode: '404' });
             },
             'https://reg2.com': () => {
-              throw { statusCode: '401' };
+              throw Object.assign(new Error(), { statusCode: '401' });
             },
             'https://reg3.com': () => {
-              throw { statusCode: '403' };
+              throw Object.assign(new Error(), { statusCode: '403' });
             },
             'https://reg4.com': () => {
               throw new Error('b');
             },
             'https://reg5.com': () => {
-              throw { code: '403' };
+              throw Object.assign(new Error(), { code: '403' });
             },
           };
           const registryUrls = Object.keys(registries);

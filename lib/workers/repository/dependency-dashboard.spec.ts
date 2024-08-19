@@ -2,12 +2,8 @@ import { ERROR, WARN } from 'bunyan';
 import { codeBlock } from 'common-tags';
 import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
-import {
-  RenovateConfig,
-  logger,
-  mockedFunction,
-  platform,
-} from '../../../test/util';
+import type { RenovateConfig } from '../../../test/util';
+import { logger, mockedFunction, platform } from '../../../test/util';
 import { getConfig } from '../../config/defaults';
 import { GlobalConfig } from '../../config/global';
 import type {

@@ -5,7 +5,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as rubyVersioning from '../../versioning/ruby';
 import { memCache } from './versions-endpoint-cache';
-import { RubyGemsDatasource } from '.';
+import { RubygemsDatasource } from '.';
 
 const rubygemsOrgVersions = codeBlock`
   created_at: 2023-01-01T00:00:00.000Z
@@ -33,7 +33,7 @@ describe('modules/datasource/rubygems/index', () => {
       expect(
         await getPkgReleases({
           versioning: rubyVersioning.id,
-          datasource: RubyGemsDatasource.id,
+          datasource: RubygemsDatasource.id,
           packageName: 'foobar',
           registryUrls: ['https://example.com'],
         }),
@@ -44,7 +44,7 @@ describe('modules/datasource/rubygems/index', () => {
       httpMock.scope('https://rubygems.org').get('/versions').reply(404);
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
-        datasource: RubyGemsDatasource.id,
+        datasource: RubygemsDatasource.id,
         packageName: 'foobar',
         registryUrls: [],
       });
@@ -67,7 +67,7 @@ describe('modules/datasource/rubygems/index', () => {
 
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
-        datasource: RubyGemsDatasource.id,
+        datasource: RubygemsDatasource.id,
         packageName: 'foobar',
         registryUrls: [],
       });
@@ -98,7 +98,7 @@ describe('modules/datasource/rubygems/index', () => {
 
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
-        datasource: RubyGemsDatasource.id,
+        datasource: RubygemsDatasource.id,
         packageName: 'foobar',
         registryUrls: [],
       });
@@ -136,7 +136,7 @@ describe('modules/datasource/rubygems/index', () => {
 
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
-        datasource: RubyGemsDatasource.id,
+        datasource: RubygemsDatasource.id,
         packageName: 'foobar',
         registryUrls: [
           'https://registry-1.com',
@@ -173,7 +173,7 @@ describe('modules/datasource/rubygems/index', () => {
 
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
-        datasource: RubyGemsDatasource.id,
+        datasource: RubygemsDatasource.id,
         packageName: 'foobar',
         registryUrls: ['https://example.com'],
       });
@@ -205,7 +205,7 @@ describe('modules/datasource/rubygems/index', () => {
 
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
-        datasource: RubyGemsDatasource.id,
+        datasource: RubygemsDatasource.id,
         packageName: 'foobar',
         registryUrls: ['https://example.com'],
       });
@@ -228,7 +228,7 @@ describe('modules/datasource/rubygems/index', () => {
       await expect(
         getPkgReleases({
           versioning: rubyVersioning.id,
-          datasource: RubyGemsDatasource.id,
+          datasource: RubygemsDatasource.id,
           packageName: 'foobar',
           registryUrls: ['https://example.com'],
         }),
@@ -248,7 +248,7 @@ describe('modules/datasource/rubygems/index', () => {
       await expect(
         getPkgReleases({
           versioning: rubyVersioning.id,
-          datasource: RubyGemsDatasource.id,
+          datasource: RubygemsDatasource.id,
           packageName: 'foobar',
           registryUrls: ['https://example.com'],
         }),
@@ -263,7 +263,7 @@ describe('modules/datasource/rubygems/index', () => {
 
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
-        datasource: RubyGemsDatasource.id,
+        datasource: RubygemsDatasource.id,
         packageName: 'foobar',
         registryUrls: ['https://rubygems.pkg.github.com/example'],
       });
@@ -286,7 +286,7 @@ describe('modules/datasource/rubygems/index', () => {
 
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
-        datasource: RubyGemsDatasource.id,
+        datasource: RubygemsDatasource.id,
         packageName: 'foobar',
         registryUrls: ['https://rubygems.pkg.github.com/example'],
       });

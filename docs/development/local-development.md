@@ -173,6 +173,13 @@ You usually don't need to fix any Prettier errors by hand.
 
 If you're only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
 
+## Documentation
+
+We use [MkDocs](https://www.mkdocs.org) to generate the documentation.
+You can run `pnpm build:docs` to generate the docs.
+Then use `pnpm mkdocs serve` to preview the documentation locally.
+The docs will update automatically when you run `pnpm build:docs` again, no need to stop the `pnpm mkdocs serve` command.
+
 ## Keeping your Renovate fork up to date
 
 First of all, never commit to the `main` branch of your fork - always use a "feature" branch like `feat/1234-add-yarn-parsing`.

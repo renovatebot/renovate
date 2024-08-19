@@ -80,7 +80,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
     const cacheMinutes = 3 * 24 * 60; // 3 days
     await packageCache.set(cacheNamespace, url, hash, cacheMinutes);
     return hash;
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     return null;
   }
 }
