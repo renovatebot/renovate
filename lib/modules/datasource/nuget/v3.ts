@@ -24,7 +24,7 @@ import type {
 } from './types';
 
 export class NugetV3Api {
-  static readonly cacheNamespace = 'datasource-nuget';
+  static readonly cacheNamespace = 'datasource-nuget-v3';
 
   async getResourceUrl(
     http: Http,
