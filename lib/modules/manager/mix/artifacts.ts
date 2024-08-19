@@ -104,7 +104,7 @@ export async function updateArtifacts({
     [] as string[],
   );
 
-  preCommands = preCommands.concat(orgPreCommands);
+  preCommands.push(...orgPreCommands);
 
   // auth repo registries
 
