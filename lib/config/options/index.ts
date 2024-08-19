@@ -515,7 +515,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:11.11.2',
+    default: 'ghcr.io/containerbase/sidecar:11.11.5',
     globalOnly: true,
   },
   {
@@ -2929,6 +2929,14 @@ const options: RenovateOptions[] = [
     type: 'integer',
     stage: 'repository',
     default: 90,
+    globalOnly: true,
+  },
+  {
+    name: 'dockerMaxPages',
+    description:
+      'By default, Renovate fetches up to 20 pages of Docker tags from registries. But you can set your own limit with this config option.',
+    type: 'integer',
+    default: 20,
     globalOnly: true,
   },
   {

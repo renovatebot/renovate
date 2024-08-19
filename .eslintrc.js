@@ -90,6 +90,10 @@ module.exports = {
       'error',
       { assertionStyle: 'as', objectLiteralTypeAssertions: 'allow' },
     ],
+    '@typescript-eslint/consistent-type-imports': [
+      'error',
+      { disallowTypeAnnotations: false },
+    ],
 
     // Makes no sense to allow type inference for expression parameters, but require typing the response
     '@typescript-eslint/explicit-function-return-type': [

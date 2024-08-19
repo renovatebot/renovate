@@ -1,4 +1,5 @@
-import { parser, query as q } from 'good-enough-parser';
+import type { parser } from 'good-enough-parser';
+import { query as q } from 'good-enough-parser';
 import { regEx } from '../../../../util/regex';
 import type { Ctx } from '../types';
 import {
