@@ -1,10 +1,6 @@
 import { logger } from '../../../logger';
-import {
-  PubspecLockSchema,
-  PubspecLockYaml,
-  PubspecSchema,
-  PubspecYaml,
-} from './schema';
+import type { PubspecLockSchema, PubspecSchema } from './schema';
+import { PubspecLockYaml, PubspecYaml } from './schema';
 
 export function parsePubspec(
   fileName: string,

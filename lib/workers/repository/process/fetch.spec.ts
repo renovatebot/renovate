@@ -1,4 +1,5 @@
-import { RenovateConfig, mocked } from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { MavenDatasource } from '../../../modules/datasource/maven';
 import type { PackageFile } from '../../../modules/manager/types';

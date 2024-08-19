@@ -117,6 +117,23 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
+      it('supports Go submodules in GitLab repo', async () => {
+        httpMock
+          .scope('https://gitlab.com')
+          .get('/example/module/submodule?go-get=1')
+          .reply(200, Fixtures.get('go-get-submodule-gitlab.html'));
+
+        const res = await BaseGoDatasource.getDatasource(
+          'gitlab.com/example/module/submodule',
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'example/module',
+          registryUrl: 'https://gitlab.com',
+        });
+      });
+
       it('supports GitLab deps', async () => {
         httpMock
           .scope('https://gitlab.com')
@@ -163,7 +180,7 @@ describe('modules/datasource/go/base', () => {
 
         expect(res).toEqual({
           datasource: GitlabTagsDatasource.id,
-          packageName: 'group/subgroup/my.git.module',
+          packageName: 'group/subgroup',
           registryUrl: 'https://gitlab.com',
         });
       });

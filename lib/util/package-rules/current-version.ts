@@ -41,7 +41,7 @@ export class CurrentVersionMatcher extends Matcher {
             version.matches(matchCurrentVersionStr, currentValue)
           )
         );
-      } catch (err) {
+      } catch {
         return false;
       }
     }

@@ -61,7 +61,7 @@ export async function getUserEmail(
       })
     ).body;
     return emails?.[0].email ?? null;
-  } catch (err) {
+  } catch {
     logger.debug(
       'Cannot read user/emails endpoint on GitHub to retrieve gitAuthor',
     );

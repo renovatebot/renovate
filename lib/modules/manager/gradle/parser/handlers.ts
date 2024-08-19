@@ -299,7 +299,7 @@ export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
           scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
         });
       }
-    } catch (e) {
+    } catch {
       // no-op
     }
   }
