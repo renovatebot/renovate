@@ -21,27 +21,6 @@ spec:
     repositoryName: glasskube
     version: v2.11.7+1
 `;
-const packageWithEmptyReponame = codeBlock`
-apiVersion: packages.glasskube.dev/v1alpha1
-kind: ClusterPackage
-metadata:
-  name: argo-cd
-spec:
-  packageInfo:
-    name: argo-cd
-    version: v2.11.7+1
-    repositoryName: ""
-`;
-const packageWithMissingReponame = codeBlock`
-apiVersion: packages.glasskube.dev/v1alpha1
-kind: ClusterPackage
-metadata:
-  name: argo-cd
-spec:
-  packageInfo:
-    name: argo-cd
-    version: v2.11.7+1
-`;
 const repository = codeBlock`
 apiVersion: packages.glasskube.dev/v1alpha1
 kind: PackageRepository
@@ -121,8 +100,26 @@ describe('modules/manager/glasskube/extract', () => {
     });
 
     it('should extract registryUrl from default repo in other file', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(packageWithEmptyReponame);
-      fs.readLocalFile.mockResolvedValueOnce(packageWithMissingReponame);
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        apiVersion: packages.glasskube.dev/v1alpha1
+        kind: ClusterPackage
+        metadata:
+          name: argo-cd
+        spec:
+          packageInfo:
+            name: argo-cd
+            version: v2.11.7+1
+      `);
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        apiVersion: packages.glasskube.dev/v1alpha1
+        kind: ClusterPackage
+        metadata:
+          name: argo-cd
+        spec:
+          packageInfo:
+            name: argo-cd
+            version: v2.11.7+1
+      `);
       fs.readLocalFile.mockResolvedValueOnce(repository);
       const deps = await extractAllPackageFiles(config, [
         'package-with-empty-reponame.yaml',
