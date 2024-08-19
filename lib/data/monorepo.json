@@ -252,6 +252,7 @@
       "https://github.com/dotnet/efcore",
       "https://github.com/dotnet/extensions",
       "https://github.com/dotnet/maui",
+      "https://github.com/dotnet/roslyn",
       "https://github.com/dotnet/runtime",
       "https://github.com/dotnet/scaffolding",
       "https://github.com/dotnet/sdk"
@@ -442,6 +443,8 @@
     "retrofit": "https://github.com/square/retrofit",
     "rjsf": "https://github.com/rjsf-team/react-jsonschema-form",
     "router5": "https://github.com/router5/router5",
+    "ruby-on-rails": "https://github.com/rails/rails",
+    "rust-analyzer": "https://github.com/rust-lang/rust-analyzer",
     "rust-futures": "https://github.com/rust-lang/futures-rs",
     "rust-wasm-bindgen": "https://github.com/rustwasm/wasm-bindgen",
     "sanity": "https://github.com/sanity-io/sanity",
@@ -494,7 +497,10 @@
     "trpc": "https://github.com/trpc/trpc",
     "trust-dns": "https://github.com/bluejekyll/trust-dns",
     "tsoa": "https://github.com/lukeautry/tsoa",
-    "turbo": "https://github.com/vercel/turbo",
+    "turbo": [
+      "https://github.com/vercel/turbo",
+      "https://github.com/vercel/turborepo"
+    ],
     "turf": "https://github.com/Turfjs/turf",
     "typed-signalr": "https://github.com/nenoNaninu/TypedSignalR.Client.TypeScript",
     "typefaces": "https://github.com/KyleAMathews/typefaces",

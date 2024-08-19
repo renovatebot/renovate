@@ -36,7 +36,7 @@ export class LocalFs implements PlatformScm {
       const stdout = execSync('git ls-files', { encoding: 'utf-8' });
       logger.debug('Got file list using git');
       fileList = stdout.split('\n');
-    } catch (err) {
+    } catch {
       logger.debug('Could not get file list using git, using glob instead');
       fileList ??= await glob('**', {
         dot: true,
