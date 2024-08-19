@@ -3,7 +3,7 @@ A `project.toml` file can reference builder / buildpack images by URIs.
 Renovate can update a `project.toml` file if:
 
 - It can find the file
-- The file follows the [project descriptor](https://github.com/buildpacks/spec/blob/main/extensions/project-descriptor.md) specifications
+- The file follows the [project descriptor specifications](https://github.com/buildpacks/spec/blob/main/extensions/project-descriptor.md)
 
 If you use buildpacks in the `io.buildpacks.group` array, then you _must_ configure the Docker reference (`uri`) for Renovate to work.
 

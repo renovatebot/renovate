@@ -23,8 +23,32 @@ describe('modules/manager/cnb/extract', () => {
         'project.toml',
         {},
       );
-      expect(res?.deps).toHaveLength(3);
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.1.1',
+          datasource: 'docker',
+          depName: 'registry.corp/builder/noble',
+          replaceString: 'registry.corp/builder/noble:1.1.1',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '2.2.2',
+          datasource: 'docker',
+          depName: 'buildpacks/java',
+          replaceString: 'buildpacks/java:2.2.2',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '3.3.3',
+          datasource: 'docker',
+          depName: 'buildpacks/nodejs',
+          replaceString: 'buildpacks/nodejs:3.3.3',
+        },
+      ]);
     });
   });
 });
