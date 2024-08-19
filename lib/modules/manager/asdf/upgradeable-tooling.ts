@@ -121,7 +121,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'cookiecutter/cookiecutter',
-      extractVersion: '^v(?<version>\\S+)',
+      versioning: semverVersioning.id,
     },
   },
   cosign: {
@@ -316,7 +316,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
       packageName: 'istio/istio',
       versioning: semverVersioning.id,
-      extractVersion: '^v(?<version>\\S+)',
     },
   },
   java: {
