@@ -96,7 +96,7 @@ export type PackageCacheNamespace =
   | 'datasource-pod'
   | 'datasource-python-version'
   | 'datasource-releases'
-  | 'datasource-repology-list'
+  | 'datasource-repology'
   | 'datasource-ruby-version'
   | 'datasource-rubygems'
   | 'datasource-terraform-module'
