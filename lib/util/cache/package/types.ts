@@ -80,6 +80,7 @@ export type PackageCacheNamespace =
   | 'datasource-hex'
   | 'datasource-hexpm-bob'
   | 'datasource-java-version'
+  | 'datasource-jenkins-plugins'
   | 'datasource-maven:head-requests-timeout'
   | 'datasource-maven:head-requests'
   | 'datasource-maven:index-html-releases'
@@ -108,7 +109,6 @@ export type PackageCacheNamespace =
   | 'github-releases-datasource-v2'
   | 'github-tags-datasource-v2'
   | 'go'
-  | 'jenkins-plugins'
   | 'merge-confidence'
   | 'preset'
   | 'url-sha256';
