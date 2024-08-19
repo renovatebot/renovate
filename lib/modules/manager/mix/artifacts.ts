@@ -121,8 +121,6 @@ export async function updateArtifacts({
         `No hostRule token defined for repo ${name} with url ${registry}.`,
       );
     }
-
-    preCommands;
   }
 
   const execOptions: ExecOptions = {
