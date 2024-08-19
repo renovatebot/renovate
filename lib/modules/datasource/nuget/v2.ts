@@ -1,4 +1,5 @@
-import { XmlDocument, XmlElement } from 'xmldoc';
+import type { XmlElement } from 'xmldoc';
+import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import type { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';

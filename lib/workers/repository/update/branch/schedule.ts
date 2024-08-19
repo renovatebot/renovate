@@ -1,13 +1,13 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
-import {
+import type {
   CronExpression,
   DayOfTheMonthRange,
   DayOfTheWeekRange,
   HourRange,
   MonthRange,
-  parseExpression,
 } from 'cron-parser';
+import { parseExpression } from 'cron-parser';
 import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
