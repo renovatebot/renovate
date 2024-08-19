@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import { regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -8,11 +9,11 @@ import type {
 } from '../types';
 import { type ProjectDescriptor, ProjectDescriptorToml } from './schema';
 
-const dockerPrefix = /^docker:\/\//;
+const dockerPrefix = regEx(/^docker:\/\//);
 
 function isDockerRef(ref: string): boolean {
-  const schemaMatch = ref.match(/^([a-z0-9]+):\/\//);
-  if (schemaMatch && !schemaMatch[0].match(dockerPrefix)) {
+  const schemaMatch = regEx(/^([a-z0-9]+):\/\//).test(ref);
+  if (schemaMatch && !ref.startsWith('docker://')) {
     return false;
   }
 
