@@ -522,5 +522,32 @@ describe('util/template/index', () => {
 
       expect(output).toBe(' ABC-123 DEF-456');
     });
+
+    it('handles null elements', () => {
+      const output = template.compile(
+        '{{#each (distinct input)}}{{{.}}}{{/each}}',
+        {
+          input: [
+            null,
+            null,
+          ],
+        },
+        false,
+      );
+
+      expect(output).toBe('');
+    });
+
+    it('handles null input', () => {
+      const output = template.compile(
+        '{{#each (distinct input)}}{{{.}}}{{/each}}',
+        {
+          input: null,
+        },
+        false,
+      );
+
+      expect(output).toBe('');
+    });
   });
 });
