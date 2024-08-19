@@ -2898,6 +2898,7 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     cli: false,
     env: false,
+    mergeable: true,
   },
   {
     name: 'matchMessage',
