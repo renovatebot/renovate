@@ -9,8 +9,10 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { BazelModuleMetadata } from './schema';
 
+const id = 'bazel';
+
 export class BazelDatasource extends Datasource {
-  static readonly id = 'bazel';
+  static readonly id = id;
 
   static readonly bazelCentralRepoUrl =
     'https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main';
@@ -30,7 +32,7 @@ export class BazelDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${BazelDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       `${registryUrl!}:${packageName}`,
   })

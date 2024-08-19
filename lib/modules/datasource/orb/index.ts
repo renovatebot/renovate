@@ -18,8 +18,10 @@ query($packageName: String!) {
 }
 `;
 
+const id = 'orb';
+
 export class OrbDatasource extends Datasource {
-  static readonly id = 'orb';
+  static readonly id = id;
 
   constructor() {
     super(OrbDatasource.id);
@@ -34,7 +36,7 @@ export class OrbDatasource extends Datasource {
     'The release timestamp is determined from the `createdAt` field in the results.';
 
   @cache({
-    namespace: `datasource-${OrbDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getReleases({

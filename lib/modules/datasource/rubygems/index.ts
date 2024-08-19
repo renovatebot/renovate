@@ -26,8 +26,10 @@ function unlessServerSide<
   return cb();
 }
 
+const id = 'rubygems';
+
 export class RubyGemsDatasource extends Datasource {
-  static readonly id = 'rubygems';
+  static readonly id = id;
 
   private metadataCache: MetadataCache;
 
@@ -54,7 +56,7 @@ export class RubyGemsDatasource extends Datasource {
     'The source URL is determined from the `source_code_uri` field in the results.';
 
   @cache({
-    namespace: `datasource-${RubyGemsDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
       // TODO: types (#22198)
       `releases:${registryUrl!}:${packageName}`,

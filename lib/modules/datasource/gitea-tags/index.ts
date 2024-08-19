@@ -7,14 +7,15 @@ import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { CommitsSchema, TagSchema, TagsSchema } from './schema';
 
+const id = 'gitea-tags';
+const cacheNamespace: PackageCacheNamespace = `datasource-${id}`;
+
 export class GiteaTagsDatasource extends Datasource {
-  static readonly id = 'gitea-tags';
+  static readonly id = id;
 
   override http = new GiteaHttp(GiteaTagsDatasource.id);
 
   static readonly defaultRegistryUrls = ['https://gitea.com'];
-
-  private static readonly cacheNamespace: PackageCacheNamespace = `datasource-${GiteaTagsDatasource.id}`;
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -56,7 +57,7 @@ export class GiteaTagsDatasource extends Datasource {
 
   // getReleases fetches list of tags for the repository
   @cache({
-    namespace: GiteaTagsDatasource.cacheNamespace,
+    namespace: cacheNamespace,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       GiteaTagsDatasource.getCacheKey(registryUrl, packageName, 'tags'),
   })
@@ -93,7 +94,7 @@ export class GiteaTagsDatasource extends Datasource {
 
   // getTagCommit fetched the commit has for specified tag
   @cache({
-    namespace: GiteaTagsDatasource.cacheNamespace,
+    namespace: cacheNamespace,
     key: (registryUrl: string | undefined, repo: string, tag: string): string =>
       GiteaTagsDatasource.getCacheKey(registryUrl, repo, `tag-${tag}`),
   })
@@ -114,7 +115,7 @@ export class GiteaTagsDatasource extends Datasource {
   // getDigest fetched the latest commit for repository main branch
   // however, if newValue is provided, then getTagCommit is called
   @cache({
-    namespace: GiteaTagsDatasource.cacheNamespace,
+    namespace: cacheNamespace,
     key: ({ registryUrl, packageName }: DigestConfig) =>
       GiteaTagsDatasource.getCacheKey(registryUrl, packageName, 'digest'),
   })

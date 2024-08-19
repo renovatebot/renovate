@@ -14,8 +14,10 @@ import type {
 } from './types';
 import { createSDBackendURL } from './utils';
 
+const id = 'terraform-module';
+
 export class TerraformModuleDatasource extends TerraformDatasource {
-  static override readonly id = 'terraform-module';
+  static override readonly id = id;
 
   constructor() {
     super(TerraformModuleDatasource.id);
@@ -43,7 +45,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
    *  - `homepage` is set to the Terraform registry's page if it's on the official main registry
    */
   @cache({
-    namespace: `datasource-${TerraformModuleDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: (getReleasesConfig: GetReleasesConfig) =>
       TerraformModuleDatasource.getCacheKey(getReleasesConfig),
   })

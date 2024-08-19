@@ -7,8 +7,10 @@ import { BicepResourceVersionIndex } from './schema';
 const BICEP_TYPES_INDEX_URL =
   'https://raw.githubusercontent.com/Azure/bicep-types-az/main/generated/index.json';
 
+const id = 'azure-bicep-resource';
+
 export class AzureBicepResourceDatasource extends Datasource {
-  static readonly id = 'azure-bicep-resource';
+  static readonly id = id;
 
   override readonly defaultConfig = {
     commitMessageTopic: 'resource {{depName}}',
@@ -33,7 +35,7 @@ export class AzureBicepResourceDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AzureBicepResourceDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ packageName }: GetReleasesConfig) => `getReleases-${packageName}`,
   })
   async getReleases(
@@ -55,7 +57,7 @@ export class AzureBicepResourceDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AzureBicepResourceDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: 'getResourceVersionIndex',
     ttlMinutes: 24 * 60,
   })

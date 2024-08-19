@@ -90,8 +90,10 @@ function releasesCDNUrl(packageName: string, registryUrl: string): string {
   return `${registryUrl}/all_pods_versions_${shard}.txt`;
 }
 
+const id = 'pod';
+
 export class PodDatasource extends Datasource {
-  static readonly id = 'pod';
+  static readonly id = id;
 
   override readonly defaultRegistryUrls = ['https://cdn.cocoapods.org'];
 
@@ -204,7 +206,7 @@ export class PodDatasource extends Datasource {
 
   @cache({
     ttlMinutes: 30,
-    namespace: `datasource-${PodDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
       // TODO: types (#22198)
       `${registryUrl}:${packageName}`,

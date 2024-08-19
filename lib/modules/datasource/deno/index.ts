@@ -11,8 +11,10 @@ import type { Release } from '../index';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { DenoAPIModuleResponse, DenoAPIModuleVersionResponse } from './schema';
 
+const id = 'deno';
+
 export class DenoDatasource extends Datasource {
-  static readonly id = 'deno';
+  static readonly id = id;
 
   override readonly customRegistrySupport = true;
 
@@ -34,7 +36,7 @@ export class DenoDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${DenoDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
       // TODO: types (#22198)
       `${registryUrl}:${packageName}`,
@@ -70,7 +72,7 @@ export class DenoDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${DenoDatasource.id}-versions`,
+    namespace: `datasource-${id}-versions`,
     key: (moduleAPIURL) => moduleAPIURL,
   })
   async getReleaseResult(moduleAPIURL: string): Promise<ReleaseResult> {

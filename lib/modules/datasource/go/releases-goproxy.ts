@@ -43,8 +43,10 @@ export function pseudoVersionToRelease(pseudoVersion: string): Release | null {
   };
 }
 
+const id = 'go-proxy';
+
 export class GoProxyDatasource extends Datasource {
-  static readonly id = 'go-proxy';
+  static readonly id = id;
 
   constructor() {
     super(GoProxyDatasource.id);
@@ -53,7 +55,7 @@ export class GoProxyDatasource extends Datasource {
   readonly direct = new GoDirectDatasource();
 
   @cache({
-    namespace: `datasource-${GoProxyDatasource.id}`,
+    namespace: `datasource-${id}`,
     key: (config: GetReleasesConfig) => GoProxyDatasource.getCacheKey(config),
   })
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {

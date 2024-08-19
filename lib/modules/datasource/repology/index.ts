@@ -43,8 +43,10 @@ function findPackageInResponse(
   return packagesWithType.length > 0 ? packagesWithType : null;
 }
 
+const id = 'repology';
+
 export class RepologyDatasource extends Datasource {
-  static readonly id = 'repology';
+  static readonly id = id;
 
   override readonly defaultRegistryUrls = ['https://repology.org/'];
 
@@ -109,7 +111,7 @@ export class RepologyDatasource extends Datasource {
 
   @cache({
     ttlMinutes: 60,
-    namespace: `datasource-${RepologyDatasource.id}-list`,
+    namespace: `datasource-${id}-list`,
     key: (registryUrl: string, repoName: string, pkgName: string) =>
       joinUrlParts(registryUrl, repoName, pkgName),
   })
