@@ -125,11 +125,14 @@ describe('documentation', () => {
       function getSelfHostedHeaders(file: string): string[] {
         const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
         const matches = content.match(/\n## (.*?)\n/g) ?? [];
-        return matches.map((match) => match.substring(4, match.length - 1));
+        return matches
+          .map((match) => match.substring(4, match.length - 1))
+          .filter((name) => name !== 'platformOptions');
       }
 
       function getRequiredSelfHostedOptions(): string[] {
         return options
+          .filter((option) => !option.parents)
           .filter((option) => option.globalOnly)
           .map((option) => option.name)
           .sort();
