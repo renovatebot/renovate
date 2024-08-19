@@ -7,7 +7,11 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types';
-import { GlasskubeResource, Package, PackageRepository } from './schema';
+import {
+  GlasskubeResource,
+  type Package,
+  type PackageRepository,
+} from './schema';
 import type { GlasskubeResources } from './types';
 
 function parseResources(
