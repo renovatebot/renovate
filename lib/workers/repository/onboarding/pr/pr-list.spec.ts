@@ -1,4 +1,5 @@
-import { RenovateConfig, partial } from '../../../../../test/util';
+import type { RenovateConfig } from '../../../../../test/util';
+import { partial } from '../../../../../test/util';
 import type { BranchConfig } from '../../../types';
 import { getPrList } from './pr-list';
 

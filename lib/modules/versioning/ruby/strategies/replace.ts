@@ -1,6 +1,7 @@
 import { logger } from '../../../../logger';
 import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator';
-import { Range, parseRanges, satisfiesRange, stringifyRanges } from '../range';
+import type { Range } from '../range';
+import { parseRanges, satisfiesRange, stringifyRanges } from '../range';
 import { adapt, decrement, floor, increment } from '../version';
 
 // Common logic for replace, widen, and bump strategies

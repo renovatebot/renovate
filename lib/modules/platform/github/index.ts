@@ -420,7 +420,7 @@ export async function findFork(
       logger.debug(`Found repo in user account: ${forkedRepo.full_name}`);
       return forkedRepo;
     }
-  } catch (err) {
+  } catch {
     throw new Error(REPOSITORY_CANNOT_FORK);
   }
   logger.debug(`No repo found in user account`);
@@ -1012,7 +1012,7 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
       const result = coerceRestPr(ghPr);
       cachePr(result);
       return result;
-    } catch (err) {
+    } catch {
       logger.debug('Could not reopen autoclosed PR');
       return null;
     }

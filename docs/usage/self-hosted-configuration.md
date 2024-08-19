@@ -388,6 +388,16 @@ The above configuration approach will mean the values are redacted in logs like 
          "customEnvVariables": {"SECRET_TOKEN": "{{ secrets.SECRET_TOKEN }}"},
 ```
 
+## deleteConfigFile
+
+If set to `true` Renovate tries to delete the self-hosted config file after reading it.
+
+The process that runs Renovate must have the correct permissions to delete the config file.
+
+<!-- prettier-ignore -->
+!!! tip
+    You can tell Renovate where to find your config file with the `RENOVATE_CONFIG_FILE` environment variable.
+
 ## detectGlobalManagerConfig
 
 The purpose of this config option is to allow you (as a bot admin) to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
@@ -1082,7 +1092,7 @@ Defines how the report is exposed:
 - `<unset>` If unset, no report will be provided, though the debug logs will still have partial information of the report
 - `logging` The report will be printed as part of the log messages on `INFO` level
 - `file` The report will be written to a path provided by [`reportPath`](#reportpath)
-- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`RENOVATE_X_S3_ENDPOINT`](./self-hosted-experimental.md#renovate_x_s3_endpoint) and [`RENOVATE_X_S3_PATH_STYLE`](./self-hosted-experimental.md#renovate_x_s3_path_style)
+- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`s3Endpoint`](#s3endpoint) and [`s3PathStyle`](#s3pathstyle)
 
 ## repositories
 
@@ -1139,6 +1149,22 @@ The combinations of `requireConfig` and `onboarding` are:
 | `requireConfig=required` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, then the repository is skipped.   | Repository is skipped unless a config file is added manually. |
 | `requireConfig=optional` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, the repository will be processed. | Repository is processed regardless of config file presence.   |
 | `requireConfig=ignored`  | No onboarding PR will be created and repo will be processed while ignoring any config file present.                                                     | Repository is processed, any config file is ignored.          |
+
+## s3Endpoint
+
+If set, Renovate will use this string as the `endpoint` when creating the AWS S3 client instance.
+
+## s3PathStyle
+
+If set, Renovate will enable `forcePathStyle` when creating the AWS S3 client instance.
+
+For example:
+| `s3PathStyle` | Path |
+| ------------- | ---------------------------------- |
+| `off` | `https://bucket.s3.amazonaws.com/` |
+| `on` | `https://s3.amazonaws.com/bucket/` |
+
+Read the [AWS S3 docs, Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html) to learn more about path-style URLs.
 
 ## secrets
 
