@@ -2,9 +2,9 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import { RepoGlobalConfig } from '../../../config/types';
+import type { RepoGlobalConfig } from '../../../config/types';
 import { GlasskubePackagesDatasource } from '../../datasource/glasskube-packages';
-import { ExtractConfig } from '../types';
+import type { ExtractConfig } from '../types';
 import { extractAllPackageFiles, extractPackageFile } from './extract';
 
 const config: ExtractConfig = {};
