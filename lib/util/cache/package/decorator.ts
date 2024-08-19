@@ -87,7 +87,7 @@ const namespaceMapping: Record<string, PackageCacheNamespace> = {
   PackagistDatasource: 'datasource-packagist',
   PodDatasource: 'datasource-pod',
   PythonVersionDatasource: 'datasource-python-version',
-  RepologyDatasource: 'datasource-repology-list',
+  RepologyDatasource: 'datasource-repology',
   RubyVersionDatasource: 'datasource-ruby-version',
   RubygemsDatasource: 'datasource-rubygems',
   TerraformDatasource: 'datasource-terraform',
