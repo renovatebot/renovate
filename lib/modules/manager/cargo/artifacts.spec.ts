@@ -132,7 +132,7 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
-        updateType: 'lockfileUpdate' as UpdateType,
+        updateType: 'lockfileUpdate' satisfies UpdateType as UpdateType,
       },
     ];
     expect(
@@ -291,21 +291,21 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
-        updateType: 'lockfileUpdate' as UpdateType,
+        updateType: 'lockfileUpdate' satisfies UpdateType as UpdateType,
       },
       {
         depName: 'dep2',
         packageName: 'dep2',
         lockedVersion: '1.0.0',
         newVersion: '1.0.2',
-        updateType: 'lockfileUpdate' as UpdateType,
+        updateType: 'lockfileUpdate' satisfies UpdateType as UpdateType,
       },
       {
         depName: 'dep3',
         packageName: 'dep3',
         lockedVersion: '1.0.0',
         newVersion: '1.0.3',
-        updateType: 'lockfileUpdate' as UpdateType,
+        updateType: 'lockfileUpdate' satisfies UpdateType as UpdateType,
       },
     ];
 
@@ -343,21 +343,21 @@ describe('modules/manager/cargo/artifacts', () => {
       {
         depName: 'dep1',
         packageName: 'dep1',
-        updateType: 'minorUpdate' as UpdateType,
+        updateType: 'minor' satisfies UpdateType as UpdateType,
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
       },
       {
         depName: 'dep2',
         packageName: 'dep2',
-        updateType: 'minorUpdate' as UpdateType,
+        updateType: 'minor' satisfies UpdateType as UpdateType,
         lockedVersion: '1.0.0',
         newVersion: '1.0.2',
       },
       {
         depName: 'dep3',
         packageName: 'dep3',
-        updateType: 'lockfileUpdate' as UpdateType,
+        updateType: 'lockfileUpdate' satisfies UpdateType as UpdateType,
         lockedVersion: '1.0.0',
         newVersion: '1.0.3',
       },
