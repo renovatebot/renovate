@@ -11,13 +11,13 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import {
+import type {
   GitRefDefinition,
   GithubReleaseDefinition,
   HelmChartDefinition,
-  Vendir,
   VendirDefinition,
 } from './schema';
+import { Vendir } from './schema';
 
 export function extractHelmChart(
   helmChart: HelmChartDefinition,

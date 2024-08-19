@@ -423,4 +423,128 @@ describe('util/template/index', () => {
       expect(output).toBe('bar');
     });
   });
+
+  describe('lookupArray', () => {
+    it('performs lookup for every array element', () => {
+      const output = template.compile(
+        '{{#each (lookupArray upgrades "prBodyDefinitions")}} {{{Issue}}}{{/each}}',
+        {
+          upgrades: [
+            {
+              prBodyDefinitions: {
+                Issue: 'ABC-123',
+              },
+            },
+            {},
+            {
+              prBodyDefinitions: {
+                Issue: 'DEF-456',
+              },
+            },
+            null,
+            undefined,
+          ],
+        },
+      );
+
+      expect(output).toBe(' ABC-123 DEF-456');
+    });
+
+    it('handles null input array', () => {
+      const output = template.compile(
+        '{{#each (lookupArray testArray "prBodyDefinitions")}} {{{Issue}}}{{/each}}',
+        {
+          testArray: null,
+        },
+        false,
+      );
+
+      expect(output).toBe('');
+    });
+
+    it('handles empty string key', () => {
+      const output = template.compile(
+        '{{#each (lookupArray testArray "")}} {{{.}}}{{/each}}',
+        {
+          testArray: [
+            {
+              '': 'ABC-123',
+            },
+          ],
+        },
+        false,
+      );
+
+      expect(output).toBe(' ABC-123');
+    });
+
+    it('handles null key', () => {
+      const output = template.compile(
+        '{{#each (lookupArray testArray null)}} {{{.}}}{{/each}}',
+        {
+          testArray: [
+            {
+              null: 'ABC-123',
+            },
+          ],
+        },
+        false,
+      );
+
+      expect(output).toBe(' ABC-123');
+    });
+  });
+
+  describe('distinct', () => {
+    it('skips duplicate values', () => {
+      const output = template.compile(
+        '{{#each (distinct (lookupArray (lookupArray upgrades "prBodyDefinitions") "Issue"))}} {{{.}}}{{/each}}',
+        {
+          upgrades: [
+            {
+              prBodyDefinitions: {
+                Issue: 'ABC-123',
+              },
+            },
+            {
+              prBodyDefinitions: {
+                Issue: 'DEF-456',
+              },
+            },
+            {
+              prBodyDefinitions: {
+                Issue: 'ABC-123',
+              },
+            },
+          ],
+        },
+      );
+
+      expect(output).toBe(' ABC-123 DEF-456');
+    });
+
+    it('handles null elements', () => {
+      const output = template.compile(
+        '{{#each (distinct input)}}{{{.}}}{{/each}}',
+        {
+          input: [null, null],
+        },
+        false,
+      );
+
+      expect(output).toBe('');
+    });
+
+    it('handles null input', () => {
+      const output = template.compile(
+        '{{#each (distinct input)}}{{{.}}}{{/each}}',
+        {
+          input: null,
+        },
+        false,
+      );
+
+      expect(output).toBe('');
+    });
+  });
 });

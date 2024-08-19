@@ -1,4 +1,5 @@
-import { SafeParseReturnType, ZodError, ZodType, ZodTypeDef, z } from 'zod';
+import type { SafeParseReturnType, ZodType, ZodTypeDef } from 'zod';
+import { ZodError, z } from 'zod';
 import { logger } from '../logger';
 
 type Val = NonNullable<unknown>;

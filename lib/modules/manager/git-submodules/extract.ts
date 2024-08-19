@@ -1,5 +1,6 @@
 import URL from 'node:url';
-import Git, { SimpleGit } from 'simple-git';
+import type { SimpleGit } from 'simple-git';
+import Git from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';

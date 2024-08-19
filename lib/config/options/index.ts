@@ -2932,6 +2932,14 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'dockerMaxPages',
+    description:
+      'By default, Renovate fetches up to 20 pages of Docker tags from registries. But you can set your own limit with this config option.',
+    type: 'integer',
+    default: 20,
+    globalOnly: true,
+  },
+  {
     name: 'deleteConfigFile',
     description:
       'If set to `true`, Renovate tries to delete the self-hosted config file after reading it.',

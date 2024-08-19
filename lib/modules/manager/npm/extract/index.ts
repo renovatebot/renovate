@@ -20,8 +20,8 @@ import { extractPackageJson } from './common/package-file';
 import { postExtract } from './post';
 import type { NpmPackage } from './types';
 import { isZeroInstall } from './yarn';
+import type { YarnConfig } from './yarnrc';
 import {
-  YarnConfig,
   loadConfigFromLegacyYarnrc,
   loadConfigFromYarnrcYml,
   resolveRegistryUrl,

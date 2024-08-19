@@ -1,10 +1,5 @@
-import {
-  RenovateConfig,
-  git,
-  partial,
-  platform,
-  scm,
-} from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { git, partial, platform, scm } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { Pr } from '../../../modules/platform/types';
 import * as cleanup from './prune';

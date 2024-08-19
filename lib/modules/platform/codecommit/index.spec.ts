@@ -27,7 +27,8 @@ import {
 import * as git from '../../../util/git';
 import type { Platform } from '../types';
 import { getCodeCommitUrl } from './codecommit-client';
-import { CodeCommitPr, config } from './index';
+import type { CodeCommitPr } from './index';
+import { config } from './index';
 
 const codeCommitClient = mockClient(CodeCommitClient);
 
