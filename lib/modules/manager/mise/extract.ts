@@ -3,11 +3,8 @@ import { logger } from '../../../logger';
 import type { ToolingConfig } from '../asdf/upgradeable-tooling';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { MiseToolSchema } from './schema';
-import {
-  ToolingDefinition,
-  asdfTooling,
-  miseTooling,
-} from './upgradeable-tooling';
+import type { ToolingDefinition } from './upgradeable-tooling';
+import { asdfTooling, miseTooling } from './upgradeable-tooling';
 import { parseTomlFile } from './utils';
 
 export function extractPackageFile(

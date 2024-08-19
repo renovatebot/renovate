@@ -119,7 +119,7 @@ export async function localPathExists(pathName: string): Promise<boolean> {
   try {
     const s = await fs.stat(path);
     return !!s;
-  } catch (_) {
+  } catch {
     return false;
   }
 }
@@ -176,12 +176,17 @@ export function createCacheWriteStream(path: string): fs.WriteStream {
   return fs.createWriteStream(fullPath);
 }
 
+export function createCacheReadStream(path: string): fs.ReadStream {
+  const fullPath = ensureCachePath(path);
+  return fs.createReadStream(fullPath);
+}
+
 export async function localPathIsFile(pathName: string): Promise<boolean> {
   const path = ensureLocalPath(pathName);
   try {
     const s = await fs.stat(path);
     return s.isFile();
-  } catch (_) {
+  } catch {
     return false;
   }
 }
@@ -193,7 +198,7 @@ export async function localPathIsSymbolicLink(
   try {
     const s = await fs.lstat(path);
     return s.isSymbolicLink();
-  } catch (_) {
+  } catch {
     return false;
   }
 }
@@ -244,7 +249,18 @@ export async function statLocalFile(
   const fullFileName = ensureLocalPath(fileName);
   try {
     return await fs.stat(fullFileName);
-  } catch (_) {
+  } catch {
+    return null;
+  }
+}
+
+export async function statCacheFile(
+  pathName: string,
+): Promise<fs.Stats | null> {
+  const path = ensureCachePath(pathName);
+  try {
+    return await fs.stat(path);
+  } catch {
     return null;
   }
 }
@@ -270,7 +286,7 @@ export async function cachePathExists(pathName: string): Promise<boolean> {
   try {
     const s = await fs.stat(path);
     return !!s;
-  } catch (_) {
+  } catch {
     return false;
   }
 }
@@ -280,7 +296,7 @@ export async function cachePathIsFile(pathName: string): Promise<boolean> {
   try {
     const s = await fs.stat(path);
     return s.isFile();
-  } catch (e) {
+  } catch {
     return false;
   }
 }

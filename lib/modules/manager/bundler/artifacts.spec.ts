@@ -126,7 +126,10 @@ describe('modules/manager/bundler/artifacts', () => {
 
     it('works for default binarySource', async () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.readLocalFile.mockResolvedValueOnce(null);
+      fs.readLocalFile.mockResolvedValueOnce(null); // .ruby-version
+      fs.readLocalFile.mockResolvedValueOnce(null); // .tool-versions
+      fs.localPathExists.mockResolvedValueOnce(true); // Gemfile.lock
+      fs.readLocalFile.mockResolvedValueOnce(null); // Gemfile.lock
       const execSnapshots = mockExecAll();
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
@@ -150,7 +153,10 @@ describe('modules/manager/bundler/artifacts', () => {
     it('works explicit global binarySource', async () => {
       GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.readLocalFile.mockResolvedValueOnce(null);
+      fs.readLocalFile.mockResolvedValueOnce(null); // .ruby-version
+      fs.readLocalFile.mockResolvedValueOnce(null); // .tool-versions
+      fs.localPathExists.mockResolvedValueOnce(true); // Gemfile.lock
+      fs.readLocalFile.mockResolvedValueOnce(null); // Gemfile.lock
       const execSnapshots = mockExecAll();
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
@@ -173,7 +179,10 @@ describe('modules/manager/bundler/artifacts', () => {
 
     it('supports conservative mode and updateType option', async () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.readLocalFile.mockResolvedValueOnce(null);
+      fs.readLocalFile.mockResolvedValueOnce(null); // .ruby-version
+      fs.readLocalFile.mockResolvedValueOnce(null); // .tool-versions
+      fs.localPathExists.mockResolvedValueOnce(true); // Gemfile.lock
+      fs.readLocalFile.mockResolvedValueOnce(null); // Gemfile.lock
       const execSnapshots = mockExecAll();
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
