@@ -81,7 +81,7 @@ const namespaceMapping: Record<string, PackageCacheNamespace> = {
   JavaVersionDatasource: 'datasource-java-version',
   JenkinsPluginsDatasource: 'jenkins-plugins',
   NodeVersionDatasource: 'datasource-node-version',
-  NugetV3Api: 'datasource-nuget',
+  NugetV3Api: 'datasource-nuget-v3',
   OrbDatasource: 'datasource-orb',
   PackagistDatasource: 'datasource-packagist',
   PodDatasource: 'datasource-pod',
@@ -92,7 +92,7 @@ const namespaceMapping: Record<string, PackageCacheNamespace> = {
   TerraformDatasource: 'datasource-terraform',
   TerraformModuleDatasource: 'datasource-terraform-module',
   TerraformProviderDatasource: 'datasource-terraform-provider',
-  TerraformProviderHash: 'datasource-terraform-provider-build-hashes',
+  TerraformProviderHash: 'datasource-terraform-provider-hash',
   Unity3dDatasource: 'datasource-unity3d',
   GitDatasource: 'datasource-git',
 } satisfies Record<string, PackageCacheNamespace>;
