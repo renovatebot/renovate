@@ -139,7 +139,7 @@ export function extractPackageFile(
 
   try {
     if (regEx('fleet.ya?ml').test(packageFile)) {
-      const docs = parseYaml(content, null, {
+      const docs = parseYaml(content, {
         json: true,
         customSchema: FleetFile,
         failureBehaviour: 'filter',
@@ -148,7 +148,7 @@ export function extractPackageFile(
 
       deps.push(...fleetDeps);
     } else {
-      const docs = parseYaml(content, null, {
+      const docs = parseYaml(content, {
         json: true,
         customSchema: GitRepo,
         failureBehaviour: 'filter',

@@ -1,6 +1,6 @@
+import URL from 'node:url';
 import { GlobalConfig } from '../../../../../../config/global';
 import { logger } from '../../../../../../logger';
-import { detectPlatform } from '../../../../../../util/common';
 import * as hostRules from '../../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../../types';
 import { ChangeLogSource } from '../source';
@@ -42,7 +42,8 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     error?: ChangeLogError;
   } {
     const sourceUrl = config.sourceUrl!;
-    const host = detectPlatform(sourceUrl);
+    const parsedUrl = URL.parse(sourceUrl);
+    const host = parsedUrl.host;
     const manager = config.manager;
     const packageName = config.packageName;
 
@@ -56,7 +57,7 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     });
     // istanbul ignore if
     if (host && !token) {
-      if (host === 'github') {
+      if (host.endsWith('.github.com') || host === 'github.com') {
         if (!GlobalConfig.get('githubTokenWarn')) {
           logger.debug(
             { manager, packageName, sourceUrl },

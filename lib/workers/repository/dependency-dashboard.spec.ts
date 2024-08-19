@@ -2,12 +2,8 @@ import { ERROR, WARN } from 'bunyan';
 import { codeBlock } from 'common-tags';
 import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
-import {
-  RenovateConfig,
-  logger,
-  mockedFunction,
-  platform,
-} from '../../../test/util';
+import type { RenovateConfig } from '../../../test/util';
+import { logger, mockedFunction, platform } from '../../../test/util';
 import { getConfig } from '../../config/defaults';
 import { GlobalConfig } from '../../config/global';
 import type {
@@ -15,10 +11,8 @@ import type {
   PackageFile,
 } from '../../modules/manager/types';
 import type { Platform } from '../../modules/platform';
-import {
-  GitHubMaxPrBodyLen,
-  massageMarkdown,
-} from '../../modules/platform/github';
+import { massageMarkdown } from '../../modules/platform/github';
+import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
@@ -46,6 +40,7 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   massageMdSpy.mockImplementation(massageMarkdown);
+  platform.maxBodyLength.mockReturnValue(60000); // Github Limit
   config = getConfig();
   config.platform = 'github';
   config.errors = [];
@@ -981,6 +976,37 @@ None detected
           // same with dry run
           await dryRun(branches, platform, 0, 1);
         });
+
+        it('shows deprecations', async () => {
+          const branches: BranchConfig[] = [];
+          const packageFilesWithDeprecations = clone(packageFiles);
+          packageFilesWithDeprecations.npm[0].deps[0].deprecationMessage =
+            'some deprecation message';
+          packageFilesWithDeprecations.npm[0].deps[2].updates.push({
+            updateType: 'replacement',
+            newName: 'prop-types-tools',
+            newValue: '2.17.0',
+            branchName: 'renovate/airbnb-prop-types-replacement',
+          });
+          PackageFiles.add('main', packageFilesWithDeprecations);
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            packageFilesWithDeprecations,
+          );
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
+            'These dependencies are deprecated',
+          );
+          expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
+            '| npm | `cookie-parser` | ![Unavailable]',
+          );
+          expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
+            'npm | `express-handlebars` | ![Available]',
+          );
+          // same with dry run
+          await dryRun(branches, platform, 0, 1);
+        });
       });
 
       describe('multi base branch repo', () => {
@@ -1031,7 +1057,7 @@ None detected
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(
             platform.ensureIssue.mock.calls[0][0].body.length <
-              GitHubMaxPrBodyLen,
+              platform.maxBodyLength(),
           ).toBeTrue();
 
           // same with dry run

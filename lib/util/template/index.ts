@@ -16,6 +16,32 @@ handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
   JSON.stringify(JSON.parse(input), null, 2),
 );
 
+handlebars.registerHelper('toJSON', (input: unknown): string =>
+  JSON.stringify(input),
+);
+
+handlebars.registerHelper('toArray', (...args: unknown[]): unknown[] => {
+  // Need to remove the 'options', as last parameter
+  // https://handlebarsjs.com/api-reference/helpers.html
+  args.pop();
+  return args;
+});
+
+handlebars.registerHelper('toObject', (...args: unknown[]): unknown => {
+  // Need to remove the 'options', as last parameter
+  // https://handlebarsjs.com/api-reference/helpers.html
+  args.pop();
+
+  if (args.length % 2 !== 0) {
+    throw new Error(`Must contain an even number of elements`);
+  }
+
+  const keys = args.filter((_, index) => index % 2 === 0);
+  const values = args.filter((_, index) => index % 2 === 1);
+
+  return Object.fromEntries(keys.map((key, index) => [key, values[index]]));
+});
+
 handlebars.registerHelper('replace', (find, replace, context) =>
   (context ?? '').replace(regEx(find, 'g'), replace),
 );
@@ -35,6 +61,16 @@ handlebars.registerHelper('includes', (arg1: string[], arg2: string) => {
 
   return false;
 });
+
+handlebars.registerHelper(
+  'split',
+  (str: unknown, separator: unknown): string[] => {
+    if (is.string(str) && is.string(separator)) {
+      return str.split(separator);
+    }
+    return [];
+  },
+);
 
 handlebars.registerHelper({
   and(...args) {
@@ -121,9 +157,11 @@ export const allowedFields = {
   newDigestShort:
     'A shorted version of newDigest, for use when the full digest is too long to be conveniently displayed',
   newMajor:
-    'The major version of the new version. e.g. "3" if the new version if "3.1.0"',
+    'The major version of the new version. e.g. "3" if the new version is "3.1.0"',
   newMinor:
-    'The minor version of the new version. e.g. "1" if the new version if "3.1.0"',
+    'The minor version of the new version. e.g. "1" if the new version is "3.1.0"',
+  newPatch:
+    'The patch version of the new version. e.g. "0" if the new version is "3.1.0"',
   newName:
     'The name of the new dependency that replaces the current deprecated dependency',
   newValue:
@@ -205,6 +243,11 @@ const compileInputProxyHandler: ProxyHandler<CompileInput> = {
 
     const value = target[prop];
 
+    if (prop === 'prBodyDefinitions') {
+      // Expose all prBodyDefinitions.*
+      return value;
+    }
+
     if (is.array(value)) {
       return value.map((element) =>
         is.primitive(element)
@@ -246,6 +289,10 @@ export function compile(
         continue;
       }
       for (const varName of varNames) {
+        if (varName === 'prBodyDefinitions') {
+          // Allow all prBodyDefinitions.*
+          break;
+        }
         if (!allowedFieldsList.includes(varName)) {
           logger.info(
             { varName, template },

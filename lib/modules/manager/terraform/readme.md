@@ -10,7 +10,7 @@ You can override this default with your own `packageRules`, for example:
   "packageRules": [
     {
       "matchDatasources": ["terraform-provider"],
-      "registryUrl": "https://registry.opentofu.org"
+      "registryUrls": ["https://registry.opentofu.org"]
     }
   ]
 }

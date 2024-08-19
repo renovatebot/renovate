@@ -1,9 +1,9 @@
 import { Buffer } from 'node:buffer';
-import {
+import type {
   GetCommentsForPullRequestOutput,
   ListRepositoriesOutput,
-  PullRequestStatusEnum,
 } from '@aws-sdk/client-codecommit';
+import { PullRequestStatusEnum } from '@aws-sdk/client-codecommit';
 import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
@@ -322,6 +322,13 @@ export function massageMarkdown(input: string): string {
     );
 }
 
+/**
+ * Unsed, no Dashboard
+ */
+export function maxBodyLength(): number {
+  return Infinity;
+}
+
 export async function getJsonFile(
   fileName: string,
   repoName?: string,
@@ -423,7 +430,7 @@ export async function updatePr({
   if (cachedPr?.state !== prStatusInput) {
     try {
       await client.updatePrStatus(`${prNo}`, prStatusInput);
-    } catch (err) {
+    } catch {
       // safety check
       // do nothing, it's ok to fail sometimes when trying to update from open to open or from closed to closed.
     }

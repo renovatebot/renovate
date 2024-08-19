@@ -2,14 +2,13 @@ import { Marshal } from '@qnighy/marshal';
 import type { ZodError } from 'zod';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
-import { HttpError } from '../../../util/http';
+import { Http, HttpError } from '../../../util/http';
 import { AsyncResult, Result } from '../../../util/result';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { getV1Releases } from './common';
-import { RubygemsHttp } from './http';
 import { MetadataCache } from './metadata-cache';
 import { GemInfo, MarshalledVersionInfo } from './schema';
 import { VersionsEndpointCache } from './versions-endpoint-cache';
@@ -27,14 +26,14 @@ function unlessServerSide<
   return cb();
 }
 
-export class RubyGemsDatasource extends Datasource {
+export class RubygemsDatasource extends Datasource {
   static readonly id = 'rubygems';
 
   private metadataCache: MetadataCache;
 
   constructor() {
-    super(RubyGemsDatasource.id);
-    this.http = new RubygemsHttp(RubyGemsDatasource.id);
+    super(RubygemsDatasource.id);
+    this.http = new Http(RubygemsDatasource.id);
     this.versionsEndpointCache = new VersionsEndpointCache(this.http);
     this.metadataCache = new MetadataCache(this.http);
   }
@@ -55,7 +54,7 @@ export class RubyGemsDatasource extends Datasource {
     'The source URL is determined from the `source_code_uri` field in the results.';
 
   @cache({
-    namespace: `datasource-${RubyGemsDatasource.id}`,
+    namespace: `datasource-${RubygemsDatasource.id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
       // TODO: types (#22198)
       `releases:${registryUrl!}:${packageName}`,

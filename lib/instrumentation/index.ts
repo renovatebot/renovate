@@ -10,10 +10,8 @@ import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider, SpanStatusCode } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import {
-  Instrumentation,
-  registerInstrumentations,
-} from '@opentelemetry/instrumentation';
+import type { Instrumentation } from '@opentelemetry/instrumentation';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { Resource } from '@opentelemetry/resources';
@@ -43,9 +41,12 @@ export function init(): void {
   const traceProvider = new NodeTracerProvider({
     resource: new Resource({
       // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value
-      [SemanticResourceAttributes.SERVICE_NAME]: 'renovate',
-      [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'renovatebot.com',
-      [SemanticResourceAttributes.SERVICE_VERSION]: pkg.version,
+      [SemanticResourceAttributes.SERVICE_NAME]:
+        process.env.OTEL_SERVICE_NAME ?? 'renovate',
+      [SemanticResourceAttributes.SERVICE_NAMESPACE]:
+        process.env.OTEL_SERVICE_NAMESPACE ?? 'renovatebot.com',
+      [SemanticResourceAttributes.SERVICE_VERSION]:
+        process.env.OTEL_SERVICE_VERSION ?? pkg.version,
     }),
   });
 
@@ -122,16 +123,16 @@ function getTracer(): Tracer {
   return getTracerProvider().getTracer('renovate');
 }
 
-export function instrument<F extends (span: Span) => ReturnType<F>>(
+export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
 ): ReturnType<F>;
-export function instrument<F extends (span: Span) => ReturnType<F>>(
+export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
   options: SpanOptions,
 ): ReturnType<F>;
-export function instrument<F extends (span: Span) => ReturnType<F>>(
+export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
   options: SpanOptions = {},
@@ -139,7 +140,7 @@ export function instrument<F extends (span: Span) => ReturnType<F>>(
 ): ReturnType<F> {
   return getTracer().startActiveSpan(name, options, context, (span: Span) => {
     try {
-      const ret = fn(span);
+      const ret = fn();
       if (ret instanceof Promise) {
         return ret
           .catch((e) => {

@@ -21,7 +21,7 @@ But there are also other aspects like bugs caused by your dependencies.
 Depending on third-party software is a sword of Damocles; you never know when a new issue will force you to drop everything to upgrade your software.
 
 <figure markdown>
-  ![XKCD 2347](../assets/images/swissquote_xkcd.png){ loading=lazy }
+  ![Tower of blocks, with a small block that supports many large blocks. The whole stack is labeled: All modern digital infrastructure. A arrow points to the small block, with the label: A project some random person in Nebraska has been thanklessly maintaining since 2003.](../assets/images/swissquote_xkcd.png){ loading=lazy }
   <figcaption><a href=https://xkcd.com/2347/>XKCD comic 2347</a> is always relevant when talking about dependencies.</figcaption>
 </figure>
 
@@ -98,7 +98,7 @@ Every company that’s been around for sometime has that old project still runni
 People talk about it laughingly but become livid when a request comes to change anything in it.
 
 <figure markdown>
-  ![Sweating person](../assets/images/swissquote_sweating_guy.jpg){ loading=lazy }
+  ![Close-up of black man with streams of sweat on his face](../assets/images/swissquote_sweating_guy.jpg){ loading=lazy }
   <figcaption>There is a fix to make on that project, the last person working on it left three years ago.</figcaption>
 </figure>
 
@@ -143,7 +143,7 @@ On our first try, we enabled 30 repositories, a cron task was running every hour
 We received 700 Pull Requests in the first month, it was a never ending Pull Request whack-a-mole: every time we merged one, another replaced it.
 
 <figure markdown>
-  ![A cat playing Whack-a-mole with a finger](../assets/images/swissquote_cat_whack_a_mole.jpg){ loading=lazy }
+  ![A cat batting at fingers coming out of holes in a box, Whack-A-Mole style](../assets/images/swissquote_cat_whack_a_mole.jpg){ loading=lazy }
   <figcaption>Me and my team merging Pull Requests.</figcaption>
 </figure>
 

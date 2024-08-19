@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import type { XmlDocument } from 'xmldoc';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { filterMap } from '../../../util/filter-map';
@@ -63,6 +64,8 @@ export const defaultRegistryUrls = [MAVEN_REPO];
 export class MavenDatasource extends Datasource {
   static id = 'maven';
 
+  override readonly caching = true;
+
   override readonly defaultRegistryUrls = defaultRegistryUrls;
 
   override readonly defaultVersioning: string = mavenVersioning.id;
@@ -110,7 +113,11 @@ export class MavenDatasource extends Datasource {
       (acc, version) => ({ ...acc, [version]: null }),
       {},
     );
-    if (isCacheable) {
+    const cachePrivatePackages = GlobalConfig.get(
+      'cachePrivatePackages',
+      false,
+    );
+    if (cachePrivatePackages || isCacheable) {
       await packageCache.set(cacheNamespace, cacheKey, releaseMap, 30);
     }
     return releaseMap;

@@ -116,5 +116,31 @@ describe('util/package-rules/current-version', () => {
       );
       expect(result).toBeFalse();
     });
+
+    it('return true for same-major verisioning if version lies in expected range', () => {
+      const result = matcher.matches(
+        {
+          versioning: 'same-major',
+          currentValue: '6.0.300',
+        },
+        {
+          matchCurrentVersion: '6.0.400',
+        },
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('return false for same-major verisioning if version lies outside of expected range', () => {
+      const result = matcher.matches(
+        {
+          versioning: 'same-major',
+          currentValue: '6.0.300',
+        },
+        {
+          matchCurrentVersion: '6.0.100',
+        },
+      );
+      expect(result).toBeFalse();
+    });
   });
 });

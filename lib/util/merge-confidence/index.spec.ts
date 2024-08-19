@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { GlobalConfig } from '../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
@@ -10,7 +9,6 @@ import {
   initConfig,
   initMergeConfidence,
   isActiveConfidenceLevel,
-  parseSupportedDatasourceString,
   resetConfig,
   satisfiesConfidenceLevel,
 } from '.';
@@ -18,15 +16,7 @@ import {
 describe('util/merge-confidence/index', () => {
   const apiBaseUrl = 'https://www.baseurl.com/';
   const defaultApiBaseUrl = 'https://developer.mend.io/';
-  const supportedDatasources = [
-    'go',
-    'maven',
-    'npm',
-    'nuget',
-    'packagist',
-    'pypi',
-    'rubygems',
-  ];
+  const userSupportedDatasources = ['go'];
 
   describe('isActiveConfidenceLevel()', () => {
     it('returns false if null', () => {
@@ -68,9 +58,8 @@ describe('util/merge-confidence/index', () => {
 
     beforeEach(() => {
       hostRules.add(hostRule);
-      initConfig();
+      initConfig({ mergeConfidenceEndpoint: apiBaseUrl });
       memCache.reset();
-      GlobalConfig.set({ mergeConfidenceEndpoint: apiBaseUrl });
     });
 
     afterEach(() => {
@@ -311,14 +300,13 @@ describe('util/merge-confidence/index', () => {
         resetConfig();
       });
 
-      it('using default base url if none is set', async () => {
-        GlobalConfig.reset();
+      it('using default base url and supported datasources if either is set', async () => {
         httpMock
           .scope(defaultApiBaseUrl)
           .get(`/api/mc/availability`)
           .reply(200);
 
-        await expect(initMergeConfidence()).toResolve();
+        await expect(initMergeConfidence({})).toResolve();
         expect(logger.debug).toHaveBeenCalledWith(
           {
             supportedDatasources: [
@@ -336,13 +324,14 @@ describe('util/merge-confidence/index', () => {
       });
 
       it('warns and then resolves if base url is invalid', async () => {
-        GlobalConfig.set({ mergeConfidenceEndpoint: 'invalid-url.com' });
         httpMock
           .scope(defaultApiBaseUrl)
           .get(`/api/mc/availability`)
           .reply(200);
 
-        await expect(initMergeConfidence()).toResolve();
+        await expect(
+          initMergeConfidence({ mergeConfidenceEndpoint: 'invalid-url.com' }),
+        ).toResolve();
         expect(logger.warn).toHaveBeenCalledWith(
           expect.anything(),
           'invalid merge confidence API base URL found in environment variables - using default value instead',
@@ -353,19 +342,25 @@ describe('util/merge-confidence/index', () => {
         );
       });
 
-      it('uses a custom base url containing path', async () => {
+      it('uses custom supported datasources and a base URL containing a path', async () => {
         const renovateApi = 'https://domain.com/proxy/renovate-api';
-        GlobalConfig.set({ mergeConfidenceEndpoint: renovateApi });
         httpMock.scope(renovateApi).get(`/api/mc/availability`).reply(200);
 
-        await expect(initMergeConfidence()).toResolve();
+        await expect(
+          initMergeConfidence({
+            mergeConfidenceEndpoint: renovateApi,
+            mergeConfidenceDatasources: userSupportedDatasources,
+          }),
+        ).toResolve();
 
         expect(logger.trace).toHaveBeenCalledWith(
           expect.anything(),
           'using merge confidence API base found in environment variables',
         );
         expect(logger.debug).toHaveBeenCalledWith(
-          expect.anything(),
+          {
+            supportedDatasources: ['go'],
+          },
           'merge confidence API - successfully authenticated',
         );
       });
@@ -373,7 +368,7 @@ describe('util/merge-confidence/index', () => {
       it('resolves if no token', async () => {
         hostRules.clear();
 
-        await expect(initMergeConfidence()).toResolve();
+        await expect(initMergeConfidence({})).toResolve();
         expect(logger.trace).toHaveBeenCalledWith(
           'merge confidence API usage is disabled',
         );
@@ -382,7 +377,9 @@ describe('util/merge-confidence/index', () => {
       it('resolves when token is valid', async () => {
         httpMock.scope(apiBaseUrl).get(`/api/mc/availability`).reply(200);
 
-        await expect(initMergeConfidence()).toResolve();
+        await expect(
+          initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
+        ).toResolve();
         expect(logger.debug).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API - successfully authenticated',
@@ -392,9 +389,9 @@ describe('util/merge-confidence/index', () => {
       it('throws on 403-Forbidden from mc API', async () => {
         httpMock.scope(apiBaseUrl).get(`/api/mc/availability`).reply(403);
 
-        await expect(initMergeConfidence()).rejects.toThrow(
-          EXTERNAL_HOST_ERROR,
-        );
+        await expect(
+          initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API token rejected - aborting run',
@@ -404,9 +401,9 @@ describe('util/merge-confidence/index', () => {
       it('throws on 5xx host errors from mc API', async () => {
         httpMock.scope(apiBaseUrl).get(`/api/mc/availability`).reply(503);
 
-        await expect(initMergeConfidence()).rejects.toThrow(
-          EXTERNAL_HOST_ERROR,
-        );
+        await expect(
+          initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API failure: 5xx - aborting run',
@@ -419,52 +416,13 @@ describe('util/merge-confidence/index', () => {
           .get(`/api/mc/availability`)
           .replyWithError({ code: 'ECONNRESET' });
 
-        await expect(initMergeConfidence()).rejects.toThrow(
-          EXTERNAL_HOST_ERROR,
-        );
+        await expect(
+          initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API request failed - aborting run',
         );
-      });
-
-      describe('parseSupportedDatasourceList()', () => {
-        afterEach(() => {
-          GlobalConfig.reset();
-        });
-
-        it.each([
-          {
-            name: 'it should do return default value when the input is undefined',
-            datasources: undefined,
-            expected: supportedDatasources,
-          },
-          {
-            name: 'it should successfully parse the given datasource list',
-            datasources: ['go', 'npm'],
-            expected: ['go', 'npm'],
-          },
-          {
-            name: 'it should gracefully handle invalid JSON',
-            datasources: `{`,
-            expected: supportedDatasources,
-          },
-          {
-            name: 'it should discard non-array JSON input',
-            datasources: `{}`,
-            expected: supportedDatasources,
-          },
-          {
-            name: 'it should discard non-string array JSON input',
-            datasources: `[1,2]`,
-            expected: supportedDatasources,
-          },
-        ])(`$name`, ({ datasources, expected }) => {
-          GlobalConfig.set({
-            mergeConfidenceDatasources: datasources,
-          });
-          expect(parseSupportedDatasourceString()).toStrictEqual(expected);
-        });
       });
     });
   });

@@ -51,6 +51,13 @@ Some features made a lot of people happy, and efficient!
 The source code for Renovate is available on [GitHub at `renovatebot/renovate`](https://github.com/renovatebot/renovate).
 This is where we do most of the development.
 
+### Getting more paid help
+
+If you need more assistance than what this project offers, you have two options:
+
+1. Become a Mend.io customer, such as by buying Renovate Enterprise, or
+1. Hire an experienced Renovate contributor privately for consulting. Mend.io staff do _not_ offer this service, but one of our volunteer maintainers, [`@secustor`](https://github.com/secustor), does
+
 ## About these docs
 
 The Renovate docs are built from Markdown files in our [`renovatebot/renovate` repository](https://github.com/renovatebot/renovate).

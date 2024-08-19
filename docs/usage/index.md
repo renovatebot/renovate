@@ -76,7 +76,33 @@ Renovate works on these platforms:
 
 Renovate is used by:
 
-![Renovate Matrix](./assets/images/matrix.png){ loading=lazy }
+![Logos of companies and projects that use Renovate](./assets/images/matrix.png){ loading=lazy }
+
+<details>
+<summary>List of companies and projects that use Renovate</summary>
+<ul>
+  <li>Prisma</li>
+  <li>Netlify</li>
+  <li>Envoy</li>
+  <li>Condé Nast</li>
+  <li>Microsoft</li>
+  <li>Atlassian</li>
+  <li>Sourcegraph</li>
+  <li>Mozilla</li>
+  <li>Deloitte</li>
+  <li>Telus</li>
+  <li>Yarn</li>
+  <li>HashiCorp</li>
+  <li>Automattic</li>
+  <li>Algolia</li>
+  <li>eBay</li>
+  <li>Cypress</li>
+  <li>Red Hat</li>
+  <li>Financial Times</li>
+  <li>Uber</li>
+  <li>Buildkite</li>
+</ul>
+</details>
 
 ## Ways to run Renovate
 

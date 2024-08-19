@@ -1,4 +1,5 @@
-import { SimpleGit, simpleGit } from 'simple-git';
+import type { SimpleGit } from 'simple-git';
+import { simpleGit } from 'simple-git';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import { add, clear } from '../../../util/host-rules';
