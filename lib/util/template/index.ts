@@ -1,9 +1,15 @@
 import is from '@sindresorhus/is';
-import handlebars from 'handlebars';
+import handlebars, { type HelperOptions } from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
+import { toArray } from '../array';
 import { getChildEnv } from '../exec/utils';
 import { regEx } from '../regex';
+
+// Missing in handlebars
+type Options = HelperOptions & {
+  lookupProperty: (element: unknown, key: unknown) => unknown;
+};
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
@@ -85,6 +91,34 @@ handlebars.registerHelper({
     args.pop();
     return args.some(Boolean);
   },
+});
+
+handlebars.registerHelper(
+  'lookupArray',
+  (obj: unknown, key: unknown, options: Options): unknown[] => {
+    return (
+      toArray(obj)
+        // skip elements like #with does
+        .filter((element) => !handlebars.Utils.isEmpty(element))
+        .map((element) => options.lookupProperty(element, key))
+        .filter((value) => value !== undefined)
+    );
+  },
+);
+
+handlebars.registerHelper('distinct', (obj: unknown): unknown[] => {
+  const seen = new Set<string>();
+
+  return toArray(obj).filter((value) => {
+    const str = JSON.stringify(value);
+
+    if (seen.has(str)) {
+      return false;
+    }
+
+    seen.add(str);
+    return true;
+  });
 });
 
 export const exposedConfigOptions = [

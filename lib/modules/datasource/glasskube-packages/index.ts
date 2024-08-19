@@ -3,9 +3,9 @@ import { joinUrlParts } from '../../../util/url';
 import * as glasskubeVersioning from '../../versioning/glasskube';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { GlasskubePackageVersions } from './schema';
 import {
   GlasskubePackageManifestYaml,
-  GlasskubePackageVersions,
   GlasskubePackageVersionsYaml,
 } from './schema';
 

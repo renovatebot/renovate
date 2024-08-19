@@ -10,10 +10,10 @@ import { replaceUrlPath, resolveBaseUrl } from '../../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { RegistryFile } from './schema';
 import {
   PackagesResponse,
   PackagistFile,
-  RegistryFile,
   RegistryMeta,
   extractDepReleases,
   parsePackagesResponses,

@@ -2,7 +2,8 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import * as p from '../../../../util/promises';
 import { escapeRegExp, regEx } from '../../../../util/regex';
-import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
+import type { GetPkgReleasesConfig } from '../../../datasource';
+import { getPkgReleases } from '../../../datasource';
 import { get as getVersioning } from '../../../versioning';
 import type {
   UpdateArtifact,

@@ -26,14 +26,14 @@ function unlessServerSide<
   return cb();
 }
 
-export class RubyGemsDatasource extends Datasource {
+export class RubygemsDatasource extends Datasource {
   static readonly id = 'rubygems';
 
   private metadataCache: MetadataCache;
 
   constructor() {
-    super(RubyGemsDatasource.id);
-    this.http = new Http(RubyGemsDatasource.id);
+    super(RubygemsDatasource.id);
+    this.http = new Http(RubygemsDatasource.id);
     this.versionsEndpointCache = new VersionsEndpointCache(this.http);
     this.metadataCache = new MetadataCache(this.http);
   }
