@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
-import semver, { ReleaseType } from 'semver';
+import type { ReleaseType } from 'semver';
+import semver from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { replaceAt } from '../../../util/string';

@@ -7,7 +7,8 @@ import {
   isCustomManager,
 } from '../../lib/modules/manager/custom';
 import { readFile, updateFile } from '../utils';
-import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
+import type { OpenItems } from './github-query-items';
+import { generateFeatureAndBugMarkdown } from './github-query-items';
 import {
   formatUrls,
   getDisplayName,

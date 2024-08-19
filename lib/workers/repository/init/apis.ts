@@ -5,7 +5,8 @@ import {
   REPOSITORY_FORKED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { RepoParams, RepoResult, platform } from '../../../modules/platform';
+import type { RepoParams, RepoResult } from '../../../modules/platform';
+import { platform } from '../../../modules/platform';
 
 // TODO: fix types (#22198)
 export type WorkerPlatformConfig = RepoResult &
