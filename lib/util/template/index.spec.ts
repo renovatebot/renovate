@@ -527,10 +527,7 @@ describe('util/template/index', () => {
       const output = template.compile(
         '{{#each (distinct input)}}{{{.}}}{{/each}}',
         {
-          input: [
-            null,
-            null,
-          ],
+          input: [null, null],
         },
         false,
       );
