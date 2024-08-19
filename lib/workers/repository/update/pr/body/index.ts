@@ -1,5 +1,6 @@
 import type { RenovateConfig } from '../../../../../config/types';
-import { PrDebugData, platform } from '../../../../../modules/platform';
+import type { PrDebugData } from '../../../../../modules/platform';
+import { platform } from '../../../../../modules/platform';
 import { regEx } from '../../../../../util/regex';
 import { toBase64 } from '../../../../../util/string';
 import * as template from '../../../../../util/template';

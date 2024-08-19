@@ -1,12 +1,14 @@
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import {
+import type {
   GitPullRequest,
   GitPullRequestCommentThread,
-  GitPullRequestMergeStrategy,
   GitStatus,
-  GitStatusState,
   GitVersionDescriptor,
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import {
+  GitPullRequestMergeStrategy,
+  GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import {
@@ -43,7 +45,8 @@ import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
-import { AzurePr, AzurePrVote } from './types';
+import type { AzurePr } from './types';
+import { AzurePrVote } from './types';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,

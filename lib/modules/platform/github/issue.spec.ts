@@ -1,6 +1,7 @@
 import * as memCache from '../../../util/cache/memory';
 import { getCache, resetCache } from '../../../util/cache/repository';
-import { GithubIssue, GithubIssueCache } from './issue';
+import type { GithubIssue } from './issue';
+import { GithubIssueCache } from './issue';
 
 describe('modules/platform/github/issue', () => {
   describe('GithubIssueCache', () => {

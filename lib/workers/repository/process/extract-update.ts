@@ -15,7 +15,8 @@ import { branchifyUpgrades } from '../updates/branchify';
 import { fetchUpdates } from './fetch';
 import { sortBranches } from './sort';
 import { Vulnerabilities } from './vulnerabilities';
-import { WriteUpdateResult, writeUpdates } from './write';
+import type { WriteUpdateResult } from './write';
+import { writeUpdates } from './write';
 
 export interface ExtractResult {
   branches: BranchConfig[];
