@@ -1,7 +1,8 @@
 import { createHash } from 'crypto';
 import { createReadStream } from 'fs';
 import { copyFile, stat } from 'fs-extra';
-import { DirectoryResult, dir } from 'tmp-promise';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
