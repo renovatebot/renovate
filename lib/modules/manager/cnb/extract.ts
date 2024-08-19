@@ -44,7 +44,7 @@ export function extractPackageFile(
   }
 
   if (
-    descriptor.io.buildpacks?.builder &&
+    descriptor.io?.buildpacks?.builder &&
     isDockerRef(descriptor.io.buildpacks.builder)
   ) {
     const dep = getDep(
@@ -65,7 +65,7 @@ export function extractPackageFile(
   }
 
   if (
-    descriptor.io.buildpacks?.group &&
+    descriptor.io?.buildpacks?.group &&
     is.array(descriptor.io.buildpacks.group)
   ) {
     for (const group of descriptor.io.buildpacks.group) {
