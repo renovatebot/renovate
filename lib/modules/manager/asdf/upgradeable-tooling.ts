@@ -116,6 +116,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       versioning: `${regexVersioning.id}:^(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+)\\.(?<build>\\d+)$`,
     },
   },
+  cookiecutter: {
+    asdfPluginUrl: 'https://github.com/shawon-crosen/asdf-cookiecutter',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'cookiecutter/cookiecutter',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   cosign: {
     asdfPluginUrl: 'https://gitlab.com/wt0f/asdf-cosign',
     config: {
@@ -299,6 +307,15 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'idris-lang/Idris-dev',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  istioctl: {
+    asdfPluginUrl: 'https://github.com/virtualstaticvoid/asdf-istioctl',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'istio/istio',
+      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
