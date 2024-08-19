@@ -1894,7 +1894,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'bbAutoCompletePrTask',
+    name: 'bbAutoResolvePrTasks',
     description:
       'The PR tasks will be automatically completed after the PR is raised.',
     type: 'boolean',

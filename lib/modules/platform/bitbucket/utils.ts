@@ -7,6 +7,7 @@ import type {
   BitbucketMergeStrategy,
   MergeRequestBody,
   PrResponse,
+  PrTask,
 } from './types';
 
 const bitbucketMergeStrategies: Map<MergeStrategy, BitbucketMergeStrategy> =
@@ -74,3 +75,7 @@ export const prFieldsFilter = [
   'values.created_on',
   'values.updated_on',
 ].join(',');
+
+export function filterUnresolvedTasksIds(tasks: PrTask[]): PrTask[] {
+  return tasks.filter((task) => task.state === 'UNRESOLVED');
+}

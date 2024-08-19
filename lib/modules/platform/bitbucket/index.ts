@@ -42,6 +42,7 @@ import type {
   BranchResponse,
   Config,
   EffectiveReviewer,
+  ListPrTasksResponse,
   PagedResult,
   PrResponse,
   RepoBranchingModel,
@@ -954,6 +955,56 @@ export async function createPr({
       );
     }
   }
+
+  logger.debug(
+    {
+      repository: config.repository,
+      title,
+      base,
+      bbAutoResolvePrTasks: platformPrOptions?.bbAutoResolvePrTasks,
+    },
+    'Auto resolve PR tasks',
+  );
+  if (platformPrOptions?.bbAutoResolvePrTasks) {
+    const listTaskRes = (
+      await bitbucketHttp.getJson<ListPrTasksResponse>(
+        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks`,
+        { paginate: true, pagelen: 100 },
+      )
+    ).body.values;
+
+    logger.debug(
+      {
+        repository: config.repository,
+        title,
+        base,
+        bbAutoCompleteTasks: platformPrOptions.bbAutoResolvePrTasks,
+        listTaskRes,
+      },
+      'List PR tasks',
+    );
+
+    const unResolvedTasks = utils.filterUnresolvedTasksIds(listTaskRes);
+
+    for (const task of unResolvedTasks) {
+      const res = await bitbucketHttp.putJson<unknown>(
+        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks/${task.id}`,
+        {
+          body: {
+            state: 'RESOLVED',
+            content: {
+              raw: task.content.raw,
+            },
+          },
+        },
+      );
+      logger.debug(
+        { repository: config.repository, title, base, updateTaskResponse: res },
+        'Put PR tasks - mark resolved',
+      );
+    }
+  }
+
   return pr;
 }
 

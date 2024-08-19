@@ -91,3 +91,17 @@ export interface BitbucketPrCacheData {
   updated_on: string | null;
   author: string | null;
 }
+
+export interface ListPrTasksResponse {
+  values: PrTask[];
+}
+
+export interface PrTask {
+  id: number;
+  state: TaskState;
+  content: {
+    raw: string;
+  };
+}
+
+export type TaskState = 'RESOLVED' | 'UNRESOLVED';
