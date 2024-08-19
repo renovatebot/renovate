@@ -909,6 +909,7 @@ export async function createPr({
     reviewers,
   };
 
+  let pr: Pr;
   try {
     const prRes = (
       await bitbucketHttp.postJson<PrResponse>(
@@ -918,14 +919,13 @@ export async function createPr({
         },
       )
     ).body;
-    const pr = utils.prInfo(prRes);
+    pr = utils.prInfo(prRes);
     await BitbucketPrCache.addPr(
       bitbucketHttp,
       config.repository,
       renovateUserUuid,
       pr,
     );
-    return pr;
   } catch (err) /* istanbul ignore next */ {
     // Try sanitizing reviewers
     const sanitizedReviewers = await sanitizeReviewers(reviewers, err);
@@ -945,16 +945,16 @@ export async function createPr({
           },
         )
       ).body;
-      const pr = utils.prInfo(prRes);
+      pr = utils.prInfo(prRes);
       await BitbucketPrCache.addPr(
         bitbucketHttp,
         config.repository,
         renovateUserUuid,
         pr,
       );
-      return pr;
     }
   }
+  return pr;
 }
 
 export async function updatePr({
