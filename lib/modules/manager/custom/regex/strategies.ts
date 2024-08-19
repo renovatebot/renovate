@@ -53,7 +53,7 @@ export function handleCombination(
     .map((match) => ({
       groups: match.groups ?? /* istanbul ignore next: can this happen? */ {},
       replaceString:
-        match?.groups?.currentValue ?? match?.groups?.currentDigest
+        (match?.groups?.currentValue ?? match?.groups?.currentDigest)
           ? match[0]
           : undefined,
     }))

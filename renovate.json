@@ -5,6 +5,8 @@
   "semanticCommitScope": "deps",
   "automergeType": "pr",
   "prCreation": "immediate",
+  "ignorePresets": [":ignoreModulesAndTests"],
+  "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
   "dockerfile": {
     "semanticCommitType": "build"
   },
@@ -39,6 +41,24 @@
       "matchDepNames": ["ghcr.io/renovatebot/base-image"],
       "matchUpdateTypes": ["major", "minor"],
       "semanticCommitType": "feat"
+    },
+    {
+      "description": "set build scope for node updates",
+      "matchPackageNames": ["node"],
+      "matchFileNames": [".nvmrc", "tools/docker/Dockerfile"],
+      "semanticCommitType": "build"
+    },
+    {
+      "description": "set branch prefix for node major updates to split from minor updates",
+      "matchPackageNames": ["node"],
+      "matchUpdateTypes": ["major"],
+      "additionalBranchPrefix": "major"
+    },
+    {
+      "description": "disable some invalid deps from docs",
+      "matchPackageNames": ["my.old.registry/**", "my.new.registry/**"],
+      "matchFileNames": ["docs/**/*.md"],
+      "enabled": false
     }
   ],
   "customManagers": [

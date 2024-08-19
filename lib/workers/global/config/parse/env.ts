@@ -88,6 +88,9 @@ function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
 const convertedExperimentalEnvVars = [
   'RENOVATE_X_AUTODISCOVER_REPO_SORT',
   'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
+  'RENOVATE_X_DELETE_CONFIG_FILE',
+  'RENOVATE_X_S3_ENDPOINT',
+  'RENOVATE_X_S3_PATH_STYLE',
   'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
   'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',
 ];
@@ -155,7 +158,7 @@ export async function getConfig(
                 'Could not parse object array',
               );
             }
-          } catch (err) {
+          } catch {
             logger.debug(
               { val: envVal, envName },
               'Could not parse environment variable',
@@ -190,6 +193,19 @@ export async function getConfig(
                 'env config requireConfig property has been changed to optional',
               );
               config[option.name] = 'optional';
+            }
+          }
+          if (option.name === 'platformCommit') {
+            if ((config[option.name] as string) === 'true') {
+              logger.warn(
+                'env config platformCommit property has been changed to enabled',
+              );
+              config[option.name] = 'enabled';
+            } else if ((config[option.name] as string) === 'false') {
+              logger.warn(
+                'env config platformCommit property has been changed to disabled',
+              );
+              config[option.name] = 'disabled';
             }
           }
         }

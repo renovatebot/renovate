@@ -146,7 +146,7 @@ export function addMetaData(
         dep.sourceUrl = parsed.toString();
         dep.sourceDirectory = parsed.filepath;
       }
-    } catch (err) {
+    } catch {
       // ignore invalid urls
     }
   }

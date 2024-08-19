@@ -1,9 +1,9 @@
-import type { LogLevel } from 'bunyan';
 import type { PlatformId } from '../constants';
 import type { LogLevelRemap } from '../logger/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { RepoSortMethod, SortMethod } from '../modules/platform/types';
 import type { HostRule, SkipReason } from '../types';
+import type { StageName } from '../types/skip-reason';
 import type { GitNoVerifyOption } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
 
@@ -27,6 +27,7 @@ export interface GroupConfig extends Record<string, unknown> {
 }
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
+export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 // TODO: Proper typings
 export interface RenovateSharedConfig {
   $schema?: string;
@@ -70,7 +71,7 @@ export interface RenovateSharedConfig {
   milestone?: number;
   npmrc?: string;
   npmrcMerge?: boolean;
-  platformCommit?: boolean;
+  platformCommit?: PlatformCommitOptions;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
@@ -114,8 +115,6 @@ export interface GlobalOnlyConfig {
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
   globalExtends?: string[];
-  logFile?: string;
-  logFileLevel?: LogLevel;
   mergeConfidenceDatasources?: string[];
   mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
@@ -126,6 +125,7 @@ export interface GlobalOnlyConfig {
   redisUrl?: string;
   repositories?: RenovateRepository[];
   useCloudMetadataServices?: boolean;
+  deleteConfigFile?: boolean;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -166,6 +166,9 @@ export interface RepoGlobalConfig {
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;
   userAgent?: string;
+  s3Endpoint?: string;
+  s3PathStyle?: boolean;
+  cachePrivatePackages?: boolean;
 }
 
 export interface LegacyAdminConfig {
@@ -176,7 +179,7 @@ export interface LegacyAdminConfig {
   onboarding?: boolean;
   onboardingBranch?: string;
   onboardingCommitMessage?: string;
-  onboardingNoDeps?: boolean;
+  onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingRebaseCheckbox?: boolean;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
@@ -224,6 +227,8 @@ export interface RenovateConfig
     AssigneesAndReviewersConfig,
     ConfigMigration,
     Record<string, unknown> {
+  s3Endpoint?: string;
+  s3PathStyle?: boolean;
   reportPath?: string;
   reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
@@ -358,13 +363,6 @@ export interface PackageRule
     UpdateConfig,
     Record<string, unknown> {
   description?: string | string[];
-  excludeDepNames?: string[];
-  excludeDepPatterns?: string[];
-  excludeDepPrefixes?: string[];
-  excludePackageNames?: string[];
-  excludePackagePatterns?: string[];
-  excludePackagePrefixes?: string[];
-  excludeRepositories?: string[];
   isVulnerabilityAlert?: boolean;
   matchBaseBranches?: string[];
   matchCategories?: string[];
@@ -374,17 +372,12 @@ export interface PackageRule
   matchCurrentVersion?: string;
   matchDatasources?: string[];
   matchDepNames?: string[];
-  matchDepPatterns?: string[];
-  matchDepPrefixes?: string[];
   matchDepTypes?: string[];
   matchFileNames?: string[];
   matchManagers?: string[];
   matchNewValue?: string;
   matchPackageNames?: string[];
-  matchPackagePatterns?: string[];
-  matchPackagePrefixes?: string[];
   matchRepositories?: string[];
-  matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
   registryUrls?: string[] | null;
@@ -554,6 +547,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   currentVersionTimestamp?: string;
   enabled?: boolean;
   skipReason?: SkipReason;
+  skipStage?: StageName;
 }
 
 export interface ConfigMigration {

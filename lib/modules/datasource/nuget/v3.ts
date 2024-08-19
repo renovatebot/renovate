@@ -9,7 +9,8 @@ import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import * as fs from '../../../util/fs';
 import { ensureCacheDir } from '../../../util/fs';
-import { Http, HttpError } from '../../../util/http';
+import type { Http } from '../../../util/http';
+import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
@@ -240,13 +241,12 @@ export class NugetV3Api {
           { registryUrl, pkgName, pkgVersion: latestStable },
           `package manifest (.nuspec) not found`,
         );
-        return dep;
+      } else {
+        logger.debug(
+          { err, registryUrl, pkgName, pkgVersion: latestStable },
+          `Cannot obtain sourceUrl`,
+        );
       }
-      logger.debug(
-        { err, registryUrl, pkgName, pkgVersion: latestStable },
-        `Cannot obtain sourceUrl`,
-      );
-      return dep;
     }
 
     // istanbul ignore else: not easy testable
