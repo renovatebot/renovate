@@ -88,49 +88,41 @@ export async function updateArtifacts({
 
   // regex match anything hex.pm to an org
   // if not hex, do repo.add
-  const orgPreCommands = Array.from(organizations).reduce(
-    (acc, organization) => {
-      const url = `${hexRepoUrl}api/repos/${organization}/`;
-      const { token } = hostRules.find({ url });
+  for (const organization of Array.from(organizations)) {
+    const url = `${hexRepoUrl}api/repos/${organization}/`;
+    const { token } = hostRules.find({ url });
 
-      if (token) {
-        logger.debug(`Authenticating to hex organization ${organization}`);
-        const authCommand = `mix hex.organization auth ${organization} --key ${token}`;
-        return [...acc, authCommand];
-      }
-
-      return acc;
-    },
-    [] as string[],
-  );
-
-  preCommands.push(...orgPreCommands);
+    if (token) {
+      logger.debug(`Authenticating to hex organization ${organization}`);
+      const authCommand = `mix hex.organization auth ${organization} --key ${token}`;
+      preCommands.push(authCommand);
+    }
+  }
 
   // auth repo registries
 
   if (config.registryAliases) {
     // regex match anything hex.pm to an org
     // if not hex, do repo.add
-    const registryPreCommands = aliasRecordToRepositories(
-      config.registryAliases,
-    ).reduce((acc, { name, registry }) => {
+    const repoAliases = aliasRecordToRepositories(config.registryAliases);
+
+    for (const { name, registry } of repoAliases) {
       const hostRule = hostRules.find({ url: registry });
 
       // istanbul ignore if: no good way to test
       if (hostRule?.token) {
         logger.debug(`Adding repo registry ${name}`);
         const authCommand = `mix repo.add ${name} ${registry} --auth-key ${hostRule.token}`;
-        return [...acc, authCommand];
+
+        preCommands.push(authCommand);
       }
 
       logger.debug(
         `No hostRule token defined for repo ${name} with url ${registry}.`,
       );
+    }
 
-      return acc;
-    }, [] as string[]);
-
-    preCommands = preCommands.concat(registryPreCommands);
+    preCommands;
   }
 
   const execOptions: ExecOptions = {
