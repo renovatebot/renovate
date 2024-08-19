@@ -16,9 +16,10 @@ async function getOnboardingConfig(
 
   const hasPredefinedPreset = onboardingConfig?.extends !== undefined;
   if (hasPredefinedPreset) {
-    logger.debug('Predefined onboardingConfig.extends found, so default org presets won't be used');
-  }
-  if (!hasPredefinedPreset) {
+    logger.debug(
+      "Predefined onboardingConfig.extends found, so default org presets won't be used",
+    );
+  } else {
     // TODO #22198 fix types
     const foundPreset = await searchDefaultOnboardingPreset(config.repository!);
 
