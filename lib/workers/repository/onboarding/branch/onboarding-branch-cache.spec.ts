@@ -147,7 +147,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
       );
       scm.isBranchModified.mockResolvedValueOnce(false);
       expect(
-        await isOnboardingBranchModified('configure/renovate'),
+        await isOnboardingBranchModified('configure/renovate', 'main'),
       ).toBeFalse();
     });
 
@@ -165,7 +165,9 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
         'new-onboarding-sha' as LongCommitSha,
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
-      expect(await isOnboardingBranchModified('configure/renovate')).toBeTrue();
+      expect(
+        await isOnboardingBranchModified('configure/renovate', 'main'),
+      ).toBeTrue();
     });
 
     it('returns cached value', async () => {
@@ -181,7 +183,9 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
       git.getBranchCommit.mockReturnValueOnce(
         'onboarding-sha' as LongCommitSha,
       );
-      expect(await isOnboardingBranchModified('configure/renovate')).toBeTrue();
+      expect(
+        await isOnboardingBranchModified('configure/renovate', 'main'),
+      ).toBeTrue();
     });
   });
 

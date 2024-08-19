@@ -71,9 +71,8 @@ function haveReachedLimits(): boolean {
 /* istanbul ignore next */
 function checkEnv(): void {
   const range = pkg.engines!.node!;
-  const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
-    logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
+    logger.warn(
       { release: process.release, versions: process.versions },
       'Unknown node environment detected.',
     );
@@ -81,14 +80,6 @@ function checkEnv(): void {
     logger.error(
       { versions: process.versions, range },
       'Unsupported node environment detected. Please update your node version.',
-    );
-  } else if (
-    rangeNext &&
-    !semver.satisfies(process.versions?.node, rangeNext)
-  ) {
-    logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
-      { versions: process.versions },
-      `Please upgrade the version of Node.js used to run Renovate to satisfy "${rangeNext}". Support for your current version will be removed in Renovate's next major release.`,
     );
   }
 }
@@ -144,17 +135,10 @@ export async function start(): Promise<number> {
       config = await getGlobalConfig();
       if (config?.globalExtends) {
         // resolve global presets immediately
-        if (process.env.RENOVATE_X_EAGER_GLOBAL_EXTENDS) {
-          config = mergeChildConfig(
-            await resolveGlobalExtends(config.globalExtends),
-            config,
-          );
-        } else {
-          config = mergeChildConfig(
-            config,
-            await resolveGlobalExtends(config.globalExtends),
-          );
-        }
+        config = mergeChildConfig(
+          await resolveGlobalExtends(config.globalExtends),
+          config,
+        );
       }
 
       // Set allowedHeaders in case hostRules headers are configured in file config
@@ -173,12 +157,12 @@ export async function start(): Promise<number> {
 
       await validatePresets(config);
 
+      setGlobalLogLevelRemaps(config.logLevelRemap);
+
       checkEnv();
 
       // validate secrets. Will throw and abort if invalid
       validateConfigSecrets(config);
-
-      setGlobalLogLevelRemaps(config.logLevelRemap);
     });
 
     // autodiscover repositories (needs to come after platform initialization)

@@ -19,10 +19,6 @@ We will try to keep breakage to a minimum, but make no guarantees that an experi
 If set, Renovate will export OpenTelemetry data to the supplied endpoint.
 For more information see [the OpenTelemetry docs](opentelemetry.md).
 
-## `RENOVATE_CACHE_NPM_MINUTES`
-
-If set to any integer, Renovate will use this integer instead of the default npm cache time (15 minutes) for the npm datasource.
-
 ## `RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK`
 
 If set to any value, Renovate will skip its default artifacts filter check in the Maven datasource.
@@ -32,25 +28,26 @@ Skipping the check will speed things up, but may result in versions being return
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
-## `RENOVATE_X_DELETE_CONFIG_FILE`
+## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
 
-If `true` Renovate tries to delete the self-hosted config file after reading it.
-You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE` environment variable.
+If set to any value, Renovate will skip attempting to get release labels (e.g. gitRef, sourceUrl) from manifest annotations for `https://index.docker.io`.
 
-The process that runs Renovate must have the correct permissions to delete the config file.
+Due to the missing label information like sourceUrl, Renovate will not be able to perform certain actions dependent on these information for the images.
 
-## `RENOVATE_X_DOCKER_HUB_TAGS`
+This includes the following:
 
-If set to any value, Renovate will use the Docker Hub API (`https://hub.docker.com`) to fetch tags instead of the normal Docker API for images pulled from `https://index.docker.io`.
+- Generating changelogs
+- Applying package rules dependent on the labels
+- Including the sourceUrls in PR bodies
+
+## `RENOVATE_X_DOCKER_HUB_TAGS_DISABLE`
+
+If set to any value, Renovate will stop using the Docker Hub API (`https://hub.docker.com`) to fetch tags and instead use the normal Docker API for images pulled from `https://index.docker.io`.
 
 ## `RENOVATE_X_DOCKER_MAX_PAGES`
 
 If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
 This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
-
-## `RENOVATE_X_EAGER_GLOBAL_EXTENDS`
-
-Resolve and merge `globalExtends` presets before other global config, instead of after.
 
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 
@@ -82,10 +79,6 @@ Default value: `250` (milliseconds).
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
 See [issue 8660](https://github.com/renovatebot/renovate/issues/8660) for background on why this was created.
 
-## `RENOVATE_X_IGNORE_NODE_WARN`
-
-Suppress the default warning when a deprecated version of Node.js is used to run Renovate.
-
 ## `RENOVATE_X_IGNORE_RE2`
 
 Skip initializing `RE2` for regular expressions and instead use Node-native `RegExp` instead.
@@ -112,18 +105,6 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 ## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
 
 If set, Renovate will persist repository cache locally after uploading to S3.
-
-## `RENOVATE_X_S3_ENDPOINT`
-
-If set, Renovate will use this string as the `endpoint` when instantiating the AWS S3 client.
-
-## `RENOVATE_X_S3_PATH_STYLE`
-
-If set, Renovate will enable `forcePathStyle` when instantiating the AWS S3 client.
-
-> Whether to force path style URLs for S3 objects (e.g., `https://s3.amazonaws.com//` instead of `https://.s3.amazonaws.com/`)
-
-Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html)
 
 ## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
 

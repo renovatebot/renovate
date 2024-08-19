@@ -20,8 +20,8 @@ import { extractPackageJson } from './common/package-file';
 import { postExtract } from './post';
 import type { NpmPackage } from './types';
 import { isZeroInstall } from './yarn';
+import type { YarnConfig } from './yarnrc';
 import {
-  YarnConfig,
   loadConfigFromLegacyYarnrc,
   loadConfigFromYarnrcYml,
   resolveRegistryUrl,
@@ -41,7 +41,7 @@ export async function extractPackageFile(
   let packageJson: NpmPackage;
   try {
     packageJson = JSON.parse(content);
-  } catch (err) {
+  } catch {
     logger.debug({ packageFile }, `Invalid JSON`);
     return null;
   }

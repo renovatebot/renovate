@@ -1,4 +1,5 @@
-import { RenovateConfig, partial } from '../../../../../test/util';
+import type { RenovateConfig } from '../../../../../test/util';
+import { partial } from '../../../../../test/util';
 import type { BranchConfig } from '../../../types';
 import { getPrList } from './pr-list';
 
@@ -133,7 +134,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
         </details>
 
-        <br />
+
 
         🚸 Branch creation will be limited to maximum 1 per hour, so it doesn't swamp any CI resources or overwhelm the project. See docs for \`prhourlylimit\` for details.
 

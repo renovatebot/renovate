@@ -53,7 +53,7 @@ export async function get<T = never>(
       // istanbul ignore next
       await rm(namespace, key);
     }
-  } catch (err) {
+  } catch {
     logger.trace({ rprefix, namespace, key }, 'Cache miss');
   }
   return undefined;
@@ -81,7 +81,7 @@ export async function set(
       { EX: redisTTL },
     );
   } catch (err) {
-    logger.once.debug({ err }, 'Error while setting cache value');
+    logger.once.warn({ err }, 'Error while setting Redis cache value');
   }
 }
 
@@ -105,4 +105,5 @@ export async function init(
     pingInterval: 30000, // 30s
   });
   await client.connect();
+  logger.debug('Redis cache connected');
 }

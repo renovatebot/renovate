@@ -38,8 +38,8 @@ import { PackageRulesMigration } from './custom/package-rules-migration';
 import { PackagesMigration } from './custom/packages-migration';
 import { PathRulesMigration } from './custom/path-rules-migration';
 import { PinVersionsMigration } from './custom/pin-versions-migration';
+import { PlatformCommitMigration } from './custom/platform-commit-migration';
 import { PostUpdateOptionsMigration } from './custom/post-update-options-migration';
-import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-warnings-migration';
 import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
 import { RecreateClosedMigration } from './custom/recreate-closed-migration';
@@ -71,11 +71,13 @@ export class MigrationsService {
     'maintainYarnLock',
     'statusCheckVerify',
     'supportPolicy',
+    'transitiveRemediation',
     'yarnCacheFolder',
     'yarnMaintenanceBranchName',
     'yarnMaintenanceCommitMessage',
     'yarnMaintenancePrBody',
     'yarnMaintenancePrTitle',
+    'raiseDeprecationWarnings',
   ]);
 
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
@@ -129,7 +131,6 @@ export class MigrationsService {
     PathRulesMigration,
     PinVersionsMigration,
     PostUpdateOptionsMigration,
-    RaiseDeprecationWarningsMigration,
     RebaseConflictedPrs,
     RebaseStalePrsMigration,
     RenovateForkMigration,
@@ -157,9 +158,13 @@ export class MigrationsService {
     FetchReleaseNotesMigration,
     MatchManagersMigration,
     CustomManagersMigration,
+    PlatformCommitMigration,
   ];
 
-  static run(originalConfig: RenovateConfig): RenovateConfig {
+  static run(
+    originalConfig: RenovateConfig,
+    parentKey?: string,
+  ): RenovateConfig {
     const migratedConfig: RenovateConfig = {};
     const migrations = this.getMigrations(originalConfig, migratedConfig);
 
@@ -168,7 +173,7 @@ export class MigrationsService {
       const migration = MigrationsService.getMigration(migrations, key);
 
       if (migration) {
-        migration.run(value, key);
+        migration.run(value, key, parentKey);
 
         if (migration.deprecated) {
           delete migratedConfig[key];

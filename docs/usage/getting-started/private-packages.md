@@ -463,11 +463,18 @@ name = "pypi"
 
 ### pip-compile
 
-The pip-compile manager extracts `--index-url` and `--extra-index-url` directives from its input file.
-Renovate will match those URLs with credentials from matching `hostRules` blocks in its configuration and pass them to `pip-compile` via environment variables.
+The pip-compile manager can extract these directives from the input file given to Renovate:
 
-> [!NOTE]
-> Placing the `--[extra-]index-url` in the lockfile is not supported; it must go in the `.in` file for it to be used by pip-compile during renovate jobs.
+- `--index-url`
+- `--extra-index-url`
+
+Renovate matches those URLs with credentials from matching `hostRules` blocks in the Renovate configuration.
+Then Renovate passes the information to `pip-compile` via environment variables.
+
+<!-- prettier-ignore -->
+!!! warning "Put directives in the .in file, avoid the lockfile"
+    You must put the `--[extra-]index-url` directive(s) in the `.in` file, for `pip-compile` to use during Renovate jobs.
+    Do _not_ put the directive(s) in the lockfile, as this is _not_ supported.
 
 ```title="requirements.in"
 --extra-index-url https://pypi.my.domain/simple
@@ -490,8 +497,21 @@ private-package==1.2.3
 }
 ```
 
-Renovate relies on `pip`'s integration with the python [keyring](https://pypi.org/project/keyring/) package along with the [keyrigs.envvars](https://pypi.org/project/keyrings.envvars/) backend for this.
-If you are self-hosting Renovate and are not running in a Containerbase environment or using the Docker sidecar container you will need to install those two packages.
+#### Packages that Renovate needs
+
+Renovate relies on `pip`'s integration with the Python [keyring](https://pypi.org/project/keyring/) package along with the [keyrigs.envvars](https://pypi.org/project/keyrings.envvars/) backend for this.
+
+##### Self-hosting Renovate
+
+This section only applies to users who self-host Renovate.
+If you self-host and use Containerbase, or our Docker sidecar container, then Renovate can already access the packages it needs.
+
+But if you are self-hosting Renovate and:
+
+- _not_ running Renovate in a Containerbase environment
+- or, _not_ using the Docker sidecar container
+
+Then you must install the Python keyring package and the keyrigs.envvars package into your self-hosted environment.
 
 ### poetry
 
@@ -565,30 +585,33 @@ The solution to this is that you should break your presets into public and priva
 It is strongly recommended that you avoid committing secrets to repositories, including private ones, and this includes secrets needed by Renovate to access private modules.
 The preferred approach to secrets is that the bot administrator configures them as `hostRules` which are then applied to all repositories which the bot accesses.
 
+<!-- prettier-ignore -->
+!!! warning "Store secrets for your Mend-hosted app via the web UI"
+    Mend no longer supports putting encrypted secrets in the Renovate config file on your repository.
+    Going forward, all secrets must be stored in the App settings via the web UI.
+    If you have encrypted secrets in your Renovate config, you must migrate them to the web UI.
+    Read [Migrating Secrets from Repo Config to App Settings](../mend-hosted/migrating-secrets.md) to learn how.
+
 If you need to provide credentials to the Mend Renovate App, please do this:
 
-- Encrypt each secret string using <https://app.renovatebot.com/encrypt>. Note: this encrypts using the app's public key fully in the browser and does not send the original secret to any server. You can download this file and perform the encryption fully offline if you like.
-- Wrap each secret field in an [encrypted](../configuration-options.md#encrypted) object and paste in the encrypted secret value instead. An example is shown below:
+1. Add each secret string in the Credentials section of Organisation or Repository settings in the web UI at [http://developer.mend.io](http://developer.mend.io).
 
-```json
-{
-  "hostRules": [
-    {
-      "matchHost": "registry.npmjs.org",
-      "encrypted": {
-        "token": "3f832f2983yf89hsd98ahadsjfasdfjaslf............"
-      }
-    },
-    {
-      "matchHost": "https://custom.registry.company.com/pypi/",
-      "username": "bot1",
-      "encrypted": {
-        "password": "p278djfdsi9832jnfdshufwji2r389fdskj........."
-      }
-    }
-  ]
-}
-```
+   ![Organization and repository secrets on the credentials settings page](../assets/images/app-settings/org-and-repo-secrets.png)
+
+2. Reference secrets inside your Renovate config files with notation: `{{ secrets.YOUR_SECRET }}`.
+
+   ```json
+   {
+     "hostRules": [
+       {
+         "matchHost": "github.com",
+         "token": "{{ secrets.GITHUB_COM_TOKEN }}"
+       }
+     ]
+   }
+   ```
+
+For more details, see [Using Secrets with Mend Cloud Apps](../mend-hosted/app-secrets.md).
 
 ### Access to GitHub Actions Secrets
 

@@ -278,6 +278,56 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
   });
 
+  it('skips vendor directory update with gomodSkipVendor', async () => {
+    const foo = join('vendor/github.com/foo/foo/go.mod');
+    const bar = join('vendor/github.com/bar/bar/go.mod');
+    const baz = join('vendor/github.com/baz/baz/go.mod');
+
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum', foo],
+        not_added: [bar],
+        deleted: [baz],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce('New go.mod');
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [],
+      newPackageFileContent: gomod1,
+      config: {
+        ...config,
+        postUpdateOptions: ['gomodSkipVendor'],
+      },
+    });
+    expect(res).toEqual([
+      {
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
+        },
+      },
+      {
+        file: {
+          contents: 'New go.mod',
+          path: 'go.mod',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
   it('supports vendor directory update with go.work', async () => {
     const foo = join('vendor/github.com/foo/foo/go.mod');
     const bar = join('vendor/github.com/bar/bar/go.mod');

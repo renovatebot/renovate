@@ -237,6 +237,8 @@ module.exports = {
 
 #### AWS ECR (Amazon Web Services Elastic Container Registry)
 
+##### Using access key id & secret
+
 Renovate can authenticate with AWS ECR using AWS access key id & secret as the username & password, for example:
 
 ```json
@@ -246,6 +248,27 @@ Renovate can authenticate with AWS ECR using AWS access key id & secret as the u
       "hostType": "docker",
       "matchHost": "12345612312.dkr.ecr.us-east-1.amazonaws.com",
       "username": "AKIAABCDEFGHIJKLMNOPQ",
+      "encrypted": {
+        "password": "w...A"
+      }
+    }
+  ]
+}
+```
+
+##### Using `get-login-password`
+
+Renovate can also authenticate with AWS ECR using the output from the `aws ecr get-login-password` command as outlined in
+the [AWS documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/registry_auth.html#registry-auth-token).
+To make use of this authentication mechanism, specify the username as `AWS`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "matchHost": "12345612312.dkr.ecr.us-east-1.amazonaws.com",
+      "username": "AWS",
       "encrypted": {
         "password": "w...A"
       }
@@ -384,7 +407,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:37.399.10
+FROM renovate/renovate:38.39.6
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

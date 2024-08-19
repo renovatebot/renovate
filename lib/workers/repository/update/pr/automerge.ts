@@ -1,7 +1,8 @@
 // TODO #22198
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
-import { Pr, platform } from '../../../../modules/platform';
+import type { Pr } from '../../../../modules/platform';
+import { platform } from '../../../../modules/platform';
 import {
   ensureComment,
   ensureCommentRemoval,
@@ -33,6 +34,7 @@ export async function checkAutoMerge(
   logger.trace({ config }, 'checkAutoMerge');
   const {
     branchName,
+    baseBranch,
     automergeType,
     automergeStrategy,
     pruneBranchAfterAutomerge,
@@ -50,7 +52,7 @@ export async function checkAutoMerge(
   }
   const isConflicted =
     config.isConflicted ??
-    (await scm.isBranchConflicted(config.baseBranch, config.branchName));
+    (await scm.isBranchConflicted(baseBranch, branchName));
   if (isConflicted) {
     logger.debug('PR is conflicted');
     return {
@@ -68,7 +70,7 @@ export async function checkAutoMerge(
     };
   }
   const branchStatus = await resolveBranchStatus(
-    config.branchName,
+    branchName,
     !!config.internalChecksAsSuccess,
     config.ignoreTests,
   );
@@ -81,8 +83,7 @@ export async function checkAutoMerge(
       prAutomergeBlockReason: 'BranchNotGreen',
     };
   }
-  // Check if it's been touched
-  if (await scm.isBranchModified(branchName)) {
+  if (await scm.isBranchModified(branchName, baseBranch)) {
     logger.debug('PR is ready for automerge but has been modified');
     return {
       automerged: false,

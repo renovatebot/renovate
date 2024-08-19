@@ -197,7 +197,7 @@ export async function writeExistingFiles(
                 delete npmLockParsed.dependencies![depName];
               });
             }
-          } catch (err) /* istanbul ignore next */ {
+          } catch /* istanbul ignore next */ {
             logger.warn(
               { npmLock },
               'Error massaging package-lock.json for widen',
@@ -417,16 +417,6 @@ export async function getAdditionalFiles(
   }
   if (!config.updateLockFiles) {
     logger.debug('Skipping lock file generation');
-    return { artifactErrors, updatedArtifacts };
-  }
-  if (
-    !config.updatedPackageFiles?.length &&
-    config.transitiveRemediation &&
-    config.upgrades?.every(
-      (upgrade) => upgrade.isRemediation ?? upgrade.isVulnerabilityAlert,
-    )
-  ) {
-    logger.debug('Skipping lock file generation for remediations');
     return { artifactErrors, updatedArtifacts };
   }
   if (
