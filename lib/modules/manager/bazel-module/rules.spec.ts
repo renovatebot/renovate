@@ -3,11 +3,13 @@ import { BazelDatasource } from '../../datasource/bazel';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import type { PackageDependency } from '../types';
 import * as fragments from './fragments';
-import {
+import type {
   BasePackageDep,
   BazelModulePackageDep,
   MergePackageDep,
   OverridePackageDep,
+} from './rules';
+import {
   RuleToBazelModulePackageDep,
   bazelModulePackageDepToPackageDependency,
   processModulePkgDeps,

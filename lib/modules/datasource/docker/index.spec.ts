@@ -1,8 +1,5 @@
-import {
-  ECRClient,
-  GetAuthorizationTokenCommand,
-  GetAuthorizationTokenCommandOutput,
-} from '@aws-sdk/client-ecr';
+import type { GetAuthorizationTokenCommandOutput } from '@aws-sdk/client-ecr';
+import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import * as _googleAuth from 'google-auth-library';
 import { mockDeep } from 'jest-mock-extended';
@@ -1888,6 +1885,7 @@ describe('modules/datasource/docker/index', () => {
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
         .reply(200, {
+          count: 2,
           next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
           results: [
             {
@@ -1901,6 +1899,7 @@ describe('modules/datasource/docker/index', () => {
         })
         .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
         .reply(200, {
+          count: 2,
           results: [
             {
               id: 1,
@@ -1961,6 +1960,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
         .reply(200, {
           next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
+          count: 2,
           results: [
             {
               id: 2,
@@ -1973,6 +1973,7 @@ describe('modules/datasource/docker/index', () => {
         })
         .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
         .reply(200, {
+          count: 2,
           results: [
             {
               id: 1,

@@ -38,6 +38,8 @@ export class GlobalConfig {
     'autodiscoverRepoOrder',
     'userAgent',
     'dockerMaxPages',
+    's3Endpoint',
+    's3PathStyle',
     'cachePrivatePackages',
   ];
 

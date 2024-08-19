@@ -31,23 +31,19 @@ Some are configuration options passed through, while others are generated as par
 
 ## Additional Handlebars helpers
 
-### stringToPrettyJSON
+### and
 
-If you want to print pretty JSON with Handlebars you can use the built-in function `stringToPrettyJSON` like this:
+Returns `true` only if all expressions are `true`.
 
-`{{{stringToPrettyJSON myvar}}}`
+`{{#if (and isMajor hasReleaseNotes)}}Backwards Incompatible release! Check out the Release notes.{{/if}}`
 
-In the example above `myvar` is a variable/field, that has valid JSON.
+In the example above, it will only show a text if `isMajor=true` and `hasReleaseNotes=true`.
 
-### encodeURIComponent
+### containsString
 
-If you want to convert a string to a valid URI, use the built-in function `encodeURIComponent` like this:
+Returns `true` if a given string is a substring.
 
-`{{{encodeURIComponent baseDir}}}`
-
-In the example above `baseDir` is the string you want to transform into a valid URI.
-
-Read the [MDN Web Docs, encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent) to learn more.
+`{{#if (containsString depName 'python')}}Python{{else}}Other{{/if}}`
 
 ### decodeURIComponent
 
@@ -59,6 +55,12 @@ In the example above `depName` is the string you want to decode.
 
 Read the [MDN Web Docs, decodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent) to learn more.
 
+### distinct
+
+Removes duplicate elements from an array.
+
+`{{#each (distinct (lookupArray (lookupArray upgrades "prBodyDefinitions") "Issue"))}} {{{.}}}{{/each}}`
+
 ### encodeBase64
 
 If you want to convert a string to Base64, use the built-in function `encodeBase64` like this:
@@ -66,6 +68,50 @@ If you want to convert a string to Base64, use the built-in function `encodeBase
 `{{{encodeBase64 body}}}`
 
 In the example above `body` is the string you want to transform into a Base64-encoded value.
+
+### encodeURIComponent
+
+If you want to convert a string to a valid URI, use the built-in function `encodeURIComponent` like this:
+
+`{{{encodeURIComponent baseDir}}}`
+
+In the example above `baseDir` is the string you want to transform into a valid URI.
+
+Read the [MDN Web Docs, encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent) to learn more.
+
+### equals
+
+Returns `true` if two values equals (checks strict equality, i.e. `===`).
+
+`{{#if (equals datasource 'git-refs')}}git-refs{{else}}Other{{/if}}`
+
+### lookupArray
+
+Similar to the built-in [`lookup`](https://handlebarsjs.com/guide/builtin-helpers.html#lookup)
+helper, but performs lookups in every element of an array, instead of just one object.
+
+For example:
+
+`{{#each (lookupArray upgrades "prBodyDefinitions")}} {{{Issue}}}{{/each}}`
+
+will produce the same output as:
+
+`{{#each upgrades}}{{#with prBodyDefinitions}} {{{Issue}}}{{/with}}{{/each}}`.
+
+The return value of `lookupArray` can be passed to other helpers - for example,
+to `distinct`.
+
+### lowercase
+
+The `lowercase` helper converts a given string to lower case.
+
+`{{{ lowercase depName }}}`
+
+### or
+
+Returns `true` if at least one expression is `true`.
+
+`{{#if (or isPatch isSingleVersion}}Small update, safer to merge and release.{{else}}Check out the changelog for all versions before merging!{{/if}}`
 
 ### replace
 
@@ -78,43 +124,39 @@ In the example above all matches of the regex `[a-z]+\.github\.com` will be repl
 
 Read the [MDN Web Docs, String.prototype.replace()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace) to learn more.
 
-### lowercase
+### split
 
-The `lowercase` helper converts a given string to lower case.
+Splits a string into an array of substrings.
 
-`{{{ lowercase depName }}}`
+This example splits a package name by `-` and gets the second part:
+`{{ lookup (split packageName '-') 1 }}`
+An input of `foo-bar-test` therefor would return `bar`.
 
-### containsString
+### stringToPrettyJSON
 
-Returns `true` if a given string is a substring.
+If you want to print pretty JSON with Handlebars you can use the built-in function `stringToPrettyJSON` like this:
 
-`{{#if (containsString depName 'python')}}Python{{else}}Other{{/if}}`
+`{{{stringToPrettyJSON myvar}}}`
 
-### equals
+In the example above `myvar` is a variable/field, that has valid JSON.
 
-Returns `true` if two values equals (checks strict equality, i.e. `===`).
+### toArray
 
-`{{#if (equals datasource 'git-refs')}}git-refs{{else}}Other{{/if}}`
+If you want to convert elements to an array, use `toArray`, e.g.,
 
-### and
+`{{{ toJSON (toArray 'value1' 'value2' 'value3') }}}` will render `["value1","value2","value3"]`.
 
-Returns `true` only if all expressions are `true`.
+### toJSON
 
-`{{#if (and isMajor hasReleaseNotes)}}Backwards Incompatible release! Check out the Release notes.{{/if}}`
+If you want to convert an object to a JSON string, you can use the built-in function `toJSON` like this:
 
-In the example above, it will only show a text if `isMajor=true` and `hasReleaseNotes=true`.
+`{{{ toJSON upgrades }}}`
 
-### or
+### toObject
 
-Returns `true` if at least one expression is `true`.
+If you want to convert key-value pairs to an object, use `toObject`, e.g.,
 
-`{{#if (or isPatch isSingleVersion}}Small update, safer to merge and release.{{else}}Check out the changelog for all versions before merging!{{/if}}`
-
-### includes
-
-Returns `true` if the value is included on the list given.
-
-`{{#if (includes labels 'dependencies')}}Production Dependencies{{else}}Not Production Dependencies{{/if}}`
+`{{{ toJSON (toObject 'key1' 'value1' 'key2' 'value2') }}}` will render `{"key1":"value1","key2":"value2"}`.
 
 ## Environment variables
 

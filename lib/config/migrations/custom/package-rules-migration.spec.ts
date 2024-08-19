@@ -141,6 +141,10 @@ describe('config/migrations/custom/package-rules-migration', () => {
       {
         packageRules: [
           {
+            matchPackagePatterns: ['*'],
+            automerge: true,
+          },
+          {
             matchPackagePatterns: ['foo', 'bar'],
             automerge: true,
           },
@@ -153,6 +157,10 @@ describe('config/migrations/custom/package-rules-migration', () => {
       },
       {
         packageRules: [
+          {
+            automerge: true,
+            matchPackageNames: ['*'],
+          },
           {
             automerge: true,
             matchPackageNames: ['/foo/', '/bar/'],
@@ -195,23 +203,23 @@ describe('config/migrations/custom/package-rules-migration', () => {
               'mpn1',
               'mpn2',
               '/pattern/',
-              'prefix1**',
-              'prefix2**',
+              'prefix1{/,}**',
+              'prefix2{/,}**',
               '!excluded',
               '!/excludepattern/',
-              '!prefix1b**',
+              '!prefix1b{/,}**',
             ],
             matchDepNames: [
               'mpn1',
               'mpn2',
               '/pattern/',
-              'prefix1**',
-              'prefix2**',
+              'prefix1{/,}**',
+              'prefix2{/,}**',
               '!excluded',
               '!/excludepattern/',
-              '!prefix1b**',
+              '!prefix1b{/,}**',
             ],
-            matchSourceUrls: ['prefix1**', 'prefix2**'],
+            matchSourceUrls: ['prefix1{/,}**', 'prefix2{/,}**'],
             automerge: true,
           },
         ],

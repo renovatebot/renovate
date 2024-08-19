@@ -37,7 +37,7 @@ To add a secret for the Mend cloud app:
      "hostRules": [
        {
          "matchHost": "github.com",
-         "token": "{{ secrets.MY-ORG-SECRET-1 }}"
+         "token": "{{ secrets.MY_ORG_SECRET }}"
        }
      ]
    }

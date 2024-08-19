@@ -41,7 +41,7 @@ export async function get<T = never>(
       }
       await rm(namespace, key);
     }
-  } catch (err) {
+  } catch {
     logger.trace({ namespace, key }, 'Cache miss');
   }
   return undefined;
@@ -87,7 +87,7 @@ export async function cleanup(): Promise<void> {
       let cachedValue: any;
       try {
         cachedValue = JSON.parse(res.data.toString());
-      } catch (err) {
+      } catch {
         logger.debug('Error parsing cached value - deleting');
       }
       if (

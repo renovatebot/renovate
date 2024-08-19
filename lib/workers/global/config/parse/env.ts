@@ -90,6 +90,9 @@ const convertedExperimentalEnvVars = [
   'RENOVATE_X_AUTODISCOVER_REPO_SORT',
   'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
   'RENOVATE_X_DOCKER_MAX_PAGES',
+  'RENOVATE_X_DELETE_CONFIG_FILE',
+  'RENOVATE_X_S3_ENDPOINT',
+  'RENOVATE_X_S3_PATH_STYLE',
   'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
   'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',
 ];
@@ -157,7 +160,7 @@ export async function getConfig(
                 'Could not parse object array',
               );
             }
-          } catch (err) {
+          } catch {
             logger.debug(
               { val: envVal, envName },
               'Could not parse environment variable',

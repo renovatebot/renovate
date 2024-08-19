@@ -34,7 +34,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
     if (key === 'matchDepPrefixes') {
       if (is.array(val, is.string)) {
         newPackageRule.matchDepNames ??= [];
-        newPackageRule.matchDepNames.push(...val.map((v) => `${v}**`));
+        newPackageRule.matchDepNames.push(...val.map((v) => `${v}{/,}**`));
       }
       delete newPackageRule.matchDepPrefixes;
     }
@@ -55,7 +55,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
     if (key === 'excludeDepPrefixes') {
       if (is.array(val, is.string)) {
         newPackageRule.matchDepNames ??= [];
-        newPackageRule.matchDepNames.push(...val.map((v) => `!${v}**`));
+        newPackageRule.matchDepNames.push(...val.map((v) => `!${v}{/,}**`));
       }
       delete newPackageRule.excludeDepPrefixes;
     }
@@ -70,7 +70,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
     if (key === 'matchPackagePrefixes') {
       if (is.array(val, is.string)) {
         newPackageRule.matchPackageNames ??= [];
-        newPackageRule.matchPackageNames.push(...val.map((v) => `${v}**`));
+        newPackageRule.matchPackageNames.push(...val.map((v) => `${v}{/,}**`));
       }
       delete newPackageRule.matchPackagePrefixes;
     }
@@ -78,7 +78,14 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       const patterns = is.string(val) ? [val] : val;
       if (is.array(patterns, is.string)) {
         newPackageRule.matchPackageNames ??= [];
-        newPackageRule.matchPackageNames.push(...patterns.map((v) => `/${v}/`));
+        newPackageRule.matchPackageNames.push(
+          ...patterns.map((v) => {
+            if (v === '*') {
+              return '*';
+            }
+            return `/${v}/`;
+          }),
+        );
       }
       delete newPackageRule.matchPackagePatterns;
     }
@@ -92,7 +99,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
     if (key === 'excludePackagePrefixes') {
       if (is.array(val, is.string)) {
         newPackageRule.matchPackageNames ??= [];
-        newPackageRule.matchPackageNames.push(...val.map((v) => `!${v}**`));
+        newPackageRule.matchPackageNames.push(...val.map((v) => `!${v}{/,}**`));
       }
       delete newPackageRule.excludePackagePrefixes;
     }
@@ -107,7 +114,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
     if (key === 'matchSourceUrlPrefixes') {
       if (is.array(val, is.string)) {
         newPackageRule.matchSourceUrls ??= [];
-        newPackageRule.matchSourceUrls.push(...val.map((v) => `${v}**`));
+        newPackageRule.matchSourceUrls.push(...val.map((v) => `${v}{/,}**`));
       }
       delete newPackageRule.matchSourceUrlPrefixes;
     }
