@@ -59,6 +59,11 @@ describe('modules/manager/glasskube/extract', () => {
   });
 
   describe('extractAllPackageFiles()', () => {
+    it('should return null for empty packageFiles', async () => {
+      const deps = await extractAllPackageFiles(config, []);
+      expect(deps).toBeNull();
+    });
+
     it('should skip package with non-existing repo', async () => {
       fs.readLocalFile.mockResolvedValueOnce(packageWithRepoName);
       const deps = await extractAllPackageFiles(config, ['package.yaml']);
@@ -109,6 +114,7 @@ describe('modules/manager/glasskube/extract', () => {
           packageInfo:
             name: argo-cd
             version: v2.11.7+1
+            repositoryName: ""
       `);
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
         apiVersion: packages.glasskube.dev/v1alpha1
