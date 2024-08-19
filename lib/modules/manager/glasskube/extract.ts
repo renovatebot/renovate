@@ -119,5 +119,5 @@ export async function extractAllPackageFiles(
       result.push({ packageFile: file.packageFile, deps });
     }
   }
-  return result;
+  return result.length ? result : null;
 }
