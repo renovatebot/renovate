@@ -195,7 +195,7 @@ class GerritClient {
     const base64Content = await this.gerritHttp.get(
       `a/projects/${encodeURIComponent(
         repo,
-      )}/branches/${branch}/files/${encodeURIComponent(fileName)}/content`,
+      )}/branches/${encodeURIComponent(branch)}/files/${encodeURIComponent(fileName)}/content`,
     );
     return Buffer.from(base64Content.body, 'base64').toString();
   }

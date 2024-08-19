@@ -10,10 +10,8 @@ import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider, SpanStatusCode } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import {
-  Instrumentation,
-  registerInstrumentations,
-} from '@opentelemetry/instrumentation';
+import type { Instrumentation } from '@opentelemetry/instrumentation';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { Resource } from '@opentelemetry/resources';
@@ -125,16 +123,16 @@ function getTracer(): Tracer {
   return getTracerProvider().getTracer('renovate');
 }
 
-export function instrument<F extends (span: Span) => ReturnType<F>>(
+export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
 ): ReturnType<F>;
-export function instrument<F extends (span: Span) => ReturnType<F>>(
+export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
   options: SpanOptions,
 ): ReturnType<F>;
-export function instrument<F extends (span: Span) => ReturnType<F>>(
+export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
   options: SpanOptions = {},
@@ -142,7 +140,7 @@ export function instrument<F extends (span: Span) => ReturnType<F>>(
 ): ReturnType<F> {
   return getTracer().startActiveSpan(name, options, context, (span: Span) => {
     try {
-      const ret = fn(span);
+      const ret = fn();
       if (ret instanceof Promise) {
         return ret
           .catch((e) => {

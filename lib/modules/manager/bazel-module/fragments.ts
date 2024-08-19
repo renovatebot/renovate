@@ -37,7 +37,7 @@ export const AttributeFragmentSchema = z.object({
   value: ValueFragmentsSchema.optional(),
   isComplete: z.boolean(),
 });
-const AllFragmentsSchema = z.discriminatedUnion('type', [
+export const AllFragmentsSchema = z.discriminatedUnion('type', [
   ArrayFragmentSchema,
   AttributeFragmentSchema,
   BooleanFragmentSchema,

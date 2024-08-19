@@ -1,4 +1,5 @@
-import { PutObjectCommand, PutObjectCommandInput } from '@aws-sdk/client-s3';
+import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../config/types';
 import { getProblems, logger } from '../logger';
@@ -89,7 +90,7 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
         ContentType: 'application/json',
       };
 
-      const client = getS3Client();
+      const client = getS3Client(config.s3Endpoint, config.s3PathStyle);
       const command = new PutObjectCommand(s3Params);
       await client.send(command);
     }

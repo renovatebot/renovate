@@ -165,6 +165,7 @@ export const DockerHubTag = z.object({
 export type DockerHubTag = z.infer<typeof DockerHubTag>;
 
 export const DockerHubTagsPage = z.object({
+  count: z.number(),
   next: z.string().nullable().catch(null),
   results: LooseArray(DockerHubTag, {
     onError: /* istanbul ignore next */ ({ error }) => {
