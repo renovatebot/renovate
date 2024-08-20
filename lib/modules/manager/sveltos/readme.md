@@ -33,7 +33,7 @@ You must set your own `fileMatch` rules, so Renovate knows which `*.yaml` files 
 }
 ```
 
-### Disabling parts of the manager
+### Disabling parts of the sveltos manager
 
 You can use these `depTypes` for fine-grained control, for example to disable parts of the Sveltos manager.
 
