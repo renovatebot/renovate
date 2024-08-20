@@ -7,7 +7,7 @@ import type {
   RegexManagerTemplates,
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
-import type { HostRule } from '../types/host-rules';
+import type { HostRule } from '../types';
 import { regEx } from '../util/regex';
 import {
   getRegexPredicate,
@@ -26,15 +26,15 @@ import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import { supportedDatasources } from './presets/internal/merge-confidence';
-import {
+import type {
   AllowedParents,
-  type RenovateConfig,
-  type RenovateOptions,
-  type StatusCheckKey,
-  type ValidationMessage,
-  type ValidationResult,
-  allowedStatusCheckStrings,
+  RenovateConfig,
+  RenovateOptions,
+  StatusCheckKey,
+  ValidationMessage,
+  ValidationResult,
 } from './types';
+import { allowedStatusCheckStrings } from './types';
 import * as managerValidator from './validation-helpers/managers';
 import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches';
 import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';

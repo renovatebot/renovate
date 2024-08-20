@@ -260,7 +260,13 @@ jobs:
           key: prettier-main-cache
 
       - name: Lint
-        run: pnpm prettier --cache-location .cache/prettier
+        run: |
+          pnpm prettier --write --cache-location .cache/prettier
+          git diff --quiet || {
+            echo "[ERROR] Please apply the changes prettier suggests:"
+            git diff --color=always
+            exit 1
+          }
 
       - name: Remove cache
         if: github.event_name == 'push'
@@ -677,7 +683,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@6dfb2e082aca4b8d03e064cd054f9b3746e027a3 # v3.4.4
+        uses: containerbase/internal-tools@8547f01d73522b44482b8757716e4e1d73cf3a66 # v3.4.7
         with:
           command: docker-config
 
