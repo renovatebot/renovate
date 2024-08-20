@@ -109,7 +109,7 @@ export class RepologyDatasource extends Datasource {
 
   @cache({
     ttlMinutes: 60,
-    namespace: `datasource-${RepologyDatasource.id}-list`,
+    namespace: `datasource-${RepologyDatasource.id}`,
     key: (registryUrl: string, repoName: string, pkgName: string) =>
       joinUrlParts(registryUrl, repoName, pkgName),
   })

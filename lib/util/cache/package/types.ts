@@ -88,7 +88,7 @@ export type PackageCacheNamespace =
   | 'datasource-maven:metadata-xml'
   | 'datasource-node-version'
   | 'datasource-npm:data'
-  | 'datasource-nuget'
+  | 'datasource-nuget-v3'
   | 'datasource-orb'
   | 'datasource-packagist-org'
   | 'datasource-packagist-public-files'
@@ -96,7 +96,7 @@ export type PackageCacheNamespace =
   | 'datasource-pod'
   | 'datasource-python-version'
   | 'datasource-releases'
-  | 'datasource-repology-list'
+  | 'datasource-repology'
   | 'datasource-ruby-version'
   | 'datasource-rubygems'
   | 'datasource-terraform-module'
@@ -113,3 +113,5 @@ export type PackageCacheNamespace =
   | 'merge-confidence'
   | 'preset'
   | 'url-sha256';
+
+export type CombinedKey = `global%%${PackageCacheNamespace}%%${string}`;
