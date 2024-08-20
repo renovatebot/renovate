@@ -92,5 +92,5 @@ function processAppSpec(definition: ProfileDefinition): PackageDependency[] {
     }
   }
 
-  return deps.filter(is.truthy);
+  return deps;
 }
