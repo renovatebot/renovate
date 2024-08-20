@@ -26,6 +26,6 @@ export function formatReleaseResult(
 ): ReleaseResult {
   return {
     releases: packagesDesc.map((p) => ({ version: p.Version! })),
-    homepage: packagesDesc[0].Homepage,
+    homepage: packagesDesc[0]?.Homepage,
   };
 }
