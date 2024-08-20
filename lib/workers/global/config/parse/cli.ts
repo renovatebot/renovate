@@ -17,8 +17,7 @@ export function getCliName(option: ParseConfigOptions): string {
 }
 
 export function getConfig(input: string[]): AllConfig {
-  let config: Record<string, any> = {};
-  config = migratePlatformOptions(input, config);
+  const config = migratePlatformOptions(input, {});
 
   // massage migrated configuration keys
   const argv = input

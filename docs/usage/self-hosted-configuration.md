@@ -914,7 +914,7 @@ Example:
 ```json
 {
   "platformOptions": {
-    "gitLabIgnoreApprovals": true
+    "platformVersion": "8.0.0"
   }
 }
 ```

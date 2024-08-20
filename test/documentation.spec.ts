@@ -125,9 +125,7 @@ describe('documentation', () => {
       function getSelfHostedHeaders(file: string): string[] {
         const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
         const matches = content.match(/\n## (.*?)\n/g) ?? [];
-        return matches
-          .map((match) => match.substring(4, match.length - 1))
-          .filter((name) => name !== 'platformOptions');
+        return matches.map((match) => match.substring(4, match.length - 1));
       }
 
       function getRequiredSelfHostedOptions(): string[] {
@@ -139,15 +137,15 @@ describe('documentation', () => {
       }
 
       it('has headers sorted alphabetically', () => {
-        expect(getSelfHostedHeaders('self-hosted-configuration.md')).toEqual(
-          getSelfHostedHeaders('self-hosted-configuration.md').sort(),
-        );
+        const headers = getSelfHostedHeaders('self-hosted-configuration.md');
+        expect(headers).toEqual(headers.sort());
       });
 
       it('has headers for every required option', () => {
-        expect(getSelfHostedHeaders('self-hosted-configuration.md')).toEqual(
-          getRequiredSelfHostedOptions(),
-        );
+        const headers = getSelfHostedHeaders(
+          'self-hosted-configuration.md',
+        ).filter((option) => option !== 'platformOptions');
+        expect(headers).toEqual(getRequiredSelfHostedOptions());
       });
     });
 

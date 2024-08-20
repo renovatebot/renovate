@@ -248,16 +248,14 @@ function migratePlatformOptions(
 ): AllConfig {
   const platformOptionsKeys = ['platformVersion', 'gitLabIgnoreApprovals'];
   const platformOptions: Record<string, unknown> = {};
-  let updated = false;
   for (const key of platformOptionsKeys) {
     const envKey = getEnvName({ name: key });
     if (!is.undefined(env[envKey])) {
-      updated = true;
       platformOptions[key] = env[envKey];
     }
   }
 
-  if (updated) {
+  if (is.nonEmptyObject(platformOptions)) {
     config.platformOptions = { ...config.platformOptions, ...platformOptions };
   }
 
