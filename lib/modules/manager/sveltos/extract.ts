@@ -38,8 +38,6 @@ export function extractPackageFile(
     return [];
   });
 
-  //onst deps = definitions.flatMap(processAppSpec);
-
   return deps.length ? { deps } : null;
 }
 
