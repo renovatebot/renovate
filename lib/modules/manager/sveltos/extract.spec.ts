@@ -20,7 +20,7 @@ describe('modules/manager/sveltos/extract', () => {
       ).toBeNull();
     });
 
-    it('return null for kubernetes manifest', () => {
+    it('return null for Kubernetes manifest', () => {
       const result = extractPackageFile(randomManifest, 'sveltos.yml');
       expect(result).toBeNull();
     });
