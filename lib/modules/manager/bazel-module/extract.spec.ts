@@ -289,5 +289,53 @@ describe('modules/manager/bazel-module/extract', () => {
         },
       ]);
     });
+
+    it('returns maven.install and bazel_dep dependencies together', async () => {
+      const input = codeBlock`
+        bazel_dep(name = "bazel_jar_jar", version = "0.1.0")
+
+        maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+
+        maven.install(
+            artifacts = [
+                "junit:junit:4.13.2",
+                "com.google.guava:guava:31.1-jre",
+            ],
+            lock_file = "//:maven_install.json",
+            repositories = [
+                "https://repo1.maven.org/maven2/",
+            ],
+            version_conflict_policy = "pinned",
+        )
+      `;
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+      if (!result) {
+        throw new Error('Expected a result.');
+      }
+      expect(result.deps).toEqual([
+        {
+          datasource: BazelDatasource.id,
+          depType: 'bazel_dep',
+          depName: 'bazel_jar_jar',
+          currentValue: '0.1.0',
+        },
+        {
+          datasource: MavenDatasource.id,
+          depType: 'maven_install',
+          depName: 'junit:junit',
+          currentValue: '4.13.2',
+          registryUrls: ['https://repo1.maven.org/maven2/'],
+          versioning: 'gradle',
+        },
+        {
+          datasource: MavenDatasource.id,
+          depType: 'maven_install',
+          depName: 'com.google.guava:guava',
+          currentValue: '31.1-jre',
+          registryUrls: ['https://repo1.maven.org/maven2/'],
+          versioning: 'gradle',
+        },
+      ]);
+    });
   });
 });

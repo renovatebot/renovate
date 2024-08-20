@@ -37,8 +37,8 @@ const kvParams = q
       maxDepth: 1,
       startsWith: '[',
       endsWith: ']',
-      postHandler: (ctx, tree) => ctx.endArray(),
-      preHandler: (ctx, tree) => ctx.startArray(),
+      postHandler: (ctx) => ctx.endArray(),
+      preHandler: (ctx) => ctx.startArray(),
       search: q.many(q.str<Ctx>((ctx, token) => ctx.addString(token.value))),
     }),
   );
@@ -63,7 +63,7 @@ const moduleRules = q
       type: 'wrapped-tree',
       maxDepth: 1,
       search: kvParams,
-      postHandler: (ctx, tree) => ctx.endRule(),
+      postHandler: (ctx) => ctx.endRule(),
     }),
   );
 

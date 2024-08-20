@@ -197,7 +197,7 @@ describe('modules/manager/bazel-module/parser', () => {
             version = "0.2.56",
         )
 
-        maven.artifact(
+        maven_1.artifact(
             artifact = "core.specs.alpha1",
             group = "org.clojure1",
             version = "0.2.561",

@@ -11,27 +11,17 @@ import {
 const artifactMethod = 'artifact';
 const installMethod = 'install';
 const commonDepType = 'maven_install';
-export const mavenVariableRegex = /maven.*/;
+export const mavenVariableRegex = /^maven.*/;
 export const bzlmodMavenMethods = [installMethod, artifactMethod];
 export function getParsedRuleByMethod(method: string): string {
   return `maven_${method}`;
 }
 
-// TODO: the same type as lib/modules/manager/bazel/rules/maven.ts
-const ArtifactSpec = z.union([
-  z.object({
-    group: z.string(),
-    artifact: z.string(),
-    version: z.string(),
-  }),
-  z
-    .object({
-      '0': z.string(),
-      '1': z.string(),
-      '2': z.string(),
-    })
-    .transform((x) => ({ group: x[0], artifact: x[1], version: x[2] })),
-]);
+const ArtifactSpec = z.object({
+  group: z.string(),
+  artifact: z.string(),
+  version: z.string(),
+});
 type ArtifactSpec = z.infer<typeof ArtifactSpec>;
 
 const MavenArtifactTarget = RecordFragmentSchema.extend({
