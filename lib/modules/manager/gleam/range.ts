@@ -19,7 +19,5 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   if (rangeStrategy !== 'auto') {
     return rangeStrategy;
   }
-
-  logger.debug('Defaulting to widen strategy');
   return 'widen';
 }
