@@ -291,10 +291,6 @@ export function proxyCompileInput(
   );
 }
 
-const templateRegex = regEx(
-  /{{(?:#(?:if|unless|with|each) )?([a-zA-Z.]+)(?: as \| [a-zA-Z.]+ \|)?}}/g,
-);
-
 export function compile(
   template: string,
   input: CompileInput,
@@ -331,22 +327,4 @@ export function safeCompile(
     logger.warn({ err, template }, 'Error compiling template');
     return '';
   }
-}
-
-export function containsTemplates(
-  value: unknown,
-  templates: string | string[],
-): boolean {
-  if (!is.string(value)) {
-    return false;
-  }
-  for (const m of [...value.matchAll(templateRegex)]) {
-    for (const template of is.string(templates) ? [templates] : templates) {
-      if (m[1] === template || m[1].startsWith(`${template}.`)) {
-        return true;
-      }
-    }
-  }
-
-  return false;
 }
