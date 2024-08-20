@@ -3,6 +3,11 @@ import { LooseArray } from '../../../util/schema-utils';
 
 export const KubernetesResource = z.object({
   apiVersion: z.string(),
+  kind: z.string(),
+  metadata: z.object({
+    name: z.string(),
+    namespace: z.string().optional(),
+  }),
 });
 
 export const SveltosHelmSource = z.object({
@@ -20,16 +25,19 @@ export const SveltosHelmSpec = z.object({
 export type SveltosHelmSpec = z.infer<typeof SveltosHelmSpec>;
 
 export const ClusterProfile = KubernetesResource.extend({
+  apiVersion: z.string().startsWith('config.projectsveltos.io/'),
   kind: z.literal('ClusterProfile'),
   spec: SveltosHelmSpec,
 });
 
 export const Profile = KubernetesResource.extend({
+  apiVersion: z.string().startsWith('config.projectsveltos.io/'),
   kind: z.literal('Profile'),
   spec: SveltosHelmSpec,
 });
 
 export const EventTrigger = KubernetesResource.extend({
+  apiVersion: z.string().startsWith('lib.projectsveltos.io/'),
   kind: z.literal('EventTrigger'),
   spec: SveltosHelmSpec,
 });

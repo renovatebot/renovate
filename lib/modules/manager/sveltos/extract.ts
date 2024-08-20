@@ -11,39 +11,34 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import {
-  ProfileDefinition,
-  type SveltosHelmSource,
-  type SveltosHelmSpec,
-} from './schema';
-import { fileTestRegex, removeRepositoryName } from './util';
+import { ProfileDefinition, type SveltosHelmSource } from './schema';
+import { removeRepositoryName } from './util';
 
 export function extractPackageFile(
   content: string,
   packageFile: string,
   _config?: ExtractConfig,
 ): PackageFileContent | null {
-  // check for svelteos reference. API version for the kind attribute is used
-  if (fileTestRegex.test(content) === false) {
-    logger.debug(
-      `Skip file ${packageFile} as no projectsveltos.io apiVersion could be found in matched file`,
-    );
-    return null;
-  }
-
-  let definitions: ProfileDefinition[];
+  let definitions: Record<string, unknown>[] | ProfileDefinition[];
   try {
-    definitions = parseYaml(content, null, {
+    definitions = parseYaml<any>(content, null, {
       customSchema: ProfileDefinition,
-      failureBehaviour: 'filter',
-      removeTemplates: true,
     });
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Sveltos definition.');
     return null;
   }
 
-  const deps = definitions.flatMap(processAppSpec);
+  const deps = definitions.flatMap((definition) => {
+    // Use zod's safeParse method to check if the object matches the ProfileDefinition schema
+    const result = ProfileDefinition.safeParse(definition);
+    if (result.success) {
+      return processAppSpec(result.data);
+    }
+    return [];
+  });
+
+  //onst deps = definitions.flatMap(processAppSpec);
 
   return deps.length ? { deps } : null;
 }

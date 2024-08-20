@@ -7,6 +7,7 @@ Learn about Sveltos Helm-Charts by reading the [Sveltos documentation](https://p
 The `sveltos` manager has no default `fileMatch` pattern.
 This is because there is are no common filename or directory name conventions for Sveltos YAML files.
 You must set your own `fileMatch` rules, so Renovate knows which `*.yaml` files are Sveltos definitions.
+
 #### fileMatch pattern examples
 
 ```json title="If most .yaml files in your repository are for Sveltos"
@@ -37,8 +38,8 @@ You must set your own `fileMatch` rules, so Renovate knows which `*.yaml` files 
 
 You can use these `depTypes` for fine-grained control, for example to disable parts of the Sveltos manager.
 
-| Resource                                                                                |    `depType`     |
+| Resource                                                                                | `depType`        |
 | :-------------------------------------------------------------------------------------- | :--------------- |
 | [Cluster Profiles](https://projectsveltos.github.io/sveltos/addons/clusterprofile/)     | `ClusterProfile` |
-| [Profiles](https://projectsveltos.github.io/sveltos/addons/profile/)                    |    `Profile`     |
-| [EventTrigger](https://projectsveltos.github.io/sveltos/events/addon_event_deployment/) |  `EventTrigger`  |
+| [Profiles](https://projectsveltos.github.io/sveltos/addons/profile/)                    | `Profile`        |
+| [EventTrigger](https://projectsveltos.github.io/sveltos/events/addon_event_deployment/) | `EventTrigger`   |
