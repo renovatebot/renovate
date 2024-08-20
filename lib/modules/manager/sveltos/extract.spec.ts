@@ -51,7 +51,7 @@ describe('modules/manager/sveltos/extract', () => {
           {
             currentValue: '23.4.0',
             datasource: 'helm',
-            depType: 'cluster-profile',
+            depType: 'ClusterProfile',
             depName: 'prometheus',
             registryUrls: [
               'https://prometheus-community.github.io/helm-charts',
@@ -82,7 +82,7 @@ describe('modules/manager/sveltos/extract', () => {
           {
             currentValue: '23.4.0',
             datasource: 'helm',
-            depType: 'cluster-profile',
+            depType: 'ClusterProfile',
             depName: 'prometheus',
             registryUrls: [
               'https://prometheus-community.github.io/helm-charts',
@@ -99,7 +99,7 @@ describe('modules/manager/sveltos/extract', () => {
           {
             currentValue: '23.4.0',
             datasource: 'helm',
-            depType: 'profile',
+            depType: 'Profile',
             depName: 'prometheus',
             registryUrls: [
               'https://prometheus-community.github.io/helm-charts',
@@ -108,27 +108,27 @@ describe('modules/manager/sveltos/extract', () => {
           {
             currentValue: 'v3.2.5',
             datasource: 'helm',
-            depType: 'profile',
+            depType: 'Profile',
             depName: 'kyverno',
             registryUrls: ['https://kyverno.github.io/kyverno/'],
           },
           {
             currentValue: 'v3.2.0',
             datasource: 'helm',
-            depType: 'profile',
+            depType: 'Profile',
             depName: 'kyverno-policies',
             registryUrls: ['https://kyverno.github.io/kyverno/'],
           },
           {
             currentValue: '0.7.2',
             datasource: 'docker',
-            depType: 'profile',
+            depType: 'Profile',
             depName: 'registry-1.docker.io/bitnamicharts/vault',
           },
           {
             currentValue: '0.5.0',
             datasource: 'docker',
-            depType: 'profile',
+            depType: 'Profile',
             depName: 'custom-registry:443/charts/vault-sidecar',
           },
         ],
@@ -145,7 +145,7 @@ describe('modules/manager/sveltos/extract', () => {
           {
             currentValue: '23.4.0',
             datasource: 'helm',
-            depType: 'cluster-profile',
+            depType: 'ClusterProfile',
             depName: 'prometheus',
             registryUrls: [
               'https://prometheus-community.github.io/helm-charts',
@@ -154,27 +154,27 @@ describe('modules/manager/sveltos/extract', () => {
           {
             currentValue: 'v3.2.5',
             datasource: 'helm',
-            depType: 'cluster-profile',
+            depType: 'ClusterProfile',
             depName: 'kyverno',
             registryUrls: ['https://kyverno.github.io/kyverno/'],
           },
           {
             currentValue: 'v3.2.0',
             datasource: 'helm',
-            depType: 'cluster-profile',
+            depType: 'ClusterProfile',
             depName: 'kyverno-policies',
             registryUrls: ['https://kyverno.github.io/kyverno/'],
           },
           {
             currentValue: '0.7.2',
             datasource: 'docker',
-            depType: 'cluster-profile',
+            depType: 'ClusterProfile',
             depName: 'registry-1.docker.io/bitnamicharts/vault',
           },
           {
             currentValue: '0.5.0',
             datasource: 'docker',
-            depType: 'cluster-profile',
+            depType: 'ClusterProfile',
             depName: 'custom-registry:443/charts/vault-sidecar',
           },
         ],
@@ -189,7 +189,7 @@ describe('modules/manager/sveltos/extract', () => {
             currentValue: '23.4.0',
             datasource: 'helm',
             depName: 'prometheus',
-            depType: 'event-trigger',
+            depType: 'EventTrigger',
             registryUrls: [
               'https://prometheus-community.github.io/helm-charts',
             ],
@@ -198,26 +198,26 @@ describe('modules/manager/sveltos/extract', () => {
             currentValue: 'v3.2.5',
             datasource: 'helm',
             depName: 'kyverno',
-            depType: 'event-trigger',
+            depType: 'EventTrigger',
             registryUrls: ['https://kyverno.github.io/kyverno/'],
           },
           {
             currentValue: 'v3.2.0',
             datasource: 'helm',
             depName: 'kyverno-policies',
-            depType: 'event-trigger',
+            depType: 'EventTrigger',
             registryUrls: ['https://kyverno.github.io/kyverno/'],
           },
           {
             currentValue: '0.7.2',
             datasource: 'docker',
-            depType: 'event-trigger',
+            depType: 'EventTrigger',
             depName: 'registry-1.docker.io/bitnamicharts/vault',
           },
           {
             currentValue: '0.5.0',
             datasource: 'docker',
-            depType: 'event-trigger',
+            depType: 'EventTrigger',
             depName: 'custom-registry:443/charts/vault-sidecar',
           },
         ],
