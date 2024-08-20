@@ -18,14 +18,14 @@ export function releaseMetaInformationMatches(
 /**
  * Formats the package description into a ReleaseResult.
  *
- * @param packageDesc - The package description object.
+ * @param packagesDesc - list of package description objects.
  * @returns A formatted ReleaseResult.
  */
 export function formatReleaseResult(
-  packageDesc: PackageDescription,
+  packagesDesc: PackageDescription[],
 ): ReleaseResult {
   return {
-    releases: [{ version: packageDesc.Version! }],
-    homepage: packageDesc.Homepage,
+    releases: packagesDesc.map((p) => ({ version: p.Version! })),
+    homepage: packagesDesc[0].Homepage,
   };
 }

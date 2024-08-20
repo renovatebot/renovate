@@ -297,21 +297,32 @@ describe('modules/datasource/deb/index', () => {
       );
 
       expect(parsedPackages).toEqual({
-        album: {
-          Homepage: 'http://marginalhacks.com/Hacks/album',
-          Package: 'album',
-          Version: '4.15-1',
-        },
-        'album-data': {
-          Homepage: 'http://marginalhacks.com/Hacks/album',
-          Package: 'album-data',
-          Version: '4.05-7.2',
-        },
-        'alien-arena-data': {
-          Homepage: 'https://martianbackup.com',
-          Package: 'alien-arena-data',
-          Version: '7.71.3+ds-1',
-        },
+        album: [
+          {
+            Homepage: 'http://marginalhacks.com/Hacks/album',
+            Package: 'album',
+            Version: '4.15-1',
+          },
+        ],
+        'album-data': [
+          {
+            Homepage: 'http://marginalhacks.com/Hacks/album',
+            Package: 'album-data',
+            Version: '4.05-7.2',
+          },
+          {
+            Homepage: 'http://marginalhacks.com/Hacks/album',
+            Package: 'album-data',
+            Version: '4.05-7.3',
+          },
+        ],
+        'alien-arena-data': [
+          {
+            Homepage: 'https://martianbackup.com',
+            Package: 'alien-arena-data',
+            Version: '7.71.3+ds-1',
+          },
+        ],
       });
     });
   });

@@ -305,7 +305,7 @@ export class DebDatasource extends Datasource {
   async parseExtractedPackageIndex(
     extractedFile: string,
     lastTimestamp: Date,
-  ): Promise<Record<string, PackageDescription>> {
+  ): Promise<Record<string, PackageDescription[]>> {
     // read line by line to avoid high memory consumption as the extracted Packages
     // files can be multiple MBs in size
     const rl = readline.createInterface({
@@ -314,7 +314,8 @@ export class DebDatasource extends Datasource {
     });
 
     let currentPackage: PackageDescription = {};
-    const allPackages: Record<string, PackageDescription> = {};
+    // A Package Index can contain multiple Versions of the package on private Artifactory (e.g. Jfrog)
+    const allPackages: Record<string, PackageDescription[]> = {};
 
     for await (const line of rl) {
       if (line === '') {
@@ -324,7 +325,10 @@ export class DebDatasource extends Datasource {
             (key) => key in currentPackage,
           )
         ) {
-          allPackages[currentPackage.Package!] = currentPackage;
+          if (!allPackages[currentPackage.Package!]) {
+            allPackages[currentPackage.Package!] = [];
+          }
+          allPackages[currentPackage.Package!].push(currentPackage);
           currentPackage = {};
         }
       } else {
@@ -338,8 +342,13 @@ export class DebDatasource extends Datasource {
     }
 
     // Check the last package after file reading is complete
-    if (Object.keys(currentPackage).length > 0) {
-      allPackages[currentPackage.Package!] = currentPackage;
+    if (
+      DebDatasource.requiredPackageKeys.every((key) => key in currentPackage)
+    ) {
+      if (!allPackages[currentPackage.Package!]) {
+        allPackages[currentPackage.Package!] = [];
+      }
+      allPackages[currentPackage.Package!].push(currentPackage);
     }
 
     return allPackages;
@@ -351,7 +360,7 @@ export class DebDatasource extends Datasource {
   })
   async getPackageIndex(
     componentUrl: string,
-  ): Promise<Record<string, PackageDescription>> {
+  ): Promise<Record<string, PackageDescription[]>> {
     const { extractedFile, lastTimestamp } =
       await this.downloadAndExtractPackage(componentUrl);
     return await this.parseExtractedPackageIndex(extractedFile, lastTimestamp);
@@ -378,10 +387,10 @@ export class DebDatasource extends Datasource {
     for (const componentUrl of componentUrls) {
       try {
         const packageIndex = await this.getPackageIndex(componentUrl);
-        const parsedPackage = packageIndex[packageName];
+        const parsedPackages = packageIndex[packageName];
 
-        if (parsedPackage) {
-          const newRelease = formatReleaseResult(parsedPackage);
+        if (parsedPackages) {
+          const newRelease = formatReleaseResult(parsedPackages);
           if (aggregatedRelease === null) {
             aggregatedRelease = newRelease;
           } else {
