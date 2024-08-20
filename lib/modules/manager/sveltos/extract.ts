@@ -82,7 +82,7 @@ function processAppSpec(definition: ProfileDefinition): PackageDependency[] {
 
   const depType = definition.kind;
 
-  if (is.nonEmptyObject(spec.helmCharts)) {
+  if (is.nonEmptyArray(spec.helmCharts)) {
     for (const source of coerceArray(spec.helmCharts)) {
       const dep = processHelmCharts(source);
       if (dep) {
