@@ -1,4 +1,6 @@
-The [Sveltos](https://projectsveltos.github.io/sveltos/) manager allows to manage the dependencies of Helm-Charts for Sveltos resources. Read more about Sveltos Helm-Charts in the [Sveltos documentation](https://projectsveltos.github.io/sveltos/addons/helm_charts/).
+Renovate uses the [Sveltos](https://projectsveltos.github.io/sveltos/) manager to update the dependencies in Helm-Charts for Sveltos resources.
+
+Learn about Sveltos Helm-Charts by reading the [Sveltos documentation](https://projectsveltos.github.io/sveltos/addons/helm_charts/).
 
 ### Set `fileMatch` pattern
 
