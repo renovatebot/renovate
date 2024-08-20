@@ -78,7 +78,7 @@ function processHelmCharts(
 function processAppSpec(definition: ProfileDefinition): PackageDependency[] {
   const spec: SveltosHelmSpec = definition.spec;
 
-  const deps: (PackageDependency | null)[] = [];
+  const deps: PackageDependency[] = [];
 
   const depType = definition.kind;
 
