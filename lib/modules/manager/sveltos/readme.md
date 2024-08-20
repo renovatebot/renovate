@@ -4,7 +4,9 @@ Learn about Sveltos Helm-Charts by reading the [Sveltos documentation](https://p
 
 ### Set `fileMatch` pattern
 
-The `sveltos` manager has no default `fileMatch` pattern, because there is no common filename or directory name convention for Sveltos YAML files. By setting your own `fileMatch` Renovate avoids having to check each `*.yaml` file in a repository for a Sveltos definition.
+The `sveltos` manager has no default `fileMatch` pattern.
+This is because there is are no common filename or directory name conventions for Sveltos YAML files.
+You must set your own `fileMatch` rules, so Renovate knows which `*.yaml` files are Sveltos definitions.
 
 ```json title="If most .yaml files in your repository are for Sveltos"
 {
