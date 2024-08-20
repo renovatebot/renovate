@@ -2,7 +2,7 @@ Renovate uses the [Sveltos](https://projectsveltos.github.io/sveltos/) manager t
 
 Learn about Sveltos Helm-Charts by reading the [Sveltos documentation](https://projectsveltos.github.io/sveltos/addons/helm_charts/).
 
-### Set `fileMatch` pattern
+### You must set a `fileMatch` pattern
 
 The `sveltos` manager has no default `fileMatch` pattern.
 This is because there is are no common filename or directory name conventions for Sveltos YAML files.
