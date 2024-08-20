@@ -114,3 +114,5 @@ export type PackageCacheNamespace =
   | 'merge-confidence'
   | 'preset'
   | 'url-sha256';
+
+export type CombinedKey = `global%%${PackageCacheNamespace}%%${string}`;

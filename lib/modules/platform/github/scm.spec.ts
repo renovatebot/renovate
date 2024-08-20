@@ -73,4 +73,39 @@ describe('modules/platform/github/scm', () => {
       platformCommit: 'auto',
     });
   });
+
+  describe('sanitize mentions in commit messages', () => {
+    it('single string', async () => {
+      await githubScm.commitAndPush({
+        ...commitObj,
+        message: 'Use @octokit to irritate @octocat',
+        platformCommit: 'enabled',
+      });
+
+      expect(git.commitFiles).not.toHaveBeenCalled();
+      expect(github.commitFiles).toHaveBeenCalledWith({
+        ...commitObj,
+        message: 'Use @\u{8203}octokit to irritate @\u{8203}octocat',
+        platformCommit: 'enabled',
+      });
+    });
+
+    it('array of string', async () => {
+      await githubScm.commitAndPush({
+        ...commitObj,
+        message: ['Use @octokit', 'It automates the way we irritate @octocat'],
+        platformCommit: 'enabled',
+      });
+
+      expect(git.commitFiles).not.toHaveBeenCalled();
+      expect(github.commitFiles).toHaveBeenCalledWith({
+        ...commitObj,
+        message: [
+          'Use @\u{8203}octokit',
+          'It automates the way we irritate @\u{8203}octocat',
+        ],
+        platformCommit: 'enabled',
+      });
+    });
+  });
 });
