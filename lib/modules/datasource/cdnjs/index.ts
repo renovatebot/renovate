@@ -17,11 +17,11 @@ import {
   CdnjsAPIVersionResponseSchema,
 } from './schema';
 
-export class CdnJsDatasource extends Datasource {
+export class CdnjsDatasource extends Datasource {
   static readonly id = 'cdnjs';
 
   constructor() {
-    super(CdnJsDatasource.id);
+    super(CdnjsDatasource.id);
   }
 
   override readonly customRegistrySupport = false;
@@ -33,7 +33,7 @@ export class CdnJsDatasource extends Datasource {
     'The source URL is determined from the `repository` field in the results.';
 
   @cache({
-    namespace: `datasource-${CdnJsDatasource.id}`,
+    namespace: `datasource-${CdnjsDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName.split('/')[0],
   })
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -76,7 +76,7 @@ export class CdnJsDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${CdnJsDatasource.id}-digest`,
+    namespace: `datasource-${CdnjsDatasource.id}-digest`,
     key: ({ registryUrl, packageName }: DigestConfig, newValue: string) =>
       `${registryUrl}:${packageName}:${newValue}}`,
   })

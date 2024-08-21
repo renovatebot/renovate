@@ -4,7 +4,6 @@ import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
-import { GitHubMaxPrBodyLen } from '../../modules/platform/github';
 import { regEx } from '../../util/regex';
 import { coerceString } from '../../util/string';
 import * as template from '../../util/template';
@@ -468,7 +467,7 @@ export async function ensureDependencyDashboard(
   // fit the detected dependencies section
   const footer = getFooter(config);
   issueBody += PackageFiles.getDashboardMarkdown(
-    GitHubMaxPrBodyLen - issueBody.length - footer.length,
+    platform.maxBodyLength() - issueBody.length - footer.length,
   );
 
   issueBody += footer;

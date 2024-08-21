@@ -388,6 +388,16 @@ The above configuration approach will mean the values are redacted in logs like 
          "customEnvVariables": {"SECRET_TOKEN": "{{ secrets.SECRET_TOKEN }}"},
 ```
 
+## deleteConfigFile
+
+If set to `true` Renovate tries to delete the self-hosted config file after reading it.
+
+The process that runs Renovate must have the correct permissions to delete the config file.
+
+<!-- prettier-ignore -->
+!!! tip
+    You can tell Renovate where to find your config file with the `RENOVATE_CONFIG_FILE` environment variable.
+
 ## detectGlobalManagerConfig
 
 The purpose of this config option is to allow you (as a bot admin) to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
@@ -504,6 +514,13 @@ You can use `dockerCliOptions` to pass Docker CLI options to Renovate's sidecar 
 For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `docker run` command that limits the amount of memory Renovate's sidecar Docker container can use to 4 gigabytes.
 
 Read the [Docker Docs, configure runtime resource constraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
+
+## dockerMaxPages
+
+By default, Renovate will fetch a maximum of 20 pages when looking up Docker tags on Docker registries.
+
+If set to an positive integer, Renovate will use this value as the maximum page number.
+Setting a different limit is useful for registries that ignore the `n` parameter in Renovate's query string and thus only return 50 tags per page.
 
 ## dockerSidecarImage
 
@@ -638,7 +655,9 @@ To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](h
 
 ## gitPrivateKey
 
-This should be an armored private key, so the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`.
+This is a private PGP or SSH key for signing Git commits.
+
+For PGP, it should be an armored private key, so the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`.
 Replace the newlines with `\n` before adding the resulting single-line value to your bot's config.
 
 <!-- prettier-ignore -->
@@ -648,8 +667,8 @@ Replace the newlines with `\n` before adding the resulting single-line value to 
 It will be loaded _lazily_.
 Before the first commit in a repository, Renovate will:
 
-1. Run `gpg import` (if you haven't before)
-1. Run `git config user.signingkey` and `git config commit.gpgsign true`
+1. Run `gpg import` (if you haven't before) when using PGP
+1. Run `git config user.signingkey`, `git config commit.gpgsign true` and `git config gpg.format`
 
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
@@ -761,10 +780,6 @@ When you set `inheritConfigStrict=true` then Renovate will abort the run and rai
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
 If left as default (null), a random short ID will be selected.
 
-## logFile
-
-## logFileLevel
-
 ## mergeConfidenceDatasources
 
 This feature is applicable only if you have an access token for Mend's Merge Confidence API.
@@ -850,8 +865,12 @@ Falls back to `renovate.json` if the name provided is not valid.
 
 ## onboardingNoDeps
 
-Set this to `true` if you want Renovate to create an onboarding PR even if no dependencies are found.
-Otherwise, Renovate skips onboarding a repository if it finds no dependencies in it.
+The default `auto` setting is converted to `disabled` if `autodiscoverRepositories` is `true`, or converted to `enabled` if false.
+
+In other words, the default behavior is:
+
+- If you run Renovate on discovered repositories then it will skip onboarding those without dependencies detected, but
+- If you run Renovate on _specific_ repositories then Renovate will onboard all such repositories even if no dependencies are found
 
 ## onboardingPrTitle
 
@@ -1082,7 +1101,7 @@ Defines how the report is exposed:
 - `<unset>` If unset, no report will be provided, though the debug logs will still have partial information of the report
 - `logging` The report will be printed as part of the log messages on `INFO` level
 - `file` The report will be written to a path provided by [`reportPath`](#reportpath)
-- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`RENOVATE_X_S3_ENDPOINT`](./self-hosted-experimental.md#renovate_x_s3_endpoint) and [`RENOVATE_X_S3_PATH_STYLE`](./self-hosted-experimental.md#renovate_x_s3_path_style)
+- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`s3Endpoint`](#s3endpoint) and [`s3PathStyle`](#s3pathstyle)
 
 ## repositories
 
@@ -1139,6 +1158,22 @@ The combinations of `requireConfig` and `onboarding` are:
 | `requireConfig=required` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, then the repository is skipped.   | Repository is skipped unless a config file is added manually. |
 | `requireConfig=optional` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, the repository will be processed. | Repository is processed regardless of config file presence.   |
 | `requireConfig=ignored`  | No onboarding PR will be created and repo will be processed while ignoring any config file present.                                                     | Repository is processed, any config file is ignored.          |
+
+## s3Endpoint
+
+If set, Renovate will use this string as the `endpoint` when creating the AWS S3 client instance.
+
+## s3PathStyle
+
+If set, Renovate will enable `forcePathStyle` when creating the AWS S3 client instance.
+
+For example:
+| `s3PathStyle` | Path |
+| ------------- | ---------------------------------- |
+| `off` | `https://bucket.s3.amazonaws.com/` |
+| `on` | `https://s3.amazonaws.com/bucket/` |
+
+Read the [AWS S3 docs, Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html) to learn more about path-style URLs.
 
 ## secrets
 

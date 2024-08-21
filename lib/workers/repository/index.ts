@@ -16,11 +16,11 @@ import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import { isCloned } from '../../util/git';
 import { detectSemanticCommits } from '../../util/git/semantic';
-import { clearDnsCache, printDnsStats } from '../../util/http/dns';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import {
+  DatasourceCacheStats,
   HttpCacheStats,
   HttpStats,
   LookupStats,
@@ -28,6 +28,7 @@ import {
 } from '../../util/stats';
 import { setBranchCache } from './cache';
 import { extractRepoProblems } from './common';
+import { configMigration } from './config-migration';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finalizeRepo } from './finalize';
@@ -37,7 +38,8 @@ import { OnboardingState } from './onboarding/common';
 import { ensureOnboardingPr } from './onboarding/pr';
 import { extractDependencies, updateRepo } from './process';
 import type { ExtractResult } from './process/extract-update';
-import { ProcessResult, processResult } from './result';
+import type { ProcessResult } from './result';
+import { processResult } from './result';
 
 // istanbul ignore next
 export async function renovateRepository(
@@ -100,6 +102,7 @@ export async function renovateRepository(
         }
         logger.debug(`Automerged but already retried once`);
       } else {
+        await configMigration(config, branchList);
         await ensureDependencyDashboard(config, branches, packageFiles);
       }
       await finalizeRepo(config, branchList);
@@ -135,11 +138,10 @@ export async function renovateRepository(
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
   PackageCacheStats.report();
+  DatasourceCacheStats.report();
   HttpStats.report();
   HttpCacheStats.report();
   LookupStats.report();
-  printDnsStats();
-  clearDnsCache();
   const cloned = isCloned();
   logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
   resetRepositoryLogLevelRemaps();

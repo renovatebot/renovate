@@ -54,6 +54,11 @@ export const PyProjectSchema = z.object({
             .optional(),
         })
         .optional(),
+      uv: z
+        .object({
+          'dev-dependencies': DependencyListSchema,
+        })
+        .optional(),
     })
     .optional(),
 });

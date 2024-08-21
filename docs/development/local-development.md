@@ -11,7 +11,7 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git `>=2.45.1`
-- Node.js `^18.12.0 || >=20.0.0`
+- Node.js `^20.15.1`
 - pnpm `^9.0.0` (use corepack)
 - C++ compiler
 
@@ -172,6 +172,13 @@ If your code fails `pnpm test` due to a `prettier` rule then run `pnpm lint-fix`
 You usually don't need to fix any Prettier errors by hand.
 
 If you're only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
+
+## Documentation
+
+We use [MkDocs](https://www.mkdocs.org) to generate the documentation.
+You can run `pnpm build:docs` to generate the docs.
+Then use `pnpm mkdocs serve` to preview the documentation locally.
+The docs will update automatically when you run `pnpm build:docs` again, no need to stop the `pnpm mkdocs serve` command.
 
 ## Keeping your Renovate fork up to date
 

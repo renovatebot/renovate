@@ -1,0 +1,4 @@
+title: Mend-hosted Apps
+nav:
+  - 'App Secrets': 'app-secrets.md'
+  - 'Migrating Secrets': 'migrating-secrets.md'

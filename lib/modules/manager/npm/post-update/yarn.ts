@@ -76,7 +76,7 @@ export async function checkYarnrc(
         );
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     // not found
   }
   return { offlineMirror, yarnPath };

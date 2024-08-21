@@ -1,9 +1,15 @@
 import is from '@sindresorhus/is';
-import handlebars from 'handlebars';
+import handlebars, { type HelperOptions } from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
+import { toArray } from '../array';
 import { getChildEnv } from '../exec/utils';
 import { regEx } from '../regex';
+
+// Missing in handlebars
+type Options = HelperOptions & {
+  lookupProperty: (element: unknown, key: unknown) => unknown;
+};
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
@@ -15,6 +21,32 @@ handlebars.registerHelper('encodeBase64', (str: string) =>
 handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
   JSON.stringify(JSON.parse(input), null, 2),
 );
+
+handlebars.registerHelper('toJSON', (input: unknown): string =>
+  JSON.stringify(input),
+);
+
+handlebars.registerHelper('toArray', (...args: unknown[]): unknown[] => {
+  // Need to remove the 'options', as last parameter
+  // https://handlebarsjs.com/api-reference/helpers.html
+  args.pop();
+  return args;
+});
+
+handlebars.registerHelper('toObject', (...args: unknown[]): unknown => {
+  // Need to remove the 'options', as last parameter
+  // https://handlebarsjs.com/api-reference/helpers.html
+  args.pop();
+
+  if (args.length % 2 !== 0) {
+    throw new Error(`Must contain an even number of elements`);
+  }
+
+  const keys = args.filter((_, index) => index % 2 === 0);
+  const values = args.filter((_, index) => index % 2 === 1);
+
+  return Object.fromEntries(keys.map((key, index) => [key, values[index]]));
+});
 
 handlebars.registerHelper('replace', (find, replace, context) =>
   (context ?? '').replace(regEx(find, 'g'), replace),
@@ -36,6 +68,16 @@ handlebars.registerHelper('includes', (arg1: string[], arg2: string) => {
   return false;
 });
 
+handlebars.registerHelper(
+  'split',
+  (str: unknown, separator: unknown): string[] => {
+    if (is.string(str) && is.string(separator)) {
+      return str.split(separator);
+    }
+    return [];
+  },
+);
+
 handlebars.registerHelper({
   and(...args) {
     // Need to remove the 'options', as last parameter
@@ -49,6 +91,34 @@ handlebars.registerHelper({
     args.pop();
     return args.some(Boolean);
   },
+});
+
+handlebars.registerHelper(
+  'lookupArray',
+  (obj: unknown, key: unknown, options: Options): unknown[] => {
+    return (
+      toArray(obj)
+        // skip elements like #with does
+        .filter((element) => !handlebars.Utils.isEmpty(element))
+        .map((element) => options.lookupProperty(element, key))
+        .filter((value) => value !== undefined)
+    );
+  },
+);
+
+handlebars.registerHelper('distinct', (obj: unknown): unknown[] => {
+  const seen = new Set<string>();
+
+  return toArray(obj).filter((value) => {
+    const str = JSON.stringify(value);
+
+    if (seen.has(str)) {
+      return false;
+    }
+
+    seen.add(str);
+    return true;
+  });
 });
 
 export const exposedConfigOptions = [
@@ -168,26 +238,6 @@ export const allowedFields = {
     'The severity for a vulnerability alert upgrade (LOW, MEDIUM, MODERATE, HIGH, CRITICAL, UNKNOWN)',
 };
 
-const prBodyFields = [
-  'header',
-  'table',
-  'notes',
-  'changelogs',
-  'hasWarningsErrors',
-  'errors',
-  'warnings',
-  'configDescription',
-  'controls',
-  'footer',
-];
-
-const handlebarsUtilityFields = ['else'];
-
-const allowedFieldsList = Object.keys(allowedFields)
-  .concat(exposedConfigOptions)
-  .concat(prBodyFields)
-  .concat(handlebarsUtilityFields);
-
 type CompileInput = Record<string, unknown>;
 
 const allowedTemplateFields = new Set([
@@ -195,13 +245,16 @@ const allowedTemplateFields = new Set([
   ...exposedConfigOptions,
 ]);
 
-const compileInputProxyHandler: ProxyHandler<CompileInput> = {
+class CompileInputProxyHandler implements ProxyHandler<CompileInput> {
+  constructor(private warnVariables: Set<string>) {}
+
   get(target: CompileInput, prop: keyof CompileInput): unknown {
     if (prop === 'env') {
       return target[prop];
     }
 
     if (!allowedTemplateFields.has(prop)) {
+      this.warnVariables.add(prop);
       return undefined;
     }
 
@@ -216,25 +269,27 @@ const compileInputProxyHandler: ProxyHandler<CompileInput> = {
       return value.map((element) =>
         is.primitive(element)
           ? element
-          : proxyCompileInput(element as CompileInput),
+          : proxyCompileInput(element as CompileInput, this.warnVariables),
       );
     }
 
     if (is.plainObject(value)) {
-      return proxyCompileInput(value);
+      return proxyCompileInput(value, this.warnVariables);
     }
 
     return value;
-  },
-};
-
-export function proxyCompileInput(input: CompileInput): CompileInput {
-  return new Proxy<CompileInput>(input, compileInputProxyHandler);
+  }
 }
 
-const templateRegex = regEx(
-  /{{(?:#(?:if|unless|with|each) )?([a-zA-Z.]+)(?: as \| [a-zA-Z.]+ \|)?}}/g,
-);
+export function proxyCompileInput(
+  input: CompileInput,
+  warnVariables: Set<string>,
+): CompileInput {
+  return new Proxy<CompileInput>(
+    input,
+    new CompileInputProxyHandler(warnVariables),
+  );
+}
 
 export function compile(
   template: string,
@@ -243,30 +298,22 @@ export function compile(
 ): string {
   const env = getChildEnv({});
   const data = { ...GlobalConfig.get(), ...input, env };
-  const filteredInput = filterFields ? proxyCompileInput(data) : data;
+  const warnVariables = new Set<string>();
+  const filteredInput = filterFields
+    ? proxyCompileInput(data, warnVariables)
+    : data;
+
   logger.trace({ template, filteredInput }, 'Compiling template');
-  if (filterFields) {
-    const matches = template.matchAll(templateRegex);
-    for (const match of matches) {
-      const varNames = match[1].split('.');
-      if (varNames[0] === 'env') {
-        continue;
-      }
-      for (const varName of varNames) {
-        if (varName === 'prBodyDefinitions') {
-          // Allow all prBodyDefinitions.*
-          break;
-        }
-        if (!allowedFieldsList.includes(varName)) {
-          logger.info(
-            { varName, template },
-            'Disallowed variable name in template',
-          );
-        }
-      }
-    }
+  const result = handlebars.compile(template)(filteredInput);
+
+  if (warnVariables.size > 0) {
+    logger.info(
+      { varNames: Array.from(warnVariables), template },
+      'Disallowed variable names in template',
+    );
   }
-  return handlebars.compile(template)(filteredInput);
+
+  return result;
 }
 
 export function safeCompile(
@@ -280,22 +327,4 @@ export function safeCompile(
     logger.warn({ err, template }, 'Error compiling template');
     return '';
   }
-}
-
-export function containsTemplates(
-  value: unknown,
-  templates: string | string[],
-): boolean {
-  if (!is.string(value)) {
-    return false;
-  }
-  for (const m of [...value.matchAll(templateRegex)]) {
-    for (const template of is.string(templates) ? [templates] : templates) {
-      if (m[1] === template || m[1].startsWith(`${template}.`)) {
-        return true;
-      }
-    }
-  }
-
-  return false;
 }
