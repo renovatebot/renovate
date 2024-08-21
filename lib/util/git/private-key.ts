@@ -5,14 +5,23 @@ import upath from 'upath';
 import { PLATFORM_GPG_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { exec } from '../exec';
-import { newlineRegex } from '../regex';
+import type { ExecResult } from '../exec/types';
+import { newlineRegex, regEx } from '../regex';
 import { addSecretForSanitizing } from '../sanitize';
+
+type PrivateKeyFormat = 'gpg' | 'ssh';
+
+const sshKeyRegex = regEx(
+  /-----BEGIN ([A-Z ]+ )?PRIVATE KEY-----.*?-----END ([A-Z]+ )?PRIVATE KEY-----/,
+  's',
+);
 
 let gitPrivateKey: PrivateKey | undefined;
 
 abstract class PrivateKey {
   protected readonly key: string;
   protected keyId: string | undefined;
+  protected abstract readonly gpgFormat: string;
 
   constructor(key: string) {
     this.key = key.trim();
@@ -39,12 +48,15 @@ abstract class PrivateKey {
     // TODO: types (#22198)
     await exec(`git config user.signingkey ${this.keyId!}`, { cwd });
     await exec(`git config commit.gpgsign true`, { cwd });
+    await exec(`git config gpg.format ${this.gpgFormat}`, { cwd });
   }
 
   protected abstract importKey(): Promise<string | undefined>;
 }
 
 class GPGKey extends PrivateKey {
+  protected readonly gpgFormat = 'openpgp';
+
   protected async importKey(): Promise<string | undefined> {
     const keyFileName = upath.join(os.tmpdir() + '/git-private-gpg.key');
     await fs.outputFile(keyFileName, this.key);
@@ -60,11 +72,63 @@ class GPGKey extends PrivateKey {
   }
 }
 
+class SSHKey extends PrivateKey {
+  protected readonly gpgFormat = 'ssh';
+
+  protected async importKey(): Promise<string | undefined> {
+    const keyFileName = upath.join(os.tmpdir() + '/git-private-ssh.key');
+    if (await this.hasPassphrase(keyFileName)) {
+      throw new Error('SSH key must have an empty passhprase');
+    }
+    await fs.outputFile(keyFileName, this.key);
+    process.on('exit', () => fs.removeSync(keyFileName));
+    await fs.chmod(keyFileName, 0o600);
+    // HACK: `git` calls `ssh-keygen -Y sign ...` internally for SSH-based
+    // commit signing. Technically, only the private key is needed for signing,
+    // but `ssh-keygen` has an implementation quirk which requires also the
+    // public key file to exist. Therefore, we derive the public key from the
+    // private key just to satisfy `ssh-keygen` until the problem has been
+    // resolved.
+    // https://github.com/renovatebot/renovate/issues/18197#issuecomment-2152333710
+    const { stdout } = await exec(`ssh-keygen -y -P "" -f ${keyFileName}`);
+    const pubFileName = `${keyFileName}.pub`;
+    await fs.outputFile(pubFileName, stdout);
+    process.on('exit', () => fs.removeSync(pubFileName));
+    return keyFileName;
+  }
+
+  private async hasPassphrase(keyFileName: string): Promise<boolean> {
+    try {
+      await exec(`ssh-keygen -y -P "" -f ${keyFileName}`);
+    } catch (err) {
+      return (err as ExecResult).stderr.includes(
+        'incorrect passphrase supplied to decrypt private key',
+      );
+    }
+    return false;
+  }
+}
+
+function getPrivateKeyFormat(key: string): PrivateKeyFormat {
+  return sshKeyRegex.test(key) ? 'ssh' : 'gpg';
+}
+
+function createPrivateKey(key: string): PrivateKey {
+  switch (getPrivateKeyFormat(key)) {
+    case 'gpg':
+      logger.debug('gitPrivateKey: GPG key detected');
+      return new GPGKey(key);
+    case 'ssh':
+      logger.debug('gitPrivateKey: SSH key detected');
+      return new SSHKey(key);
+  }
+}
+
 export function setPrivateKey(key: string | undefined): void {
   if (!is.nonEmptyStringAndNotWhitespace(key)) {
     return;
   }
-  gitPrivateKey = new GPGKey(key);
+  gitPrivateKey = createPrivateKey(key);
 }
 
 export async function writePrivateKey(): Promise<void> {
