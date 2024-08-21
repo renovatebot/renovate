@@ -126,7 +126,8 @@ If you use using Azure DevOps:
 <!-- prettier-ignore -->
 !!! note
     Only Basic HTTP authentication (via username and password) is supported.
-    For Azure DevOps, you can use a PAT with `read` permissions on `Packaging` plus an empty username. (EDITOR NOTE: is the emtpy username correct????)
+    For Azure DevOps: use a PAT with `read` permissions on `Packaging`.
+    The username of the PAT must match the username of the _user of the PAT_.
     The generated `nuget.config` forces the basic authentication, which cannot be overridden externally!
 
 ## Future work
