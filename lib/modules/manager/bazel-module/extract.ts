@@ -4,7 +4,7 @@ import { isNotNullOrUndefined } from '../../../util/array';
 import { LooseArray } from '../../../util/schema-utils';
 import type { PackageDependency, PackageFileContent } from '../types';
 import * as bazelrc from './bazelrc';
-import { RecordFragment } from './fragments';
+import type { RecordFragment } from './fragments';
 import { RuleToMavenPackageDep, fillRegistryUrls } from './maven';
 import { parse } from './parser';
 import { RuleToBazelModulePackageDep } from './rules';
