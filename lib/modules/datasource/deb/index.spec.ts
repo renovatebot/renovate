@@ -1,4 +1,3 @@
-import { createHash } from 'crypto';
 import { createReadStream } from 'fs';
 import { copyFile, stat } from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
@@ -9,6 +8,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
+import { hashStream, toSha256 } from '../../../util/hash';
 import type { GetPkgReleasesConfig } from '../types';
 import { getBaseReleaseUrl } from './url';
 import { DebDatasource } from '.';
@@ -37,9 +37,7 @@ describe('modules/datasource/deb/index', () => {
     extractionFolder = await fs.ensureCacheDir(DebDatasource.cacheSubDir);
     extractedPackageFile = upath.join(
       extractionFolder,
-      `${createHash('sha256')
-        .update(getComponentUrl(debBaseUrl, 'stable', 'non-free', 'amd64'))
-        .digest('hex')}.txt`,
+      `${toSha256(getComponentUrl(debBaseUrl, 'stable', 'non-free', 'amd64'))}.txt`,
     );
 
     cfg = {
@@ -570,12 +568,6 @@ function getRegistryUrl(
  * @returns resolves to the SHA256 checksum
  */
 function computeFileChecksum(filePath: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const hash = createHash('sha256');
-    const stream = createReadStream(filePath);
-
-    stream.on('data', (data) => hash.update(data));
-    stream.on('end', () => resolve(hash.digest('hex')));
-    stream.on('error', (error) => reject(error));
-  });
+  const stream = createReadStream(filePath);
+  return hashStream(stream, 'sha256');
 }
