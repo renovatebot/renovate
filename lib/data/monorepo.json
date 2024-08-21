@@ -353,7 +353,7 @@
       "https://github.com/mui/material-ui",
       "https://github.com/mui/mui-x"
     ],
-    "mdc-react": "material-components/material-components-web-react",
+    "mdc-react": "https://github.com/material-components/material-components-web-react",
     "mdx": "https://github.com/mdx-js/mdx",
     "middy-js": "https://github.com/middyjs/middy",
     "mikro-orm": "https://github.com/mikro-orm/mikro-orm",
@@ -483,6 +483,7 @@
     "telus-tds": "https://github.com/telusdigital/tds",
     "telus-tds-core": "https://github.com/telus/tds-core",
     "temporalio-ts": "https://github.com/temporalio/sdk-typescript",
+    "terraform": "https://github.com/hashicorp/terraform",
     "testcontainers-dotnet": "https://github.com/testcontainers/testcontainers-dotnet",
     "testcontainers-go": "https://github.com/testcontainers/testcontainers-go",
     "testcontainers-java": "https://github.com/testcontainers/testcontainers-java",

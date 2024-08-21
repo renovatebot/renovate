@@ -208,64 +208,48 @@ describe('util/template/index', () => {
     };
 
     it('accessing allowed fields', () => {
-      const p = template.proxyCompileInput(compileInput);
+      const warnVariables = new Set<string>();
+      const p = template.proxyCompileInput(compileInput, warnVariables);
 
       expect(p[allowedField]).toBe('allowed');
       expect(p[allowedArrayField]).toStrictEqual(['allowed']);
+      expect(warnVariables).toBeEmpty();
       expect(p[forbiddenField]).toBeUndefined();
+      expect(warnVariables).toEqual(new Set<string>([forbiddenField]));
     });
 
     it('supports object nesting', () => {
-      const proxy = template.proxyCompileInput({
-        [allowedField]: compileInput,
-      });
+      const warnVariables = new Set<string>();
+      const proxy = template.proxyCompileInput(
+        {
+          [allowedField]: compileInput,
+        },
+        warnVariables,
+      );
 
       const obj = proxy[allowedField] as TestCompileInput;
       expect(obj[allowedField]).toBe('allowed');
+      expect(warnVariables).toBeEmpty();
       expect(obj[forbiddenField]).toBeUndefined();
+      expect(warnVariables).toEqual(new Set<string>([forbiddenField]));
     });
 
     it('supports array nesting', () => {
-      const proxy = template.proxyCompileInput({
-        [allowedField]: [compileInput],
-      });
+      const warnVariables = new Set<string>();
+      const proxy = template.proxyCompileInput(
+        {
+          [allowedField]: [compileInput],
+        },
+        warnVariables,
+      );
 
       const arr = proxy[allowedField] as TestCompileInput[];
       const obj = arr[0];
       expect(obj[allowedField]).toBe('allowed');
       expect(obj[allowedArrayField]).toStrictEqual(['allowed']);
+      expect(warnVariables).toBeEmpty();
       expect(obj[forbiddenField]).toBeUndefined();
-    });
-  });
-
-  describe('containsTemplate', () => {
-    it('supports null', () => {
-      expect(template.containsTemplates(null, 'logJSON')).toBeFalse();
-    });
-
-    it('contains template', () => {
-      expect(
-        template.containsTemplates(
-          '{{#if logJSON}}{{logJSON}}{{/if}}',
-          'logJSON',
-        ),
-      ).toBeTrue();
-      expect(
-        template.containsTemplates(
-          '{{#with logJSON.hasReleaseNotes as | hasNotes |}}{{hasNotes}}{{/if}}',
-          'logJSON',
-        ),
-      ).toBeTrue();
-      expect(
-        template.containsTemplates(
-          '{{#if logJSON.hasReleaseNotes}}has notes{{/if}}',
-          'logJSON',
-        ),
-      ).toBeTrue();
-    });
-
-    it('does not contain template', () => {
-      expect(template.containsTemplates('{{body}}', ['logJSON'])).toBeFalse();
+      expect(warnVariables).toEqual(new Set<string>([forbiddenField]));
     });
   });
 
