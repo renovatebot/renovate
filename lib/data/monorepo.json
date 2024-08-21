@@ -483,6 +483,7 @@
     "telus-tds": "https://github.com/telusdigital/tds",
     "telus-tds-core": "https://github.com/telus/tds-core",
     "temporalio-ts": "https://github.com/temporalio/sdk-typescript",
+    "terraform": "https://github.com/hashicorp/terraform",
     "testcontainers-dotnet": "https://github.com/testcontainers/testcontainers-dotnet",
     "testcontainers-go": "https://github.com/testcontainers/testcontainers-go",
     "testcontainers-java": "https://github.com/testcontainers/testcontainers-java",
