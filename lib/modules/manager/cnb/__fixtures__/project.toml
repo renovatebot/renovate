@@ -11,6 +11,18 @@ uri = "docker://buildpacks/java:2.2.2"
 uri = "buildpacks/nodejs:3.3.3"
 
 [[io.buildpacks.group]]
+uri = "example/foo@1.0.0"
+
+[[io.buildpacks.group]]
+uri = "example/registry-cnb"
+
+[[io.buildpacks.group]]
+uri = "urn:cnb:registry:example/foo@1.0.0"
+
+[[io.buildpacks.group]]
+uri = "from=builder:foobar"
+
+[[io.buildpacks.group]]
 uri = "file://local.oci"
 
 [[io.buildpacks.group]]
