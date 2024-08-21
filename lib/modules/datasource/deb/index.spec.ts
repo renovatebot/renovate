@@ -10,6 +10,8 @@ import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { hashStream, toSha256 } from '../../../util/hash';
 import type { GetPkgReleasesConfig } from '../types';
+import { cacheSubDir } from './common';
+import * as fileUtils from './file';
 import { getBaseReleaseUrl } from './url';
 import { DebDatasource } from '.';
 
@@ -34,7 +36,7 @@ describe('modules/datasource/deb/index', () => {
     cacheDir = await dir({ unsafeCleanup: true });
     GlobalConfig.set({ cacheDir: cacheDir.path });
 
-    extractionFolder = await fs.ensureCacheDir(DebDatasource.cacheSubDir);
+    extractionFolder = await fs.ensureCacheDir(cacheSubDir);
     extractedPackageFile = upath.join(
       extractionFolder,
       `${toSha256(getComponentUrl(debBaseUrl, 'stable', 'non-free', 'amd64'))}.txt`,
@@ -325,18 +327,6 @@ describe('modules/datasource/deb/index', () => {
     });
   });
 
-  describe('extract', () => {
-    it('should throw error for unsupported compression', async () => {
-      await expect(
-        DebDatasource.extract(
-          fixturePackagesArchivePath,
-          'xz',
-          extractedPackageFile,
-        ),
-      ).rejects.toThrow('Unsupported compression standard');
-    });
-  });
-
   describe('downloadAndExtractPackage', () => {
     it('should ignore error when fetching the InRelease content fails', async () => {
       const packageArgs: [release: string, component: string, arch: string] = [
@@ -378,6 +368,8 @@ describe('modules/datasource/deb/index', () => {
     });
 
     it('should throw error for unsupported compression', async () => {
+      jest.spyOn(fileUtils, 'extract').mockRejectedValueOnce(new Error());
+
       httpMock
         .scope(debBaseUrl)
         .get(getPackageUrl('', 'bullseye', 'main', 'amd64'))
@@ -389,7 +381,6 @@ describe('modules/datasource/deb/index', () => {
         'amd64',
       );
 
-      DebDatasource.extract = jest.fn().mockRejectedValueOnce(new Error());
       await expect(
         debDatasource.downloadAndExtractPackage(
           getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),

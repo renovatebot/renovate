@@ -1,5 +1,4 @@
 import readline from 'readline';
-import { createUnzip } from 'zlib';
 import { nanoid } from 'nanoid';
 import upath from 'upath';
 import { logger } from '../../../logger';
@@ -11,6 +10,13 @@ import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { computeFileChecksum, parseChecksumsFromInRelease } from './checksum';
+import {
+  cacheSubDir,
+  packageKeys,
+  requiredPackageKeys,
+  supportedPackageCompressions,
+} from './common';
+import { extract, getFileCreationTime } from './file';
 import { formatReleaseResult, releaseMetaInformationMatches } from './release';
 import type { PackageDescription } from './types';
 import { constructComponentUrls, getBaseReleaseUrl } from './url';
@@ -21,17 +27,6 @@ export class DebDatasource extends Datasource {
   constructor() {
     super(DebDatasource.id);
   }
-
-  /**
-   * This is just an internal list of compressions that are supported and tried to be downloaded from the remote
-   */
-  static readonly compressions = ['gz'];
-
-  /**
-   * This specifies the directory where the extracted and downloaded packages files are stored relative to cacheDir.
-   * The folder will be created automatically if it doesn't exist.
-   */
-  static readonly cacheSubDir: string = 'deb';
 
   /**
    * Users are able to specify custom Debian repositories as long as they follow
@@ -67,49 +62,6 @@ export class DebDatasource extends Datasource {
 
   override readonly defaultVersioning = 'deb';
 
-  static requiredPackageKeys: Array<keyof PackageDescription> = [
-    'Package',
-    'Version',
-  ];
-
-  static packagesKeys: Array<keyof PackageDescription> = [
-    ...DebDatasource.requiredPackageKeys,
-    'Homepage',
-  ];
-
-  /**
-   * Extracts the specified compressed file to the output file.
-   *
-   * @param compressedFile - The path to the compressed file.
-   * @param compression - The compression method used (currently only 'gz' is supported).
-   * @param outputFile - The path where the extracted content will be stored.
-   * @throws Will throw an error if the compression method is unknown.
-   */
-  static async extract(
-    compressedFile: string,
-    compression: string,
-    outputFile: string,
-  ): Promise<void> {
-    if (compression === 'gz') {
-      const source = fs.createCacheReadStream(compressedFile);
-      const destination = fs.createCacheWriteStream(outputFile);
-      await fs.pipeline(source, createUnzip(), destination);
-    } else {
-      throw new Error(`Unsupported compression standard '${compression}'`);
-    }
-  }
-
-  /**
-   * Checks if the file exists and retrieves its creation time.
-   *
-   * @param filePath - The path to the file.
-   * @returns The creation time if the file exists, otherwise undefined.
-   */
-  async getFileCreationTime(filePath: string): Promise<Date | undefined> {
-    const stats = await fs.statCacheFile(filePath);
-    return stats?.ctime;
-  }
-
   /**
    * Downloads and extracts a package file from a component URL.
    *
@@ -121,11 +73,11 @@ export class DebDatasource extends Datasource {
     componentUrl: string,
   ): Promise<{ extractedFile: string; lastTimestamp: Date }> {
     const packageUrlHash = toSha256(componentUrl);
-    const fullCacheDir = await fs.ensureCacheDir(DebDatasource.cacheSubDir);
+    const fullCacheDir = await fs.ensureCacheDir(cacheSubDir);
     const extractedFile = upath.join(fullCacheDir, `${packageUrlHash}.txt`);
-    let lastTimestamp = await this.getFileCreationTime(extractedFile);
+    let lastTimestamp = await getFileCreationTime(extractedFile);
 
-    for (const compression of DebDatasource.compressions) {
+    for (const compression of supportedPackageCompressions) {
       const compressedFile = upath.join(
         fullCacheDir,
         `${nanoid()}_${packageUrlHash}.${compression}`,
@@ -154,12 +106,8 @@ export class DebDatasource extends Datasource {
 
       if (wasUpdated || !lastTimestamp) {
         try {
-          await DebDatasource.extract(
-            compressedFile,
-            compression,
-            extractedFile,
-          );
-          lastTimestamp = await this.getFileCreationTime(extractedFile);
+          await extract(compressedFile, compression, extractedFile);
+          lastTimestamp = await getFileCreationTime(extractedFile);
         } catch (error) {
           logger.error(
             {
@@ -324,11 +272,7 @@ export class DebDatasource extends Datasource {
     for await (const line of rl) {
       if (line === '') {
         // All information of the package are available, add to the list of packages
-        if (
-          DebDatasource.requiredPackageKeys.every(
-            (key) => key in currentPackage,
-          )
-        ) {
+        if (requiredPackageKeys.every((key) => key in currentPackage)) {
           if (!allPackages[currentPackage.Package!]) {
             allPackages[currentPackage.Package!] = [];
           }
@@ -336,7 +280,7 @@ export class DebDatasource extends Datasource {
           currentPackage = {};
         }
       } else {
-        for (const key of DebDatasource.packagesKeys) {
+        for (const key of packageKeys) {
           if (line.startsWith(`${key}:`)) {
             currentPackage[key] = line.substring(key.length + 1).trim();
             break;
@@ -346,9 +290,7 @@ export class DebDatasource extends Datasource {
     }
 
     // Check the last package after file reading is complete
-    if (
-      DebDatasource.requiredPackageKeys.every((key) => key in currentPackage)
-    ) {
+    if (requiredPackageKeys.every((key) => key in currentPackage)) {
       if (!allPackages[currentPackage.Package!]) {
         allPackages[currentPackage.Package!] = [];
       }
@@ -377,9 +319,9 @@ export class DebDatasource extends Datasource {
    * @returns The release result if the package is found, otherwise null.
    */
   @cache({
-    namespace: `datasource-${DebDatasource.id}`,
+    namespace: `datasource-${DebDatasource.id}-releases`,
     key: (registryUrl: string, packageName: string) =>
-      `${toSha256(registryUrl)}_${packageName}`,
+      `${registryUrl}-${packageName}`,
   })
   async getReleases({
     registryUrl,
