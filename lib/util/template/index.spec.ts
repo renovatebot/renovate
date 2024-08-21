@@ -253,37 +253,6 @@ describe('util/template/index', () => {
     });
   });
 
-  describe('containsTemplate', () => {
-    it('supports null', () => {
-      expect(template.containsTemplates(null, 'logJSON')).toBeFalse();
-    });
-
-    it('contains template', () => {
-      expect(
-        template.containsTemplates(
-          '{{#if logJSON}}{{logJSON}}{{/if}}',
-          'logJSON',
-        ),
-      ).toBeTrue();
-      expect(
-        template.containsTemplates(
-          '{{#with logJSON.hasReleaseNotes as | hasNotes |}}{{hasNotes}}{{/if}}',
-          'logJSON',
-        ),
-      ).toBeTrue();
-      expect(
-        template.containsTemplates(
-          '{{#if logJSON.hasReleaseNotes}}has notes{{/if}}',
-          'logJSON',
-        ),
-      ).toBeTrue();
-    });
-
-    it('does not contain template', () => {
-      expect(template.containsTemplates('{{body}}', ['logJSON'])).toBeFalse();
-    });
-  });
-
   describe('percent encoding', () => {
     it('encodes values', () => {
       const output = template.compile(
