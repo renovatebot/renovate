@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { isVersion } from '../../versioning/semver';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -10,14 +11,27 @@ import type {
 import { type ProjectDescriptor, ProjectDescriptorToml } from './schema';
 
 const dockerPrefix = regEx(/^docker:\/?\//);
-const buildpackRegistryRef = regEx(/^[a-z0-9\-.]+\/[a-z0-9\-.]+(?:@.+)?$/);
+const buildpackRegistryRef = regEx(
+  /^[a-z0-9\-.]+\/[a-z0-9\-.]+(?:@(?<version>.+))?$/,
+);
+
+function isBuildpackRegistryRef(ref: string): boolean {
+  const bpRegistryMatch = buildpackRegistryRef.exec(ref);
+  if (!bpRegistryMatch) {
+    return false;
+  } else if (!bpRegistryMatch.groups?.version) {
+    return true;
+  }
+
+  return isVersion(bpRegistryMatch.groups.version);
+}
 
 function isDockerRef(ref: string): boolean {
   const schemaMatch = regEx(/^([a-z0-9]+):\/?\//).test(ref);
   if (
     ref.startsWith('urn:cnb') || // buildpacks registry or builder urns
     ref.startsWith('from=') || // builder reference
-    buildpackRegistryRef.test(ref) || // buildpack registry ID reference
+    isBuildpackRegistryRef(ref) || // buildpack registry ID reference
     (schemaMatch && !ref.startsWith('docker:/')) // unsupported schema
   ) {
     return false;
