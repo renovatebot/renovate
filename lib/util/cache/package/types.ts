@@ -42,7 +42,7 @@ export type PackageCacheNamespace =
   | 'datasource-cpan'
   | 'datasource-crate-metadata'
   | 'datasource-crate'
-  | 'datasource-deb-package'
+  | 'datasource-deb'
   | 'datasource-deno-details'
   | 'datasource-deno-versions'
   | 'datasource-deno'

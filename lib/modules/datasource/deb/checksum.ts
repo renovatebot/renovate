@@ -1,5 +1,5 @@
-import crypto from 'crypto';
 import { createCacheReadStream } from '../../../util/fs';
+import { hashStream } from '../../../util/hash';
 import { escapeRegExp, regEx } from '../../../util/regex';
 
 /**
@@ -35,12 +35,6 @@ export function parseChecksumsFromInRelease(
  * @returns resolves to the SHA256 checksum
  */
 export function computeFileChecksum(filePath: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const hash = crypto.createHash('sha256');
-    const stream = createCacheReadStream(filePath);
-
-    stream.on('data', (data) => hash.update(data));
-    stream.on('end', () => resolve(hash.digest('hex')));
-    stream.on('error', (error) => reject(error));
-  });
+  const stream = createCacheReadStream(filePath);
+  return hashStream(stream, 'sha256');
 }

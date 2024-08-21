@@ -1,4 +1,3 @@
-import { createHash } from 'crypto';
 import readline from 'readline';
 import { createUnzip } from 'zlib';
 import { nanoid } from 'nanoid';
@@ -6,6 +5,7 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import * as fs from '../../../util/fs';
+import { toSha256 } from '../../../util/hash';
 import type { HttpOptions } from '../../../util/http/types';
 import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
@@ -120,9 +120,7 @@ export class DebDatasource extends Datasource {
   async downloadAndExtractPackage(
     componentUrl: string,
   ): Promise<{ extractedFile: string; lastTimestamp: Date }> {
-    const packageUrlHash = createHash('sha256')
-      .update(componentUrl)
-      .digest('hex');
+    const packageUrlHash = toSha256(componentUrl);
     const fullCacheDir = await fs.ensureCacheDir(DebDatasource.cacheSubDir);
     const extractedFile = upath.join(fullCacheDir, `${packageUrlHash}.txt`);
     let lastTimestamp = await this.getFileCreationTime(extractedFile);
@@ -225,8 +223,6 @@ export class DebDatasource extends Datasource {
       'Downloading Debian package file',
     );
 
-    const actualChecksum = await computeFileChecksum(compressedFile);
-
     let inReleaseContent = '';
 
     try {
@@ -234,12 +230,13 @@ export class DebDatasource extends Datasource {
     } catch (error) {
       // This is expected to fail for Artifactory if GPG verification is not enabled
       logger.debug(
-        { url: baseReleaseUrl, error },
+        { url: baseReleaseUrl, err: error },
         'Could not fetch InRelease file',
       );
     }
 
     if (inReleaseContent) {
+      const actualChecksum = await computeFileChecksum(compressedFile);
       const expectedChecksum = parseChecksumsFromInRelease(
         inReleaseContent,
         // path to the Package.gz file
@@ -304,7 +301,7 @@ export class DebDatasource extends Datasource {
    * @returns a list of packages with minimal Metadata.
    */
   @cache({
-    namespace: `datasource-${DebDatasource.id}-package`,
+    namespace: `datasource-${DebDatasource.id}`,
     key: (extractedFile: string, lastTimestamp: Date) =>
       `${extractedFile}:${lastTimestamp.getTime()}`,
     ttlMinutes: 24 * 60,
@@ -362,7 +359,7 @@ export class DebDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${DebDatasource.id}-package`,
+    namespace: `datasource-${DebDatasource.id}`,
     key: (componentUrl: string) => componentUrl,
   })
   async getPackageIndex(
