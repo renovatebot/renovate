@@ -10,7 +10,7 @@ import type {
 import { type ProjectDescriptor, ProjectDescriptorToml } from './schema';
 
 const dockerPrefix = regEx(/^docker:\/?\//);
-const buildpackRegistryRef = regEx(/^[a-z0-9\-\.]+\/[a-z0-9\-\.]+(?:@.+)?$/);
+const buildpackRegistryRef = regEx(/^[a-z0-9\-.]+\/[a-z0-9\-.]+(?:@.+)?$/);
 
 function isDockerRef(ref: string): boolean {
   const schemaMatch = regEx(/^([a-z0-9]+):\/?\//).test(ref);
