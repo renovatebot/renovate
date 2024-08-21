@@ -14,9 +14,11 @@ export const ProjectDescriptor = z.object({
   _: z.object({
     'schema-version': z.string(),
   }),
-  io: z.object({
-    buildpacks: IoBuildpacks.optional(),
-  }).optional(),
+  io: z
+    .object({
+      buildpacks: IoBuildpacks.optional(),
+    })
+    .optional(),
 });
 
 export type ProjectDescriptor = z.infer<typeof ProjectDescriptor>;

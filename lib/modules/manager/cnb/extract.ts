@@ -9,11 +9,17 @@ import type {
 } from '../types';
 import { type ProjectDescriptor, ProjectDescriptorToml } from './schema';
 
-const dockerPrefix = regEx(/^docker:\/\//);
+const dockerPrefix = regEx(/^docker:\/?\//);
+const buildpackRegistryRef = regEx(/^[a-z0-9\-\.]+\/[a-z0-9\-\.]+(?:@.+)?$/);
 
 function isDockerRef(ref: string): boolean {
-  const schemaMatch = regEx(/^([a-z0-9]+):\/\//).test(ref);
-  if (schemaMatch && !ref.startsWith('docker://')) {
+  const schemaMatch = regEx(/^([a-z0-9]+):\/?\//).test(ref);
+  if (
+    ref.startsWith('urn:cnb') || // buildpacks registry or builder urns
+    ref.startsWith('from=') || // builder reference
+    buildpackRegistryRef.test(ref) || // buildpack registry ID reference
+    (schemaMatch && !ref.startsWith('docker:/')) // unsupported schema
+  ) {
     return false;
   }
 
