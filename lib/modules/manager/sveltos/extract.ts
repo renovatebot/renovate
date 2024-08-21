@@ -21,9 +21,9 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   let definitions: Record<string, unknown>[] | ProfileDefinition[];
   try {
-    definitions = parseYaml<any>(content, null, {
+    definitions = parseYaml(content, null, {
       customSchema: ProfileDefinition,
-    });
+    }) as any;
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Sveltos definition.');
     return null;
