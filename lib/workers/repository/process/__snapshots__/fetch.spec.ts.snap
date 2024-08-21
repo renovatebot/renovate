@@ -44,6 +44,7 @@ exports[`workers/repository/process/fetch fetchUpdates() handles ignored, skippe
         },
         {
           "depName": "skipped",
+          "packageName": "skipped",
           "skipReason": "some-reason",
           "updates": [],
         },
