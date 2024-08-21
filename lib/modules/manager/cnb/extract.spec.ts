@@ -10,7 +10,7 @@ describe('modules/manager/cnb/extract', () => {
 
     it('returns null for empty package.toml', () => {
       const res = extractPackageFile(
-        Fixtures.get('empty_project.toml'),
+        '[_]\nschema-version = "0.2"',
         'project.toml',
         {},
       );
@@ -47,6 +47,27 @@ describe('modules/manager/cnb/extract', () => {
           datasource: 'docker',
           depName: 'buildpacks/nodejs',
           replaceString: 'buildpacks/nodejs:3.3.3',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+          datasource: 'docker',
+          depName: 'some-bp',
+          replaceString:
+            'some-bp@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+          currentValue: 'some-tag',
+          datasource: 'docker',
+          depName: 'cnbs/some-bp',
+          replaceString:
+            'cnbs/some-bp:some-tag@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
         },
       ]);
     });
