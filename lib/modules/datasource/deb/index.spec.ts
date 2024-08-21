@@ -364,10 +364,10 @@ describe('modules/datasource/deb/index', () => {
         debDatasource.downloadAndExtractPackage(
           getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
         ),
-      ).rejects.toThrow(`No compression standard worked for `);
+      ).rejects.toThrow(`SHA256 checksum validation failed`);
     });
 
-    it('should throw error for unsupported compression', async () => {
+    it('should throw error for when extracting fails', async () => {
       jest.spyOn(fileUtils, 'extract').mockRejectedValueOnce(new Error());
 
       httpMock
@@ -385,7 +385,7 @@ describe('modules/datasource/deb/index', () => {
         debDatasource.downloadAndExtractPackage(
           getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
         ),
-      ).rejects.toThrow(`No compression standard worked for `);
+      ).rejects.toThrow(`Missing metadata in extracted package index file!`);
     });
   });
 

@@ -10,12 +10,7 @@ import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { computeFileChecksum, parseChecksumsFromInRelease } from './checksum';
-import {
-  cacheSubDir,
-  packageKeys,
-  requiredPackageKeys,
-  supportedPackageCompressions,
-} from './common';
+import { cacheSubDir, packageKeys, requiredPackageKeys } from './common';
 import { extract, getFileCreationTime } from './file';
 import { formatReleaseResult, releaseMetaInformationMatches } from './release';
 import type { PackageDescription } from './types';
@@ -77,60 +72,43 @@ export class DebDatasource extends Datasource {
     const extractedFile = upath.join(fullCacheDir, `${packageUrlHash}.txt`);
     let lastTimestamp = await getFileCreationTime(extractedFile);
 
-    for (const compression of supportedPackageCompressions) {
-      const compressedFile = upath.join(
-        fullCacheDir,
-        `${nanoid()}_${packageUrlHash}.${compression}`,
-      );
+    const compression = 'gz';
+    const compressedFile = upath.join(
+      fullCacheDir,
+      `${nanoid()}_${packageUrlHash}.${compression}`,
+    );
 
-      let wasUpdated = false;
+    const wasUpdated = await this.downloadPackageFile(
+      componentUrl,
+      compression,
+      compressedFile,
+      lastTimestamp,
+    );
 
+    if (wasUpdated || !lastTimestamp) {
       try {
-        wasUpdated = await this.downloadPackageFile(
-          componentUrl,
-          compression,
-          compressedFile,
-          lastTimestamp,
-        );
+        await extract(compressedFile, compression, extractedFile);
+        lastTimestamp = await getFileCreationTime(extractedFile);
       } catch (error) {
         logger.error(
           {
+            componentUrl,
             compression,
             error: error.message,
           },
-          `Failed to download package file from ${componentUrl}`,
+          `Failed to extract package file from ${compressedFile}`,
         );
-
-        continue;
+      } finally {
+        await fs.rmCache(compressedFile);
       }
-
-      if (wasUpdated || !lastTimestamp) {
-        try {
-          await extract(compressedFile, compression, extractedFile);
-          lastTimestamp = await getFileCreationTime(extractedFile);
-        } catch (error) {
-          logger.error(
-            {
-              componentUrl,
-              compression,
-              error: error.message,
-            },
-            `Failed to extract package file from ${compressedFile}`,
-          );
-        } finally {
-          await fs.rmCache(compressedFile);
-        }
-      }
-
-      if (!lastTimestamp) {
-        //extracting went wrong
-        continue;
-      }
-
-      return { extractedFile, lastTimestamp };
     }
 
-    throw new Error(`No compression standard worked for ${componentUrl}`);
+    if (!lastTimestamp) {
+      //extracting went wrong
+      throw new Error('Missing metadata in extracted package index file!');
+    }
+
+    return { extractedFile, lastTimestamp };
   }
 
   /**
