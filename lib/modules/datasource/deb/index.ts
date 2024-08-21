@@ -41,6 +41,13 @@ export class DebDatasource extends Datasource {
   override readonly customRegistrySupport = true;
 
   /**
+   * Users can specify multiple upstream repositories and the datasource will aggregate the release
+   * @example
+   * When specifying multiple dependencies both internal and external dependencies from internal/external artifactory
+   */
+  override readonly registryStrategy = 'merge';
+
+  /**
    * The original apt source list file format is
    * deb uri distribution [component1] [component2] [...]
    * @see{https://wiki.debian.org/DebianRepository/Format}
