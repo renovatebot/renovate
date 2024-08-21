@@ -12,11 +12,11 @@ import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
 import { branchifyUpgrades } from '../updates/branchify';
-import { raiseDeprecationWarnings } from './deprecated';
 import { fetchUpdates } from './fetch';
 import { sortBranches } from './sort';
 import { Vulnerabilities } from './vulnerabilities';
-import { WriteUpdateResult, writeUpdates } from './write';
+import type { WriteUpdateResult } from './write';
+import { writeUpdates } from './write';
 
 export interface ExtractResult {
   branches: BranchConfig[];
@@ -191,7 +191,6 @@ export async function lookup(
 ): Promise<ExtractResult> {
   await fetchVulnerabilities(config, packageFiles);
   await fetchUpdates(config, packageFiles);
-  await raiseDeprecationWarnings(config, packageFiles);
   const { branches, branchList } = await branchifyUpgrades(
     config,
     packageFiles,

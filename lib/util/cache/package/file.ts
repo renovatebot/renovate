@@ -41,7 +41,7 @@ export async function get<T = never>(
       }
       await rm(namespace, key);
     }
-  } catch (err) {
+  } catch {
     logger.trace({ namespace, key }, 'Cache miss');
   }
   return undefined;
@@ -87,7 +87,7 @@ export async function cleanup(): Promise<void> {
       let cachedValue: any;
       try {
         cachedValue = JSON.parse(res.data.toString());
-      } catch (err) {
+      } catch {
         logger.debug('Error parsing cached value - deleting');
       }
       if (
@@ -96,11 +96,10 @@ export async function cleanup(): Promise<void> {
           DateTime.local() > DateTime.fromISO(cachedValue.expiry))
       ) {
         await cacache.rm.entry(cacheFileName, cachedItem.key);
+        await cacache.rm.content(cacheFileName, cachedItem.integrity);
         deletedCount += 1;
       }
     }
-    logger.debug(`Verifying and cleaning cache: ${cacheFileName}`);
-    await cacache.verify(cacheFileName);
     const durationMs = Math.round(Date.now() - startTime);
     logger.debug(
       `Deleted ${deletedCount} of ${totalCount} file cached entries in ${durationMs}ms`,

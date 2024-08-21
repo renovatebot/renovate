@@ -27,7 +27,8 @@ import {
 import * as git from '../../../util/git';
 import type { Platform } from '../types';
 import { getCodeCommitUrl } from './codecommit-client';
-import { CodeCommitPr, config } from './index';
+import type { CodeCommitPr } from './index';
+import { config } from './index';
 
 const codeCommitClient = mockClient(CodeCommitClient);
 
@@ -61,6 +62,10 @@ describe('modules/platform/codecommit/index', () => {
     expect(newStr).toBe(
       '**foo**bartext\n[//]: # (<!--renovate-debug:hiddenmessage123-->)',
     );
+  });
+
+  it('maxBodyLength', () => {
+    expect(codeCommit.maxBodyLength()).toBe(Infinity);
   });
 
   describe('initPlatform()', () => {

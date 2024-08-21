@@ -19,7 +19,7 @@ export function extractMsbuildGlobalManifest(
   let extractedConstraints: Record<string, string> | undefined;
   try {
     manifest = JSON.parse(content);
-  } catch (err) {
+  } catch {
     logger.debug({ packageFile }, `Invalid JSON`);
     return null;
   }

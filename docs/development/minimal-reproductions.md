@@ -23,13 +23,13 @@ Please read this section in full _before_ starting on your minimal reproduction.
 
 There are two methods to create a reproduction, see the table for a comparison.
 
-| Start point          | Method                  | Benefits                          | Drawbacks                                  |
-| :------------------- | :---------------------- | :-------------------------------- | :----------------------------------------- |
-| Empty repo           | Copy files and config   | Minimal start point               | Crafting the bad config/setup from scratch |
-| Fork production repo | Remove files and config | Start with known bad config/setup | May need to edit/delete many files         |
+| Start point                                                                                       | Method                  | Benefits                          | Drawbacks                                  |
+| :------------------------------------------------------------------------------------------------ | :---------------------- | :-------------------------------- | :----------------------------------------- |
+| [our minimal reproduction template](https://github.com/renovatebot/minimal-reproduction-template) | Copy files and config   | Minimal start point               | Crafting the bad config/setup from scratch |
+| Fork production repo                                                                              | Remove files and config | Start with known bad config/setup | May need to edit/delete many files         |
 
 Either method will work.
-We recommend you start from an empty repository.
+We recommend you start from [our minimal reproduction template](https://github.com/renovatebot/minimal-reproduction-template).
 
 ### General steps
 
@@ -39,7 +39,7 @@ _Always_ follow these steps:
 1. Use the fewest number of repository files and dependencies
 1. Reduce your Renovate config to a minimum
 1. Remove private or secret information
-1. Create a `readme.md` file and:
+1. Create a `readme.md` file (or edit the template `readme.md`) and:
    - Explain the _Current behavior_ and _Expected behavior_
    - Link to the Renovate Issue or Discussion
    - Use headings to organize the information

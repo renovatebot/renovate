@@ -24,9 +24,9 @@ It builds `latest` based on the `main` branch and all SemVer tags are published 
 
 ```sh title="Example of valid tags"
 docker run --rm renovate/renovate
-docker run --rm renovate/renovate:35
-docker run --rm renovate/renovate:35.14
-docker run --rm renovate/renovate:35.14.4
+docker run --rm renovate/renovate:38
+docker run --rm renovate/renovate:38.39
+docker run --rm renovate/renovate:38.39.6
 ```
 
 <!-- prettier-ignore -->
@@ -62,7 +62,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:35.14.4
+              image: renovate/renovate:38.39.6
               args:
                 - user/repo
               # Environment Variables
@@ -105,7 +105,7 @@ data:
   config.json: |-
     {
       "repositories": ["orgname/repo","username/repo"],
-      "dryRun" : "true"
+      "dryRun" : "full"
     }
 
 ---
@@ -121,7 +121,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:35.14.4
+            - image: renovate/renovate:38.39.6
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -248,7 +248,7 @@ module.exports = {
 };
 ```
 
-Here change the `logFile` and `repositories` to something appropriate.
+Here change the `repositories` to something appropriate.
 Also replace `gitlab-token` value with the one created during the previous step.
 
 If you're running against GitHub Enterprise Server, then change the `gitlab` values in the example to the equivalent GitHub ones.
@@ -367,7 +367,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:35.14.4
+              image: renovate/renovate:38.39.6
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true
@@ -438,14 +438,6 @@ RUN update-ca-certificates
 # Change back to the Ubuntu user
 USER 1000
 
-# Some tools come with their own certificate authority stores and thus need to trust the self-signed certificate or the entire OS store explicitly.
-# This list is _not_ comprehensive and other tools may require further configuration.
-#
-# Node
-ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/self-signed-certificate.crt
-# Python
-RUN pip config set global.cert /etc/ssl/certs/ca-certificates.crt
-ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 # OpenSSL
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 ```

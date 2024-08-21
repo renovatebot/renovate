@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
-import { XmlDocument, XmlElement, XmlNode } from 'xmldoc';
+import type { XmlElement, XmlNode } from 'xmldoc';
+import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { hasKey } from '../../../util/object';
@@ -74,7 +75,33 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
           currentValue,
         });
       }
+    } else if (name === 'Sdk') {
+      const depName = attr?.Name;
+      const version = attr?.Version;
+      // if sdk element is present it will always have the Name field but the Version is an optional field
+      if (depName && version) {
+        results.push({
+          depName,
+          currentValue: version,
+          depType: 'msbuild-sdk',
+          datasource: NugetDatasource.id,
+        });
+      }
     } else {
+      if (name === 'Project') {
+        if (attr?.Sdk) {
+          const str = attr?.Sdk;
+          const [name, version] = str.split('/');
+          if (name && version) {
+            results.push({
+              depName: name,
+              depType: 'msbuild-sdk',
+              currentValue: version,
+              datasource: NugetDatasource.id,
+            });
+          }
+        }
+      }
       todo.push(...(child.children.filter(isXmlElem) as XmlElement[]));
     }
   }
@@ -96,7 +123,7 @@ export async function extractPackageFile(
 
     try {
       manifest = JSON.parse(content);
-    } catch (err) {
+    } catch {
       logger.debug({ packageFile }, `Invalid JSON`);
       return null;
     }

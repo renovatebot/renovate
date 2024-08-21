@@ -1,5 +1,6 @@
 import { mock } from 'jest-mock-extended';
-import { RenovateConfig, partial, platform } from '../../../test/util';
+import type { RenovateConfig } from '../../../test/util';
+import { partial, platform } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -17,7 +18,6 @@ beforeEach(() => {
   // default values
   config = partial<RenovateConfig>({
     onboardingBranch: 'configure/renovate',
-    suppressNotifications: ['deprecationWarningIssues'],
     configWarningReuseIssue: true,
     confidential: false,
   });
@@ -127,7 +127,6 @@ Message: some-message
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
-      // config.suppressNotifications = ['deprecationWarningIssues']
       config.suppressNotifications = [notificationName];
       platform.getBranchPr.mockResolvedValueOnce({
         ...mock<Pr>(),

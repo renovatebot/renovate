@@ -98,7 +98,11 @@ describe('modules/platform/gerrit/client', () => {
       ['owner:self', { branchName: 'dependency-xyz' }],
       ['project:repo', { branchName: 'dependency-xyz' }],
       ['-is:wip', { branchName: 'dependency-xyz' }],
-      ['hashtag:sourceBranch-dependency-xyz', { branchName: 'dependency-xyz' }],
+      [
+        'footer:Renovate-Branch=dependency-xyz',
+        { branchName: 'dependency-xyz' },
+      ],
+      ['hashtag:sourceBranch-dependency-xyz', { branchName: 'dependency-xyz' }], // for backwards compatibility
       ['label:Code-Review=-2', { branchName: 'dependency-xyz', label: '-2' }],
       [
         'branch:otherTarget',
@@ -411,11 +415,11 @@ describe('modules/platform/gerrit/client', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get(
-          '/a/projects/test%2Frepo/branches/main/files/renovate.json/content',
+          '/a/projects/test%2Frepo/branches/base%2Fbranch/files/renovate.json/content',
         )
         .reply(200, gerritFileResponse('{}'));
       await expect(
-        client.getFile('test/repo', 'main', 'renovate.json'),
+        client.getFile('test/repo', 'base/branch', 'renovate.json'),
       ).resolves.toBe('{}');
     });
   });

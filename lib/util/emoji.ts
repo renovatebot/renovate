@@ -120,7 +120,7 @@ export function unemojify(text: string): string {
   return text.replace(emojiRegex, (emoji) => {
     const hexCode = stripHexCode(fromUnicodeToHexcode(emoji));
     const shortCode = shortCodesByHex.get(hexCode);
-    return shortCode ?? '�';
+    return shortCode ?? /* istanbul ignore next */ '�';
   });
 }
 

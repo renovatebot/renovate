@@ -5,19 +5,9 @@ import * as hostRules from '../../../util/host-rules';
 import { PypiDatasource } from '.';
 
 const res1 = Fixtures.get('azure-cli-monitor.json');
-const res2 = Fixtures.get('azure-cli-monitor-updated.json');
 const htmlResponse = Fixtures.get('versions-html.html');
-const badResponse = Fixtures.get('versions-html-badfile.html');
-const dataRequiresPythonResponse = Fixtures.get(
-  'versions-html-data-requires-python.html',
-);
-const mixedHyphensResponse = Fixtures.get('versions-html-mixed-hyphens.html');
 const mixedCaseResponse = Fixtures.get('versions-html-mixed-case.html');
 const withPeriodsResponse = Fixtures.get('versions-html-with-periods.html');
-const withWhitespacesResponse = Fixtures.get(
-  'versions-html-with-whitespaces.html',
-);
-const hyphensResponse = Fixtures.get('versions-html-hyphens.html');
 
 const baseUrl = 'https://pypi.org/pypi';
 const datasource = PypiDatasource.id;
@@ -116,7 +106,7 @@ describe('modules/datasource/pypi/index', () => {
       httpMock
         .scope('https://third-index/foo')
         .get('/azure-cli-monitor/json')
-        .reply(200, res2);
+        .reply(200, Fixtures.get('azure-cli-monitor-updated.json'));
       const config = {
         registryUrls: [
           'https://custom.pypi.net/foo',
@@ -339,7 +329,7 @@ describe('modules/datasource/pypi/index', () => {
       httpMock
         .scope('https://some.registry.org/simple/')
         .get('/package-with-hyphens/')
-        .reply(200, hyphensResponse);
+        .reply(200, Fixtures.get('versions-html-hyphens.html'));
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
@@ -355,11 +345,30 @@ describe('modules/datasource/pypi/index', () => {
       ]);
     });
 
+    it('process data from simple endpoint with zip archives', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/company-aws-sso-client/')
+        .reply(200, Fixtures.get('versions-archives.html'));
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'company-aws-sso-client',
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '0.11.7' },
+        { version: '0.11.8' },
+      ]);
+    });
+
     it('process data from simple endpoint with hyphens replaced with underscores', async () => {
       httpMock
         .scope('https://some.registry.org/simple/')
         .get('/image-collector/')
-        .reply(200, mixedHyphensResponse);
+        .reply(200, Fixtures.get('versions-html-mixed-hyphens.html'));
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
@@ -433,11 +442,98 @@ describe('modules/datasource/pypi/index', () => {
       ]);
     });
 
+    it('process data from simple endpoint with periods when using normalized name', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/package-with-periods/')
+        .reply(200, withPeriodsResponse);
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'package-with-periods',
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '2.0.0' },
+        { version: '2.0.1' },
+        { version: '2.0.2' },
+      ]);
+    });
+
+    it('process data from simple endpoint for snowflake-legacy', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/snowflake-legacy/')
+        .reply(200, Fixtures.get('versions-html-snowflake-legacy.html'));
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'snowflake-legacy',
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '0.3.0' },
+        { version: '0.4.0' },
+        { version: '0.5.0' },
+        { version: '0.7.0' },
+        { version: '0.8.0' },
+        { version: '0.8.1' },
+        { version: '0.9.0' },
+        { version: '0.10.0' },
+        { version: '0.11.0' },
+      ]);
+    });
+
+    it('ignores invalid distribution file name formats', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/invalid-version/')
+        .reply(200, Fixtures.get('versions-html-invalid-version.html'));
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'invalid-version',
+      });
+      expect(res?.releases).toMatchObject([]);
+    });
+
+    it('process data from simple endpoint with non normalized name', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/friendly-bard/')
+        .reply(
+          200,
+          Fixtures.get('versions-html-with-non-normalized-name.html'),
+        );
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'friendly-bard',
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '2.0.0' },
+        { version: '2.0.1' },
+        { version: '2.0.2' },
+        { version: '2.0.3' },
+        { version: '2.0.4' },
+      ]);
+    });
+
     it('process data from simple endpoint with extra whitespaces in html', async () => {
       httpMock
         .scope('https://some.registry.org/simple/')
         .get('/package-with-whitespaces/')
-        .reply(200, withWhitespacesResponse);
+        .reply(200, Fixtures.get('versions-html-with-whitespaces.html'));
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
@@ -493,7 +589,7 @@ describe('modules/datasource/pypi/index', () => {
       httpMock
         .scope('https://some.registry.org/simple/')
         .get('/dj-database-url/')
-        .reply(200, badResponse);
+        .reply(200, Fixtures.get('versions-html-badfile.html'));
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
@@ -531,7 +627,7 @@ describe('modules/datasource/pypi/index', () => {
       httpMock
         .scope('https://some.registry.org/simple/')
         .get('/dj-database-url/')
-        .reply(200, dataRequiresPythonResponse);
+        .reply(200, Fixtures.get('versions-html-data-requires-python.html'));
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };

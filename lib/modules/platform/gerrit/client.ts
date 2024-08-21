@@ -195,7 +195,7 @@ class GerritClient {
     const base64Content = await this.gerritHttp.get(
       `a/projects/${encodeURIComponent(
         repo,
-      )}/branches/${branch}/files/${encodeURIComponent(fileName)}/content`,
+      )}/branches/${encodeURIComponent(branch)}/files/${encodeURIComponent(fileName)}/content`,
     );
     return Buffer.from(base64Content.body, 'base64').toString();
   }
@@ -231,8 +231,17 @@ class GerritClient {
   ): string[] {
     const filterState = mapPrStateToGerritFilter(searchConfig.state);
     const filters = ['owner:self', 'project:' + repository, filterState];
-    if (searchConfig.branchName !== '') {
-      filters.push(`hashtag:sourceBranch-${searchConfig.branchName}`);
+    if (searchConfig.branchName) {
+      filters.push(
+        ...[
+          '(',
+          `footer:Renovate-Branch=${searchConfig.branchName}`,
+          // for backwards compatibility
+          'OR',
+          `hashtag:sourceBranch-${searchConfig.branchName}`,
+          ')',
+        ],
+      );
     }
     if (searchConfig.targetBranch) {
       filters.push(`branch:${searchConfig.targetBranch}`);

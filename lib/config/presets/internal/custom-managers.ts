@@ -87,6 +87,23 @@ export const presets: Record<string, Preset> = {
     ],
     description: 'Update `appVersion` value in Helm chart `Chart.yaml`.',
   },
+  makefileVersions: {
+    customManagers: [
+      {
+        customType: 'regex',
+        fileMatch: [
+          '(^|/)Makefile$',
+          '(^|/)makefile$',
+          '(^|/)GNUMakefile$',
+          '\\.mk$',
+        ],
+        matchStrings: [
+          '# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:*\\??=\\s*["\']?(?<currentValue>.+?)["\']?\\s',
+        ],
+      },
+    ],
+    description: 'Update `_VERSION` variables in Makefiles.',
+  },
   mavenPropertyVersions: {
     customManagers: [
       {

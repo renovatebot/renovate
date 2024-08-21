@@ -1,10 +1,12 @@
 import { Readable } from 'node:stream';
-import {
-  GetObjectCommand,
+import type {
   GetObjectCommandInput,
-  PutObjectCommand,
   PutObjectCommandInput,
   PutObjectCommandOutput,
+} from '@aws-sdk/client-s3';
+import {
+  GetObjectCommand,
+  PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';

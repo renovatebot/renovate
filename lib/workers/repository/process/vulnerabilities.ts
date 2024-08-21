@@ -1,5 +1,6 @@
 // TODO #22198
-import { Ecosystem, Osv, OsvOffline } from '@renovatebot/osv-offline';
+import type { Ecosystem, Osv } from '@renovatebot/osv-offline';
+import { OsvOffline } from '@renovatebot/osv-offline';
 import is from '@sindresorhus/is';
 import type { CvssScore } from 'vuln-vects';
 import { parseCvssVector } from 'vuln-vects';
@@ -11,10 +12,8 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../../../modules/manager/types';
-import {
-  VersioningApi,
-  get as getVersioning,
-} from '../../../modules/versioning';
+import type { VersioningApi } from '../../../modules/versioning';
+import { get as getVersioning } from '../../../modules/versioning';
 import { findGithubToken } from '../../../util/check-token';
 import { find } from '../../../util/host-rules';
 import { sanitizeMarkdown } from '../../../util/markdown';
@@ -409,7 +408,7 @@ export class Vulnerabilities {
       this.isVersionGt(version, depVersion, versioningApi),
     );
     if (fixedVersion) {
-      return ecosystem === 'PyPI' ? `==${fixedVersion}` : fixedVersion;
+      return this.getFixedVersionByEcosystem(fixedVersion, ecosystem);
     }
 
     lastAffectedVersions.sort((a, b) => versioningApi.sortVersions(a, b));
@@ -421,6 +420,21 @@ export class Vulnerabilities {
     }
 
     return null;
+  }
+
+  private getFixedVersionByEcosystem(
+    fixedVersion: string,
+    ecosystem: Ecosystem,
+  ): string {
+    if (ecosystem === 'Maven') {
+      return `[${fixedVersion},)`;
+    } else if (ecosystem === 'NuGet') {
+      // TODO: add support for nuget version ranges when #26150 is merged
+      return fixedVersion;
+    }
+
+    // crates.io, Go, Hex, npm, RubyGems, PyPI
+    return `>= ${fixedVersion}`;
   }
 
   private getLastAffectedByEcosystem(
@@ -506,7 +520,7 @@ export class Vulnerabilities {
       const severityLevel = parsedCvss.cvss3OverallSeverityText;
 
       return [parsedCvss.baseScore.toFixed(1), severityLevel];
-    } catch (err) {
+    } catch {
       logger.debug(`Error processing CVSS vector ${vector}`);
     }
 

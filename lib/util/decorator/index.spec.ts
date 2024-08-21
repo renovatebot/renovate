@@ -1,4 +1,5 @@
-import { Decorator, decorate } from '.';
+import type { Decorator } from '.';
+import { decorate } from '.';
 
 interface WrapParameters {
   mock: jest.Mock;

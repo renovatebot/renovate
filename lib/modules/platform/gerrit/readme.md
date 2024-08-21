@@ -3,11 +3,16 @@
 ## Supported Gerrit versions
 
 Renovate supports all Gerrit 3.x versions.
+
 Support for Gerrit is currently _experimental_, meaning that it _might_ still have some undiscovered bugs or design limitations, and that we _might_ need to change functionality in a non-backwards compatible manner in a non-major release.
 
-The current implementation uses Gerrit's "hashtags" feature.
-Therefore you must use a Gerrit version that uses the [NoteDB](https://gerrit-review.googlesource.com/Documentation/note-db.html) backend.
-We did not test Gerrit `2.x` with NoteDB (only in `2.15` and `2.16`), but could work.
+Renovate stores its metadata in the _commit message footer_.
+
+Previously Renovate stored metadata in Gerrit's _hashtags_.
+To keep backwards compatibility, Renovate still reads metadata from hashtags.
+But Renovate _always_ puts its metadata in the _commit message footer_!
+When the Renovate maintainers mark Gerrit support as stable, the maintainers will remove the "read metadata from hashtags" feature.
+This means changes without metadata in the commit message footer will be "forgotten" by Renovate.
 
 ## Authentication
 

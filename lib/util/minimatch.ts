@@ -1,4 +1,5 @@
-import { Minimatch, MinimatchOptions } from 'minimatch';
+import type { MinimatchOptions } from 'minimatch';
+import { Minimatch } from 'minimatch';
 
 const cache = new Map<string, Minimatch>();
 

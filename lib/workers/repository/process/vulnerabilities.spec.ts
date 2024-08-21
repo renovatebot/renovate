@@ -1,7 +1,8 @@
 import type { Osv, OsvOffline } from '@renovatebot/osv-offline';
 import { codeBlock } from 'common-tags';
 import { mockFn } from 'jest-mock-extended';
-import { RenovateConfig, logger } from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { logger } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import type { PackageFile } from '../../../modules/manager/types';
 import { Vulnerabilities } from './vulnerabilities';
@@ -104,13 +105,13 @@ describe('workers/repository/process/vulnerabilities', () => {
         {
           packageName: 'django',
           depVersion: '3.2',
-          fixedVersion: '==3.3.8',
+          fixedVersion: '>= 3.3.8',
           datasource: 'pypi',
         },
         {
           packageName: 'django',
           depVersion: '3.2',
-          fixedVersion: '==3.2.16',
+          fixedVersion: '>= 3.2.16',
           datasource: 'pypi',
         },
       ]);
@@ -501,7 +502,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         'Vulnerability GO-2022-0187 affects stdlib 1.7.5',
       );
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Setting allowed version 1.7.6 to fix vulnerability GO-2022-0187 in stdlib 1.7.5',
+        'Setting allowed version >= 1.7.6 to fix vulnerability GO-2022-0187 in stdlib 1.7.5',
       );
       expect(config.packageRules).toHaveLength(1);
       expect(config.packageRules).toMatchObject([
@@ -509,7 +510,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchDatasources: ['go'],
           matchPackageNames: ['stdlib'],
           matchCurrentVersion: '1.7.5',
-          allowedVersions: '1.7.6',
+          allowedVersions: '>= 1.7.6',
           isVulnerabilityAlert: true,
         },
       ]);
@@ -581,7 +582,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchDatasources: ['pypi'],
           matchPackageNames: ['django'],
           matchCurrentVersion: '3.2',
-          allowedVersions: '==3.2.16',
+          allowedVersions: '>= 3.2.16',
           isVulnerabilityAlert: true,
         },
       ]);
@@ -643,14 +644,14 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchDatasources: ['pypi'],
           matchPackageNames: ['django'],
           matchCurrentVersion: '3.2',
-          allowedVersions: '==3.2.16',
+          allowedVersions: '>= 3.2.16',
           isVulnerabilityAlert: true,
         },
         {
           matchDatasources: ['pypi'],
           matchPackageNames: ['django'],
           matchCurrentVersion: '3.2',
-          allowedVersions: '==3.3.8',
+          allowedVersions: '>= 3.3.8',
           isVulnerabilityAlert: true,
         },
       ]);
@@ -744,7 +745,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchDatasources: ['crate'],
           matchPackageNames: ['tiny_http'],
           matchCurrentVersion: '0.1.2',
-          allowedVersions: '0.6.3',
+          allowedVersions: '>= 0.6.3',
           isVulnerabilityAlert: true,
           prBodyNotes: [
             '\n\n' +
@@ -826,14 +827,14 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchDatasources: ['npm'],
           matchPackageNames: ['lodash'],
           matchCurrentVersion: '4.17.10',
-          allowedVersions: '4.17.11',
+          allowedVersions: '>= 4.17.11',
           isVulnerabilityAlert: true,
         },
         {
           matchDatasources: ['npm'],
           matchPackageNames: ['lodash'],
           matchCurrentVersion: '4.17.10',
-          allowedVersions: '4.17.20',
+          allowedVersions: '>= 4.17.20',
           isVulnerabilityAlert: true,
         },
       ]);
@@ -880,6 +881,131 @@ describe('workers/repository/process/vulnerabilities', () => {
         'OSV advisory GHSA-xxxx-yyyy-zzzz lists quokka 1.2.3 as vulnerable',
       );
       expect(config.packageRules).toHaveLength(0);
+    });
+
+    it('describe fixed version as ecosystem-specific version constraint', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        maven: [
+          {
+            deps: [
+              {
+                depName: 'com.guicedee.services:log4j-core',
+                currentValue: '1.0.10.1',
+                datasource: 'maven',
+              },
+            ],
+            packageFile: 'some-file1',
+          },
+        ],
+        nuget: [
+          {
+            deps: [
+              {
+                depName: 'SharpZipLib',
+                currentValue: '1.3.0',
+                datasource: 'nuget',
+              },
+            ],
+            packageFile: 'some-file2',
+          },
+        ],
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'lodash',
+                currentValue: '4.17.15',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'some-file3',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValue([
+        {
+          id: 'GHSA-jfh8-c2jp-5v3q',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'com.guicedee.services:log4j-core',
+                ecosystem: 'Maven',
+                purl: 'pkg:maven/com.guicedee.services/log4j-core',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.2.1.2-jre17' }],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: ' GHSA-mm6g-mmq6-53ff',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'SharpZipLib',
+                ecosystem: 'NuGet',
+                purl: 'pkg:nuget/SharpZipLib',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.3.3' }],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'GHSA-29mw-wpgm-hmr9',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'lodash',
+                ecosystem: 'npm',
+                purl: 'pkg:npm/lodash',
+              },
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0' }, { fixed: '4.17.21' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['maven'],
+          matchPackageNames: ['com.guicedee.services:log4j-core'],
+          matchCurrentVersion: '1.0.10.1',
+          allowedVersions: '[1.2.1.2-jre17,)',
+        },
+        {
+          matchDatasources: ['nuget'],
+          matchPackageNames: ['SharpZipLib'],
+          matchCurrentVersion: '1.3.0',
+          allowedVersions: '1.3.3',
+        },
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['lodash'],
+          matchCurrentVersion: '4.17.15',
+          allowedVersions: '>= 4.17.21',
+        },
+      ]);
     });
 
     it('describe last_affected version as ecosystem-specific version constraint', async () => {
@@ -1065,7 +1191,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchDatasources: ['pypi'],
           matchPackageNames: ['django-mfa2'],
           matchCurrentVersion: '2.5.0',
-          allowedVersions: '==2.5.1',
+          allowedVersions: '>= 2.5.1',
           isVulnerabilityAlert: true,
           prBodyNotes: [
             '\n\n' +
@@ -1127,7 +1253,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchDatasources: ['npm'],
           matchPackageNames: ['lodash'],
           matchCurrentVersion: '4.17.10',
-          allowedVersions: '4.17.11',
+          allowedVersions: '>= 4.17.11',
           isVulnerabilityAlert: true,
           prBodyNotes: [
             '\n\n' +
@@ -1212,7 +1338,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchDatasources: ['crate'],
           matchPackageNames: ['sys-info'],
           matchCurrentVersion: '0.6.0',
-          allowedVersions: '0.8.0',
+          allowedVersions: '>= 0.8.0',
           isVulnerabilityAlert: true,
           prBodyNotes: [
             '\n\n' +

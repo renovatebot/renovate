@@ -7,7 +7,7 @@ import {
 } from '../../../../test/exec-util';
 import { env, fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
+import type { RepoGlobalConfig, UpdateType } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import { ExecError } from '../../../util/exec/exec-error';
 import * as _hostRules from '../../../util/host-rules';
@@ -132,6 +132,7 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
+        updateType: 'lockfileUpdate' satisfies UpdateType as UpdateType,
       },
     ];
     expect(
@@ -290,18 +291,21 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
+        updateType: 'lockfileUpdate' satisfies UpdateType as UpdateType,
       },
       {
         depName: 'dep2',
         packageName: 'dep2',
         lockedVersion: '1.0.0',
         newVersion: '1.0.2',
+        updateType: 'lockfileUpdate' satisfies UpdateType as UpdateType,
       },
       {
         depName: 'dep3',
         packageName: 'dep3',
         lockedVersion: '1.0.0',
         newVersion: '1.0.3',
+        updateType: 'lockfileUpdate' satisfies UpdateType as UpdateType,
       },
     ];
 
@@ -325,6 +329,62 @@ describe('modules/manager/cargo/artifacts', () => {
     expect(execSnapshotsIter2).toMatchObject([
       { cmd: workspaceCmd },
       { cmd: packageDep3Cmd },
+    ]);
+  });
+
+  it('runs cargo update precise only for lockfile update', async () => {
+    fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll();
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+        updateType: 'minor' satisfies UpdateType as UpdateType,
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.1',
+      },
+      {
+        depName: 'dep2',
+        packageName: 'dep2',
+        updateType: 'minor' satisfies UpdateType as UpdateType,
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.2',
+      },
+      {
+        depName: 'dep3',
+        packageName: 'dep3',
+        updateType: 'lockfileUpdate' satisfies UpdateType as UpdateType,
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.3',
+      },
+    ];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd:
+          'cargo update --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml' +
+          ' --workspace',
+      },
+      {
+        cmd:
+          'cargo update --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml' +
+          ' --package dep3@1.0.0 --precise 1.0.3',
+      },
     ]);
   });
 

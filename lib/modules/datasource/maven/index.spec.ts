@@ -1,5 +1,6 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
-import { ReleaseResult, getPkgReleases } from '..';
+import type { ReleaseResult } from '..';
+import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';

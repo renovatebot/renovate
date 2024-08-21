@@ -1,0 +1,10 @@
+.md-header .md-header__button.md-logo {
+  padding: 0;
+}
+.md-header .md-header__button.md-logo img,
+.md-header .md-header__button.md-logo svg {
+  height: 1.5rem;
+}
+.md-typeset a {
+  text-decoration: underline;
+}
