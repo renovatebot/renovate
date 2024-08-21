@@ -3,7 +3,6 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { FindPRConfig, Pr } from '../../../../modules/platform';
 import { platform } from '../../../../modules/platform';
-import { ensureComment } from '../../../../modules/platform/comment';
 import { scm } from '../../../../modules/platform/scm';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
@@ -11,15 +10,32 @@ import { createConfigMigrationBranch } from './create';
 import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 
+interface CheckConfigMigrationBranchResult {
+  migrationBranch?: string;
+  result?: string;
+  prNumber?: number;
+}
+
 export async function checkConfigMigrationBranch(
   config: RenovateConfig,
   migratedConfigData: MigratedData | null,
-): Promise<string | null> {
+): Promise<CheckConfigMigrationBranchResult> {
   logger.debug('checkConfigMigrationBranch()');
   if (!migratedConfigData) {
     logger.debug('checkConfigMigrationBranch() Config does not need migration');
-    return null;
+    return { result: 'nothing' };
   }
+
+  if (
+    !config.configMigration &&
+    !config.dependencyDashboardChecks?.createMigrationPr
+  ) {
+    logger.debug(
+      'Config migration needed but config migration is disabled and checkbox not ticked.',
+    );
+    return { result: 'add-checkbox' };
+  }
+
   const configMigrationBranch = getMigrationBranchName(config);
 
   const branchPr = await migrationPrExists(
@@ -45,12 +61,23 @@ export async function checkConfigMigrationBranch(
 
     // found closed migration PR
     if (closedPr) {
+      logger.debug('Closed config migration PR found.');
+
+      // previously we used to add a comment and skip the branch
+      // but now we add a checkbox in DD
+      // if checkbox is ticked then remove this branch/pr and create a new one
+
+      if (!config.dependencyDashboardChecks?.createMigrationPr) {
+        logger.debug(
+          'Closed PR and config migration enabled. Adding checkbox to DD, will check in next run.',
+        );
+        return { result: 'add-checkbox' };
+      }
+
       logger.debug(
-        { prTitle: closedPr.title },
-        'Closed PR already exists. Skipping branch.',
+        'Closed migration PR found and checkbox is ticked so delete this branch and create a new one.',
       );
       await handlePr(config, closedPr);
-      return null;
     }
   }
 
@@ -74,40 +101,26 @@ export async function checkConfigMigrationBranch(
   if (!GlobalConfig.get('dryRun')) {
     await scm.checkoutBranch(configMigrationBranch);
   }
-  return configMigrationBranch;
+  return {
+    migrationBranch: configMigrationBranch,
+    result: 'pr-created',
+    prNumber: branchPr?.number,
+  };
 }
 
 export async function migrationPrExists(
   branchName: string,
   targetBranch?: string,
-): Promise<boolean> {
-  return !!(await platform.getBranchPr(branchName, targetBranch));
+): Promise<Pr | null> {
+  return await platform.getBranchPr(branchName, targetBranch);
 }
 
 async function handlePr(config: RenovateConfig, pr: Pr): Promise<void> {
-  if (
-    pr.state === 'closed' &&
-    !config.suppressNotifications!.includes('prIgnoreNotification')
-  ) {
+  if (await scm.branchExists(pr.sourceBranch)) {
     if (GlobalConfig.get('dryRun')) {
-      logger.info(
-        `DRY-RUN: Would ensure closed PR comment in PR #${pr.number}`,
-      );
+      logger.info('DRY-RUN: Would delete branch ' + pr.sourceBranch);
     } else {
-      const content =
-        '\n\nIf you accidentally closed this PR, or if you changed your mind: rename this PR to get a fresh replacement PR.';
-      await ensureComment({
-        number: pr.number,
-        topic: 'Renovate Ignore Notification',
-        content,
-      });
-    }
-    if (await scm.branchExists(pr.sourceBranch)) {
-      if (GlobalConfig.get('dryRun')) {
-        logger.info('DRY-RUN: Would delete branch ' + pr.sourceBranch);
-      } else {
-        await scm.deleteBranch(pr.sourceBranch);
-      }
+      await scm.deleteBranch(pr.sourceBranch);
     }
   }
 }

@@ -9,6 +9,7 @@ import { coerceString } from '../../util/string';
 import * as template from '../../util/template';
 import type { BranchConfig, SelectAllConfig } from '../types';
 import { extractRepoProblems } from './common';
+import type { ConfigMigrationResult } from './config-migration';
 import { getDepWarningsDashboard } from './errors-warnings';
 import { PackageFiles } from './package-files';
 import type { Vulnerability } from './process/types';
@@ -178,6 +179,7 @@ export async function ensureDependencyDashboard(
   config: SelectAllConfig,
   allBranches: BranchConfig[],
   packageFiles: Record<string, PackageFile[]> = {},
+  configMigrationRes: ConfigMigrationResult,
 ): Promise<void> {
   logger.debug('ensureDependencyDashboard()');
   if (config.mode === 'silent') {
