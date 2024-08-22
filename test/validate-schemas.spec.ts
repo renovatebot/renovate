@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import upath from 'upath';
+import { Json } from '../lib/util/schema-utils';
 import { capitalize } from '../tools/docs/utils';
 import * as Schemas from '../tools/schemas/schema';
 
@@ -31,13 +32,19 @@ describe('validate-schemas', () => {
 
     await Promise.all(
       schemasAndJsonFiles.map(async ({ schemaName, dataFileName }) => {
-        const data = JSON.parse(
+        const data = Json.parse(
           await fs.readFile(upath.join(dataFileDir, dataFileName), 'utf8'),
         );
 
-        // eslint-disable-next-line import/namespace
-        const result = Schemas[schemaName].safeParse(data);
-        expect(result.success).toBeTrue();
+        let result: Record<string, unknown> =
+          // eslint-disable-next-line import/namespace
+          Schemas[schemaName].safeParse(data);
+        result = { ...result, dataFileName, schemaName };
+        expect(result).toMatchObject({
+          dataFileName,
+          schemaName,
+          success: true,
+        });
       }),
     );
   });
