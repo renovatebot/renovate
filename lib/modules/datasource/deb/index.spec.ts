@@ -25,7 +25,7 @@ describe('modules/datasource/deb/index', () => {
   let fixturePackagesArchiveHash2: string;
 
   let debDatasource: DebDatasource;
-  let cacheDir: DirectoryResult;
+  let cacheDir: DirectoryResult | null;
   let cfg: GetPkgReleasesConfig;
   let extractionFolder: string;
   let extractedPackageFile: string;
@@ -56,6 +56,11 @@ describe('modules/datasource/deb/index', () => {
     fixturePackagesArchiveHash2 = await computeFileChecksum(
       fixturePackagesArchivePath2,
     );
+  });
+
+  afterEach(async () => {
+    await cacheDir?.cleanup();
+    cacheDir = null;
   });
 
   describe('getReleases', () => {
@@ -356,7 +361,7 @@ describe('modules/datasource/deb/index', () => {
       mockFetchInReleaseContent('wrong-hash', ...packageArgs, true);
 
       await expect(
-        debDatasource.downloadAndExtractPackage(
+        debDatasource['downloadAndExtractPackage'](
           getComponentUrl(debBaseUrl, ...packageArgs),
         ),
       ).resolves.toEqual(
@@ -375,7 +380,7 @@ describe('modules/datasource/deb/index', () => {
       mockFetchInReleaseContent('wrong-hash', 'bullseye', 'main', 'amd64');
 
       await expect(
-        debDatasource.downloadAndExtractPackage(
+        debDatasource['downloadAndExtractPackage'](
           getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
         ),
       ).rejects.toThrow(`SHA256 checksum validation failed`);
@@ -396,7 +401,7 @@ describe('modules/datasource/deb/index', () => {
       );
 
       await expect(
-        debDatasource.downloadAndExtractPackage(
+        debDatasource['downloadAndExtractPackage'](
           getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
         ),
       ).rejects.toThrow(`Missing metadata in extracted package index file!`);
@@ -411,7 +416,7 @@ describe('modules/datasource/deb/index', () => {
         .reply(200);
 
       await expect(
-        debDatasource.checkIfModified(
+        debDatasource['checkIfModified'](
           getPackageUrl(debBaseUrl, 'stable', 'non-free', 'amd64'),
           new Date(),
         ),
@@ -425,7 +430,7 @@ describe('modules/datasource/deb/index', () => {
         .replyWithError('Unexpected Error');
 
       await expect(
-        debDatasource.checkIfModified(
+        debDatasource['checkIfModified'](
           getPackageUrl(debBaseUrl, 'stable', 'non-free', 'amd64'),
           new Date(),
         ),

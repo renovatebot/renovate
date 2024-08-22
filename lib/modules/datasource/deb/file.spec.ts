@@ -1,3 +1,4 @@
+import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
@@ -8,7 +9,7 @@ import { extract } from './file';
 const fixturePackagesArchivePath = Fixtures.getPath(`Packages.gz`);
 
 describe('modules/datasource/deb/file', () => {
-  let cacheDir;
+  let cacheDir: DirectoryResult | null;
   let extractedPackageFile: string;
 
   beforeEach(async () => {

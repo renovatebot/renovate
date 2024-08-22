@@ -1,3 +1,4 @@
+import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
@@ -7,11 +8,16 @@ import { computeFileChecksum, parseChecksumsFromInRelease } from './checksum';
 const fixtureInRelease = Fixtures.getBinary(`InRelease`).toString();
 
 describe('modules/datasource/deb/checksum', () => {
-  beforeEach(async () => {
-    const cacheDirResult = await dir({ unsafeCleanup: true });
-    const cacheDir = cacheDirResult.path;
+  let cacheDir: DirectoryResult | null;
 
-    GlobalConfig.set({ cacheDir });
+  beforeEach(async () => {
+    const cacheDir = await dir({ unsafeCleanup: true });
+    GlobalConfig.set({ cacheDir: cacheDir.path });
+  });
+
+  afterEach(async () => {
+    await cacheDir?.cleanup();
+    cacheDir = null;
   });
 
   describe('parseChecksumsFromInRelease', () => {
