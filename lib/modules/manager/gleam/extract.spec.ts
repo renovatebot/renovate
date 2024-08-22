@@ -162,4 +162,30 @@ describe('modules/manager/gleam/extract', () => {
     );
     expect(extracted!.deps.every((dep) => 'lockedVersion' in dep)).toBe(false);
   });
+
+  it('should handle invalid versions in lock file', async () => {
+    const packageFileContent = codeBlock`
+      name = "test_gleam_toml"
+      version = "1.0.0"
+
+      [dependencies]
+      foo = ">= 1.0.0 and < 2.0.0"
+    `;
+    const lockFileContent = codeBlock`
+      packages = [
+        { name = "foo", version = "fooey", build_tools = ["gleam"], requirements = [], otp_app = "foo", source = "hex", outer_checksum = "5C66647D62BCB11FE327E7A6024907C4A17954EF22865FE0940B54A852446D01" },
+      ]
+
+      [requirements]
+      foo = { version = ">= 1.0.0 and < 2.0.0" }
+    `;
+
+    fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
+    fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+    const extracted = await gleamManager.extractPackageFile(
+      packageFileContent,
+      'gleam.toml',
+    );
+    expect(extracted!.deps).not.toHaveProperty('lockedVersion');
+  });
 });
