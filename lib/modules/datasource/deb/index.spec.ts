@@ -17,13 +17,13 @@ import { DebDatasource } from '.';
 
 const debBaseUrl = 'http://deb.debian.org';
 
-const fixturePackagesArchivePath = Fixtures.getPath(`Packages.gz`);
-const fixturePackagesArchivePath2 = Fixtures.getPath(`Packages2.gz`);
-const fixturePackagesPath = Fixtures.getPath(`Packages`);
-let fixturePackagesArchiveHash: string;
-let fixturePackagesArchiveHash2: string;
-
 describe('modules/datasource/deb/index', () => {
+  const fixturePackagesArchivePath = Fixtures.getPath(`Packages.gz`);
+  const fixturePackagesArchivePath2 = Fixtures.getPath(`Packages2.gz`);
+  const fixturePackagesPath = Fixtures.getPath(`Packages`);
+  let fixturePackagesArchiveHash: string;
+  let fixturePackagesArchiveHash2: string;
+
   let debDatasource: DebDatasource;
   let cacheDir: DirectoryResult;
   let cfg: GetPkgReleasesConfig;
@@ -113,7 +113,14 @@ describe('modules/datasource/deb/index', () => {
 
     describe('without local version', () => {
       beforeEach(() => {
-        mockHttpCalls('stable', 'non-free', 'amd64', false);
+        mockHttpCalls(
+          'stable',
+          'non-free',
+          'amd64',
+          false,
+          fixturePackagesArchivePath,
+          fixturePackagesArchiveHash,
+        );
       });
 
       it('returns a valid version for the package `album`', async () => {
@@ -274,7 +281,14 @@ describe('modules/datasource/deb/index', () => {
       for (let i = 0; i < packages.length; i++) {
         // first call doesn't include a http head call, since the file doesn't exists locally yet
         // the package index is downloaded every time since the http head call returns 200
-        mockHttpCalls('stable', 'non-free', 'amd64', !!i);
+        mockHttpCalls(
+          'stable',
+          'non-free',
+          'amd64',
+          !!i,
+          fixturePackagesArchivePath,
+          fixturePackagesArchiveHash,
+        );
       }
 
       const results = await Promise.all(
@@ -431,24 +445,23 @@ describe('modules/datasource/deb/index', () => {
  * @param component - The component name (e.g., 'main').
  * @param arch - The architecture (e.g., 'amd64').
  * @param checkIfModified - whether it should mock the http head call of the Package Index file
+ * @param packageArchivePath - path to package index
+ * @param packagesArchiveHash - sha256 hash of package
  */
 function mockHttpCalls(
   release: string,
   component: string,
   arch: string,
   checkIfModified: boolean,
+  packageArchivePath: string,
+  packagesArchiveHash: string,
 ) {
   httpMock
     .scope(debBaseUrl)
     .get(getPackageUrl('', release, component, arch))
-    .replyWithFile(200, fixturePackagesArchivePath);
+    .replyWithFile(200, packageArchivePath);
 
-  mockFetchInReleaseContent(
-    fixturePackagesArchiveHash,
-    release,
-    component,
-    arch,
-  );
+  mockFetchInReleaseContent(packagesArchiveHash, release, component, arch);
 
   if (checkIfModified) {
     httpMock

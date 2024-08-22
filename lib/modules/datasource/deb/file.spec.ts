@@ -8,14 +8,20 @@ import { extract } from './file';
 const fixturePackagesArchivePath = Fixtures.getPath(`Packages.gz`);
 
 describe('modules/datasource/deb/file', () => {
+  let cacheDir;
   let extractedPackageFile: string;
 
   beforeEach(async () => {
-    const cacheDir = await dir({ unsafeCleanup: true });
+    cacheDir = await dir({ unsafeCleanup: true });
     GlobalConfig.set({ cacheDir: cacheDir.path });
 
     const extractionFolder = await fs.ensureCacheDir('file');
     extractedPackageFile = upath.join(extractionFolder, `package.txt`);
+  });
+
+  afterEach(async () => {
+    await cacheDir?.cleanup();
+    cacheDir = null;
   });
 
   describe('extract', () => {
