@@ -267,6 +267,7 @@
       "https://github.com/electron/forge"
     ],
     "ember-decorators": "https://github.com/ember-decorators/ember-decorators",
+    "embla-carousel": "https://github.com/davidjerleke/embla-carousel",
     "emojibase": "https://github.com/milesj/emojibase",
     "emotion": "https://github.com/emotion-js/emotion",
     "eslint": "https://github.com/eslint/eslint",
@@ -300,6 +301,7 @@
       "https://github.com/dotansimha/graphql-code-generator",
       "https://github.com/dotansimha/graphql-codegen"
     ],
+    "greenmail": "https://github.com/greenmail-mail-test/greenmail",
     "groovy": "https://github.com/apache/groovy",
     "grpc-dotnet": "https://github.com/grpc/grpc-dotnet",
     "grpc-java": "https://github.com/grpc/grpc-java",

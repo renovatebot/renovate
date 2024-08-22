@@ -5,21 +5,21 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:7.15.9@sha256:2358998f33fd3c6dcf39e469af5cf17fafa37a7d1963eccba72a3f168f985a8c AS slim-base
+FROM ghcr.io/renovatebot/base-image:7.16.0@sha256:afa4d0461877e0cc3869fcf2189174a9ba7deb796174497311c8cd59f747ae2f AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:7.15.9-full@sha256:769049a2df1a0c7b334eee3a2727271822162815b63d7e38eba45e130587a35a AS full-base
+FROM ghcr.io/renovatebot/base-image:7.16.0-full@sha256:93e7c16dac3e9b23bbb4cf4d3cf5b466397a1c88b306d906ce9ec1004eaa4375 AS full-base
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:7.15.9@sha256:2358998f33fd3c6dcf39e469af5cf17fafa37a7d1963eccba72a3f168f985a8c AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:7.16.0@sha256:afa4d0461877e0cc3869fcf2189174a9ba7deb796174497311c8cd59f747ae2f AS build
 
 # We want a specific node version here
 # renovate: datasource=node-version
-RUN install-tool node 20.16.0
+RUN install-tool node 20.17.0
 
 WORKDIR /usr/local/renovate
 

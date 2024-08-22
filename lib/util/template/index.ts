@@ -176,6 +176,7 @@ export const allowedFields = {
   isGroup: 'true if the upgrade is part of a group',
   isLockfileUpdate: 'true if the branch is a lock file update',
   isMajor: 'true if the upgrade is major',
+  isMinor: 'true if the upgrade is minor',
   isPatch: 'true if the upgrade is a patch upgrade',
   isPin: 'true if the upgrade is pinning dependencies',
   isPinDigest: 'true if the upgrade is pinning digests',
