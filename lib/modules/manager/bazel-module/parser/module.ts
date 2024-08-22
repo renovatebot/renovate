@@ -17,7 +17,6 @@ const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
  * Matches key-value pairs:
  * - `name = "foobar"`
  * - `name = True`
- * - `name = ["foo", "bar"]`
  **/
 const kvParams = q
   .sym<Ctx>((ctx, token) => ctx.startAttribute(token.value))
@@ -25,15 +24,6 @@ const kvParams = q
   .alt(
     q.str((ctx, token) => ctx.addString(token.value)),
     q.sym<Ctx>(booleanValuesRegex, (ctx, token) => ctx.addBoolean(token.value)),
-    q.tree({
-      type: 'wrapped-tree',
-      maxDepth: 1,
-      startsWith: '[',
-      endsWith: ']',
-      postHandler: (ctx) => ctx.endArray(),
-      preHandler: (ctx) => ctx.startArray(),
-      search: q.many(q.str<Ctx>((ctx, token) => ctx.addString(token.value))),
-    }),
   );
 
 export const moduleRules = q

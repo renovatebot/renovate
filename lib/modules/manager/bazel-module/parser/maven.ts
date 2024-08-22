@@ -1,15 +1,15 @@
 import { query as q } from 'good-enough-parser';
 import { z } from 'zod';
-import { regEx } from '../../../util/regex';
-import { MavenDatasource } from '../../datasource/maven';
-import { id as versioning } from '../../versioning/gradle';
-import type { PackageDependency } from '../types';
-import type { Ctx } from './context';
+import { regEx } from '../../../../util/regex';
+import { MavenDatasource } from '../../../datasource/maven';
+import { id as versioning } from '../../../versioning/gradle';
+import type { PackageDependency } from '../../types';
+import type { Ctx } from '../context';
 import {
   RecordFragmentSchema,
   StringArrayFragmentSchema,
   StringFragmentSchema,
-} from './fragments';
+} from '../fragments';
 
 const artifactMethod = 'artifact';
 const installMethod = 'install';
@@ -114,6 +114,22 @@ export function fillRegistryUrls(
   return result;
 }
 
+const kvParams = q
+  .sym<Ctx>((ctx, token) => ctx.startAttribute(token.value))
+  .op('=')
+  .alt(
+    q.str((ctx, token) => ctx.addString(token.value)),
+    q.tree({
+      type: 'wrapped-tree',
+      maxDepth: 1,
+      startsWith: '[',
+      endsWith: ']',
+      postHandler: (ctx) => ctx.endArray(),
+      preHandler: (ctx) => ctx.startArray(),
+      search: q.many(q.str<Ctx>((ctx, token) => ctx.addString(token.value))),
+    }),
+  );
+
 export const mavenRules = q
   .sym<Ctx>(mavenVariableRegex, (ctx, token) => {
     return ctx.startRule(token.value);
@@ -125,4 +141,12 @@ export const mavenRules = q
       rule.value = getParsedRuleByMethod(token.value);
     }
     return ctx;
-  });
+  })
+  .join(
+    q.tree({
+      type: 'wrapped-tree',
+      maxDepth: 1,
+      search: kvParams,
+      postHandler: (ctx) => ctx.endRule(),
+    }),
+  );
