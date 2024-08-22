@@ -5,8 +5,8 @@ import { LooseArray } from '../../../util/schema-utils';
 import type { PackageDependency, PackageFileContent } from '../types';
 import * as bazelrc from './bazelrc';
 import type { RecordFragment } from './fragments';
-import { RuleToMavenPackageDep, fillRegistryUrls } from './parser/maven';
 import { parse } from './parser';
+import { RuleToMavenPackageDep, fillRegistryUrls } from './parser/maven';
 import { RuleToBazelModulePackageDep } from './rules';
 import * as rules from './rules';
 
