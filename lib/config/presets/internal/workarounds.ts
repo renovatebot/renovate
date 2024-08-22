@@ -176,7 +176,7 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['github-releases'],
         matchPackageNames: ['k3s-io/k3s'],
         versioning:
-          'regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<compatibility>\\+k3s)(?<build>\\d+)$',
+          'regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>[a-z]+\\d+))?(?<compatibility>\\+k3s)(?<build>\\d+)$',
       },
     ],
   },
