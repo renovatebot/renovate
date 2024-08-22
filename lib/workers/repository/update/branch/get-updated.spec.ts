@@ -463,6 +463,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
         manager: 'composer',
+        packageFile: 'composer.json',
         branchName: '',
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
