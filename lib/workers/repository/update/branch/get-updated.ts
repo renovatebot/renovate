@@ -40,10 +40,10 @@ async function getFileContent(
   return fileContent;
 }
 
-function sortPackageFiles<T extends FilePath>(
+function sortPackageFiles(
   config: BranchConfig,
   manager: string,
-  packageFiles: T[],
+  packageFiles: FilePath[],
 ): void {
   const managerPackageFiles = config.packageFiles?.[manager];
   if (!managerPackageFiles) {
