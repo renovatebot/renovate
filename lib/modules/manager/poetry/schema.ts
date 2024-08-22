@@ -1,4 +1,5 @@
-import { ZodEffects, ZodType, ZodTypeDef, z } from 'zod';
+import type { ZodEffects, ZodType, ZodTypeDef } from 'zod';
+import { z } from 'zod';
 import { logger } from '../../../logger';
 import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';

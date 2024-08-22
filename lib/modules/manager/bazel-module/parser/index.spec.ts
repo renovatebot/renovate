@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import * as fragments from './fragments';
-import { parse } from './parser';
+import * as fragments from '../fragments';
+import { parse } from '.';
 
-describe('modules/manager/bazel-module/parser', () => {
+describe('modules/manager/bazel-module/parser/index', () => {
   describe('parse', () => {
     it('returns empty string if invalid content', () => {
       const input = codeBlock`
