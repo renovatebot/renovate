@@ -16,6 +16,7 @@ const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 /**
  * Matches key-value pairs:
  * - `name = "foobar"`
+ * - `name = True`
  **/
 const kvParams = q
   .sym<Ctx>((ctx, token) => ctx.startAttribute(token.value))
@@ -32,6 +33,6 @@ export const moduleRules = q
       type: 'wrapped-tree',
       maxDepth: 1,
       search: kvParams,
-      postHandler: (ctx, tree) => ctx.endRule(),
+      postHandler: (ctx) => ctx.endRule(),
     }),
   );
