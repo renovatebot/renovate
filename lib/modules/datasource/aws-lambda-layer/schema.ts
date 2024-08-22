@@ -5,3 +5,5 @@ export const AwsLambdaLayerFilterMetadata = z.object({
   runtime: z.string().optional(),
   architecture: z.string().optional(),
 });
+
+export const FilterParser = Json.pipe(AwsLambdaLayerFilterMetadata);
