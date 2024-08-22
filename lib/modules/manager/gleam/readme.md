@@ -1,34 +1,41 @@
-Updates `gleam.toml` and/or `manifest.toml` with latest and greatest dependencies.
+Renovate can update `gleam.toml` and/or `manifest.toml` files.
 
-The following `depTypes` are currently supported by the `gleam` manager:
+The `gleam` manager can update these `depTypes`:
 
 - `dependencies`
 - `dev-dependencies`
 
-The `gleam` manager extracts dependencies for the `hex` datasource and uses Renovate's implementation of Hex SemVer to evaluate `gleam.toml` updates.
-The `gleam` manager, however, uses `gleam` itself to keep `manifest.toml` up-to-date.
+### How Renovate updates `gleam.toml` files
 
-<!-- prettier-ignore -->
-!!! note
-    To ensure that all your dependencies, including those with in-range updates, are kept up-to-date, we strongly recommend enabling [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance) in your Renovate configuration.
-    This feature will periodically refresh your `manifest.toml`, ensuring all dependencies are updated to their latest allowed versions.
+The `gleam` manager extracts dependencies for the `hex` datasource, and uses Renovate's implementation of Hex SemVer to evaluate `gleam.toml` updates.
 
-Renovate's `"auto"` strategy defaults to `"widen"` and works like this for `gleam`:
+### How Renovate updates `manifest.toml` files
 
-<!--
-  TODO: remove ignore
-  prettier & markdownlint conflicting nested list format
-  see: https://github.com/renovatebot/renovate/pull/30608
--->
-<!-- prettier-ignore -->
-1. If an existing range is a complex range (contains multiple range specifications), Renovate widens it to include the new version.
-    - Example: `>= 0.14.0 and < 0.15.0` becomes `>= 0.14.0 and < 0.16.1` for a new `0.16.0` version.
-1. For simple ranges, if the update is outside the existing range, Renovate widens the range to include the new version.
-    - Example: `<= 0.38.0` becomes `<= 0.39.0` for a new `0.39.0` version.
-1. For exact version constraints, Renovate replaces the version with the new one.
-    - Example: `== 0.12.0` becomes `== 0.13.0` for a new `0.13.0` version.
+The `gleam` manager uses the `gleam` program to update `manifest.toml` files.
 
-<!-- prettier-ignore -->
-!!! warning
-    The `gleam` manager does not support the `"update-lockfile"` or `"in-range-only"` strategies.
-    If used, the `gleam` manager will default to the `"widen"` strategy instead.
+### Enable `lockFileMaintenance`
+
+We recommend you set [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance) to `true` for the `gleam` manager, in your Renovate config.
+This way Renovate can update all your dependencies, including those with in-range updates.
+
+`lockFileMaintenance=true` periodically refreshes your `manifest.toml` files, ensuring all dependencies are updated to their latest allowed versions.
+
+### Default `rangeStrategy=auto` behavior
+
+Renovate's default [`rangeStrategy`](../../../configuration-options.md#rangestrategy) is `"auto"`.
+Here's how `"auto"` works with the `gleam` manager:
+
+| Version type             | New version | Old range                | New range after update   | What Renovate does                                                        |
+| :----------------------- | :---------- | :----------------------- | :----------------------- | :------------------------------------------------------------------------ |
+| Complex range            | `0.16.0`    | `>= 0.14.0 and < 0.15.0` | `>= 0.14.0 and < 0.16.1` | Widen range to include the new version.                                   |
+| Simple range             | `0.39.0`    | `<= 0.38.0`              | `<= 0.39.0`              | If update outside current range: widens range to include the new version. |
+| Exact version constraint | `0.13.0`    | `== 0.12.0`              | `== 0.13.0`              | Replace old version with new version.                                     |
+
+#### Do not set `rangeStrategy` to `update-lockfile` or `in-range-only`
+
+Do _not_ set `rangeStrategy` to:
+
+- `"update-lockfile"`
+- `"in-range-only"`
+
+Renovate's `gleam` manager ignores these values, and uses the `widen` strategy instead.
