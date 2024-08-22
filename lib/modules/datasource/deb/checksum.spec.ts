@@ -1,7 +1,7 @@
 import { dir } from 'tmp-promise';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
-import { createCacheWriteStream } from '../../../util/fs';
+import { outputCacheFile } from '../../../util/fs';
 import { computeFileChecksum, parseChecksumsFromInRelease } from './checksum';
 
 const fixtureInRelease = Fixtures.getBinary(`InRelease`).toString();
@@ -36,13 +36,7 @@ describe('modules/datasource/deb/checksum', () => {
 
   describe('computeFileChecksum', () => {
     it('computes the checksum of a file', async () => {
-      const stream = createCacheWriteStream('file.txt');
-
-      const write = new Promise((resolve, reject) => {
-        stream.write('bar');
-        stream.close(resolve);
-      });
-      await write;
+      await outputCacheFile('file.txt', 'bar');
 
       const expectedHash =
         'fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9';

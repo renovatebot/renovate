@@ -64,7 +64,7 @@ export class DebDatasource extends Datasource {
    * @returns The path to the extracted file and the last modification timestamp.
    * @throws Will throw an error if no valid compression method is found.
    */
-  async downloadAndExtractPackage(
+  private async downloadAndExtractPackage(
     componentUrl: string,
   ): Promise<{ extractedFile: string; lastTimestamp: Date }> {
     const packageUrlHash = toSha256(componentUrl);
@@ -120,7 +120,7 @@ export class DebDatasource extends Datasource {
    * @param lastDownloadTimestamp - The timestamp of the last download.
    * @returns True if the file was downloaded, otherwise false.
    */
-  async downloadPackageFile(
+  private async downloadPackageFile(
     basePackageUrl: string,
     compression: string,
     compressedFile: string,
@@ -184,7 +184,7 @@ export class DebDatasource extends Datasource {
    * @returns resolves to the content of the InRelease file.
    * @throws An error if the InRelease file could not be downloaded.
    */
-  async fetchInReleaseFile(baseReleaseUrl: string): Promise<string> {
+  private async fetchInReleaseFile(baseReleaseUrl: string): Promise<string> {
     const inReleaseUrl = joinUrlParts(baseReleaseUrl, 'InRelease');
     const response = await this.http.get(inReleaseUrl);
     return response.body;
@@ -198,7 +198,7 @@ export class DebDatasource extends Datasource {
    * @returns True if the content has been modified, otherwise false.
    * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
    */
-  async checkIfModified(
+  private async checkIfModified(
     packageUrl: string,
     lastDownloadTimestamp: Date,
   ): Promise<boolean> {
