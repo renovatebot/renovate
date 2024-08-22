@@ -296,6 +296,11 @@ export class DebDatasource extends Datasource {
    * @param config - Configuration for fetching releases.
    * @returns The release result if the package is found, otherwise null.
    */
+  @cache({
+    namespace: `datasource-${DebDatasource.id}-releases`,
+    key: (registryUrl: string, packageName: string) =>
+      `${registryUrl}-${packageName}`,
+  })
   async getReleases({
     registryUrl,
     packageName,
