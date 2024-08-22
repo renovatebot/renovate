@@ -267,6 +267,7 @@
       "https://github.com/electron/forge"
     ],
     "ember-decorators": "https://github.com/ember-decorators/ember-decorators",
+    "embla-carousel": "https://github.com/davidjerleke/embla-carousel",
     "emojibase": "https://github.com/milesj/emojibase",
     "emotion": "https://github.com/emotion-js/emotion",
     "eslint": "https://github.com/eslint/eslint",
