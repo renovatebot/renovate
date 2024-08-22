@@ -300,6 +300,7 @@
       "https://github.com/dotansimha/graphql-code-generator",
       "https://github.com/dotansimha/graphql-codegen"
     ],
+    "greenmail": "https://github.com/greenmail-mail-test/greenmail",
     "groovy": "https://github.com/apache/groovy",
     "grpc-dotnet": "https://github.com/grpc/grpc-dotnet",
     "grpc-java": "https://github.com/grpc/grpc-java",
