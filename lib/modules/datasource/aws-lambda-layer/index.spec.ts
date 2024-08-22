@@ -127,6 +127,44 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
         LayerName: 'arn',
       });
     });
+
+    it('should call AWS with no architecture if there is no architecture in the filter', async () => {
+      mockListLayerVersionsCommandOutput(mock3Layers);
+      const lambdaLayerDatasource = new AwsLambdaLayerDataSource();
+
+      await lambdaLayerDatasource.getSortedLambdaLayerVersions(
+        'arn',
+        'runtime',
+        undefined,
+      );
+
+      expect(lambdaClientMock.calls()).toHaveLength(1);
+
+      expect(lambdaClientMock.calls()[0].args[0].input).toEqual({
+        CompatibleArchitecture: undefined,
+        CompatibleRuntime: 'runtime',
+        LayerName: 'arn',
+      });
+    });
+
+    it('should call AWS with no runtime if there is no runtime in the filter', async () => {
+      mockListLayerVersionsCommandOutput(mock3Layers);
+      const lambdaLayerDatasource = new AwsLambdaLayerDataSource();
+
+      await lambdaLayerDatasource.getSortedLambdaLayerVersions(
+        'arn',
+        undefined,
+        'python3.8',
+      );
+
+      expect(lambdaClientMock.calls()).toHaveLength(1);
+
+      expect(lambdaClientMock.calls()[0].args[0].input).toEqual({
+        CompatibleArchitecture: 'python3.8',
+        CompatibleRuntime: undefined,
+        LayerName: 'arn',
+      });
+    });
   });
 
   describe('getReleases', () => {

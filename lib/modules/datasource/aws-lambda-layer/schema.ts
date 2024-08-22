@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Json } from '../../../util/schema-utils';
 
 export const AwsLambdaLayerFilterMetadata = z.object({
   arn: z.string(),

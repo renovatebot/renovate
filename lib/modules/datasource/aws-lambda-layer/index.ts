@@ -9,10 +9,9 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { Lazy } from '../../../util/lazy';
 import { Result } from '../../../util/result';
-import { Json } from '../../../util/schema-utils';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { AwsLambdaLayerFilterMetadata } from './schema';
+import { AwsLambdaLayerFilterMetadata, FilterParser } from './schema';
 
 export class AwsLambdaLayerDataSource extends Datasource {
   static readonly id = 'aws-lambda-layer';
@@ -54,7 +53,8 @@ export class AwsLambdaLayerDataSource extends Datasource {
   async getReleases({
     packageName: serializedLambdaLayerFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const lambdaLayerFilter = Json.pipe(AwsLambdaLayerFilterMetadata).parse(serializedLambdaLayerFilter);
+    const lambdaLayerFilter = FilterParser.parse(serializedLambdaLayerFilter);
+
     const result = Result.parse(lambdaLayerFilter, AwsLambdaLayerFilterMetadata)
       .transform(({ arn, runtime, architecture }) => {
         return this.getSortedLambdaLayerVersions(arn, runtime, architecture);
