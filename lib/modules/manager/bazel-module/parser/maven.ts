@@ -16,10 +16,11 @@ const installMethod = 'install';
 const commonDepType = 'maven_install';
 const mavenVariableRegex = regEx(/^maven.*/);
 const bzlmodMavenMethods = [installMethod, artifactMethod];
+const methodRegex = regEx(`^${bzlmodMavenMethods.join('|')}$`);
+
 function getParsedRuleByMethod(method: string): string {
   return `maven_${method}`;
 }
-const methodRegex = regEx(`^${bzlmodMavenMethods.join('|')}$`);
 
 const ArtifactSpec = z.object({
   group: z.string(),
