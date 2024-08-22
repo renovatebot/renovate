@@ -38,7 +38,7 @@ export async function extractPackageFile(
       );
       return null;
     }
-  } catch (err) {
+  } catch {
     logger.debug({ packageFile }, `Failed to parse helm Chart.yaml`);
     return null;
   }

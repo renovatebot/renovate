@@ -12,11 +12,11 @@ describe('modules/datasource/aws-lambda-layer/schema', () => {
         JSON.parse(metadataJson),
       );
 
-      expect(metadata.architecture).toBe('x86_64');
-      expect(metadata.arn).toBe(
-        'arn:aws:lambda:us-east-1:123456789012:layer:my-layer',
-      );
-      expect(metadata.runtime).toBe('nodejs14.x');
+      expect(metadata).toStrictEqual({
+        architecture: 'x86_64',
+        arn: 'arn:aws:lambda:us-east-1:123456789012:layer:my-layer',
+        runtime: 'nodejs14.x',
+      });
     });
 
     it('has optional runtime attribute', () => {
@@ -29,11 +29,10 @@ describe('modules/datasource/aws-lambda-layer/schema', () => {
         JSON.parse(metadataJson),
       );
 
-      expect(metadata.architecture).toBe('x86_64');
-      expect(metadata.arn).toBe(
-        'arn:aws:lambda:us-east-1:123456789012:layer:my-layer',
-      );
-      expect(metadata.runtime).toBeUndefined();
+      expect(metadata).toStrictEqual({
+        architecture: 'x86_64',
+        arn: 'arn:aws:lambda:us-east-1:123456789012:layer:my-layer',
+      });
     });
 
     it('has optional architecture attribute', () => {
@@ -45,11 +44,10 @@ describe('modules/datasource/aws-lambda-layer/schema', () => {
         JSON.parse(metadataJson),
       );
 
-      expect(metadata.architecture).toBeUndefined();
-      expect(metadata.arn).toBe(
-        'arn:aws:lambda:us-east-1:123456789012:layer:my-layer',
-      );
-      expect(metadata.runtime).toBe('nodejs14.x');
+      expect(metadata).toStrictEqual({
+        arn: 'arn:aws:lambda:us-east-1:123456789012:layer:my-layer',
+        runtime: 'nodejs14.x',
+      });
     });
   });
 });

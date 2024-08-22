@@ -73,7 +73,7 @@ export function scope(basePath: BasePath, options?: nock.Options): nock.Scope {
         } else {
           result.body = body;
         }
-      } catch (e) {
+      } catch {
         result.body = requestBody;
       }
     }

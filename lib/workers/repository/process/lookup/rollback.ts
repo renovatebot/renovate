@@ -21,7 +21,7 @@ export function getRollbackUpdate(
   const lessThanVersions = versions.filter((v) => {
     try {
       return version.isLessThanRange!(v.version, currentValue!);
-    } catch (err) /* istanbul ignore next */ {
+    } catch /* istanbul ignore next */ {
       return false;
     }
   });
