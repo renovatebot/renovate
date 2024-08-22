@@ -1,7 +1,10 @@
+import { query as q } from 'good-enough-parser';
 import { z } from 'zod';
+import { regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { id as versioning } from '../../versioning/gradle';
 import type { PackageDependency } from '../types';
+import type { Ctx } from './context';
 import {
   RecordFragmentSchema,
   StringArrayFragmentSchema,
@@ -11,11 +14,12 @@ import {
 const artifactMethod = 'artifact';
 const installMethod = 'install';
 const commonDepType = 'maven_install';
-export const mavenVariableRegex = /^maven.*/;
-export const bzlmodMavenMethods = [installMethod, artifactMethod];
-export function getParsedRuleByMethod(method: string): string {
+const mavenVariableRegex = regEx(/^maven.*/);
+const bzlmodMavenMethods = [installMethod, artifactMethod];
+function getParsedRuleByMethod(method: string): string {
   return `maven_${method}`;
 }
+const methodRegex = regEx(`^${bzlmodMavenMethods.join('|')}$`);
 
 const ArtifactSpec = z.object({
   group: z.string(),
@@ -109,3 +113,16 @@ export function fillRegistryUrls(
 
   return result;
 }
+
+export const mavenRules = q
+  .sym<Ctx>(mavenVariableRegex, (ctx, token) => {
+    return ctx.startRule(token.value);
+  })
+  .op('.')
+  .sym(methodRegex, (ctx, token) => {
+    const rule = ctx.currentRecord.children.rule;
+    if (rule.type === 'string') {
+      rule.value = getParsedRuleByMethod(token.value);
+    }
+    return ctx;
+  });

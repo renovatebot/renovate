@@ -1,6 +1,6 @@
 The `bazel-module` manager can update [Bazel module (bzlmod)](https://bazel.build/external/module) enabled workspaces.
 
-It also takes care about maven artifacts initalized with [bzlmod](https://github.com/bazelbuild/rules_jvm_external/blob/master/docs/bzlmod.md). Current implementation has extension variable name limitation. It should start from `maven`:
+It also takes care about maven artifacts initalized with [bzlmod](https://github.com/bazelbuild/rules_jvm_external/blob/master/docs/bzlmod.md). For simplicity the name of extension variable is limited to `maven*`. E.g.:
 
 ```
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")

@@ -2,11 +2,7 @@ import { lang, query as q } from 'good-enough-parser';
 import { regEx } from '../../../util/regex';
 import { Ctx } from './context';
 import type { RecordFragment } from './fragments';
-import {
-  bzlmodMavenMethods,
-  getParsedRuleByMethod,
-  mavenVariableRegex,
-} from './maven';
+import { mavenRules } from './maven';
 import * as starlark from './starlark';
 
 const booleanValuesRegex = regEx(`^${starlark.booleanStringValues.join('|')}$`);
@@ -16,7 +12,6 @@ const supportedRules = [
   'git_override',
   'local_path_override',
   'single_version_override',
-  ...bzlmodMavenMethods,
 ];
 const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 
@@ -44,20 +39,14 @@ const kvParams = q
   );
 
 const moduleRules = q
-  .opt<Ctx>(
-    q.sym(mavenVariableRegex, (ctx, token) => {
+  .alt<Ctx>(
+    mavenRules,
+    q.sym(supportedRulesRegex, (ctx, token) => {
+      // TODO in separate parser
+
       return ctx.startRule(token.value);
     }),
   )
-  .opt(q.op('.'))
-  .sym(supportedRulesRegex, (ctx, token) => {
-    if (ctx.stack.length) {
-      extendMavenRule(ctx.currentRecord, token.value);
-      return ctx;
-    } else {
-      return ctx.startRule(token.value);
-    }
-  })
   .join(
     q.tree({
       type: 'wrapped-tree',
@@ -82,13 +71,4 @@ export function parse(input: string): RecordFragment[] {
   return parsedResult?.results ?? [];
 }
 
-function extendMavenRule(record: RecordFragment, tokenValue: string): void {
-  const rule = record.children.rule;
-  if (
-    rule.type === 'string' &&
-    rule.value.match(mavenVariableRegex) &&
-    bzlmodMavenMethods.includes(tokenValue)
-  ) {
-    rule.value = getParsedRuleByMethod(tokenValue);
-  }
-}
+
