@@ -55,7 +55,7 @@ abstract class PrivateKey {
 }
 
 class GPGKey extends PrivateKey {
-  protected readonly gpgFormat = 'opengpg';
+  protected readonly gpgFormat = 'openpgp';
 
   protected async importKey(): Promise<string | undefined> {
     const keyFileName = upath.join(os.tmpdir() + '/git-private-gpg.key');

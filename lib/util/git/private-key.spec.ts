@@ -66,7 +66,7 @@ describe('util/git/private-key', () => {
       expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
         cwd: repoDir,
       });
-      expect(exec.exec).toHaveBeenCalledWith('git config gpg.format opengpg', {
+      expect(exec.exec).toHaveBeenCalledWith('git config gpg.format openpgp', {
         cwd: repoDir,
       });
     });
