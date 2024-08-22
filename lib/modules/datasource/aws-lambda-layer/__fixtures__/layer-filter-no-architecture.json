@@ -1,4 +1,0 @@
-{
-  "runtime": "nodejs14.x",
-  "arn": "arn:aws:lambda:us-east-1:123456789012:layer:my-layer"
-}
