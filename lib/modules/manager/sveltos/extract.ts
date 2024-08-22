@@ -21,7 +21,7 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   let definitions: Record<string, unknown>[] | ProfileDefinition[];
   try {
-    definitions = parseYaml(content, null, {
+    definitions = parseYaml(content, {
       customSchema: ProfileDefinition,
     }) as any;
   } catch (err) {
