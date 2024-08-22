@@ -40,10 +40,10 @@ async function getFileContent(
   return fileContent;
 }
 
-function sortPackageFiles(
+function sortPackageFiles<T extends FilePath>(
   config: BranchConfig,
   manager: string,
-  packageFiles: FileAddition[],
+  packageFiles: T[],
 ): void {
   const managerPackageFiles = config.packageFiles?.[manager];
   if (!managerPackageFiles) {
@@ -67,6 +67,29 @@ function hasAny(set: Set<string>, targets: Iterable<string>): boolean {
     }
   }
   return false;
+}
+
+type FilePath = Pick<FileChange, 'path'>;
+
+function getManagersForPackageFiles<T extends FilePath>(
+  packageFiles: T[],
+  managerPackageFiles: Record<string, Set<string>>,
+): Set<string> {
+  const packageFileNames = packageFiles.map((packageFile) => packageFile.path);
+  return new Set(
+    Object.keys(managerPackageFiles).filter((manager) =>
+      hasAny(managerPackageFiles[manager], packageFileNames),
+    ),
+  );
+}
+
+function getPackageFilesForManager<T extends FilePath>(
+  packageFiles: T[],
+  managerPackageFiles: Set<string>,
+): T[] {
+  return packageFiles.filter((packageFile) =>
+    managerPackageFiles.has(packageFile.path),
+  );
 }
 
 export async function getUpdatedPackageFiles(
@@ -322,17 +345,14 @@ export async function getUpdatedPackageFiles(
   const artifactNotices: ArtifactNotice[] = [];
   if (is.nonEmptyArray(updatedPackageFiles)) {
     logger.debug('updateArtifacts for updatedPackageFiles');
-    const updatedPackageFileNames = updatedPackageFiles.map(
-      (packageFile) => packageFile.path,
-    );
-    const updatedPackageFileManagers = new Set(
-      Object.keys(managerPackageFiles).filter((manager) =>
-        hasAny(managerPackageFiles[manager], updatedPackageFileNames),
-      ),
+    const updatedPackageFileManagers = getManagersForPackageFiles(
+      updatedPackageFiles,
+      managerPackageFiles,
     );
     for (const manager of updatedPackageFileManagers) {
-      const packageFilesForManager = updatedPackageFiles.filter((packageFile) =>
-        managerPackageFiles[manager].has(packageFile.path),
+      const packageFilesForManager = getPackageFilesForManager(
+        updatedPackageFiles,
+        managerPackageFiles[manager],
       );
       sortPackageFiles(config, manager, packageFilesForManager);
       for (const packageFile of packageFilesForManager) {
@@ -366,17 +386,14 @@ export async function getUpdatedPackageFiles(
   }));
   if (is.nonEmptyArray(nonUpdatedPackageFiles)) {
     logger.debug('updateArtifacts for nonUpdatedPackageFiles');
-    const nonUpdatedPackageFileNames = nonUpdatedPackageFiles.map(
-      (packageFile) => packageFile.path,
-    );
-    const nonUpdatedPackageFileManagers = new Set(
-      Object.keys(managerPackageFiles).filter((manager) =>
-        hasAny(managerPackageFiles[manager], nonUpdatedPackageFileNames),
-      ),
+    const nonUpdatedPackageFileManagers = getManagersForPackageFiles(
+      nonUpdatedPackageFiles,
+      managerPackageFiles,
     );
     for (const manager of nonUpdatedPackageFileManagers) {
-      const packageFilesForManager = nonUpdatedPackageFiles.filter(
-        (packageFile) => managerPackageFiles[manager].has(packageFile.path),
+      const packageFilesForManager = getPackageFilesForManager(
+        nonUpdatedPackageFiles,
+        managerPackageFiles[manager],
       );
       sortPackageFiles(config, manager, packageFilesForManager);
       for (const packageFile of packageFilesForManager) {
@@ -405,23 +422,21 @@ export async function getUpdatedPackageFiles(
     }
   }
   if (!reuseExistingBranch) {
-    const lockFileMaintenancePackageFiles: FileAddition[] =
+    const lockFileMaintenancePackageFiles: FilePath[] =
       lockFileMaintenanceFiles.map((name) => ({
-        type: 'addition',
         path: name,
-        contents: null,
       }));
     // Only perform lock file maintenance if it's a fresh commit
     if (is.nonEmptyArray(lockFileMaintenanceFiles)) {
       logger.debug('updateArtifacts for lockFileMaintenanceFiles');
-      const lockFileMaintenanceManagers = new Set(
-        Object.keys(managerPackageFiles).filter((manager) =>
-          hasAny(managerPackageFiles[manager], lockFileMaintenanceFiles),
-        ),
+      const lockFileMaintenanceManagers = getManagersForPackageFiles(
+        lockFileMaintenancePackageFiles,
+        managerPackageFiles,
       );
       for (const manager of lockFileMaintenanceManagers) {
-        const packageFilesForManager = lockFileMaintenancePackageFiles.filter(
-          (packageFile) => managerPackageFiles[manager].has(packageFile.path),
+        const packageFilesForManager = getPackageFilesForManager(
+          lockFileMaintenancePackageFiles,
+          managerPackageFiles[manager],
         );
         sortPackageFiles(config, manager, packageFilesForManager);
         for (const packageFile of packageFilesForManager) {

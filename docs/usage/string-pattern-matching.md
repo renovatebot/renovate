@@ -81,10 +81,15 @@ If you need a case-sensitive pattern you must use a regex pattern.
 
 ### Example glob patterns
 
-| Pattern  | Glob pattern explanation                |
-| -------- | --------------------------------------- |
-| `abc123` | matches `abc123` exactly, or `AbC123`   |
-| `abc*`   | matches `abc`, `abc123`, `ABCabc`, etc. |
+| Pattern     | Glob pattern explanation                                     |
+| ----------- | ------------------------------------------------------------ |
+| `abc123`    | matches `abc123` exactly, or `AbC123`                        |
+| `abc*`      | matches `abc`, `abc123`, `ABCabc`, but not `abc/def`         |
+| `abc**/*`   | matches `abc/def` but not `abc`, `abcd`, or `abc/def/ghi`,   |
+| `abc**/**`  | matches `abc/def` and `abc/def/ghi`, but not `abc` or `abcd` |
+| `abc{/,}**` | matches `abc`, `abcd`, `abc/def`, and `abc/def/ghi`          |
+
+All matches above are case-insensitive, even if not shown.
 
 ## Negative matching
 

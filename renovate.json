@@ -5,6 +5,8 @@
   "semanticCommitScope": "deps",
   "automergeType": "pr",
   "prCreation": "immediate",
+  "ignorePresets": [":ignoreModulesAndTests"],
+  "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
   "dockerfile": {
     "semanticCommitType": "build"
   },
@@ -51,6 +53,12 @@
       "matchPackageNames": ["node"],
       "matchUpdateTypes": ["major"],
       "additionalBranchPrefix": "major"
+    },
+    {
+      "description": "disable some invalid deps from docs",
+      "matchPackageNames": ["my.old.registry/**", "my.new.registry/**"],
+      "matchFileNames": ["docs/**/*.md"],
+      "enabled": false
     }
   ],
   "customManagers": [

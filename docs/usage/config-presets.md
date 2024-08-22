@@ -115,7 +115,7 @@ It mostly uses Renovate config defaults but adds a few smart customizations such
 
 ## How to Use Preset Configs
 
-By default, Renovate App's onboarding PR suggests the `["config:recommended]"` preset.
+By default, Renovate App's onboarding PR suggests the `["config:recommended"]` preset.
 If you're self hosting, and want to use the `config:recommended` preset, then you must add `"onboardingConfig": { "extends": ["config:recommended"] }` to your bot's config.
 
 Read the [Full Config Presets](./presets-config.md) page to learn more about our `config:` presets.

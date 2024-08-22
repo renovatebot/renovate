@@ -110,7 +110,6 @@ function fromShorterToLongerMatchHost(a: HostRule, b: HostRule): number {
 }
 
 function hostRuleRank({ hostType, matchHost, readOnly }: HostRule): number {
-  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
   if ((hostType || readOnly) && matchHost) {
     return 3;
   }

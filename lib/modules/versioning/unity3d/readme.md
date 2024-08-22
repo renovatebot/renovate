@@ -4,7 +4,7 @@ Unity versioning follow semantic versioning, followed by a letter, number and an
 - Minor and patch version are incremental, starting at 0
 - The letter denotes a stream (**a**lpha, **b**eta, **f**inal release, etc.)
 - The number is a growing index
-- The hash is calculated by Unity internally and irrelevant for comparision
+- The hash is calculated by Unity internally and irrelevant for comparison
 
 Examples:
 

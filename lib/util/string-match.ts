@@ -85,7 +85,7 @@ function parseRegexMatch(input: string): RegExp | null {
       .replace(configValStart, '')
       .replace(configValEnd, '');
     return input.endsWith('i') ? regEx(regexString, 'i') : regEx(regexString);
-  } catch (err) {
+  } catch {
     // no-op
   }
   return null;

@@ -22,6 +22,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:disableMavenParentRoot',
       'workarounds:containerbase',
       'workarounds:bitnamiDockerImageVersioning',
+      'workarounds:k3sKubernetesVersioning',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
@@ -165,6 +166,17 @@ export const presets: Record<string, Preset> = {
         ],
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
+      },
+    ],
+  },
+  k3sKubernetesVersioning: {
+    description: 'Use custom regex versioning for k3s-io/k3s',
+    packageRules: [
+      {
+        matchDatasources: ['github-releases'],
+        matchPackageNames: ['k3s-io/k3s'],
+        versioning:
+          'regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>[a-z]+\\d+))?(?<compatibility>\\+k3s)(?<build>\\d+)$',
       },
     ],
   },

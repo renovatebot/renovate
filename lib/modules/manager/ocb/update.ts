@@ -31,7 +31,7 @@ export function bumpPackageVersion(
     } else {
       logger.debug('Bumped OCB version');
     }
-  } catch (err) {
+  } catch {
     logger.warn(
       {
         content,
