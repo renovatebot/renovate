@@ -24,7 +24,7 @@ import {
   extractEnvironmentVariableName,
   getMatchingHostRule,
 } from './artifacts';
-import { PipfileLock } from './types';
+import type { PipfileLock } from './types';
 import { updateArtifacts } from '.';
 
 const datasource = mocked(_datasource);

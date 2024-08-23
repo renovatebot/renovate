@@ -1,32 +1,40 @@
-Updates `gleam.toml` and/or `manifest.toml` with latest and greatest dependencies.
+Renovate can update `gleam.toml` and/or `manifest.toml` files.
 
-The following `depTypes` are currently supported by the `gleam` manager:
+The `gleam` manager can update these `depTypes`:
 
 - `dependencies`
 - `dev-dependencies`
 
-The `gleam` manager extracts dependencies for the `hex` datasource and uses Renovate's implementation of Hex SemVer to evaluate `gleam.toml` updates.
-The `gleam` manager, however, uses `gleam` itself to keep `manifest.toml` up-to-date.
+### How Renovate updates `gleam.toml` files
 
-<!-- prettier-ignore -->
-!!! note
-    To ensure that all your dependencies, including those with in-range updates, are kept up-to-date, we strongly recommend enabling [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance) in your Renovate configuration.
-    This feature will periodically refresh your `manifest.toml`, ensuring all dependencies are updated to their latest allowed versions.
+The `gleam` manager extracts dependencies for the `hex` datasource, and uses Renovate's implementation of Hex SemVer to evaluate `gleam.toml` updates.
 
-Renovate's `"auto"` strategy defaults to `"widen"` and works like this for `gleam`:
+### How Renovate updates `manifest.toml` files
 
-<!-- prettier-ignore -->
-1. If an existing range is a complex range (contains multiple range specifications), Renovate widens it to include the new version.
-    - Example: `>= 0.14.0 and < 0.15.0` becomes `>= 0.14.0 and < 0.16.1` for a new `0.16.0` version.
-1. For simple ranges, if the update is outside the existing range, Renovate widens the range to include the new version.
-    - Example: `<= 0.38.0` becomes `<= 0.39.0` for a new `0.39.0` version.
-1. For exact version constraints, Renovate replaces the version with the new one.
-    - Example: `== 0.12.0` becomes `== 0.13.0` for a new `0.13.0` version.
+The `gleam` manager uses the `gleam` program to update `manifest.toml` files.
 
-If Renovate updates `gleam.toml`, then the command `gleam deps update` is used to ensure `manifest.toml` remains up-to-date as well.
+### Enable `lockFileMaintenance`
 
-<!-- prettier-ignore -->
-!!! note
-    For applications, it is generally [recommended to pin dependencies](../../../dependency-pinning.md), and `gleam` projects are no exception.
-    To pin your dependencies in apps, use the `"pin"` strategy.
-    However, for libraries, it's typically better to use version ranges along with the `"widen"` strategy to allow greater compatibility.
+We recommend you set [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance) to `true` for the `gleam` manager, in your Renovate config.
+This way Renovate can update all your dependencies, including those with in-range updates.
+
+`lockFileMaintenance=true` periodically refreshes your `manifest.toml` files, ensuring all dependencies are updated to their latest allowed versions.
+
+### Default `rangeStrategy=auto` behavior
+
+Renovate's default [`rangeStrategy`](../../../configuration-options.md#rangestrategy) is `"auto"`.
+Here's how `"auto"` works with the `gleam` manager:
+
+| Version type             | New version | Old range                | New range after update   | What Renovate does                                                        |
+| :----------------------- | :---------- | :----------------------- | :----------------------- | :------------------------------------------------------------------------ |
+| Complex range            | `0.16.0`    | `>= 0.14.0 and < 0.15.0` | `>= 0.14.0 and < 0.16.1` | Widen range to include the new version.                                   |
+| Simple range             | `0.39.0`    | `<= 0.38.0`              | `<= 0.39.0`              | If update outside current range: widens range to include the new version. |
+| Exact version constraint | `0.13.0`    | `== 0.12.0`              | `== 0.13.0`              | Replace old version with new version.                                     |
+
+### Recommended `rangeStrategy` for apps and libraries
+
+For applications, we recommend using `rangeStrategy=pin`.
+This pins your dependencies to exact versions, which is generally considered [best practice for apps](../../../dependency-pinning.md).
+
+For libraries, use `rangeStrategy=widen` with version ranges in your `gleam.toml`.
+This allows for greater compatibility with other projects that may use your library as a dependency.

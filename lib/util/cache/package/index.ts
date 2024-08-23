@@ -2,15 +2,12 @@ import type { AllConfig } from '../../../config/types';
 import { PackageCacheStats } from '../../stats';
 import * as memCache from '../memory';
 import * as fileCache from './file';
+import { getCombinedKey } from './key';
 import * as redisCache from './redis';
 import { SqlitePackageCache } from './sqlite';
 import type { PackageCache, PackageCacheNamespace } from './types';
 
 let cacheProxy: PackageCache | undefined;
-
-function getGlobalKey(namespace: string, key: string): string {
-  return `global%%${namespace}%%${key}`;
-}
 
 export async function get<T = any>(
   namespace: PackageCacheNamespace,
@@ -20,13 +17,13 @@ export async function get<T = any>(
     return undefined;
   }
 
-  const globalKey = getGlobalKey(namespace, key);
-  let p = memCache.get(globalKey);
+  const combinedKey = getCombinedKey(namespace, key);
+  let p = memCache.get(combinedKey);
   if (!p) {
     p = PackageCacheStats.wrapGet(() =>
       cacheProxy!.get<number[]>(namespace, key),
     );
-    memCache.set(globalKey, p);
+    memCache.set(combinedKey, p);
   }
 
   const result = await p;
@@ -47,9 +44,9 @@ export async function set(
     cacheProxy!.set(namespace, key, value, minutes),
   );
 
-  const globalKey = getGlobalKey(namespace, key);
+  const combinedKey = getCombinedKey(namespace, key);
   const p = Promise.resolve(value);
-  memCache.set(globalKey, p);
+  memCache.set(combinedKey, p);
 }
 
 export async function init(config: AllConfig): Promise<void> {
