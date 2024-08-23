@@ -48,6 +48,10 @@ function checkRebaseAll(issueBody: string): boolean {
   return issueBody.includes(' - [x] <!-- rebase-all-open-prs -->');
 }
 
+function checkCreateConfigMigrationPr(issueBody: string): boolean {
+  return issueBody.includes(' - [x] <!-- create-config-migration-pr -->');
+}
+
 function selectAllRelevantBranches(issueBody: string): string[] {
   const checkedBranches = [];
   if (checkOpenAllRateLimitedPR(issueBody)) {
@@ -93,6 +97,8 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const dependencyDashboardAllPending = checkApproveAllPendingPR(issueBody);
   const dependencyDashboardAllRateLimited =
     checkOpenAllRateLimitedPR(issueBody);
+  dependencyDashboardChecks['createConfigMigrationPr'] =
+    checkCreateConfigMigrationPr(issueBody) ? 'yes' : 'no';
   return {
     dependencyDashboardChecks,
     dependencyDashboardRebaseAllOpen,
@@ -265,6 +271,13 @@ export async function ensureDependencyDashboard(
     return;
   }
   let issueBody = '';
+
+  if (configMigrationRes.result === 'pr-exists') {
+    issueBody += `Config Migration PR Number: #${configMigrationRes.prNumber}\n\n`;
+  } else if (configMigrationRes.result === 'add-checkbox') {
+    issueBody +=
+      ' - [ ] <!-- create-config-migration-pr --> Create Migration PR' + '\n\n';
+  }
   if (config.dependencyDashboardHeader?.length) {
     issueBody +=
       template.compile(config.dependencyDashboardHeader, config) + '\n\n';

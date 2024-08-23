@@ -7,7 +7,7 @@ import { ensureConfigMigrationPr } from './pr';
 
 export interface ConfigMigrationResult {
   migrationBranch?: string;
-  result?: string;
+  result?: 'add-checkbox' | 'pr-exists';
   prNumber?: number;
 }
 

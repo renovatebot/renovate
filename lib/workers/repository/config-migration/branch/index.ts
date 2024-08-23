@@ -12,7 +12,7 @@ import { rebaseMigrationBranch } from './rebase';
 
 interface CheckConfigMigrationBranchResult {
   migrationBranch?: string;
-  result?: string;
+  result?: 'add-checkbox' | 'pr-exists';
   prNumber?: number;
 }
 
@@ -23,12 +23,12 @@ export async function checkConfigMigrationBranch(
   logger.debug('checkConfigMigrationBranch()');
   if (!migratedConfigData) {
     logger.debug('checkConfigMigrationBranch() Config does not need migration');
-    return { result: 'nothing' };
+    return {};
   }
 
   if (
     !config.configMigration &&
-    !config.dependencyDashboardChecks?.createMigrationPr
+    !config.dependencyDashboardChecks?.createConfigMigrationPr
   ) {
     logger.debug(
       'Config migration needed but config migration is disabled and checkbox not ticked.',
@@ -65,9 +65,12 @@ export async function checkConfigMigrationBranch(
 
       // previously we used to add a comment and skip the branch
       // but now we add a checkbox in DD
-      // if checkbox is ticked then remove this branch/pr and create a new one
+      // if checkbox is ticked then remove this branch/pr and create  new one
 
-      if (!config.dependencyDashboardChecks?.createMigrationPr) {
+      if (
+        !config.dependencyDashboardChecks?.createConfigMigrationPr ||
+        config.dependencyDashboardChecks?.createConfigMigrationPr === 'no'
+      ) {
         logger.debug(
           'Closed PR and config migration enabled. Adding checkbox to DD, will check in next run.',
         );
@@ -103,7 +106,7 @@ export async function checkConfigMigrationBranch(
   }
   return {
     migrationBranch: configMigrationBranch,
-    result: 'pr-created',
+    result: 'pr-exists',
     prNumber: branchPr?.number,
   };
 }
