@@ -1,9 +1,10 @@
-The `cnb` manager updates Cloud Native Buildpacks project descriptors in `project.toml` files.
+The `buildpacks` manager updates Cloud Native Buildpacks project descriptors in `project.toml` files.
 A `project.toml` file can reference builder / buildpack images by URIs.
 Renovate can update a `project.toml` file if:
 
 - It can find the file
 - The file follows the [project descriptor specifications](https://github.com/buildpacks/spec/blob/main/extensions/project-descriptor.md)
+- The buildpack `uri` is an OCI image reference (references to a local file or buildpack registry are ignored)
 
 If you use buildpacks in the `io.buildpacks.group` array, then you _must_ configure the Docker reference (`uri`) for Renovate to work.
 
