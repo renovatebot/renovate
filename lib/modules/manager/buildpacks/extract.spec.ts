@@ -27,6 +27,7 @@ describe('modules/manager/buildpacks/extract', () => {
         {
           autoReplaceStringTemplate:
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          commitMessageTopic: 'builder {{depName}}',
           currentValue: '1.1.1',
           datasource: 'docker',
           depName: 'registry.corp/builder/noble',

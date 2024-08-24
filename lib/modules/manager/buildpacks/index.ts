@@ -3,7 +3,7 @@ import { DockerDatasource } from '../../datasource/docker';
 export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
-  commitMessageTopic: 'buildpacks project descriptor {{depName}}',
+  commitMessageTopic: 'buildpack {{depName}}',
   fileMatch: ['(^|/)project\\.toml$'],
   pinDigests: false,
 };
