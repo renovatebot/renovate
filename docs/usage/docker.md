@@ -279,12 +279,51 @@ To make use of this authentication mechanism, specify the username as `AWS`:
 
 #### Google Container Registry / Google Artifact Registry
 
-##### Using Application Default Credentials / Workload Identity (Self-Hosted only)
+##### Using Workload Identity
 
-Just configure [ADC](https://cloud.google.com/docs/authentication/provide-credentials-adc) /
-[Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) as normal and _don't_
-provide a username, password or token. Renovate will automatically retrieve the credentials using the
-google-auth-library.
+To let Renovate authenticate with [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity), you must:
+
+- Configure Workload Identity
+- Give the Service Account the `artifactregistry.repositories.downloadArtifacts` permission
+
+###### With Application Default Credentials (self-hosted only)
+
+To let Renovate authenticate with [ADC](https://cloud.google.com/docs/authentication/provide-credentials-adc), you must:
+
+- Configure ADC as normal
+- _Not_ provide a username, password or token
+
+Renovate will get the credentials with the [`google-auth-library`](https://www.npmjs.com/package/google-auth-library).
+
+###### With short-lived access token / GitHub Actions (self-hosted only)
+
+```yaml title="Example for Workload Identity plus Renovate host rules"
+- name: authenticate to google cloud
+  id: auth
+  uses: google-github-actions/auth@v2.1.3
+  with:
+    token_format: 'access_token'
+    workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+    service_account: ${{ env.SERVICE_ACCOUNT }}
+
+- name: renovate
+  uses: renovatebot/github-action@v40.2.4
+  env:
+    RENOVATE_HOST_RULES: |
+      [
+        {
+          matchHost: "us-central1-docker.pkg.dev",
+          hostType: "docker",
+          username: "oauth2accesstoken",
+          password: "${{ steps.auth.outputs.access_token }}"
+        }
+      ]
+  with:
+    token: ${{ secrets.RENOVATE_TOKEN }}
+    configurationFile: .github/renovate.json5
+```
+
+You can find a full GitHub Workflow example on the [renovatebot/github-action](https://github.com/renovatebot/github-action) repository.
 
 ##### Using long-lived service account credentials
 
@@ -386,7 +425,7 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
       }
       ```
 
-##### Using short-lived access tokens
+##### Using short-lived access token / Gitlab CI / Google Cloud
 
 Assume you are running GitLab CI in the Google Cloud, and you are storing your Docker images in the Google Container Registry (GCR).
 
