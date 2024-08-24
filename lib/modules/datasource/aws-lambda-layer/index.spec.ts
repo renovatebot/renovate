@@ -32,6 +32,20 @@ const layer3: LayerVersionsListItem = {
   LayerVersionArn: 'arn:aws:lambda:us-east-1:123456789012:layer:my-layer:1',
 };
 
+const layerWithArchitecture: LayerVersionsListItem = {
+  Version: 3,
+  CreatedDate: '2021-03-01T00:00:00.000Z',
+  LayerVersionArn: 'arn:aws:lambda:us-east-1:123456789012:layer:my-layer:1',
+  CompatibleArchitecture: 'x86_64',
+};
+
+const layerWithRuntime: LayerVersionsListItem = {
+  Version: 3,
+  CreatedDate: '2021-03-01T00:00:00.000Z',
+  LayerVersionArn: 'arn:aws:lambda:us-east-1:123456789012:layer:my-layer:1',
+  CompatibleRuntime: 'python37',
+};
+
 const mock3Layers: ListLayerVersionsCommandOutput = {
   LayerVersions: [layer1, layer2, layer3],
   $metadata: {},
@@ -47,6 +61,16 @@ const mockEmpty: ListLayerVersionsCommandOutput = {
   $metadata: {},
 };
 
+const mockLayerWithArchitecture: ListLayerVersionsCommandOutput = {
+  LayerVersions: [layerWithArchitecture],
+  $metadata: {},
+};
+
+const mockLayerWithRuntime: ListLayerVersionsCommandOutput = {
+  LayerVersions: [layerWithArchitecture],
+  $metadata: {},
+};
+
 const lambdaClientMock = mockClient(LambdaClient);
 
 function mockListLayerVersionsCommandOutput(
@@ -58,6 +82,36 @@ function mockListLayerVersionsCommandOutput(
 
 describe('modules/datasource/aws-lambda-layer/index', () => {
   describe('getSortedLambdaLayerVersions', () => {
+    it('should warn about missing architecture in filter if AWS response contains architecture', async () => {
+      mockListLayerVersionsCommandOutput(mockLayerWithArchitecture);
+      const lambdaLayerDatasource = new AwsLambdaLayerDataSource();
+
+      await lambdaLayerDatasource.getSortedLambdaLayerVersions(
+        'arn',
+        'runtime',
+        undefined,
+      );
+
+      expect(lambdaLayerDatasource.logger.warn).toHaveBeenCalledWith(
+        'AWS returned layers with architecture but the architecture is not set in the filter. You might update to a layer with wrong architecture.',
+      );
+    });
+
+    it('should warn about missing runtime in filter if AWS response contains runtime', async () => {
+      mockListLayerVersionsCommandOutput(mockLayerWithRuntime);
+      const lambdaLayerDatasource = new AwsLambdaLayerDataSource();
+
+      await lambdaLayerDatasource.getSortedLambdaLayerVersions(
+        'arn',
+        undefined,
+        'architecture',
+      );
+
+      expect(lambdaLayerDatasource.logger.warn).toHaveBeenCalledWith(
+        'AWS returned layers with runtime but the runtime is not set in the filter. You might update to a layer with wrong runtime.',
+      );
+    });
+    
     it('should return empty array if no layers are found', async () => {
       mockListLayerVersionsCommandOutput(mockEmpty);
       const lamdbaLayerDatasource = new AwsLambdaLayerDataSource();
