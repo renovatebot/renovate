@@ -43,6 +43,25 @@ export class AwsLambdaLayerDataSource extends Datasource {
 
     const matchingLayerVersions = await this.lambda.getValue().send(cmd);
 
+    let hasArchitecture = false;
+    let hasRuntime = false;
+
+    matchingLayerVersions.LayerVersions?.forEach((layer) => {
+      if (layer.CompatibleArchitecture !== undefined) {
+        hasArchitecture = true;
+      }
+      if (layer.CompatibleRuntime !== undefined) {
+        hasRuntime = true;
+      }
+    });
+
+    if (hasArchitecture && architecture === undefined) {
+      logger.warn("AWS returned layers with architecture but the architecture is not set in the filter. You might update to a layer with wrong architecture.");
+    }
+    if (hasRuntime && runtime === undefined) {
+      logger.warn("AWS returned layers with runtime but the runtime is not set in the filter. You might update to a layer with wrong runtime.");
+    }
+
     return matchingLayerVersions.LayerVersions ?? [];
   }
 
