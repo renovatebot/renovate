@@ -12,7 +12,7 @@ describe('modules/versioning/versioning-metadata', () => {
           'lib/modules/versioning/' + versioning + '/readme.md',
           'utf8',
         );
-      } catch (err) {
+      } catch {
         // ignore missing file
       }
       if (readme) {

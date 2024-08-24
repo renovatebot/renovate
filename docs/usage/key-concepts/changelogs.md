@@ -10,7 +10,7 @@ This page explains how Renovate fetches changelogs, when it can display them, an
 Renovate detects and populates changelogs by:
 
 1. Identifying a source URL from the datasource response for a package, and saving that internally as `sourceUrl` if found
-1. Checking if Renovate's internal [_manual_ metadata](https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/metadata-manual.ts) for the package includes a source URL
+1. Checking if Renovate's internal [_sourceUrl_ data](https://github.com/renovatebot/renovate/blob/main/lib/data/source-urls.json) for the package includes a source URL
 1. Looking up the source URL, if it resides on a supported platform (e.g. GitHub)
 1. Checking for both "Releases" metadata in the repository and any commonly known "changelog" file names
 1. Filtering the found releases to only include those versions being updated by the current PR

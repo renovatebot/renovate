@@ -1,7 +1,8 @@
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { readLocalFile } from '../../../util/fs';
-import { CargoLockSchema, CargoLockSchemaToml } from './schema';
+import type { CargoLockSchema } from './schema';
+import { CargoLockSchemaToml } from './schema';
 
 export async function extractLockFileVersions(
   lockFilePath: string,

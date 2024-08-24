@@ -34,7 +34,7 @@ export async function getPreset({
     const body = (await http.getJson<NpmResponse>(packageUrl)).body;
     // TODO: check null #22198
     dep = body.versions![body['dist-tags']!.latest];
-  } catch (err) {
+  } catch {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
   if (!dep?.['renovate-config']) {
