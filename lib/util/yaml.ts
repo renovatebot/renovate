@@ -1,6 +1,5 @@
+import type { DumpOptions, LoadOptions } from 'js-yaml';
 import {
-  DumpOptions,
-  LoadOptions,
   loadAll as multiple,
   load as single,
   dump as upstreamDump,

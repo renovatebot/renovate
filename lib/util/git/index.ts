@@ -3,13 +3,8 @@ import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import semver from 'semver';
-import {
-  Options,
-  ResetMode,
-  SimpleGit,
-  TaskOptions,
-  simpleGit,
-} from 'simple-git';
+import type { Options, SimpleGit, TaskOptions } from 'simple-git';
+import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
