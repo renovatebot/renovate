@@ -70,7 +70,12 @@ describe('modules/datasource/deb/index', () => {
       const ts = stats.ctime;
 
       httpMock
-        .scope(debBaseUrl)
+        .scope(debBaseUrl, {
+          // ensure the rest call sets the correct request headers
+          reqheaders: {
+            'if-modified-since': ts.toUTCString(),
+          },
+        })
         .head(getPackageUrl('', 'stable', 'non-free', 'amd64'))
         .reply(304);
 
@@ -85,9 +90,6 @@ describe('modules/datasource/deb/index', () => {
           },
         ],
       });
-
-      const modifiedTs = httpMock.getTrace()[0].headers['if-modified-since'];
-      expect(modifiedTs).toBe(ts.toUTCString());
     });
 
     describe('parsing of registry url', () => {
