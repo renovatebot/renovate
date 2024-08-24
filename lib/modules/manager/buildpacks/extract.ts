@@ -87,7 +87,7 @@ export function extractPackageFile(
       'Cloud Native Buildpacks builder',
     );
 
-    deps.push(dep);
+    deps.push({ ...dep, commitMessageTopic: 'builder {{depName}}' });
   }
 
   if (
