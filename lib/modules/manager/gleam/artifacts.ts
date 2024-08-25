@@ -49,7 +49,7 @@ export async function updateArtifacts(
       ],
     };
 
-    await exec('gleam deps download', execOptions);
+    await exec('gleam deps update', execOptions);
     const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
     if (!newLockFileContent) {
       logger.debug(`No ${lockFileName} found`);
