@@ -490,7 +490,7 @@ describe('modules/manager/helmfile/extract', () => {
         - name: argocd
           version: 0.4.2
           chart: oci://gitlab.example.com:5000/group/subgroup
-      `
+      `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
         registryAliases: {
@@ -505,8 +505,8 @@ describe('modules/manager/helmfile/extract', () => {
             datasource: 'docker',
             depName: 'subgroup',
             packageName: 'gitlab.example.com:5000/group/subgroup',
-            registryUrls: []
-          }
+            registryUrls: [],
+          },
         ],
       });
     });
