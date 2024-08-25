@@ -72,7 +72,7 @@ export async function extractPackageFile(
 
   const deps = extractGleamTomlDeps(gleamToml);
   if (!deps.length) {
-    logger.debug('No dependencies found in package file content');
+    logger.debug(`No dependencies found in Gleam package file ${packageFile}`);
     return null;
   }
 
