@@ -80,8 +80,8 @@ export async function extractPackageFile(
 
   const lockFileName = getSiblingFileName(packageFile, 'manifest.toml');
   if (lockFileName) {
-    logger.debug(
-      `Found lockFile ${lockFileName} for packageFile: ${packageFile}`,
+    logger.trace(
+      `Finding lockFile ${lockFileName} for packageFile: ${packageFile}`,
     );
 
     const versionsByPackage = await extractLockFileVersions(lockFileName);
