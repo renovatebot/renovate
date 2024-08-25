@@ -956,16 +956,16 @@ export async function createPr({
     }
   }
 
-  logger.debug(
-    {
-      repository: config.repository,
-      title,
-      base,
-      bbAutoResolvePrTasks: platformPrOptions?.bbAutoResolvePrTasks,
-    },
-    'Auto resolve PR tasks',
-  );
   if (platformPrOptions?.bbAutoResolvePrTasks) {
+    logger.debug(
+      {
+        repository: config.repository,
+        title,
+        base,
+        bbAutoResolvePrTasks: platformPrOptions?.bbAutoResolvePrTasks,
+      },
+      'Auto resolve PR tasks',
+    );
     const listTaskRes = (
       await bitbucketHttp.getJson<ListPrTasksResponse>(
         `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks`,
@@ -998,7 +998,7 @@ export async function createPr({
           },
         },
       );
-      logger.debug(
+      logger.trace(
         { repository: config.repository, title, base, updateTaskResponse: res },
         'Put PR tasks - mark resolved',
       );
