@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { join } from 'upath';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
@@ -118,12 +117,12 @@ export async function extractPackageFile(
 
       if (isOCIRegistry(dep.chart)) {
         res.datasource = DockerDatasource.id;
-        res.packageName = join(repoName, depName);
+        res.packageName = repoName + '/' + depName;
       } else if (registryData[repoName]?.oci) {
         res.datasource = DockerDatasource.id;
         const alias = registryData[repoName]?.url;
         if (alias) {
-          res.packageName = join(alias, depName);
+          res.packageName = alias + '/' + depName;
         }
       }
 
