@@ -956,7 +956,7 @@ export async function createPr({
     }
   }
 
-  if (platformPrOptions?.bbAutoResolvePrTasks) {
+  if (platformPrOptions?.bbAutoResolvePrTasks && pr) {
     logger.debug(
       {
         repository: config.repository,
