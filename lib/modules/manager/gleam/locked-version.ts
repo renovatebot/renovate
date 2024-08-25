@@ -13,7 +13,7 @@ export async function extractLockFileVersions(
   }
 
   const versionsByPackage = new Map<string, string[]>();
-  const lock = parseLockFile(lockFileContent);
+  const lock = parseLockFile(content);
   if (!lock) {
     logger.debug(`Error parsing Gleam lock file ${lockFilePath}`);
     return null;
