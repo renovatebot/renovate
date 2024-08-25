@@ -7,16 +7,11 @@ export async function extractLockFileVersions(
   lockFilePath: string,
 ): Promise<Map<string, string[]> | null> {
   const content = await readLocalFile(lockFilePath, 'utf8');
-  if (content) {
-    return extractLockFileContentVersions(content);
+  if (!content) {
+    logger.debug(`Gleam lock file ${lockFilePath} not found`);
+    return null;
   }
-  logger.debug('Error reading lock file.');
-  return null;
-}
 
-export function extractLockFileContentVersions(
-  lockFileContent: string,
-): Map<string, string[]> | null {
   const versionsByPackage = new Map<string, string[]>();
   const lock = parseLockFile(lockFileContent);
   if (!lock) {
