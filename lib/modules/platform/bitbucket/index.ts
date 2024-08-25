@@ -959,7 +959,6 @@ export async function createPr({
   if (platformPrOptions?.bbAutoResolvePrTasks && pr) {
     logger.debug(
       {
-        repository: config.repository,
         title,
         base,
         bbAutoResolvePrTasks: platformPrOptions?.bbAutoResolvePrTasks,
@@ -976,7 +975,6 @@ export async function createPr({
 
       logger.debug(
         {
-          repository: config.repository,
           title,
           base,
           bbAutoCompleteTasks: platformPrOptions.bbAutoResolvePrTasks,
@@ -1001,7 +999,6 @@ export async function createPr({
         );
         logger.trace(
           {
-            repository: config.repository,
             title,
             base,
             updateTaskResponse: res,
