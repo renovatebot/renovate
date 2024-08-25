@@ -78,35 +78,29 @@ export async function extractPackageFile(
   }
 
   const packageFileContent: PackageFileContent = { deps };
-
   const lockFileName = getSiblingFileName(packageFile, 'manifest.toml');
-  if (lockFileName) {
-    logger.trace(
-      `Finding lockFile ${lockFileName} for packageFile: ${packageFile}`,
+
+  const versionsByPackage = await extractLockFileVersions(lockFileName);
+  if (!versionsByPackage) {
+    logger.debug(`Could not extract locked versions from ${lockFileName}.`);
+    return packageFileContent;
+  }
+
+  packageFileContent.lockFiles = [lockFileName];
+
+  for (const dep of packageFileContent.deps) {
+    const packageName = dep.depName!;
+    const versions = coerceArray(versionsByPackage.get(packageName));
+    const lockedVersion = versioning.getSatisfyingVersion(
+      versions,
+      dep.currentValue!,
     );
-
-    const versionsByPackage = await extractLockFileVersions(lockFileName);
-    if (!versionsByPackage) {
-      logger.debug(`Could not extract locked versions from ${lockFileName}.`);
-      return packageFileContent;
-    }
-
-    packageFileContent.lockFiles = [lockFileName];
-
-    for (const dep of packageFileContent.deps) {
-      const packageName = dep.depName!;
-      const versions = coerceArray(versionsByPackage.get(packageName));
-      const lockedVersion = versioning.getSatisfyingVersion(
-        versions,
-        dep.currentValue!,
+    if (lockedVersion) {
+      dep.lockedVersion = lockedVersion;
+    } else {
+      logger.debug(
+        `No locked version found for package ${dep.depName} in the range of ${dep.currentValue}.`,
       );
-      if (lockedVersion) {
-        dep.lockedVersion = lockedVersion;
-      } else {
-        logger.debug(
-          `No locked version found for package ${dep.depName} in the range of ${dep.currentValue}.`,
-        );
-      }
     }
   }
   return packageFileContent;
