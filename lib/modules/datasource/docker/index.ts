@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { GlobalConfig } from '../../../config/global';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -39,13 +40,12 @@ import {
 } from './common';
 import { DockerHubCache } from './dockerhub-cache';
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr';
+import type { DistributionManifest, OciImageManifest } from './schema';
 import {
-  DistributionManifest,
   DockerHubTagsPage,
   ManifestJson,
   OciHelmConfig,
   OciImageConfig,
-  OciImageManifest,
 } from './schema';
 
 const defaultConfig = {
@@ -666,9 +666,7 @@ export class DockerDatasource extends Datasource {
       return null;
     }
     let page = 0;
-    const pages = process.env.RENOVATE_X_DOCKER_MAX_PAGES
-      ? parseInt(process.env.RENOVATE_X_DOCKER_MAX_PAGES, 10)
-      : 20;
+    const pages = GlobalConfig.get('dockerMaxPages', 20);
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<{ tags: string[] }>;

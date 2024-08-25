@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
@@ -784,6 +785,168 @@ describe('util/http/github', () => {
           count: 9,
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+  });
+
+  describe('getRawFile()', () => {
+    it('add header and return', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/foo/bar/contents/lore/ipsum.txt')
+        .matchHeader(
+          'accept',
+          'application/vnd.github.raw+json, application/vnd.github.v3+json',
+        )
+        .reply(200, 'foo');
+      await expect(
+        githubApi.getRawTextFile(
+          `${githubApiHost}/foo/bar/contents/lore/ipsum.txt`,
+        ),
+      ).resolves.toMatchObject({
+        body: 'foo',
+      });
+    });
+
+    it('support relative path', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/foo/bar/contents/lore/ipsum.txt')
+        .matchHeader(
+          'accept',
+          'application/vnd.github.raw+json, application/vnd.github.v3+json',
+        )
+        .reply(200, 'foo');
+      await expect(
+        githubApi.getRawTextFile(
+          `${githubApiHost}/foo/bar/contents/foo/../lore/ipsum.txt`,
+        ),
+      ).resolves.toMatchObject({
+        body: 'foo',
+      });
+    });
+
+    it('support default to api.github.com if no baseURL has been supplied', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/foo/bar/contents/lore/ipsum.txt')
+        .matchHeader(
+          'accept',
+          'application/vnd.github.raw+json, application/vnd.github.v3+json',
+        )
+        .reply(200, 'foo');
+      await expect(
+        githubApi.getRawTextFile(`foo/bar/contents/lore/ipsum.txt`),
+      ).resolves.toMatchObject({
+        body: 'foo',
+      });
+    });
+
+    it('support custom host if a baseURL has been supplied', async () => {
+      const customApiHost = 'https://my.comapny.com/api/v3/';
+      httpMock
+        .scope(customApiHost)
+        .get('/foo/bar/contents/lore/ipsum.txt')
+        .matchHeader(
+          'accept',
+          'application/vnd.github.raw+json, application/vnd.github.v3+json',
+        )
+        .reply(200, 'foo');
+      await expect(
+        githubApi.getRawTextFile(`foo/bar/contents/lore/ipsum.txt`, {
+          baseUrl: customApiHost,
+        }),
+      ).resolves.toMatchObject({
+        body: 'foo',
+      });
+    });
+
+    it('support default to api.github.com if no baseURL, but repository has been supplied', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/foo/bar/contents/lore/ipsum.txt')
+        .matchHeader(
+          'accept',
+          'application/vnd.github.raw+json, application/vnd.github.v3+json',
+        )
+        .reply(200, 'foo');
+      await expect(
+        githubApi.getRawTextFile(`lore/ipsum.txt`, {
+          repository: 'foo/bar',
+        }),
+      ).resolves.toMatchObject({
+        body: 'foo',
+      });
+    });
+
+    it('support custom host if a baseURL and repository has been supplied', async () => {
+      const customApiHost = 'https://my.comapny.com/api/v3/';
+      httpMock
+        .scope(customApiHost)
+        .get('/foo/bar/contents/lore/ipsum.txt')
+        .matchHeader(
+          'accept',
+          'application/vnd.github.raw+json, application/vnd.github.v3+json',
+        )
+        .reply(200, 'foo');
+      await expect(
+        githubApi.getRawTextFile(`lore/ipsum.txt`, {
+          baseUrl: customApiHost,
+          repository: 'foo/bar',
+        }),
+      ).resolves.toMatchObject({
+        body: 'foo',
+      });
+    });
+
+    it('support default to api.github.com if content path is used', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/foo/bar/contents/lore/ipsum.txt')
+        .matchHeader(
+          'accept',
+          'application/vnd.github.raw+json, application/vnd.github.v3+json',
+        )
+        .reply(200, 'foo');
+      await expect(
+        githubApi.getRawTextFile(`foo/bar/contents/lore/ipsum.txt`),
+      ).resolves.toMatchObject({
+        body: 'foo',
+      });
+    });
+
+    it('support custom host if content path is used', async () => {
+      const customApiHost = 'https://my.comapny.com/api/v3/';
+      httpMock
+        .scope(customApiHost)
+        .get('/foo/bar/contents/lore/ipsum.txt')
+        .matchHeader(
+          'accept',
+          'application/vnd.github.raw+json, application/vnd.github.v3+json',
+        )
+        .reply(200, 'test');
+      await expect(
+        githubApi.getRawTextFile(`foo/bar/contents/lore/ipsum.txt`, {
+          baseUrl: customApiHost,
+        }),
+      ).resolves.toMatchObject({
+        body: 'test',
+      });
+    });
+
+    it('throw error if a ', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/foo/bar/contents/lore/ipsum.bin')
+        .matchHeader(
+          'accept',
+          'application/vnd.github.raw+json, application/vnd.github.v3+json',
+        )
+        .reply(200, Buffer.from('foo', 'binary'));
+      await expect(
+        githubApi.getRawTextFile(`foo/bar/contents/lore/ipsum.bin`, {
+          responseType: 'buffer',
+        }),
+      ).rejects.toThrow();
     });
   });
 });

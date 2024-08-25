@@ -1,4 +1,5 @@
-import { PutObjectCommand, PutObjectCommandInput } from '@aws-sdk/client-s3';
+import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../config/types';
 import { getProblems, logger } from '../logger';

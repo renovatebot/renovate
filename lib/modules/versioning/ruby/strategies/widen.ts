@@ -1,5 +1,6 @@
 import { GTE, LT, PGTE } from '../operator';
-import { Range, parseRanges, satisfiesRange, stringifyRanges } from '../range';
+import type { Range } from '../range';
+import { parseRanges, satisfiesRange, stringifyRanges } from '../range';
 import { increment, pgteUpperBound } from '../version';
 import { replacePart } from './replace';
 

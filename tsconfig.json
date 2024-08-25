@@ -31,7 +31,8 @@
     "**/__mocks__/*",
     "coverage",
     "config.js",
-    "tmp"
+    "tmp",
+    "tools/mkdocs/site"
   ],
   "ts-node": {
     "transpileOnly": true,

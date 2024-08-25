@@ -11,6 +11,7 @@ export {
   updateLockedDependency,
 } from './update';
 export { getRangeStrategy } from './range';
+export { updateArtifacts } from './artifacts';
 
 export const supportsLockFileMaintenance = true;
 
