@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
-import { getSiblingFileName } from '../../../util/fs';
+import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { HexDatasource } from '../../datasource/hex';
 import { api as versioning } from '../../versioning/hex';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -80,9 +80,17 @@ export async function extractPackageFile(
   const packageFileContent: PackageFileContent = { deps };
   const lockFileName = getSiblingFileName(packageFile, 'manifest.toml');
 
+  const lockFileExists = await localPathExists(lockFileName);
+  if (!lockFileExists) {
+    logger.debug(`Lock file ${lockFileName} does not exist.`);
+    return packageFileContent;
+  }
+
   const versionsByPackage = await extractLockFileVersions(lockFileName);
   if (!versionsByPackage) {
-    logger.debug(`Could not extract locked versions from ${lockFileName}.`);
+    logger.debug(
+      `Error parsing or extracting locked versions from ${lockFileName}.`,
+    );
     return packageFileContent;
   }
 
