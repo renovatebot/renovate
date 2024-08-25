@@ -24,6 +24,7 @@ import type {
   Issue,
   MergePRConfig,
   PlatformParams,
+  PlatformPrOptions,
   PlatformResult,
   Pr,
   RepoParams,
@@ -910,7 +911,6 @@ export async function createPr({
     reviewers,
   };
 
-  let pr: Pr;
   try {
     const prRes = (
       await bitbucketHttp.postJson<PrResponse>(
@@ -920,13 +920,17 @@ export async function createPr({
         },
       )
     ).body;
-    pr = utils.prInfo(prRes);
+    const pr = utils.prInfo(prRes);
     await BitbucketPrCache.addPr(
       bitbucketHttp,
       config.repository,
       renovateUserUuid,
       pr,
     );
+    if (platformPrOptions?.bbAutoResolvePrTasks) {
+      await autoResolvePrTasks(pr, title, base);
+    }
+    return pr;
   } catch (err) /* istanbul ignore next */ {
     // Try sanitizing reviewers
     const sanitizedReviewers = await sanitizeReviewers(reviewers, err);
@@ -946,72 +950,76 @@ export async function createPr({
           },
         )
       ).body;
-      pr = utils.prInfo(prRes);
+      const pr = utils.prInfo(prRes);
       await BitbucketPrCache.addPr(
         bitbucketHttp,
         config.repository,
         renovateUserUuid,
         pr,
       );
+      if (platformPrOptions?.bbAutoResolvePrTasks) {
+        await autoResolvePrTasks(pr, title, base);
+      }
+      return pr;
     }
   }
+}
 
-  if (platformPrOptions?.bbAutoResolvePrTasks && pr) {
+async function autoResolvePrTasks(
+  pr: Pr,
+  title: string,
+  base: string,
+): Promise<void> {
+  logger.debug(
+    {
+      title,
+      base,
+    },
+    'Auto resolve PR tasks',
+  );
+  try {
+    const listTaskRes = (
+      await bitbucketHttp.getJson<ListPrTasksResponse>(
+        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks`,
+        { paginate: true, pagelen: 100 },
+      )
+    ).body.values;
+
     logger.debug(
       {
         title,
         base,
-        bbAutoResolvePrTasks: platformPrOptions?.bbAutoResolvePrTasks,
+        listTaskRes,
       },
-      'Auto resolve PR tasks',
+      'List PR tasks',
     );
-    try {
-      const listTaskRes = (
-        await bitbucketHttp.getJson<ListPrTasksResponse>(
-          `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks`,
-          { paginate: true, pagelen: 100 },
-        )
-      ).body.values;
 
-      logger.debug(
+    const unResolvedTasks = utils.filterUnresolvedTasksIds(listTaskRes);
+
+    for (const task of unResolvedTasks) {
+      const res = await bitbucketHttp.putJson<unknown>(
+        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks/${task.id}`,
+        {
+          body: {
+            state: 'RESOLVED',
+            content: {
+              raw: task.content.raw,
+            },
+          },
+        },
+      );
+      logger.trace(
         {
           title,
           base,
-          bbAutoCompleteTasks: platformPrOptions.bbAutoResolvePrTasks,
-          listTaskRes,
+          updateTaskResponse: res,
         },
-        'List PR tasks',
+        'Put PR tasks - mark resolved',
       );
-
-      const unResolvedTasks = utils.filterUnresolvedTasksIds(listTaskRes);
-
-      for (const task of unResolvedTasks) {
-        const res = await bitbucketHttp.putJson<unknown>(
-          `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks/${task.id}`,
-          {
-            body: {
-              state: 'RESOLVED',
-              content: {
-                raw: task.content.raw,
-              },
-            },
-          },
-        );
-        logger.trace(
-          {
-            title,
-            base,
-            updateTaskResponse: res,
-          },
-          'Put PR tasks - mark resolved',
-        );
-      }
-    } catch (err) {
-      logger.warn({ err }, 'Error resolving PR tasks');
     }
+  } catch (err) {
+    logger.warn({ err }, 'Error resolving PR tasks');
   }
-
-  return pr;
 }
 
 export async function updatePr({
