@@ -966,42 +966,51 @@ export async function createPr({
       },
       'Auto resolve PR tasks',
     );
-    const listTaskRes = (
-      await bitbucketHttp.getJson<ListPrTasksResponse>(
-        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks`,
-        { paginate: true, pagelen: 100 },
-      )
-    ).body.values;
+    try {
+      const listTaskRes = (
+        await bitbucketHttp.getJson<ListPrTasksResponse>(
+          `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks`,
+          { paginate: true, pagelen: 100 },
+        )
+      ).body.values;
 
-    logger.debug(
-      {
-        repository: config.repository,
-        title,
-        base,
-        bbAutoCompleteTasks: platformPrOptions.bbAutoResolvePrTasks,
-        listTaskRes,
-      },
-      'List PR tasks',
-    );
-
-    const unResolvedTasks = utils.filterUnresolvedTasksIds(listTaskRes);
-
-    for (const task of unResolvedTasks) {
-      const res = await bitbucketHttp.putJson<unknown>(
-        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks/${task.id}`,
+      logger.debug(
         {
-          body: {
-            state: 'RESOLVED',
-            content: {
-              raw: task.content.raw,
+          repository: config.repository,
+          title,
+          base,
+          bbAutoCompleteTasks: platformPrOptions.bbAutoResolvePrTasks,
+          listTaskRes,
+        },
+        'List PR tasks',
+      );
+
+      const unResolvedTasks = utils.filterUnresolvedTasksIds(listTaskRes);
+
+      for (const task of unResolvedTasks) {
+        const res = await bitbucketHttp.putJson<unknown>(
+          `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks/${task.id}`,
+          {
+            body: {
+              state: 'RESOLVED',
+              content: {
+                raw: task.content.raw,
+              },
             },
           },
-        },
-      );
-      logger.trace(
-        { repository: config.repository, title, base, updateTaskResponse: res },
-        'Put PR tasks - mark resolved',
-      );
+        );
+        logger.trace(
+          {
+            repository: config.repository,
+            title,
+            base,
+            updateTaskResponse: res,
+          },
+          'Put PR tasks - mark resolved',
+        );
+      }
+    } catch (err) {
+      logger.warn({ err }, 'Error resolving PR tasks');
     }
   }
 
