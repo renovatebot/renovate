@@ -24,7 +24,7 @@ abstract class PrivateKey {
   protected abstract readonly gpgFormat: string;
 
   constructor(key: string) {
-    this.key = key.trim();
+    this.key = key;
     addSecretForSanitizing(this.key, 'global');
     logger.debug(
       'gitPrivateKey: successfully set (but not yet written/configured)',
@@ -56,6 +56,10 @@ abstract class PrivateKey {
 
 class GPGKey extends PrivateKey {
   protected readonly gpgFormat = 'openpgp';
+
+  constructor(key: string) {
+    super(key.trim());
+  }
 
   protected async importKey(): Promise<string | undefined> {
     const keyFileName = upath.join(os.tmpdir() + '/git-private-gpg.key');
