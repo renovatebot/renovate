@@ -20,7 +20,7 @@ export function extractLockFileContentVersions(
   const versionsByPackage = new Map<string, string[]>();
   const lock = parseLockFile(lockFileContent);
   if (!lock) {
-    logger.debug('Error parsing manifest.toml.');
+    logger.debug(`Error parsing Gleam lock file ${lockFilePath}`);
     return null;
   }
   for (const pkg of coerceArray(lock.packages)) {
