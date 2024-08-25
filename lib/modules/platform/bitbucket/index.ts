@@ -24,7 +24,6 @@ import type {
   Issue,
   MergePRConfig,
   PlatformParams,
-  PlatformPrOptions,
   PlatformResult,
   Pr,
   RepoParams,
