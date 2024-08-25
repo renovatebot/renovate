@@ -111,6 +111,7 @@ describe('modules/manager/gleam/extract', () => {
 
     fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
     fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+    fs.localPathExists.mockResolvedValueOnce(true);
     const extracted = await gleamManager.extractPackageFile(
       packageFileContent,
       'gleam.toml',
@@ -129,6 +130,7 @@ describe('modules/manager/gleam/extract', () => {
 
     fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
     fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.localPathExists.mockResolvedValueOnce(true);
     const extracted = await gleamManager.extractPackageFile(
       packageFileContent,
       'gleam.toml',
@@ -156,6 +158,7 @@ describe('modules/manager/gleam/extract', () => {
 
     fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
     fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+    fs.localPathExists.mockResolvedValueOnce(true);
     const extracted = await gleamManager.extractPackageFile(
       packageFileContent,
       'gleam.toml',
@@ -182,6 +185,27 @@ describe('modules/manager/gleam/extract', () => {
 
     fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
     fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+    fs.localPathExists.mockResolvedValueOnce(true);
+    const extracted = await gleamManager.extractPackageFile(
+      packageFileContent,
+      'gleam.toml',
+    );
+    expect(extracted!.deps).not.toHaveProperty('lockedVersion');
+  });
+
+  it('should handle lock file parsing and extracting errors', async () => {
+    const packageFileContent = codeBlock`
+      name = "test_gleam_toml"
+      version = "1.0.0"
+
+      [dependencies]
+      foo = ">= 1.0.0 and < 2.0.0"
+    `;
+    const lockFileContent = codeBlock`invalid`;
+
+    fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
+    fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+    fs.localPathExists.mockResolvedValueOnce(true);
     const extracted = await gleamManager.extractPackageFile(
       packageFileContent,
       'gleam.toml',
