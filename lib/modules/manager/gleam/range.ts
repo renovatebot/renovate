@@ -16,16 +16,6 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
     );
     return 'widen';
   }
-  if (rangeStrategy === 'update-lockfile') {
-    logger.warn(
-      'Unsupported rangeStrategy update-lockfile, defaulting to widen',
-    );
-    return 'widen';
-  }
-  if (rangeStrategy === 'in-range-only') {
-    logger.warn('Unsupported rangeStrategy in-range-only, defaulting to widen');
-    return 'widen';
-  }
   if (rangeStrategy !== 'auto') {
     return rangeStrategy;
   }
