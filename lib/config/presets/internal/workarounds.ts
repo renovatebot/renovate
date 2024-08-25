@@ -14,7 +14,6 @@ export const presets: Record<string, Preset> = {
       'workarounds:ignoreHttp4sDigestMilestones',
       'workarounds:typesNodeVersioning',
       'workarounds:nodeDockerVersioning',
-      'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
       'workarounds:javaLTSVersions',
@@ -198,17 +197,6 @@ export const presets: Record<string, Preset> = {
         matchDepNames: ['node'],
         versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
         versioning: 'node',
-      },
-    ],
-  },
-  reduceRepologyServerLoad: {
-    description:
-      'Limit requests to reduce load on Repology servers until we can fix this properly, see issue `#10133`.',
-    hostRules: [
-      {
-        concurrentRequestLimit: 1,
-        matchHost: 'repology.org',
-        maxRequestsPerSecond: 0.5,
       },
     ],
   },
