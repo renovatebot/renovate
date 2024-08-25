@@ -62,15 +62,16 @@ export async function extractPackageFile(
   content: string,
   packageFile: string,
 ): Promise<PackageFileContent | null> {
-  let gleamToml: GleamToml;
-  try {
-    gleamToml = GleamToml.parse(content);
-  } catch (err) {
-    logger.debug({ err }, 'Error parsing Gleam package file content');
+  const result = GleamToml.safeParse(content);
+  if (!result.success) {
+    logger.debug(
+      { err: result.error },
+      'Error parsing Gleam package file content',
+    );
     return null;
   }
 
-  const deps = extractGleamTomlDeps(gleamToml);
+  const deps = extractGleamTomlDeps(result.data);
   if (!deps.length) {
     logger.debug(`No dependencies found in Gleam package file ${packageFile}`);
     return null;
