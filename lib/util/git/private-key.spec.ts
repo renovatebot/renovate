@@ -89,7 +89,8 @@ describe('util/git/private-key', () => {
 -----BEGIN OPENSSH PRIVATE KEY-----
 some-private-key with-passphrase
 some-private-key with-passphrase
------END OPENSSH PRIVATE KEY-----`);
+-----END OPENSSH PRIVATE KEY-----
+`);
       await expect(writePrivateKey()).rejects.toThrow();
     });
 
@@ -98,7 +99,8 @@ some-private-key with-passphrase
 -----BEGIN OPENSSH PRIVATE KEY-----
 some-private-key
 some-private-key
------END OPENSSH PRIVATE KEY-----`;
+-----END OPENSSH PRIVATE KEY-----
+`;
       const privateKeyFile = upath.join(os.tmpdir() + '/git-private-ssh.key');
       const publicKeyFile = `${privateKeyFile}.pub`;
       const publicKey = 'some-public-key';

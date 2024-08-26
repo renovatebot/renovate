@@ -61,6 +61,7 @@ setup(
         flask=[
             'flask>=0.11,<2.0',
             'blinker>=1.4,<2.0',
+            'flask2==1.2.3',
         ],
         pg=[
             'sqlparse',

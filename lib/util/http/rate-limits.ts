@@ -10,6 +10,10 @@ const concurrencyDefaults: ConcurrencyLimitRule[] = [
     concurrency: 999,
   },
   {
+    matchHost: 'repology.org',
+    concurrency: 1,
+  },
+  {
     matchHost: '*',
     concurrency: 16,
   },
@@ -34,6 +38,10 @@ const throttleDefaults: ThrottleLimitRule[] = [
     // We stick to 20 per second just in case.
     matchHost: 'https://plugins.gradle.org',
     throttleMs: 50,
+  },
+  {
+    matchHost: 'repology.org',
+    throttleMs: 2000,
   },
 ];
 

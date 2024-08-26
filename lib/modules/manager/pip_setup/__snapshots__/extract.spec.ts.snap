@@ -76,11 +76,21 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "packageName": "blinker",
     },
     {
+      "currentValue": "==1.2.3",
+      "currentVersion": "1.2.3",
+      "datasource": "pypi",
+      "depName": "flask2",
+      "managerData": {
+        "lineNumber": 63,
+      },
+      "packageName": "flask2",
+    },
+    {
       "currentValue": ">=19.7.0,<20.0",
       "datasource": "pypi",
       "depName": "gunicorn",
       "managerData": {
-        "lineNumber": 74,
+        "lineNumber": 75,
       },
       "packageName": "gunicorn",
     },
@@ -89,7 +99,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "datasource": "pypi",
       "depName": "Werkzeug",
       "managerData": {
-        "lineNumber": 75,
+        "lineNumber": 76,
       },
       "packageName": "werkzeug",
     },
@@ -98,7 +108,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "datasource": "pypi",
       "depName": "statsd",
       "managerData": {
-        "lineNumber": 75,
+        "lineNumber": 76,
       },
       "packageName": "statsd",
     },
@@ -107,7 +117,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "datasource": "pypi",
       "depName": "requests",
       "managerData": {
-        "lineNumber": 76,
+        "lineNumber": 77,
       },
       "packageName": "requests",
       "skipReason": "ignored",
@@ -117,7 +127,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "datasource": "pypi",
       "depName": "raven",
       "managerData": {
-        "lineNumber": 77,
+        "lineNumber": 78,
       },
       "packageName": "raven",
     },
@@ -126,7 +136,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "datasource": "pypi",
       "depName": "future",
       "managerData": {
-        "lineNumber": 78,
+        "lineNumber": 79,
       },
       "packageName": "future",
     },
@@ -135,7 +145,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "datasource": "pypi",
       "depName": "ipaddress",
       "managerData": {
-        "lineNumber": 79,
+        "lineNumber": 80,
       },
       "packageName": "ipaddress",
     },
@@ -144,7 +154,7 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
       "datasource": "pypi",
       "depName": "zope.interface",
       "managerData": {
-        "lineNumber": 80,
+        "lineNumber": 81,
       },
       "packageName": "zope-interface",
     },
