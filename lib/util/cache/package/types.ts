@@ -46,6 +46,7 @@ export type PackageCacheNamespace =
   | 'datasource-deno-versions'
   | 'datasource-deno'
   | 'datasource-docker'
+  | 'datasource-docker-hub-cache'
   | 'datasource-dotnet-version'
   | 'datasource-endoflife-date'
   | 'datasource-galaxy-collection-detailed-version'
