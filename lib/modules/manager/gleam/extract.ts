@@ -65,7 +65,7 @@ export async function extractPackageFile(
   const result = GleamToml.safeParse(content);
   if (!result.success) {
     logger.debug(
-      { err: result.error },
+      { err: result.error, packageFile },
       'Error parsing Gleam package file content',
     );
     return null;
