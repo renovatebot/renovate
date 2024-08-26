@@ -14,7 +14,6 @@ export const presets: Record<string, Preset> = {
       'workarounds:ignoreHttp4sDigestMilestones',
       'workarounds:typesNodeVersioning',
       'workarounds:nodeDockerVersioning',
-      'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
       'workarounds:javaLTSVersions',
@@ -22,6 +21,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:disableMavenParentRoot',
       'workarounds:containerbase',
       'workarounds:bitnamiDockerImageVersioning',
+      'workarounds:k3sKubernetesVersioning',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
@@ -168,6 +168,17 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  k3sKubernetesVersioning: {
+    description: 'Use custom regex versioning for k3s-io/k3s',
+    packageRules: [
+      {
+        matchDatasources: ['github-releases'],
+        matchPackageNames: ['k3s-io/k3s'],
+        versioning:
+          'regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>[a-z]+\\d+))?(?<compatibility>\\+k3s)(?<build>\\d+)$',
+      },
+    ],
+  },
   mavenCommonsAncientVersion: {
     description: 'Fix some problems with very old Maven commons versions.',
     packageRules: [
@@ -186,17 +197,6 @@ export const presets: Record<string, Preset> = {
         matchDepNames: ['node'],
         versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
         versioning: 'node',
-      },
-    ],
-  },
-  reduceRepologyServerLoad: {
-    description:
-      'Limit requests to reduce load on Repology servers until we can fix this properly, see issue `#10133`.',
-    hostRules: [
-      {
-        concurrentRequestLimit: 1,
-        matchHost: 'repology.org',
-        maxRequestsPerSecond: 0.5,
       },
     ],
   },

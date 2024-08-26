@@ -12,7 +12,7 @@ export class RepoCacheLocal extends RepoCacheBase {
   protected async read(): Promise<string | null> {
     const cacheFileName = this.getCacheFileName();
     try {
-      // suppress debug logs with errros
+      // suppress debug logs with errors
       if (!(await cachePathExists(cacheFileName))) {
         return null;
       }

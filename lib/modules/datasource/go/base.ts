@@ -21,9 +21,6 @@ export class BaseGoDatasource {
   private static readonly gitlabHttpsRegExp = regEx(
     /^(?<httpsRegExpUrl>https:\/\/[^/]*gitlab\.[^/]*)\/(?<httpsRegExpName>.+?)(?:\/v\d+)?[/]?$/,
   );
-  private static readonly gitlabRegExp = regEx(
-    /^(?<regExpUrl>gitlab\.[^/]*)\/(?<regExpPath>.+?)(?:\/v\d+)?[/]?$/,
-  );
   private static readonly gitVcsRegexp = regEx(
     /^(?:[^/]+)\/(?<module>.*)\.git(?:$|\/)/,
   );
@@ -154,30 +151,18 @@ export class BaseGoDatasource {
       };
     }
 
-    const gitlabUrl =
-      BaseGoDatasource.gitlabHttpsRegExp.exec(metadataUrl)?.groups
-        ?.httpsRegExpUrl;
-    const gitlabUrlName =
-      BaseGoDatasource.gitlabHttpsRegExp.exec(metadataUrl)?.groups
-        ?.httpsRegExpName;
-    const gitlabModuleName =
-      BaseGoDatasource.gitlabRegExp.exec(goModule)?.groups?.regExpPath;
     const vcsIndicatedModule =
       BaseGoDatasource.gitVcsRegexp.exec(goModule)?.groups?.module;
-    if (gitlabUrl && gitlabUrlName) {
-      if (gitlabModuleName?.startsWith(gitlabUrlName)) {
-        const packageName = vcsIndicatedModule ?? gitlabModuleName;
-        return {
-          datasource: GitlabTagsDatasource.id,
-          registryUrl: gitlabUrl,
-          packageName,
-        };
-      }
 
+    const metadataUrlMatchGroups =
+      BaseGoDatasource.gitlabHttpsRegExp.exec(metadataUrl)?.groups;
+    if (metadataUrlMatchGroups) {
+      const { httpsRegExpUrl, httpsRegExpName } = metadataUrlMatchGroups;
+      const packageName = vcsIndicatedModule ?? httpsRegExpName;
       return {
         datasource: GitlabTagsDatasource.id,
-        registryUrl: gitlabUrl,
-        packageName: gitlabUrlName,
+        registryUrl: httpsRegExpUrl,
+        packageName,
       };
     }
 

@@ -1,18 +1,17 @@
 import is from '@sindresorhus/is';
-import {
+import type {
   ArgumentNode,
   DefinitionNode,
   DocumentNode,
   FieldNode,
-  Kind,
   OperationDefinitionNode,
   SelectionNode,
   SelectionSetNode,
   TypeNode,
   ValueNode,
   VariableDefinitionNode,
-  parse,
 } from 'graphql/language';
+import { Kind, parse } from 'graphql/language';
 
 function isOperationDefinitionNode(
   def: DefinitionNode,
@@ -199,7 +198,7 @@ export function makeGraphqlSnapshot(
       return { variables, ...queryTree };
     }
     return queryTree;
-  } catch (ex) {
+  } catch {
     return null;
   }
 }

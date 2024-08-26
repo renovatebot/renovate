@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
+import type { RenovateConfig } from '../../../../../test/util';
 import {
-  RenovateConfig,
   git,
   mockedFunction,
   partial,

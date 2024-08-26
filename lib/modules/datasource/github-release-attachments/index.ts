@@ -53,7 +53,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
 
   @cache({
     ttlMinutes: 1440,
-    namespace: 'datasource-github-releases',
+    namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
     key: (release: GithubRestRelease, digest: string) =>
       `${release.html_url}:${digest}`,
   })

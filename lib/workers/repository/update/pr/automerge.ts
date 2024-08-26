@@ -1,7 +1,8 @@
 // TODO #22198
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
-import { Pr, platform } from '../../../../modules/platform';
+import type { Pr } from '../../../../modules/platform';
+import { platform } from '../../../../modules/platform';
 import {
   ensureComment,
   ensureCommentRemoval,

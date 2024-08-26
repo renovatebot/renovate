@@ -132,7 +132,7 @@ type PackageJson = {
           );
         }
       }
-    } catch (err) {
+    } catch {
       // ignore
     }
     try {
@@ -147,7 +147,7 @@ type PackageJson = {
           returnVal = 1;
         }
       }
-    } catch (err) {
+    } catch {
       // ignore
     }
   }

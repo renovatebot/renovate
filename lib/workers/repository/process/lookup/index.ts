@@ -3,10 +3,12 @@ import { mergeChildConfig } from '../../../../config';
 import type { ValidationMessage } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import {
+import type {
   GetDigestInputConfig,
   Release,
   ReleaseResult,
+} from '../../../../modules/datasource';
+import {
   applyDatasourceFilters,
   getDigest,
   getRawPkgReleases,
@@ -368,8 +370,10 @@ export async function lookupUpdates(
           unconstrainedValue ||
           versioning.isCompatible(v.version, compareValue),
       );
+      let shrinkedViaVulnerability = false;
       if (config.isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
+        shrinkedViaVulnerability = true;
         logger.debug(
           { filteredReleases },
           'Vulnerability alert found: limiting results to a single release',
@@ -480,6 +484,7 @@ export async function lookupUpdates(
               update,
               allVersionsLength: allVersions.length,
               filteredReleaseVersions: filteredReleases.map((r) => r.version),
+              shrinkedViaVulnerability,
             },
             'Unexpected downgrade detected: skipping',
           );

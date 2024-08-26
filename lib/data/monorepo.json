@@ -35,6 +35,7 @@
       "https://github.com/AutoMapper/AutoMapper",
       "https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection"
     ],
+    "avalonia": "https://github.com/AvaloniaUI/Avalonia",
     "aws-cdk": "https://github.com/aws/aws-cdk",
     "aws-lambda-powertools-typescript": [
       "https://github.com/awslabs/aws-lambda-powertools-typescript",
@@ -251,6 +252,7 @@
       "https://github.com/dotnet/efcore",
       "https://github.com/dotnet/extensions",
       "https://github.com/dotnet/maui",
+      "https://github.com/dotnet/roslyn",
       "https://github.com/dotnet/runtime",
       "https://github.com/dotnet/scaffolding",
       "https://github.com/dotnet/sdk"
@@ -265,6 +267,7 @@
       "https://github.com/electron/forge"
     ],
     "ember-decorators": "https://github.com/ember-decorators/ember-decorators",
+    "embla-carousel": "https://github.com/davidjerleke/embla-carousel",
     "emojibase": "https://github.com/milesj/emojibase",
     "emotion": "https://github.com/emotion-js/emotion",
     "eslint": "https://github.com/eslint/eslint",
@@ -298,9 +301,11 @@
       "https://github.com/dotansimha/graphql-code-generator",
       "https://github.com/dotansimha/graphql-codegen"
     ],
+    "greenmail": "https://github.com/greenmail-mail-test/greenmail",
     "groovy": "https://github.com/apache/groovy",
     "grpc-dotnet": "https://github.com/grpc/grpc-dotnet",
     "grpc-java": "https://github.com/grpc/grpc-java",
+    "gstreamer-rust": "https://gitlab.freedesktop.org/gstreamer/gstreamer-rs",
     "guava": "https://github.com/google/guava",
     "Hangfire": "https://github.com/HangfireIO/Hangfire",
     "hickory-dns": "https://github.com/hickory-dns/hickory-dns",
@@ -309,6 +314,7 @@
     "istanbuljs": "https://github.com/istanbuljs/istanbuljs",
     "jackson": [
       "https://github.com/FasterXML/jackson",
+      "https://github.com/FasterXML/jackson-databind",
       "https://github.com/FasterXML/jackson-dataformats-binary",
       "https://github.com/FasterXML/jackson-dataformats-text"
     ],
@@ -338,6 +344,7 @@
       "https://github.com/loopbackio/loopback-next"
     ],
     "lrnwebcomponents": "https://github.com/elmsln/lrnwebcomponents",
+    "lucide": "https://github.com/lucide-icons/lucide",
     "mailing": "https://github.com/sofn-xyz/mailing",
     "mantine": "https://github.com/mantinedev/mantine",
     "mapstruct": "https://github.com/mapstruct/mapstruct",
@@ -349,7 +356,7 @@
       "https://github.com/mui/material-ui",
       "https://github.com/mui/mui-x"
     ],
-    "mdc-react": "material-components/material-components-web-react",
+    "mdc-react": "https://github.com/material-components/material-components-web-react",
     "mdx": "https://github.com/mdx-js/mdx",
     "middy-js": "https://github.com/middyjs/middy",
     "mikro-orm": "https://github.com/mikro-orm/mikro-orm",
@@ -439,9 +446,12 @@
     "retrofit": "https://github.com/square/retrofit",
     "rjsf": "https://github.com/rjsf-team/react-jsonschema-form",
     "router5": "https://github.com/router5/router5",
+    "ruby-on-rails": "https://github.com/rails/rails",
+    "rust-analyzer": "https://github.com/rust-lang/rust-analyzer",
     "rust-futures": "https://github.com/rust-lang/futures-rs",
     "rust-wasm-bindgen": "https://github.com/rustwasm/wasm-bindgen",
     "sanity": "https://github.com/sanity-io/sanity",
+    "serilog-ui": "https://github.com/serilog-contrib/serilog-ui",
     "scaffdog": "https://github.com/scaffdog/scaffdog",
     "secretlint": "https://github.com/secretlint/secretlint",
     "sendgrid-nodejs": "https://github.com/sendgrid/sendgrid-nodejs",
@@ -476,6 +486,7 @@
     "telus-tds": "https://github.com/telusdigital/tds",
     "telus-tds-core": "https://github.com/telus/tds-core",
     "temporalio-ts": "https://github.com/temporalio/sdk-typescript",
+    "terraform": "https://github.com/hashicorp/terraform",
     "testcontainers-dotnet": "https://github.com/testcontainers/testcontainers-dotnet",
     "testcontainers-go": "https://github.com/testcontainers/testcontainers-go",
     "testcontainers-java": "https://github.com/testcontainers/testcontainers-java",
@@ -490,7 +501,10 @@
     "trpc": "https://github.com/trpc/trpc",
     "trust-dns": "https://github.com/bluejekyll/trust-dns",
     "tsoa": "https://github.com/lukeautry/tsoa",
-    "turbo": "https://github.com/vercel/turbo",
+    "turbo": [
+      "https://github.com/vercel/turbo",
+      "https://github.com/vercel/turborepo"
+    ],
     "turf": "https://github.com/Turfjs/turf",
     "typed-signalr": "https://github.com/nenoNaninu/TypedSignalR.Client.TypeScript",
     "typefaces": "https://github.com/KyleAMathews/typefaces",

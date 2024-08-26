@@ -291,7 +291,11 @@ export function divideWorkspaceAndRootDeps(
       );
 
       // workspaceDir = packageFileDir - lockFileDir
-      const workspaceDir = trimSlashes(packageFileDir.replace(lockFileDir, ''));
+      const workspaceDir = trimSlashes(
+        packageFileDir.startsWith(lockFileDir)
+          ? packageFileDir.slice(lockFileDir.length)
+          : packageFileDir,
+      );
 
       if (is.nonEmptyString(workspaceDir)) {
         let workspaceName: string | undefined;
