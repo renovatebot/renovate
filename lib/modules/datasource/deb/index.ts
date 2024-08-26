@@ -298,7 +298,7 @@ export class DebDatasource extends Datasource {
    */
   @cache({
     namespace: `datasource-${DebDatasource.id}`,
-    key: ({registryUrl, packageName}: GetReleasesConfig) =>
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       `${registryUrl}:${packageName}`,
   })
   async getReleases({
