@@ -42,11 +42,12 @@ import type {
   BranchResponse,
   Config,
   EffectiveReviewer,
-  ListPrTasksResponse,
   PagedResult,
   PrResponse,
+  PrTask,
   RepoBranchingModel,
 } from './types';
+import { UnresolvedPrTasks } from './types';
 import * as utils from './utils';
 import { mergeBodyTransformer } from './utils';
 
@@ -927,7 +928,7 @@ export async function createPr({
       pr,
     );
     if (platformPrOptions?.bbAutoResolvePrTasks) {
-      await autoResolvePrTasks(pr, title, base);
+      await autoResolvePrTasks(pr);
     }
     return pr;
   } catch (err) /* istanbul ignore next */ {
@@ -957,18 +958,14 @@ export async function createPr({
         pr,
       );
       if (platformPrOptions?.bbAutoResolvePrTasks) {
-        await autoResolvePrTasks(pr, title, base);
+        await autoResolvePrTasks(pr);
       }
       return pr;
     }
   }
 }
 
-async function autoResolvePrTasks(
-  pr: Pr,
-  title: string,
-  base: string,
-): Promise<void> {
+async function autoResolvePrTasks(pr: Pr): Promise<void> {
   logger.debug(
     {
       prId: pr.number,
@@ -976,25 +973,25 @@ async function autoResolvePrTasks(
     'Auto resolve PR tasks',
   );
   try {
-    const listTaskRes = (
-      await bitbucketHttp.getJson<ListPrTasksResponse>(
+    const response = (
+      await bitbucketHttp.getJson(
         `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks`,
         { paginate: true, pagelen: 100 },
       )
-    ).body.values;
+    ).body;
 
     logger.trace(
       {
         prId: pr.number,
-        listTaskRes,
+        listTaskRes: response,
       },
       'List PR tasks',
     );
 
-    const unResolvedTasks = utils.filterUnresolvedTasksIds(listTaskRes);
+    const unResolvedTasks: Array<PrTask> = UnresolvedPrTasks.parse(response);
 
     for (const task of unResolvedTasks) {
-      const res = await bitbucketHttp.putJson<unknown>(
+      const res = await bitbucketHttp.putJson(
         `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks/${task.id}`,
         {
           body: {
