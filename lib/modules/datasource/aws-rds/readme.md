@@ -6,7 +6,6 @@ In addition, AWS may pull existing versions if serious problems arise during the
 
 <!-- prettier-ignore -->
 !!! warning
-
     The default versioning of the `aws-rds` datasource is _not_ compatible with [AWS Aurora](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/CHAP_AuroraOverview.html)!
     If you use AWS Aurora, you must set your own custom versioning.
     Scroll down to see an example.
