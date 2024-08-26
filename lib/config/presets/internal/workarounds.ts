@@ -180,17 +180,6 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
-  rke2KubernetesVersioning: {
-    description: 'Use custom regex versioning for rancher/rke2',
-    packageRules: [
-      {
-        matchDatasources: ['github-releases'],
-        matchPackageNames: ['rancher/rke2'],
-        versioning:
-          'regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>[a-z]+\\d+))?(?<compatibility>\\+rke2r)(?<build>\\d+)$',
-      },
-    ],
-  },
   mavenCommonsAncientVersion: {
     description: 'Fix some problems with very old Maven commons versions.',
     packageRules: [
@@ -209,6 +198,17 @@ export const presets: Record<string, Preset> = {
         matchDepNames: ['node'],
         versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
         versioning: 'node',
+      },
+    ],
+  },
+  rke2KubernetesVersioning: {
+    description: 'Use custom regex versioning for rancher/rke2',
+    packageRules: [
+      {
+        matchDatasources: ['github-releases'],
+        matchPackageNames: ['rancher/rke2'],
+        versioning:
+          'regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>[a-z]+\\d+))?(?<compatibility>\\+rke2r)(?<build>\\d+)$',
       },
     ],
   },
