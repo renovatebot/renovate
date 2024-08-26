@@ -65,7 +65,7 @@ For example:
       "customType": "regex",
       "fileMatch": ["\\.yaml$"],
       "matchStrings": [
-        ".*amiFilter=(?<lookupName>.+?)[ ]*\n[ ]*(?<depName>[a-zA-Z0-9-_:]*)[ ]*?:[ ]*?[\"|']?(?<currentValue>[.\\d]+)[\"|']?.*"
+        ".*rdsFilter=(?<lookupName>.+?)[ ]*\n[ ]*(?<depName>[a-zA-Z0-9-_:]*)[ ]*?:[ ]*?[\"|']?(?<currentValue>[.\\d]+)[\"|']?.*"
       ],
       "datasourceTemplate": "aws-rds"
     }
@@ -77,7 +77,7 @@ The configuration above matches every YAML file, and recognizes these lines:
 
 ```yaml
 spec:
-  # amiFilter=[{"Name":"engine","Values":["mysql"]},{"Name":"engine-version","Values":["5.7"]}]
+  # rdsFilter=[{"Name":"engine","Values":["mysql"]},{"Name":"engine-version","Values":["5.7"]}]
   engineVersion: 5.7.34
 ```
 
@@ -93,7 +93,7 @@ Here is the Renovate configuration to use Terraform, `aws-rds` and Aurora MySQL:
       "customType": "regex",
       "fileMatch": [".+\\.tf$"],
       "matchStrings": [
-        "\\s*#\\s*renovate:\\s*amiFilter=(?<lookupName>.+?) depName=(?<depName>.*) versioning=(?<versioning>.*)\\s*.*_version\\s*=\\s*\"(?<currentValue>.*)\""
+        "\\s*#\\s*renovate:\\s*rdsFilter=(?<lookupName>.+?) depName=(?<depName>.*) versioning=(?<versioning>.*)\\s*.*_version\\s*=\\s*\"(?<currentValue>.*)\""
       ],
       "datasourceTemplate": "aws-rds"
     }
@@ -104,6 +104,6 @@ Here is the Renovate configuration to use Terraform, `aws-rds` and Aurora MySQL:
 The above configuration will ...insert explanation of bits below...
 
 ```
-# renovate:amiFilter=[{"Name":"engine","Values":["aurora-mysql"]},{"Name":"engine-version","Values":["8.0"]}] depName=aurora-mysql versioning=loose
+# renovate:rdsFilter=[{"Name":"engine","Values":["aurora-mysql"]},{"Name":"engine-version","Values":["8.0"]}] depName=aurora-mysql versioning=loose
 engine_version = "8.0.mysql_aurora.3.05.2"
 ```
