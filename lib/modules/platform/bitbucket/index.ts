@@ -971,8 +971,7 @@ async function autoResolvePrTasks(
 ): Promise<void> {
   logger.debug(
     {
-      title,
-      base,
+      prId: pr.number,
     },
     'Auto resolve PR tasks',
   );
@@ -986,8 +985,7 @@ async function autoResolvePrTasks(
 
     logger.trace(
       {
-        title,
-        base,
+        prId: pr.number,
         listTaskRes,
       },
       'List PR tasks',
@@ -1009,8 +1007,7 @@ async function autoResolvePrTasks(
       );
       logger.trace(
         {
-          title,
-          base,
+          prId: pr.number,
           updateTaskResponse: res,
         },
         'Put PR tasks - mark resolved',
