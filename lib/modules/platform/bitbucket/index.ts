@@ -984,7 +984,7 @@ async function autoResolvePrTasks(
       )
     ).body.values;
 
-    logger.debug(
+    logger.trace(
       {
         title,
         base,
