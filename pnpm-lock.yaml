@@ -69,8 +69,8 @@ importers:
         specifier: 0.1.3
         version: 0.1.3
       '@renovatebot/detect-tools':
-        specifier: 1.0.4
-        version: 1.0.4
+        specifier: 1.1.0
+        version: 1.1.0
       '@renovatebot/kbpgp':
         specifier: 3.0.1
         version: 3.0.1
@@ -1531,8 +1531,8 @@ packages:
     peerDependencies:
       '@redis/client': ^1.0.0
 
-  '@renovatebot/detect-tools@1.0.4':
-    resolution: {integrity: sha512-s7RvoGgEolHIZ5IQUVoYJMa3uVDxMuz9TDq9zl+j678wNNygT4CoqaArxkZLbGzDU7Znf+HhhMGV5/etUd3ljQ==}
+  '@renovatebot/detect-tools@1.1.0':
+    resolution: {integrity: sha512-0GEOOX4QhUBQIY4xsr0g9sb/PrwO3C+uGPsAXlXklTDFnmXenFQ/XcEiQMTLAxPoeHofQCQ79BVCxlDVhcJ8DA==}
 
   '@renovatebot/eslint-plugin@file:tools/eslint':
     resolution: {directory: tools/eslint, type: directory}
@@ -7862,7 +7862,7 @@ snapshots:
     dependencies:
       '@redis/client': 1.6.0
 
-  '@renovatebot/detect-tools@1.0.4':
+  '@renovatebot/detect-tools@1.1.0':
     dependencies:
       fs-extra: 11.2.0
       toml-eslint-parser: 0.10.0
