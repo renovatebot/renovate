@@ -48,7 +48,7 @@ export class GoDatasource extends Datasource {
   @cache({
     namespace: `datasource-${GoDatasource.id}`,
     // TODO: types (#22198)
-    key: ({ packageName }: Partial<DigestConfig>) =>
+    key: ({ packageName }: GetReleasesConfig) =>
       `getReleases:${packageName}-digest`,
   })
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
