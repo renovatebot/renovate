@@ -74,3 +74,24 @@ export const Repositories = z
     values: LooseArray(RepoInfo),
   })
   .transform((body) => body.values);
+
+const taskState = z.union([z.literal('RESOLVED'), z.literal('UNRESOLVED')]);
+
+const prTask = z.object({
+  id: z.number(),
+  state: taskState,
+  content: z.object({
+    raw: z.string(),
+  }),
+});
+
+export type PrTask = z.infer<typeof prTask>;
+
+export const UnresolvedPrTasks = z
+  .object({
+    values: z.array(prTask),
+  })
+  .transform(
+    (data): Array<PrTask> =>
+      data.values.filter((task: PrTask) => task.state === 'UNRESOLVED'),
+  );

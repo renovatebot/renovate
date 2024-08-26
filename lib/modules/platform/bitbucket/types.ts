@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import type { Pr } from '../types';
 
 export type BitbucketMergeStrategy = 'fast_forward' | 'merge_commit' | 'squash';
@@ -92,24 +91,3 @@ export interface BitbucketPrCacheData {
   updated_on: string | null;
   author: string | null;
 }
-
-const taskState = z.union([z.literal('RESOLVED'), z.literal('UNRESOLVED')]);
-
-const prTask = z.object({
-  id: z.number(),
-  state: taskState,
-  content: z.object({
-    raw: z.string(),
-  }),
-});
-
-export type PrTask = z.infer<typeof prTask>;
-
-export const UnresolvedPrTasks = z
-  .object({
-    values: z.array(prTask),
-  })
-  .transform(
-    (data): Array<PrTask> =>
-      data.values.filter((task: PrTask) => task.state === 'UNRESOLVED'),
-  );

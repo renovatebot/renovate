@@ -35,7 +35,8 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import { BitbucketPrCache } from './pr-cache';
-import { RepoInfo, Repositories } from './schema';
+import type { PrTask } from './schema';
+import { RepoInfo, Repositories, UnresolvedPrTasks } from './schema';
 import type {
   Account,
   BitbucketStatus,
@@ -44,10 +45,8 @@ import type {
   EffectiveReviewer,
   PagedResult,
   PrResponse,
-  PrTask,
   RepoBranchingModel,
 } from './types';
-import { UnresolvedPrTasks } from './types';
 import * as utils from './utils';
 import { mergeBodyTransformer } from './utils';
 
