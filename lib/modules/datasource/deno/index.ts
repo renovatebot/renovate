@@ -37,7 +37,7 @@ export class DenoDatasource extends Datasource {
     namespace: `datasource-${DenoDatasource.id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
       // TODO: types (#22198)
-      `${registryUrl}:${packageName}`,
+      `getReleases:${registryUrl}:${packageName}`,
   })
   async getReleases({
     packageName,
@@ -70,8 +70,8 @@ export class DenoDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${DenoDatasource.id}-versions`,
-    key: (moduleAPIURL) => moduleAPIURL,
+    namespace: `datasource-${DenoDatasource.id}`,
+    key: (moduleAPIURL) => `getReleaseResult:${moduleAPIURL}`,
   })
   async getReleaseResult(moduleAPIURL: string): Promise<ReleaseResult> {
     const releasesCache: Record<string, Release> =
