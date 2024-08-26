@@ -53,7 +53,7 @@ export async function get<T = never>(
       // istanbul ignore next
       await rm(namespace, key);
     }
-  } catch (err) {
+  } catch {
     logger.trace({ rprefix, namespace, key }, 'Cache miss');
   }
   return undefined;

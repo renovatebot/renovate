@@ -40,6 +40,38 @@ async function getFileContent(
   return fileContent;
 }
 
+function hasAny(set: Set<string>, targets: Iterable<string>): boolean {
+  for (const target of targets) {
+    if (set.has(target)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+type FilePath = Pick<FileChange, 'path'>;
+
+function getManagersForPackageFiles<T extends FilePath>(
+  packageFiles: T[],
+  managerPackageFiles: Record<string, Set<string>>,
+): Set<string> {
+  const packageFileNames = packageFiles.map((packageFile) => packageFile.path);
+  return new Set(
+    Object.keys(managerPackageFiles).filter((manager) =>
+      hasAny(managerPackageFiles[manager], packageFileNames),
+    ),
+  );
+}
+
+function getPackageFilesForManager<T extends FilePath>(
+  packageFiles: T[],
+  managerPackageFiles: Set<string>,
+): T[] {
+  return packageFiles.filter((packageFile) =>
+    managerPackageFiles.has(packageFile.path),
+  );
+}
+
 export async function getUpdatedPackageFiles(
   config: BranchConfig,
 ): Promise<PackageFilesResult> {
@@ -50,9 +82,9 @@ export async function getUpdatedPackageFiles(
   );
   let updatedFileContents: Record<string, string> = {};
   const nonUpdatedFileContents: Record<string, string> = {};
-  const packageFileManagers: Record<string, Set<string>> = {};
+  const managerPackageFiles: Record<string, Set<string>> = {};
   const packageFileUpdatedDeps: Record<string, PackageDependency[]> = {};
-  const lockFileMaintenanceFiles = [];
+  const lockFileMaintenanceFiles: string[] = [];
   let firstUpdate = true;
   for (const upgrade of config.upgrades) {
     const manager = upgrade.manager!;
@@ -62,8 +94,8 @@ export async function getUpdatedPackageFiles(
     const newVersion = upgrade.newVersion!;
     const currentVersion = upgrade.currentVersion!;
     const updateLockedDependency = get(manager, 'updateLockedDependency')!;
-    packageFileManagers[packageFile] ??= new Set<string>();
-    packageFileManagers[packageFile].add(manager);
+    managerPackageFiles[manager] ??= new Set<string>();
+    managerPackageFiles[manager].add(packageFile);
     packageFileUpdatedDeps[packageFile] ??= [];
     packageFileUpdatedDeps[packageFile].push({ ...upgrade });
     const packageFileContent = await getFileContent(
@@ -291,15 +323,19 @@ export async function getUpdatedPackageFiles(
   const updatedArtifacts: FileChange[] = [];
   const artifactErrors: ArtifactError[] = [];
   const artifactNotices: ArtifactNotice[] = [];
-  // istanbul ignore if
   if (is.nonEmptyArray(updatedPackageFiles)) {
     logger.debug('updateArtifacts for updatedPackageFiles');
-  }
-  for (const packageFile of updatedPackageFiles) {
-    const updatedDeps = packageFileUpdatedDeps[packageFile.path];
-    const managers = packageFileManagers[packageFile.path];
-    if (is.nonEmptySet(managers)) {
-      for (const manager of managers) {
+    const updatedPackageFileManagers = getManagersForPackageFiles(
+      updatedPackageFiles,
+      managerPackageFiles,
+    );
+    for (const manager of updatedPackageFileManagers) {
+      const packageFilesForManager = getPackageFilesForManager(
+        updatedPackageFiles,
+        managerPackageFiles[manager],
+      );
+      for (const packageFile of packageFilesForManager) {
+        const updatedDeps = packageFileUpdatedDeps[packageFile.path];
         const results = await managerUpdateArtifacts(manager, {
           packageFileName: packageFile.path,
           updatedDeps,
@@ -327,15 +363,19 @@ export async function getUpdatedPackageFiles(
     path: name,
     contents: nonUpdatedFileContents[name],
   }));
-  // istanbul ignore if
   if (is.nonEmptyArray(nonUpdatedPackageFiles)) {
     logger.debug('updateArtifacts for nonUpdatedPackageFiles');
-  }
-  for (const packageFile of nonUpdatedPackageFiles) {
-    const updatedDeps = packageFileUpdatedDeps[packageFile.path];
-    const managers = packageFileManagers[packageFile.path];
-    if (is.nonEmptySet(managers)) {
-      for (const manager of managers) {
+    const nonUpdatedPackageFileManagers = getManagersForPackageFiles(
+      nonUpdatedPackageFiles,
+      managerPackageFiles,
+    );
+    for (const manager of nonUpdatedPackageFileManagers) {
+      const packageFilesForManager = getPackageFilesForManager(
+        nonUpdatedPackageFiles,
+        managerPackageFiles[manager],
+      );
+      for (const packageFile of packageFilesForManager) {
+        const updatedDeps = packageFileUpdatedDeps[packageFile.path];
         const results = await managerUpdateArtifacts(manager, {
           packageFileName: packageFile.path,
           updatedDeps,
@@ -360,26 +400,34 @@ export async function getUpdatedPackageFiles(
     }
   }
   if (!reuseExistingBranch) {
+    const lockFileMaintenancePackageFiles: FilePath[] =
+      lockFileMaintenanceFiles.map((name) => ({
+        path: name,
+      }));
     // Only perform lock file maintenance if it's a fresh commit
-    // istanbul ignore if
     if (is.nonEmptyArray(lockFileMaintenanceFiles)) {
       logger.debug('updateArtifacts for lockFileMaintenanceFiles');
-    }
-    for (const packageFileName of lockFileMaintenanceFiles) {
-      const managers = packageFileManagers[packageFileName];
-      if (is.nonEmptySet(managers)) {
-        for (const manager of managers) {
+      const lockFileMaintenanceManagers = getManagersForPackageFiles(
+        lockFileMaintenancePackageFiles,
+        managerPackageFiles,
+      );
+      for (const manager of lockFileMaintenanceManagers) {
+        const packageFilesForManager = getPackageFilesForManager(
+          lockFileMaintenancePackageFiles,
+          managerPackageFiles[manager],
+        );
+        for (const packageFile of packageFilesForManager) {
           const contents =
-            updatedFileContents[packageFileName] ||
-            (await getFile(packageFileName, config.baseBranch));
+            updatedFileContents[packageFile.path] ||
+            (await getFile(packageFile.path, config.baseBranch));
           const results = await managerUpdateArtifacts(manager, {
-            packageFileName,
+            packageFileName: packageFile.path,
             updatedDeps: [],
             newPackageFileContent: contents!,
             config: patchConfigForArtifactsUpdate(
               config,
               manager,
-              packageFileName,
+              packageFile.path,
             ),
           });
           processUpdateArtifactResults(

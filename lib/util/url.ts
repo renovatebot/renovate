@@ -47,7 +47,7 @@ export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
   let pathname;
   try {
     ({ host, pathname } = new URL(inputString));
-  } catch (e) {
+  } catch {
     pathname = inputString;
   }
 
@@ -92,7 +92,7 @@ export function isHttpUrl(url: unknown): boolean {
   try {
     const { protocol } = new URL(url);
     return protocol === 'https:' || protocol === 'http:';
-  } catch (err) {
+  } catch {
     return false;
   }
 }
@@ -104,7 +104,7 @@ export function parseUrl(url: string | undefined | null): URL | null {
 
   try {
     return new URL(url);
-  } catch (err) {
+  } catch {
     return null;
   }
 }

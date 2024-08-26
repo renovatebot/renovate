@@ -31,6 +31,7 @@ concurrency:
 env:
   DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
   NODE_VERSION: 20
+  PDM_VERSION: 2.18.1 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -259,7 +260,13 @@ jobs:
           key: prettier-main-cache
 
       - name: Lint
-        run: pnpm prettier --cache-location .cache/prettier
+        run: |
+          pnpm prettier --write --cache-location .cache/prettier
+          git diff --quiet || {
+            echo "[ERROR] Please apply the changes prettier suggests:"
+            git diff --color=always
+            exit 1
+          }
 
       - name: Remove cache
         if: github.event_name == 'push'
@@ -583,8 +590,21 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@568ddd69406b30de1774ec0044b73ae06e716aa4 # v4.1
+        with:
+          python-version-file: .python-version
+          version: ${{ env.PDM_VERSION }}
+          cache: true
+
+      - name: Install pdm dependencies
+        run: pdm install
+
       - name: Build
         run: pnpm build:docs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SKIP_GITHUB_ISSUES: ${{ github.event_name == 'pull_request' && 'true' || '' }}
 
       - name: Test docs
         run: pnpm test:docs
@@ -594,6 +614,9 @@ jobs:
         with:
           name: docs
           path: tmp/docs/
+
+      - name: Build mkdocs
+        run: pnpm mkdocs build --no-build
 
   test-e2e:
     needs: [build]
@@ -660,7 +683,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@f0e5ba416d0f8da2abcb6eefa7cda69bcc4d5994 # v3.4.1
+        uses: containerbase/internal-tools@8c6a37b66220230ae326a513771fc3345375a678 # v3.4.9
         with:
           command: docker-config
 

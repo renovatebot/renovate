@@ -3,13 +3,8 @@ import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import semver from 'semver';
-import {
-  Options,
-  ResetMode,
-  SimpleGit,
-  TaskOptions,
-  simpleGit,
-} from 'simple-git';
+import type { Options, SimpleGit, TaskOptions } from 'simple-git';
+import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
@@ -107,13 +102,15 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
     round++;
   }
 
+  // Can't be `undefined` here.
+  // eslint-disable-next-line @typescript-eslint/only-throw-error
   throw lastError;
 }
 
 async function isDirectory(dir: string): Promise<boolean> {
   try {
     return (await fs.stat(dir)).isDirectory();
-  } catch (err) {
+  } catch {
     return false;
   }
 }
@@ -517,7 +514,7 @@ export async function getCommitMessages(): Promise<string[]> {
       format: { message: '%s' },
     });
     return res.all.map((commit) => commit.message);
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     return [];
   }
 }
@@ -970,7 +967,7 @@ export async function hasDiff(
     return (
       (await gitRetry(() => git.diff([sourceRef, targetRef, '--']))) !== ''
     );
-  } catch (err) {
+  } catch {
     return true;
   }
 }

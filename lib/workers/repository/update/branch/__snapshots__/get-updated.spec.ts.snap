@@ -142,7 +142,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
   "updatedPackageFiles": [
     {
       "contents": "some new content",
-      "path": "undefined",
+      "path": "composer.json",
       "type": "addition",
     },
   ],
