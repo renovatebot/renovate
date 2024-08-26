@@ -34,7 +34,6 @@ export type PackageCacheNamespace =
   | 'datasource-bazel'
   | 'datasource-bitbucket-tags'
   | 'datasource-bitrise'
-  | 'datasource-cdnjs-digest'
   | 'datasource-cdnjs'
   | 'datasource-conan-revisions'
   | 'datasource-conan'
