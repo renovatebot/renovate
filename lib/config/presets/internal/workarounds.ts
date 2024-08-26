@@ -22,6 +22,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:containerbase',
       'workarounds:bitnamiDockerImageVersioning',
       'workarounds:k3sKubernetesVersioning',
+      'workarounds:rke2KubernetesVersioning',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
@@ -197,6 +198,17 @@ export const presets: Record<string, Preset> = {
         matchDepNames: ['node'],
         versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
         versioning: 'node',
+      },
+    ],
+  },
+  rke2KubernetesVersioning: {
+    description: 'Use custom regex versioning for rancher/rke2',
+    packageRules: [
+      {
+        matchDatasources: ['github-releases'],
+        matchPackageNames: ['rancher/rke2'],
+        versioning:
+          'regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>[a-z]+\\d+))?(?<compatibility>\\+rke2r)(?<build>\\d+)$',
       },
     ],
   },
