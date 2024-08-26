@@ -93,21 +93,21 @@ export interface BitbucketPrCacheData {
   author: string | null;
 }
 
-const _taskState = z.union([z.literal('RESOLVED'), z.literal('UNRESOLVED')]);
+const taskState = z.union([z.literal('RESOLVED'), z.literal('UNRESOLVED')]);
 
-const _prTask = z.object({
+const prTask = z.object({
   id: z.number(),
-  state: _taskState,
+  state: taskState,
   content: z.object({
     raw: z.string(),
   }),
 });
 
-export type PrTask = z.infer<typeof _prTask>;
+export type PrTask = z.infer<typeof prTask>;
 
 export const UnresolvedPrTasks = z
   .object({
-    values: z.array(_prTask),
+    values: z.array(prTask),
   })
   .transform(
     (data): Array<PrTask> =>
