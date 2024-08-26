@@ -118,10 +118,10 @@ Credentials for authenticated/private feeds can be given via host rules in the c
 }
 ```
 
-If you use using Azure DevOps:
+If you use Azure DevOps:
 
-- you can set `matchHost` to `pkgs.dev.azure.com`
-- remember to set the username, so Renovate can build the project when it creates the PR
+- set `matchHost` to `pkgs.dev.azure.com`
+- set the username, so Renovate can build the project when it creates the PR
 
 <!-- prettier-ignore -->
 !!! note
