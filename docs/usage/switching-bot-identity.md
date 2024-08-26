@@ -10,7 +10,7 @@ Renovate uses its bot identity to know:
 
 Common reasons to switch bot identity are:
 
-- Migrating from Mend-hosted to self-hosted
+- Migrating between Mend-hosted and self-hosted
 - Renaming the bot (self-hosted)
 - Editor note: Maybe there are other reasons too, please comment
 
