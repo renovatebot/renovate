@@ -67,7 +67,6 @@ export type PackageCacheNamespace =
   | 'datasource-github-release-attachments'
   | 'datasource-gitlab-packages'
   | 'datasource-gitlab-releases'
-  | 'datasource-gitlab-tags-commit'
   | 'datasource-gitlab-tags'
   | 'datasource-glasskube-packages'
   | 'datasource-go-direct'

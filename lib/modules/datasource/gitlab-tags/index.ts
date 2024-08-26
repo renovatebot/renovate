@@ -29,7 +29,7 @@ export class GitlabTagsDatasource extends Datasource {
   @cache({
     namespace: `datasource-${GitlabTagsDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${getDepHost(registryUrl)}:${packageName}`,
+      `getReleases:${getDepHost(registryUrl)}:${packageName}`,
   })
   async getReleases({
     registryUrl,
@@ -72,9 +72,9 @@ export class GitlabTagsDatasource extends Datasource {
    * Returs the latest commit hash of the repository.
    */
   @cache({
-    namespace: `datasource-${GitlabTagsDatasource.id}-commit`,
+    namespace: `datasource-${GitlabTagsDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${getDepHost(registryUrl)}:${packageName}`,
+      `getDigest:${getDepHost(registryUrl)}:${packageName}`,
   })
   override async getDigest(
     { packageName: repo, registryUrl }: Partial<DigestConfig>,
