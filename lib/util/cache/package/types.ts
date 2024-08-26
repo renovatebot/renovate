@@ -42,8 +42,6 @@ export type PackageCacheNamespace =
   | 'datasource-cpan'
   | 'datasource-crate-metadata'
   | 'datasource-crate'
-  | 'datasource-deno-details'
-  | 'datasource-deno-versions'
   | 'datasource-deno'
   | 'datasource-docker-architecture'
   | 'datasource-docker-hub-cache'
