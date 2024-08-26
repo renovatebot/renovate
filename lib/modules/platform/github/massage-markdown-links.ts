@@ -17,7 +17,7 @@ const urlRegex =
 
 function massageLink(input: string): string {
   return input.replace(
-    regEx(/(?:to|redirect\.)?github\.com/i),
+    regEx(/(?:to|redirect\.|www\.)?github\.com/i),
     'redirect.github.com',
   );
 }
