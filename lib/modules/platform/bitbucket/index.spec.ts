@@ -4,7 +4,7 @@ import { reset as memCacheReset } from '../../../util/cache/memory';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { Platform, PlatformResult, RepoParams } from '../types';
-import type { PrTask } from './types';
+import type { PrTask } from './schema';
 
 jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
