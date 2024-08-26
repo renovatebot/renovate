@@ -88,9 +88,6 @@ export async function extractPackageFile(
 
   const versionsByPackage = await extractLockFileVersions(lockFileName);
   if (!versionsByPackage) {
-    logger.debug(
-      `Error parsing or extracting locked versions from ${lockFileName}.`,
-    );
     return packageFileContent;
   }
 
