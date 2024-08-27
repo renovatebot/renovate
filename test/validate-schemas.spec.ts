@@ -30,22 +30,34 @@ describe('validate-schemas', () => {
       });
     }
 
-    await Promise.all(
+    const settledPromises: any = await Promise.allSettled(
       schemasAndJsonFiles.map(async ({ schemaName, dataFileName }) => {
         const data = Json.parse(
           await fs.readFile(upath.join(dataFileDir, dataFileName), 'utf8'),
         );
 
-        let result: Record<string, unknown> =
-          // eslint-disable-next-line import/namespace
-          Schemas[schemaName].safeParse(data);
-        result = { ...result, dataFileName, schemaName };
-        expect(result).toMatchObject({
-          dataFileName,
-          schemaName,
-          success: true,
-        });
+        // validate json data against schema: using parse here instead of safeParse so we throw
+        // this leads to a better error message when the assertion fails
+        Schemas[schemaName].parse(data);
       }),
     );
+
+    for (let i = 0; i < settledPromises.length; i++) {
+      const { schemaName, dataFileName } = schemasAndJsonFiles[i];
+      const res = {
+        schemaName,
+        dataFileName,
+        settledPromise: { reason: undefined, ...settledPromises[i] },
+      };
+
+      expect(res).toMatchObject({
+        schemaName,
+        dataFileName,
+        settledPromise: {
+          status: 'fulfilled',
+          reason: undefined,
+        },
+      });
+    }
   });
 });
