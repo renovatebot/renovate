@@ -73,16 +73,16 @@ export class GitlabTagsDatasource extends Datasource {
    */
   @cache({
     namespace: `datasource-${GitlabTagsDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+    key: ({ registryUrl, packageName }: DigestConfig) =>
       `getDigest:${getDepHost(registryUrl)}:${packageName}`,
   })
   override async getDigest(
-    { packageName: repo, registryUrl }: Partial<DigestConfig>,
+    { packageName: repo, registryUrl }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
     const depHost = getDepHost(registryUrl);
 
-    const urlEncodedRepo = encodeURIComponent(repo!);
+    const urlEncodedRepo = encodeURIComponent(repo);
     let digest: string | null = null;
 
     try {
