@@ -14,7 +14,6 @@ export const presets: Record<string, Preset> = {
       'workarounds:ignoreHttp4sDigestMilestones',
       'workarounds:typesNodeVersioning',
       'workarounds:nodeDockerVersioning',
-      'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
       'workarounds:javaLTSVersions',
@@ -23,6 +22,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:containerbase',
       'workarounds:bitnamiDockerImageVersioning',
       'workarounds:k3sKubernetesVersioning',
+      'workarounds:rke2KubernetesVersioning',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
@@ -201,14 +201,14 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
-  reduceRepologyServerLoad: {
-    description:
-      'Limit requests to reduce load on Repology servers until we can fix this properly, see issue `#10133`.',
-    hostRules: [
+  rke2KubernetesVersioning: {
+    description: 'Use custom regex versioning for rancher/rke2',
+    packageRules: [
       {
-        concurrentRequestLimit: 1,
-        matchHost: 'repology.org',
-        maxRequestsPerSecond: 0.5,
+        matchDatasources: ['github-releases'],
+        matchPackageNames: ['rancher/rke2'],
+        versioning:
+          'regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>[a-z]+\\d+))?(?<compatibility>\\+rke2r)(?<build>\\d+)$',
       },
     ],
   },
