@@ -7,6 +7,7 @@ import {
 } from '@aws-sdk/client-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getPkgReleases } from '..';
+import { logger } from '../../../logger';
 import { AwsLambdaLayerDataSource } from '.';
 
 const datasource = AwsLambdaLayerDataSource.id;
@@ -93,7 +94,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
         undefined,
       );
 
-      expect(lambdaLayerDatasource.logger.warn).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         'AWS returned layers with architecture but the architecture is not set in the filter. You might update to a layer with wrong architecture.',
       );
     });
@@ -108,7 +109,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
         'architecture',
       );
 
-      expect(lambdaLayerDatasource.logger.warn).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         'AWS returned layers with runtime but the runtime is not set in the filter. You might update to a layer with wrong runtime.',
       );
     });
