@@ -11,19 +11,20 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
+import { getDep } from '../dockerfile/extract';
 import { ProfileDefinition, type SveltosHelmSource } from './schema';
 import { removeRepositoryName } from './util';
 
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  _config?: ExtractConfig,
+  config?: ExtractConfig,
 ): PackageFileContent | null {
-  let definitions: Record<string, unknown>[] | ProfileDefinition[];
+  let definitions: ProfileDefinition[];
   try {
     definitions = parseYaml(content, null, {
       customSchema: ProfileDefinition,
-    }) as any;
+    });
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Sveltos definition.');
     return null;
@@ -33,7 +34,7 @@ export function extractPackageFile(
     // Use zod's safeParse method to check if the object matches the ProfileDefinition schema
     const result = ProfileDefinition.safeParse(definition);
     if (result.success) {
-      return processAppSpec(result.data);
+      return processAppSpec(result.data, config);
     }
     return [];
   });
@@ -43,8 +44,10 @@ export function extractPackageFile(
 
 function processHelmCharts(
   source: SveltosHelmSource,
+  registryAliases: Record<string, string> | undefined,
 ): PackageDependency | null {
-  const dep: PackageDependency = {
+  let dep: PackageDependency = {
+    depName: source.chartName,
     currentValue: source.chartVersion,
     datasource: HelmDatasource.id,
   };
@@ -53,14 +56,15 @@ function processHelmCharts(
     isOCIRegistry(source.repositoryURL) ||
     !source.repositoryURL.includes('://')
   ) {
-    const registryURL = trimTrailingSlash(
-      removeOCIPrefix(source.repositoryURL),
-    );
+    const image = trimTrailingSlash(removeOCIPrefix(source.repositoryURL));
 
-    dep.depName = `${registryURL}`;
     dep.datasource = DockerDatasource.id;
+    dep.packageName = getDep(image, false, registryAliases).depName;
   } else {
-    dep.depName = removeRepositoryName(source.repositoryName, source.chartName);
+    dep.packageName = removeRepositoryName(
+      source.repositoryName,
+      source.chartName,
+    );
     dep.registryUrls = [source.repositoryURL];
     dep.datasource = HelmDatasource.id;
   }
@@ -68,7 +72,10 @@ function processHelmCharts(
   return dep;
 }
 
-function processAppSpec(definition: ProfileDefinition): PackageDependency[] {
+function processAppSpec(
+  definition: ProfileDefinition,
+  config?: ExtractConfig,
+): PackageDependency[] {
   const spec = definition.spec;
 
   const deps: PackageDependency[] = [];
@@ -77,7 +84,7 @@ function processAppSpec(definition: ProfileDefinition): PackageDependency[] {
 
   if (is.nonEmptyArray(spec.helmCharts)) {
     for (const source of coerceArray(spec.helmCharts)) {
-      const dep = processHelmCharts(source);
+      const dep = processHelmCharts(source, config?.registryAliases);
       if (dep) {
         dep.depType = depType;
         deps.push(dep);

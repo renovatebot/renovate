@@ -4,6 +4,7 @@ import { extractPackageFile } from '.';
 
 const validProfile = Fixtures.get('validProfile.yml');
 const validClusterProfile = Fixtures.get('validClusterProfile.yml');
+const validClusterProfileOCI = Fixtures.get('validClusterProfileOCI.yml');
 const validEventTrigger = Fixtures.get('validEventTrigger.yml');
 const malformedProfiles = Fixtures.get('malformedProfiles.yml');
 const randomManifest = Fixtures.get('randomManifest.yml');
@@ -30,7 +31,7 @@ describe('modules/manager/sveltos/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('return result for double quoted argoproj.io apiVersion reference', () => {
+    it('return result for double quoted projectsveltos.io apiVersion reference', () => {
       const result = extractPackageFile(
         codeBlock`
           apiVersion: "config.projectsveltos.io/v1beta1"
@@ -52,7 +53,8 @@ describe('modules/manager/sveltos/extract', () => {
             currentValue: '23.4.0',
             datasource: 'helm',
             depType: 'ClusterProfile',
-            depName: 'prometheus',
+            depName: 'prometheus-community/prometheus',
+            packageName: 'prometheus',
             registryUrls: [
               'https://prometheus-community.github.io/helm-charts',
             ],
@@ -61,7 +63,7 @@ describe('modules/manager/sveltos/extract', () => {
       });
     });
 
-    it('return result for single quoted argoproj.io apiVersion reference', () => {
+    it('return result for single quoted projectsveltos.io apiVersion reference', () => {
       const result = extractPackageFile(
         codeBlock`
           apiVersion: 'config.projectsveltos.io/v1beta1'
@@ -83,7 +85,8 @@ describe('modules/manager/sveltos/extract', () => {
             currentValue: '23.4.0',
             datasource: 'helm',
             depType: 'ClusterProfile',
-            depName: 'prometheus',
+            depName: 'prometheus-community/prometheus',
+            packageName: 'prometheus',
             registryUrls: [
               'https://prometheus-community.github.io/helm-charts',
             ],
@@ -100,7 +103,8 @@ describe('modules/manager/sveltos/extract', () => {
             currentValue: '23.4.0',
             datasource: 'helm',
             depType: 'Profile',
-            depName: 'prometheus',
+            depName: 'prometheus-community/prometheus',
+            packageName: 'prometheus',
             registryUrls: [
               'https://prometheus-community.github.io/helm-charts',
             ],
@@ -109,27 +113,31 @@ describe('modules/manager/sveltos/extract', () => {
             currentValue: 'v3.2.5',
             datasource: 'helm',
             depType: 'Profile',
-            depName: 'kyverno',
+            depName: 'kyverno/kyverno',
+            packageName: 'kyverno',
             registryUrls: ['https://kyverno.github.io/kyverno/'],
           },
           {
             currentValue: 'v3.2.0',
             datasource: 'helm',
             depType: 'Profile',
-            depName: 'kyverno-policies',
+            depName: 'kyverno/kyverno-policies',
+            packageName: 'kyverno-policies',
             registryUrls: ['https://kyverno.github.io/kyverno/'],
           },
           {
             currentValue: '0.7.2',
             datasource: 'docker',
             depType: 'Profile',
-            depName: 'registry-1.docker.io/bitnamicharts/vault',
+            depName: 'oci://registry-1.docker.io/bitnamicharts/vault',
+            packageName: 'registry-1.docker.io/bitnamicharts/vault',
           },
           {
             currentValue: '0.5.0',
             datasource: 'docker',
             depType: 'Profile',
-            depName: 'custom-registry:443/charts/vault-sidecar',
+            depName: 'oci://custom-registry:443/charts/vault-sidecar',
+            packageName: 'custom-registry:443/charts/vault-sidecar',
           },
         ],
       });
@@ -146,7 +154,8 @@ describe('modules/manager/sveltos/extract', () => {
             currentValue: '23.4.0',
             datasource: 'helm',
             depType: 'ClusterProfile',
-            depName: 'prometheus',
+            depName: 'prometheus-community/prometheus',
+            packageName: 'prometheus',
             registryUrls: [
               'https://prometheus-community.github.io/helm-charts',
             ],
@@ -155,27 +164,54 @@ describe('modules/manager/sveltos/extract', () => {
             currentValue: 'v3.2.5',
             datasource: 'helm',
             depType: 'ClusterProfile',
-            depName: 'kyverno',
+            depName: 'kyverno/kyverno',
+            packageName: 'kyverno',
             registryUrls: ['https://kyverno.github.io/kyverno/'],
           },
           {
             currentValue: 'v3.2.0',
             datasource: 'helm',
             depType: 'ClusterProfile',
-            depName: 'kyverno-policies',
+            depName: 'kyverno/kyverno-policies',
+            packageName: 'kyverno-policies',
             registryUrls: ['https://kyverno.github.io/kyverno/'],
           },
           {
             currentValue: '0.7.2',
             datasource: 'docker',
             depType: 'ClusterProfile',
-            depName: 'registry-1.docker.io/bitnamicharts/vault',
+            depName: 'oci://registry-1.docker.io/bitnamicharts/vault',
+            packageName: 'registry-1.docker.io/bitnamicharts/vault',
           },
           {
             currentValue: '0.5.0',
             datasource: 'docker',
             depType: 'ClusterProfile',
-            depName: 'custom-registry:443/charts/vault-sidecar',
+            depName: 'oci://custom-registry:443/charts/vault-sidecar',
+            packageName: 'custom-registry:443/charts/vault-sidecar',
+          },
+        ],
+      });
+    });
+
+    it('considers registryAliases', () => {
+      const result = extractPackageFile(
+        validClusterProfileOCI,
+        'clusterprofiles.yml',
+        {
+          registryAliases: {
+            'registry-1.docker.io': 'docker.proxy.test/some/path',
+          },
+        },
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '0.7.2',
+            depName: 'oci://registry-1.docker.io/bitnamicharts/vault',
+            packageName: 'docker.proxy.test/some/path/bitnamicharts/vault',
+            datasource: 'docker',
+            depType: 'ClusterProfile',
           },
         ],
       });
@@ -188,7 +224,8 @@ describe('modules/manager/sveltos/extract', () => {
           {
             currentValue: '23.4.0',
             datasource: 'helm',
-            depName: 'prometheus',
+            depName: 'prometheus-community/prometheus',
+            packageName: 'prometheus',
             depType: 'EventTrigger',
             registryUrls: [
               'https://prometheus-community.github.io/helm-charts',
@@ -197,14 +234,16 @@ describe('modules/manager/sveltos/extract', () => {
           {
             currentValue: 'v3.2.5',
             datasource: 'helm',
-            depName: 'kyverno',
+            depName: 'kyverno/kyverno',
+            packageName: 'kyverno',
             depType: 'EventTrigger',
             registryUrls: ['https://kyverno.github.io/kyverno/'],
           },
           {
             currentValue: 'v3.2.0',
             datasource: 'helm',
-            depName: 'kyverno-policies',
+            depName: 'kyverno/kyverno-policies',
+            packageName: 'kyverno-policies',
             depType: 'EventTrigger',
             registryUrls: ['https://kyverno.github.io/kyverno/'],
           },
@@ -212,13 +251,15 @@ describe('modules/manager/sveltos/extract', () => {
             currentValue: '0.7.2',
             datasource: 'docker',
             depType: 'EventTrigger',
-            depName: 'registry-1.docker.io/bitnamicharts/vault',
+            depName: 'oci://registry-1.docker.io/bitnamicharts/vault',
+            packageName: 'registry-1.docker.io/bitnamicharts/vault',
           },
           {
             currentValue: '0.5.0',
             datasource: 'docker',
             depType: 'EventTrigger',
-            depName: 'custom-registry:443/charts/vault-sidecar',
+            depName: 'oci://custom-registry:443/charts/vault-sidecar',
+            packageName: 'custom-registry:443/charts/vault-sidecar',
           },
         ],
       });

@@ -1,14 +1,6 @@
 import { z } from 'zod';
 import { LooseArray } from '../../../util/schema-utils';
-
-export const KubernetesResource = z.object({
-  apiVersion: z.string(),
-  kind: z.string(),
-  metadata: z.object({
-    name: z.string(),
-    namespace: z.string().optional(),
-  }),
-});
+import { KubernetesResource } from '../flux/schema';
 
 export const SveltosHelmSource = z.object({
   repositoryURL: z.string(),
