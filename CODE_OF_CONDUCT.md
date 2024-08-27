@@ -29,13 +29,25 @@ We expect basic politeness, do not act rude.
 For example: it is okay if you ask a question and do not thank us afterwards.
 But avoid writing mean comments like: "Pity the documentation didn’t say that." or "Thanks for nothing.".
 
+Do not give any thumbs-down reaction emojis to express your dissatisfaction with responses when someone is helping/answering your questions.
+We don't have time to always answer in details or preface everything with "I'm really sorry but..".
+The only time when a thumbs-down is appropriate from a user towards a maintainer or other assistance is when there's some type of vote being asked for.
+
+Do not try to start Twitter mobs or wars against the project or maintainers, especially if it's because you got rate-limited from the project for not following this Code of Conduct.
+
 ## Respect the time of those who help you
 
-Respect goes both ways, but time is limited.
-When you ask for help, please remember that the maintainer's time is valuable.
+This repository is a place where a minority show up and do the work while the vast majority benefit, including getting support questions answered.
+It is not a "village square" where everyone's opinion is equal, and nor is everyone's time equal here.
+
+When you ask for help, please remember that the maintainer's time is the limited resource here.
 We get many questions each week and do our best to answer each one.
 To get the help you need, please be prepared to give detailed logs or descriptions of your issues.
 If you do not want to spend the effort giving us enough information, it's likely you will not get the help you need.
+
+Do not add comments to existing Discussions or Issues demanding a response like "Any update on this?" which force a maintainer to either respond or hide your comment.
+There are very few scenarios where secret or undocumented updates to a topic exist but are inexplicably hidden - so please don't check _just in case_.
+If you're still tempted to try to revive a stalled topic, at least be a little less selfish about it and think what value/new information you can add to the topic as part of your comment.
 
 Remember, most of the support provided by our team, including the Mend.io staff, is _unpaid_.
 

@@ -192,8 +192,8 @@ importers:
         specifier: 1.1.23
         version: 1.1.23
       google-auth-library:
-        specifier: 9.13.0
-        version: 9.13.0(encoding@0.1.13)
+        specifier: 9.14.0
+        version: 9.14.0(encoding@0.1.13)
       got:
         specifier: 11.8.6
         version: 11.8.6
@@ -551,8 +551,8 @@ importers:
         specifier: 16.9.0
         version: 16.9.0
       husky:
-        specifier: 9.1.4
-        version: 9.1.4
+        specifier: 9.1.5
+        version: 9.1.5
       jest:
         specifier: 29.7.0
         version: 29.7.0(@types/node@20.16.1)(ts-node@10.9.2(@swc/core@1.7.18)(@types/node@20.16.1)(typescript@5.5.4))
@@ -575,8 +575,8 @@ importers:
         specifier: 4.11.1
         version: 4.11.1
       nock:
-        specifier: 13.5.4
-        version: 13.5.4
+        specifier: 13.5.5
+        version: 13.5.5
       npm-run-all2:
         specifier: 6.2.2
         version: 6.2.2
@@ -3556,8 +3556,8 @@ packages:
     resolution: {integrity: sha512-QUcQZutczESpdo2w9BMG6VpLFoq9ix7ER5HLM1mAdZdri2F3eISkCb8ep84W6YOo0grYWJdyT/8JkYqGjQfSSQ==}
     engines: {node: '>=18.12.0', yarn: ^1.17.0}
 
-  google-auth-library@9.13.0:
-    resolution: {integrity: sha512-p9Y03Uzp/Igcs36zAaB0XTSwZ8Y0/tpYiz5KIde5By+H9DCVUSYtDWZu6aFXsWTqENMb8BD/pDT3hR8NVrPkfA==}
+  google-auth-library@9.14.0:
+    resolution: {integrity: sha512-Y/eq+RWVs55Io/anIsm24sDS8X79Tq948zVLGaa7+KlJYYqaGwp1YI37w48nzrNi12RgnzMrQD4NzdmCowT90g==}
     engines: {node: '>=14'}
 
   gopd@1.0.1:
@@ -3688,8 +3688,8 @@ packages:
   humanize-ms@1.2.1:
     resolution: {integrity: sha512-Fl70vYtsAFb/C06PTS9dZBo7ihau+Tu/DNCk/OyHhea07S+aeMWpFFkUaXRa8fI+ScZbEI8dfSxwY7gxZ9SAVQ==}
 
-  husky@9.1.4:
-    resolution: {integrity: sha512-bho94YyReb4JV7LYWRWxZ/xr6TtOTt8cMfmQ39MQYJ7f/YE268s3GdghGwi+y4zAeqewE5zYLvuhV0M0ijsDEA==}
+  husky@9.1.5:
+    resolution: {integrity: sha512-rowAVRUBfI0b4+niA4SJMhfQwc107VLkBUgEYYAOQAbqDCnra1nYh83hF/MDmhYs9t9n1E3DuKOrs2LYNC+0Ag==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -4658,8 +4658,8 @@ packages:
   nise@5.1.9:
     resolution: {integrity: sha512-qOnoujW4SV6e40dYxJOb3uvuoPHtmLzIk4TFo+j0jPJoC+5Z9xja5qH5JZobEPsa8+YYphMrOSwnrshEhG2qww==}
 
-  nock@13.5.4:
-    resolution: {integrity: sha512-yAyTfdeNJGGBFxWdzSKCBYxs5FxLbCg5X5Q4ets974hcQzG1+qCxvIyOo4j2Ry6MUlhWVMX4OoYDefAIIwupjw==}
+  nock@13.5.5:
+    resolution: {integrity: sha512-XKYnqUrCwXC8DGG1xX4YH5yNIrlh9c065uaMZZHUoeUUINTOyt+x/G+ezYk0Ft6ExSREVIs+qBJDK503viTfFA==}
     engines: {node: '>= 10.13'}
 
   node-abi@3.67.0:
@@ -10374,7 +10374,7 @@ snapshots:
       klona: 2.0.6
       moo: 0.5.2
 
-  google-auth-library@9.13.0(encoding@0.1.13):
+  google-auth-library@9.14.0(encoding@0.1.13):
     dependencies:
       base64-js: 1.5.1
       ecdsa-sig-formatter: 1.0.11
@@ -10511,7 +10511,7 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
-  husky@9.1.4: {}
+  husky@9.1.5: {}
 
   hyperdyperid@1.2.0: {}
 
@@ -11654,7 +11654,7 @@ snapshots:
       just-extend: 6.2.0
       path-to-regexp: 6.2.2
 
-  nock@13.5.4:
+  nock@13.5.5:
     dependencies:
       debug: 4.3.6
       json-stringify-safe: 5.0.1
