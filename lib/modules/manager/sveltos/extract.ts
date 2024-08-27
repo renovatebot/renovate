@@ -22,7 +22,7 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   let definitions: ProfileDefinition[];
   try {
-    definitions = parseYaml(content, null, {
+    definitions = parseYaml(content, {
       customSchema: ProfileDefinition,
     });
   } catch (err) {
