@@ -575,8 +575,8 @@ importers:
         specifier: 4.11.1
         version: 4.11.1
       nock:
-        specifier: 13.5.4
-        version: 13.5.4
+        specifier: 13.5.5
+        version: 13.5.5
       npm-run-all2:
         specifier: 6.2.2
         version: 6.2.2
@@ -4658,8 +4658,8 @@ packages:
   nise@5.1.9:
     resolution: {integrity: sha512-qOnoujW4SV6e40dYxJOb3uvuoPHtmLzIk4TFo+j0jPJoC+5Z9xja5qH5JZobEPsa8+YYphMrOSwnrshEhG2qww==}
 
-  nock@13.5.4:
-    resolution: {integrity: sha512-yAyTfdeNJGGBFxWdzSKCBYxs5FxLbCg5X5Q4ets974hcQzG1+qCxvIyOo4j2Ry6MUlhWVMX4OoYDefAIIwupjw==}
+  nock@13.5.5:
+    resolution: {integrity: sha512-XKYnqUrCwXC8DGG1xX4YH5yNIrlh9c065uaMZZHUoeUUINTOyt+x/G+ezYk0Ft6ExSREVIs+qBJDK503viTfFA==}
     engines: {node: '>= 10.13'}
 
   node-abi@3.67.0:
@@ -11654,7 +11654,7 @@ snapshots:
       just-extend: 6.2.0
       path-to-regexp: 6.2.2
 
-  nock@13.5.4:
+  nock@13.5.5:
     dependencies:
       debug: 4.3.6
       json-stringify-safe: 5.0.1
