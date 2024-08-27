@@ -122,7 +122,7 @@ export async function extractPackageFile(
         res.datasource = DockerDatasource.id;
         const alias = registryData[repoName]?.url;
         if (alias) {
-          res.packageName = alias + '/' + depName;
+          res.packageName = `${alias}/${depName}`;
         }
       }
 
