@@ -38,6 +38,7 @@ describe('validate-schemas', () => {
 
         // validate json data against schema: using parse here instead of safeParse so we throw
         // this leads to a better error message when the assertion fails
+        // eslint-disable-next-line import/namespace
         Schemas[schemaName].parse(data);
       }),
     );
