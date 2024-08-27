@@ -965,12 +965,7 @@ export async function createPr({
 }
 
 async function autoResolvePrTasks(pr: Pr): Promise<void> {
-  logger.debug(
-    {
-      prId: pr.number,
-    },
-    'Auto resolve PR tasks',
-  );
+  logger.debug(`Auto resolve PR tasks in #${pr.number}`);
   try {
     const response = (
       await bitbucketHttp.getJson(
