@@ -30,7 +30,7 @@ describe('validate-schemas', () => {
       });
     }
 
-    const settledPromises: any = await Promise.allSettled(
+    const settledPromises = await Promise.allSettled(
       schemasAndJsonFiles.map(async ({ schemaName, dataFileName }) => {
         const data = Json.parse(
           await fs.readFile(upath.join(dataFileDir, dataFileName), 'utf8'),
