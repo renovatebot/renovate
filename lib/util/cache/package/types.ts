@@ -102,6 +102,7 @@ export type PackageCacheNamespace =
   | 'github-tags-datasource-v2'
   | 'merge-confidence'
   | 'preset'
+  | 'terraform-provider-hash'
   | 'url-sha256';
 
 export type CombinedKey = `global%%${PackageCacheNamespace}%%${string}`;
