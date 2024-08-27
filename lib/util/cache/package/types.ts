@@ -36,7 +36,6 @@ export type PackageCacheNamespace =
   | 'datasource-bitrise'
   | 'datasource-cdnjs-digest'
   | 'datasource-cdnjs'
-  | 'datasource-conan-revisions'
   | 'datasource-conan'
   | 'datasource-conda'
   | 'datasource-cpan'
