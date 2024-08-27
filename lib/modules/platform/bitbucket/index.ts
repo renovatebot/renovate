@@ -1005,7 +1005,7 @@ async function autoResolvePrTasks(pr: Pr): Promise<void> {
       );
     }
   } catch (err) {
-    logger.warn({ err }, 'Error resolving PR tasks');
+    logger.warn({ prId: pr.number, err }, 'Error resolving PR tasks');
   }
 }
 
