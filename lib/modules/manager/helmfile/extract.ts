@@ -117,7 +117,7 @@ export async function extractPackageFile(
 
       if (isOCIRegistry(dep.chart)) {
         res.datasource = DockerDatasource.id;
-        res.packageName = repoName + '/' + depName;
+        res.packageName = `${repoName}/${depName}`;
       } else if (registryData[repoName]?.oci) {
         res.datasource = DockerDatasource.id;
         const alias = registryData[repoName]?.url;
