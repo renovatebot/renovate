@@ -1,9 +1,9 @@
 import {
   type Architecture,
   LambdaClient,
-  LayerVersionsListItem,
+  type LayerVersionsListItem,
   ListLayerVersionsCommand,
-  Runtime,
+  type Runtime,
 } from '@aws-sdk/client-lambda';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
@@ -47,10 +47,10 @@ export class AwsLambdaLayerDataSource extends Datasource {
     let hasRuntime = false;
 
     matchingLayerVersions.LayerVersions?.forEach((layer) => {
-      if (layer.CompatibleArchitecture !== undefined) {
+      if (layer.CompatibleArchitectures !== undefined) {
         hasArchitecture = true;
       }
-      if (layer.CompatibleRuntime !== undefined) {
+      if (layer.CompatibleRuntimes !== undefined) {
         hasRuntime = true;
       }
     });

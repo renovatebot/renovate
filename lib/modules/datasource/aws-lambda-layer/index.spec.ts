@@ -1,8 +1,9 @@
+import type {
+  LayerVersionsListItem,
+  ListLayerVersionsCommandOutput} from '@aws-sdk/client-lambda';
 import {
   LambdaClient,
-  LayerVersionsListItem,
-  ListLayerVersionsCommand,
-  ListLayerVersionsCommandOutput,
+  ListLayerVersionsCommand
 } from '@aws-sdk/client-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getPkgReleases } from '..';
@@ -36,14 +37,14 @@ const layerWithArchitecture: LayerVersionsListItem = {
   Version: 3,
   CreatedDate: '2021-03-01T00:00:00.000Z',
   LayerVersionArn: 'arn:aws:lambda:us-east-1:123456789012:layer:my-layer:1',
-  CompatibleArchitecture: 'x86_64',
+  CompatibleArchitectures: ['x86_64'],
 };
 
 const layerWithRuntime: LayerVersionsListItem = {
   Version: 3,
   CreatedDate: '2021-03-01T00:00:00.000Z',
   LayerVersionArn: 'arn:aws:lambda:us-east-1:123456789012:layer:my-layer:1',
-  CompatibleRuntime: 'python37',
+  CompatibleRuntimes: ['python3.7'],
 };
 
 const mock3Layers: ListLayerVersionsCommandOutput = {
@@ -67,7 +68,7 @@ const mockLayerWithArchitecture: ListLayerVersionsCommandOutput = {
 };
 
 const mockLayerWithRuntime: ListLayerVersionsCommandOutput = {
-  LayerVersions: [layerWithArchitecture],
+  LayerVersions: [layerWithRuntime],
   $metadata: {},
 };
 
