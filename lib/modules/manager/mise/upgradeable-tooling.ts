@@ -5,7 +5,8 @@ import { NodeVersionDatasource } from '../../datasource/node-version';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import * as regexVersioning from '../../versioning/regex';
 import * as semverVersioning from '../../versioning/semver';
-import { ToolingConfig, upgradeableTooling } from '../asdf/upgradeable-tooling';
+import type { ToolingConfig } from '../asdf/upgradeable-tooling';
+import { upgradeableTooling } from '../asdf/upgradeable-tooling';
 
 export interface ToolingDefinition {
   config: ToolingConfig;

@@ -29,11 +29,13 @@ describe('modules/manager/custom/regex/index', () => {
         '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
       depTypeTemplate: 'final',
     };
+
     const res = await extractPackageFile(
       dockerfileContent,
       'Dockerfile',
       config,
     );
+
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(8);
     expect(res?.deps.find((dep) => dep.depName === 'yarn')?.versioning).toBe(
@@ -53,7 +55,9 @@ describe('modules/manager/custom/regex/index', () => {
       versioningTemplate:
         '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
     };
+
     const res = await extractPackageFile('', 'Dockerfile', config);
+
     expect(res).toBeNull();
   });
 
@@ -64,11 +68,13 @@ describe('modules/manager/custom/regex/index', () => {
       ],
       versioningTemplate: '{{#if versioning}}{{versioning}}{{else}}semver',
     };
+
     const res = await extractPackageFile(
       dockerfileContent,
       'Dockerfile',
       config,
     );
+
     expect(res).toBeNull();
   });
 
@@ -78,11 +84,13 @@ describe('modules/manager/custom/regex/index', () => {
         'ENV NGINX_MODULE_HEADERS_MORE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?(\\&extractVersion=(?<extractVersion>.*?))?\\s',
       ],
     };
+
     const res = await extractPackageFile(
       dockerfileContent,
       'Dockerfile',
       config,
     );
+
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
     expect(
@@ -99,6 +107,7 @@ describe('modules/manager/custom/regex/index', () => {
       ],
       datasourceTemplate: 'helm',
     };
+
     const res = await extractPackageFile(
       `
       apiVersion: helm.fluxcd.io/v1
@@ -116,6 +125,7 @@ describe('modules/manager/custom/regex/index', () => {
       'Dockerfile',
       config,
     );
+
     expect(res).toMatchSnapshot({
       deps: [
         {
@@ -135,11 +145,13 @@ describe('modules/manager/custom/regex/index', () => {
       ],
       registryUrlTemplate: 'http://registry.{{depName}}.com/',
     };
+
     const res = await extractPackageFile(
       dockerfileContent,
       'Dockerfile',
       config,
     );
+
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
     expect(
@@ -154,11 +166,13 @@ describe('modules/manager/custom/regex/index', () => {
       ],
       registryUrlTemplate: 'this-is-not-a-valid-url-{{depName}}',
     };
+
     const res = await extractPackageFile(
       dockerfileContent,
       'Dockerfile',
       config,
     );
+
     expect(res).toMatchSnapshot({
       deps: [
         {
@@ -186,11 +200,13 @@ describe('modules/manager/custom/regex/index', () => {
       versioningTemplate:
         '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
     };
+
     const res = await extractPackageFile(
       dockerfileContent,
       'Dockerfile',
       config,
     );
+
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(2);
     expect(
@@ -210,11 +226,13 @@ describe('modules/manager/custom/regex/index', () => {
       autoReplaceStringTemplate: 'image: {{{depName}}}:{{{newValue}}}',
       datasourceTemplate: 'docker',
     };
+
     const res = await extractPackageFile(
       'image: my.old.registry/aRepository/andImage:1.18-alpine',
       'values.yaml',
       config,
     );
+
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
   });
@@ -228,11 +246,13 @@ describe('modules/manager/custom/regex/index', () => {
         'image:\n{{{indentation}}}  name: {{{depName}}}:{{{newValue}}}',
       datasourceTemplate: 'docker',
     };
+
     const res = await extractPackageFile(
       '     image: eclipse-temurin:17.0.0-alpine',
       'bitbucket-pipelines.yml',
       config,
     );
+
     expect(res).toMatchObject({
       deps: [
         {
@@ -255,11 +275,13 @@ describe('modules/manager/custom/regex/index', () => {
         'image:\n{{{indentation}}}  name: {{{depName}}}:{{{newValue}}}',
       datasourceTemplate: 'docker',
     };
+
     const res = await extractPackageFile(
       'name: image: eclipse-temurin:17.0.0-alpine',
       'bitbucket-pipelines.yml',
       config,
     );
+
     expect(res).toMatchObject({
       deps: [
         {
@@ -282,11 +304,13 @@ describe('modules/manager/custom/regex/index', () => {
       matchStringsStrategy: 'combination',
       datasourceTemplate: 'docker',
     };
+
     const res = await extractPackageFile(
       ansibleYamlContent,
       'ansible.yml',
       config,
     );
+
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
   });
@@ -303,11 +327,13 @@ describe('modules/manager/custom/regex/index', () => {
       datasourceTemplate: 'docker',
       depNameTemplate: '{{{ registry }}}/{{{ repository }}}',
     };
+
     const res = await extractPackageFile(
       ansibleYamlContent,
       'ansible.yml',
       config,
     );
+
     expect(res?.deps).toHaveLength(1);
     expect(res?.deps[0].depName).toBe('docker.io/prom/prometheus');
     expect(res).toMatchSnapshot();
@@ -322,11 +348,13 @@ describe('modules/manager/custom/regex/index', () => {
       matchStringsStrategy: 'combination',
       datasourceTemplate: 'docker',
     };
+
     const res = await extractPackageFile(
       ansibleYamlContent,
       'ansible.yml',
       config,
     );
+
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
   });
@@ -341,11 +369,13 @@ describe('modules/manager/custom/regex/index', () => {
       ],
       datasourceTemplate: 'helm',
     };
+
     const res = await extractPackageFile(
       exampleGitlabCiYml,
       '.gitlab-ci.yml',
       config,
     );
+
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
   });
@@ -360,11 +390,13 @@ describe('modules/manager/custom/regex/index', () => {
         'image:\n  name: {{{depName}}}{{#if newValue}}:{{{newValue}}}{{/if}}{{#if newDigest}}@{{{newDigest}}}{{/if}}',
       datasourceTemplate: 'docker',
     };
+
     const res = await extractPackageFile(
       'image: eclipse-temurin:17.0.0-alpine',
       'bitbucket-pipelines.yml',
       config,
     );
+
     expect(res).toMatchObject({
       deps: [
         {
@@ -387,11 +419,13 @@ describe('modules/manager/custom/regex/index', () => {
         'image:\n  name: {{{depName}}}{{#if newValue}}:{{{newValue}}}{{/if}}{{#if newDigest}}@{{{newDigest}}}{{/if}}',
       datasourceTemplate: 'docker',
     };
+
     const res = await extractPackageFile(
       'image: eclipse-temurin@sha256:1234567890abcdef',
       'bitbucket-pipelines.yml',
       config,
     );
+
     expect(res).toMatchObject({
       deps: [
         {
@@ -414,11 +448,13 @@ describe('modules/manager/custom/regex/index', () => {
       datasourceTemplate: 'helm',
       depNameTemplate: 'helm_repo/{{{ depName }}}',
     };
+
     const res = await extractPackageFile(
       exampleGitlabCiYml,
       '.gitlab-ci.yml',
       config,
     );
+
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
   });
@@ -433,7 +469,9 @@ describe('modules/manager/custom/regex/index', () => {
       datasourceTemplate: 'helm',
       depNameTemplate: 'helm_repo/{{{ depName }}}',
     };
+
     const res = await extractPackageFile('', '.gitlab-ci.yml', config);
+
     expect(res).toBeNull();
   });
 
@@ -445,11 +483,13 @@ describe('modules/manager/custom/regex/index', () => {
       ],
       matchStringsStrategy: 'recursive',
     };
+
     const res = await extractPackageFile(
       exampleJsonContent,
       'example.json',
       config,
     );
+
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
   });
@@ -462,11 +502,13 @@ describe('modules/manager/custom/regex/index', () => {
       ],
       matchStringsStrategy: 'recursive',
     };
+
     const res = await extractPackageFile(
       exampleJsonContent,
       'example.json',
       config,
     );
+
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(2);
   });
@@ -480,11 +522,13 @@ describe('modules/manager/custom/regex/index', () => {
       ],
       matchStringsStrategy: 'recursive',
     };
+
     const res = await extractPackageFile(
       exampleJsonContent,
       'example.json',
       config,
     );
+
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
   });
@@ -494,11 +538,13 @@ describe('modules/manager/custom/regex/index', () => {
       matchStrings: ['"group.{1}":\\s*\\{[^}]*}'],
       matchStringsStrategy: 'recursive',
     };
+
     const res = await extractPackageFile(
       exampleJsonContent,
       'example.json',
       config,
     );
+
     expect(res).toBeNull();
   });
 
@@ -507,11 +553,13 @@ describe('modules/manager/custom/regex/index', () => {
       matchStrings: ['"trunk.{1}":\\s*\\{[^}]*}'],
       matchStringsStrategy: 'recursive',
     };
+
     const res = await extractPackageFile(
       exampleJsonContent,
       'example.json',
       config,
     );
+
     expect(res).toBeNull();
   });
 
@@ -525,11 +573,13 @@ describe('modules/manager/custom/regex/index', () => {
       matchStringsStrategy: 'recursive',
       depNameTemplate: '{{{ first }}}/{{{ second }}}/{{{ depName }}}',
     };
+
     const res = await extractPackageFile(
       exampleJsonContent,
       'example.json',
       config,
     );
+
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(4);
   });
@@ -544,6 +594,7 @@ describe('modules/manager/custom/regex/index', () => {
       depNameTemplate: 'org.jacoco:jacoco',
       datasourceTemplate: 'maven',
     };
+
     const res = await extractPackageFile(
       `
     jacoco {
@@ -553,6 +604,7 @@ describe('modules/manager/custom/regex/index', () => {
       'build.gradle.kts',
       config,
     );
+
     expect(res).toMatchObject({
       deps: [
         {

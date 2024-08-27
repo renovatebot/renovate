@@ -189,6 +189,7 @@ export interface ArtifactNotice {
 }
 
 export interface ArtifactError {
+  fileName?: string;
   lockFile?: string;
   stderr?: string;
 }

@@ -120,7 +120,8 @@ export class GalaxyCollectionDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${GalaxyCollectionDatasource.id}-detailed-version`,
-    key: (versionsUrl, basicRelease: Release) => basicRelease.version,
+    key: (_packageName: string, _versionsUrl: string, basicRelease: Release) =>
+      basicRelease.version,
     ttlMinutes: 10080, // 1 week
   })
   async getVersionDetails(

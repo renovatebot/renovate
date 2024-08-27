@@ -1,5 +1,5 @@
+import type { RenovateConfig } from '../../../../test/util';
 import {
-  RenovateConfig,
   fs,
   logger,
   mocked,

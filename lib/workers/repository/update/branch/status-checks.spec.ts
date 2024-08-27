@@ -1,8 +1,8 @@
-import { RenovateConfig, partial, platform } from '../../../../../test/util';
+import type { RenovateConfig } from '../../../../../test/util';
+import { partial, platform } from '../../../../../test/util';
 import { logger } from '../../../../logger';
+import type { ConfidenceConfig, StabilityConfig } from './status-checks';
 import {
-  ConfidenceConfig,
-  StabilityConfig,
   resolveBranchStatus,
   setConfidence,
   setStability,
