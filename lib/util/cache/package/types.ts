@@ -105,7 +105,6 @@ export type PackageCacheNamespace =
   | 'datasource-unity3d'
   | 'github-releases-datasource-v2'
   | 'github-tags-datasource-v2'
-  | 'go'
   | 'merge-confidence'
   | 'preset'
   | 'url-sha256';
