@@ -6,7 +6,7 @@ import {
 } from '@aws-sdk/client-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getPkgReleases } from '..';
-import { AwsLambdaLayerDataSource } from './index';
+import { AwsLambdaLayerDataSource } from '.';
 
 const datasource = AwsLambdaLayerDataSource.id;
 
