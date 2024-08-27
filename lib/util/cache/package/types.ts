@@ -51,7 +51,6 @@ export type PackageCacheNamespace =
   | 'datasource-docker-tags'
   | 'datasource-dotnet-version'
   | 'datasource-endoflife-date'
-  | 'datasource-galaxy-collection-detailed-version'
   | 'datasource-galaxy-collection'
   | 'datasource-galaxy'
   | 'datasource-git-refs'
