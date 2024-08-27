@@ -85,8 +85,6 @@ export type PackageCacheNamespace =
   | 'datasource-npm:data'
   | 'datasource-nuget-v3'
   | 'datasource-orb'
-  | 'datasource-packagist-org'
-  | 'datasource-packagist-public-files'
   | 'datasource-packagist'
   | 'datasource-pod'
   | 'datasource-python-version'
