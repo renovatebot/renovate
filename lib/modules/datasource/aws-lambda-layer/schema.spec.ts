@@ -1,4 +1,4 @@
-import { AwsLambdaLayerFilterMetadata } from './schema';
+import { AwsLambdaLayerFilterMetadata, FilterParser } from './schema';
 
 describe('modules/datasource/aws-lambda-layer/schema', () => {
   describe('AwsLambdaLayerFilterMetadata', () => {
@@ -9,7 +9,7 @@ describe('modules/datasource/aws-lambda-layer/schema', () => {
         '  "arn": "arn:aws:lambda:us-east-1:123456789012:layer:my-layer"\n' +
         '}';
       const metadata = AwsLambdaLayerFilterMetadata.parse(
-        JSON.parse(metadataJson),
+        FilterParser.parse(metadataJson),
       );
 
       expect(metadata).toStrictEqual({
@@ -26,7 +26,7 @@ describe('modules/datasource/aws-lambda-layer/schema', () => {
         '}';
 
       const metadata = AwsLambdaLayerFilterMetadata.parse(
-        JSON.parse(metadataJson),
+        FilterParser.parse(metadataJson),
       );
 
       expect(metadata).toStrictEqual({
@@ -41,7 +41,7 @@ describe('modules/datasource/aws-lambda-layer/schema', () => {
         '  "arn": "arn:aws:lambda:us-east-1:123456789012:layer:my-layer"\n' +
         '}';
       const metadata = AwsLambdaLayerFilterMetadata.parse(
-        JSON.parse(metadataJson),
+        FilterParser.parse(metadataJson),
       );
 
       expect(metadata).toStrictEqual({

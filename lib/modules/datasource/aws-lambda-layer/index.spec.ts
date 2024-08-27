@@ -6,7 +6,7 @@ import {
 } from '@aws-sdk/client-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getPkgReleases } from '..';
-import { AwsLambdaLayerDataSource } from './index';
+import { AwsLambdaLayerDataSource } from '.';
 
 const datasource = AwsLambdaLayerDataSource.id;
 
@@ -111,7 +111,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
         'AWS returned layers with runtime but the runtime is not set in the filter. You might update to a layer with wrong runtime.',
       );
     });
-    
+
     it('should return empty array if no layers are found', async () => {
       mockListLayerVersionsCommandOutput(mockEmpty);
       const lamdbaLayerDatasource = new AwsLambdaLayerDataSource();
