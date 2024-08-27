@@ -541,14 +541,15 @@ export async function lookupUpdates(
     // Add digests if necessary
     if (supportsDigests(config.datasource)) {
       if (config.currentDigest) {
-        // Custom datasources should not run a digest update
-        // on the current version if it already runs a version update.
-        if (
-          !(
-            config.digestOneAndOnly ?? config.datasource.startsWith('custom.')
-          ) ||
-          !res.updates.length
-        ) {
+        let alwaysUpdateDigest = true;
+        if (config.digestOneAndOnly === true) {
+          alwaysUpdateDigest = false;
+        } else if (config.datasource.startsWith('custom.')) {
+          // Custom datasources should not run a digest update
+          // on the current version if it already runs a version update.
+          alwaysUpdateDigest = false;
+        }
+        if (alwaysUpdateDigest || !res.updates.length) {
           // digest update
           res.updates.push({
             updateType: 'digest',
