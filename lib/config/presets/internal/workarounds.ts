@@ -23,6 +23,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:bitnamiDockerImageVersioning',
       'workarounds:k3sKubernetesVersioning',
       'workarounds:rke2KubernetesVersioning',
+      'workarounds:libericaJdkDockerVersioning',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
@@ -177,6 +178,38 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['k3s-io/k3s'],
         versioning:
           'regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>[a-z]+\\d+))?(?<compatibility>\\+k3s)(?<build>\\d+)$',
+      },
+    ],
+  },
+  libericaJdkDockerVersioning: {
+    description:
+      'Use custom regex versioning for bellsoft/liberica-runtime-container',
+    packageRules: [
+      {
+        description: 'Liberica JDK Lite version optimized for the Cloud',
+        matchCurrentValue: '/^jdk-[^a][^l]{2}/',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['bellsoft/liberica-runtime-container'],
+        versioning:
+          'regex:^jdk-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+))?(-(?<compatibility>.*))?$',
+      },
+      {
+        description:
+          'Liberica JDK that can be used to create a custom runtime with a help of jlink tool',
+        matchCurrentValue: '/^jdk-all/',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['bellsoft/liberica-runtime-container'],
+        versioning:
+          'regex:^jdk-all-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+))?(-(?<compatibility>.*))?$',
+      },
+      {
+        description:
+          'Liberica JRE (only the runtime without the rest of JDK tools) for running Java applications',
+        matchCurrentValue: '/^jre-/',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['bellsoft/liberica-runtime-container'],
+        versioning:
+          'regex:^jre-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+))?(-(?<compatibility>.*))?$',
       },
     ],
   },
