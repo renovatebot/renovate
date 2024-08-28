@@ -366,7 +366,7 @@ export class MavenDatasource extends Datasource {
       releases,
     };
 
-    if (registryUrl !== MAVEN_REPO) {
+    if (!this.defaultRegistryUrls.includes(registryUrl)) {
       result.isPrivate = true;
     }
 
