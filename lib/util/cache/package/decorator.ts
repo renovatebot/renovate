@@ -21,8 +21,10 @@ interface CacheParameters {
   /**
    * The cache namespace
    * Either a string or a hash function that generates a string
+   *
+   * @deprecated
    */
-  namespace: PackageCacheNamespace | NamespaceFunction;
+  namespace?: PackageCacheNamespace | NamespaceFunction;
 
   /**
    * The cache key
@@ -40,6 +42,14 @@ interface CacheParameters {
    * The TTL (or expiry) of the key in minutes
    */
   ttlMinutes?: number;
+}
+
+function getClassName(instance: unknown): string | undefined {
+  if (!is.object(instance)) {
+    return undefined;
+  }
+
+  return instance.constructor.name;
 }
 
 /**
@@ -66,6 +76,8 @@ export function cache<T>({
       finalNamespace = namespace;
     } else if (is.function_(namespace)) {
       finalNamespace = namespace.apply(instance, args);
+    } else {
+      finalNamespace = getClassName(instance);
     }
 
     let finalKey: string | undefined;

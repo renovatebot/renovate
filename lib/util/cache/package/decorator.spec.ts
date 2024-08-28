@@ -46,6 +46,28 @@ describe('util/cache/package/decorator', () => {
     );
   });
 
+  it('should use default namespace equal to class name', async () => {
+    class SomeClass {
+      @cache({ key: 'some-key' })
+      public fn(): Promise<string> {
+        return getValue();
+      }
+    }
+    const obj = new SomeClass();
+
+    expect(await obj.fn()).toBe('111');
+    expect(await obj.fn()).toBe('111');
+    expect(await obj.fn()).toBe('111');
+
+    expect(getValue).toHaveBeenCalledTimes(1);
+    expect(setCache).toHaveBeenCalledExactlyOnceWith(
+      'SomeClass',
+      'cache-decorator:some-key',
+      { cachedAt: expect.any(String), value: '111' },
+      30,
+    );
+  });
+
   it('disables cache if cacheability check is false', async () => {
     class Class {
       @cache({
