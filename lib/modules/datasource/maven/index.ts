@@ -360,6 +360,16 @@ export class MavenDatasource extends Datasource {
         latestSuitableVersion,
       ));
 
-    return { ...dependency, ...dependencyInfo, releases };
+    const result: ReleaseResult = {
+      ...dependency,
+      ...dependencyInfo,
+      releases,
+    };
+
+    if (registryUrl !== MAVEN_REPO) {
+      result.isPrivate = true;
+    }
+
+    return result;
   }
 }
