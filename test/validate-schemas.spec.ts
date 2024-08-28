@@ -4,15 +4,15 @@ import { Json } from '../lib/util/schema-utils';
 import { capitalize } from '../tools/docs/utils';
 import * as Schemas from '../tools/schemas/schema';
 
-const dataFileDir = 'lib/data';
-const schemaDir = 'tools/schemas';
-const schemasAndJsonFiles: {
-  schemaName: keyof typeof Schemas;
-  dataFileName: string;
-}[] = [];
-
 describe('validate-schemas', () => {
   it('validate json files in lib/data against their schemas', async () => {
+    const dataFileDir = 'lib/data';
+    const schemaDir = 'tools/schemas';
+    const schemasAndJsonFiles: {
+      schemaName: keyof typeof Schemas;
+      dataFileName: string;
+    }[] = [];
+
     const schemaFiles = (await fs.readdir(schemaDir)).filter(
       (file) => upath.extname(file) === '.json',
     );
