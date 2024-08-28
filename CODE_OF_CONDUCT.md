@@ -71,6 +71,7 @@ We have limited time, which means we may:
 
 We know that getting a short answer feels bad.
 Please remember that we are doing the best we can to improve Renovate.
+We often respond from mobile devices.
 
 ### No "any update on this?" type comments
 
