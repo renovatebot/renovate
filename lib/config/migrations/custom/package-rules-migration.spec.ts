@@ -174,6 +174,51 @@ describe('config/migrations/custom/package-rules-migration', () => {
     );
   });
 
+  it('should migrate all match/exclude when value is of type string', () => {
+    expect(PackageRulesMigration).toMigrate(
+      {
+        packageRules: [
+          {
+            matchPackagePatterns: 'pattern',
+            matchPackagePrefixes: 'prefix1',
+            matchSourceUrlPrefixes: 'prefix1',
+            excludePackageNames: 'excluded',
+            excludePackagePatterns: 'excludepattern',
+            excludePackagePrefixes: 'prefix1b',
+            matchDepPatterns: 'pattern',
+            matchDepPrefixes: 'prefix1',
+            excludeDepNames: 'excluded',
+            excludeDepPatterns: 'excludepattern',
+            excludeDepPrefixes: 'prefix1b',
+            automerge: true,
+          },
+        ],
+      },
+      {
+        packageRules: [
+          {
+            matchPackageNames: [
+              '/pattern/',
+              'prefix1{/,}**',
+              '!excluded',
+              '!/excludepattern/',
+              '!prefix1b{/,}**',
+            ],
+            matchDepNames: [
+              '/pattern/',
+              'prefix1{/,}**',
+              '!excluded',
+              '!/excludepattern/',
+              '!prefix1b{/,}**',
+            ],
+            matchSourceUrls: ['prefix1{/,}**'],
+            automerge: true,
+          },
+        ],
+      },
+    );
+  });
+
   it('should migrate all match/exclude at once', () => {
     expect(PackageRulesMigration).toMigrate(
       {
