@@ -45,6 +45,7 @@ interface CacheParameters {
 }
 
 function getClassName(instance: unknown): string | undefined {
+  // istanbul ignore if: should never happen
   if (!is.object(instance)) {
     return undefined;
   }
