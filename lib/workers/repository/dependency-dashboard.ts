@@ -185,7 +185,7 @@ export async function ensureDependencyDashboard(
   config: SelectAllConfig,
   allBranches: BranchConfig[],
   packageFiles: Record<string, PackageFile[]> = {},
-  configMigrationRes: ConfigMigrationResult,
+  configMigrationRes?: ConfigMigrationResult,
 ): Promise<void> {
   logger.debug('ensureDependencyDashboard()');
   if (config.mode === 'silent') {
@@ -272,13 +272,14 @@ export async function ensureDependencyDashboard(
   }
   let issueBody = '';
 
-  if (configMigrationRes.result === 'pr-exists') {
+  if (configMigrationRes?.result === 'pr-exists') {
     issueBody += `Config Migration necessary. You can view the Config Migration PR here #${configMigrationRes.prNumber}\n\n`;
-  } else if (configMigrationRes.result === 'add-checkbox') {
+  } else if (configMigrationRes?.result === 'add-checkbox') {
     issueBody +=
       ' - [ ] <!-- create-config-migration-pr --> Config Migration necessary. Please tick this checkbox to create an automated Config Migration PR' +
       '\n\n';
   }
+
   if (config.dependencyDashboardHeader?.length) {
     issueBody +=
       template.compile(config.dependencyDashboardHeader, config) + '\n\n';
