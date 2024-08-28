@@ -172,4 +172,35 @@ describe('config/presets/internal/workarounds', () => {
       });
     });
   });
+
+  describe('javaLTSVersions', () => {
+    const preset = presets.javaLTSVersions;
+
+    describe('bellsoft/liberica-runtime-container', () => {
+      const packageRule = preset.packageRules![2];
+
+      const allowedVersions = packageRule.allowedVersions as string;
+      const allowedVersionsRe = regEx(
+        allowedVersions.substring(1, allowedVersions.length - 1),
+      );
+
+      it.each`
+        input                           | expected
+        ${'jdk-11-slim-musl'}           | ${true}
+        ${'jdk-all-11-slim-musl'}       | ${true}
+        ${'jre-11-slim-musl'}           | ${true}
+        ${'jdk-17-glibc'}               | ${true}
+        ${'jdk-all-17-glibc'}           | ${true}
+        ${'jre-17-glibc'}               | ${true}
+        ${'jdk-21-crac-slim-glibc'}     | ${true}
+        ${'jdk-all-21-crac-slim-glibc'} | ${true}
+        ${'jre-21-crac-slim-glibc'}     | ${true}
+        ${'jdk-22-crac-slim-glibc'}     | ${false}
+        ${'jdk-all-22-crac-slim-glibc'} | ${false}
+        ${'jre-22-crac-slim-glibc'}     | ${false}
+      `('allowedVersisons("$input") == "$expected"', ({ input, expected }) => {
+        expect(allowedVersionsRe.test(input)).toEqual(expected);
+      });
+    });
+  });
 });

@@ -168,6 +168,13 @@ export const presets: Record<string, Preset> = {
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
       },
+      {
+        allowedVersions: '/^(?:jdk|jdk-all|jre)-(?:8|11|17|21)(?:\\.|-|$)/',
+        description:
+          'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['bellsoft/liberica-runtime-container'],
+      },
     ],
   },
   k3sKubernetesVersioning: {
