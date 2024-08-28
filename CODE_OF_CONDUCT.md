@@ -25,29 +25,64 @@ Sadly, it's common in Open Source projects for a few users to behave in an aggre
 A user might say something like: "You should have fixed this bug already!", or "Why am I still waiting for this feature?".
 We do not allow this kind of behavior.
 
+### No mean comments
+
 We expect basic politeness, do not act rude.
 For example: it is okay if you ask a question and do not thank us afterwards.
-But avoid writing mean comments like: "Pity the documentation didn’t say that." or "Thanks for nothing.".
+But avoid writing mean comments like:
 
-Do not give any thumbs-down reaction emojis to express your dissatisfaction with responses when someone is helping/answering your questions.
-We don't have time to always answer in details or preface everything with "I'm really sorry but..".
-The only time when a thumbs-down is appropriate from a user towards a maintainer or other assistance is when there's some type of vote being asked for.
+- "Pity the documentation didn’t say that."
+- "Thanks for nothing."
 
-Do not try to start Twitter mobs or wars against the project or maintainers, especially if it's because you got rate-limited from the project for not following this Code of Conduct.
+### No thumbs-down emojis (except on polls)
+
+Do not give a thumbs-down emoji to posts.
+Even if you are sad, or angry about a response: do not use the thumbs-down emoji.
+
+The only time a thumbs-down is appropriate is when we, or a user, asks for a vote about something.
+
+### Do not start Twitter mobs
+
+Do not (try to) start Twitter mobs against the project or maintainers.
+Especially if you got rate-limited from interacting with this project, because you did not follow the rules.
+
+## We are not a village square
+
+This repository is a place where a minority show up to do the work.
+The vast majority benefit, for example by getting their support questions answered.
+
+This repository is not a "village square" where all opinions are equal.
+Nor is everyone's time equal here.
 
 ## Respect the time of those who help you
 
-This repository is a place where a minority show up and do the work while the vast majority benefit, including getting support questions answered.
-It is not a "village square" where everyone's opinion is equal, and nor is everyone's time equal here.
-
 When you ask for help, please remember that the maintainer's time is the limited resource here.
 We get many questions each week and do our best to answer each one.
+
 To get the help you need, please be prepared to give detailed logs or descriptions of your issues.
 If you do not want to spend the effort giving us enough information, it's likely you will not get the help you need.
 
-Do not add comments to existing Discussions or Issues demanding a response like "Any update on this?" which force a maintainer to either respond or hide your comment.
-There are very few scenarios where secret or undocumented updates to a topic exist but are inexplicably hidden - so please don't check _just in case_.
-If you're still tempted to try to revive a stalled topic, at least be a little less selfish about it and think what value/new information you can add to the topic as part of your comment.
+### Wy we sometimes give short answers
+
+We have limited time, which means we may:
+
+- only give you a short answer
+- forget to soften the blow of a negative answer with "I'm really sorry but.."
+
+We know that getting a short answer feels bad.
+Please remember that we are doing the best we can to improve Renovate.
+We often respond from mobile devices.
+
+### No "any update on this?" type comments
+
+Do not post comments in Discussions or Issues to demand a response, like: "Any update on this?".
+These comments force a maintainer to either repond, or hide your comment.
+
+Our development is mostly done in the open on GitHub.
+It's rare that updates are hidden from you.
+Please do not comment on GitHub "just in case there are updates".
+
+When you comment on a stalled topic, please add new information, or valuable insight.
 
 Remember, most of the support provided by our team, including the Mend.io staff, is _unpaid_.
 
@@ -87,6 +122,8 @@ If we confirm a bug or agree with a feature idea, and if it's well-documented, w
 This way most issues are ready to work on, either by us or the community.
 
 We may reject ideas that are too specialized, or that would make the project too hard to maintain.
+
+### Pull Request reviews
 
 We have strict coding standards and reviews to keep our code in good shape.
 A feature or fix must of course work, but it must also be well designed to stay maintainable.

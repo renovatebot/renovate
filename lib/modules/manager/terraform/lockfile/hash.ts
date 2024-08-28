@@ -107,8 +107,8 @@ export class TerraformProviderHash {
   }
 
   @cache({
-    namespace: `datasource-terraform-provider-hash`,
-    key: (build: TerraformBuild) => build.url,
+    namespace: `terraform-provider-hash`,
+    key: (build: TerraformBuild) => `calculateSingleHash:${build.url}`,
     ttlMinutes: TerraformProviderHash.hashCacheTTL,
   })
   static async calculateSingleHash(

@@ -14,7 +14,11 @@ import {
 
 export const id = 'poetry';
 export const displayName = 'Poetry';
-export const urls = ['https://python-poetry.org/docs/versions/'];
+export const urls = [
+  'https://python-poetry.org/docs/dependency-specification/',
+  'https://python-poetry.org/docs/faq#why-does-poetry-not-adhere-to-semantic-versioning',
+  'https://python-poetry.org/docs/faq#why-does-poetry-enforce-pep-440-versions',
+];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',

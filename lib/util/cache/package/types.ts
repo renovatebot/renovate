@@ -90,10 +90,6 @@ export type PackageCacheNamespace =
   | 'datasource-ruby-version'
   | 'datasource-rubygems'
   | 'datasource-terraform-module'
-  | 'datasource-terraform-provider-hash'
-  | 'datasource-terraform-provider-builds'
-  | 'datasource-terraform-provider-releaseBackendIndex'
-  | 'datasource-terraform-provider-zip-hashes'
   | 'datasource-terraform-provider'
   | 'datasource-terraform'
   | 'datasource-unity3d'
@@ -101,6 +97,7 @@ export type PackageCacheNamespace =
   | 'github-tags-datasource-v2'
   | 'merge-confidence'
   | 'preset'
+  | 'terraform-provider-hash'
   | 'url-sha256';
 
 export type CombinedKey = `global%%${PackageCacheNamespace}%%${string}`;
