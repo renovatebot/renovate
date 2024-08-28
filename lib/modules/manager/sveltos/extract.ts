@@ -22,7 +22,7 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   let definitions: ProfileDefinition[];
   try {
-    definitions = parseYaml(content, {
+    definitions = parseYaml(content, null, {
       customSchema: ProfileDefinition,
     });
   } catch (err) {
@@ -30,16 +30,22 @@ export function extractPackageFile(
     return null;
   }
 
-  const deps = definitions.flatMap((definition) => {
-    // Use zod's safeParse method to check if the object matches the ProfileDefinition schema
-    const result = ProfileDefinition.safeParse(definition);
-    if (result.success) {
-      return processAppSpec(result.data, config);
-    }
-    return [];
-  });
+  const deps = definitions.flatMap((definition) =>
+    extractDefinition(definition, config),
+  );
 
   return deps.length ? { deps } : null;
+}
+
+function extractDefinition(
+  definition: ProfileDefinition,
+  config?: ExtractConfig,
+): PackageDependency[] {
+  const result = ProfileDefinition.safeParse(definition);
+  if (result.success) {
+    return processAppSpec(result.data, config);
+  }
+  return [];
 }
 
 function processHelmCharts(
