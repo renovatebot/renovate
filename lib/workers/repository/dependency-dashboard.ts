@@ -273,10 +273,11 @@ export async function ensureDependencyDashboard(
   let issueBody = '';
 
   if (configMigrationRes.result === 'pr-exists') {
-    issueBody += `Config Migration PR Number: #${configMigrationRes.prNumber}\n\n`;
+    issueBody += `Config Migration necessary. You can view the Config Migration PR here #${configMigrationRes.prNumber}\n\n`;
   } else if (configMigrationRes.result === 'add-checkbox') {
     issueBody +=
-      ' - [ ] <!-- create-config-migration-pr --> Create Migration PR' + '\n\n';
+      ' - [ ] <!-- create-config-migration-pr --> Config Migration necessary. Please tick this checkbox to create an automated Config Migration PR' +
+      '\n\n';
   }
   if (config.dependencyDashboardHeader?.length) {
     issueBody +=
