@@ -16,7 +16,7 @@ export async function extractAllDependencies(
   const managerList = getEnabledManagersList(initConfig.enabledManagers);
 
   // process all preflight checks
-  const config = applyPreFlights(initConfig, managerList);
+  const config = await applyPreFlights(initConfig, managerList);
 
   const extractList: WorkerExtractConfig[] = [];
   const fileList = await scm.getFileList();
@@ -102,10 +102,10 @@ export async function extractAllDependencies(
   return extractResult;
 }
 
-export function applyPreFlights(
+export async function applyPreFlights(
   config: RenovateConfig,
   managerList: string[],
-): RenovateConfig {
+): Promise<RenovateConfig> {
   let result = config;
   for (const manager of managerList) {
     const preflight = get(manager, 'preflight');
@@ -113,7 +113,16 @@ export function applyPreFlights(
       continue;
     }
 
-    result = preflight(result);
+    logger.debug({ manager }, `Running preflight`);
+    logger.trace(
+      { manager, config: result },
+      `Config before running preflight for manager: '${manager}'`,
+    );
+    result = await preflight(result);
+    logger.trace(
+      { manager, config: result },
+      `Config after running preflight for '${manager}'`,
+    );
   }
 
   return result;

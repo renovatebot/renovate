@@ -22,6 +22,7 @@ The manager's `index.ts` file supports the following values or functions:
 | `extractAllPackageFiles`      | yes      | yes   |
 | `getRangeStrategy`            | yes      |       |
 | `categories`                  | yes      |       |
+| `preflight`                   | yes      | yes   |
 | `supportsLockFileMaintenance` | yes      |       |
 | `updateArtifacts`             | yes      | yes   |
 | `updateDependency`            | yes      |       |
@@ -81,6 +82,16 @@ For example, pinning or _not_ pinning a dependency, depending on other values in
 The `npm` manager uses the `getRangeStrategy` function to pin `devDependencies` but not `dependencies`, unless the package file is detected as an app.
 
 If left undefined, then a default `getRangeStrategy` will be used that always returns "replace".
+
+### `categories` (optional)
+
+Use `categories` to define the categories of dependencies that the manager supports.
+These usually are describing the purpose of the managed dependencies like `iac` for Infrastructure as Code or ecosystems like `js` for Javascript.
+
+### `preflight` (optional)
+
+Use `preflight` to modify Renovates config based on the repository content.
+For example, if a repository contains files with `.tofu` ending, then change the `filematch` and change the registry.
 
 ### `supportsLockFileMaintenance` (optional)
 

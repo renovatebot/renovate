@@ -287,7 +287,7 @@ export interface ManagerApi extends ModuleApi {
     config: UpdateLockedConfig,
   ): Result<UpdateLockedResult>;
 
-  preflight?(config: RenovateConfig): RenovateConfig;
+  preflight?(config: RenovateConfig): Result<RenovateConfig>;
 }
 
 // TODO: name and properties used by npm manager
