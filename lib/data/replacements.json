@@ -218,8 +218,9 @@
       {
         "matchDatasources": ["npm"],
         "matchPackageNames": ["eslint-plugin-eslint-comments"],
+        "matchCurrentVersion": "^4.0.0",
         "replacementName": "@eslint-community/eslint-plugin-eslint-comments",
-        "replacementVersion": "^4.4.0"
+        "replacementVersion": "4.4.0"
       }
     ]
   },
