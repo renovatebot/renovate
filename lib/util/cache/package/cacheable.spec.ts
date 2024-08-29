@@ -59,7 +59,7 @@ describe('util/cache/package/cacheable', () => {
 
   describe('public data', () => {
     it('via static method', () => {
-      const res: Cacheable<number> = Cacheable.asPublic(42);
+      const res: Cacheable<number> = Cacheable.fromPublic(42);
       expect(res.value).toBe(42);
       expect(res.isPublic).toBeTrue();
       expect(res.isPrivate).toBeFalse();
@@ -75,7 +75,7 @@ describe('util/cache/package/cacheable', () => {
 
   describe('private data', () => {
     it('via static method', () => {
-      const res: Cacheable<number> = Cacheable.asPrivate(42);
+      const res: Cacheable<number> = Cacheable.fromPrivate(42);
       expect(res.value).toBe(42);
       expect(res.isPublic).toBeFalse();
       expect(res.isPrivate).toBeTrue();
@@ -101,8 +101,8 @@ describe('util/cache/package/cacheable', () => {
 
       const t2 = new Date();
 
-      const a = Cacheable.asPrivate(42);
-      const b = Cacheable.asPublic(42);
+      const a = Cacheable.fromPrivate(42);
+      const b = Cacheable.fromPublic(42);
       const c = empty.asPrivate(42);
       const d = empty.asPublic(42);
 
