@@ -1,4 +1,5 @@
 {
+  "$schema": "../../tools/schemas/monorepo-schema.json",
   "repoGroups": {
     "accounts": "https://github.com/accounts-js/accounts",
     "acot": "https://github.com/acot-a11y/acot",
