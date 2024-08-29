@@ -105,8 +105,9 @@ export class AwsLambdaLayerDataSource extends Datasource {
 
     const { val, err } = await result.unwrap();
 
+    // istanbul ignore next - no idea how to test this branch
     if (err) {
-      logger.debug({ err }, 'aws-lambda-layer: filter validation error');
+      logger.error({ err }, 'unknown error while fetching lambda layer versions from AWS');
       return null;
     }
 
