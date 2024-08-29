@@ -75,6 +75,12 @@ When the apt package for `gcc` is updated, Renovate updates the environment vari
 
 ## Artifactory
 
+This datasource can also be used with Artifactory.
+The supported repository types are:
+- virtual
+- local
+- remote
+
 If you are using Artifactory, you can use the `deb` datasource with following `registryUrl` format:
 
 ```
