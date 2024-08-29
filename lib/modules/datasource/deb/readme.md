@@ -77,6 +77,7 @@ When the apt package for `gcc` is updated, Renovate updates the environment vari
 
 This datasource can also be used with Artifactory.
 The supported repository types are:
+
 - virtual
 - local
 - remote
