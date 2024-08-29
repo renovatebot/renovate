@@ -177,7 +177,7 @@ export class RepologyDatasource extends Datasource {
       throw err;
     }
 
-    logger.debug(
+    logger.warn(
       { repoName, pkgName },
       'Repository or package not found on Repology',
     );
