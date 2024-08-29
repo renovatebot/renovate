@@ -28,7 +28,7 @@ export async function checkConfigMigrationBranch(
 
   if (
     !config.configMigration &&
-    !config.dependencyDashboardChecks?.createConfigMigrationPr
+    config.dependencyDashboardChecks?.configMigrationInfo === 'unchecked'
   ) {
     logger.debug(
       'Config migration needed but config migration is disabled and checkbox not ticked.',
@@ -41,7 +41,7 @@ export async function checkConfigMigrationBranch(
   const branchPr = await migrationPrExists(
     configMigrationBranch,
     config.baseBranch,
-  ); // handles open/autoClosed PRs
+  ); // handles open/autoclosed PRs
 
   if (!branchPr) {
     const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
@@ -68,8 +68,7 @@ export async function checkConfigMigrationBranch(
       // if checkbox is ticked then remove this branch/pr and create  new one
 
       if (
-        !config.dependencyDashboardChecks?.createConfigMigrationPr ||
-        config.dependencyDashboardChecks?.createConfigMigrationPr === 'no'
+        config.dependencyDashboardChecks?.configMigrationInfo === 'unchecked'
       ) {
         logger.debug(
           'Closed PR and config migration enabled. Adding checkbox to DD, will check in next run.',

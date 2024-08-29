@@ -48,8 +48,20 @@ function checkRebaseAll(issueBody: string): boolean {
   return issueBody.includes(' - [x] <!-- rebase-all-open-prs -->');
 }
 
-function checkCreateConfigMigrationPr(issueBody: string): boolean {
-  return issueBody.includes(' - [x] <!-- create-config-migration-pr -->');
+function checkCreateConfigMigrationPr(issueBody: string): string {
+  if (issueBody.includes('Config Migration necessary.')) {
+    if (issueBody.includes(' - [x] <!-- create-config-migration-pr -->')) {
+      return 'checked';
+    }
+
+    if (issueBody.includes(' - [ ] <!-- create-config-migration-pr -->')) {
+      return 'unchecked';
+    }
+
+    return 'migration-pr-exists';
+  }
+
+  return 'unchecked';
 }
 
 function selectAllRelevantBranches(issueBody: string): string[] {
@@ -97,8 +109,8 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const dependencyDashboardAllPending = checkApproveAllPendingPR(issueBody);
   const dependencyDashboardAllRateLimited =
     checkOpenAllRateLimitedPR(issueBody);
-  dependencyDashboardChecks['createConfigMigrationPr'] =
-    checkCreateConfigMigrationPr(issueBody) ? 'yes' : 'no';
+  dependencyDashboardChecks['configMigrationInfo'] =
+    checkCreateConfigMigrationPr(issueBody);
   return {
     dependencyDashboardChecks,
     dependencyDashboardRebaseAllOpen,
