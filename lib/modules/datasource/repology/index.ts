@@ -177,12 +177,7 @@ export class RepologyDatasource extends Datasource {
       throw err;
     }
 
-    logger.warn(
-      { repoName, pkgName },
-      'Repository or package not found on Repology',
-    );
-
-    return undefined;
+    throw new Error(`Repository or package not found on Repology: ${repoName}/${pkgName}`);
   }
 
   async getReleases({
