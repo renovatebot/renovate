@@ -5,13 +5,13 @@ import { trimTrailingSlash } from '../../../util/url';
 import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
+import { getDep } from '../dockerfile/extract';
 import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { getDep } from '../dockerfile/extract';
 import { ProfileDefinition, type SveltosHelmSource } from './schema';
 import { removeRepositoryName } from './util';
 
@@ -52,7 +52,7 @@ function processHelmCharts(
   source: SveltosHelmSource,
   registryAliases: Record<string, string> | undefined,
 ): PackageDependency | null {
-  let dep: PackageDependency = {
+  const dep: PackageDependency = {
     depName: source.chartName,
     currentValue: source.chartVersion,
     datasource: HelmDatasource.id,
