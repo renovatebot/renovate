@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
-import { joinUrlParts } from '../../../util/url';
 import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
@@ -39,7 +38,7 @@ export async function extractPackageFile(
   // Record kustomization usage for all deps, since updating artifacts is run on the helmfile.yaml as a whole.
   let needKustomize = false;
   try {
-    docs = parseYaml(content, null, {
+    docs = parseYaml(content, {
       customSchema: documentSchema,
       failureBehaviour: 'filter',
       removeTemplates: true,
@@ -118,12 +117,12 @@ export async function extractPackageFile(
 
       if (isOCIRegistry(dep.chart)) {
         res.datasource = DockerDatasource.id;
-        res.packageName = joinUrlParts(repoName, depName);
+        res.packageName = `${repoName}/${depName}`;
       } else if (registryData[repoName]?.oci) {
         res.datasource = DockerDatasource.id;
         const alias = registryData[repoName]?.url;
         if (alias) {
-          res.packageName = joinUrlParts(alias, depName);
+          res.packageName = `${alias}/${depName}`;
         }
       }
 

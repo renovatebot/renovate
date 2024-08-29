@@ -9,7 +9,8 @@ import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import * as fs from '../../../util/fs';
 import { ensureCacheDir } from '../../../util/fs';
-import { Http, HttpError } from '../../../util/http';
+import type { Http } from '../../../util/http';
+import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
@@ -24,7 +25,7 @@ import type {
 } from './types';
 
 export class NugetV3Api {
-  static readonly cacheNamespace = 'datasource-nuget';
+  static readonly cacheNamespace = 'datasource-nuget-v3';
 
   async getResourceUrl(
     http: Http,

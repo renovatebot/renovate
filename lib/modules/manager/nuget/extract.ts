@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
-import { XmlDocument, XmlElement, XmlNode } from 'xmldoc';
+import type { XmlElement, XmlNode } from 'xmldoc';
+import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { hasKey } from '../../../util/object';

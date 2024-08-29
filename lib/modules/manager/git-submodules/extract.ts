@@ -1,5 +1,6 @@
 import URL from 'node:url';
-import Git, { SimpleGit } from 'simple-git';
+import type { SimpleGit } from 'simple-git';
+import Git from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
@@ -122,7 +123,9 @@ export default async function extractPackageFile(
   const deps = [];
   for (const { name, path } of depNames) {
     try {
-      const [currentDigest] = (await git.subModule(['status', path]))
+      const [currentDigest] = (
+        await git.subModule(['status', '--cached', path])
+      )
         .trim()
         .replace(regEx(/^[-+]/), '')
         .split(regEx(/\s/));

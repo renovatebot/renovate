@@ -5,7 +5,8 @@ import { parse as parseToml } from '../../../util/toml';
 import { PypiDatasource } from '../../datasource/pypi';
 import { normalizePythonDepName } from '../../datasource/pypi/common';
 import type { PackageDependency } from '../types';
-import { PyProject, PyProjectSchema } from './schema';
+import type { PyProject } from './schema';
+import { PyProjectSchema } from './schema';
 import type { Pep508ParseResult } from './types';
 
 const pep508Regex = regEx(
@@ -16,6 +17,7 @@ export const depTypes = {
   dependencies: 'project.dependencies',
   optionalDependencies: 'project.optional-dependencies',
   pdmDevDependencies: 'tool.pdm.dev-dependencies',
+  uvDevDependencies: 'tool.uv.dev-dependencies',
   buildSystemRequires: 'build-system.requires',
 };
 
