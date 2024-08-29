@@ -4,8 +4,10 @@ import { presets } from './workarounds';
 
 describe('config/presets/internal/workarounds', () => {
   describe('bitnamiDockerImageVersioning', () => {
-    const versioning = versionings.get(presets.bitnamiDockerImageVersioning.packageRules![0]
-      .versioning as string);
+    const versioning = versionings.get(
+      presets.bitnamiDockerImageVersioning.packageRules![0]
+        .versioning as string,
+    );
     const matchCurrentValue = presets.bitnamiDockerImageVersioning
       .packageRules![0].matchCurrentValue as string;
     const matchCurrentValueRe = regEx(
