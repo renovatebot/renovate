@@ -219,7 +219,7 @@
         "matchDatasources": ["npm"],
         "matchPackageNames": ["eslint-plugin-eslint-comments"],
         "replacementName": "@eslint-community/eslint-plugin-eslint-comments",
-        "replacementVersion": "4.4.0"
+        "replacementVersion": "^4.4.0"
       }
     ]
   },
