@@ -224,13 +224,13 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
   });
 
   describe('getReleases', () => {
-    it('should return null if the filter criteria does not match the schema', async () => {
+    it('should throw an exception if the filter criteria does not match the schema', async () => {
       const lambdaLayerDatasource = new AwsLambdaLayerDataSource();
-      const res = await lambdaLayerDatasource.getReleases({
+      const res = lambdaLayerDatasource.getReleases({
         packageName: '{"invalid": "json"}',
       });
 
-      expect(res).toBeNull();
+      await expect(res).rejects.toThrow();
     });
 
     it('should throw an exception if version is not set in AWS response', async () => {
