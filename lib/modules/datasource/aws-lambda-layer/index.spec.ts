@@ -1,10 +1,7 @@
 import type {
   LayerVersionsListItem,
   ListLayerVersionsCommandOutput} from '@aws-sdk/client-lambda';
-import {
-  LambdaClient,
-  ListLayerVersionsCommand
-} from '@aws-sdk/client-lambda';
+import { LambdaClient, ListLayerVersionsCommand } from '@aws-sdk/client-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getPkgReleases } from '..';
 import { logger } from '../../../logger';

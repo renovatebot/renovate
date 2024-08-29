@@ -56,10 +56,14 @@ export class AwsLambdaLayerDataSource extends Datasource {
     });
 
     if (hasArchitecture && architecture === undefined) {
-      logger.warn("AWS returned layers with architecture but the architecture is not set in the filter. You might update to a layer with wrong architecture.");
+      logger.warn(
+        "AWS returned layers with architecture but the architecture is not set in the filter. You might update to a layer with wrong architecture."
+      );
     }
     if (hasRuntime && runtime === undefined) {
-      logger.warn("AWS returned layers with runtime but the runtime is not set in the filter. You might update to a layer with wrong runtime.");
+      logger.warn(
+        "AWS returned layers with runtime but the runtime is not set in the filter. You might update to a layer with wrong runtime."
+      );
     }
 
     return matchingLayerVersions.LayerVersions ?? [];
