@@ -18,7 +18,7 @@ const PackageSchema = z.object({
 
 const SecurityVulnerabilitySchema = z
   .object({
-    first_patched_version: z.object({ identifier: z.string() }).optional(),
+    first_patched_version: z.object({ identifier: z.string() }).optional().nullable(),
     package: PackageSchema,
     vulnerable_version_range: z.string(),
   })
