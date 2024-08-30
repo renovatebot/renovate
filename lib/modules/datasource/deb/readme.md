@@ -91,7 +91,7 @@ The `debian` datasource supports these repository types:
 
 To use Artifactory, first configure the `deb` datasource by setting the `registryUrl`.
 
-```
+``` title="Example of valid registryUrl format"
 https://<host>:<port>/artifactory/<repository-slug>?release=<release>&components=<components>&binaryArch=<binaryArch>
 https://artifactory.example.com:443/artifactory/debian?release=bookworm&components=main,contrib,non-free&binaryArch=amd64
 ```
