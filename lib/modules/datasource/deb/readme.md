@@ -34,9 +34,9 @@ First you would set a custom manager in your `renovate.json` file for `Dockerfil
       "customType": "regex",
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": [
-        "#\\s*renovate:\\s*?depName=(?<depName>.*?)?\\sENV .*?_VERSION=\"(?<currentValue>.*)\"\\s"
+        "#\\s*renovate:\\s*?(release=(?<release>.*?))?\\s*depName=(?<depName>.*?)?\\sENV .*?_VERSION=\"(?<currentValue>.*)\""
       ],
-      "registryUrlTemplate": "https://deb.debian.org/debian?suite=stable&components=main,contrib,non-free&binaryArch=amd64",
+      "registryUrlTemplate": "https://deb.debian.org/debian?{{#if release }}release={{release}}{{else}}suite=stable{{/if}}&components=main,contrib,non-free&binaryArch=amd64",
       "datasourceTemplate": "deb"
     }
   ]
@@ -48,7 +48,7 @@ Then you would put comments in your Dockerfile, to tell Renovate where to find t
 ```dockerfile
 FROM debian:bullseye
 
-# renovate: depName=gcc-11
+# renovate: release=bullseye depName=gcc-11
 ENV GCC_VERSION="11.2.0-19"
 
 RUN apt-get update && \
@@ -85,13 +85,13 @@ The supported repository types are:
 If you are using Artifactory, you can use the `deb` datasource with following `registryUrl` format:
 
 ```
-https://<host>:<port>/artifactory/<repository-slug>?suite=<suite>&components=<components>&binaryArch=<binaryArch>
-https://artifactory.example.com:443/artifactory/debian/?release=bookworm&components=main,contrib,non-free&binaryArch=amd64
+https://<host>:<port>/artifactory/<repository-slug>?release=<release>&components=<components>&binaryArch=<binaryArch>
+https://artifactory.example.com:443/artifactory/debian?release=bookworm&components=main,contrib,non-free&binaryArch=amd64
 ```
 
-Further, you have to set up a host rule to authenticate against Artifactory.
+Additionally, if the Artifactory requires authentication, you need to set up a host rule.
 Use the "Set Me Up" feature in Artifactory to generate a password for Renovate.
-Then add the following configuration:
+Then, add the following configuration:
 
 ```json title="Artifactory host rule configuration with username and password"
 {
