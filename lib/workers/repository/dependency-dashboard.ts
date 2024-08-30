@@ -61,7 +61,7 @@ function checkCreateConfigMigrationPr(issueBody: string): string {
     return 'migration-pr-exists';
   }
 
-  return 'unchecked';
+  return 'no-checkbox';
 }
 
 function selectAllRelevantBranches(issueBody: string): string[] {

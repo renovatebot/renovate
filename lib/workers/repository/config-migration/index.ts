@@ -6,7 +6,6 @@ import { MigratedDataFactory } from './branch/migrated-data';
 import { ensureConfigMigrationPr } from './pr';
 
 export interface ConfigMigrationResult {
-  migrationBranch?: string;
   result?: 'add-checkbox' | 'pr-exists';
   prNumber?: number;
 }
@@ -33,5 +32,5 @@ export async function configMigration(
   }
   MigratedDataFactory.reset();
 
-  return { migrationBranch, result, prNumber: pr?.number ?? prNumber };
+  return { result, prNumber: pr?.number ?? prNumber };
 }

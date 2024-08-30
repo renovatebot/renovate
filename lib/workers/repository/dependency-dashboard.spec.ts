@@ -97,7 +97,7 @@ describe('workers/repository/dependency-dashboard', () => {
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
-        dependencyDashboardChecks: {},
+        dependencyDashboardChecks: { configMigrationInfo: 'no-checkbox' },
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardIssue: 1,
@@ -125,6 +125,7 @@ describe('workers/repository/dependency-dashboard', () => {
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardChecks: {
           branchName1: 'approve',
+          configMigrationInfo: 'no-checkbox',
         },
         dependencyDashboardIssue: 1,
         dependencyDashboardRebaseAllOpen: true,
@@ -150,6 +151,7 @@ describe('workers/repository/dependency-dashboard', () => {
         dependencyDashboardChecks: {
           branch1: 'global-config',
           branch2: 'global-config',
+          configMigrationInfo: 'no-checkbox',
         },
         dependencyDashboardIssue: 1,
         dependencyDashboardRebaseAllOpen: false,
@@ -174,6 +176,7 @@ describe('workers/repository/dependency-dashboard', () => {
         dependencyDashboardChecks: {
           branchName1: 'approve',
           branchName2: 'approve',
+          configMigrationInfo: 'no-checkbox',
         },
         dependencyDashboardIssue: 1,
         dependencyDashboardRebaseAllOpen: false,
@@ -200,6 +203,7 @@ describe('workers/repository/dependency-dashboard', () => {
         dependencyDashboardChecks: {
           branchName5: 'unlimit',
           branchName6: 'unlimit',
+          configMigrationInfo: 'no-checkbox',
         },
         dependencyDashboardIssue: 1,
         dependencyDashboardRebaseAllOpen: false,
@@ -207,6 +211,48 @@ describe('workers/repository/dependency-dashboard', () => {
         prCreation: 'approval',
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: true,
+      });
+    });
+
+    it('reads dashboard body and config migration checkbox - checked', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: '\n\n - [x] <!-- create-config-migration-pr --> Config Migration necessary.',
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf.dependencyDashboardChecks).toEqual({
+        configMigrationInfo: 'checked',
+      });
+    });
+
+    it('reads dashboard body and config migration checkbox - unchecked', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: '\n\n - [ ] <!-- create-config-migration-pr --> Config Migration necessary.',
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf.dependencyDashboardChecks).toEqual({
+        configMigrationInfo: 'unchecked',
+      });
+    });
+
+    it('reads dashboard body and config migration pr link', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: '\n\n Config Migration necessary. You can view the Config Migration PR here #3',
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf.dependencyDashboardChecks).toEqual({
+        configMigrationInfo: 'migration-pr-exists',
       });
     });
 
@@ -614,6 +660,93 @@ describe('workers/repository/dependency-dashboard', () => {
 
       // same with dry run
       await dryRun(branches, platform, 0, 1);
+    });
+
+    it('adds a checkbox for config migration', async () => {
+      const branches: BranchConfig[] = [];
+      config.repository = 'test';
+      config.packageRules = [
+        {
+          dependencyDashboardApproval: true,
+        },
+        {},
+      ];
+      config.dependencyDashboardHeader =
+        'This is a header for platform:{{platform}}';
+      config.dependencyDashboardFooter =
+        'And this is a footer for repository:{{repository}}';
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        undefined,
+        {
+          result: 'add-checkbox',
+        },
+      );
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
+        config.dependencyDashboardTitle,
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
+        ' - [ ] <!-- create-config-migration-pr --> Config Migration necessary.',
+      );
+    });
+
+    it('adds config migration pr link when it exists', async () => {
+      const branches: BranchConfig[] = [];
+      config.repository = 'test';
+      config.packageRules = [
+        {
+          dependencyDashboardApproval: true,
+        },
+        {},
+      ];
+      config.dependencyDashboardHeader =
+        'This is a header for platform:{{platform}}';
+      config.dependencyDashboardFooter =
+        'And this is a footer for repository:{{repository}}';
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        undefined,
+        {
+          result: 'pr-exists',
+          prNumber: 1,
+        },
+      );
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
+        config.dependencyDashboardTitle,
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
+        'Config Migration necessary. You can view the Config Migration PR here',
+      );
+    });
+
+    it('does not add a config migration checkbox when not needed', async () => {
+      const branches: BranchConfig[] = [];
+      config.repository = 'test';
+      config.packageRules = [
+        {
+          dependencyDashboardApproval: true,
+        },
+        {},
+      ];
+      config.dependencyDashboardHeader =
+        'This is a header for platform:{{platform}}';
+      config.dependencyDashboardFooter =
+        'And this is a footer for repository:{{repository}}';
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
+        config.dependencyDashboardTitle,
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).not.toMatch(
+        'Config Migration necessary',
+      );
     });
 
     it('contains logged problems', async () => {

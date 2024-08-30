@@ -1,3 +1,4 @@
+import type { ConfigMigrationResult } from '..';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -10,10 +11,8 @@ import { createConfigMigrationBranch } from './create';
 import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 
-interface CheckConfigMigrationBranchResult {
+interface CheckConfigMigrationBranchResult extends ConfigMigrationResult {
   migrationBranch?: string;
-  result?: 'add-checkbox' | 'pr-exists';
-  prNumber?: number;
 }
 
 export async function checkConfigMigrationBranch(
@@ -28,10 +27,11 @@ export async function checkConfigMigrationBranch(
 
   if (
     !config.configMigration &&
-    config.dependencyDashboardChecks?.configMigrationInfo === 'unchecked'
+    (config.dependencyDashboardChecks?.configMigrationInfo === 'no-checkbox' ||
+      config.dependencyDashboardChecks?.configMigrationInfo === 'unchecked')
   ) {
     logger.debug(
-      'Config migration needed but config migration is disabled and checkbox not ticked.',
+      'Config migration needed but config migration is disabled and checkbox not ticked or not present.',
     );
     return { result: 'add-checkbox' };
   }
@@ -68,6 +68,8 @@ export async function checkConfigMigrationBranch(
       // if checkbox is ticked then remove this branch/pr and create  new one
 
       if (
+        config.dependencyDashboardChecks?.configMigrationInfo ===
+          'no-checkbox' ||
         config.dependencyDashboardChecks?.configMigrationInfo === 'unchecked'
       ) {
         logger.debug(

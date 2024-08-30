@@ -35,16 +35,11 @@ describe('workers/repository/config-migration/index', () => {
     expect(ensureConfigMigrationPr).toHaveBeenCalledTimes(0);
   });
 
-  it('does nothing when config migration is disabled', async () => {
-    await configMigration({ ...config, configMigration: false }, []);
-    expect(MigratedDataFactory.getAsync).toHaveBeenCalledTimes(0);
-    expect(checkConfigMigrationBranch).toHaveBeenCalledTimes(0);
-    expect(ensureConfigMigrationPr).toHaveBeenCalledTimes(0);
-  });
-
   it('ensures config migration PR when migrated', async () => {
     const branchList: string[] = [];
-    mockedFunction(checkConfigMigrationBranch).mockResolvedValue(branchName);
+    mockedFunction(checkConfigMigrationBranch).mockResolvedValue({
+      migrationBranch: branchName,
+    });
     await configMigration(config, branchList);
     expect(branchList).toContainEqual(branchName);
     expect(ensureConfigMigrationPr).toHaveBeenCalledTimes(1);
@@ -52,7 +47,7 @@ describe('workers/repository/config-migration/index', () => {
 
   it('skips pr creation when migration is not needed', async () => {
     const branchList: string[] = [];
-    mockedFunction(checkConfigMigrationBranch).mockResolvedValue(null);
+    mockedFunction(checkConfigMigrationBranch).mockResolvedValue({});
     await configMigration(config, branchList);
     expect(checkConfigMigrationBranch).toHaveBeenCalledTimes(1);
     expect(ensureConfigMigrationPr).toHaveBeenCalledTimes(0);
