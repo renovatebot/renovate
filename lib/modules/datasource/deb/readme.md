@@ -1,9 +1,12 @@
-The Debian datasource enables Renovate to update packages from Debian repositories.
-It is ideal for projects that depend on Debian-based systems or distributions.
+Renovate uses the Debian datasource to update packages from Debian repositories.
+The `debian` datasource is meant for projects that:
+
+- depend on Debian-based systems, or
+- depend on Debian-based distributions, like Ubuntu
 You will need to combine Debian datasource with [regex managers](../../manager/regex/index.md) to update dependencies.
 
 **Registry URL**
-To use a Debian repository with the datasource, you need a properly formatted URL with specific query parameters as `registryUrl`:
+To use a Debian repository with the datasource, you must set a properly formatted URL with specific query parameters as `registryUrl`:
 
 - `components`: Comma-separated list of repository components (e.g., `main,contrib,non-free`).
 - `binaryArch`: Architecture of the binary packages (e.g., `amd64`,`all`).
@@ -59,7 +62,7 @@ RUN apt-get update && \
 
 When the apt package for `gcc` is updated, Renovate updates the environment variable.
 
-```json title="Overwrite deb registryUrl via packageRule"
+```json title="Override deb registryUrl with a packageRules entry"
 {
   "packageRules": [
     {
@@ -76,24 +79,30 @@ When the apt package for `gcc` is updated, Renovate updates the environment vari
 ## Artifactory
 
 This datasource can also be used with Artifactory.
-The supported repository types are:
+### Supported repository types
+
+The `debian` datasource supports these repository types:
 
 - virtual
 - local
 - remote
 
-If you are using Artifactory, you can use the `deb` datasource with following `registryUrl` format:
+### Set a `registryUrl`
+
+To use Artifactory, first configure the `deb` datasource by setting the `registryUrl`.
 
 ```
 https://<host>:<port>/artifactory/<repository-slug>?release=<release>&components=<components>&binaryArch=<binaryArch>
 https://artifactory.example.com:443/artifactory/debian?release=bookworm&components=main,contrib,non-free&binaryArch=amd64
 ```
 
-Additionally, if the Artifactory requires authentication, you need to set up a host rule.
-Use the "Set Me Up" feature in Artifactory to generate a password for Renovate.
+### Authenticating to Artifactory
+
+If Artifactory asks for authentication, you must set up a host rule.
+First, generate a password for Renovate with Artifactory's "Set Me Up" feature.
 Then, add the following configuration:
 
-```json title="Artifactory host rule configuration with username and password"
+```json title="Example Artifactory host rule configuration, with username and password"
 {
   "hostRules": [
     {
