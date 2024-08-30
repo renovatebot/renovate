@@ -63,10 +63,6 @@ export async function checkConfigMigrationBranch(
     if (closedPr) {
       logger.debug('Closed config migration PR found.');
 
-      // previously we used to add a comment and skip the branch
-      // but now we add a checkbox in DD
-      // if checkbox is ticked then remove this branch/pr and create  new one
-
       if (
         config.dependencyDashboardChecks?.configMigrationInfo ===
           'no-checkbox' ||

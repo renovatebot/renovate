@@ -47,7 +47,6 @@ describe('workers/repository/config-migration/branch/index', () => {
       );
     });
 
-    // returns result:add-checkbox when migration is disabled but needed or checkbox is not ticked
     it('returns add checkbox message when migration disabled and checkbox unchecked', async () => {
       await expect(
         checkConfigMigrationBranch(
@@ -64,7 +63,6 @@ describe('workers/repository/config-migration/branch/index', () => {
       );
     });
 
-    // return result: pr-exists, when migration branch name & pr number when migration disabled & checkbox ticked or open pr exists
     it('creates migration branch when migration disabled but checkbox checked', async () => {
       mockedFunction(createConfigMigrationBranch).mockResolvedValueOnce(
         'committed',
@@ -117,7 +115,6 @@ describe('workers/repository/config-migration/branch/index', () => {
       );
     });
 
-    // return result: pr-exists, migrationBranchName & prNum when migration enabled and no pr or open pr exists
     it('creates migration branch when migration enabled but no pr exists', async () => {
       mockedFunction(createConfigMigrationBranch).mockResolvedValueOnce(
         'committed',
@@ -222,7 +219,6 @@ describe('workers/repository/config-migration/branch/index', () => {
       const title = 'PR title';
       const pr = partial<Pr>({ title, state: 'closed', number: 1 });
 
-      // returns result:add-checkbox when migration disabled and closed migration pr exists and checkbox not ticked
       it('adds a checkbox when migration is disabled but needed and a closed pr exists', async () => {
         platform.findPr.mockResolvedValueOnce(pr);
         platform.getBranchPr.mockResolvedValue(null);
@@ -263,7 +259,6 @@ describe('workers/repository/config-migration/branch/index', () => {
         expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       });
 
-      // return result: add-checkbox, when migration enabled but closed pr exists
       it('adds a checkbox when migration is enabled and a closed pr exists', async () => {
         platform.findPr.mockResolvedValueOnce(pr);
         platform.getBranchPr.mockResolvedValue(null);
