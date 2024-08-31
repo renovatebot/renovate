@@ -426,11 +426,8 @@ export class Vulnerabilities {
     fixedVersion: string,
     ecosystem: Ecosystem,
   ): string {
-    if (ecosystem === 'Maven') {
+    if (ecosystem === 'Maven' || ecosystem === 'NuGet') {
       return `[${fixedVersion},)`;
-    } else if (ecosystem === 'NuGet') {
-      // TODO: add support for nuget version ranges when #26150 is merged
-      return fixedVersion;
     }
 
     // crates.io, Go, Hex, npm, RubyGems, PyPI
