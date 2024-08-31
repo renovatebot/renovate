@@ -142,6 +142,7 @@
     "@aws-sdk/client-codecommit": "3.621.0",
     "@aws-sdk/client-ec2": "3.621.0",
     "@aws-sdk/client-ecr": "3.621.0",
+    "@aws-sdk/client-lambda": "3.621.0",
     "@aws-sdk/client-rds": "3.621.0",
     "@aws-sdk/client-s3": "3.621.0",
     "@aws-sdk/credential-providers": "3.621.0",
