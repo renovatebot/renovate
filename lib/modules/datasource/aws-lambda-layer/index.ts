@@ -105,7 +105,7 @@ export class AwsLambdaLayerDataSource extends Datasource {
 
     const { val, err } = await result.unwrap();
 
-    // istanbul ignore next - no idea how to test this branch
+    // istanbul ignore if - no idea how to test this branch
     if (err) {
       logger.error(
         { err },
