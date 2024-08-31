@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import type { ConfigMigrationResult } from '..';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
@@ -27,7 +28,8 @@ export async function checkConfigMigrationBranch(
 
   if (
     !config.configMigration &&
-    (config.dependencyDashboardChecks?.configMigrationInfo === 'no-checkbox' ||
+    (is.undefined(config.dependencyDashboardChecks?.configMigrationInfo) ||
+      config.dependencyDashboardChecks?.configMigrationInfo === 'no-checkbox' ||
       config.dependencyDashboardChecks?.configMigrationInfo === 'unchecked')
   ) {
     logger.debug(
@@ -63,11 +65,7 @@ export async function checkConfigMigrationBranch(
     if (closedPr) {
       logger.debug('Closed config migration PR found.');
 
-      if (
-        config.dependencyDashboardChecks?.configMigrationInfo ===
-          'no-checkbox' ||
-        config.dependencyDashboardChecks?.configMigrationInfo === 'unchecked'
-      ) {
+      if (config.dependencyDashboardChecks?.configMigrationInfo !== 'checked') {
         logger.debug(
           'Closed PR and config migration enabled. Adding checkbox to DD, will check in next run.',
         );
