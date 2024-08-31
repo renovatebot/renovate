@@ -411,5 +411,37 @@ describe('modules/manager/pep621/extract', () => {
         ],
       });
     });
+
+    it('should resolve lockedVersions from uv.lock', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        Fixtures.get('pyproject_uv_lockedversion.lock'),
+      );
+
+      const res = await extractPackageFile(
+        Fixtures.get('pyproject_uv_lockedversion.toml'),
+        'pyproject.toml',
+      );
+      expect(res).toMatchObject({
+        extractedConstraints: { python: '>=3.11' },
+        deps: [
+          {
+            packageName: 'jwcrypto',
+            depName: 'jwcrypto',
+            datasource: 'pypi',
+            depType: 'project.dependencies',
+            currentValue: '>=1.4.1',
+            lockedVersion: '1.5.6',
+          },
+          {
+            packageName: 'mkdocs',
+            depName: 'mkdocs',
+            datasource: 'pypi',
+            depType: 'tool.uv.dev-dependencies',
+            currentValue: '>=1.6.0',
+            lockedVersion: '1.6.1',
+          },
+        ],
+      });
+    });
   });
 });
