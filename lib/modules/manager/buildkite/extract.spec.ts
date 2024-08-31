@@ -174,5 +174,38 @@ describe('modules/manager/buildkite/extract', () => {
       };
       expect(res).toEqual([bitbucketDependency, githubDependency]);
     });
+
+    it('extracts plugin tags with quotes', () => {
+      const fileContent = codeBlock`
+        steps:
+          - name: "When single quoted"
+            command: true
+            plugins:
+              - 'test-collector#v1.8.0':
+                  files: junit.xml
+                  format: junit
+
+          - name: "Docker Test %n"
+            command: test.sh
+            parallelism: 25
+            plugins:
+              "docker-compose#v1.3.2":
+                run: app
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      const singleQuotesDependency: PackageDependency = {
+        currentValue: 'v1.8.0',
+        datasource: 'github-tags',
+        depName: 'test-collector',
+        packageName: 'buildkite-plugins/test-collector-buildkite-plugin',
+      };
+      const doubleQuotesDependency: PackageDependency = {
+        currentValue: 'v1.3.2',
+        datasource: 'github-tags',
+        depName: 'docker-compose',
+        packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+      };
+      expect(res).toEqual([singleQuotesDependency, doubleQuotesDependency]);
+    });
   });
 });
