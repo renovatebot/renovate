@@ -2,7 +2,8 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { Pr, platform } from '../../../../modules/platform';
+import type { Pr } from '../../../../modules/platform';
+import { platform } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
@@ -128,7 +129,7 @@ ${
       await scm.deleteBranch(branchName);
       return null;
     }
-    return null;
+    throw err;
   }
 
   return null;
