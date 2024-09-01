@@ -139,12 +139,12 @@
     "pnpm": "^9.0.0"
   },
   "dependencies": {
-    "@aws-sdk/client-codecommit": "3.621.0",
-    "@aws-sdk/client-ec2": "3.621.0",
-    "@aws-sdk/client-ecr": "3.621.0",
-    "@aws-sdk/client-rds": "3.621.0",
-    "@aws-sdk/client-s3": "3.621.0",
-    "@aws-sdk/credential-providers": "3.621.0",
+    "@aws-sdk/client-codecommit": "3.637.0",
+    "@aws-sdk/client-ec2": "3.641.0",
+    "@aws-sdk/client-ecr": "3.637.0",
+    "@aws-sdk/client-rds": "3.637.0",
+    "@aws-sdk/client-s3": "3.637.0",
+    "@aws-sdk/credential-providers": "3.637.0",
     "@breejs/later": "4.2.0",
     "@cdktf/hcl2json": "0.20.8",
     "@opentelemetry/api": "1.9.0",
