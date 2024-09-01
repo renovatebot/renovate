@@ -3,7 +3,8 @@ The `debian` datasource is meant for projects that:
 
 - depend on Debian-based systems, or
 - depend on Debian-based distributions, like Ubuntu
-You will need to combine Debian datasource with [regex managers](../../manager/regex/index.md) to update dependencies.
+By default, Renovate does not detect Debian dependencies.
+For Renovate to update dependencies, you must combine the Debian datasource with [regex managers](../../manager/regex/index.md).
 
 **Registry URL**
 To use a Debian repository with the datasource, you must set a properly formatted URL with specific query parameters as `registryUrl`:
