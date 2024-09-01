@@ -43,15 +43,19 @@ export class UvProcessor implements PyProjectProcessor {
     const lockFileName = getSiblingFileName(packageFile, 'uv.lock');
     const lockFileContent = await readLocalFile(lockFileName, 'utf8');
     if (lockFileContent) {
-      const lockFileMapping = Result.parse(
+      const { val: lockFileMapping, err } = Result.parse(
         lockFileContent,
         UvLockfileSchema,
-      ).unwrapOrElse({});
+      ).unwrap();
 
-      for (const dep of deps) {
-        const packageName = dep.packageName;
-        if (packageName && packageName in lockFileMapping) {
-          dep.lockedVersion = lockFileMapping[packageName];
+      if (err) {
+        logger.debug({ packageFile, err }, `Error parsing uv lock file`);
+      } else {
+        for (const dep of deps) {
+          const packageName = dep.packageName;
+          if (packageName && packageName in lockFileMapping) {
+            dep.lockedVersion = lockFileMapping[packageName];
+          }
         }
       }
     }

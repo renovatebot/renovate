@@ -464,5 +464,32 @@ describe('modules/manager/pep621/extract', () => {
         ],
       });
     });
+
+    it('should resolve dependencies without locked versions on invalid uv.lock', async () => {
+      fs.readLocalFile.mockResolvedValue(codeBlock`invalid_toml`);
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pep621-uv"
+          version = "0.1.0"
+          dependencies = ["attrs>=24.1.0"]
+          requires-python = ">=3.11"
+        `,
+        'pyproject.toml',
+      );
+      expect(res).toMatchObject({
+        extractedConstraints: { python: '>=3.11' },
+        deps: [
+          {
+            packageName: 'attrs',
+            depName: 'attrs',
+            datasource: 'pypi',
+            depType: 'project.dependencies',
+            currentValue: '>=24.1.0',
+          },
+        ],
+      });
+    });
   });
 });
