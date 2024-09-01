@@ -45,7 +45,7 @@ export class UvProcessor implements PyProjectProcessor {
     if (lockFileContent) {
       const lockFileMapping = Result.parse(
         lockFileContent,
-        UvLockfileSchema.transform(({ lock }) => lock),
+        UvLockfileSchema,
       ).unwrapOrElse({});
 
       for (const dep of deps) {

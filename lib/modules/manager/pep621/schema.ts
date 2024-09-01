@@ -94,5 +94,4 @@ export const UvLockfileSchema = Toml.pipe(
     Object.fromEntries(
       pkg.map(({ name, version }): [string, string] => [name, version]),
     ),
-  )
-  .transform((lock) => ({ lock }));
+  );
