@@ -3,8 +3,8 @@ The `debian` datasource is meant for projects that:
 
 - depend on Debian-based systems, or
 - depend on Debian-based distributions, like Ubuntu
-By default, Renovate does not detect Debian dependencies.
-For Renovate to update dependencies, you must combine the Debian datasource with [regex managers](../../manager/regex/index.md).
+  By default, Renovate does not detect Debian dependencies.
+  For Renovate to update dependencies, you must combine the Debian datasource with [regex managers](../../manager/regex/index.md).
 
 **Registry URL**
 To use a Debian repository with the datasource, you must set a properly formatted URL with specific query parameters as `registryUrl`:
@@ -80,6 +80,7 @@ When the apt package for `gcc` is updated, Renovate updates the environment vari
 ## Artifactory
 
 The Debian datasource can be used with Artifactory.
+
 ### Supported repository types
 
 The `debian` datasource supports these repository types:
@@ -92,7 +93,7 @@ The `debian` datasource supports these repository types:
 
 To use Artifactory, first configure the `deb` datasource by setting the `registryUrl`.
 
-``` title="Example of valid registryUrl format"
+```title="Example of valid registryUrl format"
 https://<host>:<port>/artifactory/<repository-slug>?release=<release>&components=<components>&binaryArch=<binaryArch>
 https://artifactory.example.com:443/artifactory/debian?release=bookworm&components=main,contrib,non-free&binaryArch=amd64
 ```
