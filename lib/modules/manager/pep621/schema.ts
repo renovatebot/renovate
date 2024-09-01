@@ -89,9 +89,8 @@ export const UvLockfileSchema = Toml.pipe(
       }),
     ),
   }),
-)
-  .transform(({ package: pkg }) =>
-    Object.fromEntries(
-      pkg.map(({ name, version }): [string, string] => [name, version]),
-    ),
-  );
+).transform(({ package: pkg }) =>
+  Object.fromEntries(
+    pkg.map(({ name, version }): [string, string] => [name, version]),
+  ),
+);
