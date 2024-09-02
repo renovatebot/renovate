@@ -411,5 +411,85 @@ describe('modules/manager/pep621/extract', () => {
         ],
       });
     });
+
+    it('should resolve lockedVersions from uv.lock', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        codeBlock`
+          version = 1
+          requires-python = ">=3.11"
+
+          [[package]]
+          name = "attrs"
+          version = "24.2.0"
+          source = { registry = "https://pypi.org/simple" }
+          sdist = { url = "https://files.pythonhosted.org/packages/fc/0f/aafca9af9315aee06a89ffde799a10a582fe8de76c563ee80bbcdc08b3fb/attrs-24.2.0.tar.gz", hash = "sha256:5cfb1b9148b5b086569baec03f20d7b6bf3bcacc9a42bebf87ffaaca362f6346", size = 792678 }
+          wheels = [
+              { url = "https://files.pythonhosted.org/packages/6a/21/5b6702a7f963e95456c0de2d495f67bf5fd62840ac655dc451586d23d39a/attrs-24.2.0-py3-none-any.whl", hash = "sha256:81921eb96de3191c8258c199618104dd27ac608d9366f5e35d011eae1867ede2", size = 63001 },
+          ]
+
+          [[package]]
+          name = "pep621-uv"
+          version = "0.1.0"
+          source = { virtual = "." }
+          dependencies = [
+              { name = "attrs" },
+          ]
+
+          [package.metadata]
+          requires-dist = [{ name = "attrs", specifier = ">=24.1.0" }]
+        `,
+      );
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pep621-uv"
+          version = "0.1.0"
+          dependencies = ["attrs>=24.1.0"]
+          requires-python = ">=3.11"
+        `,
+        'pyproject.toml',
+      );
+      expect(res).toMatchObject({
+        extractedConstraints: { python: '>=3.11' },
+        deps: [
+          {
+            packageName: 'attrs',
+            depName: 'attrs',
+            datasource: 'pypi',
+            depType: 'project.dependencies',
+            currentValue: '>=24.1.0',
+            lockedVersion: '24.2.0',
+          },
+        ],
+      });
+    });
+
+    it('should resolve dependencies without locked versions on invalid uv.lock', async () => {
+      fs.readLocalFile.mockResolvedValue(codeBlock`invalid_toml`);
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pep621-uv"
+          version = "0.1.0"
+          dependencies = ["attrs>=24.1.0"]
+          requires-python = ">=3.11"
+        `,
+        'pyproject.toml',
+      );
+      expect(res).toMatchObject({
+        extractedConstraints: { python: '>=3.11' },
+        deps: [
+          {
+            packageName: 'attrs',
+            depName: 'attrs',
+            datasource: 'pypi',
+            depType: 'project.dependencies',
+            currentValue: '>=24.1.0',
+          },
+        ],
+      });
+    });
   });
 });
