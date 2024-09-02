@@ -34,20 +34,6 @@ export interface CargoManifest extends CargoSection {
   package?: CargoPackage;
 }
 
-export interface CargoConfig {
-  registries?: Record<string, CargoRegistry>;
-  source?: Record<string, CargoSource>;
-}
-
-export interface CargoRegistry {
-  index?: string;
-}
-
-export interface CargoSource {
-  'replace-with'?: string;
-  registry?: string;
-}
-
 /**
  * null means a registry was defined, but we couldn't find a valid URL
  */

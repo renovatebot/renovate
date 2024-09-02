@@ -2,6 +2,7 @@ import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { coerceArray } from '../../../util/array';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
+import { Result } from '../../../util/result';
 import { parse as parseToml } from '../../../util/toml';
 import { CrateDatasource } from '../../datasource/crate';
 import { api as versioning } from '../../versioning/cargo';
@@ -11,8 +12,8 @@ import type {
   PackageFileContent,
 } from '../types';
 import { extractLockFileVersions } from './locked-version';
+import { type CargoConfig, CargoConfigSchema } from './schema';
 import type {
-  CargoConfig,
   CargoManifest,
   CargoRegistries,
   CargoRegistryUrl,
@@ -135,12 +136,15 @@ async function readCargoConfig(): Promise<CargoConfig | null> {
     const path = `.cargo/${configName}`;
     const payload = await readLocalFile(path, 'utf8');
     if (payload) {
-      try {
-        return parseToml(payload) as CargoConfig;
-      } catch (err) {
-        logger.debug({ err }, `Error parsing ${path}`);
+      const { val: cargoConfig, err } = Result.parse(
+        payload,
+        CargoConfigSchema,
+      ).unwrap();
+      if (err) {
+        logger.debug({ path, err }, `Error parsing cargo config`);
+      } else {
+        return cargoConfig;
       }
-      break;
     }
   }
 
