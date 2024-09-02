@@ -3,7 +3,6 @@ import type { SkipReason } from '../../../types';
 import { coerceArray } from '../../../util/array';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
 import { Result } from '../../../util/result';
-import { parse as parseToml } from '../../../util/toml';
 import { CrateDatasource } from '../../datasource/crate';
 import { api as versioning } from '../../versioning/cargo';
 import type {
@@ -12,13 +11,13 @@ import type {
   PackageFileContent,
 } from '../types';
 import { extractLockFileVersions } from './locked-version';
-import { type CargoConfig, CargoConfigSchema } from './schema';
-import type {
-  CargoManifest,
-  CargoRegistries,
-  CargoRegistryUrl,
-  CargoSection,
-} from './types';
+import {
+  type CargoConfig,
+  CargoConfigSchema,
+  CargoManifestSchema,
+  type CargoSection,
+} from './schema';
+import type { CargoRegistries, CargoRegistryUrl } from './types';
 import { DEFAULT_REGISTRY_URL } from './utils';
 
 const DEFAULT_REGISTRY_ID = 'crates-io';
@@ -227,13 +226,16 @@ export async function extractPackageFile(
   const cargoConfig = (await readCargoConfig()) ?? {};
   const cargoRegistries = extractCargoRegistries(cargoConfig);
 
-  let cargoManifest: CargoManifest;
-  try {
-    cargoManifest = parseToml(content) as CargoManifest;
-  } catch (err) {
+  const { val: cargoManifest, err } = Result.parse(
+    content,
+    CargoManifestSchema,
+  ).unwrap();
+
+  if (err) {
     logger.debug({ err, packageFile }, 'Error parsing Cargo.toml file');
     return null;
   }
+
   /*
     There are the following sections in Cargo.toml:
     [package]
