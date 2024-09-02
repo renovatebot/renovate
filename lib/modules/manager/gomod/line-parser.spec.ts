@@ -107,6 +107,28 @@ describe('modules/manager/gomod/line-parser', () => {
     });
   });
 
+  it('should parse go modules without paths - 1', () => {
+    const line = 'require tailscale.com v1.72.0';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      currentValue: 'v1.72.0',
+      datasource: 'go',
+      depName: 'tailscale.com',
+      depType: 'require',
+    });
+  });
+
+  it('should parse go modules without paths - 2', () => {
+    const line = 'require foo.tailscale.com v1.72.0';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      currentValue: 'v1.72.0',
+      datasource: 'go',
+      depName: 'foo.tailscale.com',
+      depType: 'require',
+    });
+  });
+
   it('should parse require multi-line definition with quotes', () => {
     const line = '        "foo/foo" v1.2';
     const res = parseLine(line);
