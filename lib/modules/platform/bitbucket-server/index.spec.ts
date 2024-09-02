@@ -816,6 +816,45 @@ describe('modules/platform/bitbucket-server/index', () => {
           await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
         });
 
+        it('resolves the reviewer email to name', async () => {
+          expect.assertions(1);
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+            )
+            .twice()
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/admin/users?filter=name@renovatebot.com`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [
+                {
+                  name: 'name',
+                  emailAddress: 'name@renovatebot.com',
+                },
+              ],
+            })
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+              {
+                title: 'title',
+                version: 1,
+                reviewers: [
+                  { user: { name: 'userName2' } },
+                  { user: { name: 'name' } },
+                ],
+              },
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'));
+
+          await expect(
+            bitbucket.addReviewers(5, ['name@renovatebot.com']),
+          ).toResolve();
+        });
+
         it('throws not-found 1', async () => {
           await initRepo();
           await expect(

@@ -670,7 +670,13 @@ async function updatePRAndAddReviewers(
     }
 
     // TODO: can `reviewers` be undefined? (#22198)
-    const reviewersSet = new Set([...pr.reviewers!, ...reviewers]);
+    const reviewersSet = new Set(
+      await Promise.all(
+        [...pr.reviewers!, ...reviewers].map((name) =>
+          name.includes('@') ? resolveEmailToUsername(name) : name,
+        ),
+      ),
+    );
 
     await bitbucketServerHttp.putJson(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
@@ -730,6 +736,17 @@ async function retry<T extends (...arg0: any[]) => Promise<any>>(
   // Can't be `undefined` here.
   // eslint-disable-next-line @typescript-eslint/only-throw-error
   throw lastError;
+}
+// https://docs.atlassian.com/bitbucket-server/rest/5.1.0/bitbucket-rest.html#idm45588158982432
+async function resolveEmailToUsername(email: string): Promise<string | null> {
+  // GET /rest/api/1.0/admin/users?filter={filter}
+  const users = (
+    await bitbucketServerHttp.getJson<{ values: { name: string }[] }>(
+      `./rest/api/1.0/admin/users?filter=${email}`,
+    )
+  ).body;
+
+  return users.values?.[0].name ?? null;
 }
 
 export function deleteLabel(issueNo: number, label: string): Promise<void> {
