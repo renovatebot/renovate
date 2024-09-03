@@ -8,7 +8,6 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
-import { depTypes } from './utils';
 
 jest.mock('../../../util/fs');
 jest.mock('../../datasource', () => mockDeep());
@@ -81,12 +80,7 @@ describe('modules/manager/pep621/artifacts', () => {
         releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
       });
 
-      const updatedDeps = [
-        { packageName: 'dep1' },
-        { packageName: 'dep2' },
-        { packageName: 'dep3', depType: depTypes.pdmDevDependencies },
-        { packageName: 'dep4', depType: depTypes.pdmDevDependencies },
-      ];
+      const updatedDeps = [{ packageName: 'dep1' }];
       const result = await updateArtifacts({
         packageFileName: 'pyproject.toml',
         newPackageFileContent: codeBlock`
@@ -133,9 +127,7 @@ requires-python = "<3.9"
             '&& ' +
             'install-tool pdm v2.5.0 ' +
             '&& ' +
-            'pdm update --no-sync --update-eager dep1 dep2 ' +
-            '&& ' +
-            'pdm update --no-sync --update-eager -d dep3 dep4' +
+            'pdm update --no-sync --update-eager dep1' +
             '"',
           options: {
             cwd: '/tmp/github/some/repo',
