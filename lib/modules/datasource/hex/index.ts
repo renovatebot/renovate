@@ -105,7 +105,7 @@ export class HexDatasource extends Datasource {
       if (this.hexRepoName === 'hexpm' && releaseResult.releases.length > 0) {
         const metadataUrl = joinUrlParts(this.hexAPIBaseUrl, urlPath);
 
-        logger.debug(`Package metadata url: ${metadataUrl}`);
+        logger.trace(`Package metadata url: ${metadataUrl}`);
 
         const { val: packageMetadata, err } = await this.http
           .getJsonSafe(metadataUrl, HexAPIPackageMetadata)
