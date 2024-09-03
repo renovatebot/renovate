@@ -13,7 +13,7 @@ import { Signed } from './signed';
 export class HexDatasource extends Datasource {
   static readonly id = 'hex';
 
-  private readonly hexAPIBaseUrl = 'https://hex.pm/api';
+  private static readonly hexApiBaseUrl = 'https://hex.pm/api';
   private hexRepoName = 'hexpm';
 
   constructor() {
@@ -103,7 +103,7 @@ export class HexDatasource extends Datasource {
         );
 
       if (this.hexRepoName === 'hexpm' && releaseResult.releases.length > 0) {
-        const metadataUrl = joinUrlParts(this.hexAPIBaseUrl, urlPath);
+        const metadataUrl = joinUrlParts(HexDatasource.hexApiBaseUrl, urlPath);
 
         logger.trace(`Package metadata url: ${metadataUrl}`);
 
