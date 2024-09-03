@@ -169,18 +169,10 @@ function generateCMDs(updatedDeps: Upgrade[]): string[] {
   const packagesByCMD: Record<string, string[]> = {};
   for (const dep of updatedDeps) {
     switch (dep.depType) {
-      case depTypes.optionalDependencies: {
-        addPackageToCMDRecord(
-          packagesByCMD,
-          `${pdmUpdateCMD} -G ":all"`,
-          dep.packageName!,
-        );
-        break;
-      }
       case depTypes.pdmDevDependencies: {
         addPackageToCMDRecord(
           packagesByCMD,
-          `${pdmUpdateCMD} -d -G ":all"`,
+          `${pdmUpdateCMD} -d`,
           dep.packageName!,
         );
         break;
