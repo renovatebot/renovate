@@ -14,7 +14,6 @@ export class HexDatasource extends Datasource {
   static readonly id = 'hex';
 
   private static readonly hexApiBaseUrl = 'https://hex.pm/api';
-  private hexRepoName = 'hexpm';
 
   constructor() {
     super(HexDatasource.id);
@@ -52,6 +51,7 @@ export class HexDatasource extends Datasource {
     // If the dependency is in a private registry, packageName contains the repo name as following:
     // repo:registryName:hexPackageName
     let urlPath: string;
+    let hexRepoName: string = 'hexpm';
 
     const releaseResult: ReleaseResult = { releases: [] };
 
@@ -62,7 +62,7 @@ export class HexDatasource extends Datasource {
     } else if (packageName.startsWith('repo:')) {
       const [, repoName, hexPackageName] = packageName.split(':');
       urlPath = `/packages/${hexPackageName}`;
-      this.hexRepoName = repoName;
+      hexRepoName = repoName;
       releaseResult.isPrivate = true;
     } else {
       urlPath = `/packages/${packageName}`;
@@ -102,7 +102,7 @@ export class HexDatasource extends Datasource {
           },
         );
 
-      if (this.hexRepoName === 'hexpm' && releaseResult.releases.length > 0) {
+      if (hexRepoName === 'hexpm' && releaseResult.releases.length > 0) {
         const metadataUrl = joinUrlParts(HexDatasource.hexApiBaseUrl, urlPath);
 
         logger.trace(`Package metadata url: ${metadataUrl}`);
