@@ -702,6 +702,12 @@ export class DockerDatasource extends Datasource {
       }
       page += 1;
     } while (url && page < pages);
+    if (page >= pages) {
+      logger.warn(
+        { registryHost, dockerRepository },
+        'Reached max pages for Docker tags lookup, may not have found all the image tags',
+      );
+    }
     return tags;
   }
 
