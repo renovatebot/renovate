@@ -16,7 +16,7 @@ export function resolveAlias(
     return packageName;
   }
 
-  const [, repoName, ,] = packageName.split(':');
+  const [, repoName] = packageName.split(':');
   const alias = registryAliases[repoName];
 
   if (alias) {
