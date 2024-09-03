@@ -135,6 +135,7 @@ describe('modules/manager/pep621/extract', () => {
           depType: 'project.optional-dependencies',
           currentValue: '>12',
           depName: 'pytest',
+          managerData: { depGroup: 'pytest' },
         },
         {
           packageName: 'pytest-mock',
@@ -142,6 +143,7 @@ describe('modules/manager/pep621/extract', () => {
           depType: 'project.optional-dependencies',
           skipReason: 'unspecified-version',
           depName: 'pytest-mock',
+          managerData: { depGroup: 'pytest' },
         },
       ]);
 
@@ -155,6 +157,7 @@ describe('modules/manager/pep621/extract', () => {
           depType: 'tool.pdm.dev-dependencies',
           skipReason: 'unspecified-version',
           depName: 'pdm',
+          managerData: { depGroup: 'test' },
         },
         {
           packageName: 'pytest-rerunfailures',
@@ -162,6 +165,7 @@ describe('modules/manager/pep621/extract', () => {
           depType: 'tool.pdm.dev-dependencies',
           currentValue: '>=10.2',
           depName: 'pytest-rerunfailures',
+          managerData: { depGroup: 'test' },
         },
         {
           packageName: 'tox',
@@ -169,6 +173,7 @@ describe('modules/manager/pep621/extract', () => {
           depType: 'tool.pdm.dev-dependencies',
           skipReason: 'unspecified-version',
           depName: 'tox',
+          managerData: { depGroup: 'tox' },
         },
         {
           packageName: 'tox-pdm',
@@ -176,6 +181,7 @@ describe('modules/manager/pep621/extract', () => {
           depType: 'tool.pdm.dev-dependencies',
           currentValue: '>=0.5',
           depName: 'tox-pdm',
+          managerData: { depGroup: 'tox' },
         },
       ]);
     });
@@ -219,6 +225,7 @@ describe('modules/manager/pep621/extract', () => {
             'https://private-site.org/pypi/simple',
             'https://private.pypi.org/simple',
           ],
+          managerData: { depGroup: 'pytest' },
         },
         {
           packageName: 'pytest-rerunfailures',
@@ -230,6 +237,7 @@ describe('modules/manager/pep621/extract', () => {
             'https://private-site.org/pypi/simple',
             'https://private.pypi.org/simple',
           ],
+          managerData: { depGroup: 'test' },
         },
         {
           packageName: 'tox-pdm',
@@ -241,6 +249,7 @@ describe('modules/manager/pep621/extract', () => {
             'https://private-site.org/pypi/simple',
             'https://private.pypi.org/simple',
           ],
+          managerData: { depGroup: 'tox' },
         },
       ]);
     });
