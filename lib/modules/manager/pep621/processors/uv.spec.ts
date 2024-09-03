@@ -42,7 +42,10 @@ describe('modules/manager/pep621/processors/uv', () => {
       const result = processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
-        { packageName: 'dep1' },
+        {
+          packageName: 'dep1',
+          registryUrls: ['https://pypi.org/pypi/'],
+        },
         {
           currentValue: '==1.2.3',
           currentVersion: '1.2.3',
@@ -50,6 +53,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           depName: 'dep2',
           depType: 'tool.uv.dev-dependencies',
           packageName: 'dep2',
+          registryUrls: ['https://pypi.org/pypi/'],
         },
         {
           currentValue: '==2.3.4',
@@ -58,6 +62,62 @@ describe('modules/manager/pep621/processors/uv', () => {
           depName: 'dep3',
           depType: 'tool.uv.dev-dependencies',
           packageName: 'dep3',
+          registryUrls: ['https://pypi.org/pypi/'],
+        },
+      ]);
+    });
+
+    it('uses default PyPI and extra URLs when setting extra-index-url', () => {
+      const pyproject = {
+        tool: {
+          uv: {
+            'extra-index-url': [
+              'https://foo.example.com',
+              'https://bar.example.com',
+            ],
+          },
+        },
+      };
+      const dependencies = [{ packageName: 'dep1' }];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          packageName: 'dep1',
+          registryUrls: [
+            'https://foo.example.com',
+            'https://bar.example.com',
+            'https://pypi.org/pypi/',
+          ],
+        },
+      ]);
+    });
+
+    it('uses index and extra URLs when setting index-url and extra-index-url', () => {
+      const pyproject = {
+        tool: {
+          uv: {
+            'index-url': 'https://foobar.example.com',
+            'extra-index-url': [
+              'https://foo.example.com',
+              'https://bar.example.com',
+            ],
+          },
+        },
+      };
+      const dependencies = [{ packageName: 'dep1' }];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          packageName: 'dep1',
+          registryUrls: [
+            'https://foo.example.com',
+            'https://bar.example.com',
+            'https://foobar.example.com',
+          ],
         },
       ]);
     });

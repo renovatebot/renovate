@@ -37,7 +37,11 @@ const HatchSchema = z.object({
 
 const UvSchema = z.object({
   'dev-dependencies': DependencyListSchema,
+  'index-url': z.string().optional(),
+  'extra-index-url': z.array(z.string()).optional(),
 });
+
+export type Uv = z.infer<typeof UvSchema>;
 
 export const PyProjectSchema = z.object({
   project: z
