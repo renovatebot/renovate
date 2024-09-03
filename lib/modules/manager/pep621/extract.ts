@@ -53,7 +53,7 @@ export async function extractPackageFile(
   // process specific tool sets
   let processedDeps = deps;
   for (const processor of processors) {
-    processedDeps = processor.process(def, processedDeps);
+    processedDeps = await processor.process(def, processedDeps);
     processedDeps = await processor.extractLockedVersions(
       def,
       processedDeps,

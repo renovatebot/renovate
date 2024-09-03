@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { mockExecAll } from '../../../../../test/exec-util';
 import { fs, mockedFunction } from '../../../../../test/util';
@@ -24,22 +25,75 @@ const processor = new UvProcessor();
 
 describe('modules/manager/pep621/processors/uv', () => {
   describe('process()', () => {
-    it('returns initial dependencies if there is no tool.uv section', () => {
+    it('reads configuration solely from uv.toml if valid', async () => {
+      const pyproject = {
+        tool: { uv: { 'index-url': 'https://example.com' } },
+      };
+      const dependencies = [{ packageName: 'dep1' }];
+
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+        dev-dependencies = ["dep2==1.2.3"]
+        `,
+      );
+
+      const result = await processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          packageName: 'dep1',
+          registryUrls: ['https://pypi.org/pypi/'],
+        },
+        {
+          currentValue: '==1.2.3',
+          currentVersion: '1.2.3',
+          datasource: 'pypi',
+          depName: 'dep2',
+          depType: 'tool.uv.dev-dependencies',
+          packageName: 'dep2',
+          registryUrls: ['https://pypi.org/pypi/'],
+        },
+      ]);
+    });
+
+    it('reads configuration from pyproject.toml on invalid uv.toml', async () => {
+      const pyproject = {
+        tool: { uv: { 'index-url': 'https://example.com' } },
+      };
+      const dependencies = [{ packageName: 'dep1' }];
+
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+        dev-dependencies = invalid_toml
+        `,
+      );
+
+      const result = await processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          packageName: 'dep1',
+          registryUrls: ['https://example.com'],
+        },
+      ]);
+    });
+
+    it('returns initial dependencies if there is no tool.uv section', async () => {
       const pyproject = { tool: {} };
       const dependencies = [{ packageName: 'dep1' }];
 
-      const result = processor.process(pyproject, dependencies);
+      const result = await processor.process(pyproject, dependencies);
 
       expect(result).toEqual(dependencies);
     });
 
-    it('includes uv dev dependencies if there is a tool.uv section', () => {
+    it('includes uv dev dependencies if there is a tool.uv section', async () => {
       const pyproject = {
         tool: { uv: { 'dev-dependencies': ['dep2==1.2.3', 'dep3==2.3.4'] } },
       };
       const dependencies = [{ packageName: 'dep1' }];
 
-      const result = processor.process(pyproject, dependencies);
+      const result = await processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
         {
@@ -67,7 +121,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
-    it('uses default PyPI and extra URLs when setting extra-index-url', () => {
+    it('uses default PyPI and extra URLs when setting extra-index-url', async () => {
       const pyproject = {
         tool: {
           uv: {
@@ -80,7 +134,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       };
       const dependencies = [{ packageName: 'dep1' }];
 
-      const result = processor.process(pyproject, dependencies);
+      const result = await processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
         {
@@ -94,7 +148,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
-    it('uses index and extra URLs when setting index-url and extra-index-url', () => {
+    it('uses index and extra URLs when setting index-url and extra-index-url', async () => {
       const pyproject = {
         tool: {
           uv: {
@@ -108,7 +162,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       };
       const dependencies = [{ packageName: 'dep1' }];
 
-      const result = processor.process(pyproject, dependencies);
+      const result = await processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
         {

@@ -6,6 +6,7 @@ import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
 import { Result } from '../../../../util/result';
+import { Toml } from '../../../../util/schema-utils';
 import { PypiDatasource } from '../../../datasource/pypi';
 import type {
   PackageDependency,
@@ -17,11 +18,16 @@ import { type PyProject, type Uv, UvLockfileSchema } from '../schema';
 import { depTypes, parseDependencyList } from '../utils';
 import type { PyProjectProcessor } from './types';
 
+const UV_CONFIG_FILE = 'uv.toml';
+
 const uvUpdateCMD = 'uv lock';
 
 export class UvProcessor implements PyProjectProcessor {
-  process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
-    const uv = project.tool?.uv;
+  async process(
+    project: PyProject,
+    deps: PackageDependency[],
+  ): Promise<PackageDependency[]> {
+    const uv = await getUvConfig(project.tool?.uv);
     if (is.nullOrUndefined(uv)) {
       return deps;
     }
@@ -156,6 +162,22 @@ function extractRegistryUrls(uvManifest: Uv): string[] {
   registryUrls.push(uvManifest['index-url'] ?? PypiDatasource.defaultURL);
 
   return registryUrls;
+}
+
+async function getUvConfig(
+  uvPyprojectSection: Uv | undefined,
+): Promise<Uv | undefined> {
+  const uvTomlContent = await readLocalFile(UV_CONFIG_FILE, 'utf8');
+
+  if (uvTomlContent) {
+    try {
+      return Toml.parse(uvTomlContent) as Uv;
+    } catch (err) {
+      logger.debug({ UV_CONFIG_FILE, err }, 'Error parsing uv config file');
+    }
+  }
+
+  return uvPyprojectSection;
 }
 
 function generateCMD(updatedDeps: Upgrade[]): string {

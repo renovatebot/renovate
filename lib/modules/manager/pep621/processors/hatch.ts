@@ -12,10 +12,10 @@ export class HatchProcessor implements PyProjectProcessor {
   process(
     pyproject: PyProject,
     deps: PackageDependency[],
-  ): PackageDependency[] {
+  ): Promise<PackageDependency[]> {
     const hatch_envs = pyproject.tool?.hatch?.envs;
     if (is.nullOrUndefined(hatch_envs)) {
-      return deps;
+      return Promise.resolve(deps);
     }
 
     for (const [envName, env] of Object.entries(hatch_envs)) {
@@ -29,7 +29,7 @@ export class HatchProcessor implements PyProjectProcessor {
       deps.push(...extraDeps);
     }
 
-    return deps;
+    return Promise.resolve(deps);
   }
 
   extractLockedVersions(
