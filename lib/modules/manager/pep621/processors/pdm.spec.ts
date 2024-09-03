@@ -141,21 +141,21 @@ describe('modules/manager/pep621/processors/pdm', () => {
         },
         { packageName: 'dep2', depType: depTypes.dependencies },
         {
-          depName: 'group1/dep3',
+          packageName: 'dep3',
           depType: depTypes.optionalDependencies,
         },
-        { depName: 'group1/dep4', depType: depTypes.optionalDependencies },
+        { packageName: 'dep4', depType: depTypes.optionalDependencies },
         {
-          depName: 'group2/dep5',
+          packageName: 'dep5',
           depType: depTypes.pdmDevDependencies,
         },
-        { depName: 'group2/dep6', depType: depTypes.pdmDevDependencies },
+        { packageName: 'dep6', depType: depTypes.pdmDevDependencies },
         {
-          depName: 'group3/dep7',
+          packageName: 'dep7',
           depType: depTypes.pdmDevDependencies,
         },
-        { depName: 'group3/dep8', depType: depTypes.pdmDevDependencies },
-        { depName: 'dep9', depType: depTypes.buildSystemRequires },
+        { packageName: 'dep8', depType: depTypes.pdmDevDependencies },
+        { packageName: 'dep9', depType: depTypes.buildSystemRequires },
       ];
       const result = await processor.updateArtifacts(
         {
@@ -177,16 +177,10 @@ describe('modules/manager/pep621/processors/pdm', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'pdm update --no-sync --update-eager dep1 dep2',
+          cmd: 'pdm update --no-sync --update-eager dep1 dep2 dep3 dep4',
         },
         {
-          cmd: 'pdm update --no-sync --update-eager -G group1 dep3 dep4',
-        },
-        {
-          cmd: 'pdm update --no-sync --update-eager -dG group2 dep5 dep6',
-        },
-        {
-          cmd: 'pdm update --no-sync --update-eager -dG group3 dep7 dep8',
+          cmd: 'pdm update --no-sync --update-eager -d dep5 dep6 dep7 dep8',
         },
       ]);
     });

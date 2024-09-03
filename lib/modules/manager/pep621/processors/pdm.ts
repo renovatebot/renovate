@@ -169,21 +169,11 @@ function generateCMDs(updatedDeps: Upgrade[]): string[] {
   const packagesByCMD: Record<string, string[]> = {};
   for (const dep of updatedDeps) {
     switch (dep.depType) {
-      case depTypes.optionalDependencies: {
-        const [group, name] = dep.depName!.split('/');
-        addPackageToCMDRecord(
-          packagesByCMD,
-          `${pdmUpdateCMD} -G ${quote(group)}`,
-          name,
-        );
-        break;
-      }
       case depTypes.pdmDevDependencies: {
-        const [group, name] = dep.depName!.split('/');
         addPackageToCMDRecord(
           packagesByCMD,
-          `${pdmUpdateCMD} -dG ${quote(group)}`,
-          name,
+          `${pdmUpdateCMD} -d`,
+          dep.packageName!,
         );
         break;
       }
