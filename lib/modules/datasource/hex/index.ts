@@ -69,7 +69,7 @@ export class HexDatasource extends Datasource {
     }
 
     const hexRegistryUrl = joinUrlParts(registryUrl, urlPath);
-    logger.debug(`Package registry url: ${hexRegistryUrl}`);
+    logger.trace(`Package registry url: ${hexRegistryUrl}`);
 
     const resp = await this.http.getBuffer(hexRegistryUrl);
 
