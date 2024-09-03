@@ -80,17 +80,17 @@ export class HexDatasource extends Datasource {
           const { payload: payload } = Signed.decode(signedPackage);
           const registryPackage = Package.decode(payload);
 
-          const releases: Release[] = registryPackage.releases.map(
-            (rel): Release => {
-              const release: Release = { version: rel.version };
+          const releases: Release[] = [];
 
-              if (rel.retired) {
-                release.isDeprecated = true;
-              }
+          for (const rel of registryPackage.releases) {
+            const release: Release = { version: rel.version };
 
-              return release;
-            },
-          );
+            if (rel.retired) {
+              release.isDeprecated = true;
+            }
+
+            releases.push(release);
+          }
 
           releaseResult.releases = releases;
 
@@ -119,7 +119,9 @@ export class HexDatasource extends Datasource {
           releaseResult.sourceUrl = packageMetadata.meta?.links.Github;
           releaseResult.homepage = packageMetadata.html_url;
 
-          const releasesWithMeta = releaseResult.releases.map((rel) => {
+          const releasesWithMeta: Release[] = [];
+
+          for (const rel of releaseResult.releases) {
             const meta = packageMetadata.releases.find(
               ({ version }) => version === rel.version,
             );
@@ -128,8 +130,8 @@ export class HexDatasource extends Datasource {
               rel.releaseTimestamp = meta.inserted_at;
             }
 
-            return rel;
-          });
+            releasesWithMeta.push(rel);
+          }
 
           releaseResult.releases = releasesWithMeta;
 
