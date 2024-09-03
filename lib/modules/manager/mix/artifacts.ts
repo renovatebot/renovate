@@ -77,7 +77,7 @@ export async function updateArtifacts({
 
   for (const { packageName } of updatedDeps) {
     if (packageName) {
-      const [, organization, ,] = packageName.split(':');
+      const [, organization] = packageName.split(':');
 
       if (organization) {
         organizations.add(organization);
