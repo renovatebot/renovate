@@ -59,7 +59,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         ),
       ).resolves.toMatchObject({ result: 'add-checkbox' });
       expect(logger.debug).toHaveBeenCalledWith(
-        'Config migration needed but config migration is disabled and checkbox not ticked or not present.',
+        'Config migration needed but config migration is disabled and checkbox not checked or not present.',
       );
     });
 

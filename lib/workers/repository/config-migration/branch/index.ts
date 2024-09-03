@@ -26,16 +26,20 @@ export async function checkConfigMigrationBranch(
     return {};
   }
 
-  if (
-    !config.configMigration &&
-    (is.undefined(config.dependencyDashboardChecks?.configMigrationInfo) ||
-      config.dependencyDashboardChecks?.configMigrationInfo === 'no-checkbox' ||
-      config.dependencyDashboardChecks?.configMigrationInfo === 'unchecked')
-  ) {
-    logger.debug(
-      'Config migration needed but config migration is disabled and checkbox not ticked or not present.',
-    );
-    return { result: 'add-checkbox' };
+  const configMigrationCheckbox =
+    config.dependencyDashboardChecks?.configMigrationInfo;
+
+  if (!config.configMigration) {
+    if (
+      is.undefined(configMigrationCheckbox) ||
+      configMigrationCheckbox === 'no-checkbox' ||
+      configMigrationCheckbox === 'unchecked'
+    ) {
+      logger.debug(
+        'Config migration needed but config migration is disabled and checkbox not checked or not present.',
+      );
+      return { result: 'add-checkbox' };
+    }
   }
 
   const configMigrationBranch = getMigrationBranchName(config);
@@ -65,15 +69,18 @@ export async function checkConfigMigrationBranch(
     if (closedPr) {
       logger.debug('Closed config migration PR found.');
 
-      if (config.dependencyDashboardChecks?.configMigrationInfo !== 'checked') {
+      // if a closed pr exists and the checkbox for config migration is not checked
+      // return add-checkbox result so that the checkbox gets added again
+      // we only want to create a config migration pr if the checkbox is checked
+      if (configMigrationCheckbox !== 'checked') {
         logger.debug(
-          'Closed PR and config migration enabled. Adding checkbox to DD, will check in next run.',
+          'Config migration is enabled and needed. But a closed pr exists and checkbox is not checked. Skipping migration branch creation.',
         );
         return { result: 'add-checkbox' };
       }
 
       logger.debug(
-        'Closed migration PR found and checkbox is ticked so delete this branch and create a new one.',
+        'Closed migration PR found and checkbox is checked. Try to delete this old branch and create a new one.',
       );
       await handlePr(config, closedPr);
     }
