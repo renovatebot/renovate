@@ -1,5 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
+import { extractDefinition } from './extract';
+import { ProfileDefinition } from './schema';
 import { extractPackageFile } from '.';
 
 const validProfile = Fixtures.get('validProfile.yml');
@@ -10,6 +12,14 @@ const malformedProfiles = Fixtures.get('malformedProfiles.yml');
 const randomManifest = Fixtures.get('randomManifest.yml');
 
 describe('modules/manager/sveltos/extract', () => {
+  describe('extractDefinition()', () => {
+    it('returns an empty array when parsing fails', () => {
+      const invalidDefinition = {};
+      const result = extractDefinition(invalidDefinition as ProfileDefinition);
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here', 'sveltos.yml')).toBeNull();

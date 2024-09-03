@@ -37,7 +37,7 @@ export function extractPackageFile(
   return deps.length ? { deps } : null;
 }
 
-function extractDefinition(
+export function extractDefinition(
   definition: ProfileDefinition,
   config?: ExtractConfig,
 ): PackageDependency[] {
