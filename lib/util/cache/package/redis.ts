@@ -1,11 +1,14 @@
 /* istanbul ignore file */
 import { DateTime } from 'luxon';
-import { createClient } from 'redis';
+import { createClient, createCluster } from 'redis';
 import { logger } from '../../../logger';
 import { compressToBase64, decompressFromBase64 } from '../../compress';
 import type { PackageCacheNamespace } from './types';
 
-let client: ReturnType<typeof createClient> | undefined;
+let client:
+  | ReturnType<typeof createClient>
+  | ReturnType<typeof createCluster>
+  | undefined;
 let rprefix: string | undefined;
 
 function getKey(namespace: PackageCacheNamespace, key: string): string {
@@ -88,22 +91,30 @@ export async function set(
 export async function init(
   url: string,
   prefix: string | undefined,
+  mode: 'clustered' | 'standalone' = 'standalone',
 ): Promise<void> {
   if (!url) {
     return;
   }
   rprefix = prefix ?? '';
   logger.debug('Redis cache init');
-  client = createClient({
+  const config = {
     url,
     socket: {
-      reconnectStrategy: (retries) => {
+      reconnectStrategy: (retries: number) => {
         // Reconnect after this time
         return Math.min(retries * 100, 3000);
       },
     },
     pingInterval: 30000, // 30s
-  });
+  };
+  if (mode === 'clustered') {
+    client = createCluster({
+      rootNodes: [config],
+    });
+  } else {
+    client = createClient(config);
+  }
   await client.connect();
   logger.debug('Redis cache connected');
 }

@@ -51,7 +51,11 @@ export async function set(
 
 export async function init(config: AllConfig): Promise<void> {
   if (config.redisUrl) {
-    await redisCache.init(config.redisUrl, config.redisPrefix);
+    await redisCache.init(
+      config.redisUrl,
+      config.redisPrefix,
+      config.redisMode,
+    );
     cacheProxy = {
       get: redisCache.get,
       set: redisCache.set,

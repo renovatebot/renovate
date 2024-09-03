@@ -443,6 +443,16 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'redisMode',
+    description:
+      'Whether to connect to the Redis cache in standalone or clustered mode.',
+    stage: 'global',
+    type: 'string',
+    allowedValues: ['standalone', 'clustered'],
+    default: 'standalone',
+    globalOnly: true,
+  },
+  {
     name: 'redisPrefix',
     description: 'Key prefix for redis cache entries.',
     stage: 'global',

@@ -121,6 +121,7 @@ export interface GlobalOnlyConfig {
   prCommitsPerRunLimit?: number;
   privateKeyPath?: string;
   privateKeyPathOld?: string;
+  redisMode?: 'clustered' | 'standalone';
   redisPrefix?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
