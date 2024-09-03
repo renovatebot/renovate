@@ -25,7 +25,6 @@ export async function updateArtifacts({
   newPackageFileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  logger.debug(`mix.getArtifacts(${packageFileName})`);
   if (updatedDeps.length < 1) {
     logger.debug('No updated mix deps - returning null');
     return null;
@@ -109,17 +108,16 @@ export async function updateArtifacts({
     for (const { name, registry } of repoAliases) {
       const hostRule = hostRules.find({ url: registry });
 
-      // istanbul ignore if: no good way to test
       if (hostRule?.token) {
         logger.debug(`Adding repo registry ${name}`);
         const authCommand = `mix repo.add ${name} ${registry} --auth-key ${hostRule.token}`;
 
         preCommands.push(authCommand);
+      } else {
+        logger.debug(
+          `No hostRule token defined for repo ${name} with url ${registry}.`,
+        );
       }
-
-      logger.debug(
-        `No hostRule token defined for repo ${name} with url ${registry}.`,
-      );
     }
   }
 

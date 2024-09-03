@@ -8,6 +8,7 @@ import {
   mockedFunction,
   partial,
 } from '../../../../test/util';
+import { logger } from '../../../logger';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -310,9 +311,19 @@ describe('modules/manager/mix/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
     hostRules.getAll.mockReturnValueOnce([
-      { matchHost: 'https://getoban.pro/repo' },
+      { matchHost: 'https://getoban.pro/repo', token: 'oban_token' },
     ]);
     hostRules.find.mockReturnValueOnce({});
+    hostRules.find.mockReturnValueOnce({ token: 'oban_token' });
+
+    const config = partial<UpdateArtifactsConfig>({
+      registryAliases: {
+        no_host_rule: 'https://someorg.com',
+        oban: 'https://getoban.pro/repo',
+      },
+    });
+
+    const loggerSpy = jest.spyOn(logger, 'debug');
 
     // erlang
     getPkgReleases.mockResolvedValueOnce({
@@ -338,8 +349,18 @@ describe('modules/manager/mix/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool erlang 25.0.0.0' },
       { cmd: 'install-tool elixir v1.13.4' },
+      {
+        cmd: 'mix repo.add oban https://getoban.pro/repo --auth-key oban_token',
+      },
       { cmd: 'mix deps.update oban_pro' },
     ]);
+
+    expect(loggerSpy).toHaveBeenNthCalledWith(
+      1,
+      'No hostRule token defined for repo no_host_rule with url https://someorg.com.',
+    );
+
+    expect(loggerSpy).toHaveBeenNthCalledWith(2, 'Adding repo registry oban');
   });
 
   it('returns updated mix.lock in subdir', async () => {
