@@ -2103,7 +2103,7 @@ In the case that a user is automatically added as reviewer (such as Renovate App
 
 ## ignoreScripts
 
-Applicable for npm, Composer and Copier only for now. Set this to `true` if running scripts causes problems.
+Applicable for npm, bun, Composer and Copier only for now. Set this to `true` if running scripts causes problems.
 
 ## ignoreTests
 
@@ -2417,7 +2417,7 @@ The matching process for a package rule:
 - Combining multiple matchers will restrict the resulting matches (they're AND-ed together):
   `matchCurrentVersion`, `matchCurrentValue`, `matchNewValue`, `matchConfidence`, `matchCurrentAge`,
   `matchManagers`, `matchDatasources`, `matchCategories`, `matchDepTypes`, `matchUpdateTypes`,
-  `matchRepositories`/`excludeRepositories`, `matchBaseBranches`, `matchFileNames`
+  `matchRepositories`, `matchBaseBranches`, `matchFileNames`
 
 Here is an example if you want to group together all packages starting with `eslint` into a single branch/PR:
 
@@ -2593,7 +2593,7 @@ Use this field to restrict rules to a particular branch. e.g.
   "packageRules": [
     {
       "matchBaseBranches": ["main"],
-      "excludePackagePatterns": ["^eslint"],
+      "matchPackagePatterns": ["!/^eslint/"],
       "enabled": false
     }
   ]
@@ -2607,7 +2607,7 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
   "packageRules": [
     {
       "matchBaseBranches": ["/^release/.*/"],
-      "excludePackagePatterns": ["^eslint"],
+      "matchPackagePatterns": ["!/^eslint/"],
       "enabled": false
     }
   ]

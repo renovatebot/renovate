@@ -337,6 +337,7 @@
     "ktor": "https://github.com/ktorio/ktor",
     "lamar": "https://github.com/JasperFx/lamar",
     "lerna": "https://github.com/lerna/lerna",
+    "lerna-lite": "https://github.com/lerna-lite/lerna-lite",
     "lexical": "https://github.com/facebook/lexical",
     "linguijs": "https://github.com/lingui/js-lingui",
     "log4j2": "https://github.com/apache/logging-log4j2",

@@ -79,3 +79,18 @@ export const PdmLockfileSchema = Toml.pipe(
     ),
   )
   .transform((lock) => ({ lock }));
+
+export const UvLockfileSchema = Toml.pipe(
+  z.object({
+    package: LooseArray(
+      z.object({
+        name: z.string(),
+        version: z.string(),
+      }),
+    ),
+  }),
+).transform(({ package: pkg }) =>
+  Object.fromEntries(
+    pkg.map(({ name, version }): [string, string] => [name, version]),
+  ),
+);
