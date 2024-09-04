@@ -1,7 +1,15 @@
+import { gzip } from 'zlib';
+import { promisify } from 'util';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { mocked } from '../../../test/util';
 import type { HttpResponse } from '../../util/http/types';
-import { getGoogleAuthToken, isArtifactoryServer } from './util';
+import {
+  decompressBuffer,
+  getGoogleAuthToken,
+  isArtifactoryServer,
+} from './util';
+
+const gzipAsync = promisify(gzip);
 
 const googleAuth = mocked(_googleAuth);
 jest.mock('google-auth-library');
@@ -69,5 +77,24 @@ describe('modules/datasource/utils', () => {
 
     const res = await getGoogleAuthToken();
     expect(res).toBeNull();
+  });
+
+  describe('decompressBuffer', () => {
+    it('should decompress the buffer using gunzip', async () => {
+      const originalData = Buffer.from('This is the original data');
+
+      // Compress the buffer to use as input for the test
+      const compressedBuffer = await gzipAsync(originalData);
+
+      const result = await decompressBuffer(compressedBuffer);
+
+      expect(result).toEqual(originalData);
+    });
+
+    it('should throw an error if gunzip fails', async () => {
+      const invalidBuffer = Buffer.from('invalid compressed data');
+
+      await expect(decompressBuffer(invalidBuffer)).rejects.toThrow();
+    });
   });
 });

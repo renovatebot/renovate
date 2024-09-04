@@ -1,10 +1,9 @@
-import { promisify } from 'util';
-import { gunzip } from 'zlib';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { joinUrlParts } from '../../../util/url';
 import * as hexVersioning from '../../versioning/hex';
 import { Datasource } from '../datasource';
+import { decompressBuffer } from '../util';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { Package } from './package';
 import { HexAPIPackageMetadata } from './schema';
@@ -146,10 +145,4 @@ export class HexDatasource extends Datasource {
       return null;
     }
   }
-}
-
-const gunzipAsync = promisify(gunzip);
-
-async function decompressBuffer(buffer: Buffer): Promise<Buffer> {
-  return await gunzipAsync(buffer);
 }

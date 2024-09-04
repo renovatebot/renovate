@@ -1,3 +1,5 @@
+import { promisify } from 'util';
+import { gunzip } from 'zlib';
 import is from '@sindresorhus/is';
 import { GoogleAuth } from 'google-auth-library';
 import { logger } from '../../logger';
@@ -35,4 +37,10 @@ export async function getGoogleAuthToken(): Promise<string | null> {
     }
   }
   return null;
+}
+
+export async function decompressBuffer(buffer: Buffer): Promise<Buffer> {
+  const gunzipAsync = promisify(gunzip);
+
+  return gunzipAsync(buffer);
 }
