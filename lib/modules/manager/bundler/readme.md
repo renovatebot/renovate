@@ -2,7 +2,7 @@ The `bundler` manager is used to extract dependencies from `Gemfile` and `Gemfil
 
 ### Authenticating private registry
 
-If you need Bundler to authenticate with a private registry - and it's not the same host as your GitHub/GitLab/etc - then you should do so with `hostRules` and be sure to set the `hostType` value to be "bundler". e.g.
+If you need Bundler to authenticate with a private registry - and it's not the same host as your GitHub/GitLab/etc - then you should do so with `hostRules` and be sure to set the `hostType`. e.g.
 
 ```json
 {
