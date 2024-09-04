@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import { createClient, createCluster } from 'redis';
 import { logger } from '../../../logger';
 import { compressToBase64, decompressFromBase64 } from '../../compress';
+import { regEx } from '../../regex';
 import type { PackageCacheNamespace } from './types';
 
 let client:
@@ -16,7 +17,7 @@ function getKey(namespace: PackageCacheNamespace, key: string): string {
 }
 
 export function normalizeRedisUrl(url: string): string {
-  return url.replace(/^(rediss?)\+cluster:\/\//, '$1://');
+  return url.replace(regEx(/^(rediss?)\+cluster:\/\//), '$1://');
 }
 
 export async function end(): Promise<void> {
