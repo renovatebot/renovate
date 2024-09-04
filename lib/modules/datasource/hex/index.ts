@@ -70,13 +70,14 @@ export class HexDatasource extends Datasource {
     const hexRegistryUrl = joinUrlParts(registryUrl, urlPath);
     logger.trace(`Package registry url: ${hexRegistryUrl}`);
 
-    const resp = await this.http.getBuffer(hexRegistryUrl);
+    try {
+      const resp = await this.http.getBuffer(hexRegistryUrl);
 
-    // istanbul ignore else
-    if (resp.statusCode === 200) {
-      await decompressBuffer(resp.body)
-        .then((signedPackage) => {
-          const { payload: payload } = Signed.decode(signedPackage);
+      if (resp.statusCode === 200) {
+        try {
+          const signedPackage = await decompressBuffer(resp.body);
+
+          const { payload } = Signed.decode(signedPackage);
           const registryPackage = Package.decode(payload);
 
           const releases: Release[] = [];
@@ -92,56 +93,53 @@ export class HexDatasource extends Datasource {
           }
 
           releaseResult.releases = releases;
-
-          return releaseResult;
-        })
-        .catch(
-          /* istanbul ignore next */ (err) => {
-            return null;
-          },
-        );
-
-      if (hexRepoName === 'hexpm' && releaseResult.releases.length > 0) {
-        const metadataUrl = joinUrlParts(HexDatasource.hexApiBaseUrl, urlPath);
-
-        logger.trace(`Package metadata url: ${metadataUrl}`);
-
-        const { val: packageMetadata, err } = await this.http
-          .getJsonSafe(metadataUrl, HexAPIPackageMetadata)
-          .unwrap();
-
-        // istanbul ignore if
-        if (err) {
+        } catch (err) {
           this.handleGenericErrors(err);
-        } else {
-          releaseResult.changelogUrl = packageMetadata.meta?.links.Changelog;
-          releaseResult.sourceUrl = packageMetadata.meta?.links.Github;
-          releaseResult.homepage = packageMetadata.html_url;
+        }
 
-          const releasesWithMeta: Release[] = [];
+        if (hexRepoName === 'hexpm' && releaseResult.releases.length > 0) {
+          const metadataUrl = joinUrlParts(
+            HexDatasource.hexApiBaseUrl,
+            urlPath,
+          );
 
-          for (const rel of releaseResult.releases) {
-            const meta = packageMetadata.releases.find(
-              ({ version }) => version === rel.version,
-            );
+          logger.trace(`Package metadata url: ${metadataUrl}`);
 
-            if (meta) {
-              rel.releaseTimestamp = meta.inserted_at;
+          const { val: packageMetadata, err } = await this.http
+            .getJsonSafe(metadataUrl, HexAPIPackageMetadata)
+            .unwrap();
+
+          if (err) {
+            this.handleGenericErrors(err);
+          } else {
+            releaseResult.changelogUrl = packageMetadata.meta?.links.Changelog;
+            releaseResult.sourceUrl = packageMetadata.meta?.links.Github;
+            releaseResult.homepage = packageMetadata.html_url;
+
+            const releasesWithMeta: Release[] = [];
+
+            for (const rel of releaseResult.releases) {
+              const meta = packageMetadata.releases.find(
+                ({ version }) => version === rel.version,
+              );
+
+              if (meta) {
+                rel.releaseTimestamp = meta.inserted_at;
+              }
+
+              releasesWithMeta.push(rel);
             }
 
-            releasesWithMeta.push(rel);
+            releaseResult.releases = releasesWithMeta;
+
+            return releaseResult;
           }
-
-          releaseResult.releases = releasesWithMeta;
-
-          return releaseResult;
         }
+
+        return releaseResult;
       }
-
-      return releaseResult;
-    } else {
-      // not sure how to handle error here since get or getBuffer doesn't return an error
-
+    } catch (err) {
+      logger.debug({ err }, 'hexpm: http response error');
       return null;
     }
   }

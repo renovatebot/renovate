@@ -99,6 +99,55 @@ describe('modules/datasource/hex/index', () => {
       expect(res).toBeDefined();
     });
 
+    it('returns null for public repo with error', async () => {
+      httpMock
+        .scope(baseRegistryUrl)
+        .get('/packages/renovate_test_package')
+        .reply(200, renovateTestPackageRegistryResponse);
+
+      httpMock
+        .scope(baseHexpmUrl)
+        .get('/packages/renovate_test_package')
+        .replyWithError('error');
+
+      await expect(
+        await getPkgReleases({
+          ...config,
+          packageName: 'renovate_test_package',
+        }),
+      ).toBeNull();
+    });
+
+    it('returns null for public repo with buffer error', async () => {
+      const invalidBuffer = Buffer.from('invalid compressed data');
+
+      httpMock
+        .scope(baseRegistryUrl)
+        .get('/packages/renovate_test_package')
+        .reply(200, invalidBuffer);
+
+      await expect(
+        await getPkgReleases({
+          ...config,
+          packageName: 'renovate_test_package',
+        }),
+      ).toBeNull();
+    });
+
+    it('returns null for 500 response', async () => {
+      httpMock
+        .scope(baseRegistryUrl)
+        .get('/packages/renovate_test_package')
+        .reply(500);
+
+      await expect(
+        await getPkgReleases({
+          ...config,
+          packageName: 'renovate_test_package',
+        }),
+      ).toBeNull();
+    });
+
     it('process public repo without auth', async () => {
       httpMock
         .scope(baseRegistryUrl)
