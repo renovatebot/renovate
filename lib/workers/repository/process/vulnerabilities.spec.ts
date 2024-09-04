@@ -997,7 +997,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchDatasources: ['nuget'],
           matchPackageNames: ['SharpZipLib'],
           matchCurrentVersion: '1.3.0',
-          allowedVersions: '1.3.3',
+          allowedVersions: '[1.3.3,)',
         },
         {
           matchDatasources: ['npm'],

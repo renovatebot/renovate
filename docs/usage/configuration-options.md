@@ -1114,6 +1114,8 @@ You can choose from:
 - `unresolved` list CVEs that have no fixes
 - `all` list all CVEs
 
+You will only get OSV-based vulnerability alerts for direct dependencies.
+
 This feature is independent of the `osvVulnerabilityAlerts` option.
 
 The source of these CVEs is [OSV.dev](https://osv.dev/).
@@ -2415,7 +2417,7 @@ The matching process for a package rule:
 - Combining multiple matchers will restrict the resulting matches (they're AND-ed together):
   `matchCurrentVersion`, `matchCurrentValue`, `matchNewValue`, `matchConfidence`, `matchCurrentAge`,
   `matchManagers`, `matchDatasources`, `matchCategories`, `matchDepTypes`, `matchUpdateTypes`,
-  `matchRepositories`/`excludeRepositories`, `matchBaseBranches`, `matchFileNames`
+  `matchRepositories`, `matchBaseBranches`, `matchFileNames`
 
 Here is an example if you want to group together all packages starting with `eslint` into a single branch/PR:
 
@@ -2591,7 +2593,7 @@ Use this field to restrict rules to a particular branch. e.g.
   "packageRules": [
     {
       "matchBaseBranches": ["main"],
-      "excludePackagePatterns": ["^eslint"],
+      "matchPackagePatterns": ["!/^eslint/"],
       "enabled": false
     }
   ]
@@ -2605,7 +2607,7 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
   "packageRules": [
     {
       "matchBaseBranches": ["/^release/.*/"],
-      "excludePackagePatterns": ["^eslint"],
+      "matchPackagePatterns": ["!/^eslint/"],
       "enabled": false
     }
   ]

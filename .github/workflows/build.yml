@@ -410,7 +410,7 @@ jobs:
 
       - name: Save coverage artifacts
         if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
@@ -566,7 +566,7 @@ jobs:
         run: pnpm test-e2e:pack
 
       - name: Upload
-        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: renovate-package
           path: renovate-0.0.0-semantic-release.tgz
@@ -610,7 +610,7 @@ jobs:
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: docs
           path: tmp/docs/
@@ -683,7 +683,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@8547f01d73522b44482b8757716e4e1d73cf3a66 # v3.4.7
+        uses: containerbase/internal-tools@85061d6ea57790418fdf4e2672560b82654478de # v3.4.12
         with:
           command: docker-config
 
