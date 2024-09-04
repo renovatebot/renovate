@@ -1066,11 +1066,6 @@ Used as an alternative to `privateKeyOld`, if you want the key to be read from d
 
 Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
 
-## redisMode
-
-Determines whether to connect to Redis in clustered or standalone mode. If not provided, `standalone` is presumed. Must be either `standalone` or `clustered`.
-It's only used if `redisUrl` is configured.
-
 ## redisPrefix
 
 If this value is set then Renovate will prepend this string to the name of all Redis cache entries used in Renovate.
@@ -1088,6 +1083,10 @@ Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
 For TLS/SSL-enabled connections, use rediss prefix
 
 Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
+
+Renovate also supports connecting to Redis clusters as well. In order to connect to a cluster, provide the connection string using the `redis+cluster` or `rediss+cluster` schema as appropriate.
+
+Example URL structure: `redis+cluster://[[username]:[password]]@redis.cluster.local:6379/0`
 
 ## reportPath
 

@@ -91,15 +91,19 @@ export async function set(
 export async function init(
   url: string,
   prefix: string | undefined,
-  mode: 'clustered' | 'standalone' = 'standalone',
 ): Promise<void> {
   if (!url) {
     return;
   }
   rprefix = prefix ?? '';
   logger.debug('Redis cache init');
+
+  const rewrittenUrl = url.replace(/^(redis|rediss)\+cluster:\/\//, '$1://');
+  // If any replacement was made, it means the regex matched and we are in clustered mode
+  const clusteredMode = rewrittenUrl.length !== url.length;
+
   const config = {
-    url,
+    url: rewrittenUrl,
     socket: {
       reconnectStrategy: (retries: number) => {
         // Reconnect after this time
@@ -108,7 +112,7 @@ export async function init(
     },
     pingInterval: 30000, // 30s
   };
-  if (mode === 'clustered') {
+  if (clusteredMode) {
     client = createCluster({
       rootNodes: [config],
     });
