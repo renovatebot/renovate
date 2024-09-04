@@ -15,6 +15,10 @@ function getKey(namespace: PackageCacheNamespace, key: string): string {
   return `${rprefix}${namespace}-${key}`;
 }
 
+export function normalizeRedisUrl(url: string): string {
+  return url.replace(/^(rediss?)\+cluster:\/\//, '$1://');
+}
+
 export async function end(): Promise<void> {
   try {
     // https://github.com/redis/node-redis#disconnecting
@@ -98,7 +102,7 @@ export async function init(
   rprefix = prefix ?? '';
   logger.debug('Redis cache init');
 
-  const rewrittenUrl = url.replace(/^(redis|rediss)\+cluster:\/\//, '$1://');
+  const rewrittenUrl = normalizeRedisUrl(url);
   // If any replacement was made, it means the regex matched and we are in clustered mode
   const clusteredMode = rewrittenUrl.length !== url.length;
 
