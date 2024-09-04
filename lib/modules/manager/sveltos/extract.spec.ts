@@ -18,6 +18,22 @@ describe('modules/manager/sveltos/extract', () => {
       const result = extractDefinition(invalidDefinition as ProfileDefinition);
       expect(result).toEqual([]);
     });
+
+    it('returns null if extractDefinition returns an empty array', () => {
+      const validYAML = codeBlock`
+        apiVersion: "config.projectsveltos.io/v1beta1"
+        kind: ClusterProfile
+        metadata:
+          name: empty-profile
+      `;
+
+      jest
+        .spyOn(require('./extract'), 'extractDefinition')
+        .mockReturnValueOnce([]);
+
+      const result = extractPackageFile(validYAML, 'valid-yaml.yml');
+      expect(result).toBeNull();
+    });
   });
 
   describe('extractPackageFile()', () => {
@@ -38,6 +54,20 @@ describe('modules/manager/sveltos/extract', () => {
 
     it('return null if deps array would be empty', () => {
       const result = extractPackageFile(malformedProfiles, 'applications.yml');
+      expect(result).toBeNull();
+    });
+
+    it('return null if yaml is invalid', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          ----
+          apiVersion: "config.projectsveltos.io/v1beta1"
+             kind ClusterProfile
+          metadata:
+          name: prometheus
+        `,
+        'invalid-yaml.yml',
+      );
       expect(result).toBeNull();
     });
 
