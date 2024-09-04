@@ -105,8 +105,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       aws4:
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.2
+        version: 1.13.2
       azure-devops-node-api:
         specifier: 14.0.2
         version: 14.0.2
@@ -2453,8 +2453,8 @@ packages:
   aws-sdk-client-mock@4.0.1:
     resolution: {integrity: sha512-yD2mmgy73Xce097G5hIpr1k7j50qzvJ49/+6osGZiCyk4m6cwhb+2x7kKFY1gEMwTzaS8+m8fXv9SB29SkRYyQ==}
 
-  aws4@1.13.1:
-    resolution: {integrity: sha512-u5w79Rd7SU4JaIlA/zFqG+gOiuq25q5VLyZ8E+ijJeILuTxVzZgp2CaGw/UTw6pXYN9XMO9yiqj/nEHmhTG5CA==}
+  aws4@1.13.2:
+    resolution: {integrity: sha512-lHe62zvbTB5eEABUVi/AwVh0ZKY9rMMDhmm+eeyuuUQbQ3+J+fONVQOZyj+DdrvD4BY33uYniyRJ4UJIaSKAfw==}
 
   azure-devops-node-api@14.0.2:
     resolution: {integrity: sha512-TwjAEnWnOSZ2oypkDyqppgvJw43qArEfPiJtEWLL3NBgdvAuOuB0xgFz/Eiz4H6Dk0Yv52wCodZxtZvAMhJXwQ==}
@@ -9067,7 +9067,7 @@ snapshots:
       sinon: 16.1.3
       tslib: 2.7.0
 
-  aws4@1.13.1: {}
+  aws4@1.13.2: {}
 
   azure-devops-node-api@14.0.2:
     dependencies:
