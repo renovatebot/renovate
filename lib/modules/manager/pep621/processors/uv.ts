@@ -34,8 +34,10 @@ export class UvProcessor implements PyProjectProcessor {
     );
 
     const registryUrls = extractRegistryUrls(uv);
-    for (const dep of deps) {
-      dep.registryUrls = [...registryUrls];
+    if (registryUrls.length) {
+      for (const dep of deps) {
+        dep.registryUrls = [...registryUrls];
+      }
     }
 
     return deps;
@@ -152,8 +154,12 @@ function extractRegistryUrls(uvManifest: Uv): string[] {
   // Extra indexes have priority over default index: https://docs.astral.sh/uv/reference/settings/#extra-index-url
   const registryUrls = uvManifest['extra-index-url'] ?? [];
 
-  // If default index URL is not overridden, we need to use default PyPI URL additionally to potential extra indexes.
-  registryUrls.push(uvManifest['index-url'] ?? PypiDatasource.defaultURL);
+  if (uvManifest['index-url']) {
+    registryUrls.push(uvManifest['index-url']);
+  } else if (registryUrls.length) {
+    // If default index URL is not overridden, we need to use default PyPI URL additionally to potential extra indexes.
+    registryUrls.push(PypiDatasource.defaultURL);
+  }
 
   return registryUrls;
 }

@@ -42,10 +42,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       const result = processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
-        {
-          packageName: 'dep1',
-          registryUrls: ['https://pypi.org/pypi/'],
-        },
+        { packageName: 'dep1' },
         {
           currentValue: '==1.2.3',
           currentVersion: '1.2.3',
@@ -53,7 +50,6 @@ describe('modules/manager/pep621/processors/uv', () => {
           depName: 'dep2',
           depType: 'tool.uv.dev-dependencies',
           packageName: 'dep2',
-          registryUrls: ['https://pypi.org/pypi/'],
         },
         {
           currentValue: '==2.3.4',
@@ -62,7 +58,6 @@ describe('modules/manager/pep621/processors/uv', () => {
           depName: 'dep3',
           depType: 'tool.uv.dev-dependencies',
           packageName: 'dep3',
-          registryUrls: ['https://pypi.org/pypi/'],
         },
       ]);
     });
