@@ -7,7 +7,7 @@ import type { VersioningApi } from '../types';
 export const id = 'docker';
 export const displayName = 'Docker';
 export const urls = [
-  'https://docs.docker.com/engine/reference/commandline/tag/',
+  '[Docker CLI Tag Command Documentation](https://docs.docker.com/engine/reference/commandline/tag/)',
 ];
 export const supportsRanges = false;
 

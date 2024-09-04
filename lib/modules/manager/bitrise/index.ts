@@ -19,5 +19,6 @@ export const supportedDatasources = [
 ];
 
 export const urls = [
-  'https://devcenter.bitrise.io/en/steps-and-workflows/introduction-to-steps.html',
+  '[Introduction to Steps - Bitrise DevCenter](https://devcenter.bitrise.io/en/steps-and-workflows/introduction-to-steps.html)',
 ];
+

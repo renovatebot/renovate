@@ -51,7 +51,7 @@ export function replaceContent(content: string, txt: string): string {
 export function formatUrls(urls: string[] | null | undefined): string {
   if (Array.isArray(urls) && urls.length) {
     return `## References\n\n${urls
-      .map((url) => ` - [${url}](${url})`)
+      .map((url) => ` - [${url}](${url})`) 
       .join('\n')}\n\n`;
   }
   return '';

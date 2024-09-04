@@ -7,7 +7,9 @@ import { getNewValue, toSemverRange } from './range';
 
 export const id = 'swift';
 export const displayName = 'Swift';
-export const urls = ['https://swift.org/package-manager/'];
+export const urls = [
+  '[Swift Package Manager Documentation](https://swift.org/package-manager/)',
+];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',

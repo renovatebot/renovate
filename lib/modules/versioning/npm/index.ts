@@ -7,10 +7,10 @@ import { getNewValue } from './range';
 export const id = 'npm';
 export const displayName = 'npm';
 export const urls = [
-  'https://semver.org/',
-  'https://www.npmjs.com/package/semver',
-  'https://docs.npmjs.com/about-semantic-versioning',
-  'https://semver.npmjs.com/',
+  '[Semantic Versioning (SemVer) - Official Website](https://semver.org/)',
+  '[npm Semver Package](https://www.npmjs.com/package/semver)',
+  '[About Semantic Versioning - npm Documentation](https://docs.npmjs.com/about-semantic-versioning)',
+  '[Semver - npm](https://semver.npmjs.com/)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [

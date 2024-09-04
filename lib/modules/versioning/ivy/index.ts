@@ -16,7 +16,9 @@ import {
 
 export const id = 'ivy';
 export const displayName = 'Ivy';
-export const urls = ['https://ant.apache.org/ivy/'];
+export const urls = [
+  '[Apache Ivy - Dependency Manager](https://ant.apache.org/ivy/)',
+];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
