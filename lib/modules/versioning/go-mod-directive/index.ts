@@ -5,9 +5,7 @@ import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'go-mod-directive';
 export const displayName = 'Go Modules Directive';
-export const urls = [
-  '[Go Modules Reference](https://go.dev/ref/mod)',
-];
+export const urls = ['[Go Modules Reference](https://go.dev/ref/mod)'];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['bump', 'replace'];
 
