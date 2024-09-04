@@ -3,8 +3,8 @@ import { cache } from '../../../util/cache/package/decorator';
 import { joinUrlParts } from '../../../util/url';
 import * as hexVersioning from '../../versioning/hex';
 import { Datasource } from '../datasource';
-import { decompressBuffer } from '../util';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { decompressBuffer } from '../util';
 import { Package } from './package';
 import { HexAPIPackageMetadata } from './schema';
 import { Signed } from './signed';
@@ -70,77 +70,69 @@ export class HexDatasource extends Datasource {
     const hexRegistryUrl = joinUrlParts(registryUrl, urlPath);
     logger.trace(`Package registry url: ${hexRegistryUrl}`);
 
-    try {
-      const resp = await this.http.getBuffer(hexRegistryUrl);
+    const resp = await this.http.getBuffer(hexRegistryUrl);
 
-      if (resp.statusCode === 200) {
-        try {
-          const signedPackage = await decompressBuffer(resp.body);
+    if (resp.statusCode === 200) {
+      try {
+        const signedPackage = await decompressBuffer(resp.body);
 
-          const { payload } = Signed.decode(signedPackage);
-          const registryPackage = Package.decode(payload);
+        const { payload } = Signed.decode(signedPackage);
+        const registryPackage = Package.decode(payload);
 
-          const releases: Release[] = [];
+        const releases: Release[] = [];
 
-          for (const rel of registryPackage.releases) {
-            const release: Release = { version: rel.version };
+        for (const rel of registryPackage.releases) {
+          const release: Release = { version: rel.version };
 
-            if (rel.retired) {
-              release.isDeprecated = true;
-            }
-
-            releases.push(release);
+          if (rel.retired) {
+            release.isDeprecated = true;
           }
 
-          releaseResult.releases = releases;
-        } catch (err) {
-          this.handleGenericErrors(err);
+          releases.push(release);
         }
 
-        if (hexRepoName === 'hexpm' && releaseResult.releases.length > 0) {
-          const metadataUrl = joinUrlParts(
-            HexDatasource.hexApiBaseUrl,
-            urlPath,
-          );
-
-          logger.trace(`Package metadata url: ${metadataUrl}`);
-
-          const { val: packageMetadata, err } = await this.http
-            .getJsonSafe(metadataUrl, HexAPIPackageMetadata)
-            .unwrap();
-
-          if (err) {
-            this.handleGenericErrors(err);
-          } else {
-            releaseResult.changelogUrl = packageMetadata.meta?.links.Changelog;
-            releaseResult.sourceUrl = packageMetadata.meta?.links.Github;
-            releaseResult.homepage = packageMetadata.html_url;
-
-            const releasesWithMeta: Release[] = [];
-
-            for (const rel of releaseResult.releases) {
-              const meta = packageMetadata.releases.find(
-                ({ version }) => version === rel.version,
-              );
-
-              if (meta) {
-                rel.releaseTimestamp = meta.inserted_at;
-              }
-
-              releasesWithMeta.push(rel);
-            }
-
-            releaseResult.releases = releasesWithMeta;
-
-            return releaseResult;
-          }
-        }
-
-        return releaseResult;
+        releaseResult.releases = releases;
+      } catch (err) {
+        this.handleGenericErrors(err);
       }
-    } catch (err) {
-      logger.debug({ err }, 'hexpm: http response error');
-      return null;
+
+      if (hexRepoName === 'hexpm' && releaseResult.releases.length > 0) {
+        const metadataUrl = joinUrlParts(HexDatasource.hexApiBaseUrl, urlPath);
+
+        logger.trace(`Package metadata url: ${metadataUrl}`);
+
+        const { val: packageMetadata, err } = await this.http
+          .getJsonSafe(metadataUrl, HexAPIPackageMetadata)
+          .unwrap();
+
+        if (err) {
+          this.handleGenericErrors(err);
+        } else {
+          releaseResult.changelogUrl = packageMetadata.meta?.links.Changelog;
+          releaseResult.sourceUrl = packageMetadata.meta?.links.Github;
+          releaseResult.homepage = packageMetadata.html_url;
+
+          const releasesWithMeta: Release[] = [];
+
+          for (const rel of releaseResult.releases) {
+            const meta = packageMetadata.releases.find(
+              ({ version }) => version === rel.version,
+            );
+
+            if (meta) {
+              rel.releaseTimestamp = meta.inserted_at;
+            }
+
+            releasesWithMeta.push(rel);
+          }
+
+          releaseResult.releases = releasesWithMeta;
+
+          return releaseResult;
+        }
+      }
+
+      return releaseResult;
     }
   }
 }

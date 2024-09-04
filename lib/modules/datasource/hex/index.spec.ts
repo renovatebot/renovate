@@ -1,5 +1,6 @@
 import { mockDeep } from 'jest-mock-extended';
-import { GetPkgReleasesConfig, getPkgReleases } from '..';
+import type { GetPkgReleasesConfig } from '..';
+import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { hostRules } from '../../../../test/util';
@@ -110,7 +111,7 @@ describe('modules/datasource/hex/index', () => {
         .get('/packages/renovate_test_package')
         .replyWithError('error');
 
-      await expect(
+      expect(
         await getPkgReleases({
           ...config,
           packageName: 'renovate_test_package',
@@ -126,7 +127,7 @@ describe('modules/datasource/hex/index', () => {
         .get('/packages/renovate_test_package')
         .reply(200, invalidBuffer);
 
-      await expect(
+      expect(
         await getPkgReleases({
           ...config,
           packageName: 'renovate_test_package',
@@ -140,7 +141,7 @@ describe('modules/datasource/hex/index', () => {
         .get('/packages/renovate_test_package')
         .reply(500);
 
-      await expect(
+      expect(
         await getPkgReleases({
           ...config,
           packageName: 'renovate_test_package',

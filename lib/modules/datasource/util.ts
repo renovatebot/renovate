@@ -42,5 +42,5 @@ export async function getGoogleAuthToken(): Promise<string | null> {
 export async function decompressBuffer(buffer: Buffer): Promise<Buffer> {
   const gunzipAsync = promisify(gunzip);
 
-  return gunzipAsync(buffer);
+  return await gunzipAsync(buffer);
 }

@@ -1,5 +1,5 @@
-import { gzip } from 'zlib';
 import { promisify } from 'util';
+import { gzip } from 'zlib';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { mocked } from '../../../test/util';
 import type { HttpResponse } from '../../util/http/types';
