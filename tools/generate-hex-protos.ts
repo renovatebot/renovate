@@ -57,11 +57,11 @@ function generateProto(protos_path: string, file: string): Promise<string> {
 
     if (res.signal) {
       console.log(`Signal received: ${res.signal}`);
-      reject('');
+      reject(new Error(''));
       process.exit(-1);
     } else if (res.status && res.status !== 0) {
       console.log(`Error occured:\n${res.stderr || res.stdout}`);
-      reject('');
+      reject(new Error(''));
       process.exit(res.status);
     } else {
       console.log(
