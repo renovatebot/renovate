@@ -20,10 +20,13 @@ import type { PyProjectProcessor } from './types';
 const pdmUpdateCMD = 'pdm update --no-sync --update-eager';
 
 export class PdmProcessor implements PyProjectProcessor {
-  process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
+  process(
+    project: PyProject,
+    deps: PackageDependency[],
+  ): Promise<PackageDependency[]> {
     const pdm = project.tool?.pdm;
     if (is.nullOrUndefined(pdm)) {
-      return deps;
+      return Promise.resolve(deps);
     }
 
     deps.push(
@@ -35,7 +38,7 @@ export class PdmProcessor implements PyProjectProcessor {
 
     const pdmSource = pdm.source;
     if (is.nullOrUndefined(pdmSource)) {
-      return deps;
+      return Promise.resolve(deps);
     }
 
     // add pypi default url, if there is no source declared with the name `pypi`. https://daobook.github.io/pdm/pyproject/tool-pdm/#specify-other-sources-for-finding-packages
@@ -51,7 +54,7 @@ export class PdmProcessor implements PyProjectProcessor {
       dep.registryUrls = [...registryUrls];
     }
 
-    return deps;
+    return Promise.resolve(deps);
   }
 
   async extractLockedVersions(

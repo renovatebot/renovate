@@ -17,7 +17,10 @@ export interface PyProjectProcessor {
    * @param project PyProject object
    * @param deps List of already extracted/processed dependencies
    */
-  process(project: PyProject, deps: PackageDependency[]): PackageDependency[];
+  process(
+    project: PyProject,
+    deps: PackageDependency[],
+  ): Promise<PackageDependency[]>;
 
   extractLockedVersions(
     project: PyProject,
