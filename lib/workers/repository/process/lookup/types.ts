@@ -2,7 +2,6 @@ import type {
   RenovateConfig,
   ValidationMessage,
 } from '../../../../config/types';
-import type { Release } from '../../../../modules/datasource/types';
 import type {
   LookupUpdate,
   RangeConfig,
