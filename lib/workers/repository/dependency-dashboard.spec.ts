@@ -248,7 +248,7 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: '\n\n Config Migration needed. See Config Migration PR: #3',
+        body: '\n\n Config Migration needed. See Config Migration PR: #3.',
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf.dependencyDashboardChecks).toEqual({
