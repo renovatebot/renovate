@@ -11,7 +11,7 @@ When this happens, the developers write "config migration" code to tell Renovate
 When Renovate runs, it silently swaps old terms for new terms.
 By default, Renovate does _not_ update the terms in your Renovate configuration file!
 
-### Enabling config migration pull requests
+## Enabling config migration pull requests
 
 Renovate can create a config migration pull request, that updates old terms in your configuration file.
 To enable config migration pull request from Renovate, set the [`configMigration`](./configuration-options.md#configmigration) config option to `true`.
