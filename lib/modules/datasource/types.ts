@@ -3,6 +3,7 @@ import type {
   CustomDatasourceConfig,
 } from '../../config/types';
 import type { ModuleApi } from '../../types';
+import type { CandidateReleaseConfig } from '../../workers/repository/process/lookup/types';
 
 export interface GetDigestInputConfig {
   datasource: string;
@@ -137,4 +138,19 @@ export interface DatasourceApi extends ModuleApi {
    * false: caching is not performed, or performed within the datasource implementation
    */
   caching?: boolean | undefined;
+
+  /**
+   * When the candidate for update is formed, this method could be called
+   * to fetch additional information such as `releaseTimestamp`.
+   *
+   * Also, the release could be checked (and potentially rejected)
+   * via some datasource-specific external call.
+   *
+   * In case of reject, the next candidate release is selected,
+   * and `interceptRelease` is called again.
+   */
+  interceptRelease?(
+    config: CandidateReleaseConfig,
+    release: Release,
+  ): Promise<Release | null>;
 }

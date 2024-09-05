@@ -12,6 +12,7 @@ import {
 import { coerceNumber } from '../../../../util/number';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { toMs } from '../../../../util/pretty-time';
+import { tryInterceptRelease } from './intercept-release';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 import { getUpdateType } from './update-type';
 
@@ -36,7 +37,7 @@ export async function filterInternalChecks(
     release = sortedReleases.pop();
   } else {
     // iterate through releases from highest to lowest, looking for the first which will pass checks if present
-    for (const candidateRelease of sortedReleases.reverse()) {
+    for (let candidateRelease of sortedReleases.reverse()) {
       // merge the release data into dependency config
       let releaseConfig = mergeChildConfig(config, candidateRelease);
       // calculate updateType and then apply it
@@ -53,6 +54,16 @@ export async function filterInternalChecks(
       );
       // Apply packageRules in case any apply to updateType
       releaseConfig = applyPackageRules(releaseConfig, 'update-type');
+
+      const updatedCandidateRelease = await tryInterceptRelease(
+        releaseConfig,
+        candidateRelease,
+      );
+      if (!updatedCandidateRelease) {
+        continue;
+      }
+      candidateRelease = updatedCandidateRelease;
+
       // Now check for a minimumReleaseAge config
       const {
         minimumConfidence,
