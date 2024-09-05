@@ -43,23 +43,29 @@ Renovate will:
 1. Create a Config Migration PR
 1. If the Dependency Dashboard issue is enabled: Renovate puts a link to the Config Migration PR on the dashboard
 
-3. **Config migration needed but disabled**
+### Config migration needed but disabled
 
-   If config migration is required but disabled:
+If config migration is needed, but disabled:
 
-   We add a checkbox to the Dependency Dashboard (if enabled). We call this "on-demand config migration".
+Renovate adds a checkbox to the Dependency Dashboard (if enabled).
+This is "on-demand config migration".
 
-   The checkbox will appear in your Dependency Dashboard issue as:
+The checkbox looks like this:
 
-   ```
-   [ ] Config migration needed. Please tick this checkbox to create an automated Config Migration PR.
-   ```
+```
+- [ ] Config migration needed. Select this checkbox to let Renovate create an automated Config Migration PR.
+```
 
-   - When the user checks the box, Renovate creates a config migration PR and replaces the checkbox with a link:
+When you select the checkbox:
 
-   ```
-   Config Migration necessary. You can view the Config Migration PR here #1
-   ```
+Renovate creates a config migration PR.
+Renovate replaces the checkbox with text with a link to the Config Migration PR.
+
+For example:
+
+```
+Config Migration needed. See Config Migration PR: #1.
+```
 
 ### Config migration needed, but there is a closed migration PR
 
@@ -68,10 +74,6 @@ Renovate will:
 
 - Add a checkbox to the Dependency Dashboard issue (if enabled)
 - When you select the checkbox on the dashboard, Renovate will:
-    1. Delete the _old_ config migration branch
-    1. Create a _new_ config migration PR
-    1. Replace the checkbox with a link to the _new_ PR in the Dependency Dashboard issue
-
-<!-- prettier-ignore -->
-!!! note
-    For config migration, Renovate's behavior differs from its usual approach to closed PRs. Instead of commenting on the closed PR that no new PR will be created. Instead Renovate adds a checkbox to the Dependency Dashboard issue, allowing users to request a new config migration PR when needed.
+  1. Delete the _old_ config migration branch
+  1. Create a _new_ config migration PR
+  1. Replace the checkbox with a link to the _new_ PR in the Dependency Dashboard issue
