@@ -1,23 +1,19 @@
 import type { Category } from '../../../constants';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { isValid } from '../../versioning/pep440';
-import * as semverVersioning from '../../versioning/semver-coerced';
+import { NpmDatasource } from '../../datasource/npm';
+import { id, isValid } from '../../versioning/npm';
+
 import type { PackageDependency, PackageFileContent } from '../types';
 
-export const supportedDatasources = [GithubReleasesDatasource.id];
+export const supportedDatasources = [NpmDatasource.id];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.bun-version$'],
-  versioning: semverVersioning.id,
+  versioning: id,
 };
 
 export const categories: Category[] = ['js'];
 
 export function extractPackageFile(content: string): PackageFileContent | null {
-  if (!content.endsWith('\n')) {
-    return null;
-  }
-
   if (!content) {
     return null;
   }
@@ -28,14 +24,12 @@ export function extractPackageFile(content: string): PackageFileContent | null {
 
   const dep: PackageDependency = {
     depName: 'Bun',
-    packageName: 'oven-sh/bun',
+    packageName: 'bun',
     currentValue: content.trim(),
-    datasource: GithubReleasesDatasource.id,
-    versioning: semverVersioning.id,
-    extractVersion: '^bun-v(?<version>\\S+)',
+    datasource: NpmDatasource.id,
   };
 
-  if (!semverVersioning.isVersion(content.trim())) {
+  if (!isValid(content.trim())) {
     dep.skipReason = 'invalid-version';
   }
   return { deps: [dep] };

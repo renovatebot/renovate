@@ -7,11 +7,9 @@ describe('modules/manager/bun-version/index', () => {
       expect(res?.deps).toEqual([
         {
           depName: 'Bun',
-          packageName: 'oven-sh/bun',
+          packageName: 'bun',
           currentValue: '1.1.15',
-          datasource: 'github-releases',
-          extractVersion: '^bun-v(?<version>\\S+)',
-          versioning: 'semver-coerced',
+          datasource: 'npm',
         },
       ]);
     });
@@ -23,7 +21,7 @@ describe('modules/manager/bun-version/index', () => {
 
     it('handles no newline at the end', () => {
       const res = extractPackageFile('1.1.15');
-      expect(res).toBeNull();
+      expect(res).not.toBeNull();
     });
 
     it('handles multiple lines', () => {
@@ -36,11 +34,9 @@ describe('modules/manager/bun-version/index', () => {
       expect(res?.deps).toEqual([
         {
           depName: 'Bun',
-          packageName: 'oven-sh/bun',
+          packageName: 'bun',
           currentValue: 'notaversion',
-          datasource: 'github-releases',
-          extractVersion: '^bun-v(?<version>\\S+)',
-          versioning: 'semver-coerced',
+          datasource: 'npm',
           skipReason: 'invalid-version',
         },
       ]);
@@ -51,11 +47,9 @@ describe('modules/manager/bun-version/index', () => {
       expect(res?.deps).toEqual([
         {
           depName: 'Bun',
-          packageName: 'oven-sh/bun',
+          packageName: 'bun',
           currentValue: '1.0',
-          datasource: 'github-releases',
-          extractVersion: '^bun-v(?<version>\\S+)',
-          versioning: 'semver-coerced',
+          datasource: 'npm',
         },
       ]);
     });
