@@ -49,7 +49,7 @@ function checkRebaseAll(issueBody: string): boolean {
 }
 
 function checkCreateConfigMigrationPr(issueBody: string): string {
-  if (issueBody.includes('Config Migration necessary.')) {
+  if (issueBody.includes('Config Migration needed.')) {
     if (issueBody.includes(' - [x] <!-- create-config-migration-pr -->')) {
       return 'checked';
     }
@@ -285,10 +285,10 @@ export async function ensureDependencyDashboard(
   let issueBody = '';
 
   if (configMigrationRes?.result === 'pr-exists') {
-    issueBody += `Config Migration necessary. You can view the Config Migration PR here #${configMigrationRes.prNumber}\n\n`;
+    issueBody += `Config Migration needed. See Config Migration PR: #${configMigrationRes.prNumber}\n\n`;
   } else if (configMigrationRes?.result === 'add-checkbox') {
     issueBody +=
-      ' - [ ] <!-- create-config-migration-pr --> Config Migration necessary. Please tick this checkbox to create an automated Config Migration PR' +
+      ' - [ ] <!-- create-config-migration-pr --> Config Migration needed. Select this checkbox to let Renovate create an automated Config Migration PR.' +
       '\n\n';
   }
 

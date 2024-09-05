@@ -220,7 +220,7 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: '\n\n - [x] <!-- create-config-migration-pr --> Config Migration necessary.',
+        body: '\n\n - [x] <!-- create-config-migration-pr --> Config Migration needed.',
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf.dependencyDashboardChecks).toEqual({
@@ -234,7 +234,7 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: '\n\n - [ ] <!-- create-config-migration-pr --> Config Migration necessary.',
+        body: '\n\n - [ ] <!-- create-config-migration-pr --> Config Migration needed.',
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf.dependencyDashboardChecks).toEqual({
@@ -248,7 +248,7 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: '\n\n Config Migration necessary. You can view the Config Migration PR here #3',
+        body: '\n\n Config Migration needed. See Config Migration PR: #3',
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf.dependencyDashboardChecks).toEqual({
@@ -689,7 +689,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
-        ' - [ ] <!-- create-config-migration-pr --> Config Migration necessary.',
+        ' - [ ] <!-- create-config-migration-pr --> Config Migration needed.',
       );
     });
 
@@ -721,7 +721,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
-        'Config Migration necessary. You can view the Config Migration PR here',
+        'Config Migration needed. See Config Migration PR:',
       );
     });
 
@@ -745,7 +745,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).not.toMatch(
-        'Config Migration necessary',
+        'Config Migration needed',
       );
     });
 
