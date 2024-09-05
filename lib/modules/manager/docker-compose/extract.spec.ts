@@ -58,11 +58,11 @@ describe('modules/manager/docker-compose/extract', () => {
     it('extracts image and replaces registry', () => {
       const res = extractPackageFile(
         `
-    version: "3"
-    services:
-      nginx:
-        image: quay.io/nginx:0.0.1
-      `,
+        version: "3"
+        services:
+          nginx:
+            image: quay.io/nginx:0.0.1
+        `,
         '',
         {
           registryAliases: {
