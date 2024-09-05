@@ -57,13 +57,14 @@ describe('modules/manager/docker-compose/extract', () => {
     });
 
     it('extracts image and replaces registry', () => {
-      const res = extractPackageFile(
-        `
+      const compose = codeBlock`
         version: "3"
         services:
           nginx:
             image: quay.io/nginx:0.0.1
-        `,
+      `;
+      const res = extractPackageFile(
+        compose,
         '',
         {
           registryAliases: {
@@ -87,13 +88,14 @@ describe('modules/manager/docker-compose/extract', () => {
     });
 
     it('extracts image but no replacement', () => {
-      const res = extractPackageFile(
-        `
+      const compose = codeBlock`
         version: "3"
         services:
           nginx:
             image: quay.io/nginx:0.0.1
-        `,
+      `;
+      const res = extractPackageFile(
+        compose,
         '',
         {
           registryAliases: {
@@ -117,13 +119,14 @@ describe('modules/manager/docker-compose/extract', () => {
     });
 
     it('extracts image and no double replacement', () => {
-      const res = extractPackageFile(
-        `
+      const compose = codeBlock`
         version: "3"
         services:
           nginx:
             image: quay.io/nginx:0.0.1
-        `,
+      `;
+      const res = extractPackageFile(
+        compose,
         '',
         {
           registryAliases: {
@@ -148,18 +151,15 @@ describe('modules/manager/docker-compose/extract', () => {
     });
 
     it('extracts image of templated compose file', () => {
-      const res = extractPackageFile(
-        `
+      const compose = codeBlock`
         version: "3"
         services:
           nginx:
             image: quay.io/nginx:0.0.1
             envrionment:
               {{ services['nginx']['env'] }}
-        `,
-        '',
-        {},
-      );
+      `;
+      const res = extractPackageFile(compose, '', {},);
       expect(res?.deps).toHaveLength(1);
     });
   });
