@@ -63,15 +63,11 @@ describe('modules/manager/docker-compose/extract', () => {
           nginx:
             image: quay.io/nginx:0.0.1
       `;
-      const res = extractPackageFile(
-        compose,
-        '',
-        {
-          registryAliases: {
-            'quay.io': 'my-quay-mirror.registry.com',
-          },
+      const res = extractPackageFile(compose, '', {
+        registryAliases: {
+          'quay.io': 'my-quay-mirror.registry.com',
         },
-      );
+      });
       expect(res).toEqual({
         deps: [
           {
@@ -94,15 +90,11 @@ describe('modules/manager/docker-compose/extract', () => {
           nginx:
             image: quay.io/nginx:0.0.1
       `;
-      const res = extractPackageFile(
-        compose,
-        '',
-        {
-          registryAliases: {
-            'index.docker.io': 'my-docker-mirror.registry.com',
-          },
+      const res = extractPackageFile(compose, '', {
+        registryAliases: {
+          'index.docker.io': 'my-docker-mirror.registry.com',
         },
-      );
+      });
       expect(res).toEqual({
         deps: [
           {
@@ -125,16 +117,12 @@ describe('modules/manager/docker-compose/extract', () => {
           nginx:
             image: quay.io/nginx:0.0.1
       `;
-      const res = extractPackageFile(
-        compose,
-        '',
-        {
-          registryAliases: {
-            'quay.io': 'my-quay-mirror.registry.com',
-            'my-quay-mirror.registry.com': 'quay.io',
-          },
+      const res = extractPackageFile(compose, '', {
+        registryAliases: {
+          'quay.io': 'my-quay-mirror.registry.com',
+          'my-quay-mirror.registry.com': 'quay.io',
         },
-      );
+      });
       expect(res).toEqual({
         deps: [
           {
@@ -159,7 +147,7 @@ describe('modules/manager/docker-compose/extract', () => {
             envrionment:
               {{ services['nginx']['env'] }}
       `;
-      const res = extractPackageFile(compose, '', {},);
+      const res = extractPackageFile(compose, '', {});
       expect(res?.deps).toHaveLength(1);
     });
   });
