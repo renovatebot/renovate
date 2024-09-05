@@ -1516,6 +1516,23 @@ Under the hood, it creates a MR-level approval rule where `approvals_required` i
 This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
+## glasskube
+
+Since there is no canonical naming scheme for files containing Glasskube packages in GitOps repositories, the manager does not have a default "fileMatch" value, so you have to provide your own.
+With the following example configuration, the manager will look for Glasskube resources in all `yaml` and `yml` files:
+
+```json
+{
+  "glasskube": {
+    "fileMatch": [
+      ".+\\.(yaml)|(yml)$"
+    ]
+  }
+}
+```
+
+Note that the set of resources captured by `fileMatch` must also include a `PackageRepository` resource.
+
 ## goGetDirs
 
 By default, Renovate will run `go get -d -t ./...` to update the `go.sum`.
