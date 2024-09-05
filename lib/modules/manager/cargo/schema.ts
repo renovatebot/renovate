@@ -15,13 +15,13 @@ const CargoDep = z.union([
 
 const CargoDeps = z.record(z.string(), CargoDep);
 
+export type CargoDeps = z.infer<typeof CargoDeps>;
+
 const CargoSection = z.object({
   dependencies: CargoDeps.optional(),
   'dev-dependencies': CargoDeps.optional(),
   'build-dependencies': CargoDeps.optional(),
 });
-
-export type CargoSection = z.infer<typeof CargoSection>;
 
 const CargoWorkspace = z.object({
   dependencies: CargoDeps.optional(),

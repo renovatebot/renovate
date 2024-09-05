@@ -14,8 +14,8 @@ import { extractLockFileVersions } from './locked-version';
 import {
   type CargoConfig,
   CargoConfigSchema,
+  type CargoDeps,
   CargoManifestSchema,
-  type CargoSection,
 } from './schema';
 import type { CargoRegistries, CargoRegistryUrl } from './types';
 import { DEFAULT_REGISTRY_URL } from './utils';
@@ -28,20 +28,20 @@ function getCargoIndexEnv(registryName: string): string | null {
 }
 
 function extractFromSection(
-  parsedContent: CargoSection,
-  section: keyof CargoSection,
+  dependencies: CargoDeps | undefined,
+  depType: string,
   cargoRegistries: CargoRegistries,
   target?: string,
-  depTypeOverride?: string,
 ): PackageDependency[] {
-  const deps: PackageDependency[] = [];
-  const sectionContent = parsedContent[section];
-  if (!sectionContent) {
+  if (!dependencies) {
     return [];
   }
-  Object.keys(sectionContent).forEach((depName) => {
+
+  const deps: PackageDependency[] = [];
+
+  Object.keys(dependencies).forEach((depName) => {
     let skipReason: SkipReason | undefined;
-    let currentValue = sectionContent[depName];
+    let currentValue = dependencies[depName];
     let nestedVersion = false;
     let registryUrls: string[] | undefined;
     let packageName: string | undefined;
@@ -70,29 +70,22 @@ function extractFromSection(
             skipReason = 'unknown-registry';
           }
         }
-        if (path) {
-          skipReason = 'path-dependency';
-        }
-        if (git) {
-          skipReason = 'git-dependency';
-        }
-      } else if (path) {
-        currentValue = '';
-        skipReason = 'path-dependency';
-      } else if (git) {
-        currentValue = '';
-        skipReason = 'git-dependency';
-      } else if (workspace) {
-        currentValue = '';
-        skipReason = 'inherited-dependency';
       } else {
         currentValue = '';
         skipReason = 'invalid-dependency-specification';
       }
+
+      if (path) {
+        skipReason = 'path-dependency';
+      } else if (git) {
+        skipReason = 'git-dependency';
+      } else if (workspace) {
+        skipReason = 'inherited-dependency';
+      }
     }
     const dep: PackageDependency = {
       depName,
-      depType: section,
+      depType,
       currentValue: currentValue as any,
       managerData: { nestedVersion },
       datasource: CrateDatasource.id,
@@ -120,9 +113,6 @@ function extractFromSection(
     }
     if (packageName) {
       dep.packageName = packageName;
-    }
-    if (depTypeOverride) {
-      dep.depType = depTypeOverride;
     }
     deps.push(dep);
   });
@@ -255,19 +245,19 @@ export async function extractPackageFile(
       // Dependencies for `${target}`
       const deps = [
         ...extractFromSection(
-          targetContent,
+          targetContent.dependencies,
           'dependencies',
           cargoRegistries,
           target,
         ),
         ...extractFromSection(
-          targetContent,
+          targetContent['dev-dependencies'],
           'dev-dependencies',
           cargoRegistries,
           target,
         ),
         ...extractFromSection(
-          targetContent,
+          targetContent['build-dependencies'],
           'build-dependencies',
           cargoRegistries,
           target,
@@ -281,18 +271,29 @@ export async function extractPackageFile(
   let workspaceDeps: PackageDependency[] = [];
   if (workspaceSection) {
     workspaceDeps = extractFromSection(
-      workspaceSection,
-      'dependencies',
+      workspaceSection.dependencies,
+      'workspace.dependencies',
       cargoRegistries,
       undefined,
-      'workspace.dependencies',
     );
   }
 
   const deps = [
-    ...extractFromSection(cargoManifest, 'dependencies', cargoRegistries),
-    ...extractFromSection(cargoManifest, 'dev-dependencies', cargoRegistries),
-    ...extractFromSection(cargoManifest, 'build-dependencies', cargoRegistries),
+    ...extractFromSection(
+      cargoManifest.dependencies,
+      'dependencies',
+      cargoRegistries,
+    ),
+    ...extractFromSection(
+      cargoManifest['dev-dependencies'],
+      'dev-dependencies',
+      cargoRegistries,
+    ),
+    ...extractFromSection(
+      cargoManifest['build-dependencies'],
+      'build-dependencies',
+      cargoRegistries,
+    ),
     ...targetDeps,
     ...workspaceDeps,
   ];
