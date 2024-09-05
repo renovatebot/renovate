@@ -1,18 +1,47 @@
 # Config Migration
 
-Config migration is necessary when Renovate's configuration options are updated. Users can enable automatic config migration pull requests by setting the [configMigration](./configuration-options.md#configmigration) option to `true`.
+The developers may need to rename user-facing configuration options.
+For example to:
 
-While this feature is disabled by default, we strongly recommend enabling it to prevent unexpected behavior due to outdated configurations. Keeping your config up-to-date can significantly reduce debugging time for both users and maintainers when issues arise.
+- Use a better name for a config option, preset or concept
+- Make a experimental configuration option officially supported
 
-Here are the possible scenarios related to config migration:
+When this happens, the developers write "config migration" code to tell Renovate the old name and the new name.
 
-1. **No config migration needed**
+When Renovate runs, it silently swaps old terms for new terms.
+By default, Renovate does _not_ update the terms in your Renovate configuration file!
 
-   Renovate takes no action.
+### Enabling config migration pull requests
 
-2. **Config migration needed and enabled**
+Renovate can create a config migration pull request, that updates old terms in your configuration file.
+To enable config migration pull request from Renovate, set the [`configMigration`](./configuration-options.md#configmigration) config option to `true`.
 
-   Renovate creates a Config Migration PR and adds a link to it at the top of the Dependency Dashboard issue (if enabled).
+Config migration PRs are disabled by default.
+But we _strongly_ recommend you enable config migration PRs, because:
+
+- the config migration PR "tells" you something changed
+- up-to-date terms help you search the Renovate documentation
+- up-to-date terms help you, and us, debug problems quicker
+
+## Config migration scenarios
+
+The scenarios for config migration are:
+
+- No config migration needed
+- Config migration needed, and enabled
+- Config migration needed, but disabled
+- Config migration needed, but there is a closed migration PR
+
+### No config migration needed
+
+Renovate takes no action.
+
+### Config migration needed, and enabled
+
+Renovate will:
+
+1. Create a Config Migration PR
+1. If the Dependency Dashboard issue is enabled: Renovate puts a link to the Config Migration PR on the dashboard
 
 3. **Config migration needed but disabled**
 
@@ -32,15 +61,16 @@ Here are the possible scenarios related to config migration:
    Config Migration necessary. You can view the Config Migration PR here #1
    ```
 
-4. **Config migration needed, but a closed migration PR exists**
+### Config migration needed, but there is a closed migration PR
 
-   In this case, regardless of whether config migration is enabled:
+In this case, it does not matter if Config Migration is enabled, or not.
+Renovate will:
 
-   - Renovate adds a checkbox to the Dependency Dashboard issue (if enabled).
-   - When checked, Renovate:
-     1. Deletes the old config migration branch.
-     2. Creates a new config migration PR.
-     3. Replaces the checkbox with a link to the new PR in the Dependency Dashboard issue.
+- Add a checkbox to the Dependency Dashboard issue (if enabled)
+- When you select the checkbox on the dashboard, Renovate will:
+    1. Delete the _old_ config migration branch
+    1. Create a _new_ config migration PR
+    1. Replace the checkbox with a link to the _new_ PR in the Dependency Dashboard issue
 
 <!-- prettier-ignore -->
 !!! note
