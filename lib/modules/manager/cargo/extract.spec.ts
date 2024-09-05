@@ -136,6 +136,7 @@ replace-with = "private-crates"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registry: 'private-crates',
           },
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
@@ -148,6 +149,7 @@ replace-with = "private-crates"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registry: 'mcorbin',
           },
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
@@ -212,6 +214,7 @@ replace-with = "mcorbin"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registry: 'private-crates',
           },
         },
         {
@@ -221,6 +224,7 @@ replace-with = "mcorbin"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registry: 'mcorbin',
           },
         },
         {
@@ -302,6 +306,7 @@ replace-with = "mcorbin"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registry: 'private-crates',
           },
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
@@ -314,6 +319,7 @@ replace-with = "mcorbin"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registry: 'mcorbin',
           },
           registryUrls: ['https://github.com/mcorbin/testregistry'],
         },
@@ -437,6 +443,7 @@ replace-with = "mine"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registry: 'private-crates',
           },
           skipReason: 'unknown-registry',
         },
@@ -447,6 +454,7 @@ replace-with = "mine"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registry: 'mcorbin',
           },
           skipReason: 'unknown-registry',
         },
@@ -493,6 +501,7 @@ replace-with = "mcorbin"
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registry: 'private-crates',
           },
           skipReason: 'unknown-registry',
         },
@@ -503,6 +512,7 @@ replace-with = "mcorbin"
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registry: 'mcorbin',
           },
           skipReason: 'unknown-registry',
         },

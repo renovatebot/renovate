@@ -1,30 +1,133 @@
 import { z } from 'zod';
+import type { SkipReason } from '../../../types';
 import { Toml } from '../../../util/schema-utils';
+import { CrateDatasource } from '../../datasource/crate';
+import type { PackageDependency } from '../types';
 
 const CargoDep = z.union([
-  z.object({
-    path: z.string().optional(),
-    git: z.string().optional(),
-    version: z.string().optional(),
-    registry: z.string().optional(),
-    package: z.string().optional(),
-    workspace: z.boolean().optional(),
-  }),
-  z.string(),
+  z
+    .object({
+      path: z.string().optional(),
+      git: z.string().optional(),
+      version: z.string().optional(),
+      registry: z.string().optional(),
+      package: z.string().optional(),
+      workspace: z.boolean().optional(),
+    })
+    .transform(
+      ({
+        path,
+        git,
+        version,
+        registry,
+        package: pkg,
+        workspace,
+      }): PackageDependency => {
+        let skipReason: SkipReason | undefined;
+        let currentValue: string | undefined;
+        let nestedVersion = false;
+
+        if (version) {
+          currentValue = version;
+          nestedVersion = true;
+        } else {
+          currentValue = '';
+          skipReason = 'invalid-dependency-specification';
+        }
+
+        if (path) {
+          skipReason = 'path-dependency';
+        } else if (git) {
+          skipReason = 'git-dependency';
+        } else if (workspace) {
+          skipReason = 'inherited-dependency';
+        }
+
+        const dep: PackageDependency = {
+          currentValue: currentValue as any,
+          managerData: { nestedVersion },
+          datasource: CrateDatasource.id,
+        };
+
+        if (skipReason) {
+          dep.skipReason = skipReason;
+        }
+        if (pkg) {
+          dep.packageName = pkg;
+        }
+        if (registry) {
+          dep.managerData!.registry = registry;
+        }
+
+        return dep;
+      },
+    ),
+  z.string().transform(
+    (version): PackageDependency => ({
+      currentValue: version,
+      managerData: { nestedVersion: false },
+      datasource: CrateDatasource.id,
+    }),
+  ),
 ]);
 
-const CargoDeps = z.record(z.string(), CargoDep);
+const CargoDeps = z.record(z.string(), CargoDep).transform((record) => {
+  const deps: PackageDependency[] = [];
+
+  for (const [depName, dep] of Object.entries(record)) {
+    dep.depName = depName;
+    deps.push(dep);
+  }
+
+  return deps;
+});
 
 export type CargoDeps = z.infer<typeof CargoDeps>;
 
 const CargoSection = z.object({
-  dependencies: CargoDeps.optional(),
-  'dev-dependencies': CargoDeps.optional(),
-  'build-dependencies': CargoDeps.optional(),
+  dependencies: CargoDeps.transform((record) => {
+    const deps: PackageDependency[] = [];
+
+    for (const dep of Object.values(record)) {
+      dep.depType = 'dependencies';
+      deps.push(dep);
+    }
+
+    return deps;
+  }).optional(),
+  'dev-dependencies': CargoDeps.transform((record) => {
+    const deps: PackageDependency[] = [];
+
+    for (const dep of Object.values(record)) {
+      dep.depType = 'dev-dependencies';
+      deps.push(dep);
+    }
+
+    return deps;
+  }).optional(),
+  'build-dependencies': CargoDeps.transform((record) => {
+    const deps: PackageDependency[] = [];
+
+    for (const dep of Object.values(record)) {
+      dep.depType = 'build-dependencies';
+      deps.push(dep);
+    }
+
+    return deps;
+  }).optional(),
 });
 
 const CargoWorkspace = z.object({
-  dependencies: CargoDeps.optional(),
+  dependencies: CargoDeps.transform((record) => {
+    const deps: PackageDependency[] = [];
+
+    for (const dep of Object.values(record)) {
+      dep.depType = 'workspace.dependencies';
+      deps.push(dep);
+    }
+
+    return deps;
+  }).optional(),
 });
 
 const CargoTarget = z.record(z.string(), CargoSection);

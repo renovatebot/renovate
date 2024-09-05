@@ -1,9 +1,7 @@
 import { logger } from '../../../logger';
-import type { SkipReason } from '../../../types';
 import { coerceArray } from '../../../util/array';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
 import { Result } from '../../../util/result';
-import { CrateDatasource } from '../../datasource/crate';
 import { api as versioning } from '../../versioning/cargo';
 import type {
   ExtractConfig,
@@ -14,7 +12,6 @@ import { extractLockFileVersions } from './locked-version';
 import {
   type CargoConfig,
   CargoConfigSchema,
-  type CargoDeps,
   CargoManifestSchema,
 } from './schema';
 import type { CargoRegistries, CargoRegistryUrl } from './types';
@@ -28,8 +25,7 @@ function getCargoIndexEnv(registryName: string): string | null {
 }
 
 function extractFromSection(
-  dependencies: CargoDeps | undefined,
-  depType: string,
+  dependencies: PackageDependency[] | undefined,
   cargoRegistries: CargoRegistries,
   target?: string,
 ): PackageDependency[] {
@@ -39,57 +35,22 @@ function extractFromSection(
 
   const deps: PackageDependency[] = [];
 
-  Object.keys(dependencies).forEach((depName) => {
-    let skipReason: SkipReason | undefined;
-    let currentValue = dependencies[depName];
-    let nestedVersion = false;
+  for (const dep of Object.values(dependencies)) {
     let registryUrls: string[] | undefined;
-    let packageName: string | undefined;
 
-    if (typeof currentValue !== 'string') {
-      const version = currentValue.version;
-      const path = currentValue.path;
-      const git = currentValue.git;
-      const registryName = currentValue.registry;
-      const workspace = currentValue.workspace;
-
-      packageName = currentValue.package;
-
-      if (version) {
-        currentValue = version;
-        nestedVersion = true;
-        if (registryName) {
-          const registryUrl =
-            getCargoIndexEnv(registryName) ?? cargoRegistries[registryName];
-
-          if (registryUrl) {
-            if (registryUrl !== DEFAULT_REGISTRY_URL) {
-              registryUrls = [registryUrl];
-            }
-          } else {
-            skipReason = 'unknown-registry';
-          }
+    if (dep.managerData?.registry) {
+      const registryUrl =
+        getCargoIndexEnv(dep.managerData.registry) ??
+        cargoRegistries[dep.managerData?.registry];
+      if (registryUrl) {
+        if (registryUrl !== DEFAULT_REGISTRY_URL) {
+          registryUrls = [registryUrl];
         }
       } else {
-        currentValue = '';
-        skipReason = 'invalid-dependency-specification';
-      }
-
-      if (path) {
-        skipReason = 'path-dependency';
-      } else if (git) {
-        skipReason = 'git-dependency';
-      } else if (workspace) {
-        skipReason = 'inherited-dependency';
+        dep.skipReason = 'unknown-registry';
       }
     }
-    const dep: PackageDependency = {
-      depName,
-      depType,
-      currentValue: currentValue as any,
-      managerData: { nestedVersion },
-      datasource: CrateDatasource.id,
-    };
+
     if (registryUrls) {
       dep.registryUrls = registryUrls;
     } else {
@@ -101,21 +62,16 @@ function extractFromSection(
       } else {
         // we always expect to have DEFAULT_REGISTRY_ID set, if it's not it means the config defines an alternative
         // registry that we couldn't resolve.
-        skipReason = 'unknown-registry';
+        dep.skipReason = 'unknown-registry';
       }
     }
 
-    if (skipReason) {
-      dep.skipReason = skipReason;
-    }
     if (target) {
       dep.target = target;
     }
-    if (packageName) {
-      dep.packageName = packageName;
-    }
     deps.push(dep);
-  });
+  }
+
   return deps;
 }
 
@@ -246,19 +202,16 @@ export async function extractPackageFile(
       const deps = [
         ...extractFromSection(
           targetContent.dependencies,
-          'dependencies',
           cargoRegistries,
           target,
         ),
         ...extractFromSection(
           targetContent['dev-dependencies'],
-          'dev-dependencies',
           cargoRegistries,
           target,
         ),
         ...extractFromSection(
           targetContent['build-dependencies'],
-          'build-dependencies',
           cargoRegistries,
           target,
         ),
@@ -272,28 +225,15 @@ export async function extractPackageFile(
   if (workspaceSection) {
     workspaceDeps = extractFromSection(
       workspaceSection.dependencies,
-      'workspace.dependencies',
       cargoRegistries,
       undefined,
     );
   }
 
   const deps = [
-    ...extractFromSection(
-      cargoManifest.dependencies,
-      'dependencies',
-      cargoRegistries,
-    ),
-    ...extractFromSection(
-      cargoManifest['dev-dependencies'],
-      'dev-dependencies',
-      cargoRegistries,
-    ),
-    ...extractFromSection(
-      cargoManifest['build-dependencies'],
-      'build-dependencies',
-      cargoRegistries,
-    ),
+    ...extractFromSection(cargoManifest.dependencies, cargoRegistries),
+    ...extractFromSection(cargoManifest['dev-dependencies'], cargoRegistries),
+    ...extractFromSection(cargoManifest['build-dependencies'], cargoRegistries),
     ...targetDeps,
     ...workspaceDeps,
   ];
