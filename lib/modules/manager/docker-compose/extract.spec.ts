@@ -145,5 +145,21 @@ describe('modules/manager/docker-compose/extract', () => {
         ],
       });
     });
+
+    it('extracts image of templated compose file', () => {
+      const res = extractPackageFile(
+        `
+        version: "3"
+        services:
+          nginx:
+            image: quay.io/nginx:0.0.1
+            envrionment:
+              {{ services['nginx']['env'] }}
+        `,
+        '',
+        {},
+      );
+      expect(res?.deps).toHaveLength(1);
+    });
   });
 });
