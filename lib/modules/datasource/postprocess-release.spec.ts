@@ -9,7 +9,7 @@ import type {
   ReleaseResult,
 } from './types';
 
-jest.mock('../../../../modules/datasource/common');
+jest.mock('./common');
 const { getDatasourceFor } = mocked(_datasourceCommon);
 
 class DummyDatasource extends Datasource {
