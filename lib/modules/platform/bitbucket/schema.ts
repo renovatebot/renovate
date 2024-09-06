@@ -79,7 +79,7 @@ const TaskState = z.union([z.literal('RESOLVED'), z.literal('UNRESOLVED')]);
 
 const prTask = z.object({
   id: z.number(),
-  state: taskState,
+  state: TaskState,
   content: z.object({
     raw: z.string(),
   }),
