@@ -7,6 +7,7 @@ import * as semverVersioning from './semver';
 import * as semverCoercedVersioning from './semver-coerced';
 import type { VersioningApi, VersioningApiConstructor } from './types';
 import * as allVersioning from '.';
+import { regEx } from '../../util/regex';
 
 const supportedSchemes = getOptions().find(
   (option) => option.name === 'versioning',
@@ -56,6 +57,21 @@ describe('modules/versioning/index', () => {
     for (const name of vers.keys()) {
       const ver = vers.get(name)!;
       expect(validate(ver, name)).toBeTrue();
+    }
+
+    const urlRegex = regEx(/^\[.*\]\(.*\)$/);
+    for (const [verName, verModule] of Object.entries(loadedVers)) {
+      const urls = (verModule as { urls?: string[] }).urls ?? [];
+      for (const url of urls) {
+        const urlValid = urlRegex.test(url);
+        expect({
+          versioning: verName,
+          urlValid,
+        }).toMatchObject({
+          versioning: verName,
+          urlValid: true,
+        });
+      }
     }
   });
 

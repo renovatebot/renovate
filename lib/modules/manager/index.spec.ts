@@ -4,6 +4,7 @@ import { getDatasourceList } from '../datasource';
 import * as customManager from './custom';
 import type { ManagerApi } from './types';
 import * as manager from '.';
+import { regEx } from '../../util/regex';
 
 jest.mock('../../util/fs');
 
@@ -88,6 +89,22 @@ describe('modules/manager/index', () => {
     for (const name of mgrs.keys()) {
       const mgr = mgrs.get(name)!;
       expect(validate(mgr, name)).toBeTrue();
+    }
+
+    const urlRegex = regEx(/^\[.*\]\(.*\)$/);
+
+    for (const [managerName, managerModule] of Object.entries(loadedMgr)) {
+      const urls = (managerModule as { urls?: string[] }).urls ?? [];
+      for (const url of urls) {
+        const urlValid = urlRegex.test(url);
+        expect({
+          manager: managerName,
+          urlValid,
+        }).toMatchObject({
+          manager: managerName,
+          urlValid: true,
+        });
+      }
     }
   });
 
