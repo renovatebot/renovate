@@ -91,7 +91,6 @@ export const UnresolvedPrTasks = z
   .object({
     values: z.array(PrTask),
   })
-  .transform(
-    (data) =>
-      data.values.filter((task) => task.state === 'UNRESOLVED'),
+  .transform((data) =>
+    data.values.filter((task) => task.state === 'UNRESOLVED'),
   );
