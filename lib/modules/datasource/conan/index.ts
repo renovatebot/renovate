@@ -74,10 +74,10 @@ export class ConanDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${datasource}-revisions`,
+    namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: DigestConfig, newValue?: string) =>
       // TODO: types (#22198)
-      `${registryUrl!}:${packageName}:${newValue!}`,
+      `getDigest:${registryUrl!}:${packageName}:${newValue!}`,
   })
   override async getDigest(
     { registryUrl, packageName }: DigestConfig,
@@ -106,7 +106,7 @@ export class ConanDatasource extends Datasource {
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       // TODO: types (#22198)
-      `${registryUrl}:${packageName}`,
+      `getReleases:${registryUrl}:${packageName}`,
   })
   async getReleases({
     registryUrl,

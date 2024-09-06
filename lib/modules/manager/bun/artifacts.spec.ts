@@ -133,4 +133,90 @@ describe('modules/manager/bun/artifacts', () => {
       ]);
     });
   });
+
+  describe('bun command execution', () => {
+    it('check install options with configs', async () => {
+      const testCases = [
+        {
+          allowScripts: undefined,
+          ignoreScripts: undefined,
+          expectedCmd: 'bun install --ignore-scripts',
+        },
+        {
+          allowScripts: false,
+          ignoreScripts: undefined,
+          expectedCmd: 'bun install --ignore-scripts',
+        },
+        {
+          allowScripts: true,
+          ignoreScripts: undefined,
+          expectedCmd: 'bun install',
+        },
+        {
+          allowScripts: undefined,
+          ignoreScripts: true,
+          expectedCmd: 'bun install --ignore-scripts',
+        },
+        {
+          allowScripts: undefined,
+          ignoreScripts: false,
+          expectedCmd: 'bun install --ignore-scripts',
+        },
+        {
+          allowScripts: false,
+          ignoreScripts: true,
+          expectedCmd: 'bun install --ignore-scripts',
+        },
+        {
+          allowScripts: false,
+          ignoreScripts: false,
+          expectedCmd: 'bun install --ignore-scripts',
+        },
+        {
+          allowScripts: true,
+          ignoreScripts: true,
+          expectedCmd: 'bun install --ignore-scripts',
+        },
+        {
+          allowScripts: true,
+          ignoreScripts: false,
+          expectedCmd: 'bun install',
+        },
+      ];
+
+      for (const testCase of testCases) {
+        GlobalConfig.set({
+          ...globalConfig,
+          allowScripts: testCase.allowScripts,
+        });
+        const updateArtifact: UpdateArtifact = {
+          config: { ignoreScripts: testCase.ignoreScripts },
+          newPackageFileContent: '',
+          packageFileName: '',
+          updatedDeps: [{ manager: 'bun', lockFiles: ['bun.lockb'] }],
+        };
+
+        const oldLock = Buffer.from('old');
+        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        const newLock = Buffer.from('new');
+        fs.readFile.mockResolvedValueOnce(newLock as never);
+
+        await updateArtifacts(updateArtifact);
+
+        expect(exec).toHaveBeenCalledWith(testCase.expectedCmd, {
+          cwdFile: '',
+          docker: {},
+          toolConstraints: [
+            {
+              toolName: 'bun',
+            },
+          ],
+          userConfiguredEnv: undefined,
+        });
+
+        exec.mockClear();
+        GlobalConfig.reset();
+      }
+    });
+  });
 });
