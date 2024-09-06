@@ -1,8 +1,13 @@
+import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { mocked } from '../../../../test/util';
 import * as hostRules from '../../../util/host-rules';
 import { PypiDatasource } from '.';
+
+const googleAuth = mocked(_googleAuth);
+jest.mock('google-auth-library');
 
 const res1 = Fixtures.get('azure-cli-monitor.json');
 const htmlResponse = Fixtures.get('versions-html.html');
@@ -123,6 +128,64 @@ describe('modules/datasource/pypi/index', () => {
         version: '0.2.15',
         releaseTimestamp: '2019-06-18T13:58:55.000Z',
       });
+    });
+
+    it('supports Google Auth', async () => {
+      httpMock
+        .scope('https://someregion-python.pkg.dev/some-project/some-repo/')
+        .get('/azure-cli-monitor/json')
+        .matchHeader(
+          'authorization',
+          'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg==',
+        )
+        .reply(200, Fixtures.get('azure-cli-monitor-updated.json'));
+      const config = {
+        registryUrls: [
+          'https://someregion-python.pkg.dev/some-project/some-repo',
+        ],
+      };
+      googleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        })),
+      );
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        packageName: 'azure-cli-monitor',
+      });
+      expect(res?.releases.pop()).toMatchObject({
+        version: '0.2.15',
+        releaseTimestamp: '2019-06-18T13:58:55.000Z',
+      });
+      expect(googleAuth).toHaveBeenCalledTimes(1);
+    });
+
+    it('supports Google Auth not being configured', async () => {
+      httpMock
+        .scope('https://someregion-python.pkg.dev/some-project/some-repo/')
+        .get('/azure-cli-monitor/json')
+        .reply(200, Fixtures.get('azure-cli-monitor-updated.json'));
+      const config = {
+        registryUrls: [
+          'https://someregion-python.pkg.dev/some-project/some-repo',
+        ],
+      };
+      googleAuth.mockImplementation(
+        jest.fn().mockImplementation(() => ({
+          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        })),
+      );
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        packageName: 'azure-cli-monitor',
+      });
+      expect(res?.releases.pop()).toMatchObject({
+        version: '0.2.15',
+        releaseTimestamp: '2019-06-18T13:58:55.000Z',
+      });
+      expect(googleAuth).toHaveBeenCalledTimes(1);
     });
 
     it('returns non-github home_page', async () => {
@@ -641,6 +704,32 @@ describe('modules/datasource/pypi/index', () => {
         }),
       ).toMatchSnapshot();
     });
+  });
+
+  it('supports Google Auth with simple endpoint', async () => {
+    httpMock
+      .scope('https://someregion-python.pkg.dev/some-project/some-repo/simple/')
+      .get('/dj-database-url/')
+      .reply(200, htmlResponse);
+    const config = {
+      registryUrls: [
+        'https://someregion-python.pkg.dev/some-project/some-repo/simple/',
+      ],
+    };
+    googleAuth.mockImplementationOnce(
+      jest.fn().mockImplementationOnce(() => ({
+        getAccessToken: jest.fn().mockResolvedValue('some-token'),
+      })),
+    );
+    expect(
+      await getPkgReleases({
+        datasource,
+        ...config,
+        constraints: { python: '2.7' },
+        packageName: 'dj-database-url',
+      }),
+    ).toMatchSnapshot();
+    expect(googleAuth).toHaveBeenCalledTimes(1);
   });
 
   it('uses https://pypi.org/pypi/ instead of https://pypi.org/simple/', async () => {
