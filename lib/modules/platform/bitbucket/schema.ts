@@ -75,7 +75,7 @@ export const Repositories = z
   })
   .transform((body) => body.values);
 
-const taskState = z.union([z.literal('RESOLVED'), z.literal('UNRESOLVED')]);
+const TaskState = z.union([z.literal('RESOLVED'), z.literal('UNRESOLVED')]);
 
 const prTask = z.object({
   id: z.number(),
