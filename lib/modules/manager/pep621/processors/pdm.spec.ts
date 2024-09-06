@@ -3,6 +3,7 @@ import { mockExecAll } from '../../../../../test/exec-util';
 import { fs, mockedFunction } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
+import { logger } from '../../../../logger';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
@@ -141,21 +142,36 @@ describe('modules/manager/pep621/processors/pdm', () => {
         },
         { packageName: 'dep2', depType: depTypes.dependencies },
         {
-          depName: 'group1/dep3',
+          packageName: 'dep3',
+          managerData: { depGroup: 'group1' },
           depType: depTypes.optionalDependencies,
         },
-        { depName: 'group1/dep4', depType: depTypes.optionalDependencies },
         {
-          depName: 'group2/dep5',
-          depType: depTypes.pdmDevDependencies,
+          packageName: 'dep4',
+          depType: depTypes.optionalDependencies,
+          managerData: { depGroup: 'group1' },
         },
-        { depName: 'group2/dep6', depType: depTypes.pdmDevDependencies },
         {
-          depName: 'group3/dep7',
+          packageName: 'dep5',
           depType: depTypes.pdmDevDependencies,
+          managerData: { depGroup: 'group2' },
         },
-        { depName: 'group3/dep8', depType: depTypes.pdmDevDependencies },
-        { depName: 'dep9', depType: depTypes.buildSystemRequires },
+        {
+          packageName: 'dep6',
+          depType: depTypes.pdmDevDependencies,
+          managerData: { depGroup: 'group2' },
+        },
+        {
+          packageName: 'dep7',
+          depType: depTypes.pdmDevDependencies,
+          managerData: { depGroup: 'group3' },
+        },
+        {
+          packageName: 'dep8',
+          depType: depTypes.pdmDevDependencies,
+          managerData: { depGroup: 'group3' },
+        },
+        { packageName: 'dep9', depType: depTypes.buildSystemRequires },
       ];
       const result = await processor.updateArtifacts(
         {
@@ -189,6 +205,45 @@ describe('modules/manager/pep621/processors/pdm', () => {
           cmd: 'pdm update --no-sync --update-eager -dG group3 dep7 dep8',
         },
       ]);
+    });
+
+    it('discard dependencies if the devGroup is missing', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+      // pdm
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
+      });
+
+      const updatedDeps = [
+        {
+          packageName: 'dep3',
+          depType: depTypes.optionalDependencies,
+        },
+        {
+          packageName: 'dep5',
+          depType: depTypes.pdmDevDependencies,
+        },
+      ];
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        {},
+      );
+      expect(result).toBeNull();
+      expect(execSnapshots).toEqual([]);
+      expect(logger.once.warn).toHaveBeenCalledTimes(2);
     });
 
     it('return update on lockfileMaintenance', async () => {
