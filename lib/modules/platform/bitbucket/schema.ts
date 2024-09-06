@@ -89,7 +89,7 @@ export type PrTask = z.infer<typeof prTask>;
 
 export const UnresolvedPrTasks = z
   .object({
-    values: z.array(prTask),
+    values: z.array(PrTask),
   })
   .transform(
     (data): Array<PrTask> =>
