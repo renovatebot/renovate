@@ -85,7 +85,7 @@ const PrTask = z.object({
   }),
 });
 
-export type PrTask = z.infer<typeof prTask>;
+export type PrTask = z.infer<typeof PrTask>;
 
 export const UnresolvedPrTasks = z
   .object({
