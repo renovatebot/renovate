@@ -92,6 +92,6 @@ export const UnresolvedPrTasks = z
     values: z.array(PrTask),
   })
   .transform(
-    (data): Array<PrTask> =>
-      data.values.filter((task: PrTask) => task.state === 'UNRESOLVED'),
+    (data) =>
+      data.values.filter((task) => task.state === 'UNRESOLVED'),
   );
