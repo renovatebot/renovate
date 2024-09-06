@@ -81,7 +81,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(0);
-      expect(res.release.version).toBe('1.0.4');
+      expect(res.release?.version).toBe('1.0.4');
     });
 
     it('uses datasource-level interception mechanism', async () => {
@@ -129,7 +129,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(0);
-      expect(res.release.version).toBe('1.0.4');
+      expect(res.release?.version).toBe('1.0.4');
     });
 
     it('returns pending latest release if internalChecksFilter=strict and none pass checks', async () => {
@@ -144,7 +144,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeTrue();
       expect(res.pendingReleases).toHaveLength(0);
-      expect(res.release.version).toBe('1.0.4');
+      expect(res.release?.version).toBe('1.0.4');
     });
 
     it('returns non-latest release if internalChecksFilter=strict and some pass checks', async () => {
@@ -159,7 +159,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(2);
-      expect(res.release.version).toBe('1.0.2');
+      expect(res.release?.version).toBe('1.0.2');
     });
 
     it('returns non-latest release if internalChecksFilter=flexible and some pass checks', async () => {
@@ -174,7 +174,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(2);
-      expect(res.release.version).toBe('1.0.2');
+      expect(res.release?.version).toBe('1.0.2');
     });
 
     it('picks up minimumReleaseAge settings from hostRules', async () => {
@@ -192,7 +192,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(0);
-      expect(res.release.version).toBe('1.0.4');
+      expect(res.release?.version).toBe('1.0.4');
     });
 
     it('picks up minimumReleaseAge settings from updateType', async () => {
@@ -207,7 +207,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(1);
-      expect(res.release.version).toBe('1.0.3');
+      expect(res.release?.version).toBe('1.0.3');
     });
 
     it('picks up minimumConfidence settings from updateType', async () => {
@@ -227,7 +227,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(3);
-      expect(res.release.version).toBe('1.0.1');
+      expect(res.release?.version).toBe('1.0.1');
     });
   });
 });
