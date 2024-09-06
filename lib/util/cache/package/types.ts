@@ -75,6 +75,7 @@ export type PackageCacheNamespace =
   | 'datasource-hexpm-bob'
   | 'datasource-java-version'
   | 'datasource-jenkins-plugins'
+  | 'datasource-maven'
   | 'datasource-maven:head-requests-timeout'
   | 'datasource-maven:head-requests'
   | 'datasource-maven:index-html-releases'

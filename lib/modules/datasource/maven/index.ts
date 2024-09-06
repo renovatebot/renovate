@@ -4,10 +4,10 @@ import type { XmlDocument } from 'xmldoc';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
-import { filterMap } from '../../../util/filter-map';
-import * as p from '../../../util/promises';
+import { cache } from '../../../util/cache/package/decorator';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
+import type { CandidateReleaseConfig } from '../../../workers/repository/process/lookup/types';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
@@ -182,132 +182,6 @@ export class MavenDatasource extends Datasource {
     return releaseMap;
   }
 
-  /**
-   *
-   * Double-check releases using HEAD request and
-   * attach timestamps obtained from `Last-Modified` header.
-   *
-   * Example input:
-   *
-   * {
-   *   '1.0.0': {
-   *     version: '1.0.0',
-   *     releaseTimestamp: '2020-01-01T01:00:00.000Z',
-   *   },
-   *   '1.0.1': null,
-   * }
-   *
-   * Example output:
-   *
-   * {
-   *   '1.0.0': {
-   *     version: '1.0.0',
-   *     releaseTimestamp: '2020-01-01T01:00:00.000Z',
-   *   },
-   *   '1.0.1': {
-   *     version: '1.0.1',
-   *     releaseTimestamp: '2021-01-01T01:00:00.000Z',
-   *   }
-   * }
-   *
-   * It should validate `1.0.0` with HEAD request, but leave `1.0.1` intact.
-   *
-   */
-  async addReleasesUsingHeadRequests(
-    inputReleaseMap: ReleaseMap,
-    dependency: MavenDependency,
-    repoUrl: string,
-  ): Promise<ReleaseMap> {
-    const releaseMap = { ...inputReleaseMap };
-
-    if (process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK) {
-      return releaseMap;
-    }
-
-    const cacheNs = 'datasource-maven:head-requests';
-    const cacheTimeoutNs = 'datasource-maven:head-requests-timeout';
-    const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
-
-    // Store cache validity as the separate flag.
-    // This allows both cache updating and resetting.
-    //
-    // Even if new version is being released each 10 minutes,
-    // we still want to reset the whole cache after 24 hours.
-    const cacheValid = await packageCache.get<'valid'>(
-      cacheTimeoutNs,
-      cacheKey,
-    );
-
-    let cachedReleaseMap: ReleaseMap = {};
-    // istanbul ignore if
-    if (cacheValid) {
-      const cache = await packageCache.get<ReleaseMap>(cacheNs, cacheKey);
-      if (cache) {
-        cachedReleaseMap = cache;
-      }
-    }
-
-    // List versions to check with HEAD request
-    const freshVersions = filterMap(
-      Object.entries(releaseMap),
-      ([version, release]) => {
-        // Release is present in maven-metadata.xml,
-        // but haven't been validated yet
-        const isValidatedAtPreviousSteps = release !== null;
-
-        // Release was validated and cached with HEAD request during previous run
-        const isValidatedHere = !is.undefined(cachedReleaseMap[version]);
-
-        // istanbul ignore if: not easily testable
-        if (isValidatedAtPreviousSteps || isValidatedHere) {
-          return null;
-        }
-
-        // Select only valid releases not yet verified with HEAD request
-        return version;
-      },
-    );
-
-    // Update cached data with freshly discovered versions
-    if (freshVersions.length) {
-      const queue = freshVersions.map((version) => async (): Promise<void> => {
-        const pomUrl = await createUrlForDependencyPom(
-          this.http,
-          version,
-          dependency,
-          repoUrl,
-        );
-        const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
-        const release: Release = { version };
-
-        const res = await checkResource(this.http, artifactUrl);
-
-        if (is.date(res)) {
-          release.releaseTimestamp = res.toISOString();
-        }
-
-        cachedReleaseMap[version] =
-          res !== 'not-found' && res !== 'error' ? release : null;
-      });
-
-      await p.all(queue);
-
-      if (!cacheValid) {
-        // Store new TTL flag for 24 hours if the previous one is invalidated
-        await packageCache.set(cacheTimeoutNs, cacheKey, 'valid', 24 * 60);
-      }
-
-      // Store updated cache object
-      await packageCache.set(cacheNs, cacheKey, cachedReleaseMap, 24 * 60);
-    }
-
-    // Filter releases with the versions validated via HEAD request
-    for (const version of Object.keys(releaseMap)) {
-      releaseMap[version] = cachedReleaseMap[version] ?? null;
-    }
-    return releaseMap;
-  }
-
   getReleasesFromMap(releaseMap: ReleaseMap): Release[] {
     const releases = Object.values(releaseMap).filter(is.truthy);
     if (releases.length) {
@@ -332,11 +206,6 @@ export class MavenDatasource extends Datasource {
 
     let releaseMap = await this.fetchReleasesFromMetadata(dependency, repoUrl);
     releaseMap = await this.addReleasesFromIndexPage(
-      releaseMap,
-      dependency,
-      repoUrl,
-    );
-    releaseMap = await this.addReleasesUsingHeadRequests(
       releaseMap,
       dependency,
       repoUrl,
@@ -371,5 +240,45 @@ export class MavenDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  @cache({
+    namespace: `datasource-maven`,
+    key: (
+      { registryUrl, packageName }: CandidateReleaseConfig,
+      { version }: Release,
+    ) => `interceptRelease:${registryUrl}:${packageName}:${version}`,
+    ttlMinutes: 24 * 60,
+  })
+  async interceptRelease(
+    { packageName, registryUrl }: CandidateReleaseConfig,
+    release: Release,
+  ): Promise<Release | null> {
+    if (!packageName || !registryUrl) {
+      return release;
+    }
+
+    const dependency = getDependencyParts(packageName);
+
+    const pomUrl = await createUrlForDependencyPom(
+      this.http,
+      release.version,
+      dependency,
+      registryUrl,
+    );
+
+    const artifactUrl = getMavenUrl(dependency, registryUrl, pomUrl);
+
+    const res = await checkResource(this.http, artifactUrl);
+
+    if (res === 'not-found' || res === 'error') {
+      return null;
+    }
+
+    if (is.date(res)) {
+      release.releaseTimestamp = res.toISOString();
+    }
+
+    return release;
   }
 }

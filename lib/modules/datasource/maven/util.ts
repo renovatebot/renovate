@@ -10,7 +10,7 @@ import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { getS3Client, parseS3Url } from '../../../util/s3';
 import { streamToString } from '../../../util/streams';
-import { parseUrl } from '../../../util/url';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
 import type { ReleaseResult } from '../types';
 import { getGoogleAuthToken } from '../util';
@@ -257,7 +257,10 @@ export function getMavenUrl(
   repoUrl: string,
   path: string,
 ): URL {
-  return new URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
+  return new URL(
+    `${dependency.dependencyUrl}/${path}`,
+    ensureTrailingSlash(repoUrl),
+  );
 }
 
 export async function downloadMavenXml(
