@@ -1,6 +1,7 @@
 import { mocked } from '../../../../../test/util';
 import type {
   GetReleasesConfig,
+  PostprocessReleaseConfig,
   Release,
   ReleaseResult,
 } from '../../../../modules/datasource';
@@ -12,11 +13,7 @@ import * as _dateUtil from '../../../../util/date';
 import * as _mergeConfidence from '../../../../util/merge-confidence';
 import { toMs } from '../../../../util/pretty-time';
 import { filterInternalChecks } from './filter-checks';
-import type {
-  CandidateReleaseConfig,
-  LookupUpdateConfig,
-  UpdateResult,
-} from './types';
+import type { LookupUpdateConfig, UpdateResult } from './types';
 
 jest.mock('../../../../util/date');
 const dateUtil = mocked(_dateUtil);
@@ -93,7 +90,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
 
       class SomeDatasource extends DummyDatasource {
         interceptRelease(
-          _: CandidateReleaseConfig,
+          _: PostprocessReleaseConfig,
           release: Release,
         ): Promise<Release | null> {
           if (release.version !== '1.0.2') {

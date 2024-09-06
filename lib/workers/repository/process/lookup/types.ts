@@ -69,9 +69,3 @@ export interface UpdateResult {
   versioning?: string;
   currentVersionTimestamp?: string;
 }
-
-export interface CandidateReleaseConfig {
-  packageName?: string;
-  registryUrl?: string;
-  currentValue?: string;
-}

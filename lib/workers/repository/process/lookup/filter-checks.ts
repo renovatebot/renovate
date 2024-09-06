@@ -12,7 +12,7 @@ import {
 import { coerceNumber } from '../../../../util/number';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { toMs } from '../../../../util/pretty-time';
-import { tryInterceptRelease } from './intercept-release';
+import { postprocessRelease } from '../../../../modules/datasource/postprocess-release';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 import { getUpdateType } from './update-type';
 
@@ -55,7 +55,7 @@ export async function filterInternalChecks(
       // Apply packageRules in case any apply to updateType
       releaseConfig = applyPackageRules(releaseConfig, 'update-type');
 
-      const updatedCandidateRelease = await tryInterceptRelease(
+      const updatedCandidateRelease = await postprocessRelease(
         releaseConfig,
         candidateRelease,
       );
