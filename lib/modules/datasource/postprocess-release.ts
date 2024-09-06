@@ -1,10 +1,9 @@
-import { logger } from '../../../../logger';
-import { getDatasourceFor } from '../../../../modules/datasource/common';
-import type { Release } from '../../../../modules/datasource/types';
-import type { CandidateReleaseConfig } from './types';
+import { logger } from '../../logger';
+import { getDatasourceFor } from './common';
+import type { PostprocessReleaseConfig, Release } from './types';
 
-export async function tryInterceptRelease(
-  config: CandidateReleaseConfig & { datasource?: string },
+export async function postprocessRelease(
+  config: PostprocessReleaseConfig,
   release: Release,
 ): Promise<Release | null> {
   const { datasource } = config;

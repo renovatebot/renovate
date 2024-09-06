@@ -1,13 +1,13 @@
-import { mocked } from '../../../../../test/util';
-import * as _datasourceCommon from '../../../../modules/datasource/common';
-import { Datasource } from '../../../../modules/datasource/datasource';
+import { mocked } from '../../../test/util';
+import * as _datasourceCommon from './common';
+import { Datasource } from './datasource';
+import { postprocessRelease } from './postprocess-release';
 import type {
   GetReleasesConfig,
+  PostprocessReleaseConfig,
   Release,
   ReleaseResult,
-} from '../../../../modules/datasource/types';
-import { tryInterceptRelease } from './intercept-release';
-import type { CandidateReleaseConfig } from './types';
+} from './types';
 
 jest.mock('../../../../modules/datasource/common');
 const { getDatasourceFor } = mocked(_datasourceCommon);
@@ -22,10 +22,10 @@ class DummyDatasource extends Datasource {
   }
 }
 
-describe('workers/repository/process/lookup/intercept-release', () => {
+describe('modules/datasource/postprocess-release', () => {
   it('returns original release for empty datasource field', async () => {
     const releaseOrig: Release = { version: '1.2.3' };
-    const release = await tryInterceptRelease({}, releaseOrig);
+    const release = await postprocessRelease({}, releaseOrig);
     expect(release).toBe(releaseOrig);
   });
 
@@ -33,7 +33,7 @@ describe('workers/repository/process/lookup/intercept-release', () => {
     const releaseOrig: Release = { version: '1.2.3' };
     getDatasourceFor.mockReturnValueOnce(null);
 
-    const release = await tryInterceptRelease(
+    const release = await postprocessRelease(
       { datasource: 'some-datasource' },
       releaseOrig,
     );
@@ -45,7 +45,7 @@ describe('workers/repository/process/lookup/intercept-release', () => {
     const releaseOrig: Release = { version: '1.2.3' };
     getDatasourceFor.mockReturnValueOnce(new DummyDatasource());
 
-    const release = await tryInterceptRelease(
+    const release = await postprocessRelease(
       { datasource: 'some-datasource' },
       releaseOrig,
     );
@@ -58,7 +58,7 @@ describe('workers/repository/process/lookup/intercept-release', () => {
 
     class SomeDatasource extends DummyDatasource {
       interceptRelease(
-        _config: CandidateReleaseConfig,
+        _config: PostprocessReleaseConfig,
         release: Release,
       ): Promise<Release | null> {
         release.releaseTimestamp = '2024-09-05';
@@ -67,7 +67,7 @@ describe('workers/repository/process/lookup/intercept-release', () => {
     }
     getDatasourceFor.mockReturnValueOnce(new SomeDatasource());
 
-    const release = await tryInterceptRelease(
+    const release = await postprocessRelease(
       { datasource: 'some-datasource' },
       releaseOrig,
     );
@@ -83,7 +83,7 @@ describe('workers/repository/process/lookup/intercept-release', () => {
 
     class SomeDatasource extends DummyDatasource {
       interceptRelease(
-        _config: CandidateReleaseConfig,
+        _config: PostprocessReleaseConfig,
         _release: Release,
       ): Promise<Release | null> {
         return Promise.resolve(null);
@@ -91,7 +91,7 @@ describe('workers/repository/process/lookup/intercept-release', () => {
     }
     getDatasourceFor.mockReturnValueOnce(new SomeDatasource());
 
-    const release = await tryInterceptRelease(
+    const release = await postprocessRelease(
       { datasource: 'some-datasource' },
       releaseOrig,
     );
@@ -104,7 +104,7 @@ describe('workers/repository/process/lookup/intercept-release', () => {
 
     class SomeDatasource extends DummyDatasource {
       interceptRelease(
-        _config: CandidateReleaseConfig,
+        _config: PostprocessReleaseConfig,
         _release: Release,
       ): Promise<Release | null> {
         return Promise.reject(new Error('unknown error'));
@@ -112,7 +112,7 @@ describe('workers/repository/process/lookup/intercept-release', () => {
     }
     getDatasourceFor.mockReturnValueOnce(new SomeDatasource());
 
-    const release = await tryInterceptRelease(
+    const release = await postprocessRelease(
       { datasource: 'some-datasource' },
       releaseOrig,
     );

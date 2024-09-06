@@ -3,7 +3,6 @@ import type {
   CustomDatasourceConfig,
 } from '../../config/types';
 import type { ModuleApi } from '../../types';
-import type { CandidateReleaseConfig } from '../../workers/repository/process/lookup/types';
 
 export interface GetDigestInputConfig {
   datasource: string;
@@ -91,6 +90,13 @@ export interface ReleaseResult {
   packageScope?: string;
 }
 
+export interface PostprocessReleaseConfig {
+  datasource?: string;
+  packageName?: string;
+  registryUrl?: string;
+  currentValue?: string;
+}
+
 export type RegistryStrategy = 'first' | 'hunt' | 'merge';
 export type SourceUrlSupport = 'package' | 'release' | 'none';
 export interface DatasourceApi extends ModuleApi {
@@ -150,7 +156,7 @@ export interface DatasourceApi extends ModuleApi {
    * and `interceptRelease` is called again.
    */
   interceptRelease?(
-    config: CandidateReleaseConfig,
+    config: PostprocessReleaseConfig,
     release: Release,
   ): Promise<Release | null>;
 }
