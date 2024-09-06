@@ -35,7 +35,6 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import { BitbucketPrCache } from './pr-cache';
-import type { PrTask } from './schema';
 import { RepoInfo, Repositories, UnresolvedPrTasks } from './schema';
 import type {
   Account,
@@ -967,22 +966,21 @@ export async function createPr({
 async function autoResolvePrTasks(pr: Pr): Promise<void> {
   logger.debug(`Auto resolve PR tasks in #${pr.number}`);
   try {
-    const response = (
+    const unResolvedTasks = (
       await bitbucketHttp.getJson(
         `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks`,
         { paginate: true, pagelen: 100 },
+        UnresolvedPrTasks,
       )
     ).body;
 
     logger.trace(
       {
         prId: pr.number,
-        listTaskRes: response,
+        listTaskRes: unResolvedTasks,
       },
       'List PR tasks',
     );
-
-    const unResolvedTasks: Array<PrTask> = UnresolvedPrTasks.parse(response);
 
     for (const task of unResolvedTasks) {
       const res = await bitbucketHttp.putJson(
