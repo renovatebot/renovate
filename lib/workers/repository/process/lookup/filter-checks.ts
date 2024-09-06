@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import { logger } from '../../../../logger';
 import type { Release } from '../../../../modules/datasource';
+import { postprocessRelease } from '../../../../modules/datasource/postprocess-release';
 import type { VersioningApi } from '../../../../modules/versioning';
 import { getElapsedMs } from '../../../../util/date';
 import {
@@ -12,7 +13,6 @@ import {
 import { coerceNumber } from '../../../../util/number';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { toMs } from '../../../../util/pretty-time';
-import { postprocessRelease } from '../../../../modules/datasource/postprocess-release';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 import { getUpdateType } from './update-type';
 
