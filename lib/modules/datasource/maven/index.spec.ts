@@ -6,8 +6,8 @@ import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
-import { tryInterceptRelease } from '../../../workers/repository/process/lookup/intercept-release';
 import { id as versioning } from '../../versioning/maven';
+import { postprocessRelease } from '../postprocess-release';
 import { MAVEN_REPO } from './common';
 import { MavenDatasource } from '.';
 
@@ -651,7 +651,7 @@ describe('modules/datasource/maven/index', () => {
         .head('/foo/bar/1.2.3/bar-1.2.3.pom')
         .reply(404);
 
-      const res = await tryInterceptRelease(
+      const res = await postprocessRelease(
         { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
         { version: '1.2.3' },
       );
@@ -665,7 +665,7 @@ describe('modules/datasource/maven/index', () => {
         .head('/foo/bar/1.2.3/bar-1.2.3.pom')
         .replyWithError('unknown error');
 
-      const res = await tryInterceptRelease(
+      const res = await postprocessRelease(
         { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
         { version: '1.2.3' },
       );
@@ -680,7 +680,7 @@ describe('modules/datasource/maven/index', () => {
         .reply(200);
       const releaseOrig: Release = { version: '1.2.3' };
 
-      const res = await tryInterceptRelease(
+      const res = await postprocessRelease(
         { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
         releaseOrig,
       );
@@ -691,13 +691,13 @@ describe('modules/datasource/maven/index', () => {
     it('returns original value for invalid configs', async () => {
       const releaseOrig: Release = { version: '1.2.3' };
       expect(
-        await tryInterceptRelease(
+        await postprocessRelease(
           { datasource, registryUrl: MAVEN_REPO },
           releaseOrig,
         ),
       ).toBe(releaseOrig);
       expect(
-        await tryInterceptRelease(
+        await postprocessRelease(
           { datasource, packageName: 'foo:bar' },
           releaseOrig,
         ),
@@ -710,7 +710,7 @@ describe('modules/datasource/maven/index', () => {
         .head('/foo/bar/1.2.3/bar-1.2.3.pom')
         .reply(200, '', { 'Last-Modified': '2024-01-01T00:00:00.000Z' });
 
-      const res = await tryInterceptRelease(
+      const res = await postprocessRelease(
         { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
         { version: '1.2.3' },
       );

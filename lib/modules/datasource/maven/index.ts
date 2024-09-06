@@ -7,13 +7,13 @@ import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
-import type { CandidateReleaseConfig } from '../../../workers/repository/process/lookup/types';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
 import { Datasource } from '../datasource';
 import type {
   GetReleasesConfig,
+  PostprocessReleaseConfig,
   RegistryStrategy,
   Release,
   ReleaseResult,
@@ -245,13 +245,13 @@ export class MavenDatasource extends Datasource {
   @cache({
     namespace: `datasource-maven`,
     key: (
-      { registryUrl, packageName }: CandidateReleaseConfig,
+      { registryUrl, packageName }: PostprocessReleaseConfig,
       { version }: Release,
-    ) => `interceptRelease:${registryUrl}:${packageName}:${version}`,
+    ) => `postprocessRelease:${registryUrl}:${packageName}:${version}`,
     ttlMinutes: 24 * 60,
   })
-  async interceptRelease(
-    { packageName, registryUrl }: CandidateReleaseConfig,
+  async postprocessRelease(
+    { packageName, registryUrl }: PostprocessReleaseConfig,
     release: Release,
   ): Promise<Release | null> {
     if (!packageName || !registryUrl) {
