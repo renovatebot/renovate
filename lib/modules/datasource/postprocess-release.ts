@@ -17,16 +17,15 @@ export async function postprocessRelease(
     return release;
   }
 
-  if (!ds.interceptRelease) {
+  if (!ds.postprocessRelease) {
     return release;
   }
 
   try {
-    const result = await ds.interceptRelease(
+    const result = await ds.postprocessRelease(
       {
         packageName: config.packageName,
         registryUrl: config.registryUrl,
-        currentValue: config.currentValue,
       },
       release,
     );
