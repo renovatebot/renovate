@@ -94,7 +94,6 @@ export interface PostprocessReleaseConfig {
   datasource?: string;
   packageName?: string;
   registryUrl?: string;
-  currentValue?: string;
 }
 
 export type RegistryStrategy = 'first' | 'hunt' | 'merge';

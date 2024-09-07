@@ -26,7 +26,6 @@ export async function postprocessRelease(
       {
         packageName: config.packageName,
         registryUrl: config.registryUrl,
-        currentValue: config.currentValue,
       },
       release,
     );
