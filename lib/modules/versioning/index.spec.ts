@@ -1,5 +1,6 @@
 import { getOptions } from '../../config/options';
 import { loadModules } from '../../util/modules';
+import { regEx } from '../../util/regex';
 import { isVersioningApiConstructor } from './common';
 import type { GenericVersion } from './generic';
 import { GenericVersioningApi } from './generic';
@@ -7,7 +8,6 @@ import * as semverVersioning from './semver';
 import * as semverCoercedVersioning from './semver-coerced';
 import type { VersioningApi, VersioningApiConstructor } from './types';
 import * as allVersioning from '.';
-import { regEx } from '../../util/regex';
 
 const supportedSchemes = getOptions().find(
   (option) => option.name === 'versioning',

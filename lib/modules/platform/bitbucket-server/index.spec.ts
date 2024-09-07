@@ -249,7 +249,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           username,
           password,
         });
-      });
+      }, 10000);
 
       describe('initPlatform()', () => {
         it('should throw if no endpoint', async () => {

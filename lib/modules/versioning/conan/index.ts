@@ -21,7 +21,7 @@ import {
 export const id = 'conan';
 export const displayName = 'conan';
 export const urls = [
-  '[Semantic Versioning (SemVer) - Official Website](https://semver.org/)',
+  '[Semantic Versioning (SemVer) - Official Website](https://semver.org)',
   '[Python Node Semver - GitHub Repository](https://github.com/podhmo/python-node-semver)',
   '[Python Node Semver Examples - GitHub](https://github.com/podhmo/python-node-semver/tree/master/examples)',
   '[Conan Version Ranges Documentation](https://docs.conan.io/en/latest/versioning/version_ranges.html#version-ranges)',

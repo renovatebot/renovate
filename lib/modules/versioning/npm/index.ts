@@ -7,7 +7,7 @@ import { getNewValue } from './range';
 export const id = 'npm';
 export const displayName = 'npm';
 export const urls = [
-  '[Semantic Versioning (SemVer) - Official Website](https://semver.org/)',
+  '[Semantic Versioning (SemVer) - Official Website](https://semver.org)',
   '[npm Semver Package](https://www.npmjs.com/package/semver)',
   '[About Semantic Versioning - npm Documentation](https://docs.npmjs.com/about-semantic-versioning)',
   '[Semver - npm](https://semver.npmjs.com/)',

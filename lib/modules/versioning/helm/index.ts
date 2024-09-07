@@ -5,7 +5,7 @@ import type { VersioningApi } from '../types';
 export const id = 'helm';
 export const displayName = 'helm';
 export const urls = [
-  '[Semantic Versioning (SemVer) - Official Website](https://semver.org/)',
+  '[Semantic Versioning (SemVer) - Official Website](https://semver.org)',
   '[Helm Chart Dependencies Versioning Best Practices](https://helm.sh/docs/chart_best_practices/dependencies/#versions)',
   '[Masterminds Semver Library - Basic Comparisons](https://github.com/Masterminds/semver#basic-comparisons)',
 ];

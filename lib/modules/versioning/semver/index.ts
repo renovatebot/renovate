@@ -5,7 +5,7 @@ import type { NewValueConfig, VersioningApi } from '../types';
 export const id = 'semver';
 export const displayName = 'Semantic';
 export const urls = [
-  '[Semantic Versioning (SemVer) - Official Website](https://semver.org/)',
+  '[Semantic Versioning (SemVer) - Official Website](https://semver.org)',
 ];
 export const supportsRanges = false;
 

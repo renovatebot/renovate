@@ -1,10 +1,10 @@
 import { join } from 'upath';
 import { loadModules } from '../../util/modules';
+import { regEx } from '../../util/regex';
 import { getDatasourceList } from '../datasource';
 import * as customManager from './custom';
 import type { ManagerApi } from './types';
 import * as manager from '.';
-import { regEx } from '../../util/regex';
 
 jest.mock('../../util/fs');
 
