@@ -732,6 +732,18 @@ describe('modules/datasource/pypi/index', () => {
     expect(googleAuth).toHaveBeenCalledTimes(1);
   });
 
+  it('ignores an invalid URL when checking for auth headers', async () => {
+    const config = {
+      registryUrls: ['not-a-url/simple/'],
+    };
+    const res = await getPkgReleases({
+      ...config,
+      datasource,
+      packageName: 'azure-cli-monitor',
+    });
+    expect(res?.releases.pop()).toBeNil();
+  });
+
   it('uses https://pypi.org/pypi/ instead of https://pypi.org/simple/', async () => {
     httpMock.scope(baseUrl).get('/azure-cli-monitor/json').reply(200, res1);
     const config = {

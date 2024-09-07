@@ -89,7 +89,13 @@ export class PypiDatasource extends Datasource {
   private async getAuthHeaders(
     lookupUrl: string,
   ): Promise<OutgoingHttpHeaders> {
-    const url = new URL(lookupUrl);
+    let url: URL;
+    try {
+      url = new URL(lookupUrl);
+    } catch (err) {
+      logger.once.debug({ lookupUrl, err }, 'Failed to parse URL');
+      return {};
+    }
     if (url.hostname.endsWith(googleArtifactRegistryDomain)) {
       const auth = await getGoogleAuthToken();
       if (auth) {
