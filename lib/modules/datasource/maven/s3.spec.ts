@@ -1,11 +1,9 @@
 import { Readable } from 'node:stream';
 import {
   GetObjectCommand,
-  HeadObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
-import { DateTime } from 'luxon';
 import type { ReleaseResult } from '..';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
