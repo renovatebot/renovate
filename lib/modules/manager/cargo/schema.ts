@@ -50,7 +50,7 @@ const CargoDep = z.union([
         }
 
         const dep: PackageDependency = {
-          currentValue: currentValue as any,
+          currentValue,
           managerData: { nestedVersion },
           datasource: CrateDatasource.id,
         };
