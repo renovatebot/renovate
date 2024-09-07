@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { SkipReason } from '../../../types';
-import { Toml } from '../../../util/schema-utils';
+import { Toml, withDepType } from '../../../util/schema-utils';
 import { CrateDatasource } from '../../datasource/crate';
 import type { PackageDependency } from '../types';
 
@@ -91,49 +91,13 @@ const CargoDeps = z.record(z.string(), CargoDep).transform((record) => {
 export type CargoDeps = z.infer<typeof CargoDeps>;
 
 const CargoSection = z.object({
-  dependencies: CargoDeps.transform((record) => {
-    const deps: PackageDependency[] = [];
-
-    for (const dep of Object.values(record)) {
-      dep.depType = 'dependencies';
-      deps.push(dep);
-    }
-
-    return deps;
-  }).optional(),
-  'dev-dependencies': CargoDeps.transform((record) => {
-    const deps: PackageDependency[] = [];
-
-    for (const dep of Object.values(record)) {
-      dep.depType = 'dev-dependencies';
-      deps.push(dep);
-    }
-
-    return deps;
-  }).optional(),
-  'build-dependencies': CargoDeps.transform((record) => {
-    const deps: PackageDependency[] = [];
-
-    for (const dep of Object.values(record)) {
-      dep.depType = 'build-dependencies';
-      deps.push(dep);
-    }
-
-    return deps;
-  }).optional(),
+  dependencies: withDepType(CargoDeps, 'dependencies').optional(),
+  'dev-dependencies': withDepType(CargoDeps, 'dev-dependencies').optional(),
+  'build-dependencies': withDepType(CargoDeps, 'build-dependencies').optional(),
 });
 
 const CargoWorkspace = z.object({
-  dependencies: CargoDeps.transform((record) => {
-    const deps: PackageDependency[] = [];
-
-    for (const dep of Object.values(record)) {
-      dep.depType = 'workspace.dependencies';
-      deps.push(dep);
-    }
-
-    return deps;
-  }).optional(),
+  dependencies: withDepType(CargoDeps, 'workspace.dependencies').optional(),
 });
 
 const CargoTarget = z.record(z.string(), CargoSection);
