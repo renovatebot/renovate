@@ -7,11 +7,17 @@ import type { PackageDependency } from '../types';
 const CargoDep = z.union([
   z
     .object({
+      /** Path on disk to the crate sources */
       path: z.string().optional(),
+      /** Git URL for the dependency */
       git: z.string().optional(),
+      /** Semver version */
       version: z.string().optional(),
+      /** Name of a registry whose URL is configured in `.cargo/config.toml` or `.cargo/config` */
       registry: z.string().optional(),
+      /** Name of a package to look up */
       package: z.string().optional(),
+      /** Whether the dependency is inherited from the workspace */
       workspace: z.boolean().optional(),
     })
     .transform(
