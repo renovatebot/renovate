@@ -66,6 +66,6 @@ describe('workers/repository/init/index', () => {
       expect(logger.logger.warn).toHaveBeenCalledWith(
         "Configuration option 'expandCodeOwnersGroups' is not supported on the current platform 'undefined'.",
       );
-    }, 10000);
+    });
   });
 });
