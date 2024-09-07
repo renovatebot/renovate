@@ -95,5 +95,17 @@ describe('modules/manager/pep723/extract', () => {
 
       expect(res).toBeNull();
     });
+
+    it('should return null if there is no PEP 723 metadata', () => {
+      const res = extractPackageFile(
+        codeBlock`
+if True:
+    print("requires-python>=3.11")
+`,
+        'foo.py',
+      );
+
+      expect(res).toBeNull();
+    });
   });
 });
