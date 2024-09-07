@@ -153,9 +153,9 @@ export interface DatasourceApi extends ModuleApi {
    * via some datasource-specific external call.
    *
    * In case of reject, the next candidate release is selected,
-   * and `interceptRelease` is called again.
+   * and `postprocessRelease` is called again.
    */
-  interceptRelease?(
+  postprocessRelease?(
     config: PostprocessReleaseConfig,
     release: Release,
   ): Promise<Release | null>;

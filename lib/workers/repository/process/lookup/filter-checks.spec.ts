@@ -89,7 +89,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       config.internalChecksFilter = 'strict';
 
       class SomeDatasource extends DummyDatasource {
-        interceptRelease(
+        postprocessRelease(
           _: PostprocessReleaseConfig,
           release: Release,
         ): Promise<Release | null> {

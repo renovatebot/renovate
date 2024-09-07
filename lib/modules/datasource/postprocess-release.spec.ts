@@ -41,7 +41,7 @@ describe('modules/datasource/postprocess-release', () => {
     expect(release).toBe(releaseOrig);
   });
 
-  it('returns original release for datasource with missing `interceptRelease` method', async () => {
+  it('returns original release for datasource with missing `postprocessRelease` method', async () => {
     const releaseOrig: Release = { version: '1.2.3' };
     getDatasourceFor.mockReturnValueOnce(new DummyDatasource());
 
@@ -53,11 +53,11 @@ describe('modules/datasource/postprocess-release', () => {
     expect(release).toBe(releaseOrig);
   });
 
-  it('updates release via `interceptRelease` method', async () => {
+  it('updates release via `postprocessRelease` method', async () => {
     const releaseOrig: Release = { version: '1.2.3' };
 
     class SomeDatasource extends DummyDatasource {
-      interceptRelease(
+      postprocessRelease(
         _config: PostprocessReleaseConfig,
         release: Release,
       ): Promise<Release | null> {
@@ -78,11 +78,11 @@ describe('modules/datasource/postprocess-release', () => {
     });
   });
 
-  it('rejects release via `interceptRelease` method', async () => {
+  it('rejects release via `postprocessRelease` method', async () => {
     const releaseOrig: Release = { version: '1.2.3' };
 
     class SomeDatasource extends DummyDatasource {
-      interceptRelease(
+      postprocessRelease(
         _config: PostprocessReleaseConfig,
         _release: Release,
       ): Promise<Release | null> {
@@ -103,7 +103,7 @@ describe('modules/datasource/postprocess-release', () => {
     const releaseOrig: Release = { version: '1.2.3' };
 
     class SomeDatasource extends DummyDatasource {
-      interceptRelease(
+      postprocessRelease(
         _config: PostprocessReleaseConfig,
         _release: Release,
       ): Promise<Release | null> {
