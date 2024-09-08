@@ -4,7 +4,6 @@ import type { Http } from '../../../util/http';
 import { parseUrl } from '../../../util/url';
 import {
   checkResource,
-  checkS3Resource,
   downloadHttpProtocol,
   downloadMavenXml,
   downloadS3Protocol,
