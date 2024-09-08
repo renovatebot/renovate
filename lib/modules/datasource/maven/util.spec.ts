@@ -105,12 +105,4 @@ describe('modules/datasource/maven/util', () => {
       expect(res).toBe('error');
     });
   });
-
-  describe('checkS3Resource', () => {
-    it('returns error for non-S3 URLs', async () => {
-      // #22198
-      const res = await checkS3Resource(parseUrl('http://not-s3.com/')!);
-      expect(res).toBe('error');
-    });
-  });
 });
