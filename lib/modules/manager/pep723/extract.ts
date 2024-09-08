@@ -1,6 +1,5 @@
 import { logger } from '../../../logger';
-import {newlineRegex, regEx} from '../../../util/regex';
-import { Result } from '../../../util/result';
+import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageFileContent } from '../types';
 import { Pep723Schema } from './schema';
 
@@ -27,11 +26,11 @@ export function extractPackageFile(
     .map((line) => line.substring(line.startsWith('# ') ? 2 : 1))
     .join('\n');
 
-  const { val: deps, err } = Result.parse(parsedToml, Pep723Schema).unwrap();
+  const { data: deps, error } = Pep723Schema.safeParse(parsedToml);
 
-  if (err) {
+  if (error) {
     logger.debug(
-      { packageFile, err },
+      { packageFile, error },
       `Error parsing PEP 723 inline script metadata`,
     );
     return null;
