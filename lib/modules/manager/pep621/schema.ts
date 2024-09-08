@@ -35,8 +35,17 @@ const HatchSchema = z.object({
     .optional(),
 });
 
+// https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
+const UvSource = z.object({
+  git: z.string().optional(),
+  path: z.string().optional(),
+  url: z.string().optional(),
+  workspace: z.boolean(z.literal(true)).optional(),
+});
+
 const UvSchema = z.object({
   'dev-dependencies': DependencyListSchema,
+  sources: z.record(z.string(), UvSource).optional(),
 });
 
 export const PyProjectSchema = z.object({

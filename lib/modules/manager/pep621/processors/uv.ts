@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
+import type { SkipReason } from '../../../../types';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
@@ -31,6 +32,38 @@ export class UvProcessor implements PyProjectProcessor {
         uv['dev-dependencies'],
       ),
     );
+
+    // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
+    // Skip sources that are either not yet handled by Renovate (e.g. git), or do not make sense to handle (e.g. path).
+    if (uv.sources) {
+      for (const dep of deps) {
+        if (!dep.depName) {
+          continue;
+        }
+
+        const depSource = uv.sources[dep.depName];
+        if (depSource) {
+          let skipReason: SkipReason | undefined;
+
+          if (depSource.git) {
+            skipReason = 'git-dependency';
+          } else if (depSource.url) {
+            skipReason = 'unsupported-url';
+          } else if (depSource.path) {
+            skipReason = 'path-dependency';
+          } else if (depSource.workspace) {
+            skipReason = 'inherited-dependency';
+          } else {
+            skipReason = 'invalid-dependency-specification';
+          }
+
+          if (skipReason) {
+            dep.currentValue = '';
+            dep.skipReason = skipReason;
+          }
+        }
+      }
+    }
 
     return deps;
   }

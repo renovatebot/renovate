@@ -26,7 +26,7 @@ describe('modules/manager/pep621/processors/uv', () => {
   describe('process()', () => {
     it('returns initial dependencies if there is no tool.uv section', () => {
       const pyproject = { tool: {} };
-      const dependencies = [{ packageName: 'dep1' }];
+      const dependencies = [{ depName: 'dep1' }];
 
       const result = processor.process(pyproject, dependencies);
 
@@ -37,12 +37,12 @@ describe('modules/manager/pep621/processors/uv', () => {
       const pyproject = {
         tool: { uv: { 'dev-dependencies': ['dep2==1.2.3', 'dep3==2.3.4'] } },
       };
-      const dependencies = [{ packageName: 'dep1' }];
+      const dependencies = [{ depName: 'dep1' }];
 
       const result = processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
-        { packageName: 'dep1' },
+        { depName: 'dep1' },
         {
           currentValue: '==1.2.3',
           currentVersion: '1.2.3',
@@ -58,6 +58,63 @@ describe('modules/manager/pep621/processors/uv', () => {
           depName: 'dep3',
           depType: 'tool.uv.dev-dependencies',
           packageName: 'dep3',
+        },
+      ]);
+    });
+
+    it('skips dependencies with unsupported sources', () => {
+      const pyproject = {
+        tool: {
+          uv: {
+            sources: {
+              dep2: { git: 'https://github.com/foo/bar' },
+              dep3: { path: '/local-dep.whl' },
+              dep4: { url: 'https://example.com' },
+              dep5: { workspace: true },
+              dep6: {},
+            },
+          },
+        },
+      };
+      const dependencies = [
+        { depName: 'dep1' },
+        { depName: 'dep2' },
+        { depName: 'dep3' },
+        { depName: 'dep4' },
+        { depName: 'dep5' },
+        { depName: 'dep6' },
+      ];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          depName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          currentValue: '',
+          skipReason: 'git-dependency',
+        },
+        {
+          depName: 'dep3',
+          currentValue: '',
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'dep4',
+          currentValue: '',
+          skipReason: 'unsupported-url',
+        },
+        {
+          depName: 'dep5',
+          currentValue: '',
+          skipReason: 'inherited-dependency',
+        },
+        {
+          depName: 'dep6',
+          currentValue: '',
+          skipReason: 'invalid-dependency-specification',
         },
       ]);
     });
