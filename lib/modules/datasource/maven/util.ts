@@ -369,6 +369,7 @@ async function getSnapshotFullVersion(
   );
 
   const { xml: mavenMetadata } = await downloadMavenXml(http, metadataUrl);
+  // istanbul ignore if: hard to test
   if (!mavenMetadata) {
     return null;
   }
