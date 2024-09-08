@@ -17,7 +17,7 @@ describe('modules/manager/pep723/extract', () => {
         'foo.py',
       );
 
-      expect(res).toMatchObject({
+      expect(res).toEqual({
         deps: [
           {
             currentValue: '==2.32.3',
@@ -53,7 +53,7 @@ describe('modules/manager/pep723/extract', () => {
         'foo.py',
       );
 
-      expect(res).toMatchObject({
+      expect(res).toEqual({
         deps: [
           {
             currentValue: '==2.32.3',
