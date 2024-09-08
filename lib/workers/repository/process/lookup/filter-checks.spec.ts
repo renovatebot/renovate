@@ -86,6 +86,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
 
     it('uses datasource-level interception mechanism', async () => {
       config.datasource = 'some-datasource';
+      config.packageName = 'some-package';
       config.internalChecksFilter = 'strict';
 
       class SomeDatasource extends DummyDatasource {
