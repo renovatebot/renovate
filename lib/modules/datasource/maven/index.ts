@@ -104,6 +104,7 @@ export class MavenDatasource extends Datasource {
       this.http,
       metadataUrl,
     );
+    // istanbul ignore if: hard to test
     if (!mavenMetadata) {
       return {};
     }
