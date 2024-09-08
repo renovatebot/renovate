@@ -174,6 +174,38 @@ describe('modules/datasource/maven/index', () => {
     });
   });
 
+  it('handles invalid snapshot', async () => {
+    const meta = Fixtures.get('metadata-snapshot-version-invalid.xml');
+    httpMock
+      .scope(MAVEN_REPO)
+      .get('/org/example/package/1.0.3-SNAPSHOT/package-1.0.3-SNAPSHOT.pom')
+      .reply(200, meta);
+
+    mockGenericPackage({
+      meta: Fixtures.get('metadata-snapshot-only.xml'),
+      pom: null,
+      html: null,
+      latest: '1.0.3-SNAPSHOT',
+      snapshots: [
+        {
+          version: '1.0.3-SNAPSHOT',
+          meta,
+        },
+      ],
+    });
+
+    const res = await get();
+
+    expect(res).toEqual({
+      display: 'org.example:package',
+      group: 'org.example',
+      name: 'package',
+      packageScope: 'org.example',
+      registryUrl: 'https://repo.maven.apache.org/maven2',
+      releases: [{ version: '1.0.3-SNAPSHOT' }],
+    });
+  });
+
   it('returns html-based releases', async () => {
     mockGenericPackage({
       latest: '2.0.0',
