@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
+import {newlineRegex, regEx} from '../../../util/regex';
 import { Result } from '../../../util/result';
 import type { PackageFileContent } from '../types';
 import { Pep723Schema } from './schema';
@@ -23,7 +23,7 @@ export function extractPackageFile(
 
   // Adapted code from the Python reference implementation: https://packaging.python.org/en/latest/specifications/inline-script-metadata/#reference-implementation
   const parsedToml = matchedContent
-    .split('\n')
+    .split(newlineRegex)
     .map((line) => line.substring(line.startsWith('# ') ? 2 : 1))
     .join('\n');
 
