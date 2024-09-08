@@ -68,7 +68,7 @@ describe('modules/manager/pep723/extract', () => {
       });
     });
 
-    it('should return an empty list on missing dependencies', () => {
+    it('should return null on missing dependencies', () => {
       const res = extractPackageFile(
         codeBlock`
 # /// script
@@ -78,10 +78,7 @@ describe('modules/manager/pep723/extract', () => {
         'foo.py',
       );
 
-      expect(res).toMatchObject({
-        deps: [],
-        extractedConstraints: { python: '>=3.11' },
-      });
+      expect(res).toBeNull();
     });
 
     it('should return null on invalid TOML', () => {

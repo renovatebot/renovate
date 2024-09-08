@@ -36,5 +36,5 @@ export function extractPackageFile(
     return null;
   }
 
-  return res;
+  return res.deps.length ? res : null;
 }
