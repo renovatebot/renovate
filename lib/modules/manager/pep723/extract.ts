@@ -26,7 +26,7 @@ export function extractPackageFile(
     .map((line) => line.substring(line.startsWith('# ') ? 2 : 1))
     .join('\n');
 
-  const { data: deps, error } = Pep723Schema.safeParse(parsedToml);
+  const { data: res, error } = Pep723Schema.safeParse(parsedToml);
 
   if (error) {
     logger.debug(
@@ -36,5 +36,5 @@ export function extractPackageFile(
     return null;
   }
 
-  return { deps };
+  return res;
 }

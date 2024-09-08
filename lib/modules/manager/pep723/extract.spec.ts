@@ -35,6 +35,7 @@ describe('modules/manager/pep723/extract', () => {
             packageName: 'rich',
           },
         ],
+        extractedConstraints: { python: '>=3.11' },
       });
     });
 
@@ -42,7 +43,7 @@ describe('modules/manager/pep723/extract', () => {
       const res = extractPackageFile(
         codeBlock`
 # /// script
-# requires-python = ">=3.11"
+# requires-python = "==3.11"
 # dependencies = [
 #   "requests==2.32.3",
 #   "==1.2.3",
@@ -63,6 +64,7 @@ describe('modules/manager/pep723/extract', () => {
             packageName: 'requests',
           },
         ],
+        extractedConstraints: { python: '==3.11' },
       });
     });
 
@@ -76,7 +78,10 @@ describe('modules/manager/pep723/extract', () => {
         'foo.py',
       );
 
-      expect(res).toMatchObject({ deps: [] });
+      expect(res).toMatchObject({
+        deps: [],
+        extractedConstraints: { python: '>=3.11' },
+      });
     });
 
     it('should return null on invalid TOML', () => {
