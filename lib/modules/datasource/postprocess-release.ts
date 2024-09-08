@@ -1,19 +1,25 @@
 import { logger } from '../../logger';
+import type {
+  LookupUpdateConfig,
+  UpdateResult,
+} from '../../workers/repository/process/lookup/types';
 import { getDatasourceFor } from './common';
-import type { PostprocessReleaseConfig, Release } from './types';
+import type { Release } from './types';
+
+type Config = Partial<LookupUpdateConfig & UpdateResult>;
 
 export async function postprocessRelease(
-  config: PostprocessReleaseConfig,
+  config: Config,
   release: Release,
 ): Promise<Release | null> {
   const { datasource } = config;
 
-  if (!datasource) {
-    return release;
-  }
-
-  const ds = getDatasourceFor(datasource);
+  const ds = datasource && getDatasourceFor(datasource);
   if (!ds) {
+    logger.warn(
+      { datasource },
+      'Failed to resolve datasource during release postprocessing',
+    );
     return release;
   }
 
@@ -21,12 +27,20 @@ export async function postprocessRelease(
     return release;
   }
 
+  const { packageName } = config;
+  if (!packageName) {
+    logger.warn(
+      { datasource },
+      'Release postprocessing is not supported for empty `packageName` field',
+    );
+    return release;
+  }
+
+  const registryUrl = config.registryUrl ?? null;
+
   try {
     const result = await ds.postprocessRelease(
-      {
-        packageName: config.packageName,
-        registryUrl: config.registryUrl,
-      },
+      { packageName, registryUrl },
       release,
     );
     return result;

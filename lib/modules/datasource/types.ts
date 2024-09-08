@@ -91,9 +91,8 @@ export interface ReleaseResult {
 }
 
 export interface PostprocessReleaseConfig {
-  datasource?: string;
-  packageName?: string;
-  registryUrl?: string;
+  packageName: string;
+  registryUrl: string | null;
 }
 
 export type RegistryStrategy = 'first' | 'hunt' | 'merge';

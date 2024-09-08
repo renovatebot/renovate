@@ -25,7 +25,10 @@ class DummyDatasource extends Datasource {
 describe('modules/datasource/postprocess-release', () => {
   it('returns original release for empty datasource field', async () => {
     const releaseOrig: Release = { version: '1.2.3' };
-    const release = await postprocessRelease({}, releaseOrig);
+    const release = await postprocessRelease(
+      { packageName: 'some-package' },
+      releaseOrig,
+    );
     expect(release).toBe(releaseOrig);
   });
 
@@ -34,7 +37,7 @@ describe('modules/datasource/postprocess-release', () => {
     getDatasourceFor.mockReturnValueOnce(null);
 
     const release = await postprocessRelease(
-      { datasource: 'some-datasource' },
+      { datasource: 'some-datasource', packageName: 'some-package' },
       releaseOrig,
     );
 
@@ -44,6 +47,27 @@ describe('modules/datasource/postprocess-release', () => {
   it('returns original release for datasource with missing `postprocessRelease` method', async () => {
     const releaseOrig: Release = { version: '1.2.3' };
     getDatasourceFor.mockReturnValueOnce(new DummyDatasource());
+
+    const release = await postprocessRelease(
+      { datasource: 'some-datasource', packageName: 'some-package' },
+      releaseOrig,
+    );
+
+    expect(release).toBe(releaseOrig);
+  });
+
+  it('returns original release for datasource with missing `packageName` field', async () => {
+    class SomeDatasource extends DummyDatasource {
+      postprocessRelease(
+        _config: PostprocessReleaseConfig,
+        release: Release,
+      ): Promise<Release | null> {
+        return Promise.resolve(release);
+      }
+    }
+
+    const releaseOrig: Release = { version: '1.2.3' };
+    getDatasourceFor.mockReturnValueOnce(new SomeDatasource());
 
     const release = await postprocessRelease(
       { datasource: 'some-datasource' },
@@ -68,7 +92,7 @@ describe('modules/datasource/postprocess-release', () => {
     getDatasourceFor.mockReturnValueOnce(new SomeDatasource());
 
     const release = await postprocessRelease(
-      { datasource: 'some-datasource' },
+      { datasource: 'some-datasource', packageName: 'some-package' },
       releaseOrig,
     );
 
@@ -92,7 +116,7 @@ describe('modules/datasource/postprocess-release', () => {
     getDatasourceFor.mockReturnValueOnce(new SomeDatasource());
 
     const release = await postprocessRelease(
-      { datasource: 'some-datasource' },
+      { datasource: 'some-datasource', packageName: 'some-package' },
       releaseOrig,
     );
 
@@ -113,7 +137,7 @@ describe('modules/datasource/postprocess-release', () => {
     getDatasourceFor.mockReturnValueOnce(new SomeDatasource());
 
     const release = await postprocessRelease(
-      { datasource: 'some-datasource' },
+      { datasource: 'some-datasource', packageName: 'some-package' },
       releaseOrig,
     );
 
