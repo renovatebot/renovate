@@ -1,4 +1,7 @@
+import { HeadObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { mockClient } from 'aws-sdk-client-mock';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
+import { DateTime } from 'luxon';
 import type { Release, ReleaseResult } from '..';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
@@ -718,6 +721,125 @@ describe('modules/datasource/maven/index', () => {
       expect(res).toEqual({
         version: '1.2.3',
         releaseTimestamp: '2024-01-01T00:00:00.000Z',
+      });
+    });
+
+    describe('S3', () => {
+      const s3mock = mockClient(S3Client);
+
+      afterEach(() => {
+        s3mock.reset();
+      });
+
+      it('checks package', async () => {
+        s3mock
+          .on(HeadObjectCommand, {
+            Bucket: 'bucket',
+            Key: 'foo/bar/1.2.3/bar-1.2.3.pom',
+          })
+          .resolvesOnce({});
+
+        const res = await postprocessRelease(
+          { datasource, packageName: 'foo:bar', registryUrl: 's3://bucket' },
+          { version: '1.2.3' },
+        );
+
+        expect(res).toEqual({ version: '1.2.3' });
+      });
+
+      it('supports timestamp', async () => {
+        s3mock
+          .on(HeadObjectCommand, {
+            Bucket: 'bucket',
+            Key: 'foo/bar/1.2.3/bar-1.2.3.pom',
+          })
+          .resolvesOnce({
+            LastModified: DateTime.fromISO(
+              '2024-01-01T00:00:00.000Z',
+            ).toJSDate(),
+          });
+
+        const res = await postprocessRelease(
+          { datasource, packageName: 'foo:bar', registryUrl: 's3://bucket' },
+          { version: '1.2.3' },
+        );
+
+        expect(res).toEqual({
+          version: '1.2.3',
+          releaseTimestamp: '2024-01-01T00:00:00.000Z',
+        });
+      });
+
+      it('returns null for deleted object', async () => {
+        s3mock
+          .on(HeadObjectCommand, {
+            Bucket: 'bucket',
+            Key: 'foo/bar/1.2.3/bar-1.2.3.pom',
+          })
+          .resolvesOnce({ DeleteMarker: true });
+
+        const releaseOrig = { version: '1.2.3' };
+
+        const res = await postprocessRelease(
+          { datasource, packageName: 'foo:bar', registryUrl: 's3://bucket' },
+          releaseOrig,
+        );
+
+        expect(res).toBeNull();
+      });
+
+      it('returns null for NotFound response', async () => {
+        s3mock
+          .on(HeadObjectCommand, {
+            Bucket: 'bucket',
+            Key: 'foo/bar/1.2.3/bar-1.2.3.pom',
+          })
+          .rejectsOnce('NotFound');
+
+        const releaseOrig = { version: '1.2.3' };
+
+        const res = await postprocessRelease(
+          { datasource, packageName: 'foo:bar', registryUrl: 's3://bucket' },
+          releaseOrig,
+        );
+
+        expect(res).toBeNull();
+      });
+
+      it('returns null for NoSuchKey response', async () => {
+        s3mock
+          .on(HeadObjectCommand, {
+            Bucket: 'bucket',
+            Key: 'foo/bar/1.2.3/bar-1.2.3.pom',
+          })
+          .rejectsOnce('NoSuchKey');
+
+        const releaseOrig = { version: '1.2.3' };
+
+        const res = await postprocessRelease(
+          { datasource, packageName: 'foo:bar', registryUrl: 's3://bucket' },
+          releaseOrig,
+        );
+
+        expect(res).toBeNull();
+      });
+
+      it('returns null for unknown error', async () => {
+        s3mock
+          .on(HeadObjectCommand, {
+            Bucket: 'bucket',
+            Key: 'foo/bar/1.2.3/bar-1.2.3.pom',
+          })
+          .rejectsOnce('Unknown');
+
+        const releaseOrig = { version: '1.2.3' };
+
+        const res = await postprocessRelease(
+          { datasource, packageName: 'foo:bar', registryUrl: 's3://bucket' },
+          releaseOrig,
+        );
+
+        expect(res).toBeNull();
       });
     });
   });
