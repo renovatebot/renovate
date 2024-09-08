@@ -77,6 +77,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       };
       const dependencies = [
+        {},
         { depName: 'dep1' },
         { depName: 'dep2' },
         { depName: 'dep3' },
@@ -88,6 +89,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       const result = processor.process(pyproject, dependencies);
 
       expect(result).toEqual([
+        {},
         {
           depName: 'dep1',
         },
