@@ -65,6 +65,10 @@ describe('workers/repository/process/lookup/index', () => {
   );
 
   const getMavenReleases = jest.spyOn(MavenDatasource.prototype, 'getReleases');
+  const postprocessMavenRelease = jest.spyOn(
+    MavenDatasource.prototype,
+    'postprocessRelease',
+  );
 
   const getCustomDatasourceReleases = jest.spyOn(
     CustomDatasource.prototype,
@@ -3706,6 +3710,9 @@ describe('workers/repository/process/lookup/index', () => {
           { version: '12.6.2.jre11' },
         ],
       });
+      postprocessMavenRelease.mockImplementationOnce((_, x) =>
+        Promise.resolve(x),
+      );
 
       const res = await Result.wrap(
         lookup.lookupUpdates(config),
