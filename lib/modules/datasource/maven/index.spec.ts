@@ -465,7 +465,6 @@ describe('modules/datasource/maven/index', () => {
       meta: null,
       pom: Fixtures.get('parent-scm-homepage/pom.xml'),
       latest: '1.0.0',
-      snapshots: [],
     };
 
     it('should get source and homepage from parent', async () => {
@@ -473,7 +472,6 @@ describe('modules/datasource/maven/index', () => {
         meta: Fixtures.get('child-no-info/meta.xml'),
         pom: Fixtures.get('child-no-info/pom.xml'),
         latest: '2.0.0',
-        snapshots: [],
         html: null,
       });
       mockGenericPackage(parentPackage);
@@ -491,7 +489,6 @@ describe('modules/datasource/maven/index', () => {
         meta: Fixtures.get('child-empty/meta.xml'),
         pom: Fixtures.get('child-empty/pom.xml'),
         latest: '2.0.0',
-        snapshots: [],
         html: null,
       });
 
@@ -513,7 +510,6 @@ describe('modules/datasource/maven/index', () => {
         meta: null,
         pom: parentPom,
         latest: '2.0.0',
-        snapshots: [],
       };
 
       const childMeta = Fixtures.get('child-parent-cycle/child.meta.xml');
@@ -523,13 +519,11 @@ describe('modules/datasource/maven/index', () => {
         meta: null,
         pom: childPom,
         latest: '2.0.0',
-        snapshots: [],
       };
 
       mockGenericPackage({
         ...childPomMock,
         meta: childMeta,
-        snapshots: [],
         html: null,
       });
       mockGenericPackage(parentPomMock);
@@ -550,7 +544,6 @@ describe('modules/datasource/maven/index', () => {
         meta: Fixtures.get('child-scm/meta.xml'),
         pom: Fixtures.get('child-scm/pom.xml'),
         latest: '2.0.0',
-        snapshots: [],
         html: null,
       });
       mockGenericPackage(parentPackage);
@@ -568,7 +561,6 @@ describe('modules/datasource/maven/index', () => {
         meta: Fixtures.get('child-url/meta.xml'),
         pom: Fixtures.get('child-url/pom.xml'),
         latest: '2.0.0',
-        snapshots: [],
         html: null,
       });
       mockGenericPackage(parentPackage);
@@ -586,7 +578,6 @@ describe('modules/datasource/maven/index', () => {
         meta: Fixtures.get('child-all-info/meta.xml'),
         pom: Fixtures.get('child-all-info/pom.xml'),
         latest: '2.0.0',
-        snapshots: [],
         html: null,
       });
 
@@ -603,7 +594,6 @@ describe('modules/datasource/maven/index', () => {
         meta: Fixtures.get('child-scm-gitatcolon/meta.xml'),
         pom: Fixtures.get('child-scm-gitatcolon/pom.xml'),
         latest: '2.0.0',
-        snapshots: [],
         html: null,
       });
 
@@ -619,7 +609,6 @@ describe('modules/datasource/maven/index', () => {
         meta: Fixtures.get('child-scm-gitatslash/meta.xml'),
         pom: Fixtures.get('child-scm-gitatslash/pom.xml'),
         latest: '2.0.0',
-        snapshots: [],
         html: null,
       });
 
@@ -635,7 +624,6 @@ describe('modules/datasource/maven/index', () => {
         meta: Fixtures.get('child-scm-gitprotocol/meta.xml'),
         pom: Fixtures.get('child-scm-gitprotocol/pom.xml'),
         latest: '2.0.0',
-        snapshots: [],
         html: null,
       });
 
