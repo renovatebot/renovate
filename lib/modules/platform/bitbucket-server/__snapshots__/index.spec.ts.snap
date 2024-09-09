@@ -4,8 +4,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path addAssign
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path addReviewers does not throw 1`] = `undefined`;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path addReviewers resolves the reviewer email to name 1`] = `undefined`;
-
 exports[`modules/platform/bitbucket-server/index endpoint with no path addReviewers throws 1`] = `"Response code 405 (Method Not Allowed)"`;
 
 exports[`modules/platform/bitbucket-server/index endpoint with no path addReviewers throws on invalid reviewers 1`] = `"Response code 409 (Conflict)"`;
@@ -210,8 +208,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path updatePr(
 exports[`modules/platform/bitbucket-server/index endpoint with path addAssignees() does not throw 1`] = `undefined`;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path addReviewers does not throw 1`] = `undefined`;
-
-exports[`modules/platform/bitbucket-server/index endpoint with path addReviewers resolves the reviewer email to name 1`] = `undefined`;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path addReviewers throws 1`] = `"Response code 405 (Method Not Allowed)"`;
 
