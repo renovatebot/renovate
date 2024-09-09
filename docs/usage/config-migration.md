@@ -14,7 +14,7 @@ By default, Renovate does _not_ update the terms in your Renovate configuration 
 ## Enabling config migration pull requests
 
 Renovate can create a config migration pull request, that updates old terms in your configuration file.
-To enable config migration pull request from Renovate, set the [`configMigration`](./configuration-options.md#configmigration) config option to `true`.
+To get config migration pull requests from Renovate: set the [`configMigration`](./configuration-options.md#configmigration) config option to `true`.
 
 Config migration PRs are disabled by default.
 But we _strongly_ recommend you enable config migration PRs, because:
@@ -43,7 +43,7 @@ Renovate will:
 1. Create a Config Migration PR
 1. If the Dependency Dashboard issue is enabled: Renovate puts a link to the Config Migration PR on the dashboard
 
-### Config migration needed but disabled
+### Config migration needed, but disabled
 
 If config migration is needed, but disabled:
 
@@ -59,7 +59,7 @@ The checkbox looks like this:
 When you select the checkbox:
 
 Renovate creates a config migration PR.
-Renovate replaces the checkbox with text with a link to the Config Migration PR.
+Renovate replaces the checkbox with a link to the Config Migration PR.
 
 For example:
 
