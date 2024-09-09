@@ -36,6 +36,7 @@ export class UvProcessor implements PyProjectProcessor {
     // Skip sources that are either not yet handled by Renovate (e.g. git), or do not make sense to handle (e.g. path).
     if (uv.sources) {
       for (const dep of deps) {
+        // istanbul ignore if
         if (!dep.packageName) {
           continue;
         }
