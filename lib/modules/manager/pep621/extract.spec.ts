@@ -337,6 +337,63 @@ describe('modules/manager/pep621/extract', () => {
       ]);
     });
 
+    it('should skip dependencies with unsupported uv sources', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+        [project]
+        dependencies = [
+          "dep1",
+          "dep2",
+          "dep3",
+          "dep4",
+          "dep5",
+          "dep6",
+          "dep7",
+        ]
+
+        [tool.uv.sources]
+        dep2 = { git = "https://github.com/foo/bar" }
+        dep3 = { path = "/local-dep.whl" }
+        dep4 = { url = "https://example.com" }
+        dep5 = { workspace = true }
+        dep6 = { workspace = false }
+        dep7 = {}
+        `,
+        'pyproject.toml',
+      );
+
+      expect(result?.deps).toMatchObject([
+        {
+          packageName: 'dep1',
+          skipReason: 'unspecified-version',
+        },
+        {
+          packageName: 'dep2',
+          skipReason: 'git-dependency',
+        },
+        {
+          packageName: 'dep3',
+          skipReason: 'path-dependency',
+        },
+        {
+          packageName: 'dep4',
+          skipReason: 'unsupported-url',
+        },
+        {
+          packageName: 'dep5',
+          skipReason: 'inherited-dependency',
+        },
+        {
+          packageName: 'dep6',
+          skipReason: 'invalid-dependency-specification',
+        },
+        {
+          packageName: 'dep7',
+          skipReason: 'invalid-dependency-specification',
+        },
+      ]);
+    });
+
     it('should extract project version', async () => {
       const content = codeBlock`
         [project]
