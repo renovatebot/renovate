@@ -131,7 +131,7 @@
     Hi there,
 
 
-    Please try to reduce the amount of logs you're pasting into this discussion. Maintainers have a limited amount of time to help you, and often to do from mobile devices, and it's easier for us to help you if you provide only the relevant parts of the logs and/or make a good attempt to look through them first and point to the lines you think are relevant.
+    Please try to reduce the amount of logs you're pasting into this discussion. Maintainers have a limited amount of time to help you, and often do so from mobile devices, so it's easier for us to help you if you provide only the relevant parts of the logs and/or make a good attempt to look through them first and point to the lines you think are relevant.
 
 
     As an example, if your problem is about a certain dependency, find the log sections which apply to that dependency and paste only those sections. Similarly, if your problem is about a particular branch/PR, find the log sections which apply to that branch/PR and paste only those sections.
