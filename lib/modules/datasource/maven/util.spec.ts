@@ -4,7 +4,6 @@ import type { Http } from '../../../util/http';
 import { parseUrl } from '../../../util/url';
 import {
   checkResource,
-  checkS3Resource,
   downloadHttpProtocol,
   downloadMavenXml,
   downloadS3Protocol,
@@ -102,14 +101,6 @@ describe('modules/datasource/maven/util', () => {
         null as never, // #22198
         'not-a-valid-url',
       );
-      expect(res).toBe('error');
-    });
-  });
-
-  describe('checkS3Resource', () => {
-    it('returns error for non-S3 URLs', async () => {
-      // #22198
-      const res = await checkS3Resource(parseUrl('http://not-s3.com/')!);
       expect(res).toBe('error');
     });
   });
