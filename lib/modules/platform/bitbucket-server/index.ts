@@ -671,7 +671,7 @@ async function updatePRAndAddReviewers(
 
     // TODO: can `reviewers` be undefined? (#22198)
     const reviewersSet = new Set(
-      await Promise.all(
+      await Promise.allSettled(
         [...pr.reviewers!, ...reviewers].map((name) =>
           name.includes('@') ? resolveEmailToUsername(name) : name,
         ),
