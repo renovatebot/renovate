@@ -43,6 +43,14 @@ export async function postprocessRelease(
       { packageName, registryUrl },
       release,
     );
+
+    if (!result) {
+      logger.debug(
+        { packageName, registryUrl, version: release.version },
+        'Rejected release',
+      );
+    }
+
     return result;
   } catch (err) {
     logger.debug({ err }, `Release interceptor failed for "${datasource}"`);
