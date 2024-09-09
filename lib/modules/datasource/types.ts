@@ -152,6 +152,11 @@ export interface DatasourceApi extends ModuleApi {
    *
    * In case of reject, the next candidate release is selected,
    * and `postprocessRelease` is called again.
+   *
+   * Rejection must happen only when the release will lead to downstream error,
+   * e.g. the release turned out to be yanked or doesn't exist for some reason.
+   *
+   * In other cases, the original `Release` parameter should be returned.
    */
   postprocessRelease?(
     config: PostprocessReleaseConfig,
