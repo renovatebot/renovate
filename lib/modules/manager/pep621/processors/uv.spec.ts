@@ -71,7 +71,8 @@ describe('modules/manager/pep621/processors/uv', () => {
               dep3: { path: '/local-dep.whl' },
               dep4: { url: 'https://example.com' },
               dep5: { workspace: true },
-              dep6: {},
+              dep6: { workspace: false },
+              dep7: {},
             },
           },
         },
@@ -84,6 +85,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         { depName: 'dep4' },
         { depName: 'dep5' },
         { depName: 'dep6' },
+        { depName: 'dep7' },
       ];
 
       const result = processor.process(pyproject, dependencies);
@@ -111,6 +113,10 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
         {
           depName: 'dep6',
+          skipReason: 'invalid-dependency-specification',
+        },
+        {
+          depName: 'dep7',
           skipReason: 'invalid-dependency-specification',
         },
       ]);

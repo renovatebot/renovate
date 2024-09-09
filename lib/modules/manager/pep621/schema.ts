@@ -40,7 +40,7 @@ const UvSource = z.object({
   git: z.string().optional(),
   path: z.string().optional(),
   url: z.string().optional(),
-  workspace: z.boolean(z.literal(true)).optional(),
+  workspace: z.boolean().optional(),
 });
 
 const UvSchema = z.object({
