@@ -8,6 +8,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Http } from '../../../util/http';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import type { S3UrlParts } from '../../../util/s3';
 import { getS3Client, parseS3Url } from '../../../util/s3';
 import { streamToString } from '../../../util/streams';
 import { parseUrl } from '../../../util/url';
@@ -197,13 +198,9 @@ async function checkHttpResource(
 }
 
 export async function checkS3Resource(
-  pkgUrl: URL,
+  s3Url: S3UrlParts,
 ): Promise<HttpResourceCheckResult> {
   try {
-    const s3Url = parseS3Url(pkgUrl);
-    if (s3Url === null) {
-      return 'error';
-    }
     const response = await getS3Client().send(new HeadObjectCommand(s3Url));
     if (response.DeleteMarker) {
       return 'not-found';
@@ -217,7 +214,12 @@ export async function checkS3Resource(
       return 'not-found';
     } else {
       logger.debug(
-        { pkgUrl, name: err.name, message: err.message },
+        {
+          bucket: s3Url.Bucket,
+          key: s3Url.Key,
+          name: err.name,
+          message: err.message,
+        },
         `Can't check S3 resource existence`,
       );
     }
@@ -233,19 +235,21 @@ export async function checkResource(
   if (parsedUrl === null) {
     return 'error';
   }
-  switch (parsedUrl.protocol) {
-    case 'http:':
-    case 'https:':
-      return await checkHttpResource(http, parsedUrl);
-    case 's3:':
-      return await checkS3Resource(parsedUrl);
-    default:
-      logger.debug(
-        { url: pkgUrl.toString() },
-        `Unsupported Maven protocol in check resource`,
-      );
-      return 'not-found';
+
+  const s3Url = parseS3Url(parsedUrl);
+  if (s3Url) {
+    return await checkS3Resource(s3Url);
   }
+
+  if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
+    return await checkHttpResource(http, parsedUrl);
+  }
+
+  logger.debug(
+    { url: pkgUrl.toString() },
+    `Unsupported Maven protocol in check resource`,
+  );
+  return 'not-found';
 }
 
 function containsPlaceholder(str: string): boolean {
