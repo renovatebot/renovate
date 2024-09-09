@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import type { SkipReason } from '../../../../types';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
@@ -43,23 +42,16 @@ export class UvProcessor implements PyProjectProcessor {
 
         const depSource = uv.sources[dep.depName];
         if (depSource) {
-          let skipReason: SkipReason | undefined;
-
           if (depSource.git) {
-            skipReason = 'git-dependency';
+            dep.skipReason = 'git-dependency';
           } else if (depSource.url) {
-            skipReason = 'unsupported-url';
+            dep.skipReason = 'unsupported-url';
           } else if (depSource.path) {
-            skipReason = 'path-dependency';
+            dep.skipReason = 'path-dependency';
           } else if (depSource.workspace) {
-            skipReason = 'inherited-dependency';
+            dep.skipReason = 'inherited-dependency';
           } else {
-            skipReason = 'invalid-dependency-specification';
-          }
-
-          if (skipReason) {
-            dep.currentValue = '';
-            dep.skipReason = skipReason;
+            dep.skipReason = 'invalid-dependency-specification';
           }
         }
       }

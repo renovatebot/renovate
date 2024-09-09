@@ -95,27 +95,22 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
         {
           depName: 'dep2',
-          currentValue: '',
           skipReason: 'git-dependency',
         },
         {
           depName: 'dep3',
-          currentValue: '',
           skipReason: 'path-dependency',
         },
         {
           depName: 'dep4',
-          currentValue: '',
           skipReason: 'unsupported-url',
         },
         {
           depName: 'dep5',
-          currentValue: '',
           skipReason: 'inherited-dependency',
         },
         {
           depName: 'dep6',
-          currentValue: '',
           skipReason: 'invalid-dependency-specification',
         },
       ]);
