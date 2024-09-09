@@ -94,7 +94,7 @@ describe('modules/manager/index', () => {
     const urlRegex = regEx(/^\[.*\]\(.*\)$/);
 
     for (const [managerName, managerModule] of Object.entries(loadedMgr)) {
-      const urls = (managerModule as { urls?: string[] }).urls ?? [];
+      const urls = managerModule?.urls ?? [];
       for (const url of urls) {
         const urlValid = urlRegex.test(url);
         expect({

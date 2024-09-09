@@ -1,3 +1,4 @@
+import type { Versioning } from '../../../tools/docs/versioning';
 import { getOptions } from '../../config/options';
 import { loadModules } from '../../util/modules';
 import { regEx } from '../../util/regex';
@@ -61,7 +62,8 @@ describe('modules/versioning/index', () => {
 
     const urlRegex = regEx(/^\[.*\]\(.*\)$/);
     for (const [verName, verModule] of Object.entries(loadedVers)) {
-      const urls = (verModule as { urls?: string[] }).urls ?? [];
+      const versioningModule = verModule as Versioning;
+      const urls = versioningModule.urls ?? [];
       for (const url of urls) {
         const urlValid = urlRegex.test(url);
         expect({
