@@ -61,6 +61,61 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ]);
     });
+
+    it('uses default PyPI and extra URLs when setting extra-index-url', () => {
+      const pyproject = {
+        tool: {
+          uv: {
+            'extra-index-url': [
+              'https://foo.example.com',
+              'https://bar.example.com',
+            ],
+          },
+        },
+      };
+      const dependencies = [{ packageName: 'dep1' }];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          packageName: 'dep1',
+          registryUrls: [
+            'https://foo.example.com',
+            'https://bar.example.com',
+            'https://pypi.org/pypi/',
+          ],
+        },
+      ]);
+    });
+
+    it('uses index and extra URLs when setting index-url and extra-index-url', () => {
+      const pyproject = {
+        tool: {
+          uv: {
+            'index-url': 'https://foobar.example.com',
+            'extra-index-url': [
+              'https://foo.example.com',
+              'https://bar.example.com',
+            ],
+          },
+        },
+      };
+      const dependencies = [{ packageName: 'dep1' }];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          packageName: 'dep1',
+          registryUrls: [
+            'https://foo.example.com',
+            'https://bar.example.com',
+            'https://foobar.example.com',
+          ],
+        },
+      ]);
+    });
   });
 
   describe('updateArtifacts()', () => {
