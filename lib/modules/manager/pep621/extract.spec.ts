@@ -349,6 +349,7 @@ describe('modules/manager/pep621/extract', () => {
           "dep5",
           "dep6",
           "dep7",
+          "dep-with_NORMALIZATION",
         ]
 
         [tool.uv.sources]
@@ -358,6 +359,7 @@ describe('modules/manager/pep621/extract', () => {
         dep5 = { workspace = true }
         dep6 = { workspace = false }
         dep7 = {}
+        dep_WITH-normalization = { workspace = true }
         `,
         'pyproject.toml',
       );
@@ -390,6 +392,10 @@ describe('modules/manager/pep621/extract', () => {
         {
           packageName: 'dep7',
           skipReason: 'invalid-dependency-specification',
+        },
+        {
+          packageName: 'dep-with-normalization',
+          skipReason: 'inherited-dependency',
         },
       ]);
     });
