@@ -6,14 +6,14 @@ describe('modules/manager/pep723/extract', () => {
     it('should extract dependencies', () => {
       const res = extractPackageFile(
         codeBlock`
-# /// script
-# requires-python = ">=3.11"
-# dependencies = [
-#   "requests==2.32.3",
-#   "rich>=13.8.0",
-# ]
-# ///
-`,
+          # /// script
+          # requires-python = ">=3.11"
+          # dependencies = [
+          #   "requests==2.32.3",
+          #   "rich>=13.8.0",
+          # ]
+          # ///
+        `,
         'foo.py',
       );
 
@@ -42,14 +42,14 @@ describe('modules/manager/pep723/extract', () => {
     it('should skip invalid dependencies', () => {
       const res = extractPackageFile(
         codeBlock`
-# /// script
-# requires-python = "==3.11"
-# dependencies = [
-#   "requests==2.32.3",
-#   "==1.2.3",
-# ]
-# ///
-`,
+          # /// script
+          # requires-python = "==3.11"
+          # dependencies = [
+          #   "requests==2.32.3",
+          #   "==1.2.3",
+          # ]
+          # ///
+        `,
         'foo.py',
       );
 
@@ -71,10 +71,10 @@ describe('modules/manager/pep723/extract', () => {
     it('should return null on missing dependencies', () => {
       const res = extractPackageFile(
         codeBlock`
-# /// script
-# requires-python = ">=3.11"
-# ///
-`,
+          # /// script
+          # requires-python = ">=3.11"
+          # ///
+        `,
         'foo.py',
       );
 
@@ -84,14 +84,14 @@ describe('modules/manager/pep723/extract', () => {
     it('should return null on invalid TOML', () => {
       const res = extractPackageFile(
         codeBlock`
-# /// script
-# requires-python
-# dependencies = [
-#   "requests==2.32.3",
-#   "rich>=13.8.0",
-# ]
-# ///
-`,
+          # /// script
+          # requires-python
+          # dependencies = [
+          #   "requests==2.32.3",
+          #   "rich>=13.8.0",
+          # ]
+          # ///
+        `,
         'foo.py',
       );
 
@@ -101,9 +101,9 @@ describe('modules/manager/pep723/extract', () => {
     it('should return null if there is no PEP 723 metadata', () => {
       const res = extractPackageFile(
         codeBlock`
-if True:
-    print("requires-python>=3.11")
-`,
+          if True:
+              print("requires-python>=3.11")
+        `,
         'foo.py',
       );
 
