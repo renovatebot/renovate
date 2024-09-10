@@ -2,7 +2,6 @@ import type { HTTPError, Response } from 'got';
 import type { Pr } from '../types';
 
 export interface BbsConfig {
-  bbUseDefaultReviewers: boolean;
   fileList: any[];
   mergeMethod: string;
   owner: string;

@@ -69,6 +69,8 @@ export async function checkAutoMerge(
       prAutomergeBlockReason: 'PlatformNotReady',
     };
   }
+  // eslint-disable-next-line
+  console.log('ignoreTests', ignoreTests);
   const branchStatus = await resolveBranchStatus(
     branchName,
     !!config.internalChecksAsSuccess,

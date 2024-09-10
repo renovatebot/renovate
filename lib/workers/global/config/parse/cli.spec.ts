@@ -205,5 +205,12 @@ describe('workers/global/config/parse/cli', () => {
       argv.push('--require-config=false');
       expect(cli.getConfig(argv)).toEqual({ requireConfig: 'optional' });
     });
+
+    it('migrates platformOptions', () => {
+      argv.push('--git-lab-ignore-approvals');
+      expect(cli.getConfig(argv)).toEqual({
+        prOptions: { gitLabIgnoreApprovals: true },
+      });
+    });
   });
 });

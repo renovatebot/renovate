@@ -305,6 +305,13 @@ export interface RenovateConfig
   statusCheckNames?: Record<StatusCheckKey, string | null>;
   env?: UserEnv;
   logLevelRemap?: LogLevelRemap[];
+  prOptions?: PrOptions;
+}
+
+export interface PrOptions {
+  gitLabIgnoreApprovals?: boolean;
+  bbUseDefaultReviewers?: boolean;
+  azureWorkItemId?: number;
 }
 
 const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;
@@ -396,7 +403,8 @@ export type AllowedParents =
   | 'hostRules'
   | 'postUpgradeTasks'
   | 'packageRules'
-  | 'logLevelRemap';
+  | 'logLevelRemap'
+  | 'prOptions';
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.

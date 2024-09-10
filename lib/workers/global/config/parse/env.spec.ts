@@ -418,5 +418,13 @@ describe('workers/global/config/parse/env', () => {
       const config = await env.getConfig(envParam);
       expect(config.platformCommit).toBe('disabled');
     });
+
+    it('migrates RENOVATE_GIT_LAB_IGNORE_APPROVALS', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_GIT_LAB_IGNORE_APPROVALS: 'false',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.prOptions).toMatchObject({ gitLabIgnoreApprovals: false });
+    });
   });
 });

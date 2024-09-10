@@ -1213,9 +1213,12 @@ const options: RenovateOptions[] = [
     name: 'azureWorkItemId',
     description:
       'The id of an existing work item on Azure Boards to link to each PR.',
+    cli: false,
+    env: false,
     type: 'integer',
     default: 0,
     supportedPlatforms: ['azure'],
+    parents: ['prOptions'],
   },
   {
     name: 'autoApprove',
@@ -1896,9 +1899,12 @@ const options: RenovateOptions[] = [
   {
     name: 'bbUseDefaultReviewers',
     description: 'Use the default reviewers (Bitbucket only).',
+    cli: false,
+    env: false,
     type: 'boolean',
     default: true,
     supportedPlatforms: ['bitbucket', 'bitbucket-server'],
+    parents: ['prOptions'],
   },
   {
     name: 'bbUseDevelopmentBranch',
@@ -2648,8 +2654,11 @@ const options: RenovateOptions[] = [
   {
     name: 'gitLabIgnoreApprovals',
     description: `Ignore approval rules for MRs created by Renovate, which is useful for automerge.`,
+    cli: false,
+    env: false,
     type: 'boolean',
     default: false,
+    parents: ['prOptions'],
   },
   {
     name: 'customManagers',
@@ -2970,6 +2979,13 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     globalOnly: true,
+  },
+  {
+    name: 'prOptions',
+    description: 'Set PR-specific config options, to control PR behaviour.',
+    type: 'object',
+    default: {},
+    mergeable: true,
   },
 ];
 

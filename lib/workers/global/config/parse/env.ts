@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options';
-import type { AllConfig } from '../../../../config/types';
+import type { AllConfig, PrOptions } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { coersions } from './coersions';
 import type { ParseConfigOptions } from './types';
@@ -238,6 +238,33 @@ export async function getConfig(
   ];
 
   unsupportedEnv.forEach((val) => delete env[val]);
+
+  config = migratePlatformOptions(config, env);
+  return config;
+}
+
+function migratePlatformOptions(
+  config: AllConfig,
+  env: NodeJS.ProcessEnv,
+): AllConfig {
+  const prOptionsKeys: Record<keyof PrOptions, 'boolean' | 'integer'> = {
+    gitLabIgnoreApprovals: 'boolean',
+    bbUseDefaultReviewers: 'boolean',
+    azureWorkItemId: 'integer',
+  };
+  const prOptions: Record<string, unknown> = {};
+  for (const key of Object.keys(prOptionsKeys) as (keyof PrOptions)[]) {
+    const envKey = getEnvName({ name: key });
+    if (!is.undefined(env[envKey])) {
+      const type = prOptionsKeys[key];
+      const coerce = coersions[type];
+      prOptions[key] = coerce(env[envKey]);
+    }
+  }
+
+  if (is.nonEmptyObject(prOptions)) {
+    config.prOptions = { ...config.prOptions, ...prOptions };
+  }
 
   return config;
 }

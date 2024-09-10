@@ -1,6 +1,7 @@
+import is from '@sindresorhus/is';
 import { Command } from 'commander';
 import { getOptions } from '../../../../config/options';
-import type { AllConfig } from '../../../../config/types';
+import type { AllConfig, PrOptions } from '../../../../config/types';
 import { pkg } from '../../../../expose.cjs';
 import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
@@ -16,6 +17,7 @@ export function getCliName(option: ParseConfigOptions): string {
 }
 
 export function getConfig(input: string[]): AllConfig {
+  const config = migratePrOptions(input, {});
   // massage migrated configuration keys
   const argv = input
     .map((a) =>
@@ -36,12 +38,14 @@ export function getConfig(input: string[]): AllConfig {
         .replace('--include-forks', '--fork-processing=enabled')
         .replace('--recreate-closed=false', '--recreate-when=auto')
         .replace('--recreate-closed=true', '--recreate-when=always')
-        .replace('--recreate-closed', '--recreate-when=always'),
+        .replace('--recreate-closed', '--recreate-when=always')
+        .replace('--git-lab-ignore-approvals=false', '')
+        .replace('--git-lab-ignore-approvals=true', '')
+        .replace('--git-lab-ignore-approvals', ''),
     )
-    .filter((a) => !a.startsWith('--git-fs'));
+    .filter((a) => !a.startsWith('--git-fs'))
+    .filter((a) => a !== '');
   const options = getOptions();
-
-  const config: Record<string, any> = {};
 
   let program = new Command().arguments('[repositories...]');
 
@@ -118,6 +122,38 @@ export function getConfig(input: string[]): AllConfig {
       }
     })
     .parse(argv);
+
+  return config;
+}
+
+function migratePrOptions(
+  argv: string[],
+  config: Record<string, any>,
+): Record<string, any> {
+  const prOptionsKeys: (keyof PrOptions)[] = [
+    'gitLabIgnoreApprovals',
+    'bbUseDefaultReviewers',
+    'azureWorkItemId',
+  ];
+  const prOptionsCliKeys = prOptionsKeys.map((option) =>
+    getCliName({ name: option }),
+  );
+  const prOptions: Record<string, unknown> = {};
+
+  for (const arg of argv) {
+    for (const [index, cliKey] of prOptionsCliKeys.entries()) {
+      if (arg.includes(cliKey)) {
+        const [, val = true] = arg.split('0');
+        const key = prOptionsKeys[index];
+        prOptions[key] = val;
+        break;
+      }
+    }
+  }
+
+  if (is.nonEmptyObject(prOptions)) {
+    config.prOptions = { ...config.prOptions, ...prOptions };
+  }
 
   return config;
 }

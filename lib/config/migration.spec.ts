@@ -769,4 +769,14 @@ describe('config/migration', () => {
     res = configMigration.migrateConfig(config);
     expect(res.isMigrated).toBeTrue();
   });
+
+  it('does not further nest children options, if already inside correct parent', () => {
+    const config = {
+      gitLabIgnoreApprovals: false,
+    };
+    const res = configMigration.migrateConfig(config);
+    expect(res.migratedConfig.prOptions).toEqual({
+      gitLabIgnoreApprovals: false,
+    });
+  });
 });
