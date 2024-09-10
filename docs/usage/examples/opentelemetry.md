@@ -19,7 +19,7 @@ services:
       - '4317'
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.107.0
+    image: otel/opentelemetry-collector-contrib:0.108.0
     command: ['--config=/etc/otel-collector-config.yml']
     volumes:
       - ./otel-collector-config.yml:/etc/otel-collector-config.yml

@@ -8,6 +8,46 @@ const DependencyRecordSchema = z
   .record(z.string(), z.array(z.string()))
   .optional();
 
+const PdmSchema = z.object({
+  'dev-dependencies': DependencyRecordSchema,
+  source: z
+    .array(
+      z.object({
+        url: z.string(),
+        name: z.string(),
+        verify_ssl: z.boolean().optional(),
+      }),
+    )
+    .optional(),
+});
+
+const HatchSchema = z.object({
+  envs: z
+    .record(
+      z.string(),
+      z
+        .object({
+          dependencies: DependencyListSchema,
+          'extra-dependencies': DependencyListSchema,
+        })
+        .optional(),
+    )
+    .optional(),
+});
+
+// https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
+const UvSource = z.object({
+  git: z.string().optional(),
+  path: z.string().optional(),
+  url: z.string().optional(),
+  workspace: z.boolean().optional(),
+});
+
+const UvSchema = z.object({
+  'dev-dependencies': DependencyListSchema,
+  sources: z.record(z.string(), UvSource).optional(),
+});
+
 export const PyProjectSchema = z.object({
   project: z
     .object({
@@ -25,40 +65,9 @@ export const PyProjectSchema = z.object({
     .optional(),
   tool: z
     .object({
-      pdm: z
-        .object({
-          'dev-dependencies': DependencyRecordSchema,
-          source: z
-            .array(
-              z.object({
-                url: z.string(),
-                name: z.string(),
-                verify_ssl: z.boolean().optional(),
-              }),
-            )
-            .optional(),
-        })
-        .optional(),
-      hatch: z
-        .object({
-          envs: z
-            .record(
-              z.string(),
-              z
-                .object({
-                  dependencies: DependencyListSchema,
-                  'extra-dependencies': DependencyListSchema,
-                })
-                .optional(),
-            )
-            .optional(),
-        })
-        .optional(),
-      uv: z
-        .object({
-          'dev-dependencies': DependencyListSchema,
-        })
-        .optional(),
+      pdm: PdmSchema.optional(),
+      hatch: HatchSchema.optional(),
+      uv: UvSchema.optional(),
     })
     .optional(),
 });
@@ -79,3 +88,18 @@ export const PdmLockfileSchema = Toml.pipe(
     ),
   )
   .transform((lock) => ({ lock }));
+
+export const UvLockfileSchema = Toml.pipe(
+  z.object({
+    package: LooseArray(
+      z.object({
+        name: z.string(),
+        version: z.string(),
+      }),
+    ),
+  }),
+).transform(({ package: pkg }) =>
+  Object.fromEntries(
+    pkg.map(({ name, version }): [string, string] => [name, version]),
+  ),
+);

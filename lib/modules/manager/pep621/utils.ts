@@ -7,7 +7,7 @@ import { normalizePythonDepName } from '../../datasource/pypi/common';
 import type { PackageDependency } from '../types';
 import type { PyProject } from './schema';
 import { PyProjectSchema } from './schema';
-import type { Pep508ParseResult } from './types';
+import type { Pep508ParseResult, Pep621ManagerData } from './types';
 
 const pep508Regex = regEx(
   /^(?<packageName>[A-Z0-9._-]+)\s*(\[(?<extras>[A-Z0-9,._-]+)\])?\s*(?<currentValue>[^;]+)?(;\s*(?<marker>.*))?/i,
@@ -89,10 +89,14 @@ export function parseDependencyGroupRecord(
     return [];
   }
 
-  const deps: PackageDependency[] = [];
-  for (const pep508Strings of Object.values(records)) {
+  const deps: PackageDependency<Pep621ManagerData>[] = [];
+  for (const [depGroup, pep508Strings] of Object.entries(records)) {
     for (const dep of parseDependencyList(depType, pep508Strings)) {
-      deps.push({ ...dep, depName: dep.packageName! });
+      deps.push({
+        ...dep,
+        depName: dep.packageName!,
+        managerData: { depGroup },
+      });
     }
   }
   return deps;
