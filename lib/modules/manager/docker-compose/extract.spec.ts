@@ -148,7 +148,19 @@ describe('modules/manager/docker-compose/extract', () => {
               {{ services['nginx']['env'] }}
       `;
       const res = extractPackageFile(compose, '', {});
-      expect(res?.deps).toHaveLength(1);
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.0.1',
+            datasource: 'docker',
+            depName: 'quay.io/nginx',
+            replaceString: 'quay.io/nginx:0.0.1',
+          },
+        ],
+      });
     });
   });
 });
