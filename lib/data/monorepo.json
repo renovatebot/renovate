@@ -1,4 +1,5 @@
 {
+  "$schema": "../../tools/schemas/monorepo-schema.json",
   "repoGroups": {
     "accounts": "https://github.com/accounts-js/accounts",
     "acot": "https://github.com/acot-a11y/acot",
@@ -336,6 +337,7 @@
     "ktor": "https://github.com/ktorio/ktor",
     "lamar": "https://github.com/JasperFx/lamar",
     "lerna": "https://github.com/lerna/lerna",
+    "lerna-lite": "https://github.com/lerna-lite/lerna-lite",
     "lexical": "https://github.com/facebook/lexical",
     "linguijs": "https://github.com/lingui/js-lingui",
     "log4j2": "https://github.com/apache/logging-log4j2",
@@ -344,6 +346,7 @@
       "https://github.com/loopbackio/loopback-next"
     ],
     "lrnwebcomponents": "https://github.com/elmsln/lrnwebcomponents",
+    "lucide": "https://github.com/lucide-icons/lucide",
     "mailing": "https://github.com/sofn-xyz/mailing",
     "mantine": "https://github.com/mantinedev/mantine",
     "mapstruct": "https://github.com/mapstruct/mapstruct",

@@ -40,6 +40,26 @@ async function getFileContent(
   return fileContent;
 }
 
+function sortPackageFiles(
+  config: BranchConfig,
+  manager: string,
+  packageFiles: FilePath[],
+): void {
+  const managerPackageFiles = config.packageFiles?.[manager];
+  if (!managerPackageFiles) {
+    return;
+  }
+  packageFiles.sort((lhs, rhs) => {
+    const lhsIndex = managerPackageFiles.findIndex(
+      (entry) => entry.packageFile === lhs.path,
+    );
+    const rhsIndex = managerPackageFiles.findIndex(
+      (entry) => entry.packageFile === rhs.path,
+    );
+    return lhsIndex - rhsIndex;
+  });
+}
+
 function hasAny(set: Set<string>, targets: Iterable<string>): boolean {
   for (const target of targets) {
     if (set.has(target)) {
@@ -334,6 +354,7 @@ export async function getUpdatedPackageFiles(
         updatedPackageFiles,
         managerPackageFiles[manager],
       );
+      sortPackageFiles(config, manager, packageFilesForManager);
       for (const packageFile of packageFilesForManager) {
         const updatedDeps = packageFileUpdatedDeps[packageFile.path];
         const results = await managerUpdateArtifacts(manager, {
@@ -374,6 +395,7 @@ export async function getUpdatedPackageFiles(
         nonUpdatedPackageFiles,
         managerPackageFiles[manager],
       );
+      sortPackageFiles(config, manager, packageFilesForManager);
       for (const packageFile of packageFilesForManager) {
         const updatedDeps = packageFileUpdatedDeps[packageFile.path];
         const results = await managerUpdateArtifacts(manager, {
@@ -416,6 +438,7 @@ export async function getUpdatedPackageFiles(
           lockFileMaintenancePackageFiles,
           managerPackageFiles[manager],
         );
+        sortPackageFiles(config, manager, packageFilesForManager);
         for (const packageFile of packageFilesForManager) {
           const contents =
             updatedFileContents[packageFile.path] ||
