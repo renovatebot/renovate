@@ -92,7 +92,7 @@ async function generateBranchCache(
           baseBranch,
           baseBranchSha,
         ) ?? undefined;
-    } else if(baseBranchSha && !branchSha && branch.prNo) {
+    } else if (baseBranchSha && !branchSha && branch.prNo) {
       // if branch was deleted/ PR exists and ignored
       prNo = branch.prNo;
     }
