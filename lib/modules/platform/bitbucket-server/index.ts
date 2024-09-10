@@ -673,7 +673,7 @@ async function updatePRAndAddReviewers(
     const reviewersSet = new Set(
       await Promise.allSettled(
         [...pr.reviewers!, ...reviewers].map((name) =>
-          name.includes('@') ? resolveEmailToUsername(name) : name,
+          name.includes('@') ? utils.resolveEmailToUsername(name) : name,
         ),
       ),
     );
@@ -736,17 +736,6 @@ async function retry<T extends (...arg0: any[]) => Promise<any>>(
   // Can't be `undefined` here.
   // eslint-disable-next-line @typescript-eslint/only-throw-error
   throw lastError;
-}
-// https://docs.atlassian.com/bitbucket-server/rest/5.1.0/bitbucket-rest.html#idm45588158982432
-async function resolveEmailToUsername(email: string): Promise<string | null> {
-  // GET /rest/api/1.0/admin/users?filter={filter}
-  const users = (
-    await bitbucketServerHttp.getJson<{ values: { name: string }[] }>(
-      `./rest/api/1.0/admin/users?filter=${email}`,
-    )
-  ).body;
-
-  return users.values?.[0].name ?? null;
 }
 
 export function deleteLabel(issueNo: number, label: string): Promise<void> {

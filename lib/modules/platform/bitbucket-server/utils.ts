@@ -218,3 +218,15 @@ export function getExtraCloneOpts(opts: HostRule): GitOptions {
   }
   return {};
 }
+
+// https://docs.atlassian.com/bitbucket-server/rest/5.1.0/bitbucket-rest.html#idm45588158982432
+export async function resolveEmailToUsername(email: string): Promise<string | null> {
+  // GET /rest/api/1.0/admin/users?filter={filter}
+  const users = (
+    await bitbucketServerHttp.getJson<{ values: { name: string }[] }>(
+      `./rest/api/1.0/admin/users?filter=${email}`,
+    )
+  ).body;
+
+  return users.values?.[0].name ?? null;
+}
