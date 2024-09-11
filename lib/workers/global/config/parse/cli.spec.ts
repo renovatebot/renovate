@@ -206,10 +206,16 @@ describe('workers/global/config/parse/cli', () => {
       expect(cli.getConfig(argv)).toEqual({ requireConfig: 'optional' });
     });
 
-    it('migrates platformOptions', () => {
+    it('migrates prOptions', () => {
       argv.push('--git-lab-ignore-approvals');
+      argv.push('--bb-use-default-reviewers');
+      argv.push('--azure-work-item-id=10');
       expect(cli.getConfig(argv)).toEqual({
-        prOptions: { gitLabIgnoreApprovals: true },
+        prOptions: {
+          gitLabIgnoreApprovals: true,
+          bbUseDefaultReviewers: true,
+          azureWorkItemId: 10,
+        },
       });
     });
   });

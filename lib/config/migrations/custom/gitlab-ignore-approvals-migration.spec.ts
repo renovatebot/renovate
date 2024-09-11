@@ -1,8 +1,8 @@
-import { GitlabIgnoreApprovalsractMigration } from './gitlab-ignore-approvals-migration';
+import { GitlabIgnoreApprovalsMigration } from './gitlab-ignore-approvals-migration';
 
 describe('config/migrations/custom/gitlab-ignore-approvals-migration', () => {
   it('should migrate', () => {
-    expect(GitlabIgnoreApprovalsractMigration).toMigrate(
+    expect(GitlabIgnoreApprovalsMigration).toMigrate(
       {
         gitLabIgnoreApprovals: true,
       },
@@ -15,7 +15,7 @@ describe('config/migrations/custom/gitlab-ignore-approvals-migration', () => {
   });
 
   it('should not migrate', () => {
-    expect(GitlabIgnoreApprovalsractMigration).toMigrate(
+    expect(GitlabIgnoreApprovalsMigration).toMigrate(
       {
         prOptions: {
           gitLabIgnoreApprovals: true,

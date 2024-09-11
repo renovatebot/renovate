@@ -426,5 +426,21 @@ describe('workers/global/config/parse/env', () => {
       const config = await env.getConfig(envParam);
       expect(config.prOptions).toMatchObject({ gitLabIgnoreApprovals: false });
     });
+
+    it('migrates RENOVATE_BB_USE_DEFAULT_REVIEWERS', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_BB_USE_DEFAULT_REVIEWERS: 'false',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.prOptions).toMatchObject({ bbUseDefaultReviewers: false });
+    });
+
+    it('migrates RENOVATE_AZURE_WORK_ITEM_ID', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_AZURE_WORK_ITEM_ID: '10',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.prOptions).toMatchObject({ azureWorkItemId: 10 });
+    });
   });
 });

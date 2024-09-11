@@ -239,11 +239,11 @@ export async function getConfig(
 
   unsupportedEnv.forEach((val) => delete env[val]);
 
-  config = migratePlatformOptions(config, env);
+  config = migratePrOptions(config, env);
   return config;
 }
 
-function migratePlatformOptions(
+function migratePrOptions(
   config: AllConfig,
   env: NodeJS.ProcessEnv,
 ): AllConfig {

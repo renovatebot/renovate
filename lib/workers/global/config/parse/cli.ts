@@ -41,7 +41,13 @@ export function getConfig(input: string[]): AllConfig {
         .replace('--recreate-closed', '--recreate-when=always')
         .replace('--git-lab-ignore-approvals=false', '')
         .replace('--git-lab-ignore-approvals=true', '')
-        .replace('--git-lab-ignore-approvals', ''),
+        .replace('--git-lab-ignore-approvals', '')
+        .replace('--bb-use-default-reviewers=false', '')
+        .replace('--bb-use-default-reviewers=true', '')
+        .replace('--bb-use-default-reviewers', '')
+        .replace('--azure-work-item-id=false', '')
+        .replace('--azure-work-item-id=true', '')
+        .replace('--azure-work-item-id', ''),
     )
     .filter((a) => !a.startsWith('--git-fs'))
     .filter((a) => a !== '');

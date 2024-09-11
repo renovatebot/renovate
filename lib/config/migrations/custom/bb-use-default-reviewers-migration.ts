@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import { AbstractMigration } from '../base/abstract-migration';
 
-export class GitlabIgnoreApprovalsMigration extends AbstractMigration {
-  override readonly propertyName = 'gitLabIgnoreApprovals';
+export class BbUseDefaultReviewersMigration extends AbstractMigration {
+  override readonly propertyName = 'bbUseDefaultReviewers';
 
   override run(value: unknown, key: string, parentKey?: string): void {
     if (is.boolean(value) && parentKey !== 'prOptions') {
@@ -10,7 +10,7 @@ export class GitlabIgnoreApprovalsMigration extends AbstractMigration {
       this.delete();
       this.setHard('prOptions', {
         ...prOptions,
-        gitLabIgnoreApprovals: value,
+        bbUseDefaultReviewers: value,
       });
     }
   }
