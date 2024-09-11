@@ -514,7 +514,7 @@ describe('config/validation', () => {
         'repo',
         config,
       );
-      expect(warnings).toHaveLength(1);
+      expect(warnings).toHaveLength(2);
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(12);
     });
