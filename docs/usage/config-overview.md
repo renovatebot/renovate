@@ -285,6 +285,18 @@ To change this behavior you need to manually push a `renovate.json` to the repos
 
 If an Organization installs Renovate with "Selected repositories" then we assume the organization wants all of the selected repositories onboarded (even forked repositories), so `forkProcessing` is set to `true`.
 
+### Inherited config
+
+The Mend Renovate app will automatically apply inherited config to all installed repositories in an organization when the following conditions are met:
+
+1. A repository called `renovate-config` exists in the same organization and has the Mend Renovate app installed. (Onboarding not necessary)
+2. The file `org-inherited-config.json` is detected in the `renovate-config` repository.
+
+Unlike with the Self-hosted application, the values of the `inheritConfigFileName` and the `inheritConfigRepoName` cannot be changed in the Mend Renovate app.
+
+To avoid wasted API calls to check for the existence of inherited config file, `inheritConfig` will be applied to all relevant repositories when a commit is made to add or modify the `inheritConfig` file.
+It is important to note that the `inheritConfig` file will not be detected if the Mend Renovate app is not installed on the `renovate-config` repository at the time of adding or changing the file.
+
 ### Default presets
 
 The Mend Renovate app automatically adds the `mergeConfidence:all-badges` preset to the `extends` array.
