@@ -131,13 +131,13 @@
     Hi there,
 
 
-    Please try to reduce the amount of logs you're pasting into this discussion. Maintainers have a limited amount of time to help you, and often do so from mobile devices, so it's easier for us to help you if you provide only the relevant parts of the logs and/or make a good attempt to look through them first and point to the lines you think are relevant.
+    Please limit the amount of logs you're pasting into this discussion. The maintainers have a limited amount of time to help you, and often do so from mobile devices. It's easier for us if you only paste the relevant parts of the logs, and point us to the lines you think are relevant.
 
 
-    As an example, if your problem is about a certain dependency, find the log sections which apply to that dependency and paste only those sections. Similarly, if your problem is about a particular branch/PR, find the log sections which apply to that branch/PR and paste only those sections.
+    For example, if your problem is about a certain dependency, find the log sections which apply to that dependency and paste only those sections. Similarly, if your problem is about a particular branch/PR, find the log sections which apply to that branch/PR and paste only those sections.
 
 
-    If you're unsure, it's also perfectly acceptable to paste the full logs, including into a gist, but if that's the only thing you do, it's likely to take longer for us to help you or we may not start.
+    If you're not sure, it's acceptable to paste the full logs, including into a gist. Please try to explain the problem in enough detail to give us starting points to debug. If you only paste the full log, and do nothing else, it is likely that we will take longer to help you, or we may not start to help you at all.
 
 
     Thanks, the Renovate team
@@ -461,16 +461,16 @@
     Hi there,
 
 
-    This discussion is too complex, and we recommend you simplify it to increase chances of getting help and finding a solution.
+    This discussion is too complex, and we want you to simplify. This way you are more likely to get help or a solution.
 
 
-    For example, if you've included your _whole_ config, and it's quite complex, while your problem relates to just one specific part, consider removing the parts that are not relevant to the problem. The best way to do this is to usually create a minimal reproduction repository.
+    For example, if you've pasted your _whole_ complex config, while your problem is about just one part, consider removing the parts that are not relevant to your problem. The best way to do this is to create a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md).
 
 
-    You may have also tried many ways to achieve something, and described them all here, but if none of them work then it's best to focus on the one that you think is the most promising or the ideal solution and not complicate the description or logs with the other attempts.
+    You may have tried many ways to do something, and described all the methods you tried. If none of the methods worked, please focus on the most promising method, or the ideal solution. Avoid complicating the description (or logs) with the failed attempts.
 
 
-    Ultimately, if you reduce the complexity of your discussion, you'll increase the chances of getting help.
+    To summarize: please reduce the complexity of your discussion, to increase the chances of getting help.
 
 
     Thanks, the Renovate team
