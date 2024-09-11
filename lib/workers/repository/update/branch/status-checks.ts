@@ -16,8 +16,6 @@ export async function resolveBranchStatus(
     `resolveBranchStatus(branchName=${branchName}, ignoreTests=${ignoreTests})`,
   );
 
-  // eslint-disable-next-line
-  console.log('ignoreTests', ignoreTests);
   if (ignoreTests) {
     logger.debug('Ignore tests. Return green');
     return 'green';

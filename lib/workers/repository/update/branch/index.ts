@@ -904,8 +904,6 @@ export async function processBranch(
           });
         }
 
-        // eslint-disable-next-line
-        console.log('ignoreTests', config.ignoreTests);
         if (config.automerge) {
           logger.debug('PR is configured for automerge');
           // skip automerge if there is a new commit since status checks aren't done yet
