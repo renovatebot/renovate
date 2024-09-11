@@ -178,7 +178,7 @@ export function parseKustomize(
   let pkg: Kustomize | null = null;
   try {
     // TODO: use schema (#9610)
-    pkg = parseSingleYaml(content, { json: true });
+    pkg = parseSingleYaml(content);
   } catch /* istanbul ignore next */ {
     logger.debug({ packageFile }, 'Error parsing kustomize file');
     return null;
