@@ -77,7 +77,7 @@ export async function getJvmConfiguration(
   const daemonJvm = await readLocalFile(daemonJvmFile, 'utf8');
   if (daemonJvm) {
     const TOOLCHAIN_VERSION_REGEX = regEx(
-      '^(?:toolchainVersion=)(?<version>\\d+)$',
+      '^(?:toolchainVersion\\s*=\\s*)(?<version>\\d+)$',
       'm',
     );
     const toolChainMatch = TOOLCHAIN_VERSION_REGEX.exec(daemonJvm);
