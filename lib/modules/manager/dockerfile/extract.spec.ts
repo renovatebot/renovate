@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import type { PackageDependency } from '../types';
 import { extractVariables, getDep } from './extract';
@@ -378,6 +379,29 @@ describe('modules/manager/dockerfile/extract', () => {
     it('handles COPY --from', () => {
       const res = extractPackageFile(
         'FROM scratch\nCOPY --from=gcr.io/k8s-skaffold/skaffold:v0.11.0 /usr/bin/skaffold /usr/bin/skaffold\n',
+        '',
+        {},
+      )?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'v0.11.0',
+          datasource: 'docker',
+          depName: 'gcr.io/k8s-skaffold/skaffold',
+          depType: 'final',
+          replaceString: 'gcr.io/k8s-skaffold/skaffold:v0.11.0',
+        },
+      ]);
+    });
+
+    it('handles COPY --link --from', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM scratch
+          COPY --link --from=gcr.io/k8s-skaffold/skaffold:v0.11.0 /usr/bin/skaffold /usr/bin/skaffold
+        `,
         '',
         {},
       )?.deps;
