@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
@@ -6,6 +7,8 @@ import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
 import { scm } from '../../../modules/platform/scm';
 import { getBranchList, setUserRepoConfig } from '../../../util/git';
+import { escapeRegExp, regEx } from '../../../util/regex';
+import { uniqueStrings } from '../../../util/string';
 import { getReconfigureBranchName } from '../reconfigure';
 
 async function cleanUpBranches(
@@ -18,16 +21,28 @@ async function cleanUpBranches(
   }
   // set Git author in case the repository is not initialized yet
   setUserRepoConfig(config);
+  const prefixes = [config.branchPrefix, config.branchPrefixOld]
+    .filter(is.nonEmptyStringAndNotWhitespace)
+    .filter(uniqueStrings)
+    .map(escapeRegExp);
+  const baseBranches = config.baseBranches?.length
+    ? config.baseBranches.map(escapeRegExp)
+    : [];
+  const baseBranchRe = baseBranches.length
+    ? regEx(`^(?:${prefixes.join('|')})(${baseBranches.join('|')})-`)
+    : null;
   for (const branchName of remainingBranches) {
     try {
+      const baseBranch =
+        baseBranchRe?.exec(branchName)?.[1] ?? config.defaultBranch!;
       const pr = await platform.findPr({
         branchName,
         state: 'open',
-        targetBranch: config.baseBranch,
+        targetBranch: baseBranch,
       });
       const branchIsModified = await scm.isBranchModified(
         branchName,
-        config.defaultBranch!,
+        baseBranch,
       );
       if (pr) {
         if (branchIsModified) {
