@@ -404,19 +404,21 @@ describe('modules/manager/dockerfile/extract', () => {
         `,
         '',
         {},
-      )?.deps;
-      expect(res).toEqual([
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: 'v0.11.0',
-          datasource: 'docker',
-          depName: 'gcr.io/k8s-skaffold/skaffold',
-          depType: 'final',
-          replaceString: 'gcr.io/k8s-skaffold/skaffold:v0.11.0',
-        },
-      ]);
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v0.11.0',
+            datasource: 'docker',
+            depName: 'gcr.io/k8s-skaffold/skaffold',
+            depType: 'final',
+            replaceString: 'gcr.io/k8s-skaffold/skaffold:v0.11.0',
+          },
+        ],
+      });
     });
 
     it('skips named multistage COPY --from tags', () => {
