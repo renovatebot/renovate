@@ -1,0 +1,72 @@
+name:       RSA
+category:   Cryptography, Codec
+version:    1.0.0
+license:    BSD3
+license-file: LICENSE
+author:     Adam Wick <awick@galois.com>
+maintainer: Adam Wick <awick@galois.com>
+stability:  stable
+build-type: Simple
+cabal-version: >= 1.2
+tested-with: GHC ==6.8.0
+synopsis: Implementation of RSA, using the padding schemes of PKCS#1 v2.1.
+description: This library implements the RSA encryption and signature
+             algorithms for arbitrarily-sized ByteStrings. While the
+             implementations work, they are not necessarily the fastest ones
+             on the planet. Particularly key generation. The algorithms
+             included are based of RFC 3447, or the Public-Key Cryptography
+             Standard for RSA, version 2.1 (a.k.a, PKCS#1 v2.1).
+
+Flag IncludeMD5
+  Description: Include support for using MD5 in the various crypto routines.
+
+Flag UseBinary
+  Description: Use the binary package for serializing keys.
+
+Library
+ build-depends: base < 3
+ if flag(UseBinary)
+   build-depends: binary <10
+   CPP-Options: -DUSE_BINARY
+ if flag(IncludeMD5) && flag(UseBinary)
+   build-depends: pureMD5 <10
+   CPP-Options: -DINCLUDE_MD5
+ exposed-modules: Codec.Crypto.RSA
+
+Executable test_rsa
+    build-depends: base < 3
+  CPP-Options: -DRSA_TEST
+  Main-Is: Test.hs
+  Other-Modules: Codec.Crypto.RSA
+
+-- The above is actual RSA-1.0.0 cabal file (slightly modified to produce less check warnings)
+
+-- The following sections is further inconsistent indentation examples.
+
+-- Note that here main-is is part of GHC-Options field. (and thus warned about as missing)
+Executable warnings
+    build-depends: base < 5
+  GHC-Options: -Wall
+    main-is: warnings.hs
+  Other-Modules: FooBar
+
+-- Increasing indentation is also possible if we use braces to delimit field contents.
+Executable warnings2
+  build-depends: { base < 5 }
+    main-is: { warnings2.hs }
+      Other-Modules: FooBar
+
+-- another common mistake is something like below,
+-- where a sub-section is over-indented
+flag splitBase
+
+Executable warnings3
+    if flag(splitBase)
+        build-depends: base < 3
+    else
+        build-depends: base < 5
+
+ Main-Is: warnings3.hs
+ Other-Modules:
+  Graphics.UI.WXCore
+  Graphics.UI.WXCore.Wx

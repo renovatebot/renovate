@@ -1,0 +1,14 @@
+cabal-version: 3.0
+name:          public-multilib1
+version:       0
+synopsis:      public-multilibs
+category:      Tests
+license:       MIT
+
+library
+  default-language: Haskell2010
+  build-depends:
+    , base     ^>=4.14
+    , somelib:internal ^>=1.0
+
+  exposed-modules:  Foo

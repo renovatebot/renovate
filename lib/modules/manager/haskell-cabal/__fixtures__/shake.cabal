@@ -1,0 +1,405 @@
+cabal-version:      1.18
+build-type:         Simple
+name:               shake
+version:            0.15.11
+license:            BSD3
+license-file:       LICENSE
+category:           Development, Shake
+author:             Neil Mitchell <ndmitchell@gmail.com>
+maintainer:         Neil Mitchell <ndmitchell@gmail.com>
+copyright:          Neil Mitchell 2011-2017
+synopsis:           Build system library, like Make, but more accurate dependencies.
+description:
+    Shake is a Haskell library for writing build systems - designed as a
+    replacement for @make@. See "Development.Shake" for an introduction,
+    including an example. Further examples are included in the Cabal tarball,
+    under the @Examples@ directory. The homepage contains links to a user
+    manual, an academic paper and further information:
+    <http://shakebuild.com>
+    .
+    To use Shake the user writes a Haskell program
+    that imports "Development.Shake", defines some build rules, and calls
+    the 'Development.Shake.shakeArgs' function. Thanks to do notation and infix
+    operators, a simple Shake build system
+    is not too dissimilar from a simple Makefile. However, as build systems
+    get more complex, Shake is able to take advantage of the excellent
+    abstraction facilities offered by Haskell and easily support much larger
+    projects. The Shake library provides all the standard features available in other
+    build systems, including automatic parallelism and minimal rebuilds.
+    Shake also provides more accurate dependency tracking, including seamless
+    support for generated files, and dependencies on system information
+    (e.g. compiler version).
+homepage:           http://shakebuild.com
+bug-reports:        https://github.com/ndmitchell/shake/issues
+tested-with:        GHC==8.0.1, GHC==7.10.3, GHC==7.8.4, GHC==7.6.3, GHC==7.4.2
+extra-doc-files:
+    CHANGES.txt
+    README.md
+extra-source-files:
+    src/Test/C/constants.c
+    src/Test/C/constants.h
+    src/Test/C/main.c
+    src/Test/MakeTutor/Makefile
+    src/Test/MakeTutor/hellofunc.c
+    src/Test/MakeTutor/hellomake.c
+    src/Test/MakeTutor/hellomake.h
+    src/Test/Tar/list.txt
+    src/Test/Ninja/*.ninja
+    src/Test/Ninja/subdir/*.ninja
+    src/Test/Ninja/*.output
+    src/Test/Progress/*.prog
+    src/Test/Tup/hello.c
+    src/Test/Tup/root.cfg
+    src/Test/Tup/newmath/root.cfg
+    src/Test/Tup/newmath/square.c
+    src/Test/Tup/newmath/square.h
+    src/Paths.hs
+    docs/Manual.md
+    docs/shake-progress.png
+
+data-files:
+    html/viz.js
+    html/profile.html
+    html/progress.html
+    html/shake.js
+    docs/manual/build.bat
+    docs/manual/Build.hs
+    docs/manual/build.sh
+    docs/manual/constants.c
+    docs/manual/constants.h
+    docs/manual/main.c
+
+source-repository head
+    type:     git
+    location: https://github.com/ndmitchell/shake.git
+
+flag portable
+    default: False
+    manual: True
+    description: Obtain FileTime using portable functions
+
+library
+    default-language: Haskell2010
+    -- dot directory on own row
+    hs-source-dirs:
+        .
+        src
+    build-depends:
+        base >= 4.5,
+        directory,
+        hashable >= 1.1.2.3,
+        binary,
+        filepath,
+        process >= 1.1,
+        unordered-containers >= 0.2.1,
+        bytestring,
+        utf8-string >= 0.3,
+        time,
+        random,
+        js-jquery,
+        js-flot,
+        transformers >= 0.2,
+        extra >= 1.4.8,
+        deepseq >= 1.1
+
+    if flag(portable)
+        cpp-options: -DPORTABLE
+        if impl(ghc < 7.6)
+            build-depends: old-time
+    else
+        if !os(windows)
+            build-depends: unix >= 2.5.1
+    if !os(windows)
+        build-depends: unix
+
+    exposed-modules:
+        Development.Shake
+        Development.Shake.Classes
+        Development.Shake.Command
+        Development.Shake.Config
+        Development.Shake.FilePath
+        Development.Shake.Forward
+        Development.Shake.Rule
+        Development.Shake.Util
+
+    other-modules:
+        Development.Ninja.Env
+        Development.Ninja.Lexer
+        Development.Ninja.Parse
+        Development.Ninja.Type
+        Development.Shake.Args
+        Development.Shake.ByteString
+        Development.Shake.Core
+        Development.Shake.CmdOption
+        Development.Shake.Database
+        Development.Shake.Demo
+        Development.Shake.Derived
+        Development.Shake.Errors
+        Development.Shake.FileInfo
+        Development.Shake.FilePattern
+        Development.Shake.Monad
+        Development.Shake.Pool
+        Development.Shake.Profile
+        Development.Shake.Progress
+        Development.Shake.Resource
+        Development.Shake.Rules.Directory
+        Development.Shake.Rules.File
+        Development.Shake.Rules.Files
+        Development.Shake.Rules.Oracle
+        Development.Shake.Rules.OrderOnly
+        Development.Shake.Rules.Rerun
+        Development.Shake.Shake
+        Development.Shake.Special
+        Development.Shake.Storage
+        Development.Shake.Types
+        Development.Shake.Value
+        General.Bilist
+        General.Binary
+        General.Cleanup
+        General.Concurrent
+        General.Extra
+        General.FileLock
+        General.Intern
+        General.Process
+        General.String
+        General.Template
+        General.Timing
+        Paths_shake
+
+
+executable shake
+    default-language: Haskell2010
+    hs-source-dirs:   src
+    ghc-options: -main-is Run.main
+    main-is: Run.hs
+    ghc-options: -rtsopts
+    -- GHC bug 7646 means -threaded causes errors
+    if impl(ghc >= 7.8)
+        ghc-options: -threaded "-with-rtsopts=-I0 -qg -qb"
+    build-depends:
+        base == 4.*,
+        directory,
+        hashable >= 1.1.2.3,
+        binary,
+        filepath,
+        process >= 1.1,
+        unordered-containers >= 0.2.1,
+        bytestring,
+        utf8-string >= 0.3,
+        time,
+        random,
+        js-jquery,
+        js-flot,
+        transformers >= 0.2,
+        extra >= 1.4.8,
+        deepseq >= 1.1,
+        primitive
+
+    if flag(portable)
+        cpp-options: -DPORTABLE
+        if impl(ghc < 7.6)
+            build-depends: old-time
+    else
+        if !os(windows)
+            build-depends: unix >= 2.5.1
+    if !os(windows)
+        build-depends: unix
+
+    other-modules:
+        Development.Make.All
+        Development.Make.Env
+        Development.Make.Parse
+        Development.Make.Rules
+        Development.Make.Type
+        Development.Ninja.All
+        Development.Ninja.Env
+        Development.Ninja.Lexer
+        Development.Ninja.Parse
+        Development.Ninja.Type
+        Development.Shake
+        Development.Shake.Args
+        Development.Shake.ByteString
+        Development.Shake.Classes
+        Development.Shake.CmdOption
+        Development.Shake.Command
+        Development.Shake.Core
+        Development.Shake.Database
+        Development.Shake.Demo
+        Development.Shake.Derived
+        Development.Shake.Errors
+        Development.Shake.FileInfo
+        Development.Shake.FilePath
+        Development.Shake.FilePattern
+        Development.Shake.Forward
+        Development.Shake.Monad
+        Development.Shake.Pool
+        Development.Shake.Profile
+        Development.Shake.Progress
+        Development.Shake.Resource
+        Development.Shake.Rule
+        Development.Shake.Rules.Directory
+        Development.Shake.Rules.File
+        Development.Shake.Rules.Files
+        Development.Shake.Rules.Oracle
+        Development.Shake.Rules.OrderOnly
+        Development.Shake.Rules.Rerun
+        Development.Shake.Shake
+        Development.Shake.Special
+        Development.Shake.Storage
+        Development.Shake.Types
+        Development.Shake.Value
+        General.Bilist
+        General.Binary
+        General.Cleanup
+        General.Concurrent
+        General.Extra
+        General.FileLock
+        General.Intern
+        General.Process
+        General.String
+        General.Template
+        General.Timing
+        Paths_shake
+        Run
+
+
+test-suite shake-test
+    default-language: Haskell2010
+    type: exitcode-stdio-1.0
+    main-is: Test.hs
+    hs-source-dirs: src
+
+    ghc-options: -main-is Test.main -rtsopts
+    if impl(ghc >= 7.6)
+        -- space leak introduced by -O1 in 7.4, see #445
+        ghc-options: -with-rtsopts=-K1K
+    if impl(ghc >= 7.8)
+        -- GHC bug 7646 (fixed in 7.8) means -threaded causes errors
+        ghc-options: -threaded
+
+    build-depends:
+        base == 4.*,
+        directory,
+        hashable >= 1.1.2.3,
+        binary,
+        filepath,
+        process >= 1.1,
+        unordered-containers >= 0.2.1,
+        bytestring,
+        utf8-string >= 0.3,
+        time,
+        random,
+        js-jquery,
+        js-flot,
+        transformers >= 0.2,
+        deepseq >= 1.1,
+        extra >= 1.4.8,
+        QuickCheck >= 2.0
+
+    if flag(portable)
+        cpp-options: -DPORTABLE
+        if impl(ghc < 7.6)
+            build-depends: old-time
+    else
+        if !os(windows)
+            build-depends: unix >= 2.5.1
+    if !os(windows)
+        build-depends: unix
+
+    other-modules:
+        Development.Make.All
+        Development.Make.Env
+        Development.Make.Parse
+        Development.Make.Rules
+        Development.Make.Type
+        Development.Ninja.All
+        Development.Ninja.Env
+        Development.Ninja.Lexer
+        Development.Ninja.Parse
+        Development.Ninja.Type
+        Development.Shake
+        Development.Shake.Args
+        Development.Shake.ByteString
+        Development.Shake.Classes
+        Development.Shake.CmdOption
+        Development.Shake.Command
+        Development.Shake.Config
+        Development.Shake.Core
+        Development.Shake.Database
+        Development.Shake.Demo
+        Development.Shake.Derived
+        Development.Shake.Errors
+        Development.Shake.FileInfo
+        Development.Shake.FilePath
+        Development.Shake.FilePattern
+        Development.Shake.Forward
+        Development.Shake.Monad
+        Development.Shake.Pool
+        Development.Shake.Profile
+        Development.Shake.Progress
+        Development.Shake.Resource
+        Development.Shake.Rule
+        Development.Shake.Rules.Directory
+        Development.Shake.Rules.File
+        Development.Shake.Rules.Files
+        Development.Shake.Rules.Oracle
+        Development.Shake.Rules.OrderOnly
+        Development.Shake.Rules.Rerun
+        Development.Shake.Shake
+        Development.Shake.Special
+        Development.Shake.Storage
+        Development.Shake.Types
+        Development.Shake.Util
+        Development.Shake.Value
+        General.Bilist
+        General.Binary
+        General.Cleanup
+        General.Concurrent
+        General.Extra
+        General.FileLock
+        General.Intern
+        General.Process
+        General.String
+        General.Template
+        General.Timing
+        Paths_shake
+        Run
+        Test.Assume
+        Test.Basic
+        Test.Benchmark
+        Test.C
+        Test.Cache
+        Test.Command
+        Test.Config
+        Test.Digest
+        Test.Directory
+        Test.Docs
+        Test.Errors
+        Test.FileLock
+        Test.FilePath
+        Test.FilePattern
+        Test.Files
+        Test.Forward
+        Test.Journal
+        Test.Lint
+        Test.Live
+        Test.Makefile
+        Test.Manual
+        Test.Match
+        Test.Monad
+        Test.Ninja
+        Test.Oracle
+        Test.OrderOnly
+        Test.Parallel
+        Test.Pool
+        Test.Progress
+        Test.Random
+        Test.Resources
+        Test.Self
+        Test.Tar
+        Test.Tup
+        Test.Type
+        Test.Unicode
+        Test.Util
+        Test.Verbosity
+        Test.Version

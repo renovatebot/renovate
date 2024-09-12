@@ -1,0 +1,11 @@
+cabal-version: 2.0
+name: mixin
+version: 0
+build-type: Simple
+
+executable str-example
+  main-is:             Main.hs
+  build-depends:       base, str-string, str-bytestring
+  mixins:              str-string     (Str as Str.String),
+                       str-bytestring (Str as Str.ByteString)
+  hs-source-dirs:      str-example

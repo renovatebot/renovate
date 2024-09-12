@@ -1,0 +1,128 @@
+name:                generics-sop
+version:             0.3.1.0
+synopsis:            Generic Programming using True Sums of Products
+description:
+  A library to support the definition of generic functions.
+  Datatypes are viewed in a uniform, structured way:
+  the choice between constructors is represented using an n-ary
+  sum, and the arguments of each constructor are represented using
+  an n-ary product.
+  .
+  The module "Generics.SOP" is the main module of this library and contains
+  more detailed documentation.
+  .
+  Examples of using this library are provided by the following
+  packages:
+  .
+    * @<https://hackage.haskell.org/package/basic-sop basic-sop>@ basic examples,
+  .
+    * @<https://hackage.haskell.org/package/pretty-sop pretty-sop>@ generic pretty printing,
+  .
+    * @<https://hackage.haskell.org/package/lens-sop lens-sop>@ generically computed lenses,
+  .
+    * @<https://hackage.haskell.org/package/json-sop json-sop>@ generic JSON conversions.
+  .
+  A detailed description of the ideas behind this library is provided by
+  the paper:
+  .
+    * Edsko de Vries and Andres Löh.
+      <http://www.andres-loeh.de/TrueSumsOfProducts True Sums of Products>.
+      Workshop on Generic Programming (WGP) 2014.
+  .
+license:             BSD3
+license-file:        LICENSE
+author:              Edsko de Vries <edsko@well-typed.com>, Andres Löh <andres@well-typed.com>
+maintainer:          andres@well-typed.com
+category:            Generics
+build-type:          Custom
+cabal-version:       >=1.10
+extra-source-files:  CHANGELOG.md
+tested-with:         GHC == 7.8.4, GHC == 7.10.3, GHC == 8.0.1, GHC == 8.0.2, GHC == 8.2.1, GHC == 8.3.*
+
+custom-setup
+  setup-depends:
+    base,
+    Cabal,
+    cabal-doctest >= 1.0.2 && <1.1
+
+source-repository head
+  type:                git
+  location:            https://github.com/well-typed/generics-sop
+
+library
+  exposed-modules:     Generics.SOP
+                       Generics.SOP.GGP
+                       Generics.SOP.TH
+                       Generics.SOP.Dict
+                       Generics.SOP.Type.Metadata
+                       -- exposed via Generics.SOP:
+                       Generics.SOP.BasicFunctors
+                       Generics.SOP.Classes
+                       Generics.SOP.Constraint
+                       Generics.SOP.Instances
+                       Generics.SOP.Metadata
+                       Generics.SOP.NP
+                       Generics.SOP.NS
+                       Generics.SOP.Universe
+                       Generics.SOP.Sing
+  build-depends:       base                 >= 4.7  && < 5,
+                       template-haskell     >= 2.8  && < 2.13,
+                       ghc-prim             >= 0.3  && < 0.6,
+                       deepseq              >= 1.3  && < 1.5
+  if !impl (ghc >= 7.8)
+    build-depends:     tagged               >= 0.7  && < 0.9
+  if !impl (ghc >= 8.0)
+    build-depends:     transformers-compat  >= 0.3  && < 0.6,
+                       transformers         >= 0.3  && < 0.6
+
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  default-extensions:  CPP
+                       ScopedTypeVariables
+                       TypeFamilies
+                       RankNTypes
+                       TypeOperators
+                       GADTs
+                       ConstraintKinds
+                       MultiParamTypeClasses
+                       TypeSynonymInstances
+                       FlexibleInstances
+                       FlexibleContexts
+                       DeriveFunctor
+                       DeriveFoldable
+                       DeriveTraversable
+                       DefaultSignatures
+                       KindSignatures
+                       DataKinds
+                       FunctionalDependencies
+  if impl (ghc >= 7.8)
+    default-extensions:  AutoDeriveTypeable
+  other-extensions:    OverloadedStrings
+                       PolyKinds
+                       UndecidableInstances
+                       TemplateHaskell
+                       DeriveGeneric
+                       StandaloneDeriving
+  if impl (ghc < 7.10)
+    other-extensions:    OverlappingInstances
+
+test-suite doctests
+  type:                exitcode-stdio-1.0
+  main-is:             doctests.hs
+  x-doctest-options:   --preserve-it
+  hs-source-dirs:      test
+  default-language:    Haskell2010
+  build-depends:       base,
+                       doctest >= 0.13 && <0.14
+  ghc-options:         -Wall -threaded
+
+test-suite generics-sop-examples
+  type:                exitcode-stdio-1.0
+  main-is:             Example.hs
+  other-modules:       HTransExample
+  hs-source-dirs:      test
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  build-depends:       base                 >= 4.6  && < 5,
+                       generics-sop

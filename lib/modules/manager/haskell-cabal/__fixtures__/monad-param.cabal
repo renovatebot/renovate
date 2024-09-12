@@ -1,0 +1,25 @@
+name:           monad-param
+category:	Control
+version:        0.0.1
+synopsis:       Parameterized monads
+description:	Implements parameterized monads by overloading the monad sugar with more liberal types.
+stability:      alpha
+author:         Edward Kmett <ekmett@gmail.com>
+maintainer:     Edward Kmett <ekmett@gmail.com>
+copyright:      Copyright (C) 2006-2007, Edward Kmett
+homepage:       http://comonad.com/haskell/monad-param/dist/doc/html/Control-Monad-Parameterized.html
+package-url:    http://comonad.com/haskell/monad-param
+build-depends:  base -any, mtl -any, stm -any
+cabal-version:  -any
+license:        BSD3
+license-file:	LICENSE
+buildable:      True
+extensions:     MultiParamTypeClasses
+                FunctionalDependencies
+		OverlappingInstances
+		UndecidableInstances
+                EmptyDataDecls
+                NoImplicitPrelude
+exposed-modules: Control.Monad.Parameterized
+ghc-options:    -funbox-strict-fields -threaded -fasm
+hs-source-dirs: src

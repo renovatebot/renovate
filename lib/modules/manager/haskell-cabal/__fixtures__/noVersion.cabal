@@ -1,0 +1,11 @@
+name:                noVersion
+version:             0
+synopsis:            -none in build-depends
+build-type:          Simple
+cabal-version:       1.22
+
+library
+  default-language: Haskell2010
+  exposed-modules:  ElseIf
+
+  build-depends:     bad-package -none

@@ -1,0 +1,36 @@
+cabal-version:       2.2
+name:                common
+version:             0
+x-revision:          1
+synopsis:            Common-stanza demo demo
+build-type:          Simple
+-- note: empty field
+x-follows-version-policy:
+
+source-repository head
+  Type:     git
+  Location: https://github.com/hvr/-.git
+
+common deps
+  build-depends:
+    base >=4.10 && <4.11,
+    containers
+
+library
+  default-language: Haskell2010
+  exposed-modules:  "ElseIf"
+
+  -- not first: will be omitted and generate warning
+  import: deps
+
+  build-depends:
+    ghc-prim
+
+test-suite tests
+  import: deps
+
+  type: exitcode-stdio-1.0
+  main-is: Tests.hs
+
+  build-depends:
+    HUnit

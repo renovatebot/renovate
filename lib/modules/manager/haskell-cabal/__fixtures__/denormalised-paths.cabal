@@ -1,0 +1,78 @@
+cabal-version: 2.4
+name:          assoc
+version:       1.1
+license:       BSD-3-Clause
+license-files: LICENSE LICENSE2/ .
+synopsis:      swap and assoc: Symmetric and Semigroupy Bifunctors
+category:      Data
+description:
+  Provides generalisations of
+  @swap :: (a,b) -> (b,a)@ and
+  @assoc :: ((a,b),c) -> (a,(b,c))@
+  to
+  @Bifunctor@s supporting similar operations (e.g. @Either@, @These@).
+
+author:        Oleg Grenrus <oleg.grenrus@iki.fi>
+maintainer:    Oleg Grenrus <oleg.grenrus@iki.fi>
+build-type:    Simple
+tested-with:
+  GHC ==7.0.4
+   || ==7.2.2
+   || ==7.4.2
+   || ==7.6.3
+   || ==7.8.4
+   || ==7.10.3
+   || ==8.0.2
+   || ==8.2.2
+   || ==8.4.4
+   || ==8.6.5
+   || ==8.8.1
+
+extra-source-files:
+  -- this is fine
+  files/**/*.md
+  -- collection of invalid paths
+  files/**/*.txt/
+  files/../foo.txt
+  files/<>/*.txt
+
+source-repository head
+  type:     git
+  location: https://github.com/phadej/assoc.git
+  subdir:   ./.
+
+source-repository this
+  type:     git
+  location: https://github.com/phadej/assoc.git
+  tag:      v1.1
+  subdir:   foo/
+
+library
+  default-language: Haskell2010
+  build-depends:
+      base        >=4.3   && <4.13
+    , bifunctors  >=5.5.4 && <5.6
+
+  exposed-modules:
+    Data.Bifunctor.Assoc
+    Data.Bifunctor.Swap
+
+  -- this is fine
+  hs-source-dirs:   src/
+
+  -- collection of invalid sources
+  hs-source-dirs:   src/.
+  hs-source-dirs:   src/../src
+  hs-source-dirs:   src/../../assoc/src
+  -- this is forbidden by a parser
+  -- hs-source-dirs:   C:/foo/bar
+  hs-source-dirs:   C:foo/bar
+  hs-source-dirs:   ||s
+  -- this is forbidden by a parser
+  -- hs-source-dirs:   /var/secret/source
+
+  -- this is the only case caught by Cabal-3.0.2.0
+  hs-source-dirs:   ../../assoc/src
+
+  -- globs not allowed in field
+  c-sources: c/**/*.c

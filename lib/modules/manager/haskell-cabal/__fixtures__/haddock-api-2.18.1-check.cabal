@@ -1,0 +1,147 @@
+name:                 haddock-api
+version:              2.18.1
+synopsis:             A documentation-generation tool for Haskell libraries
+description:          Haddock is a documentation-generation tool for Haskell
+                      libraries
+license:              BSD3
+license-file:         LICENSE
+author:               Simon Marlow, David Waern
+maintainer:           Alex Biehl <alexbiehl@gmail.com>, Simon Hengel <sol@typeful.net>, Mateusz Kowalczyk <fuuzetsu@fuuzetsu.co.uk>
+homepage:             http://www.haskell.org/haddock/
+bug-reports:          https://github.com/haskell/haddock/issues
+copyright:            (c) Simon Marlow, David Waern
+category:             Documentation
+build-type:           Simple
+cabal-version:        >= 1.10
+
+extra-source-files:
+  CHANGES.md
+
+data-dir:
+  resources
+data-files:
+  html/solarized.css
+  html/haddock-util.js
+  html/highlight.js
+  html/Classic.theme/haskell_icon.gif
+  html/Classic.theme/minus.gif
+  html/Classic.theme/plus.gif
+  html/Classic.theme/xhaddock.css
+  html/Ocean.std-theme/hslogo-16.png
+  html/Ocean.std-theme/minus.gif
+  html/Ocean.std-theme/ocean.css
+  html/Ocean.std-theme/plus.gif
+  html/Ocean.std-theme/synopsis.png
+  latex/haddock.sty
+
+library
+  default-language: Haskell2010
+
+  -- this package typically supports only single major versions
+  build-depends: base            ^>= 4.10.0
+               , Cabal           ^>= 2.0.0
+               , ghc             ^>= 8.2
+               , ghc-paths       ^>= 0.1.0.9
+               , haddock-library == 1.4.4.*
+               , xhtml           ^>= 3000.2.2
+
+  -- Versions for the dependencies below are transitively pinned by
+  -- the non-reinstallable `ghc` package and hence need no version
+  -- bounds
+  build-depends: array
+               , bytestring
+               , containers
+               , deepseq
+               , directory
+               , filepath
+               , ghc-boot
+               , transformers
+
+  hs-source-dirs: src
+
+  ghc-options: -funbox-strict-fields -Wall -fwarn-tabs -O2
+  ghc-options: -Wall
+  if impl(ghc >= 8.0)
+    ghc-options: -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances
+
+  exposed-modules:
+    Documentation.Haddock
+
+  other-modules:
+    Haddock
+    Haddock.Interface
+    Haddock.Interface.Rename
+    Haddock.Interface.Create
+    Haddock.Interface.AttachInstances
+    Haddock.Interface.LexParseRn
+    Haddock.Interface.ParseModuleHeader
+    Haddock.Interface.Specialize
+    Haddock.Parser
+    Haddock.Utils
+    Haddock.Backends.Xhtml
+    Haddock.Backends.Xhtml.Decl
+    Haddock.Backends.Xhtml.DocMarkup
+    Haddock.Backends.Xhtml.Layout
+    Haddock.Backends.Xhtml.Names
+    Haddock.Backends.Xhtml.Themes
+    Haddock.Backends.Xhtml.Types
+    Haddock.Backends.Xhtml.Utils
+    Haddock.Backends.LaTeX
+    Haddock.Backends.HaddockDB
+    Haddock.Backends.Hoogle
+    Haddock.Backends.Hyperlinker
+    Haddock.Backends.Hyperlinker.Ast
+    Haddock.Backends.Hyperlinker.Parser
+    Haddock.Backends.Hyperlinker.Renderer
+    Haddock.Backends.Hyperlinker.Types
+    Haddock.Backends.Hyperlinker.Utils
+    Haddock.ModuleTree
+    Haddock.Types
+    Haddock.Doc
+    Haddock.Version
+    Haddock.InterfaceFile
+    Haddock.Options
+    Haddock.GhcUtils
+    Haddock.Syb
+    Haddock.Convert
+    Paths_haddock_api
+
+  autogen-modules:
+    Paths_haddock_api
+
+test-suite spec
+  type:             exitcode-stdio-1.0
+  default-language: Haskell2010
+  main-is:          Spec.hs
+  ghc-options: -Wall
+
+  hs-source-dirs:
+      test
+    , src
+
+  -- NB: We only use a small subset of lib:haddock-api here, which
+  --     explains why this component has a smaller build-depends set
+  other-modules:
+    Haddock.Backends.Hyperlinker.ParserSpec
+    Haddock.Backends.Hyperlinker.Parser
+    Haddock.Backends.Hyperlinker.Types
+
+  build-depends:
+      ghc         ^>= 8.2
+    , hspec       ^>= 2.4.4
+    , QuickCheck  ^>= 2.10
+
+  -- Versions for the dependencies below are transitively pinned by
+  -- the non-reinstallable `ghc` package and hence need no version
+  -- bounds
+  build-depends:
+      base
+    , containers
+
+  build-tool-depends:
+    hspec-discover:hspec-discover ^>= 2.4.4
+
+source-repository head
+  type:     git
+  subdir:   haddock-api
+  location: https://github.com/haskell/haddock.git

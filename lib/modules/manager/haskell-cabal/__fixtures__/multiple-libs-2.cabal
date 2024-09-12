@@ -1,0 +1,17 @@
+cabal-version:       2.0
+name:                multiple-libs
+version:             0
+
+synopsis:            visible flag only since 3.0
+build-type:          Simple
+
+library
+  default-language: Haskell2010
+  exposed-modules:  ElseIf
+  build-depends:    base
+
+library public
+  default-language: Haskell2010
+  exposed-modules:  ElseIf2
+  build-depends:    base
+  visibility:       public

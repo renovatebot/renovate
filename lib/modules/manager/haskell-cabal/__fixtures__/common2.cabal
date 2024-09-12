@@ -1,0 +1,53 @@
+cabal-version:       2.2
+name:                common
+version:             0
+synopsis:            Common-stanza demo demo
+build-type:          Simple
+
+source-repository head
+  Type:     git
+  Location: https://github.com/hvr/-.git
+
+common win-dows
+  if os(windows)
+    build-depends: Win32
+
+common deps
+  import: win-dows
+  buildable: True
+  build-depends:
+    base >=4.10 && <4.11,
+    containers
+
+library
+  import: deps
+
+  default-language: Haskell2010
+  exposed-modules:  ElseIf
+
+  build-depends:
+    ghc-prim
+
+-- .expr should show libVisible: False
+library internal
+  import: deps
+
+  default-language: Haskell2010
+  exposed-modules:  ElseIf2
+
+  build-depends:
+    ghc-prim
+
+test-suite tests
+  import: deps, win-dows
+
+  -- buildable fields verify that we don't have duplicate field warnings
+  buildable: True
+  if os(windows)
+    buildable: False
+
+  type: exitcode-stdio-1.0
+  main-is: Tests.hs
+
+  build-depends:
+    HUnit

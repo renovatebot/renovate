@@ -1,0 +1,10 @@
+cabal-version:       3.0
+name:                anynone
+version:             0
+synopsis:            The -any none demo
+build-type:          Simple
+
+library
+  default-language: Haskell2010
+  exposed-modules:  AnyNone
+  build-depends:    base -any

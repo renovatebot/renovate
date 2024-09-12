@@ -1,0 +1,76 @@
+name:          th-lift-instances
+version:       0.1.4
+x-revision: 1
+license:       BSD3
+cabal-version: >= 1.10
+license-file:  LICENSE
+author:        Benno Fünfstück
+maintainer:    Benno Fünfstück <benno.fuenfstueck@gmail.com>
+stability:     experimental
+homepage:      http://github.com/bennofs/th-lift-instances/
+bug-reports:   http://github.com/bennofs/th-lift-instances/issues
+copyright:     Copyright (C) 2013-2014 Benno Fünfstück
+synopsis:      Lift instances for template-haskell for common data types.
+description:   Most data types in haskell platform do not have Lift instances. This package provides orphan instances
+	       for containers, text, bytestring and vector.
+build-type:    Custom
+category:      Template Haskell
+
+extra-source-files:
+  .ghci
+  .gitignore
+  .travis.yml
+  .vim.custom
+  README.md
+
+source-repository head
+  type: git
+  location: https://github.com/bennofs/th-lift-instances.git
+
+library
+  hs-source-dirs: src
+  default-language: Haskell2010
+  ghc-options: -Wall -fwarn-tabs
+  build-depends:
+      base >= 4.4 && < 5
+    , template-haskell < 2.10
+    , th-lift
+    , containers >= 0.4 && < 0.6
+    , vector >= 0.9 && < 0.11
+    , text >= 0.11 && < 1.3
+    , bytestring >= 0.9 && < 0.11
+  exposed-modules:
+    Instances.TH.Lift
+  other-extensions: TemplateHaskell
+
+test-suite tests
+  type:    exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+    Data
+  default-language: Haskell2010
+  build-depends:
+      base
+    , template-haskell <2.10
+    , containers >= 0.4 && < 0.6
+    , vector >= 0.9 && < 0.11
+    , text >= 0.11 && < 1.2
+    , bytestring >= 0.9 && < 0.11
+    , th-lift-instances
+    , QuickCheck >= 2.6 && < 2.8
+  hs-source-dirs: tests
+  other-extensions: TemplateHaskell
+
+test-suite doctests
+  type:    exitcode-stdio-1.0
+  main-is: doctests.hs
+  default-language: Haskell2010
+  build-depends:
+      base
+    , directory >= 1.0
+    , doctest >= 0.9.1
+    , filepath
+  ghc-options: -Wall -threaded
+  if impl(ghc<7.6.1)
+    ghc-options: -Werror
+  hs-source-dirs: tests

@@ -1,0 +1,15 @@
+cabal-version: 2.2
+category:      test
+description:   test a build check involving C++-options field
+license:       BSD-3-Clause
+maintainer:    me@example.com
+name:          cxx-options-with-optimization
+synopsis:      test a build check
+version:       1
+
+library
+    build-depends: base >= 4.9 && <4.10
+    cc-options: -O2
+    default-language: Haskell2010
+    exposed-modules: Prelude
+    hs-source-dirs: .

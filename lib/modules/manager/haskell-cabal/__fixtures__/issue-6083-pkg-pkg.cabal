@@ -1,0 +1,9 @@
+cabal-version: 3.0
+name: issue
+version: 6083
+
+library
+  default-language: Haskell2010
+  -- This should be parsed as the main lib
+  build-depends: freetype
+  build-depends: freetype:freetype

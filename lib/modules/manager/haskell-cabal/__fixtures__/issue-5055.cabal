@@ -1,0 +1,25 @@
+name:                issue
+version:             5055
+synopsis:            no type in all branches
+description:         no type in all branches.
+license:             BSD3
+category:            Test
+build-type:          Simple
+cabal-version:       2.0
+
+executable flag-test-exe
+  main-is: FirstMain.hs
+  build-depends: base >= 4.8 && < 5
+  default-language: Haskell2010
+
+test-suite flag-cabal-test
+  -- TODO: fix so `type` can be on the top level
+  build-depends:       base >= 4.8 && < 5
+  default-language:    Haskell2010
+
+  main-is:             SecondMain.hs
+  type:                exitcode-stdio-1.0
+
+  if os(windows)
+    main-is:             FirstMain.hs
+    -- type:                exitcode-stdio-1.0

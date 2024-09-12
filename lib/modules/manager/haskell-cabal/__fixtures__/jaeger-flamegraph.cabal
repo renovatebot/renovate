@@ -1,0 +1,70 @@
+cabal-version:       2.2
+name:                jaeger-flamegraph
+version:             1.0.0
+synopsis:            Generate flamegraphs from Jaeger .json dumps.
+license:             BSD-3-Clause
+license-file:        LICENSE
+author:              Sam Halliday
+maintainer:          Sam Halliday
+copyright:           (c) 2018 Symbiont.io
+bug-reports:         https://github.com/symbiont-io/jaeger-flamegraph/pulls
+tested-with:         GHC ^>= 8.4.4 || ^>= 8.6.2
+category:            Testing
+description:
+  This is a small tool to convert JSON dumps obtained from a Jaeger
+  server (<https://www.jaegertracing.io/>) into a format consumable
+  by [FlameGraph](https://github.com/brendangregg/FlameGraph).
+  .
+  First download the traces for your SERVICE limiting to LIMIT traces
+  .
+  > $ curl http://your-jaeger-installation/api/traces?service=SERVICE&limit=LIMIT > input.json
+  .
+  using the [undocumented Jaeger API](https://github.com/jaegertracing/jaeger/issues/456#issuecomment-412560321)
+  then use @jaeger-flamegraph@ to convert the data and send to @flamegraph.pl@
+  .
+  > $ jaeger-flamegraph -f input.json | flamegraph.pl > output.svg
+  .
+
+source-repository head
+  type: git
+  location: https://github.com/symbiont-io/jaeger-flamegraph
+
+-- https://www.haskell.org/cabal/users-guide/cabal-projectindex.html
+
+common deps
+  build-depends:    , base ^>= 4.11.1.0 || ^>= 4.12.0.0
+  ghc-options:        -Wall
+                      -Werror=missing-home-modules
+  default-language:   Haskell2010
+
+executable jaeger-flamegraph
+  import:             deps
+  hs-source-dirs:     exe
+  main-is:            Main.hs
+  build-depends:    , jaeger-flamegraph
+                    , bytestring           ^>= 0.10.8.2
+                    , containers           ^>= 0.6.0.1
+                    , extra                ^>= 1.6.13
+                    , aeson                ^>= 1.4.1.0
+                    , optparse-applicative ^>= 0.14.3.0
+                    , text                 ^>= 1.2.3.1
+  ghc-options:        -threaded
+
+library
+  import:             deps
+  hs-source-dirs:     library
+  exposed-modules:    Interval
+  build-depends:    , QuickCheck ^>= 2.12.6.1
+
+test-suite            tests
+  import:             deps
+  hs-source-dirs:     test
+  type:               exitcode-stdio-1.0
+  main-is:            Driver.hs
+  other-modules:      IntervalTest
+  build-depends:    , jaeger-flamegraph
+                    , tasty            ^>= 1.1.0.4
+                    , tasty-hspec      ^>= 1.1.5
+                    , tasty-quickcheck ^>= 0.10
+  build-tool-depends: tasty-discover:tasty-discover ^>= 4.2.1
+  ghc-options:        -threaded

@@ -1,0 +1,11 @@
+cabal-version:       3.0
+name:                hidden-main-lib
+version:             0
+synopsis:            main lib have to be visible
+build-type:          Simple
+
+library
+  default-language: Haskell2010
+  exposed-modules:  ElseIf
+  build-depends:    base
+  visibility:       private

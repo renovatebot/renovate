@@ -1,0 +1,48 @@
+cabal-version: 1.12
+name:          assoc
+version:       1.1
+license:       BSD3
+license-file:  LICENSE
+synopsis:      swap and assoc: Symmetric and Semigroupy Bifunctors
+category:      Data
+description:
+  Provides generalisations of
+  @swap :: (a,b) -> (b,a)@ and
+  @assoc :: ((a,b),c) -> (a,(b,c))@
+  to
+  @Bifunctor@s supporting similar operations (e.g. @Either@, @These@).
+
+author:        Oleg Grenrus <oleg.grenrus@iki.fi>
+maintainer:    Oleg Grenrus <oleg.grenrus@iki.fi>
+build-type:    Simple
+tested-with:
+  GHC ==7.0.4
+   || ==7.2.2
+   || ==7.4.2
+   || ==7.6.3
+   || ==7.8.4
+   || ==7.10.3
+   || ==8.0.2
+   || ==8.2.2
+   || ==8.4.4
+   || ==8.6.5
+   || ==8.8.1
+
+source-repository head
+  type:     git
+  location: https://github.com/phadej/assoc.git
+
+library
+  default-language: Haskell2010
+  hs-source-dirs:   src
+  build-depends:
+      base        >=4.3   && <4.13
+    , bifunctors  >=5.5.4 && <5.6
+
+  cpp-options: -traditional
+
+  exposed-modules:
+    Data.Bifunctor.Assoc
+    Data.Bifunctor.Swap
+
+  other-extensions: TypeFamilies

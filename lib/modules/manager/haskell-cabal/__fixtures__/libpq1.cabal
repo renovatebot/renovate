@@ -1,0 +1,81 @@
+Name:                postgresql-libpq
+Version:             0.9.4.2
+Synopsis:            low-level binding to libpq
+
+Description:         This is a binding to libpq: the C application
+                     programmer's interface to PostgreSQL. libpq is a
+                     set of library functions that allow client
+                     programs to pass queries to the PostgreSQL
+                     backend server and to receive the results of
+                     these queries.
+
+Homepage:            https://github.com/phadej/postgresql-libpq
+License:             BSD3
+License-file:        LICENSE
+Author:              Grant Monroe, Leon P Smith, Joey Adams
+Maintainer:          Oleg Grenrus <oleg.grenrus@iki.fi>
+Copyright:           (c) 2010 Grant Monroe
+                     (c) 2011 Leon P Smith
+Category:            Database
+Build-type:          Custom
+Extra-source-files:  cbits/noticehandlers.h
+Cabal-version:       >=1.8
+Tested-with:
+  GHC==7.0.4,
+  GHC==7.2.2,
+  GHC==7.4.2,
+  GHC==7.6.3,
+  GHC==7.8.4,
+  GHC==7.10.3,
+  GHC==8.0.2,
+  GHC==8.2.2,
+  GHC==8.4.3,
+  GHC==8.6.1
+
+extra-source-files:
+  CHANGELOG.md
+
+Custom-setup
+  setup-depends:
+    base >= 4.3 && <5, Cabal >= 1.10 && <2.5
+
+-- If true,  use pkg-config,  otherwise use the pg_config based build
+-- configuration
+Flag use-pkg-config
+  default: False
+  manual:  True
+
+Library
+  hs-source-dirs:      src
+  c-sources:           cbits/noticehandlers.c
+  include-dirs:        cbits
+  Exposed-modules:     Database.PostgreSQL.LibPQ
+                       Database.PostgreSQL.LibPQ.Internal
+  Build-depends:       base       >=4.3     && <4.13
+                     , bytestring >=0.9.1.0 && <0.11
+
+  if !os(windows)
+    Build-depends:     unix  >=2.4.2.0 && <2.8
+
+  if os(windows)
+    Build-depends:     Win32 >=2.2.0.2 && <2.7
+
+  GHC-Options:       -Wall
+
+  if flag(use-pkg-config)
+    Pkgconfig-depends:   libpq ==9.*
+  else
+    if os(windows)
+      -- Due to https://sourceware.org/bugzilla/show_bug.cgi?id=22948,
+      -- if we specify pq instead of libpq, then ld might link against
+      -- libpq.dll directly, which can lead to segfaults. As a temporary hack,
+      -- we force ld to link against the libpq.lib import library directly
+      -- by specifying libpq here.
+      Extra-Libraries:   libpq
+    else
+      Extra-Libraries:     pq
+      if os(openbsd)
+        Extra-Libraries:     crypto ssl
+
+  -- Other-modules:
+  Build-tools:       hsc2hs

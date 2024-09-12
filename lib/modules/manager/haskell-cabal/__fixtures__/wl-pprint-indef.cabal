@@ -1,0 +1,34 @@
+Name:                wl-pprint-indef
+Version:             1.2
+Cabal-Version:       >=1.6
+Synopsis:            The Wadler/Leijen Pretty Printer
+Category:            Text
+Description:
+ This is a pretty printing library based on Wadler's paper "A Prettier
+ Printer".  See the haddocks for full info.  This version allows the
+ library user to declare overlapping instances of the 'Pretty' class.
+License:             BSD3
+License-file:        LICENSE
+Author:              Daan Leijen
+Maintainer:          Noam Lewis <jones.noamle@gmail.com>
+Build-Type:          Simple
+
+Executable           wl-pprint-string-example
+  Main-is:           Main.hs
+  Hs-Source-Dirs:    example-string
+  Other-Modules:     StringImpl
+  Build-Depends:     base < 5,
+                     str-string >= 0.1.0.0,
+                     wl-pprint-indef
+  Mixins:            wl-pprint-indef requires (Text.PrettyPrint.Leijen.Str as StringImpl)
+
+Library
+  Exposed-Modules:   Text.PrettyPrint.Leijen
+  Signatures:        Text.PrettyPrint.Leijen.Str
+  Mixins:            str-sig requires (Str as Text.PrettyPrint.Leijen.Str)
+  Build-Depends:     base < 5,
+                     str-sig >= 0.1.0.0
+
+source-repository head
+  type: git
+  location: git@github.com:danidiaz/wl-pprint-indef.git
