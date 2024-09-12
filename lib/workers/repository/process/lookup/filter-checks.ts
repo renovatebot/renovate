@@ -16,7 +16,7 @@ import type { LookupUpdateConfig, UpdateResult } from './types';
 import { getUpdateType } from './update-type';
 
 export interface InternalChecksResult {
-  release: Release;
+  release?: Release;
   pendingChecks: boolean;
   pendingReleases?: Release[];
 }
@@ -117,6 +117,5 @@ export async function filterInternalChecks(
     }
   }
 
-  // TODO #22198
-  return { release: release!, pendingChecks, pendingReleases };
+  return { release, pendingChecks, pendingReleases };
 }
