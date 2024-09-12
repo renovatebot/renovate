@@ -240,18 +240,12 @@ export function extractPackageFile(content: string): PackageFileContent {
       const prevToken = p.content[p.currentIdx-1];
       const replaceString: string = content.slice(beginPackageNameIdx,prevToken.offset+prevToken.value.length);
 
-      // Coerce to semver triple while PVP is unsupported
-      const r = [...currentValue.matchAll(/<([0-9]+)\.([0-9]+)$/g)];
-      if (r.length > 0) {
-        currentValue = r[0][1] + "." + r[0][2] + ".0";
-      }
-
       const dep: PackageDependency = {
         depName: packageName,
         currentValue,
         datasource: HackageDatasource.id,
         packageName,
-        versioning: 'semver',
+        versioning: 'same-major-pvp',
         replaceString,
         autoReplaceStringTemplate:
           '{{{depName}}} {{#if isSingleVersion}}^>= {{newValue}}{{else}}{{{replace " " " && " newValue}}}{{/if}}',

@@ -80,7 +80,7 @@ describe('modules/manager/haskell-cabal', () => {
       , packageName: 'base'
       , datasource: 'hackage'
       , replaceString: 'base >= 4.16 && < 4.21'
-      , versioning: 'semver'
+      , versioning: 'same-major-pvp'
       , autoReplaceStringTemplate
       };
     const mtlExpected =
@@ -89,7 +89,7 @@ describe('modules/manager/haskell-cabal', () => {
       , packageName: 'mtl'
       , datasource: 'hackage'
       , replaceString: 'mtl >= 2.3 && < 2.4'
-      , versioning: 'semver'
+      , versioning: 'same-major-pvp'
       , autoReplaceStringTemplate
       };
     it('extracts upper bound', () => {
@@ -105,7 +105,7 @@ describe('modules/manager/haskell-cabal', () => {
         , packageName: 'base'
         , datasource: 'hackage'
         , replaceString: 'base ^>= 4.16'
-        , versioning: 'semver'
+        , versioning: 'same-major-pvp'
         , autoReplaceStringTemplate
         }]);
     });
@@ -118,7 +118,7 @@ describe('modules/manager/haskell-cabal', () => {
         , packageName: 'base'
         , datasource: 'hackage'
         , replaceString: 'base ^>= 4.16 || ^>= 4.17'
-        , versioning: 'semver'
+        , versioning: 'same-major-pvp'
         , autoReplaceStringTemplate
         }]);
     });
@@ -131,7 +131,7 @@ describe('modules/manager/haskell-cabal', () => {
         , packageName: 'aeson'
         , datasource: 'hackage'
         , replaceString: 'aeson == 2.0.0.0'
-        , versioning: 'semver'
+        , versioning: 'same-major-pvp'
         , autoReplaceStringTemplate
         }]);
     });
@@ -144,7 +144,7 @@ describe('modules/manager/haskell-cabal', () => {
         , packageName: 'aeson'
         , datasource: 'hackage'
         , replaceString: 'aeson == 2.*'
-        , versioning: 'semver'
+        , versioning: 'same-major-pvp'
         , autoReplaceStringTemplate
         }]);
     });
@@ -176,7 +176,7 @@ describe('modules/manager/haskell-cabal', () => {
         , packageName: 'base'
         , datasource: 'hackage'
         , replaceString: 'base'
-        , versioning: 'semver'
+        , versioning: 'same-major-pvp'
         , autoReplaceStringTemplate
         }]);
     });

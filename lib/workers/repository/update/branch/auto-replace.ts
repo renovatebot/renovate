@@ -88,7 +88,11 @@ export async function confirmIfDepUpdated(
     return false;
   }
 
-  if (upgrade.newValue && upgrade.newValue !== newUpgrade.currentValue) {
+  if (upgrade.newValue
+      && newUpgrade.currentValue
+      && upgrade.newValue !== newUpgrade.currentValue
+      && !newUpgrade.currentValue.startsWith(">=" + upgrade.newValue + " ")
+      && newUpgrade.currentValue.slice(0,-1) !== upgrade.newValue.slice(0,-1)) {
     logger.debug(
       {
         depName: upgrade.depName,

@@ -13,6 +13,7 @@ import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags';
 import { GoDatasource } from '../../../../modules/datasource/go';
+import { HackageDatasource } from '../../../../modules/datasource/hackage';
 import { MavenDatasource } from '../../../../modules/datasource/maven';
 import { NpmDatasource } from '../../../../modules/datasource/npm';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist';
@@ -386,6 +387,31 @@ describe('workers/repository/process/lookup/index', () => {
           newValue: '1.4.1',
           newVersion: '1.4.1',
           releaseTimestamp: expect.any(String),
+          updateType: 'major',
+        },
+      ]);
+    });
+
+    it('returns one update (haskell)', async () => {
+      config.manager = 'haskell-cabal';
+      config.currentValue = '0.4.0';
+      config.packageName = 'q';
+      config.datasource = HackageDatasource.id;
+      config.versioning = 'same-major-pvp';
+      httpMock.scope('https://hackage.haskell.org').get('/package/q.json').reply(200, JSON.stringify({"1.4.1":"normal"}));
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          newMajor: 1,
+          newMinor: 4,
+          newPatch: 1,
+          newValue: '1.4.1',
+          newVersion: '1.4.1',
           updateType: 'major',
         },
       ]);
