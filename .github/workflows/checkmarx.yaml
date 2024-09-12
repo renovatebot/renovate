@@ -1,0 +1,12 @@
+name: checkmarx test
+
+on:
+  pull_request:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dbrenecki/renovate-debug/.github/actions/checkmarx@main
