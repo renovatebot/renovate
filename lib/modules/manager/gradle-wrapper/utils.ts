@@ -38,6 +38,13 @@ export async function prepareGradleCommand(
   return null;
 }
 
+/**
+ * Find compatible java version for gradle.
+ * see https://docs.gradle.org/current/userguide/compatibility.html
+ * @param gradleVersion current gradle version
+ * @param gradlewFile path to gradle wrapper
+ * @returns A Java semver range
+ */
 export async function getJavaConstraint(
   gradleVersion: string | null | undefined,
   gradlewFile: string,
@@ -66,7 +73,9 @@ export async function getJavaConstraint(
   return '^11.0.0';
 }
 
-// https://docs.gradle.org/current/userguide/gradle_daemon.html#sec:daemon_jvm_criteria
+/**
+ * https://docs.gradle.org/current/userguide/gradle_daemon.html#sec:daemon_jvm_criteria
+ */
 export async function getJvmConfiguration(
   gradlewFile: string,
 ): Promise<string | null> {
