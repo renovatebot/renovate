@@ -21,6 +21,7 @@ import {
   hashBody,
 } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
+import { smartTruncate } from '../../../../modules/platform/utils/pr-body';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedHours } from '../../../../util/date';
 import { stripEmojis } from '../../../../util/emoji';
@@ -561,6 +562,7 @@ export async function ensurePr(
         content += '\n___\n * Branch has one or more failed status checks';
       }
       content = platform.massageMarkdown(content);
+      content = smartTruncate(content, platform.maxBodyLength());
       logger.debug('Adding branch automerge failure message to PR');
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);

@@ -4,6 +4,7 @@ import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
+import { smartTruncate } from '../../modules/platform/utils/pr-body';
 import { regEx } from '../../util/regex';
 import { coerceString } from '../../util/string';
 import * as template from '../../util/template';
@@ -515,7 +516,10 @@ export async function ensureDependencyDashboard(
     await platform.ensureIssue({
       title: config.dependencyDashboardTitle!,
       reuseTitle,
-      body: platform.massageMarkdown(issueBody),
+      body: smartTruncate(
+        platform.massageMarkdown(issueBody),
+        platform.maxBodyLength(),
+      ),
       labels: config.dependencyDashboardLabels,
       confidential: config.confidential,
     });

@@ -39,7 +39,6 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { repoFingerprint } from '../util';
-import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
 import { giteaHttp } from './gitea-helper';
 import { GiteaPrCache } from './pr-cache';
@@ -998,7 +997,7 @@ const platform: Platform = {
   },
 
   massageMarkdown(prBody: string): string {
-    return smartTruncate(smartLinks(prBody), maxBodyLength());
+    return smartLinks(prBody);
   },
 
   maxBodyLength,

@@ -54,7 +54,6 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { repoFingerprint } from '../util';
-import { smartTruncate } from '../utils/pr-body';
 import {
   getMemberUserIDs,
   getMemberUsernames,
@@ -904,7 +903,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
     // Strip unicode null characters as GitLab markdown does not permit them
     .replace(regEx(/\u0000/g), ''); // eslint-disable-line no-control-regex
-  return smartTruncate(desc, maxBodyLength());
+  return desc;
 }
 
 export function maxBodyLength(): number {

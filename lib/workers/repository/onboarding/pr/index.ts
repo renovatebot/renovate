@@ -7,6 +7,7 @@ import { platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
+import { smartTruncate } from '../../../../modules/platform/utils/pr-body';
 import { emojify } from '../../../../util/emoji';
 import { getFile } from '../../../../util/git';
 import { toSha256 } from '../../../../util/hash';
@@ -148,6 +149,7 @@ If you need any further assistance then you can also [request help here](${
   logger.trace('prBody:\n' + prBody);
 
   prBody = platform.massageMarkdown(prBody);
+  prBody = smartTruncate(prBody, platform.maxBodyLength());
 
   if (existingPr) {
     logger.debug('Found open onboarding PR');

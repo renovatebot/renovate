@@ -39,7 +39,6 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { getNewBranchName, repoFingerprint } from '../util';
-import { smartTruncate } from '../utils/pr-body';
 import { UserSchema } from './schema';
 import type {
   BbsConfig,
@@ -1104,7 +1103,7 @@ export async function mergePr({
 export function massageMarkdown(input: string): string {
   logger.debug(`massageMarkdown(${input.split(newlineRegex)[0]})`);
   // Remove any HTML we use
-  return smartTruncate(input, maxBodyLength())
+  return input
     .replace(
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"',
