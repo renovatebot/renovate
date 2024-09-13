@@ -329,7 +329,6 @@ export async function ensurePr(
   const prBody = getPrBody(
     config,
     {
-      bodyMaxLength: platform.maxBodyLength(),
       debugData: updatePrDebugData(
         config.baseBranch,
         prepareLabels(config), // include labels in debug data
