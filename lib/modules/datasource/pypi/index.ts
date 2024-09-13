@@ -6,15 +6,13 @@ import { coerceArray } from '../../../util/array';
 import { parse } from '../../../util/html';
 import type { OutgoingHttpHeaders } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash } from '../../../util/url';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url';
 import * as pep440 from '../../versioning/pep440';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { getGoogleAuthToken } from '../util';
 import { isGitHubRepo, normalizePythonDepName } from './common';
 import type { PypiJSON, PypiJSONRelease, Releases } from './types';
-
-const googleArtifactRegistryDomain = '.pkg.dev';
 
 export class PypiDatasource extends Datasource {
   static readonly id = 'pypi';
@@ -89,14 +87,12 @@ export class PypiDatasource extends Datasource {
   private async getAuthHeaders(
     lookupUrl: string,
   ): Promise<OutgoingHttpHeaders> {
-    let url: URL;
-    try {
-      url = new URL(lookupUrl);
-    } catch (err) {
-      logger.once.debug({ lookupUrl, err }, 'Failed to parse URL');
+    const parsedUrl = parseUrl(lookupUrl);
+    if (!parsedUrl) {
+      logger.once.debug({ lookupUrl }, 'Failed to parse URL');
       return {};
     }
-    if (url.hostname.endsWith(googleArtifactRegistryDomain)) {
+    if (parsedUrl.hostname.endsWith('.pkg.dev')) {
       const auth = await getGoogleAuthToken();
       if (auth) {
         return { authorization: `Basic ${auth}` };

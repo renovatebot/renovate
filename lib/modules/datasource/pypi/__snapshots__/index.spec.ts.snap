@@ -278,49 +278,6 @@ exports[`modules/datasource/pypi/index getReleases respects constraints 1`] = `
 }
 `;
 
-exports[`modules/datasource/pypi/index supports Google Auth with simple endpoint 1`] = `
-{
-  "isPrivate": true,
-  "registryUrl": "https://someregion-python.pkg.dev/some-project/some-repo/simple",
-  "releases": [
-    {
-      "version": "0.1.2",
-    },
-    {
-      "version": "0.1.3",
-    },
-    {
-      "version": "0.1.4",
-    },
-    {
-      "version": "0.2.0",
-    },
-    {
-      "version": "0.2.1",
-    },
-    {
-      "version": "0.2.2",
-    },
-    {
-      "version": "0.3.0",
-    },
-    {
-      "version": "0.4.0",
-    },
-    {
-      "version": "0.4.1",
-    },
-    {
-      "version": "0.4.2",
-    },
-    {
-      "isDeprecated": true,
-      "version": "0.5.0",
-    },
-  ],
-}
-`;
-
 exports[`modules/datasource/pypi/index uses https://pypi.org/pypi/ instead of https://pypi.org/simple/ 1`] = `
 {
   "registryUrl": "https://pypi.org/simple",

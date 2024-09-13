@@ -14,6 +14,62 @@ const htmlResponse = Fixtures.get('versions-html.html');
 const mixedCaseResponse = Fixtures.get('versions-html-mixed-case.html');
 const withPeriodsResponse = Fixtures.get('versions-html-with-periods.html');
 
+const azureCliMonitorReleases = [
+  { releaseTimestamp: '2017-04-03T16:55:14.000Z', version: '0.0.1' },
+  { releaseTimestamp: '2017-04-17T20:32:30.000Z', version: '0.0.2' },
+  { releaseTimestamp: '2017-04-28T21:18:54.000Z', version: '0.0.3' },
+  { releaseTimestamp: '2017-05-09T21:36:51.000Z', version: '0.0.4' },
+  { releaseTimestamp: '2017-05-30T23:13:49.000Z', version: '0.0.5' },
+  { releaseTimestamp: '2017-06-13T22:21:05.000Z', version: '0.0.6' },
+  { releaseTimestamp: '2017-06-21T22:12:36.000Z', version: '0.0.7' },
+  { releaseTimestamp: '2017-07-07T16:22:26.000Z', version: '0.0.8' },
+  { releaseTimestamp: '2017-08-28T20:14:33.000Z', version: '0.0.9' },
+  { releaseTimestamp: '2017-09-22T23:47:59.000Z', version: '0.0.10' },
+  { releaseTimestamp: '2017-10-24T02:14:07.000Z', version: '0.0.11' },
+  { releaseTimestamp: '2017-11-14T18:31:57.000Z', version: '0.0.12' },
+  { releaseTimestamp: '2017-12-05T18:57:54.000Z', version: '0.0.13' },
+  { releaseTimestamp: '2018-01-05T21:26:03.000Z', version: '0.0.14' },
+  { releaseTimestamp: '2018-01-17T18:36:39.000Z', version: '0.1.0' },
+  { releaseTimestamp: '2018-01-31T18:05:22.000Z', version: '0.1.1' },
+  { releaseTimestamp: '2018-02-13T18:17:52.000Z', version: '0.1.2' },
+  { releaseTimestamp: '2018-03-13T17:08:20.000Z', version: '0.1.3' },
+  { releaseTimestamp: '2018-03-27T17:55:25.000Z', version: '0.1.4' },
+  { releaseTimestamp: '2018-04-10T17:25:47.000Z', version: '0.1.5' },
+  { releaseTimestamp: '2018-05-07T17:59:09.000Z', version: '0.1.6' },
+  { releaseTimestamp: '2018-05-22T17:25:23.000Z', version: '0.1.7' },
+  { releaseTimestamp: '2018-07-03T16:18:06.000Z', version: '0.1.8' },
+  { releaseTimestamp: '2018-07-18T16:20:01.000Z', version: '0.2.0' },
+  { releaseTimestamp: '2018-07-31T15:32:28.000Z', version: '0.2.1' },
+  { releaseTimestamp: '2018-08-14T14:55:32.000Z', version: '0.2.2' },
+  { releaseTimestamp: '2018-08-28T15:35:01.000Z', version: '0.2.3' },
+  { releaseTimestamp: '2018-10-09T18:09:08.000Z', version: '0.2.4' },
+  { releaseTimestamp: '2018-10-23T16:54:38.000Z', version: '0.2.5' },
+  { releaseTimestamp: '2018-11-06T16:34:51.000Z', version: '0.2.6' },
+  { releaseTimestamp: '2018-11-20T20:16:03.000Z', version: '0.2.7' },
+  { releaseTimestamp: '2019-01-15T21:08:09.000Z', version: '0.2.8' },
+  { releaseTimestamp: '2019-01-30T01:51:15.000Z', version: '0.2.9' },
+  { releaseTimestamp: '2019-02-12T18:09:43.000Z', version: '0.2.10' },
+  { releaseTimestamp: '2019-03-26T17:57:43.000Z', version: '0.2.11' },
+  { releaseTimestamp: '2019-04-09T17:01:09.000Z', version: '0.2.12' },
+  { releaseTimestamp: '2019-04-23T17:00:58.000Z', version: '0.2.13' },
+  { releaseTimestamp: '2019-05-21T18:43:17.000Z', version: '0.2.14' },
+  { releaseTimestamp: '2019-06-18T13:58:55.000Z', version: '0.2.15' },
+];
+
+const djDatabaseUrlSimpleReleases = [
+  { version: '0.1.2' },
+  { version: '0.1.3' },
+  { version: '0.1.4' },
+  { version: '0.2.0' },
+  { version: '0.2.1' },
+  { version: '0.2.2' },
+  { version: '0.3.0' },
+  { version: '0.4.0' },
+  { version: '0.4.1' },
+  { version: '0.4.2' },
+  { isDeprecated: true, version: '0.5.0' },
+];
+
 const baseUrl = 'https://pypi.org/pypi';
 const datasource = PypiDatasource.id;
 
@@ -154,10 +210,7 @@ describe('modules/datasource/pypi/index', () => {
         datasource,
         packageName: 'azure-cli-monitor',
       });
-      expect(res?.releases.pop()).toMatchObject({
-        version: '0.2.15',
-        releaseTimestamp: '2019-06-18T13:58:55.000Z',
-      });
+      expect(res).toMatchObject({ releases: azureCliMonitorReleases });
       expect(googleAuth).toHaveBeenCalledTimes(1);
     });
 
@@ -181,10 +234,7 @@ describe('modules/datasource/pypi/index', () => {
         datasource,
         packageName: 'azure-cli-monitor',
       });
-      expect(res?.releases.pop()).toMatchObject({
-        version: '0.2.15',
-        releaseTimestamp: '2019-06-18T13:58:55.000Z',
-      });
+      expect(res).toMatchObject({ releases: azureCliMonitorReleases });
       expect(googleAuth).toHaveBeenCalledTimes(1);
     });
 
@@ -728,7 +778,12 @@ describe('modules/datasource/pypi/index', () => {
         constraints: { python: '2.7' },
         packageName: 'dj-database-url',
       }),
-    ).toMatchSnapshot();
+    ).toMatchObject({
+      isPrivate: true,
+      registryUrl:
+        'https://someregion-python.pkg.dev/some-project/some-repo/simple',
+      releases: djDatabaseUrlSimpleReleases,
+    });
     expect(googleAuth).toHaveBeenCalledTimes(1);
   });
 
@@ -741,7 +796,7 @@ describe('modules/datasource/pypi/index', () => {
       datasource,
       packageName: 'azure-cli-monitor',
     });
-    expect(res?.releases.pop()).toBeNil();
+    expect(res).toBeNil();
   });
 
   it('uses https://pypi.org/pypi/ instead of https://pypi.org/simple/', async () => {
