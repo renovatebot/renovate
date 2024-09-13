@@ -51,6 +51,7 @@ describe('workers/repository/update/pr/body/index', () => {
     });
 
     it('handles empty template', () => {
+      platform.maxBodyLength.mockReturnValueOnce(3.14);
       const res = getPrBody(
         {
           manager: 'some-manager',
@@ -67,7 +68,7 @@ describe('workers/repository/update/pr/body/index', () => {
         },
         {},
       );
-      expect(res).toBeEmptyString();
+      expect(res).toStrictEqual({ body: '', comments: [] });
     });
 
     it('massages upgrades', () => {
@@ -182,8 +183,8 @@ describe('workers/repository/update/pr/body/index', () => {
         },
         {},
       );
-      expect(res).toContain('PR BODY');
-      expect(res).toContain(`<!--renovate-debug`);
+      expect(res.body).toContain('PR BODY');
+      expect(res.body).toContain(`<!--renovate-debug`);
     });
 
     it('supports custom rebasing message', () => {
@@ -207,7 +208,9 @@ describe('workers/repository/update/pr/body/index', () => {
         },
         {},
       );
-      expect(res).toContain(['aaa', '**Rebasing**: BAR', 'bbb'].join('\n'));
+      expect(res.body).toContain(
+        ['aaa', '**Rebasing**: BAR', 'bbb'].join('\n'),
+      );
     });
 
     it('updates PR due to body change without pr data', () => {
@@ -231,7 +234,7 @@ describe('workers/repository/update/pr/body/index', () => {
         {},
       );
 
-      const match = prDebugDataRe.exec(res);
+      const match = prDebugDataRe.exec(res.body);
       expect(match?.groups?.payload).toBeString();
     });
 
@@ -284,7 +287,7 @@ describe('workers/repository/update/pr/body/index', () => {
         '---\n\n### ⚠ Dependency Lookup Warnings ⚠' +
         '\n\nWarnings were logged while processing this repo. ' +
         'Please check the Dependency Dashboard for more information\n\n---';
-      expect(res).toBe(expected);
+      expect(res.body).toBe(expected);
     });
   });
 });
