@@ -42,7 +42,6 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { getNewBranchName, repoFingerprint } from '../util';
-import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
 import type { AzurePr } from './types';
@@ -811,7 +810,7 @@ export async function mergePr({
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
-  return smartTruncate(input, maxBodyLength())
+  return input
     .replace(
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"',
