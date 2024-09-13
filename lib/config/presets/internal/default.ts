@@ -293,7 +293,7 @@ export const presets: Record<string, Preset> = {
   },
   ignoreModulesAndTests: {
     description:
-      'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories.',
+      'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests (except for nuget) directories.',
     ignorePaths: [
       '**/node_modules/**',
       '**/bower_components/**',
@@ -304,6 +304,15 @@ export const presets: Record<string, Preset> = {
       '**/tests/**',
       '**/__fixtures__/**',
     ],
+    nuget: {
+      ignorePaths: [
+        '**/node_modules/**',
+        '**/bower_components/**',
+        '**/vendor/**',
+        '**/examples/**',
+        '**/__fixtures__/**',
+      ],
+    },
   },
   ignoreUnstable: {
     description:
