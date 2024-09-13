@@ -329,6 +329,7 @@ export async function ensurePr(
   const prBody = getPrBody(
     config,
     {
+      bodyMaxLength: platform.maxBodyLength(),
       debugData: updatePrDebugData(
         config.baseBranch,
         prepareLabels(config), // include labels in debug data
@@ -356,7 +357,7 @@ export async function ensurePr(
       const existingPrTitle = stripEmojis(existingPr.title);
       const existingPrBodyHash = existingPr.bodyStruct?.hash;
       const newPrTitle = stripEmojis(prTitle);
-      const newPrBodyHash = hashBody(prBody);
+      const newPrBodyHash = hashBody(prBody.body);
 
       const prInitialLabels = existingPr.bodyStruct?.debugData?.labels;
       const prCurrentLabels = existingPr.labels;
@@ -385,7 +386,7 @@ export async function ensurePr(
       const updatePrConfig: UpdatePrConfig = {
         number: existingPr.number,
         prTitle,
-        prBody,
+        prBody: prBody.body,
         platformPrOptions: getPlatformPrOptions(config),
       };
       // PR must need updating
@@ -460,7 +461,7 @@ export async function ensurePr(
         type: 'with-pr',
         pr: {
           ...existingPr,
-          bodyStruct: getPrBodyStruct(prBody),
+          bodyStruct: getPrBodyStruct(prBody.body),
           title: prTitle,
           targetBranch: config.baseBranch,
         },
@@ -488,7 +489,7 @@ export async function ensurePr(
           sourceBranch: branchName,
           targetBranch: config.baseBranch,
           prTitle,
-          prBody,
+          prBody: prBody.body,
           labels: prepareLabels(config),
           platformPrOptions: getPlatformPrOptions(config),
           draftPR: !!config.draftPR,
