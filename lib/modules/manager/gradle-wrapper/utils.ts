@@ -53,7 +53,7 @@ export async function getJavaConstraint(
   const minor = gradleVersion ? gradleVersioning.getMinor(gradleVersion) : null;
 
   // https://docs.gradle.org/8.8/release-notes.html#daemon-toolchains
-  if (major && major >= 8 && minor && minor >= 8) {
+  if (major && (major > 8 || (major === 8 && minor && minor >= 8))) {
     const toolChainVersion = await getJvmConfiguration(gradlewFile);
     if (toolChainVersion) {
       return `^${toolChainVersion}.0.0`;
