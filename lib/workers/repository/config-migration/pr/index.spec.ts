@@ -262,6 +262,7 @@ describe('workers/repository/config-migration/pr/index', () => {
         errors: [{ message: 'A pull request already exists' }],
       };
       platform.createPr.mockRejectedValue(err);
+      platform.massageMarkdown.mockImplementationOnce((x) => x);
       await expect(ensureConfigMigrationPr(config, migratedData)).toResolve();
       expect(logger.warn).toHaveBeenCalledWith(
         { err },
