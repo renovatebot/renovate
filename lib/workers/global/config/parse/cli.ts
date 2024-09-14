@@ -146,7 +146,7 @@ function migratePrOptions(
     const cliString = argv.find((arg) => arg.includes(cliKey));
 
     if (!is.undefined(cliString)) {
-      const value = cliString.split('=')[1];
+      const value = cliString.replace(regEx(`${cliKey}=?`), '');
       const type = prOptionsKeys[key];
       const coerce = coersions[type];
       prOptions[key] = coerce(value);
