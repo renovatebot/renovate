@@ -2470,6 +2470,12 @@ Followed by some information.
           await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
         });
       });
+
+      describe('maxBodyLength()', () => {
+        it('returns 30000', () => {
+          expect(bitbucket.maxBodyLength()).toBe(30000);
+        });
+      });
     });
   });
 });

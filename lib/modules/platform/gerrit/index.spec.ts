@@ -792,4 +792,10 @@ describe('modules/platform/gerrit/index', () => {
       await expect(gerrit.getIssueList()).resolves.toStrictEqual([]);
     });
   });
+
+  describe('maxBodyLength()', () => {
+    it('returns 16384', () => {
+      expect(gerrit.maxBodyLength()).toBe(16384);
+    });
+  });
 });

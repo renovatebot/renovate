@@ -2989,4 +2989,10 @@ describe('modules/platform/gitea/index', () => {
       await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
     });
   });
+
+  describe('maxBodyLength()', () => {
+    it('returns 1000000', () => {
+      expect(gitea.maxBodyLength()).toBe(1000000);
+    });
+  });
 });
