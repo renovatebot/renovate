@@ -45,9 +45,7 @@ export function getConfig(input: string[]): AllConfig {
         .replace('--bb-use-default-reviewers=false', '')
         .replace('--bb-use-default-reviewers=true', '')
         .replace('--bb-use-default-reviewers', '')
-        .replace('--azure-work-item-id=false', '')
-        .replace('--azure-work-item-id=true', '')
-        .replace('--azure-work-item-id', ''),
+        .replace(/^--azure-work-item-id=\d+/, ''),
     )
     .filter((a) => !a.startsWith('--git-fs'))
     .filter((a) => a !== '');
