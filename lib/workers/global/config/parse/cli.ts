@@ -134,24 +134,22 @@ function migratePrOptions(
   argv: string[],
   config: Record<string, any>,
 ): Record<string, any> {
-  const prOptionsKeys: (keyof PrOptions)[] = [
-    'gitLabIgnoreApprovals',
-    'bbUseDefaultReviewers',
-    'azureWorkItemId',
-  ];
-  const prOptionsCliKeys = prOptionsKeys.map((option) =>
-    getCliName({ name: option }),
-  );
+  const prOptionsKeys: Record<keyof PrOptions, 'boolean' | 'integer'> = {
+    gitLabIgnoreApprovals: 'boolean',
+    bbUseDefaultReviewers: 'boolean',
+    azureWorkItemId: 'integer',
+  };
   const prOptions: Record<string, unknown> = {};
 
-  for (const arg of argv) {
-    for (const [index, cliKey] of prOptionsCliKeys.entries()) {
-      if (arg.includes(cliKey)) {
-        const [, val = true] = arg.split('=');
-        const key = prOptionsKeys[index];
-        prOptions[key] = val;
-        break;
-      }
+  for (const key of Object.keys(prOptionsKeys) as (keyof PrOptions)[]) {
+    const cliKey = getCliName({ name: key });
+    const cliString = argv.find((arg) => arg.includes(cliKey));
+
+    if (!is.undefined(cliString)) {
+      const value = cliString.split('=')[1] ?? 'true';
+      const type = prOptionsKeys[key];
+      const coerce = coersions[type];
+      prOptions[key] = coerce(value);
     }
   }
 
