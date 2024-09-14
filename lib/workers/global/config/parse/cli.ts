@@ -147,7 +147,7 @@ function migratePrOptions(
   for (const arg of argv) {
     for (const [index, cliKey] of prOptionsCliKeys.entries()) {
       if (arg.includes(cliKey)) {
-        const [, val = true] = arg.split('0');
+        const [, val = true] = arg.split('=');
         const key = prOptionsKeys[index];
         prOptions[key] = val;
         break;
