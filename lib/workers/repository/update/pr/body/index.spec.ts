@@ -289,5 +289,71 @@ describe('workers/repository/update/pr/body/index', () => {
         'Please check the Dependency Dashboard for more information\n\n---';
       expect(res.body).toBe(expected);
     });
+
+    it('returns changelog as comment if body is larger than maxBodyLength() of the platform', () => {
+      platform.maxBodyLength.mockReturnValue('{{{header}}}'.length);
+      platform.massageMarkdown.mockImplementationOnce((x) => x);
+      platform.massageMarkdown.mockImplementationOnce((_) => '{{{header}}}');
+      template.compile.mockImplementation((x) => x);
+
+      const res = getPrBody(
+        {
+          manager: 'some-manager',
+          baseBranch: 'base',
+          branchName: 'some-branch',
+          upgrades: [],
+          prBodyTemplate: '{{{header}}}{{{changelogs}}}',
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+            targetBranch: 'base',
+          },
+        },
+        {},
+      );
+
+      expect(res).toStrictEqual({
+        body: '{{{header}}}',
+        comments: [{ content: 'getChangelogs', title: 'Release Notes' }],
+      });
+    });
+
+    it('returns changelog & update table as comments if body is larger than maxBodyLength() of the platform', () => {
+      platform.maxBodyLength.mockReturnValue('{{{header}}}'.length);
+      platform.massageMarkdown.mockImplementationOnce((x) => x);
+      platform.massageMarkdown.mockImplementationOnce(
+        (_) => '{{{header}}}{{{table}}}',
+      );
+      platform.massageMarkdown.mockImplementationOnce((_) => '{{{header}}}');
+      template.compile.mockImplementation((x) => x);
+
+      const res = getPrBody(
+        {
+          manager: 'some-manager',
+          baseBranch: 'base',
+          branchName: 'some-branch',
+          upgrades: [],
+          prBodyTemplate: '{{{header}}}{{{table}}}{{{changelogs}}}',
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+            targetBranch: 'base',
+          },
+        },
+        {},
+      );
+
+      expect(res).toStrictEqual({
+        body: '{{{header}}}',
+        comments: [
+          { content: 'getChangelogs', title: 'Release Notes' },
+          { content: 'getPrUpdatesTable', title: 'Updates' },
+        ],
+      });
+    });
   });
 });
