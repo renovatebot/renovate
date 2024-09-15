@@ -373,6 +373,7 @@ export async function lookupUpdates(
       let shrinkedViaVulnerability = false;
       if (config.isVulnerabilityAlert) {
         if (config.vulnerabilityFixVersion) {
+          res.vulnerabilityFixStrategy = config.vulnerabilityFixStrategy;
           res.vulnerabilityFixVersion = config.vulnerabilityFixVersion;
           if (versioning.isVersion(config.vulnerabilityFixVersion)) {
             // Filter out versions if the vulnerabilityFixVersion is higher
@@ -406,12 +407,19 @@ export async function lookupUpdates(
             );
           }
         }
-        filteredReleases = filteredReleases.slice(0, 1);
-        shrinkedViaVulnerability = true;
-        logger.debug(
-          { filteredReleases },
-          'Vulnerability alert found: limiting results to a single release',
-        );
+        if (config.vulnerabilityFixStrategy === 'highest') {
+          // Don't shrink the list of releases - let Renovate use its normal logic
+          logger.once.debug(
+            `Using vulnerabilityFixStrategy=highest for ${config.packageName}`,
+          );
+        } else {
+          // Shrink the list of releases to the lowest fixed version
+          logger.once.debug(
+            `Using vulnerabilityFixStrategy=lowest for ${config.packageName}`,
+          );
+          filteredReleases = filteredReleases.slice(0, 1);
+          shrinkedViaVulnerability = true;
+        }
       }
       const buckets: Record<string, [Release]> = {};
       for (const release of filteredReleases) {
