@@ -372,6 +372,40 @@ export async function lookupUpdates(
       );
       let shrinkedViaVulnerability = false;
       if (config.isVulnerabilityAlert) {
+        if (config.vulnerabilityFixVersion) {
+          res.vulnerabilityFixVersion = config.vulnerabilityFixVersion;
+          if (versioning.isVersion(config.vulnerabilityFixVersion)) {
+            // Filter out versions if the vulnerabilityFixVersion is higher
+            const fixedFilteredReleases = filteredReleases.filter(
+              (r) =>
+                !versioning.isGreaterThan(
+                  config.vulnerabilityFixVersion!,
+                  r.version,
+                ),
+            );
+            // Warn if this filtering results caused zero releases
+            if (fixedFilteredReleases.length === 0 && filteredReleases.length) {
+              logger.warn(
+                {
+                  releases: filteredReleases,
+                  vulnerabilityFixVersion: config.vulnerabilityFixVersion,
+                  packageName: config.packageName,
+                },
+                'No releases satisfy vulnerabilityFixVersion',
+              );
+            }
+            // Use the additionally filtered releases
+            filteredReleases = fixedFilteredReleases;
+          } else {
+            logger.warn(
+              {
+                vulnerabilityFixVersion: config.vulnerabilityFixVersion,
+                packageName: config.packageName,
+              },
+              'vulnerabilityFixVersion is not a version',
+            );
+          }
+        }
         filteredReleases = filteredReleases.slice(0, 1);
         shrinkedViaVulnerability = true;
         logger.debug(
