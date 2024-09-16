@@ -145,7 +145,7 @@ Here are the various ways in approximate order in which lock file awareness shou
 
 ### Lock file maintenance
 
-The goal of lock file maintenance is to update all locked dependencies (including transitive dependencies) to the latest possible version.
+The goal of lock file maintenance is to update all locked dependencies (including transitive dependencies) to the latest possible version, without changing ranges defined in package files.
 
 There are two ways to update lock files:
 
