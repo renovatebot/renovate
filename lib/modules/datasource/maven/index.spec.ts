@@ -247,6 +247,7 @@ describe('modules/datasource/maven/index', () => {
         {
           releaseTimestamp: '2020-01-01T01:00:03.000Z',
           version: '1.0.3-SNAPSHOT',
+          registryUrl: 'https://repo.maven.apache.org/maven2',
         },
       ],
     });
@@ -273,10 +274,26 @@ describe('modules/datasource/maven/index', () => {
       packageScope: 'org.example',
       registryUrl: 'https://repo.maven.apache.org/maven2',
       releases: [
-        { version: '1.0.0', releaseTimestamp: '2021-02-22T14:43:00.000Z' },
-        { version: '1.0.1', releaseTimestamp: '2021-04-12T15:51:00.000Z' },
-        { version: '1.0.2', releaseTimestamp: '2021-06-16T12:47:00.000Z' },
-        { version: '2.0.0', releaseTimestamp: '2021-06-18T16:24:00.000Z' },
+        {
+          version: '1.0.0',
+          releaseTimestamp: '2021-02-22T14:43:00.000Z',
+          registryUrl: 'https://repo.maven.apache.org/maven2',
+        },
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2021-04-12T15:51:00.000Z',
+          registryUrl: 'https://repo.maven.apache.org/maven2',
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2021-06-16T12:47:00.000Z',
+          registryUrl: 'https://repo.maven.apache.org/maven2',
+        },
+        {
+          version: '2.0.0',
+          releaseTimestamp: '2021-06-18T16:24:00.000Z',
+          registryUrl: 'https://repo.maven.apache.org/maven2',
+        },
       ],
     });
   });
@@ -491,14 +508,46 @@ describe('modules/datasource/maven/index', () => {
       registryUrl:
         'artifactregistry://maven.pkg.dev/some-project/some-repository',
       releases: [
-        { version: '0.0.1' },
-        { version: '1.0.0' },
-        { version: '1.0.1' },
-        { version: '1.0.2' },
-        { version: '1.0.3-SNAPSHOT' },
-        { version: '1.0.4-SNAPSHOT' },
-        { version: '1.0.5-SNAPSHOT' },
-        { version: '2.0.0' },
+        {
+          version: '0.0.1',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
+        {
+          version: '1.0.0',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
+        {
+          version: '1.0.1',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
+        {
+          version: '1.0.2',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
+        {
+          version: '1.0.3-SNAPSHOT',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
+        {
+          version: '1.0.4-SNAPSHOT',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
+        {
+          version: '1.0.5-SNAPSHOT',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
+        {
+          version: '2.0.0',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
       ],
       isPrivate: true,
     });
@@ -544,14 +593,46 @@ describe('modules/datasource/maven/index', () => {
       registryUrl:
         'artifactregistry://maven.pkg.dev/some-project/some-repository',
       releases: [
-        { version: '0.0.1' },
-        { version: '1.0.0' },
-        { version: '1.0.1' },
-        { version: '1.0.2' },
-        { version: '1.0.3-SNAPSHOT' },
-        { version: '1.0.4-SNAPSHOT' },
-        { version: '1.0.5-SNAPSHOT' },
-        { version: '2.0.0' },
+        {
+          version: '0.0.1',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
+        {
+          version: '1.0.0',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
+        {
+          version: '1.0.1',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
+        {
+          version: '1.0.2',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
+        {
+          version: '1.0.3-SNAPSHOT',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
+        {
+          version: '1.0.4-SNAPSHOT',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
+        {
+          version: '1.0.5-SNAPSHOT',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
+        {
+          version: '2.0.0',
+          registryUrl:
+            'artifactregistry://maven.pkg.dev/some-project/some-repository',
+        },
       ],
       isPrivate: true,
     });

@@ -134,18 +134,23 @@ describe('modules/datasource/conan/index', () => {
         releases: [
           {
             version: '1.8.1',
+            registryUrl: 'https://not.conan.io',
           },
           {
             version: '1.9.3',
+            registryUrl: 'https://not.conan.io',
           },
           {
             version: '1.9.4',
+            registryUrl: 'https://not.conan.io',
           },
           {
             version: '1.10.0',
+            registryUrl: 'https://not.conan.io',
           },
           {
             version: '1.10.1',
+            registryUrl: 'https://not.conan.io',
           },
         ],
       });
@@ -166,12 +171,15 @@ describe('modules/datasource/conan/index', () => {
         releases: [
           {
             version: '1.0.0',
+            registryUrl: 'https://not.conan.io',
           },
           {
             version: '1.1.0',
+            registryUrl: 'https://not.conan.io',
           },
           {
             version: '2.2.0',
+            registryUrl: 'https://not.conan.io',
           },
         ],
       });
@@ -195,24 +203,31 @@ describe('modules/datasource/conan/index', () => {
         releases: [
           {
             version: '1.8.1',
+            registryUrl: 'https://center.conan.io',
           },
           {
             version: '1.9.3',
+            registryUrl: 'https://center.conan.io',
           },
           {
             version: '1.9.4',
+            registryUrl: 'https://center.conan.io',
           },
           {
             version: '1.10.0',
+            registryUrl: 'https://center.conan.io',
           },
           {
             version: '1.10.1',
+            registryUrl: 'https://center.conan.io',
           },
           {
             version: '1.11.0',
+            registryUrl: 'https://center.conan.io',
           },
           {
             version: '1.11.1',
+            registryUrl: 'https://center.conan.io',
           },
         ],
       });
@@ -273,6 +288,7 @@ describe('modules/datasource/conan/index', () => {
         registryUrl: 'https://not.conan.io',
         releases: [
           {
+            registryUrl: 'https://not.conan.io',
             version: '1.9.3',
           },
         ],
@@ -355,9 +371,13 @@ describe('modules/datasource/conan/index', () => {
         releases: [
           {
             version: '1.0.0',
+            registryUrl:
+              'https://fake.artifactory.com/artifactory/api/conan/test-repo',
           },
           {
             version: '1.1.1',
+            registryUrl:
+              'https://fake.artifactory.com/artifactory/api/conan/test-repo',
           },
         ],
       });
@@ -386,9 +406,11 @@ describe('modules/datasource/conan/index', () => {
         releases: [
           {
             version: '1.0.0',
+            registryUrl: 'https://fake.artifactory.com',
           },
           {
             version: '1.1.1',
+            registryUrl: 'https://fake.artifactory.com',
           },
         ],
       });
@@ -480,9 +502,13 @@ describe('modules/datasource/conan/index', () => {
         releases: [
           {
             version: '1.0.0',
+            registryUrl:
+              'https://fake.artifactory.com/artifactory/api/conan/test-repo',
           },
           {
             version: '1.1.1',
+            registryUrl:
+              'https://fake.artifactory.com/artifactory/api/conan/test-repo',
           },
         ],
       });
@@ -519,9 +545,13 @@ describe('modules/datasource/conan/index', () => {
         releases: [
           {
             version: '1.0.0',
+            registryUrl:
+              'https://fake.artifactory.com/artifactory/api/conan/test-repo',
           },
           {
             version: '1.1.1',
+            registryUrl:
+              'https://fake.artifactory.com/artifactory/api/conan/test-repo',
           },
         ],
       });

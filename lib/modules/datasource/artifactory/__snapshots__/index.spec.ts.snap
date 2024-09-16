@@ -5,18 +5,22 @@ exports[`modules/datasource/artifactory/index getReleases parses real data (file
   "registryUrl": "https://jfrog.company.com/artifactory",
   "releases": [
     {
+      "registryUrl": "https://jfrog.company.com/artifactory",
       "releaseTimestamp": "2021-07-21T20:08:00.000Z",
       "version": "1.0.0",
     },
     {
+      "registryUrl": "https://jfrog.company.com/artifactory",
       "releaseTimestamp": "2021-08-23T20:03:00.000Z",
       "version": "1.0.1",
     },
     {
+      "registryUrl": "https://jfrog.company.com/artifactory",
       "releaseTimestamp": "2021-07-21T20:09:00.000Z",
       "version": "1.0.2",
     },
     {
+      "registryUrl": "https://jfrog.company.com/artifactory",
       "releaseTimestamp": "2021-02-06T09:54:00.000Z",
       "version": "1.0.3",
     },
@@ -29,18 +33,22 @@ exports[`modules/datasource/artifactory/index getReleases parses real data (fold
   "registryUrl": "https://jfrog.company.com/artifactory",
   "releases": [
     {
+      "registryUrl": "https://jfrog.company.com/artifactory",
       "releaseTimestamp": "2021-07-21T20:08:00.000Z",
       "version": "1.0.0",
     },
     {
+      "registryUrl": "https://jfrog.company.com/artifactory",
       "releaseTimestamp": "2021-08-23T20:03:00.000Z",
       "version": "1.0.1",
     },
     {
+      "registryUrl": "https://jfrog.company.com/artifactory",
       "releaseTimestamp": "2021-07-21T20:09:00.000Z",
       "version": "1.0.2",
     },
     {
+      "registryUrl": "https://jfrog.company.com/artifactory",
       "releaseTimestamp": "2021-02-06T09:54:00.000Z",
       "version": "1.0.3",
     },

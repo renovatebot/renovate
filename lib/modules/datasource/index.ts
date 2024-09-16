@@ -194,11 +194,11 @@ async function mergeRegistries(
     }
   }
 
-  if (lastErr) {
-    throw lastErr;
-  }
+  if (!combinedRes) {
+    if (lastErr) {
+      throw lastErr;
+    }
 
-  if (!combinedRes?.releases.length) {
     return null;
   }
 
