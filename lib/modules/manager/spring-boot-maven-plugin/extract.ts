@@ -71,20 +71,25 @@ export function extractPackageFile(
     return null;
   }
 
-  const pluginNode = descriptor
-    .childNamed('build')
-    ?.childNamed('plugins')
-    ?.childNamed('plugin');
-  if (
-    !pluginNode ||
-    pluginNode.valueWithPath('groupId')?.trim() !==
-      'org.springframework.boot' ||
-    pluginNode.valueWithPath('artifactId')?.trim() !==
-      'spring-boot-maven-plugin'
-  ) {
+  const pluginNodes =
+    descriptor
+      .childNamed('build')
+      ?.childNamed('plugins')
+      ?.childrenNamed('plugin') ?? [];
+  pluginNodes.filter((pluginNode) => {
+    return (
+      pluginNode.valueWithPath('groupId')?.trim() ===
+        'org.springframework.boot' &&
+      pluginNode.valueWithPath('artifactId')?.trim() ===
+        'spring-boot-maven-plugin'
+    );
+  });
+  if (!pluginNodes.length) {
     return null;
   }
-  const imageNode = pluginNode.childNamed('configuration')?.childNamed('image');
+  const imageNode = pluginNodes[0]
+    .childNamed('configuration')
+    ?.childNamed('image');
   if (!imageNode) {
     return null;
   }
