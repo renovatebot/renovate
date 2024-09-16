@@ -46,7 +46,7 @@ export async function postprocessRelease(
 
     if (!result) {
       logger.debug(
-        { packageName, registryUrl, version: release.version },
+        { datasource, packageName, registryUrl, version: release.version },
         'Rejected release',
       );
     }
