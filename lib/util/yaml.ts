@@ -136,7 +136,7 @@ export function parseSingleYaml<ResT = unknown>(
   return schema.parse(document);
 }
 
-export function dump(obj: any, opts?: DumpOptions | undefined): string {
+export function dump(obj: any, opts?: DumpOptions): string {
   return stringify(obj, opts);
 }
 

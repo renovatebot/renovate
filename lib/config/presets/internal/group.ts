@@ -87,7 +87,7 @@ const staticGroups = {
     packageRules: [
       {
         groupName: 'flyway',
-        matchPackageNames: ['org.flywaydb:*'],
+        matchPackageNames: ['org.flywaydb:*', 'org.flywaydb.flyway:*'],
       },
     ],
   },

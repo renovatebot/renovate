@@ -38,6 +38,7 @@ export function extractPackageFile(
   try {
     config = parseSingleYaml(content, {
       customSchema: DockerComposeFile,
+      removeTemplates: true,
     });
   } catch (err) {
     logger.debug(

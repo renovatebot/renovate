@@ -33,7 +33,7 @@ export const regexEngineStatus = status;
 
 export function regEx(
   pattern: string | RegExp,
-  flags?: string | undefined,
+  flags?: string,
   useCache = true,
 ): RegExp {
   let canBeCached = useCache;
