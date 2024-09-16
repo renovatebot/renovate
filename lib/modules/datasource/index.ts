@@ -8,6 +8,7 @@ import { coerceArray } from '../../util/array';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { clone } from '../../util/clone';
+import { filterMap } from '../../util/filter-map';
 import { AsyncResult, Result } from '../../util/result';
 import { DatasourceCacheStats } from '../../util/stats';
 import { trimTrailingSlash } from '../../util/url';
@@ -161,53 +162,56 @@ async function mergeRegistries(
   registryUrls: string[],
 ): Promise<ReleaseResult | null> {
   let combinedRes: ReleaseResult | undefined;
-  let caughtError: Error | undefined;
+  let lastErr: Error | undefined;
+
   for (const registryUrl of registryUrls) {
     try {
       const res = await getRegistryReleases(datasource, config, registryUrl);
       if (!res) {
         continue;
       }
-      if (combinedRes) {
-        for (const existingRelease of coerceArray(combinedRes.releases)) {
-          existingRelease.registryUrl ??= combinedRes.registryUrl;
-        }
-        for (const additionalRelease of coerceArray(res.releases)) {
-          additionalRelease.registryUrl = res.registryUrl;
-        }
-        combinedRes = { ...res, ...combinedRes };
-        delete combinedRes.registryUrl;
-        combinedRes.releases = [...combinedRes.releases, ...res.releases];
-      } else {
-        combinedRes = res;
+
+      const releases = coerceArray(res.releases);
+      for (const release of releases) {
+        release.registryUrl ??= res.registryUrl;
       }
+
+      if (!combinedRes) {
+        combinedRes = res;
+        continue;
+      }
+
+      combinedRes.releases.push(...releases);
+      combinedRes = { ...res, ...combinedRes };
+      delete combinedRes.registryUrl;
     } catch (err) {
       if (err instanceof ExternalHostError) {
         throw err;
       }
-      // We'll always save the last-thrown error
-      caughtError = err;
+
+      lastErr = err;
       logger.trace({ err }, 'datasource merge failure');
     }
   }
-  // De-duplicate releases
-  if (combinedRes?.releases?.length) {
-    const seenVersions = new Set<string>();
-    combinedRes.releases = combinedRes.releases.filter((release) => {
-      if (seenVersions.has(release.version)) {
-        return false;
-      }
-      seenVersions.add(release.version);
-      return true;
-    });
+
+  if (lastErr) {
+    throw lastErr;
   }
-  if (combinedRes) {
-    return combinedRes;
+
+  if (!combinedRes?.releases.length) {
+    return null;
   }
-  if (caughtError) {
-    throw caughtError;
-  }
-  return null;
+
+  const seenVersions = new Set<string>();
+  combinedRes.releases = filterMap(combinedRes.releases, (release) => {
+    if (seenVersions.has(release.version)) {
+      return null;
+    }
+    seenVersions.add(release.version);
+    return release;
+  });
+
+  return combinedRes;
 }
 
 function massageRegistryUrls(registryUrls: string[]): string[] {
