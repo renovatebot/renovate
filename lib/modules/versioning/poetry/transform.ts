@@ -119,7 +119,8 @@ export function poetry2npm(input: string, throwOnUnsupported = false): string {
   const transformed = chunks
     .map((chunk) => poetry2semver(chunk, false) ?? chunk)
     .join('')
-    .replace(/===/, '=');
+    .replace(/===/, '=')
+    .replace(/==/, '');
   if (throwOnUnsupported) {
     const isUnsupported = transformed
       .split(regEx(/\s+/))

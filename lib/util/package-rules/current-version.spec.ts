@@ -142,5 +142,21 @@ describe('util/package-rules/current-version', () => {
       );
       expect(result).toBeFalse();
     });
+
+    it('returns true for poetry with ==', () => {
+      const result = matcher.matches(
+        {
+          versioning: 'poetry',
+          datasource: "pypi",
+          currentValue: "^0.0.5",
+          lockedVersion: "0.0.5",
+        },
+        {
+          matchCurrentVersion: '==0.0.5',
+        },
+      );
+      expect(result).toBeTrue();
+    });
+
   });
 });
