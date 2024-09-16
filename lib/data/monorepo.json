@@ -333,6 +333,7 @@
     "junit5": "https://github.com/junit-team/junit5",
     "kernelmemory": "https://github.com/microsoft/kernel-memory",
     "kotlin": "https://github.com/JetBrains/kotlin",
+    "kotlinx.coroutines": "https://github.com/Kotlin/kotlinx.coroutines",
     "kroki": "https://github.com/yuzutech/kroki",
     "ktor": "https://github.com/ktorio/ktor",
     "lamar": "https://github.com/JasperFx/lamar",
