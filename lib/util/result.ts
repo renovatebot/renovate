@@ -626,7 +626,6 @@ export class AsyncResult<T extends Val, E extends Val>
   then<TResult1 = Result<T, E>>(
     onfulfilled?:
       | ((value: Result<T, E>) => TResult1 | PromiseLike<TResult1>)
-      | undefined
       | null,
   ): PromiseLike<TResult1> {
     return this.asyncResult.then(onfulfilled);
