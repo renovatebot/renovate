@@ -187,7 +187,7 @@ function extractWithYAMLParser(
   let pkg: Workflow;
   try {
     // TODO: use schema (#9610)
-    pkg = parseSingleYaml(content, { json: true });
+    pkg = parseSingleYaml(content);
   } catch (err) {
     logger.debug(
       { packageFile, err },
