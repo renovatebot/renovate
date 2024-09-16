@@ -818,7 +818,7 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    it('uses vulnerabilityFixVersion', async () => {
+    it('uses vulnerabilityFixVersion when a version', async () => {
       config.currentValue = '1.0.0';
       config.isVulnerabilityAlert = true;
       config.vulnerabilityFixVersion = '1.1.0';
@@ -844,10 +844,62 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('takes a later release when vulnerabilityFixVersion does not exist', async () => {
+      config.currentValue = '1.0.0';
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixVersion = '1.0.2';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newMajor: 1,
+          newMinor: 1,
+          newPatch: 0,
+          newValue: '1.1.0',
+          newVersion: '1.1.0',
+          releaseTimestamp: expect.any(String),
+          updateType: 'minor',
+        },
+      ]);
+    });
+
+    it('uses vulnerabilityFixVersion when a range', async () => {
+      config.currentValue = '1.0.0';
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixVersion = '>= 1.1.0';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newMajor: 1,
+          newMinor: 1,
+          newPatch: 0,
+          newValue: '1.1.0',
+          newVersion: '1.1.0',
+          releaseTimestamp: expect.any(String),
+          updateType: 'minor',
+        },
+      ]);
+    });
+
     it('ignores vulnerabilityFixVersion if not a version', async () => {
       config.currentValue = '1.0.0';
       config.isVulnerabilityAlert = true;
-      config.vulnerabilityFixVersion = '1.1';
+      config.vulnerabilityFixVersion = 'abc';
       config.packageName = 'q';
       config.datasource = NpmDatasource.id;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
