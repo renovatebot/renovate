@@ -372,35 +372,32 @@ export async function lookupUpdates(
       );
       let shrinkedViaVulnerability = false;
       if (config.isVulnerabilityAlert) {
-        if (config.vulnerabilityFixVersion) {
-          res.vulnerabilityFixVersion = config.vulnerabilityFixVersion;
-          if (versioning.isValid(config.vulnerabilityFixVersion)) {
-            // Filter out versions if the vulnerabilityFixVersion is higher
+        if (config.vulnerabilityFix) {
+          res.vulnerabilityFix = config.vulnerabilityFix;
+          if (versioning.isValid(config.vulnerabilityFix)) {
+            // Filter out versions if the vulnerabilityFix is higher
             const fixedFilteredReleases = versioning.isVersion(
-              config.vulnerabilityFixVersion,
+              config.vulnerabilityFix,
             )
               ? filteredReleases.filter(
                   (r) =>
                     !versioning.isGreaterThan(
-                      config.vulnerabilityFixVersion!,
+                      config.vulnerabilityFix!,
                       r.version,
                     ),
                 )
               : filteredReleases.filter((r) =>
-                  versioning.matches(
-                    r.version,
-                    config.vulnerabilityFixVersion!,
-                  ),
+                  versioning.matches(r.version, config.vulnerabilityFix!),
                 );
             // Warn if this filtering results caused zero releases
             if (fixedFilteredReleases.length === 0 && filteredReleases.length) {
               logger.warn(
                 {
                   releases: filteredReleases,
-                  vulnerabilityFixVersion: config.vulnerabilityFixVersion,
+                  vulnerabilityFix: config.vulnerabilityFix,
                   packageName: config.packageName,
                 },
-                'No releases satisfy vulnerabilityFixVersion',
+                'No releases satisfy vulnerabilityFix',
               );
             }
             // Use the additionally filtered releases
@@ -408,10 +405,10 @@ export async function lookupUpdates(
           } else {
             logger.warn(
               {
-                vulnerabilityFixVersion: config.vulnerabilityFixVersion,
+                vulnerabilityFix: config.vulnerabilityFix,
                 packageName: config.packageName,
               },
-              'vulnerabilityFixVersion is not a version',
+              'vulnerabilityFix is not valid',
             );
           }
         }
