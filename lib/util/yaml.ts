@@ -70,7 +70,7 @@ export function parseSingleYaml<ResT = unknown>(
   return schema.parse(rawDocument);
 }
 
-export function dump(obj: any, opts?: DumpOptions | undefined): string {
+export function dump(obj: any, opts?: DumpOptions): string {
   return upstreamDump(obj, opts);
 }
 
