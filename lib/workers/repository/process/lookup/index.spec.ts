@@ -818,7 +818,7 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    it('uses highest version for vulnerabilityAlerts when vulnerabilityFixStrategy=highest', async () => {
+    it('uses highest available version for vulnerabilityAlerts when vulnerabilityFixStrategy=highest', async () => {
       config.currentValue = '1.0.0';
       config.isVulnerabilityAlert = true;
       config.vulnerabilityFixStrategy = 'highest';
@@ -870,7 +870,7 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    it('takes highest verion when using vulnerabilityFixStrategy=highest with vulnerabilityFixVersion', async () => {
+    it('takes highest available version when using vulnerabilityFixStrategy=highest with vulnerabilityFixVersion', async () => {
       config.currentValue = '1.0.0';
       config.isVulnerabilityAlert = true;
       config.vulnerabilityFixVersion = '1.1.0';
