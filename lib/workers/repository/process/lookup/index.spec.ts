@@ -900,7 +900,7 @@ describe('workers/repository/process/lookup/index', () => {
     it('ignores vulnerabilityFixVersion if not a version', async () => {
       config.currentValue = '1.0.0';
       config.isVulnerabilityAlert = true;
-      config.vulnerabilityFixVersion = '1.1';
+      config.vulnerabilityFixVersion = 'abc';
       config.packageName = 'q';
       config.datasource = NpmDatasource.id;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);

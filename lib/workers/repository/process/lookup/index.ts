@@ -375,15 +375,24 @@ export async function lookupUpdates(
         if (config.vulnerabilityFixVersion) {
           res.vulnerabilityFixStrategy = config.vulnerabilityFixStrategy;
           res.vulnerabilityFixVersion = config.vulnerabilityFixVersion;
-          if (versioning.isVersion(config.vulnerabilityFixVersion)) {
+          if (versioning.isValid(config.vulnerabilityFixVersion)) {
             // Filter out versions if the vulnerabilityFixVersion is higher
-            const fixedFilteredReleases = filteredReleases.filter(
-              (r) =>
-                !versioning.isGreaterThan(
-                  config.vulnerabilityFixVersion!,
-                  r.version,
-                ),
-            );
+            const fixedFilteredReleases = versioning.isVersion(
+              config.vulnerabilityFixVersion,
+            )
+              ? filteredReleases.filter(
+                  (r) =>
+                    !versioning.isGreaterThan(
+                      config.vulnerabilityFixVersion!,
+                      r.version,
+                    ),
+                )
+              : filteredReleases.filter((r) =>
+                  versioning.matches(
+                    r.version,
+                    config.vulnerabilityFixVersion!,
+                  ),
+                );
             // Warn if this filtering results caused zero releases
             if (fixedFilteredReleases.length === 0 && filteredReleases.length) {
               logger.warn(
