@@ -344,7 +344,7 @@
     "typescript": "5.5.4",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@9.9.0",
+  "packageManager": "pnpm@9.10.0",
   "files": [
     "dist",
     "renovate-schema.json"
