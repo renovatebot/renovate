@@ -178,7 +178,7 @@ Usually, the flow is like this:
 ### Locked version extracting and dependency pinning
 
 The next step is for the manager's "extract" feature to return a `lockedVersion` for dependencies, whenever a lock file exists.
-To do this, the manager must:
+To do this, the manager needs to:
 
 1. Parse the lock file
 2. Match each dependency from the package file to its entry in the lock file
