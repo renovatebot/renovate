@@ -120,7 +120,7 @@ Package files have human-readable dependency definitions, for example:
 
 Some package managers may also have "lock files", like npm's `package-lock.json`.
 
-If a repository has a lock file, then Renovate MUST update the package file _and_ the matching lock file in the same commit.
+If a repository has a lock file, then Renovate _must_ update the package file _and_ the matching lock file in the same commit.
 This prevents creating "broken" updates for users and generating frustration with Renovate.
 
 ### Focus on getting lock file syncing working
