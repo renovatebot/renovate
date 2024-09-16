@@ -2,7 +2,6 @@ import type { Stats } from 'node:fs';
 import os from 'node:os';
 import { codeBlock } from 'common-tags';
 import { fs, partial } from '../../../../test/util';
-import { GlobalConfig } from '../../../config/global';
 import {
   extractGradleVersion,
   getJavaConstraint,
@@ -15,37 +14,25 @@ const platform = jest.spyOn(os, 'platform');
 jest.mock('../../../util/fs');
 
 describe('modules/manager/gradle-wrapper/util', () => {
-  beforeEach(() => GlobalConfig.reset());
-
   describe('getJavaConstraint()', () => {
-    it('return ^8.0.0 for global mode', async () => {
-      expect(await getJavaConstraint('4', '')).toBe('^8.0.0');
-    });
-
-    it('return ^11.0.0 for docker mode and undefined gradle', async () => {
-      GlobalConfig.set({ binarySource: 'docker' });
-      expect(await getJavaConstraint('', '')).toBe('^11.0.0');
-    });
-
-    it('return ^8.0.0 for docker gradle < 5', async () => {
-      GlobalConfig.set({ binarySource: 'docker' });
-      expect(await getJavaConstraint('4.9', '')).toBe('^8.0.0');
-    });
-
-    it('return ^11.0.0 for docker gradle >=5 && <7', async () => {
-      GlobalConfig.set({ binarySource: 'docker' });
-      expect(await getJavaConstraint('6.0', '')).toBe('^11.0.0');
-    });
-
-    it('return ^16.0.0 for docker gradle >= 7', async () => {
-      GlobalConfig.set({ binarySource: 'docker' });
-      expect(await getJavaConstraint('7.0.1', '')).toBe('^16.0.0');
-    });
-
-    it('return ^17.0.0 for docker gradle >= 7.3', async () => {
-      GlobalConfig.set({ binarySource: 'docker' });
-      expect(await getJavaConstraint('7.3.0', '')).toBe('^17.0.0');
-      expect(await getJavaConstraint('8.0.1', '')).toBe('^17.0.0');
+    describe('returns Java constraint based on gradle support', () => {
+      it.each`
+        gradleVersion | javaConstraint
+        ${''}         | ${'^11.0.0'}
+        ${'4'}        | ${'^8.0.0'}
+        ${'4.9'}      | ${'^8.0.0'}
+        ${'6.0'}      | ${'^11.0.0'}
+        ${'7.0.1'}    | ${'^16.0.0'}
+        ${'7.3.0'}    | ${'^17.0.0'}
+        ${'8.0.1'}    | ${'^17.0.0'}
+      `(
+        '$gradleVersion | $javaConstraint',
+        async ({ gradleVersion, javaConstraint }) => {
+          expect(await getJavaConstraint(gradleVersion, '')).toBe(
+            javaConstraint,
+          );
+        },
+      );
     });
 
     it('returns toolChainVersion constraint if daemon JVM configured', async () => {
@@ -79,9 +66,24 @@ describe('modules/manager/gradle-wrapper/util', () => {
   });
 
   describe('extractGradleVersion()', () => {
-    it('works for undefined', () => {
-      // TODO #22198
-      expect(extractGradleVersion(undefined as never)).toBeNull();
+    it('returns null', () => {
+      const properties = codeBlock`
+        distributionSha256Sum=038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768
+        zipStoreBase=GRADLE_USER_HOME
+      `;
+      expect(extractGradleVersion(properties)).toBeNull();
+    });
+
+    it('returns gradle version', () => {
+      const properties = codeBlock`
+        distributionSha256Sum=038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768
+        distributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip
+        zipStoreBase=GRADLE_USER_HOME
+      `;
+      expect(extractGradleVersion(properties)).toStrictEqual({
+        url: 'https\\://services.gradle.org/distributions/gradle-6.3-bin.zip',
+        version: '6.3',
+      });
     });
   });
 

@@ -3,7 +3,7 @@ import { dirname, join } from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { chmodLocalFile, readLocalFile, statLocalFile } from '../../../util/fs';
-import { newlineRegex, regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex';
 import gradleVersioning from '../../versioning/gradle';
 import type { GradleVersionExtract } from './types';
 
@@ -52,24 +52,26 @@ export async function getJavaConstraint(
   const major = gradleVersion ? gradleVersioning.getMajor(gradleVersion) : null;
   const minor = gradleVersion ? gradleVersioning.getMinor(gradleVersion) : null;
 
-  // https://docs.gradle.org/8.8/release-notes.html#daemon-toolchains
-  if (major && (major > 8 || (major === 8 && minor && minor >= 8))) {
-    const toolChainVersion = await getJvmConfiguration(gradlewFile);
-    if (toolChainVersion) {
-      return `^${toolChainVersion}.0.0`;
+  if (major) {
+    // https://docs.gradle.org/8.8/release-notes.html#daemon-toolchains
+    if (major > 8 || (major === 8 && minor && minor >= 8)) {
+      const toolChainVersion = await getJvmConfiguration(gradlewFile);
+      if (toolChainVersion) {
+        return `^${toolChainVersion}.0.0`;
+      }
+    }
+    if (major > 7 || (major === 7 && minor && minor >= 3)) {
+      return '^17.0.0';
+    }
+    if (major === 7) {
+      return '^16.0.0';
+    }
+    // first public gradle version was 2.0
+    if (major > 0 && major < 5) {
+      return '^8.0.0';
     }
   }
 
-  if (major && (major > 7 || (major >= 7 && minor && minor >= 3))) {
-    return '^17.0.0';
-  }
-  if (major && major >= 7) {
-    return '^16.0.0';
-  }
-  // first public gradle version was 2.0
-  if (major && major > 0 && major < 5) {
-    return '^8.0.0';
-  }
   return '^11.0.0';
 }
 
@@ -101,22 +103,18 @@ export async function getJvmConfiguration(
 // https://regex101.com/r/IcOs7P/1
 const DISTRIBUTION_URL_REGEX = regEx(
   '^(?:distributionUrl\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)-(?<type>bin|all)\\.zip)\\s*$',
+  'm',
 );
 
 export function extractGradleVersion(
   fileContent: string,
 ): GradleVersionExtract | null {
-  const lines = fileContent?.split(newlineRegex) ?? [];
-
-  for (const line of lines) {
-    const distributionUrlMatch = DISTRIBUTION_URL_REGEX.exec(line);
-
-    if (distributionUrlMatch?.groups) {
-      return {
-        url: distributionUrlMatch.groups.url,
-        version: distributionUrlMatch.groups.version,
-      };
-    }
+  const distributionUrlMatch = DISTRIBUTION_URL_REGEX.exec(fileContent);
+  if (distributionUrlMatch?.groups) {
+    return {
+      url: distributionUrlMatch.groups.url,
+      version: distributionUrlMatch.groups.version,
+    };
   }
   logger.debug(
     'Gradle wrapper version and url could not be extracted from properties - skipping update',
