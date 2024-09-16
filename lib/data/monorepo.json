@@ -262,6 +262,7 @@
     "dotnet-azure-ad-microsoft-identity-web": "https://github.com/AzureAD/microsoft-identity-web",
     "dotnet-wcf": "https://github.com/dotnet/wcf",
     "dropwizard": "https://github.com/dropwizard/dropwizard",
+    "duende-identityserver": "https://github.com/DuendeSoftware/IdentityServer",
     "elastic-apm-agent-rum-js": "https://github.com/elastic/apm-agent-rum-js",
     "electron-forge": [
       "https://github.com/electron-userland/electron-forge",
