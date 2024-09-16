@@ -17,6 +17,11 @@ To use a Debian repository with the datasource, you must set a properly formatte
   - `suite`: A rolling release alias like `stable`.
   - `release`: A fixed release name such as `bullseye` or `buster`.
 
+<!-- prettier-ignore -->
+!!! note
+  These parameters are used to give Renovate context and are not directly used to call the repository.
+  Therefore, the `registryUrl` has not to be a valid URL for a repository.
+
 **Example**:
 
 ```
