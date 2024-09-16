@@ -1978,7 +1978,7 @@ const options: RenovateOptions[] = [
   {
     name: 'vulnerabilityFixStrategy',
     description:
-      'Strategy to use when fixing vulnerabilities. `lowest` will use the lowest fixed version, `highest` will use the highest fixed version.',
+      'Strategy to use when fixing vulnerabilities. `lowest` will propose the earliest version with a fix, `highest` will always pick the latest version.',
     type: 'string',
     allowedValues: ['lowest', 'highest'],
     default: 'lowest',
