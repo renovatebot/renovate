@@ -45,7 +45,7 @@ function getReadable(
     /*do nothing*/
   };
 
-  readable.destroy = (error?: Error | undefined): Readable => {
+  readable.destroy = (error?: Error): Readable => {
     return readable;
   };
 
@@ -116,7 +116,7 @@ function getSpawnStub(args: StubArgs): any {
     /* do nothing*/
   };
 
-  const kill = (signal?: number | NodeJS.Signals | undefined): boolean => {
+  const kill = (signal?: number | NodeJS.Signals): boolean => {
     /* do nothing*/
     return true;
   };
