@@ -383,6 +383,7 @@ export interface PackageRule
   matchUpdateTypes?: UpdateType[];
   registryUrls?: string[] | null;
   vulnerabilitySeverity?: string;
+  vulnerabilityFixVersion?: string;
 }
 
 export interface ValidationMessage {
