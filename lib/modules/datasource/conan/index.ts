@@ -63,9 +63,7 @@ export class ConanDatasource extends Datasource {
       headers: { accept: 'application/vnd.github.v3.raw' },
     });
     // TODO: use schema (#9610)
-    const doc = parseSingleYaml<ConanYAML>(res.body, {
-      json: true,
-    });
+    const doc = parseSingleYaml<ConanYAML>(res.body);
     return {
       releases: Object.keys(doc?.versions ?? {}).map((version) => ({
         version,

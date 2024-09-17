@@ -385,7 +385,7 @@ export function extractPackageFile(
     const copyFromRegex = new RegExp(
       '^[ \\t]*COPY(?:' +
         escapeChar +
-        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+=[a-zA-Z0-9_.:-]+?)+--from=(?<image>\\S+)',
+        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--from=(?<image>\\S+)',
       'im',
     ); // TODO #12875 complex for re2 has too many not supported groups
     const copyFromMatch = instruction.match(copyFromRegex);
