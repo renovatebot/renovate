@@ -488,7 +488,7 @@ export async function getBranchStatus(
       'Merge request head pipeline has different sha to commit, assuming merged results pipeline',
     );
     branchStatuses.push({
-      status: mr?.headPipelineStatus as BranchState,
+      status: mr.headPipelineStatus as BranchState,
       name: 'head_pipeline',
     });
   }
