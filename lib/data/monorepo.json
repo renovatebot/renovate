@@ -262,6 +262,7 @@
     "dotnet-azure-ad-microsoft-identity-web": "https://github.com/AzureAD/microsoft-identity-web",
     "dotnet-wcf": "https://github.com/dotnet/wcf",
     "dropwizard": "https://github.com/dropwizard/dropwizard",
+    "duende-identityserver": "https://github.com/DuendeSoftware/IdentityServer",
     "elastic-apm-agent-rum-js": "https://github.com/elastic/apm-agent-rum-js",
     "electron-forge": [
       "https://github.com/electron-userland/electron-forge",
@@ -278,6 +279,7 @@
     "fabric-chaincode-node": "https://github.com/hyperledger/fabric-chaincode-node",
     "fabric8-kubernetes-client": "https://github.com/fabric8io/kubernetes-client",
     "feathers": "https://github.com/feathersjs/feathers",
+    "featuremanagement-dotnet": "https://github.com/microsoft/FeatureManagement-Dotnet",
     "feign": "https://github.com/OpenFeign/feign",
     "fela": "https://github.com/robinweser/fela",
     "fimbullinter": "https://github.com/fimbullinter/wotan",
@@ -333,6 +335,7 @@
     "junit5": "https://github.com/junit-team/junit5",
     "kernelmemory": "https://github.com/microsoft/kernel-memory",
     "kotlin": "https://github.com/JetBrains/kotlin",
+    "kotlinx-coroutines": "https://github.com/Kotlin/kotlinx.coroutines",
     "kroki": "https://github.com/yuzutech/kroki",
     "ktor": "https://github.com/ktorio/ktor",
     "lamar": "https://github.com/JasperFx/lamar",
