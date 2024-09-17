@@ -49,19 +49,19 @@ function checkRebaseAll(issueBody: string): boolean {
 }
 
 function checkCreateConfigMigrationPr(issueBody: string): string {
-  if (issueBody.includes('Config Migration needed.')) {
-    if (issueBody.includes(' - [x] <!-- create-config-migration-pr -->')) {
-      return 'checked';
-    }
-
-    if (issueBody.includes(' - [ ] <!-- create-config-migration-pr -->')) {
-      return 'unchecked';
-    }
-
-    return 'migration-pr-exists';
+  if (!issueBody.includes('Config Migration needed.')) {
+    return 'no-checkbox';
   }
 
-  return 'no-checkbox';
+  if (issueBody.includes(' - [x] <!-- create-config-migration-pr -->')) {
+    return 'checked';
+  }
+
+  if (issueBody.includes(' - [ ] <!-- create-config-migration-pr -->')) {
+    return 'unchecked';
+  }
+
+  return 'migration-pr-exists';
 }
 
 function selectAllRelevantBranches(issueBody: string): string[] {

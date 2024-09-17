@@ -37,7 +37,6 @@ describe('workers/repository/config-migration/branch/index', () => {
       config.branchPrefix = 'some/';
     });
 
-    // exists when migration not needed
     it('exits when migration is not needed', async () => {
       await expect(
         checkConfigMigrationBranch(config, null),
