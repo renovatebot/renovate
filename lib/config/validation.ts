@@ -64,7 +64,7 @@ const ignoredNodes = [
   'vulnerabilityAlertsOnly',
   'vulnerabilityAlert',
   'isVulnerabilityAlert',
-  'vulnerabilityFix', // not intended to be used by end users but may be by Mend apps
+  'vulnerabilityFixVersion', // not intended to be used by end users but may be by Mend apps
   'copyLocalLibs', // deprecated - functionality is now enabled by default
   'prBody', // deprecated
   'minimumConfidence', // undocumented feature flag

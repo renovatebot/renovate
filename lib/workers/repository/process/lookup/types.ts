@@ -49,7 +49,7 @@ export interface LookupUpdateConfig
   replacementNameTemplate?: string;
   replacementVersion?: string;
   extractVersion?: string;
-  vulnerabilityFix?: string;
+  vulnerabilityFixVersion?: string;
 }
 
 export interface UpdateResult {
@@ -69,5 +69,5 @@ export interface UpdateResult {
   warnings: ValidationMessage[];
   versioning?: string;
   currentVersionTimestamp?: string;
-  vulnerabilityFix?: string;
+  vulnerabilityFixVersion?: string;
 }
