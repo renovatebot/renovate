@@ -525,6 +525,7 @@
     "vue": ["https://github.com/vuejs/vue", "https://github.com/vuejs/core"],
     "vue-cli": "https://github.com/vuejs/vue-cli",
     "vuepress": "https://github.com/vuejs/vuepress",
+    "vueuse": "https://github.com/vueuse/vueuse",
     "weasel": "https://github.com/JasperFx/weasel",
     "web3-react": "https://github.com/Uniswap/web3-react",
     "webdriverio": "https://github.com/webdriverio/webdriverio",
