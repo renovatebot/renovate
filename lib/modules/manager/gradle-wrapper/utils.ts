@@ -60,6 +60,9 @@ export async function getJavaConstraint(
         return `^${toolChainVersion}.0.0`;
       }
     }
+    if (major > 8 || (major === 8 && minor && minor >= 5)) {
+      return '^21.0.0';
+    }
     if (major > 7 || (major === 7 && minor && minor >= 3)) {
       return '^17.0.0';
     }
