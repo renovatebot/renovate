@@ -376,22 +376,18 @@ export async function lookupUpdates(
           res.vulnerabilityFixVersion = config.vulnerabilityFixVersion;
           if (versioning.isValid(config.vulnerabilityFixVersion)) {
             // Filter out versions if the vulnerabilityFixVersion is higher
-            const fixedFilteredReleases = versioning.isVersion(
-              config.vulnerabilityFixVersion,
-            )
-              ? filteredReleases.filter(
-                  (r) =>
-                    !versioning.isGreaterThan(
-                      config.vulnerabilityFixVersion!,
-                      r.version,
-                    ),
-                )
-              : filteredReleases.filter((r) =>
-                  versioning.matches(
-                    r.version,
+            const filterCondition = (release: Release): boolean =>
+              versioning.isVersion(config.vulnerabilityFixVersion)
+                ? !versioning.isGreaterThan(
                     config.vulnerabilityFixVersion!,
-                  ),
-                );
+                    release.version,
+                  )
+                : versioning.matches(
+                    release.version,
+                    config.vulnerabilityFixVersion!,
+                  );
+            const fixedFilteredReleases =
+              filteredReleases.filter(filterCondition);
             // Warn if this filtering results caused zero releases
             if (fixedFilteredReleases.length === 0 && filteredReleases.length) {
               logger.warn(
