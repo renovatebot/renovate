@@ -483,7 +483,7 @@ export async function getBranchStatus(
   logger.debug(`Got res with ${branchStatuses.length} results`);
 
   const mr = await getBranchPr(branchName);
-  if (mr?.sha !== mr?.headPipelineSha) {
+  if (mr && mr.sha !== mr.headPipelineSha && mr.headPipelineStatus) {
     logger.debug(
       'Merge request head pipeline has different sha to commit, assuming merged results pipeline',
     );
