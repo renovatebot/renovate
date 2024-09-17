@@ -48,7 +48,9 @@ function checkRebaseAll(issueBody: string): boolean {
   return issueBody.includes(' - [x] <!-- rebase-all-open-prs -->');
 }
 
-function checkCreateConfigMigrationPr(issueBody: string): string {
+function checkCreateConfigMigrationPr(
+  issueBody: string,
+): 'no-checkbox' | 'checked' | 'unchecked' | 'migration-pr-exists' {
   if (!issueBody.includes('Config Migration needed.')) {
     return 'no-checkbox';
   }

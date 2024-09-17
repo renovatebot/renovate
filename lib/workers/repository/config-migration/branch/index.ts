@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import type { ConfigMigrationResult } from '..';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -12,9 +11,10 @@ import { createConfigMigrationBranch } from './create';
 import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 
-interface CheckConfigMigrationBranchResult extends ConfigMigrationResult {
-  migrationBranch?: string;
-}
+export type CheckConfigMigrationBranchResult =
+  | { result: 'no-migration' }
+  | { result: 'add-checkbox' }
+  | { result: 'migration-branch-exists'; migrationBranch: string };
 
 export async function checkConfigMigrationBranch(
   config: RenovateConfig,
@@ -23,7 +23,7 @@ export async function checkConfigMigrationBranch(
   logger.debug('checkConfigMigrationBranch()');
   if (!migratedConfigData) {
     logger.debug('checkConfigMigrationBranch() Config does not need migration');
-    return {};
+    return { result: 'no-migration' };
   }
 
   const configMigrationCheckbox =
@@ -108,8 +108,7 @@ export async function checkConfigMigrationBranch(
   }
   return {
     migrationBranch: configMigrationBranch,
-    result: 'pr-exists',
-    prNumber: branchPr?.number,
+    result: 'migration-branch-exists',
   };
 }
 

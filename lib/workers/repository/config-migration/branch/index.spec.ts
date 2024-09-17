@@ -40,7 +40,7 @@ describe('workers/repository/config-migration/branch/index', () => {
     it('exits when migration is not needed', async () => {
       await expect(
         checkConfigMigrationBranch(config, null),
-      ).resolves.toBeEmptyObject();
+      ).resolves.toMatchObject({ result: 'no-migration' });
       expect(logger.debug).toHaveBeenCalledWith(
         'checkConfigMigrationBranch() Config does not need migration',
       );
@@ -76,7 +76,7 @@ describe('workers/repository/config-migration/branch/index', () => {
           migratedData,
         ),
       ).resolves.toMatchObject({
-        result: 'pr-exists',
+        result: 'migration-branch-exists',
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(logger.debug).toHaveBeenCalledWith('Need to create migration PR');
@@ -102,9 +102,8 @@ describe('workers/repository/config-migration/branch/index', () => {
       );
       // TODO: types (#22198)
       expect(res).toMatchObject({
-        result: 'pr-exists',
+        result: 'migration-branch-exists',
         migrationBranch: `${config.branchPrefix!}migrate-config`,
-        prNumber: 1,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
@@ -130,7 +129,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       );
       // TODO: types (#22198)
       expect(res).toMatchObject({
-        result: 'pr-exists',
+        result: 'migration-branch-exists',
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
@@ -154,7 +153,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       );
       // TODO: types (#22198)
       expect(res).toMatchObject({
-        result: 'pr-exists',
+        result: 'migration-branch-exists',
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
@@ -182,7 +181,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       );
       // TODO: types (#22198)
       expect(res).toMatchObject({
-        result: 'pr-exists',
+        result: 'migration-branch-exists',
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
@@ -207,7 +206,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       );
       // TODO: types (#22198)
       expect(res).toMatchObject({
-        result: 'pr-exists',
+        result: 'migration-branch-exists',
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
@@ -252,7 +251,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         );
         expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
         expect(res).toMatchObject({
-          result: 'pr-exists',
+          result: 'migration-branch-exists',
           migrationBranch: `${config.branchPrefix!}migrate-config`,
         });
         expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
@@ -295,7 +294,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         );
         expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
         expect(res).toMatchObject({
-          result: 'pr-exists',
+          result: 'migration-branch-exists',
           migrationBranch: `${config.branchPrefix!}migrate-config`,
         });
         expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
