@@ -86,8 +86,6 @@ describe('modules/datasource/deb/index', () => {
           'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
         releases: [
           {
-            registryUrl:
-              'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
             version: '4.15-1',
           },
         ],
@@ -140,8 +138,6 @@ describe('modules/datasource/deb/index', () => {
             'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
           releases: [
             {
-              registryUrl:
-                'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
               version: '4.15-1',
             },
           ],
@@ -159,8 +155,6 @@ describe('modules/datasource/deb/index', () => {
             'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
           releases: [
             {
-              registryUrl:
-                'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
               version: '4.15-1',
             },
           ],
@@ -205,13 +199,9 @@ describe('modules/datasource/deb/index', () => {
               'http://deb.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
             releases: [
               {
-                registryUrl:
-                  'http://deb.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
                 version: '4.14-1',
               },
               {
-                registryUrl:
-                  'http://deb.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
                 version: '4.15-1',
               },
             ],
@@ -227,13 +217,9 @@ describe('modules/datasource/deb/index', () => {
               'http://deb.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
             releases: [
               {
-                registryUrl:
-                  'http://deb.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
                 version: '4.14-1',
               },
               {
-                registryUrl:
-                  'http://deb.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
                 version: '4.15-1',
               },
             ],
@@ -281,8 +267,6 @@ describe('modules/datasource/deb/index', () => {
           'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=riscv',
         releases: [
           {
-            registryUrl:
-              'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=riscv',
             version: '4.15-1',
           },
         ],

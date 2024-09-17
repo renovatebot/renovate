@@ -177,12 +177,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         dependencyUrl:
           'https://repo.maven.apache.org/maven2/org/foundweekends/sbt-bintray',
         registryUrl: 'https://repo.maven.apache.org/maven2',
-        releases: [
-          {
-            version: '0.5.5',
-            registryUrl: 'https://repo.maven.apache.org/maven2',
-          },
-        ],
+        releases: [{ version: '0.5.5' }],
       });
     });
 
@@ -198,12 +193,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         dependencyUrl:
           'https://repo.maven.apache.org/maven2/org/foundweekends/sbt-bintray',
         registryUrl: 'https://repo.maven.apache.org/maven2',
-        releases: [
-          {
-            version: '0.5.5',
-            registryUrl: 'https://repo.maven.apache.org/maven2',
-          },
-        ],
+        releases: [{ version: '0.5.5' }],
       });
     });
 
@@ -220,22 +210,10 @@ describe('modules/datasource/sbt-plugin/index', () => {
           'https://repo.maven.apache.org/maven2/io/get-coursier/sbt-coursier',
         registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [
-          {
-            version: '2.0.0-RC2',
-            registryUrl: 'https://repo.maven.apache.org/maven2',
-          },
-          {
-            version: '2.0.0-RC6-1',
-            registryUrl: 'https://repo.maven.apache.org/maven2',
-          },
-          {
-            version: '2.0.0-RC6-2',
-            registryUrl: 'https://repo.maven.apache.org/maven2',
-          },
-          {
-            version: '2.0.0-RC6-6',
-            registryUrl: 'https://repo.maven.apache.org/maven2',
-          },
+          { version: '2.0.0-RC2' },
+          { version: '2.0.0-RC6-1' },
+          { version: '2.0.0-RC6-2' },
+          { version: '2.0.0-RC6-6' },
         ],
         homepage: 'https://get-coursier.io/',
         sourceUrl: 'https://github.com/coursier/sbt-coursier',

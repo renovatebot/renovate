@@ -163,7 +163,7 @@ async function mergeRegistries(
 ): Promise<ReleaseResult | null> {
   let combinedRes: ReleaseResult | undefined;
   let lastErr: Error | undefined;
-
+  let commonRegistryUrl = true;
   for (const registryUrl of registryUrls) {
     try {
       const res = await getRegistryReleases(datasource, config, registryUrl);
@@ -171,14 +171,21 @@ async function mergeRegistries(
         continue;
       }
 
-      const releases = coerceArray(res.releases);
-      for (const release of releases) {
-        release.registryUrl ??= res.registryUrl;
-      }
-
       if (!combinedRes) {
         combinedRes = res;
         continue;
+      }
+
+      if (commonRegistryUrl) {
+        for (const release of coerceArray(combinedRes.releases)) {
+          release.registryUrl ??= combinedRes.registryUrl;
+        }
+        commonRegistryUrl = false;
+      }
+
+      const releases = coerceArray(res.releases);
+      for (const release of releases) {
+        release.registryUrl ??= res.registryUrl;
       }
 
       combinedRes.releases.push(...releases);

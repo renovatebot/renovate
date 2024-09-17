@@ -88,12 +88,8 @@ describe('modules/datasource/maven/s3', () => {
         name: 'package',
         registryUrl: 's3://repobucket',
         releases: [
-          { version: '1.0.2', registryUrl: 's3://repobucket' },
-          {
-            version: '1.0.3',
-            releaseTimestamp: '2020-01-01T00:00:00.000Z',
-            registryUrl: 's3://repobucket',
-          },
+          { version: '1.0.2' },
+          { version: '1.0.3', releaseTimestamp: '2020-01-01T00:00:00.000Z' },
         ],
         isPrivate: true,
       });
