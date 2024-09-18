@@ -386,7 +386,7 @@ export async function lookupUpdates(
                   ),
               );
             } else {
-              // Retain only releases which max the fix constaraint
+              // Retain only releases which max the fix constraint
               fixedFilteredReleases = filteredReleases.filter((release) =>
                 versioning.matches(
                   release.version,
