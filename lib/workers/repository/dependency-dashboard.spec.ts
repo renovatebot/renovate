@@ -689,7 +689,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
-        ' - [ ] <!-- create-config-migration-pr --> Config Migration needed.',
+        ' - [ ] <!-- create-config-migration-pr --> Select this checkbox to let Renovate create an automated Config Migration PR.',
       );
     });
 
@@ -721,7 +721,39 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
-        'Config Migration needed. See Config Migration PR:',
+        '## Config Migration Needed\n\nSee Config Migration PR:',
+      );
+    });
+
+    it('adds related text when config migration pr has been modified', async () => {
+      const branches: BranchConfig[] = [];
+      config.repository = 'test';
+      config.packageRules = [
+        {
+          dependencyDashboardApproval: true,
+        },
+        {},
+      ];
+      config.dependencyDashboardHeader =
+        'This is a header for platform:{{platform}}';
+      config.dependencyDashboardFooter =
+        'And this is a footer for repository:{{repository}}';
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        undefined,
+        {
+          result: 'pr-modified',
+          prNumber: 1,
+        },
+      );
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
+        config.dependencyDashboardTitle,
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
+        'The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted.',
       );
     });
 
@@ -745,7 +777,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).not.toMatch(
-        'Config Migration needed',
+        '## Config Migration Needed',
       );
     });
 

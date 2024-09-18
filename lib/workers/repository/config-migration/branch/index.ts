@@ -12,20 +12,17 @@ import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 
 export type CheckConfigMigrationBranchResult =
-  | { result: 'no-migration' }
-  | { result: 'add-checkbox' }
-  | { result: 'migration-branch-exists'; migrationBranch: string };
+  | { result: 'no-migration-branch' }
+  | {
+      result: 'migration-branch-exists' | 'migration-branch-modified';
+      migrationBranch: string;
+    };
 
 export async function checkConfigMigrationBranch(
   config: RenovateConfig,
-  migratedConfigData: MigratedData | null,
+  migratedConfigData: MigratedData,
 ): Promise<CheckConfigMigrationBranchResult> {
   logger.debug('checkConfigMigrationBranch()');
-  if (!migratedConfigData) {
-    logger.debug('checkConfigMigrationBranch() Config does not need migration');
-    return { result: 'no-migration' };
-  }
-
   const configMigrationCheckbox =
     config.dependencyDashboardChecks?.configMigrationInfo;
 
@@ -38,7 +35,7 @@ export async function checkConfigMigrationBranch(
       logger.debug(
         'Config migration needed but config migration is disabled and checkbox not checked or not present.',
       );
-      return { result: 'add-checkbox' };
+      return { result: 'no-migration-branch' };
     }
   }
 
@@ -76,7 +73,7 @@ export async function checkConfigMigrationBranch(
         logger.debug(
           'Config migration is enabled and needed. But a closed pr exists and checkbox is not checked. Skipping migration branch creation.',
         );
-        return { result: 'add-checkbox' };
+        return { result: 'no-migration-branch' };
       }
 
       logger.debug(
@@ -86,29 +83,44 @@ export async function checkConfigMigrationBranch(
     }
   }
 
+  let result:
+    | 'no-migration-branch'
+    | 'migration-branch-exists'
+    | 'migration-branch-modified';
+
   if (branchPr) {
     logger.debug('Config Migration PR already exists');
-    await rebaseMigrationBranch(config, migratedConfigData);
-    if (platform.refreshPr) {
-      const configMigrationPr = await platform.getBranchPr(
-        configMigrationBranch,
-        config.baseBranch,
+
+    if (await isMigrationBranchModified(config, configMigrationBranch)) {
+      logger.debug(
+        'Config Migration branch has been modified. Skipping branch rebase.',
       );
-      if (configMigrationPr) {
-        await platform.refreshPr(configMigrationPr.number);
+      result = 'migration-branch-modified';
+    } else {
+      await rebaseMigrationBranch(config, migratedConfigData);
+      if (platform.refreshPr) {
+        const configMigrationPr = await platform.getBranchPr(
+          configMigrationBranch,
+          config.baseBranch,
+        );
+        if (configMigrationPr) {
+          await platform.refreshPr(configMigrationPr.number);
+        }
       }
+      result = 'migration-branch-exists';
     }
   } else {
     logger.debug('Config Migration PR does not exist');
     logger.debug('Need to create migration PR');
     await createConfigMigrationBranch(config, migratedConfigData);
+    result = 'migration-branch-exists';
   }
   if (!GlobalConfig.get('dryRun')) {
     await scm.checkoutBranch(configMigrationBranch);
   }
   return {
     migrationBranch: configMigrationBranch,
-    result: 'migration-branch-exists',
+    result,
   };
 }
 
@@ -127,4 +139,12 @@ async function handlePr(config: RenovateConfig, pr: Pr): Promise<void> {
       await scm.deleteBranch(pr.sourceBranch);
     }
   }
+}
+
+async function isMigrationBranchModified(
+  config: RenovateConfig,
+  configMigrationBranch: string,
+): Promise<boolean> {
+  const baseBranch = config.defaultBranch!;
+  return await scm.isBranchModified(configMigrationBranch, baseBranch);
 }

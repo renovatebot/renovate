@@ -37,16 +37,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       config.branchPrefix = 'some/';
     });
 
-    it('exits when migration is not needed', async () => {
-      await expect(
-        checkConfigMigrationBranch(config, null),
-      ).resolves.toMatchObject({ result: 'no-migration' });
-      expect(logger.debug).toHaveBeenCalledWith(
-        'checkConfigMigrationBranch() Config does not need migration',
-      );
-    });
-
-    it('returns add checkbox message when migration disabled and checkbox unchecked', async () => {
+    it('does nothing when migration disabled and checkbox unchecked', async () => {
       await expect(
         checkConfigMigrationBranch(
           {
@@ -56,7 +47,7 @@ describe('workers/repository/config-migration/branch/index', () => {
           },
           migratedData,
         ),
-      ).resolves.toMatchObject({ result: 'add-checkbox' });
+      ).resolves.toMatchObject({ result: 'no-migration-branch' });
       expect(logger.debug).toHaveBeenCalledWith(
         'Config migration needed but config migration is disabled and checkbox not checked or not present.',
       );
@@ -80,6 +71,36 @@ describe('workers/repository/config-migration/branch/index', () => {
         migrationBranch: `${config.branchPrefix!}migrate-config`,
       });
       expect(logger.debug).toHaveBeenCalledWith('Need to create migration PR');
+    });
+
+    it('does not create a branch if migration branch is modified', async () => {
+      platform.getBranchPr.mockResolvedValue(
+        mock<Pr>({
+          number: 1,
+        }),
+      );
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      const res = await checkConfigMigrationBranch(
+        {
+          ...config,
+          configMigration: false,
+          dependencyDashboardChecks: {
+            configMigrationInfo: 'migration-pr-exists',
+          },
+        },
+        migratedData,
+      );
+      // TODO: types (#22198)
+      expect(res).toMatchObject({
+        result: 'migration-branch-modified',
+        migrationBranch: `${config.branchPrefix!}migrate-config`,
+      });
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(platform.refreshPr).toHaveBeenCalledTimes(0);
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Config Migration branch has been modified. Skipping branch rebase.',
+      );
     });
 
     it('updates migration branch & refreshes pr when migration disabled but open pr exists', async () => {
@@ -217,7 +238,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       const title = 'PR title';
       const pr = partial<Pr>({ title, state: 'closed', number: 1 });
 
-      it('adds a checkbox when migration is disabled but needed and a closed pr exists', async () => {
+      it('does not create a branch when migration is disabled but needed and a closed pr exists', async () => {
         platform.findPr.mockResolvedValueOnce(pr);
         platform.getBranchPr.mockResolvedValue(null);
         scm.branchExists.mockResolvedValueOnce(true);
@@ -230,7 +251,7 @@ describe('workers/repository/config-migration/branch/index', () => {
           migratedData,
         );
         expect(res).toMatchObject({
-          result: 'add-checkbox',
+          result: 'no-migration-branch',
         });
       });
 
@@ -257,7 +278,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       });
 
-      it('adds a checkbox when migration is enabled and a closed pr exists', async () => {
+      it('does not create a branch when migration is enabled and a closed pr exists', async () => {
         platform.findPr.mockResolvedValueOnce(pr);
         platform.getBranchPr.mockResolvedValue(null);
         scm.branchExists.mockResolvedValueOnce(true);
@@ -270,7 +291,7 @@ describe('workers/repository/config-migration/branch/index', () => {
           migratedData,
         );
         expect(res).toMatchObject({
-          result: 'add-checkbox',
+          result: 'no-migration-branch',
         });
       });
 
