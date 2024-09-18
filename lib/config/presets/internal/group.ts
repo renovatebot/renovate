@@ -381,6 +381,15 @@ const staticGroups = {
       },
     ],
   },
+  preCommit: {
+    description: 'Group pre-commit hooks together.',
+    packageRules: [
+      {
+        matchManagers: ['pre-commit'],
+        groupName: 'pre-commit hooks',
+      },
+    ],
+  },
   pulumi: {
     description: 'Group Pulumi packages together.',
     packageRules: [
