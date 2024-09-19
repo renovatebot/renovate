@@ -147,7 +147,7 @@ export function instrument<F extends () => ReturnType<F>>(
       if (ret instanceof Promise) {
         return ret
           .catch((e) => {
-            span.recordException(e)
+            span.recordException(e);
             span.setStatus({
               code: SpanStatusCode.ERROR,
               message: massageThrowable(e),
@@ -159,7 +159,7 @@ export function instrument<F extends () => ReturnType<F>>(
       span.end();
       return ret;
     } catch (e) {
-      span.recordException(e)
+      span.recordException(e);
       span.setStatus({
         code: SpanStatusCode.ERROR,
         message: massageThrowable(e),
