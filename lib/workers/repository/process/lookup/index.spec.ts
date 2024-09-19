@@ -870,7 +870,7 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    it('takes next version when vulnerabilityFixVersion is missing', async () => {
+    it('takes a later release when vulnerabilityFixVersion does not exist', async () => {
       config.currentValue = '1.0.0';
       config.isVulnerabilityAlert = true;
       config.vulnerabilityFixVersion = '1.0.2';
