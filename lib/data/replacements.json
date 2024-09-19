@@ -11,6 +11,7 @@
       "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
       "replacements:eslint-config-standard-with-typescript-to-eslint-config-love",
       "replacements:eslint-plugin-node-to-maintained-fork",
+      "replacements:eslint-plugin-vitest-to-scoped",
       "replacements:fakerjs-to-scoped",
       "replacements:fastify-to-scoped",
       "replacements:hapi-to-scoped",
@@ -245,6 +246,18 @@
         "matchPackageNames": ["eslint-plugin-node"],
         "replacementName": "eslint-plugin-n",
         "replacementVersion": "14.0.0"
+      }
+    ]
+  },
+  "eslint-plugin-vitest-to-scoped": {
+    "description": "`eslint-plugin-vitest` became scoped.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "0.5.4",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["eslint-plugin-vitest"],
+        "replacementName": "@vitest/eslint-plugin",
+        "replacementVersion": "1.0.0"
       }
     ]
   },
