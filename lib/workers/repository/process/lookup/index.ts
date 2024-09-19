@@ -373,22 +373,28 @@ export async function lookupUpdates(
       let shrinkedViaVulnerability = false;
       if (config.isVulnerabilityAlert) {
         if (config.vulnerabilityFixVersion) {
-          res.vulnerabilityFixStrategy = config.vulnerabilityFixStrategy;
           res.vulnerabilityFixVersion = config.vulnerabilityFixVersion;
+          res.vulnerabilityFixStrategy = config.vulnerabilityFixStrategy;
           if (versioning.isValid(config.vulnerabilityFixVersion)) {
-            // Filter out versions if the vulnerabilityFixVersion is higher
-            const filterCondition = (release: Release): boolean =>
-              versioning.isVersion(config.vulnerabilityFixVersion)
-                ? !versioning.isGreaterThan(
+            let fixedFilteredReleases;
+            if (versioning.isVersion(config.vulnerabilityFixVersion)) {
+              // Retain only releases greater than or equal to the fix version
+              fixedFilteredReleases = filteredReleases.filter(
+                (release) =>
+                  !versioning.isGreaterThan(
                     config.vulnerabilityFixVersion!,
                     release.version,
-                  )
-                : versioning.matches(
-                    release.version,
-                    config.vulnerabilityFixVersion!,
-                  );
-            const fixedFilteredReleases =
-              filteredReleases.filter(filterCondition);
+                  ),
+              );
+            } else {
+              // Retain only releases which max the fix constraint
+              fixedFilteredReleases = filteredReleases.filter((release) =>
+                versioning.matches(
+                  release.version,
+                  config.vulnerabilityFixVersion!,
+                ),
+              );
+            }
             // Warn if this filtering results caused zero releases
             if (fixedFilteredReleases.length === 0 && filteredReleases.length) {
               logger.warn(
