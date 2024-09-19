@@ -13,10 +13,8 @@ describe('modules/manager/crossplane/extract', () => {
       expect(extractPackageFile('nothing here', 'packages.yml')).toBeNull();
     });
 
-    it('returns null for invalid', () => {
-      expect(
-        extractPackageFile(`${malformedPackages}\n123`, 'packages.yml'),
-      ).toBeNull();
+    it('strips invalid templates', () => {
+      expect(extractPackageFile(`test: test: 123`, 'packages.yml')).toBeNull();
     });
 
     it('return null for kubernetes manifest', () => {

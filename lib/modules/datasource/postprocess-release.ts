@@ -16,7 +16,7 @@ export async function postprocessRelease(
 
   const ds = datasource && getDatasourceFor(datasource);
   if (!ds) {
-    logger.warn(
+    logger.once.warn(
       { datasource },
       'Failed to resolve datasource during release postprocessing',
     );
@@ -29,7 +29,7 @@ export async function postprocessRelease(
 
   const { packageName } = config;
   if (!packageName) {
-    logger.warn(
+    logger.once.warn(
       { datasource },
       'Release postprocessing is not supported for empty `packageName` field',
     );
@@ -46,14 +46,14 @@ export async function postprocessRelease(
 
     if (!result) {
       logger.debug(
-        { packageName, registryUrl, version: release.version },
+        { datasource, packageName, registryUrl, version: release.version },
         'Rejected release',
       );
     }
 
     return result;
   } catch (err) {
-    logger.debug({ err }, `Release interceptor failed for "${datasource}"`);
+    logger.once.warn({ err }, `Release interceptor failed for "${datasource}"`);
     return release;
   }
 }

@@ -32,6 +32,31 @@ export class UvProcessor implements PyProjectProcessor {
       ),
     );
 
+    // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
+    // Skip sources that are either not yet handled by Renovate (e.g. git), or do not make sense to handle (e.g. path).
+    if (uv.sources) {
+      for (const dep of deps) {
+        if (!dep.depName) {
+          continue;
+        }
+
+        const depSource = uv.sources[dep.depName];
+        if (depSource) {
+          if (depSource.git) {
+            dep.skipReason = 'git-dependency';
+          } else if (depSource.url) {
+            dep.skipReason = 'unsupported-url';
+          } else if (depSource.path) {
+            dep.skipReason = 'path-dependency';
+          } else if (depSource.workspace) {
+            dep.skipReason = 'inherited-dependency';
+          } else {
+            dep.skipReason = 'invalid-dependency-specification';
+          }
+        }
+      }
+    }
+
     return deps;
   }
 
