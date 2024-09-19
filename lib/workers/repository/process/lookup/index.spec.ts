@@ -793,7 +793,7 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    it('uses lowest version by default for vulnerabilityAlerts', async () => {
+    it('uses minimum version for vulnerabilityAlerts', async () => {
       config.currentValue = '1.0.0';
       config.isVulnerabilityAlert = true;
       config.packageName = 'q';
