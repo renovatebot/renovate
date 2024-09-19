@@ -177,7 +177,8 @@ export async function updateArtifacts({
         {
           toolName: 'java',
           constraint:
-            config.constraints?.java ?? getJavaConstraint(config.currentValue),
+            config.constraints?.java ??
+            (await getJavaConstraint(config.currentValue, gradlewFile)),
         },
       ],
     };
