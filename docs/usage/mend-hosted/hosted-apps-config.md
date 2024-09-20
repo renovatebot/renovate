@@ -1,8 +1,10 @@
 # Mend-hosted Apps Configuration
 
-The Mend-hosted apps ([Renovate App on GitHub](https://github.com/apps/renovate) and [Mend App on Bitbucket](https://marketplace.atlassian.com/apps/1232072/mend)) are popular ways to use Renovate on the cloud. This section covers non-default behavior of these Mend-hosted apps.
+The Mend-hosted apps ([Renovate App on GitHub](https://github.com/apps/renovate) and [Mend App on Bitbucket](https://marketplace.atlassian.com/apps/1232072/mend)) are popular ways to use Renovate on the cloud.
+This documentation page covers all non-default Renovate behavior of these Mend-hosted apps and is a supplement to the CLI documentation.
 
-Logs for all Renovate jobs by the Mend-hosted apps are available through the [Mend Developer Portal](https://developer.mend.io). Users can view the logs to see which settings are applied.
+Logs for all Renovate jobs by the Mend-hosted apps are available through the [Mend Developer Portal](https://developer.mend.io).
+Accessing such logs can assist users to understand the config which has been applied.
 
 <!-- prettier-ignore -->
 !!! note
@@ -44,13 +46,14 @@ If an Organization installs Renovate with "Selected repositories" then we assume
 
 The Mend Renovate app will automatically apply inherited config to all installed repositories in an organization when the following conditions are met:
 
-1. A repository called `renovate-config` exists in the same organization and has the Mend Renovate app installed. (Onboarding not necessary)
+1. A repository called `renovate-config` exists in the same organization and has the Mend Renovate app installed. It is not necessary for this repository to be onboarded.
 2. The file `org-inherited-config.json` is detected in the `renovate-config` repository.
 
-Unlike with the Self-hosted application, the values of the `inheritConfigFileName` and the `inheritConfigRepoName` cannot be changed in the Mend Renovate app.
+Unlike with self-hosted Renovate, the values of the `inheritConfigFileName` and the `inheritConfigRepoName` cannot be changed in Mend apps.
 
-To avoid wasted API calls to check for the existence of inherited config file, `inheritConfig` will be applied to all relevant repositories when a commit is made to add or modify the `inheritConfig` file.
-It is important to note that the `inheritConfig` file will not be detected if the Mend Renovate app is not installed on the `renovate-config` repository at the time of adding or changing the file.
+To avoid wasted API calls, Mend apps will enable `inheritConfig` in an org only once a commit has been detected for the `inheritConfig` file.
+Therefore, the `inheritConfig` file will not be detected if the Mend Renovate app is not installed on the `renovate-config` repository at the time of adding or changing the file.
+If you have such a file but the Mend app has not enabled `inheritConfig` in your org, then try pushing a commit to that file and waiting a minute to see if it gets detected.
 
 ## Default presets
 
