@@ -1,8 +1,8 @@
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { emojify } from '../../../../util/emoji';
-import { regEx } from '../../../../util/regex';
-import type { BranchConfig } from '../../../types';
+import type { RenovateConfig } from '../../../../../config/types';
+import { logger } from '../../../../../logger';
+import { emojify } from '../../../../../util/emoji';
+import { regEx } from '../../../../../util/regex';
+import type { BranchConfig } from '../../../../types';
 
 export function getPrList(
   config: RenovateConfig,

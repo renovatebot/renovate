@@ -1,9 +1,9 @@
-import type { RenovateConfig } from '../../../../../test/util';
-import { partial } from '../../../../../test/util';
-import type { BranchConfig } from '../../../types';
+import type { RenovateConfig } from '../../../../../../test/util';
+import { partial } from '../../../../../../test/util';
+import type { BranchConfig } from '../../../../types';
 import { getPrList } from './pr-list';
 
-describe('workers/repository/onboarding/pr/pr-list', () => {
+describe('workers/repository/onboarding/pr/body/pr-list', () => {
   describe('getPrList()', () => {
     let config: RenovateConfig;
 

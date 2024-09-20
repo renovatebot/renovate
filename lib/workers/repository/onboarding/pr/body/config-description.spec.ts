@@ -1,9 +1,9 @@
-import type { RenovateConfig } from '../../../../../test/util';
-import { partial } from '../../../../../test/util';
-import type { PackageFile } from '../../../../modules/manager/types';
+import type { RenovateConfig } from '../../../../../../test/util';
+import { partial } from '../../../../../../test/util';
+import type { PackageFile } from '../../../../../modules/manager/types';
 import { getConfigDesc } from './config-description';
 
-describe('workers/repository/onboarding/pr/config-description', () => {
+describe('workers/repository/onboarding/pr/body/config-description', () => {
   describe('getConfigDesc()', () => {
     let config: RenovateConfig;
 
