@@ -12,7 +12,7 @@ By default, none of these changes are applied to Renovate config files (e.g. `re
 ## Enabling config migration pull requests
 
 Although legacy config should continue to "just work", it's better for users if their config file uses the latest/correct configuration names.
-Using the latest names makes it easier to understand the config and look up documentation for it
+Using the latest names makes it easier to understand the config and look up documentation for it.
 
 Renovate can create a config migration pull request, that migrates legacy config in your configuration file.
 To get config migration pull requests from Renovate: set the [`configMigration`](./configuration-options.md#configmigration) config option to `true`.
@@ -52,7 +52,7 @@ This is known as "on-demand" config migration because migration PRs are only cre
 The checkbox looks like this:
 
 ```
-- [ ] Config migration needed. Select this checkbox to let Renovate create an automated Config Migration PR.
+- [ ] Select this checkbox to let Renovate create an automated Config Migration PR.
 ```
 
 When you select the checkbox:
@@ -63,7 +63,7 @@ Renovate replaces the checkbox with a link to the Config Migration PR.
 For example:
 
 ```
-Config Migration needed. See Config Migration PR: #1.
+See Config Migration PR: #1.
 ```
 
 ### Config migration needed, but there is a closed migration PR

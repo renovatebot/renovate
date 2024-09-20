@@ -67,7 +67,7 @@ export async function checkConfigMigrationBranch(
       logger.debug('Closed config migration PR found.');
 
       // if a closed pr exists and the checkbox for config migration is not checked
-      // return add-checkbox result so that the checkbox gets added again
+      // return no-migration-branch result so that the checkbox gets added again
       // we only want to create a config migration pr if the checkbox is checked
       if (configMigrationCheckbox !== 'checked') {
         logger.debug(
