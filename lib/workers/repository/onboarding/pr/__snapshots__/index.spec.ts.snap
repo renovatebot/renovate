@@ -1,9 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with empty footer and header(onboardingRebaseCheckbox="false") 1`] = `
-"
-
-Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
+"Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
 
 🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
 
@@ -23,19 +21,12 @@ It looks like your repository dependencies are already up-to-date and no Pull Re
 ❓ Got questions? Check out Renovate's [Docs](https://docs.renovatebot.com/), particularly the Getting Started section.
 If you need any further assistance then you can also [request help here](https://github.com/renovatebot/renovate/discussions).
 
-
----
-
-
-
 <!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->
 "
 `;
 
 exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with empty footer and header(onboardingRebaseCheckbox="true") 1`] = `
-"
-
-Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
+"Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
 
 🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
 
@@ -59,11 +50,6 @@ If you need any further assistance then you can also [request help here](https:/
 ---
 
  - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.
-
-
----
-
-
 
 <!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->
 "
@@ -91,7 +77,6 @@ It looks like your repository dependencies are already up-to-date and no Pull Re
 
 ❓ Got questions? Check out Renovate's [Docs](https://docs.renovatebot.com/), particularly the Getting Started section.
 If you need any further assistance then you can also [request help here](https://github.com/renovatebot/renovate/discussions).
-
 
 ---
 
@@ -129,7 +114,6 @@ If you need any further assistance then you can also [request help here](https:/
 
  - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.
 
-
 ---
 
 And this is a footer for repository:test baseBranch:some-branch
@@ -162,7 +146,6 @@ It looks like your repository dependencies are already up-to-date and no Pull Re
 
 ❓ Got questions? Check out Renovate's [Docs](https://docs.renovatebot.com/), particularly the Getting Started section.
 If you need any further assistance then you can also [request help here](https://github.com/renovatebot/renovate/discussions).
-
 
 ---
 
@@ -204,7 +187,6 @@ If you need any further assistance then you can also [request help here](https:/
 ---
 
  - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.
-
 
 ---
 
