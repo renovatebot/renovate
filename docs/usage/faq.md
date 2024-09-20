@@ -51,7 +51,7 @@ Follow these steps to see which version the Mend Renovate app is on:
    ```
    INFO: Repository started
    {
-     "renovateVersion": "37.326.0"
+     "renovateVersion": "37.356.1"
    }
    ```
 
@@ -61,10 +61,10 @@ Follow these steps to see which version the Mend Renovate app is on:
 
 ## Renovate core features not supported on all platforms
 
-| Feature               | Platforms which lack feature                               | See Renovate issue(s)                                        |
-| --------------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
-| Dependency Dashboard  | Azure, Bitbucket, Bitbucket Server                         | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
-| The Mend Renovate App | Azure, Bitbucket, Bitbucket Server, Forgejo, Gitea, GitLab |                                                              |
+| Feature               | Platforms which lack feature                    | See Renovate issue(s)                                        |
+| --------------------- | ----------------------------------------------- | ------------------------------------------------------------ |
+| Dependency Dashboard  | Azure, Bitbucket, Bitbucket Server, Gerrit      | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
+| The Mend Renovate App | Azure, Bitbucket Server, Forgejo, Gitea, GitLab |                                                              |
 
 ## Major platform features not supported by Renovate
 
@@ -120,7 +120,7 @@ The basic idea is that you create a new `packageRules` entry and describe what k
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["^jest"],
+      "matchPackageNames": ["jest"],
       "matchUpdateTypes": ["major"],
       "dependencyDashboardApproval": true
     }
@@ -223,18 +223,20 @@ e.g.
 
 ### Apply a rule, but only for packages starting with `abc`
 
-Do the same as above, but instead of using `matchPackageNames`, use `matchPackagePatterns` and a regex:
+Do the same as above, but instead of an exact match, use a glob prefix:
 
 ```json
 {
   "packageRules": [
     {
-      "matchPackagePatterns": "^abc",
+      "matchPackageNames": "abc**",
       "assignees": ["importantreviewer"]
     }
   ]
 }
 ```
+
+For more examples, see [String Pattern Matching, example glob patterns](./string-pattern-matching.md#example-glob-patterns).
 
 ### Group all packages starting with `abc` together in one PR
 
@@ -244,7 +246,7 @@ As above, but apply a `groupName`:
 {
   "packageRules": [
     {
-      "matchPackagePatterns": "^abc",
+      "matchPackageNames": "abc**",
       "groupName": ["abc packages"]
     }
   ]

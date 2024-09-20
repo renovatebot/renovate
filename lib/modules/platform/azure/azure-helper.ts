@@ -1,8 +1,9 @@
-import {
+import type { WebApiTeam } from 'azure-devops-node-api/interfaces/CoreInterfaces.js';
+import type {
   GitCommit,
-  GitPullRequestMergeStrategy,
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { logger } from '../../../logger';
 import { streamToString } from '../../../util/streams';
 import { getNewBranchName } from '../util';
@@ -94,7 +95,7 @@ export async function getFile(
           return null;
         }
       }
-    } catch (error) {
+    } catch {
       // it 's not a JSON, so I send the content directly with the line under
     }
 
@@ -174,7 +175,26 @@ export async function getMergeMethod(
           ] as never as GitPullRequestMergeStrategy,
       )
       .find((p) => p)!;
-  } catch (err) {
+  } catch {
     return GitPullRequestMergeStrategy.NoFastForward;
   }
+}
+
+export async function getAllProjectTeams(
+  projectId: string,
+): Promise<WebApiTeam[]> {
+  const allTeams: WebApiTeam[] = [];
+  const azureApiCore = await azureApi.coreApi();
+  const top = 100;
+  let skip = 0;
+  let length = 0;
+
+  do {
+    const teams = await azureApiCore.getTeams(projectId, undefined, top, skip);
+    length = teams.length;
+    allTeams.push(...teams);
+    skip += top;
+  } while (top <= length);
+
+  return allTeams;
 }

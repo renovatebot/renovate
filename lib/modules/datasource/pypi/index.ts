@@ -4,11 +4,13 @@ import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { parse } from '../../../util/html';
+import type { OutgoingHttpHeaders } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash } from '../../../util/url';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url';
 import * as pep440 from '../../versioning/pep440';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { getGoogleAuthToken } from '../util';
 import { isGitHubRepo, normalizePythonDepName } from './common';
 import type { PypiJSON, PypiJSONRelease, Releases } from './types';
 
@@ -34,6 +36,12 @@ export class PypiDatasource extends Datasource {
 
   override readonly registryStrategy = 'merge';
 
+  override readonly releaseTimestampNote =
+    'The relase timestamp is determined from the `upload_time` field in the results.';
+  override readonly sourceUrlSupport = 'release';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `homepage` field if it is a github repository, else we use the `project_urls` field.';
+
   async getReleases({
     packageName,
     registryUrl,
@@ -42,7 +50,7 @@ export class PypiDatasource extends Datasource {
     const hostUrl = ensureTrailingSlash(registryUrl!);
     const simpleHostUrl = hostUrl.replace(jsonPyPiUrl, simplePyPiUrl);
     const pypiJsonHostUrl = hostUrl.replace(simplePyPiUrl, jsonPyPiUrl);
-    const normalizedLookupName = PypiDatasource.normalizeName(packageName);
+    const normalizedLookupName = normalizePythonDepName(packageName);
 
     const simpleDependencies = await this.getResultsViaSimple(
       normalizedLookupName,
@@ -85,8 +93,23 @@ export class PypiDatasource extends Datasource {
     };
   }
 
-  private static normalizeName(input: string): string {
-    return input.toLowerCase().replace(regEx(/_/g), '-');
+  private async getAuthHeaders(
+    lookupUrl: string,
+  ): Promise<OutgoingHttpHeaders> {
+    const parsedUrl = parseUrl(lookupUrl);
+    if (!parsedUrl) {
+      logger.once.debug({ lookupUrl }, 'Failed to parse URL');
+      return {};
+    }
+    if (parsedUrl.hostname.endsWith('.pkg.dev')) {
+      const auth = await getGoogleAuthToken();
+      if (auth) {
+        return { authorization: `Basic ${auth}` };
+      }
+      logger.once.debug({ lookupUrl }, 'Could not get Google access token');
+      return {};
+    }
+    return {};
   }
 
   private static normalizeNameForUrlLookup(input: string): string {
@@ -103,7 +126,8 @@ export class PypiDatasource extends Datasource {
     );
     const dependency: ReleaseResult = { releases: [] };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
-    const rep = await this.http.getJson<PypiJSON>(lookupUrl);
+    const headers = await this.getAuthHeaders(lookupUrl);
+    const rep = await this.http.getJson<PypiJSON>(lookupUrl, { headers });
     const dep = rep?.body;
     if (!dep) {
       logger.trace({ dependency: packageName }, 'pip package not found');
@@ -187,33 +211,39 @@ export class PypiDatasource extends Datasource {
     packageName: string,
   ): string | null {
     // source packages
-    const srcText = PypiDatasource.normalizeName(text);
+    const lcText = text.toLowerCase();
+    const normalizedSrcText = normalizePythonDepName(text);
     const srcPrefix = `${packageName}-`;
-    const srcSuffix = '.tar.gz';
-    if (srcText.startsWith(srcPrefix) && srcText.endsWith(srcSuffix)) {
-      return srcText.replace(srcPrefix, '').replace(regEx(/\.tar\.gz$/), '');
+
+    // source distribution format: `{name}-{version}.tar.gz` (https://packaging.python.org/en/latest/specifications/source-distribution-format/#source-distribution-file-name)
+    // binary distribution: `{distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}.whl` (https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention)
+    // officially both `name` and `distribution` should be normalized and then the - replaced with _, but in reality this is not the case
+    // We therefore normalize the name we have (replacing `_-.` with -) and then check if the text starts with the normalized name
+
+    if (!normalizedSrcText.startsWith(srcPrefix)) {
+      return null;
     }
 
-    // pep-0427 wheel packages
-    //  {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}.whl.
-    // Also match the current wheel spec
-    // https://packaging.python.org/en/latest/specifications/binary-distribution-format/#escaping-and-unicode
-    // where any of -_. characters in {distribution} are replaced with _
-    const wheelText = text.toLowerCase();
-    const wheelPrefixWithPeriod =
-      packageName.replace(regEx(/[^\w\d.]+/g), '_') + '-';
-    const wheelPrefixWithoutPeriod =
-      packageName.replace(regEx(/[^\w\d]+/g), '_') + '-';
+    // strip off the prefix using the prefix length as we may have normalized the srcPrefix/packageName
+    // We assume that neither the version nor the suffix contains multiple `-` like `0.1.2---rc1.tar.gz`
+    // and use the difference in length to strip off the prefix in case the name contains double `--` characters
+    const normalizedLengthDiff = lcText.length - normalizedSrcText.length;
+    const res = lcText.slice(srcPrefix.length + normalizedLengthDiff);
+
+    // source distribution
+    const srcSuffixes = ['.tar.gz', '.tar.bz2', '.tar.xz', '.zip', '.tgz'];
+    const srcSuffix = srcSuffixes.find((suffix) => lcText.endsWith(suffix));
+    if (srcSuffix) {
+      // strip off the suffix using character length
+      return res.slice(0, -srcSuffix.length);
+    }
+
+    // binary distribution
+    // for binary distributions the version is the first part after the removed distribution name
     const wheelSuffix = '.whl';
-    if (
-      (wheelText.startsWith(wheelPrefixWithPeriod) ||
-        wheelText.startsWith(wheelPrefixWithoutPeriod)) &&
-      wheelText.endsWith(wheelSuffix) &&
-      wheelText.split('-').length > 2
-    ) {
-      return wheelText.split('-')[1];
+    if (lcText.endsWith(wheelSuffix) && lcText.split('-').length > 2) {
+      return res.split('-')[0];
     }
-
     return null;
   }
 
@@ -242,7 +272,8 @@ export class PypiDatasource extends Datasource {
       ensureTrailingSlash(normalizePythonDepName(packageName)),
     );
     const dependency: ReleaseResult = { releases: [] };
-    const response = await this.http.get(lookupUrl);
+    const headers = await this.getAuthHeaders(lookupUrl);
+    const response = await this.http.get(lookupUrl, { headers });
     const dep = response?.body;
     if (!dep) {
       logger.trace(

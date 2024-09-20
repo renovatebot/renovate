@@ -38,6 +38,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'composer/composer',
     versioning: composerVersioningId,
   },
+  copier: {
+    datasource: 'pypi',
+    packageName: 'copier',
+    versioning: pep440VersioningId,
+  },
   corepack: {
     datasource: 'npm',
     packageName: 'corepack',
@@ -61,6 +66,11 @@ const allToolConfig: Record<string, ToolConfig> = {
   flux: {
     datasource: 'github-releases',
     packageName: 'fluxcd/flux2',
+    versioning: semverVersioningId,
+  },
+  gleam: {
+    datasource: 'github-releases',
+    packageName: 'gleam-lang/gleam',
     versioning: semverVersioningId,
   },
   golang: {
@@ -175,6 +185,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'docker',
     packageName: 'rust',
     versioning: semverVersioningId,
+  },
+  uv: {
+    datasource: 'pypi',
+    packageName: 'uv',
+    versioning: pep440VersioningId,
   },
   yarn: {
     datasource: 'npm',

@@ -1,13 +1,14 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
-import {
+import type {
   CronExpression,
   DayOfTheMonthRange,
   DayOfTheWeekRange,
   HourRange,
   MonthRange,
-  parseExpression,
 } from 'cron-parser';
+import { parseExpression } from 'cron-parser';
+import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
 import type { RenovateConfig } from '../../../../config/types';
@@ -26,7 +27,7 @@ function parseCron(
 ): CronExpression | undefined {
   try {
     return parseExpression(scheduleText, { tz: timezone });
-  } catch (err) {
+  } catch {
     return undefined;
   }
 }
@@ -144,7 +145,7 @@ export function isScheduledNow(
   let configSchedule = config[scheduleKey];
   logger.debug(
     // TODO: types (#22198)
-    `Checking schedule(${String(configSchedule)}, ${config.timezone!})`,
+    `Checking schedule(schedule=${String(configSchedule)}, tz=${config.timezone!}, now=${new Date().toISOString()})`,
   );
   if (
     !configSchedule ||
@@ -198,6 +199,10 @@ export function isScheduledNow(
   const isWithinSchedule = configSchedule.some((scheduleText) => {
     const cronSchedule = parseCron(scheduleText);
     if (cronSchedule) {
+      const cronScheduleSummary = cronstrue.toString(scheduleText, {
+        throwExceptionOnParseError: false,
+      });
+      logger.debug(`Human-readable summary for cron:: ${cronScheduleSummary}`);
       // We have Cron syntax
       if (cronMatches(scheduleText, now, config.timezone)) {
         logger.debug(`Matches schedule ${scheduleText}`);

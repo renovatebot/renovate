@@ -54,9 +54,6 @@ describe('index', async () => {
     const todo = await glob('**/*.md', { cwd: 'tmp/docs' });
     const files = new Set(todo);
 
-    // Files from https://github.com/renovatebot/renovatebot.github.io/tree/main/src
-    files.add('index.md');
-
     let c = 0;
 
     for (const file of todo) {

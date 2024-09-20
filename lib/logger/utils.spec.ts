@@ -11,11 +11,13 @@ describe('logger/utils', () => {
   });
 
   it('checks for valid log levels', () => {
-    expect(validateLogLevel(undefined)).toBeUndefined();
-    expect(validateLogLevel('warn')).toBeUndefined();
-    expect(validateLogLevel('debug')).toBeUndefined();
-    expect(validateLogLevel('trace')).toBeUndefined();
-    expect(validateLogLevel('info')).toBeUndefined();
+    expect(validateLogLevel(undefined, 'info')).toBe('info');
+    expect(validateLogLevel('warn', 'info')).toBe('warn');
+    expect(validateLogLevel('debug', 'info')).toBe('debug');
+    expect(validateLogLevel('trace', 'info')).toBe('trace');
+    expect(validateLogLevel('info', 'info')).toBe('info');
+    expect(validateLogLevel('error', 'info')).toBe('error');
+    expect(validateLogLevel('fatal', 'info')).toBe('fatal');
   });
 
   it.each`
@@ -32,7 +34,7 @@ describe('logger/utils', () => {
       throw new Error(`process.exit: ${number}`);
     });
     expect(() => {
-      validateLogLevel(input);
+      validateLogLevel(input, 'info');
     }).toThrow();
     expect(mockExit).toHaveBeenCalledWith(1);
   });
@@ -49,6 +51,34 @@ describe('logger/utils', () => {
     ${'user@domain.com'}                                                  | ${'user@domain.com'}
   `('sanitizeValue("$input") == "$output"', ({ input, output }) => {
     expect(sanitizeValue(input)).toBe(output);
+  });
+
+  it('preserves secret template strings in redacted fields', () => {
+    const input = {
+      normal: 'value',
+      token: '{{ secrets.MY_SECRET }}',
+      password: '{{secrets.ANOTHER_SECRET}}',
+      content: '{{ secrets.CONTENT_SECRET }}',
+      npmToken: '{{ secrets.NPM_TOKEN }}',
+      forkToken: 'some-token',
+      nested: {
+        authorization: '{{ secrets.NESTED_SECRET }}',
+        password: 'some-password',
+      },
+    };
+    const expected = {
+      normal: 'value',
+      token: '{{ secrets.MY_SECRET }}',
+      password: '{{secrets.ANOTHER_SECRET}}',
+      content: '[content]',
+      npmToken: '{{ secrets.NPM_TOKEN }}',
+      forkToken: '***********',
+      nested: {
+        authorization: '{{ secrets.NESTED_SECRET }}',
+        password: '***********',
+      },
+    };
+    expect(sanitizeValue(input)).toEqual(expected);
   });
 
   describe('prepareError', () => {

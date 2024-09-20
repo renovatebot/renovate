@@ -246,9 +246,16 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'hashicorp/example',
             registryUrls: ['https://gitea.com'],
           },
+          {
+            currentValue: 'v1.0.0',
+            datasource: 'git-tags',
+            depName: 'bitbucket.example.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'https://bitbucket.example.com/hashicorp/example',
+          },
         ],
       });
-      expect(res?.deps).toHaveLength(35);
+      expect(res?.deps).toHaveLength(36);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 

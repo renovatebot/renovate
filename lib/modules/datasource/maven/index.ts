@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import type { XmlDocument } from 'xmldoc';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { filterMap } from '../../../util/filter-map';
@@ -63,11 +64,20 @@ export const defaultRegistryUrls = [MAVEN_REPO];
 export class MavenDatasource extends Datasource {
   static id = 'maven';
 
+  override readonly caching = true;
+
   override readonly defaultRegistryUrls = defaultRegistryUrls;
 
   override readonly defaultVersioning: string = mavenVersioning.id;
 
   override readonly registryStrategy: RegistryStrategy = 'merge';
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `Last-Modified` header or the `lastModified` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `scm` tags in the results.';
 
   constructor(id = MavenDatasource.id) {
     super(id);
@@ -103,7 +113,11 @@ export class MavenDatasource extends Datasource {
       (acc, version) => ({ ...acc, [version]: null }),
       {},
     );
-    if (isCacheable) {
+    const cachePrivatePackages = GlobalConfig.get(
+      'cachePrivatePackages',
+      false,
+    );
+    if (cachePrivatePackages || isCacheable) {
       await packageCache.set(cacheNamespace, cacheKey, releaseMap, 30);
     }
     return releaseMap;
@@ -346,6 +360,16 @@ export class MavenDatasource extends Datasource {
         latestSuitableVersion,
       ));
 
-    return { ...dependency, ...dependencyInfo, releases };
+    const result: ReleaseResult = {
+      ...dependency,
+      ...dependencyInfo,
+      releases,
+    };
+
+    if (!this.defaultRegistryUrls.includes(registryUrl)) {
+      result.isPrivate = true;
+    }
+
+    return result;
   }
 }

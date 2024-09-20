@@ -71,8 +71,7 @@ function extractApis(
 
   try {
     // TODO: use schema (#9610)
-    doc = parseYaml(content, null, {
-      filename: packageFile,
+    doc = parseYaml(content, {
       removeTemplates: true,
     });
   } catch (err) {

@@ -10,10 +10,10 @@ import { replaceUrlPath, resolveBaseUrl } from '../../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { RegistryFile } from './schema';
 import {
   PackagesResponse,
   PackagistFile,
-  RegistryFile,
   RegistryMeta,
   extractDepReleases,
   parsePackagesResponses,
@@ -31,6 +31,14 @@ export class PackagistDatasource extends Datasource {
   override readonly defaultVersioning = composerVersioning.id;
 
   override readonly registryStrategy = 'hunt';
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `time` field in the results.';
+  // Note: this can be changed to 'release', as the source is present in each release but we remove it while processing
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from `source` field in the results.';
 
   // We calculate auth at this datasource layer so that we can know whether it's safe to cache or not
   private static getHostOpts(url: string): HttpOptions {
@@ -78,9 +86,9 @@ export class PackagistDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${PackagistDatasource.id}-public-files`,
+    namespace: `datasource-${PackagistDatasource.id}`,
     key: (regUrl: string, regFile: RegistryFile) =>
-      PackagistDatasource.getPackagistFileUrl(regUrl, regFile),
+      `getPackagistFile:${PackagistDatasource.getPackagistFileUrl(regUrl, regFile)}`,
     cacheable: (regUrl: string) =>
       !PackagistDatasource.isPrivatePackage(regUrl),
     ttlMinutes: 1440,
@@ -117,9 +125,9 @@ export class PackagistDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${PackagistDatasource.id}-org`,
+    namespace: `datasource-${PackagistDatasource.id}`,
     key: (registryUrl: string, metadataUrl: string, packageName: string) =>
-      `${registryUrl}:${metadataUrl}:${packageName}`,
+      `packagistV2Lookup:${registryUrl}:${metadataUrl}:${packageName}`,
     ttlMinutes: 10,
   })
   async packagistV2Lookup(

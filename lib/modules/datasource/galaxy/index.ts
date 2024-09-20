@@ -19,6 +19,13 @@ export class GalaxyDatasource extends Datasource {
 
   override readonly defaultVersioning = pep440Versioning.id;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `created` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `github_user` and `github_repo` fields in the results.';
+
   @cache({
     namespace: 'datasource-galaxy',
     key: (getReleasesConfig: GetReleasesConfig) =>
@@ -40,7 +47,7 @@ export class GalaxyDatasource extends Datasource {
       const raw = await this.http.getJson(galaxyAPIUrl, GalaxyV1);
       body = raw.body;
     } catch (err) {
-      throw this.handleGenericErrors(err);
+      this.handleGenericErrors(err);
     }
 
     // istanbul ignore if

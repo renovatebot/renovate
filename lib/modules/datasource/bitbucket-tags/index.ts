@@ -19,6 +19,13 @@ export class BitbucketTagsDatasource extends Datasource {
 
   static readonly defaultRegistryUrls = ['https://bitbucket.org'];
 
+  static readonly releaseTimestampSupport = true;
+  static readonly releaseTimestampNote =
+    'The release timestamp is determined from the `date` field in the results.';
+  static readonly sourceUrlSupport = 'package';
+  static readonly sourceUrlNote =
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
+
   static readonly cacheNamespace: PackageCacheNamespace = `datasource-${BitbucketTagsDatasource.id}`;
 
   constructor() {
@@ -101,7 +108,7 @@ export class BitbucketTagsDatasource extends Datasource {
       BitbucketTagsDatasource.getCacheKey(registryUrl, repo, 'mainbranch'),
     ttlMinutes: 60,
   })
-  async getMainBranch(repo: string): Promise<string> {
+  async getMainBranch(_registryUrl: string, repo: string): Promise<string> {
     return (
       await this.bitbucketHttp.getJson(`/2.0/repositories/${repo}`, RepoInfo)
     ).body.mainbranch;
@@ -122,7 +129,10 @@ export class BitbucketTagsDatasource extends Datasource {
       return this.getTagCommit(registryUrl, repo, newValue);
     }
 
-    const mainBranch = await this.getMainBranch(repo);
+    const mainBranch = await this.getMainBranch(
+      BitbucketTagsDatasource.getRegistryURL(registryUrl),
+      repo,
+    );
 
     const url = `/2.0/repositories/${repo}/commits/${mainBranch}`;
     const bitbucketCommits = (

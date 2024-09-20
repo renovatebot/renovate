@@ -229,27 +229,6 @@ describe('config/presets/index', () => {
       expect(e!.validationMessage).toBeUndefined();
     });
 
-    it('combines two package alls', async () => {
-      config.extends = ['packages:eslint', 'packages:stylelint'];
-      const res = await presets.resolveConfigPresets(config);
-      expect(res).toEqual({
-        matchPackageNames: [
-          '@types/eslint',
-          'babel-eslint',
-          '@babel/eslint-parser',
-          '@stylistic/stylelint-plugin',
-        ],
-        matchPackagePrefixes: [
-          '@eslint/',
-          '@stylistic/eslint-plugin',
-          '@types/eslint__',
-          '@typescript-eslint/',
-          'eslint',
-          'stylelint',
-        ],
-      });
-    });
-
     it('resolves packageRule', async () => {
       config.packageRules = [
         {
@@ -266,13 +245,13 @@ describe('config/presets/index', () => {
               '@types/eslint',
               'babel-eslint',
               '@babel/eslint-parser',
-            ],
-            matchPackagePrefixes: [
-              '@eslint/',
-              '@stylistic/eslint-plugin',
-              '@types/eslint__',
-              '@typescript-eslint/',
-              'eslint',
+              '@eslint/**',
+              '@eslint-community/**',
+              '@stylistic/eslint-plugin**',
+              '@types/eslint__**',
+              '@typescript-eslint/**',
+              'typescript-eslint',
+              'eslint**',
             ],
           },
         ],
@@ -283,16 +262,14 @@ describe('config/presets/index', () => {
       config.extends = ['packages:eslint'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.matchPackagePrefixes).toHaveLength(5);
+      expect(res.matchPackageNames).toHaveLength(10);
     });
 
     it('resolves linters', async () => {
       config.extends = ['packages:linters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.matchPackageNames).toHaveLength(11);
-      expect(res.matchPackagePatterns).toHaveLength(1);
-      expect(res.matchPackagePrefixes).toHaveLength(7);
+      expect(res.matchPackageNames).toHaveLength(20);
     });
 
     it('resolves nested groups', async () => {
@@ -301,9 +278,7 @@ describe('config/presets/index', () => {
       expect(res).toMatchSnapshot();
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(11);
-      expect(rule.matchPackagePatterns).toHaveLength(1);
-      expect(rule.matchPackagePrefixes).toHaveLength(7);
+      expect(rule.matchPackageNames).toHaveLength(20);
     });
 
     it('migrates automerge in presets', async () => {
@@ -334,6 +309,21 @@ describe('config/presets/index', () => {
       expect(res.labels).toEqual(['self-hosted resolved']);
       expect(local.getPreset.mock.calls).toHaveLength(1);
       expect(res).toMatchSnapshot();
+    });
+
+    it('resolves self-hosted preset with templating', async () => {
+      GlobalConfig.set({ customEnvVariables: { GIT_REF: 'abc123' } });
+      config.extends = ['local>username/preset-repo#{{ env.GIT_REF }}'];
+      local.getPreset.mockImplementationOnce(({ tag }) =>
+        tag === 'abc123'
+          ? Promise.resolve({ labels: ['self-hosted with template resolved'] })
+          : Promise.reject(new Error('Failed to resolve self-hosted preset')),
+      );
+
+      const res = await presets.resolveConfigPresets(config);
+
+      expect(res.labels).toEqual(['self-hosted with template resolved']);
+      expect(local.getPreset).toHaveBeenCalledOnce();
     });
 
     it('resolves self-hosted transitive presets without baseConfig', async () => {
@@ -1060,6 +1050,14 @@ describe('config/presets/index', () => {
           ],
         }
       `);
+    });
+
+    it('handles renamed regexManagers presets', async () => {
+      const res = await presets.getPreset(
+        'regexManagers:dockerfileVersions',
+        {},
+      );
+      expect(res.customManagers).toHaveLength(1);
     });
 
     it('gets linters', async () => {

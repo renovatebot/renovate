@@ -6,6 +6,7 @@ import type {
   GetReleasesConfig,
   RegistryStrategy,
   ReleaseResult,
+  SourceUrlSupport,
 } from './types';
 
 export abstract class Datasource implements DatasourceApi {
@@ -24,6 +25,12 @@ export abstract class Datasource implements DatasourceApi {
   defaultVersioning?: string | undefined;
 
   registryStrategy: RegistryStrategy | undefined = 'first';
+
+  releaseTimestampSupport = false;
+  releaseTimestampNote?: string | undefined;
+
+  sourceUrlSupport: SourceUrlSupport = 'none';
+  sourceUrlNote?: string | undefined;
 
   protected http: Http;
 

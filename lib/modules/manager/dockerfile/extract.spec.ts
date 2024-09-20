@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import type { PackageDependency } from '../types';
 import { extractVariables, getDep } from './extract';
@@ -330,6 +331,26 @@ describe('modules/manager/dockerfile/extract', () => {
       ]);
     });
 
+    it('extracts tags from Dockerfile which begins with a BOM marker', () => {
+      const res = extractPackageFile(
+        '\uFEFFFROM node:6.12.3 as frontend\n\n',
+        '',
+        {},
+      )?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '6.12.3',
+          datasource: 'docker',
+          depName: 'node',
+          depType: 'final',
+          replaceString: 'node:6.12.3',
+        },
+      ]);
+    });
+
     it('skips scratches', () => {
       const res = extractPackageFile('FROM scratch\nADD foo\n', '', {});
       expect(res).toBeNull();
@@ -373,6 +394,31 @@ describe('modules/manager/dockerfile/extract', () => {
           replaceString: 'gcr.io/k8s-skaffold/skaffold:v0.11.0',
         },
       ]);
+    });
+
+    it('handles COPY --link --from', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM scratch
+          COPY --link --from=gcr.io/k8s-skaffold/skaffold:v0.11.0 /usr/bin/skaffold /usr/bin/skaffold
+        `,
+        '',
+        {},
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v0.11.0',
+            datasource: 'docker',
+            depName: 'gcr.io/k8s-skaffold/skaffold',
+            depType: 'final',
+            replaceString: 'gcr.io/k8s-skaffold/skaffold:v0.11.0',
+          },
+        ],
+      });
     });
 
     it('skips named multistage COPY --from tags', () => {
@@ -669,6 +715,27 @@ describe('modules/manager/dockerfile/extract', () => {
       ]);
     });
 
+    it('handles debian with prefixes and registries', () => {
+      const res = extractPackageFile(
+        'FROM docker.io/library/debian:10\n',
+        '',
+        {},
+      )?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '10',
+          datasource: 'docker',
+          depName: 'docker.io/library/debian',
+          depType: 'final',
+          replaceString: 'docker.io/library/debian:10',
+          versioning: 'debian',
+        },
+      ]);
+    });
+
     it('handles prefixes', () => {
       const res = extractPackageFile('FROM amd64/ubuntu:18.04\n', '', {})?.deps;
       expect(res).toEqual([
@@ -682,6 +749,27 @@ describe('modules/manager/dockerfile/extract', () => {
           depType: 'final',
           packageName: 'amd64/ubuntu',
           replaceString: 'amd64/ubuntu:18.04',
+          versioning: 'ubuntu',
+        },
+      ]);
+    });
+
+    it('handles prefixes with registries', () => {
+      const res = extractPackageFile(
+        'FROM public.ecr.aws/ubuntu/ubuntu:18.04\n',
+        '',
+        {},
+      )?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '18.04',
+          datasource: 'docker',
+          depName: 'public.ecr.aws/ubuntu/ubuntu',
+          depType: 'final',
+          replaceString: 'public.ecr.aws/ubuntu/ubuntu:18.04',
           versioning: 'ubuntu',
         },
       ]);

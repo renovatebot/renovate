@@ -1,4 +1,5 @@
 import JSON5 from 'json5';
+import * as JSONC from 'jsonc-parser';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
 import { z } from 'zod';
@@ -199,7 +200,7 @@ export function LooseRecord<
 export const Json = z.string().transform((str, ctx): JsonValue => {
   try {
     return JSON.parse(str);
-  } catch (e) {
+  } catch {
     ctx.addIssue({ code: 'custom', message: 'Invalid JSON' });
     return z.NEVER;
   }
@@ -209,10 +210,20 @@ type Json = z.infer<typeof Json>;
 export const Json5 = z.string().transform((str, ctx): JsonValue => {
   try {
     return JSON5.parse(str);
-  } catch (e) {
+  } catch {
     ctx.addIssue({ code: 'custom', message: 'Invalid JSON5' });
     return z.NEVER;
   }
+});
+
+export const Jsonc = z.string().transform((str, ctx): JsonValue => {
+  const errors: JSONC.ParseError[] = [];
+  const value = JSONC.parse(str, errors);
+  if (errors.length === 0) {
+    return value;
+  }
+  ctx.addIssue({ code: 'custom', message: 'Invalid JSONC' });
+  return z.NEVER;
 });
 
 export const UtcDate = z
@@ -228,8 +239,8 @@ export const UtcDate = z
 
 export const Yaml = z.string().transform((str, ctx): JsonValue => {
   try {
-    return parseSingleYaml(str, { json: true });
-  } catch (e) {
+    return parseSingleYaml(str);
+  } catch {
     ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
     return z.NEVER;
   }
@@ -237,8 +248,8 @@ export const Yaml = z.string().transform((str, ctx): JsonValue => {
 
 export const MultidocYaml = z.string().transform((str, ctx): JsonArray => {
   try {
-    return parseYaml(str, null, { json: true }) as JsonArray;
-  } catch (e) {
+    return parseYaml(str) as JsonArray;
+  } catch {
     ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
     return z.NEVER;
   }
@@ -247,7 +258,7 @@ export const MultidocYaml = z.string().transform((str, ctx): JsonArray => {
 export const Toml = z.string().transform((str, ctx) => {
   try {
     return parseToml(str);
-  } catch (e) {
+  } catch {
     ctx.addIssue({ code: 'custom', message: 'Invalid TOML' });
     return z.NEVER;
   }

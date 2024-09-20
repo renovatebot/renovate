@@ -1,23 +1,74 @@
+import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { mocked } from '../../../../test/util';
 import * as hostRules from '../../../util/host-rules';
 import { PypiDatasource } from '.';
 
+const googleAuth = mocked(_googleAuth);
+jest.mock('google-auth-library');
+
 const res1 = Fixtures.get('azure-cli-monitor.json');
-const res2 = Fixtures.get('azure-cli-monitor-updated.json');
 const htmlResponse = Fixtures.get('versions-html.html');
-const badResponse = Fixtures.get('versions-html-badfile.html');
-const dataRequiresPythonResponse = Fixtures.get(
-  'versions-html-data-requires-python.html',
-);
-const mixedHyphensResponse = Fixtures.get('versions-html-mixed-hyphens.html');
 const mixedCaseResponse = Fixtures.get('versions-html-mixed-case.html');
 const withPeriodsResponse = Fixtures.get('versions-html-with-periods.html');
-const withWhitespacesResponse = Fixtures.get(
-  'versions-html-with-whitespaces.html',
-);
-const hyphensResponse = Fixtures.get('versions-html-hyphens.html');
+
+const azureCliMonitorReleases = [
+  { releaseTimestamp: '2017-04-03T16:55:14.000Z', version: '0.0.1' },
+  { releaseTimestamp: '2017-04-17T20:32:30.000Z', version: '0.0.2' },
+  { releaseTimestamp: '2017-04-28T21:18:54.000Z', version: '0.0.3' },
+  { releaseTimestamp: '2017-05-09T21:36:51.000Z', version: '0.0.4' },
+  { releaseTimestamp: '2017-05-30T23:13:49.000Z', version: '0.0.5' },
+  { releaseTimestamp: '2017-06-13T22:21:05.000Z', version: '0.0.6' },
+  { releaseTimestamp: '2017-06-21T22:12:36.000Z', version: '0.0.7' },
+  { releaseTimestamp: '2017-07-07T16:22:26.000Z', version: '0.0.8' },
+  { releaseTimestamp: '2017-08-28T20:14:33.000Z', version: '0.0.9' },
+  { releaseTimestamp: '2017-09-22T23:47:59.000Z', version: '0.0.10' },
+  { releaseTimestamp: '2017-10-24T02:14:07.000Z', version: '0.0.11' },
+  { releaseTimestamp: '2017-11-14T18:31:57.000Z', version: '0.0.12' },
+  { releaseTimestamp: '2017-12-05T18:57:54.000Z', version: '0.0.13' },
+  { releaseTimestamp: '2018-01-05T21:26:03.000Z', version: '0.0.14' },
+  { releaseTimestamp: '2018-01-17T18:36:39.000Z', version: '0.1.0' },
+  { releaseTimestamp: '2018-01-31T18:05:22.000Z', version: '0.1.1' },
+  { releaseTimestamp: '2018-02-13T18:17:52.000Z', version: '0.1.2' },
+  { releaseTimestamp: '2018-03-13T17:08:20.000Z', version: '0.1.3' },
+  { releaseTimestamp: '2018-03-27T17:55:25.000Z', version: '0.1.4' },
+  { releaseTimestamp: '2018-04-10T17:25:47.000Z', version: '0.1.5' },
+  { releaseTimestamp: '2018-05-07T17:59:09.000Z', version: '0.1.6' },
+  { releaseTimestamp: '2018-05-22T17:25:23.000Z', version: '0.1.7' },
+  { releaseTimestamp: '2018-07-03T16:18:06.000Z', version: '0.1.8' },
+  { releaseTimestamp: '2018-07-18T16:20:01.000Z', version: '0.2.0' },
+  { releaseTimestamp: '2018-07-31T15:32:28.000Z', version: '0.2.1' },
+  { releaseTimestamp: '2018-08-14T14:55:32.000Z', version: '0.2.2' },
+  { releaseTimestamp: '2018-08-28T15:35:01.000Z', version: '0.2.3' },
+  { releaseTimestamp: '2018-10-09T18:09:08.000Z', version: '0.2.4' },
+  { releaseTimestamp: '2018-10-23T16:54:38.000Z', version: '0.2.5' },
+  { releaseTimestamp: '2018-11-06T16:34:51.000Z', version: '0.2.6' },
+  { releaseTimestamp: '2018-11-20T20:16:03.000Z', version: '0.2.7' },
+  { releaseTimestamp: '2019-01-15T21:08:09.000Z', version: '0.2.8' },
+  { releaseTimestamp: '2019-01-30T01:51:15.000Z', version: '0.2.9' },
+  { releaseTimestamp: '2019-02-12T18:09:43.000Z', version: '0.2.10' },
+  { releaseTimestamp: '2019-03-26T17:57:43.000Z', version: '0.2.11' },
+  { releaseTimestamp: '2019-04-09T17:01:09.000Z', version: '0.2.12' },
+  { releaseTimestamp: '2019-04-23T17:00:58.000Z', version: '0.2.13' },
+  { releaseTimestamp: '2019-05-21T18:43:17.000Z', version: '0.2.14' },
+  { releaseTimestamp: '2019-06-18T13:58:55.000Z', version: '0.2.15' },
+];
+
+const djDatabaseUrlSimpleReleases = [
+  { version: '0.1.2' },
+  { version: '0.1.3' },
+  { version: '0.1.4' },
+  { version: '0.2.0' },
+  { version: '0.2.1' },
+  { version: '0.2.2' },
+  { version: '0.3.0' },
+  { version: '0.4.0' },
+  { version: '0.4.1' },
+  { version: '0.4.2' },
+  { isDeprecated: true, version: '0.5.0' },
+];
 
 const baseJsonUrl = 'https://pypi.org/pypi';
 const baseSimpleUrl = 'https://pypi.org/simple';
@@ -137,7 +188,7 @@ describe('modules/datasource/pypi/index', () => {
       httpMock
         .scope('https://third-index/foo')
         .get('/azure-cli-monitor/json')
-        .reply(200, res2);
+        .reply(200, Fixtures.get('azure-cli-monitor-updated.json'));
       httpMock
         .scope('https://third-index/foo')
         .get('/azure-cli-monitor/')
@@ -158,6 +209,58 @@ describe('modules/datasource/pypi/index', () => {
         version: '0.2.15',
         releaseTimestamp: '2019-06-18T13:58:55.000Z',
       });
+    });
+
+    it('supports Google Auth', async () => {
+      httpMock
+        .scope('https://someregion-python.pkg.dev/some-project/some-repo/')
+        .get('/azure-cli-monitor/json')
+        .matchHeader(
+          'authorization',
+          'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg==',
+        )
+        .reply(200, Fixtures.get('azure-cli-monitor-updated.json'));
+      const config = {
+        registryUrls: [
+          'https://someregion-python.pkg.dev/some-project/some-repo',
+        ],
+      };
+      googleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        })),
+      );
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        packageName: 'azure-cli-monitor',
+      });
+      expect(res).toMatchObject({ releases: azureCliMonitorReleases });
+      expect(googleAuth).toHaveBeenCalledTimes(1);
+    });
+
+    it('supports Google Auth not being configured', async () => {
+      httpMock
+        .scope('https://someregion-python.pkg.dev/some-project/some-repo/')
+        .get('/azure-cli-monitor/json')
+        .reply(200, Fixtures.get('azure-cli-monitor-updated.json'));
+      const config = {
+        registryUrls: [
+          'https://someregion-python.pkg.dev/some-project/some-repo',
+        ],
+      };
+      googleAuth.mockImplementation(
+        jest.fn().mockImplementation(() => ({
+          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        })),
+      );
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        packageName: 'azure-cli-monitor',
+      });
+      expect(res).toMatchObject({ releases: azureCliMonitorReleases });
+      expect(googleAuth).toHaveBeenCalledTimes(1);
     });
 
     it('returns non-github home_page', async () => {
@@ -384,7 +487,7 @@ describe('modules/datasource/pypi/index', () => {
       httpMock
         .scope(simpleRegistryUrl)
         .get('/package-with-hyphens/')
-        .reply(200, hyphensResponse);
+        .reply(200, Fixtures.get('versions-html-hyphens.html'));
       httpMock
         .scope(simpleRegistryUrl)
         .get('/package-with-hyphens/json')
@@ -404,12 +507,31 @@ describe('modules/datasource/pypi/index', () => {
       ]);
     });
 
+    it('process data from simple endpoint with zip archives', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/company-aws-sso-client/')
+        .reply(200, Fixtures.get('versions-archives.html'));
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'company-aws-sso-client',
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '0.11.7' },
+        { version: '0.11.8' },
+      ]);
+    });
+
     it('process data from simple endpoint with hyphens replaced with underscores', async () => {
       const simpleRegistryUrl = 'https://some.registry.org/simple/';
       httpMock
         .scope(simpleRegistryUrl)
         .get('/image-collector/')
-        .reply(200, mixedHyphensResponse);
+        .reply(200, Fixtures.get('versions-html-mixed-hyphens.html'));
       httpMock.scope(simpleRegistryUrl).get('/image-collector/json').reply(404);
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
@@ -499,11 +621,98 @@ describe('modules/datasource/pypi/index', () => {
       ]);
     });
 
+    it('process data from simple endpoint with periods when using normalized name', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/package-with-periods/')
+        .reply(200, withPeriodsResponse);
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'package-with-periods',
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '2.0.0' },
+        { version: '2.0.1' },
+        { version: '2.0.2' },
+      ]);
+    });
+
+    it('process data from simple endpoint for snowflake-legacy', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/snowflake-legacy/')
+        .reply(200, Fixtures.get('versions-html-snowflake-legacy.html'));
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'snowflake-legacy',
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '0.3.0' },
+        { version: '0.4.0' },
+        { version: '0.5.0' },
+        { version: '0.7.0' },
+        { version: '0.8.0' },
+        { version: '0.8.1' },
+        { version: '0.9.0' },
+        { version: '0.10.0' },
+        { version: '0.11.0' },
+      ]);
+    });
+
+    it('ignores invalid distribution file name formats', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/invalid-version/')
+        .reply(200, Fixtures.get('versions-html-invalid-version.html'));
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'invalid-version',
+      });
+      expect(res?.releases).toMatchObject([]);
+    });
+
+    it('process data from simple endpoint with non normalized name', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/friendly-bard/')
+        .reply(
+          200,
+          Fixtures.get('versions-html-with-non-normalized-name.html'),
+        );
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'friendly-bard',
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '2.0.0' },
+        { version: '2.0.1' },
+        { version: '2.0.2' },
+        { version: '2.0.3' },
+        { version: '2.0.4' },
+      ]);
+    });
+
     it('process data from simple endpoint with extra whitespaces in html', async () => {
       httpMock
         .scope('https://some.registry.org/simple/')
         .get('/package-with-whitespaces/')
-        .reply(200, withWhitespacesResponse);
+        .reply(200, Fixtures.get('versions-html-with-whitespaces.html'));
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
@@ -559,7 +768,7 @@ describe('modules/datasource/pypi/index', () => {
       httpMock
         .scope(simpleRegistryUrl)
         .get('/dj-database-url/')
-        .reply(200, badResponse);
+        .reply(200, Fixtures.get('versions-html-badfile.html'));
       httpMock.scope(simpleRegistryUrl).get('/dj-database-url/json').reply(404);
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
@@ -639,7 +848,7 @@ describe('modules/datasource/pypi/index', () => {
       httpMock
         .scope('https://some.registry.org/simple/')
         .get('/dj-database-url/')
-        .reply(200, dataRequiresPythonResponse);
+        .reply(200, Fixtures.get('versions-html-data-requires-python.html'));
       httpMock
         .scope('https://some.registry.org/simple/')
         .get('/dj-database-url/json')
@@ -777,4 +986,61 @@ describe('modules/datasource/pypi/index', () => {
       });
     },
   );
+  it('supports Google Auth with simple endpoint', async () => {
+    httpMock
+      .scope('https://someregion-python.pkg.dev/some-project/some-repo/simple/')
+      .get('/dj-database-url/')
+      .reply(200, htmlResponse);
+    const config = {
+      registryUrls: [
+        'https://someregion-python.pkg.dev/some-project/some-repo/simple/',
+      ],
+    };
+    googleAuth.mockImplementationOnce(
+      jest.fn().mockImplementationOnce(() => ({
+        getAccessToken: jest.fn().mockResolvedValue('some-token'),
+      })),
+    );
+    expect(
+      await getPkgReleases({
+        datasource,
+        ...config,
+        constraints: { python: '2.7' },
+        packageName: 'dj-database-url',
+      }),
+    ).toMatchObject({
+      isPrivate: true,
+      registryUrl:
+        'https://someregion-python.pkg.dev/some-project/some-repo/simple',
+      releases: djDatabaseUrlSimpleReleases,
+    });
+    expect(googleAuth).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores an invalid URL when checking for auth headers', async () => {
+    const config = {
+      registryUrls: ['not-a-url/simple/'],
+    };
+    const res = await getPkgReleases({
+      ...config,
+      datasource,
+      packageName: 'azure-cli-monitor',
+    });
+    expect(res).toBeNil();
+  });
+
+  it('uses https://pypi.org/pypi/ instead of https://pypi.org/simple/', async () => {
+    httpMock.scope(baseUrl).get('/azure-cli-monitor/json').reply(200, res1);
+    const config = {
+      registryUrls: ['https://pypi.org/simple/'],
+    };
+    expect(
+      await getPkgReleases({
+        datasource,
+        ...config,
+        constraints: { python: '2.7' },
+        packageName: 'azure-cli-monitor',
+      }),
+    ).toMatchSnapshot();
+  });
 });

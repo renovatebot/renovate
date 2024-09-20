@@ -1,13 +1,6 @@
 import { mock } from 'jest-mock-extended';
-import {
-  RenovateConfig,
-  fs,
-  git,
-  mocked,
-  partial,
-  platform,
-  scm,
-} from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { fs, git, mocked, partial, platform, scm } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform/types';
@@ -42,6 +35,14 @@ describe('workers/repository/reconfigure/index', () => {
     fs.readLocalFile.mockResolvedValue(null);
     platform.getBranchStatusCheck.mockResolvedValue(null);
     GlobalConfig.reset();
+  });
+
+  it('no effect when running with platform=local', async () => {
+    GlobalConfig.set({ platform: 'local' });
+    await validateReconfigureBranch(config);
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Not attempting to reconfigure when running with local platform',
+    );
   });
 
   it('no effect on repo with no reconfigure branch', async () => {

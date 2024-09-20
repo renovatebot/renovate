@@ -1,5 +1,6 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
-import { ReleaseResult, getPkgReleases } from '..';
+import type { ReleaseResult } from '..';
+import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
@@ -499,6 +500,7 @@ describe('modules/datasource/maven/index', () => {
         { version: '1.0.5-SNAPSHOT' },
         { version: '2.0.0' },
       ],
+      isPrivate: true,
     });
     expect(googleAuth).toHaveBeenCalledTimes(5);
   });
@@ -551,6 +553,7 @@ describe('modules/datasource/maven/index', () => {
         { version: '1.0.5-SNAPSHOT' },
         { version: '2.0.0' },
       ],
+      isPrivate: true,
     });
     expect(googleAuth).toHaveBeenCalledTimes(5);
   });

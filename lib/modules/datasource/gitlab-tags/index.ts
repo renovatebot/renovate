@@ -12,6 +12,13 @@ export class GitlabTagsDatasource extends Datasource {
 
   protected override http: GitlabHttp;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'To get release timestamp we use the `created_at` field from the response.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
+
   constructor() {
     super(GitlabTagsDatasource.id);
     this.http = new GitlabHttp(GitlabTagsDatasource.id);
@@ -22,7 +29,7 @@ export class GitlabTagsDatasource extends Datasource {
   @cache({
     namespace: `datasource-${GitlabTagsDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${getDepHost(registryUrl)}:${packageName}`,
+      `getReleases:${getDepHost(registryUrl)}:${packageName}`,
   })
   async getReleases({
     registryUrl,
@@ -65,17 +72,17 @@ export class GitlabTagsDatasource extends Datasource {
    * Returs the latest commit hash of the repository.
    */
   @cache({
-    namespace: `datasource-${GitlabTagsDatasource.id}-commit`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${getDepHost(registryUrl)}:${packageName}`,
+    namespace: `datasource-${GitlabTagsDatasource.id}`,
+    key: ({ registryUrl, packageName }: DigestConfig) =>
+      `getDigest:${getDepHost(registryUrl)}:${packageName}`,
   })
   override async getDigest(
-    { packageName: repo, registryUrl }: Partial<DigestConfig>,
+    { packageName: repo, registryUrl }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
     const depHost = getDepHost(registryUrl);
 
-    const urlEncodedRepo = encodeURIComponent(repo!);
+    const urlEncodedRepo = encodeURIComponent(repo);
     let digest: string | null = null;
 
     try {

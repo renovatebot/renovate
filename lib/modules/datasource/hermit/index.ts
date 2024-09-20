@@ -30,6 +30,10 @@ export class HermitDatasource extends Datasource {
     'https://github.com/cashapp/hermit-packages',
   ];
 
+  override readonly sourceUrlSupport = 'release';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `Repository` field in the results.';
+
   pathRegex: RegExp;
 
   constructor() {
@@ -39,9 +43,9 @@ export class HermitDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-hermit-package`,
+    namespace: `datasource-${HermitDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl ?? ''}-${packageName}`,
+      `getReleases:${registryUrl ?? ''}-${packageName}`,
   })
   async getReleases({
     packageName,
@@ -102,8 +106,8 @@ export class HermitDatasource extends Datasource {
    * named index, parses it and returned the parsed JSON result
    */
   @cache({
-    namespace: `datasource-hermit-search-manifest`,
-    key: (u) => u.toString(),
+    namespace: `datasource-${HermitDatasource.id}`,
+    key: (u) => `getHermitSearchManifest:${u.toString()}`,
   })
   async getHermitSearchManifest(u: URL): Promise<HermitSearchResult[] | null> {
     const registryUrl = u.toString();
@@ -154,7 +158,7 @@ export class HermitDatasource extends Datasource {
 
     try {
       return JSON.parse(indexContent) as HermitSearchResult[];
-    } catch (e) {
+    } catch {
       logger.warn('error parsing hermit search manifest from remote respond');
     }
 

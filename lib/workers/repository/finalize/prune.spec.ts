@@ -1,10 +1,5 @@
-import {
-  RenovateConfig,
-  git,
-  partial,
-  platform,
-  scm,
-} from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { git, partial, platform, scm } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { Pr } from '../../../modules/platform/types';
 import * as cleanup from './prune';
@@ -85,6 +80,38 @@ describe('workers/repository/finalize/prune', () => {
       expect(git.getBranchList).toHaveBeenCalledTimes(1);
       expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
+    });
+
+    it('deletes with base branches', async () => {
+      config.branchList = ['renovate/main-a'];
+      config.baseBranches = ['main', 'maint/v7'];
+      git.getBranchList.mockReturnValueOnce(
+        config.branchList.concat([
+          'renovate/main-b',
+          'renovate/maint/v7-a',
+          'renovate/maint/v7-b',
+        ]),
+      );
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      scm.isBranchModified.mockResolvedValueOnce(false);
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(git.getBranchList).toHaveBeenCalledTimes(1);
+      expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
+      expect(scm.deleteBranch).toHaveBeenCalledWith('renovate/maint/v7-a');
+      expect(scm.isBranchModified).toHaveBeenCalledTimes(3);
+      expect(scm.isBranchModified).toHaveBeenCalledWith(
+        'renovate/main-b',
+        'main',
+      );
+      expect(scm.isBranchModified).toHaveBeenCalledWith(
+        'renovate/maint/v7-a',
+        'maint/v7',
+      );
+      expect(scm.isBranchModified).toHaveBeenCalledWith(
+        'renovate/maint/v7-b',
+        'maint/v7',
+      );
     });
 
     it('does nothing on dryRun', async () => {

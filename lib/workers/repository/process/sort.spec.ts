@@ -58,11 +58,16 @@ describe('workers/repository/process/sort', () => {
           prTitle: 'a minor update',
           prPriority: -1,
         },
+        {
+          updateType: 'patch' as UpdateType,
+          prTitle: 'a patch update',
+        },
       ];
       sortBranches(branches);
       expect(branches).toEqual([
         { prPriority: 1, prTitle: 'some major update', updateType: 'major' },
         { prPriority: 0, prTitle: 'some other pin', updateType: 'pin' },
+        { prTitle: 'a patch update', updateType: 'patch' },
         { prPriority: -1, prTitle: 'some pin', updateType: 'pin' },
         { prPriority: -1, prTitle: 'a minor update', updateType: 'minor' },
       ]);

@@ -7,7 +7,7 @@ import type {
   RegexManagerTemplates,
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
-import type { HostRule } from '../types/host-rules';
+import type { HostRule } from '../types';
 import { regEx } from '../util/regex';
 import {
   getRegexPredicate,
@@ -15,6 +15,7 @@ import {
   matchRegexOrGlobList,
 } from '../util/string-match';
 import * as template from '../util/template';
+import { parseUrl } from '../util/url';
 import {
   hasValidSchedule,
   hasValidTimezone,
@@ -24,16 +25,18 @@ import { GlobalConfig } from './global';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
-import {
+import { supportedDatasources } from './presets/internal/merge-confidence';
+import type {
   AllowedParents,
-  type RenovateConfig,
-  type RenovateOptions,
-  type StatusCheckKey,
-  type ValidationMessage,
-  type ValidationResult,
-  allowedStatusCheckStrings,
+  RenovateConfig,
+  RenovateOptions,
+  StatusCheckKey,
+  ValidationMessage,
+  ValidationResult,
 } from './types';
+import { allowedStatusCheckStrings } from './types';
 import * as managerValidator from './validation-helpers/managers';
+import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches';
 import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
 
 const options = getOptions();
@@ -44,6 +47,7 @@ let optionParents: Record<string, AllowedParents[]>;
 let optionGlobals: Set<string>;
 let optionInherits: Set<string>;
 let optionRegexOrGlob: Set<string>;
+let optionAllowsNegativeIntegers: Set<string>;
 
 const managerList = getManagerList();
 
@@ -60,6 +64,7 @@ const ignoredNodes = [
   'vulnerabilityAlertsOnly',
   'vulnerabilityAlert',
   'isVulnerabilityAlert',
+  'vulnerabilityFixVersion', // not intended to be used by end users but may be by Mend apps
   'copyLocalLibs', // deprecated - functionality is now enabled by default
   'prBody', // deprecated
   'minimumConfidence', // undocumented feature flag
@@ -85,6 +90,33 @@ function validatePlainObject(val: Record<string, unknown>): true | string {
     }
   }
   return true;
+}
+
+function validateNumber(
+  key: string,
+  val: unknown,
+  currentPath?: string,
+  subKey?: string,
+): ValidationMessage[] {
+  const errors: ValidationMessage[] = [];
+  const path = `${currentPath}${subKey ? '.' + subKey : ''}`;
+  if (is.number(val)) {
+    if (val < 0 && !optionAllowsNegativeIntegers.has(key)) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `Configuration option \`${path}\` should be a positive integer. Found negative value instead.`,
+      });
+    }
+  } else {
+    errors.push({
+      topic: 'Configuration Error',
+      message: `Configuration option \`${path}\` should be an integer. Found: ${JSON.stringify(
+        val,
+      )} (${typeof val}).`,
+    });
+  }
+
+  return errors;
 }
 
 function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
@@ -124,6 +156,7 @@ function initOptions(): void {
   optionTypes = {};
   optionRegexOrGlob = new Set();
   optionGlobals = new Set();
+  optionAllowsNegativeIntegers = new Set();
 
   for (const option of options) {
     optionTypes[option.name] = option.type;
@@ -142,6 +175,10 @@ function initOptions(): void {
 
     if (option.globalOnly) {
       optionGlobals.add(option.name);
+    }
+
+    if (option.allowNegative) {
+      optionAllowsNegativeIntegers.add(option.name);
     }
   }
 
@@ -262,7 +299,7 @@ export async function validateConfig(
           let res = template.compile((val as string).toString(), config, false);
           res = template.compile(res, config, false);
           template.compile(res, config, false);
-        } catch (err) {
+        } catch {
           errors.push({
             topic: 'Configuration Error',
             message: `Invalid template in config path: ${currentPath}`,
@@ -298,7 +335,12 @@ export async function validateConfig(
           });
         }
       } else if (
-        ['allowedVersions', 'matchCurrentVersion'].includes(key) &&
+        [
+          'allowedVersions',
+          'matchCurrentVersion',
+          'matchCurrentValue',
+          'matchNewValue',
+        ].includes(key) &&
         isRegexMatch(val)
       ) {
         if (!getRegexPredicate(val)) {
@@ -307,24 +349,6 @@ export async function validateConfig(
             message: `Invalid regExp for ${currentPath}: \`${val}\``,
           });
         }
-      } else if (
-        key === 'matchCurrentValue' &&
-        is.string(val) &&
-        !getRegexPredicate(val)
-      ) {
-        errors.push({
-          topic: 'Configuration Error',
-          message: `Invalid regExp for ${currentPath}: \`${val}\``,
-        });
-      } else if (
-        key === 'matchNewValue' &&
-        is.string(val) &&
-        !getRegexPredicate(val)
-      ) {
-        errors.push({
-          topic: 'Configuration Error',
-          message: `Invalid regExp for ${currentPath}: \`${val}\``,
-        });
       } else if (key === 'timezone' && val !== null) {
         const [validTimezone, errorMessage] = hasValidTimezone(val as string);
         if (!validTimezone) {
@@ -345,14 +369,7 @@ export async function validateConfig(
             });
           }
         } else if (type === 'integer') {
-          if (!is.number(val)) {
-            errors.push({
-              topic: 'Configuration Error',
-              message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
-                val,
-              )} (${typeof val})`,
-            });
-          }
+          errors.push(...validateNumber(key, val, currentPath));
         } else if (type === 'array' && val) {
           if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
@@ -416,21 +433,9 @@ export async function validateConfig(
               'matchDatasources',
               'matchDepTypes',
               'matchDepNames',
-              'matchDepPatterns',
-              'matchDepPrefixes',
               'matchPackageNames',
-              'matchPackagePatterns',
-              'matchPackagePrefixes',
-              'excludeDepNames',
-              'excludeDepPatterns',
-              'excludeDepPrefixes',
-              'excludePackageNames',
-              'excludePackagePatterns',
-              'excludePackagePrefixes',
-              'excludeRepositories',
               'matchCurrentValue',
               'matchCurrentVersion',
-              'matchSourceUrlPrefixes',
               'matchSourceUrls',
               'matchUpdateTypes',
               'matchConfidence',
@@ -451,6 +456,13 @@ export async function validateConfig(
                   }).migratedConfig.packageRules![0];
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath }),
+                  );
+                  warnings.push(
+                    ...matchBaseBranchesValidator.check({
+                      resolvedRule,
+                      currentPath: `${currentPath}[${subIndex}]`,
+                      baseBranches: config.baseBranches!,
+                    }),
                   );
                   const selectorLength = Object.keys(resolvedRule).filter(
                     (ruleKey) => selectors.includes(ruleKey),
@@ -581,19 +593,15 @@ export async function validateConfig(
                 }
               }
             }
-            if (
-              [
-                'matchPackagePatterns',
-                'excludePackagePatterns',
-                'matchDepPatterns',
-                'excludeDepPatterns',
-              ].includes(key)
-            ) {
+            if (['matchPackageNames', 'matchDepNames'].includes(key)) {
+              const startPattern = regEx(/!?\//);
+              const endPattern = regEx(/\/g?i?$/);
               for (const pattern of val as string[]) {
-                if (pattern !== '*') {
+                if (startPattern.test(pattern) && endPattern.test(pattern)) {
                   try {
-                    regEx(pattern);
-                  } catch (e) {
+                    // regEx isn't aware of our !/ prefix but can handle the suffix
+                    regEx(pattern.replace(startPattern, '/'));
+                  } catch {
                     errors.push({
                       topic: 'Configuration Error',
                       message: `Invalid regExp for ${currentPath}: \`${pattern}\``,
@@ -606,7 +614,7 @@ export async function validateConfig(
               for (const fileMatch of val as string[]) {
                 try {
                   regEx(fileMatch);
-                } catch (e) {
+                } catch {
                   errors.push({
                     topic: 'Configuration Error',
                     message: `Invalid regExp for ${currentPath}: \`${fileMatch}\``,
@@ -656,8 +664,7 @@ export async function validateConfig(
         } else if (
           type === 'object' &&
           currentPath !== 'compatibility' &&
-          currentPath !== 'constraints' &&
-          currentPath !== 'force.constraints'
+          key !== 'constraints'
         ) {
           if (is.plainObject(val)) {
             if (key === 'registryAliases') {
@@ -671,7 +678,7 @@ export async function validateConfig(
             } else if (key === 'env') {
               const allowedEnvVars =
                 configType === 'global'
-                  ? (config.allowedEnv as string[]) ?? []
+                  ? ((config.allowedEnv as string[]) ?? [])
                   : GlobalConfig.get('allowedEnv', []);
               for (const [envVarName, envVarValue] of Object.entries(val)) {
                 if (!is.string(envVarValue)) {
@@ -789,9 +796,26 @@ export async function validateConfig(
     if (key === 'hostRules' && is.array(val)) {
       const allowedHeaders =
         configType === 'global'
-          ? (config.allowedHeaders as string[]) ?? []
+          ? ((config.allowedHeaders as string[]) ?? [])
           : GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
+        if (is.nonEmptyString(rule.matchHost)) {
+          if (rule.matchHost.includes('://')) {
+            if (parseUrl(rule.matchHost) === null) {
+              errors.push({
+                topic: 'Configuration Error',
+                message: `hostRules matchHost \`${rule.matchHost}\` is not a valid URL.`,
+              });
+            }
+          }
+        } else if (is.emptyString(rule.matchHost)) {
+          errors.push({
+            topic: 'Configuration Error',
+            message:
+              'Invalid value for hostRules matchHost. It cannot be an empty string.',
+          });
+        }
+
         if (!rule.headers) {
           continue;
         }
@@ -898,6 +922,13 @@ async function validateGlobalConfig(
   currentPath: string | undefined,
   config: RenovateConfig,
 ): Promise<void> {
+  // istanbul ignore if
+  if (getDeprecationMessage(key)) {
+    warnings.push({
+      topic: 'Deprecation Warning',
+      message: getDeprecationMessage(key)!,
+    });
+  }
   if (val !== null) {
     if (type === 'string') {
       if (is.string(val)) {
@@ -968,14 +999,7 @@ async function validateGlobalConfig(
         });
       }
     } else if (type === 'integer') {
-      if (!is.number(val)) {
-        warnings.push({
-          topic: 'Configuration Error',
-          message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
-            val,
-          )} (${typeof val}).`,
-        });
-      }
+      warnings.push(...validateNumber(key, val, currentPath));
     } else if (type === 'boolean') {
       if (val !== true && val !== false) {
         warnings.push({
@@ -1006,6 +1030,17 @@ async function validateGlobalConfig(
             }
           }
         }
+        if (key === 'mergeConfidenceDatasources') {
+          const allowedValues = supportedDatasources;
+          for (const value of val as string[]) {
+            if (!allowedValues.includes(value)) {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `Invalid value \`${value}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
+              });
+            }
+          }
+        }
       } else {
         warnings.push({
           topic: 'Configuration Error',
@@ -1030,12 +1065,9 @@ async function validateGlobalConfig(
           }
         } else if (key === 'cacheTtlOverride') {
           for (const [subKey, subValue] of Object.entries(val)) {
-            if (!is.number(subValue)) {
-              warnings.push({
-                topic: 'Configuration Error',
-                message: `Invalid \`${currentPath}.${subKey}\` configuration: value must be an integer.`,
-              });
-            }
+            warnings.push(
+              ...validateNumber(key, subValue, currentPath, subKey),
+            );
           }
         } else {
           const res = validatePlainObject(val);

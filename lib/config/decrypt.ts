@@ -134,6 +134,12 @@ export async function decryptConfig(
   for (const [key, val] of Object.entries(config)) {
     if (key === 'encrypted' && is.object(val)) {
       logger.debug({ config: val }, 'Found encrypted config');
+
+      const encryptedWarning = GlobalConfig.get('encryptedWarning');
+      if (is.string(encryptedWarning)) {
+        logger.once.warn(encryptedWarning);
+      }
+
       if (privateKey) {
         for (const [eKey, eVal] of Object.entries(val)) {
           logger.debug('Trying to decrypt ' + eKey);

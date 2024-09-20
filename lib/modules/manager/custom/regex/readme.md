@@ -1,4 +1,4 @@
-With the `regex` manager you can configure Renovate so it finds dependencies that are not detected by its other built-in package managers.
+With `customManagers` using `regex` you can configure Renovate so it finds dependencies that are not detected by its other built-in package managers.
 
 Renovate supports the `ECMAScript (JavaScript)` flavor of regex.
 
@@ -52,6 +52,35 @@ RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VER
 ```
 
 You would need to capture the `currentValue` with a named capture group, like this: `ENV YARN_VERSION=(?<currentValue>.*?)\\n`.
+
+To update a version string multiple times in a line: use multiple `matchStrings`, one for each occurrence.
+
+Here is the full Renovate `.json5` config:
+
+```json5
+{
+  customManagers: [
+    {
+      customType: 'regex',
+      fileMatch: ['file-you-want-to-match'],
+      matchStrings: [
+        // for the version on the left part, ignoring the right
+        '# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s\\S+?:(?<currentValue>\\S+)\\s+\\S+:.+',
+        // for the version on the right part, ignoring the left
+        '# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s\\S+?:\\S+\\s+\\S+:(?<currentValue>\\S+)',
+      ],
+      versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}',
+    },
+  ],
+}
+```
+
+And an example how the `file-you-want-to-match` could look like:
+
+```text
+# renovate: datasource=github-tags depName=org/repo versioning=loose
+something:4.7.2    something-else:4.7.2
+```
 
 If you're looking for an online regex testing tool that supports capture groups, try [regex101.com](<https://regex101.com/?flavor=javascript&flags=g&regex=ENV%20YARN_VERSION%3D(%3F%3CcurrentValue%3E.*%3F)%5Cn&testString=FROM%20node%3A12%0AENV%20YARN_VERSION%3D1.19.1%0ARUN%20curl%20-o-%20-L%20https%3A%2F%2Fyarnpkg.com%2Finstall.sh%20%7C%20bash%20-s%20--%20--version%20%24%7BYARN_VERSION%7D>).
 You must select the `ECMAScript (JavaScript)` flavor of regex.
