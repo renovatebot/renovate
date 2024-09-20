@@ -4,7 +4,7 @@ The Mend-hosted apps ([Renovate App on GitHub](https://github.com/apps/renovate)
 This documentation page covers all non-default Renovate behavior of these Mend-hosted apps and is a supplement to the CLI documentation.
 
 Logs for all Renovate jobs by the Mend-hosted apps are available through the [Mend Developer Portal](https://developer.mend.io).
-Accessing such logs can assist users to understand the config which has been applied.
+Accessing such logs can assist users to understand the config that has been applied.
 
 <!-- prettier-ignore -->
 !!! note
