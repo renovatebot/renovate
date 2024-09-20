@@ -253,7 +253,7 @@
     "description": "`eslint-plugin-vitest` became scoped.",
     "packageRules": [
       {
-        "matchCurrentVersion": "0.5.4",
+        "matchCurrentVersion": ">=0.5.4",
         "matchDatasources": ["npm"],
         "matchPackageNames": ["eslint-plugin-vitest"],
         "replacementName": "@vitest/eslint-plugin",
