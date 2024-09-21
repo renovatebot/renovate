@@ -2410,14 +2410,14 @@ The order of rules matters, because later rules may override configuration optio
 
 The matching process for a package rule:
 
-- Each package rule can include `match...` selectors to identify dependencies and `exclude...` selectors to filter them out.
-- Each package rule must include at least one `match...` or `exclude...` selector.
-- If an aspect is both `match`ed and `exclude`d, the exclusion wins.
-- Multiple values within a single selector will be evaluated independently (they're OR-ed together).
-- Combining multiple selector will restrict the resulting matches (they're AND-ed together):
-  `matchCurrentVersion`, `matchCurrentValue`, `matchNewValue`, `matchConfidence`, `matchCurrentAge`,
-  `matchManagers`, `matchDatasources`, `matchCategories`, `matchDepTypes`, `matchUpdateTypes`,
-  `matchRepositories`, `matchBaseBranches`, `matchFileNames`
+- Each package rule must include at least one `match...` matcher to include or exclude dependencies.
+- Each matcher must contain at least one pattern and may contain a mix of positive and negative patterns.
+- A matcher includes a package if it matches at least one positive pattern, or if there are no positive patterns.
+- A matcher exludes a package if it matches any negative pattern.
+- If a package is both included and excluded, the negative pattern wins and the package is excluded.
+- A package rule matches a dependency if it is included by every matcher (they're AND-ed together).
+
+For more details on positive and negative pattern syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 Here is an example if you want to group together all packages starting with `eslint` into a single branch/PR:
 
