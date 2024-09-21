@@ -2410,11 +2410,11 @@ The order of rules matters, because later rules may override configuration optio
 
 The matching process for a package rule:
 
-- Each package rule can include `match...` matchers to identify dependencies and `exclude...` matchers to filter them out.
-- If no match/exclude matchers are defined, everything matches.
+- Each package rule can include `match...` selectors to identify dependencies and `exclude...` selectors to filter them out.
+- Each package rule must include at least one `match...` or `exclude...` selector.
 - If an aspect is both `match`ed and `exclude`d, the exclusion wins.
-- Multiple values within a single matcher will be evaluated independently (they're OR-ed together).
-- Combining multiple matchers will restrict the resulting matches (they're AND-ed together):
+- Multiple values within a single selector will be evaluated independently (they're OR-ed together).
+- Combining multiple selector will restrict the resulting matches (they're AND-ed together):
   `matchCurrentVersion`, `matchCurrentValue`, `matchNewValue`, `matchConfidence`, `matchCurrentAge`,
   `matchManagers`, `matchDatasources`, `matchCategories`, `matchDepTypes`, `matchUpdateTypes`,
   `matchRepositories`, `matchBaseBranches`, `matchFileNames`
