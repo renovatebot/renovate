@@ -392,7 +392,7 @@ export class CrateDatasource extends Datasource {
       { registryUrl, packageName }: PostprocessReleaseConfig,
       { version }: Release,
     ) => `postprocessRelease:${registryUrl}:${packageName}:${version}`,
-    ttlMinutes: 24 * 60,
+    ttlMinutes: 7 * 24 * 60,
     cacheable: ({ registryUrl }: PostprocessReleaseConfig, _: Release) =>
       registryUrl === 'https://crates.io',
   })
