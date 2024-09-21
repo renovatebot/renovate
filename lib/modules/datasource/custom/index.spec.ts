@@ -3,8 +3,8 @@ import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { fs } from '../../../../test/util';
-import { CustomDatasource } from './index';
 import { logger } from '../../../logger';
+import { CustomDatasource } from './index';
 
 jest.mock('../../../util/fs');
 
