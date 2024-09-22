@@ -273,7 +273,7 @@ describe('workers/repository/update/branch/reuse', () => {
       expect(result.rebaseWhen).toBe('behind-base-branch');
     });
 
-    it('converts rebaseWhen=automerging to behind-base-branch', async () => {
+    it('converts rebaseWhen=automerging to behind-base-branch if keep-updated', async () => {
       config.rebaseWhen = 'automerging';
       config.keepUpdatedLabel = 'keep-updated';
       config.automerge = false;
