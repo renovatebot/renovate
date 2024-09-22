@@ -2410,12 +2410,11 @@ The order of rules matters, because later rules may override configuration optio
 
 The matching process for a package rule:
 
-- Each package rule must include at least one `match...` matcher to include or exclude dependencies.
-- Each matcher must contain at least one pattern and may contain a mix of positive and negative patterns.
-- A matcher includes a package if it matches at least one positive pattern, or if there are no positive patterns.
-- A matcher exludes a package if it matches any negative pattern.
-- If a package is both included and excluded, the negative pattern wins and the package is excluded.
-- A package rule matches a dependency if it is included by every matcher (they're AND-ed together).
+- Each package rule must include at least one `match...` matcher.
+- If multiple matchers are included in one package rule, all of them must match.
+- Each matcher must contain at least one pattern. Some matchers allow both positive and negative patterns.
+- If a matcher includes any positive patterns, it must match at least one of them.
+- A matcher returns `false` if it matches _any_ negative pattern, even if a positive match also occurred.
 
 For more details on positive and negative pattern syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
