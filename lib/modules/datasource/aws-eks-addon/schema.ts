@@ -1,10 +1,11 @@
 import { z } from 'zod';
 
-export const EKSAddonsFilterSchema = z.object({
+export const EksAddonsFilterSchema = z.object({
   kubernetesVersion: z.string().min(1),
   addonName: z.string().min(1),
   region: z.string().optional(),
   profile: z.string().optional(),
 });
 
-export type EKSAddonsFilter = z.infer<typeof EKSAddonsFilterSchema>;
+export type EksAddonsFilter = z.infer<typeof EKSAddonsFilterSchema>;
+export EksAddonsFilterJson = Json.pipe(EksAddonsFilterSchema);
