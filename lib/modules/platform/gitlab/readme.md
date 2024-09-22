@@ -7,7 +7,7 @@ You can authenticate Renovate to GitLab, with a [Personal Access Token](https://
 To start, create either:
 
 - a [Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token) for the bot account
-- or a [Project Access Token](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html#create-a-project-access-token) to the project Renovate will be working on
+- or a [Project Access Token](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html#create-a-project-access-token) if Renovate only needs to check/update one project (usually not recommended as it requires configuring Renovate and tokens once per project)
 - or a [Group Access Token](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html#create-a-group-access-token-using-ui) to the group Renovate will be working on
 
 The bot account or token must have at least the Developer role in order to [create issues and merge requests](https://docs.gitlab.com/ee/user/permissions.html#project-members-permissions).
