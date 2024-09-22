@@ -186,6 +186,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'rust',
     versioning: semverVersioningId,
   },
+  uv: {
+    datasource: 'pypi',
+    packageName: 'uv',
+    versioning: pep440VersioningId,
+  },
   yarn: {
     datasource: 'npm',
     packageName: 'yarn',

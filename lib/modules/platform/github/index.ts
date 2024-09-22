@@ -1944,13 +1944,19 @@ export function massageMarkdown(input: string): string {
     return smartTruncate(input, maxBodyLength());
   }
   const massagedInput = massageMarkdownLinks(input)
-    // to be safe, replace all github.com links with renovatebot redirector
+    // to be safe, replace all github.com links with redirect.github.com
     .replace(
       regEx(/href="https?:\/\/github.com\//g),
-      'href="https://togithub.com/',
+      'href="https://redirect.github.com/',
     )
-    .replace(regEx(/]\(https:\/\/github\.com\//g), '](https://togithub.com/')
-    .replace(regEx(/]: https:\/\/github\.com\//g), ']: https://togithub.com/')
+    .replace(
+      regEx(/]\(https:\/\/github\.com\//g),
+      '](https://redirect.github.com/',
+    )
+    .replace(
+      regEx(/]: https:\/\/github\.com\//g),
+      ']: https://redirect.github.com/',
+    )
     .replace('> ℹ **Note**\n> \n', '> [!NOTE]\n')
     .replace('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
     .replace('> ⚠️ **Warning**\n> \n', '> [!WARNING]\n')

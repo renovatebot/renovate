@@ -4,6 +4,7 @@ import { reset as memCacheReset } from '../../../util/cache/memory';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { Platform, PlatformResult, RepoParams } from '../types';
+import type { PrTask } from './schema';
 
 jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
@@ -1435,6 +1436,157 @@ describe('modules/platform/bitbucket/index', () => {
           },
         }),
       ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
+    });
+
+    it('lists PR tasks and resolves the unresolved tasks', async () => {
+      const prTask1: PrTask = {
+        id: 1,
+        state: 'UNRESOLVED',
+        content: {
+          raw: 'task 1',
+        },
+      };
+      const resolvedPrTask1: Partial<PrTask> = {
+        state: 'RESOLVED',
+        content: {
+          raw: 'task 1',
+        },
+      };
+      const prTask2: PrTask = {
+        id: 2,
+        state: 'UNRESOLVED',
+        content: {
+          raw: 'task 2',
+        },
+      };
+      const resolvedPrTask2: Partial<PrTask> = {
+        state: 'RESOLVED',
+        content: {
+          raw: 'task 2',
+        },
+      };
+      const prTask3: PrTask = {
+        id: 3,
+        state: 'RESOLVED',
+        content: {
+          raw: 'task 3',
+        },
+      };
+      const scope = await initRepoMock();
+      scope
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 })
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests/5/tasks')
+        .query({
+          pagelen: 100,
+        })
+        .reply(200, { values: [prTask1, prTask2, prTask3] });
+      scope
+        .put(
+          '/2.0/repositories/some/repo/pullrequests/5/tasks/1',
+          resolvedPrTask1,
+        )
+        .reply(200);
+      scope
+        .put(
+          '/2.0/repositories/some/repo/pullrequests/5/tasks/2',
+          resolvedPrTask2,
+        )
+        .reply(200);
+      const pr = await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformPrOptions: {
+          bbUseDefaultReviewers: false,
+          bbAutoResolvePrTasks: true,
+        },
+      });
+      expect(pr?.number).toBe(5);
+    });
+
+    it('swallows list PR error and PR creation succeeds', async () => {
+      const scope = await initRepoMock();
+      scope
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 })
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests/5/tasks')
+        .query({
+          pagelen: 100,
+        })
+        .reply(500);
+      const pr = await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformPrOptions: {
+          bbUseDefaultReviewers: false,
+          bbAutoResolvePrTasks: true,
+        },
+      });
+      expect(pr?.number).toBe(5);
+    });
+
+    it('swallows resolve PR task error and PR creation succeeds', async () => {
+      const prTask1: PrTask = {
+        id: 1,
+        state: 'UNRESOLVED',
+        content: {
+          raw: 'task 1',
+        },
+      };
+      const resolvedPrTask1: Partial<PrTask> = {
+        state: 'RESOLVED',
+        content: {
+          raw: 'task 1',
+        },
+      };
+      const scope = await initRepoMock();
+      scope
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 })
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests/5/tasks')
+        .query({
+          pagelen: 100,
+        })
+        .reply(200, { values: [prTask1] });
+      scope
+        .put(
+          '/2.0/repositories/some/repo/pullrequests/5/tasks/1',
+          resolvedPrTask1,
+        )
+        .reply(500);
+      const pr = await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformPrOptions: {
+          bbUseDefaultReviewers: false,
+          bbAutoResolvePrTasks: true,
+        },
+      });
+      expect(pr?.number).toBe(5);
     });
   });
 

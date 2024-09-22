@@ -159,7 +159,7 @@ export function extractPackageFile(
   let parsedContent: ParsedContent;
   try {
     // TODO: use schema (#9610)
-    parsedContent = parseSingleYaml(content, { json: true });
+    parsedContent = parseSingleYaml(content);
   } catch (err) {
     logger.debug(
       { filename: packageFile, err },

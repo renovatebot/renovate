@@ -500,6 +500,7 @@ describe('modules/datasource/maven/index', () => {
         { version: '1.0.5-SNAPSHOT' },
         { version: '2.0.0' },
       ],
+      isPrivate: true,
     });
     expect(googleAuth).toHaveBeenCalledTimes(5);
   });
@@ -552,6 +553,7 @@ describe('modules/datasource/maven/index', () => {
         { version: '1.0.5-SNAPSHOT' },
         { version: '2.0.0' },
       ],
+      isPrivate: true,
     });
     expect(googleAuth).toHaveBeenCalledTimes(5);
   });
