@@ -337,6 +337,10 @@ You can also use the special `"$default"` string to denote the repository's defa
     Do _not_ use the `baseBranches` config option when you've set a `forkToken`.
     You may need a `forkToken` when you're using the Forking Renovate app.
 
+## bbAutoResolvePrTasks
+
+Configuring this to `true` means that Renovate will mark all PR Tasks as complete.
+
 ## bbUseDefaultReviewers
 
 Configuring this to `true` means that Renovate will detect and apply the default reviewers rules to PRs (Bitbucket only).
@@ -1113,6 +1117,8 @@ You can choose from:
 - `none` (default) do not list any CVEs
 - `unresolved` list CVEs that have no fixes
 - `all` list all CVEs
+
+You will only get OSV-based vulnerability alerts for direct dependencies.
 
 This feature is independent of the `osvVulnerabilityAlerts` option.
 
@@ -2101,7 +2107,7 @@ In the case that a user is automatically added as reviewer (such as Renovate App
 
 ## ignoreScripts
 
-Applicable for npm, Composer and Copier only for now. Set this to `true` if running scripts causes problems.
+Applicable for npm, bun, Composer and Copier only for now. Set this to `true` if running scripts causes problems.
 
 ## ignoreTests
 
@@ -2415,7 +2421,7 @@ The matching process for a package rule:
 - Combining multiple matchers will restrict the resulting matches (they're AND-ed together):
   `matchCurrentVersion`, `matchCurrentValue`, `matchNewValue`, `matchConfidence`, `matchCurrentAge`,
   `matchManagers`, `matchDatasources`, `matchCategories`, `matchDepTypes`, `matchUpdateTypes`,
-  `matchRepositories`/`excludeRepositories`, `matchBaseBranches`, `matchFileNames`
+  `matchRepositories`, `matchBaseBranches`, `matchFileNames`
 
 Here is an example if you want to group together all packages starting with `eslint` into a single branch/PR:
 
@@ -2591,7 +2597,7 @@ Use this field to restrict rules to a particular branch. e.g.
   "packageRules": [
     {
       "matchBaseBranches": ["main"],
-      "excludePackagePatterns": ["^eslint"],
+      "matchPackageNames": ["!/^eslint/"],
       "enabled": false
     }
   ]
@@ -2605,7 +2611,7 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
   "packageRules": [
     {
       "matchBaseBranches": ["/^release/.*/"],
-      "excludePackagePatterns": ["^eslint"],
+      "matchPackageNames": ["!/^eslint/"],
       "enabled": false
     }
   ]

@@ -37,6 +37,14 @@ describe('workers/repository/reconfigure/index', () => {
     GlobalConfig.reset();
   });
 
+  it('no effect when running with platform=local', async () => {
+    GlobalConfig.set({ platform: 'local' });
+    await validateReconfigureBranch(config);
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Not attempting to reconfigure when running with local platform',
+    );
+  });
+
   it('no effect on repo with no reconfigure branch', async () => {
     scm.branchExists.mockResolvedValueOnce(false);
     await validateReconfigureBranch(config);

@@ -55,6 +55,10 @@ function depStringHandler(
     datasource: PypiDatasource.id,
   };
 
+  if (currentValue?.startsWith('==')) {
+    dep.currentVersion = currentValue.replace(regEx(/^==\s*/), '');
+  }
+
   return { ...ctx, deps: [...ctx.deps, dep] };
 }
 

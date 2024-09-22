@@ -191,6 +191,7 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`
       "groupName": "angular packages",
       "matchPackageNames": [
         "/^(@angular|typescript)/",
+        "!foo",
       ],
     },
     {

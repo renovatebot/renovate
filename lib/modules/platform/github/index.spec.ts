@@ -3820,10 +3820,28 @@ describe('modules/platform/github/index', () => {
               manifest_path: 'bar/foo',
             },
           },
+          {
+            security_advisory: {
+              description: 'description',
+              identifiers: [{ type: 'type', value: 'value' }],
+              references: [],
+            },
+            security_vulnerability: {
+              package: {
+                ecosystem: 'npm',
+                name: 'foo',
+              },
+              vulnerable_version_range: '0.0.2',
+              first_patched_version: null,
+            },
+            dependency: {
+              manifest_path: 'bar/foo',
+            },
+          },
         ]);
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
-      expect(res).toHaveLength(1);
+      expect(res).toHaveLength(2);
     });
 
     it('returns empty if disabled', async () => {

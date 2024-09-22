@@ -8,6 +8,10 @@ Please give us enough time to investigate the bug before you report it anywhere 
 
 Please do not create GitHub issues for security-related doubts or problems.
 
+## Code of Conduct
+
+Please follow the rules in our [Code of Conduct](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md).
+
 ## Support
 
 If you want help with your Renovate configuration, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and open a new "config help" discussion post.

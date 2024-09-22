@@ -87,7 +87,7 @@ const staticGroups = {
     packageRules: [
       {
         groupName: 'flyway',
-        matchPackageNames: ['org.flywaydb:*'],
+        matchPackageNames: ['org.flywaydb:*', 'org.flywaydb.flyway:*'],
       },
     ],
   },
@@ -340,7 +340,7 @@ const staticGroups = {
         commitMessageTopic: 'Node.js',
         matchDatasources: ['docker'],
         matchPackageNames: [
-          '/(^/)node$/', // node or ends with "/node, except those below"
+          '/(?:^|/)node$/', // node or ends with "/node, except those below"
           '!calico/node',
           '!docker.io/calico/node',
           '!kindest/node',
