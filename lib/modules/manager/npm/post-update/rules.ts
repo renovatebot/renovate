@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../../../logger';
 import * as hostRules from '../../../../util/host-rules';
 import { regEx } from '../../../../util/regex';
 import { toBase64 } from '../../../../util/string';
 import { isHttpUrl } from '../../../../util/url';
 import type { YarnRcYmlFile } from './types';
-import { logger } from '../../../../logger';
 
 export interface HostRulesResult {
   additionalNpmrcContent: string[];
