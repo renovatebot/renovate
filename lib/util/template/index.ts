@@ -156,6 +156,7 @@ export const allowedFields = {
   currentValue: 'The extracted current value of the dependency being updated',
   currentVersion:
     'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
+  currentVersionTimestamp: 'The timestamp of the current version',
   currentDigest: 'The extracted current digest of the dependency being updated',
   currentDigestShort:
     'The extracted current short digest of the dependency being updated',
@@ -176,6 +177,7 @@ export const allowedFields = {
   isGroup: 'true if the upgrade is part of a group',
   isLockfileUpdate: 'true if the branch is a lock file update',
   isMajor: 'true if the upgrade is major',
+  isMinor: 'true if the upgrade is minor',
   isPatch: 'true if the upgrade is a patch upgrade',
   isPin: 'true if the upgrade is pinning dependencies',
   isPinDigest: 'true if the upgrade is pinning digests',
@@ -218,6 +220,7 @@ export const allowedFields = {
   references: 'A list of references for the upgrade',
   releases: 'An array of releases for an upgrade',
   releaseNotes: 'A ChangeLogNotes object for the release',
+  releaseTimestamp: 'The timestamp of the release',
   repository: 'The current repository',
   semanticPrefix: 'The fully generated semantic prefix for commit messages',
   sourceRepo: 'The repository in the sourceUrl, if present',

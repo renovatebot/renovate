@@ -69,7 +69,7 @@ export function extractResource(base: string): PackageDependency | null {
 
 export function extractImage(
   image: Image,
-  aliases?: Record<string, string> | undefined,
+  aliases?: Record<string, string>,
 ): PackageDependency | null {
   if (!image.name) {
     return null;
@@ -141,7 +141,7 @@ export function extractImage(
 
 export function extractHelmChart(
   helmChart: HelmChart,
-  aliases?: Record<string, string> | undefined,
+  aliases?: Record<string, string>,
 ): PackageDependency | null {
   if (!helmChart.name) {
     return null;
@@ -178,7 +178,7 @@ export function parseKustomize(
   let pkg: Kustomize | null = null;
   try {
     // TODO: use schema (#9610)
-    pkg = parseSingleYaml(content, { json: true });
+    pkg = parseSingleYaml(content);
   } catch /* istanbul ignore next */ {
     logger.debug({ packageFile }, 'Error parsing kustomize file');
     return null;

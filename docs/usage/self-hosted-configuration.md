@@ -1084,6 +1084,10 @@ For TLS/SSL-enabled connections, use rediss prefix
 
 Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
 
+Renovate also supports connecting to Redis clusters as well. In order to connect to a cluster, provide the connection string using the `redis+cluster` or `rediss+cluster` schema as appropriate.
+
+Example URL structure: `redis+cluster://[[username]:[password]]@redis.cluster.local:6379/0`
+
 ## reportPath
 
 `reportPath` describes the location where the report is written to.
@@ -1168,10 +1172,11 @@ If set, Renovate will use this string as the `endpoint` when creating the AWS S3
 If set, Renovate will enable `forcePathStyle` when creating the AWS S3 client instance.
 
 For example:
-| `s3PathStyle` | Path |
+
+| `s3PathStyle` | Path                               |
 | ------------- | ---------------------------------- |
-| `off` | `https://bucket.s3.amazonaws.com/` |
-| `on` | `https://s3.amazonaws.com/bucket/` |
+| `off`         | `https://bucket.s3.amazonaws.com/` |
+| `on`          | `https://s3.amazonaws.com/bucket/` |
 
 Read the [AWS S3 docs, Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html) to learn more about path-style URLs.
 

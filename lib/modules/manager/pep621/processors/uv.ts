@@ -5,13 +5,14 @@ import { logger } from '../../../../logger';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import { Result } from '../../../../util/result';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types';
-import { type PyProject } from '../schema';
+import { type PyProject, UvLockfileSchema } from '../schema';
 import { depTypes, parseDependencyList } from '../utils';
 import type { PyProjectProcessor } from './types';
 
@@ -31,14 +32,59 @@ export class UvProcessor implements PyProjectProcessor {
       ),
     );
 
+    // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
+    // Skip sources that are either not yet handled by Renovate (e.g. git), or do not make sense to handle (e.g. path).
+    if (uv.sources) {
+      for (const dep of deps) {
+        if (!dep.depName) {
+          continue;
+        }
+
+        const depSource = uv.sources[dep.depName];
+        if (depSource) {
+          if (depSource.git) {
+            dep.skipReason = 'git-dependency';
+          } else if (depSource.url) {
+            dep.skipReason = 'unsupported-url';
+          } else if (depSource.path) {
+            dep.skipReason = 'path-dependency';
+          } else if (depSource.workspace) {
+            dep.skipReason = 'inherited-dependency';
+          } else {
+            dep.skipReason = 'invalid-dependency-specification';
+          }
+        }
+      }
+    }
+
     return deps;
   }
 
-  extractLockedVersions(
+  async extractLockedVersions(
     project: PyProject,
     deps: PackageDependency[],
     packageFile: string,
   ): Promise<PackageDependency[]> {
+    const lockFileName = getSiblingFileName(packageFile, 'uv.lock');
+    const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+    if (lockFileContent) {
+      const { val: lockFileMapping, err } = Result.parse(
+        lockFileContent,
+        UvLockfileSchema,
+      ).unwrap();
+
+      if (err) {
+        logger.debug({ packageFile, err }, `Error parsing uv lock file`);
+      } else {
+        for (const dep of deps) {
+          const packageName = dep.packageName;
+          if (packageName && packageName in lockFileMapping) {
+            dep.lockedVersion = lockFileMapping[packageName];
+          }
+        }
+      }
+    }
+
     return Promise.resolve(deps);
   }
 

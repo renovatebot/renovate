@@ -4,6 +4,7 @@ import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
 import { ZodError } from 'zod';
+import { regEx } from '../util/regex';
 import { redactedFields, sanitize } from '../util/sanitize';
 import type { BunyanRecord, BunyanStream } from './types';
 
@@ -214,7 +215,12 @@ export function sanitizeValue(
       if (!val) {
         curValue = val;
       } else if (redactedFields.includes(key)) {
-        curValue = '***********';
+        // Do not mask/sanitize secrets templates
+        if (is.string(val) && regEx(/^{{\s*secrets\..*}}$/).test(val)) {
+          curValue = val;
+        } else {
+          curValue = '***********';
+        }
       } else if (contentFields.includes(key)) {
         curValue = '[content]';
       } else if (key === 'secrets') {

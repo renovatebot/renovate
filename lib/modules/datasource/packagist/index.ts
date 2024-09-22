@@ -86,9 +86,9 @@ export class PackagistDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${PackagistDatasource.id}-public-files`,
+    namespace: `datasource-${PackagistDatasource.id}`,
     key: (regUrl: string, regFile: RegistryFile) =>
-      PackagistDatasource.getPackagistFileUrl(regUrl, regFile),
+      `getPackagistFile:${PackagistDatasource.getPackagistFileUrl(regUrl, regFile)}`,
     cacheable: (regUrl: string) =>
       !PackagistDatasource.isPrivatePackage(regUrl),
     ttlMinutes: 1440,
@@ -125,9 +125,9 @@ export class PackagistDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${PackagistDatasource.id}-org`,
+    namespace: `datasource-${PackagistDatasource.id}`,
     key: (registryUrl: string, metadataUrl: string, packageName: string) =>
-      `${registryUrl}:${metadataUrl}:${packageName}`,
+      `packagistV2Lookup:${registryUrl}:${metadataUrl}:${packageName}`,
     ttlMinutes: 10,
   })
   async packagistV2Lookup(

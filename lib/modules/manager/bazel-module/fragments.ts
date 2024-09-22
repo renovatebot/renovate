@@ -21,6 +21,11 @@ export const ArrayFragmentSchema = z.object({
   items: LooseArray(PrimitiveFragmentsSchema),
   isComplete: z.boolean(),
 });
+export const StringArrayFragmentSchema = z.object({
+  type: z.literal('array'),
+  items: LooseArray(StringFragmentSchema),
+  isComplete: z.boolean(),
+});
 const ValueFragmentsSchema = z.discriminatedUnion('type', [
   StringFragmentSchema,
   BooleanFragmentSchema,
