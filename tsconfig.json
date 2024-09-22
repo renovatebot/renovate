@@ -20,7 +20,6 @@
     "types": ["node", "jest-extended", "expect-more-jest"],
     "allowJs": true,
     "checkJs": true,
-    "importsNotUsedAsValues": "error",
     "ignoreDeprecations": "5.0"
   },
   "include": ["**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs"],
@@ -31,7 +30,8 @@
     "**/__mocks__/*",
     "coverage",
     "config.js",
-    "tmp"
+    "tmp",
+    "tools/mkdocs/site"
   ],
   "ts-node": {
     "transpileOnly": true,

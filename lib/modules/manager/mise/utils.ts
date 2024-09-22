@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
-import { MiseFileSchema, MiseFileSchemaToml } from './schema';
+import type { MiseFileSchema } from './schema';
+import { MiseFileSchemaToml } from './schema';
 
 export function parseTomlFile(
   content: string,

@@ -1,12 +1,6 @@
 import { mock } from 'jest-mock-extended';
-import {
-  RenovateConfig,
-  fs,
-  git,
-  mocked,
-  platform,
-  scm,
-} from '../../../../../test/util';
+import type { RenovateConfig } from '../../../../../test/util';
+import { fs, git, mocked, platform, scm } from '../../../../../test/util';
 import { configFileNames } from '../../../../config/app-strings';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';

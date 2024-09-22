@@ -1,3 +1,4 @@
+import type { SpawnSyncReturns } from 'child_process';
 import { Command } from 'commander';
 import fs from 'fs-extra';
 import { logger } from '../lib/logger';
@@ -10,16 +11,49 @@ process.on('unhandledRejection', (err) => {
   process.exit(-1);
 });
 
-const program = new Command('pnpm build:mkdocs')
-  .description('Build mkdocs')
-  .option('--build <boolean>', 'build docs from source', (s) =>
-    s ? s !== 'false' : undefined,
-  );
+const program = new Command('pnpm mkdocs').description('Run mkdocs');
 
-void (async () => {
-  await program.parseAsync();
-  const opts = program.opts();
-  logger.info('validating docs');
+program
+  .command('build', { isDefault: true })
+  .description('Build mkdocs')
+  .option('--no-build', 'do not build docs from source')
+  .option('--no-strict', 'do not build in strict mode')
+  .action(async (opts) => {
+    await prepareDocs(opts);
+    logger.info('* running mkdocs build');
+    const args = ['run', 'mkdocs', 'build'];
+    if (opts.strict) {
+      args.push('--strict');
+    }
+    const res = exec('pdm', args, {
+      cwd: 'tools/mkdocs',
+      stdio: 'inherit',
+    });
+    checkResult(res);
+  });
+
+program
+  .command('serve')
+  .description('serve mkdocs')
+  .option('--no-build', 'do not build docs from source')
+  .option('--no-strict', 'do not build in strict mode')
+  .action(async (opts) => {
+    await prepareDocs(opts);
+    logger.info('serving docs');
+    logger.info('* running mkdocs serve');
+    const args = ['run', 'mkdocs', 'serve'];
+    if (opts.strict) {
+      args.push('--strict');
+    }
+    const res = exec('pdm', args, {
+      cwd: 'tools/mkdocs',
+      stdio: 'inherit',
+    });
+    checkResult(res);
+  });
+
+async function prepareDocs(opts: any): Promise<void> {
+  logger.info('Building docs');
   if (opts.build) {
     logger.info('* generate docs');
     await generateDocs('tools/mkdocs', false);
@@ -27,10 +61,9 @@ void (async () => {
     logger.info('* using prebuild docs from build step');
     await fs.copy('tmp/docs', 'tools/mkdocs/docs');
   }
-  logger.info('* running mkdocs build');
-  const res = exec('pdm', ['run', 'mkdocs', 'build'], {
-    cwd: 'tools/mkdocs',
-  });
+}
+
+function checkResult(res: SpawnSyncReturns<string>): void {
   if (res.signal) {
     logger.error(`Signal received: ${res.signal}`);
     process.exit(-1);
@@ -40,4 +73,6 @@ void (async () => {
   } else {
     logger.debug(`Build completed:\n${res.stdout || res.stderr}`);
   }
-})();
+}
+
+void program.parseAsync();

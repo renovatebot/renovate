@@ -53,9 +53,9 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
 
   @cache({
     ttlMinutes: 1440,
-    namespace: 'datasource-github-releases',
+    namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
     key: (release: GithubRestRelease, digest: string) =>
-      `${release.html_url}:${digest}`,
+      `findDigestFile:${release.html_url}:${digest}`,
   })
   async findDigestFile(
     release: GithubRestRelease,
@@ -83,9 +83,9 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
 
   @cache({
     ttlMinutes: 1440,
-    namespace: 'datasource-github-releases',
+    namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
     key: (asset: GithubRestAsset, algorithm: string) =>
-      `${asset.browser_download_url}:${algorithm}:assetDigest`,
+      `downloadAndDigest:${asset.browser_download_url}:${algorithm}`,
   })
   async downloadAndDigest(
     asset: GithubRestAsset,

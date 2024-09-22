@@ -10,10 +10,8 @@ import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider, SpanStatusCode } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import {
-  Instrumentation,
-  registerInstrumentations,
-} from '@opentelemetry/instrumentation';
+import type { Instrumentation } from '@opentelemetry/instrumentation';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { Resource } from '@opentelemetry/resources';
@@ -23,12 +21,17 @@ import {
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import {
+  ATTR_SERVICE_NAME,
+  ATTR_SERVICE_VERSION,
+} from '@opentelemetry/semantic-conventions';
+import { ATTR_SERVICE_NAMESPACE } from '@opentelemetry/semantic-conventions/incubating';
 import { pkg } from '../expose.cjs';
 import {
   isTraceDebuggingEnabled,
   isTraceSendingEnabled,
   isTracingEnabled,
+  massageThrowable,
 } from './utils';
 
 let instrumentations: Instrumentation[] = [];
@@ -43,12 +46,10 @@ export function init(): void {
   const traceProvider = new NodeTracerProvider({
     resource: new Resource({
       // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value
-      [SemanticResourceAttributes.SERVICE_NAME]:
-        process.env.OTEL_SERVICE_NAME ?? 'renovate',
-      [SemanticResourceAttributes.SERVICE_NAMESPACE]:
+      [ATTR_SERVICE_NAME]: process.env.OTEL_SERVICE_NAME ?? 'renovate',
+      [ATTR_SERVICE_NAMESPACE]:
         process.env.OTEL_SERVICE_NAMESPACE ?? 'renovatebot.com',
-      [SemanticResourceAttributes.SERVICE_VERSION]:
-        process.env.OTEL_SERVICE_VERSION ?? pkg.version,
+      [ATTR_SERVICE_VERSION]: process.env.OTEL_SERVICE_VERSION ?? pkg.version,
     }),
   });
 
@@ -125,16 +126,16 @@ function getTracer(): Tracer {
   return getTracerProvider().getTracer('renovate');
 }
 
-export function instrument<F extends (span: Span) => ReturnType<F>>(
+export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
 ): ReturnType<F>;
-export function instrument<F extends (span: Span) => ReturnType<F>>(
+export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
   options: SpanOptions,
 ): ReturnType<F>;
-export function instrument<F extends (span: Span) => ReturnType<F>>(
+export function instrument<F extends () => ReturnType<F>>(
   name: string,
   fn: F,
   options: SpanOptions = {},
@@ -142,13 +143,14 @@ export function instrument<F extends (span: Span) => ReturnType<F>>(
 ): ReturnType<F> {
   return getTracer().startActiveSpan(name, options, context, (span: Span) => {
     try {
-      const ret = fn(span);
+      const ret = fn();
       if (ret instanceof Promise) {
         return ret
           .catch((e) => {
+            span.recordException(e);
             span.setStatus({
               code: SpanStatusCode.ERROR,
-              message: e,
+              message: massageThrowable(e),
             });
             throw e;
           })
@@ -157,9 +159,10 @@ export function instrument<F extends (span: Span) => ReturnType<F>>(
       span.end();
       return ret;
     } catch (e) {
+      span.recordException(e);
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e,
+        message: massageThrowable(e),
       });
       span.end();
       throw e;

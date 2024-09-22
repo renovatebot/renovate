@@ -6,7 +6,8 @@ import {
 } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
 import { DateTime } from 'luxon';
-import { ReleaseResult, getPkgReleases } from '..';
+import type { ReleaseResult } from '..';
+import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
@@ -90,6 +91,7 @@ describe('modules/datasource/maven/s3', () => {
           { version: '1.0.2' },
           { version: '1.0.3', releaseTimestamp: '2020-01-01T00:00:00.000Z' },
         ],
+        isPrivate: true,
       });
     });
 

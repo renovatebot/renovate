@@ -279,12 +279,12 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_S3_PATH_STYLE: 'true',
       };
       const config = await env.getConfig(envParam);
-      expect(config.dockerMaxPages).toBeUndefined();
       expect(config).toMatchObject({
         mergeConfidenceEndpoint: 'some-url',
         mergeConfidenceDatasources: ['docker'],
         autodiscoverRepoSort: 'alpha',
         autodiscoverRepoOrder: 'desc',
+        dockerMaxPages: 10,
         deleteConfigFile: true,
         s3Endpoint: 'endpoint',
         s3PathStyle: true,
