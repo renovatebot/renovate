@@ -273,6 +273,17 @@ describe('workers/repository/update/branch/reuse', () => {
       expect(result.rebaseWhen).toBe('behind-base-branch');
     });
 
+    it('converts rebaseWhen=automerging to behind-base-branch', async () => {
+      config.rebaseWhen = 'automerging';
+      config.keepUpdatedLabel = 'keep-updated';
+      config.automerge = false;
+      scm.branchExists.mockResolvedValueOnce(true);
+      scm.isBranchBehindBase.mockResolvedValueOnce(false);
+      const result = await shouldReuseExistingBranch(config);
+      expect(config.rebaseWhen).toBe('automerging');
+      expect(result.rebaseWhen).toBe('behind-base-branch');
+    });
+
     it('converts rebaseWhen=automerging to never', async () => {
       config.rebaseWhen = 'automerging';
       scm.branchExists.mockResolvedValueOnce(true);
@@ -281,5 +292,8 @@ describe('workers/repository/update/branch/reuse', () => {
       expect(config.rebaseWhen).toBe('automerging');
       expect(result.rebaseWhen).toBe('never');
     });
+
+
+
   });
 });
