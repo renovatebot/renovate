@@ -483,5 +483,32 @@ describe('modules/manager/helmfile/extract', () => {
         managerData: { needKustomize: true },
       });
     });
+
+    it('makes sure url joiner works correctly', async () => {
+      const content = codeBlock`
+      releases:
+        - name: argocd
+          version: 0.4.2
+          chart: oci://gitlab.example.com:5000/group/subgroup
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.4.2',
+            datasource: 'docker',
+            depName: 'subgroup',
+            packageName: 'gitlab.example.com:5000/group/subgroup',
+            registryUrls: [],
+          },
+        ],
+      });
+    });
   });
 });

@@ -372,6 +372,51 @@ export async function lookupUpdates(
       );
       let shrinkedViaVulnerability = false;
       if (config.isVulnerabilityAlert) {
+        if (config.vulnerabilityFixVersion) {
+          res.vulnerabilityFixVersion = config.vulnerabilityFixVersion;
+          if (versioning.isValid(config.vulnerabilityFixVersion)) {
+            let fixedFilteredReleases;
+            if (versioning.isVersion(config.vulnerabilityFixVersion)) {
+              // Retain only releases greater than or equal to the fix version
+              fixedFilteredReleases = filteredReleases.filter(
+                (release) =>
+                  !versioning.isGreaterThan(
+                    config.vulnerabilityFixVersion!,
+                    release.version,
+                  ),
+              );
+            } else {
+              // Retain only releases which max the fix constraint
+              fixedFilteredReleases = filteredReleases.filter((release) =>
+                versioning.matches(
+                  release.version,
+                  config.vulnerabilityFixVersion!,
+                ),
+              );
+            }
+            // Warn if this filtering results caused zero releases
+            if (fixedFilteredReleases.length === 0 && filteredReleases.length) {
+              logger.warn(
+                {
+                  releases: filteredReleases,
+                  vulnerabilityFixVersion: config.vulnerabilityFixVersion,
+                  packageName: config.packageName,
+                },
+                'No releases satisfy vulnerabilityFixVersion',
+              );
+            }
+            // Use the additionally filtered releases
+            filteredReleases = fixedFilteredReleases;
+          } else {
+            logger.warn(
+              {
+                vulnerabilityFixVersion: config.vulnerabilityFixVersion,
+                packageName: config.packageName,
+              },
+              'vulnerabilityFixVersion is not valid',
+            );
+          }
+        }
         filteredReleases = filteredReleases.slice(0, 1);
         shrinkedViaVulnerability = true;
         logger.debug(

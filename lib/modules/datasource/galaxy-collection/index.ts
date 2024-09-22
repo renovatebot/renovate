@@ -39,7 +39,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${GalaxyCollectionDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
+    key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
   })
   async getReleases({
     packageName,
@@ -119,9 +119,9 @@ export class GalaxyCollectionDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${GalaxyCollectionDatasource.id}-detailed-version`,
-    key: (_packageName: string, _versionsUrl: string, basicRelease: Release) =>
-      basicRelease.version,
+    namespace: `datasource-${GalaxyCollectionDatasource.id}`,
+    key: (_packageName: string, versionsUrl: string, basicRelease: Release) =>
+      `getVersionDetails:${versionsUrl}:${basicRelease.version}`,
     ttlMinutes: 10080, // 1 week
   })
   async getVersionDetails(

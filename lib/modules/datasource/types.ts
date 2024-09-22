@@ -90,6 +90,11 @@ export interface ReleaseResult {
   packageScope?: string;
 }
 
+export interface PostprocessReleaseConfig {
+  packageName: string;
+  registryUrl: string | null;
+}
+
 export type RegistryStrategy = 'first' | 'hunt' | 'merge';
 export type SourceUrlSupport = 'package' | 'release' | 'none';
 export interface DatasourceApi extends ModuleApi {
@@ -137,4 +142,24 @@ export interface DatasourceApi extends ModuleApi {
    * false: caching is not performed, or performed within the datasource implementation
    */
   caching?: boolean | undefined;
+
+  /**
+   * When the candidate for update is formed, this method could be called
+   * to fetch additional information such as `releaseTimestamp`.
+   *
+   * Also, the release could be checked (and potentially rejected)
+   * via some datasource-specific external call.
+   *
+   * In case of reject, the next candidate release is selected,
+   * and `postprocessRelease` is called again.
+   *
+   * Rejection must happen only when the release will lead to downstream error,
+   * e.g. the release turned out to be yanked or doesn't exist for some reason.
+   *
+   * In other cases, the original `Release` parameter should be returned.
+   */
+  postprocessRelease?(
+    config: PostprocessReleaseConfig,
+    release: Release,
+  ): Promise<Release | null>;
 }

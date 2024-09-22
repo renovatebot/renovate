@@ -72,9 +72,7 @@ export function extractPackageFile(
   const endpoint = GlobalConfig.get('endpoint');
   try {
     // TODO: use schema (#9610)
-    const doc = parseSingleYaml<GitlabPipeline>(replaceReferenceTags(content), {
-      json: true,
-    });
+    const doc = parseSingleYaml<GitlabPipeline>(replaceReferenceTags(content));
     const includes = getAllIncludeProjects(doc);
     for (const includeObj of includes) {
       const dep = extractDepFromIncludeFile(includeObj);

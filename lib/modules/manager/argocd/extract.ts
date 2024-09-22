@@ -36,17 +36,11 @@ export function extractPackageFile(
     return null;
   }
 
-  let definitions: ApplicationDefinition[];
-  try {
-    definitions = parseYaml(content, {
-      customSchema: ApplicationDefinition,
-      failureBehaviour: 'filter',
-      removeTemplates: true,
-    });
-  } catch (err) {
-    logger.debug({ err, packageFile }, 'Failed to parse ArgoCD definition.');
-    return null;
-  }
+  const definitions = parseYaml(content, {
+    customSchema: ApplicationDefinition,
+    failureBehaviour: 'filter',
+    removeTemplates: true,
+  });
 
   const deps = definitions.flatMap(processAppSpec);
 

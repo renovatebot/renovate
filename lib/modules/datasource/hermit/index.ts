@@ -43,9 +43,9 @@ export class HermitDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-hermit-package`,
+    namespace: `datasource-${HermitDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl ?? ''}-${packageName}`,
+      `getReleases:${registryUrl ?? ''}-${packageName}`,
   })
   async getReleases({
     packageName,
@@ -106,8 +106,8 @@ export class HermitDatasource extends Datasource {
    * named index, parses it and returned the parsed JSON result
    */
   @cache({
-    namespace: `datasource-hermit-search-manifest`,
-    key: (u) => u.toString(),
+    namespace: `datasource-${HermitDatasource.id}`,
+    key: (u) => `getHermitSearchManifest:${u.toString()}`,
   })
   async getHermitSearchManifest(u: URL): Promise<HermitSearchResult[] | null> {
     const registryUrl = u.toString();

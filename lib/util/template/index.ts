@@ -156,6 +156,7 @@ export const allowedFields = {
   currentValue: 'The extracted current value of the dependency being updated',
   currentVersion:
     'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
+  currentVersionTimestamp: 'The timestamp of the current version',
   currentDigest: 'The extracted current digest of the dependency being updated',
   currentDigestShort:
     'The extracted current short digest of the dependency being updated',
@@ -176,6 +177,7 @@ export const allowedFields = {
   isGroup: 'true if the upgrade is part of a group',
   isLockfileUpdate: 'true if the branch is a lock file update',
   isMajor: 'true if the upgrade is major',
+  isMinor: 'true if the upgrade is minor',
   isPatch: 'true if the upgrade is a patch upgrade',
   isPin: 'true if the upgrade is pinning dependencies',
   isPinDigest: 'true if the upgrade is pinning digests',
@@ -218,6 +220,7 @@ export const allowedFields = {
   references: 'A list of references for the upgrade',
   releases: 'An array of releases for an upgrade',
   releaseNotes: 'A ChangeLogNotes object for the release',
+  releaseTimestamp: 'The timestamp of the release',
   repository: 'The current repository',
   semanticPrefix: 'The fully generated semantic prefix for commit messages',
   sourceRepo: 'The repository in the sourceUrl, if present',
@@ -238,26 +241,6 @@ export const allowedFields = {
     'The severity for a vulnerability alert upgrade (LOW, MEDIUM, MODERATE, HIGH, CRITICAL, UNKNOWN)',
 };
 
-const prBodyFields = [
-  'header',
-  'table',
-  'notes',
-  'changelogs',
-  'hasWarningsErrors',
-  'errors',
-  'warnings',
-  'configDescription',
-  'controls',
-  'footer',
-];
-
-const handlebarsUtilityFields = ['else'];
-
-const allowedFieldsList = Object.keys(allowedFields)
-  .concat(exposedConfigOptions)
-  .concat(prBodyFields)
-  .concat(handlebarsUtilityFields);
-
 type CompileInput = Record<string, unknown>;
 
 const allowedTemplateFields = new Set([
@@ -265,13 +248,16 @@ const allowedTemplateFields = new Set([
   ...exposedConfigOptions,
 ]);
 
-const compileInputProxyHandler: ProxyHandler<CompileInput> = {
+class CompileInputProxyHandler implements ProxyHandler<CompileInput> {
+  constructor(private warnVariables: Set<string>) {}
+
   get(target: CompileInput, prop: keyof CompileInput): unknown {
     if (prop === 'env') {
       return target[prop];
     }
 
     if (!allowedTemplateFields.has(prop)) {
+      this.warnVariables.add(prop);
       return undefined;
     }
 
@@ -286,25 +272,27 @@ const compileInputProxyHandler: ProxyHandler<CompileInput> = {
       return value.map((element) =>
         is.primitive(element)
           ? element
-          : proxyCompileInput(element as CompileInput),
+          : proxyCompileInput(element as CompileInput, this.warnVariables),
       );
     }
 
     if (is.plainObject(value)) {
-      return proxyCompileInput(value);
+      return proxyCompileInput(value, this.warnVariables);
     }
 
     return value;
-  },
-};
-
-export function proxyCompileInput(input: CompileInput): CompileInput {
-  return new Proxy<CompileInput>(input, compileInputProxyHandler);
+  }
 }
 
-const templateRegex = regEx(
-  /{{(?:#(?:if|unless|with|each) )?([a-zA-Z.]+)(?: as \| [a-zA-Z.]+ \|)?}}/g,
-);
+export function proxyCompileInput(
+  input: CompileInput,
+  warnVariables: Set<string>,
+): CompileInput {
+  return new Proxy<CompileInput>(
+    input,
+    new CompileInputProxyHandler(warnVariables),
+  );
+}
 
 export function compile(
   template: string,
@@ -313,30 +301,22 @@ export function compile(
 ): string {
   const env = getChildEnv({});
   const data = { ...GlobalConfig.get(), ...input, env };
-  const filteredInput = filterFields ? proxyCompileInput(data) : data;
+  const warnVariables = new Set<string>();
+  const filteredInput = filterFields
+    ? proxyCompileInput(data, warnVariables)
+    : data;
+
   logger.trace({ template, filteredInput }, 'Compiling template');
-  if (filterFields) {
-    const matches = template.matchAll(templateRegex);
-    for (const match of matches) {
-      const varNames = match[1].split('.');
-      if (varNames[0] === 'env') {
-        continue;
-      }
-      for (const varName of varNames) {
-        if (varName === 'prBodyDefinitions') {
-          // Allow all prBodyDefinitions.*
-          break;
-        }
-        if (!allowedFieldsList.includes(varName)) {
-          logger.info(
-            { varName, template },
-            'Disallowed variable name in template',
-          );
-        }
-      }
-    }
+  const result = handlebars.compile(template)(filteredInput);
+
+  if (warnVariables.size > 0) {
+    logger.info(
+      { varNames: Array.from(warnVariables), template },
+      'Disallowed variable names in template',
+    );
   }
-  return handlebars.compile(template)(filteredInput);
+
+  return result;
 }
 
 export function safeCompile(
@@ -350,22 +330,4 @@ export function safeCompile(
     logger.warn({ err, template }, 'Error compiling template');
     return '';
   }
-}
-
-export function containsTemplates(
-  value: unknown,
-  templates: string | string[],
-): boolean {
-  if (!is.string(value)) {
-    return false;
-  }
-  for (const m of [...value.matchAll(templateRegex)]) {
-    for (const template of is.string(templates) ? [templates] : templates) {
-      if (m[1] === template || m[1].startsWith(`${template}.`)) {
-        return true;
-      }
-    }
-  }
-
-  return false;
 }

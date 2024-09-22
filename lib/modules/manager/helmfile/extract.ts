@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
-import { joinUrlParts } from '../../../util/url';
 import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
@@ -34,24 +33,14 @@ export async function extractPackageFile(
   config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   const deps: PackageDependency[] = [];
-  let docs: Doc[];
   let registryData: Record<string, HelmRepository> = {};
   // Record kustomization usage for all deps, since updating artifacts is run on the helmfile.yaml as a whole.
   let needKustomize = false;
-  try {
-    docs = parseYaml(content, {
-      customSchema: documentSchema,
-      failureBehaviour: 'filter',
-      removeTemplates: true,
-      json: true,
-    });
-  } catch (err) {
-    logger.debug(
-      { err, packageFile },
-      'Failed to parse helmfile helmfile.yaml',
-    );
-    return null;
-  }
+  const docs: Doc[] = parseYaml(content, {
+    customSchema: documentSchema,
+    failureBehaviour: 'filter',
+    removeTemplates: true,
+  });
 
   for (const doc of docs) {
     // Always check for repositories in the current document and override the existing ones if any (as YAML does)
@@ -118,12 +107,12 @@ export async function extractPackageFile(
 
       if (isOCIRegistry(dep.chart)) {
         res.datasource = DockerDatasource.id;
-        res.packageName = joinUrlParts(repoName, depName);
+        res.packageName = `${repoName}/${depName}`;
       } else if (registryData[repoName]?.oci) {
         res.datasource = DockerDatasource.id;
         const alias = registryData[repoName]?.url;
         if (alias) {
-          res.packageName = joinUrlParts(alias, depName);
+          res.packageName = `${alias}/${depName}`;
         }
       }
 
