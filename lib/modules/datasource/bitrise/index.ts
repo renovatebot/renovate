@@ -115,12 +115,9 @@ export class BitriseDatasource extends Datasource {
         customSchema: BitriseStepFile,
       });
 
-      const releaseTimestamp = is.string(published_at)
-        ? published_at
-        : published_at.toISOString();
       result.releases.push({
         version: versionDir.name,
-        releaseTimestamp,
+        releaseTimestamp: published_at,
         sourceUrl: source_code_url,
       });
     }

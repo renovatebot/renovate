@@ -26,9 +26,6 @@ export async function extractPnpmFilters(
     // TODO: use schema (#9610,#22198)
     const contents = parseSingleYaml<PnpmWorkspaceFile>(
       (await readLocalFile(fileName, 'utf8'))!,
-      {
-        json: true,
-      },
     );
     if (
       !Array.isArray(contents.packages) ||

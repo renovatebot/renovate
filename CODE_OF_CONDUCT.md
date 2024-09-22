@@ -62,7 +62,7 @@ We get many questions each week and do our best to answer each one.
 To get the help you need, please be prepared to give detailed logs or descriptions of your issues.
 If you do not want to spend the effort giving us enough information, it's likely you will not get the help you need.
 
-### Wy we sometimes give short answers
+### Why we sometimes give short answers
 
 We have limited time, which means we may:
 

@@ -48,8 +48,7 @@ export class GoDatasource extends Datasource {
   @cache({
     namespace: `datasource-${GoDatasource.id}`,
     // TODO: types (#22198)
-    key: ({ packageName }: GetReleasesConfig) =>
-      `getReleases:${packageName}-digest`,
+    key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
   })
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.goproxy.getReleases(config);
@@ -67,11 +66,12 @@ export class GoDatasource extends Datasource {
    */
   @cache({
     namespace: `datasource-${GoDatasource.id}`,
-    key: ({ packageName }: DigestConfig) => `getDigest:${packageName}-digest`,
+    key: ({ packageName }: DigestConfig, newValue?: string) =>
+      `getDigest:${packageName}:${newValue}`,
   })
   override async getDigest(
     { packageName }: DigestConfig,
-    value?: string | null,
+    newValue?: string,
   ): Promise<string | null> {
     if (parseGoproxy().some(({ url }) => url === 'off')) {
       logger.debug(
@@ -88,8 +88,10 @@ export class GoDatasource extends Datasource {
     // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up default branch instead
     // ignore v0.0.0 versions to fetch the digest of default branch, not the commit of non-existing tag `v0.0.0`
     const tag =
-      value && !GoDatasource.pversionRegexp.test(value) && value !== 'v0.0.0'
-        ? value
+      newValue &&
+      !GoDatasource.pversionRegexp.test(newValue) &&
+      newValue !== 'v0.0.0'
+        ? newValue
         : undefined;
 
     switch (source.datasource) {
