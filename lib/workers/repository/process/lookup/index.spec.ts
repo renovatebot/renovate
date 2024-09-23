@@ -4123,10 +4123,10 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    it("handles version update with new digest for single-entry custom datasource releases", async () => {
-      config.currentValue = "1.0.0";
-      config.packageName = "my-package";
-      config.datasource = "custom.package";
+    it('handles version update with new digest for single-entry custom datasource releases', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'my-package';
+      config.datasource = 'custom.package';
       config.currentDigest = 'zzzzzzzzzzzzzzz';
       getCustomDatasourceReleases.mockResolvedValueOnce({
         releases: [
