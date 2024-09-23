@@ -239,7 +239,7 @@ export const UtcDate = z
 
 export const Yaml = z.string().transform((str, ctx): JsonValue => {
   try {
-    return parseSingleYaml(str, { json: true });
+    return parseSingleYaml(str);
   } catch {
     ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
     return z.NEVER;
@@ -248,7 +248,7 @@ export const Yaml = z.string().transform((str, ctx): JsonValue => {
 
 export const MultidocYaml = z.string().transform((str, ctx): JsonArray => {
   try {
-    return parseYaml(str, { json: true }) as JsonArray;
+    return parseYaml(str) as JsonArray;
   } catch {
     ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
     return z.NEVER;
