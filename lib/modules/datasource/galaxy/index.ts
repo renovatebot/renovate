@@ -51,14 +51,12 @@ export class GalaxyDatasource extends Datasource {
     }
 
     if (body.results.length > 1) {
-      const githubUsernames = body.results.map((result) => result.github_user);
-      if (githubUsernames.includes(userName)) {
-        body.results = body.results.filter(
-          (result) => result.github_user === userName,
-        );
-      } else {
+      body.results = body.results.filter(
+        (result) => result.github_user === userName,
+      );
+      if (!body.results.length) {
         logger.warn(
-          { dependency: packageName, githubUsernames },
+          { dependency: packageName, userName },
           `Multiple results from galaxy for ${packageName}, none match`,
         );
         return null;
