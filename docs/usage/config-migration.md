@@ -1,20 +1,24 @@
 # Config Migration
 
-Renovate maintainers often need to rename, remove or combine configuration options to improve the user experience and mature the product.
+To improve the Renovate program, the Renovate maintainers often rename, remove or combine configuration options.
 
-When they do so, "config migration" code is added at the same time so that any "legacy" config from users continues to work.
-Config migration works by migrating legacy config internally before the config is used.
-If done right, it "just works" silently and legacy configs continue working indefinitely.
-The only sign when this is necessary is a debug message in logs noting the old and newly migrated configs.
+When the Renovate maintainers change configuration options, they add "config migration" code.
+The migration code allows "legacy" config from users to keep working.
+Config migration works by migrating legacy config internally, before the config is used.
+If done right, config migration "just works" silently and legacy configs continue working indefinitely.
+The only sign that "config migration" is needed is the debug message in the Renovate logs, noting the old and newly migrated configs.
 
 By default, none of these changes are applied to Renovate config files (e.g. `renovate.json`)
 
 ## Enabling config migration pull requests
 
-Although legacy config should continue to "just work", it's better for users if their config file uses the latest/correct configuration names.
-Using the latest names makes it easier to understand the config and look up documentation for it.
+Even though Renovate allows you to keep using "legacy config", we recommend you update the configuration names in your config regularly.
+Using the latest names:
 
-Renovate can create a config migration pull request, that migrates legacy config in your configuration file.
+- makes it easier for you to understand the config
+- helps you find the documentation for the config
+
+Renovate can create a config migration Pull Request, to migrate legacy config in your configuration file.
 To get config migration pull requests from Renovate: set the [`configMigration`](./configuration-options.md#configmigration) config option to `true`.
 
 Config migration PRs are disabled by default.
@@ -46,7 +50,7 @@ Renovate will:
 
 ### Config migration needed, but disabled
 
-If config migration is needed, but disabled then Renovate adds a checkbox to the Dependency Dashboard if one exists.
+If config migration is needed, but disabled then Renovate adds a checkbox to the Dependency Dashboard if it exists.
 This is known as "on-demand" config migration because migration PRs are only created at the request of the user by ticking the checkbox.
 
 The checkbox looks like this:
@@ -57,8 +61,8 @@ The checkbox looks like this:
 
 When you select the checkbox:
 
-Renovate creates a config migration PR.
-Renovate replaces the checkbox with a link to the Config Migration PR.
+1. Renovate creates a config migration PR
+2. Renovate replaces the checkbox with a link to the Config Migration PR
 
 For example:
 
