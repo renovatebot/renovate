@@ -42,7 +42,7 @@ If you're using a private [GitLab container registry](https://docs.gitlab.com/ee
 
 - Set the `RENOVATE_HOST_RULES` CI variable to `[{"matchHost": "${CI_REGISTRY}","username": "${GITLAB_USER_NAME}","password": "${RENOVATE_TOKEN}", "hostType": "docker"}]`.
 
-  Alternatively, if [`detectHostRulesFromEnv`](../../../../self-hosted-configuration.md#detecthostrulesfromenv) is enabled, you can set the CI variables `DOCKER_REGISTRY_GITLAB_COM_USERNAME=${GITLAB_USER_NAME}` and `DOCKER_REGISTRY_GITLAB_COM_PASSWORD=${RENOVATE_TOKEN}`.
+  Alternatively, if [`detectHostRulesFromEnv`](../../../self-hosted-configuration.md#detecthostrulesfromenv) is enabled, you can set the CI variables `DOCKER_REGISTRY_GITLAB_COM_USERNAME=${GITLAB_USER_NAME}` and `DOCKER_REGISTRY_GITLAB_COM_PASSWORD=${RENOVATE_TOKEN}`.
 
 - Make sure the user that owns the access token is a member of the corresponding GitLab projects/groups with the right permissions.
 - Make sure the access token has the `read_registry` scope.
