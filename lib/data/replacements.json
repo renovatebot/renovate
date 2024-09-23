@@ -8,6 +8,7 @@
       "replacements:containerbase",
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
+      "replacements:docker-compose",
       "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
       "replacements:eslint-config-standard-with-typescript-to-eslint-config-love",
       "replacements:eslint-plugin-node-to-maintained-fork",
@@ -210,6 +211,18 @@
         "matchPackageNames": ["cucumber"],
         "replacementName": "@cucumber/cucumber",
         "replacementVersion": "7.0.0"
+      }
+    ]
+  },
+  "docker-compose": {
+    "description": "Compose is now part of the official Docker image.",
+    "packageRules": [
+      {
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["docker/compose"],
+        "matchCurrentValue": "/^((debian|alpine)-)?1\\.29\\.2$/",
+        "replacementName": "docker",
+        "replacementVersion": "23.0.0-cli"
       }
     ]
   },
