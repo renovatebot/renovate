@@ -10,7 +10,7 @@ When Renovate runs on a repository, the final config used is derived from the:
 
 <!-- prettier-ignore -->
 !!! note
-    If you're using a Mend-hosted app, refer to [additional documentation on config specific to the Mend-hosted Apps](mend-hosted/hosted-apps-config.md) section in addition to the below.
+    If you use a Mend-hosted app, please read [Mend-hosted Apps Configuration](mend-hosted/hosted-apps-config.md) _after_ reading this page.
 
 ## Types of config
 
