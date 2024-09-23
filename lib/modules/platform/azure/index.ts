@@ -1,12 +1,14 @@
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import {
+import type {
   GitPullRequest,
   GitPullRequestCommentThread,
-  GitPullRequestMergeStrategy,
   GitStatus,
-  GitStatusState,
   GitVersionDescriptor,
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import {
+  GitPullRequestMergeStrategy,
+  GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import {
@@ -43,7 +45,8 @@ import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
-import { AzurePr, AzurePrVote } from './types';
+import type { AzurePr } from './types';
+import { AzurePrVote } from './types';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
@@ -811,7 +814,7 @@ export function massageMarkdown(input: string): string {
   return smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
-      'rename PR to start with "rebase!"',
+      'PR is renamed to start with "rebase!"',
     )
     .replace(
       'checking the rebase/retry box above',
@@ -827,13 +830,15 @@ export function maxBodyLength(): number {
 
 /* istanbul ignore next */
 export function findIssue(): Promise<Issue | null> {
-  logger.warn(`findIssue() is not implemented`);
+  // TODO: Needs implementation (#9592)
+  logger.debug(`findIssue() is not implemented`);
   return Promise.resolve(null);
 }
 
 /* istanbul ignore next */
 export function ensureIssue(): Promise<EnsureIssueResult | null> {
-  logger.warn(`ensureIssue() is not implemented`);
+  // TODO: Needs implementation (#9592)
+  logger.debug(`ensureIssue() is not implemented`);
   return Promise.resolve(null);
 }
 

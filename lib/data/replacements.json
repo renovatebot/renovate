@@ -9,8 +9,10 @@
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
       "replacements:docker-compose",
+      "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
       "replacements:eslint-config-standard-with-typescript-to-eslint-config-love",
       "replacements:eslint-plugin-node-to-maintained-fork",
+      "replacements:eslint-plugin-vitest-to-scoped",
       "replacements:fakerjs-to-scoped",
       "replacements:fastify-to-scoped",
       "replacements:hapi-to-scoped",
@@ -39,6 +41,7 @@
       "replacements:semantic-release-replace-plugin-to-unscoped",
       "replacements:spectre-cli-to-spectre-console-cli",
       "replacements:standard-version-to-commit-and-tag",
+      "replacements:typeorm-seeding-to-scoped",
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
       "replacements:xmldom-to-scoped",
@@ -170,8 +173,10 @@
         "description": "Replace `renovate` `slim` docker tag with `latest`.",
         "matchCurrentValue": "/^slim$/",
         "matchDatasources": ["docker"],
-        "matchPackageNames": ["ghcr.io/renovatebot/renovate"],
-        "matchPackageNames": ["/^(?:docker\\.io/)?renovate/renovate$/"],
+        "matchPackageNames": [
+          "ghcr.io/renovatebot/renovate",
+          "/^(?:docker\\.io/)?renovate/renovate$/"
+        ],
         "replacementVersion": "latest"
       },
       {
@@ -179,8 +184,10 @@
         "extractVersion": "^(?<version>.+)-slim$",
         "matchCurrentValue": "/-slim$/",
         "matchDatasources": ["docker"],
-        "matchPackageNames": ["ghcr.io/renovatebot/renovate"],
-        "matchPackageNames": ["/^(?:docker\\.io/)?renovate/renovate$/"],
+        "matchPackageNames": [
+          "ghcr.io/renovatebot/renovate",
+          "/^(?:docker\\.io/)?renovate/renovate$/"
+        ],
         "versioning": "semver"
       }
     ]
@@ -219,6 +226,18 @@
       }
     ]
   },
+  "eslint-plugin-eslint-comments-to-maintained-fork": {
+    "description": "Replace `eslint-plugin-eslint-comments` with a maintained fork: `@eslint-community/eslint-plugin-eslint-comments`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["eslint-plugin-eslint-comments"],
+        "matchCurrentVersion": "^3.2.0",
+        "replacementName": "@eslint-community/eslint-plugin-eslint-comments",
+        "replacementVersion": "3.2.0"
+      }
+    ]
+  },
   "eslint-config-standard-with-typescript-to-eslint-config-love": {
     "description": "`eslint-config-standard-with-typescript` was renamed to `eslint-config-love`.",
     "packageRules": [
@@ -240,6 +259,18 @@
         "matchPackageNames": ["eslint-plugin-node"],
         "replacementName": "eslint-plugin-n",
         "replacementVersion": "14.0.0"
+      }
+    ]
+  },
+  "eslint-plugin-vitest-to-scoped": {
+    "description": "`eslint-plugin-vitest` became scoped.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=0.5.4",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["eslint-plugin-vitest"],
+        "replacementName": "@vitest/eslint-plugin",
+        "replacementVersion": "1.0.0"
       }
     ]
   },
@@ -940,6 +971,18 @@
         "matchPackageNames": ["standard-version"],
         "replacementName": "commit-and-tag-version",
         "replacementVersion": "9.5.0"
+      }
+    ]
+  },
+  "typeorm-seeding-to-scoped": {
+    "description": "`typeorm-seeding` is now maintained as scoped package.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "1.6.1",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["typeorm-seeding"],
+        "replacementName": "@jorgebodega/typeorm-seeding",
+        "replacementVersion": "2.0.0"
       }
     ]
   },

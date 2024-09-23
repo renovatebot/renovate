@@ -16,9 +16,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
   switch (upath.extname(file)) {
     case '.yaml':
     case '.yml':
-      return parseSingleYaml(await readSystemFile(file, 'utf8'), {
-        json: true,
-      });
+      return parseSingleYaml(await readSystemFile(file, 'utf8'));
     case '.json5':
     case '.json':
       return parseJson(
@@ -79,13 +77,12 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     logger.debug('No config file found on disk - skipping');
   }
 
-  await deleteNonDefaultConfig(env); // Try deletion only if RENOVATE_CONFIG_FILE is specified
-
   return migrateAndValidateConfig(config, configFile);
 }
 
 export async function deleteNonDefaultConfig(
   env: NodeJS.ProcessEnv,
+  deleteConfigFile: boolean,
 ): Promise<void> {
   const configFile = env.RENOVATE_CONFIG_FILE;
 
@@ -93,7 +90,7 @@ export async function deleteNonDefaultConfig(
     return;
   }
 
-  if (env.RENOVATE_X_DELETE_CONFIG_FILE !== 'true') {
+  if (!deleteConfigFile) {
     return;
   }
 

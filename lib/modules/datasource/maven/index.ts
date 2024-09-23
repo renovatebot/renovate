@@ -64,6 +64,8 @@ export const defaultRegistryUrls = [MAVEN_REPO];
 export class MavenDatasource extends Datasource {
   static id = 'maven';
 
+  override readonly caching = true;
+
   override readonly defaultRegistryUrls = defaultRegistryUrls;
 
   override readonly defaultVersioning: string = mavenVersioning.id;
@@ -358,6 +360,16 @@ export class MavenDatasource extends Datasource {
         latestSuitableVersion,
       ));
 
-    return { ...dependency, ...dependencyInfo, releases };
+    const result: ReleaseResult = {
+      ...dependency,
+      ...dependencyInfo,
+      releases,
+    };
+
+    if (!this.defaultRegistryUrls.includes(registryUrl)) {
+      result.isPrivate = true;
+    }
+
+    return result;
   }
 }

@@ -35,7 +35,7 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import { BitbucketPrCache } from './pr-cache';
-import { RepoInfo, Repositories } from './schema';
+import { RepoInfo, Repositories, UnresolvedPrTasks } from './schema';
 import type {
   Account,
   BitbucketStatus,
@@ -925,6 +925,9 @@ export async function createPr({
       renovateUserUuid,
       pr,
     );
+    if (platformPrOptions?.bbAutoResolvePrTasks) {
+      await autoResolvePrTasks(pr);
+    }
     return pr;
   } catch (err) /* istanbul ignore next */ {
     // Try sanitizing reviewers
@@ -952,8 +955,55 @@ export async function createPr({
         renovateUserUuid,
         pr,
       );
+      if (platformPrOptions?.bbAutoResolvePrTasks) {
+        await autoResolvePrTasks(pr);
+      }
       return pr;
     }
+  }
+}
+
+async function autoResolvePrTasks(pr: Pr): Promise<void> {
+  logger.debug(`Auto resolve PR tasks in #${pr.number}`);
+  try {
+    const unResolvedTasks = (
+      await bitbucketHttp.getJson(
+        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks`,
+        { paginate: true, pagelen: 100 },
+        UnresolvedPrTasks,
+      )
+    ).body;
+
+    logger.trace(
+      {
+        prId: pr.number,
+        listTaskRes: unResolvedTasks,
+      },
+      'List PR tasks',
+    );
+
+    for (const task of unResolvedTasks) {
+      const res = await bitbucketHttp.putJson(
+        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks/${task.id}`,
+        {
+          body: {
+            state: 'RESOLVED',
+            content: {
+              raw: task.content.raw,
+            },
+          },
+        },
+      );
+      logger.trace(
+        {
+          prId: pr.number,
+          updateTaskResponse: res,
+        },
+        'Put PR tasks - mark resolved',
+      );
+    }
+  } catch (err) {
+    logger.warn({ prId: pr.number, err }, 'Error resolving PR tasks');
   }
 }
 

@@ -28,13 +28,6 @@ Skipping the check will speed things up, but may result in versions being return
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
-## `RENOVATE_X_DELETE_CONFIG_FILE`
-
-If `true` Renovate tries to delete the self-hosted config file after reading it.
-You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE` environment variable.
-
-The process that runs Renovate must have the correct permissions to delete the config file.
-
 ## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
 
 If set to any value, Renovate will skip attempting to get release labels (e.g. gitRef, sourceUrl) from manifest annotations for `https://index.docker.io`.
@@ -50,11 +43,6 @@ This includes the following:
 ## `RENOVATE_X_DOCKER_HUB_TAGS_DISABLE`
 
 If set to any value, Renovate will stop using the Docker Hub API (`https://hub.docker.com`) to fetch tags and instead use the normal Docker API for images pulled from `https://index.docker.io`.
-
-## `RENOVATE_X_DOCKER_MAX_PAGES`
-
-If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
-This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
 
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 
@@ -112,18 +100,6 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 ## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
 
 If set, Renovate will persist repository cache locally after uploading to S3.
-
-## `RENOVATE_X_S3_ENDPOINT`
-
-If set, Renovate will use this string as the `endpoint` when instantiating the AWS S3 client.
-
-## `RENOVATE_X_S3_PATH_STYLE`
-
-If set, Renovate will enable `forcePathStyle` when instantiating the AWS S3 client.
-
-> Whether to force path style URLs for S3 objects (e.g., `https://s3.amazonaws.com//` instead of `https://.s3.amazonaws.com/`)
-
-Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html)
 
 ## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
 

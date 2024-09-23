@@ -56,9 +56,7 @@ export class HelmDatasource extends Datasource {
     }
     try {
       // TODO: use schema (#9610)
-      const doc = parseSingleYaml<HelmRepository>(res.body, {
-        json: true,
-      });
+      const doc = parseSingleYaml<HelmRepository>(res.body);
       if (!is.plainObject<HelmRepository>(doc)) {
         logger.warn(
           { helmRepository },

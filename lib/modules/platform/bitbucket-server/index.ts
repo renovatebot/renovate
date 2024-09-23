@@ -710,7 +710,7 @@ async function retry<T extends (...arg0: any[]) => Promise<any>>(
   retryErrorMessages: string[],
 ): Promise<Awaited<ReturnType<T>>> {
   const maxAttempts = Math.max(maxTries, 1);
-  let lastError: Error | null = null;
+  let lastError: Error | undefined;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       return await fn(...args);
@@ -727,6 +727,8 @@ async function retry<T extends (...arg0: any[]) => Promise<any>>(
   }
 
   logger.debug(`All ${maxAttempts} retry attempts exhausted`);
+  // Can't be `undefined` here.
+  // eslint-disable-next-line @typescript-eslint/only-throw-error
   throw lastError;
 }
 
@@ -1105,7 +1107,7 @@ export function massageMarkdown(input: string): string {
   return smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
-      'rename PR to start with "rebase!"',
+      'PR is renamed to start with "rebase!"',
     )
     .replace(
       'checking the rebase/retry box above',

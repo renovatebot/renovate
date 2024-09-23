@@ -1,5 +1,6 @@
 // TODO #22198
-import { Ecosystem, Osv, OsvOffline } from '@renovatebot/osv-offline';
+import type { Ecosystem, Osv } from '@renovatebot/osv-offline';
+import { OsvOffline } from '@renovatebot/osv-offline';
 import is from '@sindresorhus/is';
 import type { CvssScore } from 'vuln-vects';
 import { parseCvssVector } from 'vuln-vects';
@@ -11,10 +12,8 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../../../modules/manager/types';
-import {
-  VersioningApi,
-  get as getVersioning,
-} from '../../../modules/versioning';
+import type { VersioningApi } from '../../../modules/versioning';
+import { get as getVersioning } from '../../../modules/versioning';
 import { findGithubToken } from '../../../util/check-token';
 import { find } from '../../../util/host-rules';
 import { sanitizeMarkdown } from '../../../util/markdown';
@@ -427,11 +426,8 @@ export class Vulnerabilities {
     fixedVersion: string,
     ecosystem: Ecosystem,
   ): string {
-    if (ecosystem === 'Maven') {
+    if (ecosystem === 'Maven' || ecosystem === 'NuGet') {
       return `[${fixedVersion},)`;
-    } else if (ecosystem === 'NuGet') {
-      // TODO: add support for nuget version ranges when #26150 is merged
-      return fixedVersion;
     }
 
     // crates.io, Go, Hex, npm, RubyGems, PyPI
@@ -521,7 +517,7 @@ export class Vulnerabilities {
       const severityLevel = parsedCvss.cvss3OverallSeverityText;
 
       return [parsedCvss.baseScore.toFixed(1), severityLevel];
-    } catch (err) {
+    } catch {
       logger.debug(`Error processing CVSS vector ${vector}`);
     }
 

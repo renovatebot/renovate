@@ -1,15 +1,23 @@
 /* istanbul ignore file */
 import { DateTime } from 'luxon';
-import { createClient } from 'redis';
+import { createClient, createCluster } from 'redis';
 import { logger } from '../../../logger';
 import { compressToBase64, decompressFromBase64 } from '../../compress';
+import { regEx } from '../../regex';
 import type { PackageCacheNamespace } from './types';
 
-let client: ReturnType<typeof createClient> | undefined;
+let client:
+  | ReturnType<typeof createClient>
+  | ReturnType<typeof createCluster>
+  | undefined;
 let rprefix: string | undefined;
 
 function getKey(namespace: PackageCacheNamespace, key: string): string {
   return `${rprefix}${namespace}-${key}`;
+}
+
+export function normalizeRedisUrl(url: string): string {
+  return url.replace(regEx(/^(rediss?)\+cluster:\/\//), '$1://');
 }
 
 export async function end(): Promise<void> {
@@ -53,7 +61,7 @@ export async function get<T = never>(
       // istanbul ignore next
       await rm(namespace, key);
     }
-  } catch (err) {
+  } catch {
     logger.trace({ rprefix, namespace, key }, 'Cache miss');
   }
   return undefined;
@@ -94,16 +102,28 @@ export async function init(
   }
   rprefix = prefix ?? '';
   logger.debug('Redis cache init');
-  client = createClient({
-    url,
+
+  const rewrittenUrl = normalizeRedisUrl(url);
+  // If any replacement was made, it means the regex matched and we are in clustered mode
+  const clusteredMode = rewrittenUrl.length !== url.length;
+
+  const config = {
+    url: rewrittenUrl,
     socket: {
-      reconnectStrategy: (retries) => {
+      reconnectStrategy: (retries: number) => {
         // Reconnect after this time
         return Math.min(retries * 100, 3000);
       },
     },
     pingInterval: 30000, // 30s
-  });
+  };
+  if (clusteredMode) {
+    client = createCluster({
+      rootNodes: [config],
+    });
+  } else {
+    client = createClient(config);
+  }
   await client.connect();
   logger.debug('Redis cache connected');
 }

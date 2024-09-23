@@ -125,6 +125,7 @@ export interface GlobalOnlyConfig {
   redisUrl?: string;
   repositories?: RenovateRepository[];
   useCloudMetadataServices?: boolean;
+  deleteConfigFile?: boolean;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -165,6 +166,9 @@ export interface RepoGlobalConfig {
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;
   userAgent?: string;
+  dockerMaxPages?: number;
+  s3Endpoint?: string;
+  s3PathStyle?: boolean;
   cachePrivatePackages?: boolean;
 }
 
@@ -224,6 +228,8 @@ export interface RenovateConfig
     AssigneesAndReviewersConfig,
     ConfigMigration,
     Record<string, unknown> {
+  s3Endpoint?: string;
+  s3PathStyle?: boolean;
   reportPath?: string;
   reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
@@ -377,6 +383,7 @@ export interface PackageRule
   matchUpdateTypes?: UpdateType[];
   registryUrls?: string[] | null;
   vulnerabilitySeverity?: string;
+  vulnerabilityFixVersion?: string;
 }
 
 export interface ValidationMessage {
