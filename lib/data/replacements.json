@@ -215,7 +215,7 @@
     ]
   },
   "docker-compose": {
-    "description": "Compose has been integrated in the official Docker image.",
+    "description": "Compose is now part of the official Docker image.",
     "packageRules": [
       {
         "matchDatasources": ["docker"],
