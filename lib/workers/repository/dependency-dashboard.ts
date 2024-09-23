@@ -48,7 +48,7 @@ function checkRebaseAll(issueBody: string): boolean {
   return issueBody.includes(' - [x] <!-- rebase-all-open-prs -->');
 }
 
-function checkCreateConfigMigrationPr(
+function getConfigMigrationCheckboxState(
   issueBody: string,
 ): 'no-checkbox' | 'checked' | 'unchecked' | 'migration-pr-exists' {
   if (!issueBody.includes('Config Migration needed.')) {
@@ -199,7 +199,7 @@ export async function ensureDependencyDashboard(
   config: SelectAllConfig,
   allBranches: BranchConfig[],
   packageFiles: Record<string, PackageFile[]> = {},
-  configMigrationRes?: ConfigMigrationResult,
+  configMigrationRes: ConfigMigrationResult,
 ): Promise<void> {
   logger.debug('ensureDependencyDashboard()');
   if (config.mode === 'silent') {
@@ -286,7 +286,7 @@ export async function ensureDependencyDashboard(
   }
   let issueBody = '';
 
-  if (configMigrationRes?.result === 'pr-exists') {
+  if (configMigrationRes.result === 'pr-exists') {
     issueBody +=
       '## Config Migration Needed\n\n' +
       `See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;

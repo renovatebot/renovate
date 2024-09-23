@@ -83,10 +83,7 @@ export async function checkConfigMigrationBranch(
     }
   }
 
-  let result:
-    | 'no-migration-branch'
-    | 'migration-branch-exists'
-    | 'migration-branch-modified';
+  let result: CheckConfigMigrationBranchResult['result'];
 
   if (branchPr) {
     logger.debug('Config Migration PR already exists');
