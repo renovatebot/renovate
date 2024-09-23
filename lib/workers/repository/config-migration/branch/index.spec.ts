@@ -43,7 +43,9 @@ describe('workers/repository/config-migration/branch/index', () => {
           {
             ...config,
             configMigration: false,
-            dependencyDashboardChecks: { configMigrationInfo: 'unchecked' },
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'unchecked',
+            },
           },
           migratedData,
         ),
@@ -62,7 +64,9 @@ describe('workers/repository/config-migration/branch/index', () => {
           {
             ...config,
             configMigration: false,
-            dependencyDashboardChecks: { configMigrationInfo: 'checked' },
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'checked',
+            },
           },
           migratedData,
         ),
@@ -85,7 +89,7 @@ describe('workers/repository/config-migration/branch/index', () => {
           ...config,
           configMigration: false,
           dependencyDashboardChecks: {
-            configMigrationInfo: 'migration-pr-exists',
+            configMigrationCheckboxState: 'migration-pr-exists',
           },
         },
         migratedData,
@@ -116,7 +120,7 @@ describe('workers/repository/config-migration/branch/index', () => {
           ...config,
           configMigration: false,
           dependencyDashboardChecks: {
-            configMigrationInfo: 'migration-pr-exists',
+            configMigrationCheckboxState: 'migration-pr-exists',
           },
         },
         migratedData,
@@ -143,7 +147,7 @@ describe('workers/repository/config-migration/branch/index', () => {
           ...config,
           configMigration: true,
           dependencyDashboardChecks: {
-            configMigrationInfo: 'no-checkbox',
+            configMigrationCheckboxState: 'no-checkbox',
           },
         },
         migratedData,
@@ -167,7 +171,7 @@ describe('workers/repository/config-migration/branch/index', () => {
           ...config,
           configMigration: true,
           dependencyDashboardChecks: {
-            configMigrationInfo: 'migration-pr-exists',
+            configMigrationCheckboxState: 'migration-pr-exists',
           },
         },
         migratedData,
@@ -195,7 +199,7 @@ describe('workers/repository/config-migration/branch/index', () => {
           ...config,
           configMigration: true,
           dependencyDashboardChecks: {
-            configMigrationInfo: 'migration-pr-exists',
+            configMigrationCheckboxState: 'migration-pr-exists',
           },
         },
         migratedData,
@@ -220,7 +224,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         {
           ...config,
           dependencyDashboardChecks: {
-            configMigrationInfo: 'checked',
+            configMigrationCheckboxState: 'checked',
           },
         },
         migratedData,
@@ -246,7 +250,9 @@ describe('workers/repository/config-migration/branch/index', () => {
           {
             ...config,
             configMigration: false,
-            dependencyDashboardChecks: { configMigrationInfo: 'no-checkbox' },
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'no-checkbox',
+            },
           },
           migratedData,
         );
@@ -266,7 +272,9 @@ describe('workers/repository/config-migration/branch/index', () => {
           {
             ...config,
             configMigration: false,
-            dependencyDashboardChecks: { configMigrationInfo: 'checked' },
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'checked',
+            },
           },
           migratedData,
         );
@@ -286,7 +294,9 @@ describe('workers/repository/config-migration/branch/index', () => {
           {
             ...config,
             configMigration: true,
-            dependencyDashboardChecks: { configMigrationInfo: 'no-checkbox' },
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'no-checkbox',
+            },
           },
           migratedData,
         );
@@ -309,7 +319,9 @@ describe('workers/repository/config-migration/branch/index', () => {
           {
             ...config,
             configMigration: false,
-            dependencyDashboardChecks: { configMigrationInfo: 'checked' },
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'checked',
+            },
           },
           migratedData,
         );

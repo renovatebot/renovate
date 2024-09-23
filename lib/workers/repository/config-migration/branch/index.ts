@@ -23,14 +23,14 @@ export async function checkConfigMigrationBranch(
   migratedConfigData: MigratedData,
 ): Promise<CheckConfigMigrationBranchResult> {
   logger.debug('checkConfigMigrationBranch()');
-  const configMigrationCheckbox =
-    config.dependencyDashboardChecks?.configMigrationInfo;
+  const configMigrationCheckboxState =
+    config.dependencyDashboardChecks?.configMigrationCheckboxState;
 
   if (!config.configMigration) {
     if (
-      is.undefined(configMigrationCheckbox) ||
-      configMigrationCheckbox === 'no-checkbox' ||
-      configMigrationCheckbox === 'unchecked'
+      is.undefined(configMigrationCheckboxState) ||
+      configMigrationCheckboxState === 'no-checkbox' ||
+      configMigrationCheckboxState === 'unchecked'
     ) {
       logger.debug(
         'Config migration needed but config migration is disabled and checkbox not checked or not present.',
@@ -69,7 +69,7 @@ export async function checkConfigMigrationBranch(
       // if a closed pr exists and the checkbox for config migration is not checked
       // return no-migration-branch result so that the checkbox gets added again
       // we only want to create a config migration pr if the checkbox is checked
-      if (configMigrationCheckbox !== 'checked') {
+      if (configMigrationCheckboxState !== 'checked') {
         logger.debug(
           'Config migration is enabled and needed. But a closed pr exists and checkbox is not checked. Skipping migration branch creation.',
         );

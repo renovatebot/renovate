@@ -111,8 +111,8 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const dependencyDashboardAllPending = checkApproveAllPendingPR(issueBody);
   const dependencyDashboardAllRateLimited =
     checkOpenAllRateLimitedPR(issueBody);
-  dependencyDashboardChecks['configMigrationInfo'] =
-    checkCreateConfigMigrationPr(issueBody);
+  dependencyDashboardChecks['configMigrationCheckboxState'] =
+    getConfigMigrationCheckboxState(issueBody);
   return {
     dependencyDashboardChecks,
     dependencyDashboardRebaseAllOpen,
