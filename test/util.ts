@@ -120,10 +120,6 @@ export const replacingSerializer = (
   },
 });
 
-export function addReplacingSerializer(from: string, to: string): void {
-  expect.addSnapshotSerializer(replacingSerializer(from, to));
-}
-
 function toHash(buf: Buffer): string {
   return crypto.createHash('sha256').update(buf).digest('hex');
 }
@@ -135,10 +131,6 @@ const bufferSerializer: Plugin = {
     return printer(replaced, config, indent, depth, refs);
   },
 };
-
-export function addBufferSerializer(): void {
-  expect.addSnapshotSerializer(bufferSerializer);
-}
 
 export function regexMatches(target: string, patterns: string[]): boolean {
   return patterns.some((patt: string) => {
