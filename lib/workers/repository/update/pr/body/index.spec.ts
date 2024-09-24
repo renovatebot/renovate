@@ -355,5 +355,42 @@ describe('workers/repository/update/pr/body/index', () => {
         ],
       });
     });
+
+    it('returns & truncates comments if comment is too long', () => {
+      platform.maxBodyLength.mockReturnValue('{{{header}}}'.length);
+      platform.maxCommentLength.mockReturnValue(3);
+      platform.massageMarkdown.mockImplementationOnce((x) => x);
+      platform.massageMarkdown.mockImplementationOnce(
+        (_) => '{{{header}}}{{{table}}}',
+      );
+      platform.massageMarkdown.mockImplementationOnce((_) => '{{{header}}}');
+      template.compile.mockImplementation((x) => x);
+
+      const res = getPrBody(
+        {
+          manager: 'some-manager',
+          baseBranch: 'base',
+          branchName: 'some-branch',
+          upgrades: [],
+          prBodyTemplate: '{{{header}}}{{{table}}}{{{changelogs}}}',
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+            targetBranch: 'base',
+          },
+        },
+        {},
+      );
+
+      expect(res).toStrictEqual({
+        body: '{{{header}}}',
+        comments: [
+          { content: 'get', title: 'Release Notes' },
+          { content: 'get', title: 'Updates' },
+        ],
+      });
+    });
   });
 });

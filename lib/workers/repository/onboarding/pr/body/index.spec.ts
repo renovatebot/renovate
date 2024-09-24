@@ -175,5 +175,30 @@ describe('workers/repository/onboarding/pr/body/index', () => {
         'And this is a footer for repository:test baseBranch:some-branch\n',
       );
     });
+
+    it('creates & truncates comments if comment is too long', () => {
+      platform.maxBodyLength.mockReturnValue('PrBody'.length);
+      platform.maxCommentLength.mockReturnValue(3);
+      platform.massageMarkdown.mockImplementationOnce((x) => x);
+      platform.massageMarkdown.mockImplementationOnce(
+        (x) => 'PrBody{{PACKAGE FILES}}',
+      );
+      platform.massageMarkdown.mockImplementationOnce((_) => 'PrBody');
+      packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
+      const template = 'PrBody{{PRLIST}}{{PACKAGE FILES}}';
+
+      const res = getPrBody(template, packageFiles, config, branches, '');
+
+      expect(res).toStrictEqual({
+        body: 'PrBody',
+        comments: [
+          { title: 'PR List', content: 'get' },
+          {
+            title: 'Package Files',
+            content: '###',
+          },
+        ],
+      });
+    });
   });
 });
