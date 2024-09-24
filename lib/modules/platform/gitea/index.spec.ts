@@ -2995,4 +2995,10 @@ describe('modules/platform/gitea/index', () => {
       expect(gitea.maxBodyLength()).toBe(1000000);
     });
   });
+
+  describe('maxCommentLength()', () => {
+    it('returns Infinity', () => {
+      expect(gitea.maxCommentLength()).toBe(Infinity);
+    });
+  });
 });

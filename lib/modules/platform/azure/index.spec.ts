@@ -1991,4 +1991,10 @@ describe('modules/platform/azure/index', () => {
       expect(azure.maxBodyLength()).toBe(4000);
     });
   });
+
+  describe('maxCommentLength()', () => {
+    it('returns 150000', () => {
+      expect(azure.maxCommentLength()).toBe(150000);
+    });
+  });
 });

@@ -3082,6 +3082,12 @@ These updates have all been created already. Click a checkbox below to force a r
     });
   });
 
+  describe('maxCommentLength()', () => {
+    it('returns Infinity', () => {
+      expect(gitlab.maxCommentLength()).toBe(Infinity);
+    });
+  });
+
   describe('deleteLabel(issueNo, label)', () => {
     it('should delete the label', async () => {
       httpMock

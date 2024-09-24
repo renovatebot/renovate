@@ -798,4 +798,10 @@ describe('modules/platform/gerrit/index', () => {
       expect(gerrit.maxBodyLength()).toBe(16384);
     });
   });
+
+  describe('maxCommentLength()', () => {
+    it('returns Infinity', () => {
+      expect(gerrit.maxCommentLength()).toBe(Infinity);
+    });
+  });
 });

@@ -2476,6 +2476,12 @@ Followed by some information.
           expect(bitbucket.maxBodyLength()).toBe(30000);
         });
       });
+
+      describe('maxCommentLength()', () => {
+        it('returns Infinity', () => {
+          expect(bitbucket.maxCommentLength()).toBe(Infinity);
+        });
+      });
     });
   });
 });

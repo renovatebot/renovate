@@ -1902,4 +1902,10 @@ describe('modules/platform/bitbucket/index', () => {
       expect(bitbucket.maxBodyLength()).toBe(50000);
     });
   });
+
+  describe('maxCommentLength()', () => {
+    it('returns Infinity', () => {
+      expect(bitbucket.maxCommentLength()).toBe(Infinity);
+    });
+  });
 });
