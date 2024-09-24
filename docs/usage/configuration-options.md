@@ -3765,10 +3765,6 @@ Renovate does not support scheduled minutes or "at an exact time" granularity.
 !!! note
     Actions triggered via the [Dependency Dashboard](#dependencydashboard) are not restricted by a configured schedule.
 
-<!-- prettier-ignore -->
-!!! tip
-    To validate your `later` schedule before updating your `renovate.json`, you can use [this CodePen](https://codepen.io/rationaltiger24/full/ZExQEgK).
-
 ## semanticCommitScope
 
 By default you will see Angular-style commit prefixes like `"chore(deps):"`.
