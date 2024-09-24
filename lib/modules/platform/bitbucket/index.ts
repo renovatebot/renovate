@@ -589,6 +589,10 @@ export function maxBodyLength(): number {
   return 50000;
 }
 
+export function maxCommentLength(): number {
+  return Infinity;
+}
+
 export async function ensureIssue({
   title,
   reuseTitle,

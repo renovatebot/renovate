@@ -279,6 +279,7 @@ export interface Platform {
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
 
   maxBodyLength(): number;
+  maxCommentLength(): number;
 }
 
 export interface PlatformScm {

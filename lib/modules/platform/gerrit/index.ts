@@ -422,6 +422,10 @@ export function maxBodyLength(): number {
   return 16384; //TODO: check the real gerrit limit (max. chars)
 }
 
+export function maxCommentLength(): number {
+  return Infinity;
+}
+
 export function deleteLabel(number: number, label: string): Promise<void> {
   return Promise.resolve();
 }

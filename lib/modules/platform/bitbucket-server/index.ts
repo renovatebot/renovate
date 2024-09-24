@@ -1121,3 +1121,7 @@ export function massageMarkdown(input: string): string {
 export function maxBodyLength(): number {
   return 30000;
 }
+
+export function maxCommentLength(): number {
+  return Infinity;
+}

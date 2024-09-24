@@ -122,7 +122,7 @@ export function getPrBody(
   if (content.changelogs) {
     result.comments.push({
       title: 'Release Notes',
-      content: content.changelogs,
+      content: smartTruncate(content.changelogs, platform.maxCommentLength()),
     });
     content.changelogs = 'Please see comment below for changelogs';
 
@@ -133,7 +133,10 @@ export function getPrBody(
   }
 
   if (content.table) {
-    result.comments.push({ title: 'Updates', content: content.table });
+    result.comments.push({
+      title: 'Updates',
+      content: smartTruncate(content.table, platform.maxCommentLength()),
+    });
     content.table = 'Please see comment below for updates';
 
     result.body = createPrBody(content, branchConfig, prBodyConfig);

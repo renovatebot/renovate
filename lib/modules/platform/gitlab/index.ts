@@ -918,6 +918,10 @@ export function maxBodyLength(): number {
   }
 }
 
+export function maxCommentLength(): number {
+  return Infinity;
+}
+
 // Branch
 
 function matchesState(state: string, desiredState: string): boolean {

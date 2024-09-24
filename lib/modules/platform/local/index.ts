@@ -69,6 +69,10 @@ export function maxBodyLength(): number {
   return Infinity;
 }
 
+export function maxCommentLength(): number {
+  return Infinity;
+}
+
 export function updatePr(): Promise<void> {
   return Promise.resolve();
 }

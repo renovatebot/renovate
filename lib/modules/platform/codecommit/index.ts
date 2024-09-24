@@ -329,6 +329,10 @@ export function maxBodyLength(): number {
   return Infinity;
 }
 
+export function maxCommentLength(): number {
+  return Infinity;
+}
+
 export async function getJsonFile(
   fileName: string,
   repoName?: string,

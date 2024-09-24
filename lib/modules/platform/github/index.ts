@@ -1967,6 +1967,10 @@ export function maxBodyLength(): number {
   return GitHubMaxPrBodyLen;
 }
 
+export function maxCommentLength(): number {
+  return Infinity;
+}
+
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   if (config.hasVulnerabilityAlertsEnabled === false) {
     logger.debug('No vulnerability alerts enabled for repo');

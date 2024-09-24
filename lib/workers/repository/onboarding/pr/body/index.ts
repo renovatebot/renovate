@@ -99,7 +99,7 @@ export function getPrBody(
   if (content.prList) {
     result.comments.push({
       title: 'PR List',
-      content: content.prList,
+      content: smartTruncate(content.prList, platform.maxCommentLength()),
     });
     content.prList = 'Please see comment below for what to expect';
 
@@ -112,7 +112,7 @@ export function getPrBody(
   if (content.packageFiles) {
     result.comments.push({
       title: 'Package Files',
-      content: content.packageFiles,
+      content: smartTruncate(content.packageFiles, platform.maxCommentLength()),
     });
     content.packageFiles =
       'Please see comment below for detected Package Files\n';

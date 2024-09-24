@@ -1001,10 +1001,15 @@ const platform: Platform = {
   },
 
   maxBodyLength,
+  maxCommentLength,
 };
 
 export function maxBodyLength(): number {
   return 1000000;
+}
+
+export function maxCommentLength(): number {
+  return Infinity;
 }
 
 /* eslint-disable @typescript-eslint/unbound-method */

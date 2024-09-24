@@ -827,6 +827,10 @@ export function maxBodyLength(): number {
   return 4000;
 }
 
+export function maxCommentLength(): number {
+  return 150000;
+}
+
 /* istanbul ignore next */
 export function findIssue(): Promise<Issue | null> {
   // TODO: Needs implementation (#9592)
