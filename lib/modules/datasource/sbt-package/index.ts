@@ -13,11 +13,7 @@ import type {
   RegistryStrategy,
   ReleaseResult,
 } from '../types';
-import {
-  getLatestVersion,
-  normalizeRootRelativeUrls,
-  parseIndexDir,
-} from './util';
+import { extractPageLinks, getLatestVersion } from './util';
 
 export class SbtPackageDatasource extends MavenDatasource {
   static override id = 'sbt-package';
@@ -48,21 +44,23 @@ export class SbtPackageDatasource extends MavenDatasource {
       pkgUrl,
     );
     if (indexContent) {
-      const parseSubdirs = (content: string): string[] =>
-        parseIndexDir(content, (x) => {
-          if (x === artifact) {
-            return true;
-          }
-          if (x.startsWith(`${artifact}_native`)) {
-            return false;
-          }
-          if (x.startsWith(`${artifact}_sjs`)) {
-            return false;
-          }
-          return x.startsWith(`${artifact}_`);
-        });
-      const normalizedContent = normalizeRootRelativeUrls(indexContent, pkgUrl);
-      let artifactSubdirs = parseSubdirs(normalizedContent);
+      const rootPath = new URL(pkgUrl).pathname;
+      let artifactSubdirs = extractPageLinks(indexContent, (href) => {
+        const path = href.replace(rootPath, '');
+        if (
+          path.startsWith(`${artifact}_native`) ||
+          path.startsWith(`${artifact}_sjs`)
+        ) {
+          return null;
+        }
+
+        if (path === artifact || path.startsWith(`${artifact}_`)) {
+          return path;
+        }
+
+        return null;
+      });
+
       if (
         scalaVersion &&
         artifactSubdirs.includes(`${artifact}_${scalaVersion}`)
@@ -81,14 +79,20 @@ export class SbtPackageDatasource extends MavenDatasource {
   ): Promise<string[] | null> {
     if (artifactSubdirs) {
       const releases: string[] = [];
-      const parseReleases = (content: string): string[] =>
-        parseIndexDir(content, (x) => !regEx(/^\.+$/).test(x));
       for (const searchSubdir of artifactSubdirs) {
         const pkgUrl = ensureTrailingSlash(`${searchRoot}/${searchSubdir}`);
         const { body: content } = await downloadHttpProtocol(this.http, pkgUrl);
         if (content) {
-          const normalizedContent = normalizeRootRelativeUrls(content, pkgUrl);
-          const subdirReleases = parseReleases(normalizedContent);
+          const rootPath = new URL(pkgUrl).pathname;
+          const subdirReleases = extractPageLinks(content, (href) => {
+            const path = href.replace(rootPath, '');
+            if (path.startsWith('.')) {
+              return null;
+            }
+
+            return path;
+          });
+
           subdirReleases.forEach((x) => releases.push(x));
         }
       }
