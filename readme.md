@@ -32,7 +32,7 @@ Supports over 90 different package managers.
 
 Renovate updates code repositories on the following platforms: GitHub, GitLab, Bitbucket, Azure DevOps, AWS Code Commit, Gitea, Forgejo, Gerrit (experimental)
 
-#  Ways to Run Renovate
+# Ways to Run Renovate
 
 The most effective way to run Renovate is to use an automated job scheduling system that regularly runs Renovate on all enabled repositories and responds with priority to user activity.
 Mend offers cloud-hosted and self-hosted solutions. See the options below.
@@ -43,8 +43,8 @@ Mend offers cloud-hosted and self-hosted solutions. See the options below.
 
 Hosted by Mend.io. No setup is required. Community plan available (Free)
 
-* GitHub Cloud: Install the [Renovate Cloud-Hosted App](https://github.com/apps/renovate) on your GitHub org, then select the repos to enable
-* Bitbucket Cloud: Add the [Mend App](https://marketplace.atlassian.com/apps/1232072/mend) to your Workspace, the add the Mend Renovate user to the projects you want to enable
+- GitHub Cloud: Install the [Renovate Cloud-Hosted App](https://github.com/apps/renovate) on your GitHub org, then select the repos to enable
+- Bitbucket Cloud: Add the [Mend App](https://marketplace.atlassian.com/apps/1232072/mend) to your Workspace, the add the Mend Renovate user to the projects you want to enable
 
 ## Mend Renovate Community (Self-hosted)
 
@@ -52,8 +52,8 @@ Hosted by Mend.io. No setup is required. Community plan available (Free)
 
 Install and run your own Renovate server. Access internal packages.
 
-* [Mend Renovate Community Self-Hosted](https://github.com/mend/renovate-ce-ee/tree/main/docs) (Free)
-* [Mend Renovate Enterprise](https://www.mend.io/mend-renovate/) (Paid plan)
+- [Mend Renovate Community Self-Hosted](https://github.com/mend/renovate-ce-ee/tree/main/docs) (Free)
+- [Mend Renovate Enterprise](https://www.mend.io/mend-renovate/) (Paid plan)
 
 ## Other ways to run Renovate
 
@@ -63,11 +63,11 @@ If you can’t use a pre-built job scheduling system, or want to build your own,
 
 Mend provides a _**GitHub Action**_ and _**GitLab Runner**_ to make it easier to run Renovate as a CI pipeline job.
 
-* GitHub Action: [renovatebot/github-action](https://github.com/renovatebot/github-action).
-* GitLab Runner: [Renovate Runner project](https://gitlab.com/renovate-bot/renovate-runner/)
-* AzureDevOps action: [Renovate Me extension](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me)<br>
+- GitHub Action: [renovatebot/github-action](https://github.com/renovatebot/github-action).
+- GitLab Runner: [Renovate Runner project](https://gitlab.com/renovate-bot/renovate-runner/)
+- AzureDevOps action: [Renovate Me extension](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me)<br>
   _Note: This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository._
-* Custom pipeline: You can create a custom pipeline with a **yml** definition that triggers **npx renovate**. [More details on how to configure the pipeline](https://docs.renovatebot.com/modules/platform/azure/).
+- Custom pipeline: You can create a custom pipeline with a **yml** definition that triggers **npx renovate**. [More details on how to configure the pipeline](https://docs.renovatebot.com/modules/platform/azure/).
 
 ### Run Renovate CLI
 
@@ -106,21 +106,25 @@ See docs: [Running Renovate](https://docs.renovatebot.com/getting-started/runnin
 ### Issues and Discussions
 
 We prefer all items to be opened as a discussion before opening an issue.
+
 - [GitHub Discussions forum
   ](https://github.com/renovatebot/renovate/discussions)
 
 ### Contributing
 
 To contribute to Renovate, or run a local copy, please read the contributing guidelines.
+
 - [Guidelines for Contributing](https://github.com/renovatebot/renovate/blob/main/.github/contributing.md)
 - Items that need contribution: [good first issues](https://github.com/renovatebot/renovate/contribute)
 
 ### Contact and Social Media
 
 The Renovate project is proudly supported and actively maintained by Mend.io.
+
 - Contact [Mend.io](http://Mend.io) for commercial support questions.
 
 Follow us on Twitter, LinkedIn and Mastodon.
+
 - Twitter: [x.com/mend_io](http://x.com/mend_io)
 - LinkedIn: [linkedin.com/company/mend-io](https://linkedin.com/company/mend-io)
 
