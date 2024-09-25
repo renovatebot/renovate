@@ -2,6 +2,7 @@ import { codeBlock, html } from 'common-tags';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { regEx } from '../../../util/regex';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from '../sbt-package/util';
@@ -12,11 +13,15 @@ const sbtPluginIndex = Fixtures.get(`sbt-plugins-index.html`);
 
 describe('modules/datasource/sbt-plugin/index', () => {
   it('parses Maven index directory', () => {
-    expect(parseIndexDir(mavenIndexHtml)).toMatchSnapshot();
+    expect(
+      parseIndexDir(mavenIndexHtml, (x) => !regEx(/^\.+/).test(x)),
+    ).toMatchSnapshot();
   });
 
   it('parses sbt index directory', () => {
-    expect(parseIndexDir(sbtPluginIndex)).toMatchSnapshot();
+    expect(
+      parseIndexDir(sbtPluginIndex, (x) => !regEx(/^\.+/).test(x)),
+    ).toMatchSnapshot();
   });
 
   it('uses proper hostType', () => {
