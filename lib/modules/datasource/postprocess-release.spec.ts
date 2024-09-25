@@ -5,6 +5,7 @@ import { postprocessRelease } from './postprocess-release';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
+  PostprocessReleaseResult,
   Release,
   ReleaseResult,
 } from './types';
@@ -61,7 +62,7 @@ describe('modules/datasource/postprocess-release', () => {
       postprocessRelease(
         _config: PostprocessReleaseConfig,
         release: Release,
-      ): Promise<Release | null> {
+      ): Promise<PostprocessReleaseResult> {
         return Promise.resolve(release);
       }
     }
@@ -84,7 +85,7 @@ describe('modules/datasource/postprocess-release', () => {
       postprocessRelease(
         _config: PostprocessReleaseConfig,
         release: Release,
-      ): Promise<Release | null> {
+      ): Promise<PostprocessReleaseResult> {
         release.releaseTimestamp = '2024-09-05';
         return Promise.resolve(release);
       }
@@ -109,8 +110,8 @@ describe('modules/datasource/postprocess-release', () => {
       postprocessRelease(
         _config: PostprocessReleaseConfig,
         _release: Release,
-      ): Promise<Release | null> {
-        return Promise.resolve(null);
+      ): Promise<PostprocessReleaseResult> {
+        return Promise.resolve('reject');
       }
     }
     getDatasourceFor.mockReturnValueOnce(new SomeDatasource());
@@ -130,7 +131,7 @@ describe('modules/datasource/postprocess-release', () => {
       postprocessRelease(
         _config: PostprocessReleaseConfig,
         _release: Release,
-      ): Promise<Release | null> {
+      ): Promise<PostprocessReleaseResult> {
         return Promise.reject(new Error('unknown error'));
       }
     }
