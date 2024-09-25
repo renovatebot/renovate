@@ -44,11 +44,12 @@ export async function postprocessRelease(
       release,
     );
 
-    if (!result) {
+    if (result === 'reject') {
       logger.debug(
         { datasource, packageName, registryUrl, version: release.version },
         'Rejected release',
       );
+      return null;
     }
 
     return result;

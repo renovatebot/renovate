@@ -2,6 +2,7 @@ import { mocked } from '../../../../../test/util';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
+  PostprocessReleaseResult,
   Release,
   ReleaseResult,
 } from '../../../../modules/datasource';
@@ -93,9 +94,9 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         postprocessRelease(
           _: PostprocessReleaseConfig,
           release: Release,
-        ): Promise<Release | null> {
+        ): Promise<PostprocessReleaseResult> {
           if (release.version !== '1.0.2') {
-            return Promise.resolve(null);
+            return Promise.resolve('reject');
           }
 
           release.isStable = true;
