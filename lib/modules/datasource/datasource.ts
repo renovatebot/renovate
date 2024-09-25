@@ -4,7 +4,10 @@ import type {
   DatasourceApi,
   DigestConfig,
   GetReleasesConfig,
+  PostprocessReleaseConfig,
+  PostprocessReleaseResult,
   RegistryStrategy,
+  Release,
   ReleaseResult,
   SourceUrlSupport,
 } from './types';
@@ -60,5 +63,13 @@ export abstract class Datasource implements DatasourceApi {
     }
 
     throw err;
+  }
+
+  // no-op implementation
+  postprocessRelease(
+    config: PostprocessReleaseConfig,
+    release: Release,
+  ): Promise<PostprocessReleaseResult> {
+    return Promise.resolve(release);
   }
 }

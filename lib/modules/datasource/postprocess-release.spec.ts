@@ -59,7 +59,7 @@ describe('modules/datasource/postprocess-release', () => {
 
   it('returns original release for datasource with missing `packageName` field', async () => {
     class SomeDatasource extends DummyDatasource {
-      postprocessRelease(
+      override postprocessRelease(
         _config: PostprocessReleaseConfig,
         release: Release,
       ): Promise<PostprocessReleaseResult> {
@@ -82,7 +82,7 @@ describe('modules/datasource/postprocess-release', () => {
     const releaseOrig: Release = { version: '1.2.3' };
 
     class SomeDatasource extends DummyDatasource {
-      postprocessRelease(
+      override postprocessRelease(
         _config: PostprocessReleaseConfig,
         release: Release,
       ): Promise<PostprocessReleaseResult> {
@@ -107,7 +107,7 @@ describe('modules/datasource/postprocess-release', () => {
     const releaseOrig: Release = { version: '1.2.3' };
 
     class SomeDatasource extends DummyDatasource {
-      postprocessRelease(
+      override postprocessRelease(
         _config: PostprocessReleaseConfig,
         _release: Release,
       ): Promise<PostprocessReleaseResult> {
@@ -128,7 +128,7 @@ describe('modules/datasource/postprocess-release', () => {
     const releaseOrig: Release = { version: '1.2.3' };
 
     class SomeDatasource extends DummyDatasource {
-      postprocessRelease(
+      override postprocessRelease(
         _config: PostprocessReleaseConfig,
         _release: Release,
       ): Promise<PostprocessReleaseResult> {
