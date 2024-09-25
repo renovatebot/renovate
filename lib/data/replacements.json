@@ -270,7 +270,7 @@
         "matchDatasources": ["npm"],
         "matchPackageNames": ["eslint-plugin-vitest"],
         "replacementName": "@vitest/eslint-plugin",
-        "replacementVersion": "1.0.0"
+        "replacementVersion": "1.0.1"
       }
     ]
   },
