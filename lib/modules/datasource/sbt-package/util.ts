@@ -1,12 +1,11 @@
 import { coerceArray } from '../../../util/array';
-import { regEx } from '../../../util/regex';
 import { compare } from '../../versioning/maven/compare';
 
 const linkRegExp = /(?<=href=['"])[^'"]*(?=\/['"])/gi;
 
 export function parseIndexDir(
   content: string,
-  filterFn = (x: string): boolean => !regEx(/^\.+/).test(x),
+  filterFn: (x: string) => boolean,
 ): string[] {
   const unfiltered = coerceArray(content.match(linkRegExp));
   return unfiltered.filter(filterFn);
