@@ -65,9 +65,9 @@ export abstract class Datasource implements DatasourceApi {
     throw err;
   }
 
-  // no-op implementation
+  // istanbul ignore: no-op implementation, never called
   postprocessRelease(
-    config: PostprocessReleaseConfig,
+    _config: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
     return Promise.resolve(release);
