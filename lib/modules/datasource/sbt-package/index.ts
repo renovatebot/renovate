@@ -13,10 +13,7 @@ import type {
   RegistryStrategy,
   ReleaseResult,
 } from '../types';
-import {
-  extractPageLinks,
-  getLatestVersion,
-} from './util';
+import { extractPageLinks, getLatestVersion } from './util';
 
 export class SbtPackageDatasource extends MavenDatasource {
   static override id = 'sbt-package';
