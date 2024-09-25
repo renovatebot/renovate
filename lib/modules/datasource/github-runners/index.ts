@@ -14,7 +14,7 @@ export class GithubRunnersDatasource extends Datasource {
    */
   private static readonly releases: Record<string, Release[] | undefined> = {
     ubuntu: [
-      { version: '24.04', isStable: false },
+      { version: '24.04' },
       { version: '22.04' },
       { version: '20.04' },
       { version: '18.04', isDeprecated: true },
