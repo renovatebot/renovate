@@ -4,24 +4,22 @@ import * as httpMock from '../../../../test/http-mock';
 import { regEx } from '../../../util/regex';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
-import { parseIndexDir } from './util';
+import { extractPageLinks } from './util';
 import { SbtPackageDatasource } from '.';
 
 describe('modules/datasource/sbt-package/index', () => {
   it('parses Maven index directory', () => {
     expect(
-      parseIndexDir(
-        Fixtures.get(`maven-index.html`),
-        (x) => !regEx(/^\.+/).test(x),
+      extractPageLinks(Fixtures.get(`maven-index.html`), (x) =>
+        regEx(/^\.+/).test(x) ? null : x,
       ),
     ).toMatchSnapshot();
   });
 
   it('parses sbt index directory', () => {
     expect(
-      parseIndexDir(
-        Fixtures.get(`sbt-plugins-index.html`),
-        (x) => !regEx(/^\.+/).test(x),
+      extractPageLinks(Fixtures.get(`sbt-plugins-index.html`), (x) =>
+        regEx(/^\.+/).test(x) ? null : x,
       ),
     ).toMatchSnapshot();
   });

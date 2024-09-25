@@ -5,7 +5,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { regEx } from '../../../util/regex';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
-import { parseIndexDir } from '../sbt-package/util';
+import { extractPageLinks } from '../sbt-package/util';
 import { SbtPluginDatasource } from '.';
 
 const mavenIndexHtml = Fixtures.get(`maven-index.html`);
@@ -14,13 +14,17 @@ const sbtPluginIndex = Fixtures.get(`sbt-plugins-index.html`);
 describe('modules/datasource/sbt-plugin/index', () => {
   it('parses Maven index directory', () => {
     expect(
-      parseIndexDir(mavenIndexHtml, (x) => !regEx(/^\.+/).test(x)),
+      extractPageLinks(mavenIndexHtml, (x) =>
+        regEx(/^\.+/).test(x) ? null : x,
+      ),
     ).toMatchSnapshot();
   });
 
   it('parses sbt index directory', () => {
     expect(
-      parseIndexDir(sbtPluginIndex, (x) => !regEx(/^\.+/).test(x)),
+      extractPageLinks(sbtPluginIndex, (x) =>
+        regEx(/^\.+/).test(x) ? null : x,
+      ),
     ).toMatchSnapshot();
   });
 
