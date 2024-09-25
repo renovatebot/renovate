@@ -1,10 +1,5 @@
 ![Mend Renovate CLI banner](https://docs.renovatebot.com/assets/images/mend-renovate-cli-banner.jpg)
 
-# Renovate
-
-Automated dependency updates.
-Multi-platform and multi-language.
-
 [![License: AGPL-3.0-only](https://img.shields.io/badge/license-%20%09AGPL--3.0--only-blue.svg)](https://raw.githubusercontent.com/renovatebot/renovate/main/license)
 [![codecov](https://codecov.io/gh/renovatebot/renovate/branch/main/graph/badge.svg)](https://codecov.io/gh/renovatebot/renovate)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
@@ -12,140 +7,122 @@ Multi-platform and multi-language.
 ![Docker Pulls](https://img.shields.io/docker/pulls/renovate/renovate?color=turquoise)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/renovatebot/renovate/badge)](https://securityscorecards.dev/viewer/?uri=github.com/renovatebot/renovate)
 
-## Why Use Renovate?
+# What is the Mend Renovate CLI?
 
-- Get automated Pull Requests to update your dependencies
-- Reduce noise by running Renovate on a schedule, for example:
-  - on weekends
-  - outside of working hours
-  - each week
-  - each month
-- Relevant package files are discovered automatically
-- Supports monorepo architectures with workspaces with no extra configuration
-- Bot behavior is customizable via configuration files (config as code)
-- Use ESLint-like shared config presets for ease of use and simplifying configuration (JSON format only)
-- Lock files are supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
-- Get replacement PRs to migrate from a deprecated dependency to the community suggested replacement, works with _most_ managers, see [issue 14149](https://github.com/renovatebot/renovate/issues/14149) for exceptions
-- Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via the Mend Renovate App
+Renovate is an automated dependency update tool.
+It helps to update dependencies in your code without needing to do it manually.
+When Renovate runs on your repo, it looks for references to dependencies (both public and private) and, if there are newer versions available, Renovate can create pull requests to update your versions automatically.
 
-## Supported Platforms
+## Features
 
-Renovate works on these platforms:
+- Delivers update PRs directly to your repo
+  - Relevant package files are discovered automatically
+  - Pull Requests automatically generated in your repo
+- Provides useful information to help you decide which updates to accept (age, adoption, pass rates, merge confidence)
+- Highly configurable and flexible to fit in with your needs and repository standards
+- Largest collection of languages and platforms (listed below)
+- Connects with private repositories and package registries
 
-- [GitHub (.com and Enterprise Server)](https://docs.renovatebot.com/modules/platform/github/)
-- [GitLab (.com and CE/EE)](https://docs.renovatebot.com/modules/platform/gitlab/)
-- [Bitbucket Cloud](https://docs.renovatebot.com/modules/platform/bitbucket/)
-- [Bitbucket Server](https://docs.renovatebot.com/modules/platform/bitbucket-server/)
-- [Azure DevOps](https://docs.renovatebot.com/modules/platform/azure/)
-- [AWS CodeCommit](https://docs.renovatebot.com/modules/platform/codecommit/)
-- [Gitea and Forgejo](https://docs.renovatebot.com/modules/platform/gitea/)
-- [Gerrit (experimental)](https://docs.renovatebot.com/modules/platform/gerrit/)
+### Languages
 
-## Who Uses Renovate?
+Renovate can provide updates for most popular languages, platforms, and registries including: npm, Java, Python, .NET, Scala, Ruby, Go, Docker and more.
+Supports over 90 different package managers.
 
-Renovate is widely used in the developer community:
+### Platforms
 
-![Logos of companies and projects that use Renovate](./docs/usage/assets/images/matrix.png)
+Renovate updates code repositories on the following platforms: GitHub, GitLab, Bitbucket, Azure DevOps, AWS Code Commit, Gitea, Forgejo, Gerrit (experimental)
 
-<details>
-<summary>List of companies and projects that use Renovate</summary>
+#  Ways to Run Renovate
 
-- Prisma
-- Netlify
-- Envoy
-- Condé Nast
-- Microsoft
-- Atlassian
-- Sourcegraph
-- Mozilla
-- Deloitte
-- Telus
-- Yarn
-- HashiCorp
-- Automattic
-- Algolia
-- eBay
-- Cypress
-- Red Hat
-- Financial Times
-- Uber
-- Buildkite
+The most effective way to run Renovate is to use an automated job scheduling system that regularly runs Renovate on all enabled repositories and responds with priority to user activity.
+Mend offers cloud-hosted and self-hosted solutions. See the options below.
 
-</details>
+## Mend Renovate Community (Cloud-Hosted)
 
-## Renovate OSS Insights
+**Supports: GitHub.com, Bitbucket Cloud**
 
-Renovate is built on a big community and actively invites and supports contributions.
-Information about our contributors and community can be found on [OSS Insight](https://ossinsight.io/analyze/renovatebot/renovate).
+Hosted by Mend.io. No setup is required. Community plan available (Free)
 
-## Star History
+* GitHub Cloud: Install the [Renovate Cloud-Hosted App](https://github.com/apps/renovate) on your GitHub org, then select the repos to enable
+* Bitbucket Cloud: Add the [Mend App](https://marketplace.atlassian.com/apps/1232072/mend) to your Workspace, the add the Mend Renovate user to the projects you want to enable
 
-[![Star History Chart](https://api.star-history.com/svg?repos=renovatebot/renovate&type=Date)](https://star-history.com/#renovatebot/renovate&Date)
+## Mend Renovate Community (Self-hosted)
 
-## The Renovate Approach
+**Supports: GitHub, GitLab, Bitbucket Data Center**
 
-We believe everyone benefits from automation, whether it's a little or a lot.
-This means that Renovate:
+Install and run your own Renovate server. Access internal packages.
 
-- Adapts to your workflow
-- Allows you to configure its behavior
-- Will autodetect settings where possible
+* [Mend Renovate Community Self-Hosted](https://github.com/mend/renovate-ce-ee/tree/main/docs) (Free)
+* [Mend Renovate Enterprise](https://www.mend.io/mend-renovate/) (Paid plan)
 
-## Using Renovate
+## Other ways to run Renovate
 
-Get started with Renovate by checking out our [tutorial](https://github.com/renovatebot/tutorial).
+If you can’t use a pre-built job scheduling system, or want to build your own, the following options are available:
 
-### GitHub
+### Run Renovate on your Pipeline
 
-We recommend that you use the Mend Renovate App.
-Install [the Mend Renovate App](https://github.com/apps/renovate) now.
-[More details on the Mend Renovate App installation](https://docs.renovatebot.com/getting-started/installing-onboarding/).
+Mend provides a _**GitHub Action**_ and _**GitLab Runner**_ to make it easier to run Renovate as a CI pipeline job.
 
-### Azure DevOps
+* GitHub Action: [renovatebot/github-action](https://github.com/renovatebot/github-action).
+* GitLab Runner: [Renovate Runner project](https://gitlab.com/renovate-bot/renovate-runner/)
+* AzureDevOps action: [Renovate Me extension](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me)<br>
+  _Note: This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository._
+* Custom pipeline: You can create a custom pipeline with a **yml** definition that triggers **npx renovate**. [More details on how to configure the pipeline](https://docs.renovatebot.com/modules/platform/azure/).
 
-There are two ways to run Renovate on Azure DevOps:
+### Run Renovate CLI
 
-- Renovate Me extension
-- Custom pipeline
+There are several ways to run the Renovate CLI directly.
+See docs: [Running Renovate](https://docs.renovatebot.com/getting-started/running/) for all options.
 
-#### Renovate Me extension
+**Targets: all platforms**
 
-Go to the Visual Studio Marketplace and install the [Renovate Me](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me) extension in your organization.
-From there you can create a pipeline with the `RenovateMe` task.
+# Docs
 
-> [!NOTE]
-> This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository.
+### More about Renovate
 
-#### Custom pipeline
+- Renovate basics
+  - [Why use Renovate](https://docs.renovatebot.com/#why-use-renovate)
+  - [What does it do? / How does it work?](https://docs.renovatebot.com/key-concepts/how-renovate-works/)
+  - [Who is using it?](https://docs.renovatebot.com/#who-uses-renovate)
+- Supported platforms and languages
+  - [Supported platforms](https://docs.renovatebot.com/#supported-platforms)
+  - [Supported languages / package managers](https://docs.renovatebot.com/modules/manager/)
+- Advanced renovate usage
+  - [Accessing private packages](https://docs.renovatebot.com/getting-started/private-packages/)
+  - [Merge Confidence data](https://docs.renovatebot.com/merge-confidence/)
 
-You can create a custom pipeline with a `yml` definition that triggers `npx renovate`.
-[More details on how to configure the pipeline](https://docs.renovatebot.com/modules/platform/azure/).
+### Renovate Docs
 
-### Bitbucket Cloud/Server, Forgejo, Gitea, GitLab
+- [Renovate Configuration](https://docs.renovatebot.com/configuration-options/)
+- [Mend Renovate Self-Hosted Docs](https://github.com/mend/renovate-ce-ee/tree/main/docs)
 
-For Bitbucket Cloud, Bitbucket Server, Forgejo, Gitea and GitLab, use our self-hosting option.
+### Comparisons
 
-## Configuration
+- [Different ways to run Renovate](https://www.mend.io/renovate/)
+- [Renovate vs Dependabot Comparison](https://docs.renovatebot.com/bot-comparison/)
 
-Go to our [documentation website](https://docs.renovatebot.com/) to learn how to configure Renovate.
-We have a [full list of configuration options](https://docs.renovatebot.com/configuration-options/).
+# Get involved
 
-To get help with your configuration, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and open a new "config help" discussion post.
+### Issues and Discussions
 
-## Self-Hosting
+We prefer all items to be opened as a discussion before opening an issue.
+- [GitHub Discussions forum
+  ](https://github.com/renovatebot/renovate/discussions)
 
-To run your own instance of Renovate you have several options:
+### Contributing
 
-- Install the `renovate` CLI tool from npmjs, run it on a schedule (e.g. using `cron`)
-- Run the `renovate/renovate:full` Docker Hub image (same content/versions as the CLI tool), run it on a schedule
-- Run the `renovate/renovate:latest` Docker Hub image if you only use package managers that don't need third-party binaries (e.g. JavaScript, Docker, NuGet, pip)
+To contribute to Renovate, or run a local copy, please read the contributing guidelines.
+- [Guidelines for Contributing](https://github.com/renovatebot/renovate/blob/main/.github/contributing.md)
+- Items that need contribution: [good first issues](https://github.com/renovatebot/renovate/contribute)
 
-[More details on the self-hosting development](https://github.com/renovatebot/renovate/blob/main/docs/usage/getting-started/running.md).
+### Contact and Social Media
 
-## Contributing
+The Renovate project is proudly supported and actively maintained by Mend.io.
+- Contact [Mend.io](http://Mend.io) for commercial support questions.
 
-If you want to contribute to Renovate or get a local copy running, please read the instructions in [contributing guidelines](.github/contributing.md).
-To get started look at the [list of good first issues](https://github.com/renovatebot/renovate/contribute).
+Follow us on Twitter, LinkedIn and Mastodon.
+- Twitter: [x.com/mend_io](http://x.com/mend_io)
+- LinkedIn: [linkedin.com/company/mend-io](https://linkedin.com/company/mend-io)
 
 ## Security / Disclosure
 
