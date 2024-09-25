@@ -4062,3 +4062,18 @@ To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabi
 <!-- prettier-ignore -->
 !!! note
     If you want to raise only vulnerability fix PRs, you may use the `security:only-security-updates` preset.
+
+### vulnerabilityFixStrategy
+
+When a vulnerability fix is available, Renovate will default to picking the lowest fixed version (`vulnerabilityFixStrategy=lowest`).
+For example, if the current version is `1.0.0`, and a vulnerability is fixed in `1.1.0`, while the latest version is `1.2.0`, then Renovate will propose an update to `1.1.0` as the vulnerability fix.
+
+If `vulnerabilityFixStrategy=highest` is configured then Renovate will use its normal strategy for picking upgrades, e.g. in the above example it will propose an update to `1.2.0` to fix the vulnerability.
+
+```json title="Setting vulnerabilityFixStrategy to highest"
+{
+  "vulnerabilityAlerts": {
+    "vulnerabilityFixStrategy": "highest"
+  }
+}
+```

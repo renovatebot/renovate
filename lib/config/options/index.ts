@@ -1976,11 +1976,21 @@ const options: RenovateOptions[] = [
       commitMessageSuffix: '[SECURITY]',
       branchTopic: `{{{datasource}}}-{{{depNameSanitized}}}-vulnerability`,
       prCreation: 'immediate',
+      vulnerabilityFixStrategy: 'lowest',
     },
     mergeable: true,
     cli: false,
     env: false,
     supportedPlatforms: ['github'],
+  },
+  {
+    name: 'vulnerabilityFixStrategy',
+    description:
+      'Strategy to use when fixing vulnerabilities. `lowest` will propose the earliest version with a fix, `highest` will always pick the latest version.',
+    type: 'string',
+    allowedValues: ['lowest', 'highest'],
+    default: 'lowest',
+    parents: ['vulnerabilityAlerts'],
   },
   {
     name: 'osvVulnerabilityAlerts',
