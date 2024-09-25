@@ -5,11 +5,11 @@ import { compare } from '../../versioning/maven/compare';
 const linkRegExp = /(?<=href=['"])[^'"]*(?=\/['"])/gi;
 
 export function extractPageLinks(
-  content: string,
-  filterMapFn: (href: string) => string | null,
+  html: string,
+  filterMapHref: (href: string) => string | null,
 ): string[] {
-  const unfiltered = coerceArray(content.match(linkRegExp));
-  return filterMap(unfiltered, filterMapFn);
+  const unfiltered = coerceArray(html.match(linkRegExp));
+  return filterMap(unfiltered, filterMapHref);
 }
 
 export function getLatestVersion(versions: string[] | null): string | null {
