@@ -107,8 +107,7 @@ See docs: [Running Renovate](https://docs.renovatebot.com/getting-started/runnin
 
 We prefer all items to be opened as a discussion before opening an issue.
 
-- [GitHub Discussions forum
-  ](https://github.com/renovatebot/renovate/discussions)
+- [GitHub Discussions forum](https://github.com/renovatebot/renovate/discussions)
 
 ### Contributing
 
