@@ -1,7 +1,9 @@
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { mergeChildConfig, removeGlobalConfig } from '../../../config';
+import { decryptConfig } from '../../../config/decrypt';
 import { parseFileConfig } from '../../../config/parse';
+import { resolveConfigPresets } from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
 import {
@@ -78,7 +80,7 @@ export async function mergeInheritedConfig(
   }
   const inheritedConfig = parseResult.parsedContents as RenovateConfig;
   logger.debug({ config: inheritedConfig }, `Inherited config`);
-  const res = await validateConfig('inherit', inheritedConfig);
+  let res = await validateConfig('inherit', inheritedConfig);
   if (res.errors.length) {
     logger.warn(
       { errors: res.errors },
@@ -99,5 +101,31 @@ export async function mergeInheritedConfig(
       'Removed global config from inherited config.',
     );
   }
-  return mergeChildConfig(config, filteredConfig);
+
+  const decryptedConfig = await decryptConfig(
+    filteredConfig,
+    config.repository,
+  );
+  // Decrypt after resolving in case the preset contains npm authentication instead
+  const resolvedConfig = await decryptConfig(
+    await resolveConfigPresets(decryptedConfig, config, config.ignorePresets),
+    config.repository,
+  );
+  logger.trace({ config: resolvedConfig }, 'resolved inherited config');
+  res = await validateConfig('inherit', inheritedConfig);
+  if (res.errors.length) {
+    logger.warn(
+      { errors: res.errors },
+      'Found errors in inherited configuration.',
+    );
+    throw new Error(CONFIG_VALIDATION);
+  }
+  if (res.warnings.length) {
+    logger.warn(
+      { warnings: res.warnings },
+      'Found warnings in inherited configuration.',
+    );
+  }
+
+  return mergeChildConfig(config, resolvedConfig);
 }
