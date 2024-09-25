@@ -95,6 +95,8 @@ export interface PostprocessReleaseConfig {
   registryUrl: string | null;
 }
 
+export type PostprocessReleaseResult = Release | 'reject';
+
 export type RegistryStrategy = 'first' | 'hunt' | 'merge';
 export type SourceUrlSupport = 'package' | 'release' | 'none';
 export interface DatasourceApi extends ModuleApi {
@@ -161,5 +163,5 @@ export interface DatasourceApi extends ModuleApi {
   postprocessRelease?(
     config: PostprocessReleaseConfig,
     release: Release,
-  ): Promise<Release | null>;
+  ): Promise<PostprocessReleaseResult>;
 }
