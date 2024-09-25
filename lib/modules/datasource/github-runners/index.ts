@@ -14,13 +14,16 @@ export class GithubRunnersDatasource extends Datasource {
    */
   private static readonly releases: Record<string, Release[] | undefined> = {
     ubuntu: [
-      { version: '24.04', isStable: false },
+      { version: '24.04' },
       { version: '22.04' },
       { version: '20.04' },
       { version: '18.04', isDeprecated: true },
       { version: '16.04', isDeprecated: true },
     ],
     macos: [
+      { version: '15', isStable: false },
+      { version: '15-large', isStable: false },
+      { version: '15-xlarge', isStable: false },
       { version: '14' },
       { version: '14-large' },
       { version: '14-xlarge' },
