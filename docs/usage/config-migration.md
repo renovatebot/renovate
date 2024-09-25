@@ -50,7 +50,7 @@ Renovate will:
 
 ### Config migration needed, but disabled
 
-If config migration is needed, but disabled then Renovate adds a checkbox to the Dependency Dashboard if it exists.
+If config migration is needed, but disabled then Renovate adds a checkbox to the Dependency Dashboard (if the dashboard exists).
 This is known as "on-demand" config migration because migration PRs are only created at the request of the user by ticking the checkbox.
 
 The checkbox looks like this:
