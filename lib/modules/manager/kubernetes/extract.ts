@@ -60,7 +60,9 @@ function extractImages(
     }
   }
 
-  return deps.filter((dep) => !dep.currentValue?.includes('${'));
+  return deps
+    .filter((dep) => !dep.currentValue?.includes('${'))
+    .filter((dep) => !dep.currentValue?.includes('{{'));
 }
 
 function extractApis(
