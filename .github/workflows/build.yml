@@ -683,7 +683,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@67c1778f7c7b48110e8278952e08b8b71e3ccedf # v3.4.20
+        uses: containerbase/internal-tools@5df8d577120c2047993d397422a4f95bd0432b6f # v3.4.21
         with:
           command: docker-config
 
