@@ -86,7 +86,7 @@ export class SbtPackageDatasource extends MavenDatasource {
           const rootPath = new URL(pkgUrl).pathname;
           const subdirReleases = extractPageLinks(content, (href) => {
             const path = href.replace(rootPath, '');
-            if (regEx(/^\.+$/).test(path)) {
+            if (path.startsWith('.')) {
               return null;
             }
 

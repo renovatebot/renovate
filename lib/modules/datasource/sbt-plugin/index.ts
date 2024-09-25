@@ -44,7 +44,7 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
   ): Promise<string[] | null> {
     const searchRoot = `${rootUrl}/${artifact}`;
     const hrefFilterMap = (href: string): string | null => {
-      if (regEx(/^\.+$/).test(href)) {
+      if (href.startsWith('.')) {
         return null;
       }
 

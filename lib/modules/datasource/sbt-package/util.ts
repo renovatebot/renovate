@@ -6,7 +6,7 @@ const linkRegExp = /(?<=href=['"])[^'"]*(?=\/['"])/gi;
 
 export function extractPageLinks(
   html: string,
-  filterMapHref: (href: string) => string | null,
+  filterMapHref: (href: string) => string | null | undefined,
 ): string[] {
   const unfiltered = coerceArray(html.match(linkRegExp));
   return filterMap(unfiltered, filterMapHref);

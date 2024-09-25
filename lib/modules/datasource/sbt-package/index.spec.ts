@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
@@ -57,7 +58,12 @@ describe('modules/datasource/sbt-package/index', () => {
       httpMock
         .scope('https://repo.maven.apache.org')
         .get('/maven2/com/example/')
-        .reply(200, '<a href="empty/">empty_2.12/</a>\n')
+        .reply(
+          200,
+          codeBlock`
+            <a href="empty/">empty_2.12/</a>
+          `,
+        )
         .get('/maven2/com/example/empty/')
         .reply(200, '')
         .get('/maven2/com.example/')
@@ -83,24 +89,37 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/org/example/')
         .reply(
           200,
-          [
-            `<a href="example/" title='example/'>example_2.12/</a>`,
-            `<a href="example_2.12/" title='example_2.12/'>example_2.12/</a>`,
-            `<a href="example_native/" title='example_native/'>example_native/</a>`,
-            `<a href="example_sjs/" title='example_sjs/'>example_sjs/</a>`,
-          ].join('\n'),
+          codeBlock`
+            <a href="../" title='../'>../</a>
+            <a href="example/" title='example/'>example_2.12/</a>
+            <a href="example_2.12/" title='example_2.12/'>example_2.12/</a>
+            <a href="example_native/" title='example_native/'>example_native/</a>
+            <a href="example_sjs/" title='example_sjs/'>example_sjs/</a>
+          `,
         )
         .get('/org/example/example/')
-        .reply(200, `<a href='1.2.0/'>1.2.0/</a>`)
+        .reply(
+          200,
+          codeBlock`
+            <a href='../'>../</a>
+            <a href='1.2.0/'>1.2.0/</a>
+            `,
+        )
         .get('/org/example/example_2.12/')
-        .reply(200, `<a href='1.2.3/'>1.2.3/</a>`)
+        .reply(
+          200,
+          codeBlock`
+            <a href='../'>../</a>
+            <a href='1.2.3/'>1.2.3/</a>
+          `,
+        )
         .get('/org/example/example/1.2.3/example-1.2.3.pom')
         .twice()
-        .reply(200, ``)
+        .reply(200, '')
         .get('/org/example/example_2.12/1.2.3/example-1.2.3.pom')
-        .reply(200, ``)
+        .reply(200, '')
         .get('/org/example/example_2.12/1.2.3/example_2.12-1.2.3.pom')
-        .reply(200, ``);
+        .reply(200, '');
 
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
@@ -161,15 +180,15 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/kafka-avro-serializer/7.0.1/kafka-avro-serializer-7.0.1.pom')
         .reply(
           200,
-          `
-          <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xmlns="http://maven.apache.org/POM/4.0.0"
-          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">z
-            <artifactId>kafka-avro-serializer</artifactId>
-            <packaging>jar</packaging>
-            <name>kafka-avro-serializer</name>
-          </project>
-        `,
+          codeBlock`
+            <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://maven.apache.org/POM/4.0.0"
+            xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">z
+              <artifactId>kafka-avro-serializer</artifactId>
+              <packaging>jar</packaging>
+              <name>kafka-avro-serializer</name>
+            </project>
+          `,
         );
 
       const res = await getPkgReleases({
@@ -195,7 +214,7 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/org/example/example/1.2.3/example-1.2.3.pom')
         .reply(
           200,
-          `
+          codeBlock`
             <project>
               <url>https://package.example.org/about</url>
               <scm>
@@ -229,8 +248,8 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/org/example/example_2.13/maven-metadata.xml')
         .reply(
           200,
-          `
-          <?xml version="1.0" encoding="UTF-8"?>
+          codeBlock`
+            <?xml version="1.0" encoding="UTF-8"?>
             <metadata>
               <groupId>org.example</groupId>
               <artifactId>package</artifactId>
