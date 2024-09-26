@@ -15,6 +15,7 @@ import { Datasource } from '../datasource';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
+  PostprocessReleaseResult,
   Release,
   ReleaseResult,
 } from '../types';
@@ -396,10 +397,10 @@ export class CrateDatasource extends Datasource {
     cacheable: ({ registryUrl }: PostprocessReleaseConfig, _: Release) =>
       registryUrl === 'https://crates.io',
   })
-  async postprocessRelease(
+  override async postprocessRelease(
     { packageName, registryUrl }: PostprocessReleaseConfig,
     release: Release,
-  ): Promise<Release | null> {
+  ): Promise<PostprocessReleaseResult> {
     if (registryUrl !== 'https://crates.io') {
       return release;
     }
