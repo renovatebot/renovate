@@ -9,6 +9,7 @@
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
       "replacements:docker-compose",
+      "replacements:eslint-plugin-es-to-maintained-fork",
       "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
       "replacements:eslint-config-standard-with-typescript-to-eslint-config-love",
       "replacements:eslint-plugin-node-to-maintained-fork",
@@ -223,6 +224,18 @@
         "matchCurrentValue": "/^((debian|alpine)-)?1\\.29\\.2$/",
         "replacementName": "docker",
         "replacementVersion": "23.0.0-cli"
+      }
+    ]
+  },
+  "eslint-plugin-es-to-maintained-fork": {
+    "description": "Replace `eslint-plugin-es` with a maintained fork: `eslint-plugin-esx`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["eslint-plugin-es"],
+        "matchCurrentVersion": "^4.1.0",
+        "replacementName": "eslint-plugin-esx",
+        "replacementVersion": "4.1.0"
       }
     ]
   },
