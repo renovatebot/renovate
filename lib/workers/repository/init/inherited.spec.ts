@@ -1,4 +1,5 @@
-import { platform } from '../../../../test/util';
+import { mocked, platform } from '../../../../test/util';
+import * as _presets from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
 import {
   CONFIG_INHERIT_NOT_FOUND,
@@ -7,6 +8,10 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { mergeInheritedConfig } from './inherited';
+
+jest.mock('../../../config/presets');
+
+const presets = mocked(_presets);
 
 describe('workers/repository/init/inherited', () => {
   let config: RenovateConfig;
@@ -83,5 +88,28 @@ describe('workers/repository/init/inherited', () => {
     expect(res.labels).toEqual(['test']);
     expect(res.onboarding).toBeFalse();
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('should resolve presets found in inherited config', async () => {
+    platform.getRawFile.mockResolvedValue(
+      '{"onboarding":false,"labels":["test"],"extends":["some-shared-preset"]}',
+    );
+    presets.resolveConfigPresets.mockResolvedValueOnce({
+      onboarding: false,
+      labels: ['test'],
+      packageRules: [
+        {
+          matchUpdateTypes: ['patch'],
+          automerge: true,
+        },
+      ],
+    });
+    const res = await mergeInheritedConfig(config);
+    expect(res.labels).toEqual(['test']);
+    expect(res.onboarding).toBeFalse();
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Resolving presets found in inherited config',
+    );
   });
 });
