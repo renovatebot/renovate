@@ -7,7 +7,7 @@ import { compare } from '../../versioning/maven/compare';
 import { MAVEN_REPO } from '../maven/common';
 import { downloadHttpProtocol } from '../maven/util';
 import { SbtPackageDatasource } from '../sbt-package';
-import { getLatestVersion, parseIndexDir } from '../sbt-package/util';
+import { extractPageLinks, getLatestVersion } from '../sbt-package/util';
 import type {
   GetReleasesConfig,
   RegistryStrategy,
@@ -43,15 +43,20 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
     scalaVersion: string,
   ): Promise<string[] | null> {
     const searchRoot = `${rootUrl}/${artifact}`;
-    const parse = (content: string): string[] =>
-      parseIndexDir(content, (x) => !regEx(/^\.+$/).test(x));
+    const hrefFilterMap = (href: string): string | null => {
+      if (href.startsWith('.')) {
+        return null;
+      }
+
+      return href;
+    };
     const { body: indexContent } = await downloadHttpProtocol(
       this.http,
       ensureTrailingSlash(searchRoot),
     );
     if (indexContent) {
       const releases: string[] = [];
-      const scalaVersionItems = parse(indexContent);
+      const scalaVersionItems = extractPageLinks(indexContent, hrefFilterMap);
       const scalaVersions = scalaVersionItems.map((x) =>
         x.replace(regEx(/^scala_/), ''),
       );
@@ -65,7 +70,10 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
           ensureTrailingSlash(searchSubRoot),
         );
         if (subRootContent) {
-          const sbtVersionItems = parse(subRootContent);
+          const sbtVersionItems = extractPageLinks(
+            subRootContent,
+            hrefFilterMap,
+          );
           for (const sbtItem of sbtVersionItems) {
             const releasesRoot = `${searchSubRoot}/${sbtItem}`;
             const { body: releasesIndexContent } = await downloadHttpProtocol(
@@ -73,7 +81,10 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
               ensureTrailingSlash(releasesRoot),
             );
             if (releasesIndexContent) {
-              const releasesParsed = parse(releasesIndexContent);
+              const releasesParsed = extractPageLinks(
+                releasesIndexContent,
+                hrefFilterMap,
+              );
               releasesParsed.forEach((x) => releases.push(x));
             }
           }

@@ -818,6 +818,32 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('uses highest available version for vulnerabilityAlerts when vulnerabilityFixStrategy=highest', async () => {
+      config.currentValue = '1.0.0';
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixStrategy = 'highest';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newMajor: 1,
+          newMinor: 4,
+          newPatch: 1,
+          newValue: '1.4.1',
+          newVersion: '1.4.1',
+          releaseTimestamp: expect.any(String),
+          updateType: 'minor',
+        },
+      ]);
+    });
+
     it('uses vulnerabilityFixVersion when a version', async () => {
       config.currentValue = '1.0.0';
       config.isVulnerabilityAlert = true;
@@ -890,6 +916,33 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 0,
           newValue: '1.1.0',
           newVersion: '1.1.0',
+          releaseTimestamp: expect.any(String),
+          updateType: 'minor',
+        },
+      ]);
+    });
+
+    it('takes highest available version when using vulnerabilityFixStrategy=highest with vulnerabilityFixVersion', async () => {
+      config.currentValue = '1.0.0';
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixVersion = '1.1.0';
+      config.vulnerabilityFixStrategy = 'highest';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newMajor: 1,
+          newMinor: 4,
+          newPatch: 1,
+          newValue: '1.4.1',
+          newVersion: '1.4.1',
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
         },

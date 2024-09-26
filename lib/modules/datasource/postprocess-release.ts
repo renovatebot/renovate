@@ -4,6 +4,7 @@ import type {
   UpdateResult,
 } from '../../workers/repository/process/lookup/types';
 import { getDatasourceFor } from './common';
+import { Datasource } from './datasource';
 import type { Release } from './types';
 
 type Config = Partial<LookupUpdateConfig & UpdateResult>;
@@ -23,7 +24,10 @@ export async function postprocessRelease(
     return release;
   }
 
-  if (!ds.postprocessRelease) {
+  if (
+    ds.constructor.prototype.postprocessRelease ===
+    Datasource.prototype.postprocessRelease
+  ) {
     return release;
   }
 
@@ -44,11 +48,12 @@ export async function postprocessRelease(
       release,
     );
 
-    if (!result) {
+    if (result === 'reject') {
       logger.debug(
         { datasource, packageName, registryUrl, version: release.version },
         'Rejected release',
       );
+      return null;
     }
 
     return result;
