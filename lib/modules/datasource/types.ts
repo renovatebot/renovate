@@ -160,7 +160,7 @@ export interface DatasourceApi extends ModuleApi {
    *
    * In other cases, the original `Release` parameter should be returned.
    */
-  postprocessRelease?(
+  postprocessRelease(
     config: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult>;
