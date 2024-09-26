@@ -263,8 +263,6 @@ describe('modules/datasource/sbt-package/index', () => {
             </metadata>
           `,
         )
-        .head('/org/example/example_2.13/1.2.3/example_2.13-1.2.3.pom')
-        .reply(200)
         .get('/org/example/example_2.13/1.2.3/example_2.13-1.2.3.pom')
         .reply(200);
 

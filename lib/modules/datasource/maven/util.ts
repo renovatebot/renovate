@@ -11,7 +11,7 @@ import { regEx } from '../../../util/regex';
 import type { S3UrlParts } from '../../../util/s3';
 import { getS3Client, parseS3Url } from '../../../util/s3';
 import { streamToString } from '../../../util/streams';
-import { parseUrl } from '../../../util/url';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
 import type { ReleaseResult } from '../types';
 import { getGoogleAuthToken } from '../util';
@@ -261,7 +261,10 @@ export function getMavenUrl(
   repoUrl: string,
   path: string,
 ): URL {
-  return new URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
+  return new URL(
+    `${dependency.dependencyUrl}/${path}`,
+    ensureTrailingSlash(repoUrl),
+  );
 }
 
 export async function downloadMavenXml(
@@ -366,6 +369,7 @@ async function getSnapshotFullVersion(
   );
 
   const { xml: mavenMetadata } = await downloadMavenXml(http, metadataUrl);
+  // istanbul ignore if: hard to test
   if (!mavenMetadata) {
     return null;
   }
