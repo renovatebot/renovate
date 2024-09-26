@@ -73,6 +73,7 @@ export async function downloadHttpProtocol(
   const url = pkgUrl.toString();
   const res = await Result.wrap(http.get(url, opts))
     .onError((err) => {
+      // istanbul ignore next: never happens, needs for type narrowing
       if (!(err instanceof HttpError)) {
         return;
       }
