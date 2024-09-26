@@ -14,6 +14,7 @@ import { Datasource } from '../datasource';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
+  PostprocessReleaseResult,
   RegistryStrategy,
   Release,
   ReleaseResult,
@@ -250,10 +251,10 @@ export class MavenDatasource extends Datasource {
     ) => `postprocessRelease:${registryUrl}:${packageName}:${version}`,
     ttlMinutes: 24 * 60,
   })
-  async postprocessRelease(
+  override async postprocessRelease(
     { packageName, registryUrl }: PostprocessReleaseConfig,
     release: Release,
-  ): Promise<Release | null> {
+  ): Promise<PostprocessReleaseResult> {
     if (!packageName || !registryUrl) {
       return release;
     }
@@ -272,7 +273,7 @@ export class MavenDatasource extends Datasource {
     const res = await checkResource(this.http, artifactUrl);
 
     if (res === 'not-found' || res === 'error') {
-      return null;
+      return 'reject';
     }
 
     if (is.date(res)) {
