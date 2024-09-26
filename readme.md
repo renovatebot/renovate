@@ -32,7 +32,7 @@ Supports over 90 different package managers.
 
 Renovate updates code repositories on the following platforms: GitHub, GitLab, Bitbucket, Azure DevOps, AWS Code Commit, Gitea, Forgejo, Gerrit (experimental)
 
-## Ways to Run Renovate
+## Ways to run Renovate
 
 The most effective way to run Renovate is to use an automated job scheduling system that regularly runs Renovate on all enabled repositories and responds with priority to user activity.
 Mend offers cloud-hosted and self-hosted solutions. See the options below.
@@ -44,7 +44,7 @@ Mend offers cloud-hosted and self-hosted solutions. See the options below.
 Hosted by Mend.io. No setup is required. Community plan available (Free)
 
 - GitHub Cloud: Install the [Renovate Cloud-Hosted App](https://github.com/apps/renovate) on your GitHub org, then select the repos to enable
-- Bitbucket Cloud: Add the [Mend App](https://marketplace.atlassian.com/apps/1232072/mend) to your Workspace, the add the Mend Renovate user to the projects you want to enable
+- Bitbucket Cloud: Add the [Mend App](https://marketplace.atlassian.com/apps/1232072/mend) to your Workspace, then add the Mend Renovate user to the projects you want to enable
 
 ### Mend Renovate Community (Self-hosted)
 
@@ -99,7 +99,7 @@ See docs: [Running Renovate](https://docs.renovatebot.com/getting-started/runnin
 ### Comparisons
 
 - [Different ways to run Renovate](https://www.mend.io/renovate/)
-- [Renovate vs Dependabot Comparison](https://docs.renovatebot.com/bot-comparison/)
+- [Renovate vs Dependabot](https://docs.renovatebot.com/bot-comparison/)
 
 ## Get involved
 
@@ -107,7 +107,7 @@ See docs: [Running Renovate](https://docs.renovatebot.com/getting-started/runnin
 
 We prefer all items to be opened as a discussion before opening an issue.
 
-- [GitHub Discussions forum](https://github.com/renovatebot/renovate/discussions)
+- [GitHub Discussions for Renovate](https://github.com/renovatebot/renovate/discussions)
 
 ### Contributing
 
