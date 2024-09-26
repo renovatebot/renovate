@@ -1,10 +1,11 @@
-import { codeBlock, html } from 'common-tags';
+import { codeBlock } from 'common-tags';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { regEx } from '../../../util/regex';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
-import { parseIndexDir } from '../sbt-package/util';
+import { extractPageLinks } from '../sbt-package/util';
 import { SbtPluginDatasource } from '.';
 
 const mavenIndexHtml = Fixtures.get(`maven-index.html`);
@@ -12,11 +13,19 @@ const sbtPluginIndex = Fixtures.get(`sbt-plugins-index.html`);
 
 describe('modules/datasource/sbt-plugin/index', () => {
   it('parses Maven index directory', () => {
-    expect(parseIndexDir(mavenIndexHtml)).toMatchSnapshot();
+    expect(
+      extractPageLinks(mavenIndexHtml, (x) =>
+        regEx(/^\.+/).test(x) ? null : x,
+      ),
+    ).toMatchSnapshot();
   });
 
   it('parses sbt index directory', () => {
-    expect(parseIndexDir(sbtPluginIndex)).toMatchSnapshot();
+    expect(
+      extractPageLinks(sbtPluginIndex, (x) =>
+        regEx(/^\.+/).test(x) ? null : x,
+      ),
+    ).toMatchSnapshot();
   });
 
   it('uses proper hostType', () => {
@@ -38,7 +47,8 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/maven2/org/scalatest/')
         .reply(
           200,
-          html`
+          codeBlock`
+            <a href="../">../</a>
             <a href="scalatest/">scalatest/</a>
             <a href="scalatest_2.12/">scalatest_2.12/</a>
             <a href="scalatest_sjs2.12/">scalatest_sjs2.12/</a>
@@ -48,7 +58,13 @@ describe('modules/datasource/sbt-plugin/index', () => {
       httpMock
         .scope('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/scalatest/')
-        .reply(200, "<a href='1.2.0/'>1.2.0/</a>");
+        .reply(
+          200,
+          codeBlock`
+            <a href='../'>../</a>
+            <a href='1.2.0/'>1.2.0/</a>
+          `,
+        );
       httpMock
         .scope('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/scalatest_2.12/')
@@ -59,10 +75,11 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/maven2/org/foundweekends/sbt-bintray/')
         .reply(
           200,
-          html`
+          codeBlock`
             <html>
               <head> </head>
               <body>
+                <pre><a href="../">../</a></pre>
                 <pre><a href="scala_2.12/">scala_2.12/</a></pre>
               </body>
             </html>
@@ -73,10 +90,11 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/maven2/org/foundweekends/sbt-bintray/scala_2.12/')
         .reply(
           200,
-          html`
+          codeBlock`
             <html>
               <head> </head>
               <body>
+                <pre><a href="../">../</a></pre>
                 <pre><a href="sbt_1.0/">sbt_1.0/</a></pre>
               </body>
             </html>
@@ -87,10 +105,11 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/maven2/org/foundweekends/sbt-bintray/scala_2.12/sbt_1.0/')
         .reply(
           200,
-          html`
+          codeBlock`
             <html>
               <head> </head>
               <body>
+                <pre><a href="../">../</a></pre>
                 <pre><a href="0.5.5/">0.5.5/</a></pre>
               </body>
             </html>
@@ -102,7 +121,8 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/maven2/io/get-coursier/')
         .reply(
           200,
-          html`
+          codeBlock`
+            <a href="../">../</a>
             <a href="sbt-coursier_2.10_0.13/">sbt-coursier_2.10_0.13/</a>
             <a href="sbt-coursier_2.12_1.0/">sbt-coursier_2.12_1.0/</a>
             <a href="sbt-coursier_2.12_1.0.0-M5/"
@@ -118,7 +138,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/maven2/io/get-coursier/sbt-coursier_2.12_1.0/')
         .reply(
           200,
-          html`
+          codeBlock`
             <a href="2.0.0-RC2/">2.0.0-RC2/</a>
             <a href="2.0.0-RC6-1/">2.0.0-RC6-1/</a>
             <a href="2.0.0-RC6-2/">2.0.0-RC6-2/</a>
