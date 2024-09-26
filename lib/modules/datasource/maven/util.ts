@@ -5,9 +5,10 @@ import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import type { Http } from '../../../util/http';
+import { type Http, HttpError } from '../../../util/http';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { Result } from '../../../util/result';
 import type { S3UrlParts } from '../../../util/s3';
 import { getS3Client, parseS3Url } from '../../../util/s3';
 import { streamToString } from '../../../util/streams';
@@ -26,32 +27,33 @@ function getHost(url: string): string | null {
   return parseUrl(url)?.host ?? /* istanbul ignore next: not possible */ null;
 }
 
-function isMavenCentral(pkgUrl: URL | string): boolean {
-  const host = typeof pkgUrl === 'string' ? pkgUrl : pkgUrl.host;
-  return getHost(MAVEN_REPO) === host;
+function isTemporaryError(err: HttpError): boolean {
+  if (err.code === 'ECONNRESET') {
+    return true;
+  }
+
+  if (err.response) {
+    const status = err.response.statusCode;
+    return status === 429 || (status >= 500 && status < 600);
+  }
+
+  return false;
 }
 
-function isTemporalError(err: { code: string; statusCode: number }): boolean {
-  return (
-    err.code === 'ECONNRESET' ||
-    err.statusCode === 429 ||
-    (err.statusCode >= 500 && err.statusCode < 600)
-  );
-}
-
-function isHostError(err: { code: string }): boolean {
+function isHostError(err: HttpError): boolean {
   return err.code === 'ETIMEDOUT';
 }
 
-function isNotFoundError(err: { code: string; statusCode: number }): boolean {
-  return err.code === 'ENOTFOUND' || err.statusCode === 404;
+function isNotFoundError(err: HttpError): boolean {
+  return err.code === 'ENOTFOUND' || err.response?.statusCode === 404;
 }
 
-function isPermissionsIssue(err: { statusCode: number }): boolean {
-  return err.statusCode === 401 || err.statusCode === 403;
+function isPermissionsIssue(err: HttpError): boolean {
+  const status = err.response?.statusCode;
+  return status === 401 || status === 403;
 }
 
-function isConnectionError(err: { code: string }): boolean {
+function isConnectionError(err: HttpError): boolean {
   return (
     err.code === 'EAI_AGAIN' ||
     err.code === 'ERR_TLS_CERT_ALTNAME_INVALID' ||
@@ -59,7 +61,7 @@ function isConnectionError(err: { code: string }): boolean {
   );
 }
 
-function isUnsupportedHostError(err: { name: string }): boolean {
+function isUnsupportedHostError(err: HttpError): boolean {
   return err.name === 'UnsupportedProtocolError';
 }
 
@@ -67,37 +69,72 @@ export async function downloadHttpProtocol(
   http: Http,
   pkgUrl: URL | string,
   opts: HttpOptions = {},
-): Promise<Partial<HttpResponse>> {
-  let raw: HttpResponse;
-  try {
-    raw = await http.get(pkgUrl.toString(), opts);
-    return raw;
-  } catch (err) {
-    const failedUrl = pkgUrl.toString();
-    if (err.message === HOST_DISABLED) {
-      logger.trace({ failedUrl }, 'Host disabled');
-    } else if (isNotFoundError(err)) {
-      logger.trace({ failedUrl }, `Url not found`);
-    } else if (isHostError(err)) {
-      logger.debug(`Cannot connect to host ${failedUrl}`);
-    } else if (isPermissionsIssue(err)) {
-      logger.debug(
-        `Dependency lookup unauthorized. Please add authentication with a hostRule for ${failedUrl}`,
-      );
-    } else if (isTemporalError(err)) {
-      logger.debug({ failedUrl, err }, 'Temporary error');
-      if (isMavenCentral(pkgUrl)) {
-        throw new ExternalHostError(err);
+): Promise<HttpResponse | null> {
+  const url = pkgUrl.toString();
+  const res = await Result.wrap(http.get(url, opts))
+    .onError((err) => {
+      if (!(err instanceof HttpError)) {
+        return;
       }
-    } else if (isConnectionError(err)) {
-      logger.debug(`Connection refused to maven registry ${failedUrl}`);
-    } else if (isUnsupportedHostError(err)) {
-      logger.debug(`Unsupported host ${failedUrl} `);
-    } else {
+
+      const failedUrl = url;
+      if (err.message === HOST_DISABLED) {
+        logger.trace({ failedUrl }, 'Host disabled');
+        return;
+      }
+
+      if (isNotFoundError(err)) {
+        logger.trace({ failedUrl }, `Url not found`);
+        return;
+      }
+
+      if (isHostError(err)) {
+        logger.debug(`Cannot connect to host ${failedUrl}`);
+        return;
+      }
+
+      if (isPermissionsIssue(err)) {
+        logger.debug(
+          `Dependency lookup unauthorized. Please add authentication with a hostRule for ${failedUrl}`,
+        );
+        return;
+      }
+
+      if (isTemporaryError(err)) {
+        logger.debug({ failedUrl, err }, 'Temporary error');
+        return;
+      }
+
+      if (isConnectionError(err)) {
+        logger.debug(`Connection refused to maven registry ${failedUrl}`);
+        return;
+      }
+
+      if (isUnsupportedHostError(err)) {
+        logger.debug(`Unsupported host ${failedUrl}`);
+        return;
+      }
+
       logger.info({ failedUrl, err }, 'Unknown HTTP download error');
-    }
-    return {};
+    })
+    .catch((err): Result<HttpResponse | 'silent-error', ExternalHostError> => {
+      if (
+        err instanceof HttpError &&
+        isTemporaryError(err) &&
+        getHost(url) === getHost(MAVEN_REPO)
+      ) {
+        return Result.err(new ExternalHostError(err));
+      }
+
+      return Result.ok('silent-error');
+    })
+    .unwrapOrThrow();
+
+  if (res === 'silent-error') {
+    return null;
   }
+
+  return res;
 }
 
 function isS3NotFound(err: Error): boolean {
@@ -145,7 +182,7 @@ export async function downloadS3Protocol(pkgUrl: URL): Promise<string | null> {
 export async function downloadArtifactRegistryProtocol(
   http: Http,
   pkgUrl: URL,
-): Promise<Partial<HttpResponse>> {
+): Promise<HttpResponse | null> {
   const opts: HttpOptions = {};
   const host = pkgUrl.host;
   const path = pkgUrl.pathname;
@@ -275,48 +312,42 @@ export async function downloadMavenXml(
     return {};
   }
 
-  let isCacheable = false;
+  const protocol = pkgUrl.protocol;
 
-  let rawContent: string | undefined;
-  let authorization: boolean | undefined;
-  let statusCode: number | undefined;
-  switch (pkgUrl.protocol) {
-    case 'http:':
-    case 'https:':
-      ({
-        authorization,
-        body: rawContent,
-        statusCode,
-      } = await downloadHttpProtocol(http, pkgUrl));
-      break;
-    case 's3:':
-      rawContent = (await downloadS3Protocol(pkgUrl)) ?? undefined;
-      break;
-    case 'artifactregistry:':
-      ({
-        authorization,
-        body: rawContent,
-        statusCode,
-      } = await downloadArtifactRegistryProtocol(http, pkgUrl));
-      break;
-    default:
-      logger.debug(`Unsupported Maven protocol url:${pkgUrl.toString()}`);
-      return {};
+  if (protocol === 'http:' || protocol === 'https:') {
+    const res = await downloadHttpProtocol(http, pkgUrl);
+    const body = res?.body;
+    if (body) {
+      return {
+        xml: new XmlDocument(body),
+        isCacheable: !res.authorization,
+      };
+    }
   }
 
-  if (!rawContent) {
-    logger.debug(
-      { url: pkgUrl.toString(), statusCode },
-      `Content is not found for Maven url`,
-    );
-    return {};
+  if (protocol === 'artifactregistry:') {
+    const res = await downloadArtifactRegistryProtocol(http, pkgUrl);
+    const body = res?.body;
+    if (body) {
+      return {
+        xml: new XmlDocument(body),
+        isCacheable: !res.authorization,
+      };
+    }
   }
 
-  if (!authorization) {
-    isCacheable = true;
+  if (protocol === 's3:') {
+    const res = await downloadS3Protocol(pkgUrl);
+    if (res) {
+      return { xml: new XmlDocument(res) };
+    }
   }
 
-  return { isCacheable, xml: new XmlDocument(rawContent) };
+  logger.debug(
+    { url: pkgUrl.toString() },
+    `Content is not found for Maven url`,
+  );
+  return {};
 }
 
 export function getDependencyParts(packageName: string): MavenDependency {

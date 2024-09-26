@@ -50,13 +50,13 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
 
       return href;
     };
-    const { body: indexContent } = await downloadHttpProtocol(
+    const res = await downloadHttpProtocol(
       this.http,
       ensureTrailingSlash(searchRoot),
     );
-    if (indexContent) {
+    if (res) {
       const releases: string[] = [];
-      const scalaVersionItems = extractPageLinks(indexContent, hrefFilterMap);
+      const scalaVersionItems = extractPageLinks(res.body, hrefFilterMap);
       const scalaVersions = scalaVersionItems.map((x) =>
         x.replace(regEx(/^scala_/), ''),
       );
@@ -65,22 +65,24 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
         : scalaVersions;
       for (const searchVersion of searchVersions) {
         const searchSubRoot = `${searchRoot}/scala_${searchVersion}`;
-        const { body: subRootContent } = await downloadHttpProtocol(
+        const subRootRes = await downloadHttpProtocol(
           this.http,
           ensureTrailingSlash(searchSubRoot),
         );
-        if (subRootContent) {
+        if (subRootRes) {
+          const { body: subRootContent } = subRootRes;
           const sbtVersionItems = extractPageLinks(
             subRootContent,
             hrefFilterMap,
           );
           for (const sbtItem of sbtVersionItems) {
             const releasesRoot = `${searchSubRoot}/${sbtItem}`;
-            const { body: releasesIndexContent } = await downloadHttpProtocol(
+            const releaseIndexRes = await downloadHttpProtocol(
               this.http,
               ensureTrailingSlash(releasesRoot),
             );
-            if (releasesIndexContent) {
+            if (releaseIndexRes) {
+              const { body: releasesIndexContent } = releaseIndexRes;
               const releasesParsed = extractPageLinks(
                 releasesIndexContent,
                 hrefFilterMap,
