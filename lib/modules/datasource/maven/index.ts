@@ -145,19 +145,24 @@ export class MavenDatasource extends Datasource {
       try {
         const indexUrl = getMavenUrl(dependency, repoUrl, 'index.html');
         const res = await downloadHttpProtocol(this.http, indexUrl);
-        const { body = '' } = res;
-        for (const line of body.split(newlineRegex)) {
-          const match = line.trim().match(mavenCentralHtmlVersionRegex);
-          if (match) {
-            const { version, releaseTimestamp: timestamp } =
-              match?.groups ?? /* istanbul ignore next: hard to test */ {};
-            if (version && timestamp) {
-              const date = DateTime.fromFormat(timestamp, 'yyyy-MM-dd HH:mm', {
-                zone: 'UTC',
-              });
-              if (date.isValid) {
-                const releaseTimestamp = date.toISO();
-                workingReleaseMap[version] = { version, releaseTimestamp };
+        if (res) {
+          for (const line of res.body.split(newlineRegex)) {
+            const match = line.trim().match(mavenCentralHtmlVersionRegex);
+            if (match) {
+              const { version, releaseTimestamp: timestamp } =
+                match?.groups ?? /* istanbul ignore next: hard to test */ {};
+              if (version && timestamp) {
+                const date = DateTime.fromFormat(
+                  timestamp,
+                  'yyyy-MM-dd HH:mm',
+                  {
+                    zone: 'UTC',
+                  },
+                );
+                if (date.isValid) {
+                  const releaseTimestamp = date.toISO();
+                  workingReleaseMap[version] = { version, releaseTimestamp };
+                }
               }
             }
           }
