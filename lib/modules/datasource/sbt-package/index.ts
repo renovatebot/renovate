@@ -39,10 +39,8 @@ export class SbtPackageDatasource extends MavenDatasource {
     scalaVersion: string,
   ): Promise<string[] | null> {
     const pkgUrl = ensureTrailingSlash(searchRoot);
-    const { body: indexContent } = await downloadHttpProtocol(
-      this.http,
-      pkgUrl,
-    );
+    const res = await downloadHttpProtocol(this.http, pkgUrl);
+    const indexContent = res?.body;
     if (indexContent) {
       const rootPath = new URL(pkgUrl).pathname;
       let artifactSubdirs = extractPageLinks(indexContent, (href) => {
@@ -81,7 +79,8 @@ export class SbtPackageDatasource extends MavenDatasource {
       const releases: string[] = [];
       for (const searchSubdir of artifactSubdirs) {
         const pkgUrl = ensureTrailingSlash(`${searchRoot}/${searchSubdir}`);
-        const { body: content } = await downloadHttpProtocol(this.http, pkgUrl);
+        const res = await downloadHttpProtocol(this.http, pkgUrl);
+        const content = res?.body;
         if (content) {
           const rootPath = new URL(pkgUrl).pathname;
           const subdirReleases = extractPageLinks(content, (href) => {
@@ -128,8 +127,8 @@ export class SbtPackageDatasource extends MavenDatasource {
 
       for (const pomFileName of pomFileNames) {
         const pomUrl = `${searchRoot}/${artifactDir}/${version}/${pomFileName}`;
-        const { body: content } = await downloadHttpProtocol(this.http, pomUrl);
-
+        const res = await downloadHttpProtocol(this.http, pomUrl);
+        const content = res?.body;
         if (content) {
           const pomXml = new XmlDocument(content);
 
