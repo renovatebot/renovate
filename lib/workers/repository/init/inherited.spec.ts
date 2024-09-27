@@ -1,6 +1,6 @@
-import { mocked, platform } from '../../../../test/util';
-import * as _presets from '../../../config/presets';
+import { platform } from '../../../../test/util';
 import type { RenovateConfig } from '../../../config/types';
+import * as validation from '../../../config/validation';
 import {
   CONFIG_INHERIT_NOT_FOUND,
   CONFIG_INHERIT_PARSE_ERROR,
@@ -8,10 +8,6 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { mergeInheritedConfig } from './inherited';
-
-jest.mock('../../../config/presets');
-
-const presets = mocked(_presets);
 
 describe('workers/repository/init/inherited', () => {
   let config: RenovateConfig;
@@ -92,24 +88,83 @@ describe('workers/repository/init/inherited', () => {
 
   it('should resolve presets found in inherited config', async () => {
     platform.getRawFile.mockResolvedValue(
-      '{"onboarding":false,"labels":["test"],"extends":["some-shared-preset"]}',
+      '{"onboarding":false,"labels":["test"],"extends":[":automergeAll"]}',
     );
-    presets.resolveConfigPresets.mockResolvedValueOnce({
-      onboarding: false,
-      labels: ['test'],
-      packageRules: [
-        {
-          matchUpdateTypes: ['patch'],
-          automerge: true,
-        },
-      ],
-    });
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
     expect(res.onboarding).toBeFalse();
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.debug).toHaveBeenCalledWith(
       'Resolving presets found in inherited config',
+    );
+  });
+
+  it('should warn if presets fails validation with warnings', async () => {
+    platform.getRawFile.mockResolvedValue(
+      '{"onboarding":false,"labels":["test"],"extends":[":automergeAll"]}',
+    );
+    jest
+      .spyOn(validation, 'validateConfig')
+      .mockResolvedValueOnce({
+        warnings: [],
+        errors: [],
+      })
+      .mockResolvedValueOnce({
+        warnings: [
+          {
+            message: 'some warning',
+            topic: 'Configuration Error',
+          },
+        ],
+        errors: [],
+      });
+    const res = await mergeInheritedConfig(config);
+    expect(res.binarySource).toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(
+      {
+        warnings: [
+          {
+            message: 'some warning',
+            topic: 'Configuration Error',
+          },
+        ],
+      },
+      'Found warnings in inherited configuration.',
+    );
+  });
+
+  it('should throw error if presets fails validation with errors', async () => {
+    platform.getRawFile.mockResolvedValue(
+      '{"labels":["test"],"extends":[":automergeAll"]}',
+    );
+    jest
+      .spyOn(validation, 'validateConfig')
+      .mockResolvedValueOnce({
+        warnings: [],
+        errors: [],
+      })
+      .mockResolvedValueOnce({
+        warnings: [],
+        errors: [
+          {
+            message: 'some error',
+            topic: 'Configuration Error',
+          },
+        ],
+      });
+    await expect(mergeInheritedConfig(config)).rejects.toThrow(
+      CONFIG_VALIDATION,
+    );
+    expect(logger.warn).toHaveBeenCalledWith(
+      {
+        errors: [
+          {
+            message: 'some error',
+            topic: 'Configuration Error',
+          },
+        ],
+      },
+      'Found errors in inherited configuration.',
     );
   });
 });

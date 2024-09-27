@@ -111,22 +111,22 @@ export async function mergeInheritedConfig(
     // Decrypt after resolving in case the preset contains npm authentication instead
     logger.debug('Resolving presets found in inherited config');
     returnConfig = await decryptConfig(
-      await resolveConfigPresets(decryptedConfig, config, config.ignorePresets),
+      await resolveConfigPresets(returnConfig, config, config.ignorePresets),
       config.repository,
     );
     logger.trace({ config: returnConfig }, 'Resolved inherited config');
-    res = await validateConfig('inherit', inheritedConfig);
+    res = await validateConfig('inherit', returnConfig);
     if (res.errors.length) {
       logger.warn(
         { errors: res.errors },
-        'Found errors in inherited configuration.',
+        'Found errors in presets inside the inherited configuration.',
       );
       throw new Error(CONFIG_VALIDATION);
     }
     if (res.warnings.length) {
       logger.warn(
         { warnings: res.warnings },
-        'Found warnings in inherited configuration.',
+        'Found warnings in presets inside the inherited configuration.',
       );
     }
   }
