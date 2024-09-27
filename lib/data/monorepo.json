@@ -54,6 +54,7 @@
       "https://github.com/awslabs/aws-sdk-rust"
     ],
     "awsappsync": "https://github.com/awslabs/aws-mobile-appsync-sdk-js",
+    "azure-functions-dotnet-worker": "https://github.com/Azure/azure-functions-dotnet-worker",
     "azure azure-libraries-for-net": "https://github.com/Azure/azure-libraries-for-net",
     "azure azure-sdk-for-net": "https://github.com/Azure/azure-sdk-for-net",
     "azure azure-storage-net": "https://github.com/Azure/azure-storage-net",
