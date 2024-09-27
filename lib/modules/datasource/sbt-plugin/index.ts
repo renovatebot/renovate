@@ -19,6 +19,10 @@ export const SBT_PLUGINS_REPO =
 
 export const defaultRegistryUrls = [SBT_PLUGINS_REPO, MAVEN_REPO];
 
+function hrefFilterMap(href: string): string | null {
+  return href.startsWith('.') ? null : href;
+}
+
 export class SbtPluginDatasource extends SbtPackageDatasource {
   static override readonly id = 'sbt-plugin';
 
@@ -37,66 +41,63 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
     this.http = new Http('sbt');
   }
 
-  async resolvePluginReleases(
-    rootUrl: string,
-    artifact: string,
+  async getPluginVersions(
+    artifactRoot: string,
     scalaVersion: string,
   ): Promise<string[] | null> {
-    const searchRoot = `${rootUrl}/${artifact}`;
-    const hrefFilterMap = (href: string): string | null => {
-      if (href.startsWith('.')) {
-        return null;
-      }
-
-      return href;
-    };
     const res = await downloadHttpProtocol(
       this.http,
-      ensureTrailingSlash(searchRoot),
+      ensureTrailingSlash(artifactRoot),
     );
-    if (res) {
-      const releases: string[] = [];
-      const scalaVersionItems = extractPageLinks(res.body, hrefFilterMap);
-      const scalaVersions = scalaVersionItems.map((x) =>
-        x.replace(regEx(/^scala_/), ''),
+    const body = res?.body;
+    if (!body) {
+      return null;
+    }
+
+    const scalaVersions = extractPageLinks(body, hrefFilterMap).map((x) =>
+      x.replace(regEx(/^scala_/), ''),
+    );
+    const searchVersions = scalaVersions.includes(scalaVersion)
+      ? [scalaVersion]
+      : scalaVersions;
+
+    const allVersions = new Set<string>();
+    for (const searchVersion of searchVersions) {
+      const searchSubRoot = `${artifactRoot}/scala_${searchVersion}`;
+      const subRootRes = await downloadHttpProtocol(
+        this.http,
+        ensureTrailingSlash(searchSubRoot),
       );
-      const searchVersions = scalaVersions.includes(scalaVersion)
-        ? [scalaVersion]
-        : scalaVersions;
-      for (const searchVersion of searchVersions) {
-        const searchSubRoot = `${searchRoot}/scala_${searchVersion}`;
-        const subRootRes = await downloadHttpProtocol(
-          this.http,
-          ensureTrailingSlash(searchSubRoot),
-        );
-        if (subRootRes) {
-          const { body: subRootContent } = subRootRes;
-          const sbtVersionItems = extractPageLinks(
-            subRootContent,
-            hrefFilterMap,
+      const subRootContent = subRootRes?.body;
+      if (subRootContent) {
+        const sbtVersionItems = extractPageLinks(subRootContent, hrefFilterMap);
+        for (const sbtItem of sbtVersionItems) {
+          const releasesRoot = `${searchSubRoot}/${sbtItem}`;
+          const releaseIndexRes = await downloadHttpProtocol(
+            this.http,
+            ensureTrailingSlash(releasesRoot),
           );
-          for (const sbtItem of sbtVersionItems) {
-            const releasesRoot = `${searchSubRoot}/${sbtItem}`;
-            const releaseIndexRes = await downloadHttpProtocol(
-              this.http,
-              ensureTrailingSlash(releasesRoot),
+          const releasesIndexContent = releaseIndexRes?.body;
+          if (releasesIndexContent) {
+            const releasesParsed = extractPageLinks(
+              releasesIndexContent,
+              hrefFilterMap,
             );
-            if (releaseIndexRes) {
-              const { body: releasesIndexContent } = releaseIndexRes;
-              const releasesParsed = extractPageLinks(
-                releasesIndexContent,
-                hrefFilterMap,
-              );
-              releasesParsed.forEach((x) => releases.push(x));
+
+            for (const version of releasesParsed) {
+              allVersions.add(version);
             }
           }
         }
       }
-      if (releases.length) {
-        return [...new Set(releases)].sort(compare);
-      }
     }
-    return null;
+
+    const versions = [...allVersions].sort(compare);
+    if (!versions.length) {
+      return null;
+    }
+
+    return versions;
   }
 
   override async getReleases({
@@ -123,11 +124,8 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
 
     for (let idx = 0; idx < searchRoots.length; idx += 1) {
       const searchRoot = searchRoots[idx];
-      let versions = await this.resolvePluginReleases(
-        searchRoot,
-        artifact,
-        scalaVersion,
-      );
+      const artifactRoot = `${searchRoot}/${artifact}`;
+      let versions = await this.getPluginVersions(artifactRoot, scalaVersion);
       let urls = {};
 
       if (!versions?.length) {
