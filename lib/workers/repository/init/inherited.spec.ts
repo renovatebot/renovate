@@ -164,7 +164,7 @@ describe('workers/repository/init/inherited', () => {
           },
         ],
       },
-      'Found warnings in presets inside the inherited configuration.',
+      'Found errors in presets inside the inherited configuration.',
     );
   });
 });
