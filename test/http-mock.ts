@@ -110,7 +110,7 @@ export function scope(basePath: BasePath, options?: nock.Options): nock.Scope {
   });
 }
 
-export function getTrace(): RequestLog[] /* istanbul ignore next */ {
+export function getTrace(): RequestLog[] {
   return requestsDone;
 }
 
