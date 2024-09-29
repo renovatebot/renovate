@@ -126,6 +126,7 @@ function massageHttpMockStacktrace(err: Error): void {
 
   const content = fs.readFileSync(state.testPath, { encoding: 'utf8' });
 
+  // Shrink the `testName` until we could locate it in the source file
   let testName = state.currentTestName.replace(/^[^\s]*\s/, '');
   let idx = content.indexOf(testName);
   while (testName.length) {
@@ -133,7 +134,12 @@ function massageHttpMockStacktrace(err: Error): void {
       break;
     }
 
+    const prevName = testName;
     testName = testName.replace(/^[^\s]*\s/, '');
+    if (prevName === testName) {
+      break;
+    }
+
     idx = content.indexOf(testName);
   }
 
