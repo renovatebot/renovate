@@ -222,7 +222,7 @@ function unusedHttpMockMessage(done: RequestLog[], pending: string[]): string {
 
     This error occurs because some of the created mocks are unused.
 
-    In most cases, you simply need to remove these.
+    In most cases, you simply need to remove them.
 
     +++
   `;
