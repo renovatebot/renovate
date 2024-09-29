@@ -674,7 +674,7 @@
     "description": "gradle/wrapper-validation-action got renamed to gradle/actions/wrapper-validation",
     "packageRules": [
       {
-        "matchCurrentVersion": "2",
+        "matchCurrentVersion": "3",
         "matchDatasources": ["github-actions"],
         "matchPackageNames": ["gradle/wrapper-validation-action"],
         "replacementName": "gradle/actions/wrapper-validation",
