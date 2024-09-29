@@ -183,7 +183,7 @@ function missingHttpMockMessage(
     Note: \`httpMock.scope(...)\` is the Renovate-specific construct.
           The scope object itself is provided by the \`nock\` library.
 
-    Details: https://github.com/nock/nock?tab=readme-ov-file#usage
+    Details: https://github.com/nock/nock#usage
 
     +++
   `;
