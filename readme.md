@@ -105,7 +105,8 @@ See docs: [Running Renovate](https://docs.renovatebot.com/getting-started/runnin
 
 ### Issues and Discussions
 
-We prefer all items to be opened as a discussion before opening an issue.
+Please open a Discussion, to get help, suggest a new feature, or to report a bug.
+We only want maintainers to open Issues.
 
 - [GitHub Discussions for Renovate](https://github.com/renovatebot/renovate/discussions)
 
@@ -122,7 +123,7 @@ The Renovate project is proudly supported and actively maintained by Mend.io.
 
 - Contact [Mend.io](http://Mend.io) for commercial support questions.
 
-Follow us on Twitter, LinkedIn and Mastodon.
+Follow us on:
 
 - Twitter: [x.com/mend_io](http://x.com/mend_io)
 - LinkedIn: [linkedin.com/company/mend-io](https://linkedin.com/company/mend-io)
