@@ -87,19 +87,20 @@ describe('modules/manager/gitlabci-include/extract', () => {
           content: to be ignored
       `;
       const res = extractPackageFile(multiDocFile);
-      expect(res?.deps).toHaveLength(2);
-      expect(res?.deps).toMatchObject([
-        {
-          currentValue: '1.0.0',
-          datasource: 'gitlab-tags',
-          depName: 'mikebryant/include-source-example',
-        },
-        {
-          currentValue: '2.0.0',
-          datasource: 'gitlab-tags',
-          depName: 'mikebryant/include-source-example2',
-        },
-      ]);
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '1.0.0',
+            datasource: 'gitlab-tags',
+            depName: 'mikebryant/include-source-example',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'gitlab-tags',
+            depName: 'mikebryant/include-source-example2',
+          },
+        ],
+      });
     });
   });
 });
