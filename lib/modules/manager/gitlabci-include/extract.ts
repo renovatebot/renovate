@@ -70,6 +70,10 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
   const platform = GlobalConfig.get('platform');
   const endpoint = GlobalConfig.get('endpoint');
+  const registryUrls =
+    platform === 'gitlab' && endpoint
+      ? [endpoint.replace(regEx(/\/api\/v4\/?/), '')]
+      : null;
   try {
     // TODO: use schema (#9610)
     const docs = parseYaml<GitlabPipeline>(replaceReferenceTags(content), {
@@ -80,8 +84,8 @@ export function extractPackageFile(
         const includes = getAllIncludeProjects(doc);
         for (const includeObj of includes) {
           const dep = extractDepFromIncludeFile(includeObj);
-          if (platform === 'gitlab' && endpoint) {
-            dep.registryUrls = [endpoint.replace(regEx(/\/api\/v4\/?/), '')];
+          if (registryUrls) {
+            dep.registryUrls = registryUrls;
           }
           deps.push(dep);
         }
