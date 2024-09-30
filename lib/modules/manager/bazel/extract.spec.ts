@@ -232,5 +232,45 @@ describe('modules/manager/bazel/extract', () => {
         },
       ]);
     });
+
+    it('extracts 4-arity and 5-arity Maven coordinates', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          maven_install(
+            artifacts = [
+              "com.example:artifact:jar:1.0.0",
+              "com.example:artifact:jar:linux-x86_64:1.0.0",
+            ],
+            repositories = ["https://repo.maven.apache.org/maven2"],
+          )
+        `,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          datasource: 'maven',
+          versioning: 'gradle',
+          depName: 'com.example:artifact',
+          currentValue: '1.0.0',
+          depType: 'maven_install',
+          registryUrls: ['https://repo.maven.apache.org/maven2'],
+          managerData: {
+            packaging: 'jar',
+          },
+        },
+        {
+          datasource: 'maven',
+          versioning: 'gradle',
+          depName: 'com.example:artifact',
+          currentValue: '1.0.0',
+          depType: 'maven_install',
+          registryUrls: ['https://repo.maven.apache.org/maven2'],
+          managerData: {
+            packaging: 'jar',
+            classifier: 'linux-x86_64',
+          },
+        },
+      ]);
+    });
   });
 });

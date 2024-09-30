@@ -352,12 +352,20 @@ export async function downloadMavenXml(
 }
 
 export function getDependencyParts(packageName: string): MavenDependency {
-  const [group, name] = packageName.split(':');
+  const parts = packageName.split(':');
+  const group = parts[0];
+  const name = parts[1];
+  const version = parts[parts.length - 1];
+  const packaging = parts.length === 5 ? parts[2] : undefined;
+  const classifier = parts.length === 5 ? parts[3] : parts.length === 4 ? parts[2] : undefined;
   const dependencyUrl = `${group.replace(regEx(/\./g), '/')}/${name}`;
   return {
     display: packageName,
     group,
     name,
+    version,
+    packaging,
+    classifier,
     dependencyUrl,
   };
 }
