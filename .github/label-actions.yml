@@ -481,21 +481,23 @@
     Hi there,
 
 
-    This discussion has been labeled as a use case specific to "enterprise" users. Enterprise users typically self-host Renovate and have advanced requirements like custom certificates, HTTP proxies, private registries, air gapping, etc.
+    The maintainers have labeled this discussion as a use case specific to "enterprise" users. Enterprise users typically self-host Renovate and have advanced requirements like custom certificates, HTTP proxies, private registries, air gapping, etc.
 
 
-    Such cases usually require substantial back-and-forth to resolve, because the problem relates to the user's specific environment and cannot be reproduced publicly for maintainers to debug.
+    Such cases usually need a lot of back-and-forth to resolve, because the problem is related to the user's environment.
+    Usually the user's environment can not be reproduced publicly, which means that maintainer debugging is not possible.
 
 
-    The maintainers of this project have decided that their time is best spent on issues that benefit large numbers of users. This means that enterprise-specific issues affecting one or a small number of users are usually not a priority. If we can help you quickly, we always will, but if you are seeing this message then a maintainer believes this is not quick and they won't be actively working on this issue unless new information comes to light.
+    The maintainers decided their time is best spent on issues that help large numbers of users. This means enterprise-specific issues affecting one user (or a small number of users), are not a priority. If we can help you quickly, we will. But if you see this message, then a maintainer believes this is not a quick fix. The maintainers will not actively work on this issue, unless new information is found.
 
 
-    If you are an enterprise user, please consider the following options available to you:
+    If you are an enterprise user, please consider the following options:
 
-      - You may need to troubleshoot and contribute a fix yourself, or
-      - You may need to [hire a consultant](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#getting-more-help) to help you if you cannot, or
-      - You should consider an [Enterprise support contract from Mend.io](https://mend.io/mend-renovate/), or
-      - You may need to wait for a community member to help you if they have the same problem
+      - Troubleshoot and contribute a fix yourself, or
+      - [Hire a consultant](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#getting-more-help) to help you, or
+      - Consider an [Enterprise support contract from Mend.io](https://mend.io/mend-renovate/), or
+      - Wait for a community member to help you, if they have the same problem
 
 
-  If you choose to wait, then this discussion can remain open indefinitely, but please be patient and do not nudge or bump this discussion just to get attention.
+  If you choose to wait, then this discussion can remain open indefinitely.
+  But please be patient, do not nudge or bump this discussion just to get attention.
