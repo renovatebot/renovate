@@ -105,7 +105,7 @@ See docs: [Running Renovate](https://docs.renovatebot.com/getting-started/runnin
 
 ### Issues and Discussions
 
-Please open a Discussion, to get help, suggest a new feature, or to report a bug.
+Please open a Discussion to get help, suggest a new feature, or to report a bug.
 We only want maintainers to open Issues.
 
 - [GitHub Discussions for Renovate](https://github.com/renovatebot/renovate/discussions)
