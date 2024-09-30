@@ -3,6 +3,7 @@ import type { SkipReason } from '../../../types';
 import { Toml, withDepType } from '../../../util/schema-utils';
 import { CrateDatasource } from '../../datasource/crate';
 import type { PackageDependency } from '../types';
+import type { CargoManagerData } from './types';
 
 const CargoDep = z.union([
   z
@@ -49,7 +50,7 @@ const CargoDep = z.union([
           skipReason = 'inherited-dependency';
         }
 
-        const dep: PackageDependency = {
+        const dep: PackageDependency<CargoManagerData> = {
           currentValue,
           managerData: { nestedVersion },
           datasource: CrateDatasource.id,
@@ -69,7 +70,7 @@ const CargoDep = z.union([
       },
     ),
   z.string().transform(
-    (version): PackageDependency => ({
+    (version): PackageDependency<CargoManagerData> => ({
       currentValue: version,
       managerData: { nestedVersion: false },
       datasource: CrateDatasource.id,

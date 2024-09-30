@@ -13,7 +13,11 @@ import {
   CargoConfigSchema,
   CargoManifestSchema,
 } from './schema';
-import type { CargoRegistries, CargoRegistryUrl } from './types';
+import type {
+  CargoManagerData,
+  CargoRegistries,
+  CargoRegistryUrl,
+} from './types';
 import { DEFAULT_REGISTRY_URL } from './utils';
 
 const DEFAULT_REGISTRY_ID = 'crates-io';
@@ -24,7 +28,7 @@ function getCargoIndexEnv(registryName: string): string | null {
 }
 
 function extractFromSection(
-  dependencies: PackageDependency[] | undefined,
+  dependencies: PackageDependency<CargoManagerData>[] | undefined,
   cargoRegistries: CargoRegistries,
   target?: string,
 ): PackageDependency[] {
@@ -165,7 +169,7 @@ export async function extractPackageFile(
   content: string,
   packageFile: string,
   _config?: ExtractConfig,
-): Promise<PackageFileContent | null> {
+): Promise<PackageFileContent<CargoManagerData> | null> {
   logger.trace(`cargo.extractPackageFile(${packageFile})`);
 
   const cargoConfig = (await readCargoConfig()) ?? {};

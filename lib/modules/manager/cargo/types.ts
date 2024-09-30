@@ -7,3 +7,8 @@ export type CargoRegistryUrl = string | typeof DEFAULT_REGISTRY_URL | null;
 export interface CargoRegistries {
   [key: string]: CargoRegistryUrl;
 }
+
+export interface CargoManagerData {
+  nestedVersion?: boolean;
+  registry?: string;
+}
