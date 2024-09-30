@@ -8,11 +8,12 @@ export const displayName = 'devbox';
 
 export const supportsRanges = false;
 
-const versionPattern = regEx(/^((\d|[1-9]\d*)(\.(\d|[1-9]\d*)){0,2})$/);
+const validPattern = regEx(/^((\d|[1-9]\d*)(\.(\d|[1-9]\d*)){0,2})$/);
+const versionPattern = regEx(/^((\d|[1-9]\d*)(\.(\d|[1-9]\d*)){2})$/);
 
 class DevboxVersioningApi extends GenericVersioningApi {
   protected _parse(version: string): GenericVersion | null {
-    const matches = versionPattern.exec(version);
+    const matches = validPattern.exec(version);
     if (!matches) {
       return null;
     }
@@ -31,7 +32,8 @@ class DevboxVersioningApi extends GenericVersioningApi {
     if (version === 'latest') {
       return false;
     }
-    return this.isValid(version);
+    const matches = versionPattern.exec(version);
+    return !!matches;
   }
 
   protected override _compare(version: string, other: string): number {
