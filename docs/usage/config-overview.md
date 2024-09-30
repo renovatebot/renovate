@@ -157,9 +157,14 @@ For information on how the Mend Renovate App supports Inherited config, see the 
 
 #### Presets handling
 
-If presets are present in the inherited config, they will be resolved and added to the inherited config prior to being merged on top of global config.
+If the inherited config has presets, then Renovate:
 
-Using `ignorePresets` in your repository config to ignore certain presets will not affect presets present in the inherited config, as inherited config is resolved before repository config.
+1. Resolves the presets
+1. Adds the resolved presets to the inherited config
+1. Merges the presets on top of the global config
+
+Using `ignorePresets` in your repository config to ignore certain presets will _not_ affect presets present in the inherited config.
+This is because inherited config is resolved _before_ the repository config.
 
 ### Repository config
 
