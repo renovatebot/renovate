@@ -63,7 +63,7 @@ const CargoDep = z.union([
           dep.packageName = pkg;
         }
         if (registry) {
-          dep.managerData!.registry = registry;
+          dep.managerData!.registryName = registry;
         }
 
         return dep;

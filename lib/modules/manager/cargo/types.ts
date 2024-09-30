@@ -10,5 +10,5 @@ export interface CargoRegistries {
 
 export interface CargoManagerData {
   nestedVersion?: boolean;
-  registry?: string;
+  registryName?: string;
 }

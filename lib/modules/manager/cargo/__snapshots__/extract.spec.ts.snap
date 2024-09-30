@@ -461,7 +461,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
-      "registry": "private-crates",
+      "registryName": "private-crates",
     },
     "registryUrls": [
       "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git",
@@ -474,7 +474,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
-      "registry": "mcorbin",
+      "registryName": "mcorbin",
     },
     "registryUrls": [
       "https://github.com/mcorbin/testregistry",
@@ -501,7 +501,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
-      "registry": "private-crates",
+      "registryName": "private-crates",
     },
     "registryUrls": [
       "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git",
@@ -514,7 +514,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
-      "registry": "mcorbin",
+      "registryName": "mcorbin",
     },
     "registryUrls": [
       "https://github.com/mcorbin/testregistry",
@@ -541,7 +541,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() fails to parse cargo
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
-      "registry": "private-crates",
+      "registryName": "private-crates",
     },
     "skipReason": "unknown-registry",
   },
@@ -552,7 +552,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() fails to parse cargo
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
-      "registry": "mcorbin",
+      "registryName": "mcorbin",
     },
     "skipReason": "unknown-registry",
   },
@@ -724,7 +724,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() ignore cargo config 
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
-      "registry": "private-crates",
+      "registryName": "private-crates",
     },
     "skipReason": "unknown-registry",
   },
@@ -735,7 +735,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() ignore cargo config 
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
-      "registry": "mcorbin",
+      "registryName": "mcorbin",
     },
     "skipReason": "unknown-registry",
   },
@@ -760,7 +760,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() skips unknown regist
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
-      "registry": "not-listed",
+      "registryName": "not-listed",
     },
     "skipReason": "unknown-registry",
   },

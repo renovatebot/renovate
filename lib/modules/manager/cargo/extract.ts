@@ -41,10 +41,10 @@ function extractFromSection(
   for (const dep of Object.values(dependencies)) {
     let registryUrls: string[] | undefined;
 
-    if (dep.managerData?.registry) {
+    if (dep.managerData?.registryName) {
       const registryUrl =
-        getCargoIndexEnv(dep.managerData.registry) ??
-        cargoRegistries[dep.managerData?.registry];
+        getCargoIndexEnv(dep.managerData.registryName) ??
+        cargoRegistries[dep.managerData?.registryName];
       if (registryUrl) {
         if (registryUrl !== DEFAULT_REGISTRY_URL) {
           registryUrls = [registryUrl];
