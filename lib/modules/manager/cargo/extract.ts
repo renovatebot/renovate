@@ -1,7 +1,6 @@
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
-import { Result } from '../../../util/result';
 import { api as versioning } from '../../versioning/cargo';
 import type {
   ExtractConfig,
@@ -81,14 +80,14 @@ async function readCargoConfig(): Promise<CargoConfig | null> {
     const path = `.cargo/${configName}`;
     const payload = await readLocalFile(path, 'utf8');
     if (payload) {
-      const { val: cargoConfig, err } = Result.parse(
-        payload,
-        CargoConfigSchema,
-      ).unwrap();
-      if (err) {
-        logger.debug({ path, err }, `Error parsing cargo config`);
+      const parsedCargoConfig = CargoConfigSchema.safeParse(payload);
+      if (parsedCargoConfig.success) {
+        return parsedCargoConfig.data;
       } else {
-        return cargoConfig;
+        logger.debug(
+          { err: parsedCargoConfig.error, path },
+          `Error parsing cargo config`,
+        );
       }
     }
   }
@@ -172,15 +171,16 @@ export async function extractPackageFile(
   const cargoConfig = (await readCargoConfig()) ?? {};
   const cargoRegistries = extractCargoRegistries(cargoConfig);
 
-  const { val: cargoManifest, err } = Result.parse(
-    content,
-    CargoManifestSchema,
-  ).unwrap();
-
-  if (err) {
-    logger.debug({ err, packageFile }, 'Error parsing Cargo.toml file');
+  const parsedCargoManifest = CargoManifestSchema.safeParse(content);
+  if (!parsedCargoManifest.success) {
+    logger.debug(
+      { err: parsedCargoManifest.error, packageFile },
+      'Error parsing Cargo.toml file',
+    );
     return null;
   }
+
+  const cargoManifest = parsedCargoManifest.data;
 
   /*
     There are the following sections in Cargo.toml:
