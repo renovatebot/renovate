@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
@@ -67,6 +68,38 @@ describe('modules/manager/gitlabci-include/extract', () => {
         const res = extractPackageFile(yamlFileMultiConfig);
         expect(res?.deps[0].registryUrls).toEqual(['http://gitlab.test']);
       }
+    });
+
+    it('supports multi-document files', () => {
+      const multiDocFile = codeBlock`
+        other:
+          content: to be ignored
+        ---
+        include:
+          - project: mikebryant/include-source-example
+            ref: 1.0.0
+        ---
+        include:
+          - project: mikebryant/include-source-example2
+            ref: 2.0.0
+        ---
+        more:
+          content: to be ignored
+      `;
+      const res = extractPackageFile(multiDocFile);
+      expect(res?.deps).toHaveLength(2);
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '1.0.0',
+          datasource: 'gitlab-tags',
+          depName: 'mikebryant/include-source-example',
+        },
+        {
+          currentValue: '2.0.0',
+          datasource: 'gitlab-tags',
+          depName: 'mikebryant/include-source-example2',
+        },
+      ]);
     });
   });
 });

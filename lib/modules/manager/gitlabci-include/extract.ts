@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
-import { parseSingleYaml } from '../../../util/yaml';
+import { parseYaml } from '../../../util/yaml';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import {
   filterIncludeFromGitlabPipeline,
@@ -72,14 +72,20 @@ export function extractPackageFile(
   const endpoint = GlobalConfig.get('endpoint');
   try {
     // TODO: use schema (#9610)
-    const doc = parseSingleYaml<GitlabPipeline>(replaceReferenceTags(content));
-    const includes = getAllIncludeProjects(doc);
-    for (const includeObj of includes) {
-      const dep = extractDepFromIncludeFile(includeObj);
-      if (platform === 'gitlab' && endpoint) {
-        dep.registryUrls = [endpoint.replace(regEx(/\/api\/v4\/?/), '')];
+    const docs = parseYaml<GitlabPipeline>(replaceReferenceTags(content), {
+      uniqueKeys: false,
+    });
+    for (const doc of docs) {
+      if (is.object(doc)) {
+        const includes = getAllIncludeProjects(doc);
+        for (const includeObj of includes) {
+          const dep = extractDepFromIncludeFile(includeObj);
+          if (platform === 'gitlab' && endpoint) {
+            dep.registryUrls = [endpoint.replace(regEx(/\/api\/v4\/?/), '')];
+          }
+          deps.push(dep);
+        }
       }
-      deps.push(dep);
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.stack?.startsWith('YAMLException:')) {
