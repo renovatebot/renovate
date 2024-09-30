@@ -13,7 +13,7 @@ import {
 import { getFile } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { Result } from '../../../util/result';
-import { parseSingleYaml } from '../../../util/yaml';
+import { parseYaml } from '../../../util/yaml';
 import { generateHelmEnvs } from '../helmv3/common';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { Doc, LockVersion } from './schema';
@@ -70,21 +70,23 @@ export async function updateArtifacts({
     }
 
     const cmd: string[] = [];
-    const doc = parseSingleYaml(newPackageFileContent, {
+    const docs = parseYaml(newPackageFileContent, {
       removeTemplates: true,
       customSchema: Doc,
     });
 
-    for (const value of coerceArray(doc.repositories).filter(isOCIRegistry)) {
-      const loginCmd = await generateRegistryLoginCmd(
-        value.name,
-        `https://${value.url}`,
-        // this extracts the hostname from url like format ghcr.ip/helm-charts
-        value.url.replace(regEx(/\/.*/), ''),
-      );
+    for (const doc of docs) {
+      for (const value of coerceArray(doc.repositories).filter(isOCIRegistry)) {
+        const loginCmd = await generateRegistryLoginCmd(
+          value.name,
+          `https://${value.url}`,
+          // this extracts the hostname from url like format ghcr.ip/helm-charts
+          value.url.replace(regEx(/\/.*/), ''),
+        );
 
-      if (loginCmd) {
-        cmd.push(loginCmd);
+        if (loginCmd) {
+          cmd.push(loginCmd);
+        }
       }
     }
 
