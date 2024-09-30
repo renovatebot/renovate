@@ -251,27 +251,27 @@ export async function initRepo({
 
 export async function getPrList(): Promise<AzurePr[]> {
   logger.debug('getPrList()');
-  if (!config.prList) {
-    const azureApiGit = await azureApi.gitApi();
-    let prs: GitPullRequest[] = [];
-    let fetchedPrs: GitPullRequest[];
-    let skip = 0;
-    do {
-      fetchedPrs = await azureApiGit.getPullRequests(
-        config.repoId,
-        { status: 4 },
-        config.project,
-        0,
-        skip,
-        100,
-      );
-      prs = prs.concat(fetchedPrs);
-      skip += 100;
-    } while (fetchedPrs.length > 0);
 
-    config.prList = prs.map(getRenovatePRFormat);
-    logger.debug(`Retrieved Pull Requests count: ${config.prList.length}`);
-  }
+  const azureApiGit = await azureApi.gitApi();
+  let prs: GitPullRequest[] = [];
+  let fetchedPrs: GitPullRequest[];
+  let skip = 0;
+  do {
+    fetchedPrs = await azureApiGit.getPullRequests(
+      config.repoId,
+      { status: 4 },
+      config.project,
+      0,
+      skip,
+      100,
+    );
+    prs = prs.concat(fetchedPrs);
+    skip += 100;
+  } while (fetchedPrs.length > 0);
+
+  config.prList = prs.map(getRenovatePRFormat);
+  logger.debug(`Retrieved Pull Requests count: ${config.prList.length}`);
+
   return config.prList;
 }
 
