@@ -307,7 +307,7 @@ Renovate will get the credentials with the [`google-auth-library`](https://www.n
     service_account: ${{ env.SERVICE_ACCOUNT }}
 
 - name: renovate
-  uses: renovatebot/github-action@v40.3.0
+  uses: renovatebot/github-action@v40.3.1
   env:
     RENOVATE_HOST_RULES: |
       [
