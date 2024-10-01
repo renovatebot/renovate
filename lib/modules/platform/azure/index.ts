@@ -997,6 +997,7 @@ export async function deleteLabel(
 
 function cachePr(pr?: GitPullRequest): void {
   config.prList ??= [];
+  // istanbul ignore if
   if (!pr) {
     return;
   }
@@ -1024,7 +1025,7 @@ function updateCachedPr(prNo: number, pr?: GitPullRequest): void {
 }
 
 function getCachedPrIdx(prNo: number): number | undefined {
-   for (let idx = 0; idx < config.prList.length; idx += 1) {
+  for (let idx = 0; idx < config.prList.length; idx += 1) {
     const cachedPr = config.prList[idx];
     if (cachedPr.number === prNo) {
       return idx;

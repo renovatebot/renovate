@@ -1985,4 +1985,149 @@ describe('modules/platform/azure/index', () => {
       expect(res).toBeNull();
     });
   });
+
+  describe('pr cache check', () => {
+    it('overrides the same PR in cache if it was recreated', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequests: jest
+              .fn()
+              .mockReturnValue([])
+              .mockReturnValueOnce([
+                {
+                  pullRequestId: 1,
+                  sourceRefName: 'refs/heads/branch-a',
+                  targetRefName: 'refs/heads/branch-b',
+                  title: 'branch a pr',
+                  status: PullRequestStatus.Active,
+                },
+              ]),
+            createPullRequest: jest.fn(() => ({
+              pullRequestId: 1,
+            })),
+            createPullRequestLabel: jest.fn(() => ({})),
+          }) as any,
+      );
+
+      await azure.createPr({
+        sourceBranch: 'branch-a',
+        targetBranch: 'branch-c',
+        prTitle: 'branch a pr',
+        prBody: 'Hello world',
+        labels: ['renovate'],
+      });
+
+      let prList = await azure.getPrList();
+
+      expect(prList.length).toBe(1);
+      expect(prList[0].number).toBe(1);
+
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequests: jest
+              .fn()
+              .mockReturnValue([])
+              .mockReturnValueOnce([
+                {
+                  pullRequestId: 1,
+                  sourceRefName: 'refs/heads/branch-a',
+                  targetRefName: 'refs/heads/branch-b',
+                  title: 'branch a pr',
+                  status: PullRequestStatus.Active,
+                },
+              ]),
+            createPullRequest: jest.fn(() => ({
+              pullRequestId: 1,
+            })),
+            createPullRequestLabel: jest.fn(() => ({})),
+          }) as any,
+      );
+      await azure.createPr({
+        sourceBranch: 'branch-a',
+        targetBranch: 'branch-c',
+        prTitle: 'branch a pr',
+        prBody: 'Hello world',
+        labels: ['renovate'],
+      });
+
+      prList = await azure.getPrList();
+
+      expect(prList.length).toBe(1);
+      expect(prList[0].number).toBe(1);
+    });
+
+    it('should update cached PR', async () => {
+      await initRepo({ repository: 'some/repo' });
+
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequests: jest
+              .fn()
+              .mockReturnValue([])
+              .mockReturnValueOnce([
+                {
+                  pullRequestId: 1,
+                  sourceRefName: 'refs/heads/branch-a',
+                  targetRefName: 'refs/heads/branch-b',
+                  title: 'branch a pr',
+                  status: PullRequestStatus.Active,
+                },
+              ]),
+            createPullRequest: jest.fn(() => ({
+              pullRequestId: 1,
+              sourceRefName: 'refs/heads/branch-a',
+              targetRefName: 'refs/heads/branch-b',
+              title: 'branch a pr',
+              status: PullRequestStatus.Active,
+            })),
+            createPullRequestLabel: jest.fn(() => ({})),
+          }) as any,
+      );
+
+      await azure.createPr({
+        sourceBranch: 'branch-a',
+        targetBranch: 'branch-c',
+        prTitle: 'branch a pr',
+        prBody: 'Hello world',
+        labels: ['renovate'],
+      });
+
+      const updatePullRequest = jest.fn();
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            updatePullRequest,
+          }) as any,
+      );
+      await azure.updatePr({
+        number: 1,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+        targetBranch: 'new_base',
+      });
+
+      const prList = await azure.getPrList();
+
+      expect(prList).toEqual([
+        {
+          bodyStruct: {
+            hash: '132bee921aac0cda19f333358a16922193207ba35fcadfcec0b5f5218edbcf5b',
+          },
+          createdAt: undefined,
+          number: 1,
+          pullRequestId: 1,
+          sourceBranch: 'new_base',
+          sourceRefName: 'refs/heads/branch-b',
+          state: 'open',
+          status: 1,
+          targetBranch: 'new_base',
+          title: 'The New Title',
+        },
+      ]);
+    });
+  });
 });
