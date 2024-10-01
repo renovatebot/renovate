@@ -113,7 +113,7 @@
     Hi there,
 
 
-    A maintainer would like for you to locate and share a specific log message (`packageFiles with updates`) from your repo/environment.
+    A maintainer wants you to find and share a specific log message (`packageFiles with updates`) from your repository or environment.
 
 
     If you self-host Renovate: make sure you run Renovate with `LOG_LEVEL=debug` to get the debug log messages! Next, open the debug-level logs and search for `packageFiles with updates`. This text marks the start of a structured log message that shows every package file, dependency, and update that Renovate found.
