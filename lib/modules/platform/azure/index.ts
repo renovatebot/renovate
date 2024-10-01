@@ -65,7 +65,7 @@ interface Config {
   owner: string;
   repoId: string;
   project: string;
-  prList?: AzurePr[];
+  prList: AzurePr[];
   fileList: null;
   repository: string;
   defaultBranch: string;
@@ -1011,10 +1011,11 @@ function cachePr(pr?: GitPullRequest): void {
 }
 
 function updateCachedPr(prNo: number, pr?: GitPullRequest): void {
+  config.prList ??= [];
   const idx = getCachedPrIdx(prNo);
-  if (!config.prList || !pr || !idx) {
+  if (!pr || is.undefined(idx)) {
     // if pr doesn't exist in cache then invalidate cache so we get new list from api next time.
-    config.prList = undefined;
+    config.prList = undefined as any;
     return;
   }
 
@@ -1023,12 +1024,8 @@ function updateCachedPr(prNo: number, pr?: GitPullRequest): void {
 }
 
 function getCachedPrIdx(prNo: number): number | undefined {
-  if (!config.prList) {
-    return;
-  }
-
-  for (let idx = 0; idx < config.prList.length; idx += 1) {
-    let cachedPr = config.prList[idx];
+   for (let idx = 0; idx < config.prList.length; idx += 1) {
+    const cachedPr = config.prList[idx];
     if (cachedPr.number === prNo) {
       return idx;
     }
