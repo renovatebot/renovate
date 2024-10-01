@@ -36,6 +36,10 @@ class DevboxVersioningApi extends GenericVersioningApi {
     return !!matches;
   }
 
+  override matches(version: string, range: string): boolean {
+    return this.isVersion(version) && this.equals(version, range);
+  }
+
   protected override _compare(version: string, other: string): number {
     const parsed1 = this._parse(version);
     const parsed2 = this._parse(other);
