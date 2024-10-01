@@ -2021,7 +2021,7 @@ describe('modules/platform/azure/index', () => {
 
       let prList = await azure.getPrList();
 
-      expect(prList.length).toBe(1);
+      expect(prList).toHaveLength(1);
       expect(prList[0].number).toBe(1);
 
       azureApi.gitApi.mockImplementationOnce(
@@ -2055,7 +2055,7 @@ describe('modules/platform/azure/index', () => {
 
       prList = await azure.getPrList();
 
-      expect(prList.length).toBe(1);
+      expect(prList).toHaveLength(1);
       expect(prList[0].number).toBe(1);
     });
 
