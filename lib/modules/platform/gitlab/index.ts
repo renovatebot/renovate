@@ -652,10 +652,6 @@ async function tryPrAutomerge(
   platformPrOptions: PlatformPrOptions | undefined,
 ): Promise<void> {
   try {
-    if (platformPrOptions?.gitLabIgnoreApprovals) {
-      await ignoreApprovals(pr);
-    }
-
     if (platformPrOptions?.usePlatformAutomerge) {
       // https://docs.gitlab.com/ee/api/merge_requests.html#merge-status
       const desiredDetailedMergeStatus = [
@@ -757,6 +753,7 @@ export async function createPr({
   draftPR,
   labels,
   platformPrOptions,
+  automerge,
 }: CreatePRConfig): Promise<Pr> {
   let title = prTitle;
   if (draftPR) {
@@ -790,7 +787,13 @@ export async function createPr({
     await approvePr(pr.iid);
   }
 
-  await tryPrAutomerge(pr.iid, platformPrOptions);
+  if (platformPrOptions?.gitLabIgnoreApprovals && automerge) {
+    await ignoreApprovals(pr.iid);
+  }
+
+  if (automerge) {
+    await tryPrAutomerge(pr.iid, platformPrOptions);
+  }
 
   return massagePr(pr);
 }

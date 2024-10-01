@@ -124,6 +124,44 @@ describe('config/presets/gitlab/index', () => {
       });
       expect(content).toEqual({ foo: 'bar' });
     });
+
+    it('should remove approval rules for merge requests with automerge enabled', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(projectPath)
+        .reply(200, {
+          default_branch: 'main',
+        })
+        .get(`${basePath}/files/default.json/raw?ref=main`)
+        .reply(200, { foo: 'bar' }, {});
+
+      const content = await gitlab.getPreset({ repo: 'some/repo' });
+      expect(content).toEqual({ foo: 'bar' });
+
+      // Simulate automerge enabled
+      const automergeEnabled = true;
+      const approvalRulesRemoved = await gitlab.tryPrAutomerge(1, { gitLabIgnoreApprovals: true }, automergeEnabled);
+      expect(approvalRulesRemoved).toBe(true);
+    });
+
+    it('should not remove approval rules for merge requests without automerge enabled', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(projectPath)
+        .reply(200, {
+          default_branch: 'main',
+        })
+        .get(`${basePath}/files/default.json/raw?ref=main`)
+        .reply(200, { foo: 'bar' }, {});
+
+      const content = await gitlab.getPreset({ repo: 'some/repo' });
+      expect(content).toEqual({ foo: 'bar' });
+
+      // Simulate automerge disabled
+      const automergeDisabled = false;
+      const approvalRulesRemoved = await gitlab.tryPrAutomerge(1, { gitLabIgnoreApprovals: true }, automergeDisabled);
+      expect(approvalRulesRemoved).toBe(false);
+    });
   });
 
   describe('getPresetFromEndpoint()', () => {
