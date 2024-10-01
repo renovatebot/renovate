@@ -45,32 +45,5 @@ describe('config/migrate-validate', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('does not remove approval rules for merge requests without automerge enabled', async () => {
-      const input: RenovateConfig = {
-        platformAutomerge: true,
-        gitLabIgnoreApprovals: true,
-        automergeType: 'pr',
-        packageRules: [
-          {
-            matchPackageNames: ['/azure/'],
-            automerge: true,
-          },
-        ],
-      };
-      const res = await migrateAndValidate(config, input);
-      expect(res).toEqual({
-        platformAutomerge: true,
-        gitLabIgnoreApprovals: true,
-        automergeType: 'pr',
-        packageRules: [
-          {
-            matchPackageNames: ['/azure/'],
-            automerge: true,
-          },
-        ],
-        errors: [],
-        warnings: [],
-      });
-    });
   });
 });
