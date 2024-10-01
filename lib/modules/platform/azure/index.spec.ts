@@ -1987,7 +1987,7 @@ describe('modules/platform/azure/index', () => {
   });
 
   describe('pr cache check', () => {
-    it('overrides the same PR in cache if it was recreated', async () => {
+    it('check PR create and update cache', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
         () =>
@@ -2041,10 +2041,15 @@ describe('modules/platform/azure/index', () => {
               ]),
             createPullRequest: jest.fn(() => ({
               pullRequestId: 1,
+              sourceRefName: 'refs/heads/branch-a',
+              targetRefName: 'refs/heads/branch-b',
+              title: 'branch a pr',
+              status: PullRequestStatus.Active,
             })),
             createPullRequestLabel: jest.fn(() => ({})),
           }) as any,
       );
+      // create again same pr
       await azure.createPr({
         sourceBranch: 'branch-a',
         targetBranch: 'branch-c',
@@ -2057,44 +2062,6 @@ describe('modules/platform/azure/index', () => {
 
       expect(prList).toHaveLength(1);
       expect(prList[0].number).toBe(1);
-    });
-
-    it('should update cached PR', async () => {
-      await initRepo({ repository: 'some/repo' });
-
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequests: jest
-              .fn()
-              .mockReturnValue([])
-              .mockReturnValueOnce([
-                {
-                  pullRequestId: 1,
-                  sourceRefName: 'refs/heads/branch-a',
-                  targetRefName: 'refs/heads/branch-b',
-                  title: 'branch a pr',
-                  status: PullRequestStatus.Active,
-                },
-              ]),
-            createPullRequest: jest.fn(() => ({
-              pullRequestId: 1,
-              sourceRefName: 'refs/heads/branch-a',
-              targetRefName: 'refs/heads/branch-b',
-              title: 'branch a pr',
-              status: PullRequestStatus.Active,
-            })),
-            createPullRequestLabel: jest.fn(() => ({})),
-          }) as any,
-      );
-
-      await azure.createPr({
-        sourceBranch: 'branch-a',
-        targetBranch: 'branch-c',
-        prTitle: 'branch a pr',
-        prBody: 'Hello world',
-        labels: ['renovate'],
-      });
 
       const updatePullRequest = jest.fn();
       azureApi.gitApi.mockImplementationOnce(
@@ -2110,7 +2077,7 @@ describe('modules/platform/azure/index', () => {
         targetBranch: 'new_base',
       });
 
-      const prList = await azure.getPrList();
+      prList = await azure.getPrList();
 
       expect(prList).toEqual([
         {
@@ -2120,11 +2087,12 @@ describe('modules/platform/azure/index', () => {
           createdAt: undefined,
           number: 1,
           pullRequestId: 1,
-          sourceBranch: 'new_base',
-          sourceRefName: 'refs/heads/branch-b',
+          sourceBranch: 'branch-a',
+          sourceRefName: 'refs/heads/branch-a',
           state: 'open',
           status: 1,
           targetBranch: 'new_base',
+          targetRefName: 'refs/heads/branch-b',
           title: 'The New Title',
         },
       ]);
