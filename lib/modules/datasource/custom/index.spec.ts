@@ -3,6 +3,7 @@ import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { fs } from '../../../../test/util';
+import { logger } from '../../../logger';
 import { CustomDatasource } from './index';
 
 jest.mock('../../../util/fs');
@@ -226,6 +227,31 @@ describe('modules/datasource/custom/index', () => {
         },
       });
       expect(result).toEqual(expected);
+    });
+
+    it('returns null if transformation using jsonata rules fail', async () => {
+      httpMock
+        .scope('https://example.com')
+        .get('/v1')
+        .reply(200, '1.0.0 \n2.0.0 \n 3.0.0 ', {
+          'Content-Type': 'text/plain',
+        });
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/v1',
+            transformTemplates: ['$[.name = "Alice" and'],
+            format: 'plain',
+          },
+        },
+      });
+      expect(result).toBeNull();
+      expect(logger.debug).toHaveBeenCalledWith(
+        { err: expect.any(Object), transformTemplate: '$[.name = "Alice" and' },
+        'Error while transforming response',
+      );
     });
 
     it('return releases for plain text API when only returns a single version', async () => {

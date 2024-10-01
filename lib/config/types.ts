@@ -383,6 +383,7 @@ export interface PackageRule
   matchUpdateTypes?: UpdateType[];
   registryUrls?: string[] | null;
   vulnerabilitySeverity?: string;
+  vulnerabilityFixVersion?: string;
 }
 
 export interface ValidationMessage {
@@ -391,12 +392,13 @@ export interface ValidationMessage {
 }
 
 export type AllowedParents =
-  | 'customManagers'
   | 'customDatasources'
+  | 'customManagers'
   | 'hostRules'
-  | 'postUpgradeTasks'
+  | 'logLevelRemap'
   | 'packageRules'
-  | 'logLevelRemap';
+  | 'postUpgradeTasks'
+  | 'vulnerabilityAlerts';
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.

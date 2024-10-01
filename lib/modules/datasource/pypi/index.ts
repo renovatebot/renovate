@@ -4,11 +4,13 @@ import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { parse } from '../../../util/html';
+import type { OutgoingHttpHeaders } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash } from '../../../util/url';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url';
 import * as pep440 from '../../versioning/pep440';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { getGoogleAuthToken } from '../util';
 import { isGitHubRepo, normalizePythonDepName } from './common';
 import type { PypiJSON, PypiJSONRelease, Releases } from './types';
 
@@ -82,6 +84,25 @@ export class PypiDatasource extends Datasource {
     return dependency;
   }
 
+  private async getAuthHeaders(
+    lookupUrl: string,
+  ): Promise<OutgoingHttpHeaders> {
+    const parsedUrl = parseUrl(lookupUrl);
+    if (!parsedUrl) {
+      logger.once.debug({ lookupUrl }, 'Failed to parse URL');
+      return {};
+    }
+    if (parsedUrl.hostname.endsWith('.pkg.dev')) {
+      const auth = await getGoogleAuthToken();
+      if (auth) {
+        return { authorization: `Basic ${auth}` };
+      }
+      logger.once.debug({ lookupUrl }, 'Could not get Google access token');
+      return {};
+    }
+    return {};
+  }
+
   private async getDependency(
     packageName: string,
     hostUrl: string,
@@ -92,7 +113,8 @@ export class PypiDatasource extends Datasource {
     );
     const dependency: ReleaseResult = { releases: [] };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
-    const rep = await this.http.getJson<PypiJSON>(lookupUrl);
+    const headers = await this.getAuthHeaders(lookupUrl);
+    const rep = await this.http.getJson<PypiJSON>(lookupUrl, { headers });
     const dep = rep?.body;
     if (!dep) {
       logger.trace({ dependency: packageName }, 'pip package not found');
@@ -237,7 +259,8 @@ export class PypiDatasource extends Datasource {
       ensureTrailingSlash(normalizePythonDepName(packageName)),
     );
     const dependency: ReleaseResult = { releases: [] };
-    const response = await this.http.get(lookupUrl);
+    const headers = await this.getAuthHeaders(lookupUrl);
+    const response = await this.http.get(lookupUrl, { headers });
     const dep = response?.body;
     if (!dep) {
       logger.trace({ dependency: packageName }, 'pip package not found');

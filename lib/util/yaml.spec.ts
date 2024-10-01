@@ -193,7 +193,7 @@ describe('util/yaml', () => {
 
   describe('load', () => {
     it('should return undefined', () => {
-      expect(parseSingleYaml(``)).toBeUndefined();
+      expect(parseSingleYaml(``)).toBeNull();
     });
 
     it('should parse content with single document', () => {

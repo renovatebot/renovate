@@ -109,9 +109,32 @@ export async function postUpgradeCommandsExecutor(
 
       const status = await getRepoStatus();
 
-      for (const relativePath of status.modified.concat(status.not_added)) {
+      logger.trace({ status }, 'git status after post-upgrade tasks');
+
+      logger.debug(
+        {
+          addedCount: status.not_added?.length,
+          modifiedCount: status.modified?.length,
+          deletedCount: status.deleted?.length,
+        },
+        'git status counts after post-upgrade tasks',
+      );
+
+      const addedOrModifiedFiles = [
+        ...coerceArray(status.not_added),
+        ...coerceArray(status.modified),
+      ];
+
+      logger.trace({ addedOrModifiedFiles }, 'Added or modified files');
+      logger.debug(
+        `Checking ${addedOrModifiedFiles.length} added or modified files for post-upgrade changes`,
+      );
+
+      for (const relativePath of addedOrModifiedFiles) {
+        let fileMatched = false;
         for (const pattern of fileFilters) {
           if (minimatch(pattern, { dot: true }).match(relativePath)) {
+            fileMatched = true;
             logger.debug(
               { file: relativePath, pattern },
               'Post-upgrade file saved',
@@ -134,6 +157,12 @@ export async function postUpgradeCommandsExecutor(
               (ua) => !(ua.type === 'deletion' && ua.path === relativePath),
             );
           }
+        }
+        if (!fileMatched) {
+          logger.debug(
+            { file: relativePath },
+            'Post-upgrade file did not match any file filters',
+          );
         }
       }
 

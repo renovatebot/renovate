@@ -372,12 +372,65 @@ export async function lookupUpdates(
       );
       let shrinkedViaVulnerability = false;
       if (config.isVulnerabilityAlert) {
-        filteredReleases = filteredReleases.slice(0, 1);
-        shrinkedViaVulnerability = true;
-        logger.debug(
-          { filteredReleases },
-          'Vulnerability alert found: limiting results to a single release',
-        );
+        if (config.vulnerabilityFixVersion) {
+          res.vulnerabilityFixVersion = config.vulnerabilityFixVersion;
+          res.vulnerabilityFixStrategy = config.vulnerabilityFixStrategy;
+          if (versioning.isValid(config.vulnerabilityFixVersion)) {
+            let fixedFilteredReleases;
+            if (versioning.isVersion(config.vulnerabilityFixVersion)) {
+              // Retain only releases greater than or equal to the fix version
+              fixedFilteredReleases = filteredReleases.filter(
+                (release) =>
+                  !versioning.isGreaterThan(
+                    config.vulnerabilityFixVersion!,
+                    release.version,
+                  ),
+              );
+            } else {
+              // Retain only releases which max the fix constraint
+              fixedFilteredReleases = filteredReleases.filter((release) =>
+                versioning.matches(
+                  release.version,
+                  config.vulnerabilityFixVersion!,
+                ),
+              );
+            }
+            // Warn if this filtering results caused zero releases
+            if (fixedFilteredReleases.length === 0 && filteredReleases.length) {
+              logger.warn(
+                {
+                  releases: filteredReleases,
+                  vulnerabilityFixVersion: config.vulnerabilityFixVersion,
+                  packageName: config.packageName,
+                },
+                'No releases satisfy vulnerabilityFixVersion',
+              );
+            }
+            // Use the additionally filtered releases
+            filteredReleases = fixedFilteredReleases;
+          } else {
+            logger.warn(
+              {
+                vulnerabilityFixVersion: config.vulnerabilityFixVersion,
+                packageName: config.packageName,
+              },
+              'vulnerabilityFixVersion is not valid',
+            );
+          }
+        }
+        if (config.vulnerabilityFixStrategy === 'highest') {
+          // Don't shrink the list of releases - let Renovate use its normal logic
+          logger.once.debug(
+            `Using vulnerabilityFixStrategy=highest for ${config.packageName}`,
+          );
+        } else {
+          // Shrink the list of releases to the lowest fixed version
+          logger.once.debug(
+            `Using vulnerabilityFixStrategy=lowest for ${config.packageName}`,
+          );
+          filteredReleases = filteredReleases.slice(0, 1);
+          shrinkedViaVulnerability = true;
+        }
       }
       const buckets: Record<string, [Release]> = {};
       for (const release of filteredReleases) {
