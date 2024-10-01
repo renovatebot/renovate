@@ -44,6 +44,5 @@ describe('config/migrate-validate', () => {
       expect(res.warnings).toBeUndefined();
       expect(res).toMatchSnapshot();
     });
-
   });
 });
