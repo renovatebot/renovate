@@ -29,7 +29,7 @@ const CargoDep = z.union([
         registry,
         package: pkg,
         workspace,
-      }): PackageDependency => {
+      }): PackageDependency<CargoManagerData> => {
         let skipReason: SkipReason | undefined;
         let currentValue: string | undefined;
         let nestedVersion = false;
