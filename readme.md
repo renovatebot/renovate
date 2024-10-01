@@ -35,13 +35,16 @@ Renovate updates code repositories on the following platforms: GitHub, GitLab, B
 ## Ways to run Renovate
 
 The most effective way to run Renovate is to use an automated job scheduling system that regularly runs Renovate on all enabled repositories and responds with priority to user activity.
-Mend offers cloud-hosted and self-hosted solutions. See the options below.
+Mend offers cloud-hosted and self-hosted solutions.
+See the options below.
 
 ### Mend Renovate Community (Cloud-Hosted)
 
 **Supports: GitHub.com, Bitbucket Cloud**
 
-Hosted by Mend.io. No setup is required. Community plan available (Free)
+Hosted by Mend.io.
+No setup is needed.
+Community plan available (Free)
 
 - GitHub Cloud: Install the [Renovate Cloud-Hosted App](https://github.com/apps/renovate) on your GitHub org, then select the repos to enable
 - Bitbucket Cloud: Add the [Mend App](https://marketplace.atlassian.com/apps/1232072/mend) to your Workspace, then add the Mend Renovate user to the projects you want to enable
@@ -50,7 +53,8 @@ Hosted by Mend.io. No setup is required. Community plan available (Free)
 
 **Supports: GitHub, GitLab, Bitbucket Data Center**
 
-Install and run your own Renovate server. Access internal packages.
+Install and run your own Renovate server.
+Access internal packages.
 
 - [Mend Renovate Community Self-Hosted](https://github.com/mend/renovate-ce-ee/tree/main/docs) (Free)
 - [Mend Renovate Enterprise](https://www.mend.io/mend-renovate/) (Paid plan)
@@ -61,12 +65,12 @@ If you can’t use a pre-built job scheduling system, or want to build your own,
 
 #### Run Renovate on your Pipeline
 
-Mend provides a _**GitHub Action**_ and _**GitLab Runner**_ to make it easier to run Renovate as a CI pipeline job.
+Mend provides a _**GitHub Action**_ and _**GitLab Runner**_ to help you run Renovate as a CI pipeline job.
 
 - GitHub Action: [renovatebot/github-action](https://github.com/renovatebot/github-action).
 - GitLab Runner: [Renovate Runner project](https://gitlab.com/renovate-bot/renovate-runner/)
 - AzureDevOps action: [Renovate Me extension](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me)<br>
-  _Note: This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository._
+  _Note: This extension is created and maintained personally by a Renovate developer/user. Support requests for the extension will not be answered directly in the main Renovate repository._
 - Custom pipeline: You can create a custom pipeline with a **yml** definition that triggers **npx renovate**. [More details on how to configure the pipeline](https://docs.renovatebot.com/modules/platform/azure/).
 
 #### Run Renovate CLI
@@ -121,11 +125,11 @@ To contribute to Renovate, or run a local copy, please read the contributing gui
 
 The Renovate project is proudly supported and actively maintained by Mend.io.
 
-- Contact [Mend.io](http://Mend.io) for commercial support questions.
+- Contact [Mend.io](https://www.mend.io/) for commercial support questions.
 
 Follow us on:
 
-- Twitter: [x.com/mend_io](http://x.com/mend_io)
+- Twitter: [x.com/mend_io](https://x.com/mend_io)
 - LinkedIn: [linkedin.com/company/mend-io](https://linkedin.com/company/mend-io)
 
 ## Security / Disclosure
