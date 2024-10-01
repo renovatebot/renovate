@@ -1,9 +1,26 @@
 import is from '@sindresorhus/is';
 import { matchesHost } from '../host-rules';
 import * as hostRules from '../host-rules';
-import type { RateLimitRule } from './types';
+import type { ConcurrencyLimitRule, ThrottleLimitRule } from './types';
 
-const defaults: RateLimitRule[] = [
+// The first match wins
+const concurrencyDefaults: ConcurrencyLimitRule[] = [
+  {
+    matchHost: 'registry.npmjs.org',
+    concurrency: 999,
+  },
+  {
+    matchHost: 'repology.org',
+    concurrency: 1,
+  },
+  {
+    matchHost: '*',
+    concurrency: 16,
+  },
+];
+
+// The first match wins
+const throttleDefaults: ThrottleLimitRule[] = [
   {
     // https://guides.rubygems.org/rubygems-org-rate-limits/
     matchHost: 'rubygems.org',
@@ -15,15 +32,28 @@ const defaults: RateLimitRule[] = [
     throttleMs: 1000,
   },
   {
-    matchHost: '*',
-    concurrency: 16,
+    // The rate limit is 100 per second, according this comment:
+    // https://github.com/renovatebot/renovate/discussions/27018#discussioncomment-10336270
+    //
+    // We stick to 20 per second just in case.
+    matchHost: 'https://plugins.gradle.org',
+    throttleMs: 50,
+  },
+  {
+    matchHost: 'repology.org',
+    throttleMs: 2000,
   },
 ];
 
-let limits: RateLimitRule[] = [];
+let throttleLimits: ThrottleLimitRule[] = [];
+let concurrencyLimits: ConcurrencyLimitRule[] = [];
 
-export function setHttpRateLimits(rules?: RateLimitRule[]): void {
-  limits = rules ?? defaults;
+export function setHttpRateLimits(
+  concurrencyRules?: ConcurrencyLimitRule[],
+  throttleRules?: ThrottleLimitRule[],
+): void {
+  concurrencyLimits = concurrencyRules ?? concurrencyDefaults;
+  throttleLimits = throttleRules ?? throttleDefaults;
 }
 
 function matches(url: string, host: string): boolean {
@@ -46,8 +76,8 @@ export function getConcurrentRequestsLimit(url: string): number | null {
     result = hostRuleLimit;
   }
 
-  for (const { matchHost, concurrency: limit } of limits) {
-    if (!matches(url, matchHost) || !is.number(limit)) {
+  for (const { matchHost, concurrency: limit } of concurrencyLimits) {
+    if (!matches(url, matchHost)) {
       continue;
     }
 
@@ -70,8 +100,8 @@ export function getThrottleIntervalMs(url: string): number | null {
     result = Math.ceil(1000 / maxRequestsPerSecond);
   }
 
-  for (const { matchHost, throttleMs: limit } of limits) {
-    if (!matches(url, matchHost) || !is.number(limit)) {
+  for (const { matchHost, throttleMs: limit } of throttleLimits) {
+    if (!matches(url, matchHost)) {
       continue;
     }
 

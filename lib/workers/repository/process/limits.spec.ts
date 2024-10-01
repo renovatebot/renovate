@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
-import { RenovateConfig, partial, platform, scm } from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { partial, platform, scm } from '../../../../test/util';
 import type { Pr } from '../../../modules/platform/types';
 import type { BranchConfig } from '../../types';
 import * as limits from './limits';
@@ -64,7 +65,7 @@ describe('workers/repository/process/limits', () => {
                 state: 'open',
               }),
             )
-          : Promise.reject('some error'),
+          : Promise.reject(new Error('some error')),
       );
       const branches: BranchConfig[] = [
         { branchName: 'test' },

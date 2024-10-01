@@ -101,6 +101,7 @@ export type PlatformPrOptions = {
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
+  bbAutoResolvePrTasks?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
@@ -283,7 +284,7 @@ export interface Platform {
 
 export interface PlatformScm {
   isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean>;
-  isBranchModified(branchName: string): Promise<boolean>;
+  isBranchModified(branchName: string, baseBranch: string): Promise<boolean>;
   isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
   getBranchCommit(branchName: string): Promise<LongCommitSha | null>;

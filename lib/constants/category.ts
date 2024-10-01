@@ -1,5 +1,5 @@
 // istanbul ignore next
-const Categories = [
+export const Categories = [
   'ansible',
   'batect',
   'bazel',

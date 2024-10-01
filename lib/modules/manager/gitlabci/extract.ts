@@ -25,7 +25,7 @@ import type {
   Job,
   Services,
 } from './types';
-import { getGitlabDep, replaceReferenceTags } from './utils';
+import { getGitlabDep } from './utils';
 
 // See https://docs.gitlab.com/ee/ci/components/index.html#use-a-component
 const componentReferenceRegex = regEx(
@@ -122,12 +122,16 @@ function extractDepFromIncludeComponent(
   includeComponent: GitlabIncludeComponent,
   registryAliases?: Record<string, string>,
 ): PackageDependency | null {
-  const componentReference = componentReferenceRegex.exec(
-    includeComponent.component,
-  )?.groups;
+  let componentUrl = includeComponent.component;
+  if (registryAliases) {
+    for (const key in registryAliases) {
+      componentUrl = componentUrl.replace(key, registryAliases[key]);
+    }
+  }
+  const componentReference = componentReferenceRegex.exec(componentUrl)?.groups;
   if (!componentReference) {
     logger.debug(
-      { componentReference: includeComponent.component },
+      { componentReference: componentUrl },
       'Ignoring malformed component reference',
     );
     return null;
@@ -135,14 +139,10 @@ function extractDepFromIncludeComponent(
   const projectPathParts = componentReference.projectPath.split('/');
   if (projectPathParts.length < 2) {
     logger.debug(
-      { componentReference: includeComponent.component },
+      { componentReference: componentUrl },
       'Ignoring component reference with incomplete project path',
     );
     return null;
-  }
-  const aliasValue = registryAliases?.[componentReference.fqdn];
-  if (aliasValue) {
-    componentReference.fqdn = aliasValue;
   }
 
   const dep: PackageDependency = {
@@ -170,13 +170,9 @@ export function extractPackageFile(
   let deps: PackageDependency[] = [];
   try {
     // TODO: use schema (#9610)
-    const docs = parseYaml<GitlabPipeline>(
-      replaceReferenceTags(content),
-      null,
-      {
-        json: true,
-      },
-    );
+    const docs = parseYaml<GitlabPipeline>(content, {
+      uniqueKeys: false,
+    });
     for (const doc of docs) {
       if (is.object(doc)) {
         for (const [property, value] of Object.entries(doc)) {
@@ -263,8 +259,8 @@ export async function extractAllPackageFiles(
     let docs: GitlabPipeline[];
     try {
       // TODO: use schema (#9610)
-      docs = parseYaml(replaceReferenceTags(content), null, {
-        json: true,
+      docs = parseYaml(content, {
+        uniqueKeys: false,
       });
     } catch (err) {
       logger.debug(

@@ -62,7 +62,7 @@ Consider this example:
   "labels": ["dependencies"],
   "packageRules": [
     {
-      "matchPackagePatterns": ["eslint"],
+      "matchPackageNames": ["/eslint/"],
       "labels": ["linting"]
     },
     {
@@ -337,6 +337,10 @@ You can also use the special `"$default"` string to denote the repository's defa
     Do _not_ use the `baseBranches` config option when you've set a `forkToken`.
     You may need a `forkToken` when you're using the Forking Renovate app.
 
+## bbAutoResolvePrTasks
+
+Configuring this to `true` means that Renovate will mark all PR Tasks as complete.
+
 ## bbUseDefaultReviewers
 
 Configuring this to `true` means that Renovate will detect and apply the default reviewers rules to PRs (Bitbucket only).
@@ -443,6 +447,7 @@ For `sbt` note that Renovate will update the version string only for packages th
 ## cloneSubmodules
 
 Enabling this option will mean that any detected Git submodules will be cloned at time of repository clone.
+Submodules are always cloned recursively.
 
 Important: private submodules aren't supported by Renovate, unless the underlying `ssh` layer already has the correct permissions.
 
@@ -1084,7 +1089,7 @@ If you want to approve _specific_ packages, set `dependencyDashboardApproval` to
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["^@package-name"],
+      "matchPackageNames": ["/^@package-name/"],
       "dependencyDashboardApproval": true
     }
   ]
@@ -1113,6 +1118,8 @@ You can choose from:
 - `unresolved` list CVEs that have no fixes
 - `all` list all CVEs
 
+You will only get OSV-based vulnerability alerts for direct dependencies.
+
 This feature is independent of the `osvVulnerabilityAlerts` option.
 
 The source of these CVEs is [OSV.dev](https://osv.dev/).
@@ -1124,7 +1131,8 @@ Configure this option if you prefer a different title for the Dependency Dashboa
 ## description
 
 The description field can be used inside any configuration object to add a human-readable description of the object's config purpose.
-Descriptions fields embedded within presets are also collated as part of the onboarding description.
+A description field embedded within a preset is also collated as part of the onboarding description unless the preset only consists of presets itself.
+Presets which consist only of other presets have their own description omitted from the onboarding description because they will be fully described by the preset descriptions within.
 
 ## digest
 
@@ -1165,7 +1173,7 @@ To disable Renovate for all `eslint` packages, you can configure a package rule 
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["^eslint"],
+      "matchPackageNames": ["eslint**"],
       "enabled": false
     }
   ]
@@ -2100,7 +2108,7 @@ In the case that a user is automatically added as reviewer (such as Renovate App
 
 ## ignoreScripts
 
-Applicable for npm and Composer only for now. Set this to `true` if running scripts causes problems.
+Applicable for npm, bun, Composer and Copier only for now. Set this to `true` if running scripts causes problems.
 
 ## ignoreTests
 
@@ -2174,7 +2182,7 @@ Consider this example:
   "labels": ["dependencies"],
   "packageRules": [
     {
-      "matchPackagePatterns": ["eslint"],
+      "matchPackageNames": ["/eslint/"],
       "labels": ["linting"]
     }
   ]
@@ -2209,6 +2217,7 @@ Supported lock files:
 - `Gemfile.lock`
 - `gradle.lockfile`
 - `jsonnetfile.lock.json`
+- `manifest.toml`
 - `package-lock.json`
 - `packages.lock.json`
 - `pdm.lock`
@@ -2406,17 +2415,13 @@ The order of rules matters, because later rules may override configuration optio
 
 The matching process for a package rule:
 
-- Each package rule can include `match...` matchers to identify dependencies and `exclude...` matchers to filter them out.
-- If no match/exclude matchers are defined, everything matches.
-- If an aspect is both `match`ed and `exclude`d, the exclusion wins.
-- Multiple values within a single matcher will be evaluated independently (they're OR-ed together).
-- Combining multiple matchers will restrict the resulting matches (they're AND-ed together):
-  `matchCurrentVersion`, `matchCurrentValue`, `matchNewValue`, `matchConfidence`, `matchCurrentAge`,
-  `matchManagers`, `matchDatasources`, `matchCategories`, `matchDepTypes`, `matchUpdateTypes`, `matchReleaseAge`,
-  `matchRepositories`/`excludeRepositories`, `matchBaseBranches`, `matchFileNames`
-- Two special groups of matchers provide alternatives (they're OR-ed within their respective groups, and AND-ed with others):
-  - Source URL: `matchSourceUrls`, `matchSourceUrlPrefixes`
-  - Package/Dep identifiers: `matchDepNames`/`excludeDepNames`, `matchDepPatterns`/`excludeDepPatterns`, `matchDepPrefixes`/`excludeDepPrefixes`, `matchPackageNames`/`excludePackageNames`, `matchPackagePatterns`/`excludePackagePatterns`, `matchPackagePrefixes`/`excludePackagePrefixes`
+- Each package rule must include at least one `match...` matcher.
+- If multiple matchers are included in one package rule, all of them must match.
+- Each matcher must contain at least one pattern. Some matchers allow both positive and negative patterns.
+- If a matcher includes any positive patterns, it must match at least one of them.
+- A matcher returns `false` if it matches _any_ negative pattern, even if a positive match also occurred.
+
+For more details on positive and negative pattern syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 Here is an example if you want to group together all packages starting with `eslint` into a single branch/PR:
 
@@ -2424,14 +2429,14 @@ Here is an example if you want to group together all packages starting with `esl
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["^eslint"],
+      "matchPackageNames": ["eslint**"],
       "groupName": "eslint packages"
     }
   ]
 }
 ```
 
-Note how the above uses `matchPackagePatterns` with a regex value.
+Note how the above uses `matchPackageNames` with a prefix pattern.
 
 Here's an example config to limit the "noisy" `aws-sdk` package to weekly updates:
 
@@ -2448,24 +2453,22 @@ Here's an example config to limit the "noisy" `aws-sdk` package to weekly update
 
 For Maven dependencies, the package name is `<groupId:artefactId>`, e.g. `"matchPackageNames": ["com.thoughtworks.xstream:xstream"]`
 
-Note how the above uses `matchPackageNames` instead of `matchPackagePatterns` because it is an exact match package name.
-This is the equivalent of defining `"matchPackagePatterns": ["^aws\-sdk$"]`.
-However you can mix together both `matchPackageNames` and `matchPackagePatterns` in the same package rule and the rule will be applied if _either_ match.
+Note how the above uses an exact match string for `matchPackageNames` instead of a pattern
+However you can mix together both patterns and exact matches in the same package rule and the rule will be applied if _either_ match.
 Example:
 
 ```json
 {
   "packageRules": [
     {
-      "matchPackageNames": ["neutrino"],
-      "matchPackagePatterns": ["^@neutrino/"],
+      "matchPackageNames": ["neutrino", "@neutrino/**"],
       "groupName": "neutrino monorepo"
     }
   ]
 }
 ```
 
-The above rule will group together the `neutrino` package and any package matching `@neutrino/*`.
+The above rule will group together the `neutrino` package and any package starting with `@neutrino/`.
 
 File name matches are convenient to use if you wish to apply configuration rules to certain package or lock files using patterns.
 For example, if you have an `examples` directory and you want all updates to those examples to use the `chore` prefix instead of `fix`, then you could add this configuration:
@@ -2583,85 +2586,7 @@ To read the changelogs you must use the link.
 !!! note
     Renovate can fetch changelogs from Bitbucket, Gitea (Forgejo), GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
 
-### excludeDepNames
-
-### excludeDepPatterns
-
-### excludeDepPrefixes
-
-### excludePackageNames
-
-**Important**: Do not mix this up with the option `ignoreDeps`.
-Use `ignoreDeps` instead if all you want to do is have a list of package names for Renovate to ignore.
-
-Use `excludePackageNames` if you want to have one or more exact name matches excluded in your package rule.
-See also `matchPackageNames`.
-
-```json
-{
-  "packageRules": [
-    {
-      "matchPackagePatterns": ["^eslint"],
-      "excludePackageNames": ["eslint-foo"]
-    }
-  ]
-}
-```
-
-The above will match all package names starting with `eslint` but exclude the specific package `eslint-foo`.
-
-### excludePackagePatterns
-
-Use this field if you want to have one or more package name patterns excluded in your package rule.
-See also `matchPackagePatterns`.
-
-```json
-{
-  "packageRules": [
-    {
-      "matchPackagePatterns": ["^eslint"],
-      "excludePackagePatterns": ["^eslint-foo"]
-    }
-  ]
-}
-```
-
-The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
-
-### excludePackagePrefixes
-
-Use this field if you want to have one or more package name prefixes excluded in your package rule, without needing to write a regex.
-See also `matchPackagePrefixes`.
-
-```json
-{
-  "packageRules": [
-    {
-      "matchPackagePrefixes": ["eslint"],
-      "excludePackagePrefixes": ["eslint-foo"]
-    }
-  ]
-}
-```
-
-The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
-
-### excludeRepositories
-
-Use this field to restrict rules to a particular repository. e.g.
-
-```json
-{
-  "packageRules": [
-    {
-      "excludeRepositories": ["literal/repo", "/^some/.*$/", "**/*-archived"],
-      "enabled": false
-    }
-  ]
-}
-```
-
-This field supports Regular Expressions if they begin and end with `/`, otherwise it will use `minimatch`.
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchBaseBranches
 
@@ -2672,7 +2597,7 @@ Use this field to restrict rules to a particular branch. e.g.
   "packageRules": [
     {
       "matchBaseBranches": ["main"],
-      "excludePackagePatterns": ["^eslint"],
+      "matchPackageNames": ["!/^eslint/"],
       "enabled": false
     }
   ]
@@ -2686,7 +2611,7 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
   "packageRules": [
     {
       "matchBaseBranches": ["/^release/.*/"],
-      "excludePackagePatterns": ["^eslint"],
+      "matchPackageNames": ["!/^eslint/"],
       "enabled": false
     }
   ]
@@ -2769,7 +2694,7 @@ This option is matched against the `currentValue` field of a dependency.
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchCurrentValue": "1.*",
       "automerge": true
     }
@@ -2783,7 +2708,7 @@ Regular Expressions must begin and end with `/`.
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchCurrentValue": "/^1\\./"
     }
   ]
@@ -2797,7 +2722,7 @@ Use the syntax `!/ /` like this:
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchCurrentValue": "!/^0\\./"
     }
   ]
@@ -2838,7 +2763,7 @@ For example, the following enforces that only `1.*` versions will be used:
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchCurrentVersion": "/^1\\./"
     }
   ]
@@ -2852,7 +2777,7 @@ Use the syntax `!/ /` like this:
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchCurrentVersion": "!/^0\\./"
     }
   ]
@@ -2877,10 +2802,6 @@ Use this field to restrict rules to a particular datasource. e.g.
 ### matchDepNames
 
 This field behaves the same as `matchPackageNames` except it matches against `depName` instead of `packageName`.
-
-### matchDepPatterns
-
-### matchDepPrefixes
 
 ### matchDepTypes
 
@@ -2950,13 +2871,7 @@ Use this field to restrict rules to a particular package manager. e.g.
 }
 ```
 
-For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
-
 ### matchMessage
-
-For log level remapping, use this field to match against the particular log messages.
-
-For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchNewValue
 
@@ -2968,7 +2883,7 @@ This option is matched against the `newValue` field of a dependency.
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchNewValue": "1.*",
       "automerge": true
     }
@@ -2982,7 +2897,7 @@ Regular Expressions must begin and end with `/`.
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchNewValue": "/^1\\./"
     }
   ]
@@ -2996,7 +2911,7 @@ Use the syntax `!/ /` like this:
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchNewValue": "!/^0\\./"
     }
   ]
@@ -3007,13 +2922,17 @@ For more details on this syntax see Renovate's [string pattern matching document
 
 ### matchPackageNames
 
-Use this field if you want to have one or more exact name matches in your package rule.
-See also `excludePackageNames`.
+Use this field to match against the `packageName` field.
+This matching can be an exact match, Glob match, or Regular Expression match.
 
-```json
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+Note that Glob matching (including exact name matching) is case-insensitive.
+
+```json title="exact name match"
 {
   "packageRules": [
     {
+      "matchDatasources": ["npm"],
       "matchPackageNames": ["angular"],
       "rangeStrategy": "pin"
     }
@@ -3021,119 +2940,36 @@ See also `excludePackageNames`.
 }
 ```
 
-The above will configure `rangeStrategy` to `pin` only for the package `angular`.
+The above will configure `rangeStrategy` to `pin` only for the npm package `angular`.
 
-<!-- prettier-ignore -->
-!!! note
-    `matchPackageNames` will try matching `packageName` first and then fall back to matching `depName`.
-    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
-    Use `matchDepNames` instead.
-
-### matchPackagePatterns
-
-Use this field if you want to have one or more package names patterns in your package rule.
-See also `excludePackagePatterns`.
-
-```json
+```json title="prefix match using Glob"
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["^angular"],
+      "matchPackageNames": ["@angular/**", "!@angular/abc"],
       "rangeStrategy": "replace"
     }
   ]
 }
 ```
 
-The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
+The above will set a replaceStrategy for any npm package which starts with `@angular/` except `@angular/abc`.
 
-<!-- prettier-ignore -->
-!!! note
-    `matchPackagePatterns` will try matching `packageName` first and then fall back to matching `depName`.
-    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
-    Use `matchDepPatterns` instead.
-
-### matchPackagePrefixes
-
-Use this field to match a package prefix without needing to write a regex expression.
-See also `excludePackagePrefixes`.
-
-```json
+```json title="pattern match using RegEx"
 {
   "packageRules": [
     {
-      "matchPackagePrefixes": ["angular"],
-      "rangeStrategy": "replace"
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["/^angular/"],
+      "groupName": "Angular"
     }
   ]
 }
 ```
 
-Like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
-
-<!-- prettier-ignore -->
-!!! note
-    `matchPackagePrefixes` will try matching `packageName` first and then fall back to matching `depName`.
-    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
-    Use `matchDepPatterns` instead.
-
-### matchReleaseAge
-
-Use this field if you want to match packages based on the age of the _new_ (released) version.
-
-For example, if you want to group updates for dependencies where the new version is more than 1 month old:
-
-```json
-{
-  "packageRules": [
-    {
-      "matchReleaseAge": "> 1 month",
-      "groupName": "overdue dependencies"
-    }
-  ]
-}
-```
-
-The `matchReleaseAge` string must start with one of `>`, `>=`, `<` or `<=`.
-
-Only _one_ date part is supported, so you _cannot_ do `> 1 year 1 month`.
-Instead you should do `> 13 months`.
-
-<!-- prettier-ignore -->
-!!! note
-    We recommend you only use the words hour(s), day(s), week(s), month(s) and year(s) in your time ranges.
+The above will group together any npm package which starts with the string `angular`.
 
 ### matchRepositories
-
-Use this field to restrict rules to a particular repository. e.g.
-
-```json
-{
-  "packageRules": [
-    {
-      "matchRepositories": ["literal/repo", "/^some/.*$/", "**/*-archived"],
-      "enabled": false
-    }
-  ]
-}
-```
-
-For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
-
-### matchSourceUrlPrefixes
-
-Here's an example of where you use this to group together all packages from the `renovatebot` GitHub org:
-
-```json
-{
-  "packageRules": [
-    {
-      "matchSourceUrlPrefixes": ["https://github.com/renovatebot/"],
-      "groupName": "All renovate packages"
-    }
-  ]
-}
-```
 
 ### matchSourceUrls
 
@@ -3150,6 +2986,8 @@ Here's an example of where you use this to group together all packages from the 
 }
 ```
 
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ### matchUpdateTypes
 
 Use `matchUpdateTypes` to match rules against types of updates.
@@ -3165,6 +3003,8 @@ For example to apply a special label to `major` updates:
   ]
 }
 ```
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 <!-- prettier-ignore -->
 !!! warning
@@ -3258,7 +3098,7 @@ For example, the following package rule can be used to replace the registry for 
   "packageRules": [
     {
       "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["^docker\\.io/.+"],
+      "matchPackageNames": ["docker.io/**"],
       "replacementNameTemplate": "{{{replace 'docker\\.io/' 'ghcr.io/' packageName}}}"
     }
   ]
@@ -3273,13 +3113,13 @@ Or, to add a registry prefix to any `docker` images that do not contain an expli
     {
       "description": "official images",
       "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["^[a-z-]+$"],
+      "matchPackageNames": ["/^[a-z-]+$/"],
       "replacementNameTemplate": "some.registry.org/library/{{{packageName}}}"
     },
     {
       "description": "non-official images",
       "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["^[a-z-]+/[a-z-]+$"],
+      "matchPackageNames": ["/^[a-z-]+/[a-z-]+$/"],
       "replacementNameTemplate": "some.registry.org/{{{packageName}}}"
     }
   ]
@@ -3737,6 +3577,7 @@ Only change this setting if you really need to.
 ## registryAliases
 
 You can use the `registryAliases` object to set registry aliases.
+Renovate applies _all_ `registryAliases` objects, from top to bottom.
 
 This feature works with the following managers:
 
@@ -3928,10 +3769,6 @@ Renovate does not support scheduled minutes or "at an exact time" granularity.
 !!! note
     Actions triggered via the [Dependency Dashboard](#dependencydashboard) are not restricted by a configured schedule.
 
-<!-- prettier-ignore -->
-!!! tip
-    To validate your `later` schedule before updating your `renovate.json`, you can use [this CodePen](https://codepen.io/rationaltiger24/full/ZExQEgK).
-
 ## semanticCommitScope
 
 By default you will see Angular-style commit prefixes like `"chore(deps):"`.
@@ -4053,15 +3890,6 @@ The above config will suppress the comment which is added to a PR whenever you c
 
 It is only recommended to configure this field if you wish to use the `schedules` feature and want to write them in your local timezone.
 Please see the above link for valid timezone names.
-
-## transitiveRemediation
-
-When enabled, Renovate tries to remediate vulnerabilities even if they exist only in transitive dependencies.
-
-Applicable only for GitHub platform (with vulnerability alerts enabled) and `npm` manager.
-When the `lockfileVersion` is higher than `1` in `package-lock.json`, remediations are only possible when changes are made to `package.json`.
-
-This is considered a feature flag with the aim to remove it and default to this behavior once it has been more widely tested.
 
 ## updateInternalDeps
 
@@ -4234,3 +4062,18 @@ To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabi
 <!-- prettier-ignore -->
 !!! note
     If you want to raise only vulnerability fix PRs, you may use the `security:only-security-updates` preset.
+
+### vulnerabilityFixStrategy
+
+When a vulnerability fix is available, Renovate will default to picking the lowest fixed version (`vulnerabilityFixStrategy=lowest`).
+For example, if the current version is `1.0.0`, and a vulnerability is fixed in `1.1.0`, while the latest version is `1.2.0`, then Renovate will propose an update to `1.1.0` as the vulnerability fix.
+
+If `vulnerabilityFixStrategy=highest` is configured then Renovate will use its normal strategy for picking upgrades, e.g. in the above example it will propose an update to `1.2.0` to fix the vulnerability.
+
+```json title="Setting vulnerabilityFixStrategy to highest"
+{
+  "vulnerabilityAlerts": {
+    "vulnerabilityFixStrategy": "highest"
+  }
+}
+```

@@ -8,8 +8,11 @@
       "replacements:containerbase",
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
+      "replacements:docker-compose",
+      "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
       "replacements:eslint-config-standard-with-typescript-to-eslint-config-love",
       "replacements:eslint-plugin-node-to-maintained-fork",
+      "replacements:eslint-plugin-vitest-to-scoped",
       "replacements:fakerjs-to-scoped",
       "replacements:fastify-to-scoped",
       "replacements:hapi-to-scoped",
@@ -38,6 +41,7 @@
       "replacements:semantic-release-replace-plugin-to-unscoped",
       "replacements:spectre-cli-to-spectre-console-cli",
       "replacements:standard-version-to-commit-and-tag",
+      "replacements:typeorm-seeding-to-scoped",
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
       "replacements:xmldom-to-scoped",
@@ -136,26 +140,26 @@
       {
         "description": "Replace `containerbase/(buildpack|base)` and `renovate/buildpack` with `ghcr.io/containerbase/base`.",
         "matchDatasources": ["docker"],
-        "matchPackagePatterns": [
-          "^(?:docker\\.io/)?containerbase/(?:buildpack|base)$",
-          "^ghcr\\.io/containerbase/buildpack$",
-          "^(?:docker\\.io/)?renovate/buildpack$"
+        "matchPackageNames": [
+          "/^(?:docker\\.io/)?containerbase/(?:buildpack|base)$/",
+          "/^ghcr\\.io/containerbase/buildpack$/",
+          "/^(?:docker\\.io/)?renovate/buildpack$/"
         ],
         "replacementName": "ghcr.io/containerbase/base"
       },
       {
         "description": "Replace `containerbase/node` and `renovate/node` with `ghcr.io/containerbase/node`.",
         "matchDatasources": ["docker"],
-        "matchPackagePatterns": [
-          "^(?:docker\\.io/)?(?:containerbase|renovate)/node$"
+        "matchPackageNames": [
+          "/^(?:docker\\.io/)?(?:containerbase|renovate)/node$/"
         ],
         "replacementName": "ghcr.io/containerbase/node"
       },
       {
         "description": "Replace `containerbase/sidecar` and `renovate/sidecar` with `ghcr.io/containerbase/sidecar`.",
         "matchDatasources": ["docker"],
-        "matchPackagePatterns": [
-          "^(?:docker\\.io/)?(?:containerbase|renovate)/sidecar$"
+        "matchPackageNames": [
+          "/^(?:docker\\.io/)?(?:containerbase|renovate)/sidecar$/"
         ],
         "replacementName": "ghcr.io/containerbase/sidecar"
       },
@@ -169,8 +173,10 @@
         "description": "Replace `renovate` `slim` docker tag with `latest`.",
         "matchCurrentValue": "/^slim$/",
         "matchDatasources": ["docker"],
-        "matchPackageNames": ["ghcr.io/renovatebot/renovate"],
-        "matchPackagePatterns": ["^(?:docker\\.io/)?renovate/renovate$"],
+        "matchPackageNames": [
+          "ghcr.io/renovatebot/renovate",
+          "/^(?:docker\\.io/)?renovate/renovate$/"
+        ],
         "replacementVersion": "latest"
       },
       {
@@ -178,8 +184,10 @@
         "extractVersion": "^(?<version>.+)-slim$",
         "matchCurrentValue": "/-slim$/",
         "matchDatasources": ["docker"],
-        "matchPackageNames": ["ghcr.io/renovatebot/renovate"],
-        "matchPackagePatterns": ["^(?:docker\\.io/)?renovate/renovate$"],
+        "matchPackageNames": [
+          "ghcr.io/renovatebot/renovate",
+          "/^(?:docker\\.io/)?renovate/renovate$/"
+        ],
         "versioning": "semver"
       }
     ]
@@ -206,6 +214,30 @@
       }
     ]
   },
+  "docker-compose": {
+    "description": "Compose is now part of the official Docker image.",
+    "packageRules": [
+      {
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["docker/compose"],
+        "matchCurrentValue": "/^((debian|alpine)-)?1\\.29\\.2$/",
+        "replacementName": "docker",
+        "replacementVersion": "23.0.0-cli"
+      }
+    ]
+  },
+  "eslint-plugin-eslint-comments-to-maintained-fork": {
+    "description": "Replace `eslint-plugin-eslint-comments` with a maintained fork: `@eslint-community/eslint-plugin-eslint-comments`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["eslint-plugin-eslint-comments"],
+        "matchCurrentVersion": "^3.2.0",
+        "replacementName": "@eslint-community/eslint-plugin-eslint-comments",
+        "replacementVersion": "3.2.0"
+      }
+    ]
+  },
   "eslint-config-standard-with-typescript-to-eslint-config-love": {
     "description": "`eslint-config-standard-with-typescript` was renamed to `eslint-config-love`.",
     "packageRules": [
@@ -227,6 +259,18 @@
         "matchPackageNames": ["eslint-plugin-node"],
         "replacementName": "eslint-plugin-n",
         "replacementVersion": "14.0.0"
+      }
+    ]
+  },
+  "eslint-plugin-vitest-to-scoped": {
+    "description": "`eslint-plugin-vitest` became scoped.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=0.5.4",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["eslint-plugin-vitest"],
+        "replacementName": "@vitest/eslint-plugin",
+        "replacementVersion": "1.0.1"
       }
     ]
   },
@@ -677,7 +721,7 @@
     "packageRules": [
       {
         "matchDatasources": ["docker"],
-        "matchPackagePatterns": ["^k8s\\.gcr\\.io/.+$"],
+        "matchPackageNames": ["/^k8s\\.gcr\\.io/.+$/"],
         "replacementNameTemplate": "{{{replace 'k8s\\.gcr\\.io/' 'registry.k8s.io/' packageName}}}"
       }
     ]
@@ -930,6 +974,18 @@
       }
     ]
   },
+  "typeorm-seeding-to-scoped": {
+    "description": "`typeorm-seeding` is now maintained as scoped package.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "1.6.1",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["typeorm-seeding"],
+        "replacementName": "@jorgebodega/typeorm-seeding",
+        "replacementVersion": "2.0.0"
+      }
+    ]
+  },
   "vso-task-lib-to-azure-pipelines-task-lib": {
     "description": "The `vso-task-lib` package is now published as `azure-pipelines-task-lib`.",
     "packageRules": [
@@ -970,9 +1026,9 @@
         "description": "The `zap-stable` image has moved to the `zaproxy` organization.",
         "matchCurrentVersion": ">=2.0.0 <2.14.0",
         "matchDatasources": ["docker"],
-        "matchPackagePatterns": [
-          "^(?:docker\\.io/)?owasp/zap2docker-stable$",
-          "^(?:docker\\.io/)?softwaresecurityproject/zap-stable$"
+        "matchPackageNames": [
+          "/^(?:docker\\.io/)?owasp/zap2docker-stable$/",
+          "/^(?:docker\\.io/)?softwaresecurityproject/zap-stable$/"
         ],
         "replacementName": "zaproxy/zap-stable",
         "replacementVersion": "2.14.0"
@@ -981,9 +1037,9 @@
         "description": "The `zap-bare` image has moved to the `zaproxy` organization.",
         "matchCurrentVersion": ">=2.0.0 <2.14.0",
         "matchDatasources": ["docker"],
-        "matchPackagePatterns": [
-          "^(?:docker\\.io/)?owasp/zap2docker-bare$",
-          "^(?:docker\\.io/)?softwaresecurityproject/zap-bare$"
+        "matchPackageNames": [
+          "/^(?:docker\\.io/)?owasp/zap2docker-bare$/",
+          "/^(?:docker\\.io/)?softwaresecurityproject/zap-bare$/"
         ],
         "replacementName": "zaproxy/zap-bare",
         "replacementVersion": "2.14.0"

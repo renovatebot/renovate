@@ -16,7 +16,8 @@ import {
 } from '../../../../constants/error-messages';
 import { logger, removeMeta } from '../../../../logger';
 import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update';
-import { Pr, platform } from '../../../../modules/platform';
+import type { Pr } from '../../../../modules/platform';
+import { platform } from '../../../../modules/platform';
 import {
   ensureComment,
   ensureCommentRemoval,
@@ -255,7 +256,10 @@ export async function processBranch(
       }
 
       logger.debug('Checking if PR has been edited');
-      const branchIsModified = await scm.isBranchModified(config.branchName);
+      const branchIsModified = await scm.isBranchModified(
+        config.branchName,
+        config.baseBranch,
+      );
       if (branchPr) {
         logger.debug('Found existing branch PR');
         if (branchPr.state !== 'open') {
@@ -463,7 +467,7 @@ export async function processBranch(
       );
       config.reuseExistingBranch = false;
     } else {
-      config = { ...config, ...(await shouldReuseExistingBranch(config)) };
+      config = await shouldReuseExistingBranch(config);
     }
     // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);

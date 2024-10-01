@@ -24,9 +24,9 @@ It builds `latest` based on the `main` branch and all SemVer tags are published 
 
 ```sh title="Example of valid tags"
 docker run --rm renovate/renovate
-docker run --rm renovate/renovate:35
-docker run --rm renovate/renovate:35.14
-docker run --rm renovate/renovate:35.14.4
+docker run --rm renovate/renovate:38
+docker run --rm renovate/renovate:38.101
+docker run --rm renovate/renovate:38.101.1
 ```
 
 <!-- prettier-ignore -->
@@ -62,7 +62,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:35.14.4
+              image: renovate/renovate:38.101.1
               args:
                 - user/repo
               # Environment Variables
@@ -121,7 +121,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:35.14.4
+            - image: renovate/renovate:38.101.1
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -248,7 +248,7 @@ module.exports = {
 };
 ```
 
-Here change the `logFile` and `repositories` to something appropriate.
+Here change the `repositories` to something appropriate.
 Also replace `gitlab-token` value with the one created during the previous step.
 
 If you're running against GitHub Enterprise Server, then change the `gitlab` values in the example to the equivalent GitHub ones.
@@ -367,7 +367,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:35.14.4
+              image: renovate/renovate:38.101.1
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true

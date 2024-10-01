@@ -82,7 +82,7 @@ describe('modules/datasource/go/index', () => {
         .reply(200, '');
       const res = await datasource.getDigest(
         { packageName: 'golang.org/y/text' },
-        null,
+        undefined,
       );
       expect(res).toBeNull();
     });
@@ -94,7 +94,7 @@ describe('modules/datasource/go/index', () => {
         .reply(200, Fixtures.get('go-get-github.html'));
       const res = await datasource.getDigest(
         { packageName: 'golang.org/y/text' },
-        null,
+        undefined,
       );
       expect(res).toBeNull();
     });
@@ -107,7 +107,7 @@ describe('modules/datasource/go/index', () => {
       getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'gitlab.com/group/subgroup' },
-        null,
+        undefined,
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
     });
@@ -120,7 +120,7 @@ describe('modules/datasource/go/index', () => {
       getDigestGitMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'renovatebot.com/abc/def' },
-        null,
+        undefined,
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
     });
@@ -187,7 +187,7 @@ describe('modules/datasource/go/index', () => {
         {
           packageName: 'bitbucket.org/golang/text',
         },
-        null,
+        undefined,
       );
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();

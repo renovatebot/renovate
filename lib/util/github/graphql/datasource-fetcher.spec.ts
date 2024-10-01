@@ -2,7 +2,8 @@ import AggregateError from 'aggregate-error';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked, partial } from '../../../../test/util';
 import * as _packageCache from '../../../util/cache/package';
-import { GithubGraphqlResponse, GithubHttp } from '../../http/github';
+import type { GithubGraphqlResponse } from '../../http/github';
+import { GithubHttp } from '../../http/github';
 import { range } from '../../range';
 import {
   GithubGraphqlDatasourceFetcher as Datasource,

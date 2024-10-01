@@ -46,8 +46,16 @@ export class CustomDatasource extends Datasource {
     logger.trace({ data }, `Custom manager fetcher '${format}' returned data.`);
 
     for (const transformTemplate of transformTemplates) {
-      const expression = jsonata(transformTemplate);
-      data = await expression.evaluate(data);
+      try {
+        const expression = jsonata(transformTemplate);
+        data = await expression.evaluate(data);
+      } catch (err) {
+        logger.debug(
+          { err, transformTemplate },
+          'Error while transforming response',
+        );
+        return null;
+      }
     }
 
     try {

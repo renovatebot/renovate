@@ -65,6 +65,10 @@ describe('workers/repository/process/lookup/index', () => {
   );
 
   const getMavenReleases = jest.spyOn(MavenDatasource.prototype, 'getReleases');
+  const postprocessMavenRelease = jest.spyOn(
+    MavenDatasource.prototype,
+    'postprocessRelease',
+  );
 
   const getCustomDatasourceReleases = jest.spyOn(
     CustomDatasource.prototype,
@@ -816,6 +820,178 @@ describe('workers/repository/process/lookup/index', () => {
           updateType: 'patch',
         },
       ]);
+    });
+
+    it('uses highest available version for vulnerabilityAlerts when vulnerabilityFixStrategy=highest', async () => {
+      config.currentValue = '1.0.0';
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixStrategy = 'highest';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newMajor: 1,
+          newMinor: 4,
+          newPatch: 1,
+          newValue: '1.4.1',
+          newVersion: '1.4.1',
+          releaseTimestamp: expect.any(String),
+          updateType: 'minor',
+        },
+      ]);
+    });
+
+    it('uses vulnerabilityFixVersion when a version', async () => {
+      config.currentValue = '1.0.0';
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixVersion = '1.1.0';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newMajor: 1,
+          newMinor: 1,
+          newPatch: 0,
+          newValue: '1.1.0',
+          newVersion: '1.1.0',
+          releaseTimestamp: expect.any(String),
+          updateType: 'minor',
+        },
+      ]);
+    });
+
+    it('takes a later release when vulnerabilityFixVersion does not exist', async () => {
+      config.currentValue = '1.0.0';
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixVersion = '1.0.2';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newMajor: 1,
+          newMinor: 1,
+          newPatch: 0,
+          newValue: '1.1.0',
+          newVersion: '1.1.0',
+          releaseTimestamp: expect.any(String),
+          updateType: 'minor',
+        },
+      ]);
+    });
+
+    it('uses vulnerabilityFixVersion when a range', async () => {
+      config.currentValue = '1.0.0';
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixVersion = '>= 1.1.0';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newMajor: 1,
+          newMinor: 1,
+          newPatch: 0,
+          newValue: '1.1.0',
+          newVersion: '1.1.0',
+          releaseTimestamp: expect.any(String),
+          updateType: 'minor',
+        },
+      ]);
+    });
+
+    it('takes highest available version when using vulnerabilityFixStrategy=highest with vulnerabilityFixVersion', async () => {
+      config.currentValue = '1.0.0';
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixVersion = '1.1.0';
+      config.vulnerabilityFixStrategy = 'highest';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newMajor: 1,
+          newMinor: 4,
+          newPatch: 1,
+          newValue: '1.4.1',
+          newVersion: '1.4.1',
+          releaseTimestamp: expect.any(String),
+          updateType: 'minor',
+        },
+      ]);
+    });
+
+    it('ignores vulnerabilityFixVersion if not a version', async () => {
+      config.currentValue = '1.0.0';
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixVersion = 'abc';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newMajor: 1,
+          newMinor: 0,
+          newPatch: 1,
+          newValue: '1.0.1',
+          newVersion: '1.0.1',
+          releaseTimestamp: expect.any(String),
+          updateType: 'patch',
+        },
+      ]);
+    });
+
+    it('returns no results if vulnerabilityFixVersion is too high', async () => {
+      config.currentValue = '1.0.0';
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixVersion = '5.1.0';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toBeEmptyArray();
     });
 
     it('supports minor and major upgrades for ranged versions', async () => {
@@ -3706,6 +3882,9 @@ describe('workers/repository/process/lookup/index', () => {
           { version: '12.6.2.jre11' },
         ],
       });
+      postprocessMavenRelease.mockImplementationOnce((_, x) =>
+        Promise.resolve(x),
+      );
 
       const res = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -4071,7 +4250,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = NpmDatasource.id;
       config.packageRules = [
         {
-          matchSourceUrlPrefixes: ['https://github.com/kriskowal/q'],
+          matchSourceUrls: ['https://github.com/kriskowal/**'],
           allowedVersions: '< 1.4.0',
         },
       ];

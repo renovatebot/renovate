@@ -13,6 +13,10 @@ Options:
 | format                     | `"json"` | format used by the API. Available values are: `json`, `plain`, `yaml`, `html`                                                                                            |
 | transformTemplates         | `[]`     | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
+<!-- prettier-ignore -->
+!!! tip
+    Use [JSONata Exerciser](https://try.jsonata.org/) to test your JSONata rules.
+
 Available template variables:
 
 - `packageName`
@@ -105,7 +109,7 @@ If you use the Mend Renovate app, use the [`logLevelRemap` config option](../../
 
 If you self-host Renovate, follow these steps to get the trace logs:
 
-1. Set the [`logFileLevel` config option](../../../self-hosted-configuration.md#logfilelevel) to `trace`
+1. Set the [`LOG_FILE_LEVEL` env var](../../../config-overview.md#logging-variables) to `trace`
 1. Run Renovate in [`dryRun` mode](../../../self-hosted-configuration.md#dryrun)
 
 ### Formats

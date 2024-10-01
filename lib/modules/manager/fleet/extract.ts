@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { parseYaml } from '../../../util/yaml';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -137,27 +136,21 @@ export function extractPackageFile(
   }
   const deps: PackageDependency[] = [];
 
-  try {
-    if (regEx('fleet.ya?ml').test(packageFile)) {
-      const docs = parseYaml(content, null, {
-        json: true,
-        customSchema: FleetFile,
-        failureBehaviour: 'filter',
-      });
-      const fleetDeps = docs.flatMap(extractFleetFile);
+  if (regEx('fleet.ya?ml').test(packageFile)) {
+    const docs = parseYaml(content, {
+      customSchema: FleetFile,
+      failureBehaviour: 'filter',
+    });
+    const fleetDeps = docs.flatMap(extractFleetFile);
 
-      deps.push(...fleetDeps);
-    } else {
-      const docs = parseYaml(content, null, {
-        json: true,
-        customSchema: GitRepo,
-        failureBehaviour: 'filter',
-      });
-      const gitRepoDeps = docs.flatMap(extractGitRepo);
-      deps.push(...gitRepoDeps);
-    }
-  } catch (err) {
-    logger.debug({ error: err, packageFile }, 'Failed to parse fleet YAML');
+    deps.push(...fleetDeps);
+  } else {
+    const docs = parseYaml(content, {
+      customSchema: GitRepo,
+      failureBehaviour: 'filter',
+    });
+    const gitRepoDeps = docs.flatMap(extractGitRepo);
+    deps.push(...gitRepoDeps);
   }
 
   return deps.length ? { deps } : null;

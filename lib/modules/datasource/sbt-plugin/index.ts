@@ -7,7 +7,7 @@ import { compare } from '../../versioning/maven/compare';
 import { MAVEN_REPO } from '../maven/common';
 import { downloadHttpProtocol } from '../maven/util';
 import { SbtPackageDatasource } from '../sbt-package';
-import { getLatestVersion, parseIndexDir } from '../sbt-package/util';
+import { extractPageLinks, getLatestVersion } from '../sbt-package/util';
 import type {
   GetReleasesConfig,
   RegistryStrategy,
@@ -43,15 +43,20 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
     scalaVersion: string,
   ): Promise<string[] | null> {
     const searchRoot = `${rootUrl}/${artifact}`;
-    const parse = (content: string): string[] =>
-      parseIndexDir(content, (x) => !regEx(/^\.+$/).test(x));
-    const { body: indexContent } = await downloadHttpProtocol(
+    const hrefFilterMap = (href: string): string | null => {
+      if (href.startsWith('.')) {
+        return null;
+      }
+
+      return href;
+    };
+    const res = await downloadHttpProtocol(
       this.http,
       ensureTrailingSlash(searchRoot),
     );
-    if (indexContent) {
+    if (res) {
       const releases: string[] = [];
-      const scalaVersionItems = parse(indexContent);
+      const scalaVersionItems = extractPageLinks(res.body, hrefFilterMap);
       const scalaVersions = scalaVersionItems.map((x) =>
         x.replace(regEx(/^scala_/), ''),
       );
@@ -60,20 +65,28 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
         : scalaVersions;
       for (const searchVersion of searchVersions) {
         const searchSubRoot = `${searchRoot}/scala_${searchVersion}`;
-        const { body: subRootContent } = await downloadHttpProtocol(
+        const subRootRes = await downloadHttpProtocol(
           this.http,
           ensureTrailingSlash(searchSubRoot),
         );
-        if (subRootContent) {
-          const sbtVersionItems = parse(subRootContent);
+        if (subRootRes) {
+          const { body: subRootContent } = subRootRes;
+          const sbtVersionItems = extractPageLinks(
+            subRootContent,
+            hrefFilterMap,
+          );
           for (const sbtItem of sbtVersionItems) {
             const releasesRoot = `${searchSubRoot}/${sbtItem}`;
-            const { body: releasesIndexContent } = await downloadHttpProtocol(
+            const releaseIndexRes = await downloadHttpProtocol(
               this.http,
               ensureTrailingSlash(releasesRoot),
             );
-            if (releasesIndexContent) {
-              const releasesParsed = parse(releasesIndexContent);
+            if (releaseIndexRes) {
+              const { body: releasesIndexContent } = releaseIndexRes;
+              const releasesParsed = extractPageLinks(
+                releasesIndexContent,
+                hrefFilterMap,
+              );
               releasesParsed.forEach((x) => releases.push(x));
             }
           }
