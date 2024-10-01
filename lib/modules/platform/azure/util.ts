@@ -86,6 +86,25 @@ const stateMap = {
   [PullRequestStatus.Completed]: 'merged',
 } as Record<PullRequestStatus, PrState | undefined>;
 
+export function getRenovatePrFormatForCachedPr(
+  cachedPr: AzurePr,
+  azurePr: GitPullRequest,
+): AzurePr {
+  cachedPr.state = stateMap[azurePr.status!] ?? 'open';
+  if (azurePr.title) {
+    cachedPr.title = azurePr.title;
+  }
+  if (azurePr.description) {
+    cachedPr.bodyStruct = getPrBodyStruct(azurePr.description);
+  }
+  if (azurePr.targetRefName) {
+    cachedPr.targetBranch = getBranchNameWithoutRefsheadsPrefix(
+      azurePr.targetRefName,
+    );
+  }
+  return cachedPr;
+}
+
 export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   const number = azurePr.pullRequestId;
 

@@ -52,6 +52,7 @@ import {
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
   getRenovatePRFormat,
+  getRenovatePrFormatForCachedPr,
   getRepoByName,
   getStorageExtraCloneOpts,
   mapMergeStrategy,
@@ -64,7 +65,7 @@ interface Config {
   owner: string;
   repoId: string;
   project: string;
-  prList: AzurePr[];
+  prList?: AzurePr[];
   fileList: null;
   repository: string;
   defaultBranch: string;
@@ -538,6 +539,8 @@ export async function createPr({
       ),
     ),
   );
+
+  cachePr(pr);
   return getRenovatePRFormat(pr);
 }
 
@@ -592,6 +595,7 @@ export async function updatePr({
   }
 
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
+  updateCachedPr(prNo, objToUpdate);
 }
 
 export async function ensureComment({
@@ -989,4 +993,45 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${prNumber}`);
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
+}
+
+function cachePr(pr?: GitPullRequest): void {
+  config.prList ??= [];
+  if (!pr) {
+    return;
+  }
+
+  const azurePr = getRenovatePRFormat(pr);
+  const idx = getCachedPrIdx(azurePr.number);
+  if (is.undefined(idx)) {
+    config.prList.push(azurePr);
+  } else {
+    config.prList[idx] = azurePr;
+  }
+}
+
+function updateCachedPr(prNo: number, pr?: GitPullRequest): void {
+  const idx = getCachedPrIdx(prNo);
+  if (!config.prList || !pr || !idx) {
+    // if pr doesn't exist in cache then invalidate cache so we get new list from api next time.
+    config.prList = undefined;
+    return;
+  }
+
+  const cachedPr = config.prList[idx];
+  config.prList[idx] = getRenovatePrFormatForCachedPr(cachedPr, pr);
+}
+
+function getCachedPrIdx(prNo: number): number | undefined {
+  if (!config.prList) {
+    return;
+  }
+
+  for (let idx = 0; idx < config.prList.length; idx += 1) {
+    let cachedPr = config.prList[idx];
+    if (cachedPr.number === prNo) {
+      return idx;
+    }
+  }
+  return;
 }
