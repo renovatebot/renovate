@@ -6,7 +6,7 @@ export { extractPackageFile } from './extract';
 export const defaultConfig = {
   fileMatch: [
     '(^|/).azuredevops/.+\\.ya?ml$',
-    'azure.*pipelines?.+\\.ya?ml$',
+    'azure.*pipelines?.*\\.ya?ml$',
   ],
   enabled: false,
 };
