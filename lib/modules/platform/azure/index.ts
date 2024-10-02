@@ -54,9 +54,9 @@ import {
   getRenovatePRFormat,
   getRepoByName,
   getStorageExtraCloneOpts,
-  updateCachedPr,
   mapMergeStrategy,
   max4000Chars,
+  updateCachedPr,
 } from './util';
 
 interface Config {
@@ -539,7 +539,6 @@ export async function createPr({
       ),
     ),
   );
-
 
   const renovateAzurePr = getRenovatePRFormat(pr);
   cachePr(renovateAzurePr);
