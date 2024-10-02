@@ -1,4 +1,4 @@
-![Renovate banner](https://app.renovatebot.com/images/renovate_660_220.jpg)
+![Mend Renovate CLI banner](https://docs.renovatebot.com/assets/images/mend-renovate-cli-banner.jpg)
 
 # Renovate
 

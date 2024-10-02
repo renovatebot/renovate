@@ -13,6 +13,10 @@ Options:
 | format                     | `"json"` | format used by the API. Available values are: `json`, `plain`, `yaml`, `html`                                                                                            |
 | transformTemplates         | `[]`     | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
+<!-- prettier-ignore -->
+!!! tip
+    Use [JSONata Exerciser](https://try.jsonata.org/) to test your JSONata rules.
+
 Available template variables:
 
 - `packageName`
