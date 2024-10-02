@@ -80,6 +80,13 @@ export async function generateUpdate(
   update.updateType =
     update.updateType ??
     getUpdateType(config, versioning, currentVersion, newVersion);
+  if (versioning.isBreaking) {
+    // This versioning scheme has breaking awareness
+    update.isBreaking = versioning.isBreaking(currentVersion, newVersion);
+  } else {
+    // This versioning scheme does not have breaking awareness - assume only major updates are breaking
+    update.isBreaking = update.updateType === 'major';
+  }
   const { datasource, packageName, packageRules } = config;
   if (packageRules?.some((pr) => is.nonEmptyArray(pr.matchConfidence))) {
     update.mergeConfidenceLevel = await getMergeConfidenceLevel(

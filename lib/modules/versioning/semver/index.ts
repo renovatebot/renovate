@@ -39,6 +39,20 @@ function getNewValue({
   return newVersion;
 }
 
+export function isBreaking(current: string, version: string): boolean {
+  // The change may be breaking if either version is unstable
+  if (!isStable(version) || !isStable(current)) {
+    return true;
+  }
+  const currentMajor = getMajor(current);
+  if (currentMajor === 0) {
+    // All v0.x updates might be breaking
+    return true;
+  }
+  // Otherwise, only major updates are breaking
+  return currentMajor !== getMajor(version);
+}
+
 function isCompatible(version: string): boolean {
   return isVersion(version);
 }
@@ -56,6 +70,7 @@ export const api: VersioningApi = {
   getMajor,
   getMinor,
   getPatch,
+  isBreaking,
   isCompatible,
   isGreaterThan,
   isLessThanRange,

@@ -1,6 +1,7 @@
 import semver from 'semver';
 import stable from 'semver-stable';
 import type { RangeStrategy } from '../../../types/versioning';
+import { isBreaking } from '../semver';
 import type { VersioningApi } from '../types';
 import { getNewValue } from './range';
 
@@ -53,6 +54,7 @@ export const api: VersioningApi = {
   getMinor,
   getNewValue,
   getPatch,
+  isBreaking,
   isCompatible: isVersion,
   isGreaterThan,
   isLessThanRange,
