@@ -112,10 +112,6 @@ export class PypiDatasource extends Datasource {
     return {};
   }
 
-  private static normalizeNameForUrlLookup(input: string): string {
-    return input.toLowerCase().replace(regEx(/(_|\.|-)+/g), '-');
-  }
-
   private async getResultsViaPyPiJson(
     packageName: string,
     hostUrl: string,

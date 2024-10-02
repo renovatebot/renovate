@@ -220,6 +220,10 @@ describe('modules/datasource/pypi/index', () => {
           'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg==',
         )
         .reply(200, Fixtures.get('azure-cli-monitor-updated.json'));
+      httpMock
+        .scope('https://someregion-python.pkg.dev/some-project/some-repo/')
+        .get('/azure-cli-monitor/')
+        .reply(403);
       const config = {
         registryUrls: [
           'https://someregion-python.pkg.dev/some-project/some-repo',
@@ -236,7 +240,7 @@ describe('modules/datasource/pypi/index', () => {
         packageName: 'azure-cli-monitor',
       });
       expect(res).toMatchObject({ releases: azureCliMonitorReleases });
-      expect(googleAuth).toHaveBeenCalledTimes(1);
+      expect(googleAuth).toHaveBeenCalledTimes(2);
     });
 
     it('supports Google Auth not being configured', async () => {
@@ -244,6 +248,10 @@ describe('modules/datasource/pypi/index', () => {
         .scope('https://someregion-python.pkg.dev/some-project/some-repo/')
         .get('/azure-cli-monitor/json')
         .reply(200, Fixtures.get('azure-cli-monitor-updated.json'));
+      httpMock
+        .scope('https://someregion-python.pkg.dev/some-project/some-repo/')
+        .get('/azure-cli-monitor/')
+        .reply(404);
       const config = {
         registryUrls: [
           'https://someregion-python.pkg.dev/some-project/some-repo',
@@ -260,7 +268,7 @@ describe('modules/datasource/pypi/index', () => {
         packageName: 'azure-cli-monitor',
       });
       expect(res).toMatchObject({ releases: azureCliMonitorReleases });
-      expect(googleAuth).toHaveBeenCalledTimes(1);
+      expect(googleAuth).toHaveBeenCalledTimes(2);
     });
 
     it('returns non-github home_page', async () => {
@@ -512,6 +520,10 @@ describe('modules/datasource/pypi/index', () => {
         .scope('https://some.registry.org/simple/')
         .get('/company-aws-sso-client/')
         .reply(200, Fixtures.get('versions-archives.html'));
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/company-aws-sso-client/json')
+        .reply(404);
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
@@ -626,6 +638,10 @@ describe('modules/datasource/pypi/index', () => {
         .scope('https://some.registry.org/simple/')
         .get('/package-with-periods/')
         .reply(200, withPeriodsResponse);
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/package-with-periods/json')
+        .reply(404);
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
@@ -646,6 +662,10 @@ describe('modules/datasource/pypi/index', () => {
         .scope('https://some.registry.org/simple/')
         .get('/snowflake-legacy/')
         .reply(200, Fixtures.get('versions-html-snowflake-legacy.html'));
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/snowflake-legacy/json')
+        .reply(404);
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
@@ -672,6 +692,10 @@ describe('modules/datasource/pypi/index', () => {
         .scope('https://some.registry.org/simple/')
         .get('/invalid-version/')
         .reply(200, Fixtures.get('versions-html-invalid-version.html'));
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/invalid-version/json')
+        .reply(404);
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
@@ -691,6 +715,10 @@ describe('modules/datasource/pypi/index', () => {
           200,
           Fixtures.get('versions-html-with-non-normalized-name.html'),
         );
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/friendly-bard/json')
+        .reply(404);
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
@@ -713,6 +741,10 @@ describe('modules/datasource/pypi/index', () => {
         .scope('https://some.registry.org/simple/')
         .get('/package-with-whitespaces/')
         .reply(200, Fixtures.get('versions-html-with-whitespaces.html'));
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/package-with-whitespaces/json')
+        .reply(404);
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
@@ -986,11 +1018,16 @@ describe('modules/datasource/pypi/index', () => {
       });
     },
   );
+
   it('supports Google Auth with simple endpoint', async () => {
     httpMock
       .scope('https://someregion-python.pkg.dev/some-project/some-repo/simple/')
       .get('/dj-database-url/')
       .reply(200, htmlResponse);
+    httpMock
+      .scope('https://someregion-python.pkg.dev/some-project/some-repo/simple/')
+      .get('/dj-database-url/json')
+      .reply(404);
     const config = {
       registryUrls: [
         'https://someregion-python.pkg.dev/some-project/some-repo/simple/',
@@ -1014,7 +1051,7 @@ describe('modules/datasource/pypi/index', () => {
         'https://someregion-python.pkg.dev/some-project/some-repo/simple',
       releases: djDatabaseUrlSimpleReleases,
     });
-    expect(googleAuth).toHaveBeenCalledTimes(1);
+    expect(googleAuth).toHaveBeenCalledTimes(2);
   });
 
   it('ignores an invalid URL when checking for auth headers', async () => {
@@ -1027,20 +1064,5 @@ describe('modules/datasource/pypi/index', () => {
       packageName: 'azure-cli-monitor',
     });
     expect(res).toBeNil();
-  });
-
-  it('uses https://pypi.org/pypi/ instead of https://pypi.org/simple/', async () => {
-    httpMock.scope(baseUrl).get('/azure-cli-monitor/json').reply(200, res1);
-    const config = {
-      registryUrls: ['https://pypi.org/simple/'],
-    };
-    expect(
-      await getPkgReleases({
-        datasource,
-        ...config,
-        constraints: { python: '2.7' },
-        packageName: 'azure-cli-monitor',
-      }),
-    ).toMatchSnapshot();
   });
 });
