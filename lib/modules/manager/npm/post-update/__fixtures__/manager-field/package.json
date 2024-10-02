@@ -5,5 +5,8 @@
     "pnpm": "=6.15.0"
   },
   "engine-strict": true,
-  "packageManager": "pnpm@6.15.0"
+  "packageManager": "pnpm@6.15.0",
+  "dependencies": {
+    "parent": "file:"
+  }
 }

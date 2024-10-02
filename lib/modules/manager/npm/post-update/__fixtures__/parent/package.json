@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "engines": {
     "pnpm": "=6.16.0"
+  },
+  "dependencies": {
+    "parent": "file:"
   }
 }
