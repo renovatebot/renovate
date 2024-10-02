@@ -120,6 +120,7 @@
     'source.toolkit.fluxcd.io/v1alpha1',
     'source.toolkit.fluxcd.io/v1beta1',
     'source.toolkit.fluxcd.io/v1beta2',
+    'source.toolkit.fluxcd.io/v1',
   ],
   GitRepository: [
     'source.toolkit.fluxcd.io/v1alpha1',
