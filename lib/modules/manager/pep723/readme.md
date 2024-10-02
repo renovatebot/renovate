@@ -1,0 +1,1 @@
+This manager supports updating dependencies inside Python files that use [inline script metadata](https://packaging.python.org/en/latest/specifications/inline-script-metadata/), also known as PEP 723.

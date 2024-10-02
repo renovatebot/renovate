@@ -300,14 +300,14 @@ Renovate will get the credentials with the [`google-auth-library`](https://www.n
 ```yaml title="Example for Workload Identity plus Renovate host rules"
 - name: authenticate to google cloud
   id: auth
-  uses: google-github-actions/auth@v2.1.5
+  uses: google-github-actions/auth@v2.1.6
   with:
     token_format: 'access_token'
     workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
     service_account: ${{ env.SERVICE_ACCOUNT }}
 
 - name: renovate
-  uses: renovatebot/github-action@v40.2.10
+  uses: renovatebot/github-action@v40.3.1
   env:
     RENOVATE_HOST_RULES: |
       [
