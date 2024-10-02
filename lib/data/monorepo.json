@@ -285,6 +285,7 @@
     "feign": "https://github.com/OpenFeign/feign",
     "fela": "https://github.com/robinweser/fela",
     "fimbullinter": "https://github.com/fimbullinter/wotan",
+    "flipper": "https://github.com/flippercloud/flipper",
     "flopflip": "https://github.com/tdeekens/flopflip",
     "fontsource": [
       "https://github.com/fontsource/fontsource",
