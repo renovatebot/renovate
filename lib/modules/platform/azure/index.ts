@@ -52,7 +52,7 @@ import {
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
   getRenovatePRFormat,
-  getRenovatePrFormatForCachedPr,
+  updateCachedPrWithNewValues,
   getRepoByName,
   getStorageExtraCloneOpts,
   mapMergeStrategy,
@@ -281,11 +281,11 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   if (!pullRequestId) {
     return null;
   }
-  const azurePr = (await getPrList()).find(
+  const renovateAzurePr = (await getPrList()).find(
     (item) => item.number === pullRequestId,
   );
 
-  if (!azurePr) {
+  if (!renovateAzurePr) {
     return null;
   }
 
@@ -295,11 +295,11 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
     pullRequestId,
   );
 
-  azurePr.labels = labels
+  renovateAzurePr.labels = labels
     .filter((label) => label.active)
     .map((label) => label.name)
     .filter(is.string);
-  return azurePr;
+  return renovateAzurePr;
 }
 
 export async function findPr({
@@ -995,33 +995,27 @@ export async function deleteLabel(
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
 }
 
-function cachePr(pr?: GitPullRequest): void {
+function cachePr(scmAzurePr: GitPullRequest): void {
   config.prList ??= [];
-  // istanbul ignore if
-  if (!pr) {
-    return;
-  }
-
-  const azurePr = getRenovatePRFormat(pr);
-  const idx = getCachedPrIdx(azurePr.number);
+  const renovateAzurePr = getRenovatePRFormat(scmAzurePr);
+  const idx = getCachedPrIdx(renovateAzurePr.number);
   if (is.undefined(idx)) {
-    config.prList.push(azurePr);
+    config.prList.push(renovateAzurePr);
   } else {
-    config.prList[idx] = azurePr;
+    config.prList[idx] = renovateAzurePr;
   }
 }
 
-function updateCachedPr(prNo: number, pr?: GitPullRequest): void {
+function updateCachedPr(prNo: number, scmAzurePr: GitPullRequest): void {
   config.prList ??= [];
   const idx = getCachedPrIdx(prNo);
-  if (!pr || is.undefined(idx)) {
+  if (is.undefined(idx)) {
     // if pr doesn't exist in cache then invalidate cache so we get new list from api next time.
     config.prList = undefined as any;
     return;
   }
 
-  const cachedPr = config.prList[idx];
-  config.prList[idx] = getRenovatePrFormatForCachedPr(cachedPr, pr);
+  updateCachedPrWithNewValues(config.prList[idx], scmAzurePr);
 }
 
 function getCachedPrIdx(prNo: number): number | undefined {

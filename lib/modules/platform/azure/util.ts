@@ -86,7 +86,7 @@ const stateMap = {
   [PullRequestStatus.Completed]: 'merged',
 } as Record<PullRequestStatus, PrState | undefined>;
 
-export function getRenovatePrFormatForCachedPr(
+export function updateCachedPrWithNewValues(
   cachedPr: AzurePr,
   azurePr: GitPullRequest,
 ): AzurePr {
