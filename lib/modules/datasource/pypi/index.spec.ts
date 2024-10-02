@@ -223,14 +223,18 @@ describe('modules/datasource/pypi/index', () => {
       httpMock
         .scope('https://someregion-python.pkg.dev/some-project/some-repo/')
         .get('/azure-cli-monitor/')
-        .reply(403);
+        .matchHeader(
+          'authorization',
+          'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg==',
+        )
+        .reply(404);
       const config = {
         registryUrls: [
           'https://someregion-python.pkg.dev/some-project/some-repo',
         ],
       };
-      googleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
+      googleAuth.mockImplementation(
+        jest.fn().mockImplementation(() => ({
           getAccessToken: jest.fn().mockResolvedValue('some-token'),
         })),
       );
