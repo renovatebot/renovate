@@ -36,7 +36,7 @@ function extractFromSection(
     return [];
   }
 
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<CargoManagerData>[] = [];
 
   for (const dep of Object.values(dependencies)) {
     let registryUrls: string[] | undefined;
