@@ -89,7 +89,7 @@ const stateMap = {
 export function updateCachedPrWithNewValues(
   cachedPr: AzurePr,
   azurePr: GitPullRequest,
-): AzurePr {
+): void {
   cachedPr.state = stateMap[azurePr.status!] ?? 'open';
   if (azurePr.title) {
     cachedPr.title = azurePr.title;
@@ -102,7 +102,6 @@ export function updateCachedPrWithNewValues(
       azurePr.targetRefName,
     );
   }
-  return cachedPr;
 }
 
 export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
