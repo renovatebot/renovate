@@ -52,9 +52,9 @@ import {
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
   getRenovatePRFormat,
-  updateCachedPrWithNewValues,
   getRepoByName,
   getStorageExtraCloneOpts,
+  updateCachedPr,
   mapMergeStrategy,
   max4000Chars,
 } from './util';
@@ -540,8 +540,10 @@ export async function createPr({
     ),
   );
 
-  cachePr(pr);
-  return getRenovatePRFormat(pr);
+
+  const renovateAzurePr = getRenovatePRFormat(pr);
+  cachePr(renovateAzurePr);
+  return renovateAzurePr;
 }
 
 export async function updatePr({
@@ -595,7 +597,13 @@ export async function updatePr({
   }
 
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
-  updateCachedPr(prNo, objToUpdate);
+  const idx = getCachedPrIdx(prNo);
+  if (is.undefined(idx)) {
+    // if pr doesn't exist in cache then invalidate cache so we get new list from api next time.
+    config.prList = undefined as any;
+  } else {
+    updateCachedPr(config.prList[idx], objToUpdate);
+  }
 }
 
 export async function ensureComment({
@@ -995,9 +1003,8 @@ export async function deleteLabel(
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
 }
 
-function cachePr(scmAzurePr: GitPullRequest): void {
+function cachePr(renovateAzurePr: AzurePr): void {
   config.prList ??= [];
-  const renovateAzurePr = getRenovatePRFormat(scmAzurePr);
   const idx = getCachedPrIdx(renovateAzurePr.number);
   if (is.undefined(idx)) {
     config.prList.push(renovateAzurePr);
@@ -1006,19 +1013,8 @@ function cachePr(scmAzurePr: GitPullRequest): void {
   }
 }
 
-function updateCachedPr(prNo: number, scmAzurePr: GitPullRequest): void {
-  config.prList ??= [];
-  const idx = getCachedPrIdx(prNo);
-  if (is.undefined(idx)) {
-    // if pr doesn't exist in cache then invalidate cache so we get new list from api next time.
-    config.prList = undefined as any;
-    return;
-  }
-
-  updateCachedPrWithNewValues(config.prList[idx], scmAzurePr);
-}
-
 function getCachedPrIdx(prNo: number): number | undefined {
+  config.prList ??= [];
   for (let idx = 0; idx < config.prList.length; idx += 1) {
     const cachedPr = config.prList[idx];
     if (cachedPr.number === prNo) {

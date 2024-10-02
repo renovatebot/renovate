@@ -86,20 +86,20 @@ const stateMap = {
   [PullRequestStatus.Completed]: 'merged',
 } as Record<PullRequestStatus, PrState | undefined>;
 
-export function updateCachedPrWithNewValues(
-  cachedPr: AzurePr,
-  azurePr: GitPullRequest,
+export function updateCachedPr(
+  renovateAzurePr: AzurePr,
+  scmAzurePr: GitPullRequest,
 ): void {
-  cachedPr.state = stateMap[azurePr.status!] ?? 'open';
-  if (azurePr.title) {
-    cachedPr.title = azurePr.title;
+  renovateAzurePr.state = stateMap[scmAzurePr.status!] ?? 'open';
+  if (scmAzurePr.title) {
+    renovateAzurePr.title = scmAzurePr.title;
   }
-  if (azurePr.description) {
-    cachedPr.bodyStruct = getPrBodyStruct(azurePr.description);
+  if (scmAzurePr.description) {
+    renovateAzurePr.bodyStruct = getPrBodyStruct(scmAzurePr.description);
   }
-  if (azurePr.targetRefName) {
-    cachedPr.targetBranch = getBranchNameWithoutRefsheadsPrefix(
-      azurePr.targetRefName,
+  if (scmAzurePr.targetRefName) {
+    renovateAzurePr.targetBranch = getBranchNameWithoutRefsheadsPrefix(
+      scmAzurePr.targetRefName,
     );
   }
 }
