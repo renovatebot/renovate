@@ -838,45 +838,7 @@ describe('modules/datasource/pypi/index', () => {
           ...config,
           packageName: 'dj-database-url',
         });
-        expect(result).toEqual({
-          registryUrl: 'https://custom.pypi.net/foo',
-          releases: [
-            {
-              version: '0.1.2',
-            },
-            {
-              version: '0.1.3',
-            },
-            {
-              version: '0.1.4',
-            },
-            {
-              version: '0.2.0',
-            },
-            {
-              version: '0.2.1',
-            },
-            {
-              version: '0.2.2',
-            },
-            {
-              version: '0.3.0',
-            },
-            {
-              version: '0.4.0',
-            },
-            {
-              version: '0.4.1',
-            },
-            {
-              version: '0.4.2',
-            },
-            {
-              isDeprecated: true,
-              version: '0.5.0',
-            },
-          ],
-        });
+        expect(result).toMatchSnapshot();
       },
     );
 
