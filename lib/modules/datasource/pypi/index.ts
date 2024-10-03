@@ -85,15 +85,15 @@ export class PypiDatasource extends Datasource {
     if (pypiJsonDependencies === null || simpleDependencies === null) {
       return pypiJsonDependencies ?? simpleDependencies
     }
-    let deps = pypiJsonDependencies
-    const added_versions = new Set<string>(deps.releases.map(dep => dep.version))
+    let dependency = pypiJsonDependencies
+    const added_versions = new Set<string>(dependency.releases.map(release => release.version))
     for (const release of simpleDependencies.releases) {
       if (!added_versions.has(release.version)) {
-        deps.releases.push(release)
+        dependency.releases.push(release)
         added_versions.add(release.version)
       }
     }
-    return deps
+    return dependency
   }
 
   private async getAuthHeaders(
