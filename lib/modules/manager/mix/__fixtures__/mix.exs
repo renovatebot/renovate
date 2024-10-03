@@ -23,6 +23,7 @@ defmodule MyProject.MixProject do
       {:foo_bar, ">2.1.0 or <=3.0.0"},
       {:cowboy, github: "ninenines/cowboy", tag: "v0.4.1"},
       {:phoenix, git: "https://github.com/phoenixframework/phoenix.git", branch: "main"},
+      {:nonexistentpackage, git: "git@github:some/nonexistentpackage.git", tag: "v0.1.1"},
       {:ecto, github: "elixir-ecto/ecto", ref: "795036d997c7503b21fb64d6bf1a89b83c44f2b5"},
       {:secret, "~> 1.0", organization: "acme"},
       {:also_secret, "~> 1.0", only: [:dev, :test], organization: "acme", runtime: false},

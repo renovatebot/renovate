@@ -49,6 +49,7 @@ export async function extractPackageFile(
 
         if (git ?? github) {
           dep = {
+            versioning: 'loose',
             depName: app,
             currentDigest: ref,
             currentValue: branchOrTag,

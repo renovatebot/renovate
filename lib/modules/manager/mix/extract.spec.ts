@@ -34,6 +34,7 @@ describe('modules/manager/mix/extract', () => {
           datasource: 'github-tags',
           depName: 'cowboy',
           packageName: 'ninenines/cowboy',
+          versioning: 'loose',
         },
         {
           currentDigest: undefined,
@@ -41,6 +42,15 @@ describe('modules/manager/mix/extract', () => {
           datasource: 'git-tags',
           depName: 'phoenix',
           packageName: 'https://github.com/phoenixframework/phoenix.git',
+          versioning: 'loose',
+        },
+        {
+          currentDigest: undefined,
+          currentValue: 'v0.1.1',
+          datasource: 'git-tags',
+          depName: 'nonexistentpackage',
+          packageName: 'git@github:some/nonexistentpackage.git',
+          versioning: 'loose',
         },
         {
           currentDigest: '795036d997c7503b21fb64d6bf1a89b83c44f2b5',
@@ -48,6 +58,7 @@ describe('modules/manager/mix/extract', () => {
           datasource: 'github-tags',
           depName: 'ecto',
           packageName: 'elixir-ecto/ecto',
+          versioning: 'loose',
         },
         {
           currentValue: '~> 1.0',
