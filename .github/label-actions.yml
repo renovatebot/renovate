@@ -410,6 +410,8 @@
 
 
     Thanks, the Renovate team
+  close: true
+  close-reason: 'not planned'
 
 'auto:bug-converted':
   comment: >
