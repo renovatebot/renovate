@@ -540,7 +540,9 @@ export async function createPr({
   );
 
   const result = getRenovatePRFormat(pr);
-  setPrInCache(result);
+  if (config.prList) {
+    config.prList.push(result);
+  }
   return result;
 }
 
@@ -599,7 +601,22 @@ export async function updatePr({
     config.repoId,
     prNo,
   );
-  setPrInCache(getRenovatePRFormat(updatedPr));
+  if (config.prList) {
+    const prToCache = getRenovatePRFormat(updatedPr);
+    // We need to update the cached entry for this PR
+    const existingIndex = config.prList.findIndex(
+      (item) => item.number === prNo,
+    );
+    // istanbul ignore if: should not happen
+    if (existingIndex === -1) {
+      logger.warn({ prNo }, 'PR not found in cache');
+      // Add to cache
+      config.prList.push(prToCache);
+    } else {
+      // overwrite existing PR in cache
+      config.prList[existingIndex] = prToCache;
+    }
+  }
 }
 
 export async function ensureComment({
@@ -997,23 +1014,4 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${prNumber}`);
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
-}
-
-function setPrInCache(pr: AzurePr): void {
-  if (!config.prList) {
-    // If we don't have a list yet, so we don't need to worry about adding to it
-    return;
-  }
-
-  const existingIndex = config.prList.findIndex(
-    (item) => item.number === pr.number,
-  );
-
-  if (existingIndex === -1) {
-    // Add to cache
-    config.prList.push(pr);
-  } else {
-    // overwrite existing PR in cache
-    config.prList[existingIndex] = pr;
-  }
 }
