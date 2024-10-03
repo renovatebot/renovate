@@ -82,15 +82,18 @@ export class PypiDatasource extends Datasource {
       );
       return null;
     });
-    if (simpleDependencies === null && pypiJsonDependencies === null) {
-      return null;
+    if (pypiJsonDependencies === null || simpleDependencies === null) {
+      return pypiJsonDependencies ?? simpleDependencies
     }
-    // merge results
-    return {
-      releases: [],
-      ...simpleDependencies,
-      ...pypiJsonDependencies,
-    };
+    let deps = pypiJsonDependencies
+    const added_versions = new Set<string>(deps.releases.map(dep => dep.version))
+    for (const release of simpleDependencies.releases) {
+      if (!added_versions.has(release.version)) {
+        deps.releases.push(release)
+        added_versions.add(release.version)
+      }
+    }
+    return deps
   }
 
   private async getAuthHeaders(
