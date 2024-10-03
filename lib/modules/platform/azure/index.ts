@@ -281,11 +281,11 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   if (!pullRequestId) {
     return null;
   }
-  const renovateAzurePr = (await getPrList()).find(
+  const azurePr = (await getPrList()).find(
     (item) => item.number === pullRequestId,
   );
 
-  if (!renovateAzurePr) {
+  if (!azurePr) {
     return null;
   }
 
@@ -295,11 +295,11 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
     pullRequestId,
   );
 
-  renovateAzurePr.labels = labels
+  azurePr.labels = labels
     .filter((label) => label.active)
     .map((label) => label.name)
     .filter(is.string);
-  return renovateAzurePr;
+  return azurePr;
 }
 
 export async function findPr({
