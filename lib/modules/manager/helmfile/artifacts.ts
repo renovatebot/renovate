@@ -73,6 +73,7 @@ export async function updateArtifacts({
     const docs = parseYaml(newPackageFileContent, {
       removeTemplates: true,
       customSchema: Doc,
+      failureBehaviour: 'filter',
     });
 
     for (const doc of docs) {
