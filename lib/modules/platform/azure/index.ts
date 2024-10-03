@@ -538,7 +538,10 @@ export async function createPr({
       ),
     ),
   );
-  return getRenovatePRFormat(pr);
+
+  const result = getRenovatePRFormat(pr);
+  setPrInCache(result);
+  return result;
 }
 
 export async function updatePr({
@@ -591,7 +594,12 @@ export async function updatePr({
     );
   }
 
-  await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
+  const updatedPr = await azureApiGit.updatePullRequest(
+    objToUpdate,
+    config.repoId,
+    prNo,
+  );
+  setPrInCache(getRenovatePRFormat(updatedPr));
 }
 
 export async function ensureComment({
@@ -989,4 +997,23 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${prNumber}`);
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
+}
+
+function setPrInCache(pr: AzurePr): void {
+  if (!config.prList) {
+    // If we don't have a list yet, so we don't need to worry about adding to it
+    return;
+  }
+
+  const existingIndex = config.prList.findIndex(
+    (item) => item.number === pr.number,
+  );
+
+  if (existingIndex === -1) {
+    // Add to cache
+    config.prList.push(pr);
+  } else {
+    // overwrite existing PR in cache
+    config.prList[existingIndex] = pr;
+  }
 }
