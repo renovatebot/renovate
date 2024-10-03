@@ -3,8 +3,10 @@ import type { Preset } from '../types';
 import type { PresetTemplate, Replacement } from './auto-generate-replacements';
 import { addPresets } from './auto-generate-replacements';
 
+const { $schema, ...tempPresets } = replacementGroups;
+
 /* eslint sort-keys: ["error", "asc", {"caseSensitive": false, "natural": true}] */
-export const presets: Record<string, Preset> = replacementGroups;
+export const presets: Record<string, Preset> = tempPresets;
 
 const muiReplacement: Replacement[] = [
   [['@material-ui/codemod'], '@mui/codemod'],
