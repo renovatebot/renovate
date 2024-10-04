@@ -169,6 +169,97 @@ describe('workers/repository/update/pr/code-owners', () => {
       });
     });
 
+    describe('supports Gitlab sections', () => {
+      it('returns section code owner', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          ['[team] @jimmy', '*'].join('\n'),
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['README.md']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual(['@jimmy']);
+      });
+
+      const codeOwnerFileWithDefaultApproval = codeBlock`
+            # Required for all files
+            * @general-approvers
+
+            [Documentation] @docs-team
+            docs/
+            README.md
+            *.txt
+
+            # Invalid section
+            Something before [Tests] @tests-team
+            tests/
+
+            # Optional section
+            ^[Optional] @optional-team
+            optional/
+
+            [Database] @database-team
+            model/db/
+            config/db/database-setup.md @docs-team
+          `;
+
+      it('returns code owners of multiple sections', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          codeOwnerFileWithDefaultApproval,
+        );
+        git.getBranchFiles.mockResolvedValueOnce([
+          'config/db/database-setup.md',
+        ]);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual(['@docs-team', '@general-approvers']);
+      });
+
+      it('returns default owners when none is explicitly set', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          codeOwnerFileWithDefaultApproval,
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['model/db/CHANGELOG.txt']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual([
+          '@database-team',
+          '@docs-team',
+          '@general-approvers',
+        ]);
+      });
+
+      it('parses only sections that start at the beginning of a line', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          codeOwnerFileWithDefaultApproval,
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['tests/setup.ts']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).not.toInclude('@tests-team');
+      });
+
+      it('returns code owners for optional sections', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          codeOwnerFileWithDefaultApproval,
+        );
+        git.getBranchFiles.mockResolvedValueOnce([
+          'optional/optional-file.txt',
+        ]);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual([
+          '@optional-team',
+          '@docs-team',
+          '@general-approvers',
+        ]);
+      });
+    });
+
     it('does not require all files to match a single rule, regression test for #12611', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
