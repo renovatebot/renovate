@@ -108,8 +108,8 @@ importers:
         specifier: 1.13.2
         version: 1.13.2
       azure-devops-node-api:
-        specifier: 14.0.2
-        version: 14.0.2
+        specifier: 14.1.0
+        version: 14.1.0
       bunyan:
         specifier: 1.8.15
         version: 1.8.15
@@ -2449,8 +2449,8 @@ packages:
   aws4@1.13.2:
     resolution: {integrity: sha512-lHe62zvbTB5eEABUVi/AwVh0ZKY9rMMDhmm+eeyuuUQbQ3+J+fONVQOZyj+DdrvD4BY33uYniyRJ4UJIaSKAfw==}
 
-  azure-devops-node-api@14.0.2:
-    resolution: {integrity: sha512-TwjAEnWnOSZ2oypkDyqppgvJw43qArEfPiJtEWLL3NBgdvAuOuB0xgFz/Eiz4H6Dk0Yv52wCodZxtZvAMhJXwQ==}
+  azure-devops-node-api@14.1.0:
+    resolution: {integrity: sha512-QhpgjH1LQ+vgDJ7oBwcmsZ3+o4ZpjLVilw0D3oJQpYpRzN+L39lk5jZDLJ464hLUgsDzWn/Ksv7zLLMKLfoBzA==}
     engines: {node: '>= 16.0.0'}
 
   babel-jest@29.7.0:
@@ -9054,7 +9054,7 @@ snapshots:
 
   aws4@1.13.2: {}
 
-  azure-devops-node-api@14.0.2:
+  azure-devops-node-api@14.1.0:
     dependencies:
       tunnel: 0.0.6
       typed-rest-client: 2.1.0
