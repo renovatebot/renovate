@@ -330,6 +330,8 @@ export function sanitizeUrls(text: string): string {
   let sanitizedText = text.replace(urlRe, (url) => {
     return url.replace(urlCredRe, '//**redacted**@');
   });
+
+  // Check for data URIs
   if (sanitizedText.startsWith('data:')) {
     sanitizedText = sanitizedText.replace(dataUriCredRe, (dataUri) => {
       return 'data:**redacted**';
