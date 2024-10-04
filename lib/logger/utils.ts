@@ -337,5 +337,5 @@ export function sanitizeUrls(text: string): string {
       return 'data:**redacted**';
     });
   }
-  return sanitizedText;
+  return sanitizedText.replace(dataUriCredRe, '$1**redacted**');
 }
