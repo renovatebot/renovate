@@ -322,15 +322,18 @@ export function validateLogLevel(
 }
 
 // Can't use `util/regex` because of circular reference to logger
-const urlRe = /(?:[a-z]{3,9}:\/\/[^@/]+@[a-z0-9.-]+|data:[^,]+,[^"]*)/gi;
+const urlRe = /[a-z]{3,9}:\/\/[^@/]+@[a-z0-9.-]+/gi;
 const urlCredRe = /\/\/[^@]+@/g;
-const dataUriCredRe = /data:[^,]+,.*$/g;
+const dataUriCredRe = /^data:[0-9a-z-]+\/[0-9a-z-]+;.+/i;
 
 export function sanitizeUrls(text: string): string {
-  return text.replace(urlRe, (url) => {
-    if (url.startsWith('data:')) {
-      return url.replace(dataUriCredRe, 'data:**redacted**');
-    }
+  let sanitizedText = text.replace(urlRe, (url) => {
     return url.replace(urlCredRe, '//**redacted**@');
   });
+  if (sanitizedText.startsWith('data:')) {
+    sanitizedText = sanitizedText.replace(dataUriCredRe, (dataUri) => {
+      return 'data:**redacted**';
+    });
+  }
+  return sanitizedText;
 }
