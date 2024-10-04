@@ -329,13 +329,5 @@ const dataUriCredRe = /^(data:[0-9a-z-]+\/[0-9a-z-]+;).+/i;
 export function sanitizeUrls(text: string): string {
   return text.replace(urlRe, (url) => {
     return url.replace(urlCredRe, '//**redacted**@');
-  });
-
-  // Check for data URIs
-  if (sanitizedText.startsWith('data:')) {
-    sanitizedText = sanitizedText.replace(dataUriCredRe, (dataUri) => {
-      return 'data:**redacted**';
-    });
-  }
-  return sanitizedText.replace(dataUriCredRe, '$1**redacted**');
+   }).replace(dataUriCredRe, '$1**redacted**');
 }
