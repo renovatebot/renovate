@@ -56,6 +56,33 @@ describe('modules/manager/docker-compose/extract', () => {
       expect(res?.deps).toHaveLength(1);
     });
 
+    it('extracts can parse yaml tags for version 3', () => {
+      const compose = codeBlock`
+          web:
+            image: node:20.0.0
+            ports:
+              - "80:8000"
+          worker:
+            extends:
+              service: web
+            ports: !reset null
+      `;
+      const res = extractPackageFile(compose, '', {});
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'node',
+            currentValue: '20.0.0',
+            currentDigest: undefined,
+            replaceString: 'node:20.0.0',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
+      });
+    });
+
     it('extracts image and replaces registry', () => {
       const compose = codeBlock`
         version: "3"
