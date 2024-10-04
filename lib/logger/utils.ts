@@ -327,7 +327,7 @@ const urlCredRe = /\/\/[^@]+@/g;
 const dataUriCredRe = /^(data:[0-9a-z-]+\/[0-9a-z-]+;).+/i;
 
 export function sanitizeUrls(text: string): string {
-  let sanitizedText = text.replace(urlRe, (url) => {
+  return text.replace(urlRe, (url) => {
     return url.replace(urlCredRe, '//**redacted**@');
   });
 
