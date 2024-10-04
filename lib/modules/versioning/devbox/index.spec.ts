@@ -69,6 +69,7 @@ describe('modules/versioning/devbox/index', () => {
     ${'1.2.0'} | ${'1.2'}    | ${true}
     ${'1.2.3'} | ${'1.2'}    | ${true}
     ${'0'}     | ${'latest'} | ${false}
+    ${'1.2.3'} | ${'latest'} | ${true}
   `(
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
