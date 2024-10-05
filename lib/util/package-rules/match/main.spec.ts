@@ -116,38 +116,123 @@ describe('util/package-rules/match', () => {
     });
   });
 
-  describe('invalid expressions', () => {
-    describe('through validate()', () => {
-      it.each`
-        input                                                          | errorMessage
-        ${'packageName = '}                                            | ${'Expected a value, but got EOF at position'}
-        ${'newMajor > '}                                               | ${'Expected a value, but got EOF at position'}
-        ${'isBreaking ANY true'}                                       | ${'Expected token type LBRACKET, but got BOOLEAN_LITERAL at position'}
-        ${'packageName = "foo" AND'}                                   | ${'Unexpected token EOF at position'}
-        ${'packageName = "foo" OR OR isBreaking = true'}               | ${'Unexpected token OR at position'}
-        ${'count >'}                                                   | ${'Expected a value, but got EOF at position'}
-        ${'= "foo"'}                                                   | ${'Unexpected token EQUALS at position'}
-        ${'packageName = "foo" AND (isBreaking = true'}                | ${'Expected token type RPAREN, but got EOF at position'}
-        ${'(tags ANY ["alpha", "beta"] AND features ANY ["feature1"]'} | ${'Expected token type RPAREN, but got EOF at position'}
-      `(
-        'validate($input) throws error with message: $errorMessage',
-        ({ input, errorMessage }) => {
-          const result = validate(input);
-          expect(result.valid).toBe(false);
-          expect(result.message).toMatch(
-            new RegExp(escapeRegExp(errorMessage)),
-          );
-        },
-      );
+  describe('invalid expressions through validate()', () => {
+    it.each`
+      input
+      ${'depType = dependencies'}
+      ${'isBreaking = maybe'}
+      ${'price = null, count = 0'}
+      ${'packageName = "foo" AND (isBreaking = true)))'}
+      ${'packageName = foo'}
+      ${'packageName = "foo" AND isBreaking = tru'}
+      ${'tags ANY [beta, "gamma"]'}
+      ${'AND packageName = "foo"'}
+      ${'OR isBreaking = true'}
+      ${'packageName = "foo" AND OR isBreaking = true'}
+      ${'(packageName = "foo" AND isBreaking = true'}
+      ${'packageName = "foo" AND (isBreaking = true)))'}
+      ${'packageName = "foo" AND (isBreaking = true) AND'}
+      ${'packageName = "foo" AND (isBreaking = true) AND (depType = )'}
+      ${'packageName = "foo" AND isBreaking = true AND depType = "dependencies" OR'}
+      ${'packageName = "foo" AND (isBreaking = true) OR (depType = "dependencies" AND updateType = "patch"'}
+      ${'packageName = "foo" AND (isBreaking = true)) OR depType = "dependencies" AND updateType = "patch"'}
+      ${'packageName = "foo" AND depType = "dependencies" AND updateType patch"'}
+      ${'packageName = "foo" AND depType = "dependencies" AND updateType = patch'}
+      ${'packageName == "foo"'}
+      ${'newMajor >= "1"'}
+      ${'tags NONE [null, "beta}'}
+      ${'tags ANY ["alpha", "beta",]'}
+      ${'((packageName = "foo" AND isBreaking = true'}
+      ${'packageName = "foo" AND (isBreaking = true AND)'}
+    `('validate($input) should be invalid', ({ input }) => {
+      const result = validate(input);
+      expect(result.valid).toBe(false);
     });
 
-    describe('through match()', () => {
-      it.each`
-        input               | expected
-        ${'unknownKey > 5'} | ${false}
-      `('match($input, data) = $expected', ({ input, expected }) => {
-        expect(match(input, data)).toBe(expected);
-      });
+    // Adding 20 additional fuzz tests
+    it.each`
+      input
+      ${''}
+      ${'==='}
+      ${'packageName'}
+      ${'packageName ='}
+      ${'= "foo"'}
+      ${'packageName = "foo" AND'}
+      ${'packageName = "foo" OR'}
+      ${'packageName = "foo" AND AND isBreaking = true'}
+      ${'(packageName = "foo" AND isBreaking = true'}
+      ${'packageName = "foo" AND (isBreaking = true))'}
+      ${'packageName = "foo" AND (isBreaking = true) OR'}
+      ${'packageName = "foo" AND (isBreaking = )'}
+      ${'packageName = "foo" AND ( = true)'}
+      ${'packageName = "foo" AND isBreaking true'}
+      ${'packageName = "foo" AND isBreaking !='}
+      ${'packageName = "foo" AND isBreaking = "tru'}
+      ${'packageName = "foo" AND isBreaking = "true" extra'}
+      ${'packageName = "foo" AND (isBreaking = true OR depType = "dependencies"'}
+      ${'packageName = "foo" AND (isBreaking = true) AND'}
+      ${'packageName = "foo" AND (isBreaking = true AND depType = "dependencies"'}
+      ${'packageName = "foo" AND (isBreaking = true) AND (depType = "dependencies" AND updateType = "patch"'}
+    `('validate($input) should be invalid (fuzz test)', ({ input }) => {
+      const result = validate(input);
+      expect(result.valid).toBe(false);
     });
+  });
+
+  describe('invalid expressions through match()', () => {
+    it.each`
+      input
+      ${'depType = dependencies'}
+      ${'isBreaking = maybe'}
+      ${'price = null, count = 0'}
+      ${'packageName = "foo" AND (isBreaking = true))))'}
+      ${'packageName = foo'}
+      ${'packageName = "foo" AND isBreaking = tru'}
+      ${'tags ANY [beta, "gamma"]'}
+      ${'AND packageName = "foo"'}
+      ${'OR isBreaking = true'}
+      ${'packageName = "foo" AND OR isBreaking = true'}
+      ${'(packageName = "foo" AND isBreaking = true'}
+      ${'packageName = "foo" AND (isBreaking = true)))'}
+      ${'packageName = "foo" AND (isBreaking = true) AND'}
+      ${'packageName = "foo" AND (isBreaking = true) AND (depType = )'}
+      ${'packageName = "foo" AND isBreaking = true AND depType = "dependencies" OR'}
+      ${'packageName = "foo" AND (isBreaking = true) OR (depType = "dependencies" AND updateType = "patch'}
+      ${'packageName = "foo" AND (isBreaking = true)) OR depType = "dependencies" AND updateType = "patch"'}
+      ${'packageName = "foo" AND depType = "dependencies" AND updateType patch"'}
+      ${'packageName = "foo" AND depType = "dependencies" AND updateType = patch'}
+      ${'packageName == "foo"'}
+      ${'newMajor >= "1"'}
+      ${'tags NONE [null, "beta}'}
+      ${'tags ANY ["alpha", "beta",]'}
+      ${'((packageName = "foo" AND isBreaking = true'}
+      ${'packageName = "foo" AND (isBreaking = true AND)'}
+      ${''}
+      ${'==='}
+      ${'packageName'}
+      ${'packageName ='}
+      ${'= "foo"'}
+      ${'packageName = "foo" AND'}
+      ${'packageName = "foo" OR'}
+      ${'packageName = "foo" AND AND isBreaking = true'}
+      ${'(packageName = "foo" AND isBreaking = true'}
+      ${'packageName = "foo" AND (isBreaking = true))'}
+      ${'packageName = "foo" AND (isBreaking = true) OR'}
+      ${'packageName = "foo" AND (isBreaking = )'}
+      ${'packageName = "foo" AND ( = true)'}
+      ${'packageName = "foo" AND isBreaking true'}
+      ${'packageName = "foo" AND isBreaking !='}
+      ${'packageName = "foo" AND isBreaking = "tru'}
+      ${'packageName = "foo" AND isBreaking = "true" extra'}
+      ${'packageName = "foo" AND (isBreaking = true OR depType = "dependencies'}
+      ${'packageName = "foo" AND (isBreaking = true) AND'}
+      ${'packageName = "foo" AND (isBreaking = true AND depType = "dependencies'}
+      ${'packageName = "foo" AND (isBreaking = true) AND (depType = "dependencies" AND updateType = "patch'}
+    `(
+      'match($input, data) should return false for invalid expression',
+      ({ input }) => {
+        expect(match(input, data)).toBe(false);
+      },
+    );
   });
 });

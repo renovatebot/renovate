@@ -170,7 +170,13 @@ let currentTokenIndex: number;
 export function parse(inputTokens: Token[]): ASTNode {
   tokens = inputTokens;
   currentTokenIndex = 0;
-  return parseExpression();
+  const node = parseExpression();
+  if (peek().type !== 'EOF') {
+    throw new Error(
+      `Unexpected token ${peek().type} at position ${peek().position}`,
+    );
+  }
+  return node;
 }
 
 function peek(): Token {
@@ -293,17 +299,22 @@ function parseComparison(): ASTNode {
       value = parseFloat(valueToken.value);
     } else if (valueToken.type === 'NULL_LITERAL') {
       value = null;
-    } else {
-      if (valueToken.value === 'true') {
+    } else if (valueToken.type === 'IDENTIFIER') {
+      // Handle identifiers: only allow 'true', 'false', 'null', or numbers
+      const lowerValue = valueToken.value.toLowerCase();
+      if (lowerValue === 'true') {
         value = true;
-      } else if (valueToken.value === 'false') {
+      } else if (lowerValue === 'false') {
         value = false;
-      } else if (valueToken.value === 'null') {
+      } else if (lowerValue === 'null') {
         value = null;
       } else if (!isNaN(Number(valueToken.value))) {
         value = Number(valueToken.value);
       } else {
-        value = valueToken.value;
+        // Invalid identifier as value, expecting string literals
+        throw new Error(
+          `Invalid identifier '${valueToken.value}' at position ${valueToken.position}`,
+        );
       }
     }
 
@@ -356,16 +367,20 @@ function parseArray(): any[] {
       }
     } else if (valueToken.type === 'IDENTIFIER') {
       // Handle identifiers as potential booleans or numbers
-      if (valueToken.value === 'true') {
+      const lowerValue = valueToken.value.toLowerCase();
+      if (lowerValue === 'true') {
         value = true;
-      } else if (valueToken.value === 'false') {
+      } else if (lowerValue === 'false') {
         value = false;
-      } else if (valueToken.value === 'null') {
+      } else if (lowerValue === 'null') {
         value = null;
       } else if (!isNaN(Number(valueToken.value))) {
         value = Number(valueToken.value);
       } else {
-        value = valueToken.value;
+        // Invalid identifier in array
+        throw new Error(
+          `Invalid identifier '${valueToken.value}' in array at position ${valueToken.position}`,
+        );
       }
     } else {
       throw new Error(
@@ -375,16 +390,16 @@ function parseArray(): any[] {
 
     values.push(value);
 
-    const nextToken = peek();
-    if (nextToken.type === 'COMMA') {
+    const nextTokenAfterValue = peek();
+    if (nextTokenAfterValue.type === 'COMMA') {
       consume('COMMA');
       continue;
-    } else if (nextToken.type === 'RBRACKET') {
+    } else if (nextTokenAfterValue.type === 'RBRACKET') {
       consume('RBRACKET');
       break;
     } else {
       throw new Error(
-        `Expected ',' or ']', but got ${nextToken.type} at position ${nextToken.position}`,
+        `Expected ',' or ']', but got ${nextTokenAfterValue.type} at position ${nextTokenAfterValue.position}`,
       );
     }
   }
@@ -490,7 +505,7 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
             ),
           );
         } else {
-          // Corrected logic for non-array dataValue
+          // Check if dataValue does not match any value in compNode.value
           return !(compNode.value as any[]).some((compVal) =>
             areValuesEqual(dataValue, compVal),
           );
@@ -520,8 +535,13 @@ export function validate(input: string): ValidationResult {
   }
 }
 
+// Match function (combines parsing and evaluation)
 export function match(input: string, data: unknown): boolean {
-  const inputTokens = tokenize(input);
-  const ast = parse(inputTokens);
+  const validationResult = validate(input);
+  if (!validationResult.valid) {
+    return false; // Return false instead of throwing an error
+  }
+  const tokens = tokenize(input);
+  const ast = parse(tokens);
   return evaluate(ast, data);
 }
