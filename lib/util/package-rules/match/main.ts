@@ -1,5 +1,5 @@
-// main.ts
-
+import * as memCache from '../../cache/memory';
+import { logger } from '../../../logger';
 import {
   ASTNode,
   BinaryOpNode,
@@ -518,30 +518,44 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
   return false;
 }
 
-// Validate function
-export function validate(input: string): ValidationResult {
+function parseAndTokenize(input: string): ASTNode | Error {
   try {
     const inputTokens = tokenize(input);
-    parse(inputTokens);
-    return { valid: true };
-  } catch (error) {
-    if (error instanceof Error) {
-      return { valid: false, message: error.message };
-    }
-    return {
-      valid: false,
-      message: 'An unknown error occurred during validation.',
-    };
+    return parse(inputTokens);
+  } catch (err) {
+    return err;
   }
 }
 
-// Match function (combines parsing and evaluation)
-export function match(input: string, data: unknown): boolean {
-  const validationResult = validate(input);
-  if (!validationResult.valid) {
-    return false; // Return false instead of throwing an error
+function getMemoizedAst(input: string): ASTNode | Error {
+  const cacheKey = `ast-${input}`;
+  const cachedAst = memCache.get(cacheKey);
+  // istanbul ignore if: cannot test
+  if (cachedAst) {
+    return cachedAst;
   }
-  const tokens = tokenize(input);
-  const ast = parse(tokens);
+
+  const res = parseAndTokenize(input);
+  if (res instanceof Error) {
+    logger.warn({ err: res }, `Invalid match input`);
+  }
+
+  memCache.set(cacheKey, res);
+  return res;
+}
+
+export function validate(input: string): ValidationResult {
+  const res = getMemoizedAst(input);
+  if (res instanceof Error) {
+    return { valid: false, message: res.message };
+  }
+  return { valid: true };
+}
+
+export function match(input: string, data: unknown): boolean {
+  const ast = getMemoizedAst(input);
+  if (ast instanceof Error) {
+    return false;
+  }
   return evaluate(ast, data);
 }

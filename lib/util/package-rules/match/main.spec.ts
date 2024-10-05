@@ -50,6 +50,7 @@ describe('util/package-rules/match', () => {
     it.each`
       input                                | expected
       ${'packageName = "foo"'}             | ${true}
+      ${'packageName = "foo"'}             | ${true}
       ${'packageName ANY ["foo", "bar"]'}  | ${true}
       ${'packageName ANY ["no", "bar"]'}   | ${false}
       ${'packageName NONE ["foo", "bar"]'} | ${false}
@@ -116,7 +117,12 @@ describe('util/package-rules/match', () => {
     });
   });
 
-  describe('invalid expressions through validate()', () => {
+  describe('validate()', () => {
+    it('should return valid: true for valid expressions', () => {
+      const result = validate('packageName = "foo"');
+      expect(result.valid).toBe(true);
+    });
+
     it.each`
       input
       ${'depType = dependencies'}
@@ -144,14 +150,6 @@ describe('util/package-rules/match', () => {
       ${'tags ANY ["alpha", "beta",]'}
       ${'((packageName = "foo" AND isBreaking = true'}
       ${'packageName = "foo" AND (isBreaking = true AND)'}
-    `('validate($input) should be invalid', ({ input }) => {
-      const result = validate(input);
-      expect(result.valid).toBe(false);
-    });
-
-    // Adding 20 additional fuzz tests
-    it.each`
-      input
       ${''}
       ${'==='}
       ${'packageName'}
@@ -173,7 +171,7 @@ describe('util/package-rules/match', () => {
       ${'packageName = "foo" AND (isBreaking = true) AND'}
       ${'packageName = "foo" AND (isBreaking = true AND depType = "dependencies"'}
       ${'packageName = "foo" AND (isBreaking = true) AND (depType = "dependencies" AND updateType = "patch"'}
-    `('validate($input) should be invalid (fuzz test)', ({ input }) => {
+    `('validate($input) should be invalid', ({ input }) => {
       const result = validate(input);
       expect(result.valid).toBe(false);
     });
