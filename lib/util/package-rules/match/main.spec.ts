@@ -12,10 +12,9 @@ describe('util/package-rules/match/main', () => {
       newMajor: 1,
       score: 85,
       active: false,
-      tags: ['alpha', 'beta'],
+      labels: ['alpha', 'beta'],
       count: 0,
       price: null,
-      priority: 'high',
       category: 'utilities',
       enabled: true,
       status: 'active',
@@ -29,12 +28,12 @@ describe('util/package-rules/match/main', () => {
         ${'(packageName = "foo" AND isBreaking = true) OR (depType = "devDependencies" AND updateType = "minor")'}      | ${true}
         ${'(packageName = "bar" OR packageName = "baz") AND (isBreaking = true OR updateType = "major")'}               | ${false}
         ${'((newMajor >= 1 AND newMajor <= 2) OR score > 90) AND active = false'}                                       | ${true}
-        ${'(tags ANY ["beta", "gamma"] AND features ANY ["feature1"]) OR (priority = "low" AND enabled = false)'}       | ${true}
+        ${'(labels ANY ["beta", "gamma"] AND features ANY ["feature1"]) OR (updateType = "minor" AND enabled = false)'} | ${true}
         ${'notExistingKey = "value" OR (packageName = "foo" AND status = "inactive")'}                                  | ${false}
         ${'(price != null AND price > 100) OR (price = null AND count = 0)'}                                            | ${true}
         ${'((enabled = true AND status = "active") OR (enabled = false AND status = "inactive")) AND active = false'}   | ${true}
-        ${'(category = "utilities" OR category = "tools") AND (priority = "medium" OR priority = "high")'}              | ${true}
-        ${'(features ANY ["feature3", "feature4"] AND tags NONE ["alpha"]) OR score >= 85'}                             | ${true}
+        ${'(category = "utilities" OR category = "tools") AND (updateType = "minor" OR updateType = "patch")'}          | ${true}
+        ${'(features ANY ["feature3", "feature4"] AND labels NONE ["alpha"]) OR score >= 85'}                           | ${true}
         ${'((packageName = "foo" AND isBreaking = true) OR (updateType = "minor" AND newMajor > 2)) AND active = true'} | ${false}
       `('match($input, data) = $expected', ({ input, expected }) => {
         expect(match(input, data)).toBe(expected);
@@ -79,8 +78,8 @@ describe('util/package-rules/match/main', () => {
         ${'newMajor ANY [1,2,3]'}            | ${true}
         ${'newMajor NONE [2,3,4]'}           | ${true}
         ${'newMajor NONE [1,2,3]'}           | ${false}
-        ${'tags ANY ["beta", "gamma"]'}      | ${true}
-        ${'tags NONE ["delta"]'}             | ${true}
+        ${'labels ANY ["beta", "gamma"]'}    | ${true}
+        ${'labels NONE ["delta"]'}           | ${true}
         ${'active NONE [true]'}              | ${true}
         ${'active NONE [false]'}             | ${false}
       `('match($input, data) = $expected', ({ input, expected }) => {
@@ -221,7 +220,7 @@ describe('util/package-rules/match/main', () => {
       ${'packageName = "foo" AND (isBreaking = true)))'}
       ${'packageName = foo'}
       ${'packageName = "foo" AND isBreaking = tru'}
-      ${'tags ANY [beta, "gamma"]'}
+      ${'labels ANY [beta, "gamma"]'}
       ${'AND packageName = "foo"'}
       ${'OR isBreaking = true'}
       ${'packageName = "foo" AND OR isBreaking = true'}
@@ -236,8 +235,8 @@ describe('util/package-rules/match/main', () => {
       ${'packageName = "foo" AND depType = "dependencies" AND updateType = patch'}
       ${'packageName == "foo"'}
       ${'newMajor >= "1"'}
-      ${'tags NONE [null, "beta}'}
-      ${'tags ANY ["alpha", "beta",]'}
+      ${'labels NONE [null, "beta}'}
+      ${'labels ANY ["alpha", "beta",]'}
       ${'((packageName = "foo" AND isBreaking = true'}
       ${'packageName = "foo" AND (isBreaking = true AND)'}
       ${''}
@@ -320,7 +319,8 @@ describe('util/package-rules/match/main', () => {
     });
 
     it('should handle array operators ANY and NONE', () => {
-      const input = "tags ANY ['urgent', 'high'] OR priority NONE ['low']";
+      const input =
+        "labels ANY ['urgent', 'high'] OR updateType NONE ['major']";
       const tokens = tokenize(input);
       const expectedTypes = [
         'IDENTIFIER',
@@ -398,11 +398,11 @@ describe('util/package-rules/match/main', () => {
     });
 
     it('should parse expressions with array operators', () => {
-      const tokens = tokenize("tags ANY ['urgent', 'high']");
+      const tokens = tokenize("labels ANY ['urgent', 'high']");
       const ast = parse(tokens);
       expect(ast.type).toBe('Comparison');
       expect(ast.operator).toBe('ANY');
-      expect(ast.key).toBe('tags');
+      expect(ast.key).toBe('labels');
       expect(ast.value).toEqual(['urgent', 'high']);
     });
 
@@ -431,9 +431,9 @@ describe('util/package-rules/match/main', () => {
       age: 35,
       status: 'active',
       isActive: true,
-      tags: ['urgent', 'new'],
+      labels: ['urgent', 'new'],
       balance: -500,
-      priority: 'medium',
+      updateType: 'minor',
       score: null,
       a: 1,
       b: 2,
@@ -477,19 +477,19 @@ describe('util/package-rules/match/main', () => {
     });
 
     it('should evaluate array operators ANY and NONE', () => {
-      const astAny = parse(tokenize("tags ANY ['urgent', 'high']"));
+      const astAny = parse(tokenize("labels ANY ['urgent', 'high']"));
       expect(evaluate(astAny, data)).toBe(true);
 
-      const astNone = parse(tokenize("priority NONE ['low']"));
+      const astNone = parse(tokenize("updateType NONE ['patch']"));
       expect(evaluate(astNone, data)).toBe(true);
 
-      const astAnyNoneEmpty = parse(tokenize('tags ANY []'));
+      const astAnyNoneEmpty = parse(tokenize('labels ANY []'));
       expect(evaluate(astAnyNoneEmpty, data)).toBe(false);
 
-      const astAnyFalse = parse(tokenize("tags ANY ['low', 'medium']"));
+      const astAnyFalse = parse(tokenize("labels ANY ['low', 'medium']"));
       expect(evaluate(astAnyFalse, data)).toBe(false);
 
-      const astNoneFalse = parse(tokenize("priority NONE ['medium']"));
+      const astNoneFalse = parse(tokenize("upateType NONE ['minor']"));
       expect(evaluate(astNoneFalse, data)).toBe(false);
     });
 
