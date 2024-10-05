@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import * as memCache from '../../cache/memory';
 import type {
@@ -8,6 +9,7 @@ import type {
   TokenType,
   ValidationResult,
 } from './types';
+import { matchRegexOrGlob } from '../../string-match';
 
 // Tokenizer function
 export function tokenize(input: string): Token[] {
@@ -369,6 +371,9 @@ function parseArray(): any[] {
 // Evaluation function
 export function evaluate(node: ASTNode, data: unknown): boolean {
   function areValuesEqual(a: any, b: any): boolean {
+    if (is.string(a) && is.string(b)) {
+      return matchRegexOrGlob(a, b);
+    }
     return a === b;
   }
 
@@ -426,9 +431,9 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
 
     switch (compNode.operator) {
       case 'EQUALS':
-        return dataValue === compNode.value;
+        return areValuesEqual(dataValue, compNode.value);
       case 'NOT_EQUALS':
-        return dataValue !== compNode.value;
+        return !areValuesEqual(dataValue, compNode.value);
       case 'GREATER_THAN':
         return dataValue > compNode.value;
       case 'GREATER_THAN_OR_EQUAL':

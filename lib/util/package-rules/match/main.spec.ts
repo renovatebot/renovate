@@ -19,6 +19,7 @@ describe('util/package-rules/match/main', () => {
       category: 'utilities',
       enabled: true,
       status: 'active',
+      packageFile: 'packages/frontend/package.json',
       features: ['feature1', 'feature2'],
     };
 
@@ -129,6 +130,29 @@ describe('util/package-rules/match/main', () => {
           expect(match(input, data)).toBe(expected);
         },
       );
+    });
+
+    describe('string pattern matching', () => {
+      it.each`
+        input                                        | expected
+        ${'packageName = "*"'}                       | ${true}
+        ${'packageName != "*"'}                      | ${false}
+        ${'packageName = "**"'}                      | ${true}
+        ${'packageName = "f*"'}                      | ${true}
+        ${'packageName = "b*"'}                      | ${false}
+        ${'packageName != "b*"'}                     | ${true}
+        ${'packageName = "/^f/"'}                    | ${true}
+        ${'packageName = "/^b/"'}                    | ${false}
+        ${'packageName = "/^f$/"'}                   | ${false}
+        ${'packageName = "^f"'}                      | ${false}
+        ${'packageName ANY ["a*", "f*"]'}            | ${true}
+        ${'packageName NONE ["a*", "f*"]'}           | ${false}
+        ${'packageName ANY ["a*", "b*"]'}            | ${false}
+        ${'packageName NONE ["a*", "b*"]'}           | ${true}
+        ${'packageFile = "packages/*/package.json"'} | ${true}
+      `('match($input, data) = $expected', ({ input, expected }) => {
+        expect(match(input, data)).toBe(expected);
+      });
     });
 
     it.each([
