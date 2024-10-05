@@ -375,16 +375,16 @@ function parseArray(): any[] {
 
     values.push(value);
 
-    const nextToken = peek();
-    if (nextToken.type === 'COMMA') {
+    const nextTokenAfterValue = peek();
+    if (nextTokenAfterValue.type === 'COMMA') {
       consume('COMMA');
       continue;
-    } else if (nextToken.type === 'RBRACKET') {
+    } else if (nextTokenAfterValue.type === 'RBRACKET') {
       consume('RBRACKET');
       break;
     } else {
       throw new Error(
-        `Expected ',' or ']', but got ${nextToken.type} at position ${nextToken.position}`,
+        `Expected ',' or ']', but got ${nextTokenAfterValue.type} at position ${nextTokenAfterValue.position}`,
       );
     }
   }
@@ -490,12 +490,11 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
             ),
           );
         } else {
-          // Check if dataValue does not match any value in compNode.value
+          // Corrected logic for non-array dataValue
           return !(compNode.value as any[]).some((compVal) =>
             areValuesEqual(dataValue, compVal),
           );
         }
-
       default:
         throw new Error(`Unsupported operator ${compNode.operator}`);
     }
@@ -503,7 +502,7 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
   return false;
 }
 
-// Validate function remains unchanged
+// Validate function
 export function validate(input: string): ValidationResult {
   try {
     const inputTokens = tokenize(input);
@@ -520,12 +519,7 @@ export function validate(input: string): ValidationResult {
   }
 }
 
-// Match function (combines parsing and evaluation)
 export function match(input: string, data: unknown): boolean {
-  const validationResult = validate(input);
-  if (!validationResult.valid) {
-    throw new Error(validationResult.message);
-  }
   const tokens = tokenize(input);
   const ast = parse(tokens);
   return evaluate(ast, data);

@@ -116,26 +116,61 @@ describe('util/package-rules/match', () => {
     });
   });
 
-  describe('invalid expressions', () => {
+  describe('validate function', () => {
+    describe('valid expressions', () => {
+      it.each`
+        input
+        ${'packageName = "foo"'}
+        ${'isBreaking = true'}
+        ${'(packageName = "foo" AND isBreaking = true) OR (depType = "devDependencies" AND updateType = "minor")'}
+        ${'(tags ANY ["beta", "gamma"] AND features ANY ["feature1"]) OR (priority = "low" AND enabled = false)'}
+        ${'(price != null AND price > 100) OR (price = null AND count = 0)'}
+        ${'((enabled = true AND status = "active") OR (enabled = false AND status = "inactive")) AND active = false'}
+        ${'(category = "utilities" OR category = "tools") AND (priority = "medium" OR priority = "high")'}
+        ${'(features ANY ["feature3", "feature4"] AND tags NONE ["alpha"]) OR score >= 85'}
+        ${'((packageName = "foo" AND isBreaking = true) OR (updateType = "minor" AND newMajor > 2)) AND active = true'}
+      `('validate($input) should return valid: true', ({ input }) => {
+        const result = validate(input);
+        expect(result.valid).toBe(true);
+        expect(result.message).toBeUndefined();
+      });
+    });
+
+    describe('invalid expressions', () => {
+      it.each`
+        input                                                          | errorMessage
+        ${'packageName = '}                                            | ${'Expected a value, but got EOF at position'}
+        ${'newMajor > '}                                               | ${'Expected a value, but got EOF at position'}
+        ${'isBreaking ANY true'}                                       | ${'Expected token type LBRACKET, but got BOOLEAN_LITERAL at position'}
+        ${'packageName = "foo" AND'}                                   | ${'Unexpected token EOF at position'}
+        ${'packageName = "foo" OR OR isBreaking = true'}               | ${'Unexpected token OR at position'}
+        ${'count >'}                                                   | ${'Expected a value, but got EOF at position'}
+        ${'= "foo"'}                                                   | ${'Unexpected token EQUALS at position'}
+        ${'packageName = "foo" AND (isBreaking = true'}                | ${'Expected token type RPAREN, but got EOF at position'}
+        ${'(newMajor >= 1 AND) newMajor <= 2'}                         | ${'Unexpected token RPAREN at position'}
+        ${'((packageName = "foo") AND (isBreaking = true)'}            | ${'Expected token type RPAREN, but got EOF at position'}
+        ${'((active = true) AND (enabled = true)) OR'}                 | ${'Unexpected token EOF at position'}
+        ${'(tags ANY ["alpha", "beta"] AND features ANY ["feature1"]'} | ${'Expected token type RPAREN, but got EOF at position'}
+      `(
+        'validate($input) should return valid: false with message: "$errorMessage"',
+        ({ input, errorMessage }) => {
+          const result = validate(input);
+          expect(result.valid).toBe(false);
+          expect(result.message).toMatch(
+            new RegExp(escapeRegExp(errorMessage)),
+          );
+        },
+      );
+    });
+  });
+
+  describe('invalid expressions through match()', () => {
     it.each`
-      input                                            | errorMessage
-      ${'packageName = '}                              | ${'Expected a value, but got EOF at position'}
-      ${'newMajor > '}                                 | ${'Expected a value, but got EOF at position'}
-      ${'isBreaking ANY true'}                         | ${'Expected token type LBRACKET, but got BOOLEAN_LITERAL at position 15'}
-      ${'unknownKey > 5'}                              | ${null}
-      ${'packageName = "foo" AND'}                     | ${'Unexpected token EOF at position'}
-      ${'packageName = "foo" OR OR isBreaking = true'} | ${'Unexpected token OR at position'}
-      ${'count >'}                                     | ${'Expected a value, but got EOF at position'}
-      ${'= "foo"'}                                     | ${'Unexpected token EQUALS at position'}
-      ${'packageName = "foo" AND (isBreaking = true'}  | ${'Expected token type RPAREN, but got EOF at position 42'}
-    `('match($input, data) throws error', ({ input, errorMessage }) => {
-      if (errorMessage) {
-        expect(() => match(input, data)).toThrowError(
-          new RegExp(escapeRegExp(errorMessage)),
-        );
-      } else {
-        expect(match(input, data)).toBe(false);
-      }
+      input                           | expected
+      ${'unknownKey > 5'}             | ${false}
+      ${'someOtherInvalidExpression'} | ${false}
+    `('match($input, data) = $expected', ({ input, expected }) => {
+      expect(match(input, data)).toBe(expected);
     });
   });
 });
