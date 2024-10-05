@@ -2,11 +2,6 @@
 
 import { match, validate } from './main';
 
-// Helper function to escape special characters in regular expressions
-function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 describe('util/package-rules/match', () => {
   const data = {
     packageName: 'foo',
@@ -102,13 +97,17 @@ describe('util/package-rules/match', () => {
       ${'count <= 0'}                    | ${true}
       ${'count > -1'}                    | ${true}
       ${'price = null'}                  | ${true}
+      ${'true = true'}                   | ${false}
+      ${'null = null'}                   | ${false}
       ${'price != null'}                 | ${false}
       ${'newMajor > 0 AND newMajor < 2'} | ${true}
       ${'active != true'}                | ${true}
       ${'packageName ANY []'}            | ${false}
+      ${'packageName ANY false'}         | ${false}
       ${'packageName = "a\\tb"'}         | ${false}
       ${'labels.foo = "bar"'}            | ${false}
       ${'packageName NONE []'}           | ${false}
+      ${'packageName >= 2'}              | ${false}
       ${'score ANY [85,90,95]'}          | ${true}
       ${'score NONE [70,75,80]'}         | ${true}
       ${'score ANY [70,75,80]'}          | ${false}
@@ -229,7 +228,7 @@ describe('util/package-rules/match', () => {
       ${'packageName = "foo" AND (isBreaking = true OR depType = "dependencies'}
       ${'packageName = "foo" AND (isBreaking = true) AND'}
       ${'packageName = "foo" AND (isBreaking = true AND depType = "dependencies'}
-      ${'packageName = "foo" AND (isBreaking = true) AND (depType = "dependencies" AND updateType = "patch'}
+      ${'packageName = "foo" AND (isBreaking.true = true) AND (depType = "dependencies" AND updateType = "patch'}
     `(
       'match($input, data) should return false for invalid expression',
       ({ input }) => {

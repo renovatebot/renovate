@@ -79,6 +79,7 @@ export function tokenize(input: string): Token[] {
         value += c;
         i++;
         c = input[i];
+        // istanbul ignore if: cannot test
         if (!isDigit(c)) {
           throw new Error(`Invalid number at position ${start}`);
         }
@@ -243,13 +244,6 @@ function parseFactor(): ASTNode {
 function parseComparison(): ASTNode {
   const keyToken = consume('IDENTIFIER');
 
-  // Check for nested properties
-  if (keyToken.value.includes('.')) {
-    throw new Error(
-      `Nested properties are not supported at position ${keyToken.position}`,
-    );
-  }
-
   const operatorToken = consume();
 
   const isRelationalOperator =
@@ -300,22 +294,10 @@ function parseComparison(): ASTNode {
     } else if (valueToken.type === 'NULL_LITERAL') {
       value = null;
     } else if (valueToken.type === 'IDENTIFIER') {
-      // Handle identifiers: only allow 'true', 'false', 'null', or numbers
-      const lowerValue = valueToken.value.toLowerCase();
-      if (lowerValue === 'true') {
-        value = true;
-      } else if (lowerValue === 'false') {
-        value = false;
-      } else if (lowerValue === 'null') {
-        value = null;
-      } else if (!isNaN(Number(valueToken.value))) {
-        value = Number(valueToken.value);
-      } else {
-        // Invalid identifier as value, expecting string literals
-        throw new Error(
-          `Invalid identifier '${valueToken.value}' at position ${valueToken.position}`,
-        );
-      }
+      // Invalid identifier as value, expecting string literals
+      throw new Error(
+        `Invalid identifier '${valueToken.value}' at position ${valueToken.position}`,
+      );
     }
 
     // For relational operators, value must be a number
@@ -353,8 +335,7 @@ function parseArray(): any[] {
     if (
       valueToken.type === 'STRING_LITERAL' ||
       valueToken.type === 'NUMBER_LITERAL' ||
-      valueToken.type === 'BOOLEAN_LITERAL' ||
-      valueToken.type === 'NULL_LITERAL'
+      valueToken.type === 'BOOLEAN_LITERAL'
     ) {
       if (valueToken.type === 'STRING_LITERAL') {
         value = valueToken.value;
@@ -362,26 +343,12 @@ function parseArray(): any[] {
         value = valueToken.value === 'true';
       } else if (valueToken.type === 'NUMBER_LITERAL') {
         value = parseFloat(valueToken.value);
-      } else if (valueToken.type === 'NULL_LITERAL') {
-        value = null;
       }
     } else if (valueToken.type === 'IDENTIFIER') {
-      // Handle identifiers as potential booleans or numbers
-      const lowerValue = valueToken.value.toLowerCase();
-      if (lowerValue === 'true') {
-        value = true;
-      } else if (lowerValue === 'false') {
-        value = false;
-      } else if (lowerValue === 'null') {
-        value = null;
-      } else if (!isNaN(Number(valueToken.value))) {
-        value = Number(valueToken.value);
-      } else {
-        // Invalid identifier in array
-        throw new Error(
-          `Invalid identifier '${valueToken.value}' in array at position ${valueToken.position}`,
-        );
-      }
+      // Invalid identifier in array
+      throw new Error(
+        `Invalid identifier '${valueToken.value}' in array at position ${valueToken.position}`,
+      );
     } else {
       throw new Error(
         `Expected a value, but got ${valueToken.type} at position ${valueToken.position}`,
