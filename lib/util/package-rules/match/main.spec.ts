@@ -58,6 +58,7 @@ describe('util/package-rules/match', () => {
       ${"packageName = 'foo'"}             | ${true}
       ${'packageName = "bar"'}             | ${false}
       ${'isBreaking = true'}               | ${true}
+      ${'isBreaking = "true"'}             | ${false}
       ${'isBreaking = false'}              | ${false}
       ${'depType = "dependencies"'}        | ${true}
       ${'depType = "devDependencies"'}     | ${false}
@@ -105,6 +106,8 @@ describe('util/package-rules/match', () => {
       ${'newMajor > 0 AND newMajor < 2'} | ${true}
       ${'active != true'}                | ${true}
       ${'packageName ANY []'}            | ${false}
+      ${'packageName = "a\\tb"'}         | ${false}
+      ${'labels.foo = "bar"'}            | ${false}
       ${'packageName NONE []'}           | ${false}
       ${'score ANY [85,90,95]'}          | ${true}
       ${'score NONE [70,75,80]'}         | ${true}
@@ -183,6 +186,7 @@ describe('util/package-rules/match', () => {
       ${'depType = dependencies'}
       ${'isBreaking = maybe'}
       ${'price = null, count = 0'}
+      ${'count > -2x'}
       ${'packageName = "foo" AND (isBreaking = true))))'}
       ${'packageName = foo'}
       ${'packageName = "foo" AND isBreaking = tru'}
