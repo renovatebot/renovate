@@ -375,16 +375,16 @@ function parseArray(): any[] {
 
     values.push(value);
 
-    const nextTokenAfterValue = peek();
-    if (nextTokenAfterValue.type === 'COMMA') {
+    const nextToken = peek();
+    if (nextToken.type === 'COMMA') {
       consume('COMMA');
       continue;
-    } else if (nextTokenAfterValue.type === 'RBRACKET') {
+    } else if (nextToken.type === 'RBRACKET') {
       consume('RBRACKET');
       break;
     } else {
       throw new Error(
-        `Expected ',' or ']', but got ${nextTokenAfterValue.type} at position ${nextTokenAfterValue.position}`,
+        `Expected ',' or ']', but got ${nextToken.type} at position ${nextToken.position}`,
       );
     }
   }
@@ -495,6 +495,7 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
             areValuesEqual(dataValue, compVal),
           );
         }
+
       default:
         throw new Error(`Unsupported operator ${compNode.operator}`);
     }
@@ -520,7 +521,7 @@ export function validate(input: string): ValidationResult {
 }
 
 export function match(input: string, data: unknown): boolean {
-  const tokens = tokenize(input);
-  const ast = parse(tokens);
+  const inputTokens = tokenize(input);
+  const ast = parse(inputTokens);
   return evaluate(ast, data);
 }

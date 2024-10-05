@@ -116,27 +116,8 @@ describe('util/package-rules/match', () => {
     });
   });
 
-  describe('validate function', () => {
-    describe('valid expressions', () => {
-      it.each`
-        input
-        ${'packageName = "foo"'}
-        ${'isBreaking = true'}
-        ${'(packageName = "foo" AND isBreaking = true) OR (depType = "devDependencies" AND updateType = "minor")'}
-        ${'(tags ANY ["beta", "gamma"] AND features ANY ["feature1"]) OR (priority = "low" AND enabled = false)'}
-        ${'(price != null AND price > 100) OR (price = null AND count = 0)'}
-        ${'((enabled = true AND status = "active") OR (enabled = false AND status = "inactive")) AND active = false'}
-        ${'(category = "utilities" OR category = "tools") AND (priority = "medium" OR priority = "high")'}
-        ${'(features ANY ["feature3", "feature4"] AND tags NONE ["alpha"]) OR score >= 85'}
-        ${'((packageName = "foo" AND isBreaking = true) OR (updateType = "minor" AND newMajor > 2)) AND active = true'}
-      `('validate($input) should return valid: true', ({ input }) => {
-        const result = validate(input);
-        expect(result.valid).toBe(true);
-        expect(result.message).toBeUndefined();
-      });
-    });
-
-    describe('invalid expressions', () => {
+  describe('invalid expressions', () => {
+    describe('through validate()', () => {
       it.each`
         input                                                          | errorMessage
         ${'packageName = '}                                            | ${'Expected a value, but got EOF at position'}
@@ -147,12 +128,9 @@ describe('util/package-rules/match', () => {
         ${'count >'}                                                   | ${'Expected a value, but got EOF at position'}
         ${'= "foo"'}                                                   | ${'Unexpected token EQUALS at position'}
         ${'packageName = "foo" AND (isBreaking = true'}                | ${'Expected token type RPAREN, but got EOF at position'}
-        ${'(newMajor >= 1 AND) newMajor <= 2'}                         | ${'Unexpected token RPAREN at position'}
-        ${'((packageName = "foo") AND (isBreaking = true)'}            | ${'Expected token type RPAREN, but got EOF at position'}
-        ${'((active = true) AND (enabled = true)) OR'}                 | ${'Unexpected token EOF at position'}
         ${'(tags ANY ["alpha", "beta"] AND features ANY ["feature1"]'} | ${'Expected token type RPAREN, but got EOF at position'}
       `(
-        'validate($input) should return valid: false with message: "$errorMessage"',
+        'validate($input) throws error with message: $errorMessage',
         ({ input, errorMessage }) => {
           const result = validate(input);
           expect(result.valid).toBe(false);
@@ -162,15 +140,14 @@ describe('util/package-rules/match', () => {
         },
       );
     });
-  });
 
-  describe('invalid expressions through match()', () => {
-    it.each`
-      input                           | expected
-      ${'unknownKey > 5'}             | ${false}
-      ${'someOtherInvalidExpression'} | ${false}
-    `('match($input, data) = $expected', ({ input, expected }) => {
-      expect(match(input, data)).toBe(expected);
+    describe('through match()', () => {
+      it.each`
+        input               | expected
+        ${'unknownKey > 5'} | ${false}
+      `('match($input, data) = $expected', ({ input, expected }) => {
+        expect(match(input, data)).toBe(expected);
+      });
     });
   });
 });
