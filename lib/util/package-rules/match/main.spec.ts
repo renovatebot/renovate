@@ -1,6 +1,6 @@
-import { tokenize, parse, evaluate, validate, match } from './main';
+import { evaluate, match, parse, tokenize, validate } from './main';
 
-describe('util/package-rules/match', () => {
+describe('util/package-rules/match/main', () => {
   const data = {
     packageName: 'foo',
     isBreaking: true,
@@ -236,7 +236,7 @@ describe('util/package-rules/match', () => {
   });
 });
 
-describe('Tokenizer', () => {
+describe('util/package-rules/match/main', () => {
   it('should tokenize a simple expression with AND and OR', () => {
     const input = "age >= 30 AND (status = 'active' OR status = 'pending')";
     const tokens = tokenize(input);
@@ -324,7 +324,7 @@ describe('Tokenizer', () => {
   });
 });
 
-describe('Parser', () => {
+describe('util/package-rules/match/main', () => {
   it('should parse a simple AND expression', () => {
     const tokens = tokenize('age >= 30 AND isActive = true');
     const ast = parse(tokens);
@@ -375,7 +375,7 @@ describe('Parser', () => {
   });
 });
 
-describe('Evaluator', () => {
+describe('util/package-rules/match/main', () => {
   const data = {
     age: 35,
     status: 'active',
@@ -406,7 +406,7 @@ describe('Evaluator', () => {
   it('should throw error when using relational operators on non numbers', () => {
     expect(() =>
       evaluate(parse(tokenize('age > "abc"')), { age: 12 }),
-    ).toThrowError();
+    ).toThrow();
   });
 
   it('should evaluate logical AND expressions', () => {
@@ -465,7 +465,7 @@ describe('Evaluator', () => {
   });
 });
 
-describe('Evaluator - Null Comparisons', () => {
+describe('util/package-rules/match/main', () => {
   it('should return true when both dataValue and compNode.value are null for EQUALS', () => {
     const ast = parse(tokenize('field = null'));
     expect(evaluate(ast, { field: null })).toBe(true);
@@ -483,7 +483,7 @@ describe('Evaluator - Null Comparisons', () => {
   });
 });
 
-describe('Evaluator - Type Consistency in Equality Operators', () => {
+describe('util/package-rules/match/main', () => {
   it.each([
     { input: 'count = "0"', data: { count: 0 }, expected: false },
     { input: 'active = "false"', data: { active: false }, expected: false },
@@ -498,7 +498,7 @@ describe('Evaluator - Type Consistency in Equality Operators', () => {
   );
 });
 
-describe('Evaluator - Null Comparisons', () => {
+describe('util/package-rules/match/main', () => {
   it('should return true when both dataValue and compNode.value are null for EQUALS', () => {
     const ast = parse(tokenize('field = null'));
     expect(evaluate(ast, { field: null })).toBe(true);
@@ -516,7 +516,7 @@ describe('Evaluator - Null Comparisons', () => {
   });
 });
 
-describe('Evaluator - Type Consistency', () => {
+describe('util/package-rules/match/main', () => {
   it.each([
     { input: 'count = "0"', data: { count: 0 }, expected: false },
     { input: 'active = "false"', data: { active: false }, expected: false },
@@ -528,12 +528,13 @@ describe('Evaluator - Type Consistency', () => {
   });
 });
 
-describe('Evaluator - Short-Circuit Evaluation', () => {
+describe('util/package-rules/match/main', () => {
   it('should short-circuit AND evaluation when the first condition is false', () => {
     const ast = parse(tokenize('isActive = true AND shouldNotEvaluate = true'));
     const data = { isActive: false, shouldNotEvaluate: true };
 
     // Spy on the evaluate function to ensure 'shouldNotEvaluate' is not evaluated
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const evaluateSpy = jest.spyOn(require('./main'), 'evaluate');
 
     expect(evaluate(ast, data)).toBe(false);
@@ -546,6 +547,7 @@ describe('Evaluator - Short-Circuit Evaluation', () => {
     const data = { isActive: true, shouldNotEvaluate: false };
 
     // Spy on the evaluate function to ensure 'shouldNotEvaluate' is not evaluated
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const evaluateSpy = jest.spyOn(require('./main'), 'evaluate');
 
     expect(evaluate(ast, data)).toBe(true);
@@ -554,7 +556,7 @@ describe('Evaluator - Short-Circuit Evaluation', () => {
   });
 });
 
-describe('Evaluator - Complex Nested Expressions', () => {
+describe('util/package-rules/match/main', () => {
   it('should evaluate deeply nested expressions correctly', () => {
     const input =
       '((a = 1 OR (b = 2 AND c = 3)) AND (d = 4 OR (e = 5 AND f = 6)))';
@@ -576,7 +578,7 @@ describe('Evaluator - Complex Nested Expressions', () => {
   });
 });
 
-describe('Evaluator - Escaped Characters in Strings', () => {
+describe('util/package-rules/match/main', () => {
   it.each([
     {
       input: 'name = "John\nDoe"',
@@ -599,7 +601,7 @@ describe('Evaluator - Escaped Characters in Strings', () => {
   });
 });
 
-describe('Validate - Empty Input Strings', () => {
+describe('util/package-rules/match/main', () => {
   it('should invalidate empty input strings', () => {
     expect(validate('')).toEqual({
       valid: false,
@@ -608,7 +610,7 @@ describe('Validate - Empty Input Strings', () => {
   });
 });
 
-describe('Parser - Only Logical Operators', () => {
+describe('util/package-rules/match/main', () => {
   it.each([
     { input: 'AND', message: 'Unexpected token AND' },
     { input: 'OR', message: 'Unexpected token OR' },
@@ -623,7 +625,7 @@ describe('Parser - Only Logical Operators', () => {
   );
 });
 
-describe('Evaluator - Unhandled Cases', () => {
+describe('util/package-rules/match/main', () => {
   it('should return false when dataValue is undefined', () => {
     const ast = parse(tokenize('age = 30'));
     expect(evaluate(ast, {})).toBe(false);

@@ -1,6 +1,6 @@
-import * as memCache from '../../cache/memory';
 import { logger } from '../../../logger';
-import {
+import * as memCache from '../../cache/memory';
+import type {
   ASTNode,
   BinaryOpNode,
   ComparisonNode,
@@ -38,7 +38,7 @@ export function tokenize(input: string): Token[] {
     }
 
     // Single-character tokens
-    if (singleCharTokens.hasOwnProperty(c)) {
+    if (c in singleCharTokens) {
       tokens.push({ type: singleCharTokens[c], value: c, position: i });
       i++;
       continue;
@@ -324,7 +324,8 @@ function parseArray(): any[] {
     return values;
   }
 
-  while (true) {
+  let done = false;
+  while (!done) {
     const valueToken = consume();
     let value: any;
 
@@ -356,10 +357,9 @@ function parseArray(): any[] {
     const nextTokenAfterValue = peek();
     if (nextTokenAfterValue.type === 'COMMA') {
       consume('COMMA');
-      continue;
     } else if (nextTokenAfterValue.type === 'RBRACKET') {
       consume('RBRACKET');
-      break;
+      done = true;
     }
   }
 
