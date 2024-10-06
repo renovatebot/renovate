@@ -486,21 +486,6 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
       if (typeof dataValue !== 'number' || typeof compNode.value !== 'number') {
         return false;
       }
-    } else if (
-      compNode.operator === 'EQUALS' ||
-      compNode.operator === 'DOUBLE_EQUALS' ||
-      compNode.operator === 'NOT_EQUALS'
-    ) {
-      // For equality operators, handle arrays and single values
-      if (Array.isArray(compNode.value)) {
-        // Arrays are only allowed to contain strings (enforced during parsing)
-        if (!compNode.value.every((v) => typeof v === 'string')) {
-          return false;
-        }
-      }
-    } else {
-      // Unsupported operator
-      return false;
     }
 
     switch (compNode.operator) {
