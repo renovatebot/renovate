@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import * as allVersioning from '../../../modules/versioning';
-import type { VersioningApi } from '../../../modules/versioning/types';
 import * as memCache from '../../cache/memory';
 import { matchRegexOrGlob } from '../../string-match';
 import type {
