@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import * as memCache from '../../cache/memory';
+import { matchRegexOrGlob } from '../../string-match';
 import type {
   ASTNode,
   BinaryOpNode,
@@ -9,7 +10,6 @@ import type {
   TokenType,
   ValidationResult,
 } from './types';
-import { matchRegexOrGlob } from '../../string-match';
 
 // Tokenizer function
 export function tokenize(input: string): Token[] {

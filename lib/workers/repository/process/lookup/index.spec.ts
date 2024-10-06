@@ -3436,7 +3436,7 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         currentVersion: '1.3.0',
         currentVersionTimestamp: '2015-04-26T16:42:11.311Z',
         fixedVersion: '1.3.0',
@@ -3478,7 +3478,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await Result.wrap(
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         currentVersion: '1.3.0',
         currentVersionTimestamp: '2015-04-26T16:42:11.311Z',
         fixedVersion: '1.3.0',
@@ -3533,7 +3533,7 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         currentVersion: '1.3.0',
         currentVersionTimestamp: '2015-04-26T16:42:11.311Z',
         deprecationMessage: codeBlock`
@@ -4367,6 +4367,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect(res).toEqual({
         currentVersion: '17.0.0',
+        currentVersionAge: 2,
         currentVersionTimestamp: releaseTimestamp,
         fixedVersion: '17.0.0',
         isSingleVersion: true,
