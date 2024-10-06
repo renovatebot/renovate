@@ -24,7 +24,7 @@ export interface InternalChecksResult {
 
 export async function filterInternalChecks(
   config: Partial<LookupUpdateConfig & UpdateResult>,
-  versioning: VersioningApi,
+  versioningApi: VersioningApi,
   bucket: string,
   sortedReleases: Release[],
 ): Promise<InternalChecksResult> {
@@ -43,7 +43,7 @@ export async function filterInternalChecks(
       // calculate updateType and then apply it
       releaseConfig.updateType = getUpdateType(
         releaseConfig,
-        versioning,
+        versioningApi,
         // TODO #22198
         currentVersion!,
         candidateRelease.version,
