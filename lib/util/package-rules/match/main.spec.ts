@@ -46,7 +46,7 @@ describe('util/package-rules/match/main', () => {
       it.each`
         input                                | expected
         ${'packageName = "foo"'}             | ${true}
-        ${'packageName = "foo"'}             | ${true}
+        ${'packageName == "foo"'}            | ${true}
         ${'packageName ANY ["foo", "bar"]'}  | ${true}
         ${'packageName ANY ["no", "bar"]'}   | ${false}
         ${'packageName NONE ["foo", "bar"]'} | ${false}
@@ -145,6 +145,7 @@ describe('util/package-rules/match/main', () => {
       it.each`
         input                                        | expected
         ${'packageName = "*"'}                       | ${true}
+        ${'packageName == "*"'}                      | ${false}
         ${'packageName != "*"'}                      | ${false}
         ${'packageName = "**"'}                      | ${true}
         ${'packageName = "f*"'}                      | ${true}
@@ -274,7 +275,6 @@ describe('util/package-rules/match/main', () => {
       ${'packageName = "foo" AND (isBreaking = true)) OR depType = "dependencies" AND updateType = "patch"'}
       ${'packageName = "foo" AND depType = "dependencies" AND updateType patch"'}
       ${'packageName = "foo" AND depType = "dependencies" AND updateType = patch'}
-      ${'packageName == "foo"'}
       ${'newMajor >= "1"'}
       ${'labels NONE [null, "beta}'}
       ${'labels ANY ["alpha", "beta",]'}

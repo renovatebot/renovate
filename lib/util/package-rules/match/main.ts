@@ -48,7 +48,11 @@ export function tokenize(input: string): Token[] {
     }
 
     // Operators
-    if (c === '=' && input[i + 1] !== '=') {
+    if (c === '=' && input[i + 1] === '=') {
+      tokens.push({ type: 'DOUBLE_EQUALS', value: '==', position: i });
+      i += 2;
+      continue;
+    } else if (c === '=' && input[i + 1] !== '=') {
       tokens.push({ type: 'EQUALS', value: '=', position: i });
       i++;
       continue;
@@ -256,6 +260,7 @@ function parseComparison(): ASTNode {
 
   if (
     operatorToken.type !== 'EQUALS' &&
+    operatorToken.type !== 'DOUBLE_EQUALS' &&
     operatorToken.type !== 'NOT_EQUALS' &&
     !isRelationalOperator &&
     !isArrayOperator
@@ -469,6 +474,8 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
     }
 
     switch (compNode.operator) {
+      case 'DOUBLE_EQUALS':
+        return dataValue === compNode.value;
       case 'EQUALS':
         return evaluateEquals(compNode.key, compNode.value, data);
       case 'NOT_EQUALS':

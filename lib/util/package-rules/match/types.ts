@@ -4,6 +4,7 @@ export type TokenType =
   | 'AND'
   | 'OR'
   | 'EQUALS'
+  | 'DOUBLE_EQUALS'
   | 'NOT_EQUALS'
   | 'GREATER_THAN'
   | 'GREATER_THAN_OR_EQUAL'
@@ -48,6 +49,7 @@ export interface BinaryOpNode extends ASTNode {
 export interface ComparisonNode extends ASTNode {
   type: 'Comparison';
   operator:
+    | 'DOUBLE_EQUALS'
     | 'EQUALS'
     | 'NOT_EQUALS'
     | 'GREATER_THAN'
