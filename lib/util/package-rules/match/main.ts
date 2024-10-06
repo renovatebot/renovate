@@ -344,11 +344,11 @@ function parseArray(): string[] {
 
 // Evaluation
 
-function areValuesEqual(a: any, b: any): boolean {
-  if (is.string(a) && is.string(b)) {
-    return matchRegexOrGlob(a, b);
+function areValuesEqual(dataValue: any, compValue: any): boolean {
+  if (is.string(dataValue) && is.string(compValue)) {
+    return matchRegexOrGlob(dataValue, compValue);
   }
-  return a === b;
+  return dataValue === compValue;
 }
 
 const versionFields = ['currentVersion', 'lockedVersion', 'newVersion'];
