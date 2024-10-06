@@ -24,66 +24,48 @@ describe('util/package-rules/match/main', () => {
       versioning: versioning.get('npm'),
     };
 
-    describe('advanced logic expressions', () => {
-      it.each`
-        input                                                                                                           | expected
-        ${'(packageName = "foo" AND isBreaking = true) OR (depType = "devDependencies" AND updateType = "minor")'}      | ${true}
-        ${'(packageName = "bar" OR packageName = "baz") AND (isBreaking = true OR updateType = "major")'}               | ${false}
-        ${'((newMajor >= 1 AND newMajor <= 2) OR score > 90) AND active = false'}                                       | ${true}
-        ${'(labels ANY ["beta", "gamma"] AND features ANY ["feature1"]) OR (updateType = "minor" AND enabled = false)'} | ${true}
-        ${'notExistingKey = "value" OR (packageName = "foo" AND status = "inactive")'}                                  | ${false}
-        ${'(currentVersionAge != null AND currentVersionAge > 100) OR (currentVersionAge = null AND count = 0)'}        | ${true}
-        ${'((enabled = true AND status = "active") OR (enabled = false AND status = "inactive")) AND active = false'}   | ${true}
-        ${'(category = "utilities" OR category = "tools") AND (updateType = "minor" OR updateType = "patch")'}          | ${true}
-        ${'(features ANY ["feature3", "feature4"] AND labels NONE ["alpha"]) OR score >= 85'}                           | ${true}
-        ${'((packageName = "foo" AND isBreaking = true) OR (updateType = "minor" AND newMajor > 2)) AND active = true'} | ${false}
-      `('match($input, data) = $expected', ({ input, expected }) => {
-        expect(match(input, data)).toBe(expected);
-      });
-    });
-
     describe('simple matches', () => {
       it.each`
         input                                | expected
+        ${'active = false'}                  | ${true}
+        ${'active = true'}                   | ${false}
+        ${'active NONE [false]'}             | ${false}
+        ${'active NONE [true]'}              | ${true}
+        ${"packageName = 'foo'"}             | ${true}
+        ${'count = 0'}                       | ${true}
+        ${'count > -1'}                      | ${true}
+        ${'count > 0'}                       | ${false}
+        ${'currentVersion = "1.0.0"'}        | ${true}
+        ${'currentVersion = "1.0.1"'}        | ${false}
+        ${'currentVersionAge = null'}        | ${true}
+        ${'depType = "dependencies"'}        | ${true}
+        ${'depType = "devDependencies"'}     | ${false}
+        ${'isBreaking = false'}              | ${false}
+        ${'isBreaking = true'}               | ${true}
+        ${'isBreaking = "true"'}             | ${false}
+        ${'labels ANY ["beta", "gamma"]'}    | ${true}
+        ${'labels NONE ["delta"]'}           | ${true}
+        ${'newMajor = 1'}                    | ${true}
+        ${'newMajor = 2'}                    | ${false}
+        ${'newMajor < 2'}                    | ${true}
+        ${'newMajor > 1'}                    | ${false}
+        ${'newMajor >= 1'}                   | ${true}
+        ${'newMajor ANY [1,2,3]'}            | ${true}
+        ${'newMajor NONE [1,2,3]'}           | ${false}
+        ${'newMajor NONE [2,3,4]'}           | ${true}
+        ${'packageName = "bar"'}             | ${false}
         ${'packageName = "foo"'}             | ${true}
         ${'packageName == "foo"'}            | ${true}
         ${'packageName ANY ["foo", "bar"]'}  | ${true}
         ${'packageName ANY ["no", "bar"]'}   | ${false}
         ${'packageName NONE ["foo", "bar"]'} | ${false}
         ${'packageName NONE ["no", "bar"]'}  | ${true}
-        ${"packageName = 'foo'"}             | ${true}
-        ${'packageName = "bar"'}             | ${false}
-        ${'isBreaking = true'}               | ${true}
-        ${'isBreaking = "true"'}             | ${false}
-        ${'isBreaking = false'}              | ${false}
-        ${'depType = "dependencies"'}        | ${true}
-        ${'depType = "devDependencies"'}     | ${false}
-        ${'updateType = "patch"'}            | ${true}
-        ${'updateType = "minor"'}            | ${false}
-        ${'currentVersion = "1.0.0"'}        | ${true}
-        ${'currentVersion = "1.0.1"'}        | ${false}
-        ${'newMajor = 1'}                    | ${true}
-        ${'newMajor = 2'}                    | ${false}
-        ${'newMajor < 2'}                    | ${true}
-        ${'newMajor > 1'}                    | ${false}
-        ${'newMajor >= 1'}                   | ${true}
-        ${'score > 80'}                      | ${true}
         ${'score >= 85'}                     | ${true}
         ${'score < 90'}                      | ${true}
-        ${'active = false'}                  | ${true}
-        ${'active = true'}                   | ${false}
-        ${'count = 0'}                       | ${true}
-        ${'count > 0'}                       | ${false}
-        ${'count > -1'}                      | ${true}
-        ${'currentVersionAge = null'}        | ${true}
+        ${'score > 80'}                      | ${true}
         ${'unknownKey = "value"'}            | ${false}
-        ${'newMajor ANY [1,2,3]'}            | ${true}
-        ${'newMajor NONE [2,3,4]'}           | ${true}
-        ${'newMajor NONE [1,2,3]'}           | ${false}
-        ${'labels ANY ["beta", "gamma"]'}    | ${true}
-        ${'labels NONE ["delta"]'}           | ${true}
-        ${'active NONE [true]'}              | ${true}
-        ${'active NONE [false]'}             | ${false}
+        ${'updateType = "minor"'}            | ${false}
+        ${'updateType = "patch"'}            | ${true}
       `('match($input, data) = $expected', ({ input, expected }) => {
         expect(match(input, data)).toBe(expected);
       });
@@ -164,7 +146,6 @@ describe('util/package-rules/match/main', () => {
         expect(match(input, data)).toBe(expected);
       });
     });
-
     describe('version matching', () => {
       it('should match versions correctly', () => {
         expect(match('currentVersion = "1.0.0"', data)).toBe(true);
@@ -206,45 +187,69 @@ describe('util/package-rules/match/main', () => {
       });
     });
 
-    it('should evaluate deeply nested expressions correctly', () => {
-      const input =
-        '((a = 1 OR (b = 2 AND c = 3)) AND (d = 4 OR (e = 5 AND f = 6)))';
-      const data = { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6 };
-      expect(match(input, data)).toBe(true);
+    describe('advanced logic expressions', () => {
+      it.each`
+        input                                                                                                                                  | expected
+        ${'(packageName = "foo" AND isBreaking = true) OR (depType = "devDependencies" AND updateType = "minor")'}                             | ${true}
+        ${'(packageName = "bar" OR packageName = "baz") AND (isBreaking = true OR updateType = "major")'}                                      | ${false}
+        ${'((newMajor >= 1 AND newMajor <= 2) OR score > 90) AND active = false'}                                                              | ${true}
+        ${'(labels ANY ["beta", "gamma"] AND features ANY ["feature1"]) OR (updateType = "minor" AND enabled = false)'}                        | ${true}
+        ${'notExistingKey = "value" OR (packageName = "foo" AND status = "inactive")'}                                                         | ${false}
+        ${'(currentVersionAge != null AND currentVersionAge > 100 AND currentVersion = "^1.0.0") OR (currentVersionAge = null AND count = 0)'} | ${true}
+        ${'((enabled = true AND status = "active") OR (enabled = false AND status = "inactive")) AND active = false'}                          | ${true}
+        ${'(category = "utilities" OR category = "tools") AND (updateType = "minor" OR updateType = "patch")'}                                 | ${true}
+        ${'(features ANY ["feature3", "feature4"] AND labels NONE ["alpha"]) OR score >= 85'}                                                  | ${true}
+        ${'((packageName = "foo" AND isBreaking = true) OR (updateType = "minor" AND newMajor > 2)) AND active = true'}                        | ${false}
+      `('match($input, data) = $expected', ({ input, expected }) => {
+        expect(match(input, data)).toBe(expected);
+      });
+
+      it('should evaluate deeply nested expressions correctly', () => {
+        const input =
+          '((a = 1 OR (b = 2 AND c = 3)) AND (d = 4 OR (e = 5 AND f = 6)))';
+        const data = { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6 };
+        expect(match(input, data)).toBe(true);
+      });
+
+      it('should handle multiple levels of nesting with mixed operators', () => {
+        const input = 'a = 1 OR (b = 2 AND (c = 3 OR (d = 4 AND e = 5)))';
+        const data = { a: 0, b: 2, c: 0, d: 4, e: 5 };
+        expect(match(input, data)).toBe(true);
+      });
+
+      it('should evaluate complex expressions with various operators correctly', () => {
+        const input =
+          'age >= 30 AND (status = "active" OR (score < 50 AND level != null))';
+        const data = { age: 35, status: 'active', score: 45, level: 2 };
+        expect(match(input, data)).toBe(true);
+      });
     });
 
-    it('should handle multiple levels of nesting with mixed operators', () => {
-      const input = 'a = 1 OR (b = 2 AND (c = 3 OR (d = 4 AND e = 5)))';
-      const data = { a: 0, b: 2, c: 0, d: 4, e: 5 };
-      expect(match(input, data)).toBe(true);
-    });
-
-    it('should evaluate complex expressions with various operators correctly', () => {
-      const input =
-        'age >= 30 AND (status = "active" OR (score < 50 AND level != null))';
-      const data = { age: 35, status: 'active', score: 45, level: 2 };
-      expect(match(input, data)).toBe(true);
-    });
-
-    it.each([
-      {
-        input: 'name = "John\nDoe"',
-        data: { name: 'John\nDoe' },
-        expected: true,
-      },
-      {
-        input: "name = 'Jane\tDoe'",
-        data: { name: 'Jane\tDoe' },
-        expected: true,
-      },
-      { input: 'name = "John\\\\"', data: { name: 'John\\' }, expected: true },
-      {
-        input: "name = 'John\\aDoe'",
-        data: { name: 'JohnaDoe' },
-        expected: true,
-      },
-    ])('match($input, data) = $expected', ({ input, data, expected }) => {
-      expect(match(input, data)).toBe(expected);
+    describe('string escape sequences', () => {
+      it.each([
+        {
+          input: 'name = "John\nDoe"',
+          data: { name: 'John\nDoe' },
+          expected: true,
+        },
+        {
+          input: "name = 'Jane\tDoe'",
+          data: { name: 'Jane\tDoe' },
+          expected: true,
+        },
+        {
+          input: 'name = "John\\\\"',
+          data: { name: 'John\\' },
+          expected: true,
+        },
+        {
+          input: "name = 'John\\aDoe'",
+          data: { name: 'JohnaDoe' },
+          expected: true,
+        },
+      ])('match($input, data) = $expected', ({ input, data, expected }) => {
+        expect(match(input, data)).toBe(expected);
+      });
     });
   });
 
