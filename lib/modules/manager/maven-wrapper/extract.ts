@@ -8,29 +8,36 @@ import type { MavenVersionExtract, Version } from './types';
 
 // https://regex101.com/r/IcOs7P/1
 const DISTRIBUTION_URL_REGEX = regEx(
-  '^(?:distributionUrl\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)-(?<type>bin|all)\\.zip)\\s*$',
+  '^(?:distributionUrl\\s*=\\s*)(?<replaceString>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)-(?<type>bin|all)\\.zip)\\s*$',
 );
 
 const WRAPPER_URL_REGEX = regEx(
-  '^(?:wrapperUrl\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)(?:.jar))',
+  '^(?:wrapperUrl\\s*=\\s*)(?<replaceString>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)(?:.jar))',
+);
+
+// https://regex101.com/r/7x1Otq/3
+const WRAPPER_VERSION_REGEX = regEx(
+  '^(?:wrapperVersion\\s*=\\s*)(?<replaceString>(?<version>\\d+\\.\\d+(?:\\.\\d+)?))',
 );
 
 function extractVersions(fileContent: string): MavenVersionExtract {
   const lines = coerceArray(fileContent?.split(newlineRegex));
   const maven = extractLineInfo(lines, DISTRIBUTION_URL_REGEX) ?? undefined;
-  const wrapper = extractLineInfo(lines, WRAPPER_URL_REGEX) ?? undefined;
+  const wrapper = extractLineInfo(lines, WRAPPER_URL_REGEX, WRAPPER_VERSION_REGEX) ?? undefined;
   return { maven, wrapper };
 }
 
-function extractLineInfo(lines: string[], regex: RegExp): Version | null {
+function extractLineInfo(lines: string[], ...regexs: RegExp[]): Version | null {
   for (const line of lines) {
-    if (line.match(regex)) {
-      const match = regex.exec(line);
-      if (match?.groups) {
-        return {
-          url: match.groups.url,
-          version: match.groups.version,
-        };
+    for (const regex of regexs) {
+      if (line.match(regex)) {
+        const match = regex.exec(line);
+        if (match?.groups) {
+          return {
+            replaceString: match.groups.replaceString,
+            version: match.groups.version,
+          };
+        }
       }
     }
   }
@@ -49,7 +56,7 @@ export function extractPackageFile(
       depName: 'maven',
       packageName: 'org.apache.maven:apache-maven',
       currentValue: extractResult.maven?.version,
-      replaceString: extractResult.maven?.url,
+      replaceString: extractResult.maven?.replaceString,
       datasource: MavenDatasource.id,
       versioning,
     };
@@ -61,7 +68,7 @@ export function extractPackageFile(
       depName: 'maven-wrapper',
       packageName: 'org.apache.maven.wrapper:maven-wrapper',
       currentValue: extractResult.wrapper?.version,
-      replaceString: extractResult.wrapper?.url,
+      replaceString: extractResult.wrapper?.replaceString,
       datasource: MavenDatasource.id,
       versioning,
     };
