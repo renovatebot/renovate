@@ -368,15 +368,16 @@ function parseArray(): any[] {
   return values;
 }
 
-// Evaluation function
-export function evaluate(node: ASTNode, data: unknown): boolean {
-  function areValuesEqual(a: any, b: any): boolean {
-    if (is.string(a) && is.string(b)) {
-      return matchRegexOrGlob(a, b);
-    }
-    return a === b;
-  }
+// Evaluation
 
+function areValuesEqual(a: any, b: any): boolean {
+  if (is.string(a) && is.string(b)) {
+    return matchRegexOrGlob(a, b);
+  }
+  return a === b;
+}
+
+export function evaluate(node: ASTNode, data: unknown): boolean {
   if (node.type === 'BinaryOp') {
     const opNode = node as BinaryOpNode;
     if (opNode.operator === 'AND') {
