@@ -80,7 +80,7 @@ export async function mergeInheritedConfig(
   }
   const inheritedConfig = parseResult.parsedContents as RenovateConfig;
   logger.debug({ config: inheritedConfig }, `Inherited config`);
-  let res = await validateConfig('inherit', inheritedConfig);
+  const res = await validateConfig('inherit', inheritedConfig);
   if (res.errors.length) {
     logger.warn(
       { errors: res.errors },
@@ -102,33 +102,43 @@ export async function mergeInheritedConfig(
     );
   }
 
-  const decryptedConfig = await decryptConfig(
-    filteredConfig,
+  if (is.nullOrUndefined(filteredConfig.extends)) {
+    return mergeChildConfig(config, filteredConfig);
+  }
+
+  let returnConfig = filteredConfig;
+
+  // Decrypt before resloving incase it contains npm authentication for any preset
+  const decryptedConfig = await decryptConfig(returnConfig, config.repository);
+
+  // Decrypt after resolving in case the preset contains npm authentication instead
+  logger.debug('Resolving presets found in inherited config');
+  const resolvedConfig = await decryptConfig(
+    await resolveConfigPresets(decryptedConfig, config, config.ignorePresets),
     config.repository,
   );
-  let returnConfig = decryptedConfig;
-  if (is.nonEmptyArray(returnConfig.extends)) {
-    // Decrypt after resolving in case the preset contains npm authentication instead
-    logger.debug('Resolving presets found in inherited config');
-    returnConfig = await decryptConfig(
-      await resolveConfigPresets(returnConfig, config, config.ignorePresets),
-      config.repository,
+  logger.trace({ config: resolvedConfig }, 'Resolved inherited config');
+  const validationRes = await validateConfig('inherit', resolvedConfig);
+  if (validationRes.errors.length) {
+    logger.warn(
+      { errors: validationRes.errors },
+      'Found errors in presets inside the inherited configuration.',
     );
-    logger.trace({ config: returnConfig }, 'Resolved inherited config');
-    res = await validateConfig('inherit', returnConfig);
-    if (res.errors.length) {
-      logger.warn(
-        { errors: res.errors },
-        'Found errors in presets inside the inherited configuration.',
-      );
-      throw new Error(CONFIG_VALIDATION);
-    }
-    if (res.warnings.length) {
-      logger.warn(
-        { warnings: res.warnings },
-        'Found warnings in presets inside the inherited configuration.',
-      );
-    }
+    throw new Error(CONFIG_VALIDATION);
+  }
+  if (validationRes.warnings.length) {
+    logger.warn(
+      { warnings: validationRes.warnings },
+      'Found warnings in presets inside the inherited configuration.',
+    );
+  }
+
+  returnConfig = removeGlobalConfig(resolvedConfig, true);
+  if (!dequal(resolvedConfig, returnConfig)) {
+    logger.debug(
+      { resolvedConfig, returnConfig },
+      'Removed global config from inherited config presets.',
+    );
   }
 
   return mergeChildConfig(config, returnConfig);
