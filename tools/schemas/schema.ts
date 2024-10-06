@@ -35,7 +35,7 @@ const RuleSetSchema = z.object({
         ),
       {
         message:
-          'At least one package rule must have either replacementName or replacementNameTemplate',
+          'At least one package rule must use either the replacementName config option, or the replacementNameTemplate config option',
       },
     ),
 });
