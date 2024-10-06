@@ -14,7 +14,7 @@ describe('util/package-rules/match/main', () => {
       active: false,
       labels: ['alpha', 'beta'],
       count: 0,
-      price: null,
+      currentVersionAge: null,
       category: 'utilities',
       enabled: true,
       status: 'active',
@@ -30,7 +30,7 @@ describe('util/package-rules/match/main', () => {
         ${'((newMajor >= 1 AND newMajor <= 2) OR score > 90) AND active = false'}                                       | ${true}
         ${'(labels ANY ["beta", "gamma"] AND features ANY ["feature1"]) OR (updateType = "minor" AND enabled = false)'} | ${true}
         ${'notExistingKey = "value" OR (packageName = "foo" AND status = "inactive")'}                                  | ${false}
-        ${'(price != null AND price > 100) OR (price = null AND count = 0)'}                                            | ${true}
+        ${'(currentVersionAge != null AND currentVersionAge > 100) OR (currentVersionAge = null AND count = 0)'}        | ${true}
         ${'((enabled = true AND status = "active") OR (enabled = false AND status = "inactive")) AND active = false'}   | ${true}
         ${'(category = "utilities" OR category = "tools") AND (updateType = "minor" OR updateType = "patch")'}          | ${true}
         ${'(features ANY ["feature3", "feature4"] AND labels NONE ["alpha"]) OR score >= 85'}                           | ${true}
@@ -73,7 +73,7 @@ describe('util/package-rules/match/main', () => {
         ${'count = 0'}                       | ${true}
         ${'count > 0'}                       | ${false}
         ${'count > -1'}                      | ${true}
-        ${'price = null'}                    | ${true}
+        ${'currentVersionAge = null'}        | ${true}
         ${'unknownKey = "value"'}            | ${false}
         ${'newMajor ANY [1,2,3]'}            | ${true}
         ${'newMajor NONE [2,3,4]'}           | ${true}
@@ -95,10 +95,10 @@ describe('util/package-rules/match/main', () => {
         ${'count < 1'}                     | ${true}
         ${'count <= 0'}                    | ${true}
         ${'count > -1'}                    | ${true}
-        ${'price = null'}                  | ${true}
+        ${'currentVersionAge = null'}      | ${true}
         ${'true = true'}                   | ${false}
         ${'null = null'}                   | ${false}
-        ${'price != null'}                 | ${false}
+        ${'currentVersionAge != null'}     | ${false}
         ${'newMajor > 0 AND newMajor < 2'} | ${true}
         ${'active != true'}                | ${true}
         ${'packageName ANY []'}            | ${false}
@@ -121,8 +121,16 @@ describe('util/package-rules/match/main', () => {
         { input: 'count = "0"', data: { count: 0 }, expected: false },
         { input: 'active = "false"', data: { active: false }, expected: false },
         { input: 'score = 85', data: { score: '85' }, expected: false },
-        { input: 'price = 100.0', data: { price: 100 }, expected: true },
-        { input: 'price = 100.0', data: { price: '100.0' }, expected: false },
+        {
+          input: 'currentVersionAge = 100.0',
+          data: { currentVersionAge: 100 },
+          expected: true,
+        },
+        {
+          input: 'currentVersionAge = 100.0',
+          data: { currentVersionAge: '100.0' },
+          expected: false,
+        },
       ])(
         'should evaluate "$input" correctly with data $data',
         ({ input, data, expected }) => {
@@ -152,16 +160,6 @@ describe('util/package-rules/match/main', () => {
       `('match($input, data) = $expected', ({ input, expected }) => {
         expect(match(input, data)).toBe(expected);
       });
-    });
-
-    it.each([
-      { input: 'count = "0"', data: { count: 0 }, expected: false },
-      { input: 'active = "false"', data: { active: false }, expected: false },
-      { input: 'score = 85', data: { score: '85' }, expected: false },
-      { input: 'price = 100.0', data: { price: 100 }, expected: true },
-      { input: 'price = 100.0', data: { price: '100.0' }, expected: false },
-    ])('match($input, data) = $expected', ({ input, data, expected }) => {
-      expect(match(input, data)).toBe(expected);
     });
 
     it('should evaluate deeply nested expressions correctly', () => {
@@ -216,7 +214,7 @@ describe('util/package-rules/match/main', () => {
       input
       ${'depType = dependencies'}
       ${'isBreaking = maybe'}
-      ${'price = null, count = 0'}
+      ${'currentVersionAge = null, count = 0'}
       ${'packageName = "foo" AND (isBreaking = true)))'}
       ${'packageName = foo'}
       ${'packageName = "foo" AND isBreaking = tru'}
