@@ -136,7 +136,7 @@ export async function mergeInheritedConfig(
   returnConfig = removeGlobalConfig(resolvedConfig, true);
   if (!dequal(resolvedConfig, returnConfig)) {
     logger.debug(
-      { resolvedConfig, returnConfig },
+      { inheritedConfig: resolvedConfig, filteredConfig: returnConfig },
       'Removed global config from inherited config presets.',
     );
   }

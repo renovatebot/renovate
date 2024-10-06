@@ -1,4 +1,5 @@
-import { platform } from '../../../../test/util';
+import { mocked, platform } from '../../../../test/util';
+import * as presets_ from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
 import * as validation from '../../../config/validation';
 import {
@@ -8,6 +9,10 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { mergeInheritedConfig } from './inherited';
+
+jest.mock('../../../config/presets');
+
+const presets = mocked(presets_);
 
 describe('workers/repository/init/inherited', () => {
   let config: RenovateConfig;
@@ -90,6 +95,11 @@ describe('workers/repository/init/inherited', () => {
     platform.getRawFile.mockResolvedValue(
       '{"onboarding":false,"labels":["test"],"extends":[":automergeAll"]}',
     );
+    presets.resolveConfigPresets.mockResolvedValue({
+      onboarding: false,
+      labels: ['test'],
+      automerge: true,
+    });
     const res = await mergeInheritedConfig(config);
     expect(res.labels).toEqual(['test']);
     expect(res.onboarding).toBeFalse();
@@ -118,6 +128,11 @@ describe('workers/repository/init/inherited', () => {
         ],
         errors: [],
       });
+    presets.resolveConfigPresets.mockResolvedValue({
+      onboarding: false,
+      labels: ['test'],
+      automerge: true,
+    });
     const res = await mergeInheritedConfig(config);
     expect(res.binarySource).toBeUndefined();
     expect(logger.warn).toHaveBeenCalledWith(
@@ -152,6 +167,10 @@ describe('workers/repository/init/inherited', () => {
           },
         ],
       });
+    presets.resolveConfigPresets.mockResolvedValue({
+      labels: ['test'],
+      automerge: true,
+    });
     await expect(mergeInheritedConfig(config)).rejects.toThrow(
       CONFIG_VALIDATION,
     );
@@ -165,6 +184,38 @@ describe('workers/repository/init/inherited', () => {
         ],
       },
       'Found errors in presets inside the inherited configuration.',
+    );
+  });
+
+  it('should remove global config from presets found in inherited config', async () => {
+    platform.getRawFile.mockResolvedValue(
+      '{"labels":["test"],"extends":[":automergeAll"]}',
+    );
+    jest.spyOn(validation, 'validateConfig').mockResolvedValue({
+      warnings: [],
+      errors: [],
+    });
+    presets.resolveConfigPresets.mockResolvedValue({
+      labels: ['test'],
+      automerge: true,
+      binarySource: 'docker', // global config option: should not be here
+    });
+    const res = await mergeInheritedConfig(config);
+    expect(res.labels).toEqual(['test']);
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      {
+        inheritedConfig: {
+          labels: ['test'],
+          automerge: true,
+          binarySource: 'docker',
+        },
+        filteredConfig: {
+          labels: ['test'],
+          automerge: true,
+        },
+      },
+      'Removed global config from inherited config presets.',
     );
   });
 });
