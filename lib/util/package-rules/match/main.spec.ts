@@ -91,6 +91,7 @@ describe('util/package-rules/match/main', () => {
         ${'labels.foo = "bar"'}            | ${false}
         ${'packageName NONE []'}           | ${false}
         ${'packageName >= 2'}              | ${false}
+        ${'packageName > "a"'}             | ${false}
         ${'score ANY [85,90,95]'}          | ${true}
         ${'score NONE [70,75,80]'}         | ${true}
         ${'score ANY [70,75,80]'}          | ${false}
@@ -156,6 +157,9 @@ describe('util/package-rules/match/main', () => {
         expect(match('currentVersion = 1', data)).toBe(false);
         expect(match('currentVersion = 1.0.0', data)).toBe(false);
         expect(match('currentVersion = "abc"', data)).toBe(false);
+        expect(match('currentVersion = ">1.0.0"', data)).toBe(false);
+        expect(match('currentVersion = ">=1.0.0"', data)).toBe(true);
+        expect(match('currentVersion = "<1.0.0"', data)).toBe(false);
         expect(match('currentVersion ANY ["1.0.0", "1.0.1"]', data)).toBe(true);
         expect(match('currentVersion ANY ["^1.0.0", "^2.0.0"]', data)).toBe(
           true,
@@ -200,6 +204,10 @@ describe('util/package-rules/match/main', () => {
         ${'(category = "utilities" OR category = "tools") AND (updateType = "minor" OR updateType = "patch")'}                                 | ${true}
         ${'(features ANY ["feature3", "feature4"] AND labels NONE ["alpha"]) OR score >= 85'}                                                  | ${true}
         ${'((packageName = "foo" AND isBreaking = true) OR (updateType = "minor" AND newMajor > 2)) AND active = true'}                        | ${false}
+        ${'(packageName = "/^fo.*/" AND isBreaking = true) OR (depType = "devDependencies" AND updateType = "minor")'}                         | ${true}
+        ${'(packageName = "ba*" OR packageName = "baz") AND (isBreaking = true OR updateType = "major")'}                                      | ${false}
+        ${'(labels ANY ["beta", "gamma"] AND features ANY ["feature*"]) OR (updateType = "minor" AND enabled = false)'}                        | ${true}
+        ${'(category = "util*" OR category = "tools") AND (updateType = "minor" OR updateType = "patch")'}                                     | ${true}
       `('match($input, data) = $expected', ({ input, expected }) => {
         expect(match(input, data)).toBe(expected);
       });
