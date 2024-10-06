@@ -1,5 +1,3 @@
-// main.ts
-
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import * as allVersioning from '../../../modules/versioning';
@@ -110,10 +108,6 @@ export function tokenize(input: string): Token[] {
         tokens.push({ type: 'AND', value: 'AND', position: start });
       } else if (upperValue === 'OR') {
         tokens.push({ type: 'OR', value: 'OR', position: start });
-      } else if (upperValue === 'ANY') {
-        tokens.push({ type: 'ANY', value: 'ANY', position: start });
-      } else if (upperValue === 'NONE') {
-        tokens.push({ type: 'NONE', value: 'NONE', position: start });
       } else if (upperValue === 'TRUE' || upperValue === 'FALSE') {
         tokens.push({
           type: 'BOOLEAN_LITERAL',
@@ -257,16 +251,12 @@ function parseComparison(): ASTNode {
     operatorToken.type === 'LESS_THAN' ||
     operatorToken.type === 'LESS_THAN_OR_EQUAL';
 
-  const isArrayOperator =
-    operatorToken.type === 'ANY' || operatorToken.type === 'NONE';
+  const isEqualityOperator =
+    operatorToken.type === 'EQUALS' ||
+    operatorToken.type === 'DOUBLE_EQUALS' ||
+    operatorToken.type === 'NOT_EQUALS';
 
-  if (
-    operatorToken.type !== 'EQUALS' &&
-    operatorToken.type !== 'DOUBLE_EQUALS' &&
-    operatorToken.type !== 'NOT_EQUALS' &&
-    !isRelationalOperator &&
-    !isArrayOperator
-  ) {
+  if (!isEqualityOperator && !isRelationalOperator) {
     throw new Error(
       `Expected a comparison operator, but got ${operatorToken.type} at position ${operatorToken.position}`,
     );
@@ -274,13 +264,12 @@ function parseComparison(): ASTNode {
 
   let value: any;
 
-  if (isArrayOperator) {
+  if (peek().type === 'LBRACKET') {
     // Parse array of values
     value = parseArray();
   } else {
     const valueToken = consume();
     if (
-      valueToken.type !== 'IDENTIFIER' &&
       valueToken.type !== 'STRING_LITERAL' &&
       valueToken.type !== 'BOOLEAN_LITERAL' &&
       valueToken.type !== 'NUMBER_LITERAL' &&
@@ -299,11 +288,6 @@ function parseComparison(): ASTNode {
       value = parseFloat(valueToken.value);
     } else if (valueToken.type === 'NULL_LITERAL') {
       value = null;
-    } else if (valueToken.type === 'IDENTIFIER') {
-      // Invalid identifier as value, expecting string literals
-      throw new Error(
-        `Invalid identifier '${valueToken.value}' at position ${valueToken.position}`,
-      );
     }
 
     // For relational operators, value must be a number
@@ -326,14 +310,6 @@ function parseComparison(): ASTNode {
 function parseArray(): string[] {
   const values: string[] = [];
   consume('LBRACKET'); // Expect '['
-
-  const nextToken = peek();
-  if (nextToken.type === 'RBRACKET') {
-    // Empty array - throw error
-    throw new Error(
-      `Empty arrays are not allowed at position ${nextToken.position}`,
-    );
-  }
 
   let done = false;
   while (!done) {
@@ -400,17 +376,78 @@ function evaluateVersionMatch(compNode: ComparisonNode, data: any): boolean {
 
 function evaluateEquals(compKey: string, compValue: any, data: any): boolean {
   const dataValue = data[compKey];
-  if (compValue === dataValue) {
-    // Exact match
-    return true;
+  if (Array.isArray(compValue)) {
+    // Array on the right-hand side: behaves like the old "ANY" operator
+    if (Array.isArray(dataValue)) {
+      // Check if any element in dataValue matches any value in compValue
+      return dataValue.some((val) =>
+        (compValue as string[]).some((compVal) =>
+          evaluateEquals(compKey, compVal, { [compKey]: val }),
+        ),
+      );
+    } else {
+      // Check if dataValue matches any value in compValue
+      return (compValue as string[]).some((compVal) =>
+        evaluateEquals(compKey, compVal, data),
+      );
+    }
+  } else {
+    if (compValue === dataValue) {
+      // Exact match
+      return true;
+    }
+    if (versionFields.includes(compKey)) {
+      return evaluateVersionMatch(
+        {
+          key: compKey,
+          value: compValue,
+          operator: 'EQUALS',
+        } as ComparisonNode,
+        data,
+      );
+    }
+    return areValuesEqual(dataValue, compValue);
   }
-  if (versionFields.includes(compKey)) {
-    return evaluateVersionMatch(
-      { key: compKey, value: compValue, operator: 'EQUALS' } as ComparisonNode,
-      data,
-    );
+}
+
+function evaluateNotEquals(
+  compKey: string,
+  compValue: any,
+  data: any,
+): boolean {
+  const dataValue = data[compKey];
+  if (Array.isArray(compValue)) {
+    // Array on the right-hand side: behaves like the old "NONE" operator
+    if (Array.isArray(dataValue)) {
+      // Check if none of the elements in dataValue match any value in compValue
+      return dataValue.every((val) =>
+        (compValue as string[]).every(
+          (compVal) => !evaluateEquals(compKey, compVal, { [compKey]: val }),
+        ),
+      );
+    } else {
+      // Check if dataValue does not match any value in compValue
+      return (compValue as string[]).every(
+        (compVal) => !evaluateEquals(compKey, compVal, data),
+      );
+    }
+  } else {
+    if (compValue === dataValue) {
+      // Exact match
+      return false;
+    }
+    if (versionFields.includes(compKey)) {
+      return !evaluateVersionMatch(
+        {
+          key: compKey,
+          value: compValue,
+          operator: 'NOT_EQUALS',
+        } as ComparisonNode,
+        data,
+      );
+    }
+    return !areValuesEqual(dataValue, compValue);
   }
-  return areValuesEqual(dataValue, compValue);
 }
 
 export function evaluate(node: ASTNode, data: unknown): boolean {
@@ -449,22 +486,21 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
       if (typeof dataValue !== 'number' || typeof compNode.value !== 'number') {
         return false;
       }
-    } else if (compNode.operator === 'ANY' || compNode.operator === 'NONE') {
-      // If the array is empty, return false (though empty arrays are invalid in parsing)
-      // This check is redundant but kept for safety
-      if ((compNode.value as any[]).length === 0) {
-        return false;
-      }
-    } else {
-      // For equality operators, ensure type consistency
-      if (typeof dataValue !== typeof compNode.value) {
-        // Special case for null comparison
-        if (dataValue === null || compNode.value === null) {
-          // Allow comparison between null and null
-        } else {
+    } else if (
+      compNode.operator === 'EQUALS' ||
+      compNode.operator === 'DOUBLE_EQUALS' ||
+      compNode.operator === 'NOT_EQUALS'
+    ) {
+      // For equality operators, handle arrays and single values
+      if (Array.isArray(compNode.value)) {
+        // Arrays are only allowed to contain strings (enforced during parsing)
+        if (!compNode.value.every((v) => typeof v === 'string')) {
           return false;
         }
       }
+    } else {
+      // Unsupported operator
+      return false;
     }
 
     switch (compNode.operator) {
@@ -473,7 +509,7 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
       case 'EQUALS':
         return evaluateEquals(compNode.key, compNode.value, data);
       case 'NOT_EQUALS':
-        return !evaluateEquals(compNode.key, compNode.value, data);
+        return evaluateNotEquals(compNode.key, compNode.value, data);
       case 'GREATER_THAN':
         return dataValue > compNode.value;
       case 'GREATER_THAN_OR_EQUAL':
@@ -482,34 +518,6 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
         return dataValue < compNode.value;
       case 'LESS_THAN_OR_EQUAL':
         return dataValue <= compNode.value;
-      case 'ANY':
-        if (Array.isArray(dataValue)) {
-          // Check if any element in dataValue matches any value in compNode.value
-          return dataValue.some((val) =>
-            (compNode.value as string[]).some((compVal) =>
-              areValuesEqual(val, compVal),
-            ),
-          );
-        } else {
-          // Check if dataValue matches any value in compNode.value
-          return (compNode.value as string[]).some((compVal) =>
-            evaluateEquals(compNode.key, compVal, data),
-          );
-        }
-      case 'NONE':
-        if (Array.isArray(dataValue)) {
-          // Check if none of the elements in dataValue match any value in compNode.value
-          return dataValue.every((val) =>
-            (compNode.value as string[]).every(
-              (compVal) => !areValuesEqual(val, compVal),
-            ),
-          );
-        } else {
-          // Check if dataValue does not match any value in compNode.value
-          return !(compNode.value as string[]).some((compVal) =>
-            evaluateEquals(compNode.key, compVal, data),
-          );
-        }
     }
   }
   // istanbul ignore next: cannot test

@@ -25,41 +25,42 @@ describe('util/package-rules/match/main', () => {
 
     describe('simple matches', () => {
       it.each`
-        input                                | expected
-        ${'active = false'}                  | ${true}
-        ${'active = true'}                   | ${false}
-        ${"packageName = 'foo'"}             | ${true}
-        ${'count = 0'}                       | ${true}
-        ${'count > -1'}                      | ${true}
-        ${'count > 0'}                       | ${false}
-        ${'currentVersion = "1.0.0"'}        | ${true}
-        ${'currentVersion = "1.0.1"'}        | ${false}
-        ${'currentVersionAge = null'}        | ${true}
-        ${'depType = "dependencies"'}        | ${true}
-        ${'depType = "devDependencies"'}     | ${false}
-        ${'isBreaking = false'}              | ${false}
-        ${'isBreaking = true'}               | ${true}
-        ${'isBreaking = "true"'}             | ${false}
-        ${'labels ANY ["beta", "gamma"]'}    | ${true}
-        ${'labels NONE ["delta"]'}           | ${true}
-        ${'newMajor = 1'}                    | ${true}
-        ${'newMajor = 2'}                    | ${false}
-        ${'newMajor < 2'}                    | ${true}
-        ${'newMajor > 1'}                    | ${false}
-        ${'newMajor >= 1'}                   | ${true}
-        ${'packageName = "bar"'}             | ${false}
-        ${'packageName = "foo"'}             | ${true}
-        ${'packageName == "foo"'}            | ${true}
-        ${'packageName ANY ["foo", "bar"]'}  | ${true}
-        ${'packageName ANY ["no", "bar"]'}   | ${false}
-        ${'packageName NONE ["foo", "bar"]'} | ${false}
-        ${'packageName NONE ["no", "bar"]'}  | ${true}
-        ${'score >= 85'}                     | ${true}
-        ${'score < 90'}                      | ${true}
-        ${'score > 80'}                      | ${true}
-        ${'unknownKey = "value"'}            | ${false}
-        ${'updateType = "minor"'}            | ${false}
-        ${'updateType = "patch"'}            | ${true}
+        input                              | expected
+        ${'active = false'}                | ${true}
+        ${'active = true'}                 | ${false}
+        ${"packageName = 'foo'"}           | ${true}
+        ${'count = 0'}                     | ${true}
+        ${'count > -1'}                    | ${true}
+        ${'count > 0'}                     | ${false}
+        ${'currentVersion = "1.0.0"'}      | ${true}
+        ${'currentVersion = "1.0.1"'}      | ${false}
+        ${'currentVersionAge = null'}      | ${true}
+        ${'depType = "dependencies"'}      | ${true}
+        ${'depType = "devDependencies"'}   | ${false}
+        ${'isBreaking = false'}            | ${false}
+        ${'isBreaking = true'}             | ${true}
+        ${'isBreaking = "true"'}           | ${false}
+        ${'labels = ["beta", "gamma"]'}    | ${true}
+        ${'labels != ["delta"]'}           | ${true}
+        ${'labels != "delta"'}             | ${true}
+        ${'newMajor = 1'}                  | ${true}
+        ${'newMajor = 2'}                  | ${false}
+        ${'newMajor < 2'}                  | ${true}
+        ${'newMajor > 1'}                  | ${false}
+        ${'newMajor >= 1'}                 | ${true}
+        ${'packageName = "bar"'}           | ${false}
+        ${'packageName = "foo"'}           | ${true}
+        ${'packageName == "foo"'}          | ${true}
+        ${'packageName = ["foo", "bar"]'}  | ${true}
+        ${'packageName = ["no", "bar"]'}   | ${false}
+        ${'packageName != ["foo", "bar"]'} | ${false}
+        ${'packageName != ["no", "bar"]'}  | ${true}
+        ${'score >= 85'}                   | ${true}
+        ${'score < 90'}                    | ${true}
+        ${'score > 80'}                    | ${true}
+        ${'unknownKey = "value"'}          | ${false}
+        ${'updateType = "minor"'}          | ${false}
+        ${'updateType = "patch"'}          | ${true}
       `('match($input, data) = $expected', ({ input, expected }) => {
         expect(match(input, data)).toBe(expected);
       });
@@ -79,7 +80,7 @@ describe('util/package-rules/match/main', () => {
         ${'currentVersionAge != null'}     | ${false}
         ${'newMajor > 0 AND newMajor < 2'} | ${true}
         ${'active != true'}                | ${true}
-        ${'packageName ANY false'}         | ${false}
+        ${'packageName = false'}           | ${false}
         ${'packageName = "a\\tb"'}         | ${false}
         ${'labels.foo = "bar"'}            | ${false}
         ${'packageName >= 2'}              | ${false}
@@ -124,19 +125,22 @@ describe('util/package-rules/match/main', () => {
         ${'packageName = "/^b/"'}                    | ${false}
         ${'packageName = "/^f$/"'}                   | ${false}
         ${'packageName = "^f"'}                      | ${false}
-        ${'packageName ANY ["a*", "f*"]'}            | ${true}
-        ${'packageName NONE ["a*", "f*"]'}           | ${false}
-        ${'packageName ANY ["a*", "b*"]'}            | ${false}
-        ${'packageName NONE ["a*", "b*"]'}           | ${true}
+        ${'packageName = ["a*", "f*"]'}              | ${true}
+        ${'packageName != ["a*", "f*"]'}             | ${false}
+        ${'packageName = ["a*", "b*"]'}              | ${false}
+        ${'packageName != ["a*", "b*"]'}             | ${true}
         ${'packageFile = "packages/*/package.json"'} | ${true}
       `('match($input, data) = $expected', ({ input, expected }) => {
         expect(match(input, data)).toBe(expected);
       });
     });
+
     describe('version matching', () => {
       it('should match versions correctly', () => {
         expect(match('currentVersion = "1.0.0"', data)).toBe(true);
         expect(match('currentVersion = "1.0.1"', data)).toBe(false);
+        expect(match('currentVersion != "1.0.0"', data)).toBe(false);
+        expect(match('currentVersion != "1.0.1"', data)).toBe(true);
         expect(match('currentVersion = "^1.0.0"', data)).toBe(true);
         expect(match('currentVersion = "1.x"', data)).toBe(true);
         expect(match('currentVersion = "1"', data)).toBe(true);
@@ -146,17 +150,15 @@ describe('util/package-rules/match/main', () => {
         expect(match('currentVersion = ">1.0.0"', data)).toBe(false);
         expect(match('currentVersion = ">=1.0.0"', data)).toBe(true);
         expect(match('currentVersion = "<1.0.0"', data)).toBe(false);
-        expect(match('currentVersion ANY ["1.0.0", "1.0.1"]', data)).toBe(true);
-        expect(match('currentVersion ANY ["^1.0.0", "^2.0.0"]', data)).toBe(
-          true,
-        );
-        expect(match('currentVersion ANY ["<1.0.0", "^2.0.0"]', data)).toBe(
+        expect(match('currentVersion = ["1.0.0", "1.0.1"]', data)).toBe(true);
+        expect(match('currentVersion = ["^1.0.0", "^2.0.0"]', data)).toBe(true);
+        expect(match('currentVersion = ["<1.0.0", "^2.0.0"]', data)).toBe(
           false,
         );
-        expect(match('currentVersion NONE ["^1.0.0", "^2.0.0"]', data)).toBe(
+        expect(match('currentVersion != ["^1.0.0", "^2.0.0"]', data)).toBe(
           false,
         );
-        expect(match('currentVersion NONE ["<1.0.0", "^2.0.0"]', data)).toBe(
+        expect(match('currentVersion != ["<1.0.0", "^2.0.0"]', data)).toBe(
           true,
         );
       });
@@ -189,16 +191,16 @@ describe('util/package-rules/match/main', () => {
         ${'(packageName = "foo" AND isBreaking = true) OR (depType = "devDependencies" AND updateType = "minor")'}                             | ${true}
         ${'(packageName = "bar" OR packageName = "baz") AND (isBreaking = true OR updateType = "major")'}                                      | ${false}
         ${'((newMajor >= 1 AND newMajor <= 2) OR score > 90) AND active = false'}                                                              | ${true}
-        ${'(labels ANY ["beta", "gamma"] AND registryUrls ANY ["https://index.docker.io"]) OR (updateType = "minor" AND enabled = false)'}     | ${true}
+        ${'(labels = ["beta", "gamma"] AND registryUrls = ["https://index.docker.io"]) OR (updateType = "minor" AND enabled = false)'}         | ${true}
         ${'notExistingKey = "value" OR (packageName = "foo" AND manager = "cargo")'}                                                           | ${false}
         ${'(currentVersionAge != null AND currentVersionAge > 100 AND currentVersion = "^1.0.0") OR (currentVersionAge = null AND count = 0)'} | ${true}
         ${'((enabled = true AND manager = "npm") OR (enabled = false AND manager = "cargo")) AND active = false'}                              | ${true}
         ${'(category = "utilities" OR category = "tools") AND (updateType = "minor" OR updateType = "patch")'}                                 | ${true}
-        ${'(registryUrls ANY ["https://somewhere.else", "https://no.pe/not-here"] AND labels NONE ["alpha"]) OR score >= 85'}                  | ${true}
+        ${'(registryUrls = ["https://somewhere.else", "https://no.pe/not-here"] AND labels != ["alpha"]) OR score >= 85'}                      | ${true}
         ${'((packageName = "foo" AND isBreaking = true) OR (updateType = "minor" AND newMajor > 2)) AND active = true'}                        | ${false}
         ${'(packageName = "/^fo.*/" AND isBreaking = true) OR (depType = "devDependencies" AND updateType = "minor")'}                         | ${true}
         ${'(packageName = "ba*" OR packageName = "baz") AND (isBreaking = true OR updateType = "major")'}                                      | ${false}
-        ${'(labels ANY ["beta", "gamma"] AND registryUrls ANY ["https://quay.*"]) OR (updateType = "minor" AND enabled = false)'}              | ${true}
+        ${'(labels = ["beta", "gamma"] AND registryUrls = ["https://quay.*"]) OR (updateType = "minor" AND enabled = false)'}                  | ${true}
         ${'(category = "util*" OR category = "tools") AND (updateType = "minor" OR updateType = "patch")'}                                     | ${true}
       `('match($input, data) = $expected', ({ input, expected }) => {
         expect(match(input, data)).toBe(expected);
@@ -267,7 +269,7 @@ describe('util/package-rules/match/main', () => {
       ${'packageName = "foo" AND (isBreaking = true)))'}
       ${'packageName = foo'}
       ${'packageName = "foo" AND isBreaking = tru'}
-      ${'labels ANY [beta, "gamma"]'}
+      ${'labels = [beta, "gamma"]'}
       ${'AND packageName = "foo"'}
       ${'OR isBreaking = true'}
       ${'packageName = "foo" AND OR isBreaking = true'}
@@ -281,8 +283,8 @@ describe('util/package-rules/match/main', () => {
       ${'packageName = "foo" AND depType = "dependencies" AND updateType patch"'}
       ${'packageName = "foo" AND depType = "dependencies" AND updateType = patch'}
       ${'newMajor >= "1"'}
-      ${'labels NONE [null, "beta}'}
-      ${'labels ANY ["alpha", "beta",]'}
+      ${'labels != [null, "beta}'}
+      ${'labels = ["alpha", "beta",]'}
       ${'((packageName = "foo" AND isBreaking = true'}
       ${'packageName = "foo" AND (isBreaking = true AND)'}
       ${''}
@@ -306,8 +308,8 @@ describe('util/package-rules/match/main', () => {
       ${'packageName = "foo" AND (isBreaking = true) AND'}
       ${'packageName = "foo" AND (isBreaking = true AND depType = "dependencies"'}
       ${'packageName = "foo" AND (isBreaking = true) AND (depType = "dependencies" AND updateType = "patch"'}
-      ${'packageName ANY ["foo", "bar"'}
-      ${'enabled ANY [true, false]'}
+      ${'packageName = ["foo", "bar"'}
+      ${'enabled = [true, false]'}
     `('validate($input) should be invalid', ({ input }) => {
       const result = validate(input);
       expect(result.valid).toBe(false);
@@ -366,13 +368,12 @@ describe('util/package-rules/match/main', () => {
       expect(actualTypes).toEqual(expectedTypes);
     });
 
-    it('should handle array operators ANY and NONE', () => {
-      const input =
-        "labels ANY ['urgent', 'high'] OR updateType NONE ['major']";
+    it('should handle array operators = and !=', () => {
+      const input = "labels = ['urgent', 'high'] OR updateType != ['major']";
       const tokens = tokenize(input);
       const expectedTypes = [
         'IDENTIFIER',
-        'ANY',
+        'EQUALS',
         'LBRACKET',
         'STRING_LITERAL',
         'COMMA',
@@ -380,7 +381,7 @@ describe('util/package-rules/match/main', () => {
         'RBRACKET',
         'OR',
         'IDENTIFIER',
-        'NONE',
+        'NOT_EQUALS',
         'LBRACKET',
         'STRING_LITERAL',
         'RBRACKET',
@@ -446,10 +447,10 @@ describe('util/package-rules/match/main', () => {
     });
 
     it('should parse expressions with array operators', () => {
-      const tokens = tokenize("labels ANY ['urgent', 'high']");
+      const tokens = tokenize("labels = ['urgent', 'high']");
       const ast = parse(tokens);
       expect(ast.type).toBe('Comparison');
-      expect(ast.operator).toBe('ANY');
+      expect(ast.operator).toBe('EQUALS');
       expect(ast.key).toBe('labels');
       expect(ast.value).toEqual(['urgent', 'high']);
     });
@@ -526,17 +527,17 @@ describe('util/package-rules/match/main', () => {
       expect(evaluate(ast2, data)).toBe(false);
     });
 
-    it('should evaluate array operators ANY and NONE', () => {
-      const astAny = parse(tokenize("labels ANY ['urgent', 'high']"));
+    it('should evaluate array operators = and !=', () => {
+      const astAny = parse(tokenize("labels = ['urgent', 'high']"));
       expect(evaluate(astAny, data)).toBe(true);
 
-      const astNone = parse(tokenize("updateType NONE ['patch']"));
+      const astNone = parse(tokenize("updateType != ['patch']"));
       expect(evaluate(astNone, data)).toBe(true);
 
-      const astAnyFalse = parse(tokenize("labels ANY ['low', 'medium']"));
+      const astAnyFalse = parse(tokenize("labels = ['low', 'medium']"));
       expect(evaluate(astAnyFalse, data)).toBe(false);
 
-      const astNoneFalse = parse(tokenize("upateType NONE ['minor']"));
+      const astNoneFalse = parse(tokenize("upateType != ['minor']"));
       expect(evaluate(astNoneFalse, data)).toBe(false);
     });
 
