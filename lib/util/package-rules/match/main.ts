@@ -344,9 +344,19 @@ function parseArray(): string[] {
 
 // Evaluation
 
-function areValuesEqual(dataValue: any, compValue: any): boolean {
+function areValuesEqual(
+  dataValue: any,
+  compKey: string,
+  compValue: any,
+): boolean {
   if (is.string(dataValue) && is.string(compValue)) {
     return matchRegexOrGlob(dataValue, compValue);
+  }
+  if (typeof dataValue !== typeof compValue) {
+    logger.once.warn(
+      `packageRules.match type mismatch: "${compKey}" (type ${typeof dataValue}) cannot be compared to ${JSON.stringify(compValue)} (type ${typeof compValue})`,
+    );
+    return false;
   }
   return dataValue === compValue;
 }
@@ -406,7 +416,7 @@ function evaluateEquals(compKey: string, compValue: any, data: any): boolean {
         data,
       );
     }
-    return areValuesEqual(dataValue, compValue);
+    return areValuesEqual(dataValue, compKey, compValue);
   }
 }
 
@@ -446,7 +456,7 @@ function evaluateNotEquals(
         data,
       );
     }
-    return !areValuesEqual(dataValue, compValue);
+    return !areValuesEqual(dataValue, compKey, compValue);
   }
 }
 

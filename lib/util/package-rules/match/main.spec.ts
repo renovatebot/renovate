@@ -310,6 +310,7 @@ describe('util/package-rules/match/main', () => {
       ${'packageName = "foo" AND (isBreaking = true) AND (depType = "dependencies" AND updateType = "patch"'}
       ${'packageName = ["foo", "bar"'}
       ${'enabled = [true, false]'}
+      ${'packageName = ["foo", 2]'}
     `('validate($input) should be invalid', ({ input }) => {
       const result = validate(input);
       expect(result.valid).toBe(false);
