@@ -1,3 +1,4 @@
+import * as versioning from '../../../modules/versioning';
 import { evaluate, match, parse, tokenize, validate } from './main';
 
 describe('util/package-rules/match/main', () => {
@@ -20,6 +21,7 @@ describe('util/package-rules/match/main', () => {
       status: 'active',
       packageFile: 'packages/frontend/package.json',
       features: ['feature1', 'feature2'],
+      versioning: versioning.get('npm'),
     };
 
     describe('advanced logic expressions', () => {
@@ -159,6 +161,33 @@ describe('util/package-rules/match/main', () => {
         ${'packageFile = "packages/*/package.json"'} | ${true}
       `('match($input, data) = $expected', ({ input, expected }) => {
         expect(match(input, data)).toBe(expected);
+      });
+    });
+
+    describe('version matching', () => {
+      it('should match versions correctly', () => {
+        expect(match('currentVersion = "1.0.0"', data)).toBe(true);
+        expect(match('currentVersion = "1.0.1"', data)).toBe(false);
+        expect(match('currentVersion = "^1.0.0"', data)).toBe(true);
+        expect(match('currentVersion = "1.x"', data)).toBe(true);
+        expect(match('currentVersion = "1"', data)).toBe(true);
+        expect(match('currentVersion = 1', data)).toBe(false);
+        expect(match('currentVersion = 1.0.0', data)).toBe(false);
+        expect(match('currentVersion = "abc"', data)).toBe(false);
+      });
+      it('should handle bad data', () => {
+        expect(
+          match('currentVersion = "1.0.0"', { currentVersion: null }),
+        ).toBe(false);
+        expect(
+          match('currentVersion = "^1.0.0"', { currentVersion: '1.2.3' }),
+        ).toBe(false); // No versioning
+        expect(
+          match('currentVersion = ">1.0.0"', {
+            currentVersion: 'not-a-version',
+            versioning: versioning.get('npm'),
+          }),
+        ).toBe(false);
       });
     });
 

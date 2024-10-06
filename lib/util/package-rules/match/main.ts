@@ -10,6 +10,7 @@ import type {
   TokenType,
   ValidationResult,
 } from './types';
+import { VersioningApi } from '../../../modules/versioning/types';
 
 // Tokenizer function
 export function tokenize(input: string): Token[] {
@@ -377,6 +378,41 @@ function areValuesEqual(a: any, b: any): boolean {
   return a === b;
 }
 
+const versionFields = ['currentVersion', 'lockedVersion', 'newVersion'];
+
+function evaluateVersionMatch(compNode: ComparisonNode, data: any): boolean {
+  const { key, value: compValue } = compNode;
+  const dataValue = data[key];
+  if (!is.string(dataValue) || !is.string(compValue)) {
+    return false;
+  }
+  if (!data.versioning) {
+    return false;
+  }
+  const versioning = data.versioning as VersioningApi;
+  if (!versioning.isValid(compValue)) {
+    return false;
+  }
+
+  if (!versioning.isVersion(dataValue)) {
+    return false;
+  }
+  return versioning.matches(dataValue, compValue);
+}
+
+function evaluateEquals(compNode: ComparisonNode, data: any): boolean {
+  const { key, value: compValue } = compNode;
+  const dataValue = data[key];
+  if (compValue === dataValue) {
+    // Exact match
+    return true;
+  }
+  if (versionFields.includes(key)) {
+    return evaluateVersionMatch(compNode, data);
+  }
+  return areValuesEqual(dataValue, compValue);
+}
+
 export function evaluate(node: ASTNode, data: unknown): boolean {
   if (node.type === 'BinaryOp') {
     const opNode = node as BinaryOpNode;
@@ -432,9 +468,9 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
 
     switch (compNode.operator) {
       case 'EQUALS':
-        return areValuesEqual(dataValue, compNode.value);
+        return evaluateEquals(compNode, data);
       case 'NOT_EQUALS':
-        return !areValuesEqual(dataValue, compNode.value);
+        return !evaluateEquals(compNode, data);
       case 'GREATER_THAN':
         return dataValue > compNode.value;
       case 'GREATER_THAN_OR_EQUAL':
