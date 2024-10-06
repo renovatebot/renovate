@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import type { VersioningApi } from '../../../modules/versioning/types';
 import * as memCache from '../../cache/memory';
 import { matchRegexOrGlob } from '../../string-match';
 import type {
@@ -10,7 +11,6 @@ import type {
   TokenType,
   ValidationResult,
 } from './types';
-import { VersioningApi } from '../../../modules/versioning/types';
 
 // Tokenizer function
 export function tokenize(input: string): Token[] {
@@ -400,15 +400,17 @@ function evaluateVersionMatch(compNode: ComparisonNode, data: any): boolean {
   return versioning.matches(dataValue, compValue);
 }
 
-function evaluateEquals(compNode: ComparisonNode, data: any): boolean {
-  const { key, value: compValue } = compNode;
-  const dataValue = data[key];
+function evaluateEquals(compKey: string, compValue: any, data: any): boolean {
+  const dataValue = data[compKey];
   if (compValue === dataValue) {
     // Exact match
     return true;
   }
-  if (versionFields.includes(key)) {
-    return evaluateVersionMatch(compNode, data);
+  if (versionFields.includes(compKey)) {
+    return evaluateVersionMatch(
+      { key: compKey, value: compValue, operator: 'EQUALS' } as ComparisonNode,
+      data,
+    );
   }
   return areValuesEqual(dataValue, compValue);
 }
@@ -468,9 +470,9 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
 
     switch (compNode.operator) {
       case 'EQUALS':
-        return evaluateEquals(compNode, data);
+        return evaluateEquals(compNode.key, compNode.value, data);
       case 'NOT_EQUALS':
-        return !evaluateEquals(compNode, data);
+        return !evaluateEquals(compNode.key, compNode.value, data);
       case 'GREATER_THAN':
         return dataValue > compNode.value;
       case 'GREATER_THAN_OR_EQUAL':
@@ -490,7 +492,7 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
         } else {
           // Check if dataValue matches any value in compNode.value
           return (compNode.value as any[]).some((compVal) =>
-            areValuesEqual(dataValue, compVal),
+            evaluateEquals(compNode.key, compVal, data),
           );
         }
       case 'NONE':
@@ -504,7 +506,7 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
         } else {
           // Check if dataValue does not match any value in compNode.value
           return !(compNode.value as any[]).some((compVal) =>
-            areValuesEqual(dataValue, compVal),
+            evaluateEquals(compNode.key, compVal, data),
           );
         }
     }

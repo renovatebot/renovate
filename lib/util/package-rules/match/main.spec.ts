@@ -174,7 +174,21 @@ describe('util/package-rules/match/main', () => {
         expect(match('currentVersion = 1', data)).toBe(false);
         expect(match('currentVersion = 1.0.0', data)).toBe(false);
         expect(match('currentVersion = "abc"', data)).toBe(false);
+        expect(match('currentVersion ANY ["1.0.0", "1.0.1"]', data)).toBe(true);
+        expect(match('currentVersion ANY ["^1.0.0", "^2.0.0"]', data)).toBe(
+          true,
+        );
+        expect(match('currentVersion ANY ["<1.0.0", "^2.0.0"]', data)).toBe(
+          false,
+        );
+        expect(match('currentVersion NONE ["^1.0.0", "^2.0.0"]', data)).toBe(
+          false,
+        );
+        expect(match('currentVersion NONE ["<1.0.0", "^2.0.0"]', data)).toBe(
+          true,
+        );
       });
+
       it('should handle bad data', () => {
         expect(
           match('currentVersion = "1.0.0"', { currentVersion: null }),
