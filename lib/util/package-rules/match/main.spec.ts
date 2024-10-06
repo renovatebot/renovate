@@ -28,8 +28,6 @@ describe('util/package-rules/match/main', () => {
         input                                | expected
         ${'active = false'}                  | ${true}
         ${'active = true'}                   | ${false}
-        ${'active NONE [false]'}             | ${false}
-        ${'active NONE [true]'}              | ${true}
         ${"packageName = 'foo'"}             | ${true}
         ${'count = 0'}                       | ${true}
         ${'count > -1'}                      | ${true}
@@ -49,9 +47,6 @@ describe('util/package-rules/match/main', () => {
         ${'newMajor < 2'}                    | ${true}
         ${'newMajor > 1'}                    | ${false}
         ${'newMajor >= 1'}                   | ${true}
-        ${'newMajor ANY [1,2,3]'}            | ${true}
-        ${'newMajor NONE [1,2,3]'}           | ${false}
-        ${'newMajor NONE [2,3,4]'}           | ${true}
         ${'packageName = "bar"'}             | ${false}
         ${'packageName = "foo"'}             | ${true}
         ${'packageName == "foo"'}            | ${true}
@@ -84,19 +79,11 @@ describe('util/package-rules/match/main', () => {
         ${'currentVersionAge != null'}     | ${false}
         ${'newMajor > 0 AND newMajor < 2'} | ${true}
         ${'active != true'}                | ${true}
-        ${'packageName ANY []'}            | ${false}
         ${'packageName ANY false'}         | ${false}
         ${'packageName = "a\\tb"'}         | ${false}
         ${'labels.foo = "bar"'}            | ${false}
-        ${'packageName NONE []'}           | ${false}
         ${'packageName >= 2'}              | ${false}
         ${'packageName > "a"'}             | ${false}
-        ${'score ANY [85,90,95]'}          | ${true}
-        ${'score NONE [70,75,80]'}         | ${true}
-        ${'score ANY [70,75,80]'}          | ${false}
-        ${'active ANY [true, false]'}      | ${true}
-        ${'active NONE [true]'}            | ${true}
-        ${'active NONE [false]'}           | ${false}
       `('match($input, data) = $expected', ({ input, expected }) => {
         expect(match(input, data)).toBe(expected);
       });
@@ -319,6 +306,8 @@ describe('util/package-rules/match/main', () => {
       ${'packageName = "foo" AND (isBreaking = true) AND'}
       ${'packageName = "foo" AND (isBreaking = true AND depType = "dependencies"'}
       ${'packageName = "foo" AND (isBreaking = true) AND (depType = "dependencies" AND updateType = "patch"'}
+      ${'packageName ANY ["foo", "bar"'}
+      ${'enabled ANY [true, false]'}
     `('validate($input) should be invalid', ({ input }) => {
       const result = validate(input);
       expect(result.valid).toBe(false);
@@ -543,9 +532,6 @@ describe('util/package-rules/match/main', () => {
 
       const astNone = parse(tokenize("updateType NONE ['patch']"));
       expect(evaluate(astNone, data)).toBe(true);
-
-      const astAnyNoneEmpty = parse(tokenize('labels ANY []'));
-      expect(evaluate(astAnyNoneEmpty, data)).toBe(false);
 
       const astAnyFalse = parse(tokenize("labels ANY ['low', 'medium']"));
       expect(evaluate(astAnyFalse, data)).toBe(false);

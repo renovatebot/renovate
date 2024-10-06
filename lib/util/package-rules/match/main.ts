@@ -1,3 +1,5 @@
+// main.ts
+
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import * as allVersioning from '../../../modules/versioning';
@@ -320,43 +322,29 @@ function parseComparison(): ASTNode {
   } as ComparisonNode;
 }
 
-// Updated parseArray function to handle NULL_LITERAL
-function parseArray(): any[] {
-  const values: any[] = [];
+// Updated parseArray function
+function parseArray(): string[] {
+  const values: string[] = [];
   consume('LBRACKET'); // Expect '['
 
   const nextToken = peek();
   if (nextToken.type === 'RBRACKET') {
-    // Empty array
-    consume('RBRACKET');
-    return values;
+    // Empty array - throw error
+    throw new Error(
+      `Empty arrays are not allowed at position ${nextToken.position}`,
+    );
   }
 
   let done = false;
   while (!done) {
     const valueToken = consume();
-    let value: any;
+    let value: string;
 
-    if (
-      valueToken.type === 'STRING_LITERAL' ||
-      valueToken.type === 'NUMBER_LITERAL' ||
-      valueToken.type === 'BOOLEAN_LITERAL'
-    ) {
-      if (valueToken.type === 'STRING_LITERAL') {
-        value = valueToken.value;
-      } else if (valueToken.type === 'BOOLEAN_LITERAL') {
-        value = valueToken.value === 'true';
-      } else if (valueToken.type === 'NUMBER_LITERAL') {
-        value = parseFloat(valueToken.value);
-      }
-    } else if (valueToken.type === 'IDENTIFIER') {
-      // Invalid identifier in array
-      throw new Error(
-        `Invalid identifier '${valueToken.value}' in array at position ${valueToken.position}`,
-      );
+    if (valueToken.type === 'STRING_LITERAL') {
+      value = valueToken.value;
     } else {
       throw new Error(
-        `Expected a value, but got ${valueToken.type} at position ${valueToken.position}`,
+        `Invalid value type '${valueToken.type}' in array at position ${valueToken.position}. Only strings are allowed.`,
       );
     }
 
@@ -368,6 +356,10 @@ function parseArray(): any[] {
     } else if (nextTokenAfterValue.type === 'RBRACKET') {
       consume('RBRACKET');
       done = true;
+    } else {
+      throw new Error(
+        `Expected ',' or ']', but got ${nextTokenAfterValue.type} at position ${nextTokenAfterValue.position}`,
+      );
     }
   }
 
@@ -458,7 +450,8 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
         return false;
       }
     } else if (compNode.operator === 'ANY' || compNode.operator === 'NONE') {
-      // If the array is empty, return false
+      // If the array is empty, return false (though empty arrays are invalid in parsing)
+      // This check is redundant but kept for safety
       if ((compNode.value as any[]).length === 0) {
         return false;
       }
@@ -493,13 +486,13 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
         if (Array.isArray(dataValue)) {
           // Check if any element in dataValue matches any value in compNode.value
           return dataValue.some((val) =>
-            (compNode.value as any[]).some((compVal) =>
+            (compNode.value as string[]).some((compVal) =>
               areValuesEqual(val, compVal),
             ),
           );
         } else {
           // Check if dataValue matches any value in compNode.value
-          return (compNode.value as any[]).some((compVal) =>
+          return (compNode.value as string[]).some((compVal) =>
             evaluateEquals(compNode.key, compVal, data),
           );
         }
@@ -507,13 +500,13 @@ export function evaluate(node: ASTNode, data: unknown): boolean {
         if (Array.isArray(dataValue)) {
           // Check if none of the elements in dataValue match any value in compNode.value
           return dataValue.every((val) =>
-            (compNode.value as any[]).every(
+            (compNode.value as string[]).every(
               (compVal) => !areValuesEqual(val, compVal),
             ),
           );
         } else {
           // Check if dataValue does not match any value in compNode.value
-          return !(compNode.value as any[]).some((compVal) =>
+          return !(compNode.value as string[]).some((compVal) =>
             evaluateEquals(compNode.key, compVal, data),
           );
         }
