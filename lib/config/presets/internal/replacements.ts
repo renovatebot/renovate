@@ -1,12 +1,12 @@
-import replacementGroups from '../../../data/replacements.json';
+import replacementGroupsJson from '../../../data/replacements.json';
 import type { Preset } from '../types';
 import type { PresetTemplate, Replacement } from './auto-generate-replacements';
 import { addPresets } from './auto-generate-replacements';
 
-const { $schema, ...tempPresets } = replacementGroups;
+const { $schema, ...replacementPresets } = replacementGroupsJson;
 
 /* eslint sort-keys: ["error", "asc", {"caseSensitive": false, "natural": true}] */
-export const presets: Record<string, Preset> = tempPresets;
+export const presets: Record<string, Preset> = replacementPresets;
 
 const muiReplacement: Replacement[] = [
   [['@material-ui/codemod'], '@mui/codemod'],
