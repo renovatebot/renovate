@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import * as allVersioning from '../../../modules/versioning';
 import type { VersioningApi } from '../../../modules/versioning/types';
 import * as memCache from '../../cache/memory';
 import { matchRegexOrGlob } from '../../string-match';
@@ -391,18 +392,19 @@ function evaluateVersionMatch(compNode: ComparisonNode, data: any): boolean {
   if (!is.string(dataValue) || !is.string(compValue)) {
     return false;
   }
-  if (!data.versioning) {
+  if (!is.string(data.versioning)) {
     return false;
   }
-  const versioning = data.versioning as VersioningApi;
-  if (!versioning.isValid(compValue)) {
+  const versioningApi = allVersioning.get(data.versioning);
+
+  if (!versioningApi.isValid(compValue)) {
     return false;
   }
 
-  if (!versioning.isVersion(dataValue)) {
+  if (!versioningApi.isVersion(dataValue)) {
     return false;
   }
-  return versioning.matches(dataValue, compValue);
+  return versioningApi.matches(dataValue, compValue);
 }
 
 function evaluateEquals(compKey: string, compValue: any, data: any): boolean {

@@ -1,4 +1,3 @@
-import * as versioning from '../../../modules/versioning';
 import { evaluate, match, parse, tokenize, validate } from './main';
 
 describe('util/package-rules/match/main', () => {
@@ -21,7 +20,7 @@ describe('util/package-rules/match/main', () => {
       enabled: true,
       packageFile: 'packages/frontend/package.json',
       registryUrls: ['https://index.docker.io', 'https://quay.io'],
-      versioning: versioning.get('npm'),
+      versioning: 'npm',
     };
 
     describe('simple matches', () => {
@@ -185,9 +184,15 @@ describe('util/package-rules/match/main', () => {
         expect(
           match('currentVersion = ">1.0.0"', {
             currentVersion: 'not-a-version',
-            versioning: versioning.get('npm'),
+            versioning: 'npm',
           }),
         ).toBe(false);
+        expect(
+          match('currentVersion = ">=1.0.0"', {
+            currentVersion: '1.0.0',
+            versioning: 'not-exists',
+          }),
+        ).toBe(true);
       });
     });
 
