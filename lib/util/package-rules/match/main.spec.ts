@@ -7,6 +7,7 @@ describe('util/package-rules/match/main', () => {
       packageName: 'foo',
       isBreaking: true,
       depType: 'dependencies',
+      manager: 'npm',
       updateType: 'patch',
       currentVersion: '1.0.0',
       newVersion: '1.0.1',
@@ -18,9 +19,8 @@ describe('util/package-rules/match/main', () => {
       currentVersionAge: null,
       category: 'utilities',
       enabled: true,
-      status: 'active',
       packageFile: 'packages/frontend/package.json',
-      features: ['feature1', 'feature2'],
+      registryUrls: ['https://index.docker.io', 'https://quay.io'],
       versioning: versioning.get('npm'),
     };
 
@@ -197,16 +197,16 @@ describe('util/package-rules/match/main', () => {
         ${'(packageName = "foo" AND isBreaking = true) OR (depType = "devDependencies" AND updateType = "minor")'}                             | ${true}
         ${'(packageName = "bar" OR packageName = "baz") AND (isBreaking = true OR updateType = "major")'}                                      | ${false}
         ${'((newMajor >= 1 AND newMajor <= 2) OR score > 90) AND active = false'}                                                              | ${true}
-        ${'(labels ANY ["beta", "gamma"] AND features ANY ["feature1"]) OR (updateType = "minor" AND enabled = false)'}                        | ${true}
-        ${'notExistingKey = "value" OR (packageName = "foo" AND status = "inactive")'}                                                         | ${false}
+        ${'(labels ANY ["beta", "gamma"] AND registryUrls ANY ["https://index.docker.io"]) OR (updateType = "minor" AND enabled = false)'}     | ${true}
+        ${'notExistingKey = "value" OR (packageName = "foo" AND manager = "cargo")'}                                                           | ${false}
         ${'(currentVersionAge != null AND currentVersionAge > 100 AND currentVersion = "^1.0.0") OR (currentVersionAge = null AND count = 0)'} | ${true}
-        ${'((enabled = true AND status = "active") OR (enabled = false AND status = "inactive")) AND active = false'}                          | ${true}
+        ${'((enabled = true AND manager = "npm") OR (enabled = false AND manager = "cargo")) AND active = false'}                              | ${true}
         ${'(category = "utilities" OR category = "tools") AND (updateType = "minor" OR updateType = "patch")'}                                 | ${true}
-        ${'(features ANY ["feature3", "feature4"] AND labels NONE ["alpha"]) OR score >= 85'}                                                  | ${true}
+        ${'(registryUrls ANY ["https://somewhere.else", "https://no.pe/not-here"] AND labels NONE ["alpha"]) OR score >= 85'}                  | ${true}
         ${'((packageName = "foo" AND isBreaking = true) OR (updateType = "minor" AND newMajor > 2)) AND active = true'}                        | ${false}
         ${'(packageName = "/^fo.*/" AND isBreaking = true) OR (depType = "devDependencies" AND updateType = "minor")'}                         | ${true}
         ${'(packageName = "ba*" OR packageName = "baz") AND (isBreaking = true OR updateType = "major")'}                                      | ${false}
-        ${'(labels ANY ["beta", "gamma"] AND features ANY ["feature*"]) OR (updateType = "minor" AND enabled = false)'}                        | ${true}
+        ${'(labels ANY ["beta", "gamma"] AND registryUrls ANY ["https://quay.*"]) OR (updateType = "minor" AND enabled = false)'}              | ${true}
         ${'(category = "util*" OR category = "tools") AND (updateType = "minor" OR updateType = "patch")'}                                     | ${true}
       `('match($input, data) = $expected', ({ input, expected }) => {
         expect(match(input, data)).toBe(expected);
@@ -227,8 +227,8 @@ describe('util/package-rules/match/main', () => {
 
       it('should evaluate complex expressions with various operators correctly', () => {
         const input =
-          'age >= 30 AND (status = "active" OR (score < 50 AND level != null))';
-        const data = { age: 35, status: 'active', score: 45, level: 2 };
+          'age >= 30 AND (manager = "npm" OR (score < 50 AND level != null))';
+        const data = { age: 35, manager: 'npm', score: 45, level: 2 };
         expect(match(input, data)).toBe(true);
       });
     });
@@ -329,7 +329,7 @@ describe('util/package-rules/match/main', () => {
 
   describe('tokenize()', () => {
     it('should tokenize a simple expression with AND and OR', () => {
-      const input = "age >= 30 AND (status = 'active' OR status = 'pending')";
+      const input = "age >= 30 AND (manager = 'npm' OR manager = 'dockerfile')";
       const tokens = tokenize(input);
       const expectedTypes = [
         'IDENTIFIER',
@@ -441,7 +441,7 @@ describe('util/package-rules/match/main', () => {
 
     it('should parse nested expressions with parentheses', () => {
       const tokens = tokenize(
-        "age >= 30 AND (status = 'active' OR status = 'pending')",
+        "age >= 30 AND (manager = 'npm' OR manager = 'dockerfile')",
       );
       const ast = parse(tokens);
       expect(ast.type).toBe('BinaryOp');
@@ -483,7 +483,7 @@ describe('util/package-rules/match/main', () => {
   describe('evaluate()', () => {
     const data = {
       age: 35,
-      status: 'active',
+      manager: 'npm',
       isActive: true,
       labels: ['urgent', 'new'],
       balance: -500,
@@ -523,10 +523,12 @@ describe('util/package-rules/match/main', () => {
     });
 
     it('should evaluate logical OR expressions', () => {
-      const ast = parse(tokenize("status = 'active' OR status = 'pending'"));
+      const ast = parse(tokenize("manager = 'npm' OR manager = 'dockerfile'"));
       expect(evaluate(ast, data)).toBe(true);
 
-      const ast2 = parse(tokenize("status = 'inactive' OR status = 'pending'"));
+      const ast2 = parse(
+        tokenize("manager = 'cargo' OR manager = 'dockerfile'"),
+      );
       expect(evaluate(ast2, data)).toBe(false);
     });
 
@@ -550,17 +552,17 @@ describe('util/package-rules/match/main', () => {
     it('should evaluate complex nested expressions', () => {
       const ast = parse(
         tokenize(
-          "age >= 30 AND (status = 'active' OR (score < 50 AND level != null))",
+          "age >= 30 AND (manager = 'npm' OR (score < 50 AND level != null))",
         ),
       );
       expect(
-        evaluate(ast, { age: 35, status: 'active', score: 45, level: 2 }),
+        evaluate(ast, { age: 35, manager: 'npm', score: 45, level: 2 }),
       ).toBe(true);
       expect(
-        evaluate(ast, { age: 25, status: 'active', score: 45, level: 2 }),
+        evaluate(ast, { age: 25, manager: 'npm', score: 45, level: 2 }),
       ).toBe(false);
       expect(
-        evaluate(ast, { age: 35, status: 'inactive', score: 45, level: null }),
+        evaluate(ast, { age: 35, manager: 'cargo', score: 45, level: null }),
       ).toBe(false);
     });
 
