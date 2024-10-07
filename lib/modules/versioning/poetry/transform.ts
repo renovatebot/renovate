@@ -115,15 +115,29 @@ export function poetry2npm(input: string, throwOnUnsupported = false): string {
     .filter(notEmpty)
     .join(' ')
     .split(RANGE_COMPARATOR_PATTERN);
-  // do not pad versions with zeros in a range
+  // do not pad versions with zeros in a range if the range specifier is tilde or caret
+  let padWithZeroes = true;
   const transformed = chunks
-    .map((chunk) => poetry2semver(chunk, false) ?? chunk)
+    .map((chunk) => {
+      const semVerVersion = poetry2semver(chunk, padWithZeroes);
+      if (semVerVersion !== null) {
+        padWithZeroes = true;
+        return semVerVersion;
+      }
+      // The chunk could not be parsed by poetry2semver - This can mean it's a specifier for the version in the next chunk
+      // PEP440 specifiers generally specify padding with zeroes, but SemVer specifiers do not.
+      if (chunk.includes('~') || chunk.includes('^')) {
+        padWithZeroes = false;
+      }
+
+      return chunk;
+    })
     .join('')
-    .replace(/===/, '=');
+    .replace(/==/, '=');
   if (throwOnUnsupported) {
     const isUnsupported = transformed
       .split(regEx(/\s+/))
-      .some((part) => part.startsWith('!=')); // Patterns like `!=1.2.3` can't be easily translated between poetry/npm
+      .some((part) => part.startsWith('!=') || part.startsWith('~=')); // Patterns like `!=1.2.3` (Corresponding to `>1.2.3 || <1.2.3` in SemVer) and `~=1.2` (Corresponding to `>= 1.2.0 1.*` in SemVer) can't be easily translated back and forth between poetry and npm
     if (isUnsupported) {
       throw new Error('Unsupported by Poetry versioning implementation');
     }
