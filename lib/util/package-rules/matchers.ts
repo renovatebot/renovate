@@ -7,13 +7,13 @@ import { DatasourcesMatcher } from './datasources';
 import { DepNameMatcher } from './dep-names';
 import { DepTypesMatcher } from './dep-types';
 import { FileNamesMatcher } from './files';
+import { JsonataMatcher } from './jsonata';
 import { ManagersMatcher } from './managers';
 import { MergeConfidenceMatcher } from './merge-confidence';
 import { NewValueMatcher } from './new-value';
 import { PackageNameMatcher } from './package-names';
 import { RepositoriesMatcher } from './repositories';
 import { SourceUrlsMatcher } from './sourceurls';
-import { JsonataMatcher } from './jsonata';
 import type { MatcherApi } from './types';
 import { UpdateTypesMatcher } from './update-types';
 

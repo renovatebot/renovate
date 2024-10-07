@@ -442,6 +442,7 @@ export async function validateConfig(
               'matchCurrentAge',
               'matchRepositories',
               'matchNewValue',
+              'matchJsonata',
             ];
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {

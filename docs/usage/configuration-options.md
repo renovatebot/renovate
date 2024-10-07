@@ -2856,6 +2856,21 @@ The following example matches any file in directories starting with `app/`:
 
 It is recommended that you avoid using "negative" globs, like `**/!(package.json)`, because such patterns might still return true if they match against the lock file name (e.g. `package-lock.json`).
 
+### matchJsonata
+
+Use the `matchJsonata` field to define custom matching logic using [JSONata](https://jsonata.org/) query logic.
+Renovate will evaluate the JSONata expression against the passed values (`manager`, `packageName`, etc.).
+
+See [the JSONata docs](https://docs.jsonata.org/) for more details on JSONata syntax.
+
+Here are some example `matchJsonata` strings for inspiration:
+
+```
+$exists(deprecationMessage)
+$exists(vulnerabilityFixVersion)
+manager = 'dockerfile' and depType = 'final'
+```
+
 ### matchManagers
 
 Use this field to restrict rules to a particular package manager. e.g.
