@@ -109,7 +109,6 @@ export class SbtPluginDatasource extends MavenDatasource {
   }
 
   // istanbul ignore next: to be rewritten
-
   async getUrls(
     searchRoot: string,
     artifactDirs: string[] | null,
