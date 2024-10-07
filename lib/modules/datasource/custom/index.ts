@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import jsonata from 'jsonata';
 import { logger } from '../../../logger';
+import * as jsonata from '../../../util/jsonata';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { fetchers } from './formats';
@@ -46,13 +46,32 @@ export class CustomDatasource extends Datasource {
     logger.trace({ data }, `Custom manager fetcher '${format}' returned data.`);
 
     for (const transformTemplate of transformTemplates) {
+      const expression = jsonata.getExpression(transformTemplate);
+
+      // istanbul ignore if: JSONata doesn't seem to ever throw for this, despite the docs
+      if (expression instanceof Error) {
+        logger.once.warn(
+          { err: expression },
+          `Error while compiling JSONata expression ${JSON.stringify(transformTemplate)}`,
+        );
+        return null;
+      }
+
+      // Check if JSONata returned a working expression
+      if (!expression.evaluate) {
+        logger.once.warn(
+          { expression },
+          `Error while compiling JSONata expression: ${transformTemplate}`,
+        );
+        return null;
+      }
+
       try {
-        const expression = jsonata(transformTemplate);
         data = await expression.evaluate(data);
       } catch (err) {
-        logger.debug(
-          { err, transformTemplate },
-          'Error while transforming response',
+        logger.once.warn(
+          { err },
+          `Error while evaluating JSONata expression: ${transformTemplate}`,
         );
         return null;
       }
