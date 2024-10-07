@@ -1,6 +1,6 @@
-import jsonata from 'jsonata';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
+import { getExpression } from '../jsonata';
 import { Matcher } from './base';
 
 export class JsonataMatcher extends Matcher {
@@ -12,13 +12,15 @@ export class JsonataMatcher extends Matcher {
       return null;
     }
 
-    let expression: jsonata.Expression;
-    try {
-      expression = jsonata(matchJsonata);
-    } catch (err) {
-      logger.warn({ err }, 'Invalid JSONata expression');
+    const expression = getExpression(matchJsonata);
+    if (expression instanceof Error) {
+      logger.warn(
+        { errorMessage: expression.message },
+        'Invalid JSONata expression',
+      );
       return false;
     }
+
     try {
       const result = await expression.evaluate(inputConfig);
       return Boolean(result);
