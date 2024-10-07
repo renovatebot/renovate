@@ -312,9 +312,16 @@ export async function lookupUpdates(
 
       if (is.nonEmptyString(currentVersionTimestamp)) {
         res.currentVersionTimestamp = currentVersionTimestamp;
+        // Calculate age in days
+        const currentVersionTimestampDate = new Date(currentVersionTimestamp);
+        const now = new Date();
+        const diffInMs = now.getTime() - currentVersionTimestampDate.getTime();
+        const currentVersionAge = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+        res.currentVersionAge = currentVersionAge;
+
         if (
-          config.packageRules?.some((rules) =>
-            is.nonEmptyString(rules.matchCurrentAge),
+          config.packageRules?.some((rule) =>
+            is.nonEmptyString(rule.matchCurrentAge),
           )
         ) {
           // Reapply package rules to check matches for matchCurrentAge

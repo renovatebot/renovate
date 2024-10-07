@@ -69,6 +69,7 @@ export interface UpdateResult {
   updates: LookupUpdate[];
   warnings: ValidationMessage[];
   versioning?: string;
+  currentVersionAge?: number;
   currentVersionTimestamp?: string;
   vulnerabilityFixVersion?: string;
   vulnerabilityFixStrategy?: string;
