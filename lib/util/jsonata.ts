@@ -18,10 +18,3 @@ export function getExpression(input: string): jsonata.Expression | Error {
   memCache.set(cacheKey, result);
   return result;
 }
-
-export function evaluateExpression(
-  expression: jsonata.Expression,
-  data: unknown,
-): Promise<unknown> {
-  return expression.evaluate(data);
-}

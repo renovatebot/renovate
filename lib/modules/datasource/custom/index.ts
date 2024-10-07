@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { evaluateExpression, getExpression } from '../../../util/jsonata';
+import { getExpression } from '../../../util/jsonata';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { fetchers } from './formats';
@@ -51,13 +51,13 @@ export class CustomDatasource extends Datasource {
       if (expression instanceof Error) {
         logger.once.warn(
           { errorMessage: expression.message },
-          `Error while compiling JSONata expression: ${transformTemplate}`,
+          `Invalid JSONata expression: ${transformTemplate}`,
         );
         return null;
       }
 
       try {
-        data = await evaluateExpression(expression, data);
+        data = await expression.evaluate(data);
       } catch (err) {
         logger.once.warn(
           { err },
