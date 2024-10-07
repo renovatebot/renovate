@@ -12,7 +12,7 @@ export class JsonataMatcher extends Matcher {
       return null;
     }
 
-    let expression;
+    let expression: jsonata.Expression;
     try {
       expression = jsonata(matchJsonata);
     } catch (err) {
