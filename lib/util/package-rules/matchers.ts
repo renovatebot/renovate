@@ -13,6 +13,7 @@ import { NewValueMatcher } from './new-value';
 import { PackageNameMatcher } from './package-names';
 import { RepositoriesMatcher } from './repositories';
 import { SourceUrlsMatcher } from './sourceurls';
+import { JsonataMatcher } from './jsonata';
 import type { MatcherApi } from './types';
 import { UpdateTypesMatcher } from './update-types';
 
@@ -40,3 +41,4 @@ matchers.push(new UpdateTypesMatcher());
 matchers.push(new SourceUrlsMatcher());
 matchers.push(new NewValueMatcher());
 matchers.push(new CurrentAgeMatcher());
+matchers.push(new JsonataMatcher());
