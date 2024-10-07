@@ -23,7 +23,9 @@ const WRAPPER_VERSION_REGEX = regEx(
 function extractVersions(fileContent: string): MavenVersionExtract {
   const lines = coerceArray(fileContent?.split(newlineRegex));
   const maven = extractLineInfo(lines, DISTRIBUTION_URL_REGEX) ?? undefined;
-  const wrapper = extractLineInfo(lines, WRAPPER_URL_REGEX, WRAPPER_VERSION_REGEX) ?? undefined;
+  const wrapper =
+    extractLineInfo(lines, WRAPPER_URL_REGEX, WRAPPER_VERSION_REGEX) ??
+    undefined;
   return { maven, wrapper };
 }
 
