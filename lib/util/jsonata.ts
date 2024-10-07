@@ -11,7 +11,8 @@ export function getExpression(input: string): jsonata.Expression | Error {
   try {
     result = jsonata(input);
   } catch (err) {
-    result = err;
+    // JSONata errors aren't detected as TypeOf Error
+    result = new Error(err.message ?? 'Unknown JSONata error');
   }
   memCache.set(cacheKey, result);
   return result;

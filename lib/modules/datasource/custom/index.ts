@@ -48,19 +48,9 @@ export class CustomDatasource extends Datasource {
     for (const transformTemplate of transformTemplates) {
       const expression = jsonata.getExpression(transformTemplate);
 
-      // istanbul ignore if: JSONata doesn't seem to ever throw for this, despite the docs
       if (expression instanceof Error) {
         logger.once.warn(
-          { err: expression },
-          `Error while compiling JSONata expression ${JSON.stringify(transformTemplate)}`,
-        );
-        return null;
-      }
-
-      // Check if JSONata returned a working expression
-      if (!expression.evaluate) {
-        logger.once.warn(
-          { expression },
+          { errorMessage: expression.message },
           `Error while compiling JSONata expression: ${transformTemplate}`,
         );
         return null;
