@@ -2,10 +2,13 @@ import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
+import type { HostRule } from '../../../../types';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import { find } from '../../../../util/host-rules';
 import { Result } from '../../../../util/result';
+import { PypiDatasource } from '../../../datasource/pypi';
 import type {
   PackageDependency,
   UpdateArtifact,
@@ -115,8 +118,12 @@ export class UvProcessor implements PyProjectProcessor {
         constraint: config.constraints?.uv,
       };
 
+      const extraEnv = {
+        ...getUvExtraIndexUrl(updateArtifact.updatedDeps),
+      };
       const execOptions: ExecOptions = {
         cwdFile: packageFileName,
+        extraEnv,
         docker: {},
         userConfiguredEnv: config.env,
         toolConstraints: [pythonConstraint, uvConstraint],
@@ -190,4 +197,35 @@ function generateCMD(updatedDeps: Upgrade[]): string {
   }
 
   return `${uvUpdateCMD} ${deps.map((dep) => `--upgrade-package ${quote(dep)}`).join(' ')}`;
+}
+
+function getMatchingHostRule(url: string | undefined): HostRule {
+  const scopedMatch = find({ hostType: PypiDatasource.id, url });
+  return is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
+}
+
+function getUvExtraIndexUrl(updatedDeps: Upgrade[]): NodeJS.ProcessEnv {
+  const registryUrls = updatedDeps.map((dep) => dep.registryUrls).flat();
+  const extraIndexUrls: string[] = [];
+
+  for (const registryUrl of registryUrls) {
+    if (!registryUrl) {
+      continue;
+    }
+    const parsedUrl = new URL(registryUrl);
+
+    const rule = getMatchingHostRule(parsedUrl.toString());
+    if (rule.username) {
+      parsedUrl.username = rule.username;
+    }
+    if (rule.password) {
+      parsedUrl.password = rule.password;
+    }
+
+    extraIndexUrls.push(parsedUrl.toString());
+  }
+
+  return {
+    UV_EXTRA_INDEX_URL: extraIndexUrls.join(' '),
+  };
 }
