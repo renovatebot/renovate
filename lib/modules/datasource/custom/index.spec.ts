@@ -229,7 +229,7 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
-    it('returns null if transformation compiation using jsonata fails', async () => {
+    it('returns null if transformation compilation using jsonata fails', async () => {
       httpMock
         .scope('https://example.com')
         .get('/v1')
