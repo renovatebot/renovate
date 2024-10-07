@@ -1,8 +1,9 @@
 import jsonata from 'jsonata';
+import { toSha256 } from './hash';
 import * as memCache from './cache/memory';
 
 export function getExpression(input: string): jsonata.Expression | Error {
-  const cacheKey = `jsonata:${input}`;
+  const cacheKey = `jsonata:${toSha256(input)}`;
   const cachedExpression = memCache.get<jsonata.Expression | Error>(cacheKey);
   // istanbul ignore if: cannot test
   if (cachedExpression) {
