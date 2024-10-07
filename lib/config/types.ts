@@ -365,7 +365,7 @@ export interface PackageRule
     Record<string, unknown> {
   description?: string | string[];
   isVulnerabilityAlert?: boolean;
-  match?: string;
+  matchQl?: string;
   matchBaseBranches?: string[];
   matchCategories?: string[];
   matchConfidence?: MergeConfidence[];

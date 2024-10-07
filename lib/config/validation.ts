@@ -425,7 +425,7 @@ export async function validateConfig(
             }
 
             const selectors = [
-              'match',
+              'matchQl',
               'matchFileNames',
               'matchLanguages',
               'matchCategories',

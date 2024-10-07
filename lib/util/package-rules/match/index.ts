@@ -6,14 +6,14 @@ import type {
 import { Matcher } from '../base';
 import { match } from './main';
 
-export class MatchMatcher extends Matcher {
+export class MatchQlMatcher extends Matcher {
   override matches(
     config: PackageRuleInputConfig,
     rule: PackageRule,
   ): boolean | null {
-    if (is.nullOrUndefined(rule.match)) {
+    if (is.nullOrUndefined(rule.matchQl)) {
       return null;
     }
-    return match(rule.match, config);
+    return match(rule.matchQl, config);
   }
 }

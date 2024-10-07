@@ -1249,7 +1249,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
-    name: 'match',
+    name: 'matchQl',
     description: 'SQL-like query language for matching',
     type: 'string',
     parents: ['packageRules'],

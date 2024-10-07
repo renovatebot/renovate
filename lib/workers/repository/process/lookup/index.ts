@@ -323,7 +323,7 @@ export async function lookupUpdates(
           config.packageRules?.some(
             (rule) =>
               is.nonEmptyString(rule.matchCurrentAge) ??
-              rule.match?.includes('currentVersionAge'),
+              rule.matchQl?.includes('currentVersionAge'),
           )
         ) {
           // Reapply package rules to check matches for matchCurrentAge
