@@ -108,10 +108,10 @@ export async function mergeInheritedConfig(
 
   let returnConfig = filteredConfig;
 
-  // Decrypt before resloving incase it contains npm authentication for any preset
+  // Decrypt before resolving, in case it contains npm authentication for any preset
   const decryptedConfig = await decryptConfig(returnConfig, config.repository);
 
-  // Decrypt after resolving in case the preset contains npm authentication instead
+  // Decrypt after resolving, in case the preset contains npm authentication instead
   logger.debug('Resolving presets found in inherited config');
   const resolvedConfig = await decryptConfig(
     await resolveConfigPresets(decryptedConfig, config, config.ignorePresets),
