@@ -5,10 +5,17 @@ import { OrbDatasource } from '../../datasource/orb';
 import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
-import { CircleCiFile, type CircleCiJob } from './schema';
+import {
+  CircleCiFile,
+  type CircleCiJob,
+  CircleCiOrb,
+  type CircleCiFile as File,
+  type CircleCiOrb as Orb,
+} from './schema';
 
 function extractDefinition(
-  definition: CircleCiOrb | CircleCiFile,
+  definition: Orb | File,
+  packageFile?: string,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
@@ -28,7 +35,10 @@ function extractDefinition(
           datasource: OrbDatasource.id,
         });
       } else {
-        deps.push(...extractDefinition(orb));
+        const parsed = CircleCiOrb.parse(orb);
+        if (parsed) {
+          deps.push(...extractDefinition(parsed));
+        }
       }
     }
 
@@ -62,7 +72,7 @@ export function extractPackageFile(
       customSchema: CircleCiFile,
     });
 
-    deps.push(...extractDefinition(parsed));
+    deps.push(...extractDefinition(parsed, packageFile));
 
     for (const alias of coerceArray(parsed.aliases)) {
       deps.push({
