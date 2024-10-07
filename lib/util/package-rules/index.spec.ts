@@ -250,6 +250,24 @@ describe('util/package-rules/index', () => {
     expect(res2.x).toBeDefined();
   });
 
+  it('supports inclusive match or', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          match: 'packageName = ["neutrino", "/^@neutrino\\//"]',
+          x: 1,
+        },
+      ],
+    };
+    const res1 = applyPackageRules({ ...config, packageName: 'neutrino' });
+    expect(res1.x).toBeDefined();
+    const res2 = applyPackageRules({
+      ...config,
+      packageName: '@neutrino/something',
+    });
+    expect(res2.x).toBeDefined();
+  });
+
   it('filters requested depType', () => {
     const config: TestConfig = {
       packageRules: [

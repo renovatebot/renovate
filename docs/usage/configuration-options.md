@@ -2588,6 +2588,34 @@ To read the changelogs you must use the link.
 
 For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
+### match
+
+`match` is an experimental query language which be used to create both simple and complex matching logic for `packageRules`.
+
+It can be used to create matching on fields not supported by other `matchX` fields (e.g. `"match": "groupName = 'foo'"`) or also as an alternative for existing fields.
+
+Principles:
+
+- strings must be surrounded in single `'` or double `"` quotes
+- numbers, boolean values, `null` and `undefined` should not use quotes
+- arrays can only contain strings
+- `string = string` (e.g. `manager = "npm"` or `packageName = "@foo/*"`) will use pattern matching (glob, regex, or exact string matching)
+- `string == string` (e.g. `manager == "npm"`) will use exact string matching only
+- `string = array[string]` (e.g. `manager = ["npm", "dockerfile"]`) will return true if _any_ of the array values pattern match
+- `string != string` e.g. (`manager != "npm"`) returns true if it doesn't pattern match the string
+- `string != array[string]` (e.g. `manager != ["npm", "dockerfile"]`) will return true if _none_ of the array values pattern match
+- `number` values (e.g. `currentVersionAge`, which is measured in days) support comparisons `=`, `!=`, `<`, `<=`, `>` and `>=`
+- `boolean` values support `=` and `!=` comparisons
+
+Here are some equivalent statements:
+
+| Original                            | Match equivalent                        |
+| ----------------------------------- | --------------------------------------- |
+| `"matchBaseBranches": ["dev"]`      | `"match": "baseBranch = 'dev'`          |
+| `"matchCategories": ["docker"]`     | `"match": "categories = 'docker'`       |
+| `"matchCurrentVersion": ">= 1.0.0"` | `"match": "currentVersion = '> 1.0.0'"` |
+| `"matchCurrentAge": "> 2 years"`    | `"match": "currentVersionAge > 730"`    |
+
 ### matchBaseBranches
 
 Use this field to restrict rules to a particular branch. e.g.

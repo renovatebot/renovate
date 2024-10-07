@@ -1249,6 +1249,16 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'match',
+    description: 'SQL-like query language for matching',
+    type: 'string',
+    parents: ['packageRules'],
+    stage: 'package',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchCurrentAge',
     description:
       'Matches the current age of the package derived from its release timestamp. Valid only within a `packageRules` object.',
