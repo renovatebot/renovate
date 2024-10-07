@@ -410,7 +410,7 @@ jobs:
 
       - name: Save coverage artifacts
         if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        uses: actions/upload-artifact@604373da6381bf24206979c74d06a550515601b9 # v4.4.1
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
@@ -566,7 +566,7 @@ jobs:
         run: pnpm test-e2e:pack
 
       - name: Upload
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        uses: actions/upload-artifact@604373da6381bf24206979c74d06a550515601b9 # v4.4.1
         with:
           name: renovate-package
           path: renovate-0.0.0-semantic-release.tgz
@@ -610,7 +610,7 @@ jobs:
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        uses: actions/upload-artifact@604373da6381bf24206979c74d06a550515601b9 # v4.4.1
         with:
           name: docs
           path: tmp/docs/
