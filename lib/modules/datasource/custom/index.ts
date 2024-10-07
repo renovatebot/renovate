@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import * as jsonata from '../../../util/jsonata';
+import { evaluateExpression, getExpression } from '../../../util/jsonata';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { fetchers } from './formats';
@@ -46,7 +46,7 @@ export class CustomDatasource extends Datasource {
     logger.trace({ data }, `Custom manager fetcher '${format}' returned data.`);
 
     for (const transformTemplate of transformTemplates) {
-      const expression = jsonata.getExpression(transformTemplate);
+      const expression = getExpression(transformTemplate);
 
       if (expression instanceof Error) {
         logger.once.warn(
@@ -57,7 +57,7 @@ export class CustomDatasource extends Datasource {
       }
 
       try {
-        data = await expression.evaluate(data);
+        data = await evaluateExpression(expression, data);
       } catch (err) {
         logger.once.warn(
           { err },
