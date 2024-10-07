@@ -282,7 +282,7 @@ export async function mergeRenovateConfig(
   return returnConfig;
 }
 
-// needed when using portal secrets for npmToken
+/** needed when using portal secrets for npmToken */
 export function setNpmTokenInNpmrc(config: RenovateConfig): void {
   if (!is.string(config.npmToken)) {
     return;
@@ -297,14 +297,9 @@ export function setNpmTokenInNpmrc(config: RenovateConfig): void {
     return;
   }
 
-  /* eslint-disable no-template-curly-in-string */
-  if (config.npmrc.includes('${NPM_TOKEN}')) {
-    logger.debug('Replacing ${NPM_TOKEN} with decrypted token');
-    config.npmrc = config.npmrc.replace(
-      /* eslint-enable no-template-curly-in-string */
-      regEx(/\${NPM_TOKEN}/g),
-      token,
-    );
+  if (config.npmrc.includes(`\${NPM_TOKEN}`)) {
+    logger.debug(`Replacing \${NPM_TOKEN} with decrypted token`);
+    config.npmrc = config.npmrc.replace(regEx(/\${NPM_TOKEN}/g), token);
   } else {
     logger.debug('Appending _authToken= to end of existing npmrc');
     config.npmrc = config.npmrc.replace(
