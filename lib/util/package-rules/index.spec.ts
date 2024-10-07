@@ -33,7 +33,7 @@ describe('util/package-rules/index', () => {
     ],
   };
 
-  it('applies', () => {
+  it('applies', async () => {
     const config: PackageRuleInputConfig = {
       packageName: 'a',
       updateType: 'minor',
@@ -60,78 +60,78 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    expect(applyPackageRules(config)).toEqual({
+    expect(await applyPackageRules(config)).toEqual({
       ...config,
       labels: ['bump'],
     });
   });
 
-  it('applies both rules for a', () => {
+  it('applies both rules for a', async () => {
     const dep = {
       packageName: 'a',
     };
-    const res = applyPackageRules({ ...config1, ...dep });
+    const res = await applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBe(2);
     expect(res.y).toBe(2);
     expect(res.groupName).toBeUndefined();
   });
 
-  it('applies both rules for b', () => {
+  it('applies both rules for b', async () => {
     const dep = {
       packageName: 'b',
     };
-    const res = applyPackageRules({ ...config1, ...dep });
+    const res = await applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBe(2);
     expect(res.y).toBe(2);
     expect(res.groupName).toBeUndefined();
   });
 
-  it('applies the second rule', () => {
+  it('applies the second rule', async () => {
     const dep = {
       packageName: 'abc',
     };
-    const res = applyPackageRules({ ...config1, ...dep });
+    const res = await applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBeUndefined();
     expect(res.y).toBe(2);
     expect(res.groupName).toBeUndefined();
   });
 
-  it('applies matchPackageNames', () => {
+  it('applies matchPackageNames', async () => {
     const dep = {
       packageName: 'xyz/foo',
     };
-    const res = applyPackageRules({ ...config1, ...dep });
+    const res = await applyPackageRules({ ...config1, ...dep });
     expect(res.groupName).toBeUndefined();
   });
 
-  it('applies the second second rule', () => {
+  it('applies the second second rule', async () => {
     const dep = {
       packageName: 'bc',
     };
-    const res = applyPackageRules({ ...config1, ...dep });
+    const res = await applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBeUndefined();
     expect(res.y).toBe(2);
   });
 
-  it('excludes package name', () => {
+  it('excludes package name', async () => {
     const dep = {
       packageName: 'aa',
     };
-    const res = applyPackageRules({ ...config1, ...dep });
+    const res = await applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBeUndefined();
     expect(res.y).toBeUndefined();
   });
 
-  it('excludes package pattern', () => {
+  it('excludes package pattern', async () => {
     const dep = {
       packageName: 'bcd',
     };
-    const res = applyPackageRules({ ...config1, ...dep });
+    const res = await applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBeUndefined();
     expect(res.y).toBeUndefined();
   });
 
-  it('ignores patterns if lock file maintenance', () => {
+  it('ignores patterns if lock file maintenance', async () => {
     const dep = {
       automerge: true,
       updateType: 'lockFileMaintenance' as UpdateType,
@@ -143,11 +143,11 @@ describe('util/package-rules/index', () => {
       ],
     };
     // This should not match
-    const res = applyPackageRules(dep);
+    const res = await applyPackageRules(dep);
     expect(res.automerge).toBeTrue();
   });
 
-  it('do apply rule with matchPackageName', () => {
+  it('do apply rule with matchPackageName', async () => {
     const dep = {
       automerge: true,
       updateType: 'lockFileMaintenance' as UpdateType,
@@ -158,13 +158,13 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res = applyPackageRules(dep);
+    const res = await applyPackageRules(dep);
     expect(res.automerge).toBeTrue();
-    const res2 = applyPackageRules({ ...dep, packageName: 'foo' });
+    const res2 = await applyPackageRules({ ...dep, packageName: 'foo' });
     expect(res2.automerge).toBeFalse();
   });
 
-  it('sets skipReason=package-rules if enabled=false', () => {
+  it('sets skipReason=package-rules if enabled=false', async () => {
     const dep: any = {
       depName: 'foo',
       packageRules: [
@@ -173,13 +173,13 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res = applyPackageRules(dep, 'datasource-merge');
+    const res = await applyPackageRules(dep, 'datasource-merge');
     expect(res.enabled).toBeFalse();
     expect(res.skipReason).toBe('package-rules');
     expect(res.skipStage).toBe('datasource-merge');
   });
 
-  it('unsets skipReason=package-rules if enabled=true', () => {
+  it('unsets skipReason=package-rules if enabled=true', async () => {
     const dep: any = {
       depName: 'foo',
       packageRules: [
@@ -191,13 +191,13 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res = applyPackageRules(dep, 'datasource-merge');
+    const res = await applyPackageRules(dep, 'datasource-merge');
     expect(res.enabled).toBeTrue();
     expect(res.skipReason).toBeUndefined();
     expect(res.skipStage).toBeUndefined();
   });
 
-  it('skips skipReason=package-rules if enabled=true', () => {
+  it('skips skipReason=package-rules if enabled=true', async () => {
     const dep: any = {
       enabled: false,
       depName: 'foo',
@@ -207,11 +207,11 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res = applyPackageRules(dep);
+    const res = await applyPackageRules(dep);
     expect(res.skipReason).toBeUndefined();
   });
 
-  it('matches anything if missing inclusive rules', () => {
+  it('matches anything if missing inclusive rules', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -220,19 +220,19 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res1 = applyPackageRules({
+    const res1 = await applyPackageRules({
       ...config,
       packageName: 'foo',
     });
     expect(res1.x).toBeUndefined();
-    const res2 = applyPackageRules({
+    const res2 = await applyPackageRules({
       ...config,
       packageName: 'bar',
     });
     expect(res2.x).toBeDefined();
   });
 
-  it('supports inclusive or', () => {
+  it('supports inclusive or', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -241,16 +241,19 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res1 = applyPackageRules({ ...config, packageName: 'neutrino' });
+    const res1 = await applyPackageRules({
+      ...config,
+      packageName: 'neutrino',
+    });
     expect(res1.x).toBeDefined();
-    const res2 = applyPackageRules({
+    const res2 = await applyPackageRules({
       ...config,
       packageName: '@neutrino/something',
     });
     expect(res2.x).toBeDefined();
   });
 
-  it('filters requested depType', () => {
+  it('filters requested depType', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -264,11 +267,11 @@ describe('util/package-rules/index', () => {
       depType: 'dependencies',
       packageName: 'a',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
 
-  it('filters from list of requested depTypes', () => {
+  it('filters from list of requested depTypes', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -282,11 +285,11 @@ describe('util/package-rules/index', () => {
       depTypes: ['build', 'test'],
       packageName: 'a',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
 
-  it('returns false if no depTypes', () => {
+  it('returns false if no depTypes', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -299,11 +302,11 @@ describe('util/package-rules/index', () => {
     const input = { ...config, packageName: 'a' };
     delete input.depType;
     delete input.depTypes;
-    const res = applyPackageRules(input);
+    const res = await applyPackageRules(input);
     expect(res).toEqual(input);
   });
 
-  it('filters managers with matching manager', () => {
+  it('filters managers with matching manager', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -318,11 +321,11 @@ describe('util/package-rules/index', () => {
       manager: 'meteor',
       packageName: 'node',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
 
-  it('filters managers with non-matching manager', () => {
+  it('filters managers with non-matching manager', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -339,11 +342,11 @@ describe('util/package-rules/index', () => {
       manager: 'pipenv',
       packageName: 'node',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
 
-  it('filters categories with matching category', () => {
+  it('filters categories with matching category', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -359,11 +362,11 @@ describe('util/package-rules/index', () => {
       manager: 'meteor',
       packageName: 'node',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
 
-  it('filters categories with non-matching category', () => {
+  it('filters categories with non-matching category', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -379,11 +382,11 @@ describe('util/package-rules/index', () => {
       manager: 'pipenv',
       packageName: 'node',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
 
-  it('filters categories with undefined category', () => {
+  it('filters categories with undefined category', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -397,11 +400,11 @@ describe('util/package-rules/index', () => {
       manager: 'pipenv',
       packageName: 'node',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
 
-  it('filters datasources with matching datasource', () => {
+  it('filters datasources with matching datasource', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -419,12 +422,12 @@ describe('util/package-rules/index', () => {
       datasource: OrbDatasource.id,
       baseBranch: 'master',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
     expect(res.y).toBeUndefined();
   });
 
-  it('filters branches with matching branch', () => {
+  it('filters branches with matching branch', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -438,11 +441,11 @@ describe('util/package-rules/index', () => {
       datasource: OrbDatasource.id,
       baseBranch: 'master',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
 
-  it('filters datasources with non-matching datasource', () => {
+  it('filters datasources with non-matching datasource', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -455,11 +458,11 @@ describe('util/package-rules/index', () => {
       depType: 'dependencies',
       baseBranch: 'staging',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
 
-  it('filters branches with non-matching branch', () => {
+  it('filters branches with non-matching branch', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -472,11 +475,11 @@ describe('util/package-rules/index', () => {
       depType: 'dependencies',
       baseBranch: 'staging',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
 
-  it('filters branches with matching branch regex', () => {
+  it('filters branches with matching branch regex', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -490,11 +493,11 @@ describe('util/package-rules/index', () => {
       datasource: OrbDatasource.id,
       baseBranch: 'release/5.8',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
 
-  it('filters branches with non-matching branch regex', () => {
+  it('filters branches with non-matching branch regex', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -508,11 +511,11 @@ describe('util/package-rules/index', () => {
       datasource: OrbDatasource.id,
       baseBranch: 'master',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
 
-  it('filters updateType', () => {
+  it('filters updateType', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -530,12 +533,12 @@ describe('util/package-rules/index', () => {
       packageName: 'a',
       updateType: 'patch' as UpdateType,
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
     expect(res.y).toBeUndefined();
   });
 
-  it('matches matchSourceUrls with glob', () => {
+  it('matches matchSourceUrls with glob', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -553,11 +556,11 @@ describe('util/package-rules/index', () => {
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/renovatebot/presets',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
 
-  it('non-matches matchSourceUrls with globs', () => {
+  it('non-matches matchSourceUrls with globs', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -575,11 +578,11 @@ describe('util/package-rules/index', () => {
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/vuejs/vue',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
 
-  it('handles matchSourceUrls when missing sourceUrl', () => {
+  it('handles matchSourceUrls when missing sourceUrl', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -596,11 +599,11 @@ describe('util/package-rules/index', () => {
       packageName: 'a',
       updateType: 'patch' as UpdateType,
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
 
-  it('matches matchSourceUrls', () => {
+  it('matches matchSourceUrls', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -618,11 +621,11 @@ describe('util/package-rules/index', () => {
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/renovatebot/presets',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
 
-  it('non-matches matchSourceUrls', () => {
+  it('non-matches matchSourceUrls', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -640,7 +643,7 @@ describe('util/package-rules/index', () => {
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/facebook/react-native',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
 
@@ -655,7 +658,7 @@ describe('util/package-rules/index', () => {
       hostRules.add(hostRule);
     });
 
-    it('matches matchConfidence', () => {
+    it('matches matchConfidence', async () => {
       const config: TestConfig = {
         packageRules: [
           {
@@ -669,11 +672,11 @@ describe('util/package-rules/index', () => {
         packageName: 'a',
         mergeConfidenceLevel: 'high' as MergeConfidence,
       };
-      const res = applyPackageRules({ ...config, ...dep });
+      const res = await applyPackageRules({ ...config, ...dep });
       expect(res.x).toBe(1);
     });
 
-    it('non-matches matchConfidence', () => {
+    it('non-matches matchConfidence', async () => {
       const config: TestConfig = {
         packageRules: [
           {
@@ -687,11 +690,11 @@ describe('util/package-rules/index', () => {
         packageName: 'a',
         mergeConfidenceLevel: 'low' as MergeConfidence,
       };
-      const res = applyPackageRules({ ...config, ...dep });
+      const res = await applyPackageRules({ ...config, ...dep });
       expect(res.x).toBeUndefined();
     });
 
-    it('does not match matchConfidence when there is no mergeConfidenceLevel', () => {
+    it('does not match matchConfidence when there is no mergeConfidenceLevel', async () => {
       const config: TestConfig = {
         packageRules: [
           {
@@ -705,11 +708,11 @@ describe('util/package-rules/index', () => {
         packageName: 'a',
         mergeConfidenceLevel: undefined,
       };
-      const res = applyPackageRules({ ...config, ...dep });
+      const res = await applyPackageRules({ ...config, ...dep });
       expect(res.x).toBeUndefined();
     });
 
-    it('throws when unauthenticated', () => {
+    it('throws when unauthenticated', async () => {
       const config: TestConfig = {
         packageRules: [
           {
@@ -723,7 +726,7 @@ describe('util/package-rules/index', () => {
 
       let error = new Error();
       try {
-        applyPackageRules(config);
+        await applyPackageRules(config);
       } catch (err) {
         error = err;
       }
@@ -736,7 +739,7 @@ describe('util/package-rules/index', () => {
     });
   });
 
-  it('filters naked depType', () => {
+  it('filters naked depType', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -749,11 +752,11 @@ describe('util/package-rules/index', () => {
       depType: 'dependencies',
       packageName: 'a',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
 
-  it('filters out unrequested depType', () => {
+  it('filters out unrequested depType', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -767,11 +770,11 @@ describe('util/package-rules/index', () => {
       depType: 'devDependencies',
       packageName: 'a',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
 
-  it('checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap', () => {
+  it('checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap', async () => {
     const config: TestConfig = {
       versioning: 'semver',
       packageRules: [
@@ -782,7 +785,7 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res1 = applyPackageRules({
+    const res1 = await applyPackageRules({
       ...config,
       ...{
         packageName: 'test',
@@ -791,7 +794,7 @@ describe('util/package-rules/index', () => {
       },
     });
     expect(res1.x).toBeDefined();
-    const res2 = applyPackageRules({
+    const res2 = await applyPackageRules({
       ...config,
       ...{
         packageName: 'test',
@@ -799,7 +802,7 @@ describe('util/package-rules/index', () => {
       },
     });
     expect(res2.x).toBeUndefined();
-    const res3 = applyPackageRules({
+    const res3 = await applyPackageRules({
       ...config,
       ...{
         packageName: 'test',
@@ -809,7 +812,7 @@ describe('util/package-rules/index', () => {
     expect(res3.x).toBeUndefined();
   });
 
-  it('checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap', () => {
+  it('checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap', async () => {
     const config: TestConfig = {
       versioning: 'semver',
       packageRules: [
@@ -820,7 +823,7 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res1 = applyPackageRules({
+    const res1 = await applyPackageRules({
       ...config,
       ...{
         packageName: 'test',
@@ -831,7 +834,7 @@ describe('util/package-rules/index', () => {
     expect(res1.x).toBeDefined();
   });
 
-  it('checks if matchCurrentVersion selector is a version and matches if currentValue is a range', () => {
+  it('checks if matchCurrentVersion selector is a version and matches if currentValue is a range', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -842,7 +845,7 @@ describe('util/package-rules/index', () => {
       ],
       versioning: 'npm',
     };
-    const res1 = applyPackageRules({
+    const res1 = await applyPackageRules({
       ...config,
       ...{
         packageName: 'test',
@@ -850,7 +853,7 @@ describe('util/package-rules/index', () => {
       },
     });
     expect(res1.x).toBeDefined();
-    const res2 = applyPackageRules({
+    const res2 = await applyPackageRules({
       ...config,
       ...{
         packageName: 'test',
@@ -860,7 +863,7 @@ describe('util/package-rules/index', () => {
     expect(res2.x).toBeUndefined();
   });
 
-  it('checks if matchCurrentVersion selector works with static values', () => {
+  it('checks if matchCurrentVersion selector works with static values', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -870,7 +873,7 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res1 = applyPackageRules({
+    const res1 = await applyPackageRules({
       ...config,
       ...{
         packageName: 'test',
@@ -881,7 +884,7 @@ describe('util/package-rules/index', () => {
     expect(res1.x).toBeDefined();
   });
 
-  it('checks if matchCurrentVersion selector works with regular expressions', () => {
+  it('checks if matchCurrentVersion selector works with regular expressions', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -891,7 +894,7 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res1 = applyPackageRules({
+    const res1 = await applyPackageRules({
       ...config,
       ...{
         packageName: 'test',
@@ -899,7 +902,7 @@ describe('util/package-rules/index', () => {
         currentVersion: '4.6.0',
       },
     });
-    const res2 = applyPackageRules({
+    const res2 = await applyPackageRules({
       ...config,
       ...{
         packageName: 'test',
@@ -911,7 +914,7 @@ describe('util/package-rules/index', () => {
     expect(res2.x).toBeUndefined();
   });
 
-  it('checks if matchCurrentVersion selector works with negated regular expressions', () => {
+  it('checks if matchCurrentVersion selector works with negated regular expressions', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -921,7 +924,7 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res1 = applyPackageRules({
+    const res1 = await applyPackageRules({
       ...config,
       ...{
         packageName: 'test',
@@ -929,7 +932,7 @@ describe('util/package-rules/index', () => {
         currentVersion: '4.6.0',
       },
     });
-    const res2 = applyPackageRules({
+    const res2 = await applyPackageRules({
       ...config,
       ...{
         packageName: 'test',
@@ -941,7 +944,7 @@ describe('util/package-rules/index', () => {
     expect(res2.x).toBeDefined();
   });
 
-  it('matches packageFiles', () => {
+  it('matches packageFiles', async () => {
     const config: TestConfig = {
       packageFile: 'examples/foo/package.json',
       packageRules: [
@@ -951,20 +954,20 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res1 = applyPackageRules({
+    const res1 = await applyPackageRules({
       ...config,
       packageName: 'test',
     });
     expect(res1.x).toBeUndefined();
     config.packageFile = 'package.json';
-    const res2 = applyPackageRules({
+    const res2 = await applyPackageRules({
       ...config,
       packageName: 'test',
     });
     expect(res2.x).toBeDefined();
   });
 
-  it('matches lock files', () => {
+  it('matches lock files', async () => {
     const config: TestConfig = {
       packageFile: 'examples/foo/package.json',
       lockFiles: ['yarn.lock'],
@@ -975,11 +978,11 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res = applyPackageRules(config);
+    const res = await applyPackageRules(config);
     expect(res.x).toBeDefined();
   });
 
-  it('matches paths', () => {
+  it('matches paths', async () => {
     const config: TestConfig = {
       packageFile: 'examples/foo/package.json',
       packageRules: [
@@ -989,35 +992,35 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res1 = applyPackageRules({
+    const res1 = await applyPackageRules({
       ...config,
       packageName: 'test',
     });
     expect(res1.x).toBeDefined();
     config.packageFile = 'package.json';
-    const res2 = applyPackageRules({
+    const res2 = await applyPackageRules({
       ...config,
       packageName: 'test',
     });
     expect(res2.x).toBeUndefined();
     config.packageFile = 'lib/a/package.json';
-    const res3 = applyPackageRules({
+    const res3 = await applyPackageRules({
       ...config,
       packageName: 'test',
     });
     expect(res3.x).toBeUndefined();
   });
 
-  it('empty rules', () => {
+  it('empty rules', async () => {
     expect(
-      applyPackageRules({ ...config1, packageRules: null as never }),
+      await applyPackageRules({ ...config1, packageRules: null as never }),
     ).toEqual({
       foo: 'bar',
       packageRules: null,
     });
   });
 
-  it('creates groupSlug if necessary', () => {
+  it('creates groupSlug if necessary', async () => {
     const config: TestConfig = {
       packageName: 'foo',
       packageRules: [
@@ -1032,11 +1035,11 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res = applyPackageRules(config);
+    const res = await applyPackageRules(config);
     expect(res.groupSlug).toBe('b');
   });
 
-  it('matches matchSourceUrls with patterns (case-insensitive)', () => {
+  it('matches matchSourceUrls with patterns (case-insensitive)', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -1054,11 +1057,11 @@ describe('util/package-rules/index', () => {
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/renovatebot/Presets',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
 
-  it('matches matchSourceUrls(case-insensitive)', () => {
+  it('matches matchSourceUrls(case-insensitive)', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -1076,11 +1079,11 @@ describe('util/package-rules/index', () => {
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/renovatebot/Renovate',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
 
-  it('needs language to match', () => {
+  it('needs language to match', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -1093,11 +1096,11 @@ describe('util/package-rules/index', () => {
     const dep = {
       packageName: 'abc',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
 
-  it('needs baseBranch to match', () => {
+  it('needs baseBranch to match', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -1110,11 +1113,11 @@ describe('util/package-rules/index', () => {
     const dep = {
       packageName: 'abc',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
 
-  it('needs manager to match', () => {
+  it('needs manager to match', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -1127,11 +1130,11 @@ describe('util/package-rules/index', () => {
     const dep = {
       packageName: 'abc',
     };
-    const res = applyPackageRules({ ...config, ...dep });
+    const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
 
-  it('matches matchDepNames(depName)', () => {
+  it('matches matchDepNames(depName)', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -1141,21 +1144,21 @@ describe('util/package-rules/index', () => {
       ],
     };
 
-    const res1 = applyPackageRules({
+    const res1 = await applyPackageRules({
       ...config,
       depName: 'test1',
     });
-    const res2 = applyPackageRules({
+    const res2 = await applyPackageRules({
       ...config,
       depName: 'test2',
     });
-    applyPackageRules(config); // coverage
+    await applyPackageRules(config); // coverage
 
     expect(res1.x).toBe(1);
     expect(res2.x).toBeUndefined();
   });
 
-  it('matches if there are no matchers', () => {
+  it('matches if there are no matchers', async () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -1164,7 +1167,7 @@ describe('util/package-rules/index', () => {
       ],
     };
 
-    const res = applyPackageRules({
+    const res = await applyPackageRules({
       ...config,
       depName: 'test2',
     });
