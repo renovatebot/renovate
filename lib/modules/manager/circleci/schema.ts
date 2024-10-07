@@ -9,9 +9,16 @@ export const CircleCiJob = z.object({
   docker: z.array(CircleCiDocker).optional(),
 });
 
+export type CircleCiOrb = z.infer<typeof CircleCiOrb>;
+export const CircleCiOrb = z.object({
+  executors: z.record(z.string(), CircleCiJob).optional(),
+  jobs: z.record(z.string(), CircleCiJob).optional(),
+  orbs: z.record(z.string(), CircleCiOrb).optional(),
+});
+
 export const CircleCiFile = z.object({
   aliases: z.array(CircleCiDocker).optional(),
   executors: z.record(z.string(), CircleCiJob).optional(),
   jobs: z.record(z.string(), CircleCiJob).optional(),
-  orbs: z.record(z.string()).optional(),
+  orbs: z.record(z.string(), z.string().or(CircleCiOrb)).optional(),
 });

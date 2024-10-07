@@ -6,6 +6,7 @@ const file1 = Fixtures.get('config.yml');
 const file2 = Fixtures.get('config2.yml');
 const file3 = Fixtures.get('config3.yml');
 const file4 = Fixtures.get('config4.yml');
+const file5 = Fixtures.get('config5.yml');
 
 describe('modules/manager/circleci/extract', () => {
   describe('extractPackageFile()', () => {
@@ -219,6 +220,40 @@ describe('modules/manager/circleci/extract', () => {
           depName: 'cimg/ruby',
           depType: 'docker',
           replaceString: 'cimg/ruby:3.0.3-browsers',
+        },
+      ]);
+    });
+
+    it('extracts orb definitions', () => {
+      const res = extractPackageFile(file5);
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '2.1.1',
+          datasource: 'orb',
+          depName: 'python',
+          depType: 'orb',
+          packageName: 'circleci/python',
+          versioning: 'npm',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '3.9',
+          datasource: 'docker',
+          depName: 'cimg/python',
+          depType: 'docker',
+          replaceString: 'cimg/python:3.9',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '3.7',
+          datasource: 'docker',
+          depName: 'cimg/python',
+          depType: 'docker',
+          replaceString: 'cimg/python:3.7',
         },
       ]);
     });
