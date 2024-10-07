@@ -5,7 +5,7 @@ import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
-import { MavenDatasource } from '../maven';
+import { Datasource } from '../datasource';
 import { MAVEN_REPO } from '../maven/common';
 import { downloadHttpProtocol } from '../maven/util';
 import { extractPageLinks, getLatestVersion } from '../sbt-package/util';
@@ -18,8 +18,8 @@ import type {
 export const SBT_PLUGINS_REPO =
   'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases';
 
-export class SbtPluginDatasource extends MavenDatasource {
-  static override readonly id = 'sbt-plugin';
+export class SbtPluginDatasource extends Datasource {
+  static readonly id = 'sbt-plugin';
 
   override readonly defaultRegistryUrls = [SBT_PLUGINS_REPO, MAVEN_REPO];
 
