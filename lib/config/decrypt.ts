@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
-import { maskToken } from '../util/mask';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
 import { ensureTrailingSlash } from '../util/url';
@@ -167,30 +166,6 @@ export async function decryptConfig(
           if (eKey === 'npmToken') {
             const token = decryptedStr.replace(regEx(/\n$/), '');
             addSecretForSanitizing(token);
-            logger.debug(
-              { decryptedToken: maskToken(token) },
-              'Migrating npmToken to npmrc',
-            );
-            if (is.string(decryptedConfig.npmrc)) {
-              /* eslint-disable no-template-curly-in-string */
-              if (decryptedConfig.npmrc.includes('${NPM_TOKEN}')) {
-                logger.debug('Replacing ${NPM_TOKEN} with decrypted token');
-                decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
-                  regEx(/\${NPM_TOKEN}/g),
-                  token,
-                );
-              } else {
-                logger.debug('Appending _authToken= to end of existing npmrc');
-                decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
-                  regEx(/\n?$/),
-                  `\n_authToken=${token}\n`,
-                );
-              }
-              /* eslint-enable no-template-curly-in-string */
-            } else {
-              logger.debug('Adding npmrc to config');
-              decryptedConfig.npmrc = `//registry.npmjs.org/:_authToken=${token}\n`;
-            }
           } else {
             decryptedConfig[eKey] = decryptedStr;
             addSecretForSanitizing(decryptedStr);

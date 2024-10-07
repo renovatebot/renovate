@@ -23,6 +23,7 @@ import { readLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
+import { maskToken } from '../../../util/mask';
 import { regEx } from '../../../util/regex';
 import { getOnboardingConfig } from '../onboarding/branch/config';
 import { getDefaultConfigFileName } from '../onboarding/branch/create';
@@ -289,6 +290,10 @@ export function setNpmTokenInNpmrc(config: RenovateConfig): void {
   }
 
   const token = config.npmToken;
+  logger.debug(
+    { decryptedToken: maskToken(token) },
+    'Migrating npmToken to npmrc',
+  );
 
   if (!is.string(config.npmrc)) {
     logger.debug('Adding npmrc to config');
