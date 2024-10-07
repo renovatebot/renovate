@@ -3,7 +3,8 @@ import * as memCache from './cache/memory';
 
 export function getExpression(input: string): jsonata.Expression | Error {
   const cacheKey = `jsonata:${input}`;
-  const cachedExpression = memCache.get(cacheKey);
+  const cachedExpression = memCache.get<jsonata.Expression | Error>(cacheKey);
+  // istanbul ignore if: cannot test
   if (cachedExpression) {
     return cachedExpression;
   }
@@ -12,7 +13,7 @@ export function getExpression(input: string): jsonata.Expression | Error {
     result = jsonata(input);
   } catch (err) {
     // JSONata errors aren't detected as TypeOf Error
-    result = new Error(err.message ?? 'Unknown JSONata error');
+    result = new Error(err.message);
   }
   memCache.set(cacheKey, result);
   return result;
