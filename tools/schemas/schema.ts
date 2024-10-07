@@ -5,7 +5,7 @@ const UrlSchema = z.record(
   z.union([z.string(), z.array(z.string())]),
 );
 
-const MonorepoSchema = z.object({
+export const MonorepoSchema = z.object({
   repoGroups: UrlSchema,
   orgGroups: UrlSchema,
   patternGroups: UrlSchema,
@@ -46,11 +46,9 @@ const AllSchema = z.object({
   ignoreDeps: z.array(z.string()).optional(),
 });
 
-const ReplacementsSchema = z
+export const ReplacementsSchema = z
   .object({
     $schema: z.string(),
     all: AllSchema,
   })
   .catchall(RuleSetSchema);
-
-export { MonorepoSchema, ReplacementsSchema };
