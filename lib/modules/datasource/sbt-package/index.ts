@@ -11,6 +11,8 @@ import { MAVEN_REPO } from '../maven/common';
 import { downloadHttpProtocol } from '../maven/util';
 import type {
   GetReleasesConfig,
+  PostprocessReleaseConfig,
+  PostprocessReleaseResult,
   RegistryStrategy,
   Release,
   ReleaseResult,
@@ -216,5 +218,14 @@ export class SbtPackageDatasource extends MavenDatasource {
 
     logger.debug(`Sbt: no versions found for "${packageName}"`);
     return null;
+  }
+
+  // istanbul ignore next: to be rewritten
+  override async postprocessRelease(
+    config: PostprocessReleaseConfig,
+    release: Release,
+  ): Promise<PostprocessReleaseResult> {
+    const mavenResult = await super.postprocessRelease(config, release);
+    return mavenResult === 'reject' ? release : mavenResult;
   }
 }
