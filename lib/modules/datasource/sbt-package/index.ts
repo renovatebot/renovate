@@ -16,7 +16,7 @@ import type {
 import { extractPageLinks, getLatestVersion } from './util';
 
 export class SbtPackageDatasource extends MavenDatasource {
-  static override id = 'sbt-package';
+  static override readonly id = 'sbt-package';
 
   override readonly defaultRegistryUrls = [MAVEN_REPO];
 
