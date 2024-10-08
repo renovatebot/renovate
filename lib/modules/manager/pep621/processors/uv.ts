@@ -205,8 +205,8 @@ function getMatchingHostRule(url: string | undefined): HostRule {
   return is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
 }
 
-function getUvExtraIndexUrl(updatedDeps: Upgrade[]): NodeJS.ProcessEnv {
-  const registryUrls = updatedDeps.map((dep) => dep.registryUrls).flat();
+function getUvExtraIndexUrl(deps: Upgrade[]): NodeJS.ProcessEnv {
+  const registryUrls = new Set(deps.map((dep) => dep.registryUrls).flat());
   const extraIndexUrls: string[] = [];
 
   for (const registryUrl of registryUrls) {
