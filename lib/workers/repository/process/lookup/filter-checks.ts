@@ -53,7 +53,7 @@ export async function filterInternalChecks(
         releaseConfig[releaseConfig.updateType]!,
       );
       // Apply packageRules in case any apply to updateType
-      releaseConfig = applyPackageRules(releaseConfig, 'update-type');
+      releaseConfig = await applyPackageRules(releaseConfig, 'update-type');
 
       const updatedCandidateRelease = await postprocessRelease(
         releaseConfig,

@@ -204,7 +204,7 @@ export async function lookupUpdates(
         }
       }
       // Reapply package rules in case we missed something from sourceUrl
-      config = applyPackageRules(
+      config = await applyPackageRules(
         { ...config, sourceUrl: res.sourceUrl },
         'source-url',
       );
@@ -320,7 +320,7 @@ export async function lookupUpdates(
           )
         ) {
           // Reapply package rules to check matches for matchCurrentAge
-          config = applyPackageRules(
+          config = await applyPackageRules(
             { ...config, currentVersionTimestamp },
             'current-timestamp',
           );
