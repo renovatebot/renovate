@@ -38,6 +38,7 @@ import { allowedStatusCheckStrings } from './types';
 import * as managerValidator from './validation-helpers/managers';
 import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches';
 import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
+import { getExpression } from '../util/jsonata';
 
 const options = getOptions();
 
@@ -834,6 +835,16 @@ export async function validateConfig(
             });
           }
         }
+      }
+    }
+
+    if (key === 'matchJsonata' && val) {
+      const expression = getExpression(val as string);
+      if (expression instanceof Error) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid JSONata expression for ${currentPath}: ${expression.message}`,
+        });
       }
     }
   }
