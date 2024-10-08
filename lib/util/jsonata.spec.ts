@@ -10,4 +10,4 @@ describe('lib/util/jsonata', () => {
       expect(getExpression('foo[')).toBeInstanceOf(Error);
     });
   });
-}
+});
