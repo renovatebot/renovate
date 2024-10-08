@@ -8,6 +8,7 @@ import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
 import { find } from '../../../../util/host-rules';
 import { Result } from '../../../../util/result';
+import { parseUrl } from '../../../../util/url';
 import { PypiDatasource } from '../../../datasource/pypi';
 import type {
   PackageDependency,
@@ -209,10 +210,10 @@ function getUvExtraIndexUrl(updatedDeps: Upgrade[]): NodeJS.ProcessEnv {
   const extraIndexUrls: string[] = [];
 
   for (const registryUrl of registryUrls) {
-    if (!registryUrl) {
+    const parsedUrl = parseUrl(registryUrl);
+    if (!parsedUrl) {
       continue;
     }
-    const parsedUrl = new URL(registryUrl);
 
     const rule = getMatchingHostRule(parsedUrl.toString());
     if (rule.username) {
