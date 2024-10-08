@@ -30,9 +30,12 @@ export function extractPackageFile(
     return null;
   }
 
-  const deps = definitions.flatMap((definition) =>
-    extractDefinition(definition, config),
-  );
+  const deps: PackageDependency[] = [];
+
+  for (const definition of definitions) {
+    const extractedDeps = extractDefinition(definition, config);
+    deps.push(...extractedDeps);
+  }
 
   return deps.length ? { deps } : null;
 }
@@ -41,11 +44,7 @@ export function extractDefinition(
   definition: ProfileDefinition,
   config?: ExtractConfig,
 ): PackageDependency[] {
-  const result = ProfileDefinition.safeParse(definition);
-  if (result.success) {
-    return processAppSpec(result.data, config);
-  }
-  return [];
+  return processAppSpec(definition, config);
 }
 
 function processHelmCharts(
@@ -88,7 +87,7 @@ function processAppSpec(
 
   const depType = definition.kind;
 
-  if (is.nonEmptyArray(spec.helmCharts)) {
+  if (spec && is.nonEmptyArray(spec.helmCharts)) {
     for (const source of coerceArray(spec.helmCharts)) {
       const dep = processHelmCharts(source, config?.registryAliases);
       if (dep) {

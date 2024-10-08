@@ -27,10 +27,6 @@ describe('modules/manager/sveltos/extract', () => {
           name: empty-profile
       `;
 
-      jest
-        .spyOn(require('./extract'), 'extractDefinition')
-        .mockReturnValueOnce([]);
-
       const result = extractPackageFile(validYAML, 'valid-yaml.yml');
       expect(result).toBeNull();
     });
