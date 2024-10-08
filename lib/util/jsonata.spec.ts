@@ -1,6 +1,6 @@
 import { getExpression } from './jsonata';
 
-describe('lib/util/jsonata', () => {
+describe('util/jsonata', () => {
   describe('getExpression', () => {
     it('should return an expression', () => {
       expect(getExpression('foo')).not.toBeInstanceOf(Error);
