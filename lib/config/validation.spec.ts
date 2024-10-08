@@ -320,10 +320,19 @@ describe('config/validation', () => {
             defaultRegistryUrlTemplate: [],
             transformTemplates: [{}],
           },
+          bar: {
+            description: 'foo',
+            defaultRegistryUrlTemplate: 'bar',
+            transformTemplates: ['foo = "bar"', 'bar[0'],
+          },
         },
       } as any;
       const { errors } = await configValidation.validateConfig('repo', config);
       expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid JSONata expression for customDatasources: Expected "]" before end of expression',
+        },
         {
           message:
             'Invalid `customDatasources.defaultRegistryUrlTemplate` configuration: is a string',

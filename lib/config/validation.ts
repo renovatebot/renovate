@@ -747,7 +747,17 @@ export async function validateConfig(
                       message: `Invalid \`${currentPath}.${subKey}\` configuration: key is not allowed`,
                     });
                   } else if (subKey === 'transformTemplates') {
-                    if (!is.array(subValue, is.string)) {
+                    if (is.array(subValue, is.string)) {
+                      for (const expression of subValue) {
+                        const res = getExpression(expression);
+                        if (res instanceof Error) {
+                          errors.push({
+                            topic: 'Configuration Error',
+                            message: `Invalid JSONata expression for ${currentPath}: ${res.message}`,
+                          });
+                        }
+                      }
+                    } else {
                       errors.push({
                         topic: 'Configuration Error',
                         message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of string`,
