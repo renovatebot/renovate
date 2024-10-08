@@ -1,4 +1,3 @@
-import { MatchMatcher } from './match';
 import { BaseBranchesMatcher } from './base-branches';
 import { CategoriesMatcher } from './categories';
 import { CurrentAgeMatcher } from './current-age';
@@ -41,4 +40,3 @@ matchers.push(new UpdateTypesMatcher());
 matchers.push(new SourceUrlsMatcher());
 matchers.push(new NewValueMatcher());
 matchers.push(new CurrentAgeMatcher());
-matchers.push(new MatchMatcher());
