@@ -51,5 +51,3 @@ exports[`config/massage massageConfig massages packageRules matchUpdateTypes 1`]
   ],
 }
 `;
-
-exports[`config/massage massageConfig massages packageRules matchUpdateTypes 2`] = `undefined`;
