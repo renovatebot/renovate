@@ -29,7 +29,7 @@ jobs:
           echo "### Calculating diff for '*.spec.ts' files..."
           git diff $BASE_BRANCH..HEAD -- '*.spec.ts' > diff_spec_ts.txt
 
-          echo "### Counting additions and deletions of undesirable code patterns..."
+          echo "### Counting additions and deletions of snapshots..."
           ADDED=$(grep '^+' diff_spec_ts.txt | grep -v '^+++' | grep -E '\.toMatch(Snapshot|InlineSnapshot)\(' | wc -l || true)
           DELETED=$(grep '^-' diff_spec_ts.txt | grep -v '^---' | grep -E '\.toMatch(Snapshot|InlineSnapshot)\(' | wc -l || true)
 
@@ -38,6 +38,8 @@ jobs:
 
           if [ "$ADDED" -gt "$DELETED" ]; then
               echo "❌ Error: More undesirable code patterns have been added than deleted."
+              echo Added:\n$ADDED
+              echo Deleted:\n$DELETED
               exit 1
           else
               echo "✅ Snapshot code check passed."
