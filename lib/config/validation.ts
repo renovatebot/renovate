@@ -838,8 +838,8 @@ export async function validateConfig(
       }
     }
 
-    if (key === 'matchJsonata' && is.array(val)) {
-      for (const expression of val as string[]) {
+    if (key === 'matchJsonata' && is.array(val, is.string)) {
+      for (const expression of val) {
         const res = getExpression(expression);
         if (res instanceof Error) {
           errors.push({
