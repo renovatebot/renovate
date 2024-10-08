@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { extractDefinition } from './extract';
-import { ProfileDefinition } from './schema';
+import type { ProfileDefinition } from './schema';
 import { extractPackageFile } from '.';
 
 const validProfile = Fixtures.get('validProfile.yml');
