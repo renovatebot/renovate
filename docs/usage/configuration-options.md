@@ -2859,7 +2859,7 @@ It is recommended that you avoid using "negative" globs, like `**/!(package.json
 ### matchJsonata
 
 Use the `matchJsonata` field to define custom matching logic using [JSONata](https://jsonata.org/) query logic.
-Renovate will evaluate the JSONata expression against the passed values (`manager`, `packageName`, etc.).
+Renovate will evaluate the provided JSONata expressions against the passed values (`manager`, `packageName`, etc.).
 
 See [the JSONata docs](https://docs.jsonata.org/) for more details on JSONata syntax.
 
@@ -2870,6 +2870,8 @@ $exists(deprecationMessage)
 $exists(vulnerabilityFixVersion)
 manager = 'dockerfile' and depType = 'final'
 ```
+
+`matchJsonata` accepts an array of strings, and will return `true` if any of those JSONata expressions evaluate to `true`.
 
 ### matchManagers
 
