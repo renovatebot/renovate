@@ -8,6 +8,7 @@ import type {
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types';
+import { getExpression } from '../util/jsonata';
 import { regEx } from '../util/regex';
 import {
   getRegexPredicate,
@@ -38,7 +39,6 @@ import { allowedStatusCheckStrings } from './types';
 import * as managerValidator from './validation-helpers/managers';
 import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches';
 import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
-import { getExpression } from '../util/jsonata';
 
 const options = getOptions();
 
@@ -838,13 +838,15 @@ export async function validateConfig(
       }
     }
 
-    if (key === 'matchJsonata' && val) {
-      const expression = getExpression(val as string);
-      if (expression instanceof Error) {
-        errors.push({
-          topic: 'Configuration Error',
-          message: `Invalid JSONata expression for ${currentPath}: ${expression.message}`,
-        });
+    if (key === 'matchJsonata' && is.array(val)) {
+      for (const expression of val as string[]) {
+        const res = getExpression(expression);
+        if (res instanceof Error) {
+          errors.push({
+            topic: 'Configuration Error',
+            message: `Invalid JSONata expression for ${currentPath}: ${res.message}`,
+          });
+        }
       }
     }
   }

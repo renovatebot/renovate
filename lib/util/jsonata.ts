@@ -1,6 +1,6 @@
 import jsonata from 'jsonata';
-import { toSha256 } from './hash';
 import * as memCache from './cache/memory';
+import { toSha256 } from './hash';
 
 export function getExpression(input: string): jsonata.Expression | Error {
   const cacheKey = `jsonata:${toSha256(input)}`;

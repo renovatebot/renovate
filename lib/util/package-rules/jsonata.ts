@@ -12,21 +12,26 @@ export class JsonataMatcher extends Matcher {
       return null;
     }
 
-    const expression = getExpression(matchJsonata);
-    if (expression instanceof Error) {
-      logger.warn(
-        { errorMessage: expression.message },
-        'Invalid JSONata expression',
-      );
-      return false;
+    for (const expressionStr of matchJsonata) {
+      const expression = getExpression(expressionStr);
+      if (expression instanceof Error) {
+        logger.warn(
+          { errorMessage: expression.message },
+          'Invalid JSONata expression',
+        );
+      } else {
+        try {
+          const result = await expression.evaluate(inputConfig);
+          if (result) {
+            // Only one needs to match, so return early
+            return true;
+          }
+        } catch (err) {
+          logger.warn({ err }, 'Error evaluating JSONata expression');
+        }
+      }
     }
-
-    try {
-      const result = await expression.evaluate(inputConfig);
-      return Boolean(result);
-    } catch (err) {
-      logger.warn({ err }, 'Error evaluating JSONata expression');
-      return false;
-    }
+    // None matched, so return false
+    return false;
   }
 }

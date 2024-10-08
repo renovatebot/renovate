@@ -1517,7 +1517,8 @@ const options: RenovateOptions[] = [
     name: 'matchJsonata',
     description:
       'A JSONata expression to match against the full config object. Valid only within a `packageRules` object.',
-    type: 'string',
+    type: 'array',
+    subType: 'string',
     stage: 'package',
     parents: ['packageRules'],
     mergeable: true,

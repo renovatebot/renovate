@@ -381,7 +381,7 @@ export interface PackageRule
   matchRepositories?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
-  matchJsonata?: string;
+  matchJsonata?: string[];
   registryUrls?: string[] | null;
   vulnerabilitySeverity?: string;
   vulnerabilityFixVersion?: string;
