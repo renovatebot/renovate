@@ -44,6 +44,7 @@ describe('config/massage', () => {
       const res = massage.massageConfig(config);
       expect(res).toMatchSnapshot();
       expect(res.packageRules).toHaveLength(3);
+      expect(res.packageFiles).toMatchSnapshot();
     });
 
     it('filters packageRules with only match/exclude', () => {
