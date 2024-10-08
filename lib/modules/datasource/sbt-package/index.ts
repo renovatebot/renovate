@@ -93,7 +93,9 @@ export class SbtPackageDatasource extends MavenDatasource {
       });
 
       if (scalaVersion) {
-        const scalaSubdir = artifactSubdirs.find((x) => x.endsWith(`/${artifactId}_${scalaVersion}/`))
+        const scalaSubdir = artifactSubdirs.find((x) =>
+          x.endsWith(`/${artifactId}_${scalaVersion}/`),
+        );
         if (scalaSubdir) {
           packageUrls = [scalaSubdir];
           break;
