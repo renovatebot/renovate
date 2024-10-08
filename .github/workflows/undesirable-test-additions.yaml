@@ -11,81 +11,53 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Ensure we fetch all history so we can compare branches
+          fetch-depth: 0 # Ensure we fetch all history for comparison
           ref: ${{ github.event.pull_request.head.ref }}
       - name: Check for undesirable code
         run: |
           #!/bin/bash
           set -e
 
+          # Fetch the base branch
           git fetch origin ${{ github.event.pull_request.base.ref }}
 
           BASE_BRANCH=origin/${{ github.event.pull_request.base.ref }}
 
-          # Get diff of *.spec.ts files
-          git diff $BASE_BRANCH..HEAD -- '*.spec.ts' > diff_spec_ts.txt
-
-          # Count additions and deletions of undesirable code patterns
-          ADDED=$(grep '^+' diff_spec_ts.txt | grep -v '^+++' | grep -E '\.toMatch(Snapshot|InlineSnapshot)\(' | wc -l)
-          DELETED=$(grep '^-' diff_spec_ts.txt | grep -v '^---' | grep -E '\.toMatch(Snapshot|InlineSnapshot)\(' | wc -l)
-
-          echo "Undesirable code patterns added: $ADDED"
-          echo "Undesirable code patterns deleted: $DELETED"
-
-          if [ "$ADDED" -gt "$DELETED" ]; then
-              echo "Error: More undesirable code patterns have been added than deleted."
-              exit 1
-          fi
-
           # Get the list of changed files with their statuses
           git diff --name-status $BASE_BRANCH..HEAD > diff_name_status.txt
 
-          # Initialize counts
+          # Initialize counts for __fixtures__ directories
           NUM_ADDED_FIXTURES=0
           NUM_DELETED_FIXTURES=0
 
-          # Process added files
+          # Process added files in __fixtures__
           ADDED_FIXTURES=$(grep '^A' diff_name_status.txt | awk '{print $2}' | grep '/__fixtures__/')
           NUM_ADDED_FIXTURES=$(echo "$ADDED_FIXTURES" | grep -c . || true)
 
-          # Process deleted files
+          # Process deleted files in __fixtures__
           DELETED_FIXTURES=$(grep '^D' diff_name_status.txt | awk '{print $2}' | grep '/__fixtures__/')
           NUM_DELETED_FIXTURES=$(echo "$DELETED_FIXTURES" | grep -c . || true)
-
-          # Process rename entries
-          RENAME_ENTRIES=$(grep '^R' diff_name_status.txt)
-
-          while read -r line; do
-              STATUS=$(echo "$line" | awk '{print $1}')
-              OLD_PATH=$(echo "$line" | awk '{print $2}')
-              NEW_PATH=$(echo "$line" | awk '{print $3}')
-
-              OLD_IN_FIXTURES=0
-              NEW_IN_FIXTURES=0
-
-              if echo "$OLD_PATH" | grep -q '/__fixtures__/'; then
-                  OLD_IN_FIXTURES=1
-              fi
-
-              if echo "$NEW_PATH" | grep -q '/__fixtures__/'; then
-                  NEW_IN_FIXTURES=1
-              fi
-
-              if [ "$OLD_IN_FIXTURES" -eq 1 ] && [ "$NEW_IN_FIXTURES" -eq 0 ]; then
-                  # Moved out of __fixtures__
-                  NUM_DELETED_FIXTURES=$((NUM_DELETED_FIXTURES + 1))
-              elif [ "$OLD_IN_FIXTURES" -eq 0 ] && [ "$NEW_IN_FIXTURES" -eq 1 ]; then
-                  # Moved into __fixtures__
-                  NUM_ADDED_FIXTURES=$((NUM_ADDED_FIXTURES + 1))
-              fi
-              # If moved within __fixtures__, counts remain the same
-          done <<< "$RENAME_ENTRIES"
 
           echo "Number of added files in __fixtures__: $NUM_ADDED_FIXTURES"
           echo "Number of deleted files in __fixtures__: $NUM_DELETED_FIXTURES"
 
           if [ "$NUM_ADDED_FIXTURES" -gt "$NUM_DELETED_FIXTURES" ]; then
               echo "Error: More files have been added to __fixtures__ directories than deleted."
+              exit 1
+          fi
+
+          # Check for undesirable code patterns in *.spec.ts files
+          git diff $BASE_BRANCH..HEAD -- '*.spec.ts' > diff_spec_ts.txt
+
+          # Count additions and deletions of undesirable code patterns
+          ADDED_SNAPSHOTS=$(grep '^+' diff_spec_ts.txt | grep -v '^+++' | grep -E '\.toMatch(Snapshot|InlineSnapshot)\(' | wc -l)
+          DELETED_SNAPSHOTS=$(grep '^-' diff_spec_ts.txt | grep -v '^---' | grep -E '\.toMatch(Snapshot|InlineSnapshot)\(' | wc -l)
+
+          echo "Undesirable code patterns added: $ADDED_SNAPSHOTS"
+          echo "Undesirable code patterns deleted: $DELETED_SNAPSHOTS"
+
+          if [ "$ADDED_SNAPSHOTS" -gt "$DELETED_SNAPSHOTS" ]; then
+              echo "Error: More undesirable code patterns have been added than deleted."
               exit 1
           fi
 
