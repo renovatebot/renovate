@@ -6,7 +6,6 @@ const file1 = Fixtures.get('config.yml');
 const file2 = Fixtures.get('config2.yml');
 const file3 = Fixtures.get('config3.yml');
 const file4 = Fixtures.get('config4.yml');
-const file5 = Fixtures.get('config5.yml');
 
 describe('modules/manager/circleci/extract', () => {
   describe('extractPackageFile()', () => {
@@ -225,7 +224,31 @@ describe('modules/manager/circleci/extract', () => {
     });
 
     it('extracts orb definitions', () => {
-      const res = extractPackageFile(file5);
+      const res = extractPackageFile(codeBlock`
+      version: 2.1
+
+      orbs:
+        myorb:
+          orbs:
+            python: circleci/python@2.1.1
+
+          executors:
+            python:
+              docker:
+                - image: cimg/python:3.9
+
+          jobs:
+            test_image:
+              docker:
+                - image: cimg/python:3.7
+              steps:
+                - checkout
+
+      workflows:
+        Test:
+          jobs:
+            - myorb/test_image`);
+
       expect(res?.deps).toEqual([
         {
           currentValue: '2.1.1',

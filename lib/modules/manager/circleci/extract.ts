@@ -18,45 +18,40 @@ function extractDefinition(
   packageFile?: string,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
+  const orbs = definition.orbs ?? {};
 
-  try {
-    const orbs = definition.orbs ?? {};
+  for (const [key, orb] of Object.entries(orbs)) {
+    if (typeof orb === 'string') {
+      const [packageName, currentValue] = orb.split('@');
 
-    for (const [key, orb] of Object.entries(orbs)) {
-      if (typeof orb === 'string') {
-        const [packageName, currentValue] = orb.split('@');
-
-        deps.push({
-          depName: key,
-          packageName,
-          depType: 'orb',
-          currentValue,
-          versioning: npmVersioning.id,
-          datasource: OrbDatasource.id,
-        });
-      } else {
-        const parsed = CircleCiOrb.parse(orb);
-        if (parsed) {
-          deps.push(...extractDefinition(parsed));
-        }
+      deps.push({
+        depName: key,
+        packageName,
+        depType: 'orb',
+        currentValue,
+        versioning: npmVersioning.id,
+        datasource: OrbDatasource.id,
+      });
+    } else {
+      const parsed = CircleCiOrb.parse(orb);
+      if (parsed) {
+        deps.push(...extractDefinition(parsed));
       }
     }
+  }
 
-    // extract environments
-    const environments: CircleCiJob[] = [
-      Object.values(definition.executors ?? {}),
-      Object.values(definition.jobs ?? {}),
-    ].flat();
-    for (const job of environments) {
-      for (const dockerElement of coerceArray(job.docker)) {
-        deps.push({
-          ...getDep(dockerElement.image),
-          depType: 'docker',
-        });
-      }
+  // extract environments
+  const environments: CircleCiJob[] = [
+    Object.values(definition.executors ?? {}),
+    Object.values(definition.jobs ?? {}),
+  ].flat();
+  for (const job of environments) {
+    for (const dockerElement of coerceArray(job.docker)) {
+      deps.push({
+        ...getDep(dockerElement.image),
+        depType: 'docker',
+      });
     }
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err, packageFile }, 'Error extracting circleci images');
   }
 
   return deps;
