@@ -33,13 +33,8 @@ jobs:
           ADDED=$(grep '^+' diff_spec_ts.txt | grep -v '^+++' | grep -E '\.toMatch(Snapshot|InlineSnapshot)\(' | wc -l || true)
           DELETED=$(grep '^-' diff_spec_ts.txt | grep -v '^---' | grep -E '\.toMatch(Snapshot|InlineSnapshot)\(' | wc -l || true)
 
-          echo "Undesirable code patterns added: $ADDED"
-          echo "Undesirable code patterns deleted: $DELETED"
-
           if [ "$ADDED" -gt "$DELETED" ]; then
-              echo "❌ Error: More undesirable code patterns have been added than deleted."
-              echo Added:\n$ADDED
-              echo Deleted:\n$DELETED
+              echo "❌ Error: Snapshots have been added in this PR. Use toMatch instead."
               exit 1
           else
               echo "✅ Snapshot code check passed."
