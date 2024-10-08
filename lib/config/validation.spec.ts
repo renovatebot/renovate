@@ -129,6 +129,20 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
+    it('catches invalid jsonata expressions', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchJsonata: ['packageName = "foo"', '{{{something wrong}'],
+            enabled: true,
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toHaveLength(1);
+      expect(errors[0].message).toContain('Invalid JSONata expression');
+    });
+
     it('catches invalid allowedVersions regex', async () => {
       const config = {
         packageRules: [
