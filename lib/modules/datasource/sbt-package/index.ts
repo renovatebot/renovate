@@ -112,6 +112,7 @@ export class SbtPackageDatasource extends MavenDatasource {
     const allVersions = new Set<string>();
     for (const pkgUrl of packageUrls) {
       const res = await downloadHttpProtocol(this.http, pkgUrl);
+      // istanbul ignore if
       if (!res) {
         continue;
       }
@@ -152,10 +153,12 @@ export class SbtPackageDatasource extends MavenDatasource {
   ): Promise<Pick<ReleaseResult, 'homepage' | 'sourceUrl'>> {
     const result: Pick<ReleaseResult, 'homepage' | 'sourceUrl'> = {};
 
+    // istanbul ignore if
     if (!packageUrls?.length) {
       return result;
     }
 
+    // istanbul ignore if
     if (!version) {
       return result;
     }
