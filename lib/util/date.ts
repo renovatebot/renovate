@@ -6,7 +6,7 @@ export function getElapsedDays(timestamp: string): number {
   const currentVersionTimestampDate = DateTime.fromISO(timestamp);
   const now = DateTime.now();
   const diffInDays = now.diff(currentVersionTimestampDate, 'days').as('days');
-  const ageInDays = Math.ceil(diffInDays);
+  const ageInDays = Math.floor(diffInDays);
   return ageInDays;
 }
 
