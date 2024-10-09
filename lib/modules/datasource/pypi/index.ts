@@ -14,6 +14,9 @@ import { getGoogleAuthToken } from '../util';
 import { isGitHubRepo, normalizePythonDepName } from './common';
 import type { PypiJSON, PypiJSONRelease, Releases } from './types';
 
+const jsonPyPiUrl = 'https://pypi.org/pypi';
+const simplePyPiUrl = 'https://pypi.org/simple';
+
 export class PypiDatasource extends Datasource {
   static readonly id = 'pypi';
 
@@ -43,45 +46,54 @@ export class PypiDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    let dependency: ReleaseResult | null = null;
     // TODO: null check (#22198)
-    const hostUrl = ensureTrailingSlash(
-      registryUrl!.replace('https://pypi.org/simple', 'https://pypi.org/pypi'),
-    );
+    const hostUrl = ensureTrailingSlash(registryUrl!);
+    const simpleHostUrl = hostUrl.replace(jsonPyPiUrl, simplePyPiUrl);
+    const pypiJsonHostUrl = hostUrl.replace(simplePyPiUrl, jsonPyPiUrl);
     const normalizedLookupName = normalizePythonDepName(packageName);
 
-    // not all simple indexes use this identifier, but most do
-    if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
+    const simpleDependencies = await this.getResultsViaSimple(
+      normalizedLookupName,
+      simpleHostUrl,
+    ).catch((err) => {
+      if (err.statusCode !== 404) {
+        throw err;
+      }
+      logger.trace(
+        { packageName, hostUrl: simpleHostUrl },
+        'Simple api not found. Looking up pypijson api as fallback.',
+      );
+      return null;
+    });
+    logger.trace(
+      { packageName, hostUrl: pypiJsonHostUrl },
+      'Querying json api for metadata',
+    );
+    const pypiJsonDependencies = await this.getResultsViaPyPiJson(
+      normalizedLookupName,
+      pypiJsonHostUrl,
+    ).catch((err) => {
+      if (simpleDependencies === null) {
+        throw err;
+      }
       logger.trace(
         { packageName, hostUrl },
-        'Looking up pypi simple dependency',
+        'Json api lookup failed but got simple results.',
       );
-      dependency = await this.getSimpleDependency(
-        normalizedLookupName,
-        hostUrl,
-      );
-    } else {
-      logger.trace({ packageName, hostUrl }, 'Looking up pypi api dependency');
-      try {
-        // we need to resolve early here so we can catch any 404s and fallback to a simple lookup
-        dependency = await this.getDependency(normalizedLookupName, hostUrl);
-      } catch (err) {
-        if (err.statusCode !== 404) {
-          throw err;
-        }
-
-        // error contacting json-style api -- attempt to fallback to a simple-style api
-        logger.trace(
-          { packageName, hostUrl },
-          'Looking up pypi simple dependency via fallback',
-        );
-        dependency = await this.getSimpleDependency(
-          normalizedLookupName,
-          hostUrl,
-        );
+      return null;
+    });
+    if (pypiJsonDependencies === null || simpleDependencies === null) {
+      return pypiJsonDependencies ?? simpleDependencies
+    }
+    let dependency = pypiJsonDependencies
+    const added_versions = new Set<string>(dependency.releases.map(release => release.version))
+    for (const release of simpleDependencies.releases) {
+      if (!added_versions.has(release.version)) {
+        dependency.releases.push(release)
+        added_versions.add(release.version)
       }
     }
-    return dependency;
+    return dependency
   }
 
   private async getAuthHeaders(
@@ -103,7 +115,7 @@ export class PypiDatasource extends Datasource {
     return {};
   }
 
-  private async getDependency(
+  private async getResultsViaPyPiJson(
     packageName: string,
     hostUrl: string,
   ): Promise<ReleaseResult | null> {
@@ -250,7 +262,7 @@ export class PypiDatasource extends Datasource {
     );
   }
 
-  private async getSimpleDependency(
+  private async getResultsViaSimple(
     packageName: string,
     hostUrl: string,
   ): Promise<ReleaseResult | null> {
@@ -263,7 +275,10 @@ export class PypiDatasource extends Datasource {
     const response = await this.http.get(lookupUrl, { headers });
     const dep = response?.body;
     if (!dep) {
-      logger.trace({ dependency: packageName }, 'pip package not found');
+      logger.trace(
+        { dependency: packageName },
+        'pip package not found via simple api',
+      );
       return null;
     }
     if (response.authorization) {
