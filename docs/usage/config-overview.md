@@ -162,8 +162,8 @@ If the inherited config has presets, then Renovate:
 1. Resolves the presets
 1. Adds the resolved presets to the inherited config
 1. Merges the presets on top of the global config
-
-Using `ignorePresets` in your repository config to ignore certain presets will _not_ affect presets present in the inherited config.
+##### You can not ignore presets from inherited config
+You can _not_ use `ignorePresets` in your repository config to ignore presets _within_ inherited config.
 This is because inherited config is resolved _before_ the repository config.
 
 ### Repository config
