@@ -40,7 +40,7 @@ export async function generateUpdate(
   // istanbul ignore if
   if (release.releaseTimestamp) {
     update.releaseTimestamp = release.releaseTimestamp;
-    update.releaseAgeInDays = getElapsedDays(release.releaseTimestamp);
+    update.newVersionAgeInDays = getElapsedDays(release.releaseTimestamp);
   }
   // istanbul ignore if
   if (release.registryUrl !== undefined) {

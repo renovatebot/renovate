@@ -99,7 +99,7 @@ export interface LookupUpdate {
   checksumUrl?: string;
   downloadUrl?: string;
   releaseTimestamp?: any;
-  releaseAgeInDays?: number;
+  newVersionAgeInDays?: number;
   registryUrl?: string;
 }
 
