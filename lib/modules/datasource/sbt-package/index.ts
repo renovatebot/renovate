@@ -1,6 +1,7 @@
 import * as upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
+import * as packageCache from '../../../util/cache/package';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash, trimTrailingSlash } from '../../../util/url';
@@ -58,11 +59,23 @@ export class SbtPackageDatasource extends MavenDatasource {
 
     const groupIdSplit = groupId.split('.');
     const repoRootUrl = ensureTrailingSlash(registryUrl);
-    const packageRootUrlWith = (sep: string): string =>
-      `${repoRootUrl}${groupIdSplit.join(sep)}`;
+
+    const validRootUrlKey = `valid-root-url:${registryUrl}:${packageName}`;
+    const validRootUrl = await packageCache.get<string>(
+      'datasource-sbt-package',
+      validRootUrlKey,
+    );
+
     const packageRootUrls: string[] = [];
-    packageRootUrls.push(ensureTrailingSlash(packageRootUrlWith('/')));
-    packageRootUrls.push(ensureTrailingSlash(packageRootUrlWith('.')));
+    // istanbul ignore if: not easily testable
+    if (validRootUrl) {
+      packageRootUrls.push(validRootUrl);
+    } else {
+      const packageRootUrlWith = (sep: string): string =>
+        `${repoRootUrl}${groupIdSplit.join(sep)}`;
+      packageRootUrls.push(ensureTrailingSlash(packageRootUrlWith('/')));
+      packageRootUrls.push(ensureTrailingSlash(packageRootUrlWith('.')));
+    }
 
     let dependencyUrl: string | undefined;
     let packageUrls: string[] | undefined;
@@ -71,6 +84,13 @@ export class SbtPackageDatasource extends MavenDatasource {
       if (!res) {
         continue;
       }
+
+      await packageCache.set(
+        'datasource-sbt-package',
+        validRootUrlKey,
+        packageRootUrl,
+        30 * 24 * 60,
+      );
 
       dependencyUrl = trimTrailingSlash(packageRootUrl);
 
@@ -110,15 +130,23 @@ export class SbtPackageDatasource extends MavenDatasource {
       return null;
     }
 
-    const validPackageUrls: string[] = [];
+    const invalidPackageUrlsKey = `invalid-package-urls:${registryUrl}:${packageName}`;
+    const invalidPackageUrls = new Set(
+      await packageCache.get<string[]>(
+        'datasource-sbt-package',
+        invalidPackageUrlsKey,
+      ),
+    );
+    packageUrls = packageUrls.filter((url) => !invalidPackageUrls.has(url));
+
     const allVersions = new Set<string>();
     for (const pkgUrl of packageUrls) {
       const res = await downloadHttpProtocol(this.http, pkgUrl);
       // istanbul ignore if
       if (!res) {
+        invalidPackageUrls.add(pkgUrl);
         continue;
       }
-      validPackageUrls.push(pkgUrl);
 
       const rootPath = new URL(pkgUrl).pathname;
       const versions = extractPageLinks(res.body, (href) => {
@@ -135,13 +163,37 @@ export class SbtPackageDatasource extends MavenDatasource {
       }
     }
 
+    if (invalidPackageUrls.size > 0) {
+      await packageCache.set(
+        'datasource-sbt-package',
+        invalidPackageUrlsKey,
+        [...invalidPackageUrls],
+        30 * 24 * 60,
+      );
+    }
+
+    if (packageUrls.length > 0) {
+      const packageUrlsKey = `package-urls:${registryUrl}:${packageName}`;
+      await packageCache.set(
+        'datasource-sbt-package',
+        packageUrlsKey,
+        packageUrls,
+        30 * 24 * 60,
+      );
+    }
+
     const versions = [...allVersions];
     if (!versions.length) {
       return null;
     }
 
     const latestVersion = getLatestVersion(versions);
-    const pomInfo = await this.getPomInfo(packageUrls, latestVersion);
+    const pomInfo = await this.getPomInfo(
+      registryUrl,
+      packageName,
+      latestVersion,
+      packageUrls,
+    );
 
     const releases: Release[] = [...allVersions]
       .sort(compare)
@@ -150,10 +202,21 @@ export class SbtPackageDatasource extends MavenDatasource {
   }
 
   async getPomInfo(
-    packageUrls: string[],
+    registryUrl: string,
+    packageName: string,
     version: string | null,
+    pkgUrls?: string[],
   ): Promise<Pick<ReleaseResult, 'homepage' | 'sourceUrl'>> {
     const result: Pick<ReleaseResult, 'homepage' | 'sourceUrl'> = {};
+
+    const packageUrlsKey = `package-urls:${registryUrl}:${packageName}`;
+    // istanbul ignore next: will be covered later
+    const packageUrls =
+      pkgUrls ??
+      (await packageCache.get<string[]>(
+        'datasource-sbt-package',
+        packageUrlsKey,
+      ));
 
     // istanbul ignore if
     if (!packageUrls?.length) {
@@ -165,6 +228,25 @@ export class SbtPackageDatasource extends MavenDatasource {
       return result;
     }
 
+    const invalidPomFilesKey = `invalid-pom-files:${registryUrl}:${packageName}:${version}`;
+    const invalidPomFiles = new Set(
+      await packageCache.get<string[]>(
+        'datasource-sbt-package',
+        invalidPomFilesKey,
+      ),
+    );
+
+    const saveCache = async (): Promise<void> => {
+      if (invalidPomFiles.size > 0) {
+        await packageCache.set(
+          'datasource-sbt-package',
+          invalidPomFilesKey,
+          [...invalidPomFiles],
+          30 * 24 * 60,
+        );
+      }
+    };
+
     for (const packageUrl of packageUrls) {
       const artifactDir = upath.basename(packageUrl);
       const [artifact] = artifactDir.split('_');
@@ -172,30 +254,39 @@ export class SbtPackageDatasource extends MavenDatasource {
       for (const pomFilePrefix of [artifactDir, artifact]) {
         const pomFileName = `${pomFilePrefix}-${version}.pom`;
         const pomUrl = `${packageUrl}${version}/${pomFileName}`;
+        if (invalidPomFiles.has(pomUrl)) {
+          continue;
+        }
+
         const res = await downloadHttpProtocol(this.http, pomUrl);
         const content = res?.body;
-        if (content) {
-          const pomXml = new XmlDocument(content);
-
-          const homepage = pomXml.valueWithPath('url');
-          if (homepage) {
-            result.homepage = homepage;
-          }
-
-          const sourceUrl = pomXml.valueWithPath('scm.url');
-          if (sourceUrl) {
-            result.sourceUrl = sourceUrl
-              .replace(regEx(/^scm:/), '')
-              .replace(regEx(/^git:/), '')
-              .replace(regEx(/^git@github.com:/), 'https://github.com/')
-              .replace(regEx(/\.git$/), '');
-          }
-
-          return result;
+        if (!content) {
+          invalidPomFiles.add(pomUrl);
+          continue;
         }
+
+        const pomXml = new XmlDocument(content);
+
+        const homepage = pomXml.valueWithPath('url');
+        if (homepage) {
+          result.homepage = homepage;
+        }
+
+        const sourceUrl = pomXml.valueWithPath('scm.url');
+        if (sourceUrl) {
+          result.sourceUrl = sourceUrl
+            .replace(regEx(/^scm:/), '')
+            .replace(regEx(/^git:/), '')
+            .replace(regEx(/^git@github.com:/), 'https://github.com/')
+            .replace(regEx(/\.git$/), '');
+        }
+
+        await saveCache();
+        return result;
       }
     }
 
+    await saveCache();
     return result;
   }
 
