@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { DateTime } from 'luxon';
 import { mergeChildConfig } from '../../../../config';
 import type { ValidationMessage } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
@@ -25,6 +24,7 @@ import * as allVersioning from '../../../../modules/versioning';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { assignKeys } from '../../../../util/assign-keys';
+import { getElapsedDays } from '../../../../util/date';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
 import { Result } from '../../../../util/result';
@@ -313,16 +313,7 @@ export async function lookupUpdates(
 
       if (is.nonEmptyString(currentVersionTimestamp)) {
         res.currentVersionTimestamp = currentVersionTimestamp;
-        // Calculate age in days
-        const currentVersionTimestampDate = DateTime.fromISO(
-          currentVersionTimestamp,
-        );
-        const now = DateTime.now();
-        const diffInDays = now
-          .diff(currentVersionTimestampDate, 'days')
-          .as('days');
-        const currentVersionAgeInDays = Math.ceil(diffInDays);
-        res.currentVersionAgeInDays = currentVersionAgeInDays;
+        res.currentVersionAgeInDays = getElapsedDays(currentVersionTimestamp);
 
         if (
           config.packageRules?.some((rule) =>

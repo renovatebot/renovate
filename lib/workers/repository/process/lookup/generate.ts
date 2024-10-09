@@ -4,6 +4,7 @@ import type { Release } from '../../../../modules/datasource';
 import type { LookupUpdate } from '../../../../modules/manager/types';
 import type { VersioningApi } from '../../../../modules/versioning';
 import type { RangeStrategy } from '../../../../types';
+import { getElapsedDays } from '../../../../util/date';
 import { getMergeConfidenceLevel } from '../../../../util/merge-confidence';
 import type { LookupUpdateConfig } from './types';
 import { getUpdateType } from './update-type';
@@ -37,8 +38,9 @@ export async function generateUpdate(
     update.newDigest = release.newDigest;
   }
   // istanbul ignore if
-  if (release.releaseTimestamp !== undefined) {
+  if (release.releaseTimestamp) {
     update.releaseTimestamp = release.releaseTimestamp;
+    update.releaseAgeInDays = getElapsedDays(release.releaseTimestamp);
   }
   // istanbul ignore if
   if (release.registryUrl !== undefined) {
