@@ -43,11 +43,12 @@ import {
 function getTimestamp(
   versions: Release[],
   version: string,
-  versioning: allVersioning.VersioningApi,
+  versioningApi: allVersioning.VersioningApi,
 ): string | null | undefined {
   return versions.find(
     (v) =>
-      versioning.isValid(v.version) && versioning.equals(v.version, version),
+      versioningApi.isValid(v.version) &&
+      versioningApi.equals(v.version, version),
   )?.releaseTimestamp;
 }
 
@@ -57,7 +58,7 @@ export async function lookupUpdates(
   let config: LookupUpdateConfig = { ...inconfig };
   config.versioning ??= getDefaultVersioning(config.datasource);
 
-  const versioning = allVersioning.get(config.versioning);
+  const versioningApi = allVersioning.get(config.versioning);
   const unconstrainedValue =
     !!config.lockedVersion && is.undefined(config.currentValue);
 
@@ -123,13 +124,14 @@ export async function lookupUpdates(
         );
       }
     }
-    const isValid = is.string(compareValue) && versioning.isValid(compareValue);
+    const isValid =
+      is.string(compareValue) && versioningApi.isValid(compareValue);
 
     if (unconstrainedValue || isValid) {
       if (
         !config.updatePinnedDependencies &&
         // TODO #22198
-        versioning.isSingleVersion(compareValue!)
+        versioningApi.isSingleVersion(compareValue!)
       ) {
         res.skipReason = 'is-pinned';
         return Result.ok(res);
@@ -186,7 +188,7 @@ export async function lookupUpdates(
       const latestVersion = dependency.tags?.latest;
       // Filter out any results from datasource that don't comply with our versioning
       let allVersions = dependency.releases.filter((release) =>
-        versioning.isVersion(release.version),
+        versioningApi.isVersion(release.version),
       );
       // istanbul ignore if
       if (allVersions.length === 0) {
@@ -203,7 +205,7 @@ export async function lookupUpdates(
         }
       }
       // Reapply package rules in case we missed something from sourceUrl
-      config = applyPackageRules(
+      config = await applyPackageRules(
         { ...config, sourceUrl: res.sourceUrl },
         'source-url',
       );
@@ -220,14 +222,14 @@ export async function lookupUpdates(
           (v) =>
             v.version === taggedVersion ||
             (v.version === compareValue &&
-              versioning.isGreaterThan(taggedVersion, compareValue)),
+              versioningApi.isGreaterThan(taggedVersion, compareValue)),
         );
       }
       // Check that existing constraint can be satisfied
       const allSatisfyingVersions = allVersions.filter(
         (v) =>
           // TODO #22198
-          unconstrainedValue || versioning.matches(v.version, compareValue!),
+          unconstrainedValue || versioningApi.matches(v.version, compareValue!),
       );
       if (!allSatisfyingVersions.length) {
         logger.debug(
@@ -236,7 +238,7 @@ export async function lookupUpdates(
       }
 
       if (config.rollbackPrs && !allSatisfyingVersions.length) {
-        const rollback = getRollbackUpdate(config, allVersions, versioning);
+        const rollback = getRollbackUpdate(config, allVersions, versioningApi);
         // istanbul ignore if
         if (!rollback) {
           res.warnings.push({
@@ -280,7 +282,7 @@ export async function lookupUpdates(
         getCurrentVersion(
           compareValue!,
           config.lockedVersion!,
-          versioning,
+          versioningApi,
           rangeStrategy!,
           latestVersion!,
           nonDeprecatedVersions,
@@ -288,7 +290,7 @@ export async function lookupUpdates(
         getCurrentVersion(
           compareValue!,
           config.lockedVersion!,
-          versioning,
+          versioningApi,
           rangeStrategy!,
           latestVersion!,
           allVersions.map((v) => v.version),
@@ -308,7 +310,7 @@ export async function lookupUpdates(
       const currentVersionTimestamp = getTimestamp(
         allVersions,
         currentVersion,
-        versioning,
+        versioningApi,
       );
 
       if (is.nonEmptyString(currentVersionTimestamp)) {
@@ -321,7 +323,7 @@ export async function lookupUpdates(
           )
         ) {
           // Reapply package rules to check matches for matchCurrentAge
-          config = applyPackageRules(
+          config = await applyPackageRules(
             { ...config, currentVersionTimestamp },
             'current-timestamp',
           );
@@ -332,20 +334,20 @@ export async function lookupUpdates(
         compareValue &&
         currentVersion &&
         rangeStrategy === 'pin' &&
-        !versioning.isSingleVersion(compareValue)
+        !versioningApi.isSingleVersion(compareValue)
       ) {
         res.updates.push({
           updateType: 'pin',
           isPin: true,
           // TODO: newValue can be null! (#22198)
-          newValue: versioning.getNewValue({
+          newValue: versioningApi.getNewValue({
             currentValue: compareValue,
             rangeStrategy,
             currentVersion,
             newVersion: currentVersion,
           })!,
           newVersion: currentVersion,
-          newMajor: versioning.getMajor(currentVersion)!,
+          newMajor: versioningApi.getMajor(currentVersion)!,
         });
       }
       if (rangeStrategy === 'pin') {
@@ -353,7 +355,7 @@ export async function lookupUpdates(
         rangeStrategy = 'replace';
       }
       // istanbul ignore if
-      if (!versioning.isVersion(currentVersion!)) {
+      if (!versioningApi.isVersion(currentVersion!)) {
         res.skipReason = 'invalid-version';
         return Result.ok(res);
       }
@@ -366,25 +368,25 @@ export async function lookupUpdates(
         config.rangeStrategy === 'in-range-only'
           ? allSatisfyingVersions
           : allVersions,
-        versioning,
+        versioningApi,
       ).filter(
         (v) =>
           // Leave only compatible versions
           unconstrainedValue ||
-          versioning.isCompatible(v.version, compareValue),
+          versioningApi.isCompatible(v.version, compareValue),
       );
       let shrinkedViaVulnerability = false;
       if (config.isVulnerabilityAlert) {
         if (config.vulnerabilityFixVersion) {
           res.vulnerabilityFixVersion = config.vulnerabilityFixVersion;
           res.vulnerabilityFixStrategy = config.vulnerabilityFixStrategy;
-          if (versioning.isValid(config.vulnerabilityFixVersion)) {
+          if (versioningApi.isValid(config.vulnerabilityFixVersion)) {
             let fixedFilteredReleases;
-            if (versioning.isVersion(config.vulnerabilityFixVersion)) {
+            if (versioningApi.isVersion(config.vulnerabilityFixVersion)) {
               // Retain only releases greater than or equal to the fix version
               fixedFilteredReleases = filteredReleases.filter(
                 (release) =>
-                  !versioning.isGreaterThan(
+                  !versioningApi.isGreaterThan(
                     config.vulnerabilityFixVersion!,
                     release.version,
                   ),
@@ -392,7 +394,7 @@ export async function lookupUpdates(
             } else {
               // Retain only releases which max the fix constraint
               fixedFilteredReleases = filteredReleases.filter((release) =>
-                versioning.matches(
+                versioningApi.matches(
                   release.version,
                   config.vulnerabilityFixVersion!,
                 ),
@@ -442,7 +444,7 @@ export async function lookupUpdates(
           // TODO #22198
           currentVersion!,
           release.version,
-          versioning,
+          versioningApi,
         );
         if (is.string(bucket)) {
           if (buckets[bucket]) {
@@ -455,12 +457,12 @@ export async function lookupUpdates(
       const depResultConfig = mergeChildConfig(config, res);
       for (const [bucket, releases] of Object.entries(buckets)) {
         const sortedReleases = releases.sort((r1, r2) =>
-          versioning.sortVersions(r1.version, r2.version),
+          versioningApi.sortVersions(r1.version, r2.version),
         );
         const { release, pendingChecks, pendingReleases } =
           await filterInternalChecks(
             depResultConfig,
-            versioning,
+            versioningApi,
             bucket,
             sortedReleases,
           );
@@ -472,7 +474,7 @@ export async function lookupUpdates(
         const update = await generateUpdate(
           config,
           compareValue,
-          versioning,
+          versioningApi,
           // TODO #22198
 
           rangeStrategy!,
@@ -520,16 +522,16 @@ export async function lookupUpdates(
         }
         res.isSingleVersion ??=
           is.string(update.newValue) &&
-          versioning.isSingleVersion(update.newValue);
+          versioningApi.isSingleVersion(update.newValue);
         // istanbul ignore if
         if (
           config.versioning === dockerVersioningId &&
           update.updateType !== 'rollback' &&
           update.newValue &&
-          versioning.isVersion(update.newValue) &&
+          versioningApi.isVersion(update.newValue) &&
           compareValue &&
-          versioning.isVersion(compareValue) &&
-          versioning.isGreaterThan(compareValue, update.newValue)
+          versioningApi.isVersion(compareValue) &&
+          versioningApi.isGreaterThan(compareValue, update.newValue)
         ) {
           logger.warn(
             {
@@ -573,7 +575,7 @@ export async function lookupUpdates(
     if (config.lockedVersion) {
       res.currentVersion = config.lockedVersion;
       res.fixedVersion = config.lockedVersion;
-    } else if (compareValue && versioning.isSingleVersion(compareValue)) {
+    } else if (compareValue && versioningApi.isSingleVersion(compareValue)) {
       res.fixedVersion = compareValue.replace(regEx(/^=+/), '');
     }
 
@@ -615,12 +617,12 @@ export async function lookupUpdates(
           });
         }
       }
-      if (versioning.valueToVersion) {
+      if (versioningApi.valueToVersion) {
         // TODO #22198
-        res.currentVersion = versioning.valueToVersion(res.currentVersion!);
+        res.currentVersion = versioningApi.valueToVersion(res.currentVersion!);
         for (const update of res.updates || /* istanbul ignore next*/ []) {
           // TODO #22198
-          update.newVersion = versioning.valueToVersion(update.newVersion!);
+          update.newVersion = versioningApi.valueToVersion(update.newVersion!);
         }
       }
       if (res.registryUrl) {

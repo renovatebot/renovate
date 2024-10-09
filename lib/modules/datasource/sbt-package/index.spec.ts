@@ -66,8 +66,6 @@ describe('modules/datasource/sbt-package/index', () => {
         )
         .get('/maven2/com/example/empty/')
         .reply(200, '')
-        .get('/maven2/com.example/')
-        .reply(404)
         .get('/maven2/com/example/empty/maven-metadata.xml')
         .reply(404)
         .get('/maven2/com/example/empty/index.html')
