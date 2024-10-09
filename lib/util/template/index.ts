@@ -156,7 +156,7 @@ export const allowedFields = {
   currentValue: 'The extracted current value of the dependency being updated',
   currentVersion:
     'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
-  currentVersionAge: 'The age of the current version in days',
+  currentVersionAgeInDays: 'The age of the current version in days',
   currentVersionTimestamp: 'The timestamp of the current version',
   currentDigest: 'The extracted current digest of the dependency being updated',
   currentDigestShort:
