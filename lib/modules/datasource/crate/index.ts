@@ -1,6 +1,5 @@
 import Git from 'simple-git';
 import upath from 'upath';
-import { z } from 'zod';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
@@ -19,6 +18,7 @@ import type {
   Release,
   ReleaseResult,
 } from '../types';
+import { ReleaseTimestampSchema } from './schema';
 import type {
   CrateMetadata,
   CrateRecord,
@@ -379,14 +379,6 @@ export class CrateDatasource extends Datasource {
     return [packageName.slice(0, 2), packageName.slice(2, 4), packageName];
   }
 
-  private static releaseTimestampSchema = z
-    .object({
-      version: z.object({
-        created_at: z.string(),
-      }),
-    })
-    .transform(({ version: { created_at } }) => created_at);
-
   @cache({
     namespace: `datasource-crate`,
     key: (
@@ -408,7 +400,7 @@ export class CrateDatasource extends Datasource {
     const url = `https://crates.io/api/v1/crates/${packageName}/${release.version}`;
     const { body: releaseTimestamp } = await this.http.getJson(
       url,
-      CrateDatasource.releaseTimestampSchema,
+      ReleaseTimestampSchema,
     );
     release.releaseTimestamp = releaseTimestamp;
     return release;
