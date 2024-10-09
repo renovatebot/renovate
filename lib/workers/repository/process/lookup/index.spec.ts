@@ -4489,7 +4489,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect(res).toEqual({
         currentVersion: '17.0.0',
-        currentVersionAgeInDays: 2,
+        currentVersionAgeInDays: 1,
         currentVersionTimestamp: releaseTimestamp,
         fixedVersion: '17.0.0',
         isSingleVersion: true,
