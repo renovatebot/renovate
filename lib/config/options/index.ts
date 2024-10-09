@@ -1275,7 +1275,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchReleaseAge',
     description:
-      'Matches the age of a proposed package update. Renovate uses the package release timestamp to decide the package age. Valid only within a `packageRules` object.',
+      'Matches the release age of the package derived from its release timestamp. Valid only within a `packageRules` object.',
     type: 'string',
     parents: ['packageRules'],
     stage: 'package',

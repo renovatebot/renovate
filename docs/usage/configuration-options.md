@@ -2684,6 +2684,10 @@ Instead you should do `> 13 months`.
 !!! note
     We recommend you only use the words hour(s), day(s), week(s), month(s) and year(s) in your time ranges.
 
+<!-- prettier-ignore -->
+!!! note
+    If you want to match packages based on the age of the proposed (new) version, use [`matchReleaseAge`](#matchreleaseage) instead.
+
 ### matchCurrentValue
 
 This option is matched against the `currentValue` field of a dependency.
@@ -2968,6 +2972,63 @@ The above will set a replaceStrategy for any npm package which starts with `@ang
 ```
 
 The above will group together any npm package which starts with the string `angular`.
+
+### matchReleaseAge
+
+Use this field if you want to match packages based on the age of the release version, i.e., how long the version has been available.
+
+For example, if you want to group updates for dependencies where the existing version is more than 2 years old:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchReleaseAge": "> 2 years",
+      "groupName": "outdated dependencies"
+    }
+  ]
+}
+```
+
+The `matchReleaseAge` string must start with one of `>`, `>=`, `<` or `<=`.
+
+Only _one_ date part is supported, so you _cannot_ do `> 1 year 1 month`.
+Instead you should do `> 13 months`.
+
+<!-- prettier-ignore -->
+!!! note
+    We recommend you only use the words hour(s), day(s), week(s), month(s) and year(s) in your time ranges.
+
+#### matchReleaseAge vs matchCurrentAge
+
+##### Overview
+
+- **`matchReleaseAge`**: Matches packages based on how long a new release has been available.
+- **`matchCurrentAge`**: Matches packages based on the age of the currently installed version.
+
+##### Examples
+
+**`matchReleaseAge`**
+
+A release has been available for 15 days. Setting `"matchReleaseAge": "> 30 days"` ensures that only versions meeting this criteria are considered for further actions. Combined with `"groupName": "outdated dependencies"`, would close any dedicated PRs whose releases are older than 30 days, and group them under a single one. Reducing the number of open PRs.
+
+**`matchCurrentAge`**
+
+If the current version in your repository is 200 days old and you set `"matchCurrentAge": "> 180 days"`, only packages meeting this age will trigger further logic such as grouping. Combined with `"groupName": "old dependencies"`, would group any new release whose current version is older than 180 days in a dedicated PR.
+
+##### Downsides
+
+- **`matchReleaseAge`**: This may cause a lot of flip-flopping if a matched package is released frequently. For example, you might want to close any PRs which of which releases are older than 20 days, and group them under a single one. But one of the packages is released monthly. With this, that package will be removed from the grouped PR for 10 days every month.
+
+- **`matchCurrentAge`**: Can delay important updates, particularly security patches, as it relies on the installed version's age. This means that new releases will always be grouped under a dedicated PR until a new version is accepted and the counter resets.
+
+#### matchReleaseAge vs minimumReleaseAge
+
+- **`matchReleaseAge`**: Matches packages based on how long a proposed release has been available.
+
+- **`minimumReleaseAge`**: Specifies a threshold for how old a release must be before it can be considered for updates.
+
+In summary, `matchReleaseAge` is for matching releases, while `minimumReleaseAge` is a criterion for eligibility based on age.
 
 ### matchRepositories
 
