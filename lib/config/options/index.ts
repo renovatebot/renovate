@@ -515,7 +515,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:11.11.29',
+    default: 'ghcr.io/containerbase/sidecar:11.11.30',
     globalOnly: true,
   },
   {
@@ -1522,6 +1522,18 @@ const options: RenovateOptions[] = [
     subType: 'string',
     stage: 'repository',
     parents: ['packageRules'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchJsonata',
+    description:
+      'A JSONata expression to match against the full config object. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
     cli: false,
     env: false,
   },

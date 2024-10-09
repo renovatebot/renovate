@@ -8,6 +8,7 @@ import type {
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types';
+import { getExpression } from '../util/jsonata';
 import { regEx } from '../util/regex';
 import {
   getRegexPredicate,
@@ -443,6 +444,7 @@ export async function validateConfig(
               'matchReleaseAge',
               'matchRepositories',
               'matchNewValue',
+              'matchJsonata',
             ];
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
@@ -746,7 +748,17 @@ export async function validateConfig(
                       message: `Invalid \`${currentPath}.${subKey}\` configuration: key is not allowed`,
                     });
                   } else if (subKey === 'transformTemplates') {
-                    if (!is.array(subValue, is.string)) {
+                    if (is.array(subValue, is.string)) {
+                      for (const expression of subValue) {
+                        const res = getExpression(expression);
+                        if (res instanceof Error) {
+                          errors.push({
+                            topic: 'Configuration Error',
+                            message: `Invalid JSONata expression for ${currentPath}: ${res.message}`,
+                          });
+                        }
+                      }
+                    } else {
                       errors.push({
                         topic: 'Configuration Error',
                         message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of string`,
@@ -833,6 +845,18 @@ export async function validateConfig(
               message: `hostRules header \`${header}\` is not allowed by this bot's \`allowedHeaders\`.`,
             });
           }
+        }
+      }
+    }
+
+    if (key === 'matchJsonata' && is.array(val, is.string)) {
+      for (const expression of val) {
+        const res = getExpression(expression);
+        if (res instanceof Error) {
+          errors.push({
+            topic: 'Configuration Error',
+            message: `Invalid JSONata expression for ${currentPath}: ${res.message}`,
+          });
         }
       }
     }
