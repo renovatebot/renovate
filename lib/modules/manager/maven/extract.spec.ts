@@ -13,7 +13,7 @@ import {
 jest.mock('../../../util/fs');
 
 const simpleContent = Fixtures.get('simple.pom.xml');
-const simpleContentWithWindowsLineEndings = Fixtures.get('simple.pom.crlf.xml');
+const simpleContentWithWindowsLineEndings = Fixtures.get('crlf.xml');
 const mirrorSettingsContent = Fixtures.get('mirror.settings.xml');
 const parentPomContent = Fixtures.get('parent.pom.xml');
 const childPomContent = Fixtures.get('child.pom.xml');
