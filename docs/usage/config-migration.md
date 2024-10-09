@@ -1,14 +1,12 @@
 # Config Migration
 
-To improve the Renovate program, the Renovate maintainers often rename, remove or combine configuration options.
+As part of continuous improvement and refinement, the Renovate maintainers often rename, remove or combine configuration options.
 
 When the Renovate maintainers change configuration options, they add "config migration" code.
 The migration code allows "legacy" config from users to keep working.
 Config migration works by migrating legacy config internally, before the config is used.
 If done right, config migration "just works" silently and legacy configs continue working indefinitely.
 The only sign that "config migration" is needed is the debug message in the Renovate logs, noting the old and newly migrated configs.
-
-By default, none of these changes are applied to Renovate config files (e.g. `renovate.json`)
 
 ## Enabling config migration pull requests
 
@@ -19,10 +17,10 @@ Using the latest names:
 - helps you find the documentation for the config
 
 Renovate can create a config migration Pull Request, to migrate legacy config in your configuration file.
-To get config migration pull requests from Renovate: set the [`configMigration`](./configuration-options.md#configmigration) config option to `true`.
+To get automated config migration pull requests from Renovate: set the [`configMigration`](./configuration-options.md#configmigration) config option to `true`.
 
 Config migration PRs are disabled by default.
-But we _strongly_ recommend you enable config migration PRs, because:
+But we recommend you enable config migration PRs, because:
 
 - the config migration PR "tells" you something changed
 - up-to-date terms help you search the Renovate documentation
