@@ -2869,7 +2869,7 @@ Here are some example `matchJsonata` strings for inspiration:
 $exists(deprecationMessage)
 $exists(vulnerabilityFixVersion)
 manager = 'dockerfile' and depType = 'final'
-newVersionAgeInDays < 7
+updateType = 'major' and newVersionAgeInDays < 7
 ```
 
 `matchJsonata` accepts an array of strings, and will return `true` if any of those JSONata expressions evaluate to `true`.
