@@ -515,7 +515,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:11.11.19',
+    default: 'ghcr.io/containerbase/sidecar:11.11.30',
     globalOnly: true,
   },
   {
@@ -1513,6 +1513,18 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
   },
+  {
+    name: 'matchJsonata',
+    description:
+      'A JSONata expression to match against the full config object. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
   // Version behavior
   {
     name: 'allowedVersions',
@@ -1894,6 +1906,14 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'bbAutoResolvePrTasks',
+    description:
+      'The PR tasks will be automatically completed after the PR is raised.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['bitbucket'],
+  },
+  {
     name: 'bbUseDefaultReviewers',
     description: 'Use the default reviewers (Bitbucket only).',
     type: 'boolean',
@@ -1968,11 +1988,21 @@ const options: RenovateOptions[] = [
       commitMessageSuffix: '[SECURITY]',
       branchTopic: `{{{datasource}}}-{{{depNameSanitized}}}-vulnerability`,
       prCreation: 'immediate',
+      vulnerabilityFixStrategy: 'lowest',
     },
     mergeable: true,
     cli: false,
     env: false,
     supportedPlatforms: ['github'],
+  },
+  {
+    name: 'vulnerabilityFixStrategy',
+    description:
+      'Strategy to use when fixing vulnerabilities. `lowest` will propose the earliest version with a fix, `highest` will always pick the latest version.',
+    type: 'string',
+    allowedValues: ['lowest', 'highest'],
+    default: 'lowest',
+    parents: ['vulnerabilityAlerts'],
   },
   {
     name: 'osvVulnerabilityAlerts',

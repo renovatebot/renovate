@@ -113,7 +113,7 @@
     Hi there,
 
 
-    Please give us specific logs, so we can help you more.
+    A maintainer wants you to find and share a specific log message (`packageFiles with updates`) from your repository or environment.
 
 
     If you self-host Renovate: make sure you run Renovate with `LOG_LEVEL=debug` to get the debug log messages! Next, open the debug-level logs and search for `packageFiles with updates`. This text marks the start of a structured log message that shows every package file, dependency, and update that Renovate found.
@@ -313,7 +313,7 @@
 
     Thanks, the Renovate team.
   close: true
-  close-reason: 'not planned'
+  close-reason: 'outdated'
 
 'auto:bad-vibes':
   comment: >
@@ -410,6 +410,8 @@
 
 
     Thanks, the Renovate team
+  close: true
+  close-reason: 'outdated'
 
 'auto:bug-converted':
   comment: >
@@ -472,6 +474,35 @@
 
 
     To summarize: please reduce the complexity of your discussion, to increase the chances of getting help.
+
+
+    Thanks, the Renovate team
+
+'auto:enterprise-support':
+  comment: >
+    Hi there,
+
+
+    The maintainers have labeled this discussion as a use case specific to "enterprise" users. Enterprise users typically self-host Renovate and have advanced requirements like custom certificates, HTTP proxies, private registries, air gapping, etc.
+
+
+    Such cases usually need a lot of back-and-forth to resolve, because the problem is related to the user's environment.
+    Usually the user's environment can not be reproduced publicly, which means that maintainer debugging is not possible.
+
+
+    The maintainers decided their time is best spent on issues that help large numbers of users. This means enterprise-specific issues affecting one user (or a small number of users), are not a priority. If we can help you quickly, we will. But if you see this message, then a maintainer believes this is not a quick fix. The maintainers will not actively work on this issue, unless new information is found.
+
+
+    If you are an enterprise user, please consider the following options:
+
+      - Troubleshoot and contribute a fix yourself, or
+      - [Hire a consultant](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#getting-more-help) to help you, or
+      - Consider an [Enterprise support contract from Mend.io](https://mend.io/mend-renovate/), or
+      - Wait for a community member to help you, if they have the same problem
+
+
+    If you choose to wait, then this discussion can remain open indefinitely.
+    But please be patient, do not nudge or bump this discussion just to get attention.
 
 
     Thanks, the Renovate team
