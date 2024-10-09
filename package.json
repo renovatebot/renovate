@@ -357,7 +357,7 @@
       "safe-json-stringify"
     ],
     "overrides": {
-      "@semantic-release/github>@octokit/plugin-paginate-rest": "11.3.0"
+      "@semantic-release/github>@octokit/plugin-paginate-rest": "11.3.5"
     }
   }
 }
