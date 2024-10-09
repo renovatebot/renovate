@@ -165,6 +165,7 @@ export async function decryptConfig(
           logger.debug(`Decrypted ${eKey}`);
           if (eKey === 'npmToken') {
             const token = decryptedStr.replace(regEx(/\n$/), '');
+            decryptedConfig[eKey] = token;
             addSecretForSanitizing(token);
           } else {
             decryptedConfig[eKey] = decryptedStr;
