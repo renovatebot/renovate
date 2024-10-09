@@ -201,8 +201,7 @@ function generateCMD(updatedDeps: Upgrade[]): string {
 }
 
 function getMatchingHostRule(url: string | undefined): HostRule {
-  const scopedMatch = find({ hostType: PypiDatasource.id, url });
-  return is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
+  return find({ hostType: PypiDatasource.id, url });
 }
 
 function getUvExtraIndexUrl(deps: Upgrade[]): NodeJS.ProcessEnv {
