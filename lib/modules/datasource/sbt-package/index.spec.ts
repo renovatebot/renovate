@@ -2,11 +2,16 @@ import { codeBlock } from 'common-tags';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { mocked } from '../../../../test/util';
+import * as _packageCache from '../../../util/cache/package';
 import { regEx } from '../../../util/regex';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
 import { extractPageLinks } from './util';
 import { SbtPackageDatasource } from '.';
+
+jest.mock('../../../util/cache/package');
+const packageCache = mocked(_packageCache);
 
 describe('modules/datasource/sbt-package/index', () => {
   it('parses Maven index directory', () => {
@@ -276,6 +281,37 @@ describe('modules/datasource/sbt-package/index', () => {
       });
 
       expect(res).toMatchObject({});
+    });
+  });
+
+  describe('postprocessRelease', () => {
+    const datasource = new SbtPackageDatasource();
+
+    it('extracts URL from Maven POM file', async () => {
+      const registryUrl = 'https://repo.maven.apache.org/maven2/';
+      const packageName = 'org.example:example';
+      packageCache.get.mockImplementation(((ns: string, k: string) =>
+        ns === 'datasource-sbt-package' &&
+        k === `package-urls:${registryUrl}:${packageName}`
+          ? Promise.resolve([`${registryUrl}org/example/`])
+          : Promise.resolve(undefined)) as never);
+
+      httpMock
+        .scope(registryUrl)
+        .get('/org/example/1.2.3/example-1.2.3.pom')
+        .reply(200, codeBlock`<project></project>`, {
+          'last-modified': '01-01-2024',
+        });
+
+      const res = await datasource.postprocessRelease(
+        { packageName, registryUrl },
+        { version: '1.2.3' },
+      );
+
+      expect(res).toEqual({
+        version: '1.2.3',
+        releaseTimestamp: '2024-01-01T03:00:00.000Z',
+      });
     });
   });
 });
