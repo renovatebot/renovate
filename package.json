@@ -139,14 +139,14 @@
     "pnpm": "^9.0.0"
   },
   "dependencies": {
-    "@aws-sdk/client-codecommit": "3.637.0",
-    "@aws-sdk/client-ec2": "3.641.0",
-    "@aws-sdk/client-ecr": "3.637.0",
-    "@aws-sdk/client-rds": "3.637.0",
-    "@aws-sdk/client-s3": "3.637.0",
-    "@aws-sdk/credential-providers": "3.637.0",
+    "@aws-sdk/client-codecommit": "3.658.1",
+    "@aws-sdk/client-ec2": "3.658.1",
+    "@aws-sdk/client-ecr": "3.658.1",
+    "@aws-sdk/client-rds": "3.658.1",
+    "@aws-sdk/client-s3": "3.658.1",
+    "@aws-sdk/credential-providers": "3.658.1",
     "@breejs/later": "4.2.0",
-    "@cdktf/hcl2json": "0.20.8",
+    "@cdktf/hcl2json": "0.20.9",
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/context-async-hooks": "1.26.0",
     "@opentelemetry/exporter-trace-otlp-http": "0.53.0",
@@ -171,7 +171,7 @@
     "async-mutex": "0.5.0",
     "auth-header": "1.0.0",
     "aws4": "1.13.2",
-    "azure-devops-node-api": "14.0.2",
+    "azure-devops-node-api": "14.1.0",
     "bunyan": "1.8.15",
     "cacache": "18.0.4",
     "chalk": "4.1.2",
@@ -234,7 +234,7 @@
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
     "shlex": "2.1.2",
-    "simple-git": "3.26.0",
+    "simple-git": "3.27.0",
     "slugify": "1.6.6",
     "source-map-support": "0.5.21",
     "toml-eslint-parser": "0.10.0",
@@ -285,7 +285,7 @@
     "@types/js-yaml": "4.0.9",
     "@types/json-dup-key-validator": "1.0.2",
     "@types/linkify-markdown": "1.0.3",
-    "@types/lodash": "4.17.7",
+    "@types/lodash": "4.17.9",
     "@types/luxon": "3.4.2",
     "@types/markdown-it": "14.1.2",
     "@types/markdown-table": "2.0.0",
@@ -293,7 +293,7 @@
     "@types/mdast": "3.0.15",
     "@types/moo": "0.5.9",
     "@types/ms": "0.7.34",
-    "@types/node": "20.16.5",
+    "@types/node": "20.16.10",
     "@types/parse-link-header": "2.0.3",
     "@types/semver": "7.5.8",
     "@types/semver-stable": "3.0.2",
@@ -304,9 +304,9 @@
     "@types/url-join": "4.0.3",
     "@types/validate-npm-package-name": "4.0.2",
     "@types/xmldoc": "1.1.9",
-    "@typescript-eslint/eslint-plugin": "8.6.0",
-    "@typescript-eslint/parser": "8.6.0",
-    "aws-sdk-client-mock": "4.0.1",
+    "@typescript-eslint/eslint-plugin": "8.8.0",
+    "@typescript-eslint/parser": "8.8.0",
+    "aws-sdk-client-mock": "4.0.2",
     "callsite": "1.0.0",
     "common-tags": "1.8.2",
     "conventional-changelog-conventionalcommits": "8.0.0",
@@ -332,10 +332,10 @@
     "memfs": "4.12.0",
     "nock": "13.5.5",
     "npm-run-all2": "6.2.3",
-    "nyc": "17.0.0",
+    "nyc": "17.1.0",
     "pretty-format": "29.7.0",
     "rimraf": "6.0.1",
-    "semantic-release": "24.1.1",
+    "semantic-release": "24.1.2",
     "tar": "7.4.3",
     "tmp-promise": "3.0.3",
     "ts-jest": "29.2.5",
@@ -344,7 +344,7 @@
     "typescript": "5.6.2",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@9.10.0",
+  "packageManager": "pnpm@9.12.0",
   "files": [
     "dist",
     "renovate-schema.json"
@@ -357,7 +357,7 @@
       "safe-json-stringify"
     ],
     "overrides": {
-      "@semantic-release/github>@octokit/plugin-paginate-rest": "11.3.0"
+      "@semantic-release/github>@octokit/plugin-paginate-rest": "11.3.5"
     }
   }
 }

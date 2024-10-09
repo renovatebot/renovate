@@ -6,12 +6,12 @@ import { logger } from '../../logger';
 import type { StageName } from '../../types/skip-reason';
 import matchers from './matchers';
 
-function matchesRule(
+async function matchesRule(
   inputConfig: PackageRuleInputConfig,
   packageRule: PackageRule,
-): boolean {
+): Promise<boolean> {
   for (const matcher of matchers) {
-    const isMatch = matcher.matches(inputConfig, packageRule);
+    const isMatch = await matcher.matches(inputConfig, packageRule);
 
     // no rules are defined
     if (is.nullOrUndefined(isMatch)) {
@@ -26,10 +26,10 @@ function matchesRule(
   return true;
 }
 
-export function applyPackageRules<T extends PackageRuleInputConfig>(
+export async function applyPackageRules<T extends PackageRuleInputConfig>(
   inputConfig: T,
   stageName?: StageName,
-): T {
+): Promise<T> {
   let config = { ...inputConfig };
   const packageRules = config.packageRules ?? [];
   logger.trace(
@@ -38,7 +38,7 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
   );
   for (const packageRule of packageRules) {
     // This rule is considered matched if there was at least one positive match and no negative matches
-    if (matchesRule(config, packageRule)) {
+    if (await matchesRule(config, packageRule)) {
       // Package rule config overrides any existing config
       const toApply = removeMatchers({ ...packageRule });
       if (config.groupSlug && packageRule.groupName && !packageRule.groupSlug) {

@@ -2123,6 +2123,7 @@ Beware: configuring Renovate to automerge without any tests can lead to broken b
 By default, Renovate won't update any package versions to unstable versions (e.g. `4.0.0-rc3`) unless the current version has the same `major.minor.patch` and was _already_ unstable (e.g. it was already on `4.0.0-rc2`).
 Renovate will also not "jump" unstable versions automatically, e.g. if you are on `4.0.0-rc2` and newer versions `4.0.0` and `4.1.0-alpha.1` exist then Renovate will update you to `4.0.0` only.
 If you need to force permanent unstable updates for a package, you can add a package rule setting `ignoreUnstable` to `false`.
+In that case you will usually also want to set `respectLatest` to `false` so that Renovate considers versions ahead of `latest`.
 
 Also check out the `followTag` configuration option above if you wish Renovate to keep you pinned to a particular release tag.
 
@@ -2854,6 +2855,23 @@ The following example matches any file in directories starting with `app/`:
 ```
 
 It is recommended that you avoid using "negative" globs, like `**/!(package.json)`, because such patterns might still return true if they match against the lock file name (e.g. `package-lock.json`).
+
+### matchJsonata
+
+Use the `matchJsonata` field to define custom matching logic using [JSONata](https://jsonata.org/) query logic.
+Renovate will evaluate the provided JSONata expressions against the passed values (`manager`, `packageName`, etc.).
+
+See [the JSONata docs](https://docs.jsonata.org/) for more details on JSONata syntax.
+
+Here are some example `matchJsonata` strings for inspiration:
+
+```
+$exists(deprecationMessage)
+$exists(vulnerabilityFixVersion)
+manager = 'dockerfile' and depType = 'final'
+```
+
+`matchJsonata` accepts an array of strings, and will return `true` if any of those JSONata expressions evaluate to `true`.
 
 ### matchManagers
 

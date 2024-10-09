@@ -66,8 +66,6 @@ describe('modules/datasource/sbt-package/index', () => {
         )
         .get('/maven2/com/example/empty/')
         .reply(200, '')
-        .get('/maven2/com.example/')
-        .reply(404)
         .get('/maven2/com/example/empty/maven-metadata.xml')
         .reply(404)
         .get('/maven2/com/example/empty/index.html')
@@ -263,8 +261,6 @@ describe('modules/datasource/sbt-package/index', () => {
             </metadata>
           `,
         )
-        .head('/org/example/example_2.13/1.2.3/example_2.13-1.2.3.pom')
-        .reply(200)
         .get('/org/example/example_2.13/1.2.3/example_2.13-1.2.3.pom')
         .reply(200);
 

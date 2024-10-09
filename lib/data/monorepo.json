@@ -54,6 +54,7 @@
       "https://github.com/awslabs/aws-sdk-rust"
     ],
     "awsappsync": "https://github.com/awslabs/aws-mobile-appsync-sdk-js",
+    "azure-functions-dotnet-worker": "https://github.com/Azure/azure-functions-dotnet-worker",
     "azure azure-libraries-for-net": "https://github.com/Azure/azure-libraries-for-net",
     "azure azure-sdk-for-net": "https://github.com/Azure/azure-sdk-for-net",
     "azure azure-storage-net": "https://github.com/Azure/azure-storage-net",
@@ -284,6 +285,7 @@
     "feign": "https://github.com/OpenFeign/feign",
     "fela": "https://github.com/robinweser/fela",
     "fimbullinter": "https://github.com/fimbullinter/wotan",
+    "flipper": "https://github.com/flippercloud/flipper",
     "flopflip": "https://github.com/tdeekens/flopflip",
     "fontsource": [
       "https://github.com/fontsource/fontsource",
@@ -320,7 +322,8 @@
       "https://github.com/FasterXML/jackson",
       "https://github.com/FasterXML/jackson-databind",
       "https://github.com/FasterXML/jackson-dataformats-binary",
-      "https://github.com/FasterXML/jackson-dataformats-text"
+      "https://github.com/FasterXML/jackson-dataformats-text",
+      "https://github.com/FasterXML/jackson-module-kotlin"
     ],
     "jasmine": "https://github.com/jasmine/jasmine",
     "javahamcrest": "https://github.com/hamcrest/JavaHamcrest",
@@ -451,6 +454,7 @@
     "remark": "https://github.com/remarkjs/remark",
     "remix": "https://github.com/remix-run/remix",
     "retrofit": "https://github.com/square/retrofit",
+    "river": "https://github.com/riverqueue/river",
     "rjsf": "https://github.com/rjsf-team/react-jsonschema-form",
     "router5": "https://github.com/router5/router5",
     "ruby-on-rails": "https://github.com/rails/rails",
