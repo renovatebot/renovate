@@ -68,10 +68,7 @@ async function getRegistryReleases(
   const cacheKey = `${datasource.id} ${registryUrl} ${config.packageName}`;
   if (datasource.caching) {
     const cachedResult = null;
-    //  await packageCache.get<ReleaseResult>(
-    //   cacheNamespace,
-    //   cacheKey,
-    // );
+    await packageCache.get<ReleaseResult>(cacheNamespace, cacheKey);
 
     // istanbul ignore if
     if (cachedResult) {
