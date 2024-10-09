@@ -10,14 +10,20 @@ export interface UpdateTypeConfig {
 
 export function getUpdateType(
   config: UpdateTypeConfig,
-  versioning: allVersioning.VersioningApi,
+  versioningApi: allVersioning.VersioningApi,
   currentVersion: string,
   newVersion: string,
 ): UpdateType {
-  if (versioning.getMajor(newVersion)! > versioning.getMajor(currentVersion)!) {
+  if (
+    versioningApi.getMajor(newVersion)! >
+    versioningApi.getMajor(currentVersion)!
+  ) {
     return 'major';
   }
-  if (versioning.getMinor(newVersion)! > versioning.getMinor(currentVersion)!) {
+  if (
+    versioningApi.getMinor(newVersion)! >
+    versioningApi.getMinor(currentVersion)!
+  ) {
     return 'minor';
   }
   return 'patch';

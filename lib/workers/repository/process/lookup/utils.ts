@@ -50,11 +50,11 @@ export function determineNewReplacementName(
 export function determineNewReplacementValue(
   config: LookupUpdateConfig,
 ): string | undefined | null {
-  const versioning = allVersioning.get(config.versioning);
+  const versioningApi = allVersioning.get(config.versioning);
   const rangeStrategy = getRangeStrategy(config);
 
   if (!is.nullOrUndefined(config.replacementVersion)) {
-    return versioning.getNewValue({
+    return versioningApi.getNewValue({
       // TODO #22198
       currentValue: config.currentValue!,
       newVersion: config.replacementVersion,
