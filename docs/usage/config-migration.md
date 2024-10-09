@@ -17,7 +17,7 @@ Using the latest names:
 - helps you find the documentation for the config
 
 Renovate can create a config migration Pull Request, to migrate legacy config in your configuration file.
-To get automated config migration pull requests from Renovate: set the [`configMigration`](./configuration-options.md#configmigration) config option to `true`.
+To get automated config migration Pull Requests from Renovate: set the [`configMigration`](./configuration-options.md#configmigration) config option to `true`.
 
 Config migration PRs are disabled by default.
 But we recommend you enable config migration PRs, because:
@@ -44,12 +44,12 @@ Renovate takes no action.
 Renovate will:
 
 1. Create a Config Migration PR
-1. If the Dependency Dashboard issue is enabled then Renovate puts a link to the Config Migration PR on the dashboard
+1. If the Dependency Dashboard issue is enabled, then Renovate puts a link to the Config Migration PR on the dashboard
 
 ### Config migration needed, but disabled
 
 If config migration is needed, but disabled then Renovate adds a checkbox to the Dependency Dashboard (if the dashboard exists).
-This is known as "on-demand" config migration because migration PRs are only created at the request of the user by ticking the checkbox.
+This is known as "on-demand" config migration, because migration PRs are only created at the request of the user by ticking the checkbox.
 
 The checkbox looks like this:
 
