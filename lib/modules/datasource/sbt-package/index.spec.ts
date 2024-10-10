@@ -300,7 +300,7 @@ describe('modules/datasource/sbt-package/index', () => {
         .scope(registryUrl)
         .get('/org/example/1.2.3/example-1.2.3.pom')
         .reply(200, codeBlock`<project></project>`, {
-          'last-modified': '01-01-2024',
+          'last-modified': 'Wed, 21 Oct 2015 07:28:00 GMT',
         });
 
       const res = await datasource.postprocessRelease(
@@ -310,7 +310,7 @@ describe('modules/datasource/sbt-package/index', () => {
 
       expect(res).toEqual({
         version: '1.2.3',
-        releaseTimestamp: '2024-01-01T03:00:00.000Z',
+        releaseTimestamp: '2015-10-21T07:28:00.000Z',
       });
     });
   });
