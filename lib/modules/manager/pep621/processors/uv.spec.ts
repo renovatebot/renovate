@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { mockExecAll } from '../../../../../test/exec-util';
-import { fs, mockedFunction } from '../../../../../test/util';
+import { fs, hostRules, mockedFunction } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
@@ -264,6 +264,69 @@ describe('modules/manager/pep621/processors/uv', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4 --upgrade-package dep5 --upgrade-package dep6',
+        },
+      ]);
+    });
+
+    it('performs update on private package registry', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      hostRules.add({
+        matchHost: 'https://example.com',
+        username: 'user',
+        password: 'pass',
+      });
+      fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+      // uv
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }, { version: '0.2.28' }],
+      });
+
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+          registryUrls: ['https://foobar.com'],
+        },
+        {
+          packageName: 'dep2',
+          depType: depTypes.dependencies,
+          registryUrls: ['https://example.com'],
+        },
+      ];
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        {},
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2',
+          options: {
+            env: {
+              UV_EXTRA_INDEX_URL:
+                'https://foobar.com/ https://user:pass@example.com/',
+            },
+          },
         },
       ]);
     });
