@@ -1,4 +1,5 @@
 {
+  "$schema": "../../tools/schemas/replacements-schema.json",
   "all": {
     "description": "Apply crowd-sourced package replacement rules.",
     "extends": [
