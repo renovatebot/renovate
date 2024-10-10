@@ -102,8 +102,13 @@ export async function renovateRepository(
         }
         logger.debug(`Automerged but already retried once`);
       } else {
-        await configMigration(config, branchList);
-        await ensureDependencyDashboard(config, branches, packageFiles);
+        const configMigrationRes = await configMigration(config, branchList);
+        await ensureDependencyDashboard(
+          config,
+          branches,
+          packageFiles,
+          configMigrationRes,
+        );
       }
       await finalizeRepo(config, branchList);
       // TODO #22198
