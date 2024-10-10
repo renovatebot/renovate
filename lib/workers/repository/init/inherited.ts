@@ -1,7 +1,9 @@
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { mergeChildConfig, removeGlobalConfig } from '../../../config';
+import { decryptConfig } from '../../../config/decrypt';
 import { parseFileConfig } from '../../../config/parse';
+import { resolveConfigPresets } from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
 import {
@@ -99,5 +101,45 @@ export async function mergeInheritedConfig(
       'Removed global config from inherited config.',
     );
   }
-  return mergeChildConfig(config, filteredConfig);
+
+  if (is.nullOrUndefined(filteredConfig.extends)) {
+    return mergeChildConfig(config, filteredConfig);
+  }
+
+  let returnConfig = filteredConfig;
+
+  // Decrypt before resolving, in case it contains npm authentication for any preset
+  const decryptedConfig = await decryptConfig(returnConfig, config.repository);
+
+  // Decrypt after resolving, in case the preset contains npm authentication instead
+  logger.debug('Resolving presets found in inherited config');
+  const resolvedConfig = await decryptConfig(
+    await resolveConfigPresets(decryptedConfig, config, config.ignorePresets),
+    config.repository,
+  );
+  logger.trace({ config: resolvedConfig }, 'Resolved inherited config');
+  const validationRes = await validateConfig('inherit', resolvedConfig);
+  if (validationRes.errors.length) {
+    logger.warn(
+      { errors: validationRes.errors },
+      'Found errors in presets inside the inherited configuration.',
+    );
+    throw new Error(CONFIG_VALIDATION);
+  }
+  if (validationRes.warnings.length) {
+    logger.warn(
+      { warnings: validationRes.warnings },
+      'Found warnings in presets inside the inherited configuration.',
+    );
+  }
+
+  returnConfig = removeGlobalConfig(resolvedConfig, true);
+  if (!dequal(resolvedConfig, returnConfig)) {
+    logger.debug(
+      { inheritedConfig: resolvedConfig, filteredConfig: returnConfig },
+      'Removed global config from inherited config presets.',
+    );
+  }
+
+  return mergeChildConfig(config, returnConfig);
 }
