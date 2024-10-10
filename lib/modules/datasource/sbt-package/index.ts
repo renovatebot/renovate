@@ -345,7 +345,7 @@ export class SbtPackageDatasource extends MavenDatasource {
       { registryUrl, packageName }: PostprocessReleaseConfig,
       { version }: Release,
     ) => `postprocessRelease:${registryUrl}:${packageName}:${version}`,
-    ttlMinutes: 24 * 60,
+    ttlMinutes: 30 * 24 * 60,
   })
   override async postprocessRelease(
     config: PostprocessReleaseConfig,
