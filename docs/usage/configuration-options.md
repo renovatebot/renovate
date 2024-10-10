@@ -3524,7 +3524,7 @@ If a branch appears stale and hasn't been modified, then:
 - If an Open PR exist for the branch, then Renovate will rename the PR to append " - autoclosed" before closing/abandoning it
 - Renovate will delete the branch
 
-You can configure `pruneStaleBranche=false` to disable deleting orphan branches and autoclosing PRs, but then you will be responsible for such branch/PR "cleanup" so it is not recommended.
+You can configure `pruneStaleBranches=false` to disable deleting orphan branches and autoclosing PRs, but then you will be responsible for such branch/PR "cleanup" so it is not recommended.
 
 ## rangeStrategy
 
