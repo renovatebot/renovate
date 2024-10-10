@@ -5,7 +5,9 @@ import type { VersioningApiConstructor } from '../types';
 
 export const id = 'nixpkgs';
 export const displayName = 'Nixpkgs';
-export const urls = ['https://github.com/NixOS/nixpkgs'];
+export const urls = [
+  '[NixOS/nixpkgs - GitHub Repository](https://github.com/NixOS/nixpkgs)',
+];
 export const supportsRanges = false;
 
 export class NixPkgsVersioning extends RegExpVersioningApi {
