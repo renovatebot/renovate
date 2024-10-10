@@ -313,7 +313,7 @@
 
     Thanks, the Renovate team.
   close: true
-  close-reason: 'not planned'
+  close-reason: 'outdated'
 
 'auto:bad-vibes':
   comment: >
@@ -411,7 +411,7 @@
 
     Thanks, the Renovate team
   close: true
-  close-reason: 'not planned'
+  close-reason: 'outdated'
 
 'auto:bug-converted':
   comment: >
