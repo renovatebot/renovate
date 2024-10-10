@@ -4221,4 +4221,16 @@ describe('modules/platform/github/index', () => {
       expect(res).toBeNull();
     });
   });
+
+  describe('maxBodyLength()', () => {
+    it('returns 60000', () => {
+      expect(github.maxBodyLength()).toBe(60000);
+    });
+  });
+
+  describe('maxCommentLength()', () => {
+    it('returns Infinity', () => {
+      expect(github.maxCommentLength()).toBe(Infinity);
+    });
+  });
 });

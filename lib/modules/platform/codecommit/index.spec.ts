@@ -1327,4 +1327,16 @@ describe('modules/platform/codecommit/index', () => {
       );
     });
   });
+
+  describe('maxBodyLength()', () => {
+    it('returns Infinity', () => {
+      expect(codeCommit.maxBodyLength()).toBe(Infinity);
+    });
+  });
+
+  describe('maxCommentLength()', () => {
+    it('returns Infinity', () => {
+      expect(codeCommit.maxCommentLength()).toBe(Infinity);
+    });
+  });
 });

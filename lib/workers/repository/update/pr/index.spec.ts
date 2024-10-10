@@ -79,7 +79,7 @@ describe('workers/repository/update/pr/index', () => {
 
     beforeEach(() => {
       GlobalConfig.reset();
-      prBody.getPrBody.mockReturnValue(body);
+      prBody.getPrBody.mockReturnValue({ body, comments: [] });
     });
 
     describe('Create', () => {
@@ -227,6 +227,29 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
+      it('creates comments if prBody contains comments', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+        prBody.getPrBody.mockReturnValueOnce({
+          body: 'body',
+          comments: [
+            { content: 'content', title: 'Release Notes' },
+            { content: 'content', title: 'Updates' },
+          ],
+        });
+        await ensurePr(config);
+        expect(platform.ensureComment).toHaveBeenCalledWith({
+          number: expect.anything(),
+          topic: 'Release Notes',
+          content: 'content',
+        });
+        expect(platform.ensureComment).toHaveBeenCalledWith({
+          number: expect.anything(),
+          topic: 'Updates',
+          content: 'content',
+        });
+        expect(platform.ensureCommentRemoval).not.toHaveBeenCalled();
+      });
+
       describe('Error handling', () => {
         it('handles unknown error', async () => {
           const err = new Error('unknown');
@@ -287,11 +310,12 @@ describe('workers/repository/update/pr/index', () => {
           labels: ['old_label'],
         };
         platform.getBranchPr.mockResolvedValueOnce(existingPr);
-        prBody.getPrBody.mockReturnValueOnce(
-          `\n<!--renovate-debug:${toBase64(
+        prBody.getPrBody.mockReturnValueOnce({
+          body: `\n<!--renovate-debug:${toBase64(
             JSON.stringify({ ...prDebugData, labels: ['new_label'] }),
           )}-->\n Some body`,
-        );
+          comments: [],
+        });
         config.labels = ['new_label'];
         const res = await ensurePr(config);
 
@@ -482,6 +506,50 @@ describe('workers/repository/update/pr/index', () => {
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'Pull Request #123 does not need updating',
         );
+      });
+
+      it('creates comments if prBody contains comments on existing Pr', async () => {
+        platform.getBranchPr.mockResolvedValueOnce(pr);
+        prBody.getPrBody.mockReturnValueOnce({
+          body: 'body',
+          comments: [
+            { content: 'content', title: 'Release Notes' },
+            { content: 'content', title: 'Updates' },
+          ],
+        });
+        await ensurePr(config);
+        expect(platform.ensureComment).toHaveBeenCalledWith({
+          number: expect.anything(),
+          topic: 'Release Notes',
+          content: 'content',
+        });
+        expect(platform.ensureComment).toHaveBeenCalledWith({
+          number: expect.anything(),
+          topic: 'Updates',
+          content: 'content',
+        });
+        expect(platform.ensureCommentRemoval).not.toHaveBeenCalled();
+      });
+
+      it('removes comments if prBody does not contains comments', async () => {
+        platform.getBranchPr.mockResolvedValueOnce(pr);
+        platform.createPr.mockResolvedValueOnce(pr);
+        prBody.getPrBody.mockReturnValueOnce({
+          body: 'body',
+          comments: [],
+        });
+        await ensurePr(config);
+        expect(platform.ensureComment).not.toHaveBeenCalled();
+        expect(platform.ensureCommentRemoval).toHaveBeenCalledWith({
+          number: expect.anything(),
+          type: 'by-topic',
+          topic: 'Release Notes',
+        });
+        expect(platform.ensureCommentRemoval).toHaveBeenCalledWith({
+          number: expect.anything(),
+          type: 'by-topic',
+          topic: 'Updates',
+        });
       });
     });
 

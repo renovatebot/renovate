@@ -1,4 +1,4 @@
-import type { RenovateConfig } from '../../../../config/types';
+import type { RenovateConfig } from '../../../../../config/types';
 
 export function getBaseBranchDesc(config: RenovateConfig): string {
   // Describe base branch only if it's configured
