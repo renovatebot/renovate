@@ -11,7 +11,7 @@ import { getUpdateType } from './update-type';
 export async function generateUpdate(
   config: LookupUpdateConfig,
   currentValue: string | undefined,
-  versioning: VersioningApi,
+  versioningApi: VersioningApi,
   rangeStrategy: RangeStrategy,
   currentVersion: string,
   bucket: string,
@@ -52,7 +52,7 @@ export async function generateUpdate(
 
   if (currentValue) {
     try {
-      update.newValue = versioning.getNewValue({
+      update.newValue = versioningApi.getNewValue({
         currentValue,
         rangeStrategy,
         currentVersion,
@@ -68,9 +68,9 @@ export async function generateUpdate(
   } else {
     update.newValue = currentValue;
   }
-  update.newMajor = versioning.getMajor(newVersion)!;
-  update.newMinor = versioning.getMinor(newVersion)!;
-  update.newPatch = versioning.getPatch(newVersion)!;
+  update.newMajor = versioningApi.getMajor(newVersion)!;
+  update.newMinor = versioningApi.getMinor(newVersion)!;
+  update.newPatch = versioningApi.getPatch(newVersion)!;
   // istanbul ignore if
   if (!update.updateType && !currentVersion) {
     logger.debug({ update }, 'Update has no currentVersion');
@@ -79,7 +79,7 @@ export async function generateUpdate(
   }
   update.updateType =
     update.updateType ??
-    getUpdateType(config, versioning, currentVersion, newVersion);
+    getUpdateType(config, versioningApi, currentVersion, newVersion);
   if (versioning.isBreaking) {
     // This versioning scheme has breaking awareness
     update.isBreaking = versioning.isBreaking(currentVersion, newVersion);
@@ -98,7 +98,7 @@ export async function generateUpdate(
       update.updateType,
     );
   }
-  if (!versioning.isVersion(update.newValue)) {
+  if (!versioningApi.isVersion(update.newValue)) {
     update.isRange = true;
   }
   if (rangeStrategy === 'update-lockfile' && currentValue === update.newValue) {
@@ -107,7 +107,7 @@ export async function generateUpdate(
   if (
     rangeStrategy === 'bump' &&
     // TODO #22198
-    versioning.matches(newVersion, currentValue!)
+    versioningApi.matches(newVersion, currentValue!)
   ) {
     update.isBump = true;
   }
