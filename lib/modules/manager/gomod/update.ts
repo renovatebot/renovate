@@ -17,12 +17,8 @@ export function updateDependency({
 }: UpdateDependencyConfig): string | null {
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
-    const { depType, updateType } = upgrade;
+    const { depType } = upgrade;
     const currentName = upgrade.depName;
-    if (updateType === 'replacement') {
-      logger.warn('gomod manager does not support replacement updates yet');
-      return null;
-    }
     // istanbul ignore if: should never happen
     if (!currentName || !upgrade.managerData) {
       return null;
@@ -56,19 +52,21 @@ export function updateDependency({
     if (depType === 'replace') {
       if (upgrade.managerData.multiLine) {
         updateLineExp = regEx(
-          /^(?<depPart>\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/,
+          /^(?<depPart>\s+[^\s]+[\s]+[=][>]+\s+)(?<depName>[^\s]+)(?<divider>\s+)[^\s]+/,
         );
       } else {
         updateLineExp = regEx(
-          /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/,
+          /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<depName>[^\s]+)(?<divider>\s+)[^\s]+/,
         );
       }
     } else if (depType === 'require' || depType === 'indirect') {
       if (upgrade.managerData.multiLine) {
-        updateLineExp = regEx(/^(?<depPart>\s+[^\s]+)(?<divider>\s+)[^\s]+/);
+        updateLineExp = regEx(
+          /^(?<depPart>\s+)(?<depName>[^\s]+)(?<divider>\s+)[^\s]+/,
+        );
       } else {
         updateLineExp = regEx(
-          /^(?<depPart>require\s+[^\s]+)(?<divider>\s+)[^\s]+/,
+          /^(?<depPart>require\s+)(?<depName>[^\s]+)(?<divider>\s+)[^\s]+/,
         );
       }
     }
@@ -77,7 +75,27 @@ export function updateDependency({
       return null;
     }
     let newLine: string;
-    if (upgrade.updateType === 'digest') {
+    let quote = '';
+
+    if (updateLineExp) {
+      const groups = lineToChange.match(updateLineExp)?.groups;
+      // istanbul ignore if: should never happen
+      if (!groups) {
+        return fileContent;
+      }
+
+      if (`${groups.depName}`.startsWith('"')) {
+        quote = '"';
+      }
+    }
+
+    // newName will be available for replacement
+    const newName = upgrade.newName ?? currentName;
+
+    if (
+      upgrade.updateType === 'digest' ||
+      (upgrade.updateType === 'replacement' && upgrade.newDigest)
+    ) {
       const newDigestRightSized = upgrade.newDigest!.substring(
         0,
         upgrade.currentDigest!.length,
@@ -92,13 +110,13 @@ export function updateDependency({
       newLine = lineToChange.replace(
         // TODO: can be undefined? (#22198)
         updateLineExp!,
-        `$<depPart>$<divider>${newDigestRightSized}`,
+        `$<depPart>${quote}${newName}${quote}$<divider>${newDigestRightSized}`,
       );
     } else {
       newLine = lineToChange.replace(
         // TODO: can be undefined? (#22198)
         updateLineExp!,
-        `$<depPart>$<divider>${upgrade.newValue}`,
+        `$<depPart>${quote}${newName}${quote}$<divider>${upgrade.newValue}`,
       );
     }
     if (upgrade.updateType === 'major') {
