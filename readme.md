@@ -65,7 +65,7 @@ If you can’t use a pre-built job scheduling system, or want to build your own,
 
 #### Run Renovate on your Pipeline
 
-Mend provides a _**GitHub Action**_ and _**GitLab Runner**_ to help you run Renovate as a CI pipeline job.
+Mend provides a _**GitHub Action**_ or a _**GitLab Runner**_ to help you run Renovate as a CI pipeline job.
 
 - GitHub Action: [renovatebot/github-action](https://github.com/renovatebot/github-action).
 - GitLab Runner: [Renovate Runner project](https://gitlab.com/renovate-bot/renovate-runner/)
@@ -78,7 +78,7 @@ Mend provides a _**GitHub Action**_ and _**GitLab Runner**_ to help you run Reno
 There are several ways to run the Renovate CLI directly.
 See docs: [Running Renovate](https://docs.renovatebot.com/getting-started/running/) for all options.
 
-**Targets: all platforms**
+**Supports: all platforms**
 
 ## Docs
 
@@ -91,7 +91,7 @@ See docs: [Running Renovate](https://docs.renovatebot.com/getting-started/runnin
 - Supported platforms and languages
   - [Supported platforms](https://docs.renovatebot.com/#supported-platforms)
   - [Supported languages / package managers](https://docs.renovatebot.com/modules/manager/)
-- Advanced renovate usage
+- Advanced Renovate usage
   - [Accessing private packages](https://docs.renovatebot.com/getting-started/private-packages/)
   - [Merge Confidence data](https://docs.renovatebot.com/merge-confidence/)
 
