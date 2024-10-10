@@ -3520,6 +3520,7 @@ If a branch appears stale but has been modified by a different git author, then 
 Instead, it will update the title to append " - abandoned" plus add a comment noting that autoclosing is skipped.
 
 If a branch appears stale and hasn't been modified, then:
+
 - If an Open PR exist for the branch, then Renovate will rename the PR to append " - autoclosed" before closing/abandoning it
 - Renovate will delete the branch
 
