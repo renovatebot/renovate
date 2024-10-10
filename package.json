@@ -344,7 +344,7 @@
     "typescript": "5.6.2",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@9.11.0",
+  "packageManager": "pnpm@9.12.0",
   "files": [
     "dist",
     "renovate-schema.json"
@@ -357,7 +357,7 @@
       "safe-json-stringify"
     ],
     "overrides": {
-      "@semantic-release/github>@octokit/plugin-paginate-rest": "11.3.0"
+      "@semantic-release/github>@octokit/plugin-paginate-rest": "11.3.5"
     }
   }
 }
