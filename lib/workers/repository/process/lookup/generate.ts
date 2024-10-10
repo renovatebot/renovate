@@ -80,9 +80,9 @@ export async function generateUpdate(
   update.updateType =
     update.updateType ??
     getUpdateType(config, versioningApi, currentVersion, newVersion);
-  if (versioning.isBreaking) {
+  if (versioningApi.isBreaking) {
     // This versioning scheme has breaking awareness
-    update.isBreaking = versioning.isBreaking(currentVersion, newVersion);
+    update.isBreaking = versioningApi.isBreaking(currentVersion, newVersion);
   } else {
     // This versioning scheme does not have breaking awareness - assume only major updates are breaking
     // Updates from or to unstable releases should be treated as breaking too, but we should not add that as default behavior until we stop treating non-LTS
