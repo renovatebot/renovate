@@ -314,7 +314,7 @@
     "eslint": "8.57.1",
     "eslint-formatter-gha": "1.5.1",
     "eslint-import-resolver-typescript": "3.6.3",
-    "eslint-plugin-import": "2.30.0",
+    "eslint-plugin-import": "2.31.0",
     "eslint-plugin-jest": "28.8.3",
     "eslint-plugin-jest-formatting": "3.1.0",
     "eslint-plugin-promise": "7.1.0",
