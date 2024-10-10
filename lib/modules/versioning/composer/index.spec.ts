@@ -250,4 +250,22 @@ describe('modules/versioning/composer/index', () => {
   `('isCompatible("$version") === $expected', ({ version, expected }) => {
     expect(semver.isCompatible(version)).toBe(expected);
   });
+
+  // isBreaking
+  it.each`
+    version    | currentVersion | expected
+    ${'0.0.2'} | ${'0.0.1'}     | ${true}
+    ${'0.2.0'} | ${'0.0.1'}     | ${true}
+    ${'1.0.0'} | ${'0.0.1'}     | ${true}
+    ${'1.0.0'} | ${'1.0.0'}     | ${false}
+    ${'2.0.0'} | ${'1.0.0'}     | ${true}
+    ${'1.0.0'} | ${'2.0.0'}     | ${true}
+    ${'2.0.1'} | ${'2.0.0'}     | ${false}
+    ${'2.1.0'} | ${'2.0.0'}     | ${false}
+  `(
+    'isBreaking("$version", "$currentVersion") === $expected',
+    ({ version, currentVersion, expected }) => {
+      expect(semver.isBreaking!(version, currentVersion)).toBe(expected);
+    },
+  );
 });

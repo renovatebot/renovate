@@ -58,6 +58,8 @@ export interface VersioningApi {
    */
   isCompatible(version: string, current?: string): boolean;
 
+  isBreaking?(current: string, version: string): boolean;
+
   // digestion of version
 
   getMajor(version: string | SemVer): null | number;

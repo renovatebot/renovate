@@ -51,10 +51,19 @@ function subset(subRange: string, superRange: string): boolean | undefined {
     : undefined;
 }
 
+export function isBreaking(current: string, version: string): boolean {
+  const currentMajor = poetry.getMajor(current);
+  const currentMinor = poetry.getMinor(current);
+  const newMajor = poetry.getMajor(version);
+  const newMinor = poetry.getMinor(version);
+  return !(currentMajor === newMajor && currentMinor === newMinor);
+}
+
 export const api: VersioningApi = {
   ...poetry,
   getNewValue,
   getSatisfyingVersion,
+  isBreaking,
   isLessThanRange,
   isValid,
   matches,
