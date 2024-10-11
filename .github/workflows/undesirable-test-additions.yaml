@@ -22,11 +22,10 @@ jobs:
           set -e
 
           echo "### Fetching base branch for comparison..."
-          git fetch origin ${{ github.event.pull_request.base.ref }}
+          git fetch remote ${{ github.event.pull_request.base.ref }}
 
-          BASE_BRANCH=origin/${{ github.event.pull_request.base.ref }}
+          BASE_BRANCH=${{ github.event.pull_request.base.ref }}
           echo "Base branch is: $BASE_BRANCH"
-          echo "Current HEAD is: $(git rev-parse HEAD)"
           BASE_BRANCH_REF=${{ github.event.pull_request.base.sha }}
           echo "Base branch ref for this PR is: $BASE_BRANCH_REF"
 
@@ -45,7 +44,7 @@ jobs:
           fi
 
           echo "### Calculating file changes in '__fixtures__' directories..."
-          git diff --name-status $BASE_BRANCH..HEAD > diff_name_status.txt
+          git diff --name-status $BASE_BRANCH_REF > diff_name_status.txt
 
           echo "### Processing added files in '__fixtures__' directories..."
           ADDED_FIXTURES=$(grep '^A' diff_name_status.txt | awk '{print $2}' | grep '/__fixtures__/' || true)
