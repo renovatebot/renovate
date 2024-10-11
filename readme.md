@@ -26,7 +26,7 @@ When Renovate runs on your repo, it looks for references to dependencies (both p
 ### Languages
 
 Renovate can provide updates for most popular languages, platforms, and registries including: npm, Java, Python, .NET, Scala, Ruby, Go, Docker and more.
-Supports over 90 different package managers.
+Supports over [90 different package managers](https://docs.renovatebot.com/modules/manager/).
 
 ### Platforms
 
