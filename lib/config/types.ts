@@ -381,6 +381,7 @@ export interface PackageRule
   matchRepositories?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
+  matchJsonata?: string[];
   registryUrls?: string[] | null;
   vulnerabilitySeverity?: string;
   vulnerabilityFixVersion?: string;
@@ -547,6 +548,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
   releaseTimestamp?: string | null;
   repository?: string;
+  currentVersionAgeInDays?: number;
   currentVersionTimestamp?: string;
   enabled?: boolean;
   skipReason?: SkipReason;

@@ -229,7 +229,7 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
-    it('returns null if transformation using jsonata rules fail', async () => {
+    it('returns null if transformation compilation using jsonata fails', async () => {
       httpMock
         .scope('https://example.com')
         .get('/v1')
@@ -248,9 +248,34 @@ describe('modules/datasource/custom/index', () => {
         },
       });
       expect(result).toBeNull();
-      expect(logger.debug).toHaveBeenCalledWith(
-        { err: expect.any(Object), transformTemplate: '$[.name = "Alice" and' },
-        'Error while transforming response',
+      expect(logger.once.warn).toHaveBeenCalledWith(
+        { errorMessage: 'The symbol "." cannot be used as a unary operator' },
+        'Invalid JSONata expression: $[.name = "Alice" and',
+      );
+    });
+
+    it('returns null if jsonata expression evaluation fails', async () => {
+      httpMock
+        .scope('https://example.com')
+        .get('/v1')
+        .reply(200, '1.0.0 \n2.0.0 \n 3.0.0 ', {
+          'Content-Type': 'text/plain',
+        });
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/v1',
+            transformTemplates: ['$notafunction()'],
+            format: 'plain',
+          },
+        },
+      });
+      expect(result).toBeNull();
+      expect(logger.once.warn).toHaveBeenCalledWith(
+        { err: expect.any(Object) },
+        'Error while evaluating JSONata expression: $notafunction()',
       );
     });
 
