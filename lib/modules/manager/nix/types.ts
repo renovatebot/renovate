@@ -11,6 +11,7 @@ export interface NixInput {
 }
 
 export interface LockedInput {
+  readonly host?: string;
   readonly lastModified: number;
   readonly narHash: string;
   readonly owner?: string;
