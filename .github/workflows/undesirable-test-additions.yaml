@@ -26,9 +26,11 @@ jobs:
           BASE_BRANCH=origin/${{ github.event.pull_request.base.ref }}
           echo "Base branch is: $BASE_BRANCH"
           echo "Current HEAD is: $(git rev-parse HEAD)"
+          BASE_BRANCH_REF=origin/${{ github.event.pull_request.base.ref }}
+          echo "Base branch ref for this PR is: $BASE_BRANCH_REF"
 
           echo "### Calculating diff for '*.spec.ts' files..."
-          git diff $BASE_BRANCH..HEAD -- '*.spec.ts' > diff_spec_ts.txt
+          git diff $BASE_BRANCH_REF -- '*.spec.ts' > diff_spec_ts.txt
 
           echo "### Counting additions and deletions of snapshots..."
           ADDED=$(grep '^+' diff_spec_ts.txt | grep -v '^+++' | grep -E '\.toMatch(Snapshot|InlineSnapshot)\(' | wc -l || true)
