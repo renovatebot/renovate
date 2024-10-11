@@ -263,7 +263,7 @@
     "@openpgp/web-stream-tools": "0.0.14",
     "@renovate/eslint-plugin": "file:tools/eslint",
     "@semantic-release/exec": "6.0.3",
-    "@swc/core": "1.7.26",
+    "@swc/core": "1.7.28",
     "@types/auth-header": "1.0.6",
     "@types/aws4": "1.11.6",
     "@types/better-sqlite3": "7.6.11",
@@ -285,7 +285,7 @@
     "@types/js-yaml": "4.0.9",
     "@types/json-dup-key-validator": "1.0.2",
     "@types/linkify-markdown": "1.0.3",
-    "@types/lodash": "4.17.9",
+    "@types/lodash": "4.17.10",
     "@types/luxon": "3.4.2",
     "@types/markdown-it": "14.1.2",
     "@types/markdown-table": "2.0.0",
@@ -314,7 +314,7 @@
     "eslint": "8.57.1",
     "eslint-formatter-gha": "1.5.1",
     "eslint-import-resolver-typescript": "3.6.3",
-    "eslint-plugin-import": "2.30.0",
+    "eslint-plugin-import": "2.31.0",
     "eslint-plugin-jest": "28.8.3",
     "eslint-plugin-jest-formatting": "3.1.0",
     "eslint-plugin-promise": "7.1.0",
@@ -344,7 +344,7 @@
     "typescript": "5.6.2",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@9.11.0",
+  "packageManager": "pnpm@9.12.0",
   "files": [
     "dist",
     "renovate-schema.json"
@@ -357,7 +357,7 @@
       "safe-json-stringify"
     ],
     "overrides": {
-      "@semantic-release/github>@octokit/plugin-paginate-rest": "11.3.0"
+      "@semantic-release/github>@octokit/plugin-paginate-rest": "11.3.5"
     }
   }
 }

@@ -1513,6 +1513,18 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
   },
+  {
+    name: 'matchJsonata',
+    description:
+      'A JSONata expression to match against the full config object. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
   // Version behavior
   {
     name: 'allowedVersions',
