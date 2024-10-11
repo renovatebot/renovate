@@ -85,7 +85,7 @@ export class PypiDatasource extends Datasource {
     if (pypiJsonDependencies === null || simpleDependencies === null) {
       return pypiJsonDependencies ?? simpleDependencies
     }
-    let dependency = pypiJsonDependencies
+    const dependency = pypiJsonDependencies
     const added_versions = new Set<string>(dependency.releases.map(release => release.version))
     for (const release of simpleDependencies.releases) {
       if (!added_versions.has(release.version)) {
