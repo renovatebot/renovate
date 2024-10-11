@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { getPkgReleases } from '../../../modules/datasource';
-import * as versioning from '../../../modules/versioning';
+import * as allVersioning from '../../../modules/versioning';
 import { newlineRegex, regEx } from '../../regex';
 import { uniq } from '../../uniq';
 import { rawExec } from '../common';
@@ -76,41 +76,45 @@ function prepareCommands(commands: Opt<string>[]): string[] {
 export async function getDockerTag(
   packageName: string,
   constraint: string,
-  scheme: string,
+  versioning: string,
 ): Promise<string> {
-  const ver = versioning.get(scheme);
+  const versioningApi = allVersioning.get(versioning);
 
-  if (!ver.isValid(constraint)) {
+  if (!versioningApi.isValid(constraint)) {
     logger.warn(
-      { scheme, constraint },
+      { versioning, constraint },
       `Invalid Docker image version constraint`,
     );
     return 'latest';
   }
 
   logger.debug(
-    { packageName, scheme, constraint },
+    { packageName, versioning, constraint },
     `Found version constraint - checking for a compatible image to use`,
   );
   const imageReleases = await getPkgReleases({
     datasource: 'docker',
     packageName,
-    versioning: scheme,
+    versioning,
   });
   if (imageReleases?.releases) {
     let versions = imageReleases.releases.map((release) => release.version);
     versions = versions.filter(
-      (version) => ver.isVersion(version) && ver.matches(version, constraint),
+      (version) =>
+        versioningApi.isVersion(version) &&
+        versioningApi.matches(version, constraint),
     );
     // Prefer stable versions over unstable, even if the range satisfies both types
-    if (!versions.every((version) => ver.isStable(version))) {
+    if (!versions.every((version) => versioningApi.isStable(version))) {
       logger.debug('Filtering out unstable versions');
-      versions = versions.filter((version) => ver.isStable(version));
+      versions = versions.filter((version) => versioningApi.isStable(version));
     }
-    const version = versions.sort(ver.sortVersions.bind(ver)).pop();
+    const version = versions
+      .sort(versioningApi.sortVersions.bind(versioningApi))
+      .pop();
     if (version) {
       logger.debug(
-        { packageName, scheme, constraint, version },
+        { packageName, versioning, constraint, version },
         `Found compatible image version`,
       );
       return version;
@@ -120,13 +124,13 @@ export async function getDockerTag(
     return 'latest';
   }
   logger.warn(
-    { packageName, constraint, scheme },
+    { packageName, constraint, versioning },
     'Failed to find a tag satisfying constraint, using "latest" tag instead',
   );
   return 'latest';
 }
 
-function getContainerName(image: string, prefix?: string | undefined): string {
+function getContainerName(image: string, prefix?: string): string {
   return `${prefix ?? 'renovate_'}${image}`.replace(regEx(/\//g), '_');
 }
 

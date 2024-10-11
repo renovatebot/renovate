@@ -19,11 +19,6 @@ We will try to keep breakage to a minimum, but make no guarantees that an experi
 If set, Renovate will export OpenTelemetry data to the supplied endpoint.
 For more information see [the OpenTelemetry docs](opentelemetry.md).
 
-## `RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK`
-
-If set to any value, Renovate will skip its default artifacts filter check in the Maven datasource.
-Skipping the check will speed things up, but may result in versions being returned which don't properly exist on the server.
-
 ## `RENOVATE_PAGINATE_ALL`
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
@@ -43,11 +38,6 @@ This includes the following:
 ## `RENOVATE_X_DOCKER_HUB_TAGS_DISABLE`
 
 If set to any value, Renovate will stop using the Docker Hub API (`https://hub.docker.com`) to fetch tags and instead use the normal Docker API for images pulled from `https://index.docker.io`.
-
-## `RENOVATE_X_DOCKER_MAX_PAGES`
-
-If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
-This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
 
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 

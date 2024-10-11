@@ -297,7 +297,10 @@ if (end) {
 
 ## Fixtures
 
-Use the `Fixture` class to load fixtures.
+Where possible, reduce the test fixture to a size where an inline `codeBlock` is possible to use instead of a separate fixture file.
+Inline `codeBlock`s improve performance plus are more readable.
+
+Use the `Fixture` class if loading fixtures from files.
 For example:
 
 ```ts

@@ -482,10 +482,13 @@ export async function getBranchStatus(
   }
   logger.debug(`Got res with ${branchStatuses.length} results`);
 
-  const mrStatus = (await getBranchPr(branchName))?.headPipelineStatus;
-  if (!is.undefined(mrStatus)) {
+  const mr = await getBranchPr(branchName);
+  if (mr && mr.sha !== mr.headPipelineSha && mr.headPipelineStatus) {
+    logger.debug(
+      'Merge request head pipeline has different sha to commit, assuming merged results pipeline',
+    );
     branchStatuses.push({
-      status: mrStatus as BranchState,
+      status: mr.headPipelineStatus as BranchState,
       name: 'head_pipeline',
     });
   }
@@ -804,6 +807,7 @@ export async function getPr(iid: number): Promise<GitlabPr> {
     bodyStruct: getPrBodyStruct(mr.description),
     state: mr.state === 'opened' ? 'open' : mr.state,
     headPipelineStatus: mr.head_pipeline?.status,
+    headPipelineSha: mr.head_pipeline?.sha,
     hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
     reviewers: mr.reviewers?.map(({ username }) => username),
     title: mr.title,
@@ -1127,7 +1131,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
       return null;
     }
     return await getIssue(issue.iid);
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     logger.warn('Error finding issue');
     return null;
   }
@@ -1274,7 +1278,7 @@ export async function addReviewers(
         newReviewers.map((r) => async () => {
           try {
             return [await getUserID(r)];
-          } catch (err) {
+          } catch {
             // Unable to fetch userId, try resolve as a group
             return getMemberUserIDs(r);
           }

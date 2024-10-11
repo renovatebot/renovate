@@ -99,6 +99,7 @@ export interface LookupUpdate {
   checksumUrl?: string;
   downloadUrl?: string;
   releaseTimestamp?: any;
+  newVersionAgeInDays?: number;
   registryUrl?: string;
 }
 
@@ -189,6 +190,7 @@ export interface ArtifactNotice {
 }
 
 export interface ArtifactError {
+  fileName?: string;
   lockFile?: string;
   stderr?: string;
 }

@@ -47,7 +47,7 @@ export async function detectConfigFile(): Promise<string | null> {
           );
           return 'package.json';
         }
-      } catch (err) {
+      } catch {
         // Do nothing
       }
     } else if (fileList.includes(fileName)) {

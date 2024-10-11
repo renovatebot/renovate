@@ -47,21 +47,14 @@ function readManifest(
     };
   }
 
-  try {
-    const manifest: FluxManifest = {
-      kind: 'resource',
-      file: packageFile,
-      resources: parseYaml(content, null, {
-        json: true,
-        customSchema: FluxResource,
-        failureBehaviour: 'filter',
-      }),
-    };
-    return manifest;
-  } catch (err) {
-    logger.debug({ err, packageFile }, 'Failed to parse Flux manifest');
-    return null;
-  }
+  return {
+    kind: 'resource',
+    file: packageFile,
+    resources: parseYaml(content, {
+      customSchema: FluxResource,
+      failureBehaviour: 'filter',
+    }),
+  };
 }
 
 const githubUrlRegex = regEx(

@@ -4,3 +4,7 @@ export interface Pep508ParseResult {
   extras?: string[];
   marker?: string;
 }
+
+export interface Pep621ManagerData {
+  depGroup?: string;
+}

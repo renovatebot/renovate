@@ -515,6 +515,13 @@ For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `d
 
 Read the [Docker Docs, configure runtime resource constraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
 
+## dockerMaxPages
+
+By default, Renovate will fetch a maximum of 20 pages when looking up Docker tags on Docker registries.
+
+If set to an positive integer, Renovate will use this value as the maximum page number.
+Setting a different limit is useful for registries that ignore the `n` parameter in Renovate's query string and thus only return 50 tags per page.
+
 ## dockerSidecarImage
 
 By default Renovate pulls the sidecar Docker containers from `ghcr.io/containerbase/sidecar`.
@@ -648,7 +655,9 @@ To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](h
 
 ## gitPrivateKey
 
-This should be an armored private key, so the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`.
+This is a private PGP or SSH key for signing Git commits.
+
+For PGP, it should be an armored private key, so the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`.
 Replace the newlines with `\n` before adding the resulting single-line value to your bot's config.
 
 <!-- prettier-ignore -->
@@ -658,8 +667,8 @@ Replace the newlines with `\n` before adding the resulting single-line value to 
 It will be loaded _lazily_.
 Before the first commit in a repository, Renovate will:
 
-1. Run `gpg import` (if you haven't before)
-1. Run `git config user.signingkey` and `git config commit.gpgsign true`
+1. Run `gpg import` (if you haven't before) when using PGP
+1. Run `git config user.signingkey`, `git config commit.gpgsign true` and `git config gpg.format`
 
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
@@ -1075,6 +1084,10 @@ For TLS/SSL-enabled connections, use rediss prefix
 
 Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
 
+Renovate also supports connecting to Redis clusters as well. In order to connect to a cluster, provide the connection string using the `redis+cluster` or `rediss+cluster` schema as appropriate.
+
+Example URL structure: `redis+cluster://[[username]:[password]]@redis.cluster.local:6379/0`
+
 ## reportPath
 
 `reportPath` describes the location where the report is written to.
@@ -1092,7 +1105,7 @@ Defines how the report is exposed:
 - `<unset>` If unset, no report will be provided, though the debug logs will still have partial information of the report
 - `logging` The report will be printed as part of the log messages on `INFO` level
 - `file` The report will be written to a path provided by [`reportPath`](#reportpath)
-- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`s3Endpoint`](./self-hosted-configuration.md#s3endpoint) and [`s3PathStyle`](./self-hosted-configuration.md#s3PathStyle)
+- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`s3Endpoint`](#s3endpoint) and [`s3PathStyle`](#s3pathstyle)
 
 ## repositories
 
@@ -1159,10 +1172,11 @@ If set, Renovate will use this string as the `endpoint` when creating the AWS S3
 If set, Renovate will enable `forcePathStyle` when creating the AWS S3 client instance.
 
 For example:
-| `s3PathStyle` | Path |
+
+| `s3PathStyle` | Path                               |
 | ------------- | ---------------------------------- |
-| `off` | `https://bucket.s3.amazonaws.com/` |
-| `on` | `https://s3.amazonaws.com/bucket/` |
+| `off`         | `https://bucket.s3.amazonaws.com/` |
+| `on`          | `https://s3.amazonaws.com/bucket/` |
 
 Read the [AWS S3 docs, Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html) to learn more about path-style URLs.
 

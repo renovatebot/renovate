@@ -1,7 +1,8 @@
 import type { Osv, OsvOffline } from '@renovatebot/osv-offline';
 import { codeBlock } from 'common-tags';
 import { mockFn } from 'jest-mock-extended';
-import { RenovateConfig, logger } from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { logger } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import type { PackageFile } from '../../../modules/manager/types';
 import { Vulnerabilities } from './vulnerabilities';
@@ -996,7 +997,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchDatasources: ['nuget'],
           matchPackageNames: ['SharpZipLib'],
           matchCurrentVersion: '1.3.0',
-          allowedVersions: '1.3.3',
+          allowedVersions: '[1.3.3,)',
         },
         {
           matchDatasources: ['npm'],

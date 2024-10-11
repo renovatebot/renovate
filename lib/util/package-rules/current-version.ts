@@ -20,7 +20,7 @@ export class CurrentVersionMatcher extends Matcher {
     }
     const isUnconstrainedValue =
       !!lockedVersion && is.nullOrUndefined(currentValue);
-    const version = allVersioning.get(versioning);
+    const versioningApi = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
     const matchCurrentVersionPred = getRegexPredicate(matchCurrentVersionStr);
 
@@ -31,29 +31,29 @@ export class CurrentVersionMatcher extends Matcher {
         matchCurrentVersionPred(compareVersion)
       );
     }
-    if (version.isVersion(matchCurrentVersionStr)) {
+    if (versioningApi.isVersion(matchCurrentVersionStr)) {
       try {
         return (
           isUnconstrainedValue ||
           !!(
             currentValue &&
-            version.isValid(currentValue) &&
-            version.matches(matchCurrentVersionStr, currentValue)
+            versioningApi.isValid(currentValue) &&
+            versioningApi.matches(matchCurrentVersionStr, currentValue)
           )
         );
-      } catch (err) {
+      } catch {
         return false;
       }
     }
 
-    const compareVersion = version.isVersion(currentValue)
+    const compareVersion = versioningApi.isVersion(currentValue)
       ? currentValue // it's a version so we can match against it
       : (lockedVersion ?? currentVersion); // need to match against this currentVersion, if available
     if (is.nullOrUndefined(compareVersion)) {
       return false;
     }
-    if (version.isVersion(compareVersion)) {
-      return version.matches(compareVersion, matchCurrentVersion);
+    if (versioningApi.isVersion(compareVersion)) {
+      return versioningApi.matches(compareVersion, matchCurrentVersion);
     }
     logger.debug(
       { matchCurrentVersionStr, currentValue },

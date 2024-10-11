@@ -1,8 +1,8 @@
 import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
+import type { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import {
-  GitPullRequest,
   GitPullRequestMergeStrategy,
   GitStatusState,
   PullRequestStatus,
@@ -1173,7 +1173,7 @@ describe('modules/platform/azure/index', () => {
   describe('updatePr(prNo, title, body, platformPrOptions)', () => {
     it('should update the PR', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = jest.fn();
+      const updatePullRequest = jest.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -1189,9 +1189,45 @@ describe('modules/platform/azure/index', () => {
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
 
+    it('should update the PR including cache', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementation(
+        () =>
+          ({
+            createPullRequest: jest.fn(() => ({
+              pullRequestId: 456,
+              title: 'Title 1',
+            })),
+            createPullRequestLabel: jest.fn(() => ({})),
+            getPullRequests: jest.fn(() => []),
+            updatePullRequest: jest.fn(() => ({
+              pullRequestId: 456,
+              title: 'Title 2',
+            })),
+          }) as any,
+      );
+      expect(await azure.getPrList()).toEqual([]);
+      const createdPr = await azure.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'Title 1',
+        prBody: 'Hello world',
+        labels: [],
+      });
+      expect(createdPr).toMatchObject({ number: 456, title: 'Title 1' });
+      expect(await azure.getPrList()).toHaveLength(1);
+      await azure.updatePr({
+        number: 456,
+        prTitle: 'Title 2',
+      });
+      const prList = await azure.getPrList();
+      expect(prList).toHaveLength(1);
+      expect(prList[0]).toMatchObject({ number: 456, title: 'Title 2' });
+    });
+
     it('should update the PR without description', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = jest.fn();
+      const updatePullRequest = jest.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -1207,7 +1243,7 @@ describe('modules/platform/azure/index', () => {
 
     it('should close the PR', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = jest.fn();
+      const updatePullRequest = jest.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -1225,7 +1261,7 @@ describe('modules/platform/azure/index', () => {
 
     it('should reopen the PR', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = jest.fn();
+      const updatePullRequest = jest.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({

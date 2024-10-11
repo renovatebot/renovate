@@ -1,6 +1,6 @@
 import type { Category } from '../../../constants';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import { RubyGemsDatasource } from '../../datasource/rubygems';
+import { RubygemsDatasource } from '../../datasource/rubygems';
 import * as rubyVersioning from '../../versioning/ruby';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
@@ -27,6 +27,6 @@ export const defaultConfig = {
 export const categories: Category[] = ['ruby'];
 
 export const supportedDatasources = [
-  RubyGemsDatasource.id,
+  RubygemsDatasource.id,
   RubyVersionDatasource.id,
 ];

@@ -47,16 +47,20 @@ export class GalaxyDatasource extends Datasource {
       const raw = await this.http.getJson(galaxyAPIUrl, GalaxyV1);
       body = raw.body;
     } catch (err) {
-      throw this.handleGenericErrors(err);
+      this.handleGenericErrors(err);
     }
 
-    // istanbul ignore if
     if (body.results.length > 1) {
-      logger.warn(
-        { dependency: packageName },
-        `Received multiple results from ${galaxyAPIUrl}`,
+      body.results = body.results.filter(
+        (result) => result.github_user === userName,
       );
-      return null;
+      if (!body.results.length) {
+        logger.warn(
+          { dependency: packageName, userName },
+          `Multiple results from galaxy for ${packageName}, none match`,
+        );
+        return null;
+      }
     }
     if (body.results.length === 0) {
       logger.info(

@@ -10,25 +10,31 @@ export class GithubRunnersDatasource extends Datasource {
     'We use the URL: https://github.com/actions/runner-images.';
 
   /**
-   * Only add stable runners to the datasource. See datasource readme for details.
+   * Unstable runners must have the `isStable: false` property.
+   * Deprecated runners must have the `isDeprecated: true` property.
+   * Stable runners should have no extra properties.
+   * For more details, read the github-runners datasource readme.
    */
   private static readonly releases: Record<string, Release[] | undefined> = {
     ubuntu: [
-      { version: '24.04', isStable: false },
+      { version: '24.04' },
       { version: '22.04' },
       { version: '20.04' },
       { version: '18.04', isDeprecated: true },
       { version: '16.04', isDeprecated: true },
     ],
     macos: [
+      { version: '15', isStable: false },
+      { version: '15-large', isStable: false },
+      { version: '15-xlarge', isStable: false },
       { version: '14' },
       { version: '14-large' },
       { version: '14-xlarge' },
       { version: '13' },
       { version: '13-large' },
       { version: '13-xlarge' },
-      { version: '12' },
-      { version: '12-large' },
+      { version: '12-large', isDeprecated: true },
+      { version: '12', isDeprecated: true },
       { version: '11', isDeprecated: true },
       { version: '10.15', isDeprecated: true },
     ],

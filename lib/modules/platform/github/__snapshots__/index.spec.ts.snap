@@ -119,4 +119,4 @@ exports[`modules/platform/github/index initRepo should update fork when using fo
 }
 `;
 
-exports[`modules/platform/github/index massageMarkdown(input) returns updated pr body 1`] = `"[https://github.com/foo/bar/issues/5](https://togithub.com/foo/bar/issues/5) plus also [a link](https://togithub.com/foo/bar/issues/5)"`;
+exports[`modules/platform/github/index massageMarkdown(input) returns updated pr body 1`] = `"[https://github.com/foo/bar/issues/5](https://redirect.github.com/foo/bar/issues/5) plus also [a link](https://redirect.github.com/foo/bar/issues/5)"`;

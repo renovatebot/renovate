@@ -1,7 +1,9 @@
 import { setTimeout } from 'timers/promises';
 import fs from 'fs-extra';
-import _simpleGit, { SimpleGit } from 'simple-git';
-import { DirectoryResult, dir } from 'tmp-promise';
+import type { SimpleGit } from 'simple-git';
+import _simpleGit from 'simple-git';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
