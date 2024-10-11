@@ -24,6 +24,7 @@ import * as allVersioning from '../../../../modules/versioning';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { assignKeys } from '../../../../util/assign-keys';
+import { getElapsedDays } from '../../../../util/date';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
 import { Result } from '../../../../util/result';
@@ -314,9 +315,11 @@ export async function lookupUpdates(
 
       if (is.nonEmptyString(currentVersionTimestamp)) {
         res.currentVersionTimestamp = currentVersionTimestamp;
+        res.currentVersionAgeInDays = getElapsedDays(currentVersionTimestamp);
+
         if (
-          config.packageRules?.some((rules) =>
-            is.nonEmptyString(rules.matchCurrentAge),
+          config.packageRules?.some((rule) =>
+            is.nonEmptyString(rule.matchCurrentAge),
           )
         ) {
           // Reapply package rules to check matches for matchCurrentAge

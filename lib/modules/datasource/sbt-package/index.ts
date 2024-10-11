@@ -2,6 +2,7 @@ import * as upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
+import { cache } from '../../../util/cache/package/decorator';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash, trimTrailingSlash } from '../../../util/url';
@@ -10,6 +11,7 @@ import { compare } from '../../versioning/maven/compare';
 import { MavenDatasource } from '../maven';
 import { MAVEN_REPO } from '../maven/common';
 import { downloadHttpProtocol } from '../maven/util';
+import { normalizeDate } from '../metadata';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
@@ -24,6 +26,12 @@ interface ScalaDepCoordinate {
   groupId: string;
   artifactId: string;
   scalaVersion?: string;
+}
+
+interface PomInfo {
+  homepage?: string;
+  sourceUrl?: string;
+  releaseTimestamp?: string;
 }
 
 export class SbtPackageDatasource extends MavenDatasource {
@@ -187,6 +195,11 @@ export class SbtPackageDatasource extends MavenDatasource {
       return null;
     }
 
+    const releases: Release[] = [...allVersions]
+      .sort(compare)
+      .map((version) => ({ version }));
+    const res: ReleaseResult = { releases, dependencyUrl };
+
     const latestVersion = getLatestVersion(versions);
     const pomInfo = await this.getPomInfo(
       registryUrl,
@@ -195,10 +208,15 @@ export class SbtPackageDatasource extends MavenDatasource {
       packageUrls,
     );
 
-    const releases: Release[] = [...allVersions]
-      .sort(compare)
-      .map((version) => ({ version }));
-    return { releases, dependencyUrl, ...pomInfo };
+    if (pomInfo?.homepage) {
+      res.homepage = pomInfo.homepage;
+    }
+
+    if (pomInfo?.sourceUrl) {
+      res.sourceUrl = pomInfo.sourceUrl;
+    }
+
+    return res;
   }
 
   async getPomInfo(
@@ -206,9 +224,7 @@ export class SbtPackageDatasource extends MavenDatasource {
     packageName: string,
     version: string | null,
     pkgUrls?: string[],
-  ): Promise<Pick<ReleaseResult, 'homepage' | 'sourceUrl'>> {
-    const result: Pick<ReleaseResult, 'homepage' | 'sourceUrl'> = {};
-
+  ): Promise<PomInfo | null> {
     const packageUrlsKey = `package-urls:${registryUrl}:${packageName}`;
     // istanbul ignore next: will be covered later
     const packageUrls =
@@ -220,12 +236,12 @@ export class SbtPackageDatasource extends MavenDatasource {
 
     // istanbul ignore if
     if (!packageUrls?.length) {
-      return result;
+      return null;
     }
 
     // istanbul ignore if
     if (!version) {
-      return result;
+      return null;
     }
 
     const invalidPomFilesKey = `invalid-pom-files:${registryUrl}:${packageName}:${version}`;
@@ -265,6 +281,13 @@ export class SbtPackageDatasource extends MavenDatasource {
           continue;
         }
 
+        const result: PomInfo = {};
+
+        const releaseTimestamp = normalizeDate(res.headers['last-modified']);
+        if (releaseTimestamp) {
+          result.releaseTimestamp = releaseTimestamp;
+        }
+
         const pomXml = new XmlDocument(content);
 
         const homepage = pomXml.valueWithPath('url');
@@ -287,7 +310,7 @@ export class SbtPackageDatasource extends MavenDatasource {
     }
 
     await saveCache();
-    return result;
+    return null;
   }
 
   override async getReleases(
@@ -316,12 +339,33 @@ export class SbtPackageDatasource extends MavenDatasource {
     return null;
   }
 
-  // istanbul ignore next: to be rewritten
+  @cache({
+    namespace: 'datasource-sbt-package',
+    key: (
+      { registryUrl, packageName }: PostprocessReleaseConfig,
+      { version }: Release,
+    ) => `postprocessRelease:${registryUrl}:${packageName}:${version}`,
+    ttlMinutes: 30 * 24 * 60,
+  })
   override async postprocessRelease(
     config: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
-    const mavenResult = await super.postprocessRelease(config, release);
-    return mavenResult === 'reject' ? release : mavenResult;
+    // istanbul ignore if
+    if (!config.registryUrl) {
+      return release;
+    }
+
+    const res = await this.getPomInfo(
+      config.registryUrl,
+      config.packageName,
+      release.version,
+    );
+
+    if (res?.releaseTimestamp) {
+      release.releaseTimestamp = res.releaseTimestamp;
+    }
+
+    return release;
   }
 }
