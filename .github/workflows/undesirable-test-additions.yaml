@@ -26,7 +26,7 @@ jobs:
           BASE_BRANCH=origin/${{ github.event.pull_request.base.ref }}
           echo "Base branch is: $BASE_BRANCH"
           echo "Current HEAD is: $(git rev-parse HEAD)"
-          BASE_BRANCH_REF=origin/${{ github.event.pull_request.base.sha }}
+          BASE_BRANCH_REF=${{ github.event.pull_request.base.sha }}
           echo "Base branch ref for this PR is: $BASE_BRANCH_REF"
 
           echo "### Calculating diff for '*.spec.ts' files..."
