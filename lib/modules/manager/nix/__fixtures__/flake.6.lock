@@ -1,0 +1,27 @@
+{
+  "nodes": {
+    "home-manager": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1728650932,
+        "narHash": "sha256-mGKzqdsRyLnGNl6WjEr7+sghGgBtYHhJQ4mjpgRTCsU=",
+        "owner": "rycee",
+        "repo": "home-manager",
+        "rev": "65ae9c147349829d3df0222151f53f79821c5134",
+        "type": "gitlab"
+      },
+      "original": {
+        "owner": "rycee",
+        "repo": "home-manager",
+        "type": "gitlab"
+      }
+    },
+    "root": {
+      "inputs": {
+        "home-manager": "home-manager"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
