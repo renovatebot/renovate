@@ -21,9 +21,6 @@ jobs:
           #!/bin/bash
           set -e
 
-          echo "### Fetching base branch for comparison..."
-          git fetch remote ${{ github.event.pull_request.base.ref }}
-
           BASE_BRANCH=${{ github.event.pull_request.base.ref }}
           echo "Base branch is: $BASE_BRANCH"
           BASE_BRANCH_REF=${{ github.event.pull_request.base.sha }}
