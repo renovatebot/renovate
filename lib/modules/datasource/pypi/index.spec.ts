@@ -178,6 +178,10 @@ describe('modules/datasource/pypi/index', () => {
         .get('/azure-cli-monitor/')
         .replyWithError('error');
       httpMock
+        .scope('https://custom.pypi.net/foo')
+        .get('/azure-cli-monitor/json')
+        .replyWithError('error');
+      httpMock
         .scope('https://second-index/foo')
         .get('/azure-cli-monitor/json')
         .reply(200, res1);
@@ -781,10 +785,14 @@ describe('modules/datasource/pypi/index', () => {
       ).toBeNull();
     });
 
-    it('returns null for 404 response from simple endpoint', async () => {
+    it('returns null for 404 response from simple and json endpoints', async () => {
       httpMock
         .scope('https://some.registry.org/simple/')
         .get('/dj-database-url/')
+        .replyWithError('error');
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/json')
         .replyWithError('error');
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],

@@ -56,9 +56,6 @@ export class PypiDatasource extends Datasource {
       normalizedLookupName,
       simpleHostUrl,
     ).catch((err) => {
-      if (err.statusCode !== 404) {
-        throw err;
-      }
       logger.trace(
         { packageName, hostUrl: simpleHostUrl },
         'Simple api not found. Looking up pypijson api as fallback.',
