@@ -15,7 +15,6 @@ jobs:
           fetch-depth: 0 # Fetch all history for comparison
           sparse-checkout: true
           ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
       - name: Check for undesirable code
         run: |
           #!/bin/bash
