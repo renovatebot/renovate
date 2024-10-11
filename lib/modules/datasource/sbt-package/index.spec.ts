@@ -1,19 +1,32 @@
+import { codeBlock } from 'common-tags';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { mocked } from '../../../../test/util';
+import * as _packageCache from '../../../util/cache/package';
+import { regEx } from '../../../util/regex';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
-import { parseIndexDir } from './util';
+import { extractPageLinks } from './util';
 import { SbtPackageDatasource } from '.';
+
+jest.mock('../../../util/cache/package');
+const packageCache = mocked(_packageCache);
 
 describe('modules/datasource/sbt-package/index', () => {
   it('parses Maven index directory', () => {
-    expect(parseIndexDir(Fixtures.get(`maven-index.html`))).toMatchSnapshot();
+    expect(
+      extractPageLinks(Fixtures.get(`maven-index.html`), (x) =>
+        regEx(/^\.+/).test(x) ? null : x,
+      ),
+    ).toMatchSnapshot();
   });
 
   it('parses sbt index directory', () => {
     expect(
-      parseIndexDir(Fixtures.get(`sbt-plugins-index.html`)),
+      extractPageLinks(Fixtures.get(`sbt-plugins-index.html`), (x) =>
+        regEx(/^\.+/).test(x) ? null : x,
+      ),
     ).toMatchSnapshot();
   });
 
@@ -50,11 +63,17 @@ describe('modules/datasource/sbt-package/index', () => {
       httpMock
         .scope('https://repo.maven.apache.org')
         .get('/maven2/com/example/')
-        .reply(200, '<a href="empty/">empty_2.12/</a>\n')
+        .reply(
+          200,
+          codeBlock`
+            <a href="empty/">empty_2.12/</a>
+            <a href="empty_but_invalid/">???</a>
+          `,
+        )
         .get('/maven2/com/example/empty/')
         .reply(200, '')
-        .get('/maven2/com.example/')
-        .reply(404)
+        .get('/maven2/com/example/empty_but_invalid/')
+        .reply(404, '')
         .get('/maven2/com/example/empty/maven-metadata.xml')
         .reply(404)
         .get('/maven2/com/example/empty/index.html')
@@ -76,24 +95,36 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/org/example/')
         .reply(
           200,
-          [
-            `<a href="example/" title='example/'>example_2.12/</a>`,
-            `<a href="example_2.12/" title='example_2.12/'>example_2.12/</a>`,
-            `<a href="example_native/" title='example_native/'>example_native/</a>`,
-            `<a href="example_sjs/" title='example_sjs/'>example_sjs/</a>`,
-          ].join('\n'),
+          codeBlock`
+            <a href="../" title='../'>../</a>
+            <a href="example/" title='example/'>example_2.12/</a>
+            <a href="example_2.12/" title='example_2.12/'>example_2.12/</a>
+            <a href="example_native/" title='example_native/'>example_native/</a>
+            <a href="example_sjs/" title='example_sjs/'>example_sjs/</a>
+          `,
         )
         .get('/org/example/example/')
-        .reply(200, `<a href='1.2.0/'>1.2.0/</a>`)
+        .reply(
+          200,
+          codeBlock`
+            <a href='../'>../</a>
+            <a href='1.2.0/'>1.2.0/</a>
+            `,
+        )
         .get('/org/example/example_2.12/')
-        .reply(200, `<a href='1.2.3/'>1.2.3/</a>`)
+        .reply(
+          200,
+          codeBlock`
+            <a href='../'>../</a>
+            <a href='1.2.3/'>1.2.3/</a>
+          `,
+        )
         .get('/org/example/example/1.2.3/example-1.2.3.pom')
-        .twice()
-        .reply(200, ``)
+        .reply(404)
         .get('/org/example/example_2.12/1.2.3/example-1.2.3.pom')
-        .reply(200, ``)
+        .reply(404)
         .get('/org/example/example_2.12/1.2.3/example_2.12-1.2.3.pom')
-        .reply(200, ``);
+        .reply(404);
 
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
@@ -154,15 +185,15 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/kafka-avro-serializer/7.0.1/kafka-avro-serializer-7.0.1.pom')
         .reply(
           200,
-          `
-          <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xmlns="http://maven.apache.org/POM/4.0.0"
-          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">z
-            <artifactId>kafka-avro-serializer</artifactId>
-            <packaging>jar</packaging>
-            <name>kafka-avro-serializer</name>
-          </project>
-        `,
+          codeBlock`
+            <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://maven.apache.org/POM/4.0.0"
+            xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">z
+              <artifactId>kafka-avro-serializer</artifactId>
+              <packaging>jar</packaging>
+              <name>kafka-avro-serializer</name>
+            </project>
+          `,
         );
 
       const res = await getPkgReleases({
@@ -188,7 +219,7 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/org/example/example/1.2.3/example-1.2.3.pom')
         .reply(
           200,
-          `
+          codeBlock`
             <project>
               <url>https://package.example.org/about</url>
               <scm>
@@ -222,8 +253,8 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/org/example/example_2.13/maven-metadata.xml')
         .reply(
           200,
-          `
-          <?xml version="1.0" encoding="UTF-8"?>
+          codeBlock`
+            <?xml version="1.0" encoding="UTF-8"?>
             <metadata>
               <groupId>org.example</groupId>
               <artifactId>package</artifactId>
@@ -237,8 +268,6 @@ describe('modules/datasource/sbt-package/index', () => {
             </metadata>
           `,
         )
-        .head('/org/example/example_2.13/1.2.3/example_2.13-1.2.3.pom')
-        .reply(200)
         .get('/org/example/example_2.13/1.2.3/example_2.13-1.2.3.pom')
         .reply(200);
 
@@ -252,6 +281,37 @@ describe('modules/datasource/sbt-package/index', () => {
       });
 
       expect(res).toMatchObject({});
+    });
+  });
+
+  describe('postprocessRelease', () => {
+    const datasource = new SbtPackageDatasource();
+
+    it('extracts URL from Maven POM file', async () => {
+      const registryUrl = 'https://repo.maven.apache.org/maven2/';
+      const packageName = 'org.example:example';
+      packageCache.get.mockImplementation(((ns: string, k: string) =>
+        ns === 'datasource-sbt-package' &&
+        k === `package-urls:${registryUrl}:${packageName}`
+          ? Promise.resolve([`${registryUrl}org/example/`])
+          : Promise.resolve(undefined)) as never);
+
+      httpMock
+        .scope(registryUrl)
+        .get('/org/example/1.2.3/example-1.2.3.pom')
+        .reply(200, codeBlock`<project></project>`, {
+          'last-modified': 'Wed, 21 Oct 2015 07:28:00 GMT',
+        });
+
+      const res = await datasource.postprocessRelease(
+        { packageName, registryUrl },
+        { version: '1.2.3' },
+      );
+
+      expect(res).toEqual({
+        version: '1.2.3',
+        releaseTimestamp: '2015-10-21T07:28:00.000Z',
+      });
     });
   });
 });

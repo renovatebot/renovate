@@ -124,6 +124,10 @@ export const presets: Record<string, Preset> = {
       'Do not separate `patch` and `minor` upgrades into separate PRs for the same dependency.',
     separateMinorPatch: false,
   },
+  configMigration: {
+    configMigration: true,
+    description: 'Enable Renovate configuration migration PRs when needed.',
+  },
   dependencyDashboard: {
     dependencyDashboard: true,
     description: 'Enable Renovate Dependency Dashboard creation.',

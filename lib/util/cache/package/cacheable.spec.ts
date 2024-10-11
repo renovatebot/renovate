@@ -98,24 +98,24 @@ describe('util/cache/package/cacheable', () => {
       const t1 = new Date();
 
       const empty = Cacheable.empty();
+      const a = empty.asPrivate(42);
+      const b = empty.asPublic(42);
 
       const t2 = new Date();
 
-      const a = Cacheable.fromPrivate(42);
-      const b = Cacheable.fromPublic(42);
-      const c = empty.asPrivate(42);
-      const d = empty.asPublic(42);
+      const c = Cacheable.fromPrivate(42);
+      const d = Cacheable.fromPublic(42);
 
       const t3 = new Date();
 
       expect(dateOf(empty)).toBeAfterOrEqualTo(t1);
       expect(dateOf(empty)).toBeBeforeOrEqualTo(t2);
 
-      expect(dateOf(a)).toBeAfterOrEqualTo(t2);
-      expect(dateOf(a)).toBeBeforeOrEqualTo(t3);
+      expect(dateOf(a)).toBeAfterOrEqualTo(t1);
+      expect(dateOf(a)).toBeBeforeOrEqualTo(t2);
 
-      expect(dateOf(b)).toBeAfterOrEqualTo(t2);
-      expect(dateOf(b)).toBeBeforeOrEqualTo(t3);
+      expect(dateOf(b)).toBeAfterOrEqualTo(t1);
+      expect(dateOf(b)).toBeBeforeOrEqualTo(t2);
 
       expect(dateOf(c)).toBeAfterOrEqualTo(t2);
       expect(dateOf(c)).toBeBeforeOrEqualTo(t3);
