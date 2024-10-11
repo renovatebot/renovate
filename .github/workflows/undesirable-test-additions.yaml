@@ -1,7 +1,7 @@
 name: Check for Undesirable Code
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened]
 
 jobs:
@@ -15,6 +15,7 @@ jobs:
           fetch-depth: 0 # Fetch all history for comparison
           sparse-checkout: true
           ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
       - name: Check for undesirable code
         run: |
           #!/bin/bash
