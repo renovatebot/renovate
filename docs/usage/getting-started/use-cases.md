@@ -199,7 +199,6 @@ Here's how it works:
 
 #### Benefits of using Dependency Dashboard Approval
 
-
 - By not raising PRs automatically, it allows you to request updates on-demand when you're ready, and
 - It offers you an alternative to permanently ignoring/disabling certain types of updates, like major updates
 
