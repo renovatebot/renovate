@@ -91,6 +91,7 @@ export type PackageCacheNamespace =
   | 'datasource-repology'
   | 'datasource-ruby-version'
   | 'datasource-rubygems'
+  | 'datasource-sbt-package'
   | 'datasource-terraform-module'
   | 'datasource-terraform-provider'
   | 'datasource-terraform'
