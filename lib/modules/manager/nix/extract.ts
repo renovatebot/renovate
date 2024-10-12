@@ -52,28 +52,36 @@ export function extractPackageFile(
     if (flakeLocked.type === InputType.github) {
       deps.push({
         depName,
+        currentValue: flakeOriginal.ref,
         currentDigest: flakeLocked.rev,
+        replaceString: flakeLocked.rev,
         datasource: GitRefsDatasource.id,
         packageName: `https://github.com/${flakeOriginal.owner}/${flakeOriginal.repo}`,
       });
     } else if (flakeLocked.type === InputType.gitlab) {
       deps.push({
         depName,
+        currentValue: flakeOriginal.ref,
         currentDigest: flakeLocked.rev,
+        replaceString: flakeLocked.rev,
         datasource: GitRefsDatasource.id,
         packageName: `https://gitlab.com/${flakeOriginal.owner}/${flakeOriginal.repo}`,
       });
     } else if (flakeOriginal.type === InputType.git) {
       deps.push({
         depName,
+        currentValue: flakeOriginal.ref,
         currentDigest: flakeLocked.rev,
+        replaceString: flakeLocked.rev,
         datasource: GitRefsDatasource.id,
         packageName: flakeOriginal.url,
       });
     } else if (flakeLocked.type === InputType.sourcehut) {
       deps.push({
         depName,
+        currentValue: flakeOriginal.ref,
         currentDigest: flakeLocked.rev,
+        replaceString: flakeLocked.rev,
         datasource: GitRefsDatasource.id,
         packageName: `https://git.sr.ht/${flakeOriginal.owner}/${flakeOriginal.repo}`,
       });
