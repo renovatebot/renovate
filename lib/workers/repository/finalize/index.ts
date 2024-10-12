@@ -2,7 +2,7 @@ import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import * as repositoryCache from '../../../util/cache/repository';
-import { clearRenovateRefs } from '../../../util/git';
+import { clearRenovateRefs, hasCommittedTo } from '../../../util/git';
 import { PackageFiles } from '../package-files';
 import { validateReconfigureBranch } from '../reconfigure';
 import { pruneStaleBranches } from './prune';
@@ -30,7 +30,8 @@ export async function finalizeRepo(
         pr.title !== 'Configure Renovate' &&
         pr.title !== config.onboardingPrTitle &&
         pr.sourceBranch !== config.onboardingBranch,
-    )
+    ) ||
+    (await hasCommittedTo(config.baseBranches!))
   ) {
     logger.debug('Repo is activated');
     config.repoIsActivated = true;

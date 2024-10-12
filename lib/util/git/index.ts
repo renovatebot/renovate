@@ -522,6 +522,26 @@ export async function getCommitMessages(): Promise<string[]> {
   }
 }
 
+export async function hasCommittedTo(branches: string[]): Promise<boolean> {
+  logger.debug('hasCommittedTo');
+  await syncGit();
+  try {
+    const mappedBranches: Record<string, boolean> = {};
+    for (const branch of branches) {
+      mappedBranches[branch] = true;
+    }
+
+    const res = await git.log({
+      ...mappedBranches,
+      '--author': config.gitAuthorEmail!,
+      n: 1,
+    });
+    return res.total > 0;
+  } catch /* istanbul ignore next */ {
+    return false;
+  }
+}
+
 export async function checkoutBranch(
   branchName: string,
 ): Promise<LongCommitSha> {

@@ -795,6 +795,12 @@ describe('util/git/index', () => {
     });
   });
 
+  describe('hasCommitedTo()', () => {
+    it('has committed to anything', async () => {
+      expect(await git.hasCommittedTo([defaultBranch])).toBeTrue();
+    });
+  });
+
   describe('Storage.getUrl()', () => {
     const getUrl = git.getUrl;
 
