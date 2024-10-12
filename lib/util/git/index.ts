@@ -522,6 +522,10 @@ export async function getCommitMessages(): Promise<string[]> {
   }
 }
 
+/**
+ * Has committed to any of the given branches
+ * @param branches Branches to check
+ */
 export async function hasCommittedTo(branches: string[]): Promise<boolean> {
   logger.debug('hasCommittedTo');
   await syncGit();
