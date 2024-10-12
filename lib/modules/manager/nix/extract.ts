@@ -1,38 +1,43 @@
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { logger } from '../../../logger';
 import type { PackageDependency, PackageFileContent } from '../types';
-import { InputType, NixFlakeLock } from './types';
+import { NixFlakeLock } from './schema';
 
 // TODO: add support to update nixpkgs branches in flakes.nix using nixpkgsVersioning
 
-export function extractPackageFile(
+export async function extractPackageFile(
   content: string,
   packageFile: string,
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
   logger.trace(`nix.extractPackageFile(${packageFile})`);
 
   const deps: PackageDependency[] = [];
-  let lock: NixFlakeLock;
 
-  try {
-    lock = JSON.parse(content);
-  } catch {
-    logger.debug({ packageFile }, `Invalid JSON`);
+  const flakeLockParsed = await NixFlakeLock.safeParse(content);
+  if (!flakeLockParsed.success) {
+    logger.debug({ packageFile, error: flakeLockParsed.error }, `invalid flake.lock file`);
     return null;
   }
 
-  if (lock.version !== 7) {
+  const flakeLock = flakeLockParsed.data;
+
+  if (flakeLock.version !== 7) {
     logger.debug({ packageFile }, 'Unsupported flake lock version');
     return null;
   }
 
-  for (const depName of Object.keys(lock.nodes ?? {})) {
+  for (const depName of Object.keys(flakeLock.nodes ?? {})) {
     // the root input is a magic string for the entrypoint and only references other flake inputs
     if (depName === 'root') {
       continue;
     }
 
-    const flakeInput = lock.nodes[depName];
+    // skip if there are no inputs
+    if (flakeLock.nodes === undefined) {
+      continue;
+    }
+
+    const flakeInput = flakeLock.nodes[depName];
     const flakeLocked = flakeInput.locked;
     const flakeOriginal = flakeInput.original;
 
@@ -45,11 +50,11 @@ export function extractPackageFile(
     }
 
     // indirect inputs cannot be updated via normal means
-    if (flakeOriginal.type === InputType.indirect) {
+    if (flakeOriginal.type === 'indirect') {
       continue;
     }
 
-    if (flakeLocked.type === InputType.github) {
+    if (flakeLocked.type === 'github') {
       deps.push({
         depName,
         currentValue: flakeOriginal.ref,
@@ -58,7 +63,7 @@ export function extractPackageFile(
         datasource: GitRefsDatasource.id,
         packageName: `https://github.com/${flakeOriginal.owner}/${flakeOriginal.repo}`,
       });
-    } else if (flakeLocked.type === InputType.gitlab) {
+    } else if (flakeLocked.type === 'gitlab') {
       deps.push({
         depName,
         currentValue: flakeOriginal.ref,
@@ -67,7 +72,7 @@ export function extractPackageFile(
         datasource: GitRefsDatasource.id,
         packageName: `https://gitlab.com/${flakeOriginal.owner}/${flakeOriginal.repo}`,
       });
-    } else if (flakeOriginal.type === InputType.git) {
+    } else if (flakeOriginal.type === 'git') {
       deps.push({
         depName,
         currentValue: flakeOriginal.ref,
@@ -76,7 +81,7 @@ export function extractPackageFile(
         datasource: GitRefsDatasource.id,
         packageName: flakeOriginal.url,
       });
-    } else if (flakeLocked.type === InputType.sourcehut) {
+    } else if (flakeLocked.type === 'sourcehut') {
       deps.push({
         depName,
         currentValue: flakeOriginal.ref,
