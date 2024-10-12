@@ -19,8 +19,10 @@ describe('modules/manager/nix/extract', () => {
       {
         depName: 'nixpkgs',
         currentDigest: '9f4128e00b0ae8ec65918efeba59db998750ead6',
+        currentValue: "nixos-unstable",
         datasource: GitRefsDatasource.id,
         packageName: 'https://github.com/NixOS/nixpkgs',
+        replaceString: "9f4128e00b0ae8ec65918efeba59db998750ead6",
       },
     ]);
   });
