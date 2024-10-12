@@ -1,6 +1,5 @@
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { logger } from '../../../logger';
-import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { InputType, NixFlakeLock } from './types';
 
