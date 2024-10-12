@@ -1,19 +1,19 @@
-import { GitRefsDatasource } from '../../datasource/git-refs';
 import { logger } from '../../../logger';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { NixFlakeLock } from './schema';
 
 // TODO: add support to update nixpkgs branches in flakes.nix using nixpkgsVersioning
 
-export async function extractPackageFile(
+export function extractPackageFile(
   content: string,
   packageFile: string,
-): Promise<PackageFileContent | null> {
+): PackageFileContent | null {
   logger.trace(`nix.extractPackageFile(${packageFile})`);
 
   const deps: PackageDependency[] = [];
 
-  const flakeLockParsed = await NixFlakeLock.safeParse(content);
+  const flakeLockParsed = NixFlakeLock.safeParse(content);
   if (!flakeLockParsed.success) {
     logger.debug({ packageFile, error: flakeLockParsed.error }, `invalid flake.lock file`);
     return null;

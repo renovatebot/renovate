@@ -1,7 +1,13 @@
 import { z } from 'zod';
 import { Json } from '../../../util/schema-utils';
 
-export const InputType = z.enum(['git', 'github', 'gitlab', 'indirect', 'sourcehut']);
+export const InputType = z.enum([
+  'git',
+  'github',
+  'gitlab',
+  'indirect',
+  'sourcehut',
+]);
 
 export const LockedInput = z.object({
   host: z.string().optional(),
@@ -30,10 +36,12 @@ export const NixInput = z.object({
   original: OriginalInput.optional(),
 });
 
-export const NixFlakeLock = Json.pipe(z.object({
-  nodes: z.record(z.string(), NixInput).optional(),
-  root: z.string(),
-  version: z.number(),
-}));
+export const NixFlakeLock = Json.pipe(
+  z.object({
+    nodes: z.record(z.string(), NixInput).optional(),
+    root: z.string(),
+    version: z.number(),
+  }),
+);
 
 export type NixFlakeLock = z.infer<typeof NixFlakeLock>;
