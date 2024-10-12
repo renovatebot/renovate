@@ -3093,7 +3093,7 @@ Be cautious as using this setting incorrectly could break all lookups.
 
 ### overridePackageName
 
-See the `overrideDatasource` documentation for an example of use.
+See the [`overrideDatasource`](#overrideDatasource) documentation for an example of use.
 `overridePackageName` supports template compilation.
 
 Be cautious as using this setting incorrectly could break all lookups.
