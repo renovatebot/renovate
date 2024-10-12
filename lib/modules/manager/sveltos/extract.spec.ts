@@ -53,7 +53,7 @@ describe('modules/manager/sveltos/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('return null if yaml is invalid', () => {
+    it('return null if YAML is invalid', () => {
       const result = extractPackageFile(
         codeBlock`
           ----
