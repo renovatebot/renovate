@@ -130,15 +130,16 @@ describe('modules/manager/pep621/processors/uv', () => {
     const pyproject = {
       tool: {
         uv: {
-          'dev-dependencies': ['dep3', 'dep4'],
+          'dev-dependencies': ['dep3', 'dep4', 'dep5'],
           sources: {
             dep1: { git: 'https://github.com/foo/dep1', tag: '0.1.0' },
             dep2: { git: 'https://gitlab.com/foo/dep2', tag: '0.2.0' },
-            dep3: {
-              git: 'https://github.com/foo/dep3',
+            dep3: { git: 'https://codeberg.org/foo/dep3.git', tag: '0.3.0' },
+            dep4: {
+              git: 'https://github.com/foo/dep4',
               rev: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
             },
-            dep4: { git: 'https://github.com/foo/dep4', branch: 'master' },
+            dep5: { git: 'https://github.com/foo/dep5', branch: 'master' },
           },
         },
       },
@@ -165,16 +166,23 @@ describe('modules/manager/pep621/processors/uv', () => {
       {
         depName: 'dep3',
         depType: 'tool.uv.sources',
-        datasource: 'git-refs',
-        packageName: 'https://github.com/foo/dep3',
-        currentDigest: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
-        replaceString: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+        datasource: 'git-tags',
+        packageName: 'https://codeberg.org/foo/dep3.git',
+        currentValue: '0.3.0',
       },
       {
         depName: 'dep4',
         depType: 'tool.uv.sources',
         datasource: 'git-refs',
         packageName: 'https://github.com/foo/dep4',
+        currentDigest: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+        replaceString: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+      },
+      {
+        depName: 'dep5',
+        depType: 'tool.uv.sources',
+        datasource: 'git-refs',
+        packageName: 'https://github.com/foo/dep5',
         currentValue: 'master',
         skipReason: 'git-dependency',
       },
