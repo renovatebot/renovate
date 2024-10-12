@@ -4,8 +4,8 @@ import { mergeChildConfig } from '../../config';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { StageName } from '../../types/skip-reason';
-import matchers from './matchers';
 import { compile } from '../template';
+import matchers from './matchers';
 
 async function matchesRule(
   inputConfig: PackageRuleInputConfig,
