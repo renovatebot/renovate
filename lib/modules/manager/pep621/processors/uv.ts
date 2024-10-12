@@ -53,16 +53,14 @@ export class UvProcessor implements PyProjectProcessor {
         const depSource = uv.sources[dep.depName];
         if (depSource) {
           dep.depType = depTypes.uvSources;
-          if ('git' in depSource) {
-            applyGitSource(dep, depSource);
-          } else if ('url' in depSource) {
+          if ('url' in depSource) {
             dep.skipReason = 'unsupported-url';
           } else if ('path' in depSource) {
             dep.skipReason = 'path-dependency';
           } else if ('workspace' in depSource) {
             dep.skipReason = 'inherited-dependency';
           } else {
-            dep.skipReason = 'invalid-dependency-specification';
+            applyGitSource(dep, depSource);
           }
         }
       }
