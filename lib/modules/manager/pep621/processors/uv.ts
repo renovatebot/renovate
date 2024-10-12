@@ -1,14 +1,20 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
+import type { z } from 'zod';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { HostRule } from '../../../../types';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import { parseGitUrl } from '../../../../util/git/url';
 import { find } from '../../../../util/host-rules';
 import { Result } from '../../../../util/result';
 import { parseUrl } from '../../../../util/url';
+import { GitRefsDatasource } from '../../../datasource/git-refs';
+import { GitTagsDatasource } from '../../../datasource/git-tags';
+import { GithubTagsDatasource } from '../../../datasource/github-tags';
+import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags';
 import { PypiDatasource } from '../../../datasource/pypi';
 import type {
   PackageDependency,
@@ -16,7 +22,7 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types';
-import { type PyProject, UvLockfileSchema } from '../schema';
+import { type PyProject, type UvGitSource, UvLockfileSchema } from '../schema';
 import { depTypes, parseDependencyList } from '../utils';
 import type { PyProjectProcessor } from './types';
 
@@ -37,7 +43,7 @@ export class UvProcessor implements PyProjectProcessor {
     );
 
     // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
-    // Skip sources that are either not yet handled by Renovate (e.g. git), or do not make sense to handle (e.g. path).
+    // Skip sources that do not make sense to handle (e.g. path).
     if (uv.sources) {
       for (const dep of deps) {
         if (!dep.depName) {
@@ -46,13 +52,14 @@ export class UvProcessor implements PyProjectProcessor {
 
         const depSource = uv.sources[dep.depName];
         if (depSource) {
-          if (depSource.git) {
-            dep.skipReason = 'git-dependency';
-          } else if (depSource.url) {
+          dep.depType = depTypes.uvSources;
+          if ('git' in depSource) {
+            applyGitSource(dep, depSource);
+          } else if ('url' in depSource) {
             dep.skipReason = 'unsupported-url';
-          } else if (depSource.path) {
+          } else if ('path' in depSource) {
             dep.skipReason = 'path-dependency';
-          } else if (depSource.workspace) {
+          } else if ('workspace' in depSource) {
             dep.skipReason = 'inherited-dependency';
           } else {
             dep.skipReason = 'invalid-dependency-specification';
@@ -175,6 +182,40 @@ export class UvProcessor implements PyProjectProcessor {
   }
 }
 
+function applyGitSource(
+  dep: PackageDependency,
+  depSource: z.infer<typeof UvGitSource>,
+): void {
+  const { git, rev, tag, branch } = depSource;
+  if (tag) {
+    const { source, owner, name } = parseGitUrl(git);
+    const repo = `${owner}/${name}`;
+    if (source === 'github.com') {
+      dep.datasource = GithubTagsDatasource.id;
+      dep.packageName = repo;
+    } else if (source === 'gitlab.com') {
+      dep.datasource = GitlabTagsDatasource.id;
+      dep.packageName = repo;
+    } else {
+      dep.datasource = GitTagsDatasource.id;
+      dep.packageName = git;
+    }
+    dep.currentValue = tag;
+    dep.skipReason = undefined;
+  } else if (rev) {
+    dep.datasource = GitRefsDatasource.id;
+    dep.packageName = git;
+    dep.currentDigest = rev;
+    dep.replaceString = rev;
+    dep.skipReason = undefined;
+  } else {
+    dep.datasource = GitRefsDatasource.id;
+    dep.packageName = git;
+    dep.currentValue = branch;
+    dep.skipReason = 'git-dependency';
+  }
+}
+
 function generateCMD(updatedDeps: Upgrade[]): string {
   const deps: string[] = [];
 
@@ -184,7 +225,8 @@ function generateCMD(updatedDeps: Upgrade[]): string {
         deps.push(dep.depName!.split('/')[1]);
         break;
       }
-      case depTypes.uvDevDependencies: {
+      case depTypes.uvDevDependencies:
+      case depTypes.uvSources: {
         deps.push(dep.depName!);
         break;
       }

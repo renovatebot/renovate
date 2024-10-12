@@ -71,12 +71,10 @@ describe('modules/manager/pep621/processors/uv', () => {
               dep3: { path: '/local-dep.whl' },
               dep4: { url: 'https://example.com' },
               dep5: { workspace: true },
-              dep6: { workspace: false },
-              dep7: {},
             },
           },
         },
-      };
+      } as const;
       const dependencies = [
         {},
         { depName: 'dep1' },
@@ -97,30 +95,90 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
         {
           depName: 'dep2',
+          depType: 'tool.uv.sources',
+          datasource: 'git-refs',
+          packageName: 'https://github.com/foo/bar',
+          currentValue: undefined,
           skipReason: 'git-dependency',
         },
         {
           depName: 'dep3',
+          depType: 'tool.uv.sources',
           skipReason: 'path-dependency',
         },
         {
           depName: 'dep4',
+          depType: 'tool.uv.sources',
           skipReason: 'unsupported-url',
         },
         {
           depName: 'dep5',
+          depType: 'tool.uv.sources',
           skipReason: 'inherited-dependency',
         },
         {
           depName: 'dep6',
-          skipReason: 'invalid-dependency-specification',
         },
         {
           depName: 'dep7',
-          skipReason: 'invalid-dependency-specification',
         },
       ]);
     });
+  });
+
+  it('applies git sources', () => {
+    const pyproject = {
+      tool: {
+        uv: {
+          'dev-dependencies': ['dep3', 'dep4'],
+          sources: {
+            dep1: { git: 'https://github.com/foo/dep1', tag: '0.1.0' },
+            dep2: { git: 'https://gitlab.com/foo/dep2', tag: '0.2.0' },
+            dep3: {
+              git: 'https://github.com/foo/dep3',
+              rev: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+            },
+            dep4: { git: 'https://github.com/foo/dep4', branch: 'master' },
+          },
+        },
+      },
+    };
+    const dependencies = [{ depName: 'dep1' }, { depName: 'dep2' }];
+
+    const result = processor.process(pyproject, dependencies);
+
+    expect(result).toEqual([
+      {
+        depName: 'dep1',
+        depType: 'tool.uv.sources',
+        datasource: 'github-tags',
+        packageName: 'foo/dep1',
+        currentValue: '0.1.0',
+      },
+      {
+        depName: 'dep2',
+        depType: 'tool.uv.sources',
+        datasource: 'gitlab-tags',
+        packageName: 'foo/dep2',
+        currentValue: '0.2.0',
+      },
+      {
+        depName: 'dep3',
+        depType: 'tool.uv.sources',
+        datasource: 'git-refs',
+        packageName: 'https://github.com/foo/dep3',
+        currentDigest: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+        replaceString: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+      },
+      {
+        depName: 'dep4',
+        depType: 'tool.uv.sources',
+        datasource: 'git-refs',
+        packageName: 'https://github.com/foo/dep4',
+        currentValue: 'master',
+        skipReason: 'git-dependency',
+      },
+    ]);
   });
 
   describe('updateArtifacts()', () => {
