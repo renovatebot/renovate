@@ -795,7 +795,7 @@ describe('util/git/index', () => {
     });
   });
 
-  describe('hasCommitedTo()', () => {
+  describe('hasCommittedTo()', () => {
     it('has committed to anything', async () => {
       expect(await git.hasCommittedTo([defaultBranch])).toBeTrue();
     });
