@@ -24,11 +24,6 @@ export function extractPackageFile(
 
   const flakeLock = flakeLockParsed.data;
 
-  if (flakeLock.version !== 7) {
-    logger.debug({ packageFile }, 'Unsupported flake lock version');
-    return null;
-  }
-
   for (const depName of Object.keys(flakeLock.nodes ?? {})) {
     // the root input is a magic string for the entrypoint and only references other flake inputs
     if (depName === 'root') {
@@ -37,6 +32,11 @@ export function extractPackageFile(
 
     // skip if there are no inputs
     if (flakeLock.nodes === undefined) {
+      continue;
+    }
+
+    // skip all locked nodes which are not in the flake.nix and cannot be updated
+    if (!(depName in (flakeLock.nodes['root'].inputs ?? []))) {
       continue;
     }
 
@@ -52,7 +52,7 @@ export function extractPackageFile(
       continue;
     }
 
-    // indirect inputs cannot be updated via normal means
+    // indirect inputs cannot be reliable updated because they depend on the flake registry
     if (flakeOriginal.type === 'indirect') {
       continue;
     }

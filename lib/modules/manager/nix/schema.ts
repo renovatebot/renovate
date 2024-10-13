@@ -32,7 +32,7 @@ export const OriginalInput = z.object({
 });
 
 export const NixInput = z.object({
-  inputs: z.record(z.string(), z.string()).optional(),
+  inputs: z.record(z.string(), z.string().or(z.array(z.string()))).optional(),
   locked: LockedInput.optional(),
   original: OriginalInput.optional(),
 });
@@ -40,8 +40,8 @@ export const NixInput = z.object({
 export const NixFlakeLock = Json.pipe(
   z.object({
     nodes: z.record(z.string(), NixInput).optional(),
-    root: z.string(),
-    version: z.number(),
+    root: z.literal('root').optional(),
+    version: z.literal(7),
   }),
 );
 
