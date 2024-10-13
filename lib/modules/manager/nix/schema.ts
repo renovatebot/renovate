@@ -18,6 +18,7 @@ export const LockedInput = z.object({
   ref: z.string().optional(),
   rev: z.string(),
   revCount: z.number().optional(),
+  shallow: z.boolean().optional(),
   type: InputType,
   url: z.string().optional(),
 });
