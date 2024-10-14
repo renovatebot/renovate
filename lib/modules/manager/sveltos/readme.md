@@ -38,8 +38,8 @@ You must set your own `fileMatch` rules, so Renovate knows which `*.yaml` files 
 
 You can use these `depTypes` for fine-grained control, for example to disable parts of the Sveltos manager.
 
-| Resource                                                                                | `depType`        |
-| :-------------------------------------------------------------------------------------- | :--------------- |
-| [Cluster Profiles](https://projectsveltos.github.io/sveltos/addons/clusterprofile/)     | `ClusterProfile` |
-| [Profiles](https://projectsveltos.github.io/sveltos/addons/profile/)                    | `Profile`        |
-| [EventTrigger](https://projectsveltos.github.io/sveltos/events/addon_event_deployment/) | `EventTrigger`   |
+| Resource                                                                                             | `depType`        |
+| :--------------------------------------------------------------------------------------------------- | :--------------- |
+| [Cluster Profiles](https://projectsveltos.github.io/sveltos/addons/clusterprofile/)                  | `ClusterProfile` |
+| [Profiles](https://projectsveltos.github.io/sveltos/addons/profile/)                                 | `Profile`        |
+| [EventTrigger](https://projectsveltos.github.io/sveltos/events/addon_event_deployment/#eventtrigger) | `EventTrigger`   |
