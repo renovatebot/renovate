@@ -57,48 +57,54 @@ export function extractPackageFile(
       continue;
     }
 
-    if (flakeLocked.type === 'github') {
-      deps.push({
-        depName,
-        currentValue: flakeOriginal.ref,
-        currentDigest: flakeLocked.rev,
-        replaceString: flakeLocked.rev,
-        datasource: GitRefsDatasource.id,
-        packageName: `https://github.com/${flakeOriginal.owner}/${flakeOriginal.repo}`,
-      });
-    } else if (flakeLocked.type === 'gitlab') {
-      deps.push({
-        depName,
-        currentValue: flakeOriginal.ref,
-        currentDigest: flakeLocked.rev,
-        replaceString: flakeLocked.rev,
-        datasource: GitRefsDatasource.id,
-        packageName: `https://gitlab.com/${flakeOriginal.owner}/${flakeOriginal.repo}`,
-      });
-    } else if (flakeOriginal.type === 'git') {
-      deps.push({
-        depName,
-        currentValue: flakeOriginal.ref,
-        currentDigest: flakeLocked.rev,
-        replaceString: flakeLocked.rev,
-        datasource: GitRefsDatasource.id,
-        packageName: flakeOriginal.url,
-      });
-    } else if (flakeLocked.type === 'sourcehut') {
-      deps.push({
-        depName,
-        currentValue: flakeOriginal.ref,
-        currentDigest: flakeLocked.rev,
-        replaceString: flakeLocked.rev,
-        datasource: GitRefsDatasource.id,
-        packageName: `https://git.sr.ht/${flakeOriginal.owner}/${flakeOriginal.repo}`,
-      });
-    } else {
-      logger.debug(
-        { packageFile },
-        `Unknown flake.lock type "${flakeLocked.type}", skipping`,
-      );
-      continue;
+    switch (flakeLocked.type) {
+      case 'github':
+        deps.push({
+          depName,
+          currentValue: flakeOriginal.ref,
+          currentDigest: flakeLocked.rev,
+          replaceString: flakeLocked.rev,
+          datasource: GitRefsDatasource.id,
+          packageName: `https://github.com/${flakeOriginal.owner}/${flakeOriginal.repo}`,
+        });
+        break;
+      case 'gitlab':
+        deps.push({
+          depName,
+          currentValue: flakeOriginal.ref,
+          currentDigest: flakeLocked.rev,
+          replaceString: flakeLocked.rev,
+          datasource: GitRefsDatasource.id,
+          packageName: `https://gitlab.com/${flakeOriginal.owner}/${flakeOriginal.repo}`,
+        });
+        break;
+      case 'git':
+        deps.push({
+          depName,
+          currentValue: flakeOriginal.ref,
+          currentDigest: flakeLocked.rev,
+          replaceString: flakeLocked.rev,
+          datasource: GitRefsDatasource.id,
+          packageName: flakeOriginal.url,
+        });
+        break;
+      case 'sourcehut':
+        deps.push({
+          depName,
+          currentValue: flakeOriginal.ref,
+          currentDigest: flakeLocked.rev,
+          replaceString: flakeLocked.rev,
+          datasource: GitRefsDatasource.id,
+          packageName: `https://git.sr.ht/${flakeOriginal.owner}/${flakeOriginal.repo}`,
+        });
+        break;
+      // istanbul ignore next: just a safeguard
+      default:
+        logger.debug(
+          { packageFile },
+          `Unknown flake.lock type "${flakeLocked.type}", skipping`,
+        );
+        break;
     }
   }
 
