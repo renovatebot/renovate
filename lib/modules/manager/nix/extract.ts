@@ -24,14 +24,14 @@ export function extractPackageFile(
 
   const flakeLock = flakeLockParsed.data;
 
-  for (const depName of Object.keys(flakeLock.nodes ?? {})) {
+  // skip if there are no inputs
+  if (flakeLock.nodes === undefined) {
+    return null;
+  }
+
+  for (const depName of Object.keys(flakeLock.nodes)) {
     // the root input is a magic string for the entrypoint and only references other flake inputs
     if (depName === 'root') {
-      continue;
-    }
-
-    // skip if there are no inputs
-    if (flakeLock.nodes === undefined) {
       continue;
     }
 
