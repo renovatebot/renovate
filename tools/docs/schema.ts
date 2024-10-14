@@ -70,9 +70,6 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
       temp.enum = option.allowedValues;
     }
   }
-  if (option.default === null) {
-    temp.type = [option.type, 'null'];
-  }
   if (option.default !== undefined) {
     temp.default = option.default;
   }
@@ -82,7 +79,13 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
   ) {
     temp.additionalProperties = option.additionalProperties;
   }
-  if (temp.type === 'object' && !option.freeChoice) {
+  if (option.default === null) {
+    temp.type = [option.type, 'null'];
+  }
+  if (
+    (temp.type === 'object' || temp.type?.includes('object')) &&
+    !option.freeChoice
+  ) {
     temp.$ref = '#';
   }
   return temp;
