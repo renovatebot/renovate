@@ -1,5 +1,5 @@
 export const repoInfoQuery = `
-query($owner: String!, $name: String!) {
+query($owner: String!, $name: String!, $user: String!) {
   repository(owner: $owner, name: $name) {
     id
     isFork
@@ -20,6 +20,19 @@ query($owner: String!, $name: String!) {
         oid
       }
     }
+    issues(
+      orderBy: { field: UPDATED_AT, direction: DESC },
+      filterBy: { createdBy: $user },
+      first: 5
+    ) {
+      nodes {
+        number
+        state
+        title
+        body
+        updatedAt
+      }
+    }
   }
 }
 `;
@@ -28,7 +41,7 @@ export const getIssuesQuery = `
 query(
   $owner: String!,
   $name: String!,
-  $user: String!,
+  $user: String,
   $count: Int,
   $cursor: String
 ) {
@@ -49,34 +62,6 @@ query(
         title
         body
         updatedAt
-      }
-    }
-  }
-}
-`;
-
-export const vulnerabilityAlertsQuery = (filterByState: boolean): string => `
-query($owner: String!, $name: String!) {
-  repository(owner: $owner, name: $name) {
-    vulnerabilityAlerts(last: 100, ${filterByState ? 'states: [OPEN]' : ''}) {
-      edges {
-        node {
-          dismissReason
-          vulnerableManifestFilename
-          vulnerableManifestPath
-          vulnerableRequirements
-          securityAdvisory {
-            description
-            identifiers { type value }
-            references { url }
-            severity
-          }
-          securityVulnerability {
-            package { name ecosystem }
-            firstPatchedVersion { identifier }
-            vulnerableVersionRange
-          }
-        }
       }
     }
   }

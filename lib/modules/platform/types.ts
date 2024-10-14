@@ -101,6 +101,7 @@ export type PlatformPrOptions = {
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
+  bbAutoResolvePrTasks?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
@@ -112,13 +113,13 @@ export interface CreatePRConfig {
   prTitle: string;
   prBody: string;
   labels?: string[] | null;
-  platformOptions?: PlatformPrOptions;
+  platformPrOptions?: PlatformPrOptions;
   draftPR?: boolean;
   milestone?: number;
 }
 export interface UpdatePrConfig {
   number: number;
-  platformOptions?: PlatformPrOptions;
+  platformPrOptions?: PlatformPrOptions;
   prTitle: string;
   prBody?: string;
   state?: 'open' | 'closed';
@@ -148,7 +149,7 @@ export interface UpdatePrConfig {
 }
 export interface ReattemptPlatformAutomergeConfig {
   number: number;
-  platformOptions?: PlatformPrOptions;
+  platformPrOptions?: PlatformPrOptions;
 }
 export interface EnsureIssueConfig {
   title: string;
@@ -201,8 +202,19 @@ export type EnsureCommentRemovalConfig =
 
 export type EnsureIssueResult = 'updated' | 'created';
 
+export type RepoSortMethod =
+  | 'alpha'
+  | 'created'
+  | 'updated'
+  | 'size'
+  | 'id'
+  | null;
+
+export type SortMethod = 'asc' | 'desc' | null;
 export interface AutodiscoverConfig {
   topics?: string[];
+  sort?: RepoSortMethod;
+  order?: SortMethod;
   includeMirrors?: boolean;
   namespaces?: string[];
   projects?: string[];
@@ -266,11 +278,13 @@ export interface Platform {
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
+
+  maxBodyLength(): number;
 }
 
 export interface PlatformScm {
   isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean>;
-  isBranchModified(branchName: string): Promise<boolean>;
+  isBranchModified(branchName: string, baseBranch: string): Promise<boolean>;
   isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
   getBranchCommit(branchName: string): Promise<LongCommitSha | null>;

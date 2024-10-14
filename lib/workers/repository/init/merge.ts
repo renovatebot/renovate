@@ -23,6 +23,8 @@ import { readLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
+import { getOnboardingConfig } from '../onboarding/branch/config';
+import { getDefaultConfigFileName } from '../onboarding/branch/create';
 import {
   getOnboardingConfigFromCache,
   getOnboardingFileNameFromCache,
@@ -45,7 +47,7 @@ export async function detectConfigFile(): Promise<string | null> {
           );
           return 'package.json';
         }
-      } catch (err) {
+      } catch {
         // Do nothing
       }
     } else if (fileList.includes(fileName)) {
@@ -58,7 +60,7 @@ export async function detectConfigFile(): Promise<string | null> {
 export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
-  if (configFileName) {
+  if (is.nonEmptyString(configFileName)) {
     let configFileRaw: string | null;
     try {
       configFileRaw = await platform.getRawFile(configFileName);
@@ -89,6 +91,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
 
   if (!configFileName) {
     logger.debug('No renovate config file found');
+    cache.configFileName = '';
     return {};
   }
   cache.configFileName = configFileName;
@@ -170,6 +173,16 @@ export async function mergeRenovateConfig(
   let repoConfig: RepoFileConfig = {};
   if (config.requireConfig !== 'ignored') {
     repoConfig = await detectRepoFileConfig();
+  }
+  if (!repoConfig.configFileParsed && config.mode === 'silent') {
+    logger.debug(
+      'When mode=silent and repo has no config file, we use the onboarding config as repo config',
+    );
+    const configFileName = getDefaultConfigFileName(config);
+    repoConfig = {
+      configFileName,
+      configFileParsed: await getOnboardingConfig(config),
+    };
   }
   const configFileParsed = repoConfig?.configFileParsed || {};
   if (is.nonEmptyArray(returnConfig.extends)) {

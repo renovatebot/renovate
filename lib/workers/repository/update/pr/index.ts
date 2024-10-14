@@ -8,13 +8,13 @@ import {
 } from '../../../../constants/error-messages';
 import { pkg } from '../../../../expose.cjs';
 import { logger } from '../../../../logger';
-import {
+import type {
   PlatformPrOptions,
   Pr,
   PrDebugData,
   UpdatePrConfig,
-  platform,
 } from '../../../../modules/platform';
+import { platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import {
   getPrBodyStruct,
@@ -57,6 +57,7 @@ export function getPlatformPrOptions(
     autoApprove: !!config.autoApprove,
     automergeStrategy: config.automergeStrategy,
     azureWorkItemId: config.azureWorkItemId ?? 0,
+    bbAutoResolvePrTasks: !!config.bbAutoResolvePrTasks,
     bbUseDefaultReviewers: !!config.bbUseDefaultReviewers,
     gitLabIgnoreApprovals: !!config.gitLabIgnoreApprovals,
     forkModeDisallowMaintainerEdits: !!config.forkModeDisallowMaintainerEdits,
@@ -386,7 +387,7 @@ export async function ensurePr(
         number: existingPr.number,
         prTitle,
         prBody,
-        platformOptions: getPlatformPrOptions(config),
+        platformPrOptions: getPlatformPrOptions(config),
       };
       // PR must need updating
       if (existingPr?.targetBranch !== config.baseBranch) {
@@ -490,7 +491,7 @@ export async function ensurePr(
           prTitle,
           prBody,
           labels: prepareLabels(config),
-          platformOptions: getPlatformPrOptions(config),
+          platformPrOptions: getPlatformPrOptions(config),
           draftPR: !!config.draftPR,
           milestone: config.milestone,
         });

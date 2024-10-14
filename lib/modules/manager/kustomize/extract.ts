@@ -7,7 +7,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
-import { isOCIRegistry } from '../helmv3/utils';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -69,7 +69,7 @@ export function extractResource(base: string): PackageDependency | null {
 
 export function extractImage(
   image: Image,
-  aliases?: Record<string, string> | undefined,
+  aliases?: Record<string, string>,
 ): PackageDependency | null {
   if (!image.name) {
     return null;
@@ -141,7 +141,7 @@ export function extractImage(
 
 export function extractHelmChart(
   helmChart: HelmChart,
-  aliases?: Record<string, string> | undefined,
+  aliases?: Record<string, string>,
 ): PackageDependency | null {
   if (!helmChart.name) {
     return null;
@@ -149,7 +149,7 @@ export function extractHelmChart(
 
   if (isOCIRegistry(helmChart.repo)) {
     const dep = getDep(
-      `${helmChart.repo.replace('oci://', '')}/${helmChart.name}:${helmChart.version}`,
+      `${removeOCIPrefix(helmChart.repo)}/${helmChart.name}:${helmChart.version}`,
       false,
       aliases,
     );
@@ -178,8 +178,8 @@ export function parseKustomize(
   let pkg: Kustomize | null = null;
   try {
     // TODO: use schema (#9610)
-    pkg = parseSingleYaml(content, { json: true });
-  } catch (e) /* istanbul ignore next */ {
+    pkg = parseSingleYaml(content);
+  } catch /* istanbul ignore next */ {
     logger.debug({ packageFile }, 'Error parsing kustomize file');
     return null;
   }

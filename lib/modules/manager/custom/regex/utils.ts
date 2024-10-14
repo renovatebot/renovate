@@ -36,7 +36,7 @@ function updateDependency(
       try {
         const url = new URL(value).toString();
         dependency.registryUrls = [url];
-      } catch (err) {
+      } catch {
         logger.warn({ value }, 'Invalid regex manager registryUrl');
       }
       break;
@@ -67,7 +67,7 @@ export function createDependency(
       try {
         const compiled = template.compile(tmpl, groups, false);
         updateDependency(dependency, field, compiled);
-      } catch (err) {
+      } catch {
         logger.warn(
           { template: tmpl },
           'Error compiling template for custom manager',
@@ -124,10 +124,12 @@ export function isValidDependency({
   depName,
   currentValue,
   currentDigest,
+  packageName,
 }: PackageDependency): boolean {
   // check if all the fields are set
   return (
-    is.nonEmptyStringAndNotWhitespace(depName) &&
+    (is.nonEmptyStringAndNotWhitespace(depName) ||
+      is.nonEmptyStringAndNotWhitespace(packageName)) &&
     (is.nonEmptyStringAndNotWhitespace(currentDigest) ||
       is.nonEmptyStringAndNotWhitespace(currentValue))
   );

@@ -15,6 +15,13 @@ export class DartDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = ['https://pub.dartlang.org/'];
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `published` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `repository` field of the latest release object in the results.';
+
   async getReleases({
     packageName,
     registryUrl,

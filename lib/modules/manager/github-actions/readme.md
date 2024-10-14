@@ -40,7 +40,7 @@ name: build
 on: [push]
 
 env:
-  RUNNER: ubuntu-20.04
+  RUNNER: ubuntu-22.04
 
 jobs:
   build:

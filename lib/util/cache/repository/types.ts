@@ -140,6 +140,7 @@ export interface RepoCacheData {
        */
       pullRequestsCache?: unknown;
       graphqlPageCache?: unknown;
+      issuesCache?: Record<number, unknown>;
     };
     bitbucket?: {
       pullRequestsCache?: unknown;

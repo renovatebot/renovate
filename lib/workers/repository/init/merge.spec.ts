@@ -1,5 +1,5 @@
+import type { RenovateConfig } from '../../../../test/util';
 import {
-  RenovateConfig,
   fs,
   logger,
   mocked,
@@ -278,6 +278,18 @@ describe('workers/repository/init/merge', () => {
         isMigrated: false,
         migratedConfig: {},
       });
+    });
+
+    it('uses onboarding config if silent', async () => {
+      scm.getFileList.mockResolvedValue([]);
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        warnings: [],
+        errors: [],
+      });
+      config.mode = 'silent';
+      config.repository = 'some-org/some-repo';
+      const res = await mergeRenovateConfig(config);
+      expect(res).toBeDefined();
     });
 
     it('throws error if misconfigured', async () => {

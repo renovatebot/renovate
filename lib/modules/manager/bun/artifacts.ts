@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -44,6 +45,12 @@ export async function updateArtifacts(
       await deleteLocalFile(lockFileName);
     }
 
+    let cmd = 'bun install';
+
+    if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
+      cmd += ' --ignore-scripts';
+    }
+
     const execOptions: ExecOptions = {
       userConfiguredEnv: config.env,
       cwdFile: packageFileName,
@@ -56,7 +63,7 @@ export async function updateArtifacts(
       ],
     };
 
-    await exec('bun install', execOptions);
+    await exec(cmd, execOptions);
     const newLockFileContent = await readLocalFile(lockFileName);
     if (
       !newLockFileContent ||

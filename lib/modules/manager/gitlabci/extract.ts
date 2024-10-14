@@ -3,7 +3,7 @@ import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { trimLeadingSlash } from '../../../util/url';
-import { parseSingleYaml } from '../../../util/yaml';
+import { parseYaml } from '../../../util/yaml';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type {
   ExtractConfig,
@@ -25,7 +25,7 @@ import type {
   Job,
   Services,
 } from './types';
-import { getGitlabDep, replaceReferenceTags } from './utils';
+import { getGitlabDep } from './utils';
 
 // See https://docs.gitlab.com/ee/ci/components/index.html#use-a-component
 const componentReferenceRegex = regEx(
@@ -120,13 +120,18 @@ function getAllIncludeComponents(
 
 function extractDepFromIncludeComponent(
   includeComponent: GitlabIncludeComponent,
+  registryAliases?: Record<string, string>,
 ): PackageDependency | null {
-  const componentReference = componentReferenceRegex.exec(
-    includeComponent.component,
-  )?.groups;
+  let componentUrl = includeComponent.component;
+  if (registryAliases) {
+    for (const key in registryAliases) {
+      componentUrl = componentUrl.replace(key, registryAliases[key]);
+    }
+  }
+  const componentReference = componentReferenceRegex.exec(componentUrl)?.groups;
   if (!componentReference) {
     logger.debug(
-      { componentReference: includeComponent.component },
+      { componentReference: componentUrl },
       'Ignoring malformed component reference',
     );
     return null;
@@ -134,7 +139,7 @@ function extractDepFromIncludeComponent(
   const projectPathParts = componentReference.projectPath.split('/');
   if (projectPathParts.length < 2) {
     logger.debug(
-      { componentReference: includeComponent.component },
+      { componentReference: componentUrl },
       'Ignoring component reference with incomplete project path',
     );
     return null;
@@ -165,43 +170,53 @@ export function extractPackageFile(
   let deps: PackageDependency[] = [];
   try {
     // TODO: use schema (#9610)
-    const doc = parseSingleYaml<GitlabPipeline>(replaceReferenceTags(content), {
-      json: true,
+    const docs = parseYaml<GitlabPipeline>(content, {
+      uniqueKeys: false,
     });
-    if (is.object(doc)) {
-      for (const [property, value] of Object.entries(doc)) {
-        switch (property) {
-          case 'image':
-            {
-              const dep = extractFromImage(
-                value as Image,
-                config.registryAliases,
-              );
-              if (dep) {
-                deps.push(dep);
+    for (const doc of docs) {
+      if (is.object(doc)) {
+        for (const [property, value] of Object.entries(doc)) {
+          switch (property) {
+            case 'image':
+              {
+                const dep = extractFromImage(
+                  value as Image,
+                  config.registryAliases,
+                );
+                if (dep) {
+                  deps.push(dep);
+                }
               }
-            }
-            break;
+              break;
 
-          case 'services':
-            deps.push(
-              ...extractFromServices(value as Services, config.registryAliases),
-            );
-            break;
+            case 'services':
+              deps.push(
+                ...extractFromServices(
+                  value as Services,
+                  config.registryAliases,
+                ),
+              );
+              break;
 
-          default:
-            deps.push(...extractFromJob(value as Job, config.registryAliases));
-            break;
+            default:
+              deps.push(
+                ...extractFromJob(value as Job, config.registryAliases),
+              );
+              break;
+          }
         }
+        deps = deps.filter(is.truthy);
       }
-      deps = deps.filter(is.truthy);
-    }
 
-    const includedComponents = getAllIncludeComponents(doc);
-    for (const includedComponent of includedComponents) {
-      const dep = extractDepFromIncludeComponent(includedComponent);
-      if (dep) {
-        deps.push(dep);
+      const includedComponents = getAllIncludeComponents(doc);
+      for (const includedComponent of includedComponents) {
+        const dep = extractDepFromIncludeComponent(
+          includedComponent,
+          config.registryAliases,
+        );
+        if (dep) {
+          deps.push(dep);
+        }
       }
     }
   } catch (err) /* istanbul ignore next */ {
@@ -241,11 +256,11 @@ export async function extractAllPackageFiles(
       );
       continue;
     }
-    let doc: GitlabPipeline;
+    let docs: GitlabPipeline[];
     try {
       // TODO: use schema (#9610)
-      doc = parseSingleYaml(replaceReferenceTags(content), {
-        json: true,
+      docs = parseYaml(content, {
+        uniqueKeys: false,
       });
     } catch (err) {
       logger.debug(
@@ -255,19 +270,21 @@ export async function extractAllPackageFiles(
       continue;
     }
 
-    if (is.array(doc?.include)) {
-      for (const includeObj of doc.include.filter(isGitlabIncludeLocal)) {
-        const fileObj = trimLeadingSlash(includeObj.local);
+    for (const doc of docs) {
+      if (is.array(doc?.include)) {
+        for (const includeObj of doc.include.filter(isGitlabIncludeLocal)) {
+          const fileObj = trimLeadingSlash(includeObj.local);
+          if (!seen.has(fileObj)) {
+            seen.add(fileObj);
+            filesToExamine.push(fileObj);
+          }
+        }
+      } else if (is.string(doc?.include)) {
+        const fileObj = trimLeadingSlash(doc.include);
         if (!seen.has(fileObj)) {
           seen.add(fileObj);
           filesToExamine.push(fileObj);
         }
-      }
-    } else if (is.string(doc?.include)) {
-      const fileObj = trimLeadingSlash(doc.include);
-      if (!seen.has(fileObj)) {
-        seen.add(fileObj);
-        filesToExamine.push(fileObj);
       }
     }
 

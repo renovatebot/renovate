@@ -16,7 +16,7 @@ The `helmv3` manager defines this default registryAlias:
 If you use repository aliases in your Helm charts then you must set an `registryAliases` object in your configuration file so Renovate knows where to find the repository.
 Alias values must be properly formatted URIs.
 
-If you need to change the versioning format, read our [versioning](../../versioning.md) documentation to learn more.
+If you need to change the versioning format, read our [versioning](../../versioning/index.md) documentation to learn more.
 
 ### Private repositories and registries
 

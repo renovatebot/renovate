@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
@@ -6,6 +7,8 @@ import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
 import { scm } from '../../../modules/platform/scm';
 import { getBranchList, setUserRepoConfig } from '../../../util/git';
+import { escapeRegExp, regEx } from '../../../util/regex';
+import { uniqueStrings } from '../../../util/string';
 import { getReconfigureBranchName } from '../reconfigure';
 
 async function cleanUpBranches(
@@ -18,14 +21,26 @@ async function cleanUpBranches(
   }
   // set Git author in case the repository is not initialized yet
   setUserRepoConfig(config);
+
+  // calculate regex to extract base branch from branch name
+  const baseBranchRe = calculateBaseBranchRegex(config);
+
   for (const branchName of remainingBranches) {
     try {
+      // get base branch from branch name if base branches are configured
+      // use default branch if no base branches are configured
+      // use defaul branch name if no match (can happen when base branches are configured later)
+      const baseBranch =
+        baseBranchRe?.exec(branchName)?.[1] ?? config.defaultBranch!;
       const pr = await platform.findPr({
         branchName,
         state: 'open',
-        targetBranch: config.baseBranch,
+        targetBranch: baseBranch,
       });
-      const branchIsModified = await scm.isBranchModified(branchName);
+      const branchIsModified = await scm.isBranchModified(
+        branchName,
+        baseBranch,
+      );
       if (pr) {
         if (branchIsModified) {
           logger.debug(
@@ -95,6 +110,32 @@ async function cleanUpBranches(
       }
     }
   }
+}
+
+/**
+ * Calculates a {RegExp} to extract the base branch from a branch name if base branches are configured.
+ * @param config Renovate configuration
+ */
+function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
+  if (!config.baseBranches?.length) {
+    return null;
+  }
+
+  // calculate possible branch prefixes and escape for regex
+  const branchPrefixes = [config.branchPrefix, config.branchPrefixOld]
+    .filter(is.nonEmptyStringAndNotWhitespace)
+    .filter(uniqueStrings)
+    .map(escapeRegExp);
+
+  // calculate possible base branches and escape for regex
+  const baseBranches = config.baseBranches.map(escapeRegExp);
+
+  // create regex to extract base branche from branch name
+  const baseBranchRe = regEx(
+    `^(?:${branchPrefixes.join('|')})(${baseBranches.join('|')})-`,
+  );
+
+  return baseBranchRe;
 }
 
 export async function pruneStaleBranches(

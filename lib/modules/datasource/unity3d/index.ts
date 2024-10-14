@@ -1,4 +1,5 @@
-import { XmlDocument, XmlElement } from 'xmldoc';
+import type { XmlElement } from 'xmldoc';
+import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import * as Unity3dVersioning from '../../versioning/unity3d';
@@ -23,6 +24,10 @@ export class Unity3dDatasource extends Datasource {
   override readonly defaultVersioning = Unity3dVersioning.id;
 
   override readonly registryStrategy = 'merge';
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `pubDate` tag in the results.';
 
   constructor() {
     super(Unity3dDatasource.id);

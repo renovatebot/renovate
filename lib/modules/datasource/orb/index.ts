@@ -4,13 +4,15 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { OrbResponse } from './types';
 
+const MAX_VERSIONS = 100;
+
 const query = `
-query($packageName: String!) {
+query($packageName: String!, $maxVersions: Int!) {
   orb(name: $packageName) {
     name,
     homeUrl,
     isPrivate,
-    versions {
+    versions(count: $maxVersions) {
       version,
       createdAt
     }
@@ -29,6 +31,10 @@ export class OrbDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = ['https://circleci.com/'];
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `createdAt` field in the results.';
+
   @cache({
     namespace: `datasource-${OrbDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
@@ -44,7 +50,7 @@ export class OrbDatasource extends Datasource {
     const url = `${registryUrl}graphql-unstable`;
     const body = {
       query,
-      variables: { packageName },
+      variables: { packageName, maxVersions: MAX_VERSIONS },
     };
     const res = (
       await this.http.postJson<OrbResponse>(url, {

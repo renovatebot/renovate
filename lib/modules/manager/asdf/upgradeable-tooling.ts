@@ -1,6 +1,7 @@
 import { regEx } from '../../../util/regex';
 import { DartVersionDatasource } from '../../datasource/dart-version';
 import { DockerDatasource } from '../../datasource/docker';
+import { DotnetVersionDatasource } from '../../datasource/dotnet-version';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -47,6 +48,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  actionlint: {
+    asdfPluginUrl: 'https://github.com/crazy-matt/asdf-actionlint',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'rhysd/actionlint',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   'adr-tools': {
     asdfPluginUrl: 'https://gitlab.com/td7x/asdf/adr-tools.git',
     config: {
@@ -86,7 +95,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     },
   },
   'cargo-make': {
-    asdfPluginUrl: 'https://github.com/kachick/asdf-cargo-make',
+    asdfPluginUrl: 'https://github.com/mise-plugins/asdf-cargo-make',
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'sagiegurari/cargo-make',
@@ -105,6 +114,22 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubTagsDatasource.id,
       packageName: 'clojure/brew-install',
       versioning: `${regexVersioning.id}:^(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+)\\.(?<build>\\d+)$`,
+    },
+  },
+  cookiecutter: {
+    asdfPluginUrl: 'https://github.com/shawon-crosen/asdf-cookiecutter',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'cookiecutter/cookiecutter',
+      versioning: semverVersioning.id,
+    },
+  },
+  cosign: {
+    asdfPluginUrl: 'https://gitlab.com/wt0f/asdf-cosign',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'sigstore/cosign',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   crystal: {
@@ -134,6 +159,13 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
       packageName: 'direnv/direnv',
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  'dotnet-core': {
+    asdfPluginUrl: 'https://github.com/emersonsoares/asdf-dotnet-core',
+    config: {
+      datasource: DotnetVersionDatasource.id,
+      packageName: 'dotnet-sdk',
     },
   },
   dprint: {
@@ -204,6 +236,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  gleam: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-gleam.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'gleam-lang/gleam',
+      extractVersion: '^v(?<version>.+)',
+    },
+  },
   gohugo: hugoDefinition,
   golang: {
     asdfPluginUrl: 'https://github.com/kennyp/asdf-golang',
@@ -218,6 +258,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'golangci/golangci-lint',
+      extractVersion: '^v(?<version>.+)',
+    },
+  },
+  gomplate: {
+    asdfPluginUrl: 'https://github.com/sneakybeaky/asdf-gomplate',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'hairyhenderson/gomplate',
       extractVersion: '^v(?<version>.+)',
     },
   },
@@ -260,6 +308,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubTagsDatasource.id,
       packageName: 'idris-lang/Idris-dev',
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  istioctl: {
+    asdfPluginUrl: 'https://github.com/virtualstaticvoid/asdf-istioctl',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'istio/istio',
+      versioning: semverVersioning.id,
     },
   },
   java: {
@@ -399,6 +455,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^mimir-(?<version>\\S+)',
     },
   },
+  minikube: {
+    asdfPluginUrl: 'https://github.com/alvarobp/asdf-minikube.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'kubernetes/minikube',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   nim: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-nim',
     config: {
@@ -482,6 +546,13 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubTagsDatasource.id,
       packageName: 'python/cpython',
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  rebar: {
+    asdfPluginUrl: 'https://github.com/Stratus3D/asdf-rebar.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'erlang/rebar3',
     },
   },
   ruby: {
@@ -654,7 +725,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     },
   },
   yamlfmt: {
-    asdfPluginUrl: 'https://github.com/kachick/asdf-yamlfmt',
+    asdfPluginUrl: 'https://github.com/mise-plugins/asdf-yamlfmt',
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'google/yamlfmt',

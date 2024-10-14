@@ -38,6 +38,14 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
 
   override http: GithubHttp;
 
+  override readonly releaseTimestampSupport = true;
+  // Note: not sure
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `releaseTimestamp` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
+
   constructor() {
     super(GithubReleaseAttachmentsDatasource.id);
     this.http = new GithubHttp(GithubReleaseAttachmentsDatasource.id);
@@ -45,9 +53,9 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
 
   @cache({
     ttlMinutes: 1440,
-    namespace: 'datasource-github-releases',
+    namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
     key: (release: GithubRestRelease, digest: string) =>
-      `${release.html_url}:${digest}`,
+      `findDigestFile:${release.html_url}:${digest}`,
   })
   async findDigestFile(
     release: GithubRestRelease,
@@ -75,9 +83,9 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
 
   @cache({
     ttlMinutes: 1440,
-    namespace: 'datasource-github-releases',
+    namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
     key: (asset: GithubRestAsset, algorithm: string) =>
-      `${asset.browser_download_url}:${algorithm}:assetDigest`,
+      `downloadAndDigest:${asset.browser_download_url}:${algorithm}`,
   })
   async downloadAndDigest(
     asset: GithubRestAsset,
@@ -222,7 +230,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
   }
 
   /**
-   * This function can be used to fetch releases with a customisable versioning
+   * This function can be used to fetch releases with a customizable versioning
    * (e.g. semver) and with releases.
    *
    * This function will:

@@ -1,0 +1,4 @@
+[
+  {"cycle":"3.12","releaseDate":"2023-10-02","support":"2025-04-02","eol":"2028-10-31","latest":"3.12.2","latestReleaseDate":"2024-02-06","lts":false},
+  {"cycle":"3.7","releaseDate":"2018-06-26","support":"2020-06-27","eol":"2023-06-27","latest":"3.7.17","latestReleaseDate":"2023-06-05","lts":false}
+]

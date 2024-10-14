@@ -1,8 +1,8 @@
 import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
+import type { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import {
-  GitPullRequest,
   GitPullRequestMergeStrategy,
   GitStatusState,
   PullRequestStatus,
@@ -925,7 +925,7 @@ describe('modules/platform/azure/index', () => {
           prTitle: 'The Title',
           prBody: 'Hello world',
           labels: ['deps', 'renovate'],
-          platformOptions: { usePlatformAutomerge: true },
+          platformPrOptions: { usePlatformAutomerge: true },
         });
         expect(updateFn).toHaveBeenCalled();
         expect(pr).toMatchSnapshot();
@@ -996,7 +996,7 @@ describe('modules/platform/azure/index', () => {
           prTitle: 'The Title',
           prBody: 'Hello world',
           labels: ['deps', 'renovate'],
-          platformOptions: {
+          platformPrOptions: {
             automergeStrategy: 'auto',
             usePlatformAutomerge: true,
           },
@@ -1008,7 +1008,7 @@ describe('modules/platform/azure/index', () => {
           prTitle: 'The Second Title',
           prBody: 'Hello world',
           labels: ['deps', 'renovate'],
-          platformOptions: {
+          platformPrOptions: {
             automergeStrategy: 'auto',
             usePlatformAutomerge: true,
           },
@@ -1061,7 +1061,7 @@ describe('modules/platform/azure/index', () => {
             prTitle: 'The Title',
             prBody: 'Hello world',
             labels: ['deps', 'renovate'],
-            platformOptions: {
+            platformPrOptions: {
               automergeStrategy,
               usePlatformAutomerge: true,
             },
@@ -1113,7 +1113,7 @@ describe('modules/platform/azure/index', () => {
             prTitle: 'The Title',
             prBody: 'Hello world',
             labels: ['deps', 'renovate'],
-            platformOptions: {
+            platformPrOptions: {
               automergeStrategy,
               usePlatformAutomerge: true,
             },
@@ -1163,17 +1163,17 @@ describe('modules/platform/azure/index', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        platformOptions: { autoApprove: true },
+        platformPrOptions: { autoApprove: true },
       });
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();
     });
   });
 
-  describe('updatePr(prNo, title, body, platformOptions)', () => {
+  describe('updatePr(prNo, title, body, platformPrOptions)', () => {
     it('should update the PR', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = jest.fn();
+      const updatePullRequest = jest.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -1189,9 +1189,45 @@ describe('modules/platform/azure/index', () => {
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
 
+    it('should update the PR including cache', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementation(
+        () =>
+          ({
+            createPullRequest: jest.fn(() => ({
+              pullRequestId: 456,
+              title: 'Title 1',
+            })),
+            createPullRequestLabel: jest.fn(() => ({})),
+            getPullRequests: jest.fn(() => []),
+            updatePullRequest: jest.fn(() => ({
+              pullRequestId: 456,
+              title: 'Title 2',
+            })),
+          }) as any,
+      );
+      expect(await azure.getPrList()).toEqual([]);
+      const createdPr = await azure.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'Title 1',
+        prBody: 'Hello world',
+        labels: [],
+      });
+      expect(createdPr).toMatchObject({ number: 456, title: 'Title 1' });
+      expect(await azure.getPrList()).toHaveLength(1);
+      await azure.updatePr({
+        number: 456,
+        prTitle: 'Title 2',
+      });
+      const prList = await azure.getPrList();
+      expect(prList).toHaveLength(1);
+      expect(prList[0]).toMatchObject({ number: 456, title: 'Title 2' });
+    });
+
     it('should update the PR without description', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = jest.fn();
+      const updatePullRequest = jest.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -1207,7 +1243,7 @@ describe('modules/platform/azure/index', () => {
 
     it('should close the PR', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = jest.fn();
+      const updatePullRequest = jest.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -1225,7 +1261,7 @@ describe('modules/platform/azure/index', () => {
 
     it('should reopen the PR', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = jest.fn();
+      const updatePullRequest = jest.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -1272,7 +1308,7 @@ describe('modules/platform/azure/index', () => {
         number: prResult.pullRequestId,
         prTitle: 'The Title',
         prBody: 'Hello world',
-        platformOptions: { autoApprove: true },
+        platformPrOptions: { autoApprove: true },
       });
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();
@@ -1486,15 +1522,15 @@ describe('modules/platform/azure/index', () => {
       azureApi.coreApi.mockImplementation(
         () =>
           ({
-            getTeams: jest.fn(() => [
-              { id: 3, name: 'abc' },
-              { id: 4, name: 'def' },
-            ]),
             getTeamMembersWithExtendedProperties: jest.fn(() => [
               { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
             ]),
           }) as any,
       );
+      azureHelper.getAllProjectTeams = jest.fn().mockReturnValue([
+        { id: 3, name: 'abc' },
+        { id: 4, name: 'def' },
+      ]);
       await azure.addAssignees(123, ['test@bonjour.fr', 'jyc', 'def']);
       expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
@@ -1513,15 +1549,15 @@ describe('modules/platform/azure/index', () => {
       azureApi.coreApi.mockImplementation(
         () =>
           ({
-            getTeams: jest.fn(() => [
-              { id: 3, name: 'abc' },
-              { id: 4, name: 'def' },
-            ]),
             getTeamMembersWithExtendedProperties: jest.fn(() => [
               { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
             ]),
           }) as any,
       );
+      azureHelper.getAllProjectTeams = jest.fn().mockReturnValue([
+        { id: 3, name: 'abc' },
+        { id: 4, name: 'def' },
+      ]);
       await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'required:def']);
       expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
       expect(logger.once.info).toHaveBeenCalledTimes(1);
@@ -1539,15 +1575,15 @@ describe('modules/platform/azure/index', () => {
       azureApi.coreApi.mockImplementation(
         () =>
           ({
-            getTeams: jest.fn(() => [
-              { id: 3, name: 'abc' },
-              { id: 4, name: 'def' },
-            ]),
             getTeamMembersWithExtendedProperties: jest.fn(() => [
               { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
             ]),
           }) as any,
       );
+      azureHelper.getAllProjectTeams = jest.fn().mockReturnValue([
+        { id: 3, name: 'abc' },
+        { id: 4, name: 'def' },
+      ]);
       await azure.addReviewers(123, ['required:jyc']);
       expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
       expect(logger.once.info).toHaveBeenCalledTimes(0);
@@ -1886,15 +1922,24 @@ describe('modules/platform/azure/index', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemContent: jest.fn(() =>
-              Promise.resolve(Readable.from(JSON.stringify(data))),
-            ),
-          }) as any,
+        jest.fn().mockImplementationOnce(() => ({
+          getItem: jest.fn(() =>
+            Promise.resolve({ content: JSON.stringify(data) }),
+          ),
+        })),
       );
       const res = await azure.getJsonFile('file.json');
       expect(res).toEqual(data);
+    });
+
+    it('returns null when file not found', async () => {
+      azureApi.gitApi.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getItem: jest.fn(() => Promise.resolve(null)),
+        })),
+      );
+      const res = await azure.getJsonFile('file.json');
+      expect(res).toBeNull();
     });
 
     it('returns file content in json5 format', async () => {
@@ -1905,12 +1950,9 @@ describe('modules/platform/azure/index', () => {
         }
       `;
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemContent: jest.fn(() =>
-              Promise.resolve(Readable.from(json5Data)),
-            ),
-          }) as any,
+        jest.fn().mockImplementationOnce(() => ({
+          getItem: jest.fn(() => Promise.resolve({ content: json5Data })),
+        })),
       );
       const res = await azure.getJsonFile('file.json5');
       expect(res).toEqual({ foo: 'bar' });
@@ -1918,58 +1960,55 @@ describe('modules/platform/azure/index', () => {
 
     it('returns file content from branch or tag', async () => {
       const data = { foo: 'bar' };
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemContent: jest.fn(() =>
-              Promise.resolve(Readable.from(JSON.stringify(data))),
-            ),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getItem: jest.fn(() =>
+            Promise.resolve({ content: JSON.stringify(data) }),
+          ),
+        }),
       );
       const res = await azure.getJsonFile('file.json', undefined, 'dev');
       expect(res).toEqual(data);
     });
 
     it('throws on malformed JSON', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemContent: jest.fn(() =>
-              Promise.resolve(Readable.from('!@#')),
-            ),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getItemContent: jest.fn(() => Promise.resolve(Readable.from('!@#'))),
+        }),
       );
       await expect(azure.getJsonFile('file.json')).rejects.toThrow();
     });
 
     it('throws on errors', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemContent: jest.fn(() => {
-              throw new Error('some error');
-            }),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getItemContent: jest.fn(() => {
+            throw new Error('some error');
+          }),
+        }),
       );
       await expect(azure.getJsonFile('file.json')).rejects.toThrow();
     });
 
     it('supports fetch from another repo', async () => {
       const data = { foo: 'bar' };
-      const gitApiMock = {
-        getItemContent: jest.fn(() =>
-          Promise.resolve(Readable.from(JSON.stringify(data))),
-        ),
-        getRepositories: jest.fn(() =>
-          Promise.resolve([
-            { id: '123456', name: 'bar', project: { name: 'foo' } },
-          ]),
-        ),
-      };
-      azureApi.gitApi.mockImplementationOnce(() => gitApiMock as any);
+      const getItemFn = jest
+        .fn()
+        .mockResolvedValueOnce({ content: JSON.stringify(data) });
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getItem: getItemFn,
+          getRepositories: jest
+            .fn()
+            .mockResolvedValue([
+              { id: '123456', name: 'bar', project: { name: 'foo' } },
+            ]),
+        }),
+      );
       const res = await azure.getJsonFile('file.json', 'foo/bar');
       expect(res).toEqual(data);
-      expect(gitApiMock.getItemContent.mock.calls).toMatchSnapshot();
+      expect(getItemFn.mock.calls).toMatchSnapshot();
     });
 
     it('returns null', async () => {

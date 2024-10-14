@@ -282,6 +282,44 @@ describe('modules/datasource/docker/schema', () => {
     });
   });
 
+  it('parses devcontainer manifest', () => {
+    const manifest = {
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.manifest.v1+json',
+      config: {
+        mediaType: 'application/vnd.devcontainers',
+        digest:
+          'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        size: 0,
+      },
+      layers: [
+        {
+          mediaType: 'application/vnd.devcontainers.layer.v1+tar',
+          digest:
+            'sha256:d8b664ac545af10e7b241df64305d0ee7b544b826b7fe53bd7f35af114fdad97',
+          size: 22528,
+          annotations: {
+            'org.opencontainers.image.title': 'devcontainer-feature-ruby.tgz',
+          },
+        },
+      ],
+      annotations: {
+        'dev.containers.metadata':
+          '{"id":"ruby","version":"1.2.1","name":"Ruby (via rvm)","documentationURL":"https://github.com/devcontainers/features/tree/main/src/ruby","description":"Installs Ruby, rvm, rbenv, common Ruby utilities, and needed dependencies.","options":{"version":{"type":"string","proposals":["latest","none","3.1","3.0","2.7"],"default":"latest","description":"Select or enter a Ruby version to install"}},"customizations":{"vscode":{"extensions":["shopify.ruby-lsp"]}},"containerEnv":{"GEM_PATH":"/usr/local/rvm/gems/default:/usr/local/rvm/gems/default@global","GEM_HOME":"/usr/local/rvm/gems/default","MY_RUBY_HOME":"/usr/local/rvm/rubies/default","PATH":"/usr/local/rvm/gems/default/bin:/usr/local/rvm/gems/default@global/bin:/usr/local/rvm/rubies/default/bin:/usr/local/share/rbenv/bin:${PATH}"},"installsAfter":["ghcr.io/devcontainers/features/common-utils"]}',
+        'com.github.package.type': 'devcontainer_feature',
+      },
+    };
+
+    expect(OciImageManifest.parse(manifest)).toMatchObject({
+      config: {
+        mediaType: 'application/vnd.devcontainers',
+        digest:
+          'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        size: 0,
+      },
+    });
+  });
+
   it('throws for invalid manifest', () => {
     expect(() => Manifest.parse({ schemaVersion: 2 })).toThrow(ZodError);
   });

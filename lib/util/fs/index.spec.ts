@@ -1,12 +1,15 @@
 import _findUp from 'find-up';
 import fs from 'fs-extra';
-import tmp, { DirectoryResult } from 'tmp-promise';
+import type { DirectoryResult } from 'tmp-promise';
+import tmp from 'tmp-promise';
 import { join, resolve } from 'upath';
 import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
   cachePathExists,
+  cachePathIsFile,
   chmodLocalFile,
+  createCacheReadStream,
   createCacheWriteStream,
   deleteLocalFile,
   ensureCacheDir,
@@ -31,6 +34,7 @@ import {
   readSystemFile,
   renameLocalFile,
   rmCache,
+  statCacheFile,
   statLocalFile,
   writeLocalFile,
   writeSystemFile,
@@ -331,6 +335,29 @@ describe('util/fs/index', () => {
     });
   });
 
+  describe('createCacheReadStream', () => {
+    it('creates read stream', async () => {
+      const path = `${cacheDir}/file.txt`;
+      const fileContent = 'foo';
+      await fs.outputFile(path, fileContent);
+
+      const stream = createCacheReadStream('file.txt');
+      expect(stream).toBeInstanceOf(fs.ReadStream);
+
+      let data = '';
+      stream.on('data', (chunk) => {
+        data += chunk.toString();
+      });
+
+      await new Promise((resolve, reject) => {
+        stream.on('end', resolve);
+        stream.on('error', reject);
+      });
+
+      expect(data).toBe(fileContent);
+    });
+  });
+
   describe('localPathIsFile', () => {
     it('returns true for file', async () => {
       const path = `${localDir}/file.txt`;
@@ -430,6 +457,17 @@ describe('util/fs/index', () => {
     });
   });
 
+  describe('statCacheFile', () => {
+    it('returns stat object', async () => {
+      expect(await statCacheFile('foo')).toBeNull();
+
+      await fs.outputFile(`${cacheDir}/foo`, 'foobar');
+      const stat = await statCacheFile('foo');
+      expect(stat).toBeTruthy();
+      expect(stat!.isFile()).toBeTrue();
+    });
+  });
+
   describe('listCacheDir', () => {
     it('lists directory', async () => {
       await fs.outputFile(`${cacheDir}/foo/bar.txt`, 'foobar');
@@ -451,6 +489,12 @@ describe('util/fs/index', () => {
       await fs.outputFile(`${cacheDir}/foo/bar/file.txt`, 'foobar');
       expect(await cachePathExists(`foo/bar/file.txt1`)).toBeFalse();
       expect(await cachePathExists(`foo/bar/file.txt`)).toBeTrue();
+    });
+  });
+
+  describe('cachePathIsFile', () => {
+    it('returns false if does not exist', async () => {
+      await expect(cachePathIsFile(`a/a/file.txt`)).resolves.toBe(false);
     });
   });
 

@@ -13,13 +13,18 @@ export class NodeVersionDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = false;
-
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
   override readonly defaultVersioning = versioning;
 
   override readonly caching = true;
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `date` field.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'We use the URL: https://github.com/nodejs/node';
 
   @cache({
     namespace: `datasource-${datasource}`,

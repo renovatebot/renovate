@@ -21,6 +21,7 @@ describe('modules/manager/pip_setup/extract', () => {
           { depName: 'django', currentValue: '>=1.11.23,<2.0' },
           { depName: 'flask', currentValue: '>=0.11,<2.0' },
           { depName: 'blinker', currentValue: '>=1.4,<2.0' },
+          { depName: 'flask2', currentValue: '==1.2.3' },
           { depName: 'gunicorn', currentValue: '>=19.7.0,<20.0' },
           { depName: 'Werkzeug', currentValue: '>=0.15.3,<0.16' },
           { depName: 'statsd', currentValue: '>=3.2.1,<4.0' },

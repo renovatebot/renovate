@@ -1,0 +1,211 @@
+# Build settings
+
+# Halt processing when a warning is raised when building the docs.
+# https://www.mkdocs.org/user-guide/configuration/#strict
+strict: false
+
+# Use MkDocs maintainer's recommended strictness settings for link validation.
+# https://www.mkdocs.org/user-guide/configuration/#validation
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+# Set the remote branch to commit to when using `gh-deploy` to deploy to GitHub Pages.
+# https://www.mkdocs.org/user-guide/configuration/#remote_branch
+remote_branch: gh-pages
+
+# Hooks
+# https://www.mkdocs.org/user-guide/configuration/#hooks
+
+hooks:
+  - mkdocs-hooks/custom-edit-url.py
+
+# General site info
+
+# Metadata
+
+# Set the main title for the project.
+# Required setting.
+# https://www.mkdocs.org/user-guide/configuration/#site_name
+site_name: Renovate Docs
+
+# Set the canonical URL of the site.
+# https://www.mkdocs.org/user-guide/configuration/#site_url
+site_url: 'https://docs.renovatebot.com'
+
+# Set the site description, this will add a meta tag to the generated HTML header.
+# https://www.mkdocs.org/user-guide/configuration/#site_description
+site_description: 'Renovate documentation.'
+
+# Upstream Git repository information
+# https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/
+repo_name: renovatebot/renovate
+repo_url: https://github.com/renovatebot/renovate
+edit_uri: edit/main/docs/usage/
+
+# Watch the includes directory that has the abbreviations.md file.
+# Now the preview will update automatically when the abbreviations file is changed.
+watch:
+  - includes
+
+# Theme settings
+theme:
+  name: 'material'
+
+  # Allow overriding the Material for MkDocs themes with a 'overrides' directory.
+  # The custom_dir points to the overrides folder, this folder has the code for our announcement bar.
+  # The easiest way to disable the announcement bar is to comment out the custom_dir: overrides entry in this mkdocs.yml file.
+  # https://squidfunk.github.io/mkdocs-material/customization/#setup-and-theme-structure
+  # custom_dir: overrides
+
+  logo: 'assets/images/logo.png'
+  favicon: 'assets/images/logo.png'
+
+  icon:
+    repo: fontawesome/brands/github # Custom icon for link to GitHub repository in header
+    edit: material/pencil # Custom icon for the edit source button
+
+  # Setup colorscheme for Light and Dark mode
+  # Setup icon set for the light/dark mode toggle
+  # https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/
+
+  palette:
+    - media: '(prefers-color-scheme)'
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+      primary: 'indigo'
+      accent: 'indigo'
+
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to system preference
+      primary: 'teal'
+      accent: 'teal'
+
+  features:
+    # Navigation pruning (not compatible with navigation.expand)
+    # When pruning is enabled, only the visible navigation items are included in the rendered HTML, reducing the size of the built site by 33% or more.
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#navigation-pruning
+    - navigation.prune
+
+    # Back to top button
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#back-to-top-button
+    - navigation.top
+
+    # Automatically scroll the navigation sidebar, so the active anchor is always on screen.
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#anchor-following
+    - toc.follow
+
+    # Use instant loading for internal links
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#instant-loading
+    - navigation.instant
+
+    # Mark the announcement bar as read.
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-the-header/#mark-as-read
+    - announce.dismiss
+
+    # Enable copy-to-clipboard button
+    # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/#code-copy-button
+    - content.code.copy
+
+    # Enable edit source button.
+    # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#code-actions
+    - content.action.edit
+
+    # Enable navigation footer (next/previous buttons at the bottom of the page).
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-the-footer/#navigation
+    - navigation.footer
+
+# CSS customizations
+
+extra_css:
+  - 'assets/css/style.css'
+
+# Extensions
+markdown_extensions:
+  # Adds the ability to attach arbitrary key-value pairs to a document
+  # via front matter written in YAML syntax before the Markdown.
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown/#metadata
+  - meta
+
+  # The toc.permalink extension adds a permalink behind each heading.
+  # https://python-markdown.github.io/extensions/toc/#usage
+  - toc:
+      permalink: true
+
+  # The Highlight extension adds support for syntax highlighting of code blocks (with the help of SuperFences)
+  # and inline code blocks (with the help of InlineHilite).
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/#highlight
+  - pymdownx.highlight
+
+  # The SuperFences extension allows for arbitrary nesting of code and content blocks inside each other,
+  # including admonitions, tabs, lists and all other elements.
+  # SuperFences supports Mermaid.js diagrams.
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/#superfences
+  # https://squidfunk.github.io/mkdocs-material/reference/diagrams/#diagrams
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+  # The Admonition extension adds support for admonitions,
+  # more commonly known as call-outs, which can be defined in Markdown by using a simple syntax.
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown/#admonition
+  - admonition
+
+  # The Attribute Lists extension allows us to add HTML attributes and CSS classes to almost every Markdown inline- and block-level element with a special syntax.
+  # We're using this to get a button on the homepage that links to our GitHub app.
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown/#attribute-lists
+  - attr_list
+
+  # This configuration adds the ability to align images, add captions to images (rendering them as figures), and mark large images for lazy-loading.
+  # We also need the attr_list markdown extension, which is enabled in the lines above this comment.
+  # https://squidfunk.github.io/mkdocs-material/reference/images/#configuration
+  - md_in_html
+
+  # We need this to get emojis working on Material for MkDocs.
+  # We also need the attr_list extension, which is already enabled in the lines above this comment.
+  # https://squidfunk.github.io/mkdocs-material/reference/icons-emojis/#configuration
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+  # The Details extension supercharges the Admonition extension, making the resulting call-outs collapsible, allowing them to be opened and closed by the user.
+  # We're using this to enable collapsible admonition blocks for the list of bug reports and feature requests per manager.
+  - pymdownx.details
+
+  # The Abbreviations extension adds the ability to add a small tooltip to an element, by wrapping it with an abbr tag.
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown/#abbreviations
+  - abbr
+
+  # The Snippets extension adds the ability to embed content from arbitrary files into a document, including other documents or source files, by using a simple syntax.
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/#snippets
+  - pymdownx.snippets:
+      auto_append:
+        - includes/abbreviations.md
+
+# Plugins
+plugins:
+  - search:
+      separator: '[\s\-,:!?=\[\]()<>{}"/\\]+|\.(?!\d)|&[lg]t;'
+  - awesome-pages
+  - privacy
+
+# Page Tree/Sidebar
+# https://www.mkdocs.org/user-guide/writing-your-docs/#configure-pages-and-navigation
+# https://3os.org/utilities/markdown-cheatsheet/awesome-pages/
+# We now use the awesome-pages plugin, which uses `.pages` files inside the renovate docs/ folder to set the navigation structure.
+# The source `.pages` file(s) are in the renovatebot/renovate repository.

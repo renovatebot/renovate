@@ -117,6 +117,24 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
+      // eslint-disable-next-line jest/no-disabled-tests
+      it.skip('supports Go submodules in GitLab repo', async () => {
+        httpMock
+          .scope('https://gitlab.com')
+          .get('/example/module/submodule?go-get=1')
+          .reply(200, Fixtures.get('go-get-submodule-gitlab.html'));
+
+        const res = await BaseGoDatasource.getDatasource(
+          'gitlab.com/example/module/submodule',
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'example/module',
+          registryUrl: 'https://gitlab.com',
+        });
+      });
+
       it('supports GitLab deps', async () => {
         httpMock
           .scope('https://gitlab.com')
@@ -202,6 +220,23 @@ describe('modules/datasource/go/base', () => {
           packageName: 'group/subgroup',
           registryUrl: 'https://gitlab.com',
         });
+      });
+
+      it('returns null for invalid GitLab EE go-source URL', async () => {
+        hostRules.hostType.mockReturnValue('gitlab');
+        httpMock
+          .scope('https://my.custom.domain')
+          .get('/golang/myrepo?go-get=1')
+          .reply(
+            200,
+            `<meta name="go-source" content="my.custom.domain/golang/myrepo invalid-url"/>`,
+          );
+
+        const res = await BaseGoDatasource.getDatasource(
+          'my.custom.domain/golang/myrepo',
+        );
+
+        expect(res).toBeNull();
       });
 
       it('supports GitLab EE deps', async () => {
@@ -420,6 +455,21 @@ describe('modules/datasource/go/base', () => {
       it('returns null for mod imports', async () => {
         const meta =
           '<meta name="go-import" content="buf.build/gen/go/gogo/protobuf/protocolbuffers/go mod https://buf.build/gen/go">';
+        httpMock
+          .scope('https://buf.build')
+          .get('/gen/go/gogo/protobuf/protocolbuffers/go?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'buf.build/gen/go/gogo/protobuf/protocolbuffers/go',
+        );
+
+        expect(res).toBeNull();
+      });
+
+      it('returns null for invalid import URL', async () => {
+        const meta =
+          '<meta name="go-import" content="buf.build/gen/go/gogo/protobuf/protocolbuffers/go git foobar">';
         httpMock
           .scope('https://buf.build')
           .get('/gen/go/gogo/protobuf/protocolbuffers/go?go-get=1')

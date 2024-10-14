@@ -9,6 +9,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 
 - Docker's `Dockerfile` files
 - Docker Compose `docker-compose.yml`, `compose.yml` files
+- Visual Studio Code dev containers and GitHub Codespaces images and features
 - CircleCI config files
 - Kubernetes manifest files
 - Ansible configuration files
@@ -120,13 +121,13 @@ For example:
 Renovate understands [Ubuntu release code names](https://wiki.ubuntu.com/Releases) and will offer upgrades to the latest LTS release.
 
 You must only use the _first_ term of the code name in _lowercase_.
-So use `jammy` for the Jammy Jellyfish release.
+So use `noble` for the Noble Numbat release.
 
 For example, Renovate will offer to upgrade the following `Dockerfile` layer:
 
 ```diff
-- FROM ubuntu:focal
-+ FROM ubuntu:jammy
+- FROM ubuntu:jammy
++ FROM ubuntu:noble
 ```
 
 ### Debian codenames
@@ -236,6 +237,8 @@ module.exports = {
 
 #### AWS ECR (Amazon Web Services Elastic Container Registry)
 
+##### Using access key id & secret
+
 Renovate can authenticate with AWS ECR using AWS access key id & secret as the username & password, for example:
 
 ```json
@@ -253,14 +256,74 @@ Renovate can authenticate with AWS ECR using AWS access key id & secret as the u
 }
 ```
 
+##### Using `get-login-password`
+
+Renovate can also authenticate with AWS ECR using the output from the `aws ecr get-login-password` command as outlined in
+the [AWS documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/registry_auth.html#registry-auth-token).
+To make use of this authentication mechanism, specify the username as `AWS`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "matchHost": "12345612312.dkr.ecr.us-east-1.amazonaws.com",
+      "username": "AWS",
+      "encrypted": {
+        "password": "w...A"
+      }
+    }
+  ]
+}
+```
+
 #### Google Container Registry / Google Artifact Registry
 
-##### Using Application Default Credentials / Workload Identity (Self-Hosted only)
+##### Using Workload Identity
 
-Just configure [ADC](https://cloud.google.com/docs/authentication/provide-credentials-adc) /
-[Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) as normal and _don't_
-provide a username, password or token. Renovate will automatically retrieve the credentials using the
-google-auth-library.
+To let Renovate authenticate with [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity), you must:
+
+- Configure Workload Identity
+- Give the Service Account the `artifactregistry.repositories.downloadArtifacts` permission
+
+###### With Application Default Credentials (self-hosted only)
+
+To let Renovate authenticate with [ADC](https://cloud.google.com/docs/authentication/provide-credentials-adc), you must:
+
+- Configure ADC as normal
+- _Not_ provide a username, password or token
+
+Renovate will get the credentials with the [`google-auth-library`](https://www.npmjs.com/package/google-auth-library).
+
+###### With short-lived access token / GitHub Actions (self-hosted only)
+
+```yaml title="Example for Workload Identity plus Renovate host rules"
+- name: authenticate to google cloud
+  id: auth
+  uses: google-github-actions/auth@v2.1.6
+  with:
+    token_format: 'access_token'
+    workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+    service_account: ${{ env.SERVICE_ACCOUNT }}
+
+- name: renovate
+  uses: renovatebot/github-action@v40.3.3
+  env:
+    RENOVATE_HOST_RULES: |
+      [
+        {
+          matchHost: "us-central1-docker.pkg.dev",
+          hostType: "docker",
+          username: "oauth2accesstoken",
+          password: "${{ steps.auth.outputs.access_token }}"
+        }
+      ]
+  with:
+    token: ${{ secrets.RENOVATE_TOKEN }}
+    configurationFile: .github/renovate.json5
+```
+
+You can find a full GitHub Workflow example on the [renovatebot/github-action](https://github.com/renovatebot/github-action) repository.
 
 ##### Using long-lived service account credentials
 
@@ -362,35 +425,69 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
       }
       ```
 
-##### Using short-lived access tokens
+##### Using short-lived access token / Gitlab CI / Google Cloud
 
-Assume you are running GitLab CI in the Google Cloud, and you are storing your Docker images in the Google Container Registry (GCR).
+For this example, assume that you want to:
 
-Access to the GCR uses Bearer token based authentication.
-This token can be obtained by running `gcloud auth print-access-token`, which requires the Google Cloud SDK to be installed.
+- Run the GitLab CI in the Google Cloud
+- Store your Docker images in the Google Container Registry (GCR)
 
-The token expires after 60 minutes so you cannot store it in a variable for subsequent builds (like you can with `RENOVATE_TOKEN`).
+###### Accessing the Google Container Registry
 
-When running Renovate in this context the Google access token must be retrieved and injected into the `hostRules` configuration just before Renovate is started.
+Accessing the GCR uses Bearer token based authentication.
 
-_This documentation gives **a few hints** on **a possible way** to achieve this end result._
+First, install the Google Cloud SDK.
+Then get the token by running: `gcloud auth print-access-token`.
 
-The basic approach is that you create a custom image and then run Renovate as one of the stages of your project.
-To make this run independent of any user you should use a [`Project Access Token`](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html) (with Scopes: `api`, `read_api` and `write_repository`) for the project and use this as the `RENOVATE_TOKEN` variable for GitLab CI.
-See also the [renovate-runner repository on GitLab](https://gitlab.com/renovate-bot/renovate-runner) where `.gitlab-ci.yml` configuration examples can be found.
+###### Short-lived GCR Bearer tokens
 
-To get access to the token a custom Renovate Docker image is needed that includes the Google Cloud SDK.
-The Dockerfile to create such an image can look like this:
+The GCR Bearer token expires after 60 minutes.
+This means you can _not_ re-use the token in a later build.
+
+Instead, _before_ Renovate starts in the GCR context, you must:
+
+1. Fetch the Google access token
+1. Inject the token into the `hostRules` configuration
+
+The following text explains one way to fetch the token, and inject it into Renovate.
+
+###### Basic approach
+
+The basic approach is:
+
+1. Create a custom image: fetch the GCR token, and inject the token into Renovate's `config.js` file
+1. Then run Renovate as one of the stages of your project
+
+###### Independent runs
+
+To make the run independent of any user, use a [`Project Access Token`](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html).
+Give the Project Access Token these scopes:
+
+- `api`
+- `read_api`
+- `write_repository`
+
+Then use the Project Access Token as the `RENOVATE_TOKEN` variable for GitLab CI.
+For more (`gitlab-ci.yml`) configuration examples, see the [`renovate-runner` repository on GitLab](https://gitlab.com/renovate-bot/renovate-runner).
+
+###### Create a custom image
+
+To access the token, you need a custom Renovate Docker image.
+Make sure to install the Google Cloud SDK into the custom image, as you need the `gcloud auth print-access-token` command later.
+
+For example:
 
 ```Dockerfile
-FROM renovate/renovate:37.280.0
+FROM renovate/renovate:38.120.1
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...
 ```
 
-For Renovate to access the Google Container Registry (GCR) it needs the current Google Access Token.
-The configuration fragment to do that looks something like this:
+###### Accessing the Google Container Registry (GCR)
+
+Renovate needs the current Google Access Token to access the Google Container Registry (GCR).
+Here's an example of how to set that up:
 
 ```js
 hostRules: [
@@ -401,7 +498,12 @@ hostRules: [
 ];
 ```
 
-One way to provide the short-lived Google Access Token to Renovate is by generating these settings into a `config.js` file from within the `.gitlab-ci.yml` right before starting Renovate:
+One way to give Renovate the short-lived Google Access Token is to:
+
+1. Write a script that generates a `config.js` file, with the token, in your `gitlab-ci.yml` file
+1. Run the `config.js` creation scrip just before you start Renovate
+
+For example:
 
 ```yaml
 script:

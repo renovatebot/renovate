@@ -1,4 +1,4 @@
-import traverse from 'traverse';
+import traverse from 'neotraverse/legacy';
 import type { RenovateConfig } from '../config/types';
 
 export default function configSerializer(
@@ -15,14 +15,15 @@ export default function configSerializer(
 
   return traverse(config).map(function scrub(val: string) {
     if (this.key && val) {
-      if (templateFields.includes(this.key)) {
+      const key = this.key.toString();
+      if (templateFields.includes(key)) {
         this.update('[Template]');
       }
-      if (contentFields.includes(this.key)) {
+      if (contentFields.includes(key)) {
         this.update('[content]');
       }
       // istanbul ignore if
-      if (arrayFields.includes(this.key)) {
+      if (arrayFields.includes(key)) {
         this.update('[Array]');
       }
     }

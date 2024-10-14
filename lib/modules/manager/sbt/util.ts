@@ -21,9 +21,27 @@ export function normalizeScalaVersion(str: string): string {
       return str;
     }
   }
+  const isScala3 = versioning.isGreaterThan(str, '3.0.0');
   if (regEx(/^\d+\.\d+\.\d+$/).test(str)) {
-    return str.replace(regEx(/^(\d+)\.(\d+)\.\d+$/), '$1.$2');
+    if (isScala3) {
+      return str.replace(regEx(/^(\d+)\.(\d+)\.\d+$/), '$1');
+    } else {
+      return str.replace(regEx(/^(\d+)\.(\d+)\.\d+$/), '$1.$2');
+    }
   }
   // istanbul ignore next
   return str;
+}
+
+export function sortPackageFiles(packageFiles: string[]): string[] {
+  // process build.sbt first
+  const sortedPackageFiles = [...packageFiles];
+  const buildSbtIndex = sortedPackageFiles.findIndex((file) =>
+    file.endsWith('build.sbt'),
+  );
+  if (buildSbtIndex !== -1) {
+    const buildSbt = sortedPackageFiles.splice(buildSbtIndex, 1)[0];
+    sortedPackageFiles.unshift(buildSbt);
+  }
+  return sortedPackageFiles;
 }

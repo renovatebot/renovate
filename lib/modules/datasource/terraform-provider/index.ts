@@ -42,12 +42,20 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
   override readonly registryStrategy = 'hunt';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is only supported for the latest version, and is determined from the `published_at` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the the `source` field in the results.';
+
   @cache({
     namespace: `datasource-${TerraformProviderDatasource.id}`,
-    key: (getReleasesConfig: GetReleasesConfig) =>
-      `${
-        getReleasesConfig.registryUrl
-      }/${TerraformProviderDatasource.getRepository(getReleasesConfig)}`,
+    key: (getReleasesConfig: GetReleasesConfig) => {
+      const url = getReleasesConfig.registryUrl;
+      const repo = TerraformProviderDatasource.getRepository(getReleasesConfig);
+      return `getReleases:${url}/${repo}`;
+    },
   })
   async getReleases({
     packageName,
@@ -179,9 +187,9 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   }
 
   @cache({
-    namespace: `datasource-${TerraformProviderDatasource.id}-builds`,
+    namespace: `datasource-${TerraformProviderDatasource.id}`,
     key: (registryURL: string, repository: string, version: string) =>
-      `${registryURL}/${repository}/${version}`,
+      `getBuilds:${registryURL}/${repository}/${version}`,
   })
   async getBuilds(
     registryURL: string,
@@ -281,8 +289,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   }
 
   @cache({
-    namespace: `datasource-${TerraformProviderDatasource.id}-zip-hashes`,
-    key: (zipHashUrl: string) => zipHashUrl,
+    namespace: `datasource-${TerraformProviderDatasource.id}`,
+    key: (zipHashUrl: string) => `getZipHashes:${zipHashUrl}`,
   })
   async getZipHashes(zipHashUrl: string): Promise<string[] | undefined> {
     // The hashes are formatted as the result of sha256sum in plain text, each line: <hash>\t<filename>
@@ -308,9 +316,9 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   }
 
   @cache({
-    namespace: `datasource-${TerraformProviderDatasource.id}-releaseBackendIndex`,
+    namespace: `datasource-${TerraformProviderDatasource.id}`,
     key: (backendLookUpName: string, version: string) =>
-      `${backendLookUpName}/${version}`,
+      `getReleaseBackendIndex:${backendLookUpName}/${version}`,
   })
   async getReleaseBackendIndex(
     backendLookUpName: string,

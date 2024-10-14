@@ -28,9 +28,18 @@ export class GalaxyCollectionDatasource extends Datasource {
 
   override readonly defaultVersioning = pep440Versioning.id;
 
+  override readonly releaseTimestampSupport = true;
+  override releaseTimestampNote =
+    'The release timestamp is determined from the `created_at` field in the results.';
+  // sourceUrl is returned in each release as well as the ReleaseResult
+  // the one present in release result is the sourceUrl of the latest release
+  override readonly sourceUrlSupport = 'release';
+  override readonly sourceUrlNote =
+    'The `sourceUrl` is determined from the `repository` field in the results.';
+
   @cache({
     namespace: `datasource-${GalaxyCollectionDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
+    key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
   })
   async getReleases({
     packageName,
@@ -110,8 +119,9 @@ export class GalaxyCollectionDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${GalaxyCollectionDatasource.id}-detailed-version`,
-    key: (versionsUrl, basicRelease: Release) => basicRelease.version,
+    namespace: `datasource-${GalaxyCollectionDatasource.id}`,
+    key: (_packageName: string, versionsUrl: string, basicRelease: Release) =>
+      `getVersionDetails:${versionsUrl}:${basicRelease.version}`,
     ttlMinutes: 10080, // 1 week
   })
   async getVersionDetails(

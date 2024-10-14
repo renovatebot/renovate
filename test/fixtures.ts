@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import type { PathLike, Stats } from 'node:fs';
 import callsite from 'callsite';
-import { DirectoryJSON, fs as memfs, vol } from 'memfs';
+import type { DirectoryJSON } from 'memfs';
+import { fs as memfs, vol } from 'memfs';
 import type { TDataOut } from 'memfs/lib/encoding';
 import upath from 'upath';
 
@@ -24,6 +25,16 @@ export class Fixtures {
         encoding: 'utf-8',
       },
     );
+  }
+
+  /**
+   *  Returns path to fixture file in __fixtures__ folder
+   * @param name name of the fixture file
+   * @param [fixturesRoot] - Where to find the fixtures, uses the current test folder by default
+   * @return path to the fixture
+   */
+  static getPath(name: string, fixturesRoot = '.'): string {
+    return upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name);
   }
 
   /**
@@ -86,10 +97,12 @@ export class Fixtures {
     vol.reset();
     fsExtraMock.pathExists.mockImplementation(pathExists);
     fsExtraMock.remove.mockImplementation(memfs.promises.rm);
+    fsExtraMock.removeSync.mockImplementation(memfs.rmSync);
     fsExtraMock.readFile.mockImplementation(readFile);
     fsExtraMock.writeFile.mockImplementation(memfs.promises.writeFile);
     fsExtraMock.outputFile.mockImplementation(outputFile);
     fsExtraMock.stat.mockImplementation(stat);
+    fsExtraMock.chmod.mockImplementation(memfs.promises.chmod);
   }
 
   private static getPathToFixtures(fixturesRoot = '.'): string {
@@ -102,10 +115,12 @@ export class Fixtures {
 const fsExtraMock = {
   pathExists: jest.fn(),
   remove: jest.fn(),
+  removeSync: jest.fn(),
   readFile: jest.fn(),
   writeFile: jest.fn(),
   outputFile: jest.fn(),
   stat: jest.fn(),
+  chmod: jest.fn(),
 };
 
 // Temporary solution, when all tests will be rewritten to Fixtures mocks can be moved into __mocks__ folder

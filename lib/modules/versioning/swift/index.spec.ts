@@ -15,6 +15,8 @@ describe('modules/versioning/swift/index', () => {
     version            | expected
     ${'from: "1.2.3"'} | ${false}
     ${'1.2.3'}         | ${true}
+    ${'v1.2.3'}        | ${true}
+    ${'a'}             | ${false}
   `('isVersion("$version") === $expected', ({ version, expected }) => {
     expect(!!isVersion(version)).toBe(expected);
   });
@@ -99,6 +101,7 @@ describe('modules/versioning/swift/index', () => {
   it.each`
     version     | range           | expected
     ${'1.2.3'}  | ${'1.2.3'}      | ${true}
+    ${'v1.2.3'} | ${'1.2.3'}      | ${true}
     ${'1.2.4'}  | ${'..."1.2.4"'} | ${true}
     ${'v1.2.4'} | ${'..."1.2.4"'} | ${true}
     ${'1.2.4'}  | ${'..."1.2.3"'} | ${false}

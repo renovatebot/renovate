@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { GlobalConfig } from '../../../config/global';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -37,14 +38,14 @@ import {
   sourceLabel,
   sourceLabels,
 } from './common';
+import { DockerHubCache } from './dockerhub-cache';
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr';
+import type { DistributionManifest, OciImageManifest } from './schema';
 import {
-  DistributionManifest,
   DockerHubTagsPage,
   ManifestJson,
   OciHelmConfig,
   OciImageConfig,
-  OciImageManifest,
 } from './schema';
 
 const defaultConfig = {
@@ -79,6 +80,13 @@ export class DockerDatasource extends Datasource {
   override readonly defaultRegistryUrls = [DOCKER_HUB];
 
   override readonly defaultConfig = defaultConfig;
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `tag_last_pushed` field in thre results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `org.opencontainers.image.source` and `org.label-schema.vcs-url` labels present in the metadata of the **latest stable** image found on the Docker registry.';
 
   constructor() {
     super(DockerDatasource.id);
@@ -291,7 +299,14 @@ export class DockerDatasource extends Datasource {
     const parsed = ManifestJson.safeParse(manifestResponse.body);
     if (!parsed.success) {
       logger.debug(
-        { registry, dockerRepository, tag, err: parsed.error },
+        {
+          registry,
+          dockerRepository,
+          tag,
+          body: manifestResponse.body,
+          headers: manifestResponse.headers,
+          err: parsed.error,
+        },
         'Invalid manifest response',
       );
       return null;
@@ -440,6 +455,16 @@ export class DockerDatasource extends Datasource {
     tag: string,
   ): Promise<Record<string, string> | undefined> {
     logger.debug(`getLabels(${registryHost}, ${dockerRepository}, ${tag})`);
+    // Skip Docker Hub image if RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP is set
+    if (
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP &&
+      registryHost === 'https://index.docker.io'
+    ) {
+      logger.debug(
+        'Docker Hub image - skipping label lookup due to RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP',
+      );
+      return {};
+    }
     // Docker Hub library images don't have labels we need
     if (
       registryHost === 'https://index.docker.io' &&
@@ -641,9 +666,7 @@ export class DockerDatasource extends Datasource {
       return null;
     }
     let page = 0;
-    const pages = process.env.RENOVATE_X_DOCKER_MAX_PAGES
-      ? parseInt(process.env.RENOVATE_X_DOCKER_MAX_PAGES, 10)
-      : 20;
+    const pages = GlobalConfig.get('dockerMaxPages', 20);
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<{ tags: string[] }>;
@@ -855,23 +878,45 @@ export class DockerDatasource extends Datasource {
         );
 
         if (architecture && manifestResponse) {
-          const parse = ManifestJson.safeParse(manifestResponse.body);
-          const manifestList = parse.success
-            ? parse.data
-            : /* istanbul ignore next: hard to test */ null;
-          if (
-            manifestList &&
-            (manifestList.mediaType ===
-              'application/vnd.docker.distribution.manifest.list.v2+json' ||
+          const parsed = ManifestJson.safeParse(manifestResponse.body);
+          /* istanbul ignore else: hard to test */
+          if (parsed.success) {
+            const manifestList = parsed.data;
+            if (
               manifestList.mediaType ===
-                'application/vnd.oci.image.index.v1+json')
-          ) {
-            for (const manifest of manifestList.manifests) {
-              if (manifest.platform?.architecture === architecture) {
-                digest = manifest.digest;
-                break;
+                'application/vnd.docker.distribution.manifest.list.v2+json' ||
+              manifestList.mediaType ===
+                'application/vnd.oci.image.index.v1+json'
+            ) {
+              for (const manifest of manifestList.manifests) {
+                if (manifest.platform?.architecture === architecture) {
+                  digest = manifest.digest;
+                  break;
+                }
               }
+              // TODO: return null if no matching architecture digest found
+              // https://github.com/renovatebot/renovate/discussions/22639
+            } else if (
+              hasKey('docker-content-digest', manifestResponse.headers)
+            ) {
+              // TODO: return null if no matching architecture, requires to fetch the config manifest
+              // https://github.com/renovatebot/renovate/discussions/22639
+              digest = manifestResponse.headers[
+                'docker-content-digest'
+              ] as string;
             }
+          } else {
+            logger.debug(
+              {
+                registryHost,
+                dockerRepository,
+                newTag,
+                body: manifestResponse.body,
+                headers: manifestResponse.headers,
+                err: parsed.error,
+              },
+              'Failed to parse manifest response',
+            );
           }
         }
 
@@ -927,10 +972,11 @@ export class DockerDatasource extends Datasource {
     key: (dockerRepository: string) => `${dockerRepository}`,
   })
   async getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
-    const result: Release[] = [];
-    let url: null | string =
-      `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000`;
-    while (url) {
+    let url = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
+
+    const cache = await DockerHubCache.init(dockerRepository);
+    let needNextPage: boolean = true;
+    while (needNextPage) {
       const { val, err } = await this.http
         .getJsonSafe(url, DockerHubTagsPage)
         .unwrap();
@@ -940,11 +986,39 @@ export class DockerDatasource extends Datasource {
         return null;
       }
 
-      result.push(...val.items);
-      url = val.nextPage;
+      const { results, next, count } = val;
+
+      needNextPage = cache.reconcile(results, count);
+
+      if (!next) {
+        break;
+      }
+
+      url = next;
     }
 
-    return result;
+    await cache.save();
+
+    const items = cache.getItems();
+    return items.map(
+      ({
+        name: version,
+        tag_last_pushed: releaseTimestamp,
+        digest: newDigest,
+      }) => {
+        const release: Release = { version };
+
+        if (releaseTimestamp) {
+          release.releaseTimestamp = releaseTimestamp;
+        }
+
+        if (newDigest) {
+          release.newDigest = newDigest;
+        }
+
+        return release;
+      },
+    );
   }
 
   /**
@@ -1000,7 +1074,7 @@ export class DockerDatasource extends Datasource {
 
     const tagsResult =
       registryHost === 'https://index.docker.io' &&
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS
+      !process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE
         ? getDockerHubTags()
         : getTags();
 
@@ -1023,7 +1097,7 @@ export class DockerDatasource extends Datasource {
     const tags = releases.map((release) => release.version);
     const latestTag = tags.includes('latest')
       ? 'latest'
-      : findLatestStable(tags) ?? tags[tags.length - 1];
+      : (findLatestStable(tags) ?? tags[tags.length - 1]);
 
     // istanbul ignore if: needs test
     if (!latestTag) {

@@ -9,7 +9,7 @@ import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
 import { coerceString } from '../../../../../util/string';
-import { validateUrl } from '../../../../../util/url';
+import { isHttpUrl } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as bitbucket from './bitbucket';
 import * as gitea from './gitea';
@@ -132,15 +132,22 @@ export async function getReleaseNotes(
   release: ChangeLogRelease,
   config: BranchUpgradeConfig,
 ): Promise<ChangeLogNotes | null> {
-  const { packageName, repository } = project;
+  const { packageName, depName, repository } = project;
   const { version, gitRef } = release;
   // TODO: types (#22198)
-  logger.trace(`getReleaseNotes(${repository}, ${version}, ${packageName!})`);
+  logger.trace(
+    `getReleaseNotes(${repository}, ${version}, ${packageName!}, ${depName!})`,
+  );
   const releases = await getCachedReleaseList(project, release);
   logger.trace({ releases }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
 
-  let matchedRelease = getExactReleaseMatch(packageName!, version, releases);
+  let matchedRelease = getExactReleaseMatch(
+    packageName!,
+    depName!,
+    version,
+    releases,
+  );
   if (is.undefined(matchedRelease)) {
     // no exact match of a release then check other cases
     matchedRelease = releases.find(
@@ -166,10 +173,13 @@ export async function getReleaseNotes(
 
 function getExactReleaseMatch(
   packageName: string,
+  depName: string,
   version: string,
   releases: ChangeLogNotes[],
 ): ChangeLogNotes | undefined {
-  const exactReleaseReg = regEx(`${packageName}[@_-]v?${version}`);
+  const exactReleaseReg = regEx(
+    `(?:^|/)(?:${packageName}|${depName})[@_-]v?${version}`,
+  );
   const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
   const matchedRelease = candidateReleases.find((r) =>
     exactReleaseReg.test(r.tag!),
@@ -346,12 +356,12 @@ export async function getReleaseNotesMd(
             .filter(Boolean);
           let body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
           for (const word of title) {
-            if (word.includes(version) && !validateUrl(word)) {
+            if (word.includes(version) && !isHttpUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
               // TODO: fix url
               const notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
               const mdHeadingLink = title
-                .filter((word) => !validateUrl(word))
+                .filter((word) => !isHttpUrl(word))
                 .join('-')
                 .replace(regEx(/[^A-Za-z0-9-]/g), '');
               const url = `${notesSourceUrl}#${mdHeadingLink}`;

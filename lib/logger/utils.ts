@@ -4,6 +4,7 @@ import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
 import { ZodError } from 'zod';
+import { regEx } from '../util/regex';
 import { redactedFields, sanitize } from '../util/sanitize';
 import type { BunyanRecord, BunyanStream } from './types';
 
@@ -98,9 +99,7 @@ export function prepareZodError(err: ZodError): Record<string, unknown> {
   // istanbul ignore next
   Object.defineProperty(err, 'message', {
     get: () => 'Schema error',
-    set: (_) => {
-      _;
-    },
+    set: () => {},
   });
 
   return {
@@ -216,7 +215,12 @@ export function sanitizeValue(
       if (!val) {
         curValue = val;
       } else if (redactedFields.includes(key)) {
-        curValue = '***********';
+        // Do not mask/sanitize secrets templates
+        if (is.string(val) && regEx(/^{{\s*secrets\..*}}$/).test(val)) {
+          curValue = val;
+        } else {
+          curValue = '***********';
+        }
       } else if (contentFields.includes(key)) {
         curValue = '[content]';
       } else if (key === 'secrets') {
@@ -277,13 +281,16 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
 }
 
 /**
- * A function that terminates exeution if the log level that was entered is
+ * A function that terminates execution if the log level that was entered is
  *  not a valid value for the Bunyan logger.
  * @param logLevelToCheck
- * @returns returns undefined when the logLevelToCheck is valid. Else it stops execution.
+ * @returns returns the logLevel when the logLevelToCheck is valid or the defaultLevel passed as argument when it is undefined. Else it stops execution.
  */
-export function validateLogLevel(logLevelToCheck: string | undefined): void {
-  const allowedValues: bunyan.LogLevel[] = [
+export function validateLogLevel(
+  logLevelToCheck: string | undefined,
+  defaultLevel: bunyan.LogLevelString,
+): bunyan.LogLevelString {
+  const allowedValues: bunyan.LogLevelString[] = [
     'trace',
     'debug',
     'info',
@@ -291,13 +298,14 @@ export function validateLogLevel(logLevelToCheck: string | undefined): void {
     'error',
     'fatal',
   ];
+
   if (
     is.undefined(logLevelToCheck) ||
     (is.string(logLevelToCheck) &&
-      allowedValues.includes(logLevelToCheck as bunyan.LogLevel))
+      allowedValues.includes(logLevelToCheck as bunyan.LogLevelString))
   ) {
     // log level is in the allowed values or its undefined
-    return;
+    return (logLevelToCheck as bunyan.LogLevelString) ?? defaultLevel;
   }
 
   const logger = bunyan.createLogger({
@@ -316,9 +324,12 @@ export function validateLogLevel(logLevelToCheck: string | undefined): void {
 // Can't use `util/regex` because of circular reference to logger
 const urlRe = /[a-z]{3,9}:\/\/[^@/]+@[a-z0-9.-]+/gi;
 const urlCredRe = /\/\/[^@]+@/g;
+const dataUriCredRe = /^(data:[0-9a-z-]+\/[0-9a-z-]+;).+/i;
 
 export function sanitizeUrls(text: string): string {
-  return text.replace(urlRe, (url) => {
-    return url.replace(urlCredRe, '//**redacted**@');
-  });
+  return text
+    .replace(urlRe, (url) => {
+      return url.replace(urlCredRe, '//**redacted**@');
+    })
+    .replace(dataUriCredRe, '$1**redacted**');
 }

@@ -22,6 +22,13 @@ export class DenoDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = ['https://apiland.deno.dev'];
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `uploaded_at` field in the results.';
+  override readonly sourceUrlSupport = 'release';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `repository` field in the results.';
+
   constructor() {
     super(DenoDatasource.id);
   }
@@ -30,7 +37,7 @@ export class DenoDatasource extends Datasource {
     namespace: `datasource-${DenoDatasource.id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
       // TODO: types (#22198)
-      `${registryUrl}:${packageName}`,
+      `getReleases:${registryUrl}:${packageName}`,
   })
   async getReleases({
     packageName,
@@ -63,14 +70,15 @@ export class DenoDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${DenoDatasource.id}-versions`,
-    key: (moduleAPIURL) => moduleAPIURL,
+    namespace: `datasource-${DenoDatasource.id}`,
+    key: (moduleAPIURL) => `getReleaseResult:${moduleAPIURL}`,
   })
   async getReleaseResult(moduleAPIURL: string): Promise<ReleaseResult> {
+    const detailsCacheKey = `details:${moduleAPIURL}`;
     const releasesCache: Record<string, Release> =
       (await packageCache.get(
-        `datasource-${DenoDatasource.id}-details`,
-        moduleAPIURL,
+        `datasource-${DenoDatasource.id}`,
+        detailsCacheKey,
       )) ?? {};
     let cacheModified = false;
 
@@ -112,8 +120,8 @@ export class DenoDatasource extends Datasource {
     if (cacheModified) {
       // 1 week. Releases at Deno are immutable, therefore we can use a long term cache here.
       await packageCache.set(
-        `datasource-${DenoDatasource.id}-details`,
-        moduleAPIURL,
+        `datasource-${DenoDatasource.id}`,
+        detailsCacheKey,
         releasesCache,
         10080,
       );

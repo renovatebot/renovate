@@ -14,6 +14,9 @@ export type NpmPackage = PackageJson & {
   dependenciesMeta?: DependenciesMeta;
   overrides?: OverrideDependency;
   volta?: PackageJson.Dependency;
+  pnpm?: {
+    overrides?: PackageJson.Dependency;
+  };
 };
 
 export type LockFileEntry = Record<

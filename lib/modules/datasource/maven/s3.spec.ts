@@ -1,12 +1,8 @@
 import { Readable } from 'node:stream';
-import {
-  GetObjectCommand,
-  HeadObjectCommand,
-  S3Client,
-} from '@aws-sdk/client-s3';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
-import { DateTime } from 'luxon';
-import { ReleaseResult, getPkgReleases } from '..';
+import type { ReleaseResult } from '..';
+import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
@@ -50,34 +46,7 @@ describe('modules/datasource/maven/s3', () => {
           Bucket: 'repobucket',
           Key: 'org/example/package/maven-metadata.xml',
         })
-        .resolvesOnce({ Body: meta as never })
-        .on(HeadObjectCommand, {
-          Bucket: 'repobucket',
-          Key: 'org/example/package/0.0.1/package-0.0.1.pom',
-        })
-        .resolvesOnce({ DeleteMarker: true })
-        .on(HeadObjectCommand, {
-          Bucket: 'repobucket',
-          Key: 'org/example/package/1.0.0/package-1.0.0.pom',
-        })
-        .rejectsOnce('NoSuchKey')
-        .on(HeadObjectCommand, {
-          Bucket: 'repobucket',
-          Key: 'org/example/package/1.0.1/package-1.0.1.pom',
-        })
-        .rejectsOnce('Unknown')
-        .on(HeadObjectCommand, {
-          Bucket: 'repobucket',
-          Key: 'org/example/package/1.0.2/package-1.0.2.pom',
-        })
-        .resolvesOnce({})
-        .on(HeadObjectCommand, {
-          Bucket: 'repobucket',
-          Key: 'org/example/package/1.0.3/package-1.0.3.pom',
-        })
-        .resolvesOnce({
-          LastModified: DateTime.fromISO(`2020-01-01T00:00:00.000Z`).toJSDate(),
-        });
+        .resolvesOnce({ Body: meta as never });
 
       const res = await get('org.example:package', baseUrlS3);
 
@@ -87,9 +56,13 @@ describe('modules/datasource/maven/s3', () => {
         name: 'package',
         registryUrl: 's3://repobucket',
         releases: [
+          { version: '0.0.1' },
+          { version: '1.0.0' },
+          { version: '1.0.1' },
           { version: '1.0.2' },
-          { version: '1.0.3', releaseTimestamp: '2020-01-01T00:00:00.000Z' },
+          { version: '1.0.3' },
         ],
+        isPrivate: true,
       });
     });
 

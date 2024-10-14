@@ -30,7 +30,6 @@ describe('util/yaml', () => {
       myObject:
         aString: value
       `,
-          null,
           {
             customSchema: z.object({
               myObject: z.object({
@@ -78,7 +77,6 @@ describe('util/yaml', () => {
       myObject:
         aString: bar
       `,
-          null,
           {
             customSchema: z.object({
               myObject: z.object({
@@ -110,7 +108,6 @@ describe('util/yaml', () => {
       ---
       aString: bar
       `,
-          null,
           {
             customSchema: z.object({
               myObject: z.object({
@@ -131,7 +128,6 @@ describe('util/yaml', () => {
       ---
       aString: bar
       `,
-          null,
           {
             customSchema: z.object({
               myObject: z.object({
@@ -153,7 +149,6 @@ describe('util/yaml', () => {
       ---
       aString: bar
       `,
-          null,
           {
             customSchema: z.object({
               myObject: z.object({
@@ -181,7 +176,6 @@ describe('util/yaml', () => {
       ---
       foo: {{ foo.bar }}
       `,
-          undefined,
           { removeTemplates: true },
         ),
       ).toEqual([
@@ -199,7 +193,7 @@ describe('util/yaml', () => {
 
   describe('load', () => {
     it('should return undefined', () => {
-      expect(parseSingleYaml(``)).toBeUndefined();
+      expect(parseSingleYaml(``)).toBeNull();
     });
 
     it('should parse content with single document', () => {
@@ -284,6 +278,24 @@ describe('util/yaml', () => {
           myNestedObject: {
             aNestedString: null,
           },
+        },
+      });
+    });
+
+    it('should parse content with yaml tags', () => {
+      expect(
+        parseSingleYaml(
+          codeBlock`
+      myObject:
+        aString: value
+        aStringWithTag: !reset null
+      `,
+          { removeTemplates: true },
+        ),
+      ).toEqual({
+        myObject: {
+          aString: 'value',
+          aStringWithTag: 'null',
         },
       });
     });

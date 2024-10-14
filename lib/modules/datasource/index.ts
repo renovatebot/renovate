@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
+import { GlobalConfig } from '../../config/global';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -7,7 +8,9 @@ import { coerceArray } from '../../util/array';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { clone } from '../../util/clone';
+import { filterMap } from '../../util/filter-map';
 import { AsyncResult, Result } from '../../util/result';
+import { DatasourceCacheStats } from '../../util/stats';
 import { trimTrailingSlash } from '../../util/url';
 import datasources from './api';
 import {
@@ -68,22 +71,38 @@ async function getRegistryReleases(
       cacheNamespace,
       cacheKey,
     );
+
     // istanbul ignore if
     if (cachedResult) {
       logger.trace({ cacheKey }, 'Returning cached datasource response');
+      DatasourceCacheStats.hit(datasource.id, registryUrl, config.packageName);
       return cachedResult;
     }
+
+    DatasourceCacheStats.miss(datasource.id, registryUrl, config.packageName);
   }
+
   const res = await datasource.getReleases({ ...config, registryUrl });
   if (res?.releases.length) {
     res.registryUrl ??= registryUrl;
   }
+
   // cache non-null responses unless marked as private
-  if (datasource.caching && res && !res.isPrivate) {
-    logger.trace({ cacheKey }, 'Caching datasource response');
-    const cacheMinutes = 15;
-    await packageCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
+  if (datasource.caching && res) {
+    const cachePrivatePackages = GlobalConfig.get(
+      'cachePrivatePackages',
+      false,
+    );
+    if (cachePrivatePackages || !res.isPrivate) {
+      logger.trace({ cacheKey }, 'Caching datasource response');
+      const cacheMinutes = 15;
+      await packageCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
+      DatasourceCacheStats.set(datasource.id, registryUrl, config.packageName);
+    } else {
+      DatasourceCacheStats.skip(datasource.id, registryUrl, config.packageName);
+    }
   }
+
   return res;
 }
 
@@ -143,53 +162,63 @@ async function mergeRegistries(
   registryUrls: string[],
 ): Promise<ReleaseResult | null> {
   let combinedRes: ReleaseResult | undefined;
-  let caughtError: Error | undefined;
+  let lastErr: Error | undefined;
+  let commonRegistryUrl = true;
   for (const registryUrl of registryUrls) {
     try {
       const res = await getRegistryReleases(datasource, config, registryUrl);
       if (!res) {
         continue;
       }
-      if (combinedRes) {
-        for (const existingRelease of coerceArray(combinedRes.releases)) {
-          existingRelease.registryUrl ??= combinedRes.registryUrl;
-        }
-        for (const additionalRelease of coerceArray(res.releases)) {
-          additionalRelease.registryUrl = res.registryUrl;
-        }
-        combinedRes = { ...res, ...combinedRes };
-        delete combinedRes.registryUrl;
-        combinedRes.releases = [...combinedRes.releases, ...res.releases];
-      } else {
+
+      if (!combinedRes) {
         combinedRes = res;
+        continue;
       }
+
+      if (commonRegistryUrl) {
+        for (const release of coerceArray(combinedRes.releases)) {
+          release.registryUrl ??= combinedRes.registryUrl;
+        }
+        commonRegistryUrl = false;
+      }
+
+      const releases = coerceArray(res.releases);
+      for (const release of releases) {
+        release.registryUrl ??= res.registryUrl;
+      }
+
+      combinedRes.releases.push(...releases);
+      combinedRes = { ...res, ...combinedRes };
+      delete combinedRes.registryUrl;
     } catch (err) {
       if (err instanceof ExternalHostError) {
         throw err;
       }
-      // We'll always save the last-thrown error
-      caughtError = err;
+
+      lastErr = err;
       logger.trace({ err }, 'datasource merge failure');
     }
   }
-  // De-duplicate releases
-  if (combinedRes?.releases?.length) {
-    const seenVersions = new Set<string>();
-    combinedRes.releases = combinedRes.releases.filter((release) => {
-      if (seenVersions.has(release.version)) {
-        return false;
-      }
-      seenVersions.add(release.version);
-      return true;
-    });
+
+  if (!combinedRes) {
+    if (lastErr) {
+      throw lastErr;
+    }
+
+    return null;
   }
-  if (combinedRes) {
-    return combinedRes;
-  }
-  if (caughtError) {
-    throw caughtError;
-  }
-  return null;
+
+  const seenVersions = new Set<string>();
+  combinedRes.releases = filterMap(combinedRes.releases, (release) => {
+    if (seenVersions.has(release.version)) {
+      return null;
+    }
+    seenVersions.add(release.version);
+    return release;
+  });
+
+  return combinedRes;
 }
 
 function massageRegistryUrls(registryUrls: string[]): string[] {
@@ -220,7 +249,7 @@ function resolveRegistryUrls(
     }
     return is.function_(datasource.defaultRegistryUrls)
       ? datasource.defaultRegistryUrls()
-      : datasource.defaultRegistryUrls ?? [];
+      : (datasource.defaultRegistryUrls ?? []);
   }
   const customUrls = registryUrls?.filter(Boolean);
   let resolvedUrls: string[] = [];

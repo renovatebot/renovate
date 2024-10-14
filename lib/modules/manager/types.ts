@@ -86,6 +86,7 @@ export interface LookupUpdate {
   newDigest?: string;
   newMajor?: number;
   newMinor?: number;
+  newPatch?: number;
   newName?: string;
   newValue?: string;
   semanticCommitType?: string;
@@ -98,6 +99,7 @@ export interface LookupUpdate {
   checksumUrl?: string;
   downloadUrl?: string;
   releaseTimestamp?: any;
+  newVersionAgeInDays?: number;
   registryUrl?: string;
 }
 
@@ -182,15 +184,28 @@ export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   replaceString?: string;
 }
 
+export interface ArtifactNotice {
+  file: string;
+  message: string;
+}
+
 export interface ArtifactError {
+  fileName?: string;
   lockFile?: string;
   stderr?: string;
 }
 
-export interface UpdateArtifactsResult {
-  artifactError?: ArtifactError;
-  file?: FileChange;
-}
+export type UpdateArtifactsResult =
+  | {
+      file?: FileChange;
+      notice?: ArtifactNotice;
+      artifactError?: undefined;
+    }
+  | {
+      file?: undefined;
+      notice?: undefined;
+      artifactError?: ArtifactError;
+    };
 
 export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;

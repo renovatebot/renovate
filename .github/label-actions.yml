@@ -12,8 +12,15 @@
     Discussions without reproductions are less likely to be converted to Issues.
 
 
-    To get started, please read our guide on creating a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md).
+    Please follow these steps:
+     1. Read our guide on creating a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md).
+     2. Go to our [minimal reproduction template repository](https://github.com/renovatebot/minimal-reproduction-template).
+     3. Select the _Use this template_ button to create a new repository based on the template.
+     4. Work on the minimal reproduction in your own repository.
+     5. Fill out the information in your repository's `README.md`.
+     6. Add the link to your reproduction to the first post of your Discussion. If you are not the original author, you can post a new comment with the link.
 
+    If you need help with running renovate on your minimal reproduction repository, please refer to our [Running Renovate guide](https://docs.renovatebot.com/getting-started/running/).
 
     Good luck,
 
@@ -59,7 +66,7 @@
     <details><summary>Select me to read instructions</summary>
 
 
-    If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
+    Read the [Renovate docs, troubleshooting, self-hosted](https://docs.renovatebot.com/troubleshooting/#self-hosted) to learn how to find the logs.
 
     </details>
 
@@ -100,6 +107,41 @@
 
 
     The Renovate team
+
+'auto:logs-packages':
+  comment: >
+    Hi there,
+
+
+    A maintainer wants you to find and share a specific log message (`packageFiles with updates`) from your repository or environment.
+
+
+    If you self-host Renovate: make sure you run Renovate with `LOG_LEVEL=debug` to get the debug log messages! Next, open the debug-level logs and search for `packageFiles with updates`. This text marks the start of a structured log message that shows every package file, dependency, and update that Renovate found.
+
+
+    Find the relevant dependency/dependencies in the log message, and copy/paste those parts into this discussion. If you do not know which bits we need, you can copy/paste the full log message.
+
+
+    Read the [Renovate docs, Troubleshooting](https://docs.renovatebot.com/troubleshooting/) to learn more about getting the docs, and getting the correct type of logs.
+
+
+    Thanks, the Renovate team
+
+'auto:logs-reduction':
+  comment: >
+    Hi there,
+
+
+    Please limit the amount of logs you're pasting into this discussion. The maintainers have a limited amount of time to help you, and often do so from mobile devices. It's easier for us if you only paste the relevant parts of the logs, and point us to the lines you think are relevant.
+
+
+    For example, if your problem is about a certain dependency, find the log sections which apply to that dependency and paste only those sections. Similarly, if your problem is about a particular branch/PR, find the log sections which apply to that branch/PR and paste only those sections.
+
+
+    If you're not sure, it's acceptable to paste the full logs, including into a gist. Please try to explain the problem in enough detail to give us starting points to debug. If you only paste the full log, and do nothing else, it is likely that we will take longer to help you, or we may not start to help you at all.
+
+
+    Thanks, the Renovate team
 
 'new package manager':
   comment: >
@@ -229,6 +271,21 @@
   close: true
   close-reason: 'not planned'
 
+'auto:inactivity-pr-close':
+  comment: >
+    **We're closing this PR due to inactivity, but we are happy for you, or others, to finish the PR.**
+
+
+    We limit the number of open PRs, so we close stale PRs, or PRs that are not getting ready to merge.
+
+
+    If you, or someone else, want to continue working on this PR, then please reopen this PR and let us know.
+
+
+    Thanks, the Renovate team
+  close: true
+  close-reason: 'not planned'
+
 'auto:format-code':
   comment: >
     Hi, please format any copy/pasted code or logs so they're readable.
@@ -256,7 +313,7 @@
 
     Thanks, the Renovate team.
   close: true
-  close-reason: 'not planned'
+  close-reason: 'outdated'
 
 'auto:bad-vibes':
   comment: >
@@ -308,13 +365,94 @@
     Hi there,
 
 
-    Please do not unnecessarily `@` mention maintainers like `@rarkins` or `@viceice`. Doing so causes annoying mobile notifications and makes it harder to maintain this repository.
+    This is intended as a polite, automated _request_ that users avoid `@` mentioning repository maintainers like `@rarkins` or `@viceice`. Doing so causes annoying mobile notifications and makes it harder to maintain this repository.
 
 
-    For example, never `@` mention a maintainer when you are creating a discussion if your desire is to get attention. This is rude behavior, just like shouting out your coffee order in a Starbucks before it's your turn.
+    We know it might be common elsewhere but we participate in hundreds of discussions a week and would need to turn off GitHub mobile notifications if we were mentioned in every one.
 
 
-    It's OK to comment in an issue or discussion after multiple days or weeks. But please, still don't `@` mention people. The maintainers try to answer most discussions, but they can't answer all discussions. If you're still not getting an answer, take a look at the information you've given us and see if you can improve it.
+    As a general rule, we will read and respond to all discussions in this repository, so there is no need to mention us.
+
+
+    Thanks, the Renovate team
+
+'auto:idea-rewrite':
+  comment: >
+    Hi there,
+
+
+    The maintainers want to convert this idea into a Feature Request issue. Before we can convert, we need you update the Discussion title and/or the description(s).
+
+
+    We want the top post, and title, to match the current state of your idea/feature request. This is because a discussion often has lots of info, thoughts and comments. There may also be ideas that turn out to be dead ends. In simple terms, we only want the good stuff to go in the top post.
+
+
+    So please put the current information in the top post and update the title. Feel free to copy/paste examples, links or comments into the description. Let us know when you are finished updating, and we will convert your discussion to an Issue.
+
+
+    Thanks, the Renovate team
+
+'auto:no-slas':
+  comment: >
+    Hi there,
+
+
+    Please remember that there are no Service Level Agreements (SLAs) or roadmap commitments in Open Source projects like Renovate. The maintainers and contributors work on bugs/features/docs at their own pace. This means that sometimes you will have to wait for things to happen, or to get a response.
+
+
+    Please avoid comments like: "Any update on this?" or "When will this be fixed?". Do not chase a maintainer to get answers quickly. We will block you if you nudge us frequently.
+
+
+    Please read our [Code of Conduct, how we prioritize work](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#how-we-prioritize-work) to learn more about how we prioritize what to work on.
+    If you are a paying Mend.io customer, please tell your support or customer contact that this issue is important to you.
+
+
+    Thanks, the Renovate team
+
+'auto:reduce-complexity':
+  comment: >
+    Hi there,
+
+
+    This discussion is too complex, and we want you to simplify. This way you are more likely to get help or a solution.
+
+
+    For example, if you've pasted your _whole_ complex config, while your problem is about just one part, consider removing the parts that are not relevant to your problem. The best way to do this is to create a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md).
+
+
+    You may have tried many ways to do something, and described all the methods you tried. If none of the methods worked, please focus on the most promising method, or the ideal solution. Avoid complicating the description (or logs) with the failed attempts.
+
+
+    To summarize: please reduce the complexity of your discussion, to increase the chances of getting help.
+
+
+    Thanks, the Renovate team
+
+'auto:enterprise-support':
+  comment: >
+    Hi there,
+
+
+    The maintainers have labeled this discussion as a use case specific to "enterprise" users. Enterprise users typically self-host Renovate and have advanced requirements like custom certificates, HTTP proxies, private registries, air gapping, etc.
+
+
+    Such cases usually need a lot of back-and-forth to resolve, because the problem is related to the user's environment.
+    Usually the user's environment can not be reproduced publicly, which means that maintainer debugging is not possible.
+
+
+    The maintainers decided their time is best spent on issues that help large numbers of users. This means enterprise-specific issues affecting one user (or a small number of users), are not a priority. If we can help you quickly, we will. But if you see this message, then a maintainer believes this is not a quick fix. The maintainers will not actively work on this issue, unless new information is found.
+
+
+    If you are an enterprise user, please consider the following options:
+
+      - Troubleshoot and contribute a fix yourself, or
+      - [Hire a consultant](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#getting-more-help) to help you, or
+      - Consider an [Enterprise support contract from Mend.io](https://mend.io/mend-renovate/), or
+      - Wait for a community member to help you, if they have the same problem
+
+
+    If you choose to wait, then this discussion can remain open indefinitely.
+    But please be patient, do not nudge or bump this discussion just to get attention.
 
 
     Thanks, the Renovate team

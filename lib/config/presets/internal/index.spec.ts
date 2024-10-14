@@ -43,4 +43,15 @@ describe('config/presets/internal/index', () => {
       }
     }
   }
+
+  it('internal presets should not contain handlebars', () => {
+    Object.entries(internal.groups)
+      .map(([groupName, groupPresets]) =>
+        Object.entries(groupPresets).map(
+          ([presetName]) => `${groupName}:${presetName}`,
+        ),
+      )
+      .flat()
+      .forEach((preset) => expect(preset).not.toMatch(/{{.*}}/));
+  });
 });

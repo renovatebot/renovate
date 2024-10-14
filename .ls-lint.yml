@@ -12,9 +12,14 @@ ignore:
   - .git
   - .github/ISSUE_TEMPLATE
   - .github/pull_request_template.md
+  - .venv
+  - CODE_OF_CONDUCT.md
   - dist
   - jest.config.ts
   - node_modules
   - SECURITY.md
   - test/e2e/node_modules
   - tmp
+  - tools/mkdocs/docs
+  - tools/mkdocs/site
+  - tools/mkdocs/.cache

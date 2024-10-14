@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
@@ -55,21 +56,45 @@ describe('modules/manager/docker-compose/extract', () => {
       expect(res?.deps).toHaveLength(1);
     });
 
-    it('extracts image and replaces registry', () => {
-      const res = extractPackageFile(
-        `
-    version: "3"
-    services:
-      nginx:
-        image: quay.io/nginx:0.0.1
-      `,
-        '',
-        {
-          registryAliases: {
-            'quay.io': 'my-quay-mirror.registry.com',
+    it('extracts can parse yaml tags for version 3', () => {
+      const compose = codeBlock`
+          web:
+            image: node:20.0.0
+            ports:
+              - "80:8000"
+          worker:
+            extends:
+              service: web
+            ports: !reset null
+      `;
+      const res = extractPackageFile(compose, '', {});
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'node',
+            currentValue: '20.0.0',
+            currentDigest: undefined,
+            replaceString: 'node:20.0.0',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
           },
+        ],
+      });
+    });
+
+    it('extracts image and replaces registry', () => {
+      const compose = codeBlock`
+        version: "3"
+        services:
+          nginx:
+            image: quay.io/nginx:0.0.1
+      `;
+      const res = extractPackageFile(compose, '', {
+        registryAliases: {
+          'quay.io': 'my-quay-mirror.registry.com',
         },
-      );
+      });
       expect(res).toEqual({
         deps: [
           {
@@ -86,20 +111,17 @@ describe('modules/manager/docker-compose/extract', () => {
     });
 
     it('extracts image but no replacement', () => {
-      const res = extractPackageFile(
-        `
+      const compose = codeBlock`
         version: "3"
         services:
           nginx:
             image: quay.io/nginx:0.0.1
-        `,
-        '',
-        {
-          registryAliases: {
-            'index.docker.io': 'my-docker-mirror.registry.com',
-          },
+      `;
+      const res = extractPackageFile(compose, '', {
+        registryAliases: {
+          'index.docker.io': 'my-docker-mirror.registry.com',
         },
-      );
+      });
       expect(res).toEqual({
         deps: [
           {
@@ -116,21 +138,18 @@ describe('modules/manager/docker-compose/extract', () => {
     });
 
     it('extracts image and no double replacement', () => {
-      const res = extractPackageFile(
-        `
+      const compose = codeBlock`
         version: "3"
         services:
           nginx:
             image: quay.io/nginx:0.0.1
-        `,
-        '',
-        {
-          registryAliases: {
-            'quay.io': 'my-quay-mirror.registry.com',
-            'my-quay-mirror.registry.com': 'quay.io',
-          },
+      `;
+      const res = extractPackageFile(compose, '', {
+        registryAliases: {
+          'quay.io': 'my-quay-mirror.registry.com',
+          'my-quay-mirror.registry.com': 'quay.io',
         },
-      );
+      });
       expect(res).toEqual({
         deps: [
           {
@@ -140,6 +159,31 @@ describe('modules/manager/docker-compose/extract', () => {
             currentValue: '0.0.1',
             datasource: 'docker',
             depName: 'my-quay-mirror.registry.com/nginx',
+            replaceString: 'quay.io/nginx:0.0.1',
+          },
+        ],
+      });
+    });
+
+    it('extracts image of templated compose file', () => {
+      const compose = codeBlock`
+        version: "3"
+        services:
+          nginx:
+            image: quay.io/nginx:0.0.1
+            envrionment:
+              {{ services['nginx']['env'] }}
+      `;
+      const res = extractPackageFile(compose, '', {});
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.0.1',
+            datasource: 'docker',
+            depName: 'quay.io/nginx',
             replaceString: 'quay.io/nginx:0.0.1',
           },
         ],

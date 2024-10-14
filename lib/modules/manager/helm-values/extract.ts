@@ -2,23 +2,28 @@ import { logger } from '../../../logger';
 import { parseYaml } from '../../../util/yaml';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { HelmDockerImageDependency } from './types';
 import {
   matchesHelmValuesDockerHeuristic,
   matchesHelmValuesInlineImage,
 } from './util';
 
-function getHelmDep({
-  registry,
-  repository,
-  tag,
-}: {
-  registry: string;
-  repository: string;
-  tag: string;
-}): PackageDependency {
-  const dep = getDep(`${registry}${repository}:${tag}`, false);
+function getHelmDep(
+  registry: string,
+  repository: string,
+  tag: string,
+  config: ExtractConfig,
+): PackageDependency {
+  const dep = getDep(
+    `${registry}${repository}:${tag}`,
+    false,
+    config.registryAliases,
+  );
   dep.replaceString = tag;
   dep.versioning = dockerVersioning;
   dep.autoReplaceStringTemplate =
@@ -34,6 +39,7 @@ function getHelmDep({
 function findDependencies(
   parsedContent: Record<string, unknown> | HelmDockerImageDependency,
   packageDependencies: Array<PackageDependency>,
+  config: ExtractConfig,
 ): Array<PackageDependency> {
   if (!parsedContent || typeof parsedContent !== 'object') {
     return packageDependencies;
@@ -47,11 +53,15 @@ function findDependencies(
       registry = registry ? `${registry}/` : '';
       const repository = String(currentItem.repository);
       const tag = `${currentItem.tag ?? currentItem.version}`;
-      packageDependencies.push(getHelmDep({ repository, tag, registry }));
+      packageDependencies.push(getHelmDep(registry, repository, tag, config));
     } else if (matchesHelmValuesInlineImage(key, value)) {
-      packageDependencies.push(getDep(value));
+      packageDependencies.push(getDep(value, true, config.registryAliases));
     } else {
-      findDependencies(value as Record<string, unknown>, packageDependencies);
+      findDependencies(
+        value as Record<string, unknown>,
+        packageDependencies,
+        config,
+      );
     }
   });
   return packageDependencies;
@@ -59,14 +69,15 @@ function findDependencies(
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string,
+  packageFile: string,
+  config: ExtractConfig,
 ): PackageFileContent | null {
   let parsedContent: Record<string, unknown>[] | HelmDockerImageDependency[];
   try {
     // a parser that allows extracting line numbers would be preferable, with
     // the current approach we need to match anything we find again during the update
     // TODO: fix me (#9610)
-    parsedContent = parseYaml(content, null, { json: true }) as any;
+    parsedContent = parseYaml(content) as any;
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse helm-values YAML');
     return null;
@@ -75,7 +86,7 @@ export function extractPackageFile(
     const deps: PackageDependency<Record<string, any>>[] = [];
 
     for (const con of parsedContent) {
-      deps.push(...findDependencies(con, []));
+      deps.push(...findDependencies(con, [], config));
     }
 
     if (deps.length) {
