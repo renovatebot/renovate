@@ -1,5 +1,3 @@
-import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { trimTrailingSlash } from '../../../util/url';
 import { parseYaml } from '../../../util/yaml';
@@ -20,8 +18,7 @@ export function extractPackageFile(
   packageFile: string,
   config?: ExtractConfig,
 ): PackageFileContent | null {
-  let definitions: ProfileDefinition[];
-  definitions = parseYaml(content, {
+  const definitions = parseYaml(content, {
     customSchema: ProfileDefinition,
     failureBehaviour: 'filter',
   });

@@ -1,15 +1,233 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
 import { extractDefinition } from './extract';
 import type { ProfileDefinition } from './schema';
 import { extractPackageFile } from '.';
 
-const validProfile = Fixtures.get('validProfile.yml');
-const validClusterProfile = Fixtures.get('validClusterProfile.yml');
-const validClusterProfileOCI = Fixtures.get('validClusterProfileOCI.yml');
-const validEventTrigger = Fixtures.get('validEventTrigger.yml');
-const malformedProfiles = Fixtures.get('malformedProfiles.yml');
-const randomManifest = Fixtures.get('randomManifest.yml');
+const validProfile = codeBlock`
+---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: Profile
+metadata:
+  name: baseline
+spec:
+  helmCharts:
+  - repositoryURL:    https://prometheus-community.github.io/helm-charts
+    repositoryName:   prometheus-community
+    chartName:        prometheus-community/prometheus
+    chartVersion:     "23.4.0"
+  - repositoryURL:    https://kyverno.github.io/kyverno/
+    repositoryName:   kyverno
+    chartName:        kyverno/kyverno
+    chartVersion:     "v3.2.5"
+---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: Profile
+metadata:
+  name: kyverno
+spec:
+  helmCharts:
+  - repositoryURL:    https://kyverno.github.io/kyverno/
+    repositoryName:   kyverno
+    chartName:        kyverno/kyverno-policies
+    chartVersion:     v3.2.0
+    releaseName:      kyverno-latest
+    releaseNamespace: kyverno
+    helmChartAction:  Install
+    values: |
+      admissionController:
+        replicas: 1
+---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: Profile
+metadata:
+  name: vault
+spec:
+  syncMode: Continuous
+  helmCharts:
+  - repositoryURL:    oci://registry-1.docker.io/bitnamicharts/vault
+    repositoryName:   oci-vault
+    chartName:        oci://registry-1.docker.io/bitnamicharts/vault
+    chartVersion:     0.7.2
+  - repositoryURL:    oci://custom-registry:443/charts/vault-sidecar
+    repositoryName:   oci-custom-vault
+    chartName:        oci://custom-registry:443/charts/vault-sidecar
+    chartVersion:     0.5.0
+`;
+const validClusterProfile = codeBlock`
+---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterProfile
+metadata:
+  name: baseline
+spec:
+  helmCharts:
+  - repositoryURL:    https://prometheus-community.github.io/helm-charts
+    repositoryName:   prometheus-community
+    chartName:        prometheus-community/prometheus
+    chartVersion:     "23.4.0"
+  - repositoryURL:    https://kyverno.github.io/kyverno/
+    repositoryName:   kyverno
+    chartName:        kyverno/kyverno
+    chartVersion:     "v3.2.5"
+---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterProfile
+metadata:
+  name: kyverno
+spec:
+  helmCharts:
+  - repositoryURL:    https://kyverno.github.io/kyverno/
+    repositoryName:   kyverno
+    chartName:        kyverno/kyverno-policies
+    chartVersion:     v3.2.0
+    releaseName:      kyverno-latest
+    releaseNamespace: kyverno
+    helmChartAction:  Install
+    values: |
+      admissionController:
+        replicas: 1
+---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterProfile
+metadata:
+  name: vault
+spec:
+  syncMode: Continuous
+  helmCharts:
+  - repositoryURL:    oci://registry-1.docker.io/bitnamicharts/vault
+    repositoryName:   oci-vault
+    chartName:        oci://registry-1.docker.io/bitnamicharts/vault
+    chartVersion:     0.7.2
+  - repositoryURL:    oci://custom-registry:443/charts/vault-sidecar
+    repositoryName:   oci-custom-vault
+    chartName:        oci://custom-registry:443/charts/vault-sidecar
+    chartVersion:     0.5.0
+`;
+const validClusterProfileOCI = codeBlock`
+---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterProfile
+metadata:
+  name: vault
+spec:
+  syncMode: Continuous
+  helmCharts:
+  - repositoryURL:    oci://registry-1.docker.io/bitnamicharts/vault
+    repositoryName:   oci-vault
+    chartName:        oci://registry-1.docker.io/bitnamicharts/vault
+    chartVersion:     0.7.2
+`;
+const validEventTrigger = codeBlock`
+---
+apiVersion: lib.projectsveltos.io/v1beta1
+kind: EventTrigger
+metadata:
+  name: baseline
+spec:
+  helmCharts:
+  - repositoryURL:    https://prometheus-community.github.io/helm-charts
+    repositoryName:   prometheus-community
+    chartName:        prometheus-community/prometheus
+    chartVersion:     "23.4.0"
+  - repositoryURL:    https://kyverno.github.io/kyverno/
+    repositoryName:   kyverno
+    chartName:        kyverno/kyverno
+    chartVersion:     "v3.2.5"
+---
+apiVersion: lib.projectsveltos.io/v1beta1
+kind: EventTrigger
+metadata:
+  name: kyverno
+spec:
+  helmCharts:
+  - repositoryURL:    https://kyverno.github.io/kyverno/
+    repositoryName:   kyverno
+    chartName:        kyverno/kyverno-policies
+    chartVersion:     v3.2.0
+    releaseName:      kyverno-latest
+    releaseNamespace: kyverno
+    helmChartAction:  Install
+    values: |
+      admissionController:
+        replicas: 1
+---
+apiVersion: lib.projectsveltos.io/v1beta1
+kind: EventTrigger
+metadata:
+  name: vault
+spec:
+  syncMode: Continuous
+  helmCharts:
+  - repositoryURL:    oci://registry-1.docker.io/bitnamicharts/vault
+    repositoryName:   oci-vault
+    chartName:        oci://registry-1.docker.io/bitnamicharts/vault
+    chartVersion:     0.7.2
+  - repositoryURL:    oci://custom-registry:443/charts/vault-sidecar
+    repositoryName:   oci-custom-vault
+    chartName:        oci://custom-registry:443/charts/vault-sidecar
+    chartVersion:     0.5.0
+`;
+const malformedProfiles = codeBlock`
+---
+# malformed eventtrigger as the source is null
+apiVersion: lib.projectsveltos.io/v1beta1
+kind: EventTrigger
+spec:
+  helmCharts: []
+---
+# malformed eventtrigger as the source is empty
+apiVersion: lib.projectsveltos.io/v1beta1
+kind: EventTrigger
+spec:
+  helmCharts: null
+---
+# malformed clusterprofile as the sources array is empty
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterProfile
+spec:
+  helmCharts: []
+---
+# malformed clusterprofile as the source is null
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterProfile
+spec:
+  helmCharts: null
+---
+# malformed profile as the sources array is empty
+apiVersion: config.projectsveltos.io/v1beta1
+kind: Profile
+spec:
+  helmCharts: []
+---
+# malformed profile as the source is null
+apiVersion: config.projectsveltos.io/v1beta1
+kind: Profile
+spec:
+  helmCharts: null
+`;
+const randomManifest = codeBlock`
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.14.2
+          ports:
+            - containerPort: 80
+`;
 
 describe('modules/manager/sveltos/extract', () => {
   describe('extractDefinition()', () => {
