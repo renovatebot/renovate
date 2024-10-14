@@ -21,8 +21,20 @@ options.sort((a, b) => {
 });
 const properties = schema.properties as Record<string, any>;
 
+type JsonSchemaBasicType =
+  | 'string'
+  | 'number'
+  | 'integer'
+  | 'boolean'
+  | 'object'
+  | 'array'
+  | 'null';
+type JsonSchemaType = JsonSchemaBasicType | JsonSchemaBasicType[];
+
 function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
-  const temp: Record<string, any> & Partial<RenovateOptions> = {};
+  const temp: Record<string, any> & {
+    type?: JsonSchemaType;
+  } & Omit<Partial<RenovateOptions>, 'type'> = {};
   if (option.description) {
     temp.description = option.description;
   }
@@ -57,6 +69,9 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     } else if (option.allowedValues) {
       temp.enum = option.allowedValues;
     }
+  }
+  if (option.default === null) {
+    temp.type = [option.type, 'null'];
   }
   if (option.default !== undefined) {
     temp.default = option.default;
