@@ -21,15 +21,10 @@ export function extractPackageFile(
   config?: ExtractConfig,
 ): PackageFileContent | null {
   let definitions: ProfileDefinition[];
-  try {
-    definitions = parseYaml(content, {
-      customSchema: ProfileDefinition,
-      failureBehaviour: "filter",
-    });
-  } catch (err) {
-    logger.debug({ err, packageFile }, 'Failed to parse Sveltos definition.');
-    return null;
-  }
+  definitions = parseYaml(content, {
+    customSchema: ProfileDefinition,
+    failureBehaviour: 'filter',
+  });
 
   const deps: PackageDependency[] = [];
 
@@ -58,10 +53,7 @@ function processHelmCharts(
     datasource: HelmDatasource.id,
   };
 
-  if (
-    isOCIRegistry(source.repositoryURL) ||
-    !source.repositoryURL.includes('://')
-  ) {
+  if (isOCIRegistry(source.repositoryURL)) {
     const image = trimTrailingSlash(removeOCIPrefix(source.repositoryURL));
 
     dep.datasource = DockerDatasource.id;
@@ -86,13 +78,13 @@ function processAppSpec(
 
   const depType = definition.kind;
 
-    for (const source of coerceArray(definition.spec?.helmCharts)) {
-      const dep = processHelmCharts(source, config?.registryAliases);
-      if (dep) {
-        dep.depType = depType;
-        deps.push(dep);
-      }
+  for (const source of coerceArray(definition.spec?.helmCharts)) {
+    const dep = processHelmCharts(source, config?.registryAliases);
+    if (dep) {
+      dep.depType = depType;
+      deps.push(dep);
     }
+  }
 
   return deps;
 }
