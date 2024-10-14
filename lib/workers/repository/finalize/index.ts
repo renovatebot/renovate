@@ -1,8 +1,9 @@
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
+import { scm } from '../../../modules/platform/scm';
 import * as repositoryCache from '../../../util/cache/repository';
-import { clearRenovateRefs } from '../../../util/git';
+import { clearRenovateRefs, getBranchCommit } from '../../../util/git';
 import { PackageFiles } from '../package-files';
 import { validateReconfigureBranch } from '../reconfigure';
 import { pruneStaleBranches } from './prune';
@@ -11,12 +12,33 @@ import {
   runRenovateRepoStats,
 } from './repository-statistics';
 
+export async function calculateScmStats(config: RenovateConfig): Promise<void> {
+  const defaultBranchSha = getBranchCommit(config.defaultBranch!);
+  // istanbul ignore if: shouldn't happen
+  if (!defaultBranchSha) {
+    logger.debug('No default branch sha found');
+  }
+  const repoCache = repositoryCache.getCache();
+  if (repoCache.repoStats?.scm.defaultBranchSha === defaultBranchSha) {
+    logger.debug('Default branch sha unchanged - scm stats are up to date');
+  } else {
+    logger.debug('Recalculating repo scm stats');
+    const repoStats = await scm.getStats();
+    if (repoStats) {
+      repoCache.repoStats = { scm: repoStats };
+    } else {
+      logger.debug(`Could not calcualte repo stats`);
+    }
+  }
+}
+
 // istanbul ignore next
 export async function finalizeRepo(
   config: RenovateConfig,
   branchList: string[],
 ): Promise<void> {
   await validateReconfigureBranch(config);
+  await calculateScmStats(config);
   await repositoryCache.saveCache();
   await pruneStaleBranches(config, branchList);
   await ensureIssuesClosing();

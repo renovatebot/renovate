@@ -42,6 +42,13 @@ export function runRenovateRepoStats(
     }
   }
   logger.debug({ stats: prStats }, `Renovate repository PR statistics`);
+  const repoCache = getCache();
+  const scmStats = repoCache?.repoStats?.scm?.last90Days;
+  if (scmStats) {
+    logger.debug(
+      `Repository has ${scmStats.renovateCommitCount} Renovate commits in the last 90 days plus ${scmStats.committerHashList?.length} other committers`,
+    );
+  }
 }
 
 function branchCacheToMetadata({

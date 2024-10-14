@@ -4,6 +4,7 @@ import type {
   UpdateType,
 } from '../../../config/types';
 import type { PackageFile } from '../../../modules/manager/types';
+import type { ScmStats } from '../../../modules/platform';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
 import type { PrBlockedBy } from '../../../workers/types';
 
@@ -40,6 +41,21 @@ export interface OnboardingBranchCache {
   isModified: boolean;
   configFileName?: string;
   configFileParsed?: string;
+}
+
+export interface RepoStats {
+  scm: ScmStats;
+  /*
+  renovatePrs?: {
+    counts: {
+      open: number;
+      closed: number;
+      merged: number;
+    };
+    lastMerged?: string;
+  };
+  stargazerCount?: number;
+  */
 }
 
 export interface ReconfigureBranchCache {
@@ -149,6 +165,7 @@ export interface RepoCacheData {
   prComments?: Record<number, Record<string, string>>;
   onboardingBranchCache?: OnboardingBranchCache;
   reconfigureBranchCache?: ReconfigureBranchCache;
+  repoStats?: RepoStats;
 }
 
 export interface RepoCache {

@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
@@ -19,6 +20,7 @@ import {
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import type { ScmStats } from '../../modules/platform/types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
@@ -1369,4 +1371,81 @@ export async function listCommitTree(
     }
   }
   return result;
+}
+
+function parseGitShortlog(inputText: string): Map<string, number> {
+  const emailMap = new Map();
+
+  if (!inputText.trim().length) {
+    return emailMap;
+  }
+
+  // Split the input text into individual lines
+  const lines = inputText.trim().split('\n');
+
+  // Iterate over each line using "for...of"
+  for (const line of lines) {
+    // Match the pattern "<count> <name> <email>" or "<count> <email>"
+    const match = line.match(/^\s*(\d+)\s+.*?<(.+?)>|^\s*(\d+)\s+(.+@.+)$/);
+
+    if (match) {
+      // If the line matches, extract the count and the email
+      const count = parseInt(match[1] || match[3], 10);
+      const email = match[2] || match[4];
+
+      // Add or update the email's commit count in the map
+      if (emailMap.has(email)) {
+        emailMap.set(email, emailMap.get(email) + count);
+      } else {
+        emailMap.set(email, count);
+      }
+    } else {
+      logger.once.warn('Failed to parse shortlog line');
+    }
+  }
+
+  return emailMap;
+}
+
+export async function getStats(): Promise<ScmStats | null> {
+  if (!config.defaultBranch) {
+    logger.warn('No default branch found');
+    return null;
+  }
+  const defaultBranchSha = getBranchCommit(config.defaultBranch);
+  if (!defaultBranchSha) {
+    logger.warn('No default branch sha found');
+    return null;
+  }
+  await syncGit();
+  await resetToBranch(config.defaultBranch);
+  logger.debug('Checking git committers in last 90 days');
+  const rawCommitters = await git.raw([
+    'shortlog',
+    '-sne',
+    '--since="last 90 days"',
+    'HEAD',
+  ]);
+  logger.trace({ rawCommitters }, 'rawCommitters');
+  const emailMap = parseGitShortlog(rawCommitters);
+  // Find Renovate's email address and commit count
+  let renovateCommitCount = 0;
+  if (config.gitAuthorEmail) {
+    renovateCommitCount = emailMap.get(config.gitAuthorEmail) ?? 0;
+  }
+  // Convert each email to a base64-encoded SHA256 hash and produce a sorted list,
+  // excluding Renovate's email address
+  const committerHashList = Array.from(emailMap.keys())
+    .filter((email) => email !== config.gitAuthorEmail)
+    .map((email) => crypto.createHash('sha256').update(email).digest('base64'))
+    .sort();
+
+  const scmStats: ScmStats = {
+    defaultBranchSha,
+    last90Days: {
+      committerHashList,
+      renovateCommitCount,
+    },
+  };
+  return scmStats;
 }
