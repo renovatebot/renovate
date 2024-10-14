@@ -41,6 +41,7 @@ export const UvGitSource = z.object({
   tag: z.string().optional(),
   branch: z.string().optional(),
 });
+export type UvGitSource = z.infer<typeof UvGitSource>
 
 const UvUrlSource = z.object({
   url: z.string(),

@@ -182,12 +182,11 @@ export class UvProcessor implements PyProjectProcessor {
 
 function applyGitSource(
   dep: PackageDependency,
-  depSource: z.infer<typeof UvGitSource>,
+  depSource: UvGitSource,
 ): void {
   const { git, rev, tag, branch } = depSource;
   if (tag) {
-    const { source, owner, name } = parseGitUrl(git);
-    const repo = `${owner}/${name}`;
+    const { source, full_name: repo } = parseGitUrl(git);
     if (source === 'github.com') {
       dep.datasource = GithubTagsDatasource.id;
       dep.packageName = repo;
