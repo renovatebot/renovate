@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import type { z } from 'zod';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { HostRule } from '../../../../types';
@@ -180,10 +179,7 @@ export class UvProcessor implements PyProjectProcessor {
   }
 }
 
-function applyGitSource(
-  dep: PackageDependency,
-  depSource: UvGitSource,
-): void {
+function applyGitSource(dep: PackageDependency, depSource: UvGitSource): void {
   const { git, rev, tag, branch } = depSource;
   if (tag) {
     const { source, full_name: repo } = parseGitUrl(git);

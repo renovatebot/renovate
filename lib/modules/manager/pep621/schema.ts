@@ -35,13 +35,13 @@ const HatchSchema = z.object({
     .optional(),
 });
 
-export const UvGitSource = z.object({
+const UvGitSource = z.object({
   git: z.string(),
   rev: z.string().optional(),
   tag: z.string().optional(),
   branch: z.string().optional(),
 });
-export type UvGitSource = z.infer<typeof UvGitSource>
+export type UvGitSource = z.infer<typeof UvGitSource>;
 
 const UvUrlSource = z.object({
   url: z.string(),
