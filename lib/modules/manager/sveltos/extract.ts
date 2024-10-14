@@ -24,6 +24,7 @@ export function extractPackageFile(
   try {
     definitions = parseYaml(content, {
       customSchema: ProfileDefinition,
+      failureBehaviour: "filter",
     });
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Sveltos definition.');
