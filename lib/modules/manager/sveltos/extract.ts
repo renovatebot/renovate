@@ -81,8 +81,6 @@ function processAppSpec(
   definition: ProfileDefinition,
   config?: ExtractConfig,
 ): PackageDependency[] {
-  const spec = definition.spec;
-
   const deps: PackageDependency[] = [];
 
   const depType = definition.kind;
