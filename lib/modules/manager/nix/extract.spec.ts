@@ -10,6 +10,7 @@ const flake5Lock = Fixtures.get('flake.5.lock');
 const flake6Lock = Fixtures.get('flake.6.lock');
 const flake7Lock = Fixtures.get('flake.7.lock');
 const flake8Lock = Fixtures.get('flake.8.lock');
+const flake9Lock = Fixtures.get('flake.9.lock');
 
 describe('modules/manager/nix/extract', () => {
   it('returns null when no inputs', () => {
@@ -86,5 +87,9 @@ describe('modules/manager/nix/extract', () => {
         packageName: 'https://github.com/NixOS/nixpkgs',
       },
     ]);
+  });
+
+  it('includes nixpkgs but using indirect type that cannot be updated', () => {
+    expect(extractPackageFile(flake9Lock, 'flake.lock')).toBeNull();
   });
 });
