@@ -11,33 +11,15 @@ import type {
 import { type ProjectDescriptor, ProjectDescriptorToml } from './schema';
 
 const dockerPrefix = regEx(/^docker:\/?\//);
-const buildpackRegistryRef = regEx(
-  /^[a-z0-9\-.]+\/[a-z0-9\-.]+(?:@(?<version>.+))?$/,
+const dockerRef = regEx(
+  /^((?:(?:\w|\w[\w-]*\w)(?:(?:\.(?:\w|\w[\w-]*\w))+)?(?::[\d]+)?\/)?[a-z\d]+(?:(?:(?:[._]|__|[-]*)[a-z\d]+)+)?(?:(?:\/[a-z\d]+(?:(?:(?:[._]|__|[-]*)[a-z\d]+)+)?)+)?)(?::([\w][\w.-]{0,127})(?:@(sha256:[A-Fa-f\d]{32,}))?|@(sha256:[A-Fa-f\d]{32,}))$/,
 );
 
-function isBuildpackRegistryRef(ref: string): boolean {
-  const bpRegistryMatch = buildpackRegistryRef.exec(ref);
-  if (!bpRegistryMatch) {
-    return false;
-  } else if (!bpRegistryMatch.groups?.version) {
+function isDockerRef(ref: string): boolean {
+  if (ref.startsWith('docker:/') || dockerRef.test(ref)) {
     return true;
   }
-
-  return isVersion(bpRegistryMatch.groups.version);
-}
-
-function isDockerRef(ref: string): boolean {
-  const schemaMatch = regEx(/^([a-z0-9]+):\/?\//).test(ref);
-  if (
-    ref.startsWith('urn:cnb') || // buildpacks registry or builder urns
-    ref.startsWith('from=') || // builder reference
-    isBuildpackRegistryRef(ref) || // buildpack registry ID reference
-    (schemaMatch && !ref.startsWith('docker:/')) // unsupported schema
-  ) {
-    return false;
-  }
-
-  return true;
+  return false;
 }
 
 function parseProjectToml(
