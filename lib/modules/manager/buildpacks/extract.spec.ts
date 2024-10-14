@@ -1,4 +1,4 @@
-import { Fixtures } from '../../../../test/fixtures';
+import { codeBlock } from 'common-tags';
 
 import { extractPackageFile } from '.';
 
@@ -19,7 +19,42 @@ describe('modules/manager/buildpacks/extract', () => {
 
     it('extracts builder and buildpack images', () => {
       const res = extractPackageFile(
-        Fixtures.get('project.toml'),
+        codeBlock`
+[_]
+schema-version = "0.2"
+
+[io.buildpacks]
+builder = "registry.corp/builder/noble:1.1.1"
+
+[[io.buildpacks.group]]
+uri = "docker://buildpacks/java:2.2.2"
+
+[[io.buildpacks.group]]
+uri = "buildpacks/nodejs:3.3.3"
+
+[[io.buildpacks.group]]
+uri = "example/foo@1.0.0"
+
+[[io.buildpacks.group]]
+uri = "example/registry-cnb"
+
+[[io.buildpacks.group]]
+uri = "urn:cnb:registry:example/foo@1.0.0"
+
+[[io.buildpacks.group]]
+uri = "some-bp@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+
+[[io.buildpacks.group]]
+uri = "cnbs/some-bp:some-tag@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+
+[[io.buildpacks.group]]
+uri = "from=builder:foobar"
+
+[[io.buildpacks.group]]
+uri = "file://local.oci"
+
+[[io.buildpacks.group]]
+uri = "foo://fake.oci"`,
         'project.toml',
         {},
       );
