@@ -99,7 +99,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           datasource: 'git-refs',
           packageName: 'https://github.com/foo/bar',
           currentValue: undefined,
-          skipReason: 'git-dependency',
+          skipReason: 'unspecified-version',
         },
         {
           depName: 'dep3',

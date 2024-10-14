@@ -205,7 +205,7 @@ function applyGitSource(dep: PackageDependency, depSource: UvGitSource): void {
     dep.datasource = GitRefsDatasource.id;
     dep.packageName = git;
     dep.currentValue = branch;
-    dep.skipReason = 'git-dependency';
+    dep.skipReason = branch ? 'git-dependency' : 'unspecified-version';
   }
 }
 
