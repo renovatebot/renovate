@@ -11,7 +11,7 @@ import { type ProjectDescriptor, ProjectDescriptorToml } from './schema';
 
 const dockerPrefix = regEx(/^docker:\/?\//);
 const dockerRef = regEx(
-  /^((?:(?:\w|\w[\w-]*\w)(?:(?:\.(?:\w|\w[\w-]*\w))+)?(?::[\d]+)?\/)?[a-z\d]+(?:(?:(?:[._]|__|[-]*)[a-z\d]+)+)?(?:(?:\/[a-z\d]+(?:(?:(?:[._]|__|[-]*)[a-z\d]+)+)?)+)?)(?::([\w][\w.-]{0,127})(?:@(sha256:[A-Fa-f\d]{32,}))?|@(sha256:[A-Fa-f\d]{32,}))$/,
+  /^((?:(?:\w|\w[\w-]*\w)(?:(?:\.(?:\w|\w[\w-]*\w))+)?(?::\d+)?\/)?[a-z\d]+(?:(?:(?:[._]|__|-*)[a-z\d]+)+)?(?:(?:\/[a-z\d]+(?:(?:(?:[._]|__|-*)[a-z\d]+)+)?)+)?)(?::(\w[\w.-]{0,127})(?:@sha256:[A-Fa-f\d]{32,})?|@sha256:[A-Fa-f\d]{32,})$/,
 );
 
 function isDockerRef(ref: string): boolean {
