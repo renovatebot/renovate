@@ -42,4 +42,4 @@ You can use these `depTypes` for fine-grained control, for example to disable pa
 | :-------------------------------------------------------------------------------------- | :--------------- |
 | [Cluster Profiles](https://projectsveltos.github.io/sveltos/addons/clusterprofile/)     | `ClusterProfile` |
 | [Profiles](https://projectsveltos.github.io/sveltos/addons/profile/)                    | `Profile`        |
-| [EventTrigger](https://projectsveltos.github.io/sveltos/events/addon_event_deployment/) | `EventTrigger`   |
+| [EventTrigger](https://projectsveltos.github.io/sveltos/events/addon_event_deployment/#eventtrigger) | `EventTrigger`   |
