@@ -44,6 +44,7 @@ export function extractPackageFile(
     const flakeLocked = flakeInput.locked;
     const flakeOriginal = flakeInput.original;
 
+    // istanbul ignore if: if we are not in a root node then original and locked always exist which cannot be easily expressed in the type
     if (flakeLocked === undefined || flakeOriginal === undefined) {
       logger.debug(
         { packageFile },
