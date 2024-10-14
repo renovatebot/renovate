@@ -85,15 +85,13 @@ function processAppSpec(
 
   const depType = definition.kind;
 
-  if (spec && is.nonEmptyArray(spec.helmCharts)) {
-    for (const source of coerceArray(spec.helmCharts)) {
+    for (const source of coerceArray(definition.spec?.helmCharts)) {
       const dep = processHelmCharts(source, config?.registryAliases);
       if (dep) {
         dep.depType = depType;
         deps.push(dep);
       }
     }
-  }
 
   return deps;
 }
