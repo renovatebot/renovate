@@ -442,6 +442,7 @@
     "react-dnd": "https://github.com/react-dnd/react-dnd",
     "react-navigation": "https://github.com/react-navigation/react-navigation",
     "react-page": "https://github.com/react-page/react-page",
+    "react-rails": "https://github.com/reactjs/react-rails",
     "react-router": [
       "https://github.com/ReactTraining/react-router",
       "https://github.com/remix-run/react-router"
