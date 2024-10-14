@@ -5,7 +5,7 @@ import type { VersioningApi } from '../types';
 
 export const id = 'devbox';
 export const displayName = 'devbox';
-
+export const urls = [];
 export const supportsRanges = false;
 
 const validPattern = regEx(/^((\d|[1-9]\d*)(\.(\d|[1-9]\d*)){0,2})$/);
