@@ -515,7 +515,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:11.11.21',
+    default: 'ghcr.io/containerbase/sidecar:11.11.31',
     globalOnly: true,
   },
   {
@@ -1513,6 +1513,18 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
   },
+  {
+    name: 'matchJsonata',
+    description:
+      'A JSONata expression to match against the full config object. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
   // Version behavior
   {
     name: 'allowedVersions',
@@ -1900,6 +1912,36 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'overrideDatasource',
+    description: 'Override the datasource value.',
+    type: 'string',
+    stage: 'package',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
+    name: 'overrideDepName',
+    description: 'Override the depName value.',
+    type: 'string',
+    stage: 'package',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
+    name: 'overridePackageName',
+    description: 'Override the packageName value.',
+    type: 'string',
+    stage: 'package',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
     name: 'bbAutoResolvePrTasks',
     description:
       'The PR tasks will be automatically completed after the PR is raised.',
@@ -1982,11 +2024,21 @@ const options: RenovateOptions[] = [
       commitMessageSuffix: '[SECURITY]',
       branchTopic: `{{{datasource}}}-{{{depNameSanitized}}}-vulnerability`,
       prCreation: 'immediate',
+      vulnerabilityFixStrategy: 'lowest',
     },
     mergeable: true,
     cli: false,
     env: false,
     supportedPlatforms: ['github'],
+  },
+  {
+    name: 'vulnerabilityFixStrategy',
+    description:
+      'Strategy to use when fixing vulnerabilities. `lowest` will propose the earliest version with a fix, `highest` will always pick the latest version.',
+    type: 'string',
+    allowedValues: ['lowest', 'highest'],
+    default: 'lowest',
+    parents: ['vulnerabilityAlerts'],
   },
   {
     name: 'osvVulnerabilityAlerts',

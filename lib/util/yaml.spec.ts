@@ -281,5 +281,23 @@ describe('util/yaml', () => {
         },
       });
     });
+
+    it('should parse content with yaml tags', () => {
+      expect(
+        parseSingleYaml(
+          codeBlock`
+      myObject:
+        aString: value
+        aStringWithTag: !reset null
+      `,
+          { removeTemplates: true },
+        ),
+      ).toEqual({
+        myObject: {
+          aString: 'value',
+          aStringWithTag: 'null',
+        },
+      });
+    });
   });
 });
