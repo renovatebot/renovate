@@ -14,7 +14,7 @@ You can customize the per-submodule checks of the git-submodules manager like th
 ### Updating to Specific Tag Values
 
 If you want to update your Git submodules to a specific tag, you can set the desired tag as the `branch` in your `.gitmodules` file.
-Renovate will then automatically update this version to the latest Git tag.
+Renovate will then automatically update this version to the latest Git branch or tag which satisfies your versioning scheme.
 
 ```ini
 [submodule "renovate"]

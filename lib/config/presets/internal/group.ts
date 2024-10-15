@@ -54,6 +54,15 @@ const staticGroups = {
       },
     ],
   },
+  atlaskit: {
+    description: 'Group all Atlassian `@atlaskit` packages together.',
+    packageRules: [
+      {
+        extends: ['packages:atlaskit'],
+        groupName: 'Atlassian Atlaskit packages',
+      },
+    ],
+  },
   codemirror: {
     description: 'Group CodeMirror packages together.',
     packageRules: [

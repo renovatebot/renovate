@@ -3,6 +3,7 @@ import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { fs } from '../../../../test/util';
+import { logger } from '../../../logger';
 import { CustomDatasource } from './index';
 
 jest.mock('../../../util/fs');
@@ -226,6 +227,56 @@ describe('modules/datasource/custom/index', () => {
         },
       });
       expect(result).toEqual(expected);
+    });
+
+    it('returns null if transformation compilation using jsonata fails', async () => {
+      httpMock
+        .scope('https://example.com')
+        .get('/v1')
+        .reply(200, '1.0.0 \n2.0.0 \n 3.0.0 ', {
+          'Content-Type': 'text/plain',
+        });
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/v1',
+            transformTemplates: ['$[.name = "Alice" and'],
+            format: 'plain',
+          },
+        },
+      });
+      expect(result).toBeNull();
+      expect(logger.once.warn).toHaveBeenCalledWith(
+        { errorMessage: 'The symbol "." cannot be used as a unary operator' },
+        'Invalid JSONata expression: $[.name = "Alice" and',
+      );
+    });
+
+    it('returns null if jsonata expression evaluation fails', async () => {
+      httpMock
+        .scope('https://example.com')
+        .get('/v1')
+        .reply(200, '1.0.0 \n2.0.0 \n 3.0.0 ', {
+          'Content-Type': 'text/plain',
+        });
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/v1',
+            transformTemplates: ['$notafunction()'],
+            format: 'plain',
+          },
+        },
+      });
+      expect(result).toBeNull();
+      expect(logger.once.warn).toHaveBeenCalledWith(
+        { err: expect.any(Object) },
+        'Error while evaluating JSONata expression: $notafunction()',
+      );
     });
 
     it('return releases for plain text API when only returns a single version', async () => {

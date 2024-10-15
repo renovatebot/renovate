@@ -337,6 +337,10 @@ You can also use the special `"$default"` string to denote the repository's defa
     Do _not_ use the `baseBranches` config option when you've set a `forkToken`.
     You may need a `forkToken` when you're using the Forking Renovate app.
 
+## bbAutoResolvePrTasks
+
+Configuring this to `true` means that Renovate will mark all PR Tasks as complete.
+
 ## bbUseDefaultReviewers
 
 Configuring this to `true` means that Renovate will detect and apply the default reviewers rules to PRs (Bitbucket only).
@@ -1127,7 +1131,8 @@ Configure this option if you prefer a different title for the Dependency Dashboa
 ## description
 
 The description field can be used inside any configuration object to add a human-readable description of the object's config purpose.
-Descriptions fields embedded within presets are also collated as part of the onboarding description.
+A description field embedded within a preset is also collated as part of the onboarding description unless the preset only consists of presets itself.
+Presets which consist only of other presets have their own description omitted from the onboarding description because they will be fully described by the preset descriptions within.
 
 ## digest
 
@@ -2118,6 +2123,7 @@ Beware: configuring Renovate to automerge without any tests can lead to broken b
 By default, Renovate won't update any package versions to unstable versions (e.g. `4.0.0-rc3`) unless the current version has the same `major.minor.patch` and was _already_ unstable (e.g. it was already on `4.0.0-rc2`).
 Renovate will also not "jump" unstable versions automatically, e.g. if you are on `4.0.0-rc2` and newer versions `4.0.0` and `4.1.0-alpha.1` exist then Renovate will update you to `4.0.0` only.
 If you need to force permanent unstable updates for a package, you can add a package rule setting `ignoreUnstable` to `false`.
+In that case you will usually also want to set `respectLatest` to `false` so that Renovate considers versions ahead of `latest`.
 
 Also check out the `followTag` configuration option above if you wish Renovate to keep you pinned to a particular release tag.
 
@@ -2410,14 +2416,13 @@ The order of rules matters, because later rules may override configuration optio
 
 The matching process for a package rule:
 
-- Each package rule can include `match...` matchers to identify dependencies and `exclude...` matchers to filter them out.
-- If no match/exclude matchers are defined, everything matches.
-- If an aspect is both `match`ed and `exclude`d, the exclusion wins.
-- Multiple values within a single matcher will be evaluated independently (they're OR-ed together).
-- Combining multiple matchers will restrict the resulting matches (they're AND-ed together):
-  `matchCurrentVersion`, `matchCurrentValue`, `matchNewValue`, `matchConfidence`, `matchCurrentAge`,
-  `matchManagers`, `matchDatasources`, `matchCategories`, `matchDepTypes`, `matchUpdateTypes`,
-  `matchRepositories`, `matchBaseBranches`, `matchFileNames`
+- Each package rule must include at least one `match...` matcher.
+- If multiple matchers are included in one package rule, all of them must match.
+- Each matcher must contain at least one pattern. Some matchers allow both positive and negative patterns.
+- If a matcher includes any positive patterns, it must match at least one of them.
+- A matcher returns `false` if it matches _any_ negative pattern, even if a positive match also occurred.
+
+For more details on positive and negative pattern syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 Here is an example if you want to group together all packages starting with `eslint` into a single branch/PR:
 
@@ -2851,6 +2856,24 @@ The following example matches any file in directories starting with `app/`:
 
 It is recommended that you avoid using "negative" globs, like `**/!(package.json)`, because such patterns might still return true if they match against the lock file name (e.g. `package-lock.json`).
 
+### matchJsonata
+
+Use the `matchJsonata` field to define custom matching logic using [JSONata](https://jsonata.org/) query logic.
+Renovate will evaluate the provided JSONata expressions against the passed values (`manager`, `packageName`, etc.).
+
+See [the JSONata docs](https://docs.jsonata.org/) for more details on JSONata syntax.
+
+Here are some example `matchJsonata` strings for inspiration:
+
+```
+$exists(deprecationMessage)
+$exists(vulnerabilityFixVersion)
+manager = 'dockerfile' and depType = 'final'
+updateType = 'major' and newVersionAgeInDays < 7
+```
+
+`matchJsonata` accepts an array of strings, and will return `true` if any of those JSONata expressions evaluate to `true`.
+
 ### matchManagers
 
 Use this field to restrict rules to a particular package manager. e.g.
@@ -3021,6 +3044,59 @@ Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostTyp
   ]
 }
 ```
+
+### overrideDatasource
+
+If a particular `datasource`/`packageName` combination has a lookup problem, you may be able to fix it by _changing_ `datasource` and potentially also `packageName`.
+Here is an example:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["renovate/renovate"],
+      "overrideDatasource": "npm",
+      "overridePackageName": "renovate"
+    }
+  ]
+}
+```
+
+`overrideDatasource` does not support template compilation.
+Be cautious as using this setting incorrectly could break all lookups.
+
+### overrideDepName
+
+Be careful using this feature because it may cause undesirable changes such as to branch names.
+
+In Renovate terminology, `packageName` is the exact package name needing to be looked up on a registry, while `depName` is essentially the "pretty" name.
+For example, the `packageName` is `docker.io/library/node` while the `depName` might be `node` for short.
+
+`depName` is used in PR titles as well as branch names, so changes to `depName` will have effects on those.
+
+`overrideDepName` supports template compilation.
+Example:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "overrideDepName": "{{replace 'docker.io/library/' '' depName}}"
+    }
+  ]
+}
+```
+
+Be cautious as using this setting incorrectly could break all lookups.
+
+### overridePackageName
+
+See the [`overrideDatasource`](#overridedatasource) documentation for an example of use.
+`overridePackageName` supports template compilation.
+
+Be cautious as using this setting incorrectly could break all lookups.
 
 ### prPriority
 
@@ -3490,8 +3566,19 @@ Set `pruneBranchAfterAutomerge` to `false` to keep the branch after automerging.
 
 ## pruneStaleBranches
 
-Configure to `false` to disable deleting orphan branches and autoclosing PRs.
-Defaults to `true`.
+By default, Renovate will "prune" any of its own branches/PRs which it thinks are no longer needed.
+Such branches are referred to as "stale", and may be the result of Open, Merged, or Closed/Ignored PRs.
+It usually doesn't _know_ why they're there, instead it simply knows that it has no need for them.
+
+If a branch appears stale but has been modified by a different git author, then Renovate won't delete the branch or autoclose any associated PR.
+Instead, it will update the title to append " - abandoned" plus add a comment noting that autoclosing is skipped.
+
+If a branch appears stale and hasn't been modified, then:
+
+- If an Open PR exist for the branch, then Renovate will rename the PR to append " - autoclosed" before closing/abandoning it
+- Renovate will delete the branch
+
+You can configure `pruneStaleBranches=false` to disable deleting orphan branches and autoclosing PRs, but then you will be responsible for such branch/PR "cleanup" so it is not recommended.
 
 ## rangeStrategy
 
@@ -3693,35 +3780,32 @@ We recommend you do this selectively with `packageRules` and not globally.
 
 ## schedule
 
-The `schedule` option allows you to define times of week or month for Renovate updates.
-Running Renovate around the clock can be too "noisy" for some projects.
-To reduce the noise you can use the `schedule` config option to limit the time frame in which Renovate will perform actions on your repository.
-You can use the standard [Cron syntax](https://crontab.guru/crontab.5.html) and [Later syntax](https://github.com/breejs/later) to define your schedule.
+The `schedule` option allows you to define times of the day, week or month when you are willing to allow Renovate to create branches.
 
-The default value for `schedule` is "at any time", which is functionally the same as declaring a `null` schedule.
-i.e. Renovate will run on the repository around the clock.
+Setting a `schedule` does not itself cause or trigger Renovate to run. It's like putting a sign on your office which says "DHL deliveries only accepted between 9-11am". Such a sign won't _cause_ DHL to come to your office only at 9-11am, instead it simply means that if they come at any other time of the day then they'll honor the sign and skip you. It also means that if they rarely attempt between 9-11am then you'll often get no deliveries in a day. Similarly, if you set too restrictive of a Renovate `schedule` and the chance of Renovate running on your repo during those hours is low, then you might find your dependency updates regularly skipped. For this reason we recommend you usually allow a time window of at least 3-4 hours in any `schedule` unless your instance of Renovate is expected to run more frequently than that.
+
+Renovate supports the standard [Cron syntax](https://crontab.guru/crontab.5.html) as well as deprecated support for a subset of [Later syntax](https://github.com/breejs/later).
+We recommend you always use Cron syntax, due to its superior testing and robustness.
+Config support questions are no longer accepted for Later syntax problems - you will be recommended to use Cron instead.
+
+The default value for `schedule` is "at any time", which is functionally the same as declaring a `null` schedule or `* * * * *` with Cron.
+i.e. Renovate will create Pull Requests at any time of any day, as needed.
 
 The easiest way to define a schedule is to use a preset if one of them fits your requirements.
 See [Schedule presets](./presets-schedule.md) for details and feel free to request a new one in the source repository if you think it would help others.
 
-```title="Some text schedules that are known to work"
-every weekend
-before 5:00am
-after 10pm and before 5:00am
-after 10pm and before 5am every weekday
-on friday and saturday
-every 3 months on the first day of the month
-* 0 2 * *
-```
+Here are some example schedules and their Cron equivalent:
+
+| English description                          | Supported by Later? | Cron syntax           |
+| -------------------------------------------- | ------------------- | --------------------- |
+| every weekend                                | ✅                  | `* * * * 0,6`         |
+| before 5:00am                                | ✅                  | `* 0-4 * * *`         |
+| after 10pm and before 5am every weekday      | ✅                  | `* 22-23,0-4 * * 1-5` |
+| on friday and saturday                       | ✅                  | `* * * * 5,6`         |
+| every 3 months on the first day of the month | ✅                  | `* * 1 */3 *`         |
 
 <!-- prettier-ignore -->
-!!! warning
-    You _must_ keep the number and the `am`/`pm` part _together_!
-    Correct: `before 5am`, or `before 5:00am`.
-    Wrong: `before 5 am`, or `before 5:00 am`.
-
-<!-- prettier-ignore -->
-!!! warning
+!!! note
     For Cron schedules, you _must_ use the `*` wildcard for the minutes value, as Renovate doesn't support minute granularity.
 
 One example might be that you don't want Renovate to run during your typical business hours, so that your build machines don't get clogged up testing `package.json` updates.
@@ -3729,45 +3813,16 @@ You could then configure a schedule like this at the repository level:
 
 ```json
 {
-  "schedule": ["after 10pm and before 5am every weekday", "every weekend"]
+  "schedule": ["* 22-23,0-4 * * *", "* * * * 0,6"]
 }
 ```
 
 This would mean that Renovate can run for 7 hours each night plus all the time on weekends.
+Note how the above example makes use of the "OR" logic of combining multiple schedules in the array.
 
-This scheduling feature can also be particularly useful for "noisy" packages that are updated frequently, such as `aws-sdk`.
-
-To restrict `aws-sdk` to only monthly updates, you could add this package rule:
-
-```json
-{
-  "packageRules": [
-    {
-      "matchPackageNames": ["aws-sdk"],
-      "extends": ["schedule:monthly"]
-    }
-  ]
-}
-```
-
-Technical details: We mostly rely on the text parsing of the library [@breejs/later](https://github.com/breejs/later) but only its concepts of "days", "time_before", and "time_after".
-Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
-To parse Cron syntax, Renovate uses [cron-parser](https://github.com/harrisiirak/cron-parser).
-Renovate does not support scheduled minutes or "at an exact time" granularity.
-
-<!-- prettier-ignore -->
-!!! tip
-    If you want to _disable_ Renovate, then avoid setting `schedule` to `"never"`.
-    Instead, use the `enabled` config option to disable Renovate.
-    Read the [`enabled` config option docs](#enabled) to learn more.
-
-<!-- prettier-ignore -->
-!!! note
-    Actions triggered via the [Dependency Dashboard](#dependencydashboard) are not restricted by a configured schedule.
-
-<!-- prettier-ignore -->
-!!! tip
-    To validate your `later` schedule before updating your `renovate.json`, you can use [this CodePen](https://codepen.io/rationaltiger24/full/ZExQEgK).
+It's common to use `schedule` in combination with [`timezone`](#timezone).
+You should configure [`updateNotScheduled=false`](#updatenotscheduled) if you want the schedule more strictly enforced so that _updates_ to existing branches aren't pushed out of schedule.
+You can also configure [`automergeSchedule`](#automergeschedule) to limit the hours in which branches/PRs are _automerged_ (if [`automerge`](#automerge) is configured).
 
 ## semanticCommitScope
 
@@ -3888,7 +3943,7 @@ The above config will suppress the comment which is added to a PR whenever you c
 
 ## timezone
 
-It is only recommended to configure this field if you wish to use the `schedules` feature and want to write them in your local timezone.
+It is only recommended to configure this field if you wish to use the `schedule` feature and want them evaluated in your local timezone.
 Please see the above link for valid timezone names.
 
 ## updateInternalDeps
@@ -4062,3 +4117,18 @@ To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabi
 <!-- prettier-ignore -->
 !!! note
     If you want to raise only vulnerability fix PRs, you may use the `security:only-security-updates` preset.
+
+### vulnerabilityFixStrategy
+
+When a vulnerability fix is available, Renovate will default to picking the lowest fixed version (`vulnerabilityFixStrategy=lowest`).
+For example, if the current version is `1.0.0`, and a vulnerability is fixed in `1.1.0`, while the latest version is `1.2.0`, then Renovate will propose an update to `1.1.0` as the vulnerability fix.
+
+If `vulnerabilityFixStrategy=highest` is configured then Renovate will use its normal strategy for picking upgrades, e.g. in the above example it will propose an update to `1.2.0` to fix the vulnerability.
+
+```json title="Setting vulnerabilityFixStrategy to highest"
+{
+  "vulnerabilityAlerts": {
+    "vulnerabilityFixStrategy": "highest"
+  }
+}
+```

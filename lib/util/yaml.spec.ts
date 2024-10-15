@@ -193,7 +193,7 @@ describe('util/yaml', () => {
 
   describe('load', () => {
     it('should return undefined', () => {
-      expect(parseSingleYaml(``)).toBeUndefined();
+      expect(parseSingleYaml(``)).toBeNull();
     });
 
     it('should parse content with single document', () => {
@@ -278,6 +278,24 @@ describe('util/yaml', () => {
           myNestedObject: {
             aNestedString: null,
           },
+        },
+      });
+    });
+
+    it('should parse content with yaml tags', () => {
+      expect(
+        parseSingleYaml(
+          codeBlock`
+      myObject:
+        aString: value
+        aStringWithTag: !reset null
+      `,
+          { removeTemplates: true },
+        ),
+      ).toEqual({
+        myObject: {
+          aString: 'value',
+          aStringWithTag: 'null',
         },
       });
     });
