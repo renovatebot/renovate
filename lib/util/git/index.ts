@@ -56,6 +56,7 @@ import type {
   StorageConfig,
   TreeItem,
 } from './types';
+import { hash } from '../hash';
 
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
@@ -1437,7 +1438,7 @@ export async function getStats(): Promise<ScmStats | null> {
   // excluding Renovate's email address
   const committerHashList = Array.from(emailMap.keys())
     .filter((email) => email !== config.gitAuthorEmail)
-    .map((email) => crypto.createHash('sha256').update(email).digest('base64'))
+    .map((email) => hash(email))
     .sort();
 
   const scmStats: ScmStats = {
