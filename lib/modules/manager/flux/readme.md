@@ -10,13 +10,15 @@ This manager parses [Flux](https://fluxcd.io/) YAML manifests and supports:
 Extracts `helm` dependencies from `HelmRelease` resources.
 
 The `flux` manager extracts `helm` dependencies for `HelmRelease` resources linked to `HelmRepository` or `GitRepository` sources.
+`HelmRepository` resources can be referenced via `spec.chart` or indirectly via a `HelmChart` when
+using [`spec.chartRef`](https://fluxcd.io/flux/components/helm/helmreleases/#chart-reference).
 Renovate supports OCI `HelmRepository` sources, those with `type: oci`.
 Renovate will then extract the `docker` dependencies for the referenced `HelmRelease` resources.
 
 In addition, for the `flux` manager to properly link `HelmRelease` and `HelmRepository` resources, _both_ of the following conditions must be met:
 
-1. The `HelmRelease` resource must either have its `metadata.namespace` property set or its `spec.chart.spec.sourceRef.namespace` property set
-2. The referenced `HelmRepository` resource must have its `metadata.namespace` property set
+1. The `HelmRelease` resource must either have its `metadata.namespace` property set or its `spec.chart.spec.sourceRef.namespace` / `spec.chartRef.namespace` property set
+2. The referenced `HelmRepository` and `HelmChart` (when using `chartRef`) resources must have its `metadata.namespace` property set
 
 Namespaces will not be inferred from the context (e.g. from the parent `Kustomization`).
 
