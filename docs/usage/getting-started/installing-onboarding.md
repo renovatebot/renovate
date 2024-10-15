@@ -69,7 +69,7 @@ Once you have enabled Renovate on a repository, you will get a "Configure Renova
 
 <!-- prettier-ignore -->
 !!! note
-    If you self-host Renovate, and want to add the rebase/retry checkbox to Renovate's onboarding PRs: enable the [`onboardingRebaseCheckbox` config option](../self-hosted-configuration/#onboardingrebasecheckbox) first.
+    If you self-host Renovate, and want to add the rebase/retry checkbox to Renovate's onboarding PRs: enable the [`onboardingRebaseCheckbox` config option](../self-hosted-configuration.md#onboardingrebasecheckbox) first.
 
 ### No risk onboarding
 
