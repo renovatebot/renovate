@@ -227,7 +227,7 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: '\n\n - [x] <!-- create-config-migration-pr --> Config Migration needed.',
+        body: '\n\n - [x] <!-- create-config-migration-pr -->',
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf.dependencyDashboardChecks).toEqual({
@@ -241,7 +241,7 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: '\n\n - [ ] <!-- create-config-migration-pr --> Config Migration needed.',
+        body: '\n\n - [ ] <!-- create-config-migration-pr -->',
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf.dependencyDashboardChecks).toEqual({
@@ -255,7 +255,7 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: '\n\n Config Migration needed. See Config Migration PR: #3.',
+        body: '\n\n <!-- config-migration-pr-info -->',
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf.dependencyDashboardChecks).toEqual({
@@ -788,7 +788,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
-        '## Config Migration Needed\n\nSee Config Migration PR:',
+        `## Config Migration Needed\n\n<!-- config-migration-pr-info --> See Config Migration PR:`,
       );
     });
 

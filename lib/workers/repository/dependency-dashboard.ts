@@ -51,8 +51,8 @@ function checkRebaseAll(issueBody: string): boolean {
 function getConfigMigrationCheckboxState(
   issueBody: string,
 ): 'no-checkbox' | 'checked' | 'unchecked' | 'migration-pr-exists' {
-  if (!issueBody.includes('Config Migration needed.')) {
-    return 'no-checkbox';
+  if (issueBody.includes('<!-- config-migration-pr-info -->')) {
+    return 'migration-pr-exists';
   }
 
   if (issueBody.includes(' - [x] <!-- create-config-migration-pr -->')) {
@@ -63,7 +63,7 @@ function getConfigMigrationCheckboxState(
     return 'unchecked';
   }
 
-  return 'migration-pr-exists';
+  return 'no-checkbox';
 }
 
 function selectAllRelevantBranches(issueBody: string): string[] {
@@ -289,11 +289,11 @@ export async function ensureDependencyDashboard(
   if (configMigrationRes.result === 'pr-exists') {
     issueBody +=
       '## Config Migration Needed\n\n' +
-      `See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
+      `<!-- config-migration-pr-info --> See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'pr-modified') {
     issueBody +=
       '## Config Migration Needed (error)\n\n' +
-      `The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted. \n\n See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
+      `<!-- config-migration-pr-info --> The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted. \n\n See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'add-checkbox') {
     issueBody +=
       '## Config Migration Needed\n\n' +
