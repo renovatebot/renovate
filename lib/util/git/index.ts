@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
@@ -25,6 +24,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
 import { getCache } from '../cache/repository';
+import { hash } from '../hash';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import {
@@ -56,7 +56,6 @@ import type {
   StorageConfig,
   TreeItem,
 } from './types';
-import { hash } from '../hash';
 
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
