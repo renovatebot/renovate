@@ -63,18 +63,18 @@ export function parseYaml<ResT = unknown>(
 
   const results: ResT[] = [];
   for (const rawDocument of rawDocuments) {
-    const document = rawDocument.toJS({ maxAliasCount: 10000 });
-
     const errors = rawDocument.errors;
     // handle YAML parse errors
     if (errors?.length) {
       const error = new AggregateError(errors, 'Failed to parse YAML file');
       if (options?.failureBehaviour === 'filter') {
-        logger.debug({ error, document }, 'Failed to parse YAML');
+        logger.debug(`Failed to parse YAML file: ${error.message}`);
         continue;
       }
       throw error;
     }
+
+    const document = rawDocument.toJS({ maxAliasCount: 10000 });
 
     // skip schema validation if no schema is provided
     if (!schema) {
