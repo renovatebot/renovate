@@ -850,6 +850,63 @@ describe('modules/datasource/pypi/index', () => {
       },
     );
 
+    it('merges pypijson and simple api correctly',
+      async () => {
+        httpMock
+          .scope('https://custom.pypi.net/foo')
+          .get('/some-package/json')
+          .reply(200, `
+            {
+              "releases": {
+                "0.0.2": [
+                  {
+                    "upload_time": "2017-04-17T20:32:30"
+                  }
+                ],
+                "0.0.3": [
+                  {
+                    "upload_time": "2017-04-28T21:18:54.000Z"
+                  }
+                ]
+              }
+            }`);
+        httpMock
+          .scope('https://custom.pypi.net/foo')
+          .get('/some-package/')
+          .reply(200, `
+            <!DOCTYPE html>
+            <html>
+              <body>
+                <a href="https://custom.pypi.net/foo/some-package-0.0.1.tar.gz">some-package-0.0.1.tar.gz</a><br/>
+                <a href="https://custom.pypi.net/foo/some-package-0.0.2.tar.gz">some-package-0.0.2.tar.gz</a><br/>
+              </body>
+            </html>
+            `);
+        const config = {
+          registryUrls: ['https://custom.pypi.net/foo'],
+        };
+        const result = await getPkgReleases({
+          datasource,
+          ...config,
+          packageName: 'some-package',
+        });
+        console.log("here are the retrieved releases", result!.releases)
+        expect(new Set(result!.releases)).toEqual(new Set([
+          {
+            "version": "0.0.1",
+          },
+          {
+            "releaseTimestamp": "2017-04-17T20:32:30.000Z",
+            "version": "0.0.2",
+          },
+          {
+            "releaseTimestamp": "2017-04-28T21:18:54.000Z",
+            "version": "0.0.3",
+          },
+        ]));
+      },
+    );
+
     it('parses data-requires-python and respects constraints from simple endpoint', async () => {
       httpMock
         .scope('https://some.registry.org/simple/')
