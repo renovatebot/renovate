@@ -11,7 +11,6 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
 import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import { extractImage } from '../kustomize/extract';
@@ -21,13 +20,13 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types';
-import { isSystemManifest, systemManifestHeaderRegex } from './common';
 import {
-  FluxResource,
-  type HelmChart,
-  type HelmRelease,
-  type HelmRepository,
-} from './schema';
+  collectHelmReposAndCharts,
+  isSystemManifest,
+  resolveHelmReleaseManifest,
+  systemManifestHeaderRegex,
+} from './common';
+import { FluxResource, type HelmChart, type HelmRepository } from './schema';
 import type {
   FluxManagerData,
   FluxManifest,
@@ -120,66 +119,6 @@ function resolveSystemManifest(
       },
     },
   ];
-}
-
-function resolveHelmReleaseManifest(
-  resource: HelmRelease,
-  helmRepositories: HelmRepository[],
-  helmCharts: HelmChart[],
-): {
-  name: string;
-  dep: PackageDependency;
-  matchingRepositories: HelmRepository[];
-} | null {
-  if (resource.spec.chartRef) {
-    const chartRef = resource.spec.chartRef;
-    const helmChart = helmCharts.find(
-      (res) =>
-        res.kind === chartRef.kind &&
-        res.metadata.name === chartRef.name &&
-        res.metadata.namespace ===
-          (chartRef.namespace ?? resource.metadata?.namespace),
-    );
-    if (!helmChart) {
-      return null;
-    }
-    const chartName = helmChart.spec.chart;
-
-    const dep: PackageDependency = {
-      depName: chartName,
-      currentValue: helmChart.spec.version,
-      datasource: HelmDatasource.id,
-    };
-
-    const matchingRepositories = helmRepositories.filter(
-      (rep) =>
-        rep.kind === helmChart.spec.sourceRef?.kind &&
-        rep.metadata.name === helmChart.spec.sourceRef.name &&
-        rep.metadata.namespace === helmChart.metadata?.namespace,
-    );
-    return { name: chartName, dep, matchingRepositories };
-  } else if (resource.spec.chart) {
-    const chartSpec = resource.spec.chart.spec;
-    const chartName = chartSpec.chart;
-
-    const dep: PackageDependency = {
-      depName: chartName,
-      currentValue: resource.spec.chart.spec.version,
-      datasource: HelmDatasource.id,
-    };
-
-    const matchingRepositories = helmRepositories.filter(
-      (rep) =>
-        rep.kind === chartSpec.sourceRef?.kind &&
-        rep.metadata.name === chartSpec.sourceRef.name &&
-        rep.metadata.namespace ===
-          (chartSpec.sourceRef.namespace ?? resource.metadata?.namespace),
-    );
-
-    return { name: chartName, dep, matchingRepositories };
-  } else {
-    return null;
-  }
 }
 
 function resolveResourceManifest(
@@ -299,27 +238,6 @@ function resolveResourceManifest(
     }
   }
   return deps;
-}
-
-function collectHelmReposAndCharts(
-  manifests: FluxManifest[],
-): [HelmRepository[], HelmChart[]] {
-  const helmRepositories: HelmRepository[] = [];
-  const helmCharts: HelmChart[] = [];
-
-  for (const manifest of manifests) {
-    if (manifest.kind === 'resource') {
-      for (const resource of manifest.resources) {
-        if (resource.kind === 'HelmRepository') {
-          helmRepositories.push(resource);
-        } else if (resource.kind === 'HelmChart') {
-          helmCharts.push(resource);
-        }
-      }
-    }
-  }
-
-  return [helmRepositories, helmCharts];
 }
 
 export function extractPackageFile(
