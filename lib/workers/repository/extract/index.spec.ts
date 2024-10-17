@@ -2,9 +2,10 @@ import { mocked, partial, scm } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import * as managers from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _managerFiles from './manager-files';
-import { extractAllDependencies } from '.';
+import { applyPreFlights, extractAllDependencies } from '.';
 
 jest.mock('./manager-files');
 jest.mock('../../../util/git');
@@ -66,6 +67,78 @@ describe('workers/repository/extract/index', () => {
       ];
       const res = await extractAllDependencies(config);
       expect(Object.keys(res.packageFiles)).toContain('regex');
+    });
+  });
+
+  describe('applyPreFlights()', () => {
+    const getFunction = jest.spyOn(managers, 'get');
+    const baseConfig: RenovateConfig = {
+      foo: 'bar',
+    };
+
+    it('should return same config for unknown manager', async () => {
+      await expect(applyPreFlights(baseConfig, ['test'])).resolves.toEqual({
+        foo: 'bar',
+      });
+    });
+
+    it('should return modified config for manager', async () => {
+      getFunction.mockReturnValueOnce((config: RenovateConfig) => {
+        return {
+          ...config,
+          foo: 'foo',
+        };
+      });
+
+      await expect(applyPreFlights(baseConfig, ['test'])).resolves.toEqual({
+        foo: 'foo',
+      });
+    });
+
+    it('should return modified config for multiple managers', async () => {
+      getFunction.mockReturnValueOnce((config: RenovateConfig) => {
+        return {
+          ...config,
+          foo: 'foo',
+        };
+      });
+      getFunction.mockReturnValueOnce((config: RenovateConfig) => {
+        return {
+          ...config,
+          lip: 'sum',
+          foo: 'bar',
+        };
+      });
+
+      await expect(
+        applyPreFlights(baseConfig, ['test', 'another-manager']),
+      ).resolves.toEqual({
+        foo: 'bar',
+        lip: 'sum',
+      });
+    });
+
+    it('should return modified config for async preflights managers', async () => {
+      getFunction.mockReturnValueOnce((config: RenovateConfig) => {
+        return {
+          ...config,
+          foo: 'foo',
+        };
+      });
+      getFunction.mockReturnValueOnce((config: RenovateConfig) => {
+        return Promise.resolve({
+          ...config,
+          lip: 'sum',
+          foo: 'bar',
+        });
+      });
+
+      await expect(
+        applyPreFlights(baseConfig, ['test', 'another-manager']),
+      ).resolves.toEqual({
+        foo: 'bar',
+        lip: 'sum',
+      });
     });
   });
 });
