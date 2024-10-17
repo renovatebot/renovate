@@ -890,7 +890,6 @@ describe('modules/datasource/pypi/index', () => {
           ...config,
           packageName: 'some-package',
         });
-        console.log("here are the retrieved releases", result!.releases)
         expect(new Set(result!.releases)).toEqual(new Set([
           {
             "version": "0.0.1",

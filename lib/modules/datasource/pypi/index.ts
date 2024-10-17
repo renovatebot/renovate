@@ -71,6 +71,7 @@ export class PypiDatasource extends Datasource {
       pypiJsonHostUrl,
     ).catch((err) => {
       if (simpleDependencies === null) {
+        // Both Simple and API lookups failed
         throw err;
       }
       logger.trace(
@@ -82,10 +83,12 @@ export class PypiDatasource extends Datasource {
     if (pypiJsonDependencies === null || simpleDependencies === null) {
       return pypiJsonDependencies ?? simpleDependencies
     }
+    // Default to JSON results because fields should be a superset of Simple results
     const dependency = pypiJsonDependencies
     const added_versions = new Set<string>(dependency.releases.map(release => release.version))
     for (const release of simpleDependencies.releases) {
       if (!added_versions.has(release.version)) {
+        logger.once.warn(`PyPI package ${normalizedName} on registry ${registryUrl} contains releases on the simple API which are missing from the JSON API`);
         dependency.releases.push(release)
         added_versions.add(release.version)
       }
