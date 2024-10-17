@@ -51,6 +51,7 @@ describe('workers/repository/update/pr/body/index', () => {
     });
 
     it('handles empty template', () => {
+      platform.maxBodyLength.mockReturnValueOnce(3.14);
       const res = getPrBody(
         {
           manager: 'some-manager',
@@ -67,7 +68,7 @@ describe('workers/repository/update/pr/body/index', () => {
         },
         {},
       );
-      expect(res).toBeEmptyString();
+      expect(res).toStrictEqual({ body: '', comments: [] });
     });
 
     it('massages upgrades', () => {
@@ -182,8 +183,8 @@ describe('workers/repository/update/pr/body/index', () => {
         },
         {},
       );
-      expect(res).toContain('PR BODY');
-      expect(res).toContain(`<!--renovate-debug`);
+      expect(res.body).toContain('PR BODY');
+      expect(res.body).toContain(`<!--renovate-debug`);
     });
 
     it('supports custom rebasing message', () => {
@@ -207,7 +208,9 @@ describe('workers/repository/update/pr/body/index', () => {
         },
         {},
       );
-      expect(res).toContain(['aaa', '**Rebasing**: BAR', 'bbb'].join('\n'));
+      expect(res.body).toContain(
+        ['aaa', '**Rebasing**: BAR', 'bbb'].join('\n'),
+      );
     });
 
     it('updates PR due to body change without pr data', () => {
@@ -231,7 +234,7 @@ describe('workers/repository/update/pr/body/index', () => {
         {},
       );
 
-      const match = prDebugDataRe.exec(res);
+      const match = prDebugDataRe.exec(res.body);
       expect(match?.groups?.payload).toBeString();
     });
 
@@ -284,7 +287,110 @@ describe('workers/repository/update/pr/body/index', () => {
         '---\n\n### ⚠ Dependency Lookup Warnings ⚠' +
         '\n\nWarnings were logged while processing this repo. ' +
         'Please check the Dependency Dashboard for more information\n\n---';
-      expect(res).toBe(expected);
+      expect(res.body).toBe(expected);
+    });
+
+    it('returns changelog as comment if body is larger than maxBodyLength() of the platform', () => {
+      platform.maxBodyLength.mockReturnValue('{{{header}}}'.length);
+      platform.massageMarkdown.mockImplementationOnce((x) => x);
+      platform.massageMarkdown.mockImplementationOnce((_) => '{{{header}}}');
+      template.compile.mockImplementation((x) => x);
+
+      const res = getPrBody(
+        {
+          manager: 'some-manager',
+          baseBranch: 'base',
+          branchName: 'some-branch',
+          upgrades: [],
+          prBodyTemplate: '{{{header}}}{{{changelogs}}}',
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+            targetBranch: 'base',
+          },
+        },
+        {},
+      );
+
+      expect(res).toStrictEqual({
+        body: '{{{header}}}',
+        comments: [{ content: 'getChangelogs', title: 'Release Notes' }],
+      });
+    });
+
+    it('returns changelog & update table as comments if body is larger than maxBodyLength() of the platform', () => {
+      platform.maxBodyLength.mockReturnValue('{{{header}}}'.length);
+      platform.massageMarkdown.mockImplementationOnce((x) => x);
+      platform.massageMarkdown.mockImplementationOnce(
+        (_) => '{{{header}}}{{{table}}}',
+      );
+      platform.massageMarkdown.mockImplementationOnce((_) => '{{{header}}}');
+      template.compile.mockImplementation((x) => x);
+
+      const res = getPrBody(
+        {
+          manager: 'some-manager',
+          baseBranch: 'base',
+          branchName: 'some-branch',
+          upgrades: [],
+          prBodyTemplate: '{{{header}}}{{{table}}}{{{changelogs}}}',
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+            targetBranch: 'base',
+          },
+        },
+        {},
+      );
+
+      expect(res).toStrictEqual({
+        body: '{{{header}}}',
+        comments: [
+          { content: 'getChangelogs', title: 'Release Notes' },
+          { content: 'getPrUpdatesTable', title: 'Updates' },
+        ],
+      });
+    });
+
+    it('returns & truncates comments if comment is too long', () => {
+      platform.maxBodyLength.mockReturnValue('{{{header}}}'.length);
+      platform.maxCommentLength.mockReturnValue(3);
+      platform.massageMarkdown.mockImplementationOnce((x) => x);
+      platform.massageMarkdown.mockImplementationOnce(
+        (_) => '{{{header}}}{{{table}}}',
+      );
+      platform.massageMarkdown.mockImplementationOnce((_) => '{{{header}}}');
+      template.compile.mockImplementation((x) => x);
+
+      const res = getPrBody(
+        {
+          manager: 'some-manager',
+          baseBranch: 'base',
+          branchName: 'some-branch',
+          upgrades: [],
+          prBodyTemplate: '{{{header}}}{{{table}}}{{{changelogs}}}',
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+            targetBranch: 'base',
+          },
+        },
+        {},
+      );
+
+      expect(res).toStrictEqual({
+        body: '{{{header}}}',
+        comments: [
+          { content: 'get', title: 'Release Notes' },
+          { content: 'get', title: 'Updates' },
+        ],
+      });
     });
   });
 });

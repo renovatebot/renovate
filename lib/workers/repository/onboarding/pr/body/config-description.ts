@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
-import { configFileNames } from '../../../../config/app-strings';
-import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../modules/manager/types';
-import { emojify } from '../../../../util/emoji';
+import { configFileNames } from '../../../../../config/app-strings';
+import type { RenovateConfig } from '../../../../../config/types';
+import { logger } from '../../../../../logger';
+import type { PackageFile } from '../../../../../modules/manager/types';
+import { emojify } from '../../../../../util/emoji';
 
 const defaultConfigFile = configFileNames[0];
 

@@ -5,6 +5,7 @@ import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
+import { smartTruncate } from '../../../../modules/platform/utils/pr-body';
 import { emojify } from '../../../../util/emoji';
 import { coerceString } from '../../../../util/string';
 import * as template from '../../../../util/template';
@@ -64,6 +65,7 @@ ${
   logger.trace({ prBody }, 'prBody');
 
   prBody = platform.massageMarkdown(prBody);
+  prBody = smartTruncate(prBody, platform.maxBodyLength());
 
   if (existingPr) {
     logger.debug('Found open migration PR');
