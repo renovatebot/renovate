@@ -58,7 +58,7 @@ export class PypiDatasource extends Datasource {
     ).catch((err) => {
       logger.trace(
         { packageName, hostUrl: simpleHostUrl },
-        'Simple api not found. Looking up pypijson api as fallback.',
+        'Simple api lookup failed. Looking up pypijson api as fallback.',
       );
       return null;
     });
@@ -70,13 +70,9 @@ export class PypiDatasource extends Datasource {
       normalizedLookupName,
       pypiJsonHostUrl,
     ).catch((err) => {
-      if (simpleResult === null) {
-        // Both Simple and API lookups failed
-        throw err;
-      }
       logger.trace(
         { packageName, hostUrl },
-        'Json api lookup failed but got simple results.',
+        'Json api lookup failed.',
       );
       return null;
     });
@@ -88,7 +84,7 @@ export class PypiDatasource extends Datasource {
     const added_versions = new Set<string>(dependency.releases.map(release => release.version))
     for (const release of simpleResult.releases) {
       if (!added_versions.has(release.version)) {
-        logger.once.warn(`PyPI package ${normalizedName} on registry ${registryUrl} contains releases on the simple API which are missing from the JSON API`);
+        logger.once.warn(`PyPI package ${normalizedLookupName} on registry ${registryUrl} contains releases on the simple API which are missing from the JSON API`);
         dependency.releases.push(release)
         added_versions.add(release.version)
       }
