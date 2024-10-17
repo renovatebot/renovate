@@ -10,7 +10,7 @@ export { extractPackageFile, updateArtifacts };
 
 export const defaultConfig = {
   fileMatch: [
-    '(^|/)WORKSPACE(\\.bzlmod)?$',
+    '(^|/)WORKSPACE(|\\.bazel|\\.bzlmod)$',
     '\\.WORKSPACE\\.bazel$',
     '\\.bzl$',
   ],
