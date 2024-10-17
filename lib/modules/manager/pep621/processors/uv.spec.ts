@@ -4,7 +4,10 @@ import { fs, hostRules, mockedFunction } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
+import { GitRefsDatasource } from '../../../datasource/git-refs';
+import { GitTagsDatasource } from '../../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
+import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags';
 import { PypiDatasource } from '../../../datasource/pypi';
 import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
@@ -97,25 +100,25 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
         {
           depName: 'dep2',
-          depType: 'tool.uv.sources',
-          datasource: 'git-refs',
+          depType: depTypes.uvSources,
+          datasource: GitRefsDatasource.id,
           packageName: 'https://github.com/foo/bar',
           currentValue: undefined,
           skipReason: 'unspecified-version',
         },
         {
           depName: 'dep3',
-          depType: 'tool.uv.sources',
+          depType: depTypes.uvSources,
           skipReason: 'path-dependency',
         },
         {
           depName: 'dep4',
-          depType: 'tool.uv.sources',
+          depType: depTypes.uvSources,
           skipReason: 'unsupported-url',
         },
         {
           depName: 'dep5',
-          depType: 'tool.uv.sources',
+          depType: depTypes.uvSources,
           skipReason: 'inherited-dependency',
         },
         {
@@ -153,39 +156,39 @@ describe('modules/manager/pep621/processors/uv', () => {
     expect(result).toEqual([
       {
         depName: 'dep1',
-        depType: 'tool.uv.sources',
-        datasource: 'github-tags',
+        depType: depTypes.uvSources,
+        datasource: GithubTagsDatasource.id,
         registryUrls: ['https://github.com'],
         packageName: 'foo/dep1',
         currentValue: '0.1.0',
       },
       {
         depName: 'dep2',
-        depType: 'tool.uv.sources',
-        datasource: 'gitlab-tags',
+        depType: depTypes.uvSources,
+        datasource: GitlabTagsDatasource.id,
         registryUrls: ['https://gitlab.com'],
         packageName: 'foo/dep2',
         currentValue: '0.2.0',
       },
       {
         depName: 'dep3',
-        depType: 'tool.uv.sources',
-        datasource: 'git-tags',
+        depType: depTypes.uvSources,
+        datasource: GitTagsDatasource.id,
         packageName: 'https://codeberg.org/foo/dep3.git',
         currentValue: '0.3.0',
       },
       {
         depName: 'dep4',
-        depType: 'tool.uv.sources',
-        datasource: 'git-refs',
+        depType: depTypes.uvSources,
+        datasource: GitRefsDatasource.id,
         packageName: 'https://github.com/foo/dep4',
         currentDigest: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
         replaceString: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
       },
       {
         depName: 'dep5',
-        depType: 'tool.uv.sources',
-        datasource: 'git-refs',
+        depType: depTypes.uvSources,
+        datasource: GitRefsDatasource.id,
         packageName: 'https://github.com/foo/dep5',
         currentValue: 'master',
         skipReason: 'git-dependency',
