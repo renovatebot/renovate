@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { LooseArray, Toml } from '../../../util/schema-utils';
+import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
 
 export type PyProject = z.infer<typeof PyProjectSchema>;
 
@@ -65,7 +65,7 @@ const UvSource = z.union([
 
 const UvSchema = z.object({
   'dev-dependencies': DependencyListSchema,
-  sources: z.record(z.string(), UvSource).optional(),
+  sources: LooseRecord(z.string(), UvSource).optional(),
 });
 
 export const PyProjectSchema = z.object({
