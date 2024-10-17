@@ -52,7 +52,7 @@ export class PypiDatasource extends Datasource {
     const pypiJsonHostUrl = hostUrl.replace(simplePyPiUrl, jsonPyPiUrl);
     const normalizedLookupName = normalizePythonDepName(packageName);
 
-    const simpleDependencies = await this.getResultsViaSimple(
+    const simpleResult = await this.getResultsViaSimple(
       normalizedLookupName,
       simpleHostUrl,
     ).catch((err) => {
@@ -66,11 +66,11 @@ export class PypiDatasource extends Datasource {
       { packageName, hostUrl: pypiJsonHostUrl },
       'Querying json api for metadata',
     );
-    const pypiJsonDependencies = await this.getResultsViaPyPiJson(
+    const jsonResult = await this.getResultsViaPyPiJson(
       normalizedLookupName,
       pypiJsonHostUrl,
     ).catch((err) => {
-      if (simpleDependencies === null) {
+      if (simpleResult === null) {
         // Both Simple and API lookups failed
         throw err;
       }
@@ -80,13 +80,13 @@ export class PypiDatasource extends Datasource {
       );
       return null;
     });
-    if (pypiJsonDependencies === null || simpleDependencies === null) {
-      return pypiJsonDependencies ?? simpleDependencies
+    if (jsonResult === null || simpleResult === null) {
+      return jsonResult ?? simpleResult
     }
     // Default to JSON results because fields should be a superset of Simple results
-    const dependency = pypiJsonDependencies
+    const dependency = jsonResult
     const added_versions = new Set<string>(dependency.releases.map(release => release.version))
-    for (const release of simpleDependencies.releases) {
+    for (const release of simpleResult.releases) {
       if (!added_versions.has(release.version)) {
         logger.once.warn(`PyPI package ${normalizedName} on registry ${registryUrl} contains releases on the simple API which are missing from the JSON API`);
         dependency.releases.push(release)
