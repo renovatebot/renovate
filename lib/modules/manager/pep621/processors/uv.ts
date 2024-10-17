@@ -3,6 +3,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { HostRule } from '../../../../types';
+import { detectPlatform } from '../../../../util/common';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
@@ -182,13 +183,15 @@ export class UvProcessor implements PyProjectProcessor {
 function applyGitSource(dep: PackageDependency, depSource: UvGitSource): void {
   const { git, rev, tag, branch } = depSource;
   if (tag) {
-    const { source, full_name: repo } = parseGitUrl(git);
-    if (source === 'github.com') {
-      dep.datasource = GithubTagsDatasource.id;
-      dep.packageName = repo;
-    } else if (source === 'gitlab.com') {
-      dep.datasource = GitlabTagsDatasource.id;
-      dep.packageName = repo;
+    const platform = detectPlatform(git);
+    if (platform === 'github' || platform === 'gitlab') {
+      dep.datasource =
+        platform === 'github'
+          ? GithubTagsDatasource.id
+          : GitlabTagsDatasource.id;
+      const { protocol, source, full_name } = parseGitUrl(git);
+      dep.registryUrls = [`${protocol}://${source}`];
+      dep.packageName = full_name;
     } else {
       dep.datasource = GitTagsDatasource.id;
       dep.packageName = git;
