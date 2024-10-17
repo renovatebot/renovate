@@ -243,7 +243,11 @@ function getMatchingHostRule(url: string | undefined): HostRule {
 }
 
 function getUvExtraIndexUrl(deps: Upgrade[]): NodeJS.ProcessEnv {
-  const registryUrls = new Set(deps.map((dep) => dep.registryUrls).flat());
+  const pyPiRegistryUrls = deps
+    .filter((dep) => dep.datasource === PypiDatasource.id)
+    .map((dep) => dep.registryUrls)
+    .flat();
+  const registryUrls = new Set(pyPiRegistryUrls);
   const extraIndexUrls: string[] = [];
 
   for (const registryUrl of registryUrls) {

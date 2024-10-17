@@ -4,6 +4,7 @@ import { fs, hostRules, mockedFunction } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
+import { PypiDatasource } from '../../../datasource/pypi';
 import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
 import { UvProcessor } from './uv';
@@ -360,11 +361,13 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageName: 'dep1',
           depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
           registryUrls: ['https://foobar.com'],
         },
         {
           packageName: 'dep2',
           depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
           registryUrls: ['https://example.com'],
         },
       ];
