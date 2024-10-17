@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { LooseArray, Toml } from '../../../util/schema-utils';
+import { normalizePythonDepName } from '../../datasource/pypi/common';
 
 export type PyProject = z.infer<typeof PyProjectSchema>;
 
@@ -45,7 +46,13 @@ const UvSource = z.object({
 
 const UvSchema = z.object({
   'dev-dependencies': DependencyListSchema,
-  sources: z.record(z.string(), UvSource).optional(),
+  sources: z
+    .record(
+      // uv applies the same normalization as for Python dependencies on sources
+      z.string().transform((source) => normalizePythonDepName(source)),
+      UvSource,
+    )
+    .optional(),
 });
 
 export const PyProjectSchema = z.object({

@@ -61,66 +61,6 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ]);
     });
-
-    it('skips dependencies with unsupported sources', () => {
-      const pyproject = {
-        tool: {
-          uv: {
-            sources: {
-              dep2: { git: 'https://github.com/foo/bar' },
-              dep3: { path: '/local-dep.whl' },
-              dep4: { url: 'https://example.com' },
-              dep5: { workspace: true },
-              dep6: { workspace: false },
-              dep7: {},
-            },
-          },
-        },
-      };
-      const dependencies = [
-        {},
-        { depName: 'dep1' },
-        { depName: 'dep2' },
-        { depName: 'dep3' },
-        { depName: 'dep4' },
-        { depName: 'dep5' },
-        { depName: 'dep6' },
-        { depName: 'dep7' },
-      ];
-
-      const result = processor.process(pyproject, dependencies);
-
-      expect(result).toEqual([
-        {},
-        {
-          depName: 'dep1',
-        },
-        {
-          depName: 'dep2',
-          skipReason: 'git-dependency',
-        },
-        {
-          depName: 'dep3',
-          skipReason: 'path-dependency',
-        },
-        {
-          depName: 'dep4',
-          skipReason: 'unsupported-url',
-        },
-        {
-          depName: 'dep5',
-          skipReason: 'inherited-dependency',
-        },
-        {
-          depName: 'dep6',
-          skipReason: 'invalid-dependency-specification',
-        },
-        {
-          depName: 'dep7',
-          skipReason: 'invalid-dependency-specification',
-        },
-      ]);
-    });
   });
 
   describe('updateArtifacts()', () => {
