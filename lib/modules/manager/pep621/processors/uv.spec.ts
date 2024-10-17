@@ -4,6 +4,7 @@ import { fs, hostRules, mockedFunction } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
+import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { PypiDatasource } from '../../../datasource/pypi';
 import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
@@ -370,6 +371,18 @@ describe('modules/manager/pep621/processors/uv', () => {
           datasource: PypiDatasource.id,
           registryUrls: ['https://example.com'],
         },
+        {
+          packageName: 'dep3',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: ['invalidurl'],
+        },
+        {
+          packageName: 'dep4',
+          depType: depTypes.dependencies,
+          datasource: GithubTagsDatasource.id,
+          registryUrls: ['https://github.com'],
+        },
       ];
       const result = await processor.updateArtifacts(
         {
@@ -391,7 +404,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2',
+          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4',
           options: {
             env: {
               UV_EXTRA_INDEX_URL:
