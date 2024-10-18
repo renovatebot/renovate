@@ -74,6 +74,7 @@ interface GiteaRepoConfig {
 }
 
 export const id = 'gitea';
+export const labelCharLimit = 50;
 
 const defaults = {
   hostType: 'gitea',

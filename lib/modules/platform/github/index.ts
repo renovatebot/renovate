@@ -99,6 +99,7 @@ let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
 
 const GitHubMaxPrBodyLen = 60000;
+export const labelCharLimit = 50;
 
 export function resetConfigs(): void {
   config = {} as never;
@@ -1489,11 +1490,15 @@ async function addLabels(
   labels: string[] | null | undefined,
 ): Promise<void> {
   logger.debug(`Adding labels '${labels?.join(', ')}' to #${issueNo}`);
-  const repository = config.parentRepo ?? config.repository;
-  if (is.array(labels) && labels.length) {
-    await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
-      body: labels,
-    });
+  try {
+    const repository = config.parentRepo ?? config.repository;
+    if (is.array(labels) && labels.length) {
+      await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
+        body: labels,
+      });
+    }
+  } catch (err) {
+    logger.debug({ err }, 'Error while adding labels, skipping');
   }
 }
 
