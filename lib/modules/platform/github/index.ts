@@ -553,12 +553,12 @@ export async function initRepo({
     // Base branch may be configured but defaultBranch is always fixed
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
-    if (repo.rebaseMergeAllowed) {
-      config.mergeMethod = 'rebase';
-    } else if (repo.squashMergeAllowed) {
+    if (repo.squashMergeAllowed) {
       config.mergeMethod = 'squash';
     } else if (repo.mergeCommitAllowed) {
       config.mergeMethod = 'merge';
+    } else if (repo.rebaseMergeAllowed) {
+      config.mergeMethod = 'rebase';
     } else {
       // This happens if we don't have Administrator read access, it is not a critical error
       logger.debug('Could not find allowed merge methods for repo');
@@ -1844,6 +1844,7 @@ export async function reattemptPlatformAutomerge({
 export async function mergePr({
   branchName,
   id: prNo,
+  strategy,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   const url = `repos/${
