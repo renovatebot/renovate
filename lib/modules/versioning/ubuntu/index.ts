@@ -11,8 +11,8 @@ import {
 export const id = 'ubuntu';
 export const displayName = 'Ubuntu';
 export const urls = [
-  'https://changelogs.ubuntu.com/meta-release',
-  'https://debian.pages.debian.net/distro-info-data/ubuntu.csv',
+  '[Ubuntu Meta Release Changelogs](https://changelogs.ubuntu.com/meta-release)',
+  '[Ubuntu Distribution Data - Debian Pages](https://debian.pages.debian.net/distro-info-data/ubuntu.csv)',
 ];
 export const supportsRanges = false;
 
