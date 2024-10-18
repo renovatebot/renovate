@@ -79,6 +79,11 @@ With the above config:
 - ESLint dependencies will have the label `linting`
 - All other dependencies will have the label `dependencies`
 
+<!-- prettier-ignore -->
+!!! note
+    Make sure your labels do not exceed the maximum character limit specified by the platform you are on.
+    For example: Github limit the character length for labels at 50.
+
 ## additionalBranchPrefix
 
 By default, the value for this config option is an empty string.
@@ -2199,6 +2204,11 @@ Behavior details:
 
 The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.
 If you want to add/combine labels, use the `addLabels` config option, which is mergeable.
+
+<!-- prettier-ignore -->
+!!! note
+    Make sure your labels do not exceed the maximum character limit specified by the platform you are on.
+    For example: Github limit the character length for labels at 50.
 
 ## lockFileMaintenance
 
