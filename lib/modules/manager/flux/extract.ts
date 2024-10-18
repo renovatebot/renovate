@@ -11,7 +11,6 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
 import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import { extractImage } from '../kustomize/extract';
@@ -21,8 +20,13 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types';
-import { isSystemManifest, systemManifestHeaderRegex } from './common';
-import { FluxResource, type HelmRepository } from './schema';
+import {
+  collectHelmReposAndCharts,
+  isSystemManifest,
+  resolveHelmReleaseManifest,
+  systemManifestHeaderRegex,
+} from './common';
+import { FluxResource, type HelmChart, type HelmRepository } from './schema';
 import type {
   FluxManagerData,
   FluxManifest,
@@ -120,26 +124,29 @@ function resolveSystemManifest(
 function resolveResourceManifest(
   manifest: ResourceFluxManifest,
   helmRepositories: HelmRepository[],
+  helmCharts: HelmChart[],
   registryAliases: Record<string, string> | undefined,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
   for (const resource of manifest.resources) {
     switch (resource.kind) {
       case 'HelmRelease': {
-        const dep: PackageDependency = {
-          depName: resource.spec.chart.spec.chart,
-          currentValue: resource.spec.chart.spec.version,
-          datasource: HelmDatasource.id,
-        };
+        if (resource.spec.chartRef?.kind === 'OCIRepository') {
+          // Can be skipped, version is handled via OCIRepository resource directly
+          break;
+        }
 
-        const matchingRepositories = helmRepositories.filter(
-          (rep) =>
-            rep.kind === resource.spec.chart.spec.sourceRef?.kind &&
-            rep.metadata.name === resource.spec.chart.spec.sourceRef.name &&
-            rep.metadata.namespace ===
-              (resource.spec.chart.spec.sourceRef.namespace ??
-                resource.metadata?.namespace),
+        const resolvedRelease = resolveHelmReleaseManifest(
+          resource,
+          helmRepositories,
+          helmCharts,
         );
+        if (!resolvedRelease) {
+          // invalid or incomplete HelmRelease spec, thus failed to extract the dependency itself
+          break;
+        }
+        const { name: chartName, dep, matchingRepositories } = resolvedRelease;
+
         if (matchingRepositories.length) {
           dep.registryUrls = matchingRepositories
             .map((repo) => {
@@ -148,9 +155,7 @@ function resolveResourceManifest(
                 dep.datasource = DockerDatasource.id;
                 // Ensure the URL is a valid OCI path
                 dep.packageName = getDep(
-                  `${removeOCIPrefix(repo.spec.url)}/${
-                    resource.spec.chart.spec.chart
-                  }`,
+                  `${removeOCIPrefix(repo.spec.url)}/${chartName}`,
                   false,
                   registryAliases,
                 ).depName;
@@ -244,14 +249,7 @@ export function extractPackageFile(
   if (!manifest) {
     return null;
   }
-  const helmRepositories: HelmRepository[] = [];
-  if (manifest.kind === 'resource') {
-    for (const resource of manifest.resources) {
-      if (resource.kind === 'HelmRepository') {
-        helmRepositories.push(resource);
-      }
-    }
-  }
+  const [helmRepositories, helmCharts] = collectHelmReposAndCharts([manifest]);
   let deps: PackageDependency[] | null = null;
   switch (manifest.kind) {
     case 'system':
@@ -261,6 +259,7 @@ export function extractPackageFile(
       deps = resolveResourceManifest(
         manifest,
         helmRepositories,
+        helmCharts,
         config?.registryAliases,
       );
       break;
@@ -285,16 +284,7 @@ export async function extractAllPackageFiles(
     }
   }
 
-  const helmRepositories: HelmRepository[] = [];
-  for (const manifest of manifests) {
-    if (manifest.kind === 'resource') {
-      for (const resource of manifest.resources) {
-        if (resource.kind === 'HelmRepository') {
-          helmRepositories.push(resource);
-        }
-      }
-    }
-  }
+  const [helmRepositories, helmCharts] = collectHelmReposAndCharts(manifests);
 
   for (const manifest of manifests) {
     let deps: PackageDependency[] | null = null;
@@ -306,6 +296,7 @@ export async function extractAllPackageFiles(
         deps = resolveResourceManifest(
           manifest,
           helmRepositories,
+          helmCharts,
           config.registryAliases,
         );
         break;
