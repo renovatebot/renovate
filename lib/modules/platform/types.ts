@@ -282,6 +282,14 @@ export interface Platform {
   maxBodyLength(): number;
 }
 
+export interface ScmStats {
+  defaultBranchSha: string;
+  last90Days: {
+    committerHashList: string[];
+    renovateCommitCount: number;
+  };
+}
+
 export interface PlatformScm {
   isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean>;
   isBranchModified(branchName: string, baseBranch: string): Promise<boolean>;
@@ -294,4 +302,5 @@ export interface PlatformScm {
   checkoutBranch(branchName: string): Promise<LongCommitSha>;
   mergeToLocal(branchName: string): Promise<void>;
   mergeAndPush(branchName: string): Promise<void>;
+  getStats(): Promise<ScmStats | null>;
 }
