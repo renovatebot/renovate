@@ -114,6 +114,23 @@ describe('modules/manager/nuget/util', () => {
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
           <configuration>
+            <disabledPackageSources>
+              <add key="nuget.org" value="true" />
+            </disabledPackageSources>
+          </configuration>`,
+      );
+
+      const registries = await getConfiguredRegistries('NuGet.config');
+      expect(registries?.length).toBe(0);
+    });
+
+    it('reads nuget config file with default registry disabled and added sources', async () => {
+      fs.findUpLocal.mockReturnValue(
+        Promise.resolve<string | null>('NuGet.config'),
+      );
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          <configuration>
             <packageSources>
               <add key="contoso.com" value="https://contoso.com/packages/"/>
             </packageSources>
