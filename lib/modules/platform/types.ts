@@ -280,6 +280,7 @@ export interface Platform {
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
 
   maxBodyLength(): number;
+  labelCharLimit?: number;
 }
 
 export interface PlatformScm {

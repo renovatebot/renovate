@@ -99,6 +99,7 @@ let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
 
 const GitHubMaxPrBodyLen = 60000;
+export const labelCharLimit = 50;
 
 export function resetConfigs(): void {
   config = {} as never;
