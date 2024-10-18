@@ -52,13 +52,15 @@ export async function getConfiguredRegistries(
   }
 
   const packageSources = nuGetConfig.childNamed('packageSources');
-  if (!packageSources) {
+  const disabledPackageSources = nuGetConfig.childNamed('disabledPackageSources');
+
+  if (!packageSources && !disabledPackageSources) {
     return undefined;
   }
 
   const packageSourceMapping = nuGetConfig.childNamed('packageSourceMapping');
 
-  const registries = getDefaultRegistries();
+  let registries = getDefaultRegistries();
 
   // Map optional source mapped package patterns to default registries
   for (const registry of registries) {
@@ -70,47 +72,59 @@ export async function getConfiguredRegistries(
     registry.sourceMappedPackagePatterns = sourceMappedPackagePatterns;
   }
 
-  for (const child of packageSources.children) {
-    if (child.type === 'element') {
-      if (child.name === 'clear') {
-        logger.debug(`clearing registry URLs`);
-        registries.length = 0;
-      } else if (child.name === 'add') {
-        const isHttpUrl = regEx(/^https?:\/\//i).test(child.attr.value);
-        if (isHttpUrl) {
-          let registryUrl = child.attr.value;
-          if (child.attr.protocolVersion) {
-            registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
-          }
-          const sourceMappedPackagePatterns = packageSourceMapping
-            ?.childWithAttribute('key', child.attr.key)
-            ?.childrenNamed('package')
-            .map((packagePattern) => packagePattern.attr['pattern']);
+  if (packageSources) {
+    for (const child of packageSources.children) {
+      if (child.type === 'element') {
+        if (child.name === 'clear') {
+          logger.debug(`clearing registry URLs`);
+          registries.length = 0;
+        } else if (child.name === 'add') {
+          const isHttpUrl = regEx(/^https?:\/\//i).test(child.attr.value);
+          if (isHttpUrl) {
+            let registryUrl = child.attr.value;
+            if (child.attr.protocolVersion) {
+              registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
+            }
+            const sourceMappedPackagePatterns = packageSourceMapping
+              ?.childWithAttribute('key', child.attr.key)
+              ?.childrenNamed('package')
+              .map((packagePattern) => packagePattern.attr['pattern']);
 
-          logger.debug(
-            {
+            logger.debug(
+              {
+                name: child.attr.key,
+                registryUrl,
+                sourceMappedPackagePatterns,
+              },
+              `Adding registry URL ${registryUrl}`,
+            );
+
+            registries.push({
               name: child.attr.key,
-              registryUrl,
+              url: registryUrl,
               sourceMappedPackagePatterns,
-            },
-            `Adding registry URL ${registryUrl}`,
-          );
-
-          registries.push({
-            name: child.attr.key,
-            url: registryUrl,
-            sourceMappedPackagePatterns,
-          });
-        } else {
-          logger.debug(
-            { registryUrl: child.attr.value },
-            'ignoring local registry URL',
-          );
+            });
+          } else {
+            logger.debug(
+              { registryUrl: child.attr.value },
+              'ignoring local registry URL',
+            );
+          }
         }
       }
-      // child.name === 'remove' not supported
     }
   }
+
+  if (disabledPackageSources) {
+    for (const child of disabledPackageSources.children) {
+      if (child.type === 'element' && child.name === 'add' && child.attr.value === 'true') {
+        let disabledRegistryKey = child.attr.key;
+        registries = registries.filter(o => o.name !== disabledRegistryKey);
+        logger.debug(`Disabled registry with key: ${disabledRegistryKey}`);
+      }
+    }
+  }
+
   return registries;
 }
 
