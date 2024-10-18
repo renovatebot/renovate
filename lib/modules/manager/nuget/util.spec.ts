@@ -106,6 +106,102 @@ describe('modules/manager/nuget/util', () => {
         'NuGet.Common',
       ]);
     });
+
+    it('reads nuget config file with default registry disabled', async () => {
+      fs.findUpLocal.mockReturnValue(
+        Promise.resolve<string | null>('NuGet.config'),
+      );
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          <configuration>
+            <packageSources>
+              <add key="contoso.com" value="https://contoso.com/packages/"/>
+            </packageSources>
+            <disabledPackageSources>
+              <add key="nuget.org" value="true" />
+            </disabledPackageSources>
+          </configuration>`,
+      );
+
+      const registries = await getConfiguredRegistries('NuGet.config');
+      expect(registries?.length).toBe(1);
+      expect(registries![0].name).toBe('contoso.com');
+      expect(registries![0].url).toBe('https://contoso.com/packages/');
+    });
+
+    it('reads nuget config file with default registry disabled given default registry added', async () => {
+      fs.findUpLocal.mockReturnValue(
+        Promise.resolve<string | null>('NuGet.config'),
+      );
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          <configuration>
+            <packageSources>
+              <add key="nuget.org" value="https://api.nuget.org/v3/index.json"/>
+              <add key="contoso.com" value="https://contoso.com/packages/"/>
+            </packageSources>
+            <disabledPackageSources>
+              <add key="nuget.org" value="true" />
+            </disabledPackageSources>
+          </configuration>`,
+      );
+
+      const registries = await getConfiguredRegistries('NuGet.config');
+      expect(registries?.length).toBe(1);
+      expect(registries![0].name).toBe('contoso.com');
+      expect(registries![0].url).toBe('https://contoso.com/packages/');
+    });
+
+    it('reads nuget config file with unknown disabled source', async () => {
+      fs.findUpLocal.mockReturnValue(
+        Promise.resolve<string | null>('NuGet.config'),
+      );
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          <configuration>
+            <packageSources>
+              <add key="contoso.com" value="https://contoso.com/packages/"/>
+            </packageSources>
+            <disabledPackageSources>
+              <add key="unknown" value="true" />
+            </disabledPackageSources>
+          </configuration>`,
+      );
+
+      const registries = await getConfiguredRegistries('NuGet.config');
+      expect(registries?.length).toBe(2);
+      expect(registries![0].name).toBe('nuget.org');
+      expect(registries![0].url).toBe('https://api.nuget.org/v3/index.json');
+
+      expect(registries![1].name).toBe('contoso.com');
+      expect(registries![1].url).toBe('https://contoso.com/packages/');
+    });
+
+    it('reads nuget config file with disabled source with value false', async () => {
+      fs.findUpLocal.mockReturnValue(
+        Promise.resolve<string | null>('NuGet.config'),
+      );
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          <configuration>
+            <packageSources>
+              <add key="nuget.org" value="https://api.nuget.org/v3/index.json"/>
+              <add key="contoso.com" value="https://contoso.com/packages/"/>
+            </packageSources>
+            <disabledPackageSources>
+              <add key="contoso.com" value="false" />
+            </disabledPackageSources>
+          </configuration>`,
+      );
+
+      const registries = await getConfiguredRegistries('NuGet.config');
+      expect(registries?.length).toBe(2);
+      expect(registries![0].name).toBe('nuget.org');
+      expect(registries![0].url).toBe('https://api.nuget.org/v3/index.json');
+      
+      expect(registries![1].name).toBe('contoso.com');
+      expect(registries![1].url).toBe('https://contoso.com/packages/');
+    });
   });
 
   describe('applyRegistries', () => {

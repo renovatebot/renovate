@@ -52,13 +52,15 @@ export async function getConfiguredRegistries(
   }
 
   const packageSources = nuGetConfig.childNamed('packageSources');
-  if (!packageSources) {
+  const disabledPackageSources = nuGetConfig.childNamed('disabledPackageSources');
+
+  if (!packageSources && !disabledPackageSources) {
     return undefined;
   }
 
   const packageSourceMapping = nuGetConfig.childNamed('packageSourceMapping');
 
-  const registries = getDefaultRegistries();
+  let registries = getDefaultRegistries();
 
   // Map optional source mapped package patterns to default registries
   for (const registry of registries) {
@@ -70,7 +72,7 @@ export async function getConfiguredRegistries(
     registry.sourceMappedPackagePatterns = sourceMappedPackagePatterns;
   }
 
-  for (const child of packageSources.children) {
+  for (const child of packageSources?.children) {
     if (child.type === 'element') {
       if (child.name === 'clear') {
         logger.debug(`clearing registry URLs`);
@@ -108,9 +110,17 @@ export async function getConfiguredRegistries(
           );
         }
       }
-      // child.name === 'remove' not supported
     }
   }
+
+  for (const child of disabledPackageSources?.children) {
+    if (child.type === 'element' && child.name === 'add' && child.attr.value === 'true') {
+      let disabledRegistryKey = child.attr.key;
+      registries = registries.filter(o => o.name !== disabledRegistryKey);
+      logger.debug(`Disabled registry with key: ${disabledRegistryKey}`);
+    }
+  }
+
   return registries;
 }
 
