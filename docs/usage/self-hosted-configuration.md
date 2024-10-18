@@ -1109,7 +1109,8 @@ Defines how the report is exposed:
 
 ## repositories
 
-Elements in the `repositories` array can be an object if you wish to define more settings. Example:
+Elements in the `repositories` array can be an object if you wish to define more settings.
+Example:
 
 ```js
 {
