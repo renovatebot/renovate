@@ -40,11 +40,12 @@ export class UvProcessor implements PyProjectProcessor {
     // Skip sources that are either not yet handled by Renovate (e.g. git), or do not make sense to handle (e.g. path).
     if (uv.sources) {
       for (const dep of deps) {
-        if (!dep.depName) {
+        // istanbul ignore if
+        if (!dep.packageName) {
           continue;
         }
 
-        const depSource = uv.sources[dep.depName];
+        const depSource = uv.sources[dep.packageName];
         if (depSource) {
           if (depSource.git) {
             dep.skipReason = 'git-dependency';
