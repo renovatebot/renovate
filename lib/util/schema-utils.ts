@@ -2,7 +2,8 @@ import JSON5 from 'json5';
 import * as JSONC from 'jsonc-parser';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
-import { z } from 'zod';
+import { type ZodEffects, type ZodType, type ZodTypeDef, z } from 'zod';
+import type { PackageDependency } from '../modules/manager/types';
 import { parse as parseToml } from './toml';
 import { parseSingleYaml, parseYaml } from './yaml';
 
@@ -263,3 +264,15 @@ export const Toml = z.string().transform((str, ctx) => {
     return z.NEVER;
   }
 });
+
+export function withDepType<
+  Output extends PackageDependency[],
+  Schema extends ZodType<Output, ZodTypeDef, unknown>,
+>(schema: Schema, depType: string): ZodEffects<Schema> {
+  return schema.transform((deps) => {
+    for (const dep of deps) {
+      dep.depType = depType;
+    }
+    return deps;
+  });
+}
