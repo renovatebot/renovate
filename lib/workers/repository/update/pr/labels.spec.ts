@@ -102,6 +102,7 @@ describe('workers/repository/update/pr/labels', () => {
       ];
 
       it('github', () => {
+        platform.platform.labelCharLimit = undefined; // coverage
         expect(prepareLabels({ labels })).toEqual([
           'All',
           'The quick brown fox jumped over the lazy sleeping', // len: 50
