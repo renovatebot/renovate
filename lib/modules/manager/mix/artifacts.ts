@@ -11,8 +11,8 @@ import {
 } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
-
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { aliasRecordToRepositories } from './utils';
 
 const hexRepoUrl = 'https://hex.pm/';
 const hexRepoOrgUrlRegex = regEx(
@@ -25,7 +25,6 @@ export async function updateArtifacts({
   newPackageFileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  logger.debug(`mix.getArtifacts(${packageFileName})`);
   if (updatedDeps.length < 1) {
     logger.debug('No updated mix deps - returning null');
     return null;
@@ -53,6 +52,9 @@ export async function updateArtifacts({
     return null;
   }
 
+  const preCommands: string[] = [];
+
+  // auth organizations
   const organizations = new Set<string>();
 
   const hexHostRulesWithMatchHost = hostRules
@@ -83,18 +85,41 @@ export async function updateArtifacts({
     }
   }
 
-  const preCommands = Array.from(organizations).reduce((acc, organization) => {
+  // regex match anything hex.pm to an org
+  // if not hex, do repo.add
+  for (const organization of Array.from(organizations)) {
     const url = `${hexRepoUrl}api/repos/${organization}/`;
     const { token } = hostRules.find({ url });
 
     if (token) {
       logger.debug(`Authenticating to hex organization ${organization}`);
       const authCommand = `mix hex.organization auth ${organization} --key ${token}`;
-      return [...acc, authCommand];
+      preCommands.push(authCommand);
     }
+  }
 
-    return acc;
-  }, [] as string[]);
+  // auth repo registries
+
+  if (config.registryAliases) {
+    // regex match anything hex.pm to an org
+    // if not hex, do repo.add
+    const repoAliases = aliasRecordToRepositories(config.registryAliases);
+
+    for (const { name, registry } of repoAliases) {
+      const hostRule = hostRules.find({ url: registry });
+
+      if (hostRule?.token) {
+        logger.debug(`Adding repo registry ${name}`);
+        const authCommand = `mix repo.add ${name} ${registry} --auth-key ${hostRule.token}`;
+
+        preCommands.push(authCommand);
+      } else {
+        logger.debug(
+          `No hostRule token defined for repo ${name} with url ${registry}.`,
+        );
+      }
+    }
+  }
 
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
@@ -113,6 +138,7 @@ export async function updateArtifacts({
     ],
     preCommands,
   };
+
   const command = [
     'mix',
     'deps.update',
