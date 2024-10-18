@@ -69,6 +69,10 @@ describe('modules/platform/local/index', () => {
       expect(platform.maxBodyLength()).toBe(Infinity);
     });
 
+    it('maxCommentLength', () => {
+      expect(platform.maxCommentLength()).toBe(Infinity);
+    });
+
     it('updatePr', async () => {
       expect(await platform.updatePr()).toBeUndefined();
     });
