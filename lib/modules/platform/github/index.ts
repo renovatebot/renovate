@@ -1490,15 +1490,11 @@ async function addLabels(
   labels: string[] | null | undefined,
 ): Promise<void> {
   logger.debug(`Adding labels '${labels?.join(', ')}' to #${issueNo}`);
-  try {
-    const repository = config.parentRepo ?? config.repository;
-    if (is.array(labels) && labels.length) {
-      await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
-        body: labels,
-      });
-    }
-  } catch (err) {
-    logger.debug({ err }, 'Error while adding labels, skipping');
+  const repository = config.parentRepo ?? config.repository;
+  if (is.array(labels) && labels.length) {
+    await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
+      body: labels,
+    });
   }
 }
 
