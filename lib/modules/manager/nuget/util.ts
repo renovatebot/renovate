@@ -52,7 +52,9 @@ export async function getConfiguredRegistries(
   }
 
   const packageSources = nuGetConfig.childNamed('packageSources');
-  const disabledPackageSources = nuGetConfig.childNamed('disabledPackageSources');
+  const disabledPackageSources = nuGetConfig.childNamed(
+    'disabledPackageSources'
+  );
 
   if (!packageSources && !disabledPackageSources) {
     return undefined;
@@ -117,9 +119,11 @@ export async function getConfiguredRegistries(
 
   if (disabledPackageSources) {
     for (const child of disabledPackageSources.children) {
-      if (child.type === 'element' && child.name === 'add' && child.attr.value === 'true') {
-        let disabledRegistryKey = child.attr.key;
-        registries = registries.filter(o => o.name !== disabledRegistryKey);
+      if (child.type === 'element' && 
+          child.name === 'add' && 
+          child.attr.value === 'true') {
+        const disabledRegistryKey = child.attr.key;
+        registries = registries.filter((o) => o.name !== disabledRegistryKey);
         logger.debug(`Disabled registry with key: ${disabledRegistryKey}`);
       }
     }

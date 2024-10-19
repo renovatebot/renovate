@@ -215,7 +215,7 @@ describe('modules/manager/nuget/util', () => {
       expect(registries?.length).toBe(2);
       expect(registries![0].name).toBe('nuget.org');
       expect(registries![0].url).toBe('https://api.nuget.org/v3/index.json');
-      
+
       expect(registries![1].name).toBe('contoso.com');
       expect(registries![1].url).toBe('https://contoso.com/packages/');
     });
