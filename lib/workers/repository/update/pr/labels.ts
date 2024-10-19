@@ -10,7 +10,7 @@ import * as template from '../../../../util/template';
  */
 function trimLabel(label: string, limit: number): string {
   if (label.length > limit) {
-    return label.slice(0, limit).trim();
+    return label.trim().slice(0, limit).trim();
   }
 
   return label.trim();
