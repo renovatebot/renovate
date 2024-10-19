@@ -1,5 +1,4 @@
-import { mocked } from '../../../../../test/util';
-import * as _platform from '../../../../modules/platform';
+import { platform } from '../../../../../test/util';
 import {
   areLabelsModified,
   getChangedLabels,
@@ -7,13 +6,9 @@ import {
   shouldUpdateLabels,
 } from './labels';
 
-jest.mock('../../../../modules/platform');
-
-const platform = mocked(_platform);
-
 describe('workers/repository/update/pr/labels', () => {
   beforeEach(() => {
-    platform.platform.labelCharLimit = 50;
+    platform.labelCharLimit = 50;
   });
 
   describe('prepareLabels(config)', () => {
@@ -102,7 +97,7 @@ describe('workers/repository/update/pr/labels', () => {
       ];
 
       it('github', () => {
-        platform.platform.labelCharLimit = undefined; // coverage
+        platform.labelCharLimit = undefined as never; // coverage
         expect(prepareLabels({ labels })).toEqual([
           'All',
           'The quick brown fox jumped over the lazy sleeping', // len: 50
@@ -111,7 +106,7 @@ describe('workers/repository/update/pr/labels', () => {
       });
 
       it('gitlab', () => {
-        platform.platform.labelCharLimit = 255;
+        platform.labelCharLimit = 255;
         expect(prepareLabels({ labels })).toEqual([
           'All',
           'The quick brown fox jumped over the lazy sleeping dog', // len: 51
