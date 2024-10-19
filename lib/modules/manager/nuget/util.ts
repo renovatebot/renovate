@@ -120,8 +120,8 @@ export async function getConfiguredRegistries(
   if (disabledPackageSources) {
     for (const child of disabledPackageSources.children) {
       if (
-        child.type === 'element' && 
-        child.name === 'add' && 
+        child.type === 'element' &&
+        child.name === 'add' &&
         child.attr.value === 'true'
       ) {
         const disabledRegistryKey = child.attr.key;
