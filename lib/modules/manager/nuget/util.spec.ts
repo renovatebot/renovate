@@ -202,6 +202,7 @@ describe('modules/manager/nuget/util', () => {
         codeBlock`
           <configuration>
             <packageSources>
+              <clear />
               <add key="nuget.org" value="https://api.nuget.org/v3/index.json"/>
               <add key="contoso.com" value="https://contoso.com/packages/"/>
             </packageSources>
