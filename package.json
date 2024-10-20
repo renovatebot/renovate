@@ -329,7 +329,7 @@
     "jest-mock-extended": "3.0.7",
     "jest-snapshot": "29.7.0",
     "markdownlint-cli2": "0.14.0",
-    "memfs": "4.13.0",
+    "memfs": "4.14.0",
     "nock": "13.5.5",
     "npm-run-all2": "6.2.3",
     "nyc": "17.1.0",
