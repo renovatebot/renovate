@@ -9,11 +9,12 @@ import * as template from '../../../../util/template';
  * Filter labels that go over the maximum char limit, based on platform limits.
  */
 function trimLabel(label: string, limit: number): string {
-  if (label.length > limit) {
-    return label.trim().slice(0, limit).trim();
+  const trimmed = label.trim();
+  if (trimmed.length <= limit) {
+    return trimmed;
   }
 
-  return label.trim();
+  return trimmed.slice(0, limit).trim();
 }
 
 export function prepareLabels(config: RenovateConfig): string[] {
