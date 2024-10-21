@@ -61,7 +61,7 @@ export function extractPackageFile(
           currentDigest: flakeLocked.rev,
           replaceString: flakeLocked.rev,
           datasource: GitRefsDatasource.id,
-          packageName: `https://github.com/${flakeOriginal.owner}/${flakeOriginal.repo}`,
+          packageName: `https://${flakeOriginal.host ?? 'github.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
         });
         break;
       case 'gitlab':
@@ -71,7 +71,7 @@ export function extractPackageFile(
           currentDigest: flakeLocked.rev,
           replaceString: flakeLocked.rev,
           datasource: GitRefsDatasource.id,
-          packageName: `https://gitlab.com/${flakeOriginal.owner}/${flakeOriginal.repo}`,
+          packageName: `https://${flakeOriginal.host ?? 'gitlab.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
         });
         break;
       case 'git':
@@ -91,7 +91,7 @@ export function extractPackageFile(
           currentDigest: flakeLocked.rev,
           replaceString: flakeLocked.rev,
           datasource: GitRefsDatasource.id,
-          packageName: `https://git.sr.ht/${flakeOriginal.owner}/${flakeOriginal.repo}`,
+          packageName: `https://${flakeOriginal.host ?? 'git.sr.ht'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
         });
         break;
       // istanbul ignore next: just a safeguard

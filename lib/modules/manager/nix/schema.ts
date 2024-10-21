@@ -24,6 +24,7 @@ export const LockedInput = z.object({
 });
 
 export const OriginalInput = z.object({
+  host: z.string().optional(),
   owner: z.string().optional(),
   repo: z.string().optional(),
   ref: z.string().optional(),

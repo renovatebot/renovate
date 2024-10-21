@@ -11,6 +11,7 @@ const flake6Lock = Fixtures.get('flake.6.lock');
 const flake7Lock = Fixtures.get('flake.7.lock');
 const flake8Lock = Fixtures.get('flake.8.lock');
 const flake9Lock = Fixtures.get('flake.9.lock');
+const flake10Lock = Fixtures.get('flake.10.lock');
 
 describe('modules/manager/nix/extract', () => {
   it('returns null when no inputs', () => {
@@ -91,5 +92,17 @@ describe('modules/manager/nix/extract', () => {
 
   it('includes nixpkgs but using indirect type that cannot be updated', () => {
     expect(extractPackageFile(flake9Lock, 'flake.lock')).toBeNull();
+  });
+
+  it('includes flake from GitHub Enterprise', () => {
+    expect(extractPackageFile(flake10Lock, 'flake.lock')?.deps).toMatchObject([
+      {
+        currentDigest: '6bf2706348447df6f8b86b1c3e54f87b0afda84f',
+        datasource: 'git-refs',
+        depName: 'nixpkgs-extra-pkgs',
+        packageName:
+          'https://github.corp.example.com/my-org/nixpkgs-extra-pkgs',
+      },
+    ]);
   });
 });
