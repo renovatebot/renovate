@@ -7,10 +7,6 @@ import {
 } from './labels';
 
 describe('workers/repository/update/pr/labels', () => {
-  beforeEach(() => {
-    platform.labelCharLimit = 50;
-  });
-
   describe('prepareLabels(config)', () => {
     it('returns empty array if no labels are configured', () => {
       const result = prepareLabels({});
@@ -97,7 +93,6 @@ describe('workers/repository/update/pr/labels', () => {
       ];
 
       it('github', () => {
-        platform.labelCharLimit = undefined as never; // coverage
         expect(prepareLabels({ labels })).toEqual([
           'All',
           'The quick brown fox jumped over the lazy sleeping', // len: 50
@@ -106,7 +101,10 @@ describe('workers/repository/update/pr/labels', () => {
       });
 
       it('gitlab', () => {
-        platform.labelCharLimit = 255;
+        jest.spyOn(platform, 'labelCharLimit').mockImplementationOnce(() => {
+          return 255;
+        });
+        // platform.labelCharLimit.mockReturnValueOnce(255);
         expect(prepareLabels({ labels })).toEqual([
           'All',
           'The quick brown fox jumped over the lazy sleeping dog', // len: 51

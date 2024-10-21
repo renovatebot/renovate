@@ -92,7 +92,6 @@ const defaults = {
 };
 
 export const id = 'gitlab';
-export const labelCharLimit = 255;
 
 const DRAFT_PREFIX = 'Draft: ';
 const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
@@ -922,6 +921,10 @@ export function maxBodyLength(): number {
   } else {
     return 1000000;
   }
+}
+
+export function labelCharLimit(): number {
+  return 255;
 }
 
 // Branch

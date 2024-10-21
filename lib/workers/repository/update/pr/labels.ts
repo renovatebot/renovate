@@ -18,7 +18,7 @@ function trimLabel(label: string, limit: number): string {
 }
 
 export function prepareLabels(config: RenovateConfig): string[] {
-  const labelCharLimit = platform.labelCharLimit ?? 50;
+  const labelCharLimit = platform.labelCharLimit?.() ?? 50;
   const labels = config.labels ?? [];
   const addLabels = config.addLabels ?? [];
   return [...new Set([...labels, ...addLabels])]
