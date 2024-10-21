@@ -3948,7 +3948,7 @@ The above config will suppress the comment which is added to a PR whenever you c
 We recommend that you only configure the `timezone` option if _both_ of these are true:
 
 - you want to use the `schedule` feature
-- _and_ you want Renovate to evaluate the `schedule` in local timezone
+- _and_ you want Renovate to evaluate the `schedule` in your timezone
 
 Please see the above link for valid timezone names.
 
