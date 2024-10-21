@@ -747,4 +747,11 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  uv: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-uv',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'astral-sh/uv',
+    },
+  },
 };
