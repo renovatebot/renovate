@@ -18,6 +18,7 @@ export const depTypes = {
   optionalDependencies: 'project.optional-dependencies',
   pdmDevDependencies: 'tool.pdm.dev-dependencies',
   uvDevDependencies: 'tool.uv.dev-dependencies',
+  uvSources: 'tool.uv.sources',
   buildSystemRequires: 'build-system.requires',
 };
 

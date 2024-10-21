@@ -2,15 +2,30 @@ import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
+import { platform } from '../../../../modules/platform';
 import * as template from '../../../../util/template';
 
+/**
+ * Filter labels that go over the maximum char limit, based on platform limits.
+ */
+function trimLabel(label: string, limit: number): string {
+  const trimmed = label.trim();
+  if (trimmed.length <= limit) {
+    return trimmed;
+  }
+
+  return trimmed.slice(0, limit).trim();
+}
+
 export function prepareLabels(config: RenovateConfig): string[] {
+  const labelCharLimit = platform.labelCharLimit?.() ?? 50;
   const labels = config.labels ?? [];
   const addLabels = config.addLabels ?? [];
   return [...new Set([...labels, ...addLabels])]
     .filter(is.nonEmptyStringAndNotWhitespace)
     .map((label) => template.compile(label, config))
     .filter(is.nonEmptyStringAndNotWhitespace)
+    .map((label) => trimLabel(label, labelCharLimit))
     .sort();
 }
 

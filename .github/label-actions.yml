@@ -313,7 +313,7 @@
 
     Thanks, the Renovate team.
   close: true
-  close-reason: 'not planned'
+  close-reason: 'outdated'
 
 'auto:bad-vibes':
   comment: >
@@ -376,56 +376,6 @@
 
     Thanks, the Renovate team
 
-'auto:bug-to-idea':
-  comment: >
-    Hi there,
-
-
-    A maintainer reviewed the information, and decided that this is not a bug. To avoid confusing others, we will close this Discussion. Please keep reading as there is good news too!
-
-
-    The good news is that the maintainer likes your idea, in general. Please create a new [Suggest an Idea](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea) Discussion. Feel free to copy/paste what you need from this Discussion. Please focus on the feature request: explain what Renovate should do, and how Renovate can know when/what to do. We may convert that Discussion to an Issue when it is ready. Note that you will still have to wait for a maintainer, or someone else, to do the work needed for your feature.
-
-
-    Why are we closing your Discussion? For us, bug reports are about things that are not working as intended, or things that are not working as described in the docs. What you found may be bad behavior, but we do not think it is a bug.
-
-
-    For more details, please read [our development docs about bug handling](https://github.com/renovatebot/renovate/blob/main/docs/development/bug-handling.md).
-
-
-    Thanks, the Renovate team
-
-'auto:bug-invalid':
-  comment: >
-    Hi there,
-
-
-    A maintainer decided this is not a bug, and behaving as designed. The maintainer will explain why this behavior is correct. To avoid confusing future readers, we will close this Discussion.
-
-
-    We want Bug-type Discussions to be about things that we rate as bugs. For more details, please read [our development docs about bug handling](https://github.com/renovatebot/renovate/blob/main/docs/development/bug-handling.md).
-
-
-    If this bug report makes you think of an idea for a new feature, or how to improve a current feature, feel free to create a new [Suggest an Idea](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea) Discussion.
-
-
-    Thanks, the Renovate team
-  close: true
-  close-reason: 'not planned'
-
-'auto:bug-converted':
-  comment: >
-    Hi there,
-
-
-    A maintainer confirmed this is a bug, and converted this Discussion to an Issue. If you have more thoughts/info about the bug, please post them in the Issue.
-
-
-    We will close this Discussion, as we want new info to go in the Issue.
-
-
-    Thanks, the Renovate team
-
 'auto:idea-rewrite':
   comment: >
     Hi there,
@@ -442,19 +392,24 @@
 
     Thanks, the Renovate team
 
-'auto:no-slas':
+'auto:no-pings':
   comment: >
     Hi there,
 
 
-    Please remember that there are no Service Level Agreements (SLAs) or roadmap commitments in Open Source projects like Renovate. The maintainers and contributors work on bugs/features/docs at their own pace. This means that sometimes you will have to wait for things to happen, or to get a response.
+    Please do not post comments like: "Any update on this?" or "When will this be fixed?".
 
 
-    Please avoid comments like: "Any update on this?" or "When will this be fixed?". Do not chase a maintainer to get answers quickly. We will block you if you nudge us frequently.
+    If you're asking because **you want to know if there's been some progress**, then please know that we work in the open in this repo. If there was an update to this Discussion or Issue, you would see it already. So please don't ask "just in case".
 
 
-    Please read our [Code of Conduct, how we prioritize work](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#how-we-prioritize-work) to learn more about how we prioritize what to work on.
-    If you are a paying Mend.io customer, please tell your support or customer contact that this issue is important to you.
+    If you're asking because **you want to get our attention**, then please don't do that either. It wastes maintainer time and pollutes the repo. You're welcome to fix issues yourself, hire someone to help you, or _wait_ for someone else to do the work. You're _not_ welcome to post the equivalent of "Hey, someone else should really do something about this".
+
+
+    If you are a paying Mend.io customer, contact your support or customer success representative, and tell them this issue is important to you.
+
+
+    We expect everyone to follow these rules, no matter if you use the free tiers, or are a paying Mend customer. Please read our [Code of Conduct, how we prioritize work](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#how-we-prioritize-work) to learn more about how we prioritize what to work on.
 
 
     Thanks, the Renovate team
