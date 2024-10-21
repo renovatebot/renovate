@@ -18,5 +18,6 @@ export const OCBConfigSchema = z.object({
   receivers: ModuleSchema,
   processors: ModuleSchema,
   connectors: ModuleSchema,
+  providers: ModuleSchema, 
 });
 export type OCBConfig = z.infer<typeof OCBConfigSchema>;
