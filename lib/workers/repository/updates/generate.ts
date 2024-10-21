@@ -159,6 +159,14 @@ function compilePrTitle(
   logger.trace(`prTitle: ` + JSON.stringify(upgrade.prTitle));
 }
 
+const semanticCommitTypePriorities: Record<string, number> = {
+  feat: 2,
+  fix: 1,
+  build: 0,
+  ci: 0,
+  chore: 0,
+};
+
 export function generateBranchConfig(
   upgrades: BranchUpgradeConfig[],
 ): BranchConfig {
@@ -354,6 +362,27 @@ export function generateBranchConfig(
     ...config.upgrades[0],
     releaseTimestamp: releaseTimestamp!,
   }; // TODO: fixme (#9666)
+
+  let highestPrioritySemanticCommitType = '';
+
+  for (const upgrade of config.upgrades) {
+    if (
+      upgrade.semanticCommitType &&
+      upgrade.semanticCommitType in semanticCommitTypePriorities
+    ) {
+      const priority = semanticCommitTypePriorities[upgrade.semanticCommitType];
+      const highestPriority =
+        semanticCommitTypePriorities[highestPrioritySemanticCommitType] ?? -1;
+
+      if (priority > highestPriority) {
+        highestPrioritySemanticCommitType = upgrade.semanticCommitType;
+      }
+    }
+  }
+
+  if (highestPrioritySemanticCommitType) {
+    config.semanticCommitType = highestPrioritySemanticCommitType;
+  }
 
   // Use templates to generate strings
   const commitMessage = compileCommitMessage(config);
