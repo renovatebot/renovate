@@ -27,6 +27,8 @@ export class BitriseDatasource extends Datasource {
   override readonly customRegistrySupport = true;
 
   override readonly defaultRegistryUrls = [
+    // should this Bitrise default repository be renamed or moved in the future,
+    // then a change to auto-injected hostRules are needed.
     'https://github.com/bitrise-io/bitrise-steplib.git',
   ];
 
