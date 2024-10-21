@@ -39,7 +39,7 @@ export const NixInput = z.object({
 
 export const NixFlakeLock = Json.pipe(
   z.object({
-    nodes: z.record(z.string(), NixInput).optional(),
+    nodes: z.record(z.string(), NixInput),
     root: z.literal('root').optional(),
     version: z.literal(7),
   }),
