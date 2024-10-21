@@ -2882,7 +2882,7 @@ describe('modules/platform/github/index', () => {
           },
           variables: {
             pullRequestId: 'abcd',
-            mergeMethod: 'REBASE',
+            mergeMethod: 'SQUASH',
           },
         },
       };
@@ -3510,7 +3510,7 @@ describe('modules/platform/github/index', () => {
         },
         variables: {
           pullRequestId: 'abcd',
-          mergeMethod: 'REBASE',
+          mergeMethod: 'SQUASH',
         },
       },
     };
