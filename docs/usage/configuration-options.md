@@ -81,8 +81,8 @@ With the above config:
 
 <!-- prettier-ignore -->
 !!! note
-    Make sure your labels do not exceed the maximum character limit specified by the platform you are on.
-    We generally truncate labels at 50 characters except for Gitlab which have a 255 character limit
+    Keep your labels within the maximum character limit for your Git hosting platform.
+    Renovate usually truncates labels to 50 characters, except for GitLab, which has a 255 character limit.
 
 ## additionalBranchPrefix
 
@@ -2207,8 +2207,8 @@ If you want to add/combine labels, use the `addLabels` config option, which is m
 
 <!-- prettier-ignore -->
 !!! note
-    Make sure your labels do not exceed the maximum character limit specified by the platform you are on.
-    We generally truncate labels at 50 characters except for Gitlab which have a 255 character limit
+    Keep your labels within the maximum character limit for your Git hosting platform.
+    Renovate usually truncates labels to 50 characters, except for GitLab, which has a 255 character limit.
 
 ## lockFileMaintenance
 

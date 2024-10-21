@@ -88,7 +88,7 @@ describe('workers/repository/update/pr/labels', () => {
       expect(result).toEqual([]);
     });
 
-    describe('trim labels that exceed max char limit', () => {
+    describe('trim labels that go over the max char limit', () => {
       const labels = [
         'All',
         'The quick brown fox jumped over the lazy sleeping dog', // len: 51
