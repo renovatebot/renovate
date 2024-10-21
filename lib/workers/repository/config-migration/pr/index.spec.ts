@@ -249,6 +249,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     beforeEach(() => {
       GlobalConfig.reset();
       scm.deleteBranch.mockResolvedValue();
+      platform.massageMarkdown.mockImplementationOnce((x) => x);
     });
 
     it('throws when trying to create a new PR', async () => {

@@ -66,7 +66,6 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { normalizeNamePerEcosystem } from '../utils/github-alerts';
-import { smartTruncate } from '../utils/pr-body';
 import { remoteBranchExists } from './branch';
 import { coerceRestPr, githubApi } from './common';
 import {
@@ -1948,7 +1947,7 @@ export async function mergePr({
 
 export function massageMarkdown(input: string): string {
   if (platformConfig.isGhe) {
-    return smartTruncate(input, maxBodyLength());
+    return input;
   }
   const massagedInput = massageMarkdownLinks(input)
     // to be safe, replace all github.com links with redirect.github.com
@@ -1968,11 +1967,15 @@ export function massageMarkdown(input: string): string {
     .replace('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
     .replace('> ⚠️ **Warning**\n> \n', '> [!WARNING]\n')
     .replace('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
-  return smartTruncate(massagedInput, maxBodyLength());
+  return massagedInput;
 }
 
 export function maxBodyLength(): number {
   return GitHubMaxPrBodyLen;
+}
+
+export function maxCommentLength(): number {
+  return Infinity;
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

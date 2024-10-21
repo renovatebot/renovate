@@ -25,7 +25,6 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 
-import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import { client } from './client';
 import { configureScm } from './scm';
@@ -396,7 +395,7 @@ export async function ensureComment(
 
 export function massageMarkdown(prBody: string): string {
   //TODO: do more Gerrit specific replacements?
-  return smartTruncate(readOnlyIssueBody(prBody), maxBodyLength())
+  return readOnlyIssueBody(prBody)
     .replace(regEx(/Pull Request(s)?/g), 'Change-Request$1')
     .replace(regEx(/\bPR(s)?\b/g), 'Change-Request$1')
     .replace(regEx(/<\/?summary>/g), '**')
@@ -421,6 +420,10 @@ export function massageMarkdown(prBody: string): string {
 
 export function maxBodyLength(): number {
   return 16384; //TODO: check the real gerrit limit (max. chars)
+}
+
+export function maxCommentLength(): number {
+  return Infinity;
 }
 
 export function deleteLabel(number: number, label: string): Promise<void> {

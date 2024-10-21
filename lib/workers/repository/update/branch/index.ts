@@ -23,6 +23,7 @@ import {
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
 import { scm } from '../../../../modules/platform/scm';
+import { smartTruncate } from '../../../../modules/platform/utils/pr-body';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedMs } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
@@ -871,6 +872,7 @@ export async function processBranch(
           content += `\`\`\`\n${error.stderr!}\n\`\`\`\n\n`;
         });
         content = platform.massageMarkdown(content);
+        content = smartTruncate(content, platform.maxBodyLength());
         if (
           !(
             config.suppressNotifications!.includes('artifactErrors') ||

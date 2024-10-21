@@ -1,6 +1,7 @@
 import type { RenovateConfig } from '../../../../../config/types';
 import type { PrDebugData } from '../../../../../modules/platform';
 import { platform } from '../../../../../modules/platform';
+import { smartTruncate } from '../../../../../modules/platform/utils/pr-body';
 import { regEx } from '../../../../../util/regex';
 import { toBase64 } from '../../../../../util/string';
 import * as template from '../../../../../util/template';
@@ -72,13 +73,23 @@ interface PrBodyConfig {
   debugData: PrDebugData;
 }
 
+interface PrBodyContent {
+  body: string;
+  comments: PrComment[];
+}
+
+interface PrComment {
+  title: 'Release Notes' | 'Updates';
+  content: string;
+}
+
 const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 
 export function getPrBody(
   branchConfig: BranchConfig,
   prBodyConfig: PrBodyConfig,
   config: RenovateConfig,
-): string {
+): PrBodyContent {
   massageUpdateMetadata(branchConfig);
   let warnings = '';
   warnings += getWarnings(branchConfig);
@@ -100,6 +111,45 @@ export function getPrBody(
     footer: getPrFooter(branchConfig),
   };
 
+  const result: PrBodyContent = {
+    body: createPrBody(content, branchConfig, prBodyConfig),
+    comments: [],
+  };
+  if (result.body.length <= platform.maxBodyLength()) {
+    return result;
+  }
+
+  if (content.changelogs) {
+    result.comments.push({
+      title: 'Release Notes',
+      content: smartTruncate(content.changelogs, platform.maxCommentLength()),
+    });
+    content.changelogs = 'Please see comment below for changelogs';
+
+    result.body = createPrBody(content, branchConfig, prBodyConfig);
+    if (result.body.length <= platform.maxBodyLength()) {
+      return result;
+    }
+  }
+
+  if (content.table) {
+    result.comments.push({
+      title: 'Updates',
+      content: smartTruncate(content.table, platform.maxCommentLength()),
+    });
+    content.table = 'Please see comment below for updates';
+
+    result.body = createPrBody(content, branchConfig, prBodyConfig);
+  }
+  result.body = smartTruncate(result.body, platform.maxBodyLength());
+  return result;
+}
+
+function createPrBody(
+  content: Record<string, unknown>,
+  branchConfig: BranchConfig,
+  prBodyConfig: PrBodyConfig,
+): string {
   let prBody = '';
   if (branchConfig.prBodyTemplate) {
     const prBodyTemplate = branchConfig.prBodyTemplate;

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/onboarding/pr/config-description getConfigDesc() contains the onboardingConfigFileName if set 1`] = `
+exports[`workers/repository/onboarding/pr/body/config-description getConfigDesc() contains the onboardingConfigFileName if set 1`] = `
 "
 ### Configuration Summary
 
@@ -15,7 +15,7 @@ Based on the default config's presets, Renovate will:
 "
 `;
 
-exports[`workers/repository/onboarding/pr/config-description getConfigDesc() falls back to "renovate.json" if onboardingConfigFileName is not set 1`] = `
+exports[`workers/repository/onboarding/pr/body/config-description getConfigDesc() falls back to "renovate.json" if onboardingConfigFileName is not set 1`] = `
 "
 ### Configuration Summary
 
@@ -30,7 +30,7 @@ Based on the default config's presets, Renovate will:
 "
 `;
 
-exports[`workers/repository/onboarding/pr/config-description getConfigDesc() falls back to "renovate.json" if onboardingConfigFileName is not valid 1`] = `
+exports[`workers/repository/onboarding/pr/body/config-description getConfigDesc() falls back to "renovate.json" if onboardingConfigFileName is not valid 1`] = `
 "
 ### Configuration Summary
 
@@ -45,7 +45,7 @@ Based on the default config's presets, Renovate will:
 "
 `;
 
-exports[`workers/repository/onboarding/pr/config-description getConfigDesc() returns a full list 1`] = `
+exports[`workers/repository/onboarding/pr/body/config-description getConfigDesc() returns a full list 1`] = `
 "
 ### Configuration Summary
 
@@ -63,7 +63,7 @@ Based on the default config's presets, Renovate will:
 "
 `;
 
-exports[`workers/repository/onboarding/pr/config-description getConfigDesc() include retry/refresh checkbox message only if onboardingRebaseCheckbox is true 1`] = `
+exports[`workers/repository/onboarding/pr/body/config-description getConfigDesc() include retry/refresh checkbox message only if onboardingRebaseCheckbox is true 1`] = `
 "
 ### Configuration Summary
 

@@ -21,6 +21,7 @@ import {
   hashBody,
 } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
+import { smartTruncate } from '../../../../modules/platform/utils/pr-body';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedHours } from '../../../../util/date';
 import { stripEmojis } from '../../../../util/emoji';
@@ -357,7 +358,7 @@ export async function ensurePr(
       const existingPrTitle = stripEmojis(existingPr.title);
       const existingPrBodyHash = existingPr.bodyStruct?.hash;
       const newPrTitle = stripEmojis(prTitle);
-      const newPrBodyHash = hashBody(prBody);
+      const newPrBodyHash = hashBody(prBody.body);
 
       const prInitialLabels = existingPr.bodyStruct?.debugData?.labels;
       const prCurrentLabels = existingPr.labels;
@@ -368,7 +369,28 @@ export async function ensurePr(
         prCurrentLabels,
         configuredLabels,
       );
+      let topics: string[] = [];
 
+      if (prBody.comments) {
+        topics = prBody.comments.map((x) => x.title);
+        for (const comment of prBody.comments) {
+          await platform.ensureComment({
+            number: existingPr.number,
+            topic: comment.title,
+            content: comment.content,
+          });
+        }
+      }
+      const topicsToDelete = ['Release Notes', 'Updates'].filter(
+        (x) => !topics.includes(x),
+      );
+      for (const topic of topicsToDelete) {
+        await platform.ensureCommentRemoval({
+          number: existingPr.number,
+          type: 'by-topic',
+          topic,
+        });
+      }
       if (
         existingPr?.targetBranch === config.baseBranch &&
         existingPrTitle === newPrTitle &&
@@ -386,7 +408,7 @@ export async function ensurePr(
       const updatePrConfig: UpdatePrConfig = {
         number: existingPr.number,
         prTitle,
-        prBody,
+        prBody: prBody.body,
         platformPrOptions: getPlatformPrOptions(config),
       };
       // PR must need updating
@@ -461,7 +483,7 @@ export async function ensurePr(
         type: 'with-pr',
         pr: {
           ...existingPr,
-          bodyStruct: getPrBodyStruct(prBody),
+          bodyStruct: getPrBodyStruct(prBody.body),
           title: prTitle,
           targetBranch: config.baseBranch,
         },
@@ -489,12 +511,21 @@ export async function ensurePr(
           sourceBranch: branchName,
           targetBranch: config.baseBranch,
           prTitle,
-          prBody,
+          prBody: prBody.body,
           labels: prepareLabels(config),
           platformPrOptions: getPlatformPrOptions(config),
           draftPR: !!config.draftPR,
           milestone: config.milestone,
         });
+        if (pr && prBody.comments) {
+          for (const comment of prBody.comments) {
+            await platform.ensureComment({
+              number: pr.number,
+              topic: comment.title,
+              content: comment.content,
+            });
+          }
+        }
 
         incLimitedValue('PullRequests');
         logger.info({ pr: pr?.number, prTitle }, 'PR created');
@@ -532,6 +563,7 @@ export async function ensurePr(
         content += '\n___\n * Branch has one or more failed status checks';
       }
       content = platform.massageMarkdown(content);
+      content = smartTruncate(content, platform.maxBodyLength());
       logger.debug('Adding branch automerge failure message to PR');
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);
