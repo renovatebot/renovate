@@ -6,7 +6,7 @@ import { platform } from '../../../../modules/platform';
 import * as template from '../../../../util/template';
 
 /**
- * Filter labels that exceed maximum char limit based on platform limits
+ * Filter labels that go over the maximum char limit, based on platform limits.
  */
 function trimLabel(label: string, limit: number): string {
   if (label.length > limit) {
