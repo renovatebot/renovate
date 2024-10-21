@@ -88,6 +88,7 @@ export interface ReleaseResult {
   replacementVersion?: string;
   lookupName?: string;
   packageScope?: string;
+  datasourceProvidedReleaseNotes?: string | undefined;
 }
 
 export interface PostprocessReleaseConfig {
