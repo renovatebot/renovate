@@ -1,9 +1,7 @@
 import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import { DateTime } from 'luxon';
 import semver from 'semver';
-import { GlobalConfig } from '../../../config/global';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -59,6 +57,7 @@ import type {
   PlatformParams,
   PlatformPrOptions,
   PlatformResult,
+  Pr,
   ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
@@ -894,8 +893,6 @@ export async function findPr({
   return pr ?? null;
 }
 
-const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
-
 async function ensureBranchSha(
   branchName: string,
   sha: LongCommitSha,
@@ -942,65 +939,52 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
     branchName,
     state: 'open',
   });
+
   if (openPr) {
     return openPr;
   }
 
-  const autoclosedPr = await findPr({
-    branchName,
-    state: 'closed',
-  });
-  if (
-    autoclosedPr?.title?.endsWith(' - autoclosed') &&
-    autoclosedPr?.closedAt
-  ) {
-    const closedMillisAgo = DateTime.fromISO(autoclosedPr.closedAt)
-      .diffNow()
-      .negate()
-      .toMillis();
-    if (closedMillisAgo > REOPEN_THRESHOLD_MILLIS) {
-      return null;
-    }
-    logger.debug({ autoclosedPr }, 'Found autoclosed PR for branch');
-    if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would try to reopen autoclosed PR');
-      return null;
-    }
-    const { sha, number } = autoclosedPr;
-    try {
-      await ensureBranchSha(branchName, sha!);
-      logger.debug(`Recreated autoclosed branch ${branchName} with sha ${sha}`);
-    } catch (err) {
-      logger.debug(
-        { err, branchName, sha, autoclosedPr },
-        'Could not recreate autoclosed branch - skipping reopen',
-      );
-      return null;
-    }
-    try {
-      const title = autoclosedPr.title.replace(regEx(/ - autoclosed$/), '');
-      const { body: ghPr } = await githubApi.patchJson<GhRestPr>(
-        `repos/${config.repository}/pulls/${number}`,
-        {
-          body: {
-            state: 'open',
-            title,
-          },
-        },
-      );
-      logger.info(
-        { branchName, title, number },
-        'Successfully reopened autoclosed PR',
-      );
-      const result = coerceRestPr(ghPr);
-      cachePr(result);
-      return result;
-    } catch {
-      logger.debug('Could not reopen autoclosed PR');
-      return null;
-    }
-  }
   return null;
+}
+
+export async function tryReuseBranchPr(
+  autoclosedPr: Pr,
+  branchName: string,
+): Promise<Pr | null> {
+  const { sha, number } = autoclosedPr;
+  try {
+    await ensureBranchSha(branchName, sha!);
+    logger.debug(`Recreated autoclosed branch ${branchName} with sha ${sha}`);
+  } catch (err) {
+    logger.debug(
+      { err, branchName, sha, autoclosedPr },
+      'Could not recreate autoclosed branch - skipping reopen',
+    );
+    return null;
+  }
+
+  try {
+    const title = autoclosedPr.title.replace(regEx(/ - autoclosed$/), '');
+    const { body: ghPr } = await githubApi.patchJson<GhRestPr>(
+      `repos/${config.repository}/pulls/${number}`,
+      {
+        body: {
+          state: 'open',
+          title,
+        },
+      },
+    );
+    logger.info(
+      { branchName, title, number },
+      'Successfully reopened autoclosed PR',
+    );
+    const result = coerceRestPr(ghPr);
+    cachePr(result);
+    return result;
+  } catch {
+    logger.debug('Could not reopen autoclosed PR');
+    return null;
+  }
 }
 
 async function getStatus(
