@@ -367,6 +367,7 @@ export function generateBranchConfig(
 
   for (const upgrade of config.upgrades) {
     if (
+      upgrade.semanticCommits &&
       upgrade.semanticCommitType &&
       upgrade.semanticCommitType in semanticCommitTypePriorities
     ) {
@@ -383,6 +384,7 @@ export function generateBranchConfig(
   if (highestPrioritySemanticCommitType) {
     config.semanticCommitType = highestPrioritySemanticCommitType;
   }
+config.semanticCommits = config.upgrades.some((upgrade) => upgrade.semanticCommits));
 
   // Use templates to generate strings
   const commitMessage = compileCommitMessage(config);
