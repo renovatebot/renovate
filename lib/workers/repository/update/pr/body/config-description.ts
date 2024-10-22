@@ -23,7 +23,7 @@ export function getPrConfigDescription(config: BranchConfig): string {
   }
   prBody += '\n\n';
   prBody += emojify(':recycle: **Rebasing**: ');
-  if (config.rebaseWhen === 'behind-base-branch') {
+  if (config.rebaseWhen === 'behind-base-branch' || config.rebaseWhen === 'automerging') {
     prBody += 'Whenever PR is behind base branch';
   } else if (config.rebaseWhen === 'never' || config.stopUpdating) {
     prBody += 'Never';
