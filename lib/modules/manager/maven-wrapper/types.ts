@@ -1,5 +1,5 @@
 export interface Version {
-  url: string;
+  replaceString: string;
   version: string;
 }
 
