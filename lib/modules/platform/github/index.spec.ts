@@ -2462,6 +2462,56 @@ describe('modules/platform/github/index', () => {
       });
     });
 
+    it('skips PR with non-matching state', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [
+          {
+            number: 1,
+            head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
+            title: 'branch a pr',
+            state: 'closed',
+          },
+        ]);
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.findPr({
+        branchName: 'branch-a',
+        state: 'open',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('skips PRs from forks', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [
+          {
+            number: 1,
+            head: { ref: 'branch-a', repo: { full_name: 'other/repo' } },
+            title: 'branch a pr',
+            state: 'open',
+          },
+        ]);
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.findPr({
+        branchName: 'branch-a',
+        state: 'open',
+      });
+
+      expect(res).toBeNull();
+    });
+
     it('skips PR with non-matching title', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
