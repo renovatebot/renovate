@@ -3,18 +3,13 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import type { Pr } from '../../../../modules/platform/types';
-import type { BranchConfig } from '../../../types';
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
-type Config = Pick<BranchConfig, 'branchName' | 'baseBranch'>;
-
-export async function tryReuseBranchPr(config: Config): Promise<Pr | null> {
+export async function tryReuseBranchPr(branchName: string): Promise<Pr | null> {
   if (!platform.tryReuseBranchPr) {
     return null;
   }
-
-  const { branchName } = config;
 
   const autoclosedPr = await platform.findPr({ branchName, state: 'closed' });
   if (!autoclosedPr) {
@@ -45,11 +40,7 @@ export async function tryReuseBranchPr(config: Config): Promise<Pr | null> {
   }
 
   try {
-    const pr = await platform.tryReuseBranchPr(
-      autoclosedPr,
-      branchName,
-      config.baseBranch,
-    );
+    const pr = await platform.tryReuseBranchPr(autoclosedPr, branchName);
     return pr;
   } catch (err) {
     logger.debug(
