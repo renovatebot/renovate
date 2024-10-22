@@ -503,8 +503,8 @@ importers:
         specifier: 8.9.0
         version: 8.9.0(eslint@8.57.1)(typescript@5.6.3)
       aws-sdk-client-mock:
-        specifier: 4.0.2
-        version: 4.0.2
+        specifier: 4.1.0
+        version: 4.1.0
       callsite:
         specifier: 1.0.0
         version: 1.0.0
@@ -2443,8 +2443,8 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  aws-sdk-client-mock@4.0.2:
-    resolution: {integrity: sha512-saFLXQPqHuMH0A1peNIGoAFEq9B0bpS5y5qrr+Y5F86MasVkCctggHKhHPRVjGr852Nz7cLg/PBxKs6lQoK3mg==}
+  aws-sdk-client-mock@4.1.0:
+    resolution: {integrity: sha512-h/tOYTkXEsAcV3//6C1/7U4ifSpKyJvb6auveAepqqNJl6TdZaPFEtKjBQNf8UxQdDP850knB2i/whq4zlsxJw==}
 
   aws4@1.13.2:
     resolution: {integrity: sha512-lHe62zvbTB5eEABUVi/AwVh0ZKY9rMMDhmm+eeyuuUQbQ3+J+fONVQOZyj+DdrvD4BY33uYniyRJ4UJIaSKAfw==}
@@ -9048,7 +9048,7 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.0.0
 
-  aws-sdk-client-mock@4.0.2:
+  aws-sdk-client-mock@4.1.0:
     dependencies:
       '@types/sinon': 17.0.3
       sinon: 18.0.1
