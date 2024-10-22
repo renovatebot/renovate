@@ -363,11 +363,11 @@ export function generateBranchConfig(
     releaseTimestamp: releaseTimestamp!,
   }; // TODO: fixme (#9666)
 
+  // Calculate the highest priority `semanticCommitType`
   let highestPrioritySemanticCommitType = '';
-
   for (const upgrade of config.upgrades) {
     if (
-      upgrade.semanticCommits &&
+      upgrade.semanticCommits === 'enabled' &&
       upgrade.semanticCommitType &&
       upgrade.semanticCommitType in semanticCommitTypePriorities
     ) {
@@ -383,6 +383,13 @@ export function generateBranchConfig(
 
   if (highestPrioritySemanticCommitType) {
     config.semanticCommitType = highestPrioritySemanticCommitType;
+  }
+
+  // Enable `semanticCommits` if one of the branches has it enabled
+  if (
+    config.upgrades.some((upgrade) => upgrade.semanticCommits === 'enabled')
+  ) {
+    config.semanticCommits = 'enabled';
   }
 
   // Use templates to generate strings
