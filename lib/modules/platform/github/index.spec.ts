@@ -22,7 +22,6 @@ import { hashBody } from '../pr-body';
 import type {
   CreatePRConfig,
   ReattemptPlatformAutomergeConfig,
-  RepoParams,
   UpdatePrConfig,
 } from '../types';
 import * as branch from './branch';
