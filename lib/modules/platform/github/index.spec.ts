@@ -2475,6 +2475,7 @@ describe('modules/platform/github/index', () => {
             head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
             title: 'branch a pr',
             state: 'closed',
+            closed_at: DateTime.now().minus({ days: 1 }).toISO(),
           },
         ]);
       await github.initRepo({ repository: 'some/repo' });
