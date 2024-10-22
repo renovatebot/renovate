@@ -17,6 +17,15 @@ import * as poetryVersioning from '../../versioning/poetry';
 import { dependencyPattern } from '../pip_requirements/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 
+const PoetryOptionalDependencyMixin = z
+  .object({
+    optional: z.boolean().optional().catch(undefined),
+  })
+  .transform(
+    ({ optional }): PackageDependency =>
+      optional ? { depType: 'extras' } : {},
+  );
+
 const PoetryPathDependency = z
   .object({
     path: z.string(),
@@ -33,7 +42,8 @@ const PoetryPathDependency = z
     }
 
     return dep;
-  });
+  })
+  .and(PoetryOptionalDependencyMixin);
 
 const PoetryGitDependency = z
   .object({
@@ -84,7 +94,8 @@ const PoetryGitDependency = z
       packageName: git,
       skipReason: 'git-dependency',
     };
-  });
+  })
+  .and(PoetryOptionalDependencyMixin);
 
 const PoetryPypiDependency = z.union([
   z
@@ -99,7 +110,8 @@ const PoetryPypiDependency = z.union([
         managerData: { nestedVersion: true, sourceName: source?.toLowerCase() },
         currentValue,
       };
-    }),
+    })
+    .and(PoetryOptionalDependencyMixin),
   z.string().transform(
     (version): PackageDependency => ({
       datasource: PypiDatasource.id,
@@ -172,10 +184,12 @@ export const PoetryDependencies = LooseRecord(
 function withDepType<
   Output extends PackageDependency[],
   Schema extends ZodType<Output, ZodTypeDef, unknown>,
->(schema: Schema, depType: string): ZodEffects<Schema> {
+>(schema: Schema, depType: string, force: boolean = false): ZodEffects<Schema> {
   return schema.transform((deps) => {
     for (const dep of deps) {
-      dep.depType = depType;
+      if (!dep.depType || force) {
+        dep.depType = depType;
+      }
     }
     return deps;
   });
@@ -268,8 +282,8 @@ export const PoetrySectionSchema = z
     'dev-dependencies': withDepType(
       PoetryDependencies,
       'dev-dependencies',
+      true,
     ).optional(),
-    extras: withDepType(PoetryDependencies, 'extras').optional(),
     group: PoetryGroupDependencies.optional(),
     source: PoetrySources,
   })
@@ -278,14 +292,12 @@ export const PoetrySectionSchema = z
       version,
       dependencies = [],
       'dev-dependencies': devDependencies = [],
-      extras: extraDependencies = [],
       group: groupDependencies = [],
       source: sourceUrls,
     }) => {
       const deps: PackageDependency[] = [
         ...dependencies,
         ...devDependencies,
-        ...extraDependencies,
         ...groupDependencies,
       ];
 
