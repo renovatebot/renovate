@@ -1,7 +1,7 @@
 import { mockDeep } from 'jest-mock-extended';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
-import { logger, mocked, partial } from '../../../../test/util';
+import { logger, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
   PLATFORM_RATE_LIMIT_EXCEEDED,

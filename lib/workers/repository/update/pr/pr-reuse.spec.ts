@@ -21,10 +21,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
       writable: true,
     });
 
-    const res = await tryReuseBranchPr({
-      branchName: 'some-branch',
-      baseBranch: 'main',
-    });
+    const res = await tryReuseBranchPr('some-branch');
 
     expect(res).toBeNull();
   });
@@ -32,10 +29,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
   it('returns null if PR is not found', async () => {
     platform.findPr.mockResolvedValueOnce(null);
 
-    const res = await tryReuseBranchPr({
-      branchName: 'some-branch',
-      baseBranch: 'main',
-    });
+    const res = await tryReuseBranchPr('some-branch');
 
     expect(res).toBeNull();
   });
@@ -48,10 +42,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
       state: 'closed',
     });
 
-    const res = await tryReuseBranchPr({
-      branchName: 'some-branch',
-      baseBranch: 'main',
-    });
+    const res = await tryReuseBranchPr('some-branch');
 
     expect(res).toBeNull();
   });
@@ -64,10 +55,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
       state: 'closed',
     });
 
-    const res = await tryReuseBranchPr({
-      branchName: 'some-branch',
-      baseBranch: 'main',
-    });
+    const res = await tryReuseBranchPr('some-branch');
 
     expect(res).toBeNull();
   });
@@ -81,10 +69,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
       closedAt: DateTime.now().minus({ weeks: 1, seconds: 1 }).toISO(),
     });
 
-    const res = await tryReuseBranchPr({
-      branchName: 'some-branch',
-      baseBranch: 'main',
-    });
+    const res = await tryReuseBranchPr('some-branch');
 
     expect(res).toBeNull();
   });
@@ -100,10 +85,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
       closedAt: DateTime.now().minus({ hours: 1 }).toISO(),
     });
 
-    const res = await tryReuseBranchPr({
-      branchName: 'some-branch',
-      baseBranch: 'main',
-    });
+    const res = await tryReuseBranchPr('some-branch');
 
     expect(res).toBeNull();
     expect(tryReuseFn).not.toHaveBeenCalled();
@@ -125,10 +107,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
       state: 'open',
     });
 
-    const res = await tryReuseBranchPr({
-      branchName: 'some-branch',
-      baseBranch: 'main',
-    });
+    const res = await tryReuseBranchPr('some-branch');
 
     expect(res).toEqual({
       number: 123,
@@ -150,10 +129,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
 
     tryReuseFn.mockRejectedValueOnce('oops');
 
-    const res = await tryReuseBranchPr({
-      branchName: 'some-branch',
-      baseBranch: 'main',
-    });
+    const res = await tryReuseBranchPr('some-branch');
 
     expect(res).toBeNull();
     expect(tryReuseFn).toHaveBeenCalledOnce();
