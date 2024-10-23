@@ -30,7 +30,9 @@ export async function tryReuseBranchPr(branchName: string): Promise<Pr | null> {
     .negate()
     .toMillis();
   if (closedMillisAgo > REOPEN_THRESHOLD_MILLIS) {
-    logger.debug(`Found autoclosed PR ${autoclosedPr.number} but it is too old to reopen`);
+    logger.debug(
+      `Found autoclosed PR ${autoclosedPr.number} but it is too old to reopen`,
+    );
     return null;
   }
 
