@@ -1135,7 +1135,7 @@ describe('modules/platform/github/index', () => {
     });
   });
 
-  describe('tryReuseBranchPr()', () => {
+  describe('tryReuseAutoclosedPr()', () => {
     it('should reopen autoclosed PR', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -1156,7 +1156,7 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
-      const pr = await github.tryReuseBranchPr(
+      const pr = await github.tryReuseAutoclosedPr(
         {
           number: 91,
           title: 'old title - autoclosed',
@@ -1185,7 +1185,7 @@ describe('modules/platform/github/index', () => {
 
       await github.initRepo({ repository: 'some/repo' });
 
-      const pr = await github.tryReuseBranchPr(
+      const pr = await github.tryReuseAutoclosedPr(
         {
           number: 91,
           title: 'old title - autoclosed',
@@ -1207,7 +1207,7 @@ describe('modules/platform/github/index', () => {
 
       await github.initRepo({ repository: 'some/repo' });
 
-      const pr = await github.tryReuseBranchPr(
+      const pr = await github.tryReuseAutoclosedPr(
         {
           number: 91,
           title: 'old title - autoclosed',

@@ -947,7 +947,7 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
   return null;
 }
 
-export async function tryReuseBranchPr(
+export async function tryReuseAutoclosedPr(
   autoclosedPr: Pr,
   branchName: string,
 ): Promise<Pr | null> {

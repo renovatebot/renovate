@@ -1,13 +1,13 @@
 import { DateTime } from 'luxon';
 import { platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import { tryReuseBranchPr } from './pr-reuse';
+import { tryReuseAutoclosedPr } from './pr-reuse';
 
 describe('workers/repository/update/pr/pr-reuse', () => {
-  const tryReuseFn = platform.tryReuseBranchPr;
+  const tryReuseFn = platform.tryReuseAutoclosedPr;
 
   afterEach(() => {
-    Object.defineProperty(platform, 'tryReuseBranchPr', {
+    Object.defineProperty(platform, 'tryReuseAutoclosedPr', {
       value: tryReuseFn,
       writable: true,
     });
@@ -16,12 +16,12 @@ describe('workers/repository/update/pr/pr-reuse', () => {
   });
 
   it('returns null if platform does not support PR reuse', async () => {
-    Object.defineProperty(platform, 'tryReuseBranchPr', {
+    Object.defineProperty(platform, 'tryReuseAutoclosedPr', {
       value: undefined,
       writable: true,
     });
 
-    const res = await tryReuseBranchPr('some-branch');
+    const res = await tryReuseAutoclosedPr('some-branch');
 
     expect(res).toBeNull();
   });
@@ -29,7 +29,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
   it('returns null if PR is not found', async () => {
     platform.findPr.mockResolvedValueOnce(null);
 
-    const res = await tryReuseBranchPr('some-branch');
+    const res = await tryReuseAutoclosedPr('some-branch');
 
     expect(res).toBeNull();
   });
@@ -42,7 +42,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
       state: 'closed',
     });
 
-    const res = await tryReuseBranchPr('some-branch');
+    const res = await tryReuseAutoclosedPr('some-branch');
 
     expect(res).toBeNull();
   });
@@ -55,7 +55,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
       state: 'closed',
     });
 
-    const res = await tryReuseBranchPr('some-branch');
+    const res = await tryReuseAutoclosedPr('some-branch');
 
     expect(res).toBeNull();
   });
@@ -69,7 +69,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
       closedAt: DateTime.now().minus({ weeks: 1, seconds: 1 }).toISO(),
     });
 
-    const res = await tryReuseBranchPr('some-branch');
+    const res = await tryReuseAutoclosedPr('some-branch');
 
     expect(res).toBeNull();
   });
@@ -85,7 +85,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
       closedAt: DateTime.now().minus({ hours: 1 }).toISO(),
     });
 
-    const res = await tryReuseBranchPr('some-branch');
+    const res = await tryReuseAutoclosedPr('some-branch');
 
     expect(res).toBeNull();
     expect(tryReuseFn).not.toHaveBeenCalled();
@@ -107,7 +107,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
       state: 'open',
     });
 
-    const res = await tryReuseBranchPr('some-branch');
+    const res = await tryReuseAutoclosedPr('some-branch');
 
     expect(res).toEqual({
       number: 123,
@@ -129,7 +129,7 @@ describe('workers/repository/update/pr/pr-reuse', () => {
 
     tryReuseFn.mockRejectedValueOnce('oops');
 
-    const res = await tryReuseBranchPr('some-branch');
+    const res = await tryReuseAutoclosedPr('some-branch');
 
     expect(res).toBeNull();
     expect(tryReuseFn).toHaveBeenCalledOnce();

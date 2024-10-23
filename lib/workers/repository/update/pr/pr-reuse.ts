@@ -6,8 +6,10 @@ import type { Pr } from '../../../../modules/platform/types';
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
-export async function tryReuseBranchPr(branchName: string): Promise<Pr | null> {
-  if (!platform.tryReuseBranchPr) {
+export async function tryReuseAutoclosedPr(
+  branchName: string,
+): Promise<Pr | null> {
+  if (!platform.tryReuseAutoclosedPr) {
     return null;
   }
 
@@ -44,7 +46,7 @@ export async function tryReuseBranchPr(branchName: string): Promise<Pr | null> {
   }
 
   try {
-    const pr = await platform.tryReuseBranchPr(autoclosedPr, branchName);
+    const pr = await platform.tryReuseAutoclosedPr(autoclosedPr, branchName);
     return pr;
   } catch (err) {
     logger.debug(

@@ -43,7 +43,7 @@ import {
   generatePrBodyFingerprintConfig,
   validatePrCache,
 } from './pr-fingerprint';
-import { tryReuseBranchPr } from './pr-reuse';
+import { tryReuseAutoclosedPr } from './pr-reuse';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions,
@@ -141,7 +141,7 @@ export async function ensurePr(
   // Check if PR already exists
   const existingPr =
     (await platform.getBranchPr(branchName, config.baseBranch)) ??
-    (await tryReuseBranchPr(branchName));
+    (await tryReuseAutoclosedPr(branchName));
   const prCache = getPrCache(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
