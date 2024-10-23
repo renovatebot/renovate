@@ -16,8 +16,6 @@
     "lxml": "https://git.launchpad.net/lxml/plain/CHANGES.txt",
     "mypy": "https://mypy-lang.blogspot.com/",
     "phonenumbers": "https://github.com/daviddrysdale/python-phonenumbers/blob/dev/python/HISTORY.md",
-    "psycopg2": "https://initd.org/psycopg/articles/tag/release/",
-    "psycopg2-binary": "https://initd.org/psycopg/articles/tag/release/",
     "pycountry": "https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt",
     "django-debug-toolbar": "https://django-debug-toolbar.readthedocs.io/en/latest/changes.html",
     "requests": "https://github.com/psf/requests/blob/master/HISTORY.md",

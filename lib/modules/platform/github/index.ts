@@ -1484,16 +1484,23 @@ export async function addReviewers(
   }
 }
 
-async function addLabels(
+export async function addLabels(
   issueNo: number,
   labels: string[] | null | undefined,
 ): Promise<void> {
   logger.debug(`Adding labels '${labels?.join(', ')}' to #${issueNo}`);
-  const repository = config.parentRepo ?? config.repository;
-  if (is.array(labels) && labels.length) {
-    await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
-      body: labels,
-    });
+  try {
+    const repository = config.parentRepo ?? config.repository;
+    if (is.array(labels) && labels.length) {
+      await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
+        body: labels,
+      });
+    }
+  } catch (err) {
+    logger.warn(
+      { err, issueNo, labels },
+      'Error while adding labels. Skipping',
+    );
   }
 }
 
