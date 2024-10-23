@@ -532,7 +532,7 @@ describe('modules/platform/github/index', () => {
   }
 
   describe('initRepo', () => {
-    it('should rebase', async () => {
+    it('should squash', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       const config = await github.initRepo({ repository: 'some/repo' });
@@ -675,7 +675,7 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
-    it('should squash', async () => {
+    it('should merge', async () => {
       httpMock
         .scope(githubApiHost)
         .post(`/graphql`)
@@ -687,8 +687,8 @@ describe('modules/platform/github/index', () => {
               nameWithOwner: 'some/repo',
               hasIssuesEnabled: true,
               mergeCommitAllowed: true,
-              rebaseMergeAllowed: false,
-              squashMergeAllowed: true,
+              rebaseMergeAllowed: true,
+              squashMergeAllowed: false,
               defaultBranchRef: {
                 name: 'master',
                 target: {
@@ -704,7 +704,7 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
-    it('should merge', async () => {
+    it('should rebase', async () => {
       httpMock
         .scope(githubApiHost)
         .post(`/graphql`)
@@ -715,8 +715,8 @@ describe('modules/platform/github/index', () => {
               isArchived: false,
               nameWithOwner: 'some/repo',
               hasIssuesEnabled: true,
-              mergeCommitAllowed: true,
-              rebaseMergeAllowed: false,
+              mergeCommitAllowed: false,
+              rebaseMergeAllowed: true,
               squashMergeAllowed: false,
               defaultBranchRef: {
                 name: 'master',
