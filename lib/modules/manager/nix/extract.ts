@@ -1,9 +1,16 @@
 import { logger } from '../../../logger';
+import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { NixFlakeLock } from './schema';
 
 // TODO: add support to update nixpkgs branches in flakes.nix using nixpkgsVersioning
+
+// as documented upstream
+// https://github.com/NixOS/nix/blob/master/doc/manual/source/protocols/tarball-fetcher.md#gitea-and-forgejo-support
+const lockableHTTPTarballProtocol = regEx(
+  '^https://(.+)/(.+)/(.+)/archive/(.+).tar.gz$',
+);
 
 export function extractPackageFile(
   content: string,
@@ -93,6 +100,19 @@ export function extractPackageFile(
           replaceString: flakeLocked.rev,
           datasource: GitRefsDatasource.id,
           packageName: `https://${flakeOriginal.host ?? 'git.sr.ht'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
+        });
+        break;
+      case 'tarball':
+        deps.push({
+          depName,
+          currentValue: flakeLocked.ref,
+          currentDigest: flakeLocked.rev,
+          replaceString: flakeLocked.rev,
+          datasource: GitRefsDatasource.id,
+          packageName: (flakeOriginal.url ?? '').replace(
+            lockableHTTPTarballProtocol,
+            'https://$1/$2/$3',
+          ),
         });
         break;
       // istanbul ignore next: just a safeguard

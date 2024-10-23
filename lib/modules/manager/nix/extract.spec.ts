@@ -12,6 +12,7 @@ const flake7Lock = Fixtures.get('flake.7.lock');
 const flake8Lock = Fixtures.get('flake.8.lock');
 const flake9Lock = Fixtures.get('flake.9.lock');
 const flake10Lock = Fixtures.get('flake.10.lock');
+const flake11Lock = Fixtures.get('flake.11.lock');
 
 describe('modules/manager/nix/extract', () => {
   it('returns null when no inputs', () => {
@@ -102,6 +103,17 @@ describe('modules/manager/nix/extract', () => {
         depName: 'nixpkgs-extra-pkgs',
         packageName:
           'https://github.corp.example.com/my-org/nixpkgs-extra-pkgs',
+      },
+    ]);
+  });
+
+  it('includes flake with tarball type', () => {
+    expect(extractPackageFile(flake11Lock, 'flake.lock')?.deps).toMatchObject([
+      {
+        currentDigest: 'c7e39452affcc0f89e023091524e38b3aaf109e9',
+        datasource: 'git-refs',
+        depName: 'data-mesher',
+        packageName: 'https://git.clan.lol/clan/data-mesher',
       },
     ]);
   });

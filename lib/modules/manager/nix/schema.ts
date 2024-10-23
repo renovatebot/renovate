@@ -7,6 +7,7 @@ export const InputType = z.enum([
   'gitlab',
   'indirect',
   'sourcehut',
+  'tarball',
 ]);
 
 export const LockedInput = z.object({
