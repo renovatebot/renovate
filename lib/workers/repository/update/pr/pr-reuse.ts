@@ -38,7 +38,10 @@ export async function tryReuseAutoclosedPr(
     return null;
   }
 
-  logger.debug({ autoclosedPr }, 'Found autoclosed PR for branch');
+  logger.debug(
+    { number: autoclosedPr.number },
+    'Found autoclosed PR for branch',
+  );
 
   if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would try to reopen autoclosed PR');
