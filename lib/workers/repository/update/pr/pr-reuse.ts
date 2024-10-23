@@ -15,7 +15,6 @@ export async function tryReuseBranchPr(branchName: string): Promise<Pr | null> {
   if (!autoclosedPr) {
     return null;
   }
-  logger.debug({ autoclosedPr }, 'Found autoclosed PR for branch');
 
   if (!autoclosedPr.title.endsWith(' - autoclosed')) {
     return null;
@@ -33,6 +32,8 @@ export async function tryReuseBranchPr(branchName: string): Promise<Pr | null> {
   if (closedMillisAgo > REOPEN_THRESHOLD_MILLIS) {
     return null;
   }
+
+  logger.debug({ autoclosedPr }, 'Found autoclosed PR for branch');
 
   if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would try to reopen autoclosed PR');
