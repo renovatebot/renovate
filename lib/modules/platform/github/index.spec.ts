@@ -3665,7 +3665,7 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('mergePr(prNo) - autodetection', () => {
-    it('should try rebase first', async () => {
+    it('should try squash first', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.put('/repos/some/repo/pulls/1235/merge').reply(200);
@@ -3684,12 +3684,12 @@ describe('modules/platform/github/index', () => {
       ).toBeTrue();
     });
 
-    it('should try squash after rebase', async () => {
+    it('should try merge after squash', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
         .put('/repos/some/repo/pulls/1236/merge')
-        .reply(400, 'no rebasing allowed');
+        .reply(400, 'no squashing allowed');
       await github.initRepo({ repository: 'some/repo' });
       const pr = {
         number: 1236,
@@ -3705,14 +3705,14 @@ describe('modules/platform/github/index', () => {
       ).toBeFalse();
     });
 
-    it('should try merge after squash', async () => {
+    it('should try rebase after merge', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
         .put('/repos/some/repo/pulls/1237/merge')
-        .reply(405, 'no rebasing allowed')
-        .put('/repos/some/repo/pulls/1237/merge')
         .reply(405, 'no squashing allowed')
+        .put('/repos/some/repo/pulls/1237/merge')
+        .reply(405, 'no merging allowed')
         .put('/repos/some/repo/pulls/1237/merge')
         .reply(200);
       await github.initRepo({ repository: 'some/repo' });
@@ -3735,11 +3735,11 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .put('/repos/some/repo/pulls/1237/merge')
-        .reply(405, 'no rebasing allowed')
-        .put('/repos/some/repo/pulls/1237/merge')
-        .replyWithError('no squashing allowed')
+        .reply(405, 'no squashing allowed')
         .put('/repos/some/repo/pulls/1237/merge')
         .replyWithError('no merging allowed')
+        .put('/repos/some/repo/pulls/1237/merge')
+        .replyWithError('no rebasing allowed')
         .put('/repos/some/repo/pulls/1237/merge')
         .replyWithError('never gonna give you up');
       await github.initRepo({ repository: 'some/repo' });
