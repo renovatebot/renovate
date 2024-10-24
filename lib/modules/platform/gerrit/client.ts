@@ -98,25 +98,6 @@ class GerritClient {
     return change.body;
   }
 
-  async setCommitMessage(changeNumber: number, message: string): Promise<void> {
-    await this.gerritHttp.putJson(`a/changes/${changeNumber}/message`, {
-      body: { message },
-    });
-  }
-
-  async updateChangeSubject(
-    number: number,
-    currentMessage: string,
-    newSubject: string,
-  ): Promise<void> {
-    // Replace first line of the commit message with the new subject
-    const newMessage = currentMessage.replace(
-      new RegExp(`^.*$`, 'm'),
-      newSubject,
-    );
-    await this.setCommitMessage(number, newMessage);
-  }
-
   async getMessages(changeNumber: number): Promise<GerritChangeMessageInfo[]> {
     const messages = await this.gerritHttp.getJson<GerritChangeMessageInfo[]>(
       `a/changes/${changeNumber}/messages`,

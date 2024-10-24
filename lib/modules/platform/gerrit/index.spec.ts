@@ -187,29 +187,6 @@ describe('modules/platform/gerrit/index', () => {
       gerrit.writeToConfig({ labels: {} });
     });
 
-    it('updatePr() - new prTitle => copy to commit msg', async () => {
-      const oldSubject = 'old title';
-      const oldMessage = `${oldSubject}\n\nsome body\n\nChange-Id: ...`;
-      const change = partial<GerritChange>({
-        subject: oldSubject,
-        current_revision: 'some-revision',
-        revisions: {
-          'some-revision': partial<GerritRevisionInfo>({
-            commit: {
-              message: oldMessage,
-            },
-          }),
-        },
-      });
-      clientMock.getChange.mockResolvedValueOnce(change);
-      await gerrit.updatePr({ number: 123456, prTitle: 'new title' });
-      expect(clientMock.updateChangeSubject).toHaveBeenCalledWith(
-        123456,
-        oldMessage,
-        'new title',
-      );
-    });
-
     it('updatePr() - auto approve enabled', async () => {
       const change = partial<GerritChange>({
         current_revision: 'some-revision',
@@ -332,7 +309,7 @@ describe('modules/platform/gerrit/index', () => {
       ]);
     });
 
-    it('createPr() - update body/title WITHOUT approve', async () => {
+    it('createPr() - update body WITHOUT approve', async () => {
       const pr = await gerrit.createPr({
         sourceBranch: 'source',
         targetBranch: 'target',
@@ -349,11 +326,6 @@ describe('modules/platform/gerrit/index', () => {
         TAG_PULL_REQUEST_BODY,
       );
       expect(clientMock.approveChange).not.toHaveBeenCalled();
-      expect(clientMock.updateChangeSubject).toHaveBeenCalledWith(
-        123456,
-        message,
-        'title',
-      );
     });
 
     it('createPr() - update body and approve', async () => {
@@ -373,7 +345,6 @@ describe('modules/platform/gerrit/index', () => {
         TAG_PULL_REQUEST_BODY,
       );
       expect(clientMock.approveChange).toHaveBeenCalledWith(123456);
-      expect(clientMock.setCommitMessage).not.toHaveBeenCalled();
     });
   });
 
