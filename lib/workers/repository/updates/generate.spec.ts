@@ -703,6 +703,54 @@ describe('workers/repository/updates/generate', () => {
       );
     });
 
+    it('calculates the highest priority semanticCommitType', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'chore',
+          semanticCommitScope: 'package',
+          newValue: '1.2.0',
+          isSingleVersion: true,
+          newVersion: '1.2.0',
+          branchName: 'some-branch',
+        },
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'feat',
+          semanticCommitScope: 'package',
+          newValue: '1.2.0',
+          isSingleVersion: true,
+          newVersion: '1.2.0',
+          branchName: 'some-branch',
+        },
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'fix',
+          semanticCommitScope: 'package',
+          newValue: '1.2.0',
+          isSingleVersion: true,
+          newVersion: '1.2.0',
+          branchName: 'some-branch',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe(
+        'feat(package): update dependency some-dep to v1.2.0',
+      );
+      expect(res.commitMessage).toBe(
+        'feat(package): update dependency some-dep to v1.2.0',
+      );
+    });
+
     it('scopes monorepo commits', () => {
       const branch = [
         {
