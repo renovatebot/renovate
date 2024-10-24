@@ -55,6 +55,23 @@ export async function shouldReuseExistingBranch(
       result.rebaseWhen = 'behind-base-branch';
     }
   }
+
+  if (result.rebaseWhen === 'automerging') {
+    if (result.automerge === true) {
+      logger.debug(
+        'Converting rebaseWhen=automerging to rebaseWhen=behind-base-branch because automerge=true',
+      );
+      result.rebaseWhen = 'behind-base-branch';
+    } else if (await shouldKeepUpdated(result, baseBranch, branchName)) {
+      logger.debug(
+        'Converting rebaseWhen=automerging to rebaseWhen=behind-base-branch because keep-updated label is set',
+      );
+      result.rebaseWhen = 'behind-base-branch';
+    } else {
+      result.rebaseWhen = 'never';
+    }
+  }
+
   if (result.rebaseWhen === 'auto') {
     logger.debug(
       'Converting rebaseWhen=auto to rebaseWhen=conflicted because no rule for converting to rebaseWhen=behind-base-branch applies',
