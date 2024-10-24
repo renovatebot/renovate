@@ -1,6 +1,6 @@
 import * as git from '../../util/git';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
-import type { PlatformScm } from './types';
+import type { PlatformScm, ScmStats } from './types';
 
 export class DefaultGitScm implements PlatformScm {
   branchExists(branchName: string): Promise<boolean> {
@@ -47,5 +47,9 @@ export class DefaultGitScm implements PlatformScm {
 
   mergeToLocal(branchName: string): Promise<void> {
     return git.mergeToLocal(branchName);
+  }
+
+  getStats(): Promise<ScmStats | null> {
+    return git.getStats();
   }
 }
