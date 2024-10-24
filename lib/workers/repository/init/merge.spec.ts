@@ -7,6 +7,7 @@ import {
   platform,
   scm,
 } from '../../../../test/util';
+import * as decrypt from '../../../config/decrypt';
 import { getConfig } from '../../../config/defaults';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import * as _migrate from '../../../config/migration';
@@ -20,6 +21,7 @@ import {
   checkForRepoConfigError,
   detectRepoFileConfig,
   mergeRenovateConfig,
+  setNpmTokenInNpmrc,
 } from './merge';
 
 jest.mock('../../../util/fs');
@@ -384,6 +386,87 @@ describe('workers/repository/init/merge', () => {
           secrets: undefined,
         }),
       ).toBeDefined();
+    });
+
+    it('sets npmToken to npmrc when it is not inside encrypted', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
+      fs.readLocalFile.mockResolvedValue(
+        '{"npmToken": "{{ secrets.NPM_TOKEN }}", "npmrc": "something_authToken=${NPM_TOKEN}"}',
+      );
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        ...config,
+        npmToken: '{{ secrets.NPM_TOKEN }}',
+        npmrc: 'something_authToken=${NPM_TOKEN}',
+        warnings: [],
+        errors: [],
+      });
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+      config.secrets = {
+        NPM_TOKEN: 'confidential',
+      };
+      const res = await mergeRenovateConfig(config);
+      expect(res.npmrc).toBe('something_authToken=confidential');
+    });
+
+    it('sets npmToken to npmrc when it is inside encrypted', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
+      fs.readLocalFile.mockResolvedValue(
+        '{"encrypted": { "npmToken": "encrypted-token" }, "npmrc": "something_authToken=${NPM_TOKEN}"}',
+      );
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        ...config,
+        npmrc: 'something_authToken=${NPM_TOKEN}',
+        encrypted: {
+          npmToken: 'encrypted-token',
+        },
+        warnings: [],
+        errors: [],
+      });
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+      jest.spyOn(decrypt, 'decryptConfig').mockResolvedValueOnce({
+        ...config,
+        npmrc: 'something_authToken=${NPM_TOKEN}',
+        npmToken: 'token',
+      });
+      const res = await mergeRenovateConfig(config);
+      expect(res.npmrc).toBe('something_authToken=token');
+    });
+  });
+
+  describe('setNpmTokenInNpmrc', () => {
+    it('skips in no npmToken found', () => {
+      const config = {};
+      setNpmTokenInNpmrc(config);
+      expect(config).toMatchObject({});
+    });
+
+    it('adds default npmrc registry if it does not exist', () => {
+      const config = { npmToken: 'token' };
+      setNpmTokenInNpmrc(config);
+      expect(config).toMatchObject({
+        npmrc: '//registry.npmjs.org/:_authToken=token\n',
+      });
+    });
+
+    it('adds npmToken at end of npmrc string if ${NPM_TOKEN} string not found', () => {
+      const config = { npmToken: 'token', npmrc: 'something\n' };
+      setNpmTokenInNpmrc(config);
+      expect(config).toMatchObject({ npmrc: 'something\n_authToken=token\n' });
+    });
+
+    it('replaces ${NPM_TOKEN} with npmToken value', () => {
+      const config = {
+        npmToken: 'token',
+        npmrc: 'something_auth=${NPM_TOKEN}\n',
+      };
+      setNpmTokenInNpmrc(config);
+      expect(config).toMatchObject({ npmrc: 'something_auth=token\n' });
     });
   });
 });
