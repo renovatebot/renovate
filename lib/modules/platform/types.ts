@@ -274,7 +274,7 @@ export interface Platform {
     internalChecksAsSuccess: boolean,
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string, targetBranch?: string): Promise<Pr | null>;
-  tryReuseAutoclosedPr?(pr: Pr, branchName: string): Promise<Pr | null>;
+  tryReuseAutoclosedPr?(pr: Pr): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;

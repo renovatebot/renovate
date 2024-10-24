@@ -949,9 +949,8 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
 
 export async function tryReuseAutoclosedPr(
   autoclosedPr: Pr,
-  branchName: string,
 ): Promise<Pr | null> {
-  const { sha, number } = autoclosedPr;
+  const { sha, number, sourceBranch: branchName } = autoclosedPr;
   try {
     await ensureBranchSha(branchName, sha!);
     logger.debug(`Recreated autoclosed branch ${branchName} with sha ${sha}`);

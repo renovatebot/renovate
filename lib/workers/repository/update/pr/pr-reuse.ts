@@ -49,7 +49,7 @@ export async function tryReuseAutoclosedPr(
   }
 
   try {
-    const pr = await platform.tryReuseAutoclosedPr(autoclosedPr, branchName);
+    const pr = await platform.tryReuseAutoclosedPr(autoclosedPr);
     return pr;
   } catch (err) {
     logger.debug(
