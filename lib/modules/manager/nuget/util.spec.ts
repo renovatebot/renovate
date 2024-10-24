@@ -222,6 +222,42 @@ describe('modules/manager/nuget/util', () => {
     });
   });
 
+  it('reads nuget config file without packageSources and with unknown disabled source', async () => {
+    fs.findUpLocal.mockReturnValue(
+      Promise.resolve<string | null>('NuGet.config'),
+    );
+    fs.readLocalFile.mockResolvedValueOnce(
+      codeBlock`
+        <configuration>
+          <disabledPackageSources>
+            <add key="unknown" value="false" />
+          </disabledPackageSources>
+        </configuration>`,
+    );
+
+    const registries = await getConfiguredRegistries('NuGet.config');
+    expect(registries?.length).toBe(1);
+    expect(registries![0].name).toBe('nuget.org');
+    expect(registries![0].url).toBe('https://api.nuget.org/v3/index.json');
+  });
+
+  it('reads nuget config file without packageSources and with default registry disabled', async () => {
+    fs.findUpLocal.mockReturnValue(
+      Promise.resolve<string | null>('NuGet.config'),
+    );
+    fs.readLocalFile.mockResolvedValueOnce(
+      codeBlock`
+        <configuration>
+          <disabledPackageSources>
+                <add key="nuget.org" value="true" />
+          </disabledPackageSources>
+        </configuration>`,
+    );
+
+    const registries = await getConfiguredRegistries('NuGet.config');
+    expect(registries?.length).toBe(0);
+  });
+
   describe('applyRegistries', () => {
     it('applies registry to package name via source mapping', () => {
       const registries: Registry[] = [
