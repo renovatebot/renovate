@@ -3,7 +3,9 @@ import { BzlmodVersion } from './bzlmod-version';
 
 export const id = 'bazel-module';
 export const displayName = 'Bazel Module';
-export const urls = ['https://bazel.build/external/module'];
+export const urls = [
+  '[Bazel External Module Documentation](https://bazel.build/external/module)',
+];
 export const supportsRanges = false;
 
 function getBzlmodVersion(version: string): BzlmodVersion {

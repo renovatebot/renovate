@@ -4,7 +4,7 @@ import type { VersioningApi } from '../types';
 export const id = 'kubernetes-api';
 export const displayName = 'Kubernetes API';
 export const urls = [
-  'https://kubernetes.io/docs/reference/using-api/#api-versioning',
+  '[Kubernetes API Versioning Documentation](https://kubernetes.io/docs/reference/using-api/#api-versioning)',
 ];
 export const supportsRanges = false;
 

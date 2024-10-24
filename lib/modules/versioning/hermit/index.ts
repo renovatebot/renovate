@@ -6,7 +6,7 @@ import type { VersioningApiConstructor } from '../types';
 export const id = 'hermit';
 export const displayName = 'Hermit';
 export const urls = [
-  'https://cashapp.github.io/hermit/packaging/reference/#versions',
+  '[Hermit Packaging Version Reference](https://cashapp.github.io/hermit/packaging/reference/#versions)',
 ];
 export const supportsRanges = false;
 

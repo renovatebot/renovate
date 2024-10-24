@@ -1,5 +1,7 @@
+import type { Versioning } from '../../../tools/docs/versioning';
 import { getOptions } from '../../config/options';
 import { loadModules } from '../../util/modules';
+import { regEx } from '../../util/regex';
 import { isVersioningApiConstructor } from './common';
 import type { GenericVersion } from './generic';
 import { GenericVersioningApi } from './generic';
@@ -56,6 +58,22 @@ describe('modules/versioning/index', () => {
     for (const name of vers.keys()) {
       const ver = vers.get(name)!;
       expect(validate(ver, name)).toBeTrue();
+    }
+
+    const urlRegex = regEx(/^\[.*\]\(.*\)$/);
+    for (const [verName, verModule] of Object.entries(loadedVers)) {
+      const versioningModule = verModule as Versioning;
+      const urls = versioningModule.urls ?? [];
+      for (const url of urls) {
+        const urlValid = urlRegex.test(url);
+        expect({
+          versioning: verName,
+          urlValid,
+        }).toMatchObject({
+          versioning: verName,
+          urlValid: true,
+        });
+      }
     }
   });
 
