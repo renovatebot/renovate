@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { getEnabledManagersList, hashMap } from '../../../modules/manager';
+import { get, getEnabledManagersList, hashMap } from '../../../modules/manager';
 import { isCustomManager } from '../../../modules/manager/custom';
 import { scm } from '../../../modules/platform/scm';
 import type { ExtractResult, WorkerExtractConfig } from '../../types';
@@ -11,9 +11,13 @@ import { getManagerPackageFiles } from './manager-files';
 import { processSupersedesManagers } from './supersedes';
 
 export async function extractAllDependencies(
-  config: RenovateConfig,
+  initConfig: RenovateConfig,
 ): Promise<ExtractResult> {
-  const managerList = getEnabledManagersList(config.enabledManagers);
+  const managerList = getEnabledManagersList(initConfig.enabledManagers);
+
+  // process all preflight checks
+  const config = await applyPreFlights(initConfig, managerList);
+
   const extractList: WorkerExtractConfig[] = [];
   const fileList = await scm.getFileList();
 
@@ -96,4 +100,30 @@ export async function extractAllDependencies(
   }
 
   return extractResult;
+}
+
+export async function applyPreFlights(
+  config: RenovateConfig,
+  managerList: string[],
+): Promise<RenovateConfig> {
+  let result = config;
+  for (const manager of managerList) {
+    const preflight = get(manager, 'preflight');
+    if (!preflight) {
+      continue;
+    }
+
+    logger.debug({ manager }, `Running preflight`);
+    logger.trace(
+      { manager, config: result },
+      `Config before running preflight for manager: '${manager}'`,
+    );
+    result = await preflight(result);
+    logger.trace(
+      { manager, config: result },
+      `Config after running preflight for '${manager}'`,
+    );
+  }
+
+  return result;
 }
