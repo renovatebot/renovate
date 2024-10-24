@@ -4,7 +4,7 @@ import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
+import type { RepoGlobalConfig, UpdateType } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as _hostRules from '../../../util/host-rules';
@@ -1428,6 +1428,67 @@ describe('modules/manager/gomod/artifacts', () => {
       },
       {
         cmd: 'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
+  it('updates import paths with gomodUpdateImportPaths when performing a replacement', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum', 'main.go'],
+      }),
+    );
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New main.go')
+      .mockResolvedValueOnce('New go.mod');
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [
+          {
+            depName: 'github.com/google/go-github/v24',
+            newVersion: 'v28.0.0',
+
+            updateType: 'replacement' as UpdateType,
+            newName: 'github.com/forkzilla/go-github/v28',
+          },
+        ],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          updateType: 'major',
+          postUpdateOptions: ['gomodUpdateImportPaths'],
+        },
+      }),
+    ).toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'mod upgrade --mod-name=github.com/forkzilla/go-github/v28 -t=28',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
