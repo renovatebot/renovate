@@ -24,11 +24,11 @@ The first two required fields are `fileMatch` and `matchStrings`:
 
 Before Renovate can look up a dependency and decide about updates, it must have this info about each dependency:
 
-| Info type | Required | Notes | Docs |
-| --- | --- | --- | --- |
-| Name of the dependency | Yes | | |
-| `datasource` | Yes | Example datasources: npm, Docker, GitHub tags, and so on. | [supported datasources](../../datasource/index.md#supported-datasources) |
-| Version scheme to use. Defaults to `semver-coerced`. | Yes | You may set another version scheme, like `pep440`. | [supported versioning schemes](../../versioning/index.md#supported-versioning) |
+| Info type                                            | Required | Notes                                                     | Docs                                                                           |
+| :--------------------------------------------------- | :------- | :-------------------------------------------------------- | :----------------------------------------------------------------------------- |
+| Name of the dependency                               | Yes      |                                                           |                                                                                |
+| `datasource`                                         | Yes      | Example datasources: npm, Docker, GitHub tags, and so on. | [Supported datasources](../../datasource/index.md#supported-datasources)       |
+| Version scheme to use. Defaults to `semver-coerced`. | Yes      | You may set another version scheme, like `pep440`.        | [Supported versioning schemes](../../versioning/index.md#supported-versioning) |
 
 ### Required capture groups
 
