@@ -15,7 +15,8 @@ You need the following dependencies for local development:
 - pnpm `^9.0.0` (use corepack)
 - C++ compiler
 
-We recommend you use the version of Node.js defined in the repository's `.nvmrc`.
+We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Volta](https://volta.sh/) to manage your tool versions.
+Volta will apply automatically the correct version of Node.js and pnpm when you enter the repository directory.
 
 #### Linux
 

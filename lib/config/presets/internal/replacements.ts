@@ -12,7 +12,7 @@ const muiReplacement: Replacement[] = [
   [['@material-ui/codemod'], '@mui/codemod'],
   [['@material-ui/core'], '@mui/material'],
   [['@material-ui/icons'], '@mui/icons-material'],
-  [['@material-ui/lab'], '@mui/labs'],
+  [['@material-ui/lab'], '@mui/lab'],
   [['@material-ui/private-theming'], '@mui/private-theming'],
   [['@material-ui/styled-engine'], '@mui/styled-engine'],
   [['@material-ui/styled-engine-sc'], '@mui/styled-engine-sc'],
