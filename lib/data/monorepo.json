@@ -380,6 +380,7 @@
       "https://github.com/nestjs/schematics",
       "https://github.com/nestjs/terminus"
     ],
+    "nest-graphql": "https://github.com/nestjs/graphql",
     "netty": "https://github.com/netty/netty",
     "neutrino": [
       "https://github.com/neutrinojs/neutrino",
