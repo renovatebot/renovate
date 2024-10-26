@@ -88,7 +88,7 @@ export const PyProjectSchema = z.object({
     .record(
       z.string(),
       // Skip non-string entries, like `{include-group = "typing"}`, as they are not dependencies.
-      LooseArray(z.string())
+      LooseArray(z.string()),
     )
     .optional(),
   tool: z
