@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
 
