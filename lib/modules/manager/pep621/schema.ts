@@ -87,10 +87,8 @@ export const PyProjectSchema = z.object({
   'dependency-groups': z
     .record(
       z.string(),
-      z
-        .array(z.union([z.string(), z.object({})]))
-        // Skip non-string entries, like `{include-group = "typing"}`, as they are not dependencies.
-        .transform((deps) => deps.filter(is.string)),
+      // Skip non-string entries, like `{include-group = "typing"}`, as they are not dependencies.
+      LooseArray(z.string())
     )
     .optional(),
   tool: z
