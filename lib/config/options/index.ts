@@ -1944,8 +1944,8 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['bitbucket'],
   },
   {
-    name: 'bbMendAppDashboardCheck',
-    description: `When enabled, Renovate will set a branch status check on the *main branch* linked to the repository's [Mend App on Bitbucket Dashboard](https://docs.renovatebot.com/mend-hosted/hosted-apps-config/).`,
+    name: 'bbMendAppDashboardStatus',
+    description: `Creates a main branch status linked to the repository's dashboard from [Mend App on Bitbucket](https://docs.renovatebot.com/mend-hosted/hosted-apps-config/).`,
     type: 'boolean',
     default: false,
     supportedPlatforms: ['bitbucket'],

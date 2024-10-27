@@ -186,7 +186,7 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   ignorePrAuthor,
-  bbMendAppDashboardCheck,
+  bbMendAppDashboardStatus,
   bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
@@ -224,8 +224,8 @@ export async function initRepo({
 
     config.defaultBranch = mainBranch;
 
-    if (bbMendAppDashboardCheck) {
-      logger.debug('Setting Mend App Dashboard branch status');
+    if (bbMendAppDashboardStatus) {
+      logger.debug('Creating branch status for Mend App Repository Dashboard');
       await setBranchStatus({
         branchName: config.defaultBranch,
         context: 'Renovate',

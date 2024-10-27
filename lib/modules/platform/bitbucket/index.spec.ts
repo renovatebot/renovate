@@ -245,7 +245,7 @@ describe('modules/platform/bitbucket/index', () => {
     });
   });
 
-  describe('bbMendAppDashboardCheck', () => {
+  describe('bbMendAppDashboardStatus', () => {
     it('not enabled: should skip setting branch status for main branch', async () => {
       httpMock
         .scope(baseUrl)
@@ -259,7 +259,7 @@ describe('modules/platform/bitbucket/index', () => {
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
-          bbMendAppDashboardCheck: false,
+          bbMendAppDashboardStatus: false,
         }),
       ).toMatchObject({
         defaultBranch: 'master',
@@ -309,7 +309,7 @@ describe('modules/platform/bitbucket/index', () => {
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
-          bbMendAppDashboardCheck: true,
+          bbMendAppDashboardStatus: true,
         }),
       ).toMatchObject({
         defaultBranch: 'master',
