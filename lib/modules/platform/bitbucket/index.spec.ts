@@ -258,6 +258,133 @@ describe('modules/platform/bitbucket/index', () => {
     });
   });
 
+  describe('bbMendAppDashboardStatus', () => {
+    it('not enabled: should skip setting branch status for main branch', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, {
+          mainbranch: { name: 'main' },
+          uuid: '123',
+          full_name: 'some/repo',
+        });
+
+      expect(
+        await bitbucket.initRepo({
+          repository: 'some/repo',
+          bbMendAppDashboardStatus: false,
+        }),
+      ).toMatchObject({
+        defaultBranch: 'main',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
+    });
+
+    it('enabled: should set main branch status if does not exist', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, {
+          mainbranch: { name: 'main' },
+          uuid: '123',
+          full_name: 'some/repo',
+        })
+        .get('/2.0/repositories/some/repo/refs/branches/main')
+        .reply(200, {
+          name: 'main',
+          target: {
+            hash: 'main_hash',
+          },
+        })
+        .post('/2.0/repositories/some/repo/commit/main_hash/statuses/build', {
+          name: 'Mend.io Dashboard',
+          state: 'SUCCESSFUL',
+          key: 'Mend.io Dashboard',
+          description: '',
+          url: 'https://developer.mend.io/bitbucket/some/repo',
+        })
+        .reply(200)
+        .get(
+          '/2.0/repositories/some/repo/commit/main_hash/statuses?pagelen=100',
+        )
+        .reply(200, {
+          values: [
+            {
+              key: 'Some other status',
+              state: 'SUCCESSFUL',
+            },
+          ],
+        })
+        .get(
+          '/2.0/repositories/some/repo/commit/main_hash/statuses?pagelen=100',
+        )
+        .reply(200, {
+          values: [
+            {
+              key: 'Some other status',
+              state: 'SUCCESSFUL',
+            },
+            {
+              key: 'Mend.io Dashboard',
+              state: 'SUCCESSFUL',
+            },
+          ],
+        });
+
+      expect(
+        await bitbucket.initRepo({
+          repository: 'some/repo',
+          bbMendAppDashboardStatus: true,
+        }),
+      ).toMatchObject({
+        defaultBranch: 'main',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
+    });
+
+    it('enabled: should skip creating main branch status if already exist', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, {
+          mainbranch: { name: 'main' },
+          uuid: '123',
+          full_name: 'some/repo',
+        })
+        .get('/2.0/repositories/some/repo/refs/branches/main')
+        .reply(200, {
+          name: 'main',
+          target: {
+            hash: 'main_hash',
+          },
+        })
+        .get(
+          '/2.0/repositories/some/repo/commit/main_hash/statuses?pagelen=100',
+        )
+        .reply(200, {
+          values: [
+            {
+              key: 'Mend.io Dashboard',
+              state: 'SUCCESSFUL',
+            },
+          ],
+        });
+
+      expect(
+        await bitbucket.initRepo({
+          repository: 'some/repo',
+          bbMendAppDashboardStatus: true,
+        }),
+      ).toMatchObject({
+        defaultBranch: 'main',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
+    });
+  });
+
   describe('bbUseDevelopmentBranch', () => {
     it('not enabled: defaults to using main branch', async () => {
       httpMock

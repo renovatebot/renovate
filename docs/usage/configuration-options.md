@@ -404,6 +404,10 @@ You can also use the special `"$default"` string to denote the repository's defa
 
 Configuring this to `true` means that Renovate will mark all PR Tasks as complete.
 
+## bbMendAppDashboardStatus
+
+Configure this to `true` means that Renovate will create a branch status against the repository's main branch, linking to the [Mend App on Bitbucket Repository Dashboard](./mend-hosted/hosted-apps-config.md).
+
 ## bbUseDefaultReviewers
 
 Configuring this to `true` means that Renovate will detect and apply the default reviewers rules to PRs (Bitbucket only).

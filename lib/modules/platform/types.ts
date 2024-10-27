@@ -49,6 +49,7 @@ export interface RepoParams {
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
   ignorePrAuthor?: boolean;
+  bbMendAppDashboardStatus?: boolean;
   bbUseDevelopmentBranch?: boolean;
   includeMirrors?: boolean;
 }
@@ -101,8 +102,9 @@ export interface PlatformPrOptions {
   autoApprove?: boolean;
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
-  bbUseDefaultReviewers?: boolean;
   bbAutoResolvePrTasks?: boolean;
+  bbMendAppDashboardStatus?: boolean;
+  bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
