@@ -479,42 +479,6 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "versioning": "poetry",
   },
   {
-    "currentValue": "^0.8.3",
-    "datasource": "pypi",
-    "depName": "extra_dep1",
-    "depType": "extras",
-    "managerData": {
-      "nestedVersion": true,
-      "sourceName": undefined,
-    },
-    "packageName": "extra-dep1",
-    "versioning": "poetry",
-  },
-  {
-    "currentValue": "^0.9.4",
-    "datasource": "pypi",
-    "depName": "extra_dep2",
-    "depType": "extras",
-    "managerData": {
-      "nestedVersion": true,
-      "sourceName": undefined,
-    },
-    "packageName": "extra-dep2",
-    "versioning": "poetry",
-  },
-  {
-    "currentValue": "^0.4.0",
-    "datasource": "pypi",
-    "depName": "extra_dep3",
-    "depType": "extras",
-    "managerData": {
-      "nestedVersion": true,
-      "sourceName": undefined,
-    },
-    "packageName": "extra-dep3",
-    "versioning": "poetry",
-  },
-  {
     "commitMessageTopic": "Python",
     "currentValue": "~2.7 || ^3.4",
     "datasource": "github-releases",

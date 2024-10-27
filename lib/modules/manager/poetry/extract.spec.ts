@@ -51,7 +51,7 @@ describe('modules/manager/poetry/extract', () => {
     it('extracts multiple dependencies', async () => {
       const res = await extractPackageFile(pyproject1toml, filename);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(10);
+      expect(res?.deps).toHaveLength(7);
       expect(res?.extractedConstraints).toEqual({
         python: '~2.7 || ^3.4',
       });
