@@ -19,7 +19,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 
 const PoetryOptionalDependencyMixin = z
   .object({
-    optional: z.boolean().optional().catch(undefined),
+    optional: z.boolean().optional().catch(false),
   })
   .transform(
     ({ optional }): PackageDependency =>
