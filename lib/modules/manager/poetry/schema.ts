@@ -96,7 +96,10 @@ const PoetryPypiDependency = z.union([
 
       return {
         datasource: PypiDatasource.id,
-        managerData: { nestedVersion: true, sourceName: source?.toLowerCase() },
+        managerData: {
+          nestedVersion: true,
+          ...(source ? { sourceName: source.toLowerCase() } : {}),
+        },
         currentValue,
       };
     }),
