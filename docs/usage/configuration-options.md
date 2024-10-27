@@ -1486,7 +1486,7 @@ You can't use other filenames because Renovate only checks the default filename 
 
 ## gitAuthor
 
-You can customize the Git author that's used whenever Renovate creates a commit, although we you do not recommend this.
+You can customize the Git author that's used whenever Renovate creates a commit, although we do not recommend this.
 When this field is unset (default), Renovate will use its platform credentials (e.g. token) to learn/discover its account's git author automatically.
 
 <!-- prettier-ignore -->
