@@ -147,6 +147,47 @@ describe('modules/manager/pep621/extract', () => {
         },
       ]);
 
+      const dependenciesFromDependencyGroups = result?.deps.filter(
+        (dep) => dep.depType === 'dependency-groups',
+      );
+      expect(dependenciesFromDependencyGroups).toEqual([
+        {
+          packageName: 'mypy',
+          datasource: 'pypi',
+          depType: 'dependency-groups',
+          currentValue: '==1.13.0',
+          currentVersion: '1.13.0',
+          depName: 'mypy',
+          managerData: { depGroup: 'typing' },
+        },
+        {
+          packageName: 'types-requests',
+          datasource: 'pypi',
+          depType: 'dependency-groups',
+          skipReason: 'unspecified-version',
+          depName: 'types-requests',
+          managerData: { depGroup: 'typing' },
+        },
+        {
+          packageName: 'pytest-cov',
+          datasource: 'pypi',
+          depType: 'dependency-groups',
+          currentValue: '==5.0.0',
+          currentVersion: '5.0.0',
+          depName: 'pytest-cov',
+          managerData: { depGroup: 'coverage' },
+        },
+        {
+          packageName: 'click',
+          datasource: 'pypi',
+          depType: 'dependency-groups',
+          currentValue: '==8.1.7',
+          currentVersion: '8.1.7',
+          depName: 'click',
+          managerData: { depGroup: 'all' },
+        },
+      ]);
+
       const pdmDevDependencies = result?.deps.filter(
         (dep) => dep.depType === 'tool.pdm.dev-dependencies',
       );

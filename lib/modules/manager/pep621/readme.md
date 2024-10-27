@@ -10,6 +10,7 @@ Available `depType`s:
 
 - `project.dependencies`
 - `project.optional-dependencies`
+- `dependency-groups`
 - `build-system.requires`
 - `tool.pdm.dev-dependencies`
 - `tool.uv.dev-dependencies`

@@ -39,6 +39,12 @@ export async function extractPackageFile(
   );
   deps.push(
     ...parseDependencyGroupRecord(
+      depTypes.dependencyGroups,
+      def['dependency-groups'],
+    ),
+  );
+  deps.push(
+    ...parseDependencyGroupRecord(
       depTypes.optionalDependencies,
       def.project?.['optional-dependencies'],
     ),

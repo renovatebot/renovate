@@ -32,6 +32,7 @@
     "aspnet-api-versioning": "https://github.com/Microsoft/aspnet-api-versioning",
     "aspnet-health-checks": "https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks",
     "astro": "https://github.com/withastro/astro",
+    "auto": "https://github.com/intuit/auto",
     "autofixture": "https://github.com/AutoFixture/AutoFixture",
     "automapper-dotnet": [
       "https://github.com/AutoMapper/AutoMapper",
@@ -380,6 +381,7 @@
       "https://github.com/nestjs/schematics",
       "https://github.com/nestjs/terminus"
     ],
+    "nest-graphql": "https://github.com/nestjs/graphql",
     "netty": "https://github.com/netty/netty",
     "neutrino": [
       "https://github.com/neutrinojs/neutrino",
