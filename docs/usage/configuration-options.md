@@ -348,7 +348,7 @@ Configuring this to `true` means that Renovate will mark all PR Tasks as complet
 
 ## bbMendAppDashboardStatus
 
-Configure this to `true` means that Renovate will create a branch status against the repository's main branch, linking to the [Mend App on Bitbucket Repository Dashboard](./mend-hosted/hosted-apps-config.md)
+Configure this to `true` means that Renovate will create a branch status against the repository's main branch, linking to the [Mend App on Bitbucket Repository Dashboard](./mend-hosted/hosted-apps-config.md).
 
 ## bbUseDefaultReviewers
 

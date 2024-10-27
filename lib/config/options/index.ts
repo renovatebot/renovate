@@ -1945,7 +1945,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'bbMendAppDashboardStatus',
-    description: `Creates a main branch status linked to the repository's dashboard from [Mend App on Bitbucket](https://docs.renovatebot.com/mend-hosted/hosted-apps-config/).`,
+    description: `Creates a main branch status linked to the repository's Mend App Dashboard.`,
     type: 'boolean',
     default: false,
     supportedPlatforms: ['bitbucket'],
