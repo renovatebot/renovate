@@ -245,6 +245,80 @@ describe('modules/platform/bitbucket/index', () => {
     });
   });
 
+  describe('bbMendAppDashboardCheck', () => {
+    it('not enabled: should skip setting branch status for main branch', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, {
+          mainbranch: { name: 'master' },
+          uuid: '123',
+          full_name: 'some/repo',
+        });
+
+      expect(
+        await bitbucket.initRepo({
+          repository: 'some/repo',
+          bbMendAppDashboardCheck: false,
+        }),
+      ).toMatchObject({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
+    });
+
+    it('enabled: should set branch status for main branch', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, {
+          mainbranch: { name: 'master' },
+          uuid: '123',
+          full_name: 'some/repo',
+        })
+        .get('/2.0/repositories/some/repo/refs/branches/master')
+        .twice()
+        .reply(200, {
+          name: 'branch',
+          target: {
+            hash: 'branch_hash',
+            parents: [{ hash: 'master_hash' }],
+          },
+        })
+        .post('/2.0/repositories/some/repo/commit/branch_hash/statuses/build', {
+          name: 'Renovate',
+          state: 'SUCCESSFUL',
+          key: 'Renovate',
+          description: 'Repository Dashboard',
+          url: 'https://developer.mend.io/bitbucket/some/repo',
+        })
+        .reply(200)
+        .get(
+          '/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100',
+        )
+        .reply(200, {
+          values: [
+            {
+              key: 'Renovate',
+              state: 'SUCCESSFUL',
+            },
+          ],
+        });
+
+      expect(
+        await bitbucket.initRepo({
+          repository: 'some/repo',
+          bbMendAppDashboardCheck: true,
+        }),
+      ).toMatchObject({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
+    });
+  });
+
   describe('bbUseDevelopmentBranch', () => {
     it('not enabled: defaults to using main branch', async () => {
       httpMock

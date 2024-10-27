@@ -186,6 +186,7 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   ignorePrAuthor,
+  bbMendAppDashboardCheck,
   bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
@@ -222,6 +223,17 @@ export async function initRepo({
     }
 
     config.defaultBranch = mainBranch;
+
+    if (bbMendAppDashboardCheck) {
+      logger.debug('Setting Mend App Dashboard branch status');
+      await setBranchStatus({
+        branchName: config.defaultBranch,
+        context: 'Renovate',
+        description: 'Repository Dashboard',
+        state: 'green',
+        url: `https://developer.mend.io/bitbucket/${repository}`,
+      });
+    }
 
     config = {
       ...config,
