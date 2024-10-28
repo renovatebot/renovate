@@ -2111,24 +2111,24 @@ In the case that a user is automatically added as reviewer (such as Renovate App
 
 By default, Renovate will not run any scripts.
 
-### No script execution on free Mend-hosted Renovate
+#### No script execution on free Mend-hosted Renovate
 
 The Mend Renovate App does not allow scripts to run.
 We do not plan to let users on free tiers run scripts, because the risk of abuse is too high.
 
-### Renovate Enterprise Cloud can be configured to run scripts
+#### Renovate Enterprise Cloud can be configured to run scripts
 
 Scripts can be enabled for paying customers on Mend.io hosted apps.
 Please ask Mend.io sales about "Renovate Enterprise Cloud".
 
-### Allowing scripts if self-hosting Renovate
+#### Allowing scripts if self-hosting Renovate
 
 If you are self-hosting Renovate, and want Renovate to run scripts:
 
 1. Set the self-hosted config option [`allowScripts`](../self-hosted-configuration.md#allowscripts) to `true` in your bot/admin configuration
 1. Set `ignoreScripts` to `false` for the package managers you want to allow to run scripts (only works for the listed supportedManagers in the table above)
 
-#### Example config to allow scripts for npm
+##### Example config to allow scripts for npm
 
 Insert example config that allows script execution for just the npm package manager.
 
