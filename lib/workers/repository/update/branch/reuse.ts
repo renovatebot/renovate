@@ -39,7 +39,7 @@ export async function shouldReuseExistingBranch(
   logger.debug(`Branch already exists`);
   const keepUpdated = await shouldKeepUpdated(result, baseBranch, branchName);
   // handle auto/automerging
-  await updateRebaseWhenAuto(result, baseBranch, branchName, keepUpdated);
+  await updateRebaseWhenAuto(result, keepUpdated);
 
   if (result.rebaseWhen === 'behind-base-branch' || keepUpdated) {
     if (await scm.isBranchBehindBase(branchName, baseBranch)) {
@@ -113,12 +113,10 @@ export async function shouldReuseExistingBranch(
 
 async function updateRebaseWhenAuto(
   result: BranchConfig,
-  baseBranch: string,
-  branchName: string,
   keepUpdated: boolean,
 ): Promise<void> {
   // Helper function for logging and assigning
-  const setRebaseWhen = (value: string, reason: string) => {
+  const setRebaseWhen = (value: string, reason: string): void => {
     logger.debug(
       `Converting rebaseWhen=${result.rebaseWhen} to rebaseWhen=${value} because ${reason}`,
     );
