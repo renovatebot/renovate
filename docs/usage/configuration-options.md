@@ -2111,6 +2111,8 @@ In the case that a user is automatically added as reviewer (such as Renovate App
 
 By default, Renovate will not run any scripts.
 
+<!-- markdownlint-disable MD001 -->
+
 #### No script execution on free Mend-hosted Renovate
 
 The Mend Renovate App does not allow scripts to run.
@@ -2131,6 +2133,8 @@ If you are self-hosting Renovate, and want Renovate to run scripts:
 ##### Example config to allow scripts for npm
 
 Insert example config that allows script execution for just the npm package manager.
+
+<!-- markdownlint-enable MD001 -->
 
 ## ignoreTests
 
