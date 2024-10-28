@@ -2113,7 +2113,7 @@ By default, Renovate will disable package manager scripts.
 Allowing packager manager scripts is a risk:
 
 - Untrusted or compromised repository users could use package manager scripts to exploit the system where Renovate runs, and
-- Malicious package authors could use scripts to exploit and repository and Renovate system (e.g. exfiltrate source code and secrets)
+- Malicious package authors could use scripts to exploit a repository and Renovate system, for example to exfiltrate source code and secrets
 
 <!-- markdownlint-disable MD001 -->
 
