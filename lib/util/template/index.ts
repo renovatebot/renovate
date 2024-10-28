@@ -127,6 +127,7 @@ export const exposedConfigOptions = [
   'branchName',
   'branchPrefix',
   'branchTopic',
+  'changelogUrl',
   'commitBody',
   'commitMessage',
   'commitMessageAction',
