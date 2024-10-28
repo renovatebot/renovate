@@ -106,5 +106,22 @@ describe('workers/repository/update/pr/body/config-description', () => {
         `**Automerge**: Disabled because a matching PR was automerged previously.`,
       );
     });
+
+    it('renders automerging with automerge', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        automerge: true,
+        rebaseWhen: 'automerging',
+      });
+      expect(res).toContain(`**Rebasing**: Whenever PR is behind base branch`);
+    });
+
+    it('renders automerging without automerge', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        rebaseWhen: 'automerging',
+      });
+      expect(res).toContain(`**Rebasing**: Never`);
+    });
   });
 });
