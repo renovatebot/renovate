@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft-04/schema#",
   "type": "object",
   "patternProperties": {
-    "^[a-zA-Z]+$": {
+    "^[a-zA-Z-]+$": {
       "type": "object",
       "patternProperties": {
         "^[a-zA-Z0-9. -/:@]+$": {
