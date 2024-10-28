@@ -2109,7 +2109,11 @@ In the case that a user is automatically added as reviewer (such as Renovate App
 
 ## ignoreScripts
 
-By default, Renovate will not run any scripts.
+By default, Renovate will disable package manager scripts.
+Allowing packager manager scripts is a risk:
+
+- Untrusted or compromised repository users could use package manager scripts to exploit the system where Renovate runs, and
+- Malicious package authors could use scripts to exploit and repository and Renovate system (e.g. exfiltrate source code and secrets)
 
 <!-- markdownlint-disable MD001 -->
 
@@ -2125,7 +2129,7 @@ Please ask Mend.io sales about "Renovate Enterprise Cloud".
 
 #### Allowing scripts if self-hosting Renovate
 
-If you are self-hosting Renovate, and want Renovate to run scripts:
+If you are self-hosting Renovate, and want to allow Renovate to run any scripts:
 
 1. Set the self-hosted config option [`allowScripts`](../self-hosted-configuration.md#allowscripts) to `true` in your bot/admin configuration
 1. Set `ignoreScripts` to `false` for the package managers you want to allow to run scripts (only works for the listed supportedManagers in the table above)
