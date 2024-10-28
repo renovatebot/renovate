@@ -120,26 +120,24 @@ async function determineRebaseWhenValue(
   result: BranchConfig,
   keepUpdated: boolean,
 ): Promise<void> {
-  // Helper function for logging and assigning
-  const setRebaseWhen = (value: string, reason: string): void => {
-    logger.debug(
-      `Converting rebaseWhen=${result.rebaseWhen} to rebaseWhen=${value} because ${reason}`,
-    );
-    result.rebaseWhen = value;
-  };
-
   if (result.rebaseWhen === 'auto') {
+    let reason;
+
+    let newValue = 'behind-base-branch';
     if (result.automerge === true) {
-      setRebaseWhen('behind-base-branch', 'automerge=true');
+      reason = 'automerge=true';
     } else if (await platform.getBranchForceRebase?.(result.baseBranch)) {
-      setRebaseWhen(
-        'behind-base-branch',
-        'platform is configured to require up-to-date branches',
-      );
+      reason = 'platform is configured to require up-to-date branches';
     } else if (keepUpdated) {
-      setRebaseWhen('behind-base-branch', 'keep-updated label is set');
+      reason = 'keep-updated label is set';
     } else {
-      setRebaseWhen('conflicted', 'no rule for behind-base-branch applies');
+      newValue = 'conflicted';
+      reason = 'no rule for behind-base-branch applies';
     }
+
+    logger.debug(
+      `Converting rebaseWhen=${result.rebaseWhen} to rebaseWhen=${newValue} because ${reason}`,
+    );
+    result.rebaseWhen = newValue;
   }
 }
