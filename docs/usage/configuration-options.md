@@ -2109,7 +2109,21 @@ In the case that a user is automatically added as reviewer (such as Renovate App
 
 ## ignoreScripts
 
-Applicable for npm, bun, Composer and Copier only for now. Set this to `true` if running scripts causes problems.
+By default, Renovate will not run any scripts.
+
+### No script execution on free Mend-hosted Renovate
+
+The Mend Renovate App does not allow scripts to run.
+We do not plan to let users on free tiers run scripts, because the risk of abuse is too high.
+
+### Allowing scripts if self-hosting Renovate
+
+If you are self-hosting Renovate, and want Renovate to run scripts: set `ignoreScripts` to `false`.
+
+### Renovate Enterprise Cloud can be configured to run scripts
+
+Scripts can now be enabled for paying customers on Mend.io hosted apps.
+Please ask Mend.io sales about "Renovate Enterprise Cloud".
 
 ## ignoreTests
 
