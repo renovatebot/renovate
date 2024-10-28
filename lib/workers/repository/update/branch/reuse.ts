@@ -126,7 +126,10 @@ async function determineRebaseWhenValue(
     let newValue = 'behind-base-branch';
     if (result.automerge === true) {
       reason = 'automerge=true';
-    } else if (result.rebaseWhen !== 'automerging' && await platform.getBranchForceRebase?.(result.baseBranch)) {
+    } else if (
+      result.rebaseWhen !== 'automerging' &&
+      (await platform.getBranchForceRebase?.(result.baseBranch))
+    ) {
       reason = 'platform is configured to require up-to-date branches';
     } else if (keepUpdated) {
       reason = 'keep-updated label is set';
