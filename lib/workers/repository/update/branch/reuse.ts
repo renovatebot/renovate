@@ -38,8 +38,7 @@ export async function shouldReuseExistingBranch(
   }
   logger.debug(`Branch already exists`);
   const keepUpdated = await shouldKeepUpdated(result, baseBranch, branchName);
-  // handle auto/automerging
-  await updateRebaseWhenAuto(result, keepUpdated);
+  await determineRebaseWhenValue(result, keepUpdated);
 
   if (result.rebaseWhen === 'behind-base-branch' || keepUpdated) {
     if (await scm.isBranchBehindBase(branchName, baseBranch)) {
@@ -111,32 +110,37 @@ export async function shouldReuseExistingBranch(
   return result;
 }
 
-async function updateRebaseWhenAuto(
+/**
+ * This method updates rebaseWhen value when it's set to auto(default) or automerging
+ *
+ * @param result BranchConfig
+ * @param keepUpdated boolean
+ */
+async function determineRebaseWhenValue(
   result: BranchConfig,
   keepUpdated: boolean,
 ): Promise<void> {
-  // Helper function for logging and assigning
-  const setRebaseWhen = (value: string, reason: string): void => {
-    logger.debug(
-      `Converting rebaseWhen=${result.rebaseWhen} to rebaseWhen=${value} because ${reason}`,
-    );
-    result.rebaseWhen = value;
-  };
-
   if (result.rebaseWhen === 'auto' || result.rebaseWhen === 'automerging') {
+    let reason;
+
+    let newValue = 'behind-base-branch';
     if (result.automerge === true) {
-      setRebaseWhen('behind-base-branch', 'automerge=true');
-    } else if (await platform.getBranchForceRebase?.(result.baseBranch)) {
-      setRebaseWhen(
-        'behind-base-branch',
-        'platform is configured to require up-to-date branches',
-      );
+      reason = 'automerge=true';
+    } else if (result.rebaseWhen !== 'automerging' && await platform.getBranchForceRebase?.(result.baseBranch)) {
+      reason = 'platform is configured to require up-to-date branches';
     } else if (keepUpdated) {
-      setRebaseWhen('behind-base-branch', 'keep-updated label is set');
+      reason = 'keep-updated label is set';
     } else if (result.rebaseWhen === 'automerging') {
-      setRebaseWhen('never', 'no keep-updated label and automerging is set');
+      newValue = 'never';
+      reason = 'no keep-updated label and automerging is set';
     } else {
-      setRebaseWhen('conflicted', 'no rule for behind-base-branch applies');
+      newValue = 'conflicted';
+      reason = 'no rule for behind-base-branch applies';
     }
+
+    logger.debug(
+      `Converting rebaseWhen=${result.rebaseWhen} to rebaseWhen=${newValue} because ${reason}`,
+    );
+    result.rebaseWhen = newValue;
   }
 }

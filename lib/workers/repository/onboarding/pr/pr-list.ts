@@ -4,11 +4,11 @@ import { emojify } from '../../../../util/emoji';
 import { regEx } from '../../../../util/regex';
 import type { BranchConfig } from '../../../types';
 
-export function getPrList(
+export function getExpectedPrList(
   config: RenovateConfig,
   branches: BranchConfig[],
 ): string {
-  logger.debug('getPrList()');
+  logger.debug('getExpectedPrList()');
   logger.trace({ config });
   let prDesc = `\n### What to Expect\n\n`;
   if (!branches.length) {

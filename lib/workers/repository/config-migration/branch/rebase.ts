@@ -17,10 +17,6 @@ export async function rebaseMigrationBranch(
   logger.debug('Checking if migration branch needs rebasing');
   const baseBranch = config.defaultBranch!;
   const branchName = getMigrationBranchName(config);
-  if (await scm.isBranchModified(branchName, baseBranch)) {
-    logger.debug('Migration branch has been edited and cannot be rebased');
-    return null;
-  }
   const configFileName = migratedConfigData.filename;
   let contents = migratedConfigData.content;
   const existingContents = await getFile(configFileName, branchName);
