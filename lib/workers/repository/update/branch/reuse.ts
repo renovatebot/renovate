@@ -39,7 +39,7 @@ export async function shouldReuseExistingBranch(
   logger.debug(`Branch already exists`);
   const keepUpdated = await shouldKeepUpdated(result, baseBranch, branchName);
   // handle auto/automerging
-  await updateRebaseWhenAuto(result, baseBranch, branchName, keepUpdated)
+  await updateRebaseWhenAuto(result, baseBranch, branchName, keepUpdated);
 
   if (result.rebaseWhen === 'behind-base-branch' || keepUpdated) {
     if (await scm.isBranchBehindBase(branchName, baseBranch)) {
@@ -68,10 +68,7 @@ export async function shouldReuseExistingBranch(
 
     if ((await scm.isBranchModified(branchName, baseBranch)) === false) {
       logger.debug(`Branch is not mergeable and needs rebasing`);
-      if (
-        result.rebaseWhen === 'never' &&
-        !keepUpdated
-      ) {
+      if (result.rebaseWhen === 'never' && !keepUpdated) {
         logger.debug('Rebasing disabled by config');
         result.reuseExistingBranch = true;
         result.isModified = false;
@@ -114,11 +111,17 @@ export async function shouldReuseExistingBranch(
   return result;
 }
 
-async function updateRebaseWhenAuto(result: BranchConfig, baseBranch: string, branchName: string, keepUpdated: boolean): Promise<void> {
-
+async function updateRebaseWhenAuto(
+  result: BranchConfig,
+  baseBranch: string,
+  branchName: string,
+  keepUpdated: boolean,
+): Promise<void> {
   // Helper function for logging and assigning
   const setRebaseWhen = (value: string, reason: string) => {
-    logger.debug(`Converting rebaseWhen=${result.rebaseWhen} to rebaseWhen=${value} because ${reason}`);
+    logger.debug(
+      `Converting rebaseWhen=${result.rebaseWhen} to rebaseWhen=${value} because ${reason}`,
+    );
     result.rebaseWhen = value;
   };
 
@@ -126,7 +129,10 @@ async function updateRebaseWhenAuto(result: BranchConfig, baseBranch: string, br
     if (result.automerge === true) {
       setRebaseWhen('behind-base-branch', 'automerge=true');
     } else if (await platform.getBranchForceRebase?.(result.baseBranch)) {
-      setRebaseWhen('behind-base-branch', 'platform is configured to require up-to-date branches');
+      setRebaseWhen(
+        'behind-base-branch',
+        'platform is configured to require up-to-date branches',
+      );
     } else if (keepUpdated) {
       setRebaseWhen('behind-base-branch', 'keep-updated label is set');
     } else if (result.rebaseWhen === 'automerging') {
