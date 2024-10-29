@@ -64,14 +64,11 @@ export async function filterInternalChecks(
       }
       candidateRelease = updatedCandidateRelease;
 
+      const { version, releaseTimestamp } = candidateRelease;
+
       // Now check for a minimumReleaseAge config
-      const {
-        minimumConfidence,
-        minimumReleaseAge,
-        releaseTimestamp,
-        version: newVersion,
-        updateType,
-      } = releaseConfig;
+      const { minimumConfidence, minimumReleaseAge, updateType } =
+        releaseConfig;
       if (is.nonEmptyString(minimumReleaseAge) && releaseTimestamp) {
         if (
           getElapsedMs(releaseTimestamp) <
@@ -80,7 +77,7 @@ export async function filterInternalChecks(
           // Skip it if it doesn't pass checks
           logger.trace(
             { depName, check: 'minimumReleaseAge' },
-            `Release ${candidateRelease.version} is pending status checks`,
+            `Release ${version} is pending status checks`,
           );
           pendingReleases.unshift(candidateRelease);
           continue;
@@ -94,14 +91,14 @@ export async function filterInternalChecks(
             datasource!,
             depName!,
             currentVersion!,
-            newVersion,
+            version,
             updateType!,
           )) ?? 'neutral';
         // TODO #22198
         if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence!)) {
           logger.trace(
             { depName, check: 'minimumConfidence' },
-            `Release ${candidateRelease.version} is pending status checks`,
+            `Release ${version} is pending status checks`,
           );
           pendingReleases.unshift(candidateRelease);
           continue;
