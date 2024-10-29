@@ -52,7 +52,7 @@
     "test-e2e:install": "cd test/e2e && npm install --no-package-lock --prod",
     "test-e2e:run": "cd test/e2e && npm test",
     "test-schema": "run-s create-json-schema",
-    "test:docs": "node --test tools/docs/test/",
+    "test:docs": "node --test tools/docs/test/**/*.mjs",
     "schedule-test-shards": "SCHEDULE_TEST_SHARDS=true ts-node jest.config.ts",
     "tsc": "tsc",
     "type-check": "run-s 'generate:*' 'tsc --noEmit {@}' --",
