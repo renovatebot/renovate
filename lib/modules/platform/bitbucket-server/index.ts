@@ -1011,17 +1011,31 @@ export async function updatePr({
       };
     }
 
-    const { body: updatedPr } = await bitbucketServerHttp.putJson<{
-      version: number;
-      state: string;
-    }>(
+    const { body: updatedPrRes } = await bitbucketServerHttp.putJson<
+      BbsRestPr & {
+        version: number;
+        state: string;
+      }
+    >(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
       { body },
     );
 
-    updatePrVersion(prNo, updatedPr.version);
+    updatePrVersion(prNo, updatedPrRes.version);
 
-    const currentState = updatedPr.state;
+    if (config.prList) {
+      const updatedPr = utils.prInfo(updatedPrRes);
+      const existingIndex = config.prList.findIndex(
+        (item) => item.number === prNo,
+      );
+      if (existingIndex === -1) {
+        config.prList.push(updatedPr);
+      } else {
+        config.prList[existingIndex] = updatedPr;
+      }
+    }
+
+    const currentState = updatedPrRes.state;
     // TODO #22198
     const newState = {
       ['open']: 'OPEN',
@@ -1037,7 +1051,7 @@ export async function updatePr({
       const { body: updatedStatePr } = await bitbucketServerHttp.postJson<{
         version: number;
       }>(
-        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/${command}?version=${updatedPr.version}`,
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/${command}?version=${updatedPrRes.version}`,
       );
 
       updatePrVersion(pr.number, updatedStatePr.version);
