@@ -359,7 +359,6 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "depType": "dependencies",
       "managerData": {
         "nestedVersion": true,
-        "sourceName": undefined,
       },
       "versioning": "poetry",
     },
@@ -370,7 +369,6 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "depType": "dependencies",
       "managerData": {
         "nestedVersion": true,
-        "sourceName": undefined,
       },
       "versioning": "poetry",
     },

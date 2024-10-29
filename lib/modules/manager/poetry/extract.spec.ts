@@ -481,11 +481,17 @@ describe('modules/manager/poetry/extract', () => {
             depName: 'typer',
             currentValue: '^0.9.0',
             registryUrls: ['https://pypi.org/pypi/'],
+            managerData: {
+              sourceName: 'pypi',
+            },
           },
           {
             depName: 'requests-cache',
             currentValue: '^1.1.0',
             registryUrls: ['https://example.com'],
+            managerData: {
+              sourceName: 'artifactory',
+            },
           },
         ]);
       });

@@ -286,6 +286,11 @@ export async function ensureDependencyDashboard(
   }
   let issueBody = '';
 
+  if (config.dependencyDashboardHeader?.length) {
+    issueBody +=
+      template.compile(config.dependencyDashboardHeader, config) + '\n\n';
+  }
+
   if (configMigrationRes.result === 'pr-exists') {
     issueBody +=
       '## Config Migration Needed\n\n' +
@@ -299,11 +304,6 @@ export async function ensureDependencyDashboard(
       '## Config Migration Needed\n\n' +
       ' - [ ] <!-- create-config-migration-pr --> Select this checkbox to let Renovate create an automated Config Migration PR.' +
       '\n\n';
-  }
-
-  if (config.dependencyDashboardHeader?.length) {
-    issueBody +=
-      template.compile(config.dependencyDashboardHeader, config) + '\n\n';
   }
 
   issueBody = appendRepoProblems(config, issueBody);

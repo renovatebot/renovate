@@ -46,6 +46,7 @@ export class UvProcessor implements PyProjectProcessor {
     // Skip sources that do not make sense to handle (e.g. path).
     if (uv.sources) {
       for (const dep of deps) {
+        // istanbul ignore if
         if (!dep.packageName) {
           continue;
         }
