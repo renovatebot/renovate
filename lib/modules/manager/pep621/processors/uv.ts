@@ -22,7 +22,7 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types';
-import { type PyProject, type UvGitSource, UvLockfileSchema } from '../schema';
+import { type PyProject, UvLockfileSchema } from '../schema';
 import { depTypes, parseDependencyList } from '../utils';
 import type { PyProjectProcessor } from './types';
 
@@ -63,7 +63,13 @@ export class UvProcessor implements PyProjectProcessor {
           } else if ('workspace' in depSource) {
             dep.skipReason = 'inherited-dependency';
           } else {
-            applyGitSource(dep, depSource);
+            applyGitSource(
+              dep,
+              depSource.git,
+              depSource.rev,
+              depSource.tag,
+              depSource.branch,
+            );
           }
         }
       }
@@ -183,8 +189,13 @@ export class UvProcessor implements PyProjectProcessor {
   }
 }
 
-function applyGitSource(dep: PackageDependency, depSource: UvGitSource): void {
-  const { git, rev, tag, branch } = depSource;
+function applyGitSource(
+  dep: PackageDependency,
+  git: string,
+  rev: string | undefined,
+  tag: string | undefined,
+  branch: string | undefined,
+): void {
   if (tag) {
     const platform = detectPlatform(git);
     if (platform === 'github' || platform === 'gitlab') {
