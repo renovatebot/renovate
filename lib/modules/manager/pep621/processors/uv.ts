@@ -47,11 +47,13 @@ export class UvProcessor implements PyProjectProcessor {
     if (uv.sources) {
       for (const dep of deps) {
         // istanbul ignore if
-        if (!dep.depName) {
+        if (!dep.packageName) {
           continue;
         }
 
-        const depSource = uv.sources[dep.depName];
+        // Using `packageName` as it applies PEP 508 normalization, which is
+        // also applied by uv when matching a source to a dependency.
+        const depSource = uv.sources[dep.packageName];
         if (depSource) {
           dep.depType = depTypes.uvSources;
           if ('url' in depSource) {
