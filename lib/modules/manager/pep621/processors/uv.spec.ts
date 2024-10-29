@@ -95,10 +95,6 @@ describe('modules/manager/pep621/processors/uv', () => {
         depName: 'dep2',
         packageName: 'dep2',
       },
-      {
-        depName: undefined,
-        packageName: undefined,
-      },
     ];
 
     const result = processor.process(pyproject, dependencies);
@@ -119,10 +115,6 @@ describe('modules/manager/pep621/processors/uv', () => {
         registryUrls: ['https://gitlab.com'],
         packageName: 'foo/dep2',
         currentValue: '0.2.0',
-      },
-      {
-        depName: undefined,
-        packageName: undefined,
       },
       {
         depName: 'dep3',
