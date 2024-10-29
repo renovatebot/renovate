@@ -83,6 +83,13 @@ export const PyProjectSchema = z.object({
       'build-backend': z.string().optional(),
     })
     .optional(),
+  'dependency-groups': z
+    .record(
+      z.string(),
+      // Skip non-string entries, like `{include-group = "typing"}`, as they are not dependencies.
+      LooseArray(z.string()),
+    )
+    .optional(),
   tool: z
     .object({
       pdm: PdmSchema.optional(),
