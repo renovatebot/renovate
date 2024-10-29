@@ -86,7 +86,16 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       },
     };
-    const dependencies = [{ depName: 'dep1' }, { depName: 'dep2' }];
+    const dependencies = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+      },
+      {
+        depName: 'dep2',
+        packageName: 'dep2',
+      },
+    ];
 
     const result = processor.process(pyproject, dependencies);
 

@@ -339,7 +339,7 @@ describe('modules/manager/pep621/extract', () => {
           "dep4",
           "dep5",
           "dep6",
-          "dep7",
+          "dep-with_NORMALIZATION",
         ]
 
         [tool.uv.sources]
@@ -347,6 +347,7 @@ describe('modules/manager/pep621/extract', () => {
         dep3 = { path = "/local-dep.whl" }
         dep4 = { url = "https://example.com" }
         dep5 = { workspace = true }
+        dep_WITH-normalization = { workspace = true }
         `,
         'pyproject.toml',
       );
@@ -382,7 +383,9 @@ describe('modules/manager/pep621/extract', () => {
           depName: 'dep6',
         },
         {
-          depName: 'dep7',
+          depName: 'dep-with_NORMALIZATION',
+          depType: depTypes.uvSources,
+          skipReason: 'inherited-dependency',
         },
       ]);
     });
