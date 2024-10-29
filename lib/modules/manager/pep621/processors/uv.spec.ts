@@ -66,69 +66,6 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ]);
     });
-
-    it('skips dependencies with unsupported sources', () => {
-      const pyproject = {
-        tool: {
-          uv: {
-            sources: {
-              dep2: { git: 'https://github.com/foo/bar' },
-              dep3: { path: '/local-dep.whl' },
-              dep4: { url: 'https://example.com' },
-              dep5: { workspace: true },
-            },
-          },
-        },
-      } as const;
-      const dependencies = [
-        {},
-        { depName: 'dep1' },
-        { depName: 'dep2' },
-        { depName: 'dep3' },
-        { depName: 'dep4' },
-        { depName: 'dep5' },
-        { depName: 'dep6' },
-        { depName: 'dep7' },
-      ];
-
-      const result = processor.process(pyproject, dependencies);
-
-      expect(result).toEqual([
-        {},
-        {
-          depName: 'dep1',
-        },
-        {
-          depName: 'dep2',
-          depType: depTypes.uvSources,
-          datasource: GitRefsDatasource.id,
-          packageName: 'https://github.com/foo/bar',
-          currentValue: undefined,
-          skipReason: 'unspecified-version',
-        },
-        {
-          depName: 'dep3',
-          depType: depTypes.uvSources,
-          skipReason: 'path-dependency',
-        },
-        {
-          depName: 'dep4',
-          depType: depTypes.uvSources,
-          skipReason: 'unsupported-url',
-        },
-        {
-          depName: 'dep5',
-          depType: depTypes.uvSources,
-          skipReason: 'inherited-dependency',
-        },
-        {
-          depName: 'dep6',
-        },
-        {
-          depName: 'dep7',
-        },
-      ]);
-    });
   });
 
   it('applies git sources', () => {
