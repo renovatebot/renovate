@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
+import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,
   extractExtensions,
@@ -232,6 +233,17 @@ describe('modules/manager/maven/extract', () => {
         packageFileVersion: '0.0.1',
         parent: '../pom.xml',
       });
+    });
+
+    it('extract dependencies with windows line endings', () => {
+      const logSpy = jest.spyOn(logger, 'warn');
+      extractPackage(
+        '<?xml version="1.0" encoding="UTF-8"?> \r\n',
+        'some-file',
+      );
+      expect(logSpy).toHaveBeenCalledWith(
+        'Your pom.xml contains windows line endings. This is not supported and may result in parsing issues.',
+      );
     });
 
     it('tries minimum manifests', () => {

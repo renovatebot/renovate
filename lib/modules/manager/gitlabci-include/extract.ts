@@ -14,7 +14,6 @@ import type {
   GitlabIncludeProject,
   GitlabPipeline,
 } from '../gitlabci/types';
-import { replaceReferenceTags } from '../gitlabci/utils';
 import type { PackageDependency, PackageFileContent } from '../types';
 
 function extractDepFromIncludeFile(
@@ -76,7 +75,7 @@ export function extractPackageFile(
       : null;
   try {
     // TODO: use schema (#9610)
-    const docs = parseYaml<GitlabPipeline>(replaceReferenceTags(content), {
+    const docs = parseYaml<GitlabPipeline>(content, {
       uniqueKeys: false,
     });
     for (const doc of docs) {
