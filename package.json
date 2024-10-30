@@ -138,7 +138,7 @@
     "node": "^20.15.1",
     "pnpm": "^9.0.0"
   },
-  "volta":{
+  "volta": {
     "node": "20.18.0",
     "pnpm": "9.12.2"
   },
@@ -230,6 +230,7 @@
     "p-throttle": "4.1.1",
     "parse-link-header": "2.0.0",
     "prettier": "3.3.3",
+    "protobufjs": "7.4.0",
     "redis": "4.7.0",
     "remark": "13.0.0",
     "remark-github": "10.1.0",
