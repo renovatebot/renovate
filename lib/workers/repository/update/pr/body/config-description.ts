@@ -21,17 +21,11 @@ export function getPrConfigDescription(config: BranchConfig): string {
     prBody +=
       'Disabled by config. Please merge this manually once you are satisfied.';
   }
-
-  let rebaseWhenCfg = config.rebaseWhen;
-  if (config.rebaseWhen === 'automerging') {
-    rebaseWhenCfg = config.automerge ? 'behind-base-branch' : 'never';
-  }
-
   prBody += '\n\n';
   prBody += emojify(':recycle: **Rebasing**: ');
-  if (rebaseWhenCfg === 'behind-base-branch') {
+  if (config.rebaseWhen === 'behind-base-branch') {
     prBody += 'Whenever PR is behind base branch';
-  } else if (rebaseWhenCfg === 'never' || config.stopUpdating) {
+  } else if (config.rebaseWhen === 'never' || config.stopUpdating) {
     prBody += 'Never';
   } else {
     prBody += 'Whenever PR becomes conflicted';
