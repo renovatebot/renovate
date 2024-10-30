@@ -66,7 +66,7 @@ describe('modules/manager/cargo/extract', () => {
     it('extracts multiple dependencies simple', async () => {
       const res = await extractPackageFile(cargo1toml, 'Cargo.toml', config);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(15);
+      expect(res?.deps).toHaveLength(18);
     });
 
     it('extracts multiple dependencies advanced', async () => {
