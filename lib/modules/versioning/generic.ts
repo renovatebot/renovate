@@ -153,10 +153,10 @@ export abstract class GenericVersioningApi<
   isSame(type: 'major'|'minor'|'patch', a: string, b: string): boolean {
     if (type === 'major') {
       return this.getMajor(a)! === this.getMajor(b)!;
-    } else if (type === 'minor') {
-      return this.getMinor(a)! === this.getMinor(b)!;
-    } else {
-      return this.getPatch(a)! === this.getPatch(b)!;
     }
+    if (type === 'minor') {
+      return this.getMinor(a)! === this.getMinor(b)!;
+    }
+    return this.getPatch(a)! === this.getPatch(b)!;
   }
 }
