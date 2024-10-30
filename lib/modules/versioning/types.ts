@@ -134,7 +134,7 @@ export interface VersioningApi {
    * Check whether the `type` in the `a` and `b` version numbers match.
    * Both `a` and `b` must pass `isVersion`.
    */
-  isSame?(type: 'major'|'minor'|'patch', a: string, b: string): boolean;
+  isSame?(type: 'major' | 'minor' | 'patch', a: string, b: string): boolean;
 }
 
 export interface VersioningApiConstructor {
