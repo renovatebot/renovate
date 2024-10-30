@@ -457,7 +457,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     },
   },
   'markdownlint-cli2': {
-    asdfPluginUrl: 'https://github.com/paulo-ferraz-oliveira/asdf-markdownlint-cli2',
+    asdfPluginUrl:
+      'https://github.com/paulo-ferraz-oliveira/asdf-markdownlint-cli2',
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'DavidAnson/markdownlint-cli2',
