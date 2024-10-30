@@ -21,6 +21,15 @@ import * as poetryVersioning from '../../versioning/poetry';
 import { dependencyPattern } from '../pip_requirements/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 
+const PoetryOptionalDependencyMixin = z
+  .object({
+    optional: z.boolean().optional().catch(false),
+  })
+  .transform(
+    ({ optional }): PackageDependency =>
+      optional ? { depType: 'extras' } : {},
+  );
+
 const PoetryPathDependency = z
   .object({
     path: z.string(),
@@ -37,7 +46,8 @@ const PoetryPathDependency = z
     }
 
     return dep;
-  });
+  })
+  .and(PoetryOptionalDependencyMixin);
 
 const PoetryGitDependency = z
   .object({
@@ -88,7 +98,8 @@ const PoetryGitDependency = z
       packageName: git,
       skipReason: 'git-dependency',
     };
-  });
+  })
+  .and(PoetryOptionalDependencyMixin);
 
 const PoetryPypiDependency = z.union([
   z
@@ -106,7 +117,8 @@ const PoetryPypiDependency = z.union([
         },
         currentValue,
       };
-    }),
+    })
+    .and(PoetryOptionalDependencyMixin),
   z.string().transform(
     (version): PackageDependency => ({
       datasource: PypiDatasource.id,
@@ -259,12 +271,15 @@ export const PoetrySources = LooseArray(PoetrySource, {
 export const PoetrySectionSchema = z
   .object({
     version: z.string().optional().catch(undefined),
-    dependencies: withDepType(PoetryDependencies, 'dependencies').optional(),
+    dependencies: withDepType(
+      PoetryDependencies,
+      'dependencies',
+      false,
+    ).optional(),
     'dev-dependencies': withDepType(
       PoetryDependencies,
       'dev-dependencies',
     ).optional(),
-    extras: withDepType(PoetryDependencies, 'extras').optional(),
     group: PoetryGroupDependencies.optional(),
     source: PoetrySources,
   })
@@ -273,14 +288,12 @@ export const PoetrySectionSchema = z
       version,
       dependencies = [],
       'dev-dependencies': devDependencies = [],
-      extras: extraDependencies = [],
       group: groupDependencies = [],
       source: sourceUrls,
     }) => {
       const deps: PackageDependency[] = [
         ...dependencies,
         ...devDependencies,
-        ...extraDependencies,
         ...groupDependencies,
       ];
 
