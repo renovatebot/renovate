@@ -272,6 +272,9 @@ importers:
       prettier:
         specifier: 3.3.3
         version: 3.3.3
+      protobufjs:
+        specifier: 7.4.0
+        version: 7.4.0
       redis:
         specifier: 4.7.0
         version: 4.7.0
