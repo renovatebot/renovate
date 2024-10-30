@@ -235,7 +235,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         matchDatasources: ['docker'],
-        matchDepNames: ['node'],
+        matchDepNames: ['/(^|\\/)node$/'],
         versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
         versioning: 'node',
       },
