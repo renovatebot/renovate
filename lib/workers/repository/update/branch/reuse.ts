@@ -31,14 +31,16 @@ export async function shouldReuseExistingBranch(
 ): Promise<BranchConfig> {
   const { baseBranch, branchName } = config;
   const result: BranchConfig = { ...config, reuseExistingBranch: false };
+
+  const keepUpdated = await shouldKeepUpdated(result, baseBranch, branchName);
+  await determineRebaseWhenValue(result, keepUpdated);
+
   // Check if branch exists
   if (!(await scm.branchExists(branchName))) {
     logger.debug(`Branch needs creating`);
     return result;
   }
   logger.debug(`Branch already exists`);
-  const keepUpdated = await shouldKeepUpdated(result, baseBranch, branchName);
-  await determineRebaseWhenValue(result, keepUpdated);
 
   if (result.rebaseWhen === 'behind-base-branch' || keepUpdated) {
     if (await scm.isBranchBehindBase(branchName, baseBranch)) {
