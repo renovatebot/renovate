@@ -1,6 +1,8 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
+import { GitRefsDatasource } from '../../datasource/git-refs';
+import { depTypes } from './utils';
 import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
@@ -322,6 +324,68 @@ describe('modules/manager/pep621/extract', () => {
             'https://pypi.org/pypi/',
             'https://private-site.org/pypi/simple',
           ],
+        },
+      ]);
+    });
+
+    it('should skip dependencies with unsupported uv sources', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+        [project]
+        dependencies = [
+          "dep1",
+          "dep2",
+          "dep3",
+          "dep4",
+          "dep5",
+          "dep6",
+          "dep-with_NORMALIZATION",
+        ]
+
+        [tool.uv.sources]
+        dep2 = { git = "https://github.com/foo/bar" }
+        dep3 = { path = "/local-dep.whl" }
+        dep4 = { url = "https://example.com" }
+        dep5 = { workspace = true }
+        dep_WITH-normalization = { workspace = true }
+        `,
+        'pyproject.toml',
+      );
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          depType: depTypes.uvSources,
+          datasource: GitRefsDatasource.id,
+          packageName: 'https://github.com/foo/bar',
+          currentValue: undefined,
+          skipReason: 'unspecified-version',
+        },
+        {
+          depName: 'dep3',
+          depType: depTypes.uvSources,
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'dep4',
+          depType: depTypes.uvSources,
+          skipReason: 'unsupported-url',
+        },
+        {
+          depName: 'dep5',
+          depType: depTypes.uvSources,
+          skipReason: 'inherited-dependency',
+        },
+        {
+          depName: 'dep6',
+        },
+        {
+          depName: 'dep-with_NORMALIZATION',
+          depType: depTypes.uvSources,
+          skipReason: 'inherited-dependency',
         },
       ]);
     });

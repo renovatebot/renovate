@@ -1,9 +1,13 @@
-import type { ZodEffects, ZodType, ZodTypeDef } from 'zod';
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
-import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
+import {
+  LooseArray,
+  LooseRecord,
+  Toml,
+  withDepType,
+} from '../../../util/schema-utils';
 import { uniq } from '../../../util/uniq';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -184,20 +188,6 @@ export const PoetryDependencies = LooseRecord(
   return deps;
 });
 
-function withDepType<
-  Output extends PackageDependency[],
-  Schema extends ZodType<Output, ZodTypeDef, unknown>,
->(schema: Schema, depType: string, force: boolean = false): ZodEffects<Schema> {
-  return schema.transform((deps) => {
-    for (const dep of deps) {
-      if (!dep.depType || force) {
-        dep.depType = depType;
-      }
-    }
-    return deps;
-  });
-}
-
 export const PoetryGroupDependencies = LooseRecord(
   z.string(),
   z
@@ -281,11 +271,14 @@ export const PoetrySources = LooseArray(PoetrySource, {
 export const PoetrySectionSchema = z
   .object({
     version: z.string().optional().catch(undefined),
-    dependencies: withDepType(PoetryDependencies, 'dependencies').optional(),
+    dependencies: withDepType(
+      PoetryDependencies,
+      'dependencies',
+      false,
+    ).optional(),
     'dev-dependencies': withDepType(
       PoetryDependencies,
       'dev-dependencies',
-      true,
     ).optional(),
     group: PoetryGroupDependencies.optional(),
     source: PoetrySources,

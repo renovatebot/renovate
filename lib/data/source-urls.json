@@ -1,4 +1,5 @@
 {
+  "$schema": "../../tools/schemas/source-urls-schema.json",
   "orb": {
     "cypress-io/cypress": "https://github.com/cypress-io/circleci-orb",
     "hutson/library-release-workflows": "https://github.com/hyper-expanse/library-release-workflows"
