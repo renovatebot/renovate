@@ -68,7 +68,7 @@ export class PypiDatasource extends Datasource {
       } catch (err) {
         // error contacting json-style api -- attempt to fallback to a simple-style api
         logger.trace(
-          { packageName, hostUrl },
+          { packageName, hostUrl, err },
           'Looking up pypi simple dependency via fallback',
         );
         dependency = await this.getSimpleDependency(
