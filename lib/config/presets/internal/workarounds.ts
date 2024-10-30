@@ -235,7 +235,13 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         matchDatasources: ['docker'],
-        matchDepNames: ['/(^|\\/)node$/'],
+        // copied from https://github.com/renovatebot/renovate/blob/a471762e137619c06e73a678d6b63ca984da7dba/lib/config/presets/internal/group.ts#L351
+        matchPackageNames: [
+          '/(?:^|/)node$/', // node or ends with "/node, except those below"
+          '!calico/node',
+          '!docker.io/calico/node',
+          '!kindest/node',
+        ],
         versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
         versioning: 'node',
       },
