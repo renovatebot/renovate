@@ -262,5 +262,15 @@ describe('workers/repository/update/branch/reuse', () => {
       expect(config.rebaseWhen).toBe('auto');
       expect(result.rebaseWhen).toBe('conflicted');
     });
+
+    it('converts rebaseWhen=auto to behind-base-branch if automerge is true AND branch is new', async () => {
+      config.rebaseWhen = 'auto';
+      config.automerge = true;
+      scm.branchExists.mockResolvedValueOnce(false);
+      scm.isBranchBehindBase.mockResolvedValueOnce(false);
+      const result = await shouldReuseExistingBranch(config);
+      expect(config.rebaseWhen).toBe('auto');
+      expect(result.rebaseWhen).toBe('behind-base-branch');
+    });
   });
 });
