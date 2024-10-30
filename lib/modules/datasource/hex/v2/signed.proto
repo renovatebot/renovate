@@ -1,4 +1,4 @@
-// https://github.com/hexpm/specifications/blob/main/registry/signed.proto
+// https://github.com/hexpm/specifications/blob/9c411dbe96c87ccee438d40838d02b5fa6abb60b/registry/signed.proto
 
 syntax = "proto2";
 
