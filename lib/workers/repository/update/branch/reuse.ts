@@ -113,7 +113,7 @@ export async function shouldReuseExistingBranch(
 }
 
 /**
- * This method updates rebaseWhen value when it's set to auto(default)
+ * This method updates rebaseWhen value when it's set to auto(default) or automerging
  *
  * @param result BranchConfig
  * @param keepUpdated boolean
@@ -122,16 +122,18 @@ async function determineRebaseWhenValue(
   result: BranchConfig,
   keepUpdated: boolean,
 ): Promise<void> {
-  if (result.rebaseWhen === 'auto') {
+  if (result.rebaseWhen === 'auto' || result.rebaseWhen === 'automerging') {
     let reason;
-
     let newValue = 'behind-base-branch';
     if (result.automerge === true) {
       reason = 'automerge=true';
-    } else if (await platform.getBranchForceRebase?.(result.baseBranch)) {
-      reason = 'platform is configured to require up-to-date branches';
     } else if (keepUpdated) {
       reason = 'keep-updated label is set';
+    } else if (result.rebaseWhen === 'automerging') {
+      newValue = 'never';
+      reason = 'no keep-updated label and automerging is set';
+    } else if (await platform.getBranchForceRebase?.(result.baseBranch)) {
+      reason = 'platform is configured to require up-to-date branches';
     } else {
       newValue = 'conflicted';
       reason = 'no rule for behind-base-branch applies';
