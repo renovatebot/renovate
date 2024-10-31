@@ -10,7 +10,7 @@ FROM ghcr.io/renovatebot/base-image:7.40.5@sha256:8e41118ad1201765b00bc236490e52
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:7.40.4-full@sha256:f2f1ccd296889c839de978a5a2ed6c5d671abc67882ad866957b00ccaf717bc2 AS full-base
+FROM ghcr.io/renovatebot/base-image:7.40.5-full@sha256:4e60b3e39c05a6fb979e67455d0903e1d20d812453ca498a319832791f190f2e AS full-base
 
 # --------------------------------------
 # build image
