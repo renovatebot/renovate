@@ -1851,7 +1851,6 @@ export async function reattemptPlatformAutomerge({
 export async function mergePr({
   branchName,
   id: prNo,
-  strategy,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   const url = `repos/${
