@@ -28,6 +28,15 @@ describe('modules/manager/bundler/host-rules', () => {
         }),
       ).toBe('token');
     });
+
+    it('escapes special characters in the username but not the password', () => {
+      expect(
+        getAuthenticationHeaderValue({
+          username: 'test@example.com',
+          password: 'p@ssword',
+        }),
+      ).toBe('test%40example.com:p@ssword');
+    });
   });
 
   describe('findAllAuthenticatable()', () => {

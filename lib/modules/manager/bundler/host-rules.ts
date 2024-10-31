@@ -18,8 +18,9 @@ export function findAllAuthenticatable({
 
 export function getAuthenticationHeaderValue(hostRule: HostRule): string {
   if (hostRule.username) {
+    const username = encodeURIComponent(hostRule.username);
     // TODO: types (#22198)
-    return `${hostRule.username}:${hostRule.password!}`;
+    return `${username}:${hostRule.password!}`;
   }
 
   // TODO: types (#22198)

@@ -268,10 +268,12 @@ export const Toml = z.string().transform((str, ctx) => {
 export function withDepType<
   Output extends PackageDependency[],
   Schema extends ZodType<Output, ZodTypeDef, unknown>,
->(schema: Schema, depType: string): ZodEffects<Schema> {
+>(schema: Schema, depType: string, force: boolean = true): ZodEffects<Schema> {
   return schema.transform((deps) => {
     for (const dep of deps) {
-      dep.depType = depType;
+      if (!dep.depType || force) {
+        dep.depType = depType;
+      }
     }
     return deps;
   });
