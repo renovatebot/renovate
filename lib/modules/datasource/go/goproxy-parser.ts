@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import moo from 'moo';
 import * as memCache from '../../../util/cache/memory';
 import { regEx } from '../../../util/regex';
+import { trimTrailingSlash } from '../../../util/url';
 import type { GoproxyItem } from './types';
 
 /**
@@ -35,7 +36,7 @@ export function parseGoproxy(
     .filter(Boolean)
     .map((s) => s.split(/(?=,|\|)/)) // TODO: #12872 lookahead
     .map(([url, separator]) => ({
-      url,
+      url: trimTrailingSlash(url),
       fallback: separator === ',' ? ',' : '|',
     }));
 

@@ -12,8 +12,23 @@ describe('modules/datasource/go/goproxy-parser', () => {
       expect(result).toMatchObject([{ url: 'foo' }]);
     });
 
+    it('parses url with trailing slash', () => {
+      const result = parseGoproxy('foo/');
+      expect(result).toMatchObject([{ url: 'foo' }]);
+    });
+
     it('parses multiple urls', () => {
       const result = parseGoproxy('foo,bar|baz,qux');
+      expect(result).toMatchObject([
+        { url: 'foo', fallback: ',' },
+        { url: 'bar', fallback: '|' },
+        { url: 'baz', fallback: ',' },
+        { url: 'qux' },
+      ]);
+    });
+
+    it('parses multiple urls with trailing slash', () => {
+      const result = parseGoproxy('foo/,bar/|baz,qux/');
       expect(result).toMatchObject([
         { url: 'foo', fallback: ',' },
         { url: 'bar', fallback: '|' },
