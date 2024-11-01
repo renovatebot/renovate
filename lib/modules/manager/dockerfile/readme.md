@@ -1,4 +1,51 @@
-Extracts image references in a `Dockerfile` and/or `Containerfile`.
+### Supported dependencies
+
+This manager extracts image references in a `Dockerfile` and/or `Containerfile` and supports:
+
+1. [`FROM`](https://docs.docker.com/reference/dockerfile/#from) images
+2. [`COPY --from`](https://docs.docker.com/reference/dockerfile/#copy---from) images
+3. [`syntax`](https://docs.docker.com/reference/dockerfile/#syntax) images
+
+#### `FROM` support
+
+Renovate can update images referenced in `FROM` directives. This also works for multi stage builds where multiple `FROM` directives are being used in a single `Dockerfile`.
+
+```dockerfile
+FROM node:20.9.0
+```
+
+Advanced `FROM` flags like `--platform` or `AS <name>` are also supported:
+
+```dockerfile
+FROM --platform=linux/amd64 node:20.9.0 AS installer
+```
+
+Also variables and [`ARG` directives](https://docs.docker.com/reference/dockerfile/#understand-how-arg-and-from-interact) will automatically be expanded:
+
+```dockerfile
+ARG TAG=3.19.4
+FROM alpine:${TAG}
+```
+
+#### `COPY --from` support
+
+Renovate can update images referenced in `COPY --from` directives.
+
+```dockerfile
+FROM node:20.9.0
+COPY --from alpine:3.19.4 /bin/sh /usr/local/sh
+```
+
+#### `syntax` support
+
+Renovate can update `syntax` references.
+
+```dockerfile
+# syntax=docker/dockerfile:1.9.0
+FROM alpine:3.19.4
+```
+
+### Versioning
 
 Renovate's managers does not understand versioning, that's up to Renovate's versioning modules.
 The default `docker` versioning for container image datasources treats suffixes as "compatibility", for example: `-alpine`.
