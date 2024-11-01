@@ -394,7 +394,12 @@ If `true`, Renovate removes special characters when slugifying the branch name:
 - only alphabetic characters are allowed
 - hyphens `-` are used to separate sections
 
-The default `false` behavior will mean that special characters like `.` may end up in the branch name.
+The default `false` behavior will mean that special characters like `.` and `/` may end up in the branch name.
+
+<!-- prettier-ignore -->
+!!! note
+    Renovate will not apply any search/replace to the `branchPrefix` part of the branch name.
+    If you don't want any `/` in your branch name then you will also need to change `branchPrefix` from the default `renovate/` value to something like `renovate-`.
 
 ## branchPrefix
 

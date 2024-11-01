@@ -26,12 +26,20 @@ const RE_SPECIAL_CHARS_STRICT = regEx(/[`~!@#$%^&*()_=+[\]\\|{};':",.<>?]/g);
  */
 function cleanBranchName(
   branchName: string,
+  branchPrefix: string,
   branchNameStrict?: boolean,
 ): string {
   let cleanedBranchName = branchName;
 
+  let existingBranchPrefix = '';
   if (branchNameStrict) {
-    cleanedBranchName = cleanedBranchName.replace(RE_SPECIAL_CHARS_STRICT, '-'); // massage out all special characters that slip through slugify
+    if (cleanedBranchName.startsWith(branchPrefix)) {
+      existingBranchPrefix = branchPrefix;
+      cleanedBranchName = cleanedBranchName.slice(branchPrefix.length);
+    }
+    cleanedBranchName =
+      existingBranchPrefix +
+      cleanedBranchName.replace(RE_SPECIAL_CHARS_STRICT, '-'); // massage out all special characters that slip through slugify
   }
 
   return cleanGitRef
@@ -125,6 +133,7 @@ export function generateBranchName(update: RenovateConfig): void {
   }
   update.branchName = cleanBranchName(
     update.branchName,
+    update.branchPrefix!,
     update.branchNameStrict,
   );
 }
