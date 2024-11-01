@@ -100,7 +100,7 @@ export class BaseGoDatasource {
   private static async goGetDatasource(
     goModule: string,
   ): Promise<DataSource | null> {
-    const goModuleUrl = goModule.replace(/\.git\/v2$/, '');
+    const goModuleUrl = goModule.replace(/\.git(\/[a-z0-9/]*)?$/, '');
     const pkgUrl = `https://${goModuleUrl}?go-get=1`;
     const { body: html } = await BaseGoDatasource.http.get(pkgUrl);
 
