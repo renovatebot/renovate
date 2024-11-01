@@ -532,7 +532,7 @@ describe('modules/platform/github/index', () => {
   }
 
   describe('initRepo', () => {
-    it('should rebase', async () => {
+    it('should squash', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       const config = await github.initRepo({ repository: 'some/repo' });
@@ -675,7 +675,7 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
-    it('should squash', async () => {
+    it('should merge', async () => {
       httpMock
         .scope(githubApiHost)
         .post(`/graphql`)
@@ -687,8 +687,8 @@ describe('modules/platform/github/index', () => {
               nameWithOwner: 'some/repo',
               hasIssuesEnabled: true,
               mergeCommitAllowed: true,
-              rebaseMergeAllowed: false,
-              squashMergeAllowed: true,
+              rebaseMergeAllowed: true,
+              squashMergeAllowed: false,
               defaultBranchRef: {
                 name: 'master',
                 target: {
@@ -704,7 +704,7 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
-    it('should merge', async () => {
+    it('should rebase', async () => {
       httpMock
         .scope(githubApiHost)
         .post(`/graphql`)
@@ -715,8 +715,8 @@ describe('modules/platform/github/index', () => {
               isArchived: false,
               nameWithOwner: 'some/repo',
               hasIssuesEnabled: true,
-              mergeCommitAllowed: true,
-              rebaseMergeAllowed: false,
+              mergeCommitAllowed: false,
+              rebaseMergeAllowed: true,
               squashMergeAllowed: false,
               defaultBranchRef: {
                 name: 'master',
@@ -2882,7 +2882,7 @@ describe('modules/platform/github/index', () => {
           },
           variables: {
             pullRequestId: 'abcd',
-            mergeMethod: 'REBASE',
+            mergeMethod: 'SQUASH',
           },
         },
       };
@@ -3510,7 +3510,7 @@ describe('modules/platform/github/index', () => {
         },
         variables: {
           pullRequestId: 'abcd',
-          mergeMethod: 'REBASE',
+          mergeMethod: 'SQUASH',
         },
       },
     };
@@ -3683,7 +3683,7 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('mergePr(prNo) - autodetection', () => {
-    it('should try rebase first', async () => {
+    it('should try squash first', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.put('/repos/some/repo/pulls/1235/merge').reply(200);
@@ -3702,12 +3702,12 @@ describe('modules/platform/github/index', () => {
       ).toBeTrue();
     });
 
-    it('should try squash after rebase', async () => {
+    it('should try merge after squash', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
         .put('/repos/some/repo/pulls/1236/merge')
-        .reply(400, 'no rebasing allowed');
+        .reply(400, 'no squashing allowed');
       await github.initRepo({ repository: 'some/repo' });
       const pr = {
         number: 1236,
@@ -3723,14 +3723,14 @@ describe('modules/platform/github/index', () => {
       ).toBeFalse();
     });
 
-    it('should try merge after squash', async () => {
+    it('should try rebase after merge', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
         .put('/repos/some/repo/pulls/1237/merge')
-        .reply(405, 'no rebasing allowed')
-        .put('/repos/some/repo/pulls/1237/merge')
         .reply(405, 'no squashing allowed')
+        .put('/repos/some/repo/pulls/1237/merge')
+        .reply(405, 'no merging allowed')
         .put('/repos/some/repo/pulls/1237/merge')
         .reply(200);
       await github.initRepo({ repository: 'some/repo' });
@@ -3753,11 +3753,11 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .put('/repos/some/repo/pulls/1237/merge')
-        .reply(405, 'no rebasing allowed')
-        .put('/repos/some/repo/pulls/1237/merge')
-        .replyWithError('no squashing allowed')
+        .reply(405, 'no squashing allowed')
         .put('/repos/some/repo/pulls/1237/merge')
         .replyWithError('no merging allowed')
+        .put('/repos/some/repo/pulls/1237/merge')
+        .replyWithError('no rebasing allowed')
         .put('/repos/some/repo/pulls/1237/merge')
         .replyWithError('never gonna give you up');
       await github.initRepo({ repository: 'some/repo' });
