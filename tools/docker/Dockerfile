@@ -12,6 +12,8 @@ FROM ghcr.io/renovatebot/base-image:7.41.2@sha256:b104d2a8ae0072f205f29b972769e4
 # --------------------------------------
 FROM ghcr.io/renovatebot/base-image:7.41.2-full@sha256:3365becc7d7b50b210f793e58e4e871ead00976280f3451fd97230417c02f423 AS full-base
 
+ENV RENOVATE_BINARY_SOURCE=global
+
 # --------------------------------------
 # build image
 # --------------------------------------
