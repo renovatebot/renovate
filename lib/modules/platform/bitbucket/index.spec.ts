@@ -277,34 +277,14 @@ describe('modules/platform/bitbucket/index', () => {
           uuid: '123',
           full_name: 'some/repo',
         })
-        .get('/2.0/repositories/some/repo/refs/branches/master')
-        .twice()
-        .reply(200, {
-          name: 'branch',
-          target: {
-            hash: 'branch_hash',
-            parents: [{ hash: 'master_hash' }],
-          },
-        })
-        .post('/2.0/repositories/some/repo/commit/branch_hash/statuses/build', {
+        .post('/2.0/repositories/some/repo/commit/HEAD/statuses/build', {
           name: 'Renovate',
           state: 'SUCCESSFUL',
           key: 'Renovate',
           description: 'Repository Dashboard',
           url: 'https://developer.mend.io/bitbucket/some/repo',
         })
-        .reply(200)
-        .get(
-          '/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100',
-        )
-        .reply(200, {
-          values: [
-            {
-              key: 'Renovate',
-              state: 'SUCCESSFUL',
-            },
-          ],
-        });
+        .reply(200);
 
       expect(
         await bitbucket.initRepo({

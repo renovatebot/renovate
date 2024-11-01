@@ -226,7 +226,7 @@ export async function initRepo({
 
     if (bbMendAppDashboardStatus) {
       logger.debug('Creating branch status for Mend App Repository Dashboard');
-      await setBranchStatus({
+      await setHeadBranchStatus({
         branchName: config.defaultBranch,
         context: 'Renovate',
         description: 'Repository Dashboard',
@@ -525,6 +525,26 @@ export async function setBranchStatus({
   );
   // update status cache
   await getStatus(branchName, false);
+}
+
+async function setHeadBranchStatus({
+  context,
+  description,
+  state,
+  url,
+}: BranchStatusConfig): Promise<void> {
+  const body = {
+    name: context,
+    state: utils.buildStates[state],
+    key: context,
+    description,
+    url,
+  };
+
+  await bitbucketHttp.postJson(
+    `/2.0/repositories/${config.repository}/commit/HEAD/statuses/build`,
+    { body },
+  );
 }
 
 type BbIssue = { id: number; title: string; content?: { raw: string } };
