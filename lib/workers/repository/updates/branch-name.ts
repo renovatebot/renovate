@@ -11,7 +11,7 @@ const MIN_HASH_LENGTH = 6;
 
 const RE_MULTIPLE_DASH = regEx(/--+/g);
 
-const RE_SPECIAL_CHARS_STRICT = regEx(/[`~!@#$%^&*()_=+[\]\\|{};':",.<>?]/g);
+const RE_SPECIAL_CHARS_STRICT = regEx(/[`~!@#$%^&*()_=+[\]\\|{};':",.<>?/]/g);
 
 /**
  * Clean git branch name
