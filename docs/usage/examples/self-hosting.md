@@ -436,7 +436,7 @@ COPY self-signed-certificate.crt /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
 # Change back to the Ubuntu user
-USER 1000
+USER 12021
 
 # OpenSSL
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
