@@ -159,13 +159,8 @@ function compilePrTitle(
   logger.trace(`prTitle: ` + JSON.stringify(upgrade.prTitle));
 }
 
-const semanticCommitTypePriorities: Record<string, number> = {
-  feat: 2,
-  fix: 1,
-  build: 0,
-  ci: 0,
-  chore: 0,
-};
+// Sorted by priority, from low to high
+const semanticCommitTypeByPriority = ['chore', 'ci', 'build', 'fix', 'feat'];
 
 export function generateBranchConfig(
   upgrades: BranchUpgradeConfig[],
@@ -363,33 +358,31 @@ export function generateBranchConfig(
     releaseTimestamp: releaseTimestamp!,
   }; // TODO: fixme (#9666)
 
-  // Calculate the highest priority `semanticCommitType`
-  let highestPrioritySemanticCommitType = '';
-  for (const upgrade of config.upgrades) {
-    if (
-      upgrade.semanticCommits === 'enabled' &&
-      upgrade.semanticCommitType &&
-      upgrade.semanticCommitType in semanticCommitTypePriorities
-    ) {
-      const priority = semanticCommitTypePriorities[upgrade.semanticCommitType];
-      const highestPriority =
-        semanticCommitTypePriorities[highestPrioritySemanticCommitType] ?? -1;
-
-      if (priority > highestPriority) {
-        highestPrioritySemanticCommitType = upgrade.semanticCommitType;
-      }
-    }
-  }
-
-  if (highestPrioritySemanticCommitType) {
-    config.semanticCommitType = highestPrioritySemanticCommitType;
-  }
-
   // Enable `semanticCommits` if one of the branches has it enabled
   if (
     config.upgrades.some((upgrade) => upgrade.semanticCommits === 'enabled')
   ) {
     config.semanticCommits = 'enabled';
+  }
+
+  if (config.semanticCommits === 'enabled') {
+    // Calculate the highest priority `semanticCommitType`
+    let highestIndex = -1;
+    for (const upgrade of config.upgrades) {
+      if (upgrade.semanticCommits === 'enabled' && upgrade.semanticCommitType) {
+        const priorityIndex = semanticCommitTypeByPriority.indexOf(
+          upgrade.semanticCommitType,
+        );
+
+        if (priorityIndex > highestIndex) {
+          highestIndex = priorityIndex;
+        }
+      }
+    }
+
+    if (highestIndex > -1) {
+      config.semanticCommitType = semanticCommitTypeByPriority[highestIndex];
+    }
   }
 
   // Use templates to generate strings
