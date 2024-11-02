@@ -1023,24 +1023,13 @@ export async function updatePr({
 
     updatePrVersion(prNo, updatedPrRes.version);
 
-    if (config.prList) {
-      const updatedPr = utils.prInfo(updatedPrRes);
-      const existingIndex = config.prList.findIndex(
-        (item) => item.number === prNo,
-      );
-      if (existingIndex === -1) {
-        config.prList.push(updatedPr);
-      } else {
-        config.prList[existingIndex] = updatedPr;
-      }
-    }
-
     const currentState = updatedPrRes.state;
     // TODO #22198
     const newState = {
       ['open']: 'OPEN',
       ['closed']: 'DECLINED',
     }[state!];
+    let finalState: string = currentState;
 
     if (
       newState &&
@@ -1054,7 +1043,22 @@ export async function updatePr({
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/${command}?version=${updatedPrRes.version}`,
       );
 
+      finalState = state!;
+
       updatePrVersion(pr.number, updatedStatePr.version);
+    }
+
+    if (config.prList) {
+      const updatedPr = utils.prInfo(updatedPrRes);
+      const existingIndex = config.prList.findIndex(
+        (item) => item.number === prNo,
+      );
+      // istanbul ignore if: should never happen
+      if (existingIndex === -1) {
+        config.prList.push({ ...updatedPr, state: finalState });
+      } else {
+        config.prList[existingIndex] = { ...updatedPr, state: finalState };
+      }
     }
   } catch (err) {
     logger.debug({ err, prNo }, `Failed to update PR`);
