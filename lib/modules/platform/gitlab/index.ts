@@ -855,10 +855,35 @@ export async function updatePr({
     body.remove_labels = removeLabels;
   }
 
-  await gitlabApi.putJson(
-    `projects/${config.repository}/merge_requests/${iid}`,
-    { body },
-  );
+  const updatedPrRes = (
+    await gitlabApi.putJson<{
+      iid: number;
+      source_branch: string;
+      title: string;
+      state: string;
+      created_at: string;
+    }>(`projects/${config.repository}/merge_requests/${iid}`, { body })
+  ).body;
+
+  const updatedPr: Pr = massagePr({
+    number: updatedPrRes.iid,
+    state: updatedPrRes.state === 'opened' ? 'open' : updatedPrRes.state,
+    title: updatedPrRes.title,
+    createdAt: updatedPrRes.created_at,
+    sourceBranch: updatedPrRes.source_branch,
+  });
+
+  if (config.prList) {
+    const existingIndex = config.prList.findIndex(
+      (pr) => pr.number === updatedPr.number,
+    );
+    // istanbul ignore if: should not happen
+    if (existingIndex === -1) {
+      config.prList.push(updatedPr);
+    } else {
+      config.prList[existingIndex] = updatePr;
+    }
+  }
 
   if (platformPrOptions?.autoApprove) {
     await approvePr(iid);
