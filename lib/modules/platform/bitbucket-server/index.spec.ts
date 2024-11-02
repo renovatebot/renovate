@@ -1703,13 +1703,14 @@ describe('modules/platform/bitbucket-server/index', () => {
               },
             });
 
-          await bitbucket.updatePr({
-            number: 5,
-            prTitle: 'title',
-            prBody: 'body',
-            targetBranch: 'new_base',
-          });
-          expect(1).toBe(1);
+          await expect(
+            bitbucket.updatePr({
+              number: 5,
+              prTitle: 'title',
+              prBody: 'body',
+              targetBranch: 'new_base',
+            }),
+          ).toResolve();
         });
 
         it('closes PR', async () => {

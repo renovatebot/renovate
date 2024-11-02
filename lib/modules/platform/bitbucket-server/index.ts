@@ -1011,17 +1011,12 @@ export async function updatePr({
       };
     }
 
-    const { body: updatedPrRes } = await bitbucketServerHttp.putJson<
-      BbsRestPr & {
-        version: number;
-        state: string;
-      }
-    >(
+    const { body: updatedPrRes } = await bitbucketServerHttp.putJson<BbsRestPr>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
       { body },
     );
 
-    updatePrVersion(prNo, updatedPrRes.version);
+    updatePrVersion(prNo, updatedPrRes.version!);
 
     const currentState = updatedPrRes.state;
     // TODO #22198
