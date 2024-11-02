@@ -32,6 +32,7 @@
     "aspnet-api-versioning": "https://github.com/Microsoft/aspnet-api-versioning",
     "aspnet-health-checks": "https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks",
     "astro": "https://github.com/withastro/astro",
+    "auto": "https://github.com/intuit/auto",
     "autofixture": "https://github.com/AutoFixture/AutoFixture",
     "automapper-dotnet": [
       "https://github.com/AutoMapper/AutoMapper",
@@ -338,6 +339,7 @@
     "jsplumb": "https://github.com/jsplumb/jsplumb",
     "junit5": "https://github.com/junit-team/junit5",
     "kernelmemory": "https://github.com/microsoft/kernel-memory",
+    "kiota": "https://github.com/microsoft/kiota",
     "kotlin": "https://github.com/JetBrains/kotlin",
     "kotlinx-coroutines": "https://github.com/Kotlin/kotlinx.coroutines",
     "kroki": "https://github.com/yuzutech/kroki",
@@ -380,6 +382,7 @@
       "https://github.com/nestjs/schematics",
       "https://github.com/nestjs/terminus"
     ],
+    "nest-graphql": "https://github.com/nestjs/graphql",
     "netty": "https://github.com/netty/netty",
     "neutrino": [
       "https://github.com/neutrinojs/neutrino",
@@ -442,6 +445,7 @@
     "react-dnd": "https://github.com/react-dnd/react-dnd",
     "react-navigation": "https://github.com/react-navigation/react-navigation",
     "react-page": "https://github.com/react-page/react-page",
+    "react-rails": "https://github.com/reactjs/react-rails",
     "react-router": [
       "https://github.com/ReactTraining/react-router",
       "https://github.com/remix-run/react-router"
@@ -457,6 +461,7 @@
     "river": "https://github.com/riverqueue/river",
     "rjsf": "https://github.com/rjsf-team/react-jsonschema-form",
     "router5": "https://github.com/router5/router5",
+    "rspack": "https://github.com/web-infra-dev/rspack",
     "ruby-on-rails": "https://github.com/rails/rails",
     "rust-analyzer": "https://github.com/rust-lang/rust-analyzer",
     "rust-futures": "https://github.com/rust-lang/futures-rs",

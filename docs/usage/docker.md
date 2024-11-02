@@ -300,14 +300,14 @@ Renovate will get the credentials with the [`google-auth-library`](https://www.n
 ```yaml title="Example for Workload Identity plus Renovate host rules"
 - name: authenticate to google cloud
   id: auth
-  uses: google-github-actions/auth@v2.1.6
+  uses: google-github-actions/auth@v2.1.7
   with:
     token_format: 'access_token'
     workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
     service_account: ${{ env.SERVICE_ACCOUNT }}
 
 - name: renovate
-  uses: renovatebot/github-action@v40.3.2
+  uses: renovatebot/github-action@v40.3.4
   env:
     RENOVATE_HOST_RULES: |
       [
@@ -478,7 +478,7 @@ Make sure to install the Google Cloud SDK into the custom image, as you need the
 For example:
 
 ```Dockerfile
-FROM renovate/renovate:38.110.2
+FROM renovate/renovate:38.132.3
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

@@ -83,6 +83,26 @@ exports[`config/presets/index resolvePreset migrates automerge in presets 1`] = 
       "semanticCommitType": "fix",
     },
     {
+      "matchDepTypes": [
+        "project.dependencies",
+        "project.optional-dependencies",
+      ],
+      "matchManagers": [
+        "pep621",
+      ],
+      "semanticCommitType": "fix",
+    },
+    {
+      "matchDepTypes": [
+        "dependencies",
+        "extras",
+      ],
+      "matchManagers": [
+        "poetry",
+      ],
+      "semanticCommitType": "fix",
+    },
+    {
       "matchPackageNames": [
         "*",
       ],
