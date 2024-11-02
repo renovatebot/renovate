@@ -225,14 +225,26 @@ export async function initRepo({
     config.defaultBranch = mainBranch;
 
     if (bbMendAppDashboardStatus) {
-      logger.debug('Creating branch status for Mend App Repository Dashboard');
-      await setHeadBranchStatus({
-        branchName: config.defaultBranch,
-        context: 'Renovate',
-        description: 'Repository Dashboard',
-        state: 'green',
-        url: `https://developer.mend.io/bitbucket/${repository}`,
-      });
+      const statusName = 'Renovate Dashboard';
+
+      const mendAppDashboardStatus = await getBranchStatusCheck(
+        config.defaultBranch,
+        statusName,
+      );
+
+      if (!mendAppDashboardStatus) {
+        logger.debug(
+          'Creating branch status for Mend App Repository Dashboard',
+        );
+
+        await setBranchStatus({
+          branchName: config.defaultBranch,
+          context: statusName,
+          description: '',
+          state: 'green',
+          url: `https://developer.mend.io/bitbucket/${repository}`,
+        });
+      }
     }
 
     config = {
@@ -443,6 +455,7 @@ async function getStatus(
     )
   ).body.values;
 }
+
 // Returns the combined status for a branch.
 export async function getBranchStatus(
   branchName: string,
@@ -525,26 +538,6 @@ export async function setBranchStatus({
   );
   // update status cache
   await getStatus(branchName, false);
-}
-
-async function setHeadBranchStatus({
-  context,
-  description,
-  state,
-  url,
-}: BranchStatusConfig): Promise<void> {
-  const body = {
-    name: context,
-    state: utils.buildStates[state],
-    key: context,
-    description,
-    url,
-  };
-
-  await bitbucketHttp.postJson(
-    `/2.0/repositories/${config.repository}/commit/HEAD/statuses/build`,
-    { body },
-  );
 }
 
 type BbIssue = { id: number; title: string; content?: { raw: string } };

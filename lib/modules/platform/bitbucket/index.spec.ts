@@ -251,7 +251,7 @@ describe('modules/platform/bitbucket/index', () => {
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
         .reply(200, {
-          mainbranch: { name: 'master' },
+          mainbranch: { name: 'main' },
           uuid: '123',
           full_name: 'some/repo',
         });
@@ -262,29 +262,63 @@ describe('modules/platform/bitbucket/index', () => {
           bbMendAppDashboardStatus: false,
         }),
       ).toMatchObject({
-        defaultBranch: 'master',
+        defaultBranch: 'main',
         isFork: false,
         repoFingerprint: expect.any(String),
       });
     });
 
-    it('enabled: should set branch status for main branch', async () => {
+    it('enabled: should set main branch status if doesnt exist', async () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
         .reply(200, {
-          mainbranch: { name: 'master' },
+          mainbranch: { name: 'main' },
           uuid: '123',
           full_name: 'some/repo',
         })
-        .post('/2.0/repositories/some/repo/commit/HEAD/statuses/build', {
-          name: 'Renovate',
+        .get('/2.0/repositories/some/repo/refs/branches/main')
+        .thrice()
+        .reply(200, {
+          name: 'main',
+          target: {
+            hash: 'main_hash',
+          },
+        })
+        .post('/2.0/repositories/some/repo/commit/main_hash/statuses/build', {
+          name: 'Renovate Dashboard',
           state: 'SUCCESSFUL',
-          key: 'Renovate',
-          description: 'Repository Dashboard',
+          key: 'Renovate Dashboard',
+          description: '',
           url: 'https://developer.mend.io/bitbucket/some/repo',
         })
-        .reply(200);
+        .reply(200)
+        .get(
+          '/2.0/repositories/some/repo/commit/main_hash/statuses?pagelen=100',
+        )
+        .reply(200, {
+          values: [
+            {
+              key: 'Some other status',
+              state: 'SUCCESSFUL',
+            },
+          ],
+        })
+        .get(
+          '/2.0/repositories/some/repo/commit/main_hash/statuses?pagelen=100',
+        )
+        .reply(200, {
+          values: [
+            {
+              key: 'Some other status',
+              state: 'SUCCESSFUL',
+            },
+            {
+              key: 'Renovate Dashboard',
+              state: 'SUCCESSFUL',
+            },
+          ],
+        });
 
       expect(
         await bitbucket.initRepo({
@@ -292,7 +326,47 @@ describe('modules/platform/bitbucket/index', () => {
           bbMendAppDashboardStatus: true,
         }),
       ).toMatchObject({
-        defaultBranch: 'master',
+        defaultBranch: 'main',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
+    });
+
+    it('enabled: should skip creating main branch status if already exist', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, {
+          mainbranch: { name: 'main' },
+          uuid: '123',
+          full_name: 'some/repo',
+        })
+        .get('/2.0/repositories/some/repo/refs/branches/main')
+        .reply(200, {
+          name: 'main',
+          target: {
+            hash: 'main_hash',
+          },
+        })
+        .get(
+          '/2.0/repositories/some/repo/commit/main_hash/statuses?pagelen=100',
+        )
+        .reply(200, {
+          values: [
+            {
+              key: 'Renovate Dashboard',
+              state: 'SUCCESSFUL',
+            },
+          ],
+        });
+
+      expect(
+        await bitbucket.initRepo({
+          repository: 'some/repo',
+          bbMendAppDashboardStatus: true,
+        }),
+      ).toMatchObject({
+        defaultBranch: 'main',
         isFork: false,
         repoFingerprint: expect.any(String),
       });
