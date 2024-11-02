@@ -12,6 +12,7 @@ import {
 } from '../../../util/fs';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { regEx } from '../../../util/regex';
+import { CrateDatasource } from '../../datasource/crate';
 import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
 import { extractLockFileContentVersions } from './locked-version';
 
@@ -130,13 +131,23 @@ async function updateArtifactsImpl(
         config.constraints?.rust,
       );
     } else {
-      const missingDep = updatedDeps.find((dep) => !dep.lockedVersion);
-      if (missingDep) {
-        // If there is a dependency without a locked version then log a warning
-        // and perform a regular workspace lockfile update.
-        logger.warn(
-          `Missing locked version for dependency \`${missingDep.depName}\``,
-        );
+      const nonCrateDep = updatedDeps.find(
+        (dep) => dep.datasource !== CrateDatasource.id,
+      );
+      const crateDepWithoutLockedVersion = updatedDeps.find(
+        (dep) => !dep.lockedVersion && dep.datasource === CrateDatasource.id,
+      );
+      // Non-crate dependencies (like git ones) do not have locked versions.
+      // For crate dependencies, not having a locked version is not expected.
+      // In both situations, perform a regular workspace lockfile update.
+      if (nonCrateDep || crateDepWithoutLockedVersion) {
+        if (crateDepWithoutLockedVersion) {
+          // Only warn when a crate dependency has no locked version, as this is
+          // not an expected situation.
+          logger.warn(
+            `Missing locked version for dependency \`${crateDepWithoutLockedVersion.depName}\``,
+          );
+        }
         await cargoUpdate(
           packageFileName,
           false,
