@@ -11,17 +11,9 @@ export const InputType = z.enum([
 ]);
 
 export const LockedInput = z.object({
-  host: z.string().optional(),
-  lastModified: z.number(),
-  narHash: z.string(),
-  owner: z.string().optional(),
-  repo: z.string().optional(),
   ref: z.string().optional(),
   rev: z.string(),
-  revCount: z.number().optional(),
-  shallow: z.boolean().optional(),
   type: InputType,
-  url: z.string().optional(),
 });
 
 export const OriginalInput = z.object({
@@ -42,7 +34,6 @@ export const NixInput = z.object({
 export const NixFlakeLock = Json.pipe(
   z.object({
     nodes: z.record(z.string(), NixInput),
-    root: z.literal('root').optional(),
     version: z.literal(7),
   }),
 );
