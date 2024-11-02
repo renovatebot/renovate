@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "patternProperties": {
+    "^[a-zA-Z-]+$": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9. -/:@]+$": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

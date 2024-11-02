@@ -25,6 +25,11 @@ pytest = [
   "pytest-mock",
 ]
 
+[dependency-groups]
+typing = ["mypy==1.13.0", "types-requests"]
+coverage = ["pytest-cov==5.0.0"]
+all = [{include-group = "typing"}, {include-group = "coverage"}, "click==8.1.7"]
+
 [tool.pdm.dev-dependencies]
 test = [
   "pdm[pytest]",

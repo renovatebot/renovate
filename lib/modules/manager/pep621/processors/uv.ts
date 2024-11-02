@@ -3,18 +3,12 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { HostRule } from '../../../../types';
-import { detectPlatform } from '../../../../util/common';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
-import { parseGitUrl } from '../../../../util/git/url';
 import { find } from '../../../../util/host-rules';
 import { Result } from '../../../../util/result';
 import { parseUrl } from '../../../../util/url';
-import { GitRefsDatasource } from '../../../datasource/git-refs';
-import { GitTagsDatasource } from '../../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags';
 import { PypiDatasource } from '../../../datasource/pypi';
 import type {
   PackageDependency,
@@ -22,7 +16,8 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types';
-import { type PyProject, type UvGitSource, UvLockfileSchema } from '../schema';
+import { applyGitSource } from '../../util';
+import { type PyProject, UvLockfileSchema } from '../schema';
 import { depTypes, parseDependencyList } from '../utils';
 import type { PyProjectProcessor } from './types';
 
@@ -46,11 +41,14 @@ export class UvProcessor implements PyProjectProcessor {
     // Skip sources that do not make sense to handle (e.g. path).
     if (uv.sources) {
       for (const dep of deps) {
-        if (!dep.depName) {
+        // istanbul ignore if
+        if (!dep.packageName) {
           continue;
         }
 
-        const depSource = uv.sources[dep.depName];
+        // Using `packageName` as it applies PEP 508 normalization, which is
+        // also applied by uv when matching a source to a dependency.
+        const depSource = uv.sources[dep.packageName];
         if (depSource) {
           dep.depType = depTypes.uvSources;
           if ('url' in depSource) {
@@ -60,7 +58,13 @@ export class UvProcessor implements PyProjectProcessor {
           } else if ('workspace' in depSource) {
             dep.skipReason = 'inherited-dependency';
           } else {
-            applyGitSource(dep, depSource);
+            applyGitSource(
+              dep,
+              depSource.git,
+              depSource.rev,
+              depSource.tag,
+              depSource.branch,
+            );
           }
         }
       }
@@ -177,38 +181,6 @@ export class UvProcessor implements PyProjectProcessor {
         },
       ];
     }
-  }
-}
-
-function applyGitSource(dep: PackageDependency, depSource: UvGitSource): void {
-  const { git, rev, tag, branch } = depSource;
-  if (tag) {
-    const platform = detectPlatform(git);
-    if (platform === 'github' || platform === 'gitlab') {
-      dep.datasource =
-        platform === 'github'
-          ? GithubTagsDatasource.id
-          : GitlabTagsDatasource.id;
-      const { protocol, source, full_name } = parseGitUrl(git);
-      dep.registryUrls = [`${protocol}://${source}`];
-      dep.packageName = full_name;
-    } else {
-      dep.datasource = GitTagsDatasource.id;
-      dep.packageName = git;
-    }
-    dep.currentValue = tag;
-    dep.skipReason = undefined;
-  } else if (rev) {
-    dep.datasource = GitRefsDatasource.id;
-    dep.packageName = git;
-    dep.currentDigest = rev;
-    dep.replaceString = rev;
-    dep.skipReason = undefined;
-  } else {
-    dep.datasource = GitRefsDatasource.id;
-    dep.packageName = git;
-    dep.currentValue = branch;
-    dep.skipReason = branch ? 'git-dependency' : 'unspecified-version';
   }
 }
 
