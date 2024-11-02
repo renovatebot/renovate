@@ -1,4 +1,5 @@
 import { logger } from '../../../logger';
+import { getSiblingFileName } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -16,14 +17,16 @@ export function extractPackageFile(
   content: string,
   packageFile: string,
 ): PackageFileContent | null {
-  logger.trace(`nix.extractPackageFile(${packageFile})`);
+  const packageLockFile = getSiblingFileName(packageFile, 'flake.lock');
+
+  logger.trace(`nix.extractPackageFile(${packageLockFile})`);
 
   const deps: PackageDependency[] = [];
 
   const flakeLockParsed = NixFlakeLock.safeParse(content);
   if (!flakeLockParsed.success) {
     logger.debug(
-      { packageFile, error: flakeLockParsed.error },
+      { packageLockFile, error: flakeLockParsed.error },
       `invalid flake.lock file`,
     );
     return null;
@@ -50,7 +53,7 @@ export function extractPackageFile(
     // istanbul ignore if: if we are not in a root node then original and locked always exist which cannot be easily expressed in the type
     if (flakeLocked === undefined || flakeOriginal === undefined) {
       logger.debug(
-        { packageFile },
+        { packageLockFile },
         `Found empty flake input '${JSON.stringify(flakeInput)}', skipping`,
       );
       continue;
@@ -119,7 +122,7 @@ export function extractPackageFile(
       // istanbul ignore next: just a safeguard
       default:
         logger.debug(
-          { packageFile },
+          { packageLockFile },
           `Unknown flake.lock type "${flakeLocked.type}", skipping`,
         );
         break;
