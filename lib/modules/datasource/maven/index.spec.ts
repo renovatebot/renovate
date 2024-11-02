@@ -63,9 +63,9 @@ function mockGenericPackage(opts: MockOpts = {}) {
   }
 
   if (html) {
-    scope.get(`/${packagePath}/index.html`).reply(200, html);
+    scope.get(`/${packagePath}/`).reply(200, html);
   } else if (html === null) {
-    scope.get(`/${packagePath}/index.html`).reply(404);
+    scope.get(`/${packagePath}/`).reply(404);
   }
 
   if (pom) {
@@ -129,7 +129,7 @@ describe('modules/datasource/maven/index', () => {
   it('returns null when metadata is not found', async () => {
     httpMock
       .scope(baseUrl)
-      .get('/org/example/package/index.html')
+      .get('/org/example/package/')
       .reply(404)
       .get('/org/example/package/maven-metadata.xml')
       .reply(404);
