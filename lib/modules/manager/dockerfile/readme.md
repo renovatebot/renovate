@@ -3,8 +3,8 @@
 This manager extracts image references in a `Dockerfile` and/or `Containerfile` and supports:
 
 1. [`FROM`](https://docs.docker.com/reference/dockerfile/#from) images
-2. [`COPY --from`](https://docs.docker.com/reference/dockerfile/#copy---from) images
-3. [`syntax`](https://docs.docker.com/reference/dockerfile/#syntax) images
+1. [`COPY --from`](https://docs.docker.com/reference/dockerfile/#copy---from) images
+1. [`syntax`](https://docs.docker.com/reference/dockerfile/#syntax) images
 
 #### `FROM` support
 
