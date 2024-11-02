@@ -278,7 +278,7 @@ export class MavenDatasource extends Datasource {
     const res = await checkResource(this.http, artifactUrl);
 
     if (
-      this.defaultRegistryUrls.includes(registryUrl) &&
+      registryUrl === MAVEN_REPO &&
       (res === 'not-found' || res === 'error')
     ) {
       return 'reject';

@@ -790,7 +790,7 @@ describe('modules/datasource/maven/index', () => {
         });
       });
 
-      it('returns null for deleted object', async () => {
+      it('handles deleted object', async () => {
         s3mock
           .on(HeadObjectCommand, {
             Bucket: 'bucket',
@@ -805,10 +805,10 @@ describe('modules/datasource/maven/index', () => {
           releaseOrig,
         );
 
-        expect(res).toBeNull();
+        expect(res).toBe(releaseOrig);
       });
 
-      it('returns null for NotFound response', async () => {
+      it('handles NotFound response', async () => {
         s3mock
           .on(HeadObjectCommand, {
             Bucket: 'bucket',
@@ -823,10 +823,10 @@ describe('modules/datasource/maven/index', () => {
           releaseOrig,
         );
 
-        expect(res).toBeNull();
+        expect(res).toBe(releaseOrig);
       });
 
-      it('returns null for NoSuchKey response', async () => {
+      it('handles NoSuchKey response', async () => {
         s3mock
           .on(HeadObjectCommand, {
             Bucket: 'bucket',
@@ -841,10 +841,10 @@ describe('modules/datasource/maven/index', () => {
           releaseOrig,
         );
 
-        expect(res).toBeNull();
+        expect(res).toBe(releaseOrig);
       });
 
-      it('returns null for unknown error', async () => {
+      it('handles unknown error', async () => {
         s3mock
           .on(HeadObjectCommand, {
             Bucket: 'bucket',
@@ -859,7 +859,7 @@ describe('modules/datasource/maven/index', () => {
           releaseOrig,
         );
 
-        expect(res).toBeNull();
+        expect(res).toBe(releaseOrig);
       });
     });
   });
