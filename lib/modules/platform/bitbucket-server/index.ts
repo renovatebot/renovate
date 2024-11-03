@@ -1011,14 +1011,14 @@ export async function updatePr({
       };
     }
 
-    const { body: updatedPrRes } = await bitbucketServerHttp.putJson<BbsRestPr>(
+    const { body: updatedPr } = await bitbucketServerHttp.putJson<BbsRestPr>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
       { body },
     );
 
-    updatePrVersion(prNo, updatedPrRes.version!);
+    updatePrVersion(prNo, updatedPr.version!);
 
-    const currentState = updatedPrRes.state;
+    const currentState = updatedPr.state;
     // TODO #22198
     const newState = {
       ['open']: 'OPEN',
@@ -1035,7 +1035,7 @@ export async function updatePr({
       const { body: updatedStatePr } = await bitbucketServerHttp.postJson<{
         version: number;
       }>(
-        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/${command}?version=${updatedPrRes.version}`,
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/${command}?version=${updatedPr.version}`,
       );
 
       finalState = state!;
@@ -1044,15 +1044,15 @@ export async function updatePr({
     }
 
     if (config.prList) {
-      const updatedPr = utils.prInfo(updatedPrRes);
+      const bbsPr = utils.prInfo(updatedPr);
       const existingIndex = config.prList.findIndex(
         (item) => item.number === prNo,
       );
       // istanbul ignore if: should never happen
       if (existingIndex === -1) {
-        config.prList.push({ ...updatedPr, state: finalState });
+        config.prList.push({ ...bbsPr, state: finalState });
       } else {
-        config.prList[existingIndex] = { ...updatedPr, state: finalState };
+        config.prList[existingIndex] = { ...bbsPr, state: finalState };
       }
     }
   } catch (err) {
