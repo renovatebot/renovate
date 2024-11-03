@@ -8,7 +8,8 @@ This manager extracts image references in a `Dockerfile` and/or `Containerfile` 
 
 #### `FROM` support
 
-Renovate can update images referenced in `FROM` directives. This also works for multi stage builds where multiple `FROM` directives are being used in a single `Dockerfile`.
+Renovate can update images referenced in `FROM` directives.
+This even works for multi-stage builds with many `FROM` directives in one Dockerfile.
 
 ```dockerfile
 FROM node:20.9.0
@@ -20,7 +21,7 @@ Advanced `FROM` flags like `--platform` or `AS <name>` are also supported:
 FROM --platform=linux/amd64 node:20.9.0 AS installer
 ```
 
-Also variables and [`ARG` directives](https://docs.docker.com/reference/dockerfile/#understand-how-arg-and-from-interact) will automatically be expanded:
+Also, Renovate will automatically expand variables and [`ARG` directives](https://docs.docker.com/reference/dockerfile/#understand-how-arg-and-from-interact):
 
 ```dockerfile
 ARG TAG=3.19.4
