@@ -2,16 +2,22 @@ import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
+import type { HostRule } from '../../../../types';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import { find } from '../../../../util/host-rules';
+import { Result } from '../../../../util/result';
+import { parseUrl } from '../../../../util/url';
+import { PypiDatasource } from '../../../datasource/pypi';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types';
-import { type PyProject } from '../schema';
+import { applyGitSource } from '../../util';
+import { type PyProject, UvLockfileSchema } from '../schema';
 import { depTypes, parseDependencyList } from '../utils';
 import type { PyProjectProcessor } from './types';
 
@@ -31,14 +37,67 @@ export class UvProcessor implements PyProjectProcessor {
       ),
     );
 
+    // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
+    // Skip sources that do not make sense to handle (e.g. path).
+    if (uv.sources) {
+      for (const dep of deps) {
+        // istanbul ignore if
+        if (!dep.packageName) {
+          continue;
+        }
+
+        // Using `packageName` as it applies PEP 508 normalization, which is
+        // also applied by uv when matching a source to a dependency.
+        const depSource = uv.sources[dep.packageName];
+        if (depSource) {
+          dep.depType = depTypes.uvSources;
+          if ('url' in depSource) {
+            dep.skipReason = 'unsupported-url';
+          } else if ('path' in depSource) {
+            dep.skipReason = 'path-dependency';
+          } else if ('workspace' in depSource) {
+            dep.skipReason = 'inherited-dependency';
+          } else {
+            applyGitSource(
+              dep,
+              depSource.git,
+              depSource.rev,
+              depSource.tag,
+              depSource.branch,
+            );
+          }
+        }
+      }
+    }
+
     return deps;
   }
 
-  extractLockedVersions(
+  async extractLockedVersions(
     project: PyProject,
     deps: PackageDependency[],
     packageFile: string,
   ): Promise<PackageDependency[]> {
+    const lockFileName = getSiblingFileName(packageFile, 'uv.lock');
+    const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+    if (lockFileContent) {
+      const { val: lockFileMapping, err } = Result.parse(
+        lockFileContent,
+        UvLockfileSchema,
+      ).unwrap();
+
+      if (err) {
+        logger.debug({ packageFile, err }, `Error parsing uv lock file`);
+      } else {
+        for (const dep of deps) {
+          const packageName = dep.packageName;
+          if (packageName && packageName in lockFileMapping) {
+            dep.lockedVersion = lockFileMapping[packageName];
+          }
+        }
+      }
+    }
+
     return Promise.resolve(deps);
   }
 
@@ -69,8 +128,12 @@ export class UvProcessor implements PyProjectProcessor {
         constraint: config.constraints?.uv,
       };
 
+      const extraEnv = {
+        ...getUvExtraIndexUrl(updateArtifact.updatedDeps),
+      };
       const execOptions: ExecOptions = {
         cwdFile: packageFileName,
+        extraEnv,
         docker: {},
         userConfiguredEnv: config.env,
         toolConstraints: [pythonConstraint, uvConstraint],
@@ -130,7 +193,8 @@ function generateCMD(updatedDeps: Upgrade[]): string {
         deps.push(dep.depName!.split('/')[1]);
         break;
       }
-      case depTypes.uvDevDependencies: {
+      case depTypes.uvDevDependencies:
+      case depTypes.uvSources: {
         deps.push(dep.depName!);
         break;
       }
@@ -144,4 +208,38 @@ function generateCMD(updatedDeps: Upgrade[]): string {
   }
 
   return `${uvUpdateCMD} ${deps.map((dep) => `--upgrade-package ${quote(dep)}`).join(' ')}`;
+}
+
+function getMatchingHostRule(url: string | undefined): HostRule {
+  return find({ hostType: PypiDatasource.id, url });
+}
+
+function getUvExtraIndexUrl(deps: Upgrade[]): NodeJS.ProcessEnv {
+  const pyPiRegistryUrls = deps
+    .filter((dep) => dep.datasource === PypiDatasource.id)
+    .map((dep) => dep.registryUrls)
+    .flat();
+  const registryUrls = new Set(pyPiRegistryUrls);
+  const extraIndexUrls: string[] = [];
+
+  for (const registryUrl of registryUrls) {
+    const parsedUrl = parseUrl(registryUrl);
+    if (!parsedUrl) {
+      continue;
+    }
+
+    const rule = getMatchingHostRule(parsedUrl.toString());
+    if (rule.username) {
+      parsedUrl.username = rule.username;
+    }
+    if (rule.password) {
+      parsedUrl.password = rule.password;
+    }
+
+    extraIndexUrls.push(parsedUrl.toString());
+  }
+
+  return {
+    UV_EXTRA_INDEX_URL: extraIndexUrls.join(' '),
+  };
 }

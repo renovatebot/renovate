@@ -101,6 +101,7 @@ export type PlatformPrOptions = {
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
+  bbAutoResolvePrTasks?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
@@ -279,6 +280,7 @@ export interface Platform {
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
 
   maxBodyLength(): number;
+  labelCharLimit?(): number;
 }
 
 export interface PlatformScm {

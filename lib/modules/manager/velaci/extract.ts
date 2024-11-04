@@ -13,7 +13,7 @@ export function extractPackageFile(
 
   try {
     // TODO: use schema (#9610)
-    doc = parseSingleYaml(file, { json: true });
+    doc = parseSingleYaml(file);
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Vela file.');
     return null;

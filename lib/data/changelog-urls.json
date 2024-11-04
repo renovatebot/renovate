@@ -1,4 +1,5 @@
 {
+  "$schema": "../../tools/schemas/changelog-urls-schema.json",
   "npm": {
     "babel-preset-react-app": "https://github.com/facebook/create-react-app/releases",
     "firebase": "https://firebase.google.com/support/release-notes/js",
@@ -16,8 +17,6 @@
     "lxml": "https://git.launchpad.net/lxml/plain/CHANGES.txt",
     "mypy": "https://mypy-lang.blogspot.com/",
     "phonenumbers": "https://github.com/daviddrysdale/python-phonenumbers/blob/dev/python/HISTORY.md",
-    "psycopg2": "https://initd.org/psycopg/articles/tag/release/",
-    "psycopg2-binary": "https://initd.org/psycopg/articles/tag/release/",
     "pycountry": "https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt",
     "django-debug-toolbar": "https://django-debug-toolbar.readthedocs.io/en/latest/changes.html",
     "requests": "https://github.com/psf/requests/blob/master/HISTORY.md",

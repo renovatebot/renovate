@@ -3410,6 +3410,24 @@ describe('modules/platform/github/index', () => {
         `Deleting label old_label from #1234`,
       );
     });
+
+    describe('addLabels', () => {
+      it('warns if adding labels failed', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        scope.post('/repos/undefined/issues/2/labels').reply(400, {
+          message: 'Failed to add labels',
+        });
+        await expect(github.addLabels(2, ['fail'])).toResolve();
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          {
+            err: expect.any(Object),
+            issueNo: 2,
+            labels: ['fail'],
+          },
+          'Error while adding labels. Skipping',
+        );
+      });
+    });
   });
 
   describe('reattemptPlatformAutomerge(number, platformPrOptions)', () => {
@@ -3808,10 +3826,28 @@ describe('modules/platform/github/index', () => {
               manifest_path: 'bar/foo',
             },
           },
+          {
+            security_advisory: {
+              description: 'description',
+              identifiers: [{ type: 'type', value: 'value' }],
+              references: [],
+            },
+            security_vulnerability: {
+              package: {
+                ecosystem: 'npm',
+                name: 'foo',
+              },
+              vulnerable_version_range: '0.0.2',
+              first_patched_version: null,
+            },
+            dependency: {
+              manifest_path: 'bar/foo',
+            },
+          },
         ]);
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
-      expect(res).toHaveLength(1);
+      expect(res).toHaveLength(2);
     });
 
     it('returns empty if disabled', async () => {

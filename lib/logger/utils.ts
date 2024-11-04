@@ -4,6 +4,7 @@ import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
 import { ZodError } from 'zod';
+import { regEx } from '../util/regex';
 import { redactedFields, sanitize } from '../util/sanitize';
 import type { BunyanRecord, BunyanStream } from './types';
 
@@ -214,7 +215,12 @@ export function sanitizeValue(
       if (!val) {
         curValue = val;
       } else if (redactedFields.includes(key)) {
-        curValue = '***********';
+        // Do not mask/sanitize secrets templates
+        if (is.string(val) && regEx(/^{{\s*secrets\..*}}$/).test(val)) {
+          curValue = val;
+        } else {
+          curValue = '***********';
+        }
       } else if (contentFields.includes(key)) {
         curValue = '[content]';
       } else if (key === 'secrets') {
@@ -318,9 +324,12 @@ export function validateLogLevel(
 // Can't use `util/regex` because of circular reference to logger
 const urlRe = /[a-z]{3,9}:\/\/[^@/]+@[a-z0-9.-]+/gi;
 const urlCredRe = /\/\/[^@]+@/g;
+const dataUriCredRe = /^(data:[0-9a-z-]+\/[0-9a-z-]+;).+/i;
 
 export function sanitizeUrls(text: string): string {
-  return text.replace(urlRe, (url) => {
-    return url.replace(urlCredRe, '//**redacted**@');
-  });
+  return text
+    .replace(urlRe, (url) => {
+      return url.replace(urlCredRe, '//**redacted**@');
+    })
+    .replace(dataUriCredRe, '$1**redacted**');
 }

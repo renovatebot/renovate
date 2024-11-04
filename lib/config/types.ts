@@ -381,8 +381,10 @@ export interface PackageRule
   matchRepositories?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
+  matchJsonata?: string[];
   registryUrls?: string[] | null;
   vulnerabilitySeverity?: string;
+  vulnerabilityFixVersion?: string;
 }
 
 export interface ValidationMessage {
@@ -391,12 +393,13 @@ export interface ValidationMessage {
 }
 
 export type AllowedParents =
-  | 'customManagers'
   | 'customDatasources'
+  | 'customManagers'
   | 'hostRules'
-  | 'postUpgradeTasks'
+  | 'logLevelRemap'
   | 'packageRules'
-  | 'logLevelRemap';
+  | 'postUpgradeTasks'
+  | 'vulnerabilityAlerts';
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.
@@ -545,6 +548,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
   releaseTimestamp?: string | null;
   repository?: string;
+  currentVersionAgeInDays?: number;
   currentVersionTimestamp?: string;
   enabled?: boolean;
   skipReason?: SkipReason;

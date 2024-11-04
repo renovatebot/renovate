@@ -2,7 +2,8 @@ import JSON5 from 'json5';
 import * as JSONC from 'jsonc-parser';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
-import { z } from 'zod';
+import { type ZodEffects, type ZodType, type ZodTypeDef, z } from 'zod';
+import type { PackageDependency } from '../modules/manager/types';
 import { parse as parseToml } from './toml';
 import { parseSingleYaml, parseYaml } from './yaml';
 
@@ -239,7 +240,7 @@ export const UtcDate = z
 
 export const Yaml = z.string().transform((str, ctx): JsonValue => {
   try {
-    return parseSingleYaml(str, { json: true });
+    return parseSingleYaml(str);
   } catch {
     ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
     return z.NEVER;
@@ -248,7 +249,7 @@ export const Yaml = z.string().transform((str, ctx): JsonValue => {
 
 export const MultidocYaml = z.string().transform((str, ctx): JsonArray => {
   try {
-    return parseYaml(str, { json: true }) as JsonArray;
+    return parseYaml(str) as JsonArray;
   } catch {
     ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
     return z.NEVER;
@@ -263,3 +264,17 @@ export const Toml = z.string().transform((str, ctx) => {
     return z.NEVER;
   }
 });
+
+export function withDepType<
+  Output extends PackageDependency[],
+  Schema extends ZodType<Output, ZodTypeDef, unknown>,
+>(schema: Schema, depType: string, force: boolean = true): ZodEffects<Schema> {
+  return schema.transform((deps) => {
+    for (const dep of deps) {
+      if (!dep.depType || force) {
+        dep.depType = depType;
+      }
+    }
+    return deps;
+  });
+}

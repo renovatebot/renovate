@@ -156,6 +156,8 @@ export const allowedFields = {
   currentValue: 'The extracted current value of the dependency being updated',
   currentVersion:
     'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
+  currentVersionAgeInDays: 'The age of the current version in days',
+  currentVersionTimestamp: 'The timestamp of the current version',
   currentDigest: 'The extracted current digest of the dependency being updated',
   currentDigestShort:
     'The extracted current short digest of the dependency being updated',
@@ -202,6 +204,7 @@ export const allowedFields = {
   newValue:
     'The new value in the upgrade. Can be a range or version e.g. "^3.0.0" or "3.1.0"',
   newVersion: 'The new version in the upgrade, e.g. "3.1.0"',
+  newVersionAgeInDays: 'The age of the new version in days',
   packageFile: 'The filename that the dependency was found in',
   packageFileDir:
     'The directory with full path where the packageFile was found',
@@ -219,6 +222,7 @@ export const allowedFields = {
   references: 'A list of references for the upgrade',
   releases: 'An array of releases for an upgrade',
   releaseNotes: 'A ChangeLogNotes object for the release',
+  releaseTimestamp: 'The timestamp of the release',
   repository: 'The current repository',
   semanticPrefix: 'The fully generated semantic prefix for commit messages',
   sourceRepo: 'The repository in the sourceUrl, if present',
