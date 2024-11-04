@@ -1,8 +1,7 @@
-import type { NewValueConfig } from '../types';
-import type { RangeStrategy } from '../../../types/versioning';
-import type { VersioningApi } from '../types';
 import { logger } from '../../../logger';
+import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
+import type { NewValueConfig , VersioningApi } from '../types';
 
 export const id = 'pvp';
 export const displayName = 'Package Versioning Policy (Haskell)';
@@ -14,9 +13,9 @@ type Parsed = { lower: string; upper: string };
 type Components = { major: number[]; minor: number[]; patch: number[] };
 
 export function parse(input: string): Parsed | null {
-  input = input.replaceAll(' ', '');
-  const r = regEx(/>=(?<lower>[\d\.]+)&&<(?<upper>[\d\.]+)/);
-  const m = r.exec(input);
+  const noSpaces = input.replaceAll(' ', '');
+  const r = regEx(/>=(?<lower>[\d.]+)&&<(?<upper>[\d.]+)/);
+  const m = r.exec(noSpaces);
   if (!m?.groups) {
     return null;
   }
@@ -27,10 +26,10 @@ export function parse(input: string): Parsed | null {
 }
 
 export function extractAllComponents(version: string): number[] {
-  let versionMajor = version.split('.');
+  const versionMajor = version.split('.');
   const versionIntMajor: number[] = versionMajor.map((x) => parseInt(x, 10));
-  let ret = [];
-  for (let l of versionIntMajor) {
+  const ret = [];
+  for (const l of versionIntMajor) {
     if (l < 0 || !isFinite(l)) {
       continue;
     }
@@ -88,7 +87,7 @@ function getMinor(version: string): number | null {
 
 function getPatch(version: string): number | null {
   const l1 = version.split('.');
-  let components = l1.slice(3);
+  const components = l1.slice(3);
   if (components.length === 0) {
     return null;
   }
@@ -96,7 +95,7 @@ function getPatch(version: string): number | null {
 }
 
 function matches(version: string, range: string): boolean {
-  let parsed = parse(range);
+  const parsed = parse(range);
   if (parsed === null) {
     return false;
   }
@@ -113,7 +112,7 @@ function getSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  let copy = versions.slice(0);
+  const copy = versions.slice(0);
   copy.sort((a, b) => (isGreaterThan(a, b) ? -1 : 1));
   const result = copy.find((v) => matches(v, range));
   return result ?? null;
@@ -123,14 +122,14 @@ function minSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  let copy = versions.slice(0);
+  const copy = versions.slice(0);
   copy.sort((a, b) => (isGreaterThan(a, b) ? 1 : -1));
   const result = copy.find((v) => matches(v, range));
   return result ?? null;
 }
 
 function isLessThanRange(version: string, range: string): boolean {
-  let parsed = parse(range);
+  const parsed = parse(range);
   if (parsed === null) {
     return false;
   }
@@ -202,7 +201,7 @@ function getNewValue({
   return `>=${parsed.lower} && <${majorPlusOne}`;
 }
 
-function isSame(type: 'major' | 'minor' | 'patch', a: string, b: string) {
+function isSame(type: 'major' | 'minor' | 'patch', a: string, b: string): boolean {
   const aComponents = getComponents(a);
   const bComponents = getComponents(b);
   if (aComponents === null || bComponents === null) {
@@ -240,14 +239,14 @@ function isVersion(maybeRange: string | undefined | null): boolean {
   return typeof maybeRange === 'string' && parse(maybeRange) === null;
 }
 
-function isValid(ver: string) {
+function isValid(ver: string): boolean {
   return extractAllComponents(ver).length >= 1;
 }
 
 function isSingleVersion(range: string): boolean {
-  range = range.trim();
-  const r = regEx(/^[\d\.]+$/);
-  return range.startsWith('==') && r.test(range.slice(2));
+  const noSpaces = range.trim();
+  const r = regEx(/^[\d.]+$/);
+  return noSpaces.startsWith('==') && r.test(noSpaces.slice(2));
 }
 
 export const api: VersioningApi = {
