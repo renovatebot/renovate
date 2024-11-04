@@ -83,9 +83,9 @@ export const PullRequestSchema = z.object({
 const RepoTypeSchema = z.enum(['git', 'svn', 'hg']);
 
 export const RepoSchema = z.object({
-  contact: z.string(),
+  contact: z.string().optional().nullable(),
   creationDate: z.string(),
-  description: z.string(),
+  description: z.string().optional().nullable(),
   lastModified: z.string().optional().nullable(),
   namespace: z.string(),
   name: z.string(),
