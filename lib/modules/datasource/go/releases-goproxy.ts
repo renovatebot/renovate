@@ -7,6 +7,7 @@ import { filterMap } from '../../../util/filter-map';
 import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { joinUrlParts } from '../../../util/url';
 import goVersioning from '../../versioning/go-mod-directive';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -15,7 +16,6 @@ import { getSourceUrl } from './common';
 import { parseGoproxy, parseNoproxy } from './goproxy-parser';
 import { GoDirectDatasource } from './releases-direct';
 import type { VersionInfo } from './types';
-import { joinUrlParts } from '../../../util/url';
 
 const modRegex = regEx(/^(?<baseMod>.*?)(?:[./]v(?<majorVersion>\d+))?$/);
 
