@@ -32,10 +32,10 @@
     Hi there,
 
 
-    We appreciate the effort you put into creating a reproduction, but it's not minimal yet, or it doesn't include the fields we ask for in our template.
+    We appreciate the effort you put into creating a reproduction. But your reproduction is not minimal yet, or is missing fields we ask for in our template.
 
 
-    Please re-read the steps and documentation shared in the previous message, and try again to create a minimal reproduction.
+    Please re-read the steps and documentation given in the previous message, and try again to create a minimal reproduction.
 
 
     Thanks, the Renovate team
@@ -161,10 +161,10 @@
     Hi there,
 
 
-    You've redacted too much information from your config or logs, making it too difficult to pinpoint the problem.
+    You redacted too much information from your config or logs. This makes it hard for us to pinpoint the problem.
 
 
-    Please only redact truly sensitive information, or consider an enterprise support contract if Open Source support is not suitable for you.
+    Please only redact truly sensitive information. Or consider an enterprise support contract, if Open Source support does not suit you.
 
 
     Thanks, the Renovate team
@@ -407,10 +407,10 @@
     Hi there,
 
 
-    Please provide a meaningful title for your discussion. This helps others understand what your discussion is about, and increases the chances of getting help.
+    Please give your discussion a meaningful title. This helps others understand what your discussion is about, and increases the chances of getting help.
 
 
-    Do not use titles like "Need config help", "Renovate is not working", etc. Instead, use a title that describes the specifics of your problem or question.
+    Do not use titles like "Need config help", "Renovate is not working", etc. Try to summarize the specifics of your problem or question in the title.
 
 
     Thanks, the Renovate team
