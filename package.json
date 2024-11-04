@@ -198,7 +198,7 @@
     "find-packages": "10.0.4",
     "find-up": "5.0.0",
     "fs-extra": "11.2.0",
-    "git-url-parse": "14.1.0",
+    "git-url-parse": "15.0.0",
     "github-url-from-git": "1.5.0",
     "glob": "11.0.0",
     "global-agent": "3.0.0",
