@@ -1242,10 +1242,9 @@ Otherwise, it will default to `RenovateBot/${renovateVersion} (https://github.co
 
 ## username
 
+The only time where `username` is required is if using `username` + `password` credentials for the `bitbucket` platform.
 You don't need to configure `username` directly if you have already configured `token`.
 Renovate will use the token to discover its username on the platform, including if you're running Renovate as a GitHub App.
-
-The only time where `username` is required is if using `username` + `password` credentials for the `bitbucket` platform.
 
 ## writeDiscoveredRepos
 
