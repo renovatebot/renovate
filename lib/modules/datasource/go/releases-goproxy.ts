@@ -15,6 +15,7 @@ import { getSourceUrl } from './common';
 import { parseGoproxy, parseNoproxy } from './goproxy-parser';
 import { GoDirectDatasource } from './releases-direct';
 import type { VersionInfo } from './types';
+import { joinUrlParts } from '../../../util/url';
 
 const modRegex = regEx(/^(?<baseMod>.*?)(?:[./]v(?<majorVersion>\d+))?$/);
 
@@ -129,7 +130,12 @@ export class GoProxyDatasource extends Datasource {
   }
 
   async listVersions(baseUrl: string, packageName: string): Promise<Release[]> {
-    const url = `${baseUrl}/${this.encodeCase(packageName)}/@v/list`;
+    const url = joinUrlParts(
+      baseUrl,
+      this.encodeCase(packageName),
+      '@v',
+      'list',
+    );
     const { body } = await this.http.get(url);
     return filterMap(body.split(newlineRegex), (str) => {
       if (!is.nonEmptyStringAndNotWhitespace(str)) {
@@ -152,7 +158,12 @@ export class GoProxyDatasource extends Datasource {
     packageName: string,
     version: string,
   ): Promise<Release> {
-    const url = `${baseUrl}/${this.encodeCase(packageName)}/@v/${version}.info`;
+    const url = joinUrlParts(
+      baseUrl,
+      this.encodeCase(packageName),
+      '@v',
+      `${version}.info`,
+    );
     const res = await this.http.getJson<VersionInfo>(url);
 
     const result: Release = {
@@ -171,7 +182,11 @@ export class GoProxyDatasource extends Datasource {
     packageName: string,
   ): Promise<string | null> {
     try {
-      const url = `${baseUrl}/${this.encodeCase(packageName)}/@latest`;
+      const url = joinUrlParts(
+        baseUrl,
+        this.encodeCase(packageName),
+        '@latest',
+      );
       const res = await this.http.getJson<VersionInfo>(url);
       return res.body.Version;
     } catch (err) {
