@@ -51,7 +51,7 @@ export const PullRequestSchema = z.object({
   source: z.string(),
   target: z.string(),
   title: z.string(),
-  description: z.string(),
+  description: z.string().optional().nullable(),
   creationDate: z.string(),
   lastModified: z.string().optional().nullable(),
   status: PrStateSchema,
