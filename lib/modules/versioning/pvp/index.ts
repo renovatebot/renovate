@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
-import type { NewValueConfig , VersioningApi } from '../types';
+import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'pvp';
 export const displayName = 'Package Versioning Policy (Haskell)';
@@ -201,7 +201,11 @@ function getNewValue({
   return `>=${parsed.lower} && <${majorPlusOne}`;
 }
 
-function isSame(type: 'major' | 'minor' | 'patch', a: string, b: string): boolean {
+function isSame(
+  type: 'major' | 'minor' | 'patch',
+  a: string,
+  b: string,
+): boolean {
   const aComponents = getComponents(a);
   const bComponents = getComponents(b);
   if (aComponents === null || bComponents === null) {
