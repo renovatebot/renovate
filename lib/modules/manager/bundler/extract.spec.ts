@@ -145,8 +145,6 @@ describe('modules/manager/bundler/extract', () => {
 
   it('parses source variable in Gemfile', async () => {
     const sourceVariableGemfile = codeBlock`
-      source "https://rubygems.org"
-      ruby '~> 1.5.3'
       foo = 'https://gems.foo.com'
       bar = 'https://gems.bar.com'
 
@@ -159,12 +157,36 @@ describe('modules/manager/bundler/extract', () => {
 
     fs.readLocalFile.mockResolvedValueOnce(sourceVariableGemfile);
     const res = await extractPackageFile(sourceVariableGemfile, 'Gemfile');
-    expect(res?.deps).toHaveLength(2);
-    expect(res?.registryUrls).toHaveLength(2);
-    expect(res?.registryUrls?.[1]).toBe('https://gems.foo.com');
-    expect(res?.deps[1]).toMatchObject({
-      depName: 'some_internal_gem',
-      registryUrls: ['https://gems.bar.com'],
+    expect(res).toMatchObject({
+      registryUrls: ['https://gems.foo.com'],
+      deps: [
+        {
+          depName: 'some_internal_gem',
+          registryUrls: ['https://gems.bar.com'],
+        },
+      ],
+    });
+  });
+
+  it('parses inline source in Gemfile', async () => {
+    const sourceInlineGemfile = codeBlock`
+      gem "some_internal_gem", source: 'https://gems.foo.com'
+      gem 'another_internal_gem', "~> 1", source: 'https://gems.bar.com'
+      `;
+    fs.readLocalFile.mockResolvedValueOnce(sourceInlineGemfile);
+    const res = await extractPackageFile(sourceInlineGemfile, 'Gemfile');
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'some_internal_gem',
+          registryUrls: ['https://gems.foo.com'],
+        },
+        {
+          depName: 'another_internal_gem',
+          currentValue: '"~> 1"',
+          registryUrls: ['https://gems.bar.com'],
+        },
+      ],
     });
   });
 });
