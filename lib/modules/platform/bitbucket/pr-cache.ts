@@ -3,12 +3,12 @@ import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
+import { clone } from '../../../util/clone';
 import type { BitbucketHttp } from '../../../util/http/bitbucket';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import type { Pr } from '../types';
 import type { BitbucketPrCacheData, PagedResult, PrResponse } from './types';
 import { prFieldsFilter, prInfo, prStates } from './utils';
-import { clone } from '../../../util/clone';
 
 export class BitbucketPrCache {
   private cache: BitbucketPrCacheData;
