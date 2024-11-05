@@ -494,6 +494,13 @@ describe('modules/platform/scm-manager/index', () => {
       ) => {
         httpMock
           .scope(endpoint)
+          .get(
+            `/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`,
+          )
+          .reply(200, pullRequest);
+
+        httpMock
+          .scope(endpoint)
           .put(`/pull-requests/${repo.namespace}/${repo.name}/1`)
           .reply(204);
 

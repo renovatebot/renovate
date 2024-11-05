@@ -22,7 +22,6 @@ export interface PullRequestCreateParams extends PullRequestUpdateParams {
 export interface PullRequestUpdateParams {
   title: string;
   description?: string;
-  assignees?: string[];
   status?: PrState;
   target?: string;
 }

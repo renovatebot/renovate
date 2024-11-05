@@ -167,11 +167,27 @@ export default class ScmManagerHttp extends Http<ScmManagerHttpOptions> {
     id: number,
     params: PullRequestUpdateParams,
   ): Promise<void> {
+    const currentPr = await this.getRepoPr(repoPath, id);
     await this.putJson(URLS.PULLREQUEST_BY_ID(repoPath, id), {
-      body: params,
+      body: this.mergePullRequestWithUpdate(currentPr, params),
       headers: {
         'Content-Type': CONTENT_TYPES.PULLREQUEST,
       },
     });
+  }
+
+  private mergePullRequestWithUpdate(
+    pr: PullRequest,
+    updateParams: PullRequestUpdateParams,
+  ): PullRequest {
+    return {
+      ...pr,
+      title: updateParams.title,
+      description: updateParams.description
+        ? updateParams.description
+        : pr.description,
+      status: updateParams.status ? updateParams.status : pr.status,
+      target: updateParams.target ? updateParams.target : pr.target,
+    };
   }
 }

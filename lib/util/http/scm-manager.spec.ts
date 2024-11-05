@@ -235,7 +235,6 @@ describe('util/http/scm-manager', () => {
         target: 'develop',
         title: 'Test Title',
         description: 'PR description',
-        assignees: ['Test assignee'],
         status: 'OPEN',
       };
 
@@ -275,7 +274,6 @@ describe('util/http/scm-manager', () => {
             target: 'develop',
             title: 'Test Title',
             description: 'PR description',
-            assignees: ['Test assignee'],
             status: 'OPEN',
           }),
         ).rejects.toThrow();
@@ -288,11 +286,16 @@ describe('util/http/scm-manager', () => {
       const expectedUpdateParams: PullRequestUpdateParams = {
         title: 'Test Title',
         description: 'PR description',
-        assignees: ['Test assignee'],
         status: 'OPEN',
+        target: 'new/target',
       };
 
       const expectedPrId = 1337;
+
+      httpMock
+        .scope(endpoint)
+        .get(`/pull-requests/${repo.namespace}/${repo.name}/${expectedPrId}`)
+        .reply(200, pullRequest);
 
       httpMock
         .scope(endpoint)
@@ -315,6 +318,11 @@ describe('util/http/scm-manager', () => {
 
         httpMock
           .scope(endpoint)
+          .get(`/pull-requests/${repo.namespace}/${repo.name}/${expectedPrId}`)
+          .reply(200, pullRequest);
+
+        httpMock
+          .scope(endpoint)
           .put(`/pull-requests/${repo.namespace}/${repo.name}/${expectedPrId}`)
           .reply(response);
 
@@ -325,7 +333,6 @@ describe('util/http/scm-manager', () => {
             {
               title: 'Test Title',
               description: 'PR description',
-              assignees: ['Test assignee'],
               status: 'OPEN',
             },
           ),
