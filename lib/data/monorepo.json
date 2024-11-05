@@ -378,6 +378,7 @@
     "mutation-testing-elements": "https://github.com/stryker-mutator/mutation-testing-elements",
     "nest": [
       "https://github.com/nestjs/nest",
+      "https://github.com/nestjs/nest-cli",
       "https://github.com/nestjs/passport",
       "https://github.com/nestjs/schematics",
       "https://github.com/nestjs/terminus"
