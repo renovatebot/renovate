@@ -137,7 +137,7 @@ describe('modules/manager/nuget/util', () => {
         {
           name: 'contoso.com',
           url: 'https://contoso.com/packages/',
-        }
+        },
       ]);
     });
 
@@ -161,7 +161,7 @@ describe('modules/manager/nuget/util', () => {
         {
           name: 'contoso.com',
           url: 'https://contoso.com/packages/',
-        }
+        },
       ]);
     });
 
@@ -230,7 +230,7 @@ describe('modules/manager/nuget/util', () => {
       {
         name: 'nuget.org',
         url: 'https://api.nuget.org/v3/index.json',
-      }
+      },
     ]);
   });
 
