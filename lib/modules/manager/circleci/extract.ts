@@ -12,9 +12,8 @@ function extractDefinition(
   packageFile?: string,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  const orbs = definition.orbs ?? {};
 
-  for (const [key, orb] of Object.entries(orbs)) {
+  for (const [key, orb] of Object.entries(definition.orbs ?? {})) {
     if (typeof orb === 'string') {
       const [packageName, currentValue] = orb.split('@');
 
