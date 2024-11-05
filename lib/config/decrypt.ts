@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
+import * as memCache from '../util/cache/memory';
 import { maskToken } from '../util/mask';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
@@ -126,6 +127,7 @@ function validateDecryptedValue(
 export async function decryptConfig(
   config: RenovateConfig,
   repository: string,
+  existingPath = '$',
 ): Promise<RenovateConfig> {
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
@@ -133,7 +135,8 @@ export async function decryptConfig(
   const privateKeyOld = GlobalConfig.get('privateKeyOld');
   for (const [key, val] of Object.entries(config)) {
     if (key === 'encrypted' && is.object(val)) {
-      logger.debug({ config: val }, 'Found encrypted config');
+      const path = `${existingPath}.${key}`;
+      logger.debug({ config: val }, `Found encrypted config in ${path}`);
 
       const encryptedWarning = GlobalConfig.get('encryptedWarning');
       if (is.string(encryptedWarning)) {
@@ -142,7 +145,7 @@ export async function decryptConfig(
 
       if (privateKey) {
         for (const [eKey, eVal] of Object.entries(val)) {
-          logger.debug('Trying to decrypt ' + eKey);
+          logger.debug(`Trying to decrypt ${eKey} in ${path}`);
           let decryptedStr = await tryDecrypt(
             privateKey,
             eVal,
@@ -163,7 +166,7 @@ export async function decryptConfig(
             error.validationError = `Failed to decrypt field ${eKey}. Please re-encrypt and try again.`;
             throw error;
           }
-          logger.debug(`Decrypted ${eKey}`);
+          logger.debug(`Decrypted ${eKey} in ${path}`);
           if (eKey === 'npmToken') {
             const token = decryptedStr.replace(regEx(/\n$/), '');
             addSecretForSanitizing(token);
@@ -202,19 +205,22 @@ export async function decryptConfig(
       delete decryptedConfig.encrypted;
     } else if (is.array(val)) {
       decryptedConfig[key] = [];
-      for (const item of val) {
+      for (const [index, item] of val.entries()) {
         if (is.object(item) && !is.array(item)) {
+          const path = `${existingPath}.${key}[${index}]`;
           (decryptedConfig[key] as RenovateConfig[]).push(
-            await decryptConfig(item as RenovateConfig, repository),
+            await decryptConfig(item as RenovateConfig, repository, path),
           );
         } else {
           (decryptedConfig[key] as unknown[]).push(item);
         }
       }
     } else if (is.object(val) && key !== 'content') {
+      const path = `${existingPath}.${key}`;
       decryptedConfig[key] = await decryptConfig(
         val as RenovateConfig,
         repository,
+        path,
       );
     }
   }
