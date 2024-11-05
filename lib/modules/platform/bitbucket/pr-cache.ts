@@ -23,8 +23,15 @@ export class BitbucketPrCache {
     let pullRequestCache = repoCache.platform.bitbucket.pullRequestsCache as
       | BitbucketPrCacheData
       | undefined;
-    if (!pullRequestCache || pullRequestCache.author !== author) {
+    if (!pullRequestCache) {
       logger.debug('Initializing new PR cache at repository cache');
+      pullRequestCache = {
+        items: {},
+        updated_on: null,
+        author,
+      };
+    } else if (pullRequestCache.author !== author) {
+      logger.debug('Resetting PR cache because authors do not match');
       pullRequestCache = {
         items: {},
         updated_on: null,
