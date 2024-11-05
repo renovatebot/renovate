@@ -34,9 +34,7 @@ describe('modules/manager/nuget/util', () => {
 
   describe('getConfiguredRegistries', () => {
     it('reads nuget config file', async () => {
-      fs.findUpLocal.mockReturnValue(
-        Promise.resolve<string | null>('NuGet.config'),
-      );
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
           <configuration>
@@ -72,9 +70,7 @@ describe('modules/manager/nuget/util', () => {
     });
 
     it('reads nuget config file with default registry', async () => {
-      fs.findUpLocal.mockReturnValue(
-        Promise.resolve<string | null>('NuGet.config'),
-      );
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
         <configuration>
@@ -108,9 +104,7 @@ describe('modules/manager/nuget/util', () => {
     });
 
     it('reads nuget config file with default registry disabled', async () => {
-      fs.findUpLocal.mockReturnValue(
-        Promise.resolve<string | null>('NuGet.config'),
-      );
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
           <configuration>
@@ -125,9 +119,7 @@ describe('modules/manager/nuget/util', () => {
     });
 
     it('reads nuget config file with default registry disabled and added sources', async () => {
-      fs.findUpLocal.mockReturnValue(
-        Promise.resolve<string | null>('NuGet.config'),
-      );
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
           <configuration>
@@ -150,9 +142,7 @@ describe('modules/manager/nuget/util', () => {
     });
 
     it('reads nuget config file with default registry disabled given default registry added', async () => {
-      fs.findUpLocal.mockReturnValue(
-        Promise.resolve<string | null>('NuGet.config'),
-      );
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
           <configuration>
@@ -176,9 +166,7 @@ describe('modules/manager/nuget/util', () => {
     });
 
     it('reads nuget config file with unknown disabled source', async () => {
-      fs.findUpLocal.mockReturnValue(
-        Promise.resolve<string | null>('NuGet.config'),
-      );
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
           <configuration>
@@ -201,9 +189,7 @@ describe('modules/manager/nuget/util', () => {
     });
 
     it('reads nuget config file with disabled source with value false', async () => {
-      fs.findUpLocal.mockReturnValue(
-        Promise.resolve<string | null>('NuGet.config'),
-      );
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
           <configuration>
@@ -229,9 +215,7 @@ describe('modules/manager/nuget/util', () => {
   });
 
   it('reads nuget config file without packageSources and with unknown disabled source', async () => {
-    fs.findUpLocal.mockReturnValue(
-      Promise.resolve<string | null>('NuGet.config'),
-    );
+    fs.findUpLocal.mockResolvedValue('NuGet.config');
     fs.readLocalFile.mockResolvedValueOnce(
       codeBlock`
         <configuration>
@@ -251,9 +235,7 @@ describe('modules/manager/nuget/util', () => {
   });
 
   it('reads nuget config file without packageSources and with default registry disabled', async () => {
-    fs.findUpLocal.mockReturnValue(
-      Promise.resolve<string | null>('NuGet.config'),
-    );
+    fs.findUpLocal.mockResolvedValue('NuGet.config');
     fs.readLocalFile.mockResolvedValueOnce(
       codeBlock`
         <configuration>
