@@ -8,6 +8,7 @@ import { repoCacheProvider } from '../../../util/http/cache/repository-http-cach
 import type { Pr } from '../types';
 import type { BitbucketPrCacheData, PagedResult, PrResponse } from './types';
 import { prFieldsFilter, prInfo, prStates } from './utils';
+import { clone } from '../../../util/clone';
 
 export class BitbucketPrCache {
   private cache: BitbucketPrCacheData;
@@ -150,7 +151,16 @@ export class BitbucketPrCache {
 
     this.reconcile(items);
 
+    const oldCache = clone(this.cache.items);
     logger.debug(`Total PRs cached: ${Object.values(this.cache.items).length}`);
+    logger.trace(
+      {
+        items,
+        oldCache,
+        newCache: this.cache.items,
+      },
+      `Re`,
+    );
     return this;
   }
 }
