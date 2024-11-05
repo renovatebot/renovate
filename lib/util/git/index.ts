@@ -716,7 +716,10 @@ export async function isBranchModified(
     },
     'branch.isModified() = true',
   );
-  logger.debug('branch.isModified() = true');
+  logger.debug(
+    { branchName, unrecognizedAuthors: [...includedAuthors] },
+    'branch.isModified() = true',
+  );
   config.branchIsModified[branchName] = true;
   setCachedModifiedResult(branchName, true);
   return true;
