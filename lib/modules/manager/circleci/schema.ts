@@ -15,13 +15,7 @@ type Orb = {
   orbs?: Record<string, string | Orb>;
 };
 
-type OrbInput = {
-  executors?: Record<string, CircleCiJob>;
-  jobs?: Record<string, CircleCiJob>;
-  orbs?: Record<string, string | OrbInput>;
-};
-
-export const CircleCiOrb: z.ZodType<Orb, any, OrbInput> = z.object({
+export const CircleCiOrb: z.ZodType<Orb, any, Orb> = z.object({
   executors: z.record(z.string(), CircleCiJob).optional(),
   jobs: z.record(z.string(), CircleCiJob).optional(),
   orbs: z.lazy(() =>
