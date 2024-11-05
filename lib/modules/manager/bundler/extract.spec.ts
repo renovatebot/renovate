@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import { isValid } from '../../versioning/ruby';
@@ -29,6 +30,18 @@ const sourceBlockWithNewLinesGemfile = Fixtures.get(
 const sourceBlockWithGroupsGemfile = Fixtures.get(
   'Gemfile.sourceBlockWithGroups',
 );
+const sourceVariableGemfile = codeBlock`
+source "https://rubygems.org"
+ruby '~> 1.5.3'
+foo = 'https://gems.foo.com'
+bar = 'https://gems.bar.com'
+
+source foo
+
+source bar do
+  gem "some_internal_gem"
+end
+`;
 
 describe('modules/manager/bundler/extract', () => {
   describe('extractPackageFile()', () => {
@@ -140,5 +153,17 @@ describe('modules/manager/bundler/extract', () => {
       { depName: 'sfn_my_dep1', currentValue: '"~> 1"' },
       { depName: 'sfn_my_dep2', currentValue: '"~> 1"' },
     ]);
+  });
+
+  it('parses source variable in Gemfile', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(sourceVariableGemfile);
+    const res = await extractPackageFile(sourceVariableGemfile, 'Gemfile');
+    expect(res?.deps).toHaveLength(2);
+    expect(res?.registryUrls).toHaveLength(2);
+    expect(res?.registryUrls?.[1]).toBe('https://gems.foo.com');
+    expect(res?.deps[1]).toMatchObject({
+      depName: 'some_internal_gem',
+      registryUrls: ['https://gems.bar.com'],
+    });
   });
 });
