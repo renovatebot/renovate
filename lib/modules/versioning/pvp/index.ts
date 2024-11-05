@@ -108,24 +108,29 @@ function matches(version: string, range: string): boolean {
   );
 }
 
+function satisfyingVersion(
+  versions: string[],
+  range: string,
+  onGreaterThan: (isGreaterThan: boolean) => boolean,
+): string | null {
+  const copy = versions.slice(0);
+  copy.sort((a, b) => (onGreaterThan(isGreaterThan(a, b)) ? -1 : 1));
+  const result = copy.find((v) => matches(v, range));
+  return result ?? null;
+}
+
 function getSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  const copy = versions.slice(0);
-  copy.sort((a, b) => (isGreaterThan(a, b) ? -1 : 1));
-  const result = copy.find((v) => matches(v, range));
-  return result ?? null;
+  return satisfyingVersion(versions, range, (x) => x);
 }
 
 function minSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  const copy = versions.slice(0);
-  copy.sort((a, b) => (isGreaterThan(a, b) ? 1 : -1));
-  const result = copy.find((v) => matches(v, range));
-  return result ?? null;
+  return satisfyingVersion(versions, range, (x) => !x);
 }
 
 function isLessThanRange(version: string, range: string): boolean {
@@ -182,15 +187,10 @@ function getNewValue({
     // the upper bound is already high enough
     return null;
   }
+  // isLessThanRange returns true when newVersion is invalid. so we can assert it non-null
   const compos = getComponents(newVersion);
-  if (compos === null) {
-    logger.warn(
-      { currentValue, newVersion, compos },
-      'did not find two major parts',
-    );
-    return null;
-  }
-  const majorPlusOne = plusOne(compos.major);
+  const majorPlusOne = plusOne(compos!.major);
+  // istanbul ignore next: since all versions that can be parsed, can also be bumped, this can never happen
   if (!matches(newVersion, `>=${parsed.lower} && <${majorPlusOne}`)) {
     logger.warn(
       { newVersion },
@@ -253,18 +253,38 @@ function isSingleVersion(range: string): boolean {
   return noSpaces.startsWith('==') && r.test(noSpaces.slice(2));
 }
 
+function equals(a: string, b: string): boolean {
+  return (
+    'eq' === compareIntArray(extractAllComponents(a), extractAllComponents(b))
+  );
+}
+
+function sortVersions(a: string, b: string): number {
+  if (equals(a, b)) {
+    return 0;
+  }
+  return isGreaterThan(a, b) ? 1 : -1;
+}
+
+function isStable(version: string): boolean {
+  return true;
+}
+
+function isCompatible(version: string): boolean {
+  return true;
+}
+
 export const api: VersioningApi = {
   isValid,
   isVersion,
-  isStable: () => true,
-  isCompatible: () => true,
+  isStable,
+  isCompatible,
   getMajor,
   getMinor,
   getPatch,
   isSingleVersion,
-  sortVersions: (a, b) => (isGreaterThan(a, b) ? 1 : -1),
-  equals: (a, b) =>
-    'eq' === compareIntArray(extractAllComponents(a), extractAllComponents(b)),
+  sortVersions,
+  equals,
   matches,
   getSatisfyingVersion,
   minSatisfyingVersion,

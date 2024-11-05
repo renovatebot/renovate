@@ -75,6 +75,10 @@ describe('modules/versioning/pvp/index', () => {
     it("should return false when range can't be parsed", () => {
       expect(pvp.matches('4', 'gibberish')).toBeFalse();
     });
+
+    it('should return false when given an invalid version', () => {
+      expect(pvp.matches('', '>=1.0 && <1.1')).toBeFalse();
+    });
   });
 
   describe('.getSatisfyingVersion(versions, range)', () => {
@@ -85,6 +89,24 @@ describe('modules/versioning/pvp/index', () => {
           '>=1.0 && <1.1',
         ),
       ).toBe('1.0.4');
+    });
+
+    it('should handle unsorted inputs', () => {
+      expect(
+        pvp.getSatisfyingVersion(
+          ['2.0.0', '1.0.0', '1.0.4', '1.3.0'],
+          '>=1.0 && <1.1',
+        ),
+      ).toBe('1.0.4');
+    });
+
+    it('should return null when no versions match', () => {
+      expect(
+        pvp.getSatisfyingVersion(
+          ['1.0.0', '1.0.4', '1.3.0', '2.0.0'],
+          '>=3.0 && <4.0',
+        ),
+      ).toBeNull();
     });
   });
 
@@ -115,6 +137,10 @@ describe('modules/versioning/pvp/index', () => {
 
     it("should return false when range can't be parsed", () => {
       expect(pvp.isLessThanRange?.('3', 'gibberish')).toBeFalse();
+    });
+
+    it('should return true when version is invalid', () => {
+      expect(pvp.isLessThanRange?.('', '>=3.0 && <3.1')).toBeTrue();
     });
   });
 
@@ -196,6 +222,16 @@ describe('modules/versioning/pvp/index', () => {
         }),
       ).toBeNull();
     });
+
+    it('should return null when newVersion is empty', () => {
+      expect(
+        pvp.getNewValue({
+          currentValue: '>=1.0 && <1.1',
+          newVersion: '',
+          rangeStrategy: 'auto',
+        }),
+      ).toBeNull();
+    });
   });
 
   describe('.getComponents(...)', () => {
@@ -224,6 +260,12 @@ describe('modules/versioning/pvp/index', () => {
       expect(pvp.isSame?.('minor', '4.1', '4.1')).toBeTrue();
       expect(pvp.isSame?.('minor', '4.1', '5.1')).toBeTrue();
       expect(pvp.isSame?.('minor', '4.1.0', '4.1.1')).toBeFalse();
+    });
+
+    it('should compare patch components correctly', () => {
+      expect(pvp.isSame?.('patch', '1.0.0.0', '1.0.0.0')).toBeTrue();
+      expect(pvp.isSame?.('patch', '1.0.0.0', '2.0.0.0')).toBeTrue();
+      expect(pvp.isSame?.('patch', '1.0.0.0', '1.0.0.1')).toBeFalse();
     });
 
     it('should return false when the given a invalid version', () => {
@@ -280,6 +322,30 @@ describe('modules/versioning/pvp/index', () => {
 
     it("returns undefined when passed a range that can't be parsed", () => {
       expect(pvp.subset?.('gibberish', '')).toBeUndefined();
+    });
+  });
+
+  describe('.sortVersions()', () => {
+    it('should sort 1.0 and 1.1', () => {
+      expect(pvp.sortVersions('1.0', '1.1')).toBe(-1);
+      expect(pvp.sortVersions('1.1', '1.0')).toBe(1);
+      expect(pvp.sortVersions('1.0', '1.0')).toBe(0);
+    });
+  });
+
+  describe('.isStable()', () => {
+    it('should consider 0.0.0 stable', () => {
+      // in PVP, stability is not conveyed in the version number
+      // so we consider all versions stable
+      expect(pvp.isStable('0.0.0')).toBeTrue();
+    });
+  });
+
+  describe('.isCompatible()', () => {
+    it('should consider 0.0.0 compatible', () => {
+      // in PVP, there is no extra information besides the numbers
+      // so we consider all versions compatible
+      expect(pvp.isCompatible('0.0.0')).toBeTrue();
     });
   });
 });
