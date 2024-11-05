@@ -1,25 +1,27 @@
-# syntax=docker/dockerfile:1.10.0@sha256:865e5dd094beca432e8c0a1d5e1c465db5f998dca4e439981029b3b81fb39ed5
+# syntax=docker/dockerfile:1.11.0@sha256:1f2be5a2aa052cbd9aedf893d17c63277c3d1c51b3fb0f3b029c6b34f658d057
 
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:7.36.0@sha256:9b282da7e677b7e365590a74063989b07ca896df2d9ae51a12e191208c2e5665 AS slim-base
+FROM ghcr.io/renovatebot/base-image:9.2.2@sha256:ecf207fc81484f5315f27cc3c5948b12b7efb8e2be4b8a8efa03f0e228f803e4 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:7.36.0-full@sha256:5711533426db536e2377a80d4678cd2056fb44d7b04786c7863f9aea7d5f3756 AS full-base
+FROM ghcr.io/renovatebot/base-image:9.2.2-full@sha256:f5c77c3957aa467fc3a461b32561455d233c9498cbb34b81d2f3c3b2dee2ac3f AS full-base
+
+ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:7.36.0@sha256:9b282da7e677b7e365590a74063989b07ca896df2d9ae51a12e191208c2e5665 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.2.2@sha256:ecf207fc81484f5315f27cc3c5948b12b7efb8e2be4b8a8efa03f0e228f803e4 AS build
 
 # We want a specific node version here
 # renovate: datasource=node-version
-RUN install-tool node 20.18.0
+RUN install-tool node 22.11.0
 
 WORKDIR /usr/local/renovate
 
@@ -102,4 +104,4 @@ LABEL \
   org.label-schema.version="${RENOVATE_VERSION}"
 
 # Numeric user ID for the ubuntu user. Used to indicate a non-root user to OpenShift
-USER 1000
+USER 12021

@@ -76,11 +76,12 @@ export function init(cacheDir: string): string {
 
 export async function cleanup(): Promise<void> {
   logger.debug('Checking file package cache for expired items');
-  try {
-    let totalCount = 0;
-    let deletedCount = 0;
-    const startTime = Date.now();
-    for await (const item of cacache.ls.stream(cacheFileName)) {
+  let totalCount = 0;
+  let deletedCount = 0;
+  const startTime = Date.now();
+  let errorCount = 0;
+  for await (const item of cacache.ls.stream(cacheFileName)) {
+    try {
       totalCount += 1;
       const cachedItem = item as unknown as cacache.CacheObject;
       const res = await cacache.get(cacheFileName, cachedItem.key);
@@ -99,12 +100,17 @@ export async function cleanup(): Promise<void> {
         await cacache.rm.content(cacheFileName, cachedItem.integrity);
         deletedCount += 1;
       }
+    } catch (err) /* istanbul ignore next */ {
+      logger.trace({ err }, 'Error cleaning up cache entry');
+      errorCount += 1;
     }
-    const durationMs = Math.round(Date.now() - startTime);
-    logger.debug(
-      `Deleted ${deletedCount} of ${totalCount} file cached entries in ${durationMs}ms`,
-    );
-  } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error cleaning up expired file cache');
   }
+  // istanbul ignore if: cannot reproduce error
+  if (errorCount > 0) {
+    logger.debug(`Error count cleaning up cache: ${errorCount}`);
+  }
+  const durationMs = Math.round(Date.now() - startTime);
+  logger.debug(
+    `Deleted ${deletedCount} of ${totalCount} file cached entries in ${durationMs}ms`,
+  );
 }

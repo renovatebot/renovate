@@ -574,6 +574,19 @@ export const presets: Record<string, Preset> = {
         ],
         semanticCommitType: 'fix',
       },
+      {
+        matchDepTypes: [
+          'project.dependencies',
+          'project.optional-dependencies',
+        ],
+        matchManagers: ['pep621'],
+        semanticCommitType: 'fix',
+      },
+      {
+        matchDepTypes: ['dependencies', 'extras'],
+        matchManagers: ['poetry'],
+        semanticCommitType: 'fix',
+      },
     ],
   },
   separateMajorReleases: {
