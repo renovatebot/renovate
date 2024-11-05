@@ -71,6 +71,10 @@ describe('modules/versioning/pvp/index', () => {
       expect(pvp.matches('4', '>=4.0 && <4.10')).toBeFalse();
       expect(pvp.matches('4.10', '>=4.1 && <4.10')).toBeFalse();
     });
+
+    it("should return false when range can't be parsed", () => {
+      expect(pvp.matches('4', 'gibberish')).toBeFalse();
+    });
   });
 
   describe('.getSatisfyingVersion(versions, range)', () => {
@@ -107,6 +111,10 @@ describe('modules/versioning/pvp/index', () => {
       expect(pvp.isLessThanRange?.('3.0.0', '>=3.0 && <3.1')).toBeFalse();
       expect(pvp.isLessThanRange?.('4.0.0', '>=3.0 && <3.1')).toBeFalse();
       expect(pvp.isLessThanRange?.('3.1.0', '>=3.0 && <3.1')).toBeFalse();
+    });
+
+    it("should return false when range can't be parsed", () => {
+      expect(pvp.isLessThanRange?.('3', 'gibberish')).toBeFalse();
     });
   });
 
@@ -158,11 +166,45 @@ describe('modules/versioning/pvp/index', () => {
         }),
       ).toBeNull();
     });
+
+    it('should return null when given unimplemented range strategies like update-lockfile', () => {
+      expect(
+        pvp.getNewValue({
+          currentValue: '>=1.0 && <1.1',
+          newVersion: '1.2.3',
+          rangeStrategy: 'update-lockfile',
+        }),
+      ).toBeNull();
+    });
+
+    it("should return null when given range that can't be parsed", () => {
+      expect(
+        pvp.getNewValue({
+          currentValue: 'gibberish',
+          newVersion: '1.2.3',
+          rangeStrategy: 'auto',
+        }),
+      ).toBeNull();
+    });
+
+    it('should return null when newVersion is below range', () => {
+      expect(
+        pvp.getNewValue({
+          currentValue: '>=1.0 && <1.1',
+          newVersion: '0.9',
+          rangeStrategy: 'auto',
+        }),
+      ).toBeNull();
+    });
   });
 
   describe('.getComponents(...)', () => {
     it('"0" is valid major version', () => {
       expect(getComponents('0')?.major).toEqual([0]);
+    });
+
+    it('returns null when no components could be extracted', () => {
+      expect(getComponents('')).toBeNull();
     });
   });
 
@@ -182,6 +224,10 @@ describe('modules/versioning/pvp/index', () => {
       expect(pvp.isSame?.('minor', '4.1', '4.1')).toBeTrue();
       expect(pvp.isSame?.('minor', '4.1', '5.1')).toBeTrue();
       expect(pvp.isSame?.('minor', '4.1.0', '4.1.1')).toBeFalse();
+    });
+
+    it('should return false when the given a invalid version', () => {
+      expect(pvp.isSame?.('minor', '', '0')).toBeFalse();
     });
   });
 
@@ -230,6 +276,10 @@ describe('modules/versioning/pvp/index', () => {
 
     it('0.9-2.0 outside 1.0-2.0', () => {
       expect(pvp.subset?.('>=0.9 && <2.1', '>=1.0 && <2.0')).toBeFalse();
+    });
+
+    it("returns undefined when passed a range that can't be parsed", () => {
+      expect(pvp.subset?.('gibberish', '')).toBeUndefined();
     });
   });
 });
