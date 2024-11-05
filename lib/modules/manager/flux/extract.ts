@@ -132,8 +132,10 @@ function resolveResourceManifest(
     switch (resource.kind) {
       case 'HelmRelease': {
         if (resource.spec.chartRef?.kind === 'OCIRepository') {
-          // Can be skipped, version is handled via OCIRepository resource directly
-          break;
+          logger.trace(
+            'HelmRelease referencing an OCIRepository was found, skipping as version will be handled via OCIRepository resource directly',
+          );
+          continue;
         }
 
         const resolvedRelease = resolveHelmReleaseManifest(
@@ -142,8 +144,9 @@ function resolveResourceManifest(
           helmCharts,
         );
         if (!resolvedRelease) {
-          // invalid or incomplete HelmRelease spec, thus failed to extract the dependency itself
-          break;
+          // failed to extract the dependency itself
+          logger.debug('invalid or incomplete HelmRelease spec, skipping');
+          continue;
         }
         const { name: chartName, dep, matchingRepositories } = resolvedRelease;
 

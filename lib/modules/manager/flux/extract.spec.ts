@@ -14,6 +14,8 @@ import { extractAllPackageFiles, extractPackageFile } from '.';
 
 const config: ExtractConfig = {};
 const adminConfig: RepoGlobalConfig = { localDir: '' };
+const fixtureHelmChart = Fixtures.get('helmChart.yaml');
+const fixtureHelmChartRefRelease = Fixtures.get('helmChartRefRelease.yaml');
 
 describe('modules/manager/flux/extract', () => {
   beforeEach(() => {
@@ -267,7 +269,7 @@ describe('modules/manager/flux/extract', () => {
     it('does not match HelmRelease resources using chartRef without a namespace', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('helmChart.yaml')}
+          ${fixtureHelmChart}
           ---
           apiVersion: helm.toolkit.fluxcd.io/v2
           kind: HelmRelease
@@ -344,7 +346,7 @@ describe('modules/manager/flux/extract', () => {
 
     it('ignores HelmRelease resources using a chartRef without a HelmChart', () => {
       const result = extractPackageFile(
-        Fixtures.get('helmChartRefRelease.yaml'),
+        fixtureHelmChartRefRelease,
         'test.yaml',
       );
       expect(result).toBeNull();
@@ -353,9 +355,9 @@ describe('modules/manager/flux/extract', () => {
     it('extracts HelmRelease resources using a chartRef without a valid HelmRepository', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('helmChartRefRelease.yaml')}
+          ${fixtureHelmChartRefRelease}
           ---
-          ${Fixtures.get('helmChart.yaml')}
+          ${fixtureHelmChart}
         `,
         'test.yaml',
       );
