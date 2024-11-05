@@ -159,7 +159,7 @@ export class BitbucketPrCache {
         oldCache,
         newCache: this.cache.items,
       },
-      `Re`,
+      `PR cache sync finished`,
     );
     return this;
   }
