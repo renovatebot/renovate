@@ -24,6 +24,7 @@ export class BitbucketPrCache {
       | BitbucketPrCacheData
       | undefined;
     if (!pullRequestCache || pullRequestCache.author !== author) {
+      logger.debug('Initializing new PR cache at repository cache');
       pullRequestCache = {
         items: {},
         updated_on: null,
@@ -66,6 +67,7 @@ export class BitbucketPrCache {
   }
 
   private addPr(pr: Pr): void {
+    logger.debug(`Adding PR #${pr.number} to the PR cache`);
     this.cache.items[pr.number] = pr;
   }
 
@@ -135,7 +137,13 @@ export class BitbucketPrCache {
       cacheProvider: repoCacheProvider,
     };
     const res = await http.getJson<PagedResult<PrResponse>>(url, opts);
-    this.reconcile(res.body.values);
+
+    const items = res.body.values;
+    logger.debug(`Fetched ${items.length} PRs to sync with cache`);
+
+    this.reconcile(items);
+
+    logger.debug(`Total PRs cached: ${Object.values(this.cache.items).length}`);
     return this;
   }
 }
