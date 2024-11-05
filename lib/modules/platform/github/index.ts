@@ -553,12 +553,12 @@ export async function initRepo({
     // Base branch may be configured but defaultBranch is always fixed
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
-    if (repo.rebaseMergeAllowed) {
-      config.mergeMethod = 'rebase';
-    } else if (repo.squashMergeAllowed) {
+    if (repo.squashMergeAllowed) {
       config.mergeMethod = 'squash';
     } else if (repo.mergeCommitAllowed) {
       config.mergeMethod = 'merge';
+    } else if (repo.rebaseMergeAllowed) {
+      config.mergeMethod = 'rebase';
     } else {
       // This happens if we don't have Administrator read access, it is not a critical error
       logger.debug('Could not find allowed merge methods for repo');
@@ -1484,16 +1484,23 @@ export async function addReviewers(
   }
 }
 
-async function addLabels(
+export async function addLabels(
   issueNo: number,
   labels: string[] | null | undefined,
 ): Promise<void> {
   logger.debug(`Adding labels '${labels?.join(', ')}' to #${issueNo}`);
-  const repository = config.parentRepo ?? config.repository;
-  if (is.array(labels) && labels.length) {
-    await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
-      body: labels,
-    });
+  try {
+    const repository = config.parentRepo ?? config.repository;
+    if (is.array(labels) && labels.length) {
+      await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
+        body: labels,
+      });
+    }
+  } catch (err) {
+    logger.warn(
+      { err, issueNo, labels },
+      'Error while adding labels. Skipping',
+    );
   }
 }
 
@@ -1903,25 +1910,25 @@ export async function mergePr({
     }
   }
   if (!automerged) {
-    // We need to guess the merge method and try squash -> rebase -> merge
-    options.body.merge_method = 'rebase';
+    // We need to guess the merge method and try squash -> merge -> rebase
+    options.body.merge_method = 'squash';
     try {
       logger.debug({ options, url }, `mergePr`);
       automergeResult = await githubApi.putJson(url, options);
     } catch (err1) {
-      logger.debug({ err: err1 }, `Failed to rebase merge PR`);
+      logger.debug({ err: err1 }, `Failed to squash merge PR`);
       try {
-        options.body.merge_method = 'squash';
+        options.body.merge_method = 'merge';
         logger.debug({ options, url }, `mergePr`);
         automergeResult = await githubApi.putJson(url, options);
       } catch (err2) {
-        logger.debug({ err: err2 }, `Failed to merge squash PR`);
+        logger.debug({ err: err2 }, `Failed to merge commit PR`);
         try {
-          options.body.merge_method = 'merge';
+          options.body.merge_method = 'rebase';
           logger.debug({ options, url }, `mergePr`);
           automergeResult = await githubApi.putJson(url, options);
         } catch (err3) {
-          logger.debug({ err: err3 }, `Failed to merge commit PR`);
+          logger.debug({ err: err3 }, `Failed to rebase merge PR`);
           logger.info({ pr: prNo }, 'All merge attempts failed');
           return false;
         }

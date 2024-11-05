@@ -1,8 +1,8 @@
 This manager parses [Flux](https://fluxcd.io/) YAML manifests and supports:
 
 1. [`HelmRelease`](https://fluxcd.io/docs/components/helm/helmreleases/) resources
-1. ['GitRepository'](https://fluxcd.io/flux/components/source/gitrepositories/) resources
-1. ['OCIRepository'](https://fluxcd.io/flux/components/source/ocirepositories/) resources
+1. [`GitRepository`](https://fluxcd.io/flux/components/source/gitrepositories/) resources
+1. [`OCIRepository`](https://fluxcd.io/flux/components/source/ocirepositories/) resources
 1. Flux [system](https://fluxcd.io/docs/installation) manifests
 
 ### HelmRelease support

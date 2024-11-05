@@ -62,6 +62,7 @@ direnv 2.32.1
 dotnet-core 8.0.303
 dprint 0.32.2
 ecspresso 2.1.0
+editorconfig-checker 3.0.2
 elixir 1.14.1
 elm 0.19.1
 erlang 25.1.2
@@ -69,6 +70,7 @@ flutter 3.7.6-stable
 flux2 0.41.2
 gauche 0.9.12
 github-cli 2.32.1
+gitleaks 8.21.1
 gleam 1.3.1
 gohugo extended_0.104.3
 golang 1.19.2
@@ -88,6 +90,7 @@ kotlin 1.7.20
 kubectl 1.26.3
 kustomize 4.5.7
 lua 5.4.4
+markdownlint-cli2 0.13.0
 maven 3.9.6
 mimirtool 2.11.0
 minikube 1.33.1
@@ -116,6 +119,7 @@ tflint 0.44.1
 tfsec 1.28.1
 trivy 0.33.0
 vault 1.15.1
+yamllint 1.35.0
 yq 4.40.5
 zig 0.9.1
 maestro 1.24.0
@@ -248,6 +252,13 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '3.0.2',
+            datasource: 'github-releases',
+            packageName: 'editorconfig-checker/editorconfig-checker',
+            depName: 'editorconfig-checker',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.14.1',
             datasource: 'hexpm-bob',
             depName: 'elixir',
@@ -290,6 +301,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'cli/cli',
             depName: 'github-cli',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '8.21.1',
+            datasource: 'github-releases',
+            packageName: 'gitleaks/gitleaks',
+            depName: 'gitleaks',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -421,6 +439,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'lua/lua',
             depName: 'lua',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.13.0',
+            datasource: 'github-tags',
+            packageName: 'DavidAnson/markdownlint-cli2',
+            depName: 'markdownlint-cli2',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -609,6 +634,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'hashicorp/vault',
             depName: 'vault',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.35.0',
+            datasource: 'github-tags',
+            packageName: 'adrienverge/yamllint',
+            depName: 'yamllint',
             extractVersion: '^v(?<version>\\S+)',
           },
           {

@@ -63,18 +63,18 @@ export function parseYaml<ResT = unknown>(
 
   const results: ResT[] = [];
   for (const rawDocument of rawDocuments) {
-    const document = rawDocument.toJS({ maxAliasCount: 10000 });
-
     const errors = rawDocument.errors;
     // handle YAML parse errors
     if (errors?.length) {
       const error = new AggregateError(errors, 'Failed to parse YAML file');
       if (options?.failureBehaviour === 'filter') {
-        logger.debug({ error, document }, 'Failed to parse YAML');
+        logger.debug(`Failed to parse YAML file: ${error.message}`);
         continue;
       }
       throw error;
     }
+
+    const document = rawDocument.toJS({ maxAliasCount: 10000 });
 
     // skip schema validation if no schema is provided
     if (!schema) {
@@ -158,6 +158,7 @@ function prepareParseOption(options: YamlOptions | undefined): YamlOptions {
     prettyErrors: true,
     // if we're removing templates, we can run into the situation where we have duplicate keys
     uniqueKeys: !options?.removeTemplates,
+    strict: false,
     ...options,
   };
 }
