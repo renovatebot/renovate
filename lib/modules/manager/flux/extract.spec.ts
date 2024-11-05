@@ -189,6 +189,34 @@ describe('modules/manager/flux/extract', () => {
       expect(result).toBeNull();
     });
 
+    it('skip HelmRelease with local chart', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: helm.toolkit.fluxcd.io/v2beta1
+          kind: HelmRelease
+          metadata:
+            name: cert-manager-config
+            namespace: kube-system
+          spec:
+            chart:
+              spec:
+                chart: ./charts/cert-manager-config
+                sourceRef:
+                  kind: GitRepository
+                  name: chart-repo
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: './charts/cert-manager-config',
+            skipReason: 'local-chart',
+          },
+        ],
+      });
+    });
+
     it('does not match HelmRelease resources without a namespace to HelmRepository resources without a namespace', () => {
       const result = extractPackageFile(
         codeBlock`

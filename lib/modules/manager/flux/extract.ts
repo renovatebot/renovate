@@ -150,6 +150,13 @@ function resolveResourceManifest(
         }
         const { name: chartName, dep, matchingRepositories } = resolvedRelease;
 
+        if (dep.depName?.startsWith('./')) {
+          dep.skipReason = 'local-chart';
+          delete dep.datasource;
+          deps.push(dep);
+          continue;
+        }
+
         if (matchingRepositories.length) {
           dep.registryUrls = matchingRepositories
             .map((repo) => {
