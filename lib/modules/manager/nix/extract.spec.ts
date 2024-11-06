@@ -7,7 +7,7 @@ const flake1Lock = `{
   },
   "root": "root",
   "version": 7
-}`
+}`;
 const flake2Lock = `{
   "nodes": {
     "nixpkgs": {
@@ -34,7 +34,7 @@ const flake2Lock = `{
   },
   "root": "root",
   "version": 7
-}`
+}`;
 const flake3Lock = `{
   "nodes": {
     "nixpkgs": {
@@ -60,7 +60,7 @@ const flake3Lock = `{
   },
   "root": "root",
   "version": 7
-}`
+}`;
 const flake4Lock = `{
   "nodes": {
     "nixpkgs": {
@@ -104,7 +104,7 @@ const flake4Lock = `{
   },
   "root": "root",
   "version": 7
-}`
+}`;
 const flake5Lock = `{
   "nodes": {
     "ijq": {
@@ -131,7 +131,7 @@ const flake5Lock = `{
   },
   "root": "root",
   "version": 7
-}`
+}`;
 const flake6Lock = `{
   "nodes": {
     "home-manager": {
@@ -158,14 +158,14 @@ const flake6Lock = `{
   },
   "root": "root",
   "version": 7
-}`
+}`;
 const flake7Lock = `{
   "nodes": {
     "root": {}
   },
   "root": "root",
   "version": 6
-}`
+}`;
 const flake8Lock = `{
   "nodes": {
     "nixpkgs": {
@@ -193,7 +193,7 @@ const flake8Lock = `{
   },
   "root": "root",
   "version": 7
-}`
+}`;
 const flake9Lock = `{
   "nodes": {
     "nixpkgs": {
@@ -218,7 +218,7 @@ const flake9Lock = `{
   },
   "root": "root",
   "version": 7
-}`
+}`;
 const flake10Lock = `{
   "nodes": {
     "flake-utils": {
@@ -299,7 +299,7 @@ const flake10Lock = `{
   },
   "root": "root",
   "version": 7
-}`
+}`;
 const flake11Lock = `{
   "nodes": {
     "data-mesher": {
@@ -386,7 +386,7 @@ const flake11Lock = `{
   },
   "root": "root",
   "version": 7
-}`
+}`;
 
 describe('modules/manager/nix/extract', () => {
   it('returns null when no inputs', () => {
