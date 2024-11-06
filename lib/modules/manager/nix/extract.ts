@@ -10,7 +10,7 @@ import { NixFlakeLock } from './schema';
 // as documented upstream
 // https://github.com/NixOS/nix/blob/master/doc/manual/source/protocols/tarball-fetcher.md#gitea-and-forgejo-support
 const lockableHTTPTarballProtocol = regEx(
-  '^https://([^/]+)/([^/]+)/([^/]+)/archive/(.+).tar.gz$',
+  '^https://(?<domain>[^/]+)/(?<owner>[^/]+)/(?<repo>[^/]+)/archive/(?<rev>.+).tar.gz$',
 );
 
 export function extractPackageFile(
@@ -119,7 +119,7 @@ export function extractPackageFile(
           // istanbul ignore next: type tarball always contains this link
           packageName: (flakeOriginal.url ?? '').replace(
             lockableHTTPTarballProtocol,
-            'https://$1/$2/$3',
+            'https://$<domain>/$<owner>/$<repo>',
           ),
         });
         break;
