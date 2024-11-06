@@ -7,7 +7,6 @@
     /* https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping */
     "target": "es2022",
     "module": "Node16",
-    // "moduleResolution": "Node16",
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
