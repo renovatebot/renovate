@@ -88,7 +88,7 @@ describe('config/index', () => {
       const childConfig = {
         packageRules: [{ a: 3 }, { a: 4 }],
       };
-      const configParser = await import('./index');
+      const configParser = await import('./index.js');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.packageRules).toHaveLength(2);
     });

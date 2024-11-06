@@ -52,7 +52,7 @@ function csvToJson(raw) {
  * @param {string} file File path to update
  */
 async function update(url, file) {
-  const res = await got(url);
+  const res = await got.default(url);
   const csv = res.body;
   const json = csvToJson(csv);
   await updateJsonFile(file, json);

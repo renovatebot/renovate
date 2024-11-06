@@ -36,8 +36,8 @@ describe('modules/platform/gitlab/index', () => {
     // reset module
     jest.resetModules();
 
-    gitlab = await import('.');
-    logger = mocked(await import('../../../logger')).logger;
+    gitlab = await import('./index.js');
+    logger = mocked(await import('../../../logger/index.js')).logger;
     timers = jest.requireMock('timers/promises');
     hostRules = jest.requireMock('../../../util/host-rules');
     git = jest.requireMock('../../../util/git');
@@ -3199,7 +3199,7 @@ These updates have all been created already. Click a checkbox below to force a r
 
     it('returns updated pr body', async () => {
       jest.doMock('../utils/pr-body');
-      const { smartTruncate } = await import('../utils/pr-body');
+      const { smartTruncate } = await import('../utils/pr-body.js');
 
       await initFakePlatform('13.4.0');
       expect(gitlab.massageMarkdown(prBody)).toMatchSnapshot();
@@ -3208,7 +3208,7 @@ These updates have all been created already. Click a checkbox below to force a r
 
     it('truncates description if too low API version', async () => {
       jest.doMock('../utils/pr-body');
-      const { smartTruncate } = await import('../utils/pr-body');
+      const { smartTruncate } = await import('../utils/pr-body.js');
 
       await initFakePlatform('13.3.0');
       gitlab.massageMarkdown(prBody);
@@ -3217,8 +3217,7 @@ These updates have all been created already. Click a checkbox below to force a r
     });
 
     it('truncates description for API version gt 13.4', async () => {
-      jest.doMock('../utils/pr-body');
-      const { smartTruncate } = await import('../utils/pr-body');
+      jest.doMock('../utils/pr-body'); const { smartTruncate } = await import('../utils/pr-body.js');
 
       await initFakePlatform('13.4.1');
       gitlab.massageMarkdown(prBody);

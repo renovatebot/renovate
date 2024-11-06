@@ -219,8 +219,8 @@ describe('modules/platform/bitbucket-server/index', () => {
       beforeEach(async () => {
         // reset module
         jest.resetModules();
-        bitbucket = await import('.');
-        logger = mocked(await import('../../../logger')).logger;
+        bitbucket = await import('./index.js');
+        logger = mocked(await import('../../../logger/index.js')).logger;
         hostRules = jest.requireMock('../../../util/host-rules');
         git = jest.requireMock('../../../util/git');
         git.branchExists.mockReturnValue(true);

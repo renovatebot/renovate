@@ -6,6 +6,6 @@ const dataUrl =
 
 await (async () => {
   console.log('Generating node schedule');
-  const { body } = await got(dataUrl);
+  const { body } = await got.default(dataUrl);
   await updateJsonFile('./data/node-js-schedule.json', body);
 })();

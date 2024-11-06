@@ -34,7 +34,7 @@ describe('util/regex', () => {
       throw new Error();
     });
 
-    const regex = await import('./regex');
+    const regex = await import('./regex.js');
     expect(regex.regEx('foo')).toBeInstanceOf(RegExp);
   });
 });

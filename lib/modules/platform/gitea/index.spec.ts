@@ -238,13 +238,13 @@ describe('modules/platform/gitea/index', () => {
   beforeEach(async () => {
     jest.resetModules();
 
-    memCache = await import('../../../util/cache/memory');
-    gitea = await import('.');
-    logger = mocked(await import('../../../logger')).logger;
-    git = jest.requireMock('../../../util/git');
+    memCache = await import('../../../util/cache/memory/index.js');
+    gitea = await import('./index.js');
+    logger = mocked(await import('../../../logger/index.js')).logger;
+    git = jest.requireMock('../../../util/git/index.js');
     git.isBranchBehindBase.mockResolvedValue(false);
     git.getBranchCommit.mockReturnValue(mockCommitHash);
-    hostRules = await import('../../../util/host-rules');
+    hostRules = await import('../../../util/host-rules.js');
     hostRules.clear();
 
     setBaseUrl('https://gitea.renovatebot.com/');
@@ -1658,7 +1658,7 @@ describe('modules/platform/gitea/index', () => {
 
     it('should use platform automerge', async () => {
       memCache.set('gitea-pr-cache-synced', true);
-      const helper = await import('./gitea-helper');
+      const helper = await import('./gitea-helper.js');
       const mergePR = jest.spyOn(helper, 'mergePR');
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
@@ -1686,7 +1686,7 @@ describe('modules/platform/gitea/index', () => {
 
     it('should use platform automerge on forgejo v7', async () => {
       memCache.set('gitea-pr-cache-synced', true);
-      const helper = await import('./gitea-helper');
+      const helper = await import('./gitea-helper.js');
       const mergePR = jest.spyOn(helper, 'mergePR');
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
@@ -1714,7 +1714,7 @@ describe('modules/platform/gitea/index', () => {
 
     it('should use platform automerge on forgejo v7 LTS', async () => {
       memCache.set('gitea-pr-cache-synced', true);
-      const helper = await import('./gitea-helper');
+      const helper = await import('./gitea-helper.js');
       const mergePR = jest.spyOn(helper, 'mergePR');
       const scope = httpMock
         .scope('https://gitea.com/api/v1')

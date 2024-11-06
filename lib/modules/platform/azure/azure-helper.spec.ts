@@ -13,7 +13,7 @@ describe('modules/platform/azure/azure-helper', () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    azureHelper = await import('./azure-helper');
+    azureHelper = await import('./azure-helper.js');
     azureApi = jest.requireMock('./azure-got-wrapper');
   });
 

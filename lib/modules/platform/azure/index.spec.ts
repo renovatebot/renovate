@@ -40,10 +40,10 @@ describe('modules/platform/azure/index', () => {
     // reset module
     jest.resetModules();
     hostRules = jest.requireMock('../../../util/host-rules');
-    azure = await import('.');
+    azure = await import('./index.js');
     azureApi = jest.requireMock('./azure-got-wrapper');
     azureHelper = jest.requireMock('./azure-helper');
-    logger = mocked(await import('../../../logger')).logger;
+    logger = mocked(await import('../../../logger/index.js')).logger;
     git = jest.requireMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);

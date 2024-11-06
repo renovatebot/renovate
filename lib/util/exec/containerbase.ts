@@ -225,7 +225,7 @@ async function getPkgReleases(
   toolConfig: ToolConfig,
 ): Promise<ReleaseResult | null> {
   if (_getPkgReleases === null) {
-    _getPkgReleases = import('../../modules/datasource');
+    _getPkgReleases = import('../../modules/datasource/index.js');
   }
   const { getPkgReleases } = await _getPkgReleases;
   return getPkgReleases(toolConfig);
