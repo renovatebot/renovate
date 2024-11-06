@@ -260,7 +260,11 @@ export class MavenDatasource extends Datasource {
     { packageName, registryUrl }: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
-    if (!packageName || !registryUrl) {
+    if (
+      !packageName ||
+      !registryUrl ||
+      registryUrl === 'https://www.jetbrains.com/intellij-repository/snapshots'
+    ) {
       return release;
     }
 
