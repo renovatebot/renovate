@@ -148,10 +148,10 @@ export class BitbucketPrCache {
 
     const items = res.body.values;
     logger.debug(`Fetched ${items.length} PRs to sync with cache`);
+    const oldCache = clone(this.cache.items);
 
     this.reconcile(items);
 
-    const oldCache = clone(this.cache.items);
     logger.debug(`Total PRs cached: ${Object.values(this.cache.items).length}`);
     logger.trace(
       {
