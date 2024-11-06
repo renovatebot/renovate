@@ -30,7 +30,7 @@ concurrency:
 
 env:
   DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-  NODE_VERSION: 20
+  NODE_VERSION: 22
   PDM_VERSION: 2.20.0.post1 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
@@ -683,7 +683,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@24c6f15bd531c658751f021e3093c2ec4a569a5d # v3.4.34
+        uses: containerbase/internal-tools@bac5ab2e4e69658019ef136450b1941ace77a26a # v3.4.39
         with:
           command: docker-config
 
