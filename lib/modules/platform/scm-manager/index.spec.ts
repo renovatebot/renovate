@@ -271,31 +271,32 @@ describe('modules/platform/scm-manager/index', () => {
       ).toEqual(renovatePr);
     });
 
-    it.each([
-      [[], pullRequest.source, pullRequest.title, 'all', null],
-      [[pullRequest], 'invalid branchName', pullRequest.title, 'all', null],
-      [[pullRequest], pullRequest.source, 'invalid title', 'all', null],
-      [[pullRequest], pullRequest.source, null, 'all', renovatePr],
-      [[pullRequest], pullRequest.source, undefined, 'all', renovatePr],
-      [[pullRequest], pullRequest.source, pullRequest.title, 'all', renovatePr],
-      [
-        [pullRequest],
-        pullRequest.source,
-        pullRequest.title,
-        'open',
-        renovatePr,
-      ],
-      [[pullRequest], pullRequest.source, pullRequest.title, '!open', null],
-      [[pullRequest], pullRequest.source, pullRequest.title, 'closed', null],
-    ])(
-      'search within %p for %p, %p, %p with result %p',
-      async (
-        availablePullRequest: PullRequest[],
-        branchName: string,
-        prTitle: string | null | undefined,
-        state: string,
-        result: Pr | null,
-      ) => {
+    it.each`
+      availablePullRequest | branchName              | prTitle              | state       | result
+      ${[]}                | ${pullRequest.source}   | ${pullRequest.title} | ${'all'}    | ${null}
+      ${[pullRequest]}     | ${'invalid branchName'} | ${pullRequest.title} | ${'all'}    | ${null}
+      ${[pullRequest]}     | ${pullRequest.source}   | ${'invalid title'}   | ${'all'}    | ${null}
+      ${[pullRequest]}     | ${pullRequest.source}   | ${null}              | ${'all'}    | ${renovatePr}
+      ${[pullRequest]}     | ${pullRequest.source}   | ${undefined}         | ${'all'}    | ${renovatePr}
+      ${[pullRequest]}     | ${pullRequest.source}   | ${pullRequest.title} | ${'all'}    | ${renovatePr}
+      ${[pullRequest]}     | ${pullRequest.source}   | ${pullRequest.title} | ${'open'}   | ${renovatePr}
+      ${[pullRequest]}     | ${pullRequest.source}   | ${pullRequest.title} | ${'!open'}  | ${null}
+      ${[pullRequest]}     | ${pullRequest.source}   | ${pullRequest.title} | ${'closed'} | ${null}
+    `(
+      'search within available pull requests for branch name "$branchName", pr title "$prTitle" and state "$state" with result $result ',
+      async ({
+        availablePullRequest,
+        branchName,
+        prTitle,
+        state,
+        result,
+      }: {
+        availablePullRequest: PullRequest[];
+        branchName: string;
+        prTitle: string | undefined | null;
+        state: string;
+        result: Pr | null;
+      }) => {
         httpMock
           .scope(endpoint)
           .get(
@@ -321,17 +322,22 @@ describe('modules/platform/scm-manager/index', () => {
   });
 
   describe(getBranchPr, () => {
-    it.each([
-      [[], pullRequest.source, null],
-      [[pullRequest], 'invalid branchName', null],
-      [[pullRequest], pullRequest.source, renovatePr],
-    ])(
-      'search within %p for %p with result %p',
-      async (
-        availablePullRequest: PullRequest[],
-        branchName: string,
-        result: Pr | null,
-      ) => {
+    it.each`
+      availablePullRequest | branchName              | result
+      ${[]}                | ${pullRequest.source}   | ${null}
+      ${[pullRequest]}     | ${'invalid branchName'} | ${null}
+      ${[pullRequest]}     | ${pullRequest.source}   | ${renovatePr}
+    `(
+      'search within available pull requests for branch name "$branchName" with result $result',
+      async ({
+        availablePullRequest,
+        branchName,
+        result,
+      }: {
+        availablePullRequest: PullRequest[];
+        branchName: string;
+        result: Pr | null;
+      }) => {
         httpMock
           .scope(endpoint)
           .get(
