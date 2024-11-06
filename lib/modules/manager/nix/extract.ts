@@ -41,7 +41,7 @@ export function extractPackageFile(
     }
 
     // skip all locked nodes which are not in the flake.nix and cannot be updated
-    // istanbul ignore next: a valid flake.lock file will never run into this
+    // istanbul ignore if: a valid flake.lock file will never run into this
     if (!(depName in (flakeLock.nodes['root'].inputs ?? []))) {
       continue;
     }
