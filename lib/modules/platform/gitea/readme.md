@@ -28,6 +28,21 @@ The PAT should have these permissions:
 
 If you use Gitea packages, add the `read:packages` scope.
 
+For Gitea instances configured with a base URL that differs from the Renovate `endpoint` (for example, where Gitea is configured with an externally accessible base URL, but Renovate is configured to access the Gitea instance locally.), Renovate may attempt to access repositories using the base URL.  In this case it may be necessary to configure a `hostRule` to use the PAT configured above for host authentication. (see [hostRules](https://docs.renovatebot.com/configuration-options/#hostrules))
+
+An example of a hostRule for an external domain with a token:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "git.custom.org",
+      "token": "<some-token>"
+    }
+  ]
+}
+```
+
 ## Unsupported platform features/concepts
 
 - **Adding reviewers to PRs not supported**: Gitea versions older than `v1.14.0` do not have the required API.
