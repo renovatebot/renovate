@@ -43,6 +43,10 @@ export function extractPackageFile(
     // skip all locked nodes which are not in the flake.nix and cannot be updated
     // istanbul ignore if: a valid flake.lock file will never run into this
     if (!(depName in (flakeLock.nodes['root'].inputs ?? []))) {
+      logger.debug(
+        { packageLockFile, error: flakeLockParsed.error },
+        `invalid flake.lock file because cannot find "root" node`,
+      );
       continue;
     }
 
