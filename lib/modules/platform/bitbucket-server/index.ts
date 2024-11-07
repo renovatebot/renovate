@@ -1058,7 +1058,7 @@ export async function updatePr({
       if (existingIndex === -1) {
         logger.warn(
           { pr: bbsPr },
-          'Attempting to update a PR that possibly does not exist.',
+          'Possible error: Updated PR was not found in the PRs that were returned from getPrList().',
         );
         config.prList.push({ ...bbsPr, state: finalState });
       } else {
