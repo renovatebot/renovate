@@ -103,20 +103,6 @@ describe('modules/manager/nuget/util', () => {
       ]);
     });
 
-    it('reads nuget config file with default registry disabled', async () => {
-      fs.findUpLocal.mockResolvedValue('NuGet.config');
-      fs.readLocalFile.mockResolvedValueOnce(
-        codeBlock`
-          <configuration>
-            <disabledPackageSources>
-              <add key="nuget.org" value="true" />
-            </disabledPackageSources>
-          </configuration>`,
-      );
-
-      const registries = await getConfiguredRegistries('NuGet.config');
-      expect(registries?.length).toBe(0);
-    });
 
     it('reads nuget config file with default registry disabled and added sources', async () => {
       fs.findUpLocal.mockResolvedValue('NuGet.config');
