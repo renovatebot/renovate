@@ -855,7 +855,7 @@ export async function updatePr({
     body.remove_labels = removeLabels;
   }
 
-  const updatedPrRes = (
+  const updatedPrInfo = (
     await gitlabApi.putJson<{
       iid: number;
       source_branch: string;
@@ -866,11 +866,11 @@ export async function updatePr({
   ).body;
 
   const updatedPr: Pr = massagePr({
-    number: updatedPrRes.iid,
-    state: updatedPrRes.state === 'opened' ? 'open' : updatedPrRes.state,
-    title: updatedPrRes.title,
-    createdAt: updatedPrRes.created_at,
-    sourceBranch: updatedPrRes.source_branch,
+    number: updatedPrInfo.iid,
+    state: updatedPrInfo.state === 'opened' ? 'open' : updatedPrInfo.state,
+    title: updatedPrInfo.title,
+    createdAt: updatedPrInfo.created_at,
+    sourceBranch: updatedPrInfo.source_branch,
   });
 
   if (config.prList) {
@@ -881,7 +881,7 @@ export async function updatePr({
     if (existingIndex === -1) {
       config.prList.push(updatedPr);
     } else {
-      config.prList[existingIndex] = updatePr;
+      config.prList[existingIndex] = updatedPr;
     }
   }
 
