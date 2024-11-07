@@ -34,10 +34,21 @@ Read the [Rust environment variables docs](https://doc.rust-lang.org/cargo/refer
 You as user can set authentication for private crates by adding a `hostRules` configuration to your `renovate.json` file.
 
 All token `hostRules` with a `hostType` (e.g. `github`, `gitlab`, `bitbucket`, etc.) and host rules without a `hostType` will be automatically setup for authentication.
-You can also configure a `hostRules` that's only for Cargo authentication (e.g. `hostType: 'cargo'`).
+You can also configure a `hostRules` that's only for Cargo authentication (e.g. `hostType: 'crate'`).
+
+When you define `packageRules` for a private registry other than git-based hosting services(e.g. AWS CodeArtifact),
+It is required to put `sparse+` prefix before a registry url.
 
 ```js title="Example of authentication for a private GitHub and Cargo registry:"
 module.exports = {
+  packageRules: [
+    {
+       matchPackageNames: ["<your package name>"],
+       registryUrls: [
+        "sparse+https://<your domain>-012345678901.d.codeartifact.<aws region>.amazonaws.com/cargo/<your repository>/"
+      ]
+    }
+  ],
   hostRules: [
     {
       matchHost: 'github.enterprise.com',
@@ -47,7 +58,7 @@ module.exports = {
     {
       matchHost: 'someGitHost.enterprise.com',
       token: process.env.CARGO_GIT_TOKEN,
-      hostType: 'cargo',
+      hostType: 'crate',
     },
   ],
 };
