@@ -2947,7 +2947,7 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
-            state: 'open',
+            state: 'opened',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
@@ -2982,7 +2982,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 1,
           source_branch: 'branch-a',
           title: 'Draft: title',
-          state: 'open',
+          state: 'opened',
         });
       await expect(
         gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' }),
