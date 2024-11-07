@@ -268,7 +268,7 @@
     "@openpgp/web-stream-tools": "0.0.14",
     "@renovate/eslint-plugin": "file:tools/eslint",
     "@semantic-release/exec": "6.0.3",
-    "@swc/core": "1.7.40",
+    "@swc/core": "1.7.42",
     "@types/auth-header": "1.0.6",
     "@types/aws4": "1.11.6",
     "@types/better-sqlite3": "7.6.11",
