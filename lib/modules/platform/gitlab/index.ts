@@ -879,6 +879,10 @@ export async function updatePr({
     );
     // istanbul ignore if: should not happen
     if (existingIndex === -1) {
+      logger.warn(
+        { pr: updatedPr },
+        'Possible error: Updated PR was not found in the PRs that were returned from getPrList().',
+      );
       config.prList.push(updatedPr);
     } else {
       config.prList[existingIndex] = updatedPr;
