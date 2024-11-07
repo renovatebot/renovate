@@ -1011,12 +1011,16 @@ export async function updatePr({
       };
     }
 
-    const { body: updatedPr } = await bitbucketServerHttp.putJson<BbsRestPr>(
+    const { body: updatedPr } = await bitbucketServerHttp.putJson<
+      BbsRestPr & {
+        version: number;
+      }
+    >(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
       { body },
     );
 
-    updatePrVersion(prNo, updatedPr.version!);
+    updatePrVersion(prNo, updatedPr.version);
 
     const currentState = updatedPr.state;
     // TODO #22198
@@ -1024,7 +1028,9 @@ export async function updatePr({
       ['open']: 'OPEN',
       ['closed']: 'DECLINED',
     }[state!];
-    let finalState: string = currentState;
+
+    let finalState: 'open' | 'closed' =
+      currentState === 'OPEN' ? 'open' : 'closed';
 
     if (
       newState &&
@@ -1050,6 +1056,10 @@ export async function updatePr({
       );
       // istanbul ignore if: should never happen
       if (existingIndex === -1) {
+        logger.warn(
+          { pr: bbsPr },
+          'Attempting to update a PR that possibly does not exist.',
+        );
         config.prList.push({ ...bbsPr, state: finalState });
       } else {
         config.prList[existingIndex] = { ...bbsPr, state: finalState };
