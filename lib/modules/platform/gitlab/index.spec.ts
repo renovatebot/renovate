@@ -3037,7 +3037,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 1,
           source_branch: 'branch-a',
           title: 'branch a pr',
-          state: 'closed',
+          state: 'opened',
           target_branch: 'branch-new',
         });
       await expect(
