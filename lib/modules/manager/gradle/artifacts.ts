@@ -161,7 +161,8 @@ export async function updateArtifacts({
   }
 
   if (
-    config.isLockFileMaintenance &&
+    (config.updateType === 'lockFileMaintenance' ||
+      config.isLockFileMaintenance) &&
     (!isGradleBuildFile(packageFileName) ||
       dirname(packageFileName) !== dirname(gradlewFile))
   ) {
@@ -205,7 +206,8 @@ export async function updateArtifacts({
         .join(' ')}`;
 
       if (
-        config.isLockFileMaintenance === true ||
+        config.updateType === 'lockFileMaintenance' ||
+        config.isLockFileMaintenance ||
         !updatedDeps.length ||
         isGcvPropsFile(packageFileName)
       ) {

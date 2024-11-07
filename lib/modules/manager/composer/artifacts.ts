@@ -113,6 +113,8 @@ export async function updateArtifacts({
 
   const file = Json.pipe(PackageFile).parse(newPackageFileContent);
 
+  const isLockFileMaintenance =
+    config.updateType === 'lockFileMaintenance' || config.isLockFileMaintenance;
   const lockFileName = packageFileName.replace(regEx(/\.json$/), '.lock');
   const lockfile = await z
     .string()
@@ -174,7 +176,7 @@ export async function updateArtifacts({
 
     const cmd = 'composer';
     let args: string;
-    if (config.isLockFileMaintenance) {
+    if (isLockFileMaintenance) {
       args = 'update';
     } else {
       args =
