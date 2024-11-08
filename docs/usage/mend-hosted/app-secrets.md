@@ -46,7 +46,7 @@ Alternatively, you can use the Host Rules UI (see below).
 
 ### Adding a host rule
 
-1. Open the _Credentials_ section of the relevant settings page for the relevant Org or Repo.
+1. Open the _Credentials_ section of the settings page for the relevant Org or Repo.
 2. Select `ADD HOST RULE` to open the "Add a Host Rule" dialog box.
 
    ![Add Host Rule](../assets/images/app-settings/add-host-rule.png)
