@@ -199,7 +199,9 @@ async function fetchBranchCommits(): Promise<void> {
     );
   }
   try {
-    (await gitRetry(() => git.raw(opts)))
+    const lsRemoteRes = await gitRetry(() => git.raw(opts));
+    logger.trace({ lsRemoteRes }, 'git ls-remote result');
+    lsRemoteRes
       .split(newlineRegex)
       .filter(Boolean)
       .map((line) => line.trim().split(regEx(/\s+/)))
@@ -207,6 +209,7 @@ async function fetchBranchCommits(): Promise<void> {
         config.branchCommits[ref.replace('refs/heads/', '')] =
           sha as LongCommitSha;
       });
+    logger.trace({ branchCommits: config.branchCommits }, 'branch commits');
   } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
@@ -713,7 +716,10 @@ export async function isBranchModified(
     },
     'branch.isModified() = true',
   );
-  logger.debug('branch.isModified() = true');
+  logger.debug(
+    { branchName, unrecognizedAuthors: [...includedAuthors] },
+    'branch.isModified() = true',
+  );
   config.branchIsModified[branchName] = true;
   setCachedModifiedResult(branchName, true);
   return true;

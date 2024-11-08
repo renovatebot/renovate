@@ -101,6 +101,7 @@ export type PlatformPrOptions = {
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
+  bbAutoResolvePrTasks?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
@@ -273,12 +274,14 @@ export interface Platform {
     internalChecksAsSuccess: boolean,
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string, targetBranch?: string): Promise<Pr | null>;
+  tryReuseAutoclosedPr?(pr: Pr): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
 
   maxBodyLength(): number;
+  labelCharLimit?(): number;
 }
 
 export interface PlatformScm {

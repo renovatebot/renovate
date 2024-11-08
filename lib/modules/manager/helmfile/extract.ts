@@ -33,24 +33,14 @@ export async function extractPackageFile(
   config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   const deps: PackageDependency[] = [];
-  let docs: Doc[];
   let registryData: Record<string, HelmRepository> = {};
   // Record kustomization usage for all deps, since updating artifacts is run on the helmfile.yaml as a whole.
   let needKustomize = false;
-  try {
-    docs = parseYaml(content, {
-      customSchema: documentSchema,
-      failureBehaviour: 'filter',
-      removeTemplates: true,
-      json: true,
-    });
-  } catch (err) {
-    logger.debug(
-      { err, packageFile },
-      'Failed to parse helmfile helmfile.yaml',
-    );
-    return null;
-  }
+  const docs: Doc[] = parseYaml(content, {
+    customSchema: documentSchema,
+    failureBehaviour: 'filter',
+    removeTemplates: true,
+  });
 
   for (const doc of docs) {
     // Always check for repositories in the current document and override the existing ones if any (as YAML does)

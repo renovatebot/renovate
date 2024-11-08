@@ -23,7 +23,7 @@ export async function extractPackageFile(
   };
   try {
     // TODO: use schema (#9610)
-    chart = parseSingleYaml(content, { json: true });
+    chart = parseSingleYaml(content);
     if (!(chart?.apiVersion && chart.name && chart.version)) {
       logger.debug(
         { packageFile },

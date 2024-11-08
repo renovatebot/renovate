@@ -47,21 +47,14 @@ function readManifest(
     };
   }
 
-  try {
-    const manifest: FluxManifest = {
-      kind: 'resource',
-      file: packageFile,
-      resources: parseYaml(content, {
-        json: true,
-        customSchema: FluxResource,
-        failureBehaviour: 'filter',
-      }),
-    };
-    return manifest;
-  } catch (err) {
-    logger.debug({ err, packageFile }, 'Failed to parse Flux manifest');
-    return null;
-  }
+  return {
+    kind: 'resource',
+    file: packageFile,
+    resources: parseYaml(content, {
+      customSchema: FluxResource,
+      failureBehaviour: 'filter',
+    }),
+  };
 }
 
 const githubUrlRegex = regEx(
@@ -133,11 +126,19 @@ function resolveResourceManifest(
   for (const resource of manifest.resources) {
     switch (resource.kind) {
       case 'HelmRelease': {
+        const depName = resource.spec.chart.spec.chart;
         const dep: PackageDependency = {
-          depName: resource.spec.chart.spec.chart,
+          depName,
           currentValue: resource.spec.chart.spec.version,
           datasource: HelmDatasource.id,
         };
+
+        if (depName.startsWith('./')) {
+          dep.skipReason = 'local-chart';
+          delete dep.datasource;
+          deps.push(dep);
+          continue;
+        }
 
         const matchingRepositories = helmRepositories.filter(
           (rep) =>
