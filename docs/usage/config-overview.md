@@ -163,7 +163,7 @@ For information on how the Mend Renovate App supports Inherited config, see the 
 
 If the inherited config contains `extends` presets, then Renovate will:
 
-1. Resolves the presets
+1. Resolve the presets
 1. Add the resolved preset config to the beginning of the inherited config
 1. Merge the presets on top of the global config
 
