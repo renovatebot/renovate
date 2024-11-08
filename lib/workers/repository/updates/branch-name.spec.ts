@@ -213,6 +213,22 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toBe('renovate/jest-42-x');
     });
 
+    it('removes slashes from the non-suffix part', () => {
+      const upgrade: RenovateConfig = {
+        branchNameStrict: true,
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        branchPrefix: 'renovate/',
+        depNameSanitized: '@foo/jest',
+        newMajor: '42',
+        group: {},
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('renovate/foo-jest-42-x');
+    });
+
     it('hashedBranchLength hashing', () => {
       const upgrade: RenovateConfig = {
         branchName:

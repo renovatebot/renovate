@@ -2,7 +2,7 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { readLocalFile } from '../../../util/fs';
+import { readLocalFile, writeLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { getNodeToolConstraint } from './post-update/node-version';
@@ -36,6 +36,9 @@ export async function updateArtifacts({
   if (!currentValue || !regEx(versionWithHashRegString).test(currentValue)) {
     return null;
   }
+
+  // write old updates before executing corepack update so that they are not removed from package file
+  await writeLocalFile(packageFileName, existingPackageFileContent);
 
   // Asumming that corepack only needs to modify the package.json file in the root folder
   // As it should not be regular practice to have different package managers in different workspaces

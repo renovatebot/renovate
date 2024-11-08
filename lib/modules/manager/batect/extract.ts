@@ -155,7 +155,7 @@ export async function extractAllPackageFiles(
   const results: PackageFile[] = [];
 
   while (filesToExamine.size > 0) {
-    const packageFile = filesToExamine.values().next().value;
+    const packageFile = filesToExamine.values().next().value as string;
     filesToExamine.delete(packageFile);
     filesAlreadyExamined.add(packageFile);
 

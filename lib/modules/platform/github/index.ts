@@ -1,9 +1,7 @@
 import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import { DateTime } from 'luxon';
 import semver from 'semver';
-import { GlobalConfig } from '../../../config/global';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -59,6 +57,7 @@ import type {
   PlatformParams,
   PlatformPrOptions,
   PlatformResult,
+  Pr,
   ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
@@ -553,12 +552,12 @@ export async function initRepo({
     // Base branch may be configured but defaultBranch is always fixed
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
-    if (repo.rebaseMergeAllowed) {
-      config.mergeMethod = 'rebase';
-    } else if (repo.squashMergeAllowed) {
+    if (repo.squashMergeAllowed) {
       config.mergeMethod = 'squash';
     } else if (repo.mergeCommitAllowed) {
       config.mergeMethod = 'merge';
+    } else if (repo.rebaseMergeAllowed) {
+      config.mergeMethod = 'rebase';
     } else {
       // This happens if we don't have Administrator read access, it is not a critical error
       logger.debug('Could not find allowed merge methods for repo');
@@ -894,8 +893,6 @@ export async function findPr({
   return pr ?? null;
 }
 
-const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
-
 async function ensureBranchSha(
   branchName: string,
   sha: LongCommitSha,
@@ -942,65 +939,51 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
     branchName,
     state: 'open',
   });
+
   if (openPr) {
     return openPr;
   }
 
-  const autoclosedPr = await findPr({
-    branchName,
-    state: 'closed',
-  });
-  if (
-    autoclosedPr?.title?.endsWith(' - autoclosed') &&
-    autoclosedPr?.closedAt
-  ) {
-    const closedMillisAgo = DateTime.fromISO(autoclosedPr.closedAt)
-      .diffNow()
-      .negate()
-      .toMillis();
-    if (closedMillisAgo > REOPEN_THRESHOLD_MILLIS) {
-      return null;
-    }
-    logger.debug({ autoclosedPr }, 'Found autoclosed PR for branch');
-    if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would try to reopen autoclosed PR');
-      return null;
-    }
-    const { sha, number } = autoclosedPr;
-    try {
-      await ensureBranchSha(branchName, sha!);
-      logger.debug(`Recreated autoclosed branch ${branchName} with sha ${sha}`);
-    } catch (err) {
-      logger.debug(
-        { err, branchName, sha, autoclosedPr },
-        'Could not recreate autoclosed branch - skipping reopen',
-      );
-      return null;
-    }
-    try {
-      const title = autoclosedPr.title.replace(regEx(/ - autoclosed$/), '');
-      const { body: ghPr } = await githubApi.patchJson<GhRestPr>(
-        `repos/${config.repository}/pulls/${number}`,
-        {
-          body: {
-            state: 'open',
-            title,
-          },
-        },
-      );
-      logger.info(
-        { branchName, title, number },
-        'Successfully reopened autoclosed PR',
-      );
-      const result = coerceRestPr(ghPr);
-      cachePr(result);
-      return result;
-    } catch {
-      logger.debug('Could not reopen autoclosed PR');
-      return null;
-    }
-  }
   return null;
+}
+
+export async function tryReuseAutoclosedPr(
+  autoclosedPr: Pr,
+): Promise<Pr | null> {
+  const { sha, number, sourceBranch: branchName } = autoclosedPr;
+  try {
+    await ensureBranchSha(branchName, sha!);
+    logger.debug(`Recreated autoclosed branch ${branchName} with sha ${sha}`);
+  } catch (err) {
+    logger.debug(
+      { err, branchName, sha, autoclosedPr },
+      'Could not recreate autoclosed branch - skipping reopen',
+    );
+    return null;
+  }
+
+  try {
+    const title = autoclosedPr.title.replace(regEx(/ - autoclosed$/), '');
+    const { body: ghPr } = await githubApi.patchJson<GhRestPr>(
+      `repos/${config.repository}/pulls/${number}`,
+      {
+        body: {
+          state: 'open',
+          title,
+        },
+      },
+    );
+    logger.info(
+      { branchName, title, number },
+      'Successfully reopened autoclosed PR',
+    );
+    const result = coerceRestPr(ghPr);
+    cachePr(result);
+    return result;
+  } catch {
+    logger.debug('Could not reopen autoclosed PR');
+    return null;
+  }
 }
 
 async function getStatus(
@@ -1484,16 +1467,23 @@ export async function addReviewers(
   }
 }
 
-async function addLabels(
+export async function addLabels(
   issueNo: number,
   labels: string[] | null | undefined,
 ): Promise<void> {
   logger.debug(`Adding labels '${labels?.join(', ')}' to #${issueNo}`);
-  const repository = config.parentRepo ?? config.repository;
-  if (is.array(labels) && labels.length) {
-    await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
-      body: labels,
-    });
+  try {
+    const repository = config.parentRepo ?? config.repository;
+    if (is.array(labels) && labels.length) {
+      await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
+        body: labels,
+      });
+    }
+  } catch (err) {
+    logger.warn(
+      { err, issueNo, labels },
+      'Error while adding labels. Skipping',
+    );
   }
 }
 
@@ -1903,25 +1893,25 @@ export async function mergePr({
     }
   }
   if (!automerged) {
-    // We need to guess the merge method and try squash -> rebase -> merge
-    options.body.merge_method = 'rebase';
+    // We need to guess the merge method and try squash -> merge -> rebase
+    options.body.merge_method = 'squash';
     try {
       logger.debug({ options, url }, `mergePr`);
       automergeResult = await githubApi.putJson(url, options);
     } catch (err1) {
-      logger.debug({ err: err1 }, `Failed to rebase merge PR`);
+      logger.debug({ err: err1 }, `Failed to squash merge PR`);
       try {
-        options.body.merge_method = 'squash';
+        options.body.merge_method = 'merge';
         logger.debug({ options, url }, `mergePr`);
         automergeResult = await githubApi.putJson(url, options);
       } catch (err2) {
-        logger.debug({ err: err2 }, `Failed to merge squash PR`);
+        logger.debug({ err: err2 }, `Failed to merge commit PR`);
         try {
-          options.body.merge_method = 'merge';
+          options.body.merge_method = 'rebase';
           logger.debug({ options, url }, `mergePr`);
           automergeResult = await githubApi.putJson(url, options);
         } catch (err3) {
-          logger.debug({ err: err3 }, `Failed to merge commit PR`);
+          logger.debug({ err: err3 }, `Failed to rebase merge PR`);
           logger.info({ pr: prNo }, 'All merge attempts failed');
           return false;
         }
