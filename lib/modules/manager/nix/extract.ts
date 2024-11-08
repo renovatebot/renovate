@@ -116,8 +116,10 @@ export function extractPackageFile(
           currentDigest: flakeLocked.rev,
           replaceString: flakeLocked.rev,
           datasource: GitRefsDatasource.id,
-          // istanbul ignore next: type tarball always contains this link
-          packageName: (flakeOriginal.url ?? '').replace(
+          // type tarball always contains this link
+          packageName: (
+            flakeOriginal.url ?? /* istanbul ignore next */ ''
+          ).replace(
             lockableHTTPTarballProtocol,
             'https://$<domain>/$<owner>/$<repo>',
           ),
