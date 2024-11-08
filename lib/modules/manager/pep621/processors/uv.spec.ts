@@ -4,6 +4,11 @@ import { fs, hostRules, mockedFunction } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
+import { GitRefsDatasource } from '../../../datasource/git-refs';
+import { GitTagsDatasource } from '../../../datasource/git-tags';
+import { GithubTagsDatasource } from '../../../datasource/github-tags';
+import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags';
+import { PypiDatasource } from '../../../datasource/pypi';
 import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
 import { UvProcessor } from './uv';
@@ -61,66 +66,80 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ]);
     });
+  });
 
-    it('skips dependencies with unsupported sources', () => {
-      const pyproject = {
-        tool: {
-          uv: {
-            sources: {
-              dep2: { git: 'https://github.com/foo/bar' },
-              dep3: { path: '/local-dep.whl' },
-              dep4: { url: 'https://example.com' },
-              dep5: { workspace: true },
-              dep6: { workspace: false },
-              dep7: {},
+  it('applies git sources', () => {
+    const pyproject = {
+      tool: {
+        uv: {
+          'dev-dependencies': ['dep3', 'dep4', 'dep5'],
+          sources: {
+            dep1: { git: 'https://github.com/foo/dep1', tag: '0.1.0' },
+            dep2: { git: 'https://gitlab.com/foo/dep2', tag: '0.2.0' },
+            dep3: { git: 'https://codeberg.org/foo/dep3.git', tag: '0.3.0' },
+            dep4: {
+              git: 'https://github.com/foo/dep4',
+              rev: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
             },
+            dep5: { git: 'https://github.com/foo/dep5', branch: 'master' },
           },
         },
-      };
-      const dependencies = [
-        {},
-        { depName: 'dep1' },
-        { depName: 'dep2' },
-        { depName: 'dep3' },
-        { depName: 'dep4' },
-        { depName: 'dep5' },
-        { depName: 'dep6' },
-        { depName: 'dep7' },
-      ];
+      },
+    };
+    const dependencies = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+      },
+      {
+        depName: 'dep2',
+        packageName: 'dep2',
+      },
+    ];
 
-      const result = processor.process(pyproject, dependencies);
+    const result = processor.process(pyproject, dependencies);
 
-      expect(result).toEqual([
-        {},
-        {
-          depName: 'dep1',
-        },
-        {
-          depName: 'dep2',
-          skipReason: 'git-dependency',
-        },
-        {
-          depName: 'dep3',
-          skipReason: 'path-dependency',
-        },
-        {
-          depName: 'dep4',
-          skipReason: 'unsupported-url',
-        },
-        {
-          depName: 'dep5',
-          skipReason: 'inherited-dependency',
-        },
-        {
-          depName: 'dep6',
-          skipReason: 'invalid-dependency-specification',
-        },
-        {
-          depName: 'dep7',
-          skipReason: 'invalid-dependency-specification',
-        },
-      ]);
-    });
+    expect(result).toEqual([
+      {
+        depName: 'dep1',
+        depType: depTypes.uvSources,
+        datasource: GithubTagsDatasource.id,
+        registryUrls: ['https://github.com'],
+        packageName: 'foo/dep1',
+        currentValue: '0.1.0',
+      },
+      {
+        depName: 'dep2',
+        depType: depTypes.uvSources,
+        datasource: GitlabTagsDatasource.id,
+        registryUrls: ['https://gitlab.com'],
+        packageName: 'foo/dep2',
+        currentValue: '0.2.0',
+      },
+      {
+        depName: 'dep3',
+        depType: depTypes.uvSources,
+        datasource: GitTagsDatasource.id,
+        packageName: 'https://codeberg.org/foo/dep3.git',
+        currentValue: '0.3.0',
+      },
+      {
+        depName: 'dep4',
+        depType: depTypes.uvSources,
+        datasource: GitRefsDatasource.id,
+        packageName: 'https://github.com/foo/dep4',
+        currentDigest: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+        replaceString: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+      },
+      {
+        depName: 'dep5',
+        depType: depTypes.uvSources,
+        datasource: GitRefsDatasource.id,
+        packageName: 'https://github.com/foo/dep5',
+        currentValue: 'master',
+        skipReason: 'git-dependency',
+      },
+    ]);
   });
 
   describe('updateArtifacts()', () => {
@@ -292,12 +311,26 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageName: 'dep1',
           depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
           registryUrls: ['https://foobar.com'],
         },
         {
           packageName: 'dep2',
           depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
           registryUrls: ['https://example.com'],
+        },
+        {
+          packageName: 'dep3',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: ['invalidurl'],
+        },
+        {
+          packageName: 'dep4',
+          depType: depTypes.dependencies,
+          datasource: GithubTagsDatasource.id,
+          registryUrls: ['https://github.com'],
         },
       ];
       const result = await processor.updateArtifacts(
@@ -320,7 +353,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2',
+          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4',
           options: {
             env: {
               UV_EXTRA_INDEX_URL:

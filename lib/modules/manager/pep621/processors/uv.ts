@@ -16,6 +16,7 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types';
+import { applyGitSource } from '../../util';
 import { type PyProject, UvLockfileSchema } from '../schema';
 import { depTypes, parseDependencyList } from '../utils';
 import type { PyProjectProcessor } from './types';
@@ -37,25 +38,33 @@ export class UvProcessor implements PyProjectProcessor {
     );
 
     // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
-    // Skip sources that are either not yet handled by Renovate (e.g. git), or do not make sense to handle (e.g. path).
+    // Skip sources that do not make sense to handle (e.g. path).
     if (uv.sources) {
       for (const dep of deps) {
-        if (!dep.depName) {
+        // istanbul ignore if
+        if (!dep.packageName) {
           continue;
         }
 
-        const depSource = uv.sources[dep.depName];
+        // Using `packageName` as it applies PEP 508 normalization, which is
+        // also applied by uv when matching a source to a dependency.
+        const depSource = uv.sources[dep.packageName];
         if (depSource) {
-          if (depSource.git) {
-            dep.skipReason = 'git-dependency';
-          } else if (depSource.url) {
+          dep.depType = depTypes.uvSources;
+          if ('url' in depSource) {
             dep.skipReason = 'unsupported-url';
-          } else if (depSource.path) {
+          } else if ('path' in depSource) {
             dep.skipReason = 'path-dependency';
-          } else if (depSource.workspace) {
+          } else if ('workspace' in depSource) {
             dep.skipReason = 'inherited-dependency';
           } else {
-            dep.skipReason = 'invalid-dependency-specification';
+            applyGitSource(
+              dep,
+              depSource.git,
+              depSource.rev,
+              depSource.tag,
+              depSource.branch,
+            );
           }
         }
       }
@@ -184,7 +193,8 @@ function generateCMD(updatedDeps: Upgrade[]): string {
         deps.push(dep.depName!.split('/')[1]);
         break;
       }
-      case depTypes.uvDevDependencies: {
+      case depTypes.uvDevDependencies:
+      case depTypes.uvSources: {
         deps.push(dep.depName!);
         break;
       }
@@ -205,7 +215,11 @@ function getMatchingHostRule(url: string | undefined): HostRule {
 }
 
 function getUvExtraIndexUrl(deps: Upgrade[]): NodeJS.ProcessEnv {
-  const registryUrls = new Set(deps.map((dep) => dep.registryUrls).flat());
+  const pyPiRegistryUrls = deps
+    .filter((dep) => dep.datasource === PypiDatasource.id)
+    .map((dep) => dep.registryUrls)
+    .flat();
+  const registryUrls = new Set(pyPiRegistryUrls);
   const extraIndexUrls: string[] = [];
 
   for (const registryUrl of registryUrls) {

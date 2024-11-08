@@ -11,11 +11,6 @@ dep2 = "^0.6.0"
 dep3 = "^0.33.6"
 python = "~2.7 || ^3.4"
 
-[tool.poetry.extras]
-extra_dep1 = "^0.8.3"
-extra_dep2 = "^0.9.4"
-extra_dep3 = "^0.4.0"
-
 [tool.poetry.dev-dependencies]
 dev_dep1 = "^3.0"
 dev_dep2 = "Invalid version."

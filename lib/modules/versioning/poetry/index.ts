@@ -2,6 +2,7 @@ import { parseRange } from 'semver-utils';
 import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { api as npm } from '../npm';
+import { api as pep440 } from '../pep440';
 import type { NewValueConfig, VersioningApi } from '../types';
 
 import { VERSION_PATTERN } from './patterns';
@@ -53,9 +54,7 @@ function isVersion(input: string): boolean {
 }
 
 function isGreaterThan(a: string, b: string): boolean {
-  const semverA = poetry2semver(a);
-  const semverB = poetry2semver(b);
-  return !!(semverA && semverB && npm.isGreaterThan(semverA, semverB));
+  return !!(a && b && pep440.isGreaterThan(a, b));
 }
 
 function isLessThanRange(version: string, range: string): boolean {
@@ -244,8 +243,7 @@ function getNewValue({
 }
 
 function sortVersions(a: string, b: string): number {
-  // istanbul ignore next
-  return npm.sortVersions(poetry2semver(a) ?? '', poetry2semver(b) ?? '');
+  return pep440.sortVersions(a, b);
 }
 
 function subset(subRange: string, superRange: string): boolean | undefined {

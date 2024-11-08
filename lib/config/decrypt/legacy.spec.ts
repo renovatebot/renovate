@@ -44,10 +44,7 @@ describe('config/decrypt/legacy', () => {
       };
       const res = await decryptConfig(config, repository);
       expect(res.encrypted).toBeUndefined();
-      expect(res.npmToken).toBeUndefined();
-      expect(res.npmrc).toBe(
-        '//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n',
-      );
+      expect(res.npmToken).toBe('abcdef-ghijklm-nopqf-stuvwxyz');
     });
 
     it('appends npm token in npmrc', async () => {
@@ -59,10 +56,7 @@ describe('config/decrypt/legacy', () => {
       };
       const res = await decryptConfig(config, repository);
       expect(res.encrypted).toBeUndefined();
-      expect(res.npmToken).toBeUndefined();
-      expect(res.npmrc).toBe(
-        `foo=bar\n_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n`,
-      );
+      expect(res.npmToken).toBe('abcdef-ghijklm-nopqf-stuvwxyz');
     });
 
     it('decrypts nested', async () => {
@@ -88,9 +82,8 @@ describe('config/decrypt/legacy', () => {
       expect(res.packageFiles[0].devDependencies.branchPrefix).toBe(
         'abcdef-ghijklm-nopqf-stuvwxyz',
       );
-      expect(res.packageFiles[0].devDependencies.npmToken).toBeUndefined();
-      expect(res.packageFiles[0].devDependencies.npmrc).toBe(
-        '//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n',
+      expect(res.packageFiles[0].devDependencies.npmToken).toBe(
+        'abcdef-ghijklm-nopqf-stuvwxyz',
       );
     });
   });
