@@ -31,7 +31,7 @@ To add a secret for the Mend cloud app:
    ![Credentials settings page](../assets/images/app-settings/app-credentials.png)
 
 4. Use can reference the secret from Renovate config files inside the repo.
-Alternatively, you can use the Host Rules UI (see below).
+   Alternatively, you can use the Host Rules UI (see below).
 
    ```json
    {
