@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { mergeChildConfig, removeGlobalConfig } from '../../../config';
-import { decryptConfig } from '../../../config/decrypt';
 import { parseFileConfig } from '../../../config/parse';
 import { resolveConfigPresets } from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
@@ -108,13 +107,14 @@ export async function mergeInheritedConfig(
 
   let returnConfig = filteredConfig;
 
-  // Decrypt after resolving, in case the preset contains npm authentication
   logger.debug('Resolving presets found in inherited config');
-  const resolvedConfig = await decryptConfig(
-    await resolveConfigPresets(returnConfig, config, config.ignorePresets),
-    config.repository,
+  const resolvedConfig = await resolveConfigPresets(
+    returnConfig,
+    config,
+    config.ignorePresets,
   );
   logger.trace({ config: resolvedConfig }, 'Resolved inherited config');
+
   const validationRes = await validateConfig('inherit', resolvedConfig);
   if (validationRes.errors.length) {
     logger.warn(
