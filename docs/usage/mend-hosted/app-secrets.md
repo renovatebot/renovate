@@ -53,8 +53,7 @@ Alternatively, you can use the Host Rules UI (see below).
 
 3. Fill out the details for your host rule.
 
-   Note: You can select a pre-defined host rule type in the `Select Host Type` field, or provide a specific value in the `HostURL` field.
-   You do not need to provide both values.
+   As an example, if you are a Bitbucket or Azure DevOps user, and you want to specify the GITHUB_TOKEN to fetch release notes, you could create a host rule like this:
 
    ![Host Rules dialog box](../assets/images/app-settings/host-rules.png)
 
