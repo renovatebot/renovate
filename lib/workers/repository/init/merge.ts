@@ -290,10 +290,7 @@ export function setNpmTokenInNpmrc(config: RenovateConfig): void {
   }
 
   const token = config.npmToken;
-  logger.debug(
-    { decryptedToken: maskToken(token) },
-    'Migrating npmToken to npmrc',
-  );
+  logger.debug({ npmToken: maskToken(token) }, 'Migrating npmToken to npmrc');
 
   if (!is.string(config.npmrc)) {
     logger.debug('Adding npmrc to config');
@@ -303,7 +300,7 @@ export function setNpmTokenInNpmrc(config: RenovateConfig): void {
   }
 
   if (config.npmrc.includes(`\${NPM_TOKEN}`)) {
-    logger.debug(`Replacing \${NPM_TOKEN} with decrypted token`);
+    logger.debug(`Replacing \${NPM_TOKEN} with npmToken`);
     config.npmrc = config.npmrc.replace(regEx(/\${NPM_TOKEN}/g), token);
   } else {
     logger.debug('Appending _authToken= to end of existing npmrc');
