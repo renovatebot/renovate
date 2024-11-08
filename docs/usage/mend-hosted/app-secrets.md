@@ -30,7 +30,8 @@ To add a secret for the Mend cloud app:
 
    ![Credentials settings page](../assets/images/app-settings/app-credentials.png)
 
-4. Reference the secret from Renovate config files inside the repo.
+4. Use can reference the secret from Renovate config files inside the repo.
+Alternatively, you can use the Host Rules UI (see below).
 
    ```json
    {
@@ -42,6 +43,20 @@ To add a secret for the Mend cloud app:
      ]
    }
    ```
+
+### Adding a host rule
+
+1. Open the _Credentials_ section of the relevant settings page for the relevant Org or Repo.
+2. Select `ADD HOST RULE` to open the "Add a Host Rule" dialog box.
+
+   ![Add Host Rule](../assets/images/app-settings/add-host-rule.png)
+
+3. Fill out the details for your host rule.
+
+   Note: You can select a pre-defined host rule type in the `Select Host Type` field, or provide a specific value in the `HostURL` field.
+   You do not need to provide both values.
+
+   ![Host Rules dialog box](../assets/images/app-settings/host-rules.png)
 
 ## Organization secrets vs repository secrets
 
