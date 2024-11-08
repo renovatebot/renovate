@@ -161,11 +161,11 @@ For information on how the Mend Renovate App supports Inherited config, see the 
 
 #### Presets handling
 
-If the inherited config has presets, then Renovate:
+If the inherited config contains `extends` presets, then Renovate will:
 
 1. Resolves the presets
-1. Adds the resolved presets to the inherited config
-1. Merges the presets on top of the global config
+1. Add the resolved preset config to the beginning of the inherited config
+1. Merge the presets on top of the global config
 
 ##### You can not ignore presets from inherited config
 
