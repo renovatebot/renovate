@@ -72,6 +72,7 @@ import type {
   MergeMethod,
   RepoResponse,
 } from './types';
+import { prInfo } from './utils';
 
 let config: {
   repository: string;
@@ -856,22 +857,13 @@ export async function updatePr({
   }
 
   const updatedPrInfo = (
-    await gitlabApi.putJson<{
-      iid: number;
-      source_branch: string;
-      title: string;
-      state: string;
-      created_at: string;
-    }>(`projects/${config.repository}/merge_requests/${iid}`, { body })
+    await gitlabApi.putJson<GitLabMergeRequest>(
+      `projects/${config.repository}/merge_requests/${iid}`,
+      { body },
+    )
   ).body;
 
-  const updatedPr: Pr = massagePr({
-    number: updatedPrInfo.iid,
-    state: updatedPrInfo.state === 'opened' ? 'open' : updatedPrInfo.state,
-    title: updatedPrInfo.title,
-    createdAt: updatedPrInfo.created_at,
-    sourceBranch: updatedPrInfo.source_branch,
-  });
+  const updatedPr: Pr = massagePr(prInfo(updatedPrInfo));
 
   if (config.prList) {
     const existingIndex = config.prList.findIndex(
