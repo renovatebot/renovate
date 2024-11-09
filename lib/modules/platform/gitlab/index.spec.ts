@@ -2318,7 +2318,11 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: null,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
     });
 
     it('raises with squash enabled when repository squash option is always', async () => {
@@ -2353,7 +2357,11 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: null,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
     });
 
     it('adds approval rule to ignore all approvals', async () => {
