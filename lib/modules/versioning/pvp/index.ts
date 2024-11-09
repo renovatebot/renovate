@@ -2,6 +2,7 @@ import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
+import type { Components, Range } from './types';
 
 export const id = 'pvp';
 export const displayName = 'Package Versioning Policy (Haskell)';
@@ -9,13 +10,12 @@ export const urls = [];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['auto'];
 
-type Parsed = { lower: string; upper: string };
-type Components = { major: number[]; minor: number[]; patch: number[] };
+// This range format was chosen because it is common in the ecosystem
+const gteAndLtRange = />=(?<lower>[\d.]+)&&<(?<upper>[\d.]+)/;
 
-export function parse(input: string): Parsed | null {
+export function parseRange(input: string): Range | null {
   const noSpaces = input.replaceAll(' ', '');
-  const r = regEx(/>=(?<lower>[\d.]+)&&<(?<upper>[\d.]+)/);
-  const m = r.exec(noSpaces);
+  const m = regEx(gteAndLtRange).exec(noSpaces);
   if (!m?.groups) {
     return null;
   }
@@ -25,13 +25,13 @@ export function parse(input: string): Parsed | null {
   };
 }
 
-export function extractAllComponents(version: string): number[] {
+export function extractAllComponents(version: string): number[] | null {
   const versionMajor = version.split('.');
-  const versionIntMajor: number[] = versionMajor.map((x) => parseInt(x, 10));
-  const ret = [];
+  const versionIntMajor = versionMajor.map((x) => parseInt(x, 10));
+  const ret: number[] = [];
   for (const l of versionIntMajor) {
     if (l < 0 || !isFinite(l)) {
-      continue;
+      return null;
     }
     ret.push(l);
   }
@@ -66,42 +66,50 @@ function compareIntArray(
 function isGreaterThan(version: string, other: string): boolean {
   const versionIntMajor = extractAllComponents(version);
   const otherIntMajor = extractAllComponents(other);
+  if (versionIntMajor === null || otherIntMajor === null) {
+    return false;
+  }
   return compareIntArray(versionIntMajor, otherIntMajor) === 'gt';
 }
 
-function getMajor(version: string): number {
+function getMajor(version: string): number | null {
   // This basically can't be implemented correctly, since
   // 1.1 and 1.10 become equal when converted to float.
   // Consumers should use isSame instead.
-  const l1 = version.split('.');
-  return Number(l1.slice(0, 2).join('.'));
+  const components = getComponents(version);
+  if (components === null) {
+    return null;
+  }
+  return Number(components.major.join('.'));
 }
 
 function getMinor(version: string): number | null {
-  const l1 = version.split('.');
-  if (l1.length < 3) {
+  const components = getComponents(version);
+  if (components === null || components.minor.length === 0) {
     return null;
   }
-  return Number(l1[2]);
+  return Number(components.minor.join('.'));
 }
 
 function getPatch(version: string): number | null {
-  const l1 = version.split('.');
-  const components = l1.slice(3);
-  if (components.length === 0) {
+  const components = getComponents(version);
+  if (components === null || components.patch.length === 0) {
     return null;
   }
-  return Number(components[0] + '.' + components.slice(1).join(''));
+  return Number(components.patch[0] + '.' + components.patch.slice(1).join(''));
 }
 
 function matches(version: string, range: string): boolean {
-  const parsed = parse(range);
+  const parsed = parseRange(range);
   if (parsed === null) {
     return false;
   }
   const ver = extractAllComponents(version);
   const lower = extractAllComponents(parsed.lower);
   const upper = extractAllComponents(parsed.upper);
+  if (ver === null || lower === null || upper === null) {
+    return false;
+  }
   return (
     'gt' === compareIntArray(upper, ver) &&
     ['eq', 'lt'].includes(compareIntArray(lower, ver))
@@ -111,10 +119,13 @@ function matches(version: string, range: string): boolean {
 function satisfyingVersion(
   versions: string[],
   range: string,
-  onGreaterThan: (isGreaterThan: boolean) => boolean,
+  reverse: boolean,
 ): string | null {
   const copy = versions.slice(0);
-  copy.sort((a, b) => (onGreaterThan(isGreaterThan(a, b)) ? -1 : 1));
+  copy.sort((a, b) => {
+    const multiplier = reverse ? 1 : -1;
+    return sortVersions(a, b) * multiplier;
+  });
   const result = copy.find((v) => matches(v, range));
   return result ?? null;
 }
@@ -123,29 +134,32 @@ function getSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  return satisfyingVersion(versions, range, (x) => x);
+  return satisfyingVersion(versions, range, false);
 }
 
 function minSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  return satisfyingVersion(versions, range, (x) => !x);
+  return satisfyingVersion(versions, range, true);
 }
 
 function isLessThanRange(version: string, range: string): boolean {
-  const parsed = parse(range);
+  const parsed = parseRange(range);
   if (parsed === null) {
     return false;
   }
   const compos = extractAllComponents(version);
   const lower = extractAllComponents(parsed.lower);
+  if (compos === null || lower === null) {
+    return false;
+  }
   return 'lt' === compareIntArray(compos, lower);
 }
 
 export function getComponents(splitOne: string): Components | null {
   const c = extractAllComponents(splitOne);
-  if (c.length === 0) {
+  if (c === null) {
     return null;
   }
   return {
@@ -171,7 +185,7 @@ function getNewValue({
     );
     return null;
   }
-  const parsed = parse(currentValue);
+  const parsed = parseRange(currentValue);
   if (parsed === null) {
     logger.info(
       { currentValue, newVersion },
@@ -187,9 +201,11 @@ function getNewValue({
     // the upper bound is already high enough
     return null;
   }
-  // isLessThanRange returns true when newVersion is invalid. so we can assert it non-null
   const compos = getComponents(newVersion);
-  const majorPlusOne = plusOne(compos!.major);
+  if (compos === null) {
+    return null;
+  }
+  const majorPlusOne = plusOne(compos.major);
   // istanbul ignore next: since all versions that can be parsed, can also be bumped, this can never happen
   if (!matches(newVersion, `>=${parsed.lower} && <${majorPlusOne}`)) {
     logger.warn(
@@ -221,8 +237,8 @@ function isSame(
 }
 
 function subset(subRange: string, superRange: string): boolean | undefined {
-  const sub = parse(subRange);
-  const sup = parse(superRange);
+  const sub = parseRange(subRange);
+  const sup = parseRange(superRange);
   if (sub === null || sup === null) {
     return undefined;
   }
@@ -230,6 +246,14 @@ function subset(subRange: string, superRange: string): boolean | undefined {
   const subUpper = extractAllComponents(sub.upper);
   const supLower = extractAllComponents(sup.lower);
   const supUpper = extractAllComponents(sup.upper);
+  if (
+    subLower === null ||
+    subUpper === null ||
+    supLower === null ||
+    supUpper === null
+  ) {
+    return undefined;
+  }
   if ('lt' === compareIntArray(subLower, supLower)) {
     return false;
   }
@@ -240,11 +264,11 @@ function subset(subRange: string, superRange: string): boolean | undefined {
 }
 
 function isVersion(maybeRange: string | undefined | null): boolean {
-  return typeof maybeRange === 'string' && parse(maybeRange) === null;
+  return typeof maybeRange === 'string' && parseRange(maybeRange) === null;
 }
 
 function isValid(ver: string): boolean {
-  return extractAllComponents(ver).length >= 1;
+  return extractAllComponents(ver) !== null || parseRange(ver) !== null;
 }
 
 function isSingleVersion(range: string): boolean {
@@ -254,9 +278,12 @@ function isSingleVersion(range: string): boolean {
 }
 
 function equals(a: string, b: string): boolean {
-  return (
-    'eq' === compareIntArray(extractAllComponents(a), extractAllComponents(b))
-  );
+  const aComponents = extractAllComponents(a);
+  const bComponents = extractAllComponents(b);
+  if (aComponents === null || bComponents === null) {
+    return false;
+  }
+  return 'eq' === compareIntArray(aComponents, bComponents);
 }
 
 function sortVersions(a: string, b: string): number {

@@ -1,32 +1,28 @@
-import pvp, { extractAllComponents, getComponents, parse } from '.';
+import pvp, { extractAllComponents, getComponents, parseRange } from '.';
 
 describe('modules/versioning/pvp/index', () => {
   describe('.isGreaterThan(version, other)', () => {
     it.each`
-      first       | second
-      ${'1.23.1'} | ${'1.9.6'}
-      ${'4.0.0'}  | ${'3.0.0'}
-      ${'3.0.1'}  | ${'3.0.0'}
-      ${'4.10'}   | ${'4.1'}
-      ${'1.0.0'}  | ${'1.0'}
-    `('pvp.isGreaterThan($first, $second)', ({ first, second }) => {
-      expect(pvp.isGreaterThan(first, second)).toBeTrue();
-    });
-
-    it.each`
-      first      | second
-      ${'2.0.2'} | ${'3.1.0'}
-      ${'3.0.0'} | ${'3.0.0'}
-      ${'4.1'}   | ${'4.10'}
-      ${'1.0'}   | ${'1.0.0'}
-    `('pvp.isGreaterThan($first, $second)', ({ first, second }) => {
-      expect(pvp.isGreaterThan(first, second)).toBeFalse();
+      first       | second     | expected
+      ${'1.23.1'} | ${'1.9.6'} | ${true}
+      ${'4.0.0'}  | ${'3.0.0'} | ${true}
+      ${'3.0.1'}  | ${'3.0.0'} | ${true}
+      ${'4.10'}   | ${'4.1'}   | ${true}
+      ${'1.0.0'}  | ${'1.0'}   | ${true}
+      ${'2.0.2'}  | ${'3.1.0'} | ${false}
+      ${'3.0.0'}  | ${'3.0.0'} | ${false}
+      ${'4.1'}    | ${'4.10'}  | ${false}
+      ${'1.0'}    | ${'1.0.0'} | ${false}
+      ${''}       | ${'1.0'}   | ${false}
+      ${'1.0'}    | ${''}      | ${false}
+    `('pvp.isGreaterThan($first, $second)', ({ first, second, expected }) => {
+      expect(pvp.isGreaterThan(first, second)).toBe(expected);
     });
   });
 
-  describe('.parse(range)', () => {
+  describe('.parseRange(range)', () => {
     it('should parse >=1.0 && <1.1', () => {
-      const parsed = parse('>=1.0 && <1.1');
+      const parsed = parseRange('>=1.0 && <1.1');
       expect(parsed).not.toBeNull();
       expect(parsed!.lower).toBe('1.0');
       expect(parsed!.upper).toBe('1.1');
@@ -39,6 +35,7 @@ describe('modules/versioning/pvp/index', () => {
       ${'1.0.0'} | ${1.0}
       ${'1.0.1'} | ${1.0}
       ${'1.1.1'} | ${1.1}
+      ${''}      | ${null}
     `('pvp.getMajor("$version") === $expected', ({ version, expected }) => {
       expect(pvp.getMajor(version)).toBe(expected);
     });
@@ -58,11 +55,13 @@ describe('modules/versioning/pvp/index', () => {
 
   describe('.getPatch(version)', () => {
     it.each`
-      version        | expected
-      ${'1.0.0'}     | ${null}
-      ${'1.0.0.5.1'} | ${5.1}
-      ${'1.0.1.6'}   | ${6}
-      ${'1.1.2.7'}   | ${7}
+      version         | expected
+      ${'1.0.0'}      | ${null}
+      ${'1.0.0.5.1'}  | ${5.1}
+      ${'1.0.1.6'}    | ${6}
+      ${'1.1.2.7'}    | ${7}
+      ${'0.0.0.0.1'}  | ${0.1}
+      ${'0.0.0.0.10'} | ${0.1}
     `('pvp.getPatch("$version") === $expected', ({ version, expected }) => {
       expect(pvp.getPatch(version)).toBe(expected);
     });
@@ -126,7 +125,7 @@ describe('modules/versioning/pvp/index', () => {
       ${'4.0.0'} | ${'>=3.0 && <3.1'} | ${false}
       ${'3.1.0'} | ${'>=3.0 && <3.1'} | ${false}
       ${'3'}     | ${'gibberish'}     | ${false}
-      ${''}      | ${'>=3.0 && <3.1'} | ${true}
+      ${''}      | ${'>=3.0 && <3.1'} | ${false}
     `(
       'pvp.isLessThanRange?.("$version", "$range") === $expected',
       ({ version, range, expected }) => {
@@ -136,8 +135,8 @@ describe('modules/versioning/pvp/index', () => {
   });
 
   describe('.extractAllComponents(version)', () => {
-    it('should return an empty array when there are no numbers', () => {
-      expect(extractAllComponents('')).toEqual([]);
+    it('should return null when there are no numbers', () => {
+      expect(extractAllComponents('')).toBeNull();
     });
 
     it('should parse 3.0', () => {
@@ -188,22 +187,23 @@ describe('modules/versioning/pvp/index', () => {
 
   describe('.isSame(...)', () => {
     it.each`
-      type       | a            | b            | expected
-      ${'major'} | ${'4.10'}    | ${'4.1'}     | ${false}
-      ${'major'} | ${'4.1.0'}   | ${'5.1.0'}   | ${false}
-      ${'major'} | ${'4.1'}     | ${'5.1'}     | ${false}
-      ${'major'} | ${'0'}       | ${'1'}       | ${false}
-      ${'major'} | ${'4.1'}     | ${'4.1.0'}   | ${true}
-      ${'major'} | ${'4.1.1'}   | ${'4.1.2'}   | ${true}
-      ${'major'} | ${'0'}       | ${'0'}       | ${true}
-      ${'minor'} | ${'4.1.0'}   | ${'5.1.0'}   | ${true}
-      ${'minor'} | ${'4.1'}     | ${'4.1'}     | ${true}
-      ${'minor'} | ${'4.1'}     | ${'5.1'}     | ${true}
-      ${'minor'} | ${'4.1.0'}   | ${'4.1.1'}   | ${false}
-      ${'minor'} | ${''}        | ${'0'}       | ${false}
-      ${'patch'} | ${'1.0.0.0'} | ${'1.0.0.0'} | ${true}
-      ${'patch'} | ${'1.0.0.0'} | ${'2.0.0.0'} | ${true}
-      ${'patch'} | ${'1.0.0.0'} | ${'1.0.0.1'} | ${false}
+      type       | a              | b               | expected
+      ${'major'} | ${'4.10'}      | ${'4.1'}        | ${false}
+      ${'major'} | ${'4.1.0'}     | ${'5.1.0'}      | ${false}
+      ${'major'} | ${'4.1'}       | ${'5.1'}        | ${false}
+      ${'major'} | ${'0'}         | ${'1'}          | ${false}
+      ${'major'} | ${'4.1'}       | ${'4.1.0'}      | ${true}
+      ${'major'} | ${'4.1.1'}     | ${'4.1.2'}      | ${true}
+      ${'major'} | ${'0'}         | ${'0'}          | ${true}
+      ${'minor'} | ${'4.1.0'}     | ${'5.1.0'}      | ${true}
+      ${'minor'} | ${'4.1'}       | ${'4.1'}        | ${true}
+      ${'minor'} | ${'4.1'}       | ${'5.1'}        | ${true}
+      ${'minor'} | ${'4.1.0'}     | ${'4.1.1'}      | ${false}
+      ${'minor'} | ${''}          | ${'0'}          | ${false}
+      ${'patch'} | ${'1.0.0.0'}   | ${'1.0.0.0'}    | ${true}
+      ${'patch'} | ${'1.0.0.0'}   | ${'2.0.0.0'}    | ${true}
+      ${'patch'} | ${'1.0.0.0'}   | ${'1.0.0.1'}    | ${false}
+      ${'patch'} | ${'0.0.0.0.1'} | ${'0.0.0.0.10'} | ${false}
     `(
       'pvp.isSame("$type", "$a", "$b") === $expected',
       ({ type, a, b, expected }) => {
@@ -227,6 +227,8 @@ describe('modules/versioning/pvp/index', () => {
       a         | b        | expected
       ${'1.01'} | ${'1.1'} | ${true}
       ${'1.01'} | ${'1.0'} | ${false}
+      ${''}     | ${'1.0'} | ${false}
+      ${'1.0'}  | ${''}    | ${false}
     `('pvp.equals("$a", "$b") === $expected', ({ a, b, expected }) => {
       expect(pvp.equals(a, b)).toBe(expected);
     });
@@ -253,6 +255,7 @@ describe('modules/versioning/pvp/index', () => {
       ${'>=1.0 && <2.1'} | ${'>=1.0 && <2.0'} | ${false}
       ${'>=0.9 && <2.1'} | ${'>=1.0 && <2.0'} | ${false}
       ${'gibberish'}     | ${''}              | ${undefined}
+      ${'>=. && <.'}     | ${'>=. && <.'}     | ${undefined}
     `(
       'pvp.subbet("$subRange", "$superRange") === $expected',
       ({ subRange, superRange, expected }) => {

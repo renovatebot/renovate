@@ -5,5 +5,11 @@ version. That is, in `A.B.C`:
 - `A.B`: major version
 - `C`: minor
 
+The remaining components are all considered parts of the patch version, and
+they will be concatenated to form a `number`, i.e. IEEE 754 double. This means
+that both `0.0.0.0.1` and `0.0.0.0.10` have patch version `0.1`.
+
 The range syntax comes from Cabal, specifically the [build-depends
 section](https://cabal.readthedocs.io/en/3.10/cabal-package.html).
+
+This module is considered experimental since it has limited range support.
