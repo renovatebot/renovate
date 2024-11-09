@@ -1937,7 +1937,12 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: null,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        title: 'some title',
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+      });
     });
 
     it('uses default branch', async () => {
@@ -1960,7 +1965,12 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: [],
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        title: 'some title',
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+      });
     });
 
     it('supports draftPR on < 13.2', async () => {
@@ -1983,7 +1993,12 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         draftPR: true,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        title: 'some title',
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+      });
     });
 
     it('supports draftPR on >= 13.2', async () => {
@@ -2006,7 +2021,12 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         draftPR: true,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        title: 'some title',
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+      });
     });
 
     it('auto-accepts the MR when requested', async () => {
