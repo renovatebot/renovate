@@ -59,8 +59,8 @@ describe('modules/manager/conan/extract', () => {
           currentValue: '8.62.134',
           depName: 'Fake',
           depType: 'requires',
-          packageName: 'Fake/8.62.134@',
-          replaceString: 'Fake/8.62.134@',
+          packageName: 'Fake/8.62.134@_/_',
+          replaceString: 'Fake/8.62.134',
         },
         {
           currentValue: '[>1.1 <2.1, include_prerelease=True]',
