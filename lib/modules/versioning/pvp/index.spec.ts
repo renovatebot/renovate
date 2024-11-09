@@ -2,19 +2,25 @@ import pvp, { extractAllComponents, getComponents, parse } from '.';
 
 describe('modules/versioning/pvp/index', () => {
   describe('.isGreaterThan(version, other)', () => {
-    it('should return true', () => {
-      expect(pvp.isGreaterThan('1.23.1', '1.9.6')).toBeTrue();
-      expect(pvp.isGreaterThan('4.0.0', '3.0.0')).toBeTrue();
-      expect(pvp.isGreaterThan('3.0.1', '3.0.0')).toBeTrue();
-      expect(pvp.isGreaterThan('4.10', '4.1')).toBeTrue();
-      expect(pvp.isGreaterThan('1.0.0', '1.0')).toBeTrue();
+    it.each`
+      first       | second
+      ${'1.23.1'} | ${'1.9.6'}
+      ${'4.0.0'}  | ${'3.0.0'}
+      ${'3.0.1'}  | ${'3.0.0'}
+      ${'4.10'}   | ${'4.1'}
+      ${'1.0.0'}  | ${'1.0'}
+    `('pvp.isGreaterThan($first, $second)', ({ first, second }) => {
+      expect(pvp.isGreaterThan(first, second)).toBeTrue();
     });
 
-    it('should return false', () => {
-      expect(pvp.isGreaterThan('2.0.2', '3.1.0')).toBeFalse(); // less
-      expect(pvp.isGreaterThan('3.0.0', '3.0.0')).toBeFalse(); // equal
-      expect(pvp.isGreaterThan('4.1', '4.10')).toBeFalse();
-      expect(pvp.isGreaterThan('1.0', '1.0.0')).toBeFalse();
+    it.each`
+      first      | second
+      ${'2.0.2'} | ${'3.1.0'}
+      ${'3.0.0'} | ${'3.0.0'}
+      ${'4.1'}   | ${'4.10'}
+      ${'1.0'}   | ${'1.0.0'}
+    `('pvp.isGreaterThan($first, $second)', ({ first, second }) => {
+      expect(pvp.isGreaterThan(first, second)).toBeFalse();
     });
   });
 
@@ -28,86 +34,74 @@ describe('modules/versioning/pvp/index', () => {
   });
 
   describe('.getMajor(version)', () => {
-    it('should extract second component as decimal digit', () => {
-      expect(pvp.getMajor('1.0.0')).toBe(1.0);
-      expect(pvp.getMajor('1.0.1')).toBe(1.0);
-      expect(pvp.getMajor('1.1.1')).toBe(1.1);
+    it.each`
+      version    | expected
+      ${'1.0.0'} | ${1.0}
+      ${'1.0.1'} | ${1.0}
+      ${'1.1.1'} | ${1.1}
+    `('pvp.getMajor("$version") === $expected', ({ version, expected }) => {
+      expect(pvp.getMajor(version)).toBe(expected);
     });
   });
 
   describe('.getMinor(version)', () => {
-    it('should extract minor as third component in version', () => {
-      expect(pvp.getMinor('1.0')).toBeNull();
-      expect(pvp.getMinor('1.0.0')).toBe(0);
-      expect(pvp.getMinor('1.0.1')).toBe(1);
-      expect(pvp.getMinor('1.1.2')).toBe(2);
+    it.each`
+      version    | expected
+      ${'1.0'}   | ${null}
+      ${'1.0.0'} | ${0}
+      ${'1.0.1'} | ${1}
+      ${'1.1.2'} | ${2}
+    `('pvp.getMinor("$version") === $expected', ({ version, expected }) => {
+      expect(pvp.getMinor(version)).toBe(expected);
     });
   });
 
   describe('.getPatch(version)', () => {
-    it('should return null where there is no patch version', () => {
-      expect(pvp.getPatch('1.0.0')).toBeNull();
-    });
-
-    it('should extract all remaining components as decimal digits', () => {
-      expect(pvp.getPatch('1.0.0.5.1')).toBe(5.1);
-      expect(pvp.getPatch('1.0.1.6')).toBe(6);
-      expect(pvp.getPatch('1.1.2.7')).toBe(7);
+    it.each`
+      version        | expected
+      ${'1.0.0'}     | ${null}
+      ${'1.0.0.5.1'} | ${5.1}
+      ${'1.0.1.6'}   | ${6}
+      ${'1.1.2.7'}   | ${7}
+    `('pvp.getPatch("$version") === $expected', ({ version, expected }) => {
+      expect(pvp.getPatch(version)).toBe(expected);
     });
   });
 
   describe('.matches(version, range)', () => {
-    it('should return true when version has same major', () => {
-      expect(pvp.matches('1.0.1', '>=1.0 && <1.1')).toBeTrue();
-      expect(pvp.matches('4.1', '>=4.0 && <4.10')).toBeTrue();
-      expect(pvp.matches('4.1', '>=4.1 && <4.10')).toBeTrue();
-      expect(pvp.matches('4.1.0', '>=4.1 && <4.10')).toBeTrue();
-      expect(pvp.matches('4.10', '>=4.1 && <4.10.0')).toBeTrue();
-      expect(pvp.matches('4.10', '>=4.0 && <4.10.1')).toBeTrue();
-    });
-
-    it('should return false when version has different major', () => {
-      expect(pvp.matches('1.0.0', '>=2.0 && <2.1')).toBeFalse();
-      expect(pvp.matches('4', '>=4.0 && <4.10')).toBeFalse();
-      expect(pvp.matches('4.10', '>=4.1 && <4.10')).toBeFalse();
-    });
-
-    it("should return false when range can't be parsed", () => {
-      expect(pvp.matches('4', 'gibberish')).toBeFalse();
-    });
-
-    it('should return false when given an invalid version', () => {
-      expect(pvp.matches('', '>=1.0 && <1.1')).toBeFalse();
-    });
+    it.each`
+      version    | range                 | expected
+      ${'1.0.1'} | ${'>=1.0 && <1.1'}    | ${true}
+      ${'4.1'}   | ${'>=4.0 && <4.10'}   | ${true}
+      ${'4.1'}   | ${'>=4.1 && <4.10'}   | ${true}
+      ${'4.1.0'} | ${'>=4.1 && <4.10'}   | ${true}
+      ${'4.10'}  | ${'>=4.1 && <4.10.0'} | ${true}
+      ${'4.10'}  | ${'>=4.0 && <4.10.1'} | ${true}
+      ${'1.0.0'} | ${'>=2.0 && <2.1'}    | ${false}
+      ${'4'}     | ${'>=4.0 && <4.10'}   | ${false}
+      ${'4.10'}  | ${'>=4.1 && <4.10'}   | ${false}
+      ${'4'}     | ${'gibberish'}        | ${false}
+      ${''}      | ${'>=1.0 && <1.1'}    | ${false}
+    `(
+      'pvp.matches("$version", "$range") === $expected',
+      ({ version, range, expected }) => {
+        expect(pvp.matches(version, range)).toBe(expected);
+      },
+    );
   });
 
   describe('.getSatisfyingVersion(versions, range)', () => {
-    it('should return max satisfying version in range', () => {
-      expect(
-        pvp.getSatisfyingVersion(
-          ['1.0.0', '1.0.4', '1.3.0', '2.0.0'],
-          '>=1.0 && <1.1',
-        ),
-      ).toBe('1.0.4');
-    });
-
-    it('should handle unsorted inputs', () => {
-      expect(
-        pvp.getSatisfyingVersion(
-          ['2.0.0', '1.0.0', '1.0.4', '1.3.0'],
-          '>=1.0 && <1.1',
-        ),
-      ).toBe('1.0.4');
-    });
-
-    it('should return null when no versions match', () => {
-      expect(
-        pvp.getSatisfyingVersion(
-          ['1.0.0', '1.0.4', '1.3.0', '2.0.0'],
-          '>=3.0 && <4.0',
-        ),
-      ).toBeNull();
-    });
+    it.each`
+      versions                                | range              | expected
+      ${['1.0.0', '1.0.4', '1.3.0', '2.0.0']} | ${'>=1.0 && <1.1'} | ${'1.0.4'}
+      ${['2.0.0', '1.0.0', '1.0.4', '1.3.0']} | ${'>=1.0 && <1.1'} | ${'1.0.4'}
+      ${['1.0.0', '1.0.4', '1.3.0', '2.0.0']} | ${'>=3.0 && <4.0'} | ${null}
+    `(
+      'pvp.getSatisfyingVersion($versions, "$range") === $expected',
+      ({ versions, range, expected }) => {
+        expect(pvp.getSatisfyingVersion(versions, range)).toBe(expected);
+      },
+    );
   });
 
   describe('.minSatisfyingVersion(versions, range)', () => {
@@ -122,26 +116,23 @@ describe('modules/versioning/pvp/index', () => {
   });
 
   describe('.isLessThanRange(version, range)', () => {
-    it('should return true', () => {
-      expect(pvp.isLessThanRange?.('2.0.2', '>=3.0 && <3.1')).toBeTrue();
-      expect(pvp.isLessThanRange?.('3', '>=3.0 && <3.1')).toBeTrue();
-    });
-
-    it('should return false', () => {
-      expect(pvp.isLessThanRange?.('3', '>=3 && <3.1')).toBeFalse();
-      expect(pvp.isLessThanRange?.('3.0', '>=3.0 && <3.1')).toBeFalse();
-      expect(pvp.isLessThanRange?.('3.0.0', '>=3.0 && <3.1')).toBeFalse();
-      expect(pvp.isLessThanRange?.('4.0.0', '>=3.0 && <3.1')).toBeFalse();
-      expect(pvp.isLessThanRange?.('3.1.0', '>=3.0 && <3.1')).toBeFalse();
-    });
-
-    it("should return false when range can't be parsed", () => {
-      expect(pvp.isLessThanRange?.('3', 'gibberish')).toBeFalse();
-    });
-
-    it('should return true when version is invalid', () => {
-      expect(pvp.isLessThanRange?.('', '>=3.0 && <3.1')).toBeTrue();
-    });
+    it.each`
+      version    | range              | expected
+      ${'2.0.2'} | ${'>=3.0 && <3.1'} | ${true}
+      ${'3'}     | ${'>=3.0 && <3.1'} | ${true}
+      ${'3'}     | ${'>=3 && <3.1'}   | ${false}
+      ${'3.0'}   | ${'>=3.0 && <3.1'} | ${false}
+      ${'3.0.0'} | ${'>=3.0 && <3.1'} | ${false}
+      ${'4.0.0'} | ${'>=3.0 && <3.1'} | ${false}
+      ${'3.1.0'} | ${'>=3.0 && <3.1'} | ${false}
+      ${'3'}     | ${'gibberish'}     | ${false}
+      ${''}      | ${'>=3.0 && <3.1'} | ${true}
+    `(
+      'pvp.isLessThanRange?.("$version", "$range") === $expected',
+      ({ version, range, expected }) => {
+        expect(pvp.isLessThanRange?.(version, range)).toBe(expected);
+      },
+    );
   });
 
   describe('.extractAllComponents(version)', () => {
@@ -155,83 +146,34 @@ describe('modules/versioning/pvp/index', () => {
   });
 
   describe('.isValid(version)', () => {
-    it('should reject zero components', () => {
-      expect(pvp.isValid('')).toBeFalse();
-    });
-
-    it('should accept four components', () => {
-      expect(pvp.isValid('1.0.0.0')).toBeTrue();
-    });
-
-    it('should accept 1.0 as valid', () => {
-      expect(pvp.isValid('1.0')).toBeTrue();
-    });
-
-    it('should accept >=1.0 && <1.1 as valid (range)', () => {
-      expect(pvp.isValid('>=1.0 && <1.1')).toBeTrue();
+    it.each`
+      version            | expected
+      ${''}              | ${false}
+      ${'1.0.0.0'}       | ${true}
+      ${'1.0'}           | ${true}
+      ${'>=1.0 && <1.1'} | ${true}
+    `('pvp.isValid("$version") === $expected', ({ version, expected }) => {
+      expect(pvp.isValid(version)).toBe(expected);
     });
   });
 
   describe('.getNewValue(newValueConfig)', () => {
-    it('should bump the upper end of the range if necessary', () => {
-      expect(
-        pvp.getNewValue({
-          currentValue: '>=1.0 && <1.1',
-          newVersion: '1.1',
-          rangeStrategy: 'auto',
-        }),
-      ).toBe('>=1.0 && <1.2');
-    });
-
-    it("shouldn't modify the range if not necessary", () => {
-      expect(
-        pvp.getNewValue({
-          currentValue: '>=1.2 && <1.3',
-          newVersion: '1.2.3',
-          rangeStrategy: 'auto',
-        }),
-      ).toBeNull();
-    });
-
-    it('should return null when given unimplemented range strategies like update-lockfile', () => {
-      expect(
-        pvp.getNewValue({
-          currentValue: '>=1.0 && <1.1',
-          newVersion: '1.2.3',
-          rangeStrategy: 'update-lockfile',
-        }),
-      ).toBeNull();
-    });
-
-    it("should return null when given range that can't be parsed", () => {
-      expect(
-        pvp.getNewValue({
-          currentValue: 'gibberish',
-          newVersion: '1.2.3',
-          rangeStrategy: 'auto',
-        }),
-      ).toBeNull();
-    });
-
-    it('should return null when newVersion is below range', () => {
-      expect(
-        pvp.getNewValue({
-          currentValue: '>=1.0 && <1.1',
-          newVersion: '0.9',
-          rangeStrategy: 'auto',
-        }),
-      ).toBeNull();
-    });
-
-    it('should return null when newVersion is empty', () => {
-      expect(
-        pvp.getNewValue({
-          currentValue: '>=1.0 && <1.1',
-          newVersion: '',
-          rangeStrategy: 'auto',
-        }),
-      ).toBeNull();
-    });
+    it.each`
+      currentValue       | newVersion | rangeStrategy        | expected
+      ${'>=1.0 && <1.1'} | ${'1.1'}   | ${'auto'}            | ${'>=1.0 && <1.2'}
+      ${'>=1.2 && <1.3'} | ${'1.2.3'} | ${'auto'}            | ${null}
+      ${'>=1.0 && <1.1'} | ${'1.2.3'} | ${'update-lockfile'} | ${null}
+      ${'gibberish'}     | ${'1.2.3'} | ${'auto'}            | ${null}
+      ${'>=1.0 && <1.1'} | ${'0.9'}   | ${'auto'}            | ${null}
+      ${'>=1.0 && <1.1'} | ${''}      | ${'auto'}            | ${null}
+    `(
+      'pvp.getNewValue({currentValue: "$currentValue", newVersion: "$newVersion", rangeStrategy: "$rangeStrategy"}) === $expected',
+      ({ currentValue, newVersion, rangeStrategy, expected }) => {
+        expect(
+          pvp.getNewValue({ currentValue, newVersion, rangeStrategy }),
+        ).toBe(expected);
+      },
+    );
   });
 
   describe('.getComponents(...)', () => {
@@ -245,91 +187,88 @@ describe('modules/versioning/pvp/index', () => {
   });
 
   describe('.isSame(...)', () => {
-    it('should compare major components correctly', () => {
-      expect(pvp.isSame?.('major', '4.10', '4.1')).toBeFalse();
-      expect(pvp.isSame?.('major', '4.1.0', '5.1.0')).toBeFalse();
-      expect(pvp.isSame?.('major', '4.1', '5.1')).toBeFalse();
-      expect(pvp.isSame?.('major', '0', '1')).toBeFalse();
-      expect(pvp.isSame?.('major', '4.1', '4.1.0')).toBeTrue();
-      expect(pvp.isSame?.('major', '4.1.1', '4.1.2')).toBeTrue();
-      expect(pvp.isSame?.('major', '0', '0')).toBeTrue();
-    });
-
-    it('should compare minor components correctly', () => {
-      expect(pvp.isSame?.('minor', '4.1.0', '5.1.0')).toBeTrue();
-      expect(pvp.isSame?.('minor', '4.1', '4.1')).toBeTrue();
-      expect(pvp.isSame?.('minor', '4.1', '5.1')).toBeTrue();
-      expect(pvp.isSame?.('minor', '4.1.0', '4.1.1')).toBeFalse();
-    });
-
-    it('should compare patch components correctly', () => {
-      expect(pvp.isSame?.('patch', '1.0.0.0', '1.0.0.0')).toBeTrue();
-      expect(pvp.isSame?.('patch', '1.0.0.0', '2.0.0.0')).toBeTrue();
-      expect(pvp.isSame?.('patch', '1.0.0.0', '1.0.0.1')).toBeFalse();
-    });
-
-    it('should return false when the given a invalid version', () => {
-      expect(pvp.isSame?.('minor', '', '0')).toBeFalse();
-    });
+    it.each`
+      type       | a            | b            | expected
+      ${'major'} | ${'4.10'}    | ${'4.1'}     | ${false}
+      ${'major'} | ${'4.1.0'}   | ${'5.1.0'}   | ${false}
+      ${'major'} | ${'4.1'}     | ${'5.1'}     | ${false}
+      ${'major'} | ${'0'}       | ${'1'}       | ${false}
+      ${'major'} | ${'4.1'}     | ${'4.1.0'}   | ${true}
+      ${'major'} | ${'4.1.1'}   | ${'4.1.2'}   | ${true}
+      ${'major'} | ${'0'}       | ${'0'}       | ${true}
+      ${'minor'} | ${'4.1.0'}   | ${'5.1.0'}   | ${true}
+      ${'minor'} | ${'4.1'}     | ${'4.1'}     | ${true}
+      ${'minor'} | ${'4.1'}     | ${'5.1'}     | ${true}
+      ${'minor'} | ${'4.1.0'}   | ${'4.1.1'}   | ${false}
+      ${'minor'} | ${''}        | ${'0'}       | ${false}
+      ${'patch'} | ${'1.0.0.0'} | ${'1.0.0.0'} | ${true}
+      ${'patch'} | ${'1.0.0.0'} | ${'2.0.0.0'} | ${true}
+      ${'patch'} | ${'1.0.0.0'} | ${'1.0.0.1'} | ${false}
+    `(
+      'pvp.isSame("$type", "$a", "$b") === $expected',
+      ({ type, a, b, expected }) => {
+        expect(pvp.isSame?.(type, a, b)).toBe(expected);
+      },
+    );
   });
 
   describe('.isVersion(maybeRange)', () => {
-    it('should accept 1.0 as valid version', () => {
-      expect(pvp.isVersion('1.0')).toBeTrue();
-    });
-
-    it('should reject >=1.0 && <1.1 as it is a range, not a version', () => {
-      expect(pvp.isVersion('>=1.0 && <1.1')).toBeFalse();
+    it.each`
+      version            | expected
+      ${'1.0'}           | ${true}
+      ${'>=1.0 && <1.1'} | ${false}
+    `('pvp.isVersion("$version") === $expected', ({ version, expected }) => {
+      expect(pvp.isVersion(version)).toBe(expected);
     });
   });
 
   describe('.equals(a, b)', () => {
-    it('should regard 1.01 and 1.1 as equal', () => {
-      expect(pvp.equals('1.01', '1.1')).toBeTrue();
-    });
-
-    it('should regard 1.01 and 1.0 are not equal', () => {
-      expect(pvp.equals('1.01', '1.0')).toBeFalse();
+    it.each`
+      a         | b        | expected
+      ${'1.01'} | ${'1.1'} | ${true}
+      ${'1.01'} | ${'1.0'} | ${false}
+    `('pvp.equals("$a", "$b") === $expected', ({ a, b, expected }) => {
+      expect(pvp.equals(a, b)).toBe(expected);
     });
   });
 
   describe('.isSingleVersion(range)', () => {
-    it('should consider ==1.0 a single version', () => {
-      expect(pvp.isSingleVersion('==1.0')).toBeTrue();
-    });
-
-    it('should return false for ranges', () => {
-      expect(pvp.isSingleVersion('>=1.0 && <1.1')).toBeFalse();
-    });
+    it.each`
+      version            | expected
+      ${'==1.0'}         | ${true}
+      ${'>=1.0 && <1.1'} | ${false}
+    `(
+      'pvp.isSingleVersion("$version") === $expected',
+      ({ version, expected }) => {
+        expect(pvp.isSingleVersion(version)).toBe(expected);
+      },
+    );
   });
 
   describe('.subset(subRange, superRange)', () => {
-    it('1.1-1.2 is inside 1.0-2.0', () => {
-      expect(pvp.subset?.('>=1.0 && <1.1', '>=1.0 && <2.0')).toBeTrue();
-    });
-
-    it('1.0-2.0 is inside 1.0-2.0', () => {
-      expect(pvp.subset?.('>=1.0 && <2.0', '>=1.0 && <2.0')).toBeTrue();
-    });
-
-    it('1.0-2.1 outside 1.0-2.0', () => {
-      expect(pvp.subset?.('>=1.0 && <2.1', '>=1.0 && <2.0')).toBeFalse();
-    });
-
-    it('0.9-2.0 outside 1.0-2.0', () => {
-      expect(pvp.subset?.('>=0.9 && <2.1', '>=1.0 && <2.0')).toBeFalse();
-    });
-
-    it("returns undefined when passed a range that can't be parsed", () => {
-      expect(pvp.subset?.('gibberish', '')).toBeUndefined();
-    });
+    it.each`
+      subRange           | superRange         | expected
+      ${'>=1.0 && <1.1'} | ${'>=1.0 && <2.0'} | ${true}
+      ${'>=1.0 && <2.0'} | ${'>=1.0 && <2.0'} | ${true}
+      ${'>=1.0 && <2.1'} | ${'>=1.0 && <2.0'} | ${false}
+      ${'>=0.9 && <2.1'} | ${'>=1.0 && <2.0'} | ${false}
+      ${'gibberish'}     | ${''}              | ${undefined}
+    `(
+      'pvp.subbet("$subRange", "$superRange") === $expected',
+      ({ subRange, superRange, expected }) => {
+        expect(pvp.subset?.(subRange, superRange)).toBe(expected);
+      },
+    );
   });
 
   describe('.sortVersions()', () => {
-    it('should sort 1.0 and 1.1', () => {
-      expect(pvp.sortVersions('1.0', '1.1')).toBe(-1);
-      expect(pvp.sortVersions('1.1', '1.0')).toBe(1);
-      expect(pvp.sortVersions('1.0', '1.0')).toBe(0);
+    it.each`
+      a        | b        | expected
+      ${'1.0'} | ${'1.1'} | ${-1}
+      ${'1.1'} | ${'1.0'} | ${1}
+      ${'1.0'} | ${'1.0'} | ${0}
+    `('pvp.sortVersions("$a", "$b") === $expected', ({ a, b, expected }) => {
+      expect(pvp.sortVersions(a, b)).toBe(expected);
     });
   });
 
