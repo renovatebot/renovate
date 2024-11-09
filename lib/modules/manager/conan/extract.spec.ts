@@ -36,13 +36,6 @@ describe('modules/manager/conan/extract', () => {
           replaceString: 'fake/8.62.134@test/dev',
         },
         {
-          currentValue: '8.62.134',
-          depName: 'Fake',
-          depType: 'requires',
-          packageName: 'Fake/8.62.134@',
-          replaceString: 'Fake/8.62.134@',
-        },
-        {
           autoReplaceStringTemplate:
             '{{depName}}/{{newValue}}@_/_{{#if newDigest}}#{{newDigest}}{{/if}}',
           currentDigest: 'aff2d03608351db075ec1348a3afc9ff',
@@ -61,6 +54,13 @@ describe('modules/manager/conan/extract', () => {
           depType: 'requires',
           packageName: 'cairo/1.17.2@_/_',
           replaceString: 'cairo/1.17.2@_/_#aff2d03608351db075ec1348a3afc9ff',
+        },
+        {
+          currentValue: '8.62.134',
+          depName: 'Fake',
+          depType: 'requires',
+          packageName: 'Fake/8.62.134@',
+          replaceString: 'Fake/8.62.134@',
         },
         {
           currentValue: '[>1.1 <2.1, include_prerelease=True]',
