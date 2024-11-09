@@ -36,6 +36,13 @@ describe('modules/manager/conan/extract', () => {
           replaceString: 'fake/8.62.134@test/dev',
         },
         {
+          currentValue: '8.62.134',
+          depName: 'Fake',
+          depType: 'requires',
+          packageName: 'Fake/8.62.134@',
+          replaceString: 'Fake/8.62.134@',
+        },
+        {
           autoReplaceStringTemplate:
             '{{depName}}/{{newValue}}@_/_{{#if newDigest}}#{{newDigest}}{{/if}}',
           currentDigest: 'aff2d03608351db075ec1348a3afc9ff',
