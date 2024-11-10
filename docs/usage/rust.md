@@ -52,3 +52,18 @@ module.exports = {
   ],
 };
 ```
+
+# Automated updates for the Rust toolchain
+
+Renovate supports upgrading the Rust toolchain version in the `rust-toolchain.toml` file.
+
+## How it works
+
+1. Renovate searches in each repository for any `rust-toolchain.toml` files that apply [overrides](https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file)
+1. Renovate extracts existing the version from the `channel` key/value, ignoring any `nightly`, `beta` or `stable` release references (e.g. "stable", "nightly-2014-12-18")
+1. Renovate resolves the Rust toolchain version using the [rust-lang/rust](https://github.com/rust-lang/rust) Github repositories releases.
+1. If Renovate finds an update, Renovate will update the version in `rust-toolchain.toml`
+
+## Enabling Rust Modules Updating
+
+TODO: I'm not sure whether it's ok to enable a new manager by default.
