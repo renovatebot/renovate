@@ -9,6 +9,8 @@ export const urls = [
 export const supportsRanges = false;
 
 export class RustVersioningApi extends RegExpVersioningApi {
+  // Format described in https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file
+  // Examples: 1.82.1, 1.82
   private static readonly versionRegex =
     '^(?<major>\\d+)\\.(?<minor>\\d+)(\\.(?<patch>\\d+))?$';
 
