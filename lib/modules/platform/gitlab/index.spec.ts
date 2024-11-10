@@ -3166,6 +3166,7 @@ describe('modules/platform/gitlab/index', () => {
           number: 1,
           prTitle: 'title',
           prBody: 'body',
+          state: 'open',
           addLabels: ['new_label'],
           removeLabels: ['old_label'],
         }),
