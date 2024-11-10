@@ -143,7 +143,7 @@ export class MavenDatasource extends Datasource {
       workingReleaseMap = {};
       let retryEarlier = false;
       try {
-        const indexUrl = getMavenUrl(dependency, repoUrl, 'index.html');
+        const indexUrl = getMavenUrl(dependency, repoUrl, '');
         const res = await downloadHttpProtocol(this.http, indexUrl);
         if (res) {
           for (const line of res.body.split(newlineRegex)) {
@@ -171,7 +171,7 @@ export class MavenDatasource extends Datasource {
         retryEarlier = true;
         logger.debug(
           { dependency, err },
-          'Failed to get releases from index.html',
+          'Failed to get releases from package index page',
         );
       }
       const cacheTTL = retryEarlier
