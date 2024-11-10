@@ -363,9 +363,6 @@ export function generateBranchConfig(
     config.upgrades.some((upgrade) => upgrade.semanticCommits === 'enabled')
   ) {
     config.semanticCommits = 'enabled';
-  }
-
-  if (config.semanticCommits === 'enabled') {
     // Calculate the highest priority `semanticCommitType`
     let highestIndex = -1;
     for (const upgrade of config.upgrades) {
