@@ -1,9 +1,11 @@
-import Parser, { Query, SyntaxNode } from 'tree-sitter';
-import Ruby, {
+import type { SyntaxNode } from 'tree-sitter';
+import Parser, { Query } from 'tree-sitter';
+import type {
   ArgumentListNode,
   CallNode,
   IdentifierNode,
 } from 'tree-sitter-ruby';
+import Ruby from 'tree-sitter-ruby';
 import { uniq } from '../../../util/uniq';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import type { PackageDependency } from '../types';
