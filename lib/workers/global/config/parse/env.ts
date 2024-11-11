@@ -39,6 +39,8 @@ const renameKeys = {
   aliases: 'registryAliases',
   azureAutoComplete: 'platformAutomerge', // migrate: azureAutoComplete
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
+  mergeConfidenceApiBaseUrl: 'mergeConfidenceEndpoint',
+  mergeConfidenceSupportedDatasources: 'mergeConfidenceDatasources',
 };
 
 function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
@@ -83,11 +85,43 @@ function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return result;
 }
 
+// these experimental env vars have been converted into self-hosted config options
+const convertedExperimentalEnvVars = [
+  'RENOVATE_X_AUTODISCOVER_REPO_SORT',
+  'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
+  'RENOVATE_X_DOCKER_MAX_PAGES',
+  'RENOVATE_X_DELETE_CONFIG_FILE',
+  'RENOVATE_X_S3_ENDPOINT',
+  'RENOVATE_X_S3_PATH_STYLE',
+  'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
+  'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',
+];
+
+/**
+ * Massages the experimental env vars which have been converted to config options
+ *
+ * e.g. RENOVATE_X_AUTODISCOVER_REPO_SORT -> RENOVATE_AUTODISCOVER_REPO_SORT
+ */
+function massageConvertedExperimentalVars(
+  env: NodeJS.ProcessEnv,
+): NodeJS.ProcessEnv {
+  const result = { ...env };
+  for (const key of convertedExperimentalEnvVars) {
+    if (env[key] !== undefined) {
+      const newKey = key.replace('RENOVATE_X_', 'RENOVATE_');
+      result[newKey] = env[key];
+      delete result[key];
+    }
+  }
+  return result;
+}
+
 export async function getConfig(
   inputEnv: NodeJS.ProcessEnv,
 ): Promise<AllConfig> {
   let env = inputEnv;
   env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
+  env = massageConvertedExperimentalVars(env);
   env = renameEnvKeys(env);
   // massage the values of migrated configuration keys
   env = massageEnvKeyValues(env);
@@ -126,7 +160,7 @@ export async function getConfig(
                 'Could not parse object array',
               );
             }
-          } catch (err) {
+          } catch {
             logger.debug(
               { val: envVal, envName },
               'Could not parse environment variable',
@@ -161,6 +195,19 @@ export async function getConfig(
                 'env config requireConfig property has been changed to optional',
               );
               config[option.name] = 'optional';
+            }
+          }
+          if (option.name === 'platformCommit') {
+            if ((config[option.name] as string) === 'true') {
+              logger.warn(
+                'env config platformCommit property has been changed to enabled',
+              );
+              config[option.name] = 'enabled';
+            } else if ((config[option.name] as string) === 'false') {
+              logger.warn(
+                'env config platformCommit property has been changed to disabled',
+              );
+              config[option.name] = 'disabled';
             }
           }
         }

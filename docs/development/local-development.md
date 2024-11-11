@@ -10,12 +10,13 @@ For example, if you think anything is unclear, or you think something needs to b
 
 You need the following dependencies for local development:
 
-- Git `>=2.33.0`
-- Node.js `^18.12.0 || >=20.0.0`
-- pnpm `^8.6.11` (use corepack)
+- Git `>=2.45.1`
+- Node.js `^20.15.1`
+- pnpm `^9.0.0` (use corepack)
 - C++ compiler
 
-We recommend you use the version of Node.js defined in the repository's `.nvmrc`.
+We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Volta](https://volta.sh/) to manage your tool versions.
+Volta will apply automatically the correct version of Node.js and pnpm when you enter the repository directory.
 
 #### Linux
 
@@ -40,7 +41,7 @@ If you already installed a part, skip the corresponding step.
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
 - In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --debug install --global windows-build-tools`
-- Enable corepack: `corepack enable`
+- Enable corepack with: `corepack enable`
 
   You can see what versions you're using like this:
 
@@ -69,13 +70,13 @@ pnpm build
 #### Local Docker
 
 If, for some reason, you can't run the relevant versions on your local machine, you can run everything from a Docker image.
-To build the correct docker image:
+To build the correct Docker image:
 
 ```
 docker build -f .devcontainer/Dockerfile -t renovatebot_local .
 ```
 
-Starting from Docker Engine 23.0 and Docker Desktop 4.19, Docker uses Buildx by default.
+Starting from Docker Engine `23.0` and Docker Desktop `4.19`, Docker uses Buildx by default.
 So you must run the following command to get the image loaded to the Docker image store:
 
 ```
@@ -116,14 +117,14 @@ It's possible to do this against GitHub, GitLab or Bitbucket public servers.
 
 ### Register new account (optional)
 
-If you're going to be doing a lot of Renovate development then it's recommended that you set up a dedicated test account on GitHub or GitLab, so that you reduce the risk that you accidentally cause problems when testing out Renovate.
+If you're going to be doing a lot of Renovate development then we recommend that you set up a dedicated test account on GitHub or GitLab, so that you reduce the risk that you accidentally cause problems when testing out Renovate.
 
 e.g. if your GitHub username is "alex88" then maybe you register "alex88-testing" for use with Renovate.
 
 ### Generate platform token
 
 Once you have decided on your platform and account, log in and [generate a "Personal Access Token"](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) that can be used to authenticate Renovate.
-Select **repo** scope when generating the token.
+Select the **repo** scope when generating the token.
 
 ### Export platform token
 
@@ -132,8 +133,8 @@ You are better off to instead export the Environment Variable `RENOVATE_TOKEN` f
 
 ### Run against a real repo
 
-To make sure everything is working, create a test repo in your account, e.g. like `https://github.com/r4harry/testrepo1`.
-Now, add a file called `.nvmrc` with the content `8.13.0`.
+To make sure everything is working, create a test repository in your account, e.g. like `https://github.com/r4harry/testrepo1`.
+Now, add a file called `.nvmrc` with the content `20.0.0`.
 Now run against the test repo you created, e.g. `pnpm start r4harry/testrepo1`.
 If your token is set up correctly, you should find that Renovate created a "Configure Renovate" PR in the `testrepo1`.
 
@@ -173,6 +174,13 @@ You usually don't need to fix any Prettier errors by hand.
 
 If you're only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
 
+## Documentation
+
+We use [MkDocs](https://www.mkdocs.org) to generate the documentation.
+You can run `pnpm build:docs` to generate the docs.
+Then use `pnpm mkdocs serve` to preview the documentation locally.
+The docs will update automatically when you run `pnpm build:docs` again, no need to stop the `pnpm mkdocs serve` command.
+
 ## Keeping your Renovate fork up to date
 
 First of all, never commit to the `main` branch of your fork - always use a "feature" branch like `feat/1234-add-yarn-parsing`.
@@ -180,15 +188,14 @@ First of all, never commit to the `main` branch of your fork - always use a "fea
 Make sure your fork is up-to-date with the Renovate `main` branch, check this each time before you create a new branch.
 To do this, see these GitHub guides:
 
-[Configuring a remote for a fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/)
-
-[Syncing a fork](https://help.github.com/articles/syncing-a-fork/)
+- [Configuring a remote for a fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/)
+- [Syncing a fork](https://help.github.com/articles/syncing-a-fork/)
 
 ## Tips and tricks
 
 ### Log files
 
-Usually, `debug` is good enough to troubleshoot most problems or verify functionality.
+Usually the `debug` log level is good enough to troubleshoot most problems or verify functionality.
 
 It's usually easier to have the logs in a file that you can open with a text editor.
 You can use a command like this to put the log messages in a file:
@@ -197,7 +204,8 @@ You can use a command like this to put the log messages in a file:
 LOG_LEVEL=debug pnpm start myaccount/therepo > debug.log
 ```
 
-The example command will redirect/save Renovate's output to the `debug.log` file (and overwrite `debug.log` if it already exists).
+The example command will redirect and save Renovate's output to the `debug.log` file.
+Warning: the command will overwrite a existing `debug.log`!
 
 ### Adding configuration options
 

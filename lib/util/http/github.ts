@@ -276,7 +276,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
     options?: InternalHttpOptions & GithubHttpOptions,
     okToRetry = true,
   ): Promise<HttpResponse<T>> {
-    const opts: GithubHttpOptions = {
+    const opts: InternalHttpOptions & GithubHttpOptions = {
       baseUrl,
       ...options,
       throwHttpErrors: true,
@@ -296,8 +296,17 @@ export class GithubHttp extends Http<GithubHttpOptions> {
         );
       }
 
+      let readOnly = opts.readOnly;
+      const { method = 'get' } = opts;
+      if (
+        readOnly === undefined &&
+        ['get', 'head'].includes(method.toLowerCase())
+      ) {
+        readOnly = true;
+      }
       const { token } = findMatchingRule(authUrl.toString(), {
         hostType: this.hostType,
+        readOnly,
       });
       opts.token = token;
     }
@@ -393,6 +402,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
       baseUrl: baseUrl.replace('/v3/', '/'), // GHE uses unversioned graphql path
       body,
       headers: { accept: options?.acceptHeader },
+      readOnly: options.readOnly,
     };
     if (options.token) {
       opts.token = options.token;
@@ -481,6 +491,43 @@ export class GithubHttp extends Http<GithubHttpOptions> {
       setGraphqlPageSize(fieldName, optimalCount);
     }
 
+    return result;
+  }
+
+  /**
+   * Get the raw text file from a URL.
+   * Only use this method to fetch text files.
+   *
+   * @param url Full API URL, contents path or path inside the repository to the file
+   * @param options
+   *
+   * @example url = 'https://api.github.com/repos/renovatebot/renovate/contents/package.json'
+   * @example url = 'renovatebot/renovate/contents/package.json'
+   * @example url = 'package.json' & options.repository = 'renovatebot/renovate'
+   */
+  public async getRawTextFile(
+    url: string,
+    options: InternalHttpOptions & GithubHttpOptions = {},
+  ): Promise<HttpResponse> {
+    const newOptions: InternalHttpOptions & GithubHttpOptions = {
+      ...options,
+      headers: {
+        accept: 'application/vnd.github.raw+json',
+      },
+    };
+
+    let newURL = url;
+    const httpRegex = regEx(/^https?:\/\//);
+    if (options.repository && !httpRegex.test(options.repository)) {
+      newURL = joinUrlParts(options.repository, 'contents', url);
+    }
+
+    const result = await this.get(newURL, newOptions);
+    if (!is.string(result.body)) {
+      throw new Error(
+        `Expected raw text file but received ${typeof result.body}`,
+      );
+    }
     return result;
   }
 }

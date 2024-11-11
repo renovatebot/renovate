@@ -6,9 +6,5 @@ export interface MatcherApi {
   matches(
     inputConfig: PackageRuleInputConfig,
     packageRule: PackageRule,
-  ): boolean | null;
-  excludes(
-    inputConfig: PackageRuleInputConfig,
-    packageRule: PackageRule,
-  ): boolean | null;
+  ): boolean | null | Promise<boolean | null>;
 }

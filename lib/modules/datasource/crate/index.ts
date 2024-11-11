@@ -11,7 +11,14 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { joinUrlParts, parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import type {
+  GetReleasesConfig,
+  PostprocessReleaseConfig,
+  PostprocessReleaseResult,
+  Release,
+  ReleaseResult,
+} from '../types';
+import { ReleaseTimestampSchema } from './schema';
 import type {
   CrateMetadata,
   CrateRecord,
@@ -34,6 +41,10 @@ export class CrateDatasource extends Datasource {
     'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
 
   static readonly CRATES_IO_API_BASE_URL = 'https://crates.io/api/v1/';
+
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `repository` field in the results.';
 
   @cache({
     namespace: `datasource-${CrateDatasource.id}`,
@@ -366,5 +377,32 @@ export class CrateDatasource extends Datasource {
     }
 
     return [packageName.slice(0, 2), packageName.slice(2, 4), packageName];
+  }
+
+  @cache({
+    namespace: `datasource-crate`,
+    key: (
+      { registryUrl, packageName }: PostprocessReleaseConfig,
+      { version }: Release,
+    ) => `postprocessRelease:${registryUrl}:${packageName}:${version}`,
+    ttlMinutes: 7 * 24 * 60,
+    cacheable: ({ registryUrl }: PostprocessReleaseConfig, _: Release) =>
+      registryUrl === 'https://crates.io',
+  })
+  override async postprocessRelease(
+    { packageName, registryUrl }: PostprocessReleaseConfig,
+    release: Release,
+  ): Promise<PostprocessReleaseResult> {
+    if (registryUrl !== 'https://crates.io') {
+      return release;
+    }
+
+    const url = `https://crates.io/api/v1/crates/${packageName}/${release.version}`;
+    const { body: releaseTimestamp } = await this.http.getJson(
+      url,
+      ReleaseTimestampSchema,
+    );
+    release.releaseTimestamp = releaseTimestamp;
+    return release;
   }
 }

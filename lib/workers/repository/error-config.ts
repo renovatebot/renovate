@@ -2,7 +2,8 @@
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
-import { Pr, platform } from '../../modules/platform';
+import type { Pr } from '../../modules/platform';
+import { platform } from '../../modules/platform';
 
 export function raiseConfigWarningIssue(
   config: RenovateConfig,
@@ -33,6 +34,12 @@ async function raiseWarningIssue(
   initialBody: string,
   error: Error,
 ): Promise<void> {
+  if (config.mode === 'silent') {
+    logger.debug(
+      `Config warning issues are not created, updated or closed when mode=silent`,
+    );
+    return;
+  }
   let body = initialBody;
   if (error.validationSource) {
     body += `Location: \`${error.validationSource}\`\n`;

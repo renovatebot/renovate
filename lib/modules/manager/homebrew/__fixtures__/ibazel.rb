@@ -13,17 +13,17 @@
 # limitations under the License.
 
 =begin
-  url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
+  url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
   sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
 =end
-# url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
+# url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
 # sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
 
 $sha256 = '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4';
 class Ibazel < Formula
   desc 'IBazel is a tool for building Bazel targets when source files change.'
   homepage 'https://github.com/bazelbuild/bazel-watcher'
-  url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
+  url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
 
   # To generate run:
   # curl https://codeload.github.com/bazelbuild/bazel-watcher/tar.gz/v0.8.2 | sha256sum

@@ -1,3 +1,4 @@
+import { platform } from '../../../../../test/util';
 import {
   areLabelsModified,
   getChangedLabels,
@@ -81,6 +82,44 @@ describe('workers/repository/update/pr/labels', () => {
       });
       expect(result).toBeArrayOfSize(0);
       expect(result).toEqual([]);
+    });
+
+    describe('trim labels that go over the max char limit', () => {
+      const labels = [
+        'All',
+        'The quick brown fox jumped over the lazy sleeping dog', // len: 51
+        // len: 256
+        'Torem ipsum dolor sit amet, consectetur adipiscing elit. Sed fringilla erat eu lectus gravida varius. Maecenas suscipit risus nec erat mollis tempus. Vestibulum cursus urna et faucibus tempor. Nam eleifend libero in enim sodales, eu placerat enim dice rep!',
+      ];
+
+      it('github', () => {
+        expect(prepareLabels({ labels })).toEqual([
+          'All',
+          'The quick brown fox jumped over the lazy sleeping', // len: 50
+          'Torem ipsum dolor sit amet, consectetur adipiscing', // len: 50
+        ]);
+      });
+
+      it('gitlab', () => {
+        jest.spyOn(platform, 'labelCharLimit').mockImplementationOnce(() => {
+          return 255;
+        });
+        // platform.labelCharLimit.mockReturnValueOnce(255);
+        expect(prepareLabels({ labels })).toEqual([
+          'All',
+          'The quick brown fox jumped over the lazy sleeping dog', // len: 51
+          // len: 255
+          'Torem ipsum dolor sit amet, consectetur adipiscing elit. Sed fringilla erat eu lectus gravida varius. Maecenas suscipit risus nec erat mollis tempus. Vestibulum cursus urna et faucibus tempor. Nam eleifend libero in enim sodales, eu placerat enim dice rep',
+        ]);
+      });
+
+      it('gitea', () => {
+        expect(prepareLabels({ labels })).toEqual([
+          'All',
+          'The quick brown fox jumped over the lazy sleeping', // len: 50
+          'Torem ipsum dolor sit amet, consectetur adipiscing', // len: 50
+        ]);
+      });
     });
   });
 

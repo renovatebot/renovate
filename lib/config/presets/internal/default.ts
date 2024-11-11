@@ -115,7 +115,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         automerge: true,
-        matchPackagePrefixes: ['@types/'],
+        matchPackageNames: ['@types/**'],
       },
     ],
   },
@@ -123,6 +123,10 @@ export const presets: Record<string, Preset> = {
     description:
       'Do not separate `patch` and `minor` upgrades into separate PRs for the same dependency.',
     separateMinorPatch: false,
+  },
+  configMigration: {
+    configMigration: true,
+    description: 'Enable Renovate configuration migration PRs when needed.',
   },
   dependencyDashboard: {
     dependencyDashboard: true,
@@ -293,7 +297,7 @@ export const presets: Record<string, Preset> = {
   },
   ignoreModulesAndTests: {
     description:
-      'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories.',
+      'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests (except for nuget) directories.',
     ignorePaths: [
       '**/node_modules/**',
       '**/bower_components/**',
@@ -304,6 +308,15 @@ export const presets: Record<string, Preset> = {
       '**/tests/**',
       '**/__fixtures__/**',
     ],
+    nuget: {
+      ignorePaths: [
+        '**/node_modules/**',
+        '**/bower_components/**',
+        '**/vendor/**',
+        '**/examples/**',
+        '**/__fixtures__/**',
+      ],
+    },
   },
   ignoreUnstable: {
     description:
@@ -375,7 +388,7 @@ export const presets: Record<string, Preset> = {
     description: 'Pin all dependency versions except `peerDependencies`.',
     packageRules: [
       {
-        matchPackagePatterns: ['*'],
+        matchPackageNames: ['*'],
         rangeStrategy: 'pin',
       },
       {
@@ -412,7 +425,7 @@ export const presets: Record<string, Preset> = {
       'Pin dependency versions for `devDependencies` and retain SemVer ranges for others.',
     packageRules: [
       {
-        matchPackagePatterns: ['*'],
+        matchPackageNames: ['*'],
         rangeStrategy: 'replace',
       },
       {
@@ -451,7 +464,7 @@ export const presets: Record<string, Preset> = {
   preserveSemverRanges: {
     description:
       'Preserve (but continue to upgrade) any existing SemVer ranges.',
-    packageRules: [{ matchPackagePatterns: ['*'], rangeStrategy: 'replace' }],
+    packageRules: [{ matchPackageNames: ['*'], rangeStrategy: 'replace' }],
   },
   prHourlyLimit1: {
     description: 'Rate limit PR creation to a maximum of one per hour.',
@@ -542,7 +555,7 @@ export const presets: Record<string, Preset> = {
       'Use semantic commit type `fix` for dependencies and `chore` for all others if semantic commits are in use.',
     packageRules: [
       {
-        matchPackagePatterns: ['*'],
+        matchPackageNames: ['*'],
         semanticCommitType: 'chore',
       },
       {
@@ -559,6 +572,19 @@ export const presets: Record<string, Preset> = {
           'import',
           'parent',
         ],
+        semanticCommitType: 'fix',
+      },
+      {
+        matchDepTypes: [
+          'project.dependencies',
+          'project.optional-dependencies',
+        ],
+        matchManagers: ['pep621'],
+        semanticCommitType: 'fix',
+      },
+      {
+        matchDepTypes: ['dependencies', 'extras'],
+        matchManagers: ['poetry'],
         semanticCommitType: 'fix',
       },
     ],

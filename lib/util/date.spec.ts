@@ -22,6 +22,11 @@ describe('util/date', () => {
       const t = t0.minus({ days: 42 });
       expect(getElapsedDays(t.toISO()!)).toBe(42);
     });
+
+    it('rounds down', () => {
+      const t = t0.minus({ days: 42, hours: 12 });
+      expect(getElapsedDays(t.toISO()!)).toBe(42);
+    });
   });
 
   describe('getElapsedMinutes', () => {

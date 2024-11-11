@@ -1,104 +1,49 @@
-import crypto from 'node:crypto';
 import is from '@sindresorhus/is';
-import * as openpgp from 'openpgp';
 import { logger } from '../logger';
-import { maskToken } from '../util/mask';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
 import { ensureTrailingSlash } from '../util/url';
+import { tryDecryptKbPgp } from './decrypt/kbpgp';
+import {
+  tryDecryptPublicKeyDefault,
+  tryDecryptPublicKeyPKCS1,
+} from './decrypt/legacy';
+import { tryDecryptOpenPgp } from './decrypt/openpgp';
 import { GlobalConfig } from './global';
 import { DecryptedObject } from './schema';
 import type { RenovateConfig } from './types';
-
-export async function tryDecryptPgp(
-  privateKey: string,
-  encryptedStr: string,
-): Promise<string | null> {
-  if (encryptedStr.length < 500) {
-    // optimization during transition of public key -> pgp
-    return null;
-  }
-  try {
-    const pk = await openpgp.readPrivateKey({
-      // prettier-ignore
-      armoredKey: privateKey.replace(regEx(/\n[ \t]+/g), '\n'), // little massage to help a common problem
-    });
-    const startBlock = '-----BEGIN PGP MESSAGE-----\n\n';
-    const endBlock = '\n-----END PGP MESSAGE-----';
-    let armoredMessage = encryptedStr.trim();
-    if (!armoredMessage.startsWith(startBlock)) {
-      armoredMessage = `${startBlock}${armoredMessage}`;
-    }
-    if (!armoredMessage.endsWith(endBlock)) {
-      armoredMessage = `${armoredMessage}${endBlock}`;
-    }
-    const message = await openpgp.readMessage({
-      armoredMessage,
-    });
-    const { data } = await openpgp.decrypt({
-      message,
-      decryptionKeys: pk,
-    });
-    logger.debug('Decrypted config using openpgp');
-    return data;
-  } catch (err) {
-    logger.debug({ err }, 'Could not decrypt using openpgp');
-    return null;
-  }
-}
-
-export function tryDecryptPublicKeyDefault(
-  privateKey: string,
-  encryptedStr: string,
-): string | null {
-  let decryptedStr: string | null = null;
-  try {
-    decryptedStr = crypto
-      .privateDecrypt(privateKey, Buffer.from(encryptedStr, 'base64'))
-      .toString();
-    logger.debug('Decrypted config using default padding');
-  } catch (err) {
-    logger.debug('Could not decrypt using default padding');
-  }
-  return decryptedStr;
-}
-
-export function tryDecryptPublicKeyPKCS1(
-  privateKey: string,
-  encryptedStr: string,
-): string | null {
-  let decryptedStr: string | null = null;
-  try {
-    decryptedStr = crypto
-      .privateDecrypt(
-        {
-          key: privateKey,
-          padding: crypto.constants.RSA_PKCS1_PADDING,
-        },
-        Buffer.from(encryptedStr, 'base64'),
-      )
-      .toString();
-  } catch (err) {
-    logger.debug('Could not decrypt using PKCS1 padding');
-  }
-  return decryptedStr;
-}
 
 export async function tryDecrypt(
   privateKey: string,
   encryptedStr: string,
   repository: string,
+  keyName: string,
 ): Promise<string | null> {
   let decryptedStr: string | null = null;
   if (privateKey?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
-    const decryptedObjStr = await tryDecryptPgp(privateKey, encryptedStr);
+    const decryptedObjStr =
+      process.env.RENOVATE_X_USE_OPENPGP === 'true'
+        ? await tryDecryptOpenPgp(privateKey, encryptedStr)
+        : await tryDecryptKbPgp(privateKey, encryptedStr);
     if (decryptedObjStr) {
       decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
     }
   } else {
     decryptedStr = tryDecryptPublicKeyDefault(privateKey, encryptedStr);
-    if (!is.string(decryptedStr)) {
+    if (is.string(decryptedStr)) {
+      logger.warn(
+        { keyName },
+        'Encrypted value is using deprecated default padding, please change to using PGP encryption.',
+      );
+    } else {
       decryptedStr = tryDecryptPublicKeyPKCS1(privateKey, encryptedStr);
+      // istanbul ignore if
+      if (is.string(decryptedStr)) {
+        logger.warn(
+          { keyName },
+          'Encrypted value is using deprecated PKCS1 padding, please change to using PGP encryption.',
+        );
+      }
     }
   }
   return decryptedStr;
@@ -188,13 +133,29 @@ export async function decryptConfig(
   for (const [key, val] of Object.entries(config)) {
     if (key === 'encrypted' && is.object(val)) {
       logger.debug({ config: val }, 'Found encrypted config');
+
+      const encryptedWarning = GlobalConfig.get('encryptedWarning');
+      if (is.string(encryptedWarning)) {
+        logger.once.warn(encryptedWarning);
+      }
+
       if (privateKey) {
         for (const [eKey, eVal] of Object.entries(val)) {
           logger.debug('Trying to decrypt ' + eKey);
-          let decryptedStr = await tryDecrypt(privateKey, eVal, repository);
+          let decryptedStr = await tryDecrypt(
+            privateKey,
+            eVal,
+            repository,
+            eKey,
+          );
           if (privateKeyOld && !is.nonEmptyString(decryptedStr)) {
             logger.debug(`Trying to decrypt with old private key`);
-            decryptedStr = await tryDecrypt(privateKeyOld, eVal, repository);
+            decryptedStr = await tryDecrypt(
+              privateKeyOld,
+              eVal,
+              repository,
+              eKey,
+            );
           }
           if (!is.nonEmptyString(decryptedStr)) {
             const error = new Error('config-validation');
@@ -204,31 +165,8 @@ export async function decryptConfig(
           logger.debug(`Decrypted ${eKey}`);
           if (eKey === 'npmToken') {
             const token = decryptedStr.replace(regEx(/\n$/), '');
+            decryptedConfig[eKey] = token;
             addSecretForSanitizing(token);
-            logger.debug(
-              { decryptedToken: maskToken(token) },
-              'Migrating npmToken to npmrc',
-            );
-            if (is.string(decryptedConfig.npmrc)) {
-              /* eslint-disable no-template-curly-in-string */
-              if (decryptedConfig.npmrc.includes('${NPM_TOKEN}')) {
-                logger.debug('Replacing ${NPM_TOKEN} with decrypted token');
-                decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
-                  regEx(/\${NPM_TOKEN}/g),
-                  token,
-                );
-              } else {
-                logger.debug('Appending _authToken= to end of existing npmrc');
-                decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
-                  regEx(/\n?$/),
-                  `\n_authToken=${token}\n`,
-                );
-              }
-              /* eslint-enable no-template-curly-in-string */
-            } else {
-              logger.debug('Adding npmrc to config');
-              decryptedConfig.npmrc = `//registry.npmjs.org/:_authToken=${token}\n`;
-            }
           } else {
             decryptedConfig[eKey] = decryptedStr;
             addSecretForSanitizing(decryptedStr);

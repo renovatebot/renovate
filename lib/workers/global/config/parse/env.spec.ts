@@ -267,6 +267,30 @@ describe('workers/global/config/parse/env', () => {
       expect(config.token).toBe('a');
     });
 
+    it('massages converted experimental env vars', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL: 'some-url', // converted
+        RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES: '["docker"]', // converted
+        RENOVATE_X_AUTODISCOVER_REPO_SORT: 'alpha',
+        RENOVATE_X_DOCKER_MAX_PAGES: '10',
+        RENOVATE_AUTODISCOVER_REPO_ORDER: 'desc',
+        RENOVATE_X_DELETE_CONFIG_FILE: 'true',
+        RENOVATE_X_S3_ENDPOINT: 'endpoint',
+        RENOVATE_X_S3_PATH_STYLE: 'true',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config).toMatchObject({
+        mergeConfidenceEndpoint: 'some-url',
+        mergeConfidenceDatasources: ['docker'],
+        autodiscoverRepoSort: 'alpha',
+        autodiscoverRepoOrder: 'desc',
+        dockerMaxPages: 10,
+        deleteConfigFile: true,
+        s3Endpoint: 'endpoint',
+        s3PathStyle: true,
+      });
+    });
+
     describe('RENOVATE_CONFIG tests', () => {
       let processExit: jest.SpyInstance<never, [code?: number]>;
 
@@ -377,6 +401,22 @@ describe('workers/global/config/parse/env', () => {
       };
       const config = await env.getConfig(envParam);
       expect(config.requireConfig).toBe('optional');
+    });
+
+    it('platformCommit boolean true', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_PLATFORM_COMMIT: 'true',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.platformCommit).toBe('enabled');
+    });
+
+    it('platformCommit boolean false', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_PLATFORM_COMMIT: 'false',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.platformCommit).toBe('disabled');
     });
   });
 });

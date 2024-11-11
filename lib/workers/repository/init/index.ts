@@ -10,7 +10,8 @@ import { cloneSubmodules, setUserRepoConfig } from '../../../util/git';
 import { getAll } from '../../../util/host-rules';
 import { checkIfConfigured } from '../configured';
 import { PackageFiles } from '../package-files';
-import { WorkerPlatformConfig, initApis } from './apis';
+import type { WorkerPlatformConfig } from './apis';
+import { initApis } from './apis';
 import { initializeCaches, resetCaches } from './cache';
 import { getRepoConfig } from './config';
 import { detectVulnerabilityAlerts } from './vulnerability';
@@ -54,6 +55,11 @@ export async function initRepo(
   await initializeCaches(config as WorkerPlatformConfig);
   config = await getRepoConfig(config);
   setRepositoryLogLevelRemaps(config.logLevelRemap);
+  if (config.mode === 'silent') {
+    logger.info(
+      'Repository is running with mode=silent and will not make Issues or PRs by default',
+    );
+  }
   checkIfConfigured(config);
   warnOnUnsupportedOptions(config);
   config = applySecretsToConfig(config);

@@ -1,9 +1,13 @@
 import { codeBlock } from 'common-tags';
+import * as _fsExtra from 'fs-extra';
+import { join } from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
+import { mocked } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/fs');
+jest.mock('fs-extra');
+const fsExtra = mocked(_fsExtra);
 
 const pipfile1 = Fixtures.get('Pipfile1');
 const pipfile2 = Fixtures.get('Pipfile2');
@@ -12,6 +16,16 @@ const pipfile4 = Fixtures.get('Pipfile4');
 const pipfile5 = Fixtures.get('Pipfile5');
 
 describe('modules/manager/pipenv/extract', () => {
+  beforeEach(() => {
+    GlobalConfig.set({
+      localDir: join('/tmp/github/some/repo'),
+    });
+  });
+
+  afterEach(() => {
+    GlobalConfig.reset();
+  });
+
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
       expect(await extractPackageFile('[packages]\r\n', 'Pipfile')).toBeNull();
@@ -22,7 +36,8 @@ describe('modules/manager/pipenv/extract', () => {
     });
 
     it('extracts dependencies', async () => {
-      fs.localPathExists.mockResolvedValueOnce(true);
+      fsExtra.stat.mockResolvedValueOnce({} as never);
+      fsExtra.readFile.mockResolvedValueOnce(pipfile1 as never);
       const res = await extractPackageFile(pipfile1, 'Pipfile');
       expect(res).toMatchObject({
         deps: [
@@ -77,6 +92,20 @@ describe('modules/manager/pipenv/extract', () => {
             },
           },
           {
+            currentValue: '==1.2.3',
+            currentVersion: '1.2.3',
+            datasource: 'pypi',
+            depName: 'container-specific-package',
+            depType: 'container',
+          },
+          {
+            currentValue: '==2.3.4',
+            currentVersion: '2.3.4',
+            datasource: 'pypi',
+            depName: 'function-specific-package',
+            depType: 'function',
+          },
+          {
             depType: 'dev-packages',
             depName: 'dev-package',
             currentValue: '==0.1.0',
@@ -85,7 +114,7 @@ describe('modules/manager/pipenv/extract', () => {
           },
         ],
         extractedConstraints: {
-          python: '== 3.6.*',
+          python: '== 3.6.2',
         },
         lockFiles: ['Pipfile.lock'],
         registryUrls: [
@@ -94,7 +123,7 @@ describe('modules/manager/pipenv/extract', () => {
         ],
       });
 
-      expect(res?.deps.filter((dep) => !dep.skipReason)).toHaveLength(6);
+      expect(res?.deps.filter((dep) => !dep.skipReason)).toHaveLength(8);
     });
 
     it('marks packages with "extras" as skipReason === unspecified-version', async () => {
@@ -104,7 +133,8 @@ describe('modules/manager/pipenv/extract', () => {
     });
 
     it('extracts multiple dependencies', async () => {
-      fs.localPathExists.mockResolvedValueOnce(true);
+      fsExtra.stat.mockResolvedValueOnce({} as never);
+      fsExtra.readFile.mockResolvedValueOnce(pipfile2 as never);
       const res = await extractPackageFile(pipfile2, 'Pipfile');
       expect(res).toMatchObject({
         deps: [
@@ -208,7 +238,8 @@ describe('modules/manager/pipenv/extract', () => {
     });
 
     it('extracts example pipfile', async () => {
-      fs.localPathExists.mockResolvedValueOnce(true);
+      fsExtra.stat.mockResolvedValueOnce({} as never);
+      fsExtra.readFile.mockResolvedValueOnce(pipfile4 as never);
       const res = await extractPackageFile(pipfile4, 'Pipfile');
       expect(res).toMatchObject({
         deps: [
@@ -273,7 +304,7 @@ describe('modules/manager/pipenv/extract', () => {
     });
 
     it('supports custom index', async () => {
-      fs.localPathExists.mockResolvedValueOnce(true);
+      fsExtra.stat.mockResolvedValueOnce({} as never);
       const res = await extractPackageFile(pipfile5, 'Pipfile');
       expect(res).toMatchObject({
         deps: [
@@ -304,6 +335,7 @@ describe('modules/manager/pipenv/extract', () => {
         [requires]
         python_version = "3.8"
       `;
+      fsExtra.readFile.mockResolvedValueOnce(content as never);
       const res = await extractPackageFile(content, 'Pipfile');
       expect(res?.extractedConstraints?.python).toBe('== 3.8.*');
     });
@@ -315,6 +347,7 @@ describe('modules/manager/pipenv/extract', () => {
         [requires]
         python_full_version = "3.8.6"
       `;
+      fsExtra.readFile.mockResolvedValueOnce(content as never);
       const res = await extractPackageFile(content, 'Pipfile');
       expect(res?.extractedConstraints?.python).toBe('== 3.8.6');
     });
@@ -324,6 +357,7 @@ describe('modules/manager/pipenv/extract', () => {
         [packages]
         pipenv = "==2020.8.13"
       `;
+      fsExtra.readFile.mockResolvedValue(content as never);
       const res = await extractPackageFile(content, 'Pipfile');
       expect(res?.extractedConstraints?.pipenv).toBe('==2020.8.13');
     });
@@ -333,6 +367,7 @@ describe('modules/manager/pipenv/extract', () => {
         [dev-packages]
         pipenv = "==2020.8.13"
       `;
+      fsExtra.readFile.mockResolvedValue(content as never);
       const res = await extractPackageFile(content, 'Pipfile');
       expect(res?.extractedConstraints?.pipenv).toBe('==2020.8.13');
     });

@@ -5,7 +5,8 @@ import {
   REPOSITORY_NO_CONFIG,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { Pr, platform } from '../../../../modules/platform';
+import type { Pr } from '../../../../modules/platform';
+import { platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
@@ -36,7 +37,7 @@ async function packageJsonConfigExists(): Promise<boolean> {
     if (pJson.renovate) {
       return true;
     }
-  } catch (err) {
+  } catch {
     // Do nothing
   }
   return false;
@@ -62,6 +63,12 @@ async function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
 export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   logger.debug('isOnboarded()');
   const title = `Action required: Add a Renovate config`;
+
+  // Repo is onboarded if in silent mode
+  if (config.mode === 'silent') {
+    logger.debug('Silent mode enabled so repo is considered onboarded');
+    return true;
+  }
 
   // Repo is onboarded if global config is bypassing onboarding and does not require a
   // configuration file.
@@ -113,7 +120,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
           return true;
         }
       }
-    } catch (err) {
+    } catch {
       // probably file doesn't exist
     }
     logger.debug('Existing config file no longer exists');

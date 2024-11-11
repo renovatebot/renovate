@@ -164,5 +164,26 @@ kind: ConfigMap
         ],
       });
     });
+
+    it('extracts from complex templates', () => {
+      const res = extractPackageFile(
+        Fixtures.get('complex.yaml'),
+        'complex.yaml',
+        {},
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: undefined,
+            datasource: 'docker',
+            depName: 'busybox',
+            replaceString: 'busybox',
+          },
+        ],
+      });
+    });
   });
 });

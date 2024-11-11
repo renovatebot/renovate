@@ -31,6 +31,18 @@ export const removedPresets: Record<string, string | null> = {
   'github>whitesource/merge-confidence:beta': 'mergeConfidence:all-badges',
   'replacements:messageFormat-{{package}}-to-@messageformat/{{package}}':
     'replacements:messageFormat-to-scoped',
+  'regexManagers:biomeVersions': 'customManagers:biomeVersions',
+  'regexManagers:bitbucketPipelinesVersions':
+    'customManagers:bitbucketPipelinesVersions',
+  'regexManagers:dockerfileVersions': 'customManagers:dockerfileVersions',
+  'regexManagers:githubActionsVersions': 'customManagers:githubActionsVersions',
+  'regexManagers:gitlabPipelineVersions':
+    'customManagers:gitlabPipelineVersions',
+  'regexManagers:helmChartYamlAppVersions':
+    'customManagers:helmChartYamlAppVersions',
+  'regexManagers:mavenPropertyVersions': 'customManagers:mavenPropertyVersions',
+  'regexManagers:tfvarsVersions': 'customManagers:tfvarsVersions',
+  'workarounds:reduceRepologyServerLoad': null,
 };
 
 const renamedMonorepos: Record<string, string> = {

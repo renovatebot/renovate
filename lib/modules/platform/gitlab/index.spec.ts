@@ -652,7 +652,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(res).toBe('yellow');
     });
 
-    it('returns success if no results but head pipeline success', async () => {
+    it('returns success if no results with merged results pipeline success', async () => {
       const scope = await initRepo();
       scope
         .get(
@@ -688,7 +688,9 @@ describe('modules/platform/gitlab/index', () => {
           },
           head_pipeline: {
             status: 'success',
+            sha: 'abcd',
           },
+          sha: 'defg',
         });
       const res = await gitlab.getBranchStatus('some-branch', true);
       expect(res).toBe('green');
@@ -728,6 +730,140 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch', false);
       expect(res).toBe('yellow');
+    });
+
+    it('returns pending if merge request with no pipelines', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+        )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [
+          {
+            iid: 91,
+            title: 'some change',
+            source_branch: 'some-branch',
+            target_branch: 'master',
+            state: 'opened',
+          },
+        ])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1',
+        )
+        .reply(200, {
+          iid: 91,
+          title: 'some change',
+          state: 'opened',
+          additions: 1,
+          deletions: 1,
+          commits: 1,
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          base: {
+            sha: '1234',
+          },
+          sha: 'abcd',
+        });
+      const res = await gitlab.getBranchStatus('some-branch', false);
+      expect(res).toBe('yellow');
+    });
+
+    it('returns pending if all are internal success with no merged results pipeline', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+        )
+        .reply(200, [
+          { name: 'renovate/stability-days', status: 'success' },
+          { name: 'renovate/other', status: 'success' },
+        ])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [
+          {
+            iid: 91,
+            title: 'some change',
+            source_branch: 'some-branch',
+            target_branch: 'master',
+            state: 'opened',
+          },
+        ])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1',
+        )
+        .reply(200, {
+          iid: 91,
+          title: 'some change',
+          state: 'opened',
+          additions: 1,
+          deletions: 1,
+          commits: 1,
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          base: {
+            sha: '1234',
+          },
+          head_pipeline: {
+            status: 'success',
+            sha: 'abcd',
+          },
+          sha: 'abcd',
+        });
+      const res = await gitlab.getBranchStatus('some-branch', false);
+      expect(res).toBe('yellow');
+    });
+
+    it('returns success if all are internal success with merged results pipeline success', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+        )
+        .reply(200, [
+          { name: 'renovate/stability-days', status: 'success' },
+          { name: 'renovate/other', status: 'success' },
+        ])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [
+          {
+            iid: 91,
+            title: 'some change',
+            source_branch: 'some-branch',
+            target_branch: 'master',
+            state: 'opened',
+          },
+        ])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1',
+        )
+        .reply(200, {
+          iid: 91,
+          title: 'some change',
+          state: 'opened',
+          additions: 1,
+          deletions: 1,
+          commits: 1,
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          base: {
+            sha: '1234',
+          },
+          head_pipeline: {
+            status: 'success',
+            sha: 'defg',
+          },
+          sha: 'abcd',
+        });
+      const res = await gitlab.getBranchStatus('some-branch', false);
+      expect(res).toBe('green');
     });
 
     it('returns success if optional jobs fail', async () => {
@@ -1316,10 +1452,43 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/users?username=someuser')
+        .replyWithError('some error')
+        .get('/api/v4/users?username=someotheruser')
+        .reply(200, [{ id: 124 }])
+        .put('/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=124')
         .replyWithError('some error');
       await expect(
         gitlab.addAssignees(42, ['someuser', 'someotheruser']),
       ).toResolve();
+    });
+
+    it('should log message for each assignee that could not be found', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/users?username=someuser')
+        .reply(304, [])
+        .get('/api/v4/users?username=someotheruser')
+        .reply(200, [{ id: 124 }])
+        .put('/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=124')
+        .reply(200);
+      await expect(
+        gitlab.addAssignees(42, ['someuser', 'someotheruser']),
+      ).toResolve();
+      expect(logger.warn).toHaveBeenCalledWith(
+        {
+          assignee: 'someuser',
+        },
+        'Failed to add assignee - could not get ID',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          assignee: 'someuser',
+          err: new Error(
+            'User ID for the username: someuser could not be found.',
+          ),
+        },
+        'getUserID() error',
+      );
     });
   });
 
@@ -1851,7 +2020,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             usePlatformAutomerge: true,
           },
         }),
@@ -1895,7 +2064,7 @@ describe('modules/platform/gitlab/index', () => {
         targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
-        platformOptions: {
+        platformPrOptions: {
           usePlatformAutomerge: true,
         },
       });
@@ -1950,7 +2119,7 @@ describe('modules/platform/gitlab/index', () => {
         targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
-        platformOptions: {
+        platformPrOptions: {
           usePlatformAutomerge: true,
         },
       });
@@ -2004,7 +2173,7 @@ describe('modules/platform/gitlab/index', () => {
         targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
-        platformOptions: {
+        platformPrOptions: {
           usePlatformAutomerge: true,
         },
       });
@@ -2066,7 +2235,7 @@ describe('modules/platform/gitlab/index', () => {
         targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
-        platformOptions: {
+        platformPrOptions: {
           usePlatformAutomerge: true,
         },
       });
@@ -2179,7 +2348,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
@@ -2193,6 +2362,49 @@ describe('modules/platform/gitlab/index', () => {
           "title": "some title",
         }
       `);
+    });
+
+    it('adds approval rule to ignore all approvals when platformAutomerge is false', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
+        .reply(200, [
+          {
+            name: 'AnyApproverRule',
+            rule_type: 'any_approver',
+            id: 50005,
+          },
+        ])
+        .put(
+          '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50005',
+        )
+        .reply(200);
+      expect(
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformPrOptions: {
+            usePlatformAutomerge: false,
+            gitLabIgnoreApprovals: true,
+          },
+        }),
+      ).toEqual({
+        id: 1,
+        iid: 12345,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
     });
 
     it('will modify a rule of type any_approvers, if such a rule exists', async () => {
@@ -2238,7 +2450,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
@@ -2306,7 +2518,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
@@ -2384,7 +2596,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
@@ -2433,7 +2645,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
@@ -2484,7 +2696,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
@@ -2519,7 +2731,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             autoApprove: true,
           },
         }),
@@ -2551,7 +2763,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'some-title',
           prBody: 'the-body',
           labels: [],
-          platformOptions: {
+          platformPrOptions: {
             autoApprove: true,
           },
         }),
@@ -2709,6 +2921,7 @@ describe('modules/platform/gitlab/index', () => {
         },
         hasAssignees: false,
         headPipelineStatus: undefined,
+        headPipelineSha: undefined,
         labels: undefined,
         number: 12345,
         reviewers: ['foo', 'bar'],
@@ -2841,7 +3054,7 @@ describe('modules/platform/gitlab/index', () => {
           number: 1,
           prTitle: 'title',
           prBody: 'body',
-          platformOptions: {
+          platformPrOptions: {
             autoApprove: true,
           },
         }),
@@ -2905,10 +3118,10 @@ describe('modules/platform/gitlab/index', () => {
     });
   });
 
-  describe('reattemptPlatformAutomerge(number, platformOptions)', () => {
+  describe('reattemptPlatformAutomerge(number, platformPrOptions)', () => {
     const pr = {
       number: 12345,
-      platformOptions: {
+      platformPrOptions: {
         usePlatformAutomerge: true,
       },
     };

@@ -8,7 +8,7 @@ import type { HostRule } from '../../../types';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { fromBase64 } from '../../../util/string';
-import { ensureTrailingSlash, validateUrl } from '../../../util/url';
+import { ensureTrailingSlash, isHttpUrl } from '../../../util/url';
 import { defaultRegistryUrls } from './common';
 import type { NpmrcRules } from './types';
 
@@ -29,7 +29,7 @@ function envReplace(value: any, env = process.env): any {
       logger.warn('Failed to replace env in config: ' + match);
       throw new Error('env-replace');
     }
-    return env[envVarName]!;
+    return env[envVarName];
   });
 }
 
@@ -89,7 +89,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
   const { registry } = npmrc;
   // packageRules order matters, so look for a default registry first
   if (is.nonEmptyString(registry)) {
-    if (validateUrl(registry)) {
+    if (isHttpUrl(registry)) {
       // Default registry
       rules.packageRules?.push({
         matchDatasources,
@@ -108,10 +108,10 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
     const keyType = keyParts.pop();
     if (keyType === 'registry' && keyParts.length && is.nonEmptyString(value)) {
       const scope = keyParts.join(':');
-      if (validateUrl(value)) {
+      if (isHttpUrl(value)) {
         rules.packageRules?.push({
           matchDatasources,
-          matchPackagePrefixes: [scope + '/'],
+          matchPackageNames: [`${scope}/**`],
           registryUrls: [value],
         });
       } else {
@@ -168,10 +168,10 @@ export function setNpmrc(input?: string): void {
 export function resolveRegistryUrl(packageName: string): string {
   let registryUrl = defaultRegistryUrls[0];
   for (const rule of packageRules) {
-    const { matchPackagePrefixes, registryUrls } = rule;
+    const { matchPackageNames, registryUrls } = rule;
     if (
-      !matchPackagePrefixes ||
-      packageName.startsWith(matchPackagePrefixes[0])
+      !matchPackageNames ||
+      packageName.startsWith(matchPackageNames[0].replace(regEx(/\*\*$/), ''))
     ) {
       // TODO: fix types #22198
       registryUrl = registryUrls![0];

@@ -171,6 +171,34 @@ describe('modules/manager/flux/extract', () => {
       expect(result).toBeNull();
     });
 
+    it('skip HelmRelease with local chart', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: helm.toolkit.fluxcd.io/v2beta1
+          kind: HelmRelease
+          metadata:
+            name: cert-manager-config
+            namespace: kube-system
+          spec:
+            chart:
+              spec:
+                chart: ./charts/cert-manager-config
+                sourceRef:
+                  kind: GitRepository
+                  name: chart-repo
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: './charts/cert-manager-config',
+            skipReason: 'local-chart',
+          },
+        ],
+      });
+    });
+
     it('does not match HelmRelease resources without a namespace to HelmRepository resources without a namespace', () => {
       const result = extractPackageFile(
         codeBlock`
@@ -502,6 +530,9 @@ describe('modules/manager/flux/extract', () => {
       expect(result).toEqual({
         deps: [
           {
+            currentDigest: undefined,
+            currentValue: undefined,
+            datasource: 'docker',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             skipReason: 'unversioned-reference',
           },
@@ -523,6 +554,11 @@ describe('modules/manager/flux/extract', () => {
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
         'test.yaml',
+        {
+          registryAliases: {
+            'ghcr.io': 'ghcr.proxy.test/some/path',
+          },
+        },
       );
       expect(result).toEqual({
         deps: [
@@ -531,7 +567,7 @@ describe('modules/manager/flux/extract', () => {
               '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentValue: 'v1.8.2',
             currentDigest: undefined,
-            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            depName: 'ghcr.proxy.test/some/path/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
             replaceString: 'v1.8.2',
           },
@@ -621,6 +657,68 @@ describe('modules/manager/flux/extract', () => {
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+          },
+        ],
+      });
+    });
+
+    it('extracts Kustomization', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: kustomize.toolkit.fluxcd.io/v1
+        kind: Kustomization
+        metadata:
+          name: podinfo
+          namespace: flux-system
+        spec:
+          images:
+          - name: podinfo
+            newName: my-registry/podinfo
+            newTag: v1
+          - name: podinfo
+            newTag: 1.8.0
+          - name: podinfo
+            newName: my-podinfo
+          - name: podinfo
+            digest: sha256:24a0c4b4a4c0eb97a1aabb8e29f18e917d05abfe1b7a7c07857230879ce7d3d3
+      `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1',
+            datasource: 'docker',
+            depName: 'my-registry/podinfo',
+            replaceString: 'v1',
+          },
+          {
+            autoReplaceStringTemplate:
+              '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '1.8.0',
+            datasource: 'docker',
+            depName: 'podinfo',
+            replaceString: '1.8.0',
+          },
+          {
+            currentDigest: undefined,
+            currentValue: undefined,
+            datasource: 'docker',
+            depName: 'my-podinfo',
+            replaceString: 'my-podinfo',
+          },
+          {
+            currentDigest:
+              'sha256:24a0c4b4a4c0eb97a1aabb8e29f18e917d05abfe1b7a7c07857230879ce7d3d3',
+            currentValue: undefined,
+            datasource: 'docker',
+            depName: 'podinfo',
+            replaceString:
+              'sha256:24a0c4b4a4c0eb97a1aabb8e29f18e917d05abfe1b7a7c07857230879ce7d3d3',
           },
         ],
       });
@@ -723,10 +821,16 @@ describe('modules/manager/flux/extract', () => {
     });
 
     it('should handle HelmRepository with type OCI', async () => {
-      const result = await extractAllPackageFiles(config, [
-        'lib/modules/manager/flux/__fixtures__/helmOCISource.yaml',
-        'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
-      ]);
+      const result = await extractAllPackageFiles(
+        {
+          ...config,
+          registryAliases: { 'ghcr.io': 'ghcr.proxy.test/some/path' },
+        },
+        [
+          'lib/modules/manager/flux/__fixtures__/helmOCISource.yaml',
+          'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
+        ],
+      );
       expect(result).toEqual([
         {
           deps: [
@@ -735,7 +839,7 @@ describe('modules/manager/flux/extract', () => {
               datasource: DockerDatasource.id,
               depName: 'actions-runner-controller-charts/gha-runner-scale-set',
               packageName:
-                'ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set',
+                'ghcr.proxy.test/some/path/actions/actions-runner-controller-charts/gha-runner-scale-set',
             },
           ],
           packageFile:

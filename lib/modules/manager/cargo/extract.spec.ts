@@ -23,6 +23,7 @@ const cargo4toml = Fixtures.get('Cargo.4.toml');
 const cargo5toml = Fixtures.get('Cargo.5.toml');
 const cargo6configtoml = Fixtures.get('cargo.6.config.toml');
 const cargo6toml = Fixtures.get('Cargo.6.toml');
+const cargo7toml = Fixtures.get('Cargo.7.toml');
 
 const lockfileUpdateCargotoml = Fixtures.get('lockfile-update/Cargo.toml');
 
@@ -135,6 +136,7 @@ replace-with = "private-crates"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'private-crates',
           },
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
@@ -147,6 +149,7 @@ replace-with = "private-crates"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'mcorbin',
           },
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
@@ -163,6 +166,31 @@ replace-with = "private-crates"`,
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
           ],
+        },
+      ]);
+    });
+
+    it('extracts overridden source registry indexes from .cargo/config.toml', async () => {
+      mockReadLocalFile({
+        '.cargo/config.toml': codeBlock`[source.crates-io-replacement]
+registry = "https://github.com/replacement/testregistry"
+
+[source.crates-io]
+replace-with = "crates-io-replacement"`,
+      });
+      const res = await extractPackageFile(cargo7toml, 'Cargo.toml', {
+        ...config,
+      });
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '0.2',
+          datasource: 'crate',
+          depName: 'tokio',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: false,
+          },
+          registryUrls: ['https://github.com/replacement/testregistry'],
         },
       ]);
     });
@@ -186,6 +214,7 @@ replace-with = "mcorbin"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'private-crates',
           },
         },
         {
@@ -195,6 +224,7 @@ replace-with = "mcorbin"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'mcorbin',
           },
         },
         {
@@ -276,6 +306,7 @@ replace-with = "mcorbin"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'private-crates',
           },
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
@@ -288,6 +319,7 @@ replace-with = "mcorbin"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'mcorbin',
           },
           registryUrls: ['https://github.com/mcorbin/testregistry'],
         },
@@ -411,6 +443,7 @@ replace-with = "mine"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'private-crates',
           },
           skipReason: 'unknown-registry',
         },
@@ -421,6 +454,7 @@ replace-with = "mine"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'mcorbin',
           },
           skipReason: 'unknown-registry',
         },
@@ -467,6 +501,7 @@ replace-with = "mcorbin"
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'private-crates',
           },
           skipReason: 'unknown-registry',
         },
@@ -477,6 +512,7 @@ replace-with = "mcorbin"
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'mcorbin',
           },
           skipReason: 'unknown-registry',
         },

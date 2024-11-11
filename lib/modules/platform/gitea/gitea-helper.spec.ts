@@ -1,4 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
+import { partial } from '../../../../test/util';
 import type { LongCommitSha } from '../../../util/git/types';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { toBase64 } from '../../../util/string';
@@ -67,7 +68,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
     email: 'renovate@example.com',
   };
 
-  const mockRepo: Repo = {
+  const mockRepo: Repo = partial<Repo>({
     id: 123,
     allow_rebase: true,
     allow_rebase_explicit: true,
@@ -88,7 +89,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
       admin: false,
     },
     has_issues: true,
-  };
+    has_pull_requests: true,
+  });
 
   const otherMockRepo: Repo = {
     ...mockRepo,

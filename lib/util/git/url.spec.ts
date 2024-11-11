@@ -49,6 +49,14 @@ describe('util/git/url', () => {
       expect(getHttpUrl('http://foo.bar/')).toBe('http://foo.bar/');
     });
 
+    it('returns http url for ssh url with port', () => {
+      expect(
+        getHttpUrl(
+          'ssh://git@gitlab.example.com:22222/typo3-extensions/poll-pro.git',
+        ),
+      ).toBe('https://gitlab.example.com/typo3-extensions/poll-pro.git');
+    });
+
     it('returns gitlab url with token', () => {
       expect(getHttpUrl('http://gitlab.com/', 'token')).toBe(
         'http://gitlab-ci-token:token@gitlab.com/',
@@ -76,6 +84,16 @@ describe('util/git/url', () => {
       ).toBe('http://x-access-token:token@github.com:8443/');
       expect(getHttpUrl('git@github.com:some/repo', 'token')).toBe(
         'https://x-access-token:token@github.com/some/repo',
+      );
+    });
+
+    it('returns bitbucket-server url', () => {
+      expect(getHttpUrl('http://git.mycompany.com/scm/proj/repo.git')).toBe(
+        'http://git.mycompany.com/scm/proj/repo.git',
+      );
+      hostRules.hostType.mockReturnValueOnce('bitbucket-server');
+      expect(getHttpUrl('ssh://git@git.mycompany.com:7999/proj/repo.git')).toBe(
+        'https://git.mycompany.com/scm/proj/repo.git',
       );
     });
 

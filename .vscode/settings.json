@@ -16,11 +16,20 @@
     ".releaserc": "json"
   },
   "omnisharp.autoStart": false,
-  "jest.autoRun": "off",
-  "jest.jestCommandLine": "pnpm jest",
+  "jest.runMode": "on-demand",
+  "jest.jestCommandLine": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+  "jest.nodeEnv": {
+    "NODE_ENV": "test",
+    "LOG_LEVEL": "trace",
+    "GIT_ALLOW_PROTOCOL": "file"
+  },
   "npm.packageManager": "pnpm",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
-  }
+  },
+  "yaml.customTags": [
+    "tag:yaml.org,2002:python/name:materialx.emoji.twemoji",
+    "tag:yaml.org,2002:python/name:materialx.emoji.to_svg"
+  ]
 }

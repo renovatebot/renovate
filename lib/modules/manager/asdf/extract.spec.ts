@@ -45,6 +45,7 @@ describe('modules/manager/asdf/extract', () => {
       const res = extractPackageFile(
         codeBlock`
 act 0.2.54
+actionlint 0.7.0
 adr-tools 3.0.0
 argocd 2.5.4
 asdf-plugin-manager 1.1.1
@@ -53,12 +54,15 @@ bun 0.2.2
 cargo-make 0.36.2
 checkov 2.3.3
 clojure 1.11.1.1182
+cosign 2.2.4
 crystal 1.6.1
 dart 2.19.3
 deno 1.26.2
 direnv 2.32.1
+dotnet-core 8.0.303
 dprint 0.32.2
 ecspresso 2.1.0
+editorconfig-checker 3.0.2
 elixir 1.14.1
 elm 0.19.1
 erlang 25.1.2
@@ -66,9 +70,12 @@ flutter 3.7.6-stable
 flux2 0.41.2
 gauche 0.9.12
 github-cli 2.32.1
+gitleaks 8.21.1
+gleam 1.3.1
 gohugo extended_0.104.3
 golang 1.19.2
 golangci-lint 1.52.2
+gomplate 3.11.7
 hadolint 2.12.0
 haskell 9.4.2
 helm 3.10.1
@@ -83,8 +90,10 @@ kotlin 1.7.20
 kubectl 1.26.3
 kustomize 4.5.7
 lua 5.4.4
+markdownlint-cli2 0.13.0
 maven 3.9.6
 mimirtool 2.11.0
+minikube 1.33.1
 nim 1.6.8
 nodejs 18.12.0
 ocaml 4.14.0
@@ -96,6 +105,7 @@ poetry 1.3.2
 pre-commit 3.3.1
 pulumi 3.57.1
 python 3.11.0
+rebar 3.23.0
 ruby 3.1.2
 rust 1.64.0
 sbt 1.9.7
@@ -109,6 +119,7 @@ tflint 0.44.1
 tfsec 1.28.1
 trivy 0.33.0
 vault 1.15.1
+yamllint 1.35.0
 yq 4.40.5
 zig 0.9.1
 maestro 1.24.0
@@ -127,6 +138,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'nektos/act',
             depName: 'act',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.7.0',
+            datasource: 'github-releases',
+            packageName: 'rhysd/actionlint',
+            depName: 'actionlint',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -183,6 +201,13 @@ dummy 1.2.3
             depName: 'clojure',
           },
           {
+            currentValue: '2.2.4',
+            datasource: 'github-releases',
+            packageName: 'sigstore/cosign',
+            depName: 'cosign',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.6.1',
             datasource: 'github-releases',
             packageName: 'crystal-lang/crystal',
@@ -208,6 +233,12 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '8.0.303',
+            datasource: 'dotnet-version',
+            packageName: 'dotnet-sdk',
+            depName: 'dotnet-core',
+          },
+          {
             currentValue: '0.32.2',
             datasource: 'github-releases',
             packageName: 'dprint/dprint',
@@ -218,6 +249,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'kayac/ecspresso',
             depName: 'ecspresso',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '3.0.2',
+            datasource: 'github-releases',
+            packageName: 'editorconfig-checker/editorconfig-checker',
+            depName: 'editorconfig-checker',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -266,6 +304,20 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '8.21.1',
+            datasource: 'github-releases',
+            packageName: 'gitleaks/gitleaks',
+            depName: 'gitleaks',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.3.1',
+            datasource: 'github-tags',
+            packageName: 'gleam-lang/gleam',
+            depName: 'gleam',
+            extractVersion: '^v(?<version>.+)',
+          },
+          {
             currentValue: '0.104.3',
             datasource: 'github-releases',
             packageName: 'gohugoio/hugo',
@@ -284,6 +336,13 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'golangci/golangci-lint',
             depName: 'golangci-lint',
+            extractVersion: '^v(?<version>.+)',
+          },
+          {
+            currentValue: '3.11.7',
+            datasource: 'github-releases',
+            packageName: 'hairyhenderson/gomplate',
+            depName: 'gomplate',
             extractVersion: '^v(?<version>.+)',
           },
           {
@@ -383,6 +442,13 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '0.13.0',
+            datasource: 'github-tags',
+            packageName: 'DavidAnson/markdownlint-cli2',
+            depName: 'markdownlint-cli2',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '3.9.6',
             datasource: 'github-releases',
             packageName: 'apache/maven',
@@ -394,6 +460,13 @@ dummy 1.2.3
             packageName: 'grafana/mimir',
             depName: 'mimirtool',
             extractVersion: '^mimir-(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.33.1',
+            datasource: 'github-releases',
+            packageName: 'kubernetes/minikube',
+            depName: 'minikube',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '1.6.8',
@@ -467,6 +540,12 @@ dummy 1.2.3
             packageName: 'python/cpython',
             depName: 'python',
             extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '3.23.0',
+            datasource: 'github-tags',
+            packageName: 'erlang/rebar3',
+            depName: 'rebar',
           },
           {
             currentValue: '3.1.2',
@@ -555,6 +634,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'hashicorp/vault',
             depName: 'vault',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.35.0',
+            datasource: 'github-tags',
+            packageName: 'adrienverge/yamllint',
+            depName: 'yamllint',
             extractVersion: '^v(?<version>\\S+)',
           },
           {

@@ -4,12 +4,12 @@ import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
-import { GitHubMaxPrBodyLen } from '../../modules/platform/github';
 import { regEx } from '../../util/regex';
 import { coerceString } from '../../util/string';
 import * as template from '../../util/template';
 import type { BranchConfig, SelectAllConfig } from '../types';
 import { extractRepoProblems } from './common';
+import type { ConfigMigrationResult } from './config-migration';
 import { getDepWarningsDashboard } from './errors-warnings';
 import { PackageFiles } from './package-files';
 import type { Vulnerability } from './process/types';
@@ -46,6 +46,24 @@ function checkApproveAllPendingPR(issueBody: string): boolean {
 
 function checkRebaseAll(issueBody: string): boolean {
   return issueBody.includes(' - [x] <!-- rebase-all-open-prs -->');
+}
+
+function getConfigMigrationCheckboxState(
+  issueBody: string,
+): 'no-checkbox' | 'checked' | 'unchecked' | 'migration-pr-exists' {
+  if (issueBody.includes('<!-- config-migration-pr-info -->')) {
+    return 'migration-pr-exists';
+  }
+
+  if (issueBody.includes(' - [x] <!-- create-config-migration-pr -->')) {
+    return 'checked';
+  }
+
+  if (issueBody.includes(' - [ ] <!-- create-config-migration-pr -->')) {
+    return 'unchecked';
+  }
+
+  return 'no-checkbox';
 }
 
 function selectAllRelevantBranches(issueBody: string): string[] {
@@ -93,6 +111,8 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const dependencyDashboardAllPending = checkApproveAllPendingPR(issueBody);
   const dependencyDashboardAllRateLimited =
     checkOpenAllRateLimitedPR(issueBody);
+  dependencyDashboardChecks['configMigrationCheckboxState'] =
+    getConfigMigrationCheckboxState(issueBody);
   return {
     dependencyDashboardChecks,
     dependencyDashboardRebaseAllOpen,
@@ -179,8 +199,15 @@ export async function ensureDependencyDashboard(
   config: SelectAllConfig,
   allBranches: BranchConfig[],
   packageFiles: Record<string, PackageFile[]> = {},
+  configMigrationRes: ConfigMigrationResult,
 ): Promise<void> {
   logger.debug('ensureDependencyDashboard()');
+  if (config.mode === 'silent') {
+    logger.debug(
+      'Dependency Dashboard issue is not created, updated or closed when mode=silent',
+    );
+    return;
+  }
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
   const branches = allBranches.filter(
@@ -218,8 +245,34 @@ export async function ensureDependencyDashboard(
     return;
   }
   logger.debug('Ensuring Dependency Dashboard');
+
+  // Check packageFiles for any deprecations
+  let hasDeprecations = false;
+  const deprecatedPackages: Record<string, Record<string, boolean>> = {};
+  logger.debug(
+    { packageFiles },
+    'Checking packageFiles for deprecated packages',
+  );
+  if (is.nonEmptyObject(packageFiles)) {
+    for (const [manager, fileNames] of Object.entries(packageFiles)) {
+      for (const fileName of fileNames) {
+        for (const dep of fileName.deps) {
+          const name = dep.packageName ?? dep.depName;
+          const hasReplacement = !!dep.updates?.find(
+            (updates) => updates.updateType === 'replacement',
+          );
+          if (name && (dep.deprecationMessage ?? hasReplacement)) {
+            hasDeprecations = true;
+            deprecatedPackages[manager] ??= {};
+            deprecatedPackages[manager][name] ??= hasReplacement;
+          }
+        }
+      }
+    }
+  }
+
   const hasBranches = is.nonEmptyArray(branches);
-  if (config.dependencyDashboardAutoclose && !hasBranches) {
+  if (config.dependencyDashboardAutoclose && !hasBranches && !hasDeprecations) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         { title: config.dependencyDashboardTitle },
@@ -232,12 +285,47 @@ export async function ensureDependencyDashboard(
     return;
   }
   let issueBody = '';
+
   if (config.dependencyDashboardHeader?.length) {
     issueBody +=
       template.compile(config.dependencyDashboardHeader, config) + '\n\n';
   }
 
+  if (configMigrationRes.result === 'pr-exists') {
+    issueBody +=
+      '## Config Migration Needed\n\n' +
+      `<!-- config-migration-pr-info --> See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
+  } else if (configMigrationRes?.result === 'pr-modified') {
+    issueBody +=
+      '## Config Migration Needed (error)\n\n' +
+      `<!-- config-migration-pr-info --> The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted. \n\n See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
+  } else if (configMigrationRes?.result === 'add-checkbox') {
+    issueBody +=
+      '## Config Migration Needed\n\n' +
+      ' - [ ] <!-- create-config-migration-pr --> Select this checkbox to let Renovate create an automated Config Migration PR.' +
+      '\n\n';
+  }
+
   issueBody = appendRepoProblems(config, issueBody);
+
+  if (hasDeprecations) {
+    issueBody += '> ⚠ **Warning**\n> \n';
+    issueBody += 'These dependencies are deprecated:\n\n';
+    issueBody += '| Datasource | Name | Replacement PR? |\n';
+    issueBody += '|------------|------|--------------|\n';
+    for (const manager of Object.keys(deprecatedPackages).sort()) {
+      const deps = deprecatedPackages[manager];
+      for (const depName of Object.keys(deps).sort()) {
+        const hasReplacement = deps[depName];
+        issueBody += `| ${manager} | \`${depName}\` | ${
+          hasReplacement
+            ? '![Available](https://img.shields.io/badge/available-green?style=flat-square)'
+            : '![Unavailable](https://img.shields.io/badge/unavailable-orange?style=flat-square)'
+        } |\n`;
+      }
+    }
+    issueBody += '\n';
+  }
 
   const pendingApprovals = branches.filter(
     (branch) => branch.result === 'needs-approval',
@@ -417,7 +505,7 @@ export async function ensureDependencyDashboard(
   // fit the detected dependencies section
   const footer = getFooter(config);
   issueBody += PackageFiles.getDashboardMarkdown(
-    GitHubMaxPrBodyLen - issueBody.length - footer.length,
+    platform.maxBodyLength() - issueBody.length - footer.length,
   );
 
   issueBody += footer;

@@ -2,8 +2,14 @@
 
 You might be interested in the following `postUpdateOptions`:
 
+<!--
+  TODO: remove ignore
+  prettier & markdownlint conflicting nested list format
+  see: https://github.com/renovatebot/renovate/pull/30608
+-->
+<!-- prettier-ignore -->
 1. `gomodTidy` - if you'd like Renovate to run `go mod tidy` after every update before raising the PR
-   1. This is implicitly enabled for major updates if the user has enabled the option `gomodUpdateImportPaths`
+    1. This is implicitly enabled for major updates if the user has enabled the option `gomodUpdateImportPaths`
 1. `gomodTidy1.17` - if you'd like Renovate to run `go mod tidy -compat=1.17` after every update before raising the PR
 1. `gomodTidyE` - if you'd like Renovate to run `go mod tidy -e` after every update before raising the PR
 1. `gomodUpdateImportPaths` - if you'd like Renovate to update your source import paths on major updates before raising the PR
@@ -42,3 +48,14 @@ Rules from this list are converted to environment variable directives if they ma
 - No `hostType` is defined, or
 - `hostType` is `go`, or
 - `hostType` is a platform (`github`, `gitlab`, `azure`, etc.)
+
+### Major upgrades of dependencies
+
+Major upgrades in Go are different from most other ecosystems, because both the version and module name need to be changed.
+It is very common that such upgrades require changes to application code, which Renovate doesn't do.
+
+By default, Renovate will make such change in the `go.mod` files but nothing else - the rest is up to you.
+If you add `gomodUpdateImportPaths` to `postUpdateOptions` then Renovate will also use a third-party tool to migrate import paths within application code, but there may still be actual application logic which needs to be changed too.
+
+Ultimately: it is known and unavoidable that the majority of major Go upgrades won't be immediately mergeable.
+You might prefer to configure such major updates with `dependencyDashboardApproval=true` so that you can request them on demand, on supported platforms.

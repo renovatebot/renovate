@@ -24,6 +24,7 @@ class GerritClient {
     'LABELS',
     'CURRENT_ACTIONS', //to check if current_revision can be "rebased"
     'CURRENT_REVISION', //get RevisionInfo::ref to fetch
+    'CURRENT_COMMIT', // to get the commit message
   ] as const;
 
   private gerritHttp = new GerritHttp();
@@ -103,15 +104,17 @@ class GerritClient {
     });
   }
 
-  async updateCommitMessage(
+  async updateChangeSubject(
     number: number,
-    gerritChangeID: string,
-    prTitle: string,
+    currentMessage: string,
+    newSubject: string,
   ): Promise<void> {
-    await this.setCommitMessage(
-      number,
-      `${prTitle}\n\nChange-Id: ${gerritChangeID}\n`,
+    // Replace first line of the commit message with the new subject
+    const newMessage = currentMessage.replace(
+      new RegExp(`^.*$`, 'm'),
+      newSubject,
     );
+    await this.setCommitMessage(number, newMessage);
   }
 
   async getMessages(changeNumber: number): Promise<GerritChangeMessageInfo[]> {
@@ -192,7 +195,7 @@ class GerritClient {
     const base64Content = await this.gerritHttp.get(
       `a/projects/${encodeURIComponent(
         repo,
-      )}/branches/${branch}/files/${encodeURIComponent(fileName)}/content`,
+      )}/branches/${encodeURIComponent(branch)}/files/${encodeURIComponent(fileName)}/content`,
     );
     return Buffer.from(base64Content.body, 'base64').toString();
   }
@@ -228,8 +231,17 @@ class GerritClient {
   ): string[] {
     const filterState = mapPrStateToGerritFilter(searchConfig.state);
     const filters = ['owner:self', 'project:' + repository, filterState];
-    if (searchConfig.branchName !== '') {
-      filters.push(`hashtag:sourceBranch-${searchConfig.branchName}`);
+    if (searchConfig.branchName) {
+      filters.push(
+        ...[
+          '(',
+          `footer:Renovate-Branch=${searchConfig.branchName}`,
+          // for backwards compatibility
+          'OR',
+          `hashtag:sourceBranch-${searchConfig.branchName}`,
+          ')',
+        ],
+      );
     }
     if (searchConfig.targetBranch) {
       filters.push(`branch:${searchConfig.targetBranch}`);

@@ -10,7 +10,7 @@ describe('util/cache/repository/http-cache', () => {
   });
 
   it('should not throw if cache is not a valid HttpCache', () => {
-    expect(() => cleanupHttpCache('not a valid cache')).not.toThrow();
+    expect(() => cleanupHttpCache({})).not.toThrow();
   });
 
   it('should remove expired items from the cache', () => {

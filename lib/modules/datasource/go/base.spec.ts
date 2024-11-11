@@ -117,6 +117,24 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
+      // eslint-disable-next-line jest/no-disabled-tests
+      it.skip('supports Go submodules in GitLab repo', async () => {
+        httpMock
+          .scope('https://gitlab.com')
+          .get('/example/module/submodule?go-get=1')
+          .reply(200, Fixtures.get('go-get-submodule-gitlab.html'));
+
+        const res = await BaseGoDatasource.getDatasource(
+          'gitlab.com/example/module/submodule',
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'example/module',
+          registryUrl: 'https://gitlab.com',
+        });
+      });
+
       it('supports GitLab deps', async () => {
         httpMock
           .scope('https://gitlab.com')
@@ -137,7 +155,7 @@ describe('modules/datasource/go/base', () => {
       it('supports GitLab deps on private subgroups', async () => {
         httpMock
           .scope('https://gitlab.com')
-          .get('/group/subgroup/private.git/v3?go-get=1')
+          .get('/group/subgroup/private?go-get=1')
           .reply(200, Fixtures.get('go-get-gitlab.html'));
 
         const res = await BaseGoDatasource.getDatasource(
@@ -202,6 +220,23 @@ describe('modules/datasource/go/base', () => {
           packageName: 'group/subgroup',
           registryUrl: 'https://gitlab.com',
         });
+      });
+
+      it('returns null for invalid GitLab EE go-source URL', async () => {
+        hostRules.hostType.mockReturnValue('gitlab');
+        httpMock
+          .scope('https://my.custom.domain')
+          .get('/golang/myrepo?go-get=1')
+          .reply(
+            200,
+            `<meta name="go-source" content="my.custom.domain/golang/myrepo invalid-url"/>`,
+          );
+
+        const res = await BaseGoDatasource.getDatasource(
+          'my.custom.domain/golang/myrepo',
+        );
+
+        expect(res).toBeNull();
       });
 
       it('supports GitLab EE deps', async () => {
@@ -299,6 +334,24 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
+      it('supports GitLab EE deps in private subgroup with vcs indicator and subfolders', async () => {
+        hostRules.hostType.mockReturnValue('gitlab');
+        httpMock
+          .scope('https://my.custom.domain')
+          .get('/golang/subgroup/myrepo?go-get=1')
+          .reply(200, Fixtures.get('go-get-gitlab-ee-private-subgroup.html'));
+
+        const res = await BaseGoDatasource.getDatasource(
+          'my.custom.domain/golang/subgroup/myrepo.git/v2/database',
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'golang/subgroup/myrepo',
+          registryUrl: 'https://my.custom.domain',
+        });
+      });
+
       it('supports GitLab EE monorepo deps in subgroup', async () => {
         hostRules.hostType.mockReturnValue('gitlab');
         httpMock
@@ -375,7 +428,7 @@ describe('modules/datasource/go/base', () => {
           '<meta name="go-import" content="org.visualstudio.com/my-project/_git/my-repo.git git https://org.visualstudio.com/my-project/_git/my-repo.git" />';
         httpMock
           .scope('https://org.visualstudio.com')
-          .get('/my-project/_git/my-repo.git?go-get=1')
+          .get('/my-project/_git/my-repo?go-get=1')
           .reply(200, meta);
         const res = await BaseGoDatasource.getDatasource(
           'org.visualstudio.com/my-project/_git/my-repo.git',
@@ -389,7 +442,7 @@ describe('modules/datasource/go/base', () => {
       it('returns null for invalid azure devops source', async () => {
         httpMock
           .scope('https://dev.azure.com')
-          .get('/foo/bar.git?go-get=1')
+          .get('/foo/bar?go-get=1')
           .reply(200);
 
         const res = await BaseGoDatasource.getDatasource(
@@ -432,6 +485,21 @@ describe('modules/datasource/go/base', () => {
         expect(res).toBeNull();
       });
 
+      it('returns null for invalid import URL', async () => {
+        const meta =
+          '<meta name="go-import" content="buf.build/gen/go/gogo/protobuf/protocolbuffers/go git foobar">';
+        httpMock
+          .scope('https://buf.build')
+          .get('/gen/go/gogo/protobuf/protocolbuffers/go?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'buf.build/gen/go/gogo/protobuf/protocolbuffers/go',
+        );
+
+        expect(res).toBeNull();
+      });
+
       it('it correctly splits a URL where the endpoint is contained', async () => {
         hostRules.hostType.mockReturnValue('gitlab');
 
@@ -441,7 +509,7 @@ describe('modules/datasource/go/base', () => {
           '<meta name="go-import" content="example.com/gitlab/my-project/my-repo.git git https://example.com/gitlab/my-project/my-repo" />';
         httpMock
           .scope('https://example.com')
-          .get('/gitlab/my-project/my-repo.git?go-get=1')
+          .get('/gitlab/my-project/my-repo?go-get=1')
           .reply(200, meta);
 
         const res = await BaseGoDatasource.getDatasource(
@@ -458,7 +526,7 @@ describe('modules/datasource/go/base', () => {
 
         httpMock
           .scope('https://example.com')
-          .get('/gitlab/my-project/my-repo.git?go-get=1')
+          .get('/gitlab/my-project/my-repo?go-get=1')
           .reply(200, meta);
 
         const res2 = await BaseGoDatasource.getDatasource(

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import {
   Json,
   Json5,
+  Jsonc,
   LooseArray,
   LooseRecord,
   MultidocYaml,
@@ -259,6 +260,72 @@ describe('util/schema-utils', () => {
           issues: [
             {
               message: 'Invalid JSON5',
+              code: 'custom',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
+    });
+  });
+
+  describe('Jsonc', () => {
+    it('parses JSONC', () => {
+      const Schema = Jsonc.pipe(z.object({ foo: z.literal('bar') }));
+
+      expect(Schema.parse('{"foo": "bar"}')).toEqual({ foo: 'bar' });
+
+      expect(Schema.safeParse(42)).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Expected string, received number',
+              code: 'invalid_type',
+              expected: 'string',
+              received: 'number',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
+
+      expect(Schema.safeParse('{"foo": "foo"}')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Invalid literal value, expected "bar"',
+              code: 'invalid_literal',
+              expected: 'bar',
+              received: 'foo',
+              path: ['foo'],
+            },
+          ],
+        },
+        success: false,
+      });
+
+      expect(Schema.safeParse('["foo", "bar"]')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Expected object, received array',
+              code: 'invalid_type',
+              expected: 'object',
+              received: 'array',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
+
+      expect(Schema.safeParse('{')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Invalid JSONC',
               code: 'custom',
               path: [],
             },

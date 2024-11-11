@@ -1,0 +1,1050 @@
+{
+  "$schema": "../../tools/schemas/replacements-schema.json",
+  "all": {
+    "description": "Apply crowd-sourced package replacement rules.",
+    "extends": [
+      "replacements:airbnb-prop-types-to-prop-types-tools",
+      "replacements:apollo-server-to-scoped",
+      "replacements:babel-eslint-to-eslint-parser",
+      "replacements:containerbase",
+      "replacements:cpx-to-maintenance-fork",
+      "replacements:cucumber-to-scoped",
+      "replacements:docker-compose",
+      "replacements:eslint-plugin-eslint-comments-to-maintained-fork",
+      "replacements:eslint-config-standard-with-typescript-to-eslint-config-love",
+      "replacements:eslint-plugin-node-to-maintained-fork",
+      "replacements:eslint-plugin-vitest-to-scoped",
+      "replacements:fakerjs-to-scoped",
+      "replacements:fastify-to-scoped",
+      "replacements:hapi-to-scoped",
+      "replacements:jade-to-pug",
+      "replacements:joi-to-scoped",
+      "replacements:joi-to-unscoped",
+      "replacements:k8s-registry-move",
+      "replacements:mem-rename",
+      "replacements:middie-to-scoped",
+      "replacements:now-to-vercel",
+      "replacements:npm-run-all-to-maintenance-fork",
+      "replacements:opencost-registry-move",
+      "replacements:parcel-css-to-lightningcss",
+      "replacements:passport-saml",
+      "replacements:react-query-devtools-to-scoped",
+      "replacements:react-query-to-scoped",
+      "replacements:react-scripts-ts-to-react-scripts",
+      "replacements:read-pkg-up-rename",
+      "replacements:redux-devtools-extension-to-scope",
+      "replacements:renovate-pep440-to-renovatebot-pep440",
+      "replacements:rollup-babel-to-scoped",
+      "replacements:rollup-json-to-scoped",
+      "replacements:rollup-node-resolve-to-scoped",
+      "replacements:rollup-terser-to-scoped",
+      "replacements:rome-to-biome",
+      "replacements:semantic-release-replace-plugin-to-unscoped",
+      "replacements:spectre-cli-to-spectre-console-cli",
+      "replacements:standard-version-to-commit-and-tag",
+      "replacements:typeorm-seeding-to-scoped",
+      "replacements:vso-task-lib-to-azure-pipelines-task-lib",
+      "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
+      "replacements:xmldom-to-scoped",
+      "replacements:zap"
+    ],
+    "ignoreDeps": []
+  },
+  "airbnb-prop-types-to-prop-types-tools": {
+    "description": "`airbnb-prop-types` was given to a new maintainer and renamed to `prop-types-tools`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "^2",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["airbnb-prop-types"],
+        "replacementName": "prop-types-tools",
+        "replacementVersion": "2.17.0"
+      }
+    ]
+  },
+  "apollo-server-to-scoped": {
+    "description": "`apollo-server` packages became scoped.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=3.10.3",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": [
+          "apollo-server",
+          "apollo-server-core",
+          "apollo-server-express"
+        ],
+        "replacementName": "@apollo/server",
+        "replacementVersion": "4.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=3.3.1",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["apollo-server-errors"],
+        "replacementName": "@apollo/server",
+        "replacementVersion": "4.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=3.6.3",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": [
+          "apollo-server-types",
+          "apollo-server-plugin-base"
+        ],
+        "replacementName": "@apollo/server",
+        "replacementVersion": "4.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=3.7.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["apollo-datasource-rest"],
+        "replacementName": "@apollo/datasource-rest",
+        "replacementVersion": "4.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=3.7.1",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["apollo-server-plugin-response-cache"],
+        "replacementName": "@apollo/server-plugin-response-cache",
+        "replacementVersion": "4.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=3.5.1",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["apollo-server-plugin-operation-registry"],
+        "replacementName": "@apollo/server-plugin-operation-registry",
+        "replacementVersion": "3.5.6"
+      },
+      {
+        "matchCurrentVersion": ">=3.3.3",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["apollo-reporting-protobuf"],
+        "replacementName": "@apollo/usage-reporting-protobuf",
+        "replacementVersion": "4.0.0"
+      }
+    ]
+  },
+  "babel-eslint-to-eslint-parser": {
+    "description": "`babel-eslint` was renamed under the `@babel` scope.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=7.11.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["babel-eslint"],
+        "replacementName": "@babel/eslint-parser",
+        "replacementVersion": "7.11.0"
+      }
+    ]
+  },
+  "containerbase": {
+    "description": "Replace containerbase dependencies.",
+    "packageRules": [
+      {
+        "description": "Replace `containerbase/(buildpack|base)` and `renovate/buildpack` with `ghcr.io/containerbase/base`.",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": [
+          "/^(?:docker\\.io/)?containerbase/(?:buildpack|base)$/",
+          "/^ghcr\\.io/containerbase/buildpack$/",
+          "/^(?:docker\\.io/)?renovate/buildpack$/"
+        ],
+        "replacementName": "ghcr.io/containerbase/base"
+      },
+      {
+        "description": "Replace `containerbase/node` and `renovate/node` with `ghcr.io/containerbase/node`.",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": [
+          "/^(?:docker\\.io/)?(?:containerbase|renovate)/node$/"
+        ],
+        "replacementName": "ghcr.io/containerbase/node"
+      },
+      {
+        "description": "Replace `containerbase/sidecar` and `renovate/sidecar` with `ghcr.io/containerbase/sidecar`.",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": [
+          "/^(?:docker\\.io/)?(?:containerbase|renovate)/sidecar$/"
+        ],
+        "replacementName": "ghcr.io/containerbase/sidecar"
+      },
+      {
+        "description": "Replace `renovatebot/internal-tools` with `containerbase/internal-tools`.",
+        "matchDatasources": ["github-tags"],
+        "matchPackageNames": ["renovatebot/internal-tools"],
+        "replacementName": "containerbase/internal-tools"
+      },
+      {
+        "description": "Replace `renovate` `slim` docker tag with `latest`.",
+        "matchCurrentValue": "/^slim$/",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": [
+          "ghcr.io/renovatebot/renovate",
+          "/^(?:docker\\.io/)?renovate/renovate$/"
+        ],
+        "replacementVersion": "latest"
+      },
+      {
+        "description": "Remove `renovate` `-slim` docker tag suffix.",
+        "extractVersion": "^(?<version>.+)-slim$",
+        "matchCurrentValue": "/-slim$/",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": [
+          "ghcr.io/renovatebot/renovate",
+          "/^(?:docker\\.io/)?renovate/renovate$/"
+        ],
+        "versioning": "semver"
+      }
+    ]
+  },
+  "cpx-to-maintenance-fork": {
+    "description": "Maintenance fork of `cpx`",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["cpx"],
+        "replacementName": "cpx2",
+        "replacementVersion": "2.0.0"
+      }
+    ]
+  },
+  "cucumber-to-scoped": {
+    "description": "`cucumber` became scoped.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["cucumber"],
+        "replacementName": "@cucumber/cucumber",
+        "replacementVersion": "7.0.0"
+      }
+    ]
+  },
+  "docker-compose": {
+    "description": "Compose is now part of the official Docker image.",
+    "packageRules": [
+      {
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["docker/compose"],
+        "matchCurrentValue": "/^((debian|alpine)-)?1\\.29\\.2$/",
+        "replacementName": "docker",
+        "replacementVersion": "23.0.0-cli"
+      }
+    ]
+  },
+  "eslint-plugin-eslint-comments-to-maintained-fork": {
+    "description": "Replace `eslint-plugin-eslint-comments` with a maintained fork: `@eslint-community/eslint-plugin-eslint-comments`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["eslint-plugin-eslint-comments"],
+        "matchCurrentVersion": "^3.2.0",
+        "replacementName": "@eslint-community/eslint-plugin-eslint-comments",
+        "replacementVersion": "3.2.0"
+      }
+    ]
+  },
+  "eslint-config-standard-with-typescript-to-eslint-config-love": {
+    "description": "`eslint-config-standard-with-typescript` was renamed to `eslint-config-love`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "^43.0.1",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["eslint-config-standard-with-typescript"],
+        "replacementName": "eslint-config-love",
+        "replacementVersion": "43.1.0"
+      }
+    ]
+  },
+  "eslint-plugin-node-to-maintained-fork": {
+    "description": "Replace stale `eslint-plugin-node` with a maintained fork: `eslint-plugin-n`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "^11.1.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["eslint-plugin-node"],
+        "replacementName": "eslint-plugin-n",
+        "replacementVersion": "14.0.0"
+      }
+    ]
+  },
+  "eslint-plugin-vitest-to-scoped": {
+    "description": "`eslint-plugin-vitest` became scoped.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=0.5.4",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["eslint-plugin-vitest"],
+        "replacementName": "@vitest/eslint-plugin",
+        "replacementVersion": "1.0.1"
+      }
+    ]
+  },
+  "fakerjs-to-scoped": {
+    "description": "`fakerjs` packages became scoped.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=5.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["faker"],
+        "replacementName": "@faker-js/faker",
+        "replacementVersion": "5.5.3"
+      },
+      {
+        "matchCurrentVersion": ">=4.0.0 <5.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["faker"],
+        "replacementName": "@faker-js/faker",
+        "replacementVersion": "4.1.0"
+      },
+      {
+        "matchCurrentVersion": ">=3.0.0 <4.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["faker"],
+        "replacementName": "@faker-js/faker",
+        "replacementVersion": "3.1.0"
+      },
+      {
+        "matchCurrentVersion": ">=2.0.0 <3.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["faker"],
+        "replacementName": "@faker-js/faker",
+        "replacementVersion": "2.1.5"
+      },
+      {
+        "matchCurrentVersion": "<2.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["faker"],
+        "replacementName": "@faker-js/faker",
+        "replacementVersion": "1.1.0"
+      }
+    ]
+  },
+  "fastify-to-scoped": {
+    "description": "`fastify` packages became scoped.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=3.3.0 <4.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-accepts-serializer"],
+        "replacementName": "@fastify/accepts-serializer",
+        "replacementVersion": "4.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=2.3.0 <3.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-accepts"],
+        "replacementName": "@fastify/accepts",
+        "replacementVersion": "3.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=1.2.0 <2.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-auth"],
+        "replacementName": "@fastify/auth",
+        "replacementVersion": "2.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=3.13.0 <4.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-autoload"],
+        "replacementName": "@fastify/autoload",
+        "replacementVersion": "4.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=1.3.0 <2.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-awilix"],
+        "replacementName": "@fastify/awilix",
+        "replacementVersion": "2.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=2.3.0 <3.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-basic-auth"],
+        "replacementName": "@fastify/basic-auth",
+        "replacementVersion": "3.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=6.3.0 <7.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-bearer-auth"],
+        "replacementName": "@fastify/bearer-auth",
+        "replacementVersion": "7.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=6.3.0 <7.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-caching"],
+        "replacementName": "@fastify/caching",
+        "replacementVersion": "7.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=1.2.0 <2.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-circuit-breaker"],
+        "replacementName": "@fastify/circuit-breaker",
+        "replacementVersion": "2.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=4.1.0 <5.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-compress"],
+        "replacementName": "@fastify/compress",
+        "replacementVersion": "5.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=5.7.0 <6.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-cookie"],
+        "replacementName": "@fastify/cookie",
+        "replacementVersion": "6.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=6.1.0 <7.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-cors"],
+        "replacementName": "@fastify/cors",
+        "replacementVersion": "7.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=1.1.0 <2.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-diagnostics-channel"],
+        "replacementName": "@fastify/diagnostics-channel",
+        "replacementVersion": "2.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=1.2.0 <2.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-elasticsearch"],
+        "replacementName": "@fastify/elasticsearch",
+        "replacementVersion": "2.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=2.2.0 <3.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-env"],
+        "replacementName": "@fastify/env",
+        "replacementVersion": "3.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=1.2.0 <2.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-error"],
+        "replacementName": "@fastify/error",
+        "replacementVersion": "2.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=2.2.0 <3.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-etag"],
+        "replacementName": "@fastify/etag",
+        "replacementVersion": "3.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=0.4.0 <1.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-express"],
+        "replacementName": "@fastify/express",
+        "replacementVersion": "1.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=3.1.0 <4.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-flash"],
+        "replacementName": "@fastify/flash",
+        "replacementVersion": "4.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=5.3.0 <6.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-formbody"],
+        "replacementName": "@fastify/formbody",
+        "replacementVersion": "6.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=1.1.0 <2.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-funky"],
+        "replacementName": "@fastify/funky",
+        "replacementVersion": "2.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=7.1.0 <8.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-helmet"],
+        "replacementName": "@fastify/helmet",
+        "replacementVersion": "8.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=0.3.0 <1.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-hotwire"],
+        "replacementName": "@fastify/hotwire",
+        "replacementVersion": "1.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=6.3.0 <7.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-http-proxy"],
+        "replacementName": "@fastify/http-proxy",
+        "replacementVersion": "7.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=4.2.0 <5.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-jwt"],
+        "replacementName": "@fastify/jwt",
+        "replacementVersion": "5.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=0.3.0 <1.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-kafka"],
+        "replacementName": "@fastify/kafka",
+        "replacementVersion": "1.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=3.2.0 <4.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-leveldb"],
+        "replacementName": "@fastify/leveldb",
+        "replacementVersion": "4.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=4.2.0 <5.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-mongodb"],
+        "replacementName": "@fastify/mongodb",
+        "replacementVersion": "5.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=5.4.0 <6.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-multipart"],
+        "replacementName": "@fastify/multipart",
+        "replacementVersion": "6.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=2.2.0 <3.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-mysql"],
+        "replacementName": "@fastify/mysql",
+        "replacementVersion": "3.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=7.3.0 <8.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-nextjs"],
+        "replacementName": "@fastify/nextjs",
+        "replacementVersion": "8.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=4.6.0 <5.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-oauth2"],
+        "replacementName": "@fastify/oauth2",
+        "replacementVersion": "5.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=0.5.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-passport"],
+        "replacementName": "@fastify/passport",
+        "replacementVersion": "1.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=3.7.0 <4.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-postgres"],
+        "replacementName": "@fastify/postgres",
+        "replacementVersion": "4.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=5.9.0 <6.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-rate-limit"],
+        "replacementName": "@fastify/rate-limit",
+        "replacementVersion": "6.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=4.4.0 <5.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-redis"],
+        "replacementName": "@fastify/redis",
+        "replacementVersion": "5.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=6.7.0 <7.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-reply-from"],
+        "replacementName": "@fastify/reply-from",
+        "replacementVersion": "7.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=2.3.0 <3.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-request-context"],
+        "replacementName": "@fastify/request-context",
+        "replacementVersion": "3.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=0.3.0 <1.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-response-validation"],
+        "replacementName": "@fastify/response-validation",
+        "replacementVersion": "1.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=2.1.0 <3.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-routes-stats"],
+        "replacementName": "@fastify/routes-stats",
+        "replacementVersion": "3.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=3.2.0 <4.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-routes"],
+        "replacementName": "@fastify/routes",
+        "replacementVersion": "4.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=1.1.0 <2.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-schedule"],
+        "replacementName": "@fastify/schedule",
+        "replacementVersion": "2.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=3.2.0 <4.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-secure-session"],
+        "replacementName": "@fastify/secure-session",
+        "replacementVersion": "4.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=3.2.0 <4.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-sensible"],
+        "replacementName": "@fastify/sensible",
+        "replacementVersion": "4.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=0.3.0 <1.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-soap-client"],
+        "replacementName": "@fastify/soap-client",
+        "replacementVersion": "1.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=4.7.0 <5.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-static"],
+        "replacementName": "@fastify/static",
+        "replacementVersion": "5.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=5.2.0 <6.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-swagger"],
+        "replacementName": "@fastify/swagger",
+        "replacementVersion": "6.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=3.1.0 <4.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-url-data"],
+        "replacementName": "@fastify/url-data",
+        "replacementVersion": "4.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=4.3.0 <5.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-websocket"],
+        "replacementName": "@fastify/websocket",
+        "replacementVersion": "5.0.0"
+      },
+      {
+        "matchCurrentVersion": ">=2.1.0 <3.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["fastify-zipkin"],
+        "replacementName": "@fastify/zipkin",
+        "replacementVersion": "3.0.0"
+      }
+    ]
+  },
+  "hapi-to-scoped": {
+    "description": "`hapi` became scoped.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=18.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["hapi"],
+        "replacementName": "@hapi/hapi",
+        "replacementVersion": "18.2.0"
+      }
+    ]
+  },
+  "jade-to-pug": {
+    "description": "Jade was renamed to Pug.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["jade"],
+        "replacementName": "pug",
+        "replacementVersion": "2.0.0"
+      }
+    ]
+  },
+  "joi-to-scoped": {
+    "description": "`joi` became scoped under the `hapi` organization.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=14.0.0 <14.4.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["joi"],
+        "replacementName": "@hapi/joi",
+        "replacementVersion": "14.4.0"
+      }
+    ]
+  },
+  "joi-to-unscoped": {
+    "description": "`joi` was moved out of the `hapi` organization.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=17.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@hapi/joi"],
+        "replacementName": "joi",
+        "replacementVersion": "17.1.1"
+      }
+    ]
+  },
+  "k8s-registry-move": {
+    "description": "The Kubernetes container registry has changed from `k8s.gcr.io` to `registry.k8s.io`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["/^k8s\\.gcr\\.io/.+$/"],
+        "replacementNameTemplate": "{{{replace 'k8s\\.gcr\\.io/' 'registry.k8s.io/' packageName}}}"
+      }
+    ]
+  },
+  "mem-rename": {
+    "description": "`mem` was renamed to `memoize`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "^10.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["mem"],
+        "replacementName": "memoize",
+        "replacementVersion": "10.0.0"
+      }
+    ]
+  },
+  "middie-to-scoped": {
+    "description": "`middie` became scoped.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=7.1.0 <8.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["middie"],
+        "replacementName": "@fastify/middie",
+        "replacementVersion": "8.0.0"
+      }
+    ]
+  },
+  "now-to-vercel": {
+    "description": "`now` was renamed to `vercel`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=21.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["now"],
+        "replacementName": "vercel",
+        "replacementVersion": "21.0.0"
+      }
+    ]
+  },
+  "npm-run-all-to-maintenance-fork": {
+    "description": "Maintenance fork of `npm-run-all`",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["npm-run-all"],
+        "replacementName": "npm-run-all2",
+        "replacementVersion": "5.0.0"
+      }
+    ]
+  },
+  "opencost-registry-move": {
+    "description": "Replace OpenCost registry from quay.io to ghcr.io.",
+    "packageRules": [
+      {
+        "description": "Replace `quay.io/kubecost1/kubecost-cost-model` with `ghcr.io/opencost/opencost`.",
+        "matchCurrentVersion": "1.108.0",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["quay.io/kubecost1/kubecost-cost-model"],
+        "replacementName": "ghcr.io/opencost/opencost",
+        "replacementVersion": "1.109.0"
+      },
+      {
+        "description": "Replace `quay.io/kubecost1/opencost-ui` with `ghcr.io/opencost/opencost-ui`.",
+        "matchCurrentVersion": "1.108.0",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["quay.io/kubecost1/opencost-ui"],
+        "replacementName": "ghcr.io/opencost/opencost-ui",
+        "replacementVersion": "1.109.0"
+      }
+    ]
+  },
+  "parcel-css-to-lightningcss": {
+    "description": "`@parcel/css` was renamed to `lightningcss`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@parcel/css"],
+        "replacementName": "lightningcss",
+        "replacementVersion": "1.14.0"
+      }
+    ]
+  },
+  "passport-saml": {
+    "description": "`passport-saml` was renamed to `@node-saml/passport-saml`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["passport-saml"],
+        "replacementName": "@node-saml/passport-saml",
+        "replacementVersion": "4.0.4"
+      }
+    ]
+  },
+  "react-query-devtools-to-scoped": {
+    "description": "`react-query/devtools` became scoped under the `tanstack` organization.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=2.0.0 <4.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["react-query/devtools"],
+        "replacementName": "@tanstack/react-query-devtools",
+        "replacementVersion": "4.0.0"
+      }
+    ]
+  },
+  "react-query-to-scoped": {
+    "description": "`react-query` became scoped under the `tanstack` organization.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=3.0.0 <4.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["react-query"],
+        "replacementName": "@tanstack/react-query",
+        "replacementVersion": "4.0.5"
+      }
+    ]
+  },
+  "react-scripts-ts-to-react-scripts": {
+    "description": "`react-scripts` supports TypeScript since version `2.1.0`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["react-scripts-ts"],
+        "replacementName": "react-scripts",
+        "replacementVersion": "2.1.8"
+      }
+    ]
+  },
+  "read-pkg-up-rename": {
+    "description": "`read-pkg-up` was renamed to `read-package-up`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["read-pkg-up"],
+        "replacementName": "read-package-up",
+        "replacementVersion": "11.0.0"
+      }
+    ]
+  },
+  "redux-devtools-extension-to-scope": {
+    "description": "The `redux-devtools-extension` package was renamed to `@redux-devtools/extension`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["redux-devtools-extension"],
+        "replacementName": "@redux-devtools/extension",
+        "replacementVersion": "3.0.0"
+      }
+    ]
+  },
+  "renovate-pep440-to-renovatebot-pep440": {
+    "description": "The `@renovate/pep440` package was renamed to `@renovatebot/pep440`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@renovate/pep440"],
+        "replacementName": "@renovatebot/pep440",
+        "replacementVersion": "1.0.0"
+      }
+    ]
+  },
+  "rollup-babel-to-scoped": {
+    "description": "The babel plugin for rollup became scoped.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["rollup-plugin-babel"],
+        "replacementName": "@rollup/plugin-babel",
+        "replacementVersion": "5.0.0"
+      }
+    ]
+  },
+  "rollup-json-to-scoped": {
+    "description": "The json plugin for rollup became scoped.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["rollup-plugin-json"],
+        "replacementName": "@rollup/plugin-json",
+        "replacementVersion": "4.0.0"
+      }
+    ]
+  },
+  "rollup-node-resolve-to-scoped": {
+    "description": "The node-resolve plugin for rollup became scoped.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["rollup-plugin-node-resolve"],
+        "replacementName": "@rollup/plugin-node-resolve",
+        "replacementVersion": "6.0.0"
+      }
+    ]
+  },
+  "rollup-terser-to-scoped": {
+    "description": "The terser plugin for rollup became scoped.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=7.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["rollup-plugin-terser"],
+        "replacementName": "@rollup/plugin-terser",
+        "replacementVersion": "0.1.0"
+      }
+    ]
+  },
+  "rome-to-biome": {
+    "description": "The Rome repository is archived, and Biome is the community replacement. Read [the Biome announcement](https://biomejs.dev/blog/annoucing-biome/) for migration instructions.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["rome"],
+        "replacementName": "@biomejs/biome",
+        "replacementVersion": "1.0.0"
+      }
+    ]
+  },
+  "semantic-release-replace-plugin-to-unscoped": {
+    "description": "`semantic-release-replace-plugin` was moved out of the `google` organization.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@google/semantic-release-replace-plugin"],
+        "replacementName": "semantic-release-replace-plugin",
+        "replacementVersion": "1.2.1"
+      }
+    ]
+  },
+  "spectre-cli-to-spectre-console-cli": {
+    "description": "The `Spectre.Cli` package was renamed to `Spectre.Console.Cli`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["nuget"],
+        "matchPackageNames": ["Spectre.Cli"],
+        "replacementName": "Spectre.Console.Cli",
+        "replacementVersion": "0.45.0"
+      }
+    ]
+  },
+  "standard-version-to-commit-and-tag": {
+    "description": "`standard-version` is now maintained as `commit-and-tag-version`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "^9.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["standard-version"],
+        "replacementName": "commit-and-tag-version",
+        "replacementVersion": "9.5.0"
+      }
+    ]
+  },
+  "typeorm-seeding-to-scoped": {
+    "description": "`typeorm-seeding` is now maintained as scoped package.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "1.6.1",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["typeorm-seeding"],
+        "replacementName": "@jorgebodega/typeorm-seeding",
+        "replacementVersion": "2.0.0"
+      }
+    ]
+  },
+  "vso-task-lib-to-azure-pipelines-task-lib": {
+    "description": "The `vso-task-lib` package is now published as `azure-pipelines-task-lib`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["vso-task-lib"],
+        "replacementName": "azure-pipelines-task-lib",
+        "replacementVersion": "3.4.0"
+      }
+    ]
+  },
+  "vsts-task-lib-to-azure-pipelines-task-lib": {
+    "description": "The `vsts-task-lib` package is now published as `azure-pipelines-task-lib`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["vsts-task-lib"],
+        "replacementName": "azure-pipelines-task-lib",
+        "replacementVersion": "3.4.0"
+      }
+    ]
+  },
+  "xmldom-to-scoped": {
+    "description": "The `xmldom` package is now published as `@xmldom/xmldom`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["xmldom", "xmldom-alpha"],
+        "replacementName": "@xmldom/xmldom",
+        "replacementVersion": "0.7.5"
+      }
+    ]
+  },
+  "zap": {
+    "description": "Replace ZAP dependencies.",
+    "packageRules": [
+      {
+        "description": "The `zap-stable` image has moved to the `zaproxy` organization.",
+        "matchCurrentVersion": ">=2.0.0 <2.14.0",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": [
+          "/^(?:docker\\.io/)?owasp/zap2docker-stable$/",
+          "/^(?:docker\\.io/)?softwaresecurityproject/zap-stable$/"
+        ],
+        "replacementName": "zaproxy/zap-stable",
+        "replacementVersion": "2.14.0"
+      },
+      {
+        "description": "The `zap-bare` image has moved to the `zaproxy` organization.",
+        "matchCurrentVersion": ">=2.0.0 <2.14.0",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": [
+          "/^(?:docker\\.io/)?owasp/zap2docker-bare$/",
+          "/^(?:docker\\.io/)?softwaresecurityproject/zap-bare$/"
+        ],
+        "replacementName": "zaproxy/zap-bare",
+        "replacementVersion": "2.14.0"
+      }
+    ]
+  }
+}

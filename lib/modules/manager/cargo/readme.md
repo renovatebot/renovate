@@ -3,7 +3,9 @@ Extracts dependencies from `Cargo.toml` files, and also updates `Cargo.lock` fil
 When using the default rangeStrategy=auto:
 
 - If a "less than" instruction is found (e.g. `<2`) then `rangeStrategy=widen` will be selected,
-- Otherwise, `rangeStrategy=bump` will be selected.
+- Otherwise, `rangeStrategy=update-lockfile` will be selected.
+
+The `update-lockfile` default means that most upgrades will update `Cargo.lock` files without the need to change the value in `Cargo.toml`.
 
 ### Private Modules Authentication
 

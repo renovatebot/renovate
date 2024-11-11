@@ -8,6 +8,10 @@ Please give us enough time to investigate the bug before you report it anywhere 
 
 Please do not create GitHub issues for security-related doubts or problems.
 
+## Code of Conduct
+
+Please follow the rules in our [Code of Conduct](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md).
+
 ## Support
 
 If you want help with your Renovate configuration, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and open a new "config help" discussion post.
@@ -20,15 +24,6 @@ If you want help with your Renovate configuration, go to the [discussions tab in
 1. Open a new _discussion_ and link to the minimal reproduction
 
 For **feature requests**: first search for related requests in the issues and discussions, if you don't find anything: create a _discussion_.
-
-## Rate Limiting of Support Requests through Temporary Blocking
-
-To ensure that the Renovate maintainers don't burn out from dealing with unfriendly behavior, those who display a bad attitude when asking for or receiving support in the repo will be rate limited from further requests through the use of temporary blocking.
-The duration of the temporary block depends on how rude or inconsiderate the behavior is perceived to be, and can be from 1-30 days.
-
-If you have been blocked temporarily and believe that it is due to a misunderstanding, or you regret your comments and wish to make amends, please reach out to the lead maintainer Rhys Arkins by email with any request for early unblocking.
-If/once you are unblocked, you should edit or delete whatever comment lead to the blocking, even if you did not intend it to be rude or inconsiderate.
-Long emails or apologies are undesirable - the maintainers are busy and want to be able to help as many users as possible with the time they have available.
 
 ## Code
 
@@ -80,7 +75,7 @@ And some options:
 Please do not force push to your PR's branch after you have created your PR, as doing so forces us to review the whole PR again.
 This makes it harder for us to review your work because we don't know what has changed.
 PRs will always be squashed by us when we merge your work.
-Commit as many times as you need in your pull request branch.
+Commit as many times as you need in your pull request branch, but please batch apply review suggestions.
 
 If you're updating your PR branch from within the GitHub PR interface, use the default "Update branch" button.
 This is the "Update with merge commit" option in the dropdown.
@@ -92,7 +87,8 @@ Force pushing a PR, or using the "Update with rebase" button is OK when you:
 
 ## Apply maintainer provided review suggestions
 
-Maintainers can suggest changes while reviewing your pull request, please follow these steps to apply them:
+Maintainers can suggest changes while reviewing your pull request.
+To apply these suggestions, please:
 
 1. Batch the suggestions into a logical group by selecting the **Add suggestion to batch** button
 1. Select the **Commit suggestions** button

@@ -13,15 +13,24 @@ exports[`modules/datasource/clojure/index falls back to next registry url 1`] = 
       "version": "0.0.1",
     },
     {
-      "releaseTimestamp": "2020-01-01T01:00:00.000Z",
       "version": "1.0.0",
     },
     {
-      "releaseTimestamp": "2020-01-01T01:00:03.000Z",
+      "version": "1.0.1",
+    },
+    {
+      "version": "1.0.2",
+    },
+    {
       "version": "1.0.3-SNAPSHOT",
     },
     {
-      "releaseTimestamp": "2020-01-01T02:00:00.000Z",
+      "version": "1.0.4-SNAPSHOT",
+    },
+    {
+      "version": "1.0.5-SNAPSHOT",
+    },
+    {
       "version": "2.0.0",
     },
   ],
@@ -34,15 +43,24 @@ exports[`modules/datasource/clojure/index ignores unsupported protocols 1`] = `
     "version": "0.0.1",
   },
   {
-    "releaseTimestamp": "2020-01-01T01:00:00.000Z",
     "version": "1.0.0",
   },
   {
-    "releaseTimestamp": "2020-01-01T01:00:03.000Z",
+    "version": "1.0.1",
+  },
+  {
+    "version": "1.0.2",
+  },
+  {
     "version": "1.0.3-SNAPSHOT",
   },
   {
-    "releaseTimestamp": "2020-01-01T02:00:00.000Z",
+    "version": "1.0.4-SNAPSHOT",
+  },
+  {
+    "version": "1.0.5-SNAPSHOT",
+  },
+  {
     "version": "2.0.0",
   },
 ]
@@ -53,6 +71,7 @@ exports[`modules/datasource/clojure/index returns releases from custom repositor
   "display": "org.example:package",
   "group": "org.example",
   "homepage": "https://package.example.org/about",
+  "isPrivate": true,
   "name": "package",
   "packageScope": "org.example",
   "registryUrl": "https://custom.registry.renovatebot.com",
@@ -61,15 +80,24 @@ exports[`modules/datasource/clojure/index returns releases from custom repositor
       "version": "0.0.1",
     },
     {
-      "releaseTimestamp": "2020-01-01T01:00:00.000Z",
       "version": "1.0.0",
     },
     {
-      "releaseTimestamp": "2020-01-01T01:00:03.000Z",
+      "version": "1.0.1",
+    },
+    {
+      "version": "1.0.2",
+    },
+    {
       "version": "1.0.3-SNAPSHOT",
     },
     {
-      "releaseTimestamp": "2020-01-01T02:00:00.000Z",
+      "version": "1.0.4-SNAPSHOT",
+    },
+    {
+      "version": "1.0.5-SNAPSHOT",
+    },
+    {
       "version": "2.0.0",
     },
   ],
@@ -89,15 +117,24 @@ exports[`modules/datasource/clojure/index skips registry with invalid XML 1`] = 
       "version": "0.0.1",
     },
     {
-      "releaseTimestamp": "2020-01-01T01:00:00.000Z",
       "version": "1.0.0",
     },
     {
-      "releaseTimestamp": "2020-01-01T01:00:03.000Z",
+      "version": "1.0.1",
+    },
+    {
+      "version": "1.0.2",
+    },
+    {
       "version": "1.0.3-SNAPSHOT",
     },
     {
-      "releaseTimestamp": "2020-01-01T02:00:00.000Z",
+      "version": "1.0.4-SNAPSHOT",
+    },
+    {
+      "version": "1.0.5-SNAPSHOT",
+    },
+    {
       "version": "2.0.0",
     },
   ],
@@ -117,15 +154,24 @@ exports[`modules/datasource/clojure/index skips registry with invalid metadata s
       "version": "0.0.1",
     },
     {
-      "releaseTimestamp": "2020-01-01T01:00:00.000Z",
       "version": "1.0.0",
     },
     {
-      "releaseTimestamp": "2020-01-01T01:00:03.000Z",
+      "version": "1.0.1",
+    },
+    {
+      "version": "1.0.2",
+    },
+    {
       "version": "1.0.3-SNAPSHOT",
     },
     {
-      "releaseTimestamp": "2020-01-01T02:00:00.000Z",
+      "version": "1.0.4-SNAPSHOT",
+    },
+    {
+      "version": "1.0.5-SNAPSHOT",
+    },
+    {
       "version": "2.0.0",
     },
   ],

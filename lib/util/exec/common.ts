@@ -1,5 +1,7 @@
-import { ChildProcess, spawn } from 'node:child_process';
-import { ExecError, ExecErrorData } from './exec-error';
+import type { ChildProcess } from 'node:child_process';
+import { spawn } from 'node:child_process';
+import type { ExecErrorData } from './exec-error';
+import { ExecError } from './exec-error';
 import type { ExecResult, RawExecOptions } from './types';
 
 // https://man7.org/linux/man-pages/man7/signal.7.html#NAME
@@ -139,7 +141,7 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
       cp.unref();
       return cp.kill(signal);
     }
-  } catch (err) {
+  } catch {
     // cp is a single node tree, therefore -pid is invalid as there is no such pgid,
     return false;
   }

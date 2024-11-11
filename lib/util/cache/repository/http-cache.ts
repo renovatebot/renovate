@@ -1,15 +1,15 @@
-import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { HttpCacheSchema } from '../../http/cache/schema';
+import type { RepoCacheData } from './types';
 
-export function cleanupHttpCache(cacheData: unknown): void {
-  if (!is.plainObject(cacheData) || !is.plainObject(cacheData['httpCache'])) {
-    logger.warn('cleanupHttpCache: invalid cache data');
+export function cleanupHttpCache(cacheData: RepoCacheData): void {
+  const { httpCache } = cacheData;
+  if (!httpCache) {
+    logger.trace('cleanupHttpCache: no http cache to clean up');
     return;
   }
-  const httpCache = cacheData['httpCache'];
 
   const ttlDays = GlobalConfig.get('httpCacheTtlDays', 90);
   if (ttlDays === 0) {

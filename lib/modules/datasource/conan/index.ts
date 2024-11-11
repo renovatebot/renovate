@@ -38,6 +38,10 @@ export class ConanDatasource extends Datasource {
 
   githubHttp: GithubHttp;
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is supported only if the package is served from the Artifactory servers. In which case we determine it from the `properties[conan.package.url]` field in the results.';
+
   constructor(id = ConanDatasource.id) {
     super(id);
     this.githubHttp = new GithubHttp(id);
@@ -59,9 +63,7 @@ export class ConanDatasource extends Datasource {
       headers: { accept: 'application/vnd.github.v3.raw' },
     });
     // TODO: use schema (#9610)
-    const doc = parseSingleYaml<ConanYAML>(res.body, {
-      json: true,
-    });
+    const doc = parseSingleYaml<ConanYAML>(res.body);
     return {
       releases: Object.keys(doc?.versions ?? {}).map((version) => ({
         version,
@@ -70,10 +72,10 @@ export class ConanDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${datasource}-revisions`,
+    namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: DigestConfig, newValue?: string) =>
       // TODO: types (#22198)
-      `${registryUrl!}:${packageName}:${newValue!}`,
+      `getDigest:${registryUrl!}:${packageName}:${newValue!}`,
   })
   override async getDigest(
     { registryUrl, packageName }: DigestConfig,
@@ -102,7 +104,7 @@ export class ConanDatasource extends Datasource {
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       // TODO: types (#22198)
-      `${registryUrl}:${packageName}`,
+      `getReleases:${registryUrl}:${packageName}`,
   })
   async getReleases({
     registryUrl,

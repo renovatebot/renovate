@@ -1,7 +1,9 @@
 import { setTimeout } from 'timers/promises';
 import fs from 'fs-extra';
-import _simpleGit, { SimpleGit } from 'simple-git';
-import { DirectoryResult, dir } from 'tmp-promise';
+import type { SimpleGit } from 'simple-git';
+import _simpleGit from 'simple-git';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
@@ -385,6 +387,48 @@ describe('modules/datasource/crate/index', () => {
       await expect(
         crateDatasource.fetchCrateRecordsPayload(info, 'benedict'),
       ).toReject();
+    });
+  });
+
+  describe('postprocessRelease', () => {
+    const datasource = new CrateDatasource();
+
+    it('no-op for registries other than crates.io', async () => {
+      const releaseOrig = { version: '4.5.17' };
+
+      const res = await datasource.postprocessRelease(
+        {
+          packageName: 'clap',
+          registryUrl: 'https://example.com',
+        },
+        releaseOrig,
+      );
+
+      expect(res).toBe(releaseOrig);
+    });
+
+    it('fetches releaseTimestamp', async () => {
+      httpMock
+        .scope(API_BASE_URL)
+        .get('/crates/clap/4.5.17')
+        .reply(200, {
+          version: {
+            created_at: '2024-09-04T19:16:41.355243+00:00',
+          },
+        });
+
+      const res = await datasource.postprocessRelease(
+        {
+          packageName: 'clap',
+          registryUrl: 'https://crates.io',
+        },
+        { version: '4.5.17' },
+      );
+
+      expect(res).toEqual({
+        version: '4.5.17',
+        releaseTimestamp: '2024-09-04T19:16:41.355243+00:00',
+      });
     });
   });
 });

@@ -1,4 +1,5 @@
-import { RenovateConfig, logger, mocked, partial } from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { logger, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import * as _secrets from '../../../config/secrets';
 import * as _onboarding from '../onboarding/branch';
@@ -38,7 +39,7 @@ describe('workers/repository/init/index', () => {
     it('runs', async () => {
       apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
       onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
-      config.getRepoConfig.mockResolvedValueOnce({});
+      config.getRepoConfig.mockResolvedValueOnce({ mode: 'silent' });
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsToConfig.mockReturnValueOnce(
         partial<RenovateConfig>(),

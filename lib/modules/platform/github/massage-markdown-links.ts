@@ -16,7 +16,10 @@ const urlRegex =
   /(?:https?:)?(?:\/\/)?(?:www\.)?(?<!api\.)(?:to)?github\.com\/[-a-z0-9]+\/[-_a-z0-9.]+\/(?:discussions|issues|pull)\/[0-9]+(?:#[-_a-z0-9]+)?/i; // TODO #12872 (?<!re) after text not matching
 
 function massageLink(input: string): string {
-  return input.replace(regEx(/(?:to)?github\.com/i), 'togithub.com');
+  return input.replace(
+    regEx(/(?:to|redirect\.|www\.)?github\.com/i),
+    'redirect.github.com',
+  );
 }
 
 function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {

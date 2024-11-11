@@ -1,0 +1,9 @@
+[package]
+name = "renovate-test"
+version = "0.1.0"
+authors = ["John Doe <john.doe@example.org>"]
+edition = "2018"
+
+[dependencies]
+tokio = "0.2"
+

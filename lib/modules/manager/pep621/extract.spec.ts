@@ -1,6 +1,8 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
+import { GitRefsDatasource } from '../../datasource/git-refs';
+import { depTypes } from './utils';
 import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
@@ -134,14 +136,57 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'project.optional-dependencies',
           currentValue: '>12',
-          depName: 'pytest/pytest',
+          depName: 'pytest',
+          managerData: { depGroup: 'pytest' },
         },
         {
           packageName: 'pytest-mock',
           datasource: 'pypi',
           depType: 'project.optional-dependencies',
           skipReason: 'unspecified-version',
-          depName: 'pytest/pytest-mock',
+          depName: 'pytest-mock',
+          managerData: { depGroup: 'pytest' },
+        },
+      ]);
+
+      const dependenciesFromDependencyGroups = result?.deps.filter(
+        (dep) => dep.depType === 'dependency-groups',
+      );
+      expect(dependenciesFromDependencyGroups).toEqual([
+        {
+          packageName: 'mypy',
+          datasource: 'pypi',
+          depType: 'dependency-groups',
+          currentValue: '==1.13.0',
+          currentVersion: '1.13.0',
+          depName: 'mypy',
+          managerData: { depGroup: 'typing' },
+        },
+        {
+          packageName: 'types-requests',
+          datasource: 'pypi',
+          depType: 'dependency-groups',
+          skipReason: 'unspecified-version',
+          depName: 'types-requests',
+          managerData: { depGroup: 'typing' },
+        },
+        {
+          packageName: 'pytest-cov',
+          datasource: 'pypi',
+          depType: 'dependency-groups',
+          currentValue: '==5.0.0',
+          currentVersion: '5.0.0',
+          depName: 'pytest-cov',
+          managerData: { depGroup: 'coverage' },
+        },
+        {
+          packageName: 'click',
+          datasource: 'pypi',
+          depType: 'dependency-groups',
+          currentValue: '==8.1.7',
+          currentVersion: '8.1.7',
+          depName: 'click',
+          managerData: { depGroup: 'all' },
         },
       ]);
 
@@ -154,28 +199,32 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           skipReason: 'unspecified-version',
-          depName: 'test/pdm',
+          depName: 'pdm',
+          managerData: { depGroup: 'test' },
         },
         {
           packageName: 'pytest-rerunfailures',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           currentValue: '>=10.2',
-          depName: 'test/pytest-rerunfailures',
+          depName: 'pytest-rerunfailures',
+          managerData: { depGroup: 'test' },
         },
         {
           packageName: 'tox',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           skipReason: 'unspecified-version',
-          depName: 'tox/tox',
+          depName: 'tox',
+          managerData: { depGroup: 'tox' },
         },
         {
           packageName: 'tox-pdm',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           currentValue: '>=0.5',
-          depName: 'tox/tox-pdm',
+          depName: 'tox-pdm',
+          managerData: { depGroup: 'tox' },
         },
       ]);
     });
@@ -214,33 +263,36 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'project.optional-dependencies',
           currentValue: '>12',
-          depName: 'pytest/pytest',
+          depName: 'pytest',
           registryUrls: [
             'https://private-site.org/pypi/simple',
             'https://private.pypi.org/simple',
           ],
+          managerData: { depGroup: 'pytest' },
         },
         {
           packageName: 'pytest-rerunfailures',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           currentValue: '>=10.2',
-          depName: 'test/pytest-rerunfailures',
+          depName: 'pytest-rerunfailures',
           registryUrls: [
             'https://private-site.org/pypi/simple',
             'https://private.pypi.org/simple',
           ],
+          managerData: { depGroup: 'test' },
         },
         {
           packageName: 'tox-pdm',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           currentValue: '>=0.5',
-          depName: 'tox/tox-pdm',
+          depName: 'tox-pdm',
           registryUrls: [
             'https://private-site.org/pypi/simple',
             'https://private.pypi.org/simple',
           ],
+          managerData: { depGroup: 'tox' },
         },
       ]);
     });
@@ -272,6 +324,68 @@ describe('modules/manager/pep621/extract', () => {
             'https://pypi.org/pypi/',
             'https://private-site.org/pypi/simple',
           ],
+        },
+      ]);
+    });
+
+    it('should skip dependencies with unsupported uv sources', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+        [project]
+        dependencies = [
+          "dep1",
+          "dep2",
+          "dep3",
+          "dep4",
+          "dep5",
+          "dep6",
+          "dep-with_NORMALIZATION",
+        ]
+
+        [tool.uv.sources]
+        dep2 = { git = "https://github.com/foo/bar" }
+        dep3 = { path = "/local-dep.whl" }
+        dep4 = { url = "https://example.com" }
+        dep5 = { workspace = true }
+        dep_WITH-normalization = { workspace = true }
+        `,
+        'pyproject.toml',
+      );
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          depType: depTypes.uvSources,
+          datasource: GitRefsDatasource.id,
+          packageName: 'https://github.com/foo/bar',
+          currentValue: undefined,
+          skipReason: 'unspecified-version',
+        },
+        {
+          depName: 'dep3',
+          depType: depTypes.uvSources,
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'dep4',
+          depType: depTypes.uvSources,
+          skipReason: 'unsupported-url',
+        },
+        {
+          depName: 'dep5',
+          depType: depTypes.uvSources,
+          skipReason: 'inherited-dependency',
+        },
+        {
+          depName: 'dep6',
+        },
+        {
+          depName: 'dep-with_NORMALIZATION',
+          depType: depTypes.uvSources,
+          skipReason: 'inherited-dependency',
         },
       ]);
     });
@@ -407,6 +521,86 @@ describe('modules/manager/pep621/extract', () => {
             datasource: 'pypi',
             depType: 'build-system.requires',
             skipReason: 'unspecified-version',
+          },
+        ],
+      });
+    });
+
+    it('should resolve lockedVersions from uv.lock', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        codeBlock`
+          version = 1
+          requires-python = ">=3.11"
+
+          [[package]]
+          name = "attrs"
+          version = "24.2.0"
+          source = { registry = "https://pypi.org/simple" }
+          sdist = { url = "https://files.pythonhosted.org/packages/fc/0f/aafca9af9315aee06a89ffde799a10a582fe8de76c563ee80bbcdc08b3fb/attrs-24.2.0.tar.gz", hash = "sha256:5cfb1b9148b5b086569baec03f20d7b6bf3bcacc9a42bebf87ffaaca362f6346", size = 792678 }
+          wheels = [
+              { url = "https://files.pythonhosted.org/packages/6a/21/5b6702a7f963e95456c0de2d495f67bf5fd62840ac655dc451586d23d39a/attrs-24.2.0-py3-none-any.whl", hash = "sha256:81921eb96de3191c8258c199618104dd27ac608d9366f5e35d011eae1867ede2", size = 63001 },
+          ]
+
+          [[package]]
+          name = "pep621-uv"
+          version = "0.1.0"
+          source = { virtual = "." }
+          dependencies = [
+              { name = "attrs" },
+          ]
+
+          [package.metadata]
+          requires-dist = [{ name = "attrs", specifier = ">=24.1.0" }]
+        `,
+      );
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pep621-uv"
+          version = "0.1.0"
+          dependencies = ["attrs>=24.1.0"]
+          requires-python = ">=3.11"
+        `,
+        'pyproject.toml',
+      );
+      expect(res).toMatchObject({
+        extractedConstraints: { python: '>=3.11' },
+        deps: [
+          {
+            packageName: 'attrs',
+            depName: 'attrs',
+            datasource: 'pypi',
+            depType: 'project.dependencies',
+            currentValue: '>=24.1.0',
+            lockedVersion: '24.2.0',
+          },
+        ],
+      });
+    });
+
+    it('should resolve dependencies without locked versions on invalid uv.lock', async () => {
+      fs.readLocalFile.mockResolvedValue(codeBlock`invalid_toml`);
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pep621-uv"
+          version = "0.1.0"
+          dependencies = ["attrs>=24.1.0"]
+          requires-python = ">=3.11"
+        `,
+        'pyproject.toml',
+      );
+      expect(res).toMatchObject({
+        extractedConstraints: { python: '>=3.11' },
+        deps: [
+          {
+            packageName: 'attrs',
+            depName: 'attrs',
+            datasource: 'pypi',
+            depType: 'project.dependencies',
+            currentValue: '>=24.1.0',
           },
         ],
       });

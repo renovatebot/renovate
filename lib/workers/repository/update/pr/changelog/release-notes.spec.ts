@@ -28,12 +28,12 @@ jest.mock('../../../../../util/host-rules', () => mockDeep());
 
 const hostRules = mocked(_hostRules);
 
-const angularJsChangelogMd = Fixtures.get('angular-js.md', '..');
-const jestChangelogMd = Fixtures.get('jest.md', '..');
-const jsYamlChangelogMd = Fixtures.get('js-yaml.md', '..');
-const yargsChangelogMd = Fixtures.get('yargs.md', '..');
-const adapterutilsChangelogMd = Fixtures.get('adapter-utils.md', '..');
-const gitterWebappChangelogMd = Fixtures.get('gitter-webapp.md', '..');
+const angularJsChangelogMd = Fixtures.get('angular-js.md');
+const jestChangelogMd = Fixtures.get('jest.md');
+const jsYamlChangelogMd = Fixtures.get('js-yaml.md');
+const yargsChangelogMd = Fixtures.get('yargs.md');
+const adapterutilsChangelogMd = Fixtures.get('adapter-utils.md');
+const gitterWebappChangelogMd = Fixtures.get('gitter-webapp.md');
 
 const githubTreeResponse = {
   tree: [
@@ -600,7 +600,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       });
     });
 
-    it('gets release notes with body "other-"', async () => {
+    it('gets release notes with body "other-" (packageName)', async () => {
       githubReleasesMock.mockResolvedValueOnce([
         {
           version: 'other-1.0.0',
@@ -626,6 +626,51 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           ...githubProject,
           repository: 'some/other-repository',
           packageName: 'other',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.1',
+          gitRef: '1.0.1',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+      expect(res).toEqual({
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
+        id: 2,
+        name: 'some/dep',
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        tag: 'other-1.0.1',
+        url: 'https://github.com/some/other-repository/releases/other-1.0.1',
+      });
+    });
+
+    it('gets release notes with body "other-" (depName)', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          version: 'other-1.0.0',
+          releaseTimestamp: '2020-01-01',
+          id: 1,
+          url: 'https://github.com/some/other-repository/releases/other-1.0.0',
+          name: 'some/dep',
+          description: 'some body',
+        },
+        {
+          version: 'other-1.0.1',
+          releaseTimestamp: '2020-01-01',
+          id: 2,
+          url: 'https://github.com/some/other-repository/releases/other-1.0.1',
+          name: 'some/dep',
+          description:
+            'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'some.registry/some/other',
+          depName: 'other',
         },
         partial<ChangeLogRelease>({
           version: '1.0.1',

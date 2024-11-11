@@ -1,10 +1,16 @@
 import is from '@sindresorhus/is';
+import extract from 'extract-zip';
 import semver from 'semver';
+import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
-import { Http, HttpError } from '../../../util/http';
+import { cache } from '../../../util/cache/package/decorator';
+import * as fs from '../../../util/fs';
+import { ensureCacheDir } from '../../../util/fs';
+import type { Http } from '../../../util/http';
+import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
@@ -19,7 +25,7 @@ import type {
 } from './types';
 
 export class NugetV3Api {
-  static readonly cacheNamespace = 'datasource-nuget';
+  static readonly cacheNamespace = 'datasource-nuget-v3';
 
   async getResourceUrl(
     http: Http,
@@ -151,8 +157,15 @@ export class NugetV3Api {
 
     let homepage: string | null = null;
     let latestStable: string | null = null;
+    let nupkgUrl: string | null = null;
     const releases = catalogEntries.map(
-      ({ version, published: releaseTimestamp, projectUrl, listed }) => {
+      ({
+        version,
+        published: releaseTimestamp,
+        projectUrl,
+        listed,
+        packageContent,
+      }) => {
         const release: Release = { version: removeBuildMeta(version) };
         if (releaseTimestamp) {
           release.releaseTimestamp = releaseTimestamp;
@@ -160,6 +173,7 @@ export class NugetV3Api {
         if (versioning.isValid(version) && versioning.isStable(version)) {
           latestStable = removeBuildMeta(version);
           homepage = projectUrl ? massageUrl(projectUrl) : homepage;
+          nupkgUrl = massageUrl(packageContent);
         }
         if (listed === false) {
           release.isDeprecated = true;
@@ -177,6 +191,7 @@ export class NugetV3Api {
       const last = catalogEntries.pop()!;
       latestStable = removeBuildMeta(last.version);
       homepage ??= last.projectUrl ?? null;
+      nupkgUrl ??= massageUrl(last.packageContent);
     }
 
     const dep: ReleaseResult = {
@@ -189,7 +204,6 @@ export class NugetV3Api {
         registryUrl,
         'PackageBaseAddress',
       );
-      // istanbul ignore else: this is a required v3 api
       if (is.nonEmptyString(packageBaseAddress)) {
         const nuspecUrl = `${ensureTrailingSlash(
           packageBaseAddress,
@@ -203,6 +217,18 @@ export class NugetV3Api {
         if (sourceUrl) {
           dep.sourceUrl = massageUrl(sourceUrl);
         }
+      } else if (nupkgUrl) {
+        const sourceUrl = await this.getSourceUrlFromNupkg(
+          http,
+          registryUrl,
+          pkgName,
+          latestStable,
+          nupkgUrl,
+        );
+        if (sourceUrl) {
+          dep.sourceUrl = massageUrl(sourceUrl);
+          logger.debug(`Determined sourceUrl ${sourceUrl} from ${nupkgUrl}`);
+        }
       }
     } catch (err) {
       // istanbul ignore if: not easy testable with nock
@@ -215,13 +241,12 @@ export class NugetV3Api {
           { registryUrl, pkgName, pkgVersion: latestStable },
           `package manifest (.nuspec) not found`,
         );
-        return dep;
+      } else {
+        logger.debug(
+          { err, registryUrl, pkgName, pkgVersion: latestStable },
+          `Cannot obtain sourceUrl`,
+        );
       }
-      logger.debug(
-        { err, registryUrl, pkgName, pkgVersion: latestStable },
-        `Cannot obtain sourceUrl`,
-      );
-      return dep;
     }
 
     // istanbul ignore else: not easy testable
@@ -232,5 +257,53 @@ export class NugetV3Api {
     }
 
     return dep;
+  }
+
+  @cache({
+    namespace: NugetV3Api.cacheNamespace,
+    key: (
+      _http: Http,
+      registryUrl: string,
+      packageName: string,
+      _packageVersion: string | null,
+      _nupkgUrl: string,
+    ) => `source-url:${registryUrl}:${packageName}`,
+    ttlMinutes: 10080, // 1 week
+  })
+  async getSourceUrlFromNupkg(
+    http: Http,
+    _registryUrl: string,
+    packageName: string,
+    packageVersion: string | null,
+    nupkgUrl: string,
+  ): Promise<string | null> {
+    // istanbul ignore if: experimental feature
+    if (!process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS) {
+      logger.once.debug('RENOVATE_X_NUGET_DOWNLOAD_NUPKGS is not set');
+      return null;
+    }
+    const cacheDir = await ensureCacheDir('nuget');
+    const nupkgFile = upath.join(
+      cacheDir,
+      `${packageName}.${packageVersion}.nupkg`,
+    );
+    const nupkgContentsDir = upath.join(
+      cacheDir,
+      `${packageName}.${packageVersion}`,
+    );
+    const readStream = http.stream(nupkgUrl);
+    try {
+      const writeStream = fs.createCacheWriteStream(nupkgFile);
+      await fs.pipeline(readStream, writeStream);
+      await extract(nupkgFile, { dir: nupkgContentsDir });
+      const nuspecFile = upath.join(nupkgContentsDir, `${packageName}.nuspec`);
+      const nuspec = new XmlDocument(
+        await fs.readCacheFile(nuspecFile, 'utf8'),
+      );
+      return nuspec.valueWithPath('metadata.repository@url') ?? null;
+    } finally {
+      await fs.rmCache(nupkgFile);
+      await fs.rmCache(nupkgContentsDir);
+    }
   }
 }

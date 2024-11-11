@@ -35,7 +35,7 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import { BitbucketPrCache } from './pr-cache';
-import { RepoInfo, Repositories } from './schema';
+import { RepoInfo, Repositories, UnresolvedPrTasks } from './schema';
 import type {
   Account,
   BitbucketStatus,
@@ -283,7 +283,7 @@ function matchesState(state: string, desiredState: string): boolean {
 }
 
 export async function getPrList(): Promise<Pr[]> {
-  logger.debug('getPrList()');
+  logger.trace('getPrList()');
   return await BitbucketPrCache.getPrs(
     bitbucketHttp,
     config.repository,
@@ -570,7 +570,7 @@ async function closeIssue(issueNumber: number): Promise<void> {
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
-  return smartTruncate(input, 50000)
+  return smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
       'by renaming this PR to start with "rebase!"',
@@ -584,6 +584,10 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+}
+
+export function maxBodyLength(): number {
+  return 50000;
 }
 
 export async function ensureIssue({
@@ -782,7 +786,10 @@ async function sanitizeReviewers(
         // Validate that each previous PR reviewer account is still active
         for (const reviewer of reviewers) {
           const reviewerUser = (
-            await bitbucketHttp.getJson<Account>(`/2.0/users/${reviewer.uuid}`)
+            await bitbucketHttp.getJson<Account>(
+              `/2.0/users/${reviewer.uuid}`,
+              { memCache: true },
+            )
           ).body;
 
           if (reviewerUser.account_status === 'active') {
@@ -836,6 +843,7 @@ async function isAccountMemberOfWorkspace(
   try {
     await bitbucketHttp.get(
       `/2.0/workspaces/${workspace}/members/${reviewer.uuid}`,
+      { memCache: true },
     );
 
     return true;
@@ -859,7 +867,7 @@ export async function createPr({
   targetBranch,
   prTitle: title,
   prBody: description,
-  platformOptions,
+  platformPrOptions,
 }: CreatePRConfig): Promise<Pr> {
   // labels is not supported in Bitbucket: https://bitbucket.org/site/master/issues/11976/ability-to-add-labels-to-pull-requests-bb
 
@@ -869,7 +877,7 @@ export async function createPr({
 
   let reviewers: Account[] = [];
 
-  if (platformOptions?.bbUseDefaultReviewers) {
+  if (platformPrOptions?.bbUseDefaultReviewers) {
     const reviewersResponse = (
       await bitbucketHttp.getJson<PagedResult<EffectiveReviewer>>(
         `/2.0/repositories/${config.repository}/effective-default-reviewers`,
@@ -917,6 +925,9 @@ export async function createPr({
       renovateUserUuid,
       pr,
     );
+    if (platformPrOptions?.bbAutoResolvePrTasks) {
+      await autoResolvePrTasks(pr);
+    }
     return pr;
   } catch (err) /* istanbul ignore next */ {
     // Try sanitizing reviewers
@@ -944,8 +955,55 @@ export async function createPr({
         renovateUserUuid,
         pr,
       );
+      if (platformPrOptions?.bbAutoResolvePrTasks) {
+        await autoResolvePrTasks(pr);
+      }
       return pr;
     }
+  }
+}
+
+async function autoResolvePrTasks(pr: Pr): Promise<void> {
+  logger.debug(`Auto resolve PR tasks in #${pr.number}`);
+  try {
+    const unResolvedTasks = (
+      await bitbucketHttp.getJson(
+        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks`,
+        { paginate: true, pagelen: 100 },
+        UnresolvedPrTasks,
+      )
+    ).body;
+
+    logger.trace(
+      {
+        prId: pr.number,
+        listTaskRes: unResolvedTasks,
+      },
+      'List PR tasks',
+    );
+
+    for (const task of unResolvedTasks) {
+      const res = await bitbucketHttp.putJson(
+        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks/${task.id}`,
+        {
+          body: {
+            state: 'RESOLVED',
+            content: {
+              raw: task.content.raw,
+            },
+          },
+        },
+      );
+      logger.trace(
+        {
+          prId: pr.number,
+          updateTaskResponse: res,
+        },
+        'Put PR tasks - mark resolved',
+      );
+    }
+  } catch (err) {
+    logger.warn({ prId: pr.number, err }, 'Error resolving PR tasks');
   }
 }
 

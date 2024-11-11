@@ -2,6 +2,7 @@ import { parseRange } from 'semver-utils';
 import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { api as npm } from '../npm';
+import { api as pep440 } from '../pep440';
 import type { NewValueConfig, VersioningApi } from '../types';
 
 import { VERSION_PATTERN } from './patterns';
@@ -14,7 +15,11 @@ import {
 
 export const id = 'poetry';
 export const displayName = 'Poetry';
-export const urls = ['https://python-poetry.org/docs/versions/'];
+export const urls = [
+  'https://python-poetry.org/docs/dependency-specification/',
+  'https://python-poetry.org/docs/faq#why-does-poetry-not-adhere-to-semantic-versioning',
+  'https://python-poetry.org/docs/faq#why-does-poetry-enforce-pep-440-versions',
+];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
@@ -49,9 +54,7 @@ function isVersion(input: string): boolean {
 }
 
 function isGreaterThan(a: string, b: string): boolean {
-  const semverA = poetry2semver(a);
-  const semverB = poetry2semver(b);
-  return !!(semverA && semverB && npm.isGreaterThan(semverA, semverB));
+  return !!(a && b && pep440.isGreaterThan(a, b));
 }
 
 function isLessThanRange(version: string, range: string): boolean {
@@ -70,7 +73,7 @@ export function isValid(input: string): boolean {
 
   try {
     return npm.isValid(poetry2npm(input, true));
-  } catch (err) {
+  } catch {
     logger.once.debug(
       { version: input },
       'Poetry version or range is not supported by current implementation',
@@ -240,8 +243,7 @@ function getNewValue({
 }
 
 function sortVersions(a: string, b: string): number {
-  // istanbul ignore next
-  return npm.sortVersions(poetry2semver(a) ?? '', poetry2semver(b) ?? '');
+  return pep440.sortVersions(a, b);
 }
 
 function subset(subRange: string, superRange: string): boolean | undefined {
