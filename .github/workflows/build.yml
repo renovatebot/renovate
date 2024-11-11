@@ -357,6 +357,7 @@ jobs:
     timeout-minutes: ${{ matrix.runner-timeout-minutes }}
 
     strategy:
+      fail-fast: false
       matrix:
         include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
 
