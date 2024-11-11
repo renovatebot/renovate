@@ -189,7 +189,7 @@ api.set('puppet', puppet);
 api.set('pyenv', pyenv);
 api.set('ruby-version', rubyVersion);
 api.set('runtime-version', runtimeVersion);
-api.set('rust-version', rust);
+api.set('rust-toolchain', rust);
 api.set('sbt', sbt);
 api.set('scalafmt', scalafmt);
 api.set('setup-cfg', setupCfg);
