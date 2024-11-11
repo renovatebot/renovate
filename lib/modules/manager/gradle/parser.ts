@@ -6,6 +6,7 @@ import { qAssignments } from './parser/assignments';
 import { qKotlinImport } from './parser/common';
 import { qDependencies, qLongFormDep } from './parser/dependencies';
 import { setParseGradleFunc } from './parser/handlers';
+import { qToolchainVersion } from './parser/language-version';
 import { qKotlinMultiObjectVarAssignment } from './parser/objects';
 import { qPlugins } from './parser/plugins';
 import { qRegistryUrls } from './parser/registry-urls';
@@ -107,6 +108,13 @@ export function parseKotlinSource(
   }
 
   return { deps, vars };
+}
+
+export function parseJavaToolchainVersion(input: string): string | null {
+  const ctx: Partial<Ctx> = {};
+  const parsedResult = groovy.query(input, qToolchainVersion, ctx);
+
+  return parsedResult?.javaLanguageVersion ?? null;
 }
 
 const propWord = '[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*';

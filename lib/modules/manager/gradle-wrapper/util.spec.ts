@@ -5,6 +5,7 @@ import { fs, partial } from '../../../../test/util';
 import {
   extractGradleVersion,
   getJavaConstraint,
+  getJavaLanguageVersion,
   getJvmConfiguration,
   gradleWrapperFileName,
   prepareGradleCommand,
@@ -45,6 +46,15 @@ describe('modules/manager/gradle-wrapper/util', () => {
       fs.readLocalFile.mockResolvedValue(daemonJvm);
       expect(await getJavaConstraint('8.8', './gradlew')).toBe('^999.0.0');
     });
+
+    it('returns languageVersion constraint if found', async () => {
+      const buildGradle = codeBlock`
+        java { toolchain { languageVersion = JavaLanguageVersion.of(456) } }
+      `;
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValue(buildGradle);
+      expect(await getJavaConstraint('6.7', './gradlew')).toBe('^456.0.0');
+    });
   });
 
   describe('getJvmConfiguration', () => {
@@ -64,6 +74,36 @@ describe('modules/manager/gradle-wrapper/util', () => {
         'sub/gradle/gradle-daemon-jvm.properties',
         'utf8',
       );
+    });
+  });
+
+  describe('getJavaLanguageVersion', () => {
+    it('extract languageVersion value', async () => {
+      const buildGradle = codeBlock`
+        java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
+      `;
+      fs.localPathExists.mockResolvedValue(true);
+      fs.readLocalFile.mockResolvedValue(buildGradle);
+      expect(await getJavaLanguageVersion('')).toBe('21');
+    });
+
+    it('returns null if build.gradle or build.gradle.kts file not found', async () => {
+      fs.localPathExists.mockResolvedValue(false);
+      fs.readLocalFile.mockResolvedValue(null);
+      expect(await getJavaLanguageVersion('sub/gradlew')).toBeNull();
+      expect(fs.readLocalFile).toHaveBeenCalledWith(
+        'sub/build.gradle.kts',
+        'utf8',
+      );
+    });
+
+    it('returns null if build.gradle does not include languageVersion', async () => {
+      const buildGradle = codeBlock`
+        dependencies { implementation "com.google.protobuf:protobuf-java:2.17.0" }
+      `;
+      fs.localPathExists.mockResolvedValue(true);
+      fs.readLocalFile.mockResolvedValue(buildGradle);
+      expect(await getJavaLanguageVersion('')).toBeNull();
     });
   });
 
