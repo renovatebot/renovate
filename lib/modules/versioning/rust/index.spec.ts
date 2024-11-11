@@ -48,6 +48,7 @@ describe('modules/versioning/rust/index', () => {
 
   it.each`
     version      | other        | expected
+    ${'1.82'}    | ${'1.82.0'}  | ${true}
     ${'1.82.0'}  | ${'1.82.0'}  | ${true}
     ${'1.82.1'}  | ${'1.82.1'}  | ${true}
     ${'1.82.42'} | ${'1.82.42'} | ${true}
@@ -78,6 +79,8 @@ describe('modules/versioning/rust/index', () => {
 
   it.each`
     version     | other       | expected
+    ${'1.82.1'} | ${'1.82'}   | ${true}
+    ${'1.81.1'} | ${'1.82'}   | ${false}
     ${'1.82.0'} | ${'1.83.0'} | ${false}
     ${'1.83.0'} | ${'1.82.0'} | ${true}
     ${'1.82.0'} | ${'1.82.1'} | ${false}

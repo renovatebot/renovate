@@ -7,7 +7,7 @@ export { extractPackageFile } from './extract';
 export const supportedDatasources = [GithubReleasesDatasource.id];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)rust-toolchain\\.toml?$'],
+  fileMatch: ['(^|/)rust-toolchain(\\.toml)?$'],
   versioning: rustVersioning.id,
 };
 

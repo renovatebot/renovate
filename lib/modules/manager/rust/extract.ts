@@ -12,8 +12,5 @@ export function extractPackageFile(content: string): PackageFileContent {
   };
   return {
     deps: [dep],
-    // Format described in https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file
-    // Examples: 'channel = "1.82.1"', 'channel = "1.82"'
-    matchStrings: ['channel\\s*=\\s*"(?<currentValue>\\d+\\.\\d+(\\.\\d+)?)"'],
   };
 }
