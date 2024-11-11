@@ -482,11 +482,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       `;
       upgrade.manager = 'bundler';
       upgrade.depName = 'rails';
-      upgrade.currentValue = "~>7.0";
+      upgrade.currentValue = '~>7.0';
       upgrade.depIndex = 0;
       upgrade.updateType = 'replacement';
       upgrade.newName = 'rack';
-      upgrade.newValue = "~>2.2";
+      upgrade.newValue = '~>2.2';
       upgrade.packageFile = 'Gemfile';
       const res = await doAutoReplace(upgrade, gemfile, reuseExistingBranch);
       expect(res).toBe(
