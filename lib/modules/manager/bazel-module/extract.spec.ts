@@ -4,8 +4,10 @@ import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { BazelDatasource } from '../../datasource/bazel';
+import { DockerDatasource } from '../../datasource/docker';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { MavenDatasource } from '../../datasource/maven';
+import { id as dockerVersioning } from '../../versioning/docker';
 import * as parser from './parser';
 import { extractPackageFile } from '.';
 
@@ -286,6 +288,62 @@ describe('modules/manager/bazel-module/extract', () => {
           currentValue: '0.2.56',
           registryUrls: ['https://repo1.maven.org/maven2/'],
           versioning: 'gradle',
+        },
+      ]);
+    });
+
+    it('returns oci.pull dependencies', async () => {
+      const input = codeBlock`
+        oci.pull(
+          name = "nginx_image",
+          digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+          image = "index.docker.io/library/nginx",
+          platforms = ["linux/amd64"],
+          tag = "1.27.1",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+      if (!result) {
+        throw new Error('Expected a result.');
+      }
+      expect(result.deps).toEqual([
+        {
+          datasource: DockerDatasource.id,
+          versioning: dockerVersioning,
+          depType: 'oci_pull',
+          depName: 'nginx_image',
+          packageName: 'index.docker.io/library/nginx',
+          currentValue: '1.27.1',
+          currentDigest:
+            'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
+        },
+      ]);
+    });
+
+    it('returns oci.pull dependencies without tags', async () => {
+      const input = codeBlock`
+        oci.pull(
+          name = "nginx_image",
+          digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+          image = "index.docker.io/library/nginx",
+          platforms = ["linux/amd64"],
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+      if (!result) {
+        throw new Error('Expected a result.');
+      }
+      expect(result.deps).toEqual([
+        {
+          datasource: DockerDatasource.id,
+          versioning: dockerVersioning,
+          depType: 'oci_pull',
+          depName: 'nginx_image',
+          packageName: 'index.docker.io/library/nginx',
+          currentDigest:
+            'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
         },
       ]);
     });

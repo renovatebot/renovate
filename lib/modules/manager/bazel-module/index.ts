@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants';
 import { BazelDatasource } from '../../datasource/bazel';
+import { DockerDatasource } from '../../datasource/docker';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { MavenDatasource } from '../../datasource/maven';
 import { extractPackageFile } from './extract';
@@ -14,6 +15,7 @@ export const categories: Category[] = ['bazel'];
 
 export const supportedDatasources = [
   BazelDatasource.id,
+  DockerDatasource.id,
   GithubTagsDatasource.id,
   MavenDatasource.id,
 ];

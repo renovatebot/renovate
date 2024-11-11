@@ -286,5 +286,34 @@ describe('modules/manager/bazel-module/parser/index', () => {
         ),
       ]);
     });
+
+    it('finds oci.pull', () => {
+      const input = codeBlock`
+        oci.pull(
+          name = "nginx_image",
+          digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+          image = "index.docker.io/library/nginx",
+          platforms = ["linux/amd64"],
+          tag = "1.27.1",
+        )
+      `;
+
+      const res = parse(input);
+      expect(res).toEqual([
+        fragments.record(
+          {
+            rule: fragments.string('oci_pull'),
+            name: fragments.string('nginx_image'),
+            digest: fragments.string(
+              'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
+            ),
+            image: fragments.string('index.docker.io/library/nginx'),
+            platforms: fragments.array([fragments.string('linux/amd64')], true),
+            tag: fragments.string('1.27.1'),
+          },
+          true,
+        ),
+      ]);
+    });
   });
 });
