@@ -66,4 +66,4 @@ Renovate supports upgrading the Rust toolchain version in the `rust-toolchain.to
 
 ## Enabling Rust toolchain updating
 
-TODO: I'm not sure whether it's ok to enable a new manager by default.
+Renovate updates the Rust toolchain by default.
