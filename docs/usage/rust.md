@@ -64,6 +64,6 @@ Renovate supports upgrading the Rust toolchain version in the `rust-toolchain.to
 1. Renovate resolves the Rust toolchain version using the [rust-lang/rust](https://github.com/rust-lang/rust) Github repositories releases.
 1. If Renovate finds an update, Renovate will update the version in `rust-toolchain.toml`
 
-## Enabling Rust Modules Updating
+## Enabling Rust toolchain updating
 
 TODO: I'm not sure whether it's ok to enable a new manager by default.
