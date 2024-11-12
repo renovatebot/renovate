@@ -60,5 +60,7 @@ export function commitFilesToBranch(
     message: config.commitMessage!,
     force: !!config.forceCommit,
     platformCommit: config.platformCommit,
+    // Only needed by Gerrit platform
+    prTitle: config.prTitle,
   });
 }
