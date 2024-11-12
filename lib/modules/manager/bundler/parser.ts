@@ -35,6 +35,8 @@ const gemStatement = `
 ) @gem-call
 `.trim();
 
+const gemQuery = new Query(Ruby, gemStatement);
+
 const globalSourceStatement = `
 (program
   .
@@ -55,6 +57,8 @@ const globalSourceStatement = `
 )
 `.trim();
 
+const globalSourceQuery = new Query(Ruby, globalSourceStatement);
+
 const rubyVersionStatement = `
 (program
   .
@@ -74,6 +78,8 @@ const rubyVersionStatement = `
   )
 )
 `.trim();
+
+const rubyVersionQuery = new Query(Ruby, rubyVersionStatement);
 
 const parser = new Parser();
 parser.setLanguage(Ruby);
@@ -162,10 +168,9 @@ function extractWeirdVersion(
 export function parseGemfile(content: string): PackageDependency[] {
   parser.reset();
   const tree = parser.parse(content);
-
-  const gemQuery = new Query(Ruby, gemStatement);
-  const globalSourceQuery = new Query(Ruby, globalSourceStatement);
-  const rubyVersionQuery = new Query(Ruby, rubyVersionStatement);
+  if (!tree) {
+    throw new Error('Empty parsed tree');
+  }
 
   const deps: PackageDependency[] = [];
 
