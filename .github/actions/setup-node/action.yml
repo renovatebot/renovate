@@ -24,7 +24,7 @@ runs:
     - name: Calculate `CACHE_KEY`
       shell: bash
       run: |
-        echo 'CACHE_KEY=node_modules-v2-${{
+        echo 'CACHE_KEY=node_modules-v3-${{
           inputs.os
         }}-${{
           inputs.node-version
@@ -79,7 +79,6 @@ runs:
 
     - name: Install dependencies
       uses: nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e # v3.0.0
-      if: env.CACHE_HIT != 'true'
       with:
         timeout_minutes: 10
         max_attempts: 3
