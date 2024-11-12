@@ -76,7 +76,7 @@ describe('modules/datasource/sbt-package/index', () => {
         .reply(404, '')
         .get('/maven2/com/example/empty/maven-metadata.xml')
         .reply(404)
-        .get('/maven2/com/example/empty/index.html')
+        .get('/maven2/com/example/empty/')
         .reply(404);
 
       const res = await getPkgReleases({
