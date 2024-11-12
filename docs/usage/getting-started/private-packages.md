@@ -611,7 +611,7 @@ If you need to provide credentials to the Mend Renovate App, please do this:
    }
    ```
 
-For more details, see [Using Secrets with Mend Cloud Apps](../mend-hosted/app-secrets.md).
+For more details, see [Using Secrets with Mend Cloud Apps](../mend-hosted/credentials).
 
 ### Access to GitHub Actions Secrets
 

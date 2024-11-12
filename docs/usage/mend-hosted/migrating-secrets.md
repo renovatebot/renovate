@@ -102,4 +102,4 @@ If you were expecting to import a secret originally encrypted by Renovate:
 
 ## Related links
 
-- [Using Secrets with Mend Cloud Apps](app-secrets.md)
+- [Using Secrets with Mend Cloud Apps](credentials)
