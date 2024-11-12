@@ -315,8 +315,8 @@ importers:
         specifier: 0.21.1
         version: 0.21.1
       tree-sitter-ruby:
-        specifier: 0.23.0
-        version: 0.23.0(tree-sitter@0.21.1)
+        specifier: 0.23.1
+        version: 0.23.1(tree-sitter@0.21.1)
       tslib:
         specifier: 2.8.1
         version: 2.8.1
@@ -5761,10 +5761,10 @@ packages:
     peerDependencies:
       tslib: '2'
 
-  tree-sitter-ruby@0.23.0:
-    resolution: {integrity: sha512-ArVDutVHjDxsnpEx+afdD4l2+WOpr7OCSVIrnm0JW/vpNVU/ywQQ90dmn7rw8vRHDNiUUWGq25OerOo6PCuEGw==}
+  tree-sitter-ruby@0.23.1:
+    resolution: {integrity: sha512-d9/RXgWjR6HanN7wTYhS5bpBQLz1VkH048Vm3CodPGyJVnamXMGb8oEhDypVCBq4QnHui9sTXuJBBP3WtCw5RA==}
     peerDependencies:
-      tree-sitter: ^0.21.0
+      tree-sitter: ^0.21.1
     peerDependenciesMeta:
       tree-sitter:
         optional: true
@@ -12840,7 +12840,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  tree-sitter-ruby@0.23.0(tree-sitter@0.21.1):
+  tree-sitter-ruby@0.23.1(tree-sitter@0.21.1):
     dependencies:
       node-addon-api: 8.2.2
       node-gyp-build: 4.8.2

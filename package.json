@@ -244,7 +244,7 @@
     "source-map-support": "0.5.21",
     "toml-eslint-parser": "0.10.0",
     "tree-sitter": "0.21.1",
-    "tree-sitter-ruby": "0.23.0",
+    "tree-sitter-ruby": "0.23.1",
     "tslib": "2.8.1",
     "upath": "2.0.1",
     "url-join": "4.0.1",
