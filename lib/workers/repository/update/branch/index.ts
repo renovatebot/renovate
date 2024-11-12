@@ -181,9 +181,9 @@ export async function processBranch(
       branchConfig.pendingChecks &&
       !dependencyDashboardCheck
     ) {
-        logger.debug(
-          `Branch ${config.branchName} creation is disabled because internalChecksFilter was not met`,
-        );
+      logger.debug(
+        `Branch ${config.branchName} creation is disabled because internalChecksFilter was not met`,
+      );
       return {
         branchExists: false,
         prNo: branchPr?.number,
