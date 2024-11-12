@@ -1,6 +1,6 @@
 The `bazel-module` manager can update [Bazel module (bzlmod)](https://bazel.build/external/module) enabled workspaces.
 
-# Maven
+### Maven
 
 It also takes care about maven artifacts initalized with [bzlmod](https://github.com/bazelbuild/rules_jvm_external/blob/master/docs/bzlmod.md). For simplicity the name of extension variable is limited to `maven*`. E.g.:
 
@@ -29,7 +29,7 @@ maven.artifact(
 )
 ```
 
-# Docker
+### Docker
 
 Similarly, it updates Docker / OCI images pulled with [oci_pull](https://github.com/bazel-contrib/rules_oci/blob/main/docs/pull.md).
 
