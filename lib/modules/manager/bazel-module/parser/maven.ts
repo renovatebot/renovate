@@ -10,6 +10,7 @@ import {
   StringArrayFragmentSchema,
   StringFragmentSchema,
 } from '../fragments';
+import { kvParams } from './common';
 
 const artifactMethod = 'artifact';
 const installMethod = 'install';
@@ -114,22 +115,6 @@ export function fillRegistryUrls(
 
   return result;
 }
-
-const kvParams = q
-  .sym<Ctx>((ctx, token) => ctx.startAttribute(token.value))
-  .op('=')
-  .alt(
-    q.str((ctx, token) => ctx.addString(token.value)),
-    q.tree({
-      type: 'wrapped-tree',
-      maxDepth: 1,
-      startsWith: '[',
-      endsWith: ']',
-      postHandler: (ctx) => ctx.endArray(),
-      preHandler: (ctx) => ctx.startArray(),
-      search: q.many(q.str<Ctx>((ctx, token) => ctx.addString(token.value))),
-    }),
-  );
 
 export const mavenRules = q
   .sym<Ctx>(mavenVariableRegex, (ctx, token) => {
