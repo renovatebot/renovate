@@ -7,7 +7,6 @@ import { BazelDatasource } from '../../datasource/bazel';
 import { DockerDatasource } from '../../datasource/docker';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { MavenDatasource } from '../../datasource/maven';
-import { id as dockerVersioning } from '../../versioning/docker';
 import * as parser from './parser';
 import { extractPackageFile } from '.';
 
@@ -310,7 +309,6 @@ describe('modules/manager/bazel-module/extract', () => {
       expect(result.deps).toEqual([
         {
           datasource: DockerDatasource.id,
-          versioning: dockerVersioning,
           depType: 'oci_pull',
           depName: 'nginx_image',
           packageName: 'index.docker.io/library/nginx',
@@ -338,7 +336,6 @@ describe('modules/manager/bazel-module/extract', () => {
       expect(result.deps).toEqual([
         {
           datasource: DockerDatasource.id,
-          versioning: dockerVersioning,
           depType: 'oci_pull',
           depName: 'nginx_image',
           packageName: 'index.docker.io/library/nginx',

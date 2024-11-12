@@ -1,7 +1,6 @@
 import { query as q } from 'good-enough-parser';
 import { z } from 'zod';
 import { DockerDatasource } from '../../../datasource/docker';
-import { id as versioning } from '../../../versioning/docker';
 import type { PackageDependency } from '../../types';
 import type { Ctx } from '../context';
 import { RecordFragmentSchema, StringFragmentSchema } from '../fragments';
@@ -20,7 +19,6 @@ export const RuleToDockerPackageDep = RecordFragmentSchema.extend({
 }).transform(
   ({ children: { rule, name, image, tag, digest } }): PackageDependency => ({
     datasource: DockerDatasource.id,
-    versioning,
     depType: rule.value,
     depName: name.value,
     packageName: image.value,
