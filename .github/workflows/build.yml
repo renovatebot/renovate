@@ -387,6 +387,8 @@ jobs:
               matrix.cache-key
             }}
 
+      - run: pnpm install --frozen-lockfile --force
+
       - name: Unit tests
         shell: bash
         run: |
