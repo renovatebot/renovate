@@ -35,6 +35,7 @@ describe('modules/versioning/lambda-node/index', () => {
   );
 
   const t1 = DateTime.fromISO('2024-09-01');
+  const t2 = DateTime.fromISO('2024-03-01');
 
   it.each`
     version       | time  | expected
@@ -42,6 +43,7 @@ describe('modules/versioning/lambda-node/index', () => {
     ${'v18.0.0'}  | ${t1} | ${true}
     ${'18.0.0'}   | ${t1} | ${true}
     ${'18.0.0a'}  | ${t1} | ${false}
+    ${'16.0.0'}   | ${t2} | ${true}
     ${'16.0.0'}   | ${t1} | ${false}
     ${'15.0.0'}   | ${t1} | ${false}
     ${'14.9.0'}   | ${t1} | ${false}
