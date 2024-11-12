@@ -168,9 +168,6 @@ function extractWeirdVersion(
 export function parseGemfile(content: string): PackageDependency[] {
   parser.reset();
   const tree = parser.parse(content);
-  if (!tree) {
-    throw new Error('Empty parsed tree');
-  }
 
   const deps: PackageDependency[] = [];
 
