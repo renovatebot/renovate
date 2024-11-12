@@ -1,6 +1,7 @@
+import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
-import { type GenericVersion, GenericVersioningApi } from '../generic';
+import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'rust';
@@ -11,53 +12,189 @@ export const urls = [
 
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
-  'auto',
   'bump',
   'pin',
   'replace',
 ];
 
-export class RustVersioningApi extends GenericVersioningApi {
-  // Format described in https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file
-  // Examples: 1.82.1, 1.82
-  private static readonly versionRegex = regEx(
-    '^(?<major>\\d+)\\.(?<minor>\\d+)(\\.(?<patch>\\d+))?$',
-  );
+// Format described in https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file
+// Examples: 1.82.1, 1.82
+const versionRegex = regEx(/^(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+))?$/);
 
-  public constructor() {
-    super();
-  }
-
-  _parse(version: string): GenericVersion | null {
-    const groups = RustVersioningApi.versionRegex.exec(version)?.groups;
-    if (!groups) {
-      return null;
-    }
-
-    const { major, minor, patch } = groups;
-    const release = [
-      typeof major === 'undefined' ? 0 : Number.parseInt(major, 10),
-      typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
-    ];
-    if (typeof patch !== 'undefined') {
-      release.push(Number.parseInt(patch, 10));
-    }
-
-    return {
-      release,
-    };
-  }
-
-  override getNewValue({
-    currentVersion,
-    newVersion,
-    rangeStrategy,
-  }: NewValueConfig): string | null {
-    
+function _parse(version: string): number[] | null {
+  const groups = versionRegex.exec(version)?.groups;
+  if (!groups) {
     return null;
   }
+
+  const release = [];
+  const { major, minor, patch } = groups;
+  if (typeof major === 'undefined') {
+    return null;
+  } else {
+    release.push(Number.parseInt(major, 10));
+  }
+  if (typeof minor === 'undefined') {
+    return null;
+  } else {
+    release.push(Number.parseInt(minor, 10));
+  }
+  // patch versions are optional.
+  if (typeof patch !== 'undefined') {
+    release.push(Number.parseInt(patch, 10));
+  }
+
+  return release;
 }
 
-export const api: VersioningApi = new RustVersioningApi();
+const isVersion = (input: string): boolean =>
+  !!_parse(input) && npm.isVersion(input);
 
+function isStable(version: string): boolean {
+  return !!_parse(version);
+}
+
+function isCompatible(version: string, current?: string): boolean {
+  return isValid(version);
+}
+
+export function isValid(input: string): boolean {
+  const npmRange = rust2npm(input);
+  return !!npmRange && npm.isValid(npmRange);
+}
+
+function getMajor(version: string): null | number {
+  const parsed = _parse(version);
+  return parsed ? parsed[0] : null;
+}
+
+function getMinor(version: string): null | number {
+  const parsed = _parse(version);
+  return parsed ? parsed[1] : null;
+}
+
+function getPatch(version: string): null | number {
+  const parsed = _parse(version);
+  return parsed && parsed.length > 2 ? parsed[2] : null;
+}
+
+function rust2npm(input: string): string | null {
+  const parsed = _parse(input);
+  if (!parsed) {
+    return null;
+  }
+  // The Rust toolchain may be specified as a fully qualified version. e.g. 1.82.2
+  if (parsed.length === 3) {
+    return '=' + parsed.join('.');
+  }
+  // Or a major.minor version which has the same meaning as '~' in semver.
+  if (parsed.length === 2) {
+    return '~' + parsed.join('.');
+  }
+  throw new Error(`Unexpected releases length: ${parsed.join('.')}`);
+}
+
+function isLessThanRange(version: string, range: string): boolean {
+  const npmRange = rust2npm(range);
+  return !!npmRange && !!npm.isLessThanRange?.(version, npmRange);
+}
+
+function matches(version: string, range: string): boolean {
+  const npmRange = rust2npm(range);
+  return !!npmRange && npm.matches(version, npmRange);
+}
+
+function getSatisfyingVersion(
+  versions: string[],
+  range: string,
+): string | null {
+  const npmRange = rust2npm(range);
+  return npmRange ? npm.getSatisfyingVersion(versions, npmRange) : null;
+}
+
+function minSatisfyingVersion(
+  versions: string[],
+  range: string,
+): string | null {
+  const npmRange = rust2npm(range);
+  return npmRange ? npm.minSatisfyingVersion(versions, npmRange) : null;
+}
+
+const isSingleVersion = (constraint: string): boolean =>
+  isVersion(constraint.trim());
+
+function getNewValue({
+  currentValue,
+  rangeStrategy,
+  currentVersion,
+  newVersion,
+}: NewValueConfig): string {
+  const npmRange = rust2npm(currentValue);
+  if (!npmRange) {
+    return currentValue;
+  }
+
+  const newSemver = npm.getNewValue({
+    currentValue: npmRange,
+    rangeStrategy,
+    currentVersion,
+    newVersion,
+  });
+  if (!newSemver) {
+    logger.info(
+      { currentValue, newSemver },
+      'Could not get rust version from semver',
+    );
+    return currentValue;
+  }
+  // Transform a tilde range back into a major.minor version.
+  if (newSemver.startsWith('~')) {
+    const parsed = _parse(newSemver.substring(1));
+    if (!parsed || parsed.length !== 3) {
+      logger.info(
+        { currentValue, newSemver },
+        'Could not parse new semver value',
+      );
+      return currentValue;
+    }
+    return parsed[0] + '.' + parsed[1];
+  }
+  // Transform an exact version back into a major.minor.patch version
+  if (newSemver.startsWith('=')) {
+    const newValue = newSemver.substring(1);
+    if (!_parse(newValue)) {
+      logger.info(
+        { currentValue, newSemver },
+        'Could not parse new semver value',
+      );
+      return currentValue;
+    }
+    return newValue;
+  }
+  if (!isVersion(newSemver)) {
+    logger.info(
+      { currentValue, newSemver },
+      'Unexpectedly got non-version as newSemver',
+    );
+    return currentValue;
+  }
+  return newSemver;
+}
+
+export const api: VersioningApi = {
+  ...npm,
+  getNewValue,
+  isLessThanRange,
+  isSingleVersion,
+  isValid,
+  isStable,
+  matches,
+  getSatisfyingVersion,
+  minSatisfyingVersion,
+  isVersion,
+  isCompatible,
+  getMajor,
+  getMinor,
+  getPatch,
+};
 export default api;

@@ -1,7 +1,7 @@
-import { RustVersioningApi } from './index';
+import { api } from './index';
 
 describe('modules/versioning/rust/index', () => {
-  const versioning = new RustVersioningApi();
+  const versioning = api;
 
   it.each`
     version      | expected
@@ -36,7 +36,7 @@ describe('modules/versioning/rust/index', () => {
     ${'1.82.0'}  | ${1}  | ${82} | ${0}
     ${'1.82.4'}  | ${1}  | ${82} | ${4}
     ${'1.82.42'} | ${1}  | ${82} | ${42}
-    ${'1.82'}    | ${1}  | ${82} | ${0}
+    ${'1.82'}    | ${1}  | ${82} | ${null}
   `(
     'getMajor, getMinor, getPatch for "$version"',
     ({ version, major, minor, patch }) => {
@@ -48,12 +48,9 @@ describe('modules/versioning/rust/index', () => {
 
   it.each`
     version      | other        | expected
-    ${'1.82'}    | ${'1.82.0'}  | ${true}
     ${'1.82.0'}  | ${'1.82.0'}  | ${true}
     ${'1.82.1'}  | ${'1.82.1'}  | ${true}
     ${'1.82.42'} | ${'1.82.42'} | ${true}
-    ${'1.82.0'}  | ${'1.82'}    | ${true}
-    ${'1.82.1'}  | ${'1.82'}    | ${false}
     ${'1.82.1'}  | ${'1.82.4'}  | ${false}
   `(
     'equals("$version", "$other") === $expected',
@@ -63,30 +60,32 @@ describe('modules/versioning/rust/index', () => {
   );
 
   it.each`
-    version      | other        | expected
+    version      | range        | expected
     ${'1.82.0'}  | ${'1.82.0'}  | ${true}
     ${'1.82.1'}  | ${'1.82.1'}  | ${true}
     ${'1.82.42'} | ${'1.82.42'} | ${true}
     ${'1.82.0'}  | ${'1.82'}    | ${true}
-    ${'1.82.1'}  | ${'1.82'}    | ${false}
+    ${'1.82.1'}  | ${'1.82'}    | ${true}
+    ${'1.82.1'}  | ${'1.83'}    | ${false}
+    ${'1.82.1'}  | ${'1.81'}    | ${false}
     ${'1.82.1'}  | ${'1.82.4'}  | ${false}
   `(
-    'matches("$version", "$other") === $expected',
-    ({ version, other, expected }) => {
-      expect(versioning.matches(version, other)).toBe(expected);
+    'matches("$version", "$range") === $expected',
+    ({ version, range, expected }) => {
+      expect(versioning.matches(version, range)).toBe(expected);
     },
   );
 
   it.each`
     version     | other       | expected
-    ${'1.82.1'} | ${'1.82'}   | ${true}
-    ${'1.81.1'} | ${'1.82'}   | ${false}
     ${'1.82.0'} | ${'1.83.0'} | ${false}
     ${'1.83.0'} | ${'1.82.0'} | ${true}
     ${'1.82.0'} | ${'1.82.1'} | ${false}
     ${'1.82.1'} | ${'1.82.0'} | ${true}
     ${'2.82.0'} | ${'1.82.1'} | ${true}
     ${'1.82.1'} | ${'2.82.0'} | ${false}
+    ${'2.82.0'} | ${'1.82.0'} | ${true}
+    ${'1.82.0'} | ${'2.82.0'} | ${false}
   `(
     'isGreaterThan("$version", "$other") === $expected',
     ({ version, other, expected }) => {
@@ -96,9 +95,9 @@ describe('modules/versioning/rust/index', () => {
 
   it('sorts versions in an ascending order', () => {
     expect(
-      ['1.83', '1.82.4', '1.82.0', '2.80.5', '1.83.1'].sort((a, b) =>
+      ['1.82.4', '1.82.0', '2.80.5', '1.83.1'].sort((a, b) =>
         versioning.sortVersions(a, b),
       ),
-    ).toEqual(['1.82.0', '1.82.4', '1.83', '1.83.1', '2.80.5']);
+    ).toEqual(['1.82.0', '1.82.4', '1.83.1', '2.80.5']);
   });
 });
