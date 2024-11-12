@@ -372,6 +372,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
+      - run: pnpm install --frozen-lockfile
+
       - name: Cache jest
         uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
         with:
