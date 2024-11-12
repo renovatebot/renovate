@@ -30,18 +30,6 @@ const sourceBlockWithNewLinesGemfile = Fixtures.get(
 const sourceBlockWithGroupsGemfile = Fixtures.get(
   'Gemfile.sourceBlockWithGroups',
 );
-const sourceVariableGemfile = codeBlock`
-source "https://rubygems.org"
-ruby '~> 1.5.3'
-foo = 'https://gems.foo.com'
-bar = 'https://gems.bar.com'
-
-source foo
-
-source bar do
-  gem "some_internal_gem"
-end
-`;
 
 describe('modules/manager/bundler/extract', () => {
   describe('extractPackageFile()', () => {
@@ -156,6 +144,19 @@ describe('modules/manager/bundler/extract', () => {
   });
 
   it('parses source variable in Gemfile', async () => {
+    const sourceVariableGemfile = codeBlock`
+      source "https://rubygems.org"
+      ruby '~> 1.5.3'
+      foo = 'https://gems.foo.com'
+      bar = 'https://gems.bar.com'
+
+      source foo
+
+      source bar do
+        gem "some_internal_gem"
+      end
+    `;
+
     fs.readLocalFile.mockResolvedValueOnce(sourceVariableGemfile);
     const res = await extractPackageFile(sourceVariableGemfile, 'Gemfile');
     expect(res?.deps).toHaveLength(2);
