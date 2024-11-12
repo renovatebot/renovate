@@ -343,8 +343,8 @@ importers:
         specifier: 11.5.0
         version: 11.5.0
       openpgp:
-        specifier: 5.11.2
-        version: 5.11.2
+        specifier: 6.0.0
+        version: 6.0.0
       re2:
         specifier: 1.21.4
         version: 1.21.4
@@ -2461,9 +2461,6 @@ packages:
     resolution: {integrity: sha512-3CYzex9M9FGQjCGMGyi6/31c8GJbgb0qGyrx5HWxPd0aCwh4cB2YjMb2Xf9UuoogrMrlO9cTqnB5rI5GHZTcUA==}
     engines: {node: '>=0.10.0'}
 
-  asn1.js@5.4.1:
-    resolution: {integrity: sha512-+I//4cYPccV8LdmBLiX8CYvf9Sp3vQsrqu2QNXRcrbiWvcx/UdlFiqUJJzxRQxgsZmvhXhn4cSKeSmoFjVdupA==}
-
   async-mutex@0.5.0:
     resolution: {integrity: sha512-1A94B18jkJ3DYq284ohPxoXbfTA5HsQ7/Mf4DEhcyLx3Bz27Rh59iScbB6EPiP+B+joue6YCxcMXSbFC1tZKwA==}
 
@@ -2541,9 +2538,6 @@ packages:
 
   bl@4.1.0:
     resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
-
-  bn.js@4.12.0:
-    resolution: {integrity: sha512-c98Bf3tPniI+scsdk237ku1Dc3ujXQTSgyiPUDEOe7tRkhrqridvh8klBv0HCEso1OLOYcHuCv/cS6DNxKH+ZA==}
 
   bn@1.0.5:
     resolution: {integrity: sha512-7TvGbqbZb6lDzsBtNz1VkdXXV0BVmZKPPViPmo2IpvwaryF7P+QKYKACyVkwo2mZPr2CpFiz7EtgPEcc3o/JFQ==}
@@ -4889,9 +4883,9 @@ packages:
     resolution: {integrity: sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ==}
     engines: {node: '>=12'}
 
-  openpgp@5.11.2:
-    resolution: {integrity: sha512-f8dJFVLwdkvPvW3VPFs6q9Vs2+HNhdvwls7a/MIFcQUB+XiQzRe7alfa3RtwfGJU7oUDDMAWPZ0nYsHa23Az+A==}
-    engines: {node: '>= 8.0.0'}
+  openpgp@6.0.0:
+    resolution: {integrity: sha512-8YMuhOV6bP8+J4bCHltvRwol1sBJhxAcJXvwEKpcK65lKpQ0VUbymQR/EuGrzxYnatNSyMyrMgip4j/F0vhZvg==}
+    engines: {node: '>= 18.0.0'}
 
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
@@ -9078,14 +9072,6 @@ snapshots:
 
   arrify@1.0.1: {}
 
-  asn1.js@5.4.1:
-    dependencies:
-      bn.js: 4.12.0
-      inherits: 2.0.4
-      minimalistic-assert: 1.0.1
-      safer-buffer: 2.1.2
-    optional: true
-
   async-mutex@0.5.0:
     dependencies:
       tslib: 2.8.1
@@ -9196,9 +9182,6 @@ snapshots:
       buffer: 5.7.1
       inherits: 2.0.4
       readable-stream: 3.6.2
-    optional: true
-
-  bn.js@4.12.0:
     optional: true
 
   bn@1.0.5: {}
@@ -11867,9 +11850,7 @@ snapshots:
     dependencies:
       mimic-fn: 4.0.0
 
-  openpgp@5.11.2:
-    dependencies:
-      asn1.js: 5.4.1
+  openpgp@6.0.0:
     optional: true
 
   optionator@0.9.4:
