@@ -39,6 +39,6 @@ await (async () => {
 
   await updateJsonFile(
     './data/lambda-node-js-schedule.json',
-    JSON.stringify(nodeRuntimes),
+    JSON.stringify(nodeRuntimes, null, 2),
   );
 })();
