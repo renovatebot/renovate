@@ -18,7 +18,8 @@ export const supportedRangeStrategies: RangeStrategy[] = [
 ];
 
 // Format described in https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file
-// Examples: 1.82.1, 1.82
+// Versions may be fully qualified: <major>.<minor>.<patch> (e.g. 1.82.1), indicating an exact version.
+// Or version may be inexact: <major>.<minor> (e.g. 1.82), allowing patch level changes.
 const versionRegex = regEx(/^(?<major>\d+)\.(?<minor>\d+)(\.(?<patch>\d+))?$/);
 
 function _parse(version: string): number[] | null {
