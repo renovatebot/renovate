@@ -1,6 +1,6 @@
 import type { Category } from '../../../constants';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import * as rustVersioning from '../../versioning/rust';
+import * as rustVersioning from '../../versioning/rust-toolchain';
 
 export { extractPackageFile } from './extract';
 

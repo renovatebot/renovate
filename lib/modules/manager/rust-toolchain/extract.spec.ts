@@ -1,6 +1,6 @@
 import { extractPackageFile } from '.';
 
-describe('modules/manager/rust/extract', () => {
+describe('modules/manager/rust-toolchain/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns result when fully qualified version is set', () => {
       const res = extractPackageFile(`

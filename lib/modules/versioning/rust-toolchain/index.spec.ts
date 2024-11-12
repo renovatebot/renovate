@@ -1,6 +1,6 @@
 import { api } from './index';
 
-describe('modules/versioning/rust/index', () => {
+describe('modules/versioning/rust-toolchain/index', () => {
   const versioning = api;
 
   it.each`
