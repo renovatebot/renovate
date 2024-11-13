@@ -70,7 +70,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       logger.fatal(err.message);
       process.exit(1);
     } else if (env.RENOVATE_CONFIG_FILE) {
-      logger.debug(err);
+      logger.debug({ err }, 'Parse error');
       logger.fatal('Error parsing config file');
       process.exit(1);
     }
