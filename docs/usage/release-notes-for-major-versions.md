@@ -7,6 +7,52 @@ The most recent versions are always at the top of the page.
 This is because recent versions may revert changes made in an older version.
 You also don't have to scroll to the bottom of the page to find the latest release notes.
 
+## Version 39
+
+### Breaking changes for 39
+
+General:
+
+- Renovate Docker images use Node.js v22 as base, was Node.js v20
+- **deps:** Renovate sidecar images will now default to use:
+   - Ubuntu 24.04, this was 20.04
+   - User ID `12021`, this was `1001`
+- **deps:** The Renovate full image uses Ubuntu 24.04, Python 3.13 and Node v22
+- **Dockerfile:** Renovate -full images now use `binarySource=global`. Set `RENOVATE_BINARY_SOURCE=install` to revert to dynamic tool installation.
+
+Specific:
+
+- **github:** Renovate prefers squash merges over other kinds of merges in GitHub. Only applies if you allow squash merges in your GitHub config for the repository.
+- **branchNameStrict:** Branch names with multiple forward slashes (`/`) will change if `branchNameStrict=true`
+
+### Commentary for 39
+
+#### Major version updates
+
+We updated our images to use new major versions of Node.js, Python and Ubuntu.
+
+#### Why we we change branch names with multiple slashes
+
+Explain why this was changed here.
+
+#### Prefer squash merge for automerges to allow signed commits on GitHub
+
+This info is for the GitHub platform only.
+
+When you sign your commits on GitHub, you'll want Renovate's commits to be signed too.
+If Renovate automerges its PRs with the **Rebase and Merge** option, then GitHub can't sign the commits.
+But GitHub can sign squash-merged commits for Renovate.
+This is why we changed the default behavior to try the squash merge first.
+
+Read the [GitHub Docs, Signature verification for rebase and merge](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#signature-verification-for-rebase-and-merge) to learn more.
+
+Note from HonkingGoose to maintainers, the [GitHub Docs, signature verification for bots](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#signature-verification-for-bots) have more info about signing commits as bot author.
+I don't know if we already do this, or if the method is better than relying on a specific kind of merge type?
+
+### Link to release notes for 39
+
+[Release notes for `v39` on GitHub](https://github.com/renovatebot/renovate/releases/tag/39.0.0).
+
 ## Version 38
 
 ### Breaking changes for 38
