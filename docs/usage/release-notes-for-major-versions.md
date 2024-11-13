@@ -11,29 +11,42 @@ You also don't have to scroll to the bottom of the page to find the latest relea
 
 ### Breaking changes for 39
 
-General:
+#### New tools and config for Renovate's Docker images
 
-- Renovate Docker images use Node.js v22 as base, was Node.js v20
-- **deps:** Renovate sidecar images will now default to use:
-   - Ubuntu 24.04, this was 20.04
-   - User ID `12021`, this was `1001`
-- **deps:** The Renovate full image uses Ubuntu 24.04, Python 3.13 and Node v22
-- **Dockerfile:** Renovate -full images now use `binarySource=global`. Set `RENOVATE_BINARY_SOURCE=install` to revert to dynamic tool installation.
+Renovate Docker images now use Node.js v22 as base, this was Node.js v20.
 
-Specific:
+##### Sidecar images
 
-- **github:** Renovate prefers squash merges over other kinds of merges in GitHub. Only applies if you allow squash merges in your GitHub config for the repository.
-- **branchNameStrict:** Branch names with multiple forward slashes (`/`) will change if `branchNameStrict=true`
+Renovate's "sidecar" images now:
+
+ - Use Ubuntu 24.04 as base, this was 20.04
+ - Set the user ID to `12021`, this was `1001`
+
+##### Full images
+
+Renovate's `-full` images now uses:
+
+- Ubuntu 24.04
+- Python 3.13
+- Node.js v22
+
+The Renovate `-full` image defaults to [`binarySource=global`](https://docs.renovatebot.com/self-hosted-configuration/#binarysource).
+If you want to keep the old behavior, where Renovate dynamically installs the needed tools: set the environment variable `RENOVATE_BINARY_SOURCE` to `"install"`.
+
+Question do we need to update the `binarySource` docs?
+It still says:
+
+> Starting in v36, Renovate's default Docker image (previously referred to as the "slim" image) uses `binarySource=install` while the "full" Docker image uses `binarySource=global`. If you are running Renovate in an environment where runtime download and install of tools is not possible then you should use the "full" image.
+
+#### Prefer squash merges for automerges on GitHub
+
+When automerging, Renovate tries the "squash merge" method first.
+
+#### Branch names with multiple slashes
+
+Branch names with multiple forward slashes (`/`) will change if `branchNameStrict=true`.
 
 ### Commentary for 39
-
-#### Major version updates
-
-We updated our images to use new major versions of Node.js, Python and Ubuntu.
-
-#### Why we we change branch names with multiple slashes
-
-Explain why this was changed here.
 
 #### Prefer squash merge for automerges to allow signed commits on GitHub
 
@@ -48,6 +61,10 @@ Read the [GitHub Docs, Signature verification for rebase and merge](https://docs
 
 Note from HonkingGoose to maintainers, the [GitHub Docs, signature verification for bots](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#signature-verification-for-bots) have more info about signing commits as bot author.
 I don't know if we already do this, or if the method is better than relying on a specific kind of merge type?
+
+#### Why we we change branch names with multiple slashes
+
+Explain why this was changed here.
 
 ### Link to release notes for 39
 
