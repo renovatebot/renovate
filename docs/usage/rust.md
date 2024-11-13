@@ -57,7 +57,7 @@ module.exports = {
 
 Renovate supports upgrading the Rust toolchain version in the `rust-toolchain.toml` file.
 
-### How it works
+### How Rust toolchain updates work
 
 1. Renovate searches in each repository for any `rust-toolchain.toml` files that apply [overrides](https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file)
 1. Renovate extracts existing the version from the `channel` key/value, ignoring any `nightly`, `beta` or `stable` release references (e.g. "stable", "nightly-2014-12-18")
