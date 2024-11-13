@@ -29,7 +29,7 @@ body:
     attributes:
       label: Logs (if relevant)
       description: |
-        If you're running self-hosted, run with `RENOVATE_LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
+        If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
         If you are using the Renovate App, log into [Renovate's app dashboard](https://developer.mend.io) and locate the correct job log for when the problem occurred (e.g. when the PR was created).
         Try to paste the *relevant* logs here, not the entire thing and not just a link to the dashboard (others don't have permissions to view them).
         If you're not sure about the relevant parts of the log, then feel free to post the full log to a [Github Gist](https://gist.github.com/) and link to it.
