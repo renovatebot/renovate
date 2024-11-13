@@ -333,3 +333,9 @@ export function sanitizeUrls(text: string): string {
     })
     .replace(dataUriCredRe, '$1**redacted**');
 }
+
+export function getEnv(key: string): string | undefined {
+  return [process.env[`RENOVATE_${key}`], process.env[key]]
+    .map((v) => v?.toLowerCase().trim())
+    .find(is.nonEmptyStringAndNotWhitespace);
+}

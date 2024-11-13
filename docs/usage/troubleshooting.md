@@ -30,10 +30,10 @@ For a full overview, select the `DEBUG` log level.
 The easiest way to gather logs from Renovate for any platform is to use the default logging to `stdout`/console.
 By default, Renovate will log in a human-readable format at `INFO` level.
 
-For troubleshooting it's recommended to increase logging to `DEBUG` level by adding `LOG_LEVEL=debug` to your environment variables before invoking Renovate.
+For troubleshooting it's recommended to increase logging to `DEBUG` level by adding `RENOVATE_LOG_LEVEL=debug` to your environment variables before invoking Renovate.
 
 If your Renovate logs are being processed by a log service before you access them, you may find it better to have Renovate output logs in JSON format instead so that they can be reliably parsed and filtered.
-This can be achieved by adding `LOG_FORMAT=json` to your environment variables before invoking Renovate.
+This can be achieved by adding `RENOVATE_LOG_FORMAT=json` to your environment variables before invoking Renovate.
 
 ## Log debug levels
 

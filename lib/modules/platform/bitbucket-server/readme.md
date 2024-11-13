@@ -60,7 +60,7 @@ export RENOVATE_ENDPOINT=http://localhost:7990
 export RENOVATE_GIT_FS=http
 export RENOVATE_USERNAME=renovate-bot
 export RENOVATE_PASSWORD=abc123456789!
-export LOG_LEVEL=debug
+export RENOVATE_LOG_LEVEL=debug
 npx renovate --autodiscover=true
 ```
 

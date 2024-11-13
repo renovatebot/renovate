@@ -10,26 +10,31 @@ import { once, reset as onceReset } from './once';
 import { RenovateStream } from './pretty-stdout';
 import { getRemappedLevel } from './remap';
 import type { BunyanRecord, Logger } from './types';
-import { ProblemStream, validateLogLevel, withSanitizer } from './utils';
+import {
+  ProblemStream,
+  getEnv,
+  validateLogLevel,
+  withSanitizer,
+} from './utils';
 
-let logContext: string = process.env.LOG_CONTEXT ?? nanoid();
+let logContext: string = getEnv('LOG_CONTEXT') ?? nanoid();
 let curMeta: Record<string, unknown> = {};
 
 const problems = new ProblemStream();
 
-// istanbul ignore if: not easily testable
-if (is.string(process.env.LOG_LEVEL)) {
-  process.env.LOG_LEVEL = process.env.LOG_LEVEL.toLowerCase().trim();
-}
-
+const level = validateLogLevel(getEnv('LOG_LEVEL'), 'info');
 const stdout: bunyan.Stream = {
   name: 'stdout',
-  level: validateLogLevel(process.env.LOG_LEVEL, 'info'),
+  level,
   stream: process.stdout,
 };
 
+export function logLevel(): bunyan.LogLevelString {
+  return level;
+}
+
 // istanbul ignore if: not testable
-if (process.env.LOG_FORMAT !== 'json') {
+if (getEnv('LOG_FORMAT') !== 'json') {
   // TODO: typings (#9615)
   const prettyStdOut = new RenovateStream() as any;
   prettyStdOut.pipe(process.stdout);
@@ -123,15 +128,16 @@ loggerLevels.forEach((loggerLevel) => {
 });
 
 // istanbul ignore if: not easily testable
-if (is.string(process.env.LOG_FILE)) {
+const logFile = getEnv('LOG_FILE');
+if (is.string(logFile)) {
   // ensure log file directory exists
-  const directoryName = upath.dirname(process.env.LOG_FILE);
+  const directoryName = upath.dirname(logFile);
   fs.ensureDirSync(directoryName);
 
   addStream({
     name: 'logfile',
-    path: process.env.LOG_FILE,
-    level: validateLogLevel(process.env.LOG_FILE_LEVEL, 'debug'),
+    path: logFile,
+    level: validateLogLevel(getEnv('LOG_FILE_LEVEL'), 'debug'),
   });
 }
 

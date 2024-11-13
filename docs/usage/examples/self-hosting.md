@@ -67,7 +67,7 @@ spec:
                 - user/repo
               # Environment Variables
               env:
-                - name: LOG_LEVEL
+                - name: RENOVATE_LOG_LEVEL
                   value: debug
               envFrom:
                 - secretRef:
@@ -134,7 +134,7 @@ spec:
                   value: '/tmp/renovate/'
                 - name: RENOVATE_CONFIG_FILE
                   value: '/opt/renovate/config.json'
-                - name: LOG_LEVEL
+                - name: RENOVATE_LOG_LEVEL
                   value: debug
               volumeMounts:
                 - name: config-volume
@@ -383,12 +383,12 @@ spec:
 
 ## Logging
 
-If you're ingesting/parsing logs into another system then we recommend you set `LOG_LEVEL=debug` and `LOG_FORMAT=json` in your environment variables.
+If you're ingesting/parsing logs into another system then we recommend you set `RENOVATE_LEVEL=debug` and `RENOVATE_LOG_FORMAT=json` in your environment variables.
 Debug logging is usually needed for any debugging, while JSON format will mean that the output is parsable.
 
 ### About the log level numbers
 
-When you use `LOG_LEVEL=debug` and `LOG_FORMAT=json`, Renovate uses numbers in the `level` field.
+When you use `RENOVATE_LOG_LEVEL=debug` and `RENOVATE_LOG_FORMAT=json`, Renovate uses numbers in the `level` field.
 
 The logging level output is controlled by the Bunyan logging library.
 
