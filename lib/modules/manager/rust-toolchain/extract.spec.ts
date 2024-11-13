@@ -88,6 +88,23 @@ describe('modules/manager/rust-toolchain/extract', () => {
       ]);
     });
 
+    it('returns result when channel with prerelease set', () => {
+      const res = extractPackageFile(`
+        [toolchain]
+        components = [ "rustfmt", "rustc-dev" ]
+        channel = "1.82.0-beta.1"
+        targets = [ "wasm32-unknown-unknown", "thumbv2-none-eabi" ]
+        profile = "minimal"`);
+      expect(res.deps).toEqual([
+        {
+          currentValue: '1.82.0-beta.1',
+          datasource: 'github-releases',
+          depName: 'rust',
+          packageName: 'rust-lang/rust',
+        },
+      ]);
+    });
+
     it('returns empty when no channel entry is present', () => {
       const res = extractPackageFile(`
         [toolchain]

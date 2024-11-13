@@ -4,10 +4,12 @@ describe('modules/versioning/rust-toolchain/index', () => {
   const versioning = api;
 
   it.each`
-    version      | expected
-    ${'1.82.0'}  | ${true}
-    ${'1.82.42'} | ${true}
-    ${'1.82'}    | ${true}
+    version            | expected
+    ${'1.82.0'}        | ${true}
+    ${'1.82.42'}       | ${true}
+    ${'1.82'}          | ${true}
+    ${'1.82.0-beta.1'} | ${false}
+    ${'1.82-beta.23'}  | ${false}
   `('isStable("$version") === $expected', ({ version, expected }) => {
     expect(versioning.isStable(version)).toBe(expected);
   });
@@ -27,16 +29,19 @@ describe('modules/versioning/rust-toolchain/index', () => {
     ${'beta-06-12-2024'}                                           | ${false}
     ${'stable'}                                                    | ${false}
     ${'stable-06-12-2024'}                                         | ${false}
+    ${'1.82.0-beta.1'}                                             | ${false}
+    ${'1.82-beta.12'}                                              | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     expect(versioning.isValid(version)).toBe(expected);
   });
 
   it.each`
-    version      | major | minor | patch
-    ${'1.82.0'}  | ${1}  | ${82} | ${0}
-    ${'1.82.4'}  | ${1}  | ${82} | ${4}
-    ${'1.82.42'} | ${1}  | ${82} | ${42}
-    ${'1.82'}    | ${1}  | ${82} | ${null}
+    version            | major   | minor   | patch
+    ${'1.82.0'}        | ${1}    | ${82}   | ${0}
+    ${'1.82.4'}        | ${1}    | ${82}   | ${4}
+    ${'1.82.42'}       | ${1}    | ${82}   | ${42}
+    ${'1.82'}          | ${1}    | ${82}   | ${null}
+    ${'1.82.0-beta.1'} | ${null} | ${null} | ${null}
   `(
     'getMajor, getMinor, getPatch for "$version"',
     ({ version, major, minor, patch }) => {
