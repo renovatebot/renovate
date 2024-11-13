@@ -46,7 +46,7 @@ describe('modules/manager/gomod/extract', () => {
     it('extracts replace directives from multi-line and single line', () => {
       const goMod = codeBlock`
         module github.com/renovate-tests/gomod
-        go 1.18
+        go 1.23
         replace golang.org/x/foo => github.com/pravesht/gocql v0.0.0
         replace (
               k8s.io/client-go => k8s.io/client-go v0.21.9
@@ -66,7 +66,7 @@ describe('modules/manager/gomod/extract', () => {
             },
             depName: 'go',
             depType: 'golang',
-            currentValue: '1.18',
+            currentValue: '1.23',
             datasource: 'golang-version',
             versioning: 'go-mod-directive',
           },
@@ -127,8 +127,8 @@ describe('modules/manager/gomod/extract', () => {
     it('extracts the toolchain directive', () => {
       const goMod = codeBlock`
         module github.com/renovate-tests/gomod
-        go 1.21
-        toolchain go1.21.7
+        go 1.23
+        toolchain go1.23.3
         replace golang.org/x/foo => github.com/pravesht/gocql v0.0.0
       `;
       const res = extractPackageFile(goMod);
@@ -140,7 +140,7 @@ describe('modules/manager/gomod/extract', () => {
             },
             depName: 'go',
             depType: 'golang',
-            currentValue: '1.21',
+            currentValue: '1.23',
             datasource: 'golang-version',
             versioning: 'go-mod-directive',
           },
@@ -150,7 +150,7 @@ describe('modules/manager/gomod/extract', () => {
             },
             depName: 'go',
             depType: 'toolchain',
-            currentValue: '1.21.7',
+            currentValue: '1.23.3',
             datasource: 'golang-version',
           },
           {
