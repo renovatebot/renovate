@@ -325,7 +325,7 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
-            currentValue: '1.19.2',
+            currentValue: '1.23.3',
             datasource: 'github-tags',
             packageName: 'golang/go',
             depName: 'golang',

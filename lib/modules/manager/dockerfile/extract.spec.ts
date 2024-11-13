@@ -482,7 +482,7 @@ describe('modules/manager/dockerfile/extract', () => {
           autoReplaceStringTemplate:
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           currentDigest: undefined,
-          currentValue: '1.7.3',
+          currentValue: '1.23.3',
           datasource: 'docker',
           depName: 'golang',
           depType: 'stage',
