@@ -3,10 +3,7 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { regexMatchAll } from '../custom/regex/utils';
 import type { PackageDependency, PackageFileContent } from '../types';
 
-const channelRegex = regEx(
-  /channel\s*=\s*"(?<currentValue>\d+\.\d+(\.\d+)?)"/,
-  'g',
-);
+const channelRegex = regEx(/channel\s*=\s*"(?<currentValue>.+)"/, 'g');
 
 export function extractPackageFile(content: string): PackageFileContent {
   const deps: PackageDependency[] = [];

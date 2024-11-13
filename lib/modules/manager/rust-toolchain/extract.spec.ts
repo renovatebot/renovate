@@ -56,20 +56,42 @@ describe('modules/manager/rust-toolchain/extract', () => {
       ]);
     });
 
-    it('returns empty when no channel entry is present', () => {
+    it('returns result when stable release channel is set', () => {
       const res = extractPackageFile(`
         [toolchain]
         components = [ "rustfmt", "rustc-dev" ]
-        targets = [ "wasm32-unknown-unknown", "thumbv2-none-eabi" ]
-        profile = "minimal"`);
-      expect(res.deps).toEqual([]);
+        channel = "stable"`);
+      expect(res.deps).toEqual([
+        {
+          currentValue: 'stable',
+          datasource: 'github-releases',
+          depName: 'rust',
+          packageName: 'rust-lang/rust',
+        },
+      ]);
     });
 
-    it('returns empty when channel with named release set', () => {
+    it('returns result when channel with named release set', () => {
       const res = extractPackageFile(`
         [toolchain]
         components = [ "rustfmt", "rustc-dev" ]
         channel = "nightly-2020-07-10"
+        targets = [ "wasm32-unknown-unknown", "thumbv2-none-eabi" ]
+        profile = "minimal"`);
+      expect(res.deps).toEqual([
+        {
+          currentValue: 'nightly-2020-07-10',
+          datasource: 'github-releases',
+          depName: 'rust',
+          packageName: 'rust-lang/rust',
+        },
+      ]);
+    });
+
+    it('returns empty when no channel entry is present', () => {
+      const res = extractPackageFile(`
+        [toolchain]
+        components = [ "rustfmt", "rustc-dev" ]
         targets = [ "wasm32-unknown-unknown", "thumbv2-none-eabi" ]
         profile = "minimal"`);
       expect(res.deps).toEqual([]);
