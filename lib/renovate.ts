@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import 'source-map-support/register';
+import './punycode.cjs';
 import { instrument, shutdown as telemetryShutdown } from './instrumentation'; // has to be imported before logger and other libraries which are instrumentalised
 import { logger } from './logger';
 import { bootstrap } from './proxy';

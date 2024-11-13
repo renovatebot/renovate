@@ -275,6 +275,9 @@ importers:
       protobufjs:
         specifier: 7.4.0
         version: 7.4.0
+      punycode:
+        specifier: 2.3.1
+        version: 2.3.1
       redis:
         specifier: 4.7.0
         version: 4.7.0
@@ -472,6 +475,9 @@ importers:
       '@types/parse-link-header':
         specifier: 2.0.3
         version: 2.0.3
+      '@types/punycode':
+        specifier: 2.1.4
+        version: 2.1.4
       '@types/semver':
         specifier: 7.5.8
         version: 7.5.8
@@ -2112,6 +2118,9 @@ packages:
 
   '@types/parse-link-header@2.0.3':
     resolution: {integrity: sha512-ffLAxD6Xqcf2gSbtEJehj8yJ5R/2OZqD4liodQvQQ+hhO4kg1mk9ToEZQPMtNTm/zIQj2GNleQbsjPp9+UQm4Q==}
+
+  '@types/punycode@2.1.4':
+    resolution: {integrity: sha512-trzh6NzBnq8yw5e35f8xe8VTYjqM3NE7bohBtvDVf/dtUer3zYTLK1Ka3DG3p7bdtoaOHZucma6FfVKlQ134pQ==}
 
   '@types/responselike@1.0.3':
     resolution: {integrity: sha512-H/+L+UkTV33uf49PH5pCAUBVPNj2nDBXTN+qS1dOwyyg24l3CcicicCA7ca+HMvJBZcFgl5r8e+RR6elsb4Lyw==}
@@ -8640,6 +8649,8 @@ snapshots:
   '@types/normalize-package-data@2.4.4': {}
 
   '@types/parse-link-header@2.0.3': {}
+
+  '@types/punycode@2.1.4': {}
 
   '@types/responselike@1.0.3':
     dependencies:
