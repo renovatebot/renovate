@@ -167,13 +167,13 @@ env:
     RENOVATE_PLATFORM: 'codecommit'
     RENOVATE_REPOSITORIES: '["repoName1", "repoName2"]'
     RENOVATE_CONFIG: '{"extends":["config:recommended"]}'
-    RENOVATE_LOG_LEVEL: 'debug'
+    LOG_LEVEL: 'debug'
     AWS_REGION: 'us-east-1'
 phases:
   build:
     on-failure: CONTINUE
     commands:
-      - docker run --rm -e AWS_REGION -e RENOVATE_CONFIG -e RENOVATE_PLATFORM -e RENOVATE_REPOSITORIES -e RENOVATE_LOG_LEVEL renovate/renovate
+      - docker run --rm -e AWS_REGION -e RENOVATE_CONFIG -e RENOVATE_PLATFORM -e RENOVATE_REPOSITORIES -e LOG_LEVEL renovate/renovate
 ```
 
 ### Renovate CLI `buildspec.yml`
@@ -187,7 +187,7 @@ env:
     RENOVATE_PLATFORM: 'codecommit'
     RENOVATE_REPOSITORIES: '["repoName1", "repoName2"]'
     RENOVATE_CONFIG: '{"extends":["config:recommended"]}'
-    RENOVATE_LOG_LEVEL: 'debug'
+    LOG_LEVEL: 'debug'
     AWS_REGION: 'us-east-1'
 phases:
   build:
