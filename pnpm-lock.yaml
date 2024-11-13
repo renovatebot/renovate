@@ -78,8 +78,8 @@ importers:
         specifier: 1.5.10
         version: 1.5.10(encoding@0.1.13)
       '@renovatebot/pep440':
-        specifier: 3.1.0
-        version: 3.1.0
+        specifier: 4.0.1
+        version: 4.0.1
       '@renovatebot/ruby-semver':
         specifier: 4.0.0
         version: 4.0.0
@@ -1542,9 +1542,9 @@ packages:
   '@renovatebot/osv-offline@1.5.10':
     resolution: {integrity: sha512-3Nu7bGVQGm0rJwGoHxZjc80cERtK7r25aii8aBwK2+JLAacC7xLju2WzuELt1TWSx/yt+QjA4ouWSC5/JnlmHw==}
 
-  '@renovatebot/pep440@3.1.0':
-    resolution: {integrity: sha512-Tx/wEv92j3HmFwlqfNp8Pq/BMJPVk8c5so/Ae8eHccceBeeZx4QDuLf6RYfXJ6kvw8H05K1KPoZSsigLQA7Rqg==}
-    engines: {node: ^18.12.0 || ^20.0.0 || ^22.11.0, pnpm: ^8.6.11}
+  '@renovatebot/pep440@4.0.1':
+    resolution: {integrity: sha512-jKodfnFIIGjK9PcoB7+2JkDQ+prjv3LHFMUS21F3+IEaiGomrvpiH27+gjyQRRwtSkkRnrxkqjEPdkj2IxC2qA==}
+    engines: {node: ^20.9.0 || ^22.11.0, pnpm: ^9.0.0}
 
   '@renovatebot/ruby-semver@4.0.0':
     resolution: {integrity: sha512-vuLfebLvwYWwQYJeZiHHs5NmydjO6cdhwS1dUHJbXMi0WD8kBa/+f7gz4WcuNJPRR+enLFQUHs89OCjfl6Os0g==}
@@ -7917,7 +7917,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@renovatebot/pep440@3.1.0': {}
+  '@renovatebot/pep440@4.0.1': {}
 
   '@renovatebot/ruby-semver@4.0.0': {}
 
