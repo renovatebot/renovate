@@ -19,8 +19,8 @@ Renovate Docker images now use Node.js v22 as base, this was Node.js v20.
 
 Renovate's "sidecar" images now:
 
- - Use Ubuntu 24.04 as base, this was 20.04
- - Set the user ID to `12021`, this was `1001`
+- Use Ubuntu 24.04 as base, this was 20.04
+- Set the user ID to `12021`, this was `1001`
 
 ##### Full images
 
