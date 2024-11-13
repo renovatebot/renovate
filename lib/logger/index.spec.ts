@@ -11,6 +11,7 @@ import {
   getProblems,
   levels,
   logger,
+  logLevel,
   removeMeta,
   setContext,
   setMeta,
@@ -53,7 +54,11 @@ describe('logger/index', () => {
   });
 
   it('sets level', () => {
+    delete process.env.RENOVATE_LOG_LEVEL;
+    delete process.env.LOG_LEVEL;
+    expect(logLevel()).toBe('info');
     expect(() => levels('stdout', 'debug')).not.toThrow();
+    expect(logLevel()).toBe('debug');
   });
 
   it('saves problems', () => {

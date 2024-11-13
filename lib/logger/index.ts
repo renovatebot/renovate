@@ -22,15 +22,15 @@ let curMeta: Record<string, unknown> = {};
 
 const problems = new ProblemStream();
 
-const level = validateLogLevel(getEnv('LOG_LEVEL'), 'info');
+let stdoutLevel = validateLogLevel(getEnv('LOG_LEVEL'), 'info');
 const stdout: bunyan.Stream = {
   name: 'stdout',
-  level,
+  level: stdoutLevel,
   stream: process.stdout,
 };
 
 export function logLevel(): bunyan.LogLevelString {
-  return level;
+  return stdoutLevel;
 }
 
 // istanbul ignore if: not testable
@@ -174,8 +174,20 @@ export /* istanbul ignore next */ function addStream(
   bunyanLogger.addStream(withSanitizer(stream));
 }
 
-export function levels(name: string, level: bunyan.LogLevel): void {
+/**
+ * For testing purposes only
+ * @param name stream name
+ * @param level log level
+ * @private
+ */
+export function levels(
+  name: 'stdout' | 'logfile',
+  level: bunyan.LogLevelString,
+): void {
   bunyanLogger.levels(name, level);
+  if (name === 'stdout') {
+    stdoutLevel = level;
+  }
 }
 
 export function getProblems(): BunyanRecord[] {
