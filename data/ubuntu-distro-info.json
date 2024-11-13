@@ -302,5 +302,12 @@
     "created": "2024-04-25",
     "release": "2024-10-10",
     "eol": "2025-07-10"
+  },
+  "v25.04": {
+    "codename": "Plucky Puffin",
+    "series": "plucky",
+    "created": "2024-10-10",
+    "release": "2025-04-17",
+    "eol": "2026-01-15"
   }
 }

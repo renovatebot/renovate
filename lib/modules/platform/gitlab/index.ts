@@ -923,6 +923,11 @@ export function maxBodyLength(): number {
   }
 }
 
+// istanbul ignore next: no need to test
+export function labelCharLimit(): number {
+  return 255;
+}
+
 // Branch
 
 function matchesState(state: string, desiredState: string): boolean {
