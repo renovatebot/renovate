@@ -13,10 +13,10 @@ You also don't have to scroll to the bottom of the page to find the latest relea
 
 #### New tools for all Docker images
 
-All our Docker images now:
+All our Docker images now use:
 
-- Use Node.js v22 as base, was Node.js v20
-- Use Ubuntu 24.04 as base, was 20.04
+- Node.js v22 as base, was Node.js v20
+- Ubuntu 24.04 as base, was 20.04
 
 #### New Docker user ID for all Docker images
 
