@@ -127,8 +127,8 @@ loggerLevels.forEach((loggerLevel) => {
   logger.once[loggerLevel] = logOnceFn as never;
 });
 
-// istanbul ignore if: not easily testable
 const logFile = getEnv('LOG_FILE');
+// istanbul ignore if: not easily testable
 if (is.string(logFile)) {
   // ensure log file directory exists
   const directoryName = upath.dirname(logFile);

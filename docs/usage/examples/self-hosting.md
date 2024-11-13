@@ -383,7 +383,7 @@ spec:
 
 ## Logging
 
-If you're ingesting/parsing logs into another system then we recommend you set `RENOVATE_LEVEL=debug` and `RENOVATE_LOG_FORMAT=json` in your environment variables.
+If you're ingesting/parsing logs into another system then we recommend you set `RENOVATE_LOG_LEVEL=debug` and `RENOVATE_LOG_FORMAT=json` in your environment variables.
 Debug logging is usually needed for any debugging, while JSON format will mean that the output is parsable.
 
 ### About the log level numbers
