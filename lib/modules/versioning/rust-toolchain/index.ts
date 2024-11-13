@@ -4,8 +4,8 @@ import { regEx } from '../../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 
-export const id = 'rust';
-export const displayName = 'Rust';
+export const id = 'rust-toolchain';
+export const displayName = 'Rust Toolchain';
 export const urls = [
   'https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file',
 ];
