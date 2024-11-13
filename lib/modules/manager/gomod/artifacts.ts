@@ -243,7 +243,7 @@ export async function updateArtifacts({
       }
     }
 
-    let args = `get -d -t ${goGetDirs ?? './...'}`;
+    let args = `get -t ${goGetDirs ?? './...'}`;
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
