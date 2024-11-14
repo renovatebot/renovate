@@ -45,14 +45,14 @@
     Hi there,
 
 
-    This discussion needs more information about your environment.
+    We need more information about your environment.
 
 
-    Please specify in detail how you are running Renovate, for example:
-      - Are you running via an official Renovate image, or by using the Renovate npm package?
+    Please explain in detail how you are running Renovate. For example:
+      - Are you running via an official Renovate image, or using the Renovate npm package?
       - Which exact image tag are you running?
       - Which config/parameters are you using when running the image?
-      - Which config are you using in your CI/CD pipeline if relevant?
+      - Which config are you using in your CI/CD pipeline, if relevant?
 
     Thanks, the Renovate team
 

@@ -1694,7 +1694,14 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200);
+            .reply(200, {
+              ...prMock(url, 'SOME', 'repo'),
+              toRef: {
+                id: 'refs/heads/new_base',
+                displayId: 'new_base',
+                latestCommit: '0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+              },
+            });
 
           await expect(
             bitbucket.updatePr({
@@ -1716,7 +1723,11 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, { state: 'OPEN', version: 42 })
+            .reply(200, {
+              ...prMock(url, 'SOME', 'repo'),
+              state: 'OPEN',
+              version: 42,
+            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/decline?version=42`,
             )
@@ -1742,7 +1753,11 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, { state: 'DECLINED', version: 42 })
+            .reply(200, {
+              ...prMock(url, 'SOME', 'repo'),
+              state: 'DECLINED',
+              version: 42,
+            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/reopen?version=42`,
             )
@@ -1880,6 +1895,67 @@ describe('modules/platform/bitbucket-server/index', () => {
             bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
           ).rejects.toThrowErrorMatchingSnapshot();
         });
+      });
+
+      it('ensure runtime getPrList() integrity', async () => {
+        const scope = await initRepo();
+        scope
+          .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
+          .reply(200, prMock(url, 'SOME', 'repo'))
+          .get(
+            `${urlPath}/rest/default-reviewers/1.0/projects/SOME/repos/repo/reviewers?sourceRefId=refs/heads/branch&targetRefId=refs/heads/master&sourceRepoId=5&targetRepoId=5`,
+          )
+          .reply(200, [{ name: 'jcitizen' }])
+          .post(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
+          )
+          .reply(200, prMock(url, 'SOME', 'repo'))
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`,
+          )
+          .reply(200, {
+            isLastPage: true,
+            values: [],
+          })
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+          )
+          .reply(200, prMock(url, 'SOME', 'repo'))
+          .put(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+          )
+          .reply(200, { ...prMock(url, 'SOME', 'repo'), title: 'new_title' });
+
+        // initialize runtime pr list
+        await bitbucket.getPrList();
+        const pr = await bitbucket.createPr({
+          sourceBranch: 'branch',
+          targetBranch: 'master',
+          prTitle: 'title',
+          prBody: 'body',
+          platformPrOptions: {
+            bbUseDefaultReviewers: true,
+          },
+        });
+
+        // check that created pr is added to runtime pr list
+        const createdPr = (await bitbucket.getPrList()).find(
+          (pri) => pri.number === pr?.number,
+        );
+        expect(createdPr).toBeDefined();
+
+        await bitbucket.updatePr({
+          number: 5,
+          prTitle: 'new_title',
+          prBody: 'body',
+          targetBranch: 'master',
+        });
+
+        // check that runtime pr list is updated after updatePr() call
+        const updatedPr = (await bitbucket.getPrList()).find(
+          (pri) => pri.number === pr?.number,
+        );
+        expect(updatedPr?.title).toBe('new_title');
       });
 
       describe('mergePr()', () => {
