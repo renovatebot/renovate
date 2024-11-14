@@ -268,7 +268,7 @@ describe('modules/platform/bitbucket/index', () => {
       });
     });
 
-    it('enabled: should set main branch status if doesnt exist', async () => {
+    it('enabled: should set main branch status if does not exist', async () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -286,9 +286,9 @@ describe('modules/platform/bitbucket/index', () => {
           },
         })
         .post('/2.0/repositories/some/repo/commit/main_hash/statuses/build', {
-          name: 'Renovate Dashboard',
+          name: 'Mend.io Dashboard',
           state: 'SUCCESSFUL',
-          key: 'Renovate Dashboard',
+          key: 'Mend.io Dashboard',
           description: '',
           url: 'https://developer.mend.io/bitbucket/some/repo',
         })
@@ -314,7 +314,7 @@ describe('modules/platform/bitbucket/index', () => {
               state: 'SUCCESSFUL',
             },
             {
-              key: 'Renovate Dashboard',
+              key: 'Mend.io Dashboard',
               state: 'SUCCESSFUL',
             },
           ],
@@ -354,7 +354,7 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200, {
           values: [
             {
-              key: 'Renovate Dashboard',
+              key: 'Mend.io Dashboard',
               state: 'SUCCESSFUL',
             },
           ],

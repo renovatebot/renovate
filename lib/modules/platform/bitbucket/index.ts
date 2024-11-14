@@ -225,7 +225,7 @@ export async function initRepo({
     config.defaultBranch = mainBranch;
 
     if (bbMendAppDashboardStatus) {
-      const statusName = 'Renovate Dashboard';
+      const statusName = 'Mend.io Dashboard';
 
       const mendAppDashboardStatus = await getBranchStatusCheck(
         config.defaultBranch,
@@ -233,9 +233,7 @@ export async function initRepo({
       );
 
       if (!mendAppDashboardStatus) {
-        logger.debug(
-          'Creating branch status for Mend App Repository Dashboard',
-        );
+        logger.debug(`Creating branch status for ${statusName}`);
 
         await setBranchStatus({
           branchName: config.defaultBranch,
