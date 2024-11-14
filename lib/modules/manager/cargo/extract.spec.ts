@@ -567,7 +567,7 @@ replace-with = "mcorbin"
         config,
       );
       mockReadLocalFile({ 'Cargo.lock': rustupCargolock });
-      expect(res?.deps).toHaveLength(25);
+      expect(res?.deps).toHaveLength(78);
     });
 
     it('extracts locked versions for renamed packages', async () => {
