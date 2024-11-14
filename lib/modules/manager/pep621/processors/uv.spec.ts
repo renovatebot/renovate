@@ -392,6 +392,67 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
+    it('continues if Google auth is not configured', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      googleAuth.mockImplementation(
+        jest.fn().mockImplementation(() => ({
+          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        })),
+      );
+      fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+      // uv
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }, { version: '0.2.28' }],
+      });
+
+      const updatedDeps = [
+        {
+          packageName: 'dep',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: [
+            'https://someregion-python.pkg.dev/some-project/some-repo/',
+          ],
+        },
+      ];
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        {},
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep',
+          options: {
+            env: {
+              UV_EXTRA_INDEX_URL:
+                'https://someregion-python.pkg.dev/some-project/some-repo/',
+            },
+          },
+        },
+      ]);
+    });
+
     it('return update on lockfileMaintenance', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
