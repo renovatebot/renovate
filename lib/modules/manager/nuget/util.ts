@@ -56,7 +56,12 @@ export async function getConfiguredRegistries(
     'disabledPackageSources',
   );
 
-  if (!packageSources && !disabledPackageSources) {
+  if (!packageSources) {
+    // If there are no packageSources, don't even look for any
+    // disabledPackageSources
+    // Even if NuGet default source (nuget.org) was among the
+    // disabledPackageSources, Renovate will default to the default source
+    // (nuget.org) anyway
     return undefined;
   }
 
@@ -74,44 +79,42 @@ export async function getConfiguredRegistries(
     registry.sourceMappedPackagePatterns = sourceMappedPackagePatterns;
   }
 
-  if (packageSources) {
-    for (const child of packageSources.children) {
-      if (child.type === 'element') {
-        if (child.name === 'clear') {
-          logger.debug(`clearing registry URLs`);
-          registries.length = 0;
-        } else if (child.name === 'add') {
-          const isHttpUrl = regEx(/^https?:\/\//i).test(child.attr.value);
-          if (isHttpUrl) {
-            let registryUrl = child.attr.value;
-            if (child.attr.protocolVersion) {
-              registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
-            }
-            const sourceMappedPackagePatterns = packageSourceMapping
-              ?.childWithAttribute('key', child.attr.key)
-              ?.childrenNamed('package')
-              .map((packagePattern) => packagePattern.attr['pattern']);
-
-            logger.debug(
-              {
-                name: child.attr.key,
-                registryUrl,
-                sourceMappedPackagePatterns,
-              },
-              `Adding registry URL ${registryUrl}`,
-            );
-
-            registries.push({
-              name: child.attr.key,
-              url: registryUrl,
-              sourceMappedPackagePatterns,
-            });
-          } else {
-            logger.debug(
-              { registryUrl: child.attr.value },
-              'ignoring local registry URL',
-            );
+  for (const child of packageSources.children) {
+    if (child.type === 'element') {
+      if (child.name === 'clear') {
+        logger.debug(`clearing registry URLs`);
+        registries.length = 0;
+      } else if (child.name === 'add') {
+        const isHttpUrl = regEx(/^https?:\/\//i).test(child.attr.value);
+        if (isHttpUrl) {
+          let registryUrl = child.attr.value;
+          if (child.attr.protocolVersion) {
+            registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
           }
+          const sourceMappedPackagePatterns = packageSourceMapping
+            ?.childWithAttribute('key', child.attr.key)
+            ?.childrenNamed('package')
+            .map((packagePattern) => packagePattern.attr['pattern']);
+
+          logger.debug(
+            {
+              name: child.attr.key,
+              registryUrl,
+              sourceMappedPackagePatterns,
+            },
+            `Adding registry URL ${registryUrl}`,
+          );
+
+          registries.push({
+            name: child.attr.key,
+            url: registryUrl,
+            sourceMappedPackagePatterns,
+          });
+        } else {
+          logger.debug(
+            { registryUrl: child.attr.value },
+            'ignoring local registry URL',
+          );
         }
       }
     }
