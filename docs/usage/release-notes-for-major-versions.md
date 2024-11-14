@@ -32,7 +32,7 @@ After updating your Renovate Docker image to the new v39 release, you must:
 On top of the changes listed above, the `-full` image now:
 
 - Uses Python 3.13
-- Defaults to [`binarySource=global`](https://docs.renovatebot.com/self-hosted-configuration/#binarysource) (note: this was previously the case in v36 onwards but regressed sometime in v38)
+- Defaults to [`binarySource=global`](self-hosted-configuration.md#binarysource) (note: this was previously the case in v36 onwards but regressed sometime in v38)
 
 If you want to keep the old behavior, where Renovate dynamically installs the needed tools: set the environment variable `RENOVATE_BINARY_SOURCE` to `"install"`.
 
