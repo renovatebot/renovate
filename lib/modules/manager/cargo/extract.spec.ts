@@ -27,6 +27,9 @@ const cargo7toml = Fixtures.get('Cargo.7.toml');
 
 const lockfileUpdateCargotoml = Fixtures.get('lockfile-update/Cargo.toml');
 
+const rustupCargotoml = Fixtures.get('rustup/Cargo.toml');
+const rustupCargolock = Fixtures.get('rustup/Cargo.lock');
+
 describe('modules/manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {
     const config: ExtractConfig = {};
@@ -555,6 +558,16 @@ replace-with = "mcorbin"
 
       const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
       expect(res?.deps).toMatchObject([{ lockedVersion: '2.0.1' }]);
+    });
+
+    it('extracts rustup with nested versions', async () => {
+      const res = await extractPackageFile(
+        rustupCargotoml,
+        'Cargo.toml',
+        config,
+      );
+      mockReadLocalFile({ 'Cargo.lock': rustupCargolock });
+      expect(res?.deps).toHaveLength(25);
     });
 
     it('extracts locked versions for renamed packages', async () => {

@@ -1,0 +1,186 @@
+[package]
+name = "rustup"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Manage multiple rust installations with ease"
+homepage = "https://github.com/rust-lang/rustup"
+keywords = ["rustup", "multirust", "install", "proxy"]
+readme = "README.md"
+repository = "https://github.com/rust-lang/rustup"
+build = "build.rs"
+
+[features]
+curl-backend = ["download/curl-backend"]
+default = [
+  "curl-backend",
+  "reqwest-backend",
+  "reqwest-native-tls",
+  "reqwest-rustls-tls",
+]
+
+reqwest-backend = ["download/reqwest-backend"]
+vendored-openssl = ['openssl/vendored']
+
+reqwest-native-tls = ["download/reqwest-native-tls"]
+reqwest-rustls-tls = ["download/reqwest-rustls-tls"]
+
+# Include in the default set to disable self-update and uninstall.
+no-self-update = []
+
+# Include an Opentelemetry sink for tracing events
+otel = [
+  "dep:opentelemetry-otlp",
+  "dep:tracing-opentelemetry",
+  "dep:opentelemetry",
+  "dep:opentelemetry_sdk",
+]
+
+# Exports code dependent on private interfaces for the integration test suite
+test = ["dep:walkdir"]
+
+# Sorted by alphabetic order
+[dependencies]
+anyhow.workspace = true
+cfg-if = "1.0"
+chrono = { version = "0.4", default-features = false, features = ["std"] }
+clap = { version = "4", features = ["derive", "wrap_help"] }
+clap_complete = "4"
+download = { path = "download", default-features = false }
+effective-limits = "0.5.5"
+enum-map = "2.5.0"
+flate2 = "1"
+fs_at.workspace = true
+git-testament = "0.2"
+home = "0.5.4"
+itertools = "0.13"
+libc = "0.2"
+opener = "0.7.0"
+# `openssl` is used by `curl` or `reqwest` backend although it isn't imported by rustup: this
+# allows controlling the vendoring status without exposing the presence of the download crate.
+openssl = { version = "0.10", optional = true }
+opentelemetry = { workspace = true, optional = true }
+opentelemetry-otlp = { workspace = true, optional = true }
+opentelemetry_sdk = { workspace = true, optional = true }
+pulldown-cmark = { version = "0.12", default-features = false }
+rand = "0.8"
+regex = "1"
+remove_dir_all = { version = "0.8.1", features = ["parallel"] }
+retry = { version = "2", default-features = false, features = ["random"] }
+rs_tracing = { version = "1.1", features = ["rs_tracing"] }
+same-file = "1"
+scopeguard = "1"
+semver = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+sha2 = "0.10"
+sharded-slab = "0.1.1"
+strsim = "0.11"
+tar = "0.4.26"
+tempfile.workspace = true
+termcolor.workspace = true
+thiserror.workspace = true
+threadpool = "1"
+tokio.workspace = true
+tokio-retry.workspace = true
+tokio-stream.workspace = true
+toml = "0.8"
+tracing.workspace = true
+tracing-opentelemetry = { workspace = true, optional = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+url.workspace = true
+wait-timeout = "0.2"
+walkdir = { workspace = true, optional = true }
+xz2 = "0.1.3"
+zstd = "0.13"
+
+[target."cfg(windows)".dependencies]
+cc = "1"
+windows-registry = "0.3.0"
+windows-result = "0.2.0"
+
+[target."cfg(windows)".dependencies.windows-sys]
+features = [
+  "Win32_Foundation",
+  "Win32_Security",
+  "Win32_Storage_FileSystem",
+  "Win32_System_Console",
+  "Win32_System_Diagnostics_ToolHelp",
+  "Win32_System_IO",
+  "Win32_System_Ioctl",
+  "Win32_System_JobObjects",
+  "Win32_System_Kernel",
+  "Win32_System_LibraryLoader",
+  "Win32_System_SystemInformation",
+  "Win32_System_SystemServices",
+  "Win32_System_Threading",
+  "Win32_System_WindowsProgramming",
+  "Win32_UI",
+  "Win32_UI_WindowsAndMessaging",
+]
+version = "0.59"
+
+[dev-dependencies]
+enum-map = "2.5.0"
+platforms.workspace = true
+proptest.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+trycmd = "0.15.0"
+
+[build-dependencies]
+platforms.workspace = true
+regex = "1"
+
+[lints]
+workspace = true
+
+[workspace]
+members = ["download"]
+
+[workspace.package]
+version = "1.27.1"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+anyhow = "1.0.69"
+fs_at = "0.2.1"
+opentelemetry = "0.26"
+opentelemetry-otlp = "0.26"
+opentelemetry_sdk = { version = "0.26", features = ["rt-tokio"] }
+platforms = "3.4"
+proptest = "1.1.0"
+tempfile = "3.8"
+termcolor = "1.2"
+thiserror = "1.0"
+tokio = { version = "1.26.0", default-features = false, features = ["macros", "rt-multi-thread"] }
+tokio-retry = { version = "0.3.0" }
+tokio-stream = { version = "0.1.14" }
+tracing = "0.1"
+tracing-opentelemetry = "0.27"
+tracing-subscriber = "0.3.16"
+url = "2.4"
+walkdir = "2"
+
+[workspace.lints.rust]
+rust_2018_idioms = "deny"
+
+[workspace.lints.clippy]
+# `dbg!()` and `todo!()` clearly shouldn't make it to production:
+dbg_macro = "warn"
+todo = "warn"
+
+[lib]
+name = "rustup"
+path = "src/lib.rs"
+
+[profile.release]
+codegen-units = 1
+lto = true
+
+# Reduce build time by setting proc-macro crates non optimized.
+[profile.release.build-override]
+opt-level = 0
+
+[package.metadata.cargo-all-features]
+# Building with no web backend will error.
+always_include_features = ["reqwest-backend", "reqwest-rustls-tls"]
