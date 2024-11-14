@@ -4947,6 +4947,29 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('handles replacements - from datasource', async () => {
+      config.currentValue = '2.0.0';
+      config.packageName = 'org.example:foo';
+      config.datasource = MavenDatasource.id;
+      getMavenReleases.mockResolvedValueOnce({
+        releases: [{ version: '2.0.0' }],
+        replacementName: 'foo:bar',
+        replacementVersion: '2.0.0',
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          updateType: 'replacement',
+          newName: 'foo:bar',
+          newValue: '2.0.0',
+        },
+      ]);
+    });
+
     it('rollback for invalid version to last stable version', async () => {
       config.currentValue = '2.5.17';
       config.packageName = 'vue';
