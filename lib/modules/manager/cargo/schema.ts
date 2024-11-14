@@ -105,7 +105,13 @@ const CargoTarget = z.record(z.string(), CargoSection);
 
 export const CargoManifestSchema = Toml.pipe(
   CargoSection.extend({
-    package: z.object({ version: z.string().optional() }).optional(),
+    package: z
+      .object({
+        version: z
+          .union([z.string(), z.object({}).transform(() => undefined)])
+          .optional(),
+      })
+      .optional(),
     workspace: CargoWorkspace.optional(),
     target: CargoTarget.optional(),
   }),
