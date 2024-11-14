@@ -3161,7 +3161,6 @@ Managers which do not support replacement:
 - `gomod`
 - `gradle`
 - `homebrew`
-- `maven`
 - `regex`
 - `sbt`
 
