@@ -36,10 +36,6 @@ On top of the changes listed above, the `-full` image now:
 
 If you want to keep the old behavior, where Renovate dynamically installs the needed tools: set the environment variable `RENOVATE_BINARY_SOURCE` to `"install"`.
 
-Question do we need to update the `binarySource` docs?
-It still says:
-
-> Starting in v36, Renovate's default Docker image (previously referred to as the "slim" image) uses `binarySource=install` while the "full" Docker image uses `binarySource=global`. If you are running Renovate in an environment where runtime download and install of tools is not possible then you should use the "full" image.
 
 #### Renovate tries squash merges first when automerging on GitHub
 
