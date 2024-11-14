@@ -105,4 +105,34 @@ describe('modules/versioning/rust-toolchain/index', () => {
       ),
     ).toEqual(['1.82.0', '1.82.4', '1.83.1', '2.80.5']);
   });
+
+  it.each`
+    currentValue | newVersion  | rangeStrategy | expected
+    ${'1.82.1'}  | ${'1.82.0'} | ${'bump'}     | ${'1.82.0'}
+    ${'1.82.0'}  | ${'1.82.0'} | ${'bump'}     | ${'1.82.0'}
+    ${'1.82.0'}  | ${'2.81.0'} | ${'bump'}     | ${'2.81.0'}
+    ${'1.82'}    | ${'1.81.1'} | ${'bump'}     | ${'1.81'}
+    ${'1.82'}    | ${'1.82.1'} | ${'bump'}     | ${'1.82'}
+    ${'1.82'}    | ${'1.83.0'} | ${'bump'}     | ${'1.83'}
+    ${'1.82'}    | ${'2.81.0'} | ${'bump'}     | ${'2.81'}
+    ${'1.82'}    | ${'2.82.1'} | ${'bump'}     | ${'2.82'}
+    ${'1.82'}    | ${'2.82.1'} | ${'pin'}      | ${'2.82.1'}
+    ${'1.82'}    | ${'1.82.1'} | ${'pin'}      | ${'1.82.1'}
+    ${'1.82'}    | ${'1.81.1'} | ${'pin'}      | ${'1.81.1'}
+    ${'1.82'}    | ${'1.83.1'} | ${'pin'}      | ${'1.83.1'}
+    ${'1.82.1'}  | ${'1.82.1'} | ${'replace'}  | ${'1.82.1'}
+    ${'1.82.1'}  | ${'1.82.2'} | ${'replace'}  | ${'1.82.2'}
+    ${'1.82.1'}  | ${'1.81.2'} | ${'replace'}  | ${'1.81.2'}
+    ${'1.82.1'}  | ${'2.81.2'} | ${'replace'}  | ${'2.81.2'}
+    ${'1.82'}    | ${'2.81.2'} | ${'replace'}  | ${'2.81'}
+    ${'1.82'}    | ${'1.81.2'} | ${'replace'}  | ${'1.81'}
+    ${'1.82'}    | ${'1.83.2'} | ${'replace'}  | ${'1.83'}
+  `(
+    'getNewValue("{currentValue=$currentValue, newVersion="$newVersion", rangeStrategy="$rangeStrategy"}) === $expected',
+    ({ currentValue, newVersion, rangeStrategy, expected }) => {
+      expect(
+        versioning.getNewValue({ currentValue, newVersion, rangeStrategy }),
+      ).toEqual(expected);
+    },
+  );
 });
