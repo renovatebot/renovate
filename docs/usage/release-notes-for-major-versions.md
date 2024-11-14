@@ -32,7 +32,7 @@ After updating your Renovate Docker image to the new v39 release, you must:
 On top of the changes listed above, the `-full` image now:
 
 - Uses Python 3.13
-- Defaults to [`binarySource=global`](https://docs.renovatebot.com/self-hosted-configuration/#binarysource) (note: this was previously the case in v36 onwards but regressed sometime in v38).
+- Defaults to [`binarySource=global`](https://docs.renovatebot.com/self-hosted-configuration/#binarysource) (note: this was previously the case in v36 onwards but regressed sometime in v38)
 
 If you want to keep the old behavior, where Renovate dynamically installs the needed tools: set the environment variable `RENOVATE_BINARY_SOURCE` to `"install"`.
 
@@ -49,9 +49,10 @@ If you want to allow squash merges on your GitHub repository, follow the steps i
 
 #### Branch names with multiple slashes
 
-Branch names with multiple forward slashes (`/`) will change if `branchNameStrict=true`.
-Previously there were cases where special characters could still enter branch names despite `branchNameStrict=true` being set.
-This has now been corrected, which can result in some branch name changes because any forward slashes will be converted to hyphens.
+If you set `branchNameStrict=true`, then branch names with multiple forward slashes (`/`) will change.
+
+The problem was that even if you set `branchNameStrict=true`, in some cases special characters could still end up in Renovate's branch names.
+We fixed this problem, by letting Renovate convert multiple forward slashes (`/`) to hyphens (`-`) in its branch names, if `branchNameStrict=true`.
 
 ### Commentary for 39
 
@@ -61,11 +62,11 @@ Renovate has changed its GitHub merge preference to "squash" because this way re
 
 Read the [GitHub Docs, Signature verification for rebase and merge](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#signature-verification-for-rebase-and-merge) to learn more about commit signing.
 
-
 #### Why we change branch names with multiple slashes
 
-Branches with slashes are undesirable and this was a bug.
-We are changing it in a major release out of politeness so that you know to expect some branch name changes if you have `branchNameStrict` enabled.
+Branches with mutiple slashes (`/`) are not wanted, this was a bug.
+We are changing it in a major release out of politeness to all our users.
+If you enabled `branchNameStrict`, you can expect some branch names to change.
 
 ### Link to release notes for 39
 
