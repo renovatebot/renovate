@@ -25,7 +25,7 @@ All our Docker images now set the Docker user ID to `12021`, the old ID was `100
 After updating your Renovate Docker image to the new v39 release, you must:
 
 - Delete your old Docker cache, _or_
-- Cut and paste the permissions from the old ID into the new user ID
+- Ensure the new user ID has write permissions to any existing cache
 
 #### Updated version of Python, and new default behavior for the `-full` Docker image
 
