@@ -5,6 +5,7 @@ import { logger } from '../../../../logger';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import { getGitEnvironmentVariables } from '../../../../util/git/auth';
 import { Result } from '../../../../util/result';
 import { PypiDatasource } from '../../../datasource/pypi';
 import type {
@@ -116,8 +117,12 @@ export class PdmProcessor implements PyProjectProcessor {
         constraint: config.constraints?.pdm,
       };
 
+      const extraEnv = {
+        ...getGitEnvironmentVariables(['pep621']),
+      };
       const execOptions: ExecOptions = {
         cwdFile: packageFileName,
+        extraEnv,
         docker: {},
         userConfiguredEnv: config.env,
         toolConstraints: [pythonConstraint, pdmConstraint],
