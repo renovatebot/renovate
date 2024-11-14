@@ -64,7 +64,9 @@ class GPGKey extends PrivateKey {
   protected async importKey(): Promise<string | undefined> {
     const keyFileName = upath.join(os.tmpdir() + '/git-private-gpg.key');
     await fs.outputFile(keyFileName, this.key);
-    const { stdout, stderr } = await exec(`gpg --batch --no-tty --import ${keyFileName}`);
+    const { stdout, stderr } = await exec(
+      `gpg --batch --no-tty --import ${keyFileName}`,
+    );
     logger.debug({ stdout, stderr }, 'Private key import result');
     await fs.remove(keyFileName);
     return `${stdout}${stderr}`
