@@ -73,7 +73,7 @@ github-cli 2.32.1
 gitleaks 8.21.1
 gleam 1.3.1
 gohugo extended_0.104.3
-golang 1.19.2
+golang 1.23.3
 golangci-lint 1.52.2
 gomplate 3.11.7
 hadolint 2.12.0
@@ -325,7 +325,7 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
-            currentValue: '1.19.2',
+            currentValue: '1.23.3',
             datasource: 'github-tags',
             packageName: 'golang/go',
             depName: 'golang',

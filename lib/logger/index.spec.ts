@@ -10,6 +10,7 @@ import {
   getContext,
   getProblems,
   levels,
+  logLevel,
   logger,
   removeMeta,
   setContext,
@@ -53,7 +54,9 @@ describe('logger/index', () => {
   });
 
   it('sets level', () => {
+    expect(logLevel()).toBeDefined(); // depends on passed env
     expect(() => levels('stdout', 'debug')).not.toThrow();
+    expect(logLevel()).toBe('debug');
   });
 
   it('saves problems', () => {
