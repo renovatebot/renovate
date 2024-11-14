@@ -11,6 +11,7 @@ import { find } from '../../../../util/host-rules';
 import { Result } from '../../../../util/result';
 import { parseUrl } from '../../../../util/url';
 import { PypiDatasource } from '../../../datasource/pypi';
+import { getGoogleAuthTokenRaw } from '../../../datasource/util';
 import type {
   PackageDependency,
   UpdateArtifact,
@@ -131,7 +132,7 @@ export class UvProcessor implements PyProjectProcessor {
 
       const extraEnv = {
         ...getGitEnvironmentVariables(['pep621']),
-        ...getUvExtraIndexUrl(updateArtifact.updatedDeps),
+        ...(await getUvExtraIndexUrl(updateArtifact.updatedDeps)),
       };
       const execOptions: ExecOptions = {
         cwdFile: packageFileName,
@@ -216,7 +217,7 @@ function getMatchingHostRule(url: string | undefined): HostRule {
   return find({ hostType: PypiDatasource.id, url });
 }
 
-function getUvExtraIndexUrl(deps: Upgrade[]): NodeJS.ProcessEnv {
+async function getUvExtraIndexUrl(deps: Upgrade[]): Promise<NodeJS.ProcessEnv> {
   const pyPiRegistryUrls = deps
     .filter((dep) => dep.datasource === PypiDatasource.id)
     .map((dep) => dep.registryUrls)
@@ -231,11 +232,21 @@ function getUvExtraIndexUrl(deps: Upgrade[]): NodeJS.ProcessEnv {
     }
 
     const rule = getMatchingHostRule(parsedUrl.toString());
-    if (rule.username) {
-      parsedUrl.username = rule.username;
-    }
-    if (rule.password) {
-      parsedUrl.password = rule.password;
+    if (rule.username || rule.password) {
+      if (rule.username) {
+        parsedUrl.username = rule.username;
+      }
+      if (rule.password) {
+        parsedUrl.password = rule.password;
+      }
+    } else if (parsedUrl.hostname.endsWith('.pkg.dev')) {
+      const accessToken = await getGoogleAuthTokenRaw();
+      if (accessToken) {
+        parsedUrl.username = 'oauth2accesstoken';
+        parsedUrl.password = accessToken;
+      } else {
+        logger.once.debug({ registryUrl }, 'Could not get Google access token');
+      }
     }
 
     extraIndexUrls.push(parsedUrl.toString());
