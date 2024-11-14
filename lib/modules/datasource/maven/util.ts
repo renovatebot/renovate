@@ -485,6 +485,18 @@ export async function getDependencyInfo(
     }
   }
 
+  const relocation = pomContent.descendantWithPath(
+    'distributionManagement.relocation',
+  );
+  if (relocation) {
+    const newGroup = relocation.valueWithPath('groupId') ?? dependency.group;
+    const newName = relocation.valueWithPath('artifactId') ?? dependency.name;
+    result.replacementName = newGroup + ':' + newName;
+    const relocationVersion = relocation.valueWithPath('version');
+    result.replacementVersion = relocationVersion ?? version;
+    result.deprecationMessage = relocation.valueWithPath('message');
+  }
+
   const groupId = pomContent.valueWithPath('groupId');
   if (groupId) {
     result.packageScope = groupId;
