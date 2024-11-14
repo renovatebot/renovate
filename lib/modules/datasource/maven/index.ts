@@ -252,8 +252,9 @@ export class MavenDatasource extends Datasource {
     namespace: `datasource-maven`,
     key: (
       { registryUrl, packageName }: PostprocessReleaseConfig,
-      { version }: Release,
-    ) => `postprocessRelease:${registryUrl}:${packageName}:${version}`,
+      { version, versionOrig }: Release,
+    ) =>
+      `postprocessRelease:${registryUrl}:${packageName}:${versionOrig ?? version}`,
     ttlMinutes: 24 * 60,
   })
   override async postprocessRelease(
@@ -268,7 +269,7 @@ export class MavenDatasource extends Datasource {
 
     const pomUrl = await createUrlForDependencyPom(
       this.http,
-      release.version,
+      release.versionOrig ?? release.version,
       dependency,
       registryUrl,
     );
