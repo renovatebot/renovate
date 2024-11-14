@@ -50,25 +50,22 @@ If you want to allow squash merges on your GitHub repository, follow the steps i
 #### Branch names with multiple slashes
 
 Branch names with multiple forward slashes (`/`) will change if `branchNameStrict=true`.
-
-Suggest a "old behavior" example.
-
-Suggest a "new behavior" example.
+Previously there were cases where special characters could still enter branch names despite `branchNameStrict=true` being set.
+This has now been corrected, which can result in some branch name changes because any forward slashes will be converted to hyphens.
 
 ### Commentary for 39
 
 #### Technical reasons for trying the squash merge first on GitHub
 
-Insert Renovate maintainer details here.
+Renovate has changed its GitHub merge preference to "squash" because this way results in signed commits, while "rebase" merges do not.
 
 Read the [GitHub Docs, Signature verification for rebase and merge](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#signature-verification-for-rebase-and-merge) to learn more about commit signing.
 
-Note from HonkingGoose to maintainers, the [GitHub Docs, signature verification for bots](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#signature-verification-for-bots) have more info about signing commits as bot author.
-I don't know if we already do this, or if the method is better than relying on a specific kind of merge type?
 
 #### Why we change branch names with multiple slashes
 
-Explain why this was changed here.
+Branches with slashes are undesirable and this was a bug.
+We are changing it in a major release out of politeness so that you know to expect some branch name changes if you have `branchNameStrict` enabled.
 
 ### Link to release notes for 39
 
