@@ -635,5 +635,21 @@ replace-with = "mcorbin"
       const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
       expect(res?.packageFileVersion).toBe('0.1.0');
     });
+
+    it('should extract project version from workspace', async () => {
+      const cargotoml = codeBlock`
+        [package]
+        name = "test"
+        version.workspace = true
+        edition = "2021"
+        [workspace.package]
+        version = "0.1.0"
+        [dependencies]
+        syn = "2.0"
+        `;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res?.packageFileVersion).toBe('0.1.0');
+    });
   });
 });

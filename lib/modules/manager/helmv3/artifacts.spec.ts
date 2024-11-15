@@ -791,6 +791,9 @@ describe('modules/manager/helmv3/artifacts', () => {
     const ecr = ecrMock.call(0).thisValue as ECRClient;
     expect(await ecr.config.region()).toBe('us-east-1');
     expect(await ecr.config.credentials()).toEqual({
+      $source: {
+        CREDENTIALS_CODE: 'e',
+      },
       accessKeyId: 'some-username',
       secretAccessKey: 'some-password',
       sessionToken: 'some-session-token',
@@ -909,6 +912,9 @@ describe('modules/manager/helmv3/artifacts', () => {
     const ecr = ecrMock.call(0).thisValue as ECRClient;
     expect(await ecr.config.region()).toBe('us-east-1');
     expect(await ecr.config.credentials()).toEqual({
+      $source: {
+        CREDENTIALS_CODE: 'e',
+      },
       accessKeyId: 'some-username',
       secretAccessKey: 'some-password',
       sessionToken: 'some-session-token',
@@ -965,6 +971,9 @@ describe('modules/manager/helmv3/artifacts', () => {
     const ecr = ecrMock.call(0).thisValue as ECRClient;
     expect(await ecr.config.region()).toBe('us-east-1');
     expect(await ecr.config.credentials()).toEqual({
+      $source: {
+        CREDENTIALS_CODE: 'e',
+      },
       accessKeyId: 'some-username',
       secretAccessKey: 'some-password',
       sessionToken: 'some-session-token',
