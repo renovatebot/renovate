@@ -32,7 +32,6 @@ import {
   getQueryString,
   parseUrl,
 } from '../../../util/url';
-import { getPrBodyStruct } from '../pr-body';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -72,6 +71,7 @@ import type {
   MergeMethod,
   RepoResponse,
 } from './types';
+import { prInfo } from './utils';
 
 let config: {
   repository: string;
@@ -560,24 +560,10 @@ async function fetchPrList(): Promise<Pr[]> {
   const query = getQueryString(searchParams);
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
   try {
-    const res = await gitlabApi.getJson<
-      {
-        iid: number;
-        source_branch: string;
-        title: string;
-        state: string;
-        created_at: string;
-      }[]
-    >(urlString, { paginate: true });
-    return res.body.map((pr) =>
-      massagePr({
-        number: pr.iid,
-        sourceBranch: pr.source_branch,
-        title: pr.title,
-        state: pr.state === 'opened' ? 'open' : pr.state,
-        createdAt: pr.created_at,
-      }),
-    );
+    const res = await gitlabApi.getJson<GitLabMergeRequest[]>(urlString, {
+      paginate: true,
+    });
+    return res.body.map((pr) => massagePr(prInfo(pr)));
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error fetching PR list');
     if (err.statusCode === 403) {
@@ -800,20 +786,7 @@ export async function getPr(iid: number): Promise<GitlabPr> {
   const mr = await getMR(config.repository, iid);
 
   // Harmonize fields with GitHub
-  const pr: GitlabPr = {
-    sourceBranch: mr.source_branch,
-    targetBranch: mr.target_branch,
-    number: mr.iid,
-    bodyStruct: getPrBodyStruct(mr.description),
-    state: mr.state === 'opened' ? 'open' : mr.state,
-    headPipelineStatus: mr.head_pipeline?.status,
-    headPipelineSha: mr.head_pipeline?.sha,
-    hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
-    reviewers: mr.reviewers?.map(({ username }) => username),
-    title: mr.title,
-    labels: mr.labels,
-    sha: mr.sha,
-  };
+  const pr: GitlabPr = prInfo(mr);
 
   return massagePr(pr);
 }
