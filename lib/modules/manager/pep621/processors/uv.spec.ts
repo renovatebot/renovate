@@ -418,7 +418,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           depType: depTypes.dependencies,
           datasource: PypiDatasource.id,
           registryUrls: [
-            'https://someregion-python.pkg.dev/some-project/some-repo/',
+            'https://someregion-python.pkg.dev/some-project/some-repo/simple/',
           ],
         },
       ];
@@ -446,7 +446,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           options: {
             env: {
               UV_EXTRA_INDEX_URL:
-                'https://someregion-python.pkg.dev/some-project/some-repo/',
+                'https://someregion-python.pkg.dev/some-project/some-repo/simple/',
             },
           },
         },
