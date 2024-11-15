@@ -210,11 +210,10 @@ export async function processBranch(
       }
     }
 
-    logger.debug({
-      concurrentPrsCount: counts.get('PullRequests'),
-      concurrentBranchesCount: counts.get('Branches'),
-      hourlyPrsCount: counts.get('HourlyPullRequests'),
-    });
+    logger.debug(
+      `Open PR Count: ${counts.get('PullRequests')?.current}, Existing Branch Count: ${counts.get('Branches')?.current}, Hourly PR Count: ${counts.get('HourlyPullRequests')?.current}`,
+    );
+
     if (
       !branchExists &&
       isCountReached('Branches', branchConfig) &&

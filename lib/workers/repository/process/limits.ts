@@ -1,7 +1,6 @@
 import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import type { Pr } from '../../../modules/platform';
 import { platform } from '../../../modules/platform';
 import { scm } from '../../../modules/platform/scm';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -40,7 +39,7 @@ export async function getConcurrentPrsCount(
   config: RenovateConfig,
   branches: BranchConfig[],
 ): Promise<number> {
-  const openPrs: Pr[] = [];
+  let openPrCount = 0;
   for (const { branchName } of branches) {
     try {
       const pr = await platform.getBranchPr(branchName, config.baseBranch);
@@ -49,7 +48,7 @@ export async function getConcurrentPrsCount(
         pr.sourceBranch !== config.onboardingBranch &&
         pr.state === 'open'
       ) {
-        openPrs.push(pr);
+        openPrCount++;
       }
     } catch (err) {
       // istanbul ignore if
@@ -61,23 +60,20 @@ export async function getConcurrentPrsCount(
     }
   }
 
-  logger.debug(`${openPrs.length} PRs are currently open`);
-  return openPrs.length;
+  logger.debug(`${openPrCount} PRs are currently open`);
+  return openPrCount;
 }
 
 export async function getConcurrentBranchesCount(
   branches: BranchConfig[],
 ): Promise<number> {
-  const existingBranches: string[] = [];
+  let existingBranchCount = 0;
   for (const branch of branches) {
     if (await scm.branchExists(branch.branchName)) {
-      existingBranches.push(branch.branchName);
+      existingBranchCount++;
     }
   }
 
-  const existingCount = existingBranches.length;
-  logger.debug(
-    `${existingCount} already existing branches found: ${existingBranches.join()}`,
-  );
-  return existingCount;
+  logger.debug(`${existingBranchCount} already existing branches found.`);
+  return existingBranchCount;
 }
