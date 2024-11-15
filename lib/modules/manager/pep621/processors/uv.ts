@@ -6,6 +6,7 @@ import type { HostRule } from '../../../../types';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import { getGitEnvironmentVariables } from '../../../../util/git/auth';
 import { find } from '../../../../util/host-rules';
 import { Result } from '../../../../util/result';
 import { parseUrl } from '../../../../util/url';
@@ -129,6 +130,7 @@ export class UvProcessor implements PyProjectProcessor {
       };
 
       const extraEnv = {
+        ...getGitEnvironmentVariables(['pep621']),
         ...getUvExtraIndexUrl(updateArtifact.updatedDeps),
       };
       const execOptions: ExecOptions = {
