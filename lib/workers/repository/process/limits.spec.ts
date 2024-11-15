@@ -18,8 +18,8 @@ beforeEach(() => {
 });
 
 describe('workers/repository/process/limits', () => {
-  describe('getPrHourlyRemaining()', () => {
-    it('calculates hourly limit remaining', async () => {
+  describe('getPrHourlyCount()', () => {
+    it('calculates hourly pr count', async () => {
       const time = DateTime.local();
       const createdAt = time.toISO();
       platform.getPrList.mockResolvedValueOnce([
@@ -33,30 +33,19 @@ describe('workers/repository/process/limits', () => {
         { createdAt, sourceBranch: 'bar/configure' },
         { createdAt, sourceBranch: 'baz/test' },
       ] as never);
-      const res = await limits.getPrHourlyRemaining({
-        ...config,
-        prHourlyLimit: 10,
-      });
-      expect(res).toBe(7);
+      const res = await limits.getPrHourlyCount(config);
+      expect(res).toBe(3);
     });
 
-    it('returns prHourlyLimit if errored', async () => {
-      config.prHourlyLimit = 5;
+    it('returns zero if errored', async () => {
       platform.getPrList.mockRejectedValue('Unknown error');
-      const res = await limits.getPrHourlyRemaining(config);
-      expect(res).toBe(5);
-    });
-
-    it('returns MAX_SAFE_INTEGER if no hourly limit', async () => {
-      config.prHourlyLimit = 0;
-      const res = await limits.getPrHourlyRemaining(config);
-      expect(res).toBe(Number.MAX_SAFE_INTEGER);
+      const res = await limits.getPrHourlyCount(config);
+      expect(res).toBe(0);
     });
   });
 
-  describe('getConcurrentPrsRemaining()', () => {
-    it('calculates concurrent limit remaining', async () => {
-      config.prConcurrentLimit = 20;
+  describe('getConcurrentPrsCount()', () => {
+    it('calculates concurrent prs present', async () => {
       platform.getBranchPr.mockImplementation((branchName) =>
         branchName
           ? Promise.resolve(
@@ -71,100 +60,21 @@ describe('workers/repository/process/limits', () => {
         { branchName: 'test' },
         { branchName: null },
       ] as never;
-      const res = await limits.getConcurrentPrsRemaining(config, branches);
-      expect(res).toBe(19);
-    });
-
-    it('returns MAX_SAFE_INTEGER if no concurrent limit', async () => {
-      config.prConcurrentLimit = 0;
-      const res = await limits.getConcurrentPrsRemaining(config, []);
-      expect(res).toBe(Number.MAX_SAFE_INTEGER);
-    });
-  });
-
-  describe('getPrsRemaining()', () => {
-    it('returns hourly limit', async () => {
-      config.prHourlyLimit = 1;
-      platform.getPrList.mockResolvedValueOnce([]);
-      const res = await limits.getPrsRemaining(config, []);
-      expect(res).toBe(1);
-    });
-
-    it('returns concurrent limit', async () => {
-      config.prConcurrentLimit = 1;
-      const res = await limits.getPrsRemaining(config, []);
+      const res = await limits.getConcurrentPrsCount(config, branches);
       expect(res).toBe(1);
     });
   });
 
-  describe('getConcurrentBranchesRemaining()', () => {
-    it('calculates concurrent limit remaining', async () => {
-      config.branchConcurrentLimit = 20;
-      scm.branchExists.mockResolvedValueOnce(true);
-      const res = await limits.getConcurrentBranchesRemaining(config, [
-        { branchName: 'foo' },
-      ] as never);
-      expect(res).toBe(19);
-    });
-
-    it('defaults to prConcurrentLimit', async () => {
-      config.branchConcurrentLimit = null;
-      config.prConcurrentLimit = 20;
-      scm.branchExists.mockResolvedValueOnce(true);
-      const res = await limits.getConcurrentBranchesRemaining(config, [
-        { branchName: 'foo' },
-      ] as never);
-      expect(res).toBe(19);
-    });
-
-    it('does not use prConcurrentLimit for explicit branchConcurrentLimit=0', async () => {
-      config.branchConcurrentLimit = 0;
-      config.prConcurrentLimit = 20;
-      const res = await limits.getConcurrentBranchesRemaining(config, []);
-      expect(res).toBe(Number.MAX_SAFE_INTEGER);
-    });
-
-    it('returns 10 if no limits are set', async () => {
-      const res = await limits.getConcurrentBranchesRemaining(config, []);
-      expect(res).toBe(10);
-    });
-
-    it('returns prConcurrentLimit if errored', async () => {
-      config.branchConcurrentLimit = 2;
-      // TODO: #22198
-      const res = await limits.getConcurrentBranchesRemaining(
-        config,
-        null as never,
+  describe('getConcurrentBranchesCount()', () => {
+    it('calculates concurrent branches present', async () => {
+      scm.branchExists.mockImplementation((branchName) =>
+        branchName ? Promise.resolve(true) : Promise.resolve(false),
       );
-      expect(res).toBe(2);
-    });
-  });
-
-  describe('getBranchesRemaining()', () => {
-    it('returns minimal of both limits', async () => {
-      platform.getPrList.mockResolvedValue([]);
-
-      await expect(
-        limits.getBranchesRemaining(
-          {
-            ...config,
-            prHourlyLimit: 3,
-            branchConcurrentLimit: 5,
-          },
-          [],
-        ),
-      ).resolves.toBe(3);
-
-      await expect(
-        limits.getBranchesRemaining(
-          {
-            ...config,
-            prHourlyLimit: 11,
-            branchConcurrentLimit: 7,
-          },
-          [],
-        ),
-      ).resolves.toBe(7);
+      const res = await limits.getConcurrentBranchesCount([
+        { branchName: 'foo' },
+        { branchName: null },
+      ] as never);
+      expect(res).toBe(1);
     });
   });
 });

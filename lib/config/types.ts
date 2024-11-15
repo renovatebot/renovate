@@ -270,6 +270,7 @@ export interface RenovateConfig
   packageFile?: string;
   packageRules?: PackageRule[];
   postUpdateOptions?: string[];
+  branchConcurrentLimit?: number;
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
   forkModeDisallowMaintainerEdits?: boolean;
