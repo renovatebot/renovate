@@ -89,8 +89,9 @@ describe('workers/repository/update/pr/index', () => {
         const res = await ensurePr(config);
 
         expect(res).toEqual({ type: 'with-pr', pr });
-        expect(limits.incLimitedValue).toHaveBeenCalledOnce();
-        expect(limits.incLimitedValue).toHaveBeenCalledWith('PullRequests');
+        expect(limits.incCountValue).toHaveBeenCalledTimes(2);
+        expect(limits.incCountValue).toHaveBeenCalledWith('PullRequests');
+        expect(limits.incCountValue).toHaveBeenCalledWith('HourlyPullRequests');
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: pr.number, prTitle },
           'PR created',
@@ -100,7 +101,7 @@ describe('workers/repository/update/pr/index', () => {
 
       it('aborts PR creation once limit is exceeded', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
-        limits.isLimitReached.mockReturnValueOnce(true);
+        limits.isCountReached.mockReturnValueOnce(true);
 
         config.fetchChangeLogs = 'pr';
 
@@ -113,7 +114,7 @@ describe('workers/repository/update/pr/index', () => {
 
       it('ignores PR limits on vulnerability alert', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
-        limits.isLimitReached.mockReturnValueOnce(true);
+        limits.isCountReached.mockReturnValueOnce(true);
 
         const prConfig = { ...config, isVulnerabilityAlert: true };
         delete prConfig.prTitle; // for coverage
