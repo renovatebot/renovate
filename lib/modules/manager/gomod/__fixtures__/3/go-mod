@@ -131,3 +131,5 @@ replace (
 	k8s.io/sample-cli-plugin => k8s.io/sample-cli-plugin v0.17.3
 	k8s.io/sample-controller => k8s.io/sample-controller v0.17.3
 )
+
+toolchain go1.23.3
