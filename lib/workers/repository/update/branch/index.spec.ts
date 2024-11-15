@@ -540,7 +540,7 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [],
       });
-      limits.isLimitReached.mockReturnValueOnce(true);
+      limits.isCountReached.mockReturnValueOnce(true);
       limits.isLimitReached.mockReturnValueOnce(false);
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: false,
@@ -598,7 +598,7 @@ describe('workers/repository/update/branch/index', () => {
         type: 'without-pr',
         prBlockedBy: 'RateLimited',
       });
-      limits.isLimitReached.mockReturnValue(false);
+      limits.isCountReached.mockReturnValue(false);
       //git.getBranchCommit.mockReturnValue('123test');TODO:not needed?
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
@@ -617,7 +617,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [],
       });
       scm.branchExists.mockResolvedValue(false);
-      limits.isLimitReached.mockReturnValueOnce(false);
+      limits.isCountReached.mockReturnValueOnce(false);
       limits.isLimitReached.mockReturnValueOnce(true);
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: false,
