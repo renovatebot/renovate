@@ -4,6 +4,7 @@ import {
   bitbucketRefMatchRegex,
   gitTagsRefMatchRegex,
   githubRefMatchRegex,
+  hostnameMatchRegex,
 } from './modules';
 
 describe('modules/manager/terraform/extractors/others/modules', () => {
@@ -297,6 +298,24 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
         repository: 'MyRepository',
         tag: 'v1.0.0',
         url: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+      });
+    });
+  });
+
+  describe('hostnameMatchRegex', () => {
+    it('should extact hostname from source url', () => {
+      const host1 = hostnameMatchRegex.exec(
+        'git-lab.git-server.com/my/terraform/module',
+      )?.groups;
+      const host2 = hostnameMatchRegex.exec(
+        'example.com/my/terraform/module',
+      )?.groups;
+
+      expect(host1).toEqual({
+        hostname: 'git-lab.git-server.com',
+      });
+      expect(host2).toEqual({
+        hostname: 'example.com',
       });
     });
   });
