@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
-import type { BranchUpgradeConfig } from '../types';
+import type { BranchConfig, BranchUpgradeConfig } from '../types';
 
 export type Limit = 'Commits';
 interface LimitValue {
@@ -66,9 +66,7 @@ export function incCountValue(key: CountName, incBy = 1): void {
 
 export function isCountReached(
   key: Exclude<CountName, 'HourlyPullRequests'>,
-  config: {
-    upgrades: BranchUpgradeConfig[];
-  },
+  config: BranchConfig,
 ): boolean {
   const limitKey =
     key === 'Branches' ? 'branchConcurrentLimit' : 'prConcurrentLimit';
