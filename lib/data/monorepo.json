@@ -378,6 +378,7 @@
     "mutation-testing-elements": "https://github.com/stryker-mutator/mutation-testing-elements",
     "nest": [
       "https://github.com/nestjs/nest",
+      "https://github.com/nestjs/nest-cli",
       "https://github.com/nestjs/passport",
       "https://github.com/nestjs/schematics",
       "https://github.com/nestjs/terminus"
@@ -482,6 +483,7 @@
     "shopify-app-bridge": "https://github.com/Shopify/app-bridge",
     "sitecore-jss": "https://github.com/Sitecore/jss",
     "skiasharp": "https://github.com/mono/SkiaSharp",
+    "slack-net": "https://github.com/soxtoby/SlackNet",
     "slf4j": "https://github.com/qos-ch/slf4j",
     "spectre-console": "https://github.com/spectreconsole/spectre.console",
     "springfox": "https://github.com/springfox/springfox",

@@ -356,6 +356,13 @@ describe('modules/manager/pep621/processors/uv', () => {
           cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4',
           options: {
             env: {
+              GIT_CONFIG_COUNT: '3',
+              GIT_CONFIG_KEY_0: 'url.https://user:pass@example.com/.insteadOf',
+              GIT_CONFIG_KEY_1: 'url.https://user:pass@example.com/.insteadOf',
+              GIT_CONFIG_KEY_2: 'url.https://user:pass@example.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'ssh://git@example.com/',
+              GIT_CONFIG_VALUE_1: 'git@example.com:',
+              GIT_CONFIG_VALUE_2: 'https://example.com/',
               UV_EXTRA_INDEX_URL:
                 'https://foobar.com/ https://user:pass@example.com/',
             },

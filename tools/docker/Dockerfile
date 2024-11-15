@@ -1,23 +1,23 @@
-# syntax=docker/dockerfile:1.11.0@sha256:1f2be5a2aa052cbd9aedf893d17c63277c3d1c51b3fb0f3b029c6b34f658d057
+# syntax=docker/dockerfile:1.11.1@sha256:10c699f1b6c8bdc8f6b4ce8974855dd8542f1768c26eb240237b8f1c9c6c9976
 
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.2.2@sha256:ecf207fc81484f5315f27cc3c5948b12b7efb8e2be4b8a8efa03f0e228f803e4 AS slim-base
+FROM ghcr.io/renovatebot/base-image:9.7.6@sha256:7e11e56ec602e91f8f19ebd0397c741d5bdb9621d2fdbc4efe342f4ab228d04c AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.2.2-full@sha256:f5c77c3957aa467fc3a461b32561455d233c9498cbb34b81d2f3c3b2dee2ac3f AS full-base
+FROM ghcr.io/renovatebot/base-image:9.7.6-full@sha256:3fdc565162cd372dcafac41c081939f57f1bb2ce2c208953658159884852ae72 AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.2.2@sha256:ecf207fc81484f5315f27cc3c5948b12b7efb8e2be4b8a8efa03f0e228f803e4 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.7.6@sha256:7e11e56ec602e91f8f19ebd0397c741d5bdb9621d2fdbc4efe342f4ab228d04c AS build
 
 # We want a specific node version here
 # renovate: datasource=node-version
@@ -92,11 +92,14 @@ ARG RENOVATE_VERSION
 
 COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
+# make our node binary available as last in path
+RUN ln -sf /usr/local/renovate/node /bin/node
+
 # test
 RUN set -ex; \
   renovate --version; \
   pushd /usr/local/renovate/; \
-  ./node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
+  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
   true
 
 LABEL \

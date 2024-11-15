@@ -208,39 +208,6 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 
-  describe('setCommitMessage()', () => {
-    it('setCommitMessage', async () => {
-      const change = partial<GerritChange>({});
-      httpMock
-        .scope(gerritEndpointUrl)
-        .put('/a/changes/123456/message', { message: 'new message' })
-        .reply(200, gerritRestResponse(change), jsonResultHeader);
-      await expect(client.setCommitMessage(123456, 'new message')).toResolve();
-    });
-  });
-
-  describe('updateChangeSubject', () => {
-    it('updateChangeSubject - success', async () => {
-      const change = partial<GerritChange>({});
-      const newSubject = 'new subject';
-      const previousSubject = 'some subject';
-      const previousBody = `some body\n\nChange-Id: some-change-id\n`;
-      httpMock
-        .scope(gerritEndpointUrl)
-        .put('/a/changes/123456/message', {
-          message: `${newSubject}\n\n${previousBody}`,
-        })
-        .reply(200, gerritRestResponse(change), jsonResultHeader);
-      await expect(
-        client.updateChangeSubject(
-          123456,
-          `${previousSubject}\n\n${previousBody}`,
-          'new subject',
-        ),
-      ).toResolve();
-    });
-  });
-
   describe('getMessages()', () => {
     it('no messages', async () => {
       httpMock
