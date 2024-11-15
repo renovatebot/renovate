@@ -52,9 +52,6 @@ export async function getConfiguredRegistries(
   }
 
   const packageSources = nuGetConfig.childNamed('packageSources');
-  const disabledPackageSources = nuGetConfig.childNamed(
-    'disabledPackageSources',
-  );
 
   if (!packageSources) {
     // If there are no packageSources, don't even look for any
@@ -119,6 +116,10 @@ export async function getConfiguredRegistries(
       }
     }
   }
+
+  const disabledPackageSources = nuGetConfig.childNamed(
+    'disabledPackageSources',
+  );
 
   if (disabledPackageSources) {
     for (const child of disabledPackageSources.children) {
