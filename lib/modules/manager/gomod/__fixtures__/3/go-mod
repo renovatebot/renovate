@@ -132,4 +132,4 @@ replace (
 	k8s.io/sample-controller => k8s.io/sample-controller v0.17.3
 )
 
-toolchain go1.22.1
+toolchain go1.23.3
