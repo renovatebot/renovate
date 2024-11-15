@@ -292,7 +292,7 @@ describe('workers/global/limits', () => {
           prConcurrentLimit: 13,
         },
         {
-          prHourlyLimit: 3,
+          prHourlyLimit: 5,
           branchConcurrentLimit: null as never,
           prConcurrentLimit: 3,
         },
