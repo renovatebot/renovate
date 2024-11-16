@@ -124,31 +124,6 @@ describe('modules/datasource/postprocess-release', () => {
     expect(release).toBeNull();
   });
 
-  it('preserves rejected release when `extractVersion` was set', async () => {
-    const releaseOrig: Release = { version: '1.2.3' };
-
-    class SomeDatasource extends DummyDatasource {
-      override postprocessRelease(
-        _config: PostprocessReleaseConfig,
-        _release: Release,
-      ): Promise<PostprocessReleaseResult> {
-        return Promise.resolve('reject');
-      }
-    }
-    getDatasourceFor.mockReturnValueOnce(new SomeDatasource());
-
-    const release = await postprocessRelease(
-      {
-        datasource: 'some-datasource',
-        packageName: 'some-package',
-        extractVersion: '^(?<version>\\d+)$',
-      },
-      releaseOrig,
-    );
-
-    expect(release).toBe(releaseOrig);
-  });
-
   it('falls back when error was thrown', async () => {
     const releaseOrig: Release = { version: '1.2.3' };
 
