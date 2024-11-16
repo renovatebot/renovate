@@ -65,6 +65,7 @@ class GPGKey extends PrivateKey {
     const keyFileName = upath.join(os.tmpdir() + '/git-private-gpg.key');
     await fs.outputFile(keyFileName, this.key);
     const { stdout, stderr } = await exec(
+      // --batch --no-tty flags allow Renovate to skip warnings about unsupported algorithms in the key
       `gpg --batch --no-tty --import ${keyFileName}`,
     );
     logger.debug({ stdout, stderr }, 'Private key import result');
