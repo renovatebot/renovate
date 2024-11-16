@@ -1,12 +1,6 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
-import type {
-  CronExpression,
-  DayOfTheMonthRange,
-  DayOfTheWeekRange,
-  HourRange,
-  MonthRange,
-} from 'cron-parser';
+import type { CronExpression } from 'cron-parser';
 import { parseExpression } from 'cron-parser';
 import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
@@ -99,7 +93,11 @@ export function hasValidSchedule(
   return [true];
 }
 
-function cronMatches(cron: string, now: DateTime, timezone?: string): boolean {
+export function cronMatches(
+  cron: string,
+  now: DateTime,
+  timezone?: string,
+): boolean {
   const parsedCron = parseCron(cron, timezone);
 
   // it will always parse because it is checked beforehand
@@ -108,28 +106,21 @@ function cronMatches(cron: string, now: DateTime, timezone?: string): boolean {
     return false;
   }
 
-  if (parsedCron.fields.hour.indexOf(now.hour as HourRange) === -1) {
+  // return the next date which matches the cron schedule
+  const nextScheduledDate = parsedCron.next();
+
+  if (nextScheduledDate.getHours() !== now.hour) {
     // Hours mismatch
     return false;
   }
 
-  if (
-    parsedCron.fields.dayOfMonth.indexOf(now.day as DayOfTheMonthRange) === -1
-  ) {
+  if (nextScheduledDate.getDate() !== now.day) {
     // Days mismatch
     return false;
   }
 
-  if (
-    !parsedCron.fields.dayOfWeek.includes(
-      (now.weekday % 7) as DayOfTheWeekRange,
-    )
-  ) {
-    // Weekdays mismatch
-    return false;
-  }
-
-  if (parsedCron.fields.month.indexOf(now.month as MonthRange) === -1) {
+  // need to inc month by one as the getMonth method reduces it before returning
+  if (nextScheduledDate.getMonth() + 1 !== now.month) {
     // Months mismatch
     return false;
   }

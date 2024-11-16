@@ -267,6 +267,40 @@ describe('workers/repository/update/branch/schedule', () => {
       });
     });
 
+    describe('supports L syntax in cron schedules', () => {
+      beforeEach(() => {
+        jest.setSystemTime(new Date('2024-10-31T10:50:00.000'));
+      });
+
+      it('supports last day of month', () => {
+        config.schedule = ['* * * L *'];
+        const res = schedule.isScheduledNow(config);
+        expect(res).toBeTrue();
+      });
+
+      it('supports last day of week', () => {
+        config.schedule = ['* * * * 4L'];
+        expect(schedule.isScheduledNow(config)).toBeTrue();
+
+        config.schedule = ['* * * * 5L'];
+        expect(schedule.isScheduledNow(config)).toBeFalse();
+      });
+    });
+
+    describe('complex cron schedules', () => {
+      it.each`
+        sched            | tz                 | datetime                     | expected
+        ${'* * 1-7 * 0'} | ${'Asia/Calcutta'} | ${'2024-10-04T10:50:00.000'} | ${true}
+        ${'* * 1-7 * 0'} | ${'Asia/Calcutta'} | ${'2024-10-13T10:50:00.000'} | ${true}
+        ${'* * 1-7 * 0'} | ${'Asia/Calcutta'} | ${'2024-10-16T10:50:00.000'} | ${false}
+      `('$sched, $tz, $datetime', ({ sched, tz, datetime, expected }) => {
+        config.schedule = [sched];
+        config.timezone = tz;
+        jest.setSystemTime(new Date(datetime));
+        expect(schedule.isScheduledNow(config)).toBe(expected);
+      });
+    });
+
     describe('supports timezone', () => {
       it.each`
         sched                     | tz                  | datetime                          | expected
