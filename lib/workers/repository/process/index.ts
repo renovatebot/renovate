@@ -119,7 +119,7 @@ export async function extractDependencies(
   let res: ExtractResult = {
     branches: [],
     branchList: [],
-    packageFiles: null!,
+    packageFiles: {},
   };
   if (GlobalConfig.get('platform') !== 'local' && config.baseBranches?.length) {
     config.baseBranches = unfoldBaseBranches(
@@ -146,7 +146,10 @@ export async function extractDependencies(
         const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
         res.branches = res.branches.concat(baseBranchRes?.branches);
         res.branchList = res.branchList.concat(baseBranchRes?.branchList);
-        res.packageFiles = res.packageFiles || baseBranchRes?.packageFiles; // Use the first branch
+        if (!res.packageFiles || !Object.keys(res.packageFiles).length) {
+          // Use the first branch
+          res.packageFiles = baseBranchRes?.packageFiles;
+        }
       }
     }
     removeMeta(['baseBranch']);
