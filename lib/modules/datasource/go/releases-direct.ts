@@ -4,6 +4,7 @@ import { regEx } from '../../../util/regex';
 import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
 import { GitTagsDatasource } from '../git-tags';
+import { GiteaTagsDatasource } from '../gitea-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -60,6 +61,7 @@ export class GoDirectDatasource extends Datasource {
   static readonly id = 'go-direct';
 
   git: GitTagsDatasource;
+  readonly gitea = new GiteaTagsDatasource();
   github: GithubTagsDatasource;
   gitlab: GitlabTagsDatasource;
   bitbucket: BitbucketTagsDatasource;
@@ -106,6 +108,10 @@ export class GoDirectDatasource extends Datasource {
     switch (source.datasource) {
       case GitTagsDatasource.id: {
         res = await this.git.getReleases(source);
+        break;
+      }
+      case GiteaTagsDatasource.id: {
+        res = await this.gitea.getReleases(source);
         break;
       }
       case GithubTagsDatasource.id: {

@@ -51,7 +51,6 @@ export function parseGradle(
 
   const query = q.tree<Ctx>({
     type: 'root-tree',
-    maxDepth: 32,
     search: q.alt<Ctx>(
       qKotlinImport,
       qAssignments,
