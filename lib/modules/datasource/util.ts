@@ -12,7 +12,7 @@ export function isArtifactoryServer<T = unknown>(
   return is.string(res?.headers[JFROG_ARTIFACTORY_RES_HEADER]);
 }
 
-export async function getGoogleAuthToken(): Promise<string | null> {
+export async function getGoogleAuthTokenRaw(): Promise<string | null> {
   try {
     const googleAuth: GoogleAuth = new GoogleAuth({
       scopes: 'https://www.googleapis.com/auth/cloud-platform',
@@ -21,7 +21,7 @@ export async function getGoogleAuthToken(): Promise<string | null> {
     if (accessToken) {
       // sanitize token
       addSecretForSanitizing(accessToken);
-      return Buffer.from(`oauth2accesstoken:${accessToken}`).toString('base64');
+      return accessToken;
     } else {
       logger.warn(
         'Could not retrieve access token using google-auth-library getAccessToken',
@@ -33,6 +33,14 @@ export async function getGoogleAuthToken(): Promise<string | null> {
     } else {
       throw err;
     }
+  }
+  return null;
+}
+
+export async function getGoogleAuthToken(): Promise<string | null> {
+  const accessToken = await getGoogleAuthTokenRaw();
+  if (accessToken) {
+    return Buffer.from(`oauth2accesstoken:${accessToken}`).toString('base64');
   }
   return null;
 }

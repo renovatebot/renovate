@@ -1,6 +1,12 @@
+import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { join } from 'upath';
 import { mockExecAll } from '../../../../../test/exec-util';
-import { fs, hostRules, mockedFunction } from '../../../../../test/util';
+import {
+  fs,
+  hostRules,
+  mocked,
+  mockedFunction,
+} from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
@@ -13,9 +19,11 @@ import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
 import { UvProcessor } from './uv';
 
+jest.mock('google-auth-library');
 jest.mock('../../../../util/fs');
 jest.mock('../../../datasource');
 
+const googleAuth = mocked(_googleAuth);
 const getPkgReleases = mockedFunction(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
@@ -295,6 +303,11 @@ describe('modules/manager/pep621/processors/uv', () => {
         username: 'user',
         password: 'pass',
       });
+      googleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        })),
+      );
       fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
       fs.readLocalFile.mockResolvedValueOnce('changed test content');
@@ -332,6 +345,14 @@ describe('modules/manager/pep621/processors/uv', () => {
           datasource: GithubTagsDatasource.id,
           registryUrls: ['https://github.com'],
         },
+        {
+          packageName: 'dep5',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: [
+            'https://someregion-python.pkg.dev/some-project/some-repo/',
+          ],
+        },
       ];
       const result = await processor.updateArtifacts(
         {
@@ -353,7 +374,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4',
+          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4 --upgrade-package dep5',
           options: {
             env: {
               GIT_CONFIG_COUNT: '3',
@@ -364,7 +385,68 @@ describe('modules/manager/pep621/processors/uv', () => {
               GIT_CONFIG_VALUE_1: 'git@example.com:',
               GIT_CONFIG_VALUE_2: 'https://example.com/',
               UV_EXTRA_INDEX_URL:
-                'https://foobar.com/ https://user:pass@example.com/',
+                'https://foobar.com/ https://user:pass@example.com/ https://oauth2accesstoken:some-token@someregion-python.pkg.dev/some-project/some-repo/',
+            },
+          },
+        },
+      ]);
+    });
+
+    it('continues if Google auth is not configured', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      googleAuth.mockImplementation(
+        jest.fn().mockImplementation(() => ({
+          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        })),
+      );
+      fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+      // uv
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }, { version: '0.2.28' }],
+      });
+
+      const updatedDeps = [
+        {
+          packageName: 'dep',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: [
+            'https://someregion-python.pkg.dev/some-project/some-repo/simple/',
+          ],
+        },
+      ];
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        {},
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep',
+          options: {
+            env: {
+              UV_EXTRA_INDEX_URL:
+                'https://someregion-python.pkg.dev/some-project/some-repo/simple/',
             },
           },
         },
