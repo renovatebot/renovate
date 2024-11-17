@@ -206,7 +206,7 @@ describe('modules/manager/poetry/artifacts', () => {
           },
         },
       ]);
-      expect(hostRules.find.mock.calls).toHaveLength(7);
+      expect(hostRules.find.mock.calls).toHaveLength(9);
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'poetry update --lock --no-interaction dep1',
@@ -269,7 +269,7 @@ describe('modules/manager/poetry/artifacts', () => {
           },
         },
       ]);
-      expect(hostRules.find.mock.calls).toHaveLength(7);
+      expect(hostRules.find.mock.calls).toHaveLength(9);
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'poetry update --lock --no-interaction dep1',
