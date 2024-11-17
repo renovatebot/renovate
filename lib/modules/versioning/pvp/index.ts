@@ -12,7 +12,7 @@ export const supportedRangeStrategies: RangeStrategy[] = ['auto'];
 
 // This range format was chosen because it is common in the ecosystem
 const gteAndLtRange = />=(?<lower>[\d.]+)&&<(?<upper>[\d.]+)/;
-const ltAndGteRange = /<(?<upper>[\d.]+)&&<(?<lower>[\d.]+)/;
+const ltAndGteRange = /<(?<upper>[\d.]+)&&>=(?<lower>[\d.]+)/;
 
 export function parseRange(input: string): Range | null {
   const noSpaces = input.replaceAll(' ', '');

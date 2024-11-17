@@ -13,5 +13,6 @@ The range syntax comes from Cabal, specifically the [build-depends
 section](https://cabal.readthedocs.io/en/3.10/cabal-package.html).
 
 This module is considered experimental since it only supports ranges of forms:
-* `>=W.X && <Y.Z`
-* `<Y.Z && >=W.X`
+
+- `>=W.X && <Y.Z`
+- `<Y.Z && >=W.X`
