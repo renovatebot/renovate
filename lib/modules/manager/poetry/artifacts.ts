@@ -17,7 +17,9 @@ import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { Result } from '../../../util/result';
 import { parse as parseToml } from '../../../util/toml';
+import { parseUrl } from '../../../util/url';
 import { PypiDatasource } from '../../datasource/pypi';
+import { getGoogleAuthTokenRaw } from '../../datasource/util';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { Lockfile, PoetrySchemaToml } from './schema';
 import type { PoetryFile, PoetrySource } from './types';
@@ -92,7 +94,7 @@ export function getPoetryRequirement(
   return null;
 }
 
-function getPoetrySources(content: string, fileName: string): PoetrySource[] {
+function getPoetrySources(content: string): PoetrySource[] {
   let pyprojectFile: PoetryFile;
   try {
     pyprojectFile = parseToml(content) as PoetryFile;
@@ -115,20 +117,41 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
   return sourceArray;
 }
 
-function getMatchingHostRule(url: string | undefined): HostRule {
+async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
   const scopedMatch = find({ hostType: PypiDatasource.id, url });
-  return is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
+  const hostRule = is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
+  if (hostRule) {
+    return hostRule;
+  }
+
+  const parsedUrl = parseUrl(url);
+  if (!parsedUrl) {
+    logger.once.debug({ url }, 'Failed to parse URL');
+    return {};
+  }
+
+  if (parsedUrl.hostname.endsWith('.pkg.dev')) {
+    const accessToken = await getGoogleAuthTokenRaw();
+    if (accessToken) {
+      return {
+        username: 'oauth2accesstoken',
+        password: accessToken,
+      };
+    }
+    logger.once.debug({ url }, 'Could not get Google access token');
+  }
+
+  return {};
 }
 
-function getSourceCredentialVars(
+async function getSourceCredentialVars(
   pyprojectContent: string,
-  packageFileName: string,
-): NodeJS.ProcessEnv {
-  const poetrySources = getPoetrySources(pyprojectContent, packageFileName);
+): Promise<NodeJS.ProcessEnv> {
+  const poetrySources = getPoetrySources(pyprojectContent);
   const envVars: NodeJS.ProcessEnv = {};
 
   for (const source of poetrySources) {
-    const matchingHostRule = getMatchingHostRule(source.url);
+    const matchingHostRule = await getMatchingHostRule(source.url);
     const formattedSourceName = source.name
       .replace(regEx(/(\.|-)+/g), '_')
       .toUpperCase();
@@ -192,7 +215,7 @@ export async function updateArtifacts({
       config.constraints?.poetry ??
       getPoetryRequirement(newPackageFileContent, existingLockFileContent);
     const extraEnv = {
-      ...getSourceCredentialVars(newPackageFileContent, packageFileName),
+      ...(await getSourceCredentialVars(newPackageFileContent)),
       ...getGitEnvironmentVariables(['poetry']),
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
     };

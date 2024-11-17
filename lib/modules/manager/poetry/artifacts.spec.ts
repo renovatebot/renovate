@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
@@ -20,11 +21,13 @@ jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
 jest.mock('../../datasource', () => mockDeep());
 jest.mock('../../../util/host-rules', () => mockDeep());
+jest.mock('google-auth-library');
 
 process.env.CONTAINERBASE = 'true';
 
 const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
+const googleAuth = mocked(_googleAuth);
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
@@ -181,6 +184,11 @@ describe('modules/manager/poetry/artifacts', () => {
       hostRules.find.mockReturnValueOnce({ username: 'usernameTwo' });
       hostRules.find.mockReturnValueOnce({});
       hostRules.find.mockReturnValueOnce({ password: 'passwordFour' });
+      googleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        })),
+      );
       const updatedDeps = [{ depName: 'dep1' }];
       expect(
         await updateArtifacts({
@@ -198,9 +206,89 @@ describe('modules/manager/poetry/artifacts', () => {
           },
         },
       ]);
-      expect(hostRules.find.mock.calls).toHaveLength(5);
+      expect(hostRules.find.mock.calls).toHaveLength(7);
       expect(execSnapshots).toMatchObject([
-        { cmd: 'poetry update --lock --no-interaction dep1' },
+        {
+          cmd: 'poetry update --lock --no-interaction dep1',
+          options: {
+            env: {
+              HOME: '/home/user',
+              HTTPS_PROXY: 'https://example.com',
+              HTTP_PROXY: 'http://example.com',
+              LANG: 'en_US.UTF-8',
+              LC_ALL: 'en_US',
+              NO_PROXY: 'localhost',
+              PATH: '/tmp/path',
+              POETRY_HTTP_BASIC_FOUR_OH_FOUR_PASSWORD: 'passwordFour',
+              POETRY_HTTP_BASIC_ONE_PASSWORD: 'passwordOne',
+              POETRY_HTTP_BASIC_ONE_USERNAME: 'usernameOne',
+              POETRY_HTTP_BASIC_TWO_USERNAME: 'usernameTwo',
+              POETRY_HTTP_BASIC_SOME_GAR_REPO_USERNAME: 'oauth2accesstoken',
+              POETRY_HTTP_BASIC_SOME_GAR_REPO_PASSWORD: 'some-token',
+            },
+          },
+        },
+      ]);
+    });
+
+    it('continues if Google auth is not configured', async () => {
+      // poetry.lock
+      fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      // pyproject.lock
+      fs.getSiblingFileName.mockReturnValueOnce('pyproject.lock');
+      fs.readLocalFile.mockResolvedValueOnce('[metadata]\n');
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+      hostRules.find.mockReturnValueOnce({
+        username: 'usernameOne',
+        password: 'passwordOne',
+      });
+      hostRules.find.mockReturnValueOnce({ username: 'usernameTwo' });
+      hostRules.find.mockReturnValueOnce({});
+      hostRules.find.mockReturnValueOnce({ password: 'passwordFour' });
+      googleAuth.mockImplementation(
+        jest.fn().mockImplementation(() => ({
+          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        })),
+      );
+      const updatedDeps = [{ depName: 'dep1' }];
+      expect(
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps,
+          newPackageFileContent: pyproject10toml,
+          config,
+        }),
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pyproject.lock',
+            contents: 'New poetry.lock',
+          },
+        },
+      ]);
+      expect(hostRules.find.mock.calls).toHaveLength(7);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'poetry update --lock --no-interaction dep1',
+          options: {
+            env: {
+              HOME: '/home/user',
+              HTTPS_PROXY: 'https://example.com',
+              HTTP_PROXY: 'http://example.com',
+              LANG: 'en_US.UTF-8',
+              LC_ALL: 'en_US',
+              NO_PROXY: 'localhost',
+              PATH: '/tmp/path',
+              POETRY_HTTP_BASIC_FOUR_OH_FOUR_PASSWORD: 'passwordFour',
+              POETRY_HTTP_BASIC_ONE_PASSWORD: 'passwordOne',
+              POETRY_HTTP_BASIC_ONE_USERNAME: 'usernameOne',
+              POETRY_HTTP_BASIC_TWO_USERNAME: 'usernameTwo',
+            },
+          },
+        },
       ]);
     });
 
