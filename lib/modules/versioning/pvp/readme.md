@@ -12,4 +12,6 @@ that both `0.0.0.0.1` and `0.0.0.0.10` have patch version `0.1`.
 The range syntax comes from Cabal, specifically the [build-depends
 section](https://cabal.readthedocs.io/en/3.10/cabal-package.html).
 
-This module is considered experimental since it has limited range support.
+This module is considered experimental since it only supports ranges of forms:
+* `>=W.X && <Y.Z`
+* `<Y.Z && >=W.X`
