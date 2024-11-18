@@ -33,8 +33,8 @@ importers:
         specifier: 4.2.0
         version: 4.2.0
       '@cdktf/hcl2json':
-        specifier: 0.20.9
-        version: 0.20.9
+        specifier: 0.20.10
+        version: 0.20.10
       '@opentelemetry/api':
         specifier: 1.9.0
         version: 1.9.0
@@ -1004,8 +1004,8 @@ packages:
     resolution: {integrity: sha512-EVMD0SgJtOuFeg0lAVbCwa+qeTKILb87jqvLyUtQswGD9+ce2nB52Y5zbTF1Hc0MDFfbydcMcxb47jSdhikVHA==}
     engines: {node: '>= 10'}
 
-  '@cdktf/hcl2json@0.20.9':
-    resolution: {integrity: sha512-HlYqFsvEANyQJiQx8L2j05xot+bKa6T6PInc11dUCyQh8SbpVehdbGVN39TVnv1lIjdG7E2WNuxOf1L/Y3oF5w==}
+  '@cdktf/hcl2json@0.20.10':
+    resolution: {integrity: sha512-oh8g9727sSEnwRjIjPYnhTn4mvvxclRcovf5GIkFED+4HpiBLioVUUsX33rFk6wZZh175uJBOAvQ/qVG+Uaqyw==}
 
   '@colors/colors@1.5.0':
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
@@ -7218,7 +7218,7 @@ snapshots:
 
   '@breejs/later@4.2.0': {}
 
-  '@cdktf/hcl2json@0.20.9':
+  '@cdktf/hcl2json@0.20.10':
     dependencies:
       fs-extra: 11.2.0
 
