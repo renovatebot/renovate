@@ -1,14 +1,12 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
-import type { CronExpression } from 'cron-parser';
-import { parseExpression } from 'cron-parser';
+import type { Cron as CronJob } from 'croner';
+import { Cron } from 'croner';
 import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-
-const minutesChar = '*';
 
 const scheduleMappings: Record<string, string> = {
   'every month': 'before 5am on the first day of the month',
@@ -18,9 +16,11 @@ const scheduleMappings: Record<string, string> = {
 function parseCron(
   scheduleText: string,
   timezone?: string,
-): CronExpression | undefined {
+): CronJob | undefined {
   try {
-    return parseExpression(scheduleText, { tz: timezone });
+    return new Cron(scheduleText, {
+      ...(timezone && { timezone }),
+    });
   } catch {
     return undefined;
   }
@@ -48,10 +48,7 @@ export function hasValidSchedule(
   const hasFailedSchedules = schedule.some((scheduleText) => {
     const parsedCron = parseCron(scheduleText);
     if (parsedCron !== undefined) {
-      if (
-        parsedCron.fields.minute.length !== 60 ||
-        scheduleText.indexOf(minutesChar) !== 0
-      ) {
+      if (scheduleText.split(' ')[0] !== '*') {
         message = `Invalid schedule: "${scheduleText}" has cron syntax, but doesn't have * as minutes`;
         return true;
       }
@@ -107,21 +104,24 @@ export function cronMatches(
   }
 
   // return the next date which matches the cron schedule
-  const nextScheduledDate = parsedCron.next();
+  const nextRun = parsedCron.nextRun();
 
-  if (nextScheduledDate.getHours() !== now.hour) {
-    // Hours mismatch
+  // istanbul ignore if: should not happen
+  if (!nextRun) {
+    logger.warn(`Invalid cron schedule ${cron}. No next run is possible`);
     return false;
   }
 
-  if (nextScheduledDate.getDate() !== now.day) {
-    // Days mismatch
+  const nextDate: DateTime = DateTime.fromISO(nextRun.toISOString());
+  if (nextDate.hour !== now.hour) {
     return false;
   }
 
-  // need to inc month by one as the getMonth method reduces it before returning
-  if (nextScheduledDate.getMonth() + 1 !== now.month) {
-    // Months mismatch
+  if (nextDate.day !== now.day) {
+    return false;
+  }
+
+  if (nextDate.month !== now.month) {
     return false;
   }
 

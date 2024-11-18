@@ -109,7 +109,7 @@ describe('workers/repository/update/branch/schedule', () => {
     it('returns true if schedule uses cron syntax', () => {
       expect(schedule.hasValidSchedule(['* 5 * * *'])[0]).toBeTrue();
       expect(schedule.hasValidSchedule(['* * * * * 6L'])[0]).toBeTrue();
-      expect(schedule.hasValidSchedule(['* * */2 6#1'])[0]).toBeTrue();
+      expect(schedule.hasValidSchedule(['* * * */2 6#1'])[0]).toBeTrue();
     });
 
     it('massages schedules', () => {
@@ -287,6 +287,17 @@ describe('workers/repository/update/branch/schedule', () => {
       });
     });
 
+    describe('supports # syntax in cron schedules', () => {
+      it('supports first Monday of month', () => {
+        jest.setSystemTime(new Date('2024-10-07T10:50:00.000'));
+        config.timezone = 'Asia/Calcutta';
+        config.schedule = ['* * * * 1#1'];
+        expect(schedule.isScheduledNow(config)).toBeTrue();
+        config.schedule = ['* * * * 1#2'];
+        expect(schedule.isScheduledNow(config)).toBeFalse();
+      });
+    });
+
     describe('complex cron schedules', () => {
       it.each`
         sched            | tz                 | datetime                     | expected
@@ -314,6 +325,24 @@ describe('workers/repository/update/branch/schedule', () => {
         jest.setSystemTime(new Date(datetime));
         expect(schedule.isScheduledNow(config)).toBe(expected);
       });
+    });
+
+    it('reject if day mismatch', () => {
+      config.schedule = ['* 10 21 * *'];
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBeFalse();
+    });
+
+    it('reject if month mismatch', () => {
+      config.schedule = ['* 10 30 1 *'];
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBeFalse();
+    });
+
+    it('reject if no schedule available', () => {
+      config.schedule = ['* * * 1 *'];
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBeFalse();
     });
 
     it('supports multiple schedules', () => {
