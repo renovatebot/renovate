@@ -35,9 +35,7 @@ async function fetchDepUpdates(
   if (dep.isInternal && !packageFileConfig.updateInternalDeps) {
     dep.skipReason = 'internal-package';
   }
-  if (dep.skipReason) {
-    return Result.ok(dep);
-  }
+
   const { depName } = dep;
   // TODO: fix types
   let depConfig = mergeChildConfig(packageFileConfig, dep);
@@ -46,6 +44,15 @@ async function fetchDepUpdates(
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = await applyPackageRules(depConfig, 'pre-lookup');
   depConfig.packageName ??= depConfig.depName;
+
+  if (dep.skipReason === 'unknown-registry' && depConfig.registryUrls && depConfig.registryUrls.length > 0) {
+    dep.skipReason = undefined;
+  }
+
+  if (dep.skipReason) {
+    return Result.ok(dep);
+  }
+
   if (depConfig.ignoreDeps!.includes(depName!)) {
     // TODO: fix types (#22198)
     logger.debug(`Dependency: ${depName!}, is ignored`);

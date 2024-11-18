@@ -57,6 +57,35 @@ describe('workers/repository/process/fetch', () => {
       expect(packageFiles.npm[0].deps[1].updates).toHaveLength(0);
     });
 
+    it('handles skipped dependencies due to unknown-registry', async () => {
+      config.packageRules = [
+        {
+          matchPackageNames: ['foo'],
+          registryUrls: ['some-registry']
+        },
+      ];
+
+      const packageFiles: any = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            deps: [
+              { depName: 'foo', skipReason: 'unknown-registry', datasource: MavenDatasource.id },
+              { depName: 'baz', skipReason: 'unknown-registry', datasource: MavenDatasource.id },
+            ],
+          },
+        ],
+      };
+
+      lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
+      await fetchUpdates(config, packageFiles);
+
+      expect(packageFiles.maven[0].deps[0].skipReason).toBe(undefined);
+      expect(packageFiles.maven[0].deps[0].updates).toHaveLength(2);
+      expect(packageFiles.maven[0].deps[1].skipReason).toBe('unknown-registry');
+      expect(packageFiles.maven[0].deps[1].updates).toHaveLength(0);
+    });
+
     it('fetches updates', async () => {
       config.rangeStrategy = 'auto';
       config.constraints = { some: 'different' };
