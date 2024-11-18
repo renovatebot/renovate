@@ -13,6 +13,16 @@ function formatContent(input: string): string {
   return input.replace(regEx(/^ {2}/), '') + '\n'; //remove leading whitespace and add a new line at the end
 }
 
+const variableMatchRegex = regEx(
+  `^(?<key>\\w+)\\s*=\\s*['"](?<value>[^'"]+)['"]`,
+);
+const gemGitRefsMatchRegex = regEx(
+  `^\\s*gem\\s+(['"])(?<depName>[^'"]+)['"]((\\s*,\\s*git:\\s*['"](?<gitUrl>[^'"]+)['"])|(\\s*,\\s*github:\\s*['"](?<repoName>[^'"]+)['"]))(\\s*,\\s*branch:\\s*['"](?<branchName>[^'"]+)['"])?(\\s*,\\s*ref:\\s*['"](?<refName>[^'"]+)['"])?(\\s*,\\s*tag:\\s*['"](?<tagName>[^'"]+)['"])?`,
+);
+const gemMatchRegex = regEx(
+  `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?`,
+);
+
 export async function extractPackageFile(
   content: string,
   packageFile?: string,
@@ -115,9 +125,6 @@ export async function extractPackageFile(
       });
     }
 
-    const variableMatchRegex = regEx(
-      `^(?<key>\\w+)\\s*=\\s*['"](?<value>[^'"]+)['"]`,
-    );
     const variableMatch = variableMatchRegex.exec(line);
     if (variableMatch) {
       if (variableMatch.groups?.key) {
@@ -125,48 +132,41 @@ export async function extractPackageFile(
       }
     }
 
-    const gemGitRefsMatchRegex = regEx(
-      `^\\s*gem\\s+(['"])(?<depName>[^'"]+)['"]((\\s*,\\s*git:\\s*['"](?<gitUrl>[^'"]+)['"])|(\\s*,\\s*github:\\s*['"](?<repoName>[^'"]+)['"]))(\\s*,\\s*branch:\\s*['"](?<branchName>[^'"]+)['"])?(\\s*,\\s*ref:\\s*['"](?<refName>[^'"]+)['"])?(\\s*,\\s*tag:\\s*['"](?<tagName>[^'"]+)['"])?`,
-    );
-    const gemGitRefsMatch = gemGitRefsMatchRegex.exec(line);
-
-    const gemMatchRegex = regEx(
-      `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?(\\s*,\\s*source:\\s*(['"](?<registryUrl>[^'"]+)['"]|(?<sourceName>[^'"]+)))?`,
-    );
-    const gemMatch = gemMatchRegex.exec(line);
+    const gemGitRefsMatch = gemGitRefsMatchRegex.exec(line)?.groups;
+    const gemMatch = gemMatchRegex.exec(line)?.groups;
 
     if (gemGitRefsMatch) {
       const dep: PackageDependency = {
-        depName: gemGitRefsMatch.groups?.depName,
+        depName: gemGitRefsMatch.depName,
         managerData: { lineNumber },
       };
-      if (gemGitRefsMatch.groups?.gitUrl) {
-        const gitUrl = gemGitRefsMatch.groups.gitUrl;
+      if (gemGitRefsMatch.gitUrl) {
+        const gitUrl = gemGitRefsMatch.gitUrl;
         dep.packageName = gitUrl;
 
         if (gitUrl.startsWith('https://')) {
           dep.sourceUrl = gitUrl.replace(/\.git$/, '');
         }
-      } else if (gemGitRefsMatch.groups?.repoName) {
-        dep.packageName = `https://github.com/${gemGitRefsMatch.groups.repoName}`;
+      } else if (gemGitRefsMatch.repoName) {
+        dep.packageName = `https://github.com/${gemGitRefsMatch.repoName}`;
         dep.sourceUrl = dep.packageName;
       }
-      if (gemGitRefsMatch.groups?.refName) {
-        dep.currentDigest = gemGitRefsMatch.groups.refName;
-      } else if (gemGitRefsMatch.groups?.branchName) {
-        dep.currentValue = gemGitRefsMatch.groups.branchName;
-      } else if (gemGitRefsMatch.groups?.tagName) {
-        dep.currentValue = gemGitRefsMatch.groups.tagName;
+      if (gemGitRefsMatch.refName) {
+        dep.currentDigest = gemGitRefsMatch.refName;
+      } else if (gemGitRefsMatch.branchName) {
+        dep.currentValue = gemGitRefsMatch.branchName;
+      } else if (gemGitRefsMatch.tagName) {
+        dep.currentValue = gemGitRefsMatch.tagName;
       }
       dep.datasource = GitRefsDatasource.id;
       res.deps.push(dep);
     } else if (gemMatch) {
       const dep: PackageDependency = {
-        depName: gemMatch.groups?.depName,
+        depName: gemMatch.depName,
         managerData: { lineNumber },
       };
-      if (gemMatch.groups?.currentValue) {
-        const currentValue = gemMatch.groups.currentValue;
+      if (gemMatch.currentValue) {
+        const currentValue = gemMatch.currentValue;
         dep.currentValue = currentValue;
       }
       dep.datasource = RubygemsDatasource.id;
