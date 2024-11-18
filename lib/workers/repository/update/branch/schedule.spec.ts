@@ -290,7 +290,6 @@ describe('workers/repository/update/branch/schedule', () => {
     describe('supports # syntax in cron schedules', () => {
       it('supports first Monday of month', () => {
         jest.setSystemTime(new Date('2024-10-07T10:50:00.000'));
-        config.timezone = 'Asia/Calcutta';
         config.schedule = ['* * * * 1#1'];
         expect(schedule.isScheduledNow(config)).toBeTrue();
         config.schedule = ['* * * * 1#2'];
@@ -300,13 +299,12 @@ describe('workers/repository/update/branch/schedule', () => {
 
     describe('complex cron schedules', () => {
       it.each`
-        sched            | tz                 | datetime                     | expected
-        ${'* * 1-7 * 0'} | ${'Asia/Calcutta'} | ${'2024-10-04T10:50:00.000'} | ${true}
-        ${'* * 1-7 * 0'} | ${'Asia/Calcutta'} | ${'2024-10-13T10:50:00.000'} | ${true}
-        ${'* * 1-7 * 0'} | ${'Asia/Calcutta'} | ${'2024-10-16T10:50:00.000'} | ${false}
+        sched            | datetime                          | expected
+        ${'* * 1-7 * 0'} | ${'2024-10-04T10:50:00.000+0530'} | ${true}
+        ${'* * 1-7 * 0'} | ${'2024-10-13T10:50:00.000'}      | ${true}
+        ${'* * 1-7 * 0'} | ${'2024-10-16T10:50:00.000'}      | ${false}
       `('$sched, $tz, $datetime', ({ sched, tz, datetime, expected }) => {
         config.schedule = [sched];
-        config.timezone = tz;
         jest.setSystemTime(new Date(datetime));
         expect(schedule.isScheduledNow(config)).toBe(expected);
       });
