@@ -153,7 +153,7 @@ export async function updateArtifacts({
 
   const gradlewName = gradleWrapperFileName();
   const gradlewFile = await findUpLocal(
-    gradlewName.replace(new RegExp(`^\\./`), ''),
+    gradlewName.replace(new regEx(`^\\./`), ''),
     dirname(packageFileName),
   );
   if (!gradlewFile) {
