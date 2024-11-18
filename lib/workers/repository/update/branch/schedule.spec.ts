@@ -299,13 +299,13 @@ describe('workers/repository/update/branch/schedule', () => {
 
     describe('complex cron schedules', () => {
       it.each`
-        sched            | tz              | datetime                          | expected
-        ${'* * 1-7 * 0'} | ${'Asia/Tokyo'} | ${'2024-10-04T10:50:00.000+0900'} | ${true}
-        ${'* * 1-7 * 0'} | ${'Asia/Tokyo'} | ${'2024-10-13T10:50:00.000+0900'} | ${true}
-        ${'* * 1-7 * 0'} | ${'Asia/Tokyo'} | ${'2024-10-16T10:50:00.000+0900'} | ${false}
+        sched            | datetime                          | expected
+        ${'* * 1-7 * 0'} | ${'2024-10-04T10:50:00.000+0900'} | ${true}
+        ${'* * 1-7 * 0'} | ${'2024-10-13T10:50:00.000+0900'} | ${true}
+        ${'* * 1-7 * 0'} | ${'2024-10-16T10:50:00.000+0900'} | ${false}
       `('$sched, $tz, $datetime', ({ sched, tz, datetime, expected }) => {
         config.schedule = [sched];
-        config.timezone = tz;
+        config.timezone = 'Asia/Tokyo';
         jest.setSystemTime(new Date(datetime));
         expect(schedule.isScheduledNow(config)).toBe(expected);
       });

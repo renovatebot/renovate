@@ -1,7 +1,6 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
-import type { Cron as CronJob } from 'croner';
-import { Cron } from 'croner';
+import { Cron, CronPattern } from 'croner';
 import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
@@ -13,14 +12,11 @@ const scheduleMappings: Record<string, string> = {
   monthly: 'before 5am on the first day of the month',
 };
 
-function parseCron(
-  scheduleText: string,
-  timezone?: string,
-): CronJob | undefined {
+const minutesChar = '*';
+
+function parseCron(scheduleText: string): CronPattern | undefined {
   try {
-    return new Cron(scheduleText, {
-      ...(timezone && { timezone }),
-    });
+    return new CronPattern(scheduleText);
   } catch {
     return undefined;
   }
@@ -48,7 +44,10 @@ export function hasValidSchedule(
   const hasFailedSchedules = schedule.some((scheduleText) => {
     const parsedCron = parseCron(scheduleText);
     if (parsedCron !== undefined) {
-      if (scheduleText.split(' ')[0] !== '*') {
+      if (
+        parsedCron.minute.filter((v) => v !== 1).length !== 0 ||
+        scheduleText.indexOf(minutesChar) !== 0
+      ) {
         message = `Invalid schedule: "${scheduleText}" has cron syntax, but doesn't have * as minutes`;
         return true;
       }
@@ -95,7 +94,9 @@ export function cronMatches(
   now: DateTime,
   timezone?: string,
 ): boolean {
-  const parsedCron = parseCron(cron, timezone);
+  const parsedCron: Cron = new Cron(cron, {
+    ...(timezone && { timezone }),
+  });
   // it will always parse because it is checked beforehand
   // istanbul ignore if
   if (!parsedCron) {
@@ -110,7 +111,7 @@ export function cronMatches(
     return false;
   }
 
-  let nextDate = DateTime.fromISO(nextRun.toISOString());
+  let nextDate: DateTime = DateTime.fromJSDate(nextRun);
   if (timezone) {
     nextDate = nextDate.setZone(timezone);
   }
