@@ -183,7 +183,6 @@
     "clean-git-ref": "2.0.1",
     "commander": "12.1.0",
     "conventional-commits-detector": "1.0.3",
-    "cron-parser": "4.9.0",
     "croner": "9.0.0",
     "cronstrue": "2.51.0",
     "deepmerge": "4.3.1",

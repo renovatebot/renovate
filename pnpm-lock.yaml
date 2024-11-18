@@ -131,9 +131,6 @@ importers:
       conventional-commits-detector:
         specifier: 1.0.3
         version: 1.0.3
-      cron-parser:
-        specifier: 4.9.0
-        version: 4.9.0
       croner:
         specifier: 9.0.0
         version: 9.0.0
@@ -2841,10 +2838,6 @@ packages:
 
   create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
-
-  cron-parser@4.9.0:
-    resolution: {integrity: sha512-p0SaNjrHOnQeR8/VnfGbmg9te2kfyYSQ7Sc/j/6DtPL3JQvKxmjO9TSjNFpujqV3vEYYBvNNvXSxzyksBWAx1Q==}
-    engines: {node: '>=12.0.0'}
 
   croner@9.0.0:
     resolution: {integrity: sha512-onMB0OkDjkXunhdW9htFjEhqrD54+M94i6ackoUkjHKbRnXdyEyKRelp4nJ1kAz32+s27jP1FsebpJCVl0BsvA==}
@@ -9495,10 +9488,6 @@ snapshots:
       - ts-node
 
   create-require@1.1.1: {}
-
-  cron-parser@4.9.0:
-    dependencies:
-      luxon: 3.5.0
 
   croner@9.0.0: {}
 
