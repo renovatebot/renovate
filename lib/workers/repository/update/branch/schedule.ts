@@ -96,7 +96,6 @@ export function cronMatches(
   timezone?: string,
 ): boolean {
   const parsedCron = parseCron(cron, timezone);
-
   // it will always parse because it is checked beforehand
   // istanbul ignore if
   if (!parsedCron) {
@@ -105,14 +104,17 @@ export function cronMatches(
 
   // return the next date which matches the cron schedule
   const nextRun = parsedCron.nextRun();
-
   // istanbul ignore if: should not happen
   if (!nextRun) {
     logger.warn(`Invalid cron schedule ${cron}. No next run is possible`);
     return false;
   }
 
-  const nextDate: DateTime = DateTime.fromISO(nextRun.toISOString());
+  let nextDate: DateTime = DateTime.fromISO(nextRun.toISOString());
+  if (timezone) {
+    nextDate = nextDate.setZone(timezone);
+  }
+
   if (nextDate.hour !== now.hour) {
     return false;
   }
@@ -125,7 +127,6 @@ export function cronMatches(
     return false;
   }
 
-  // Match
   return true;
 }
 
