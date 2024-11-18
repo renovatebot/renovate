@@ -96,8 +96,8 @@ COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renov
 RUN ln -sf /usr/local/renovate/node /bin/node
 
 # ensure default base and cache directories exist.
-RUN mkdir -p /tmp/renovate /tmp/renovate/cache && \
-    chmod 775 /tmp/renovate /tmp/renovate/cache
+RUN mkdir -p /tmp/renovate/cache && \
+    chmod -R 775 /tmp/renovate/cache
 
 # test
 RUN set -ex; \
