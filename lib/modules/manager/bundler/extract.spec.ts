@@ -170,21 +170,27 @@ describe('modules/manager/bundler/extract', () => {
 
   it('parses inline source in Gemfile', async () => {
     const sourceInlineGemfile = codeBlock`
-      gem "some_internal_gem", source: 'https://gems.foo.com'
-      gem 'another_internal_gem', "~> 1", source: 'https://gems.bar.com'
+      baz = 'https://gems.baz.com'
+      gem "inline_source_gem", source: 'https://gems.foo.com'
+      gem 'inline_source_gem_with_version', "~> 1", source: 'https://gems.bar.com'
+      gem 'inline_source_gem_with_variable_source', source: baz
       `;
     fs.readLocalFile.mockResolvedValueOnce(sourceInlineGemfile);
     const res = await extractPackageFile(sourceInlineGemfile, 'Gemfile');
     expect(res).toMatchObject({
       deps: [
         {
-          depName: 'some_internal_gem',
+          depName: 'inline_source_gem',
           registryUrls: ['https://gems.foo.com'],
         },
         {
-          depName: 'another_internal_gem',
+          depName: 'inline_source_gem_with_version',
           currentValue: '"~> 1"',
           registryUrls: ['https://gems.bar.com'],
+        },
+        {
+          depName: 'inline_source_gem_with_variable_source',
+          registryUrls: ['https://gems.baz.com'],
         },
       ],
     });
