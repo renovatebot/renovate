@@ -110,24 +110,16 @@ export function cronMatches(
     return false;
   }
 
-  let nextDate: DateTime = DateTime.fromISO(nextRun.toISOString());
+  let nextDate = DateTime.fromISO(nextRun.toISOString());
   if (timezone) {
     nextDate = nextDate.setZone(timezone);
   }
 
-  if (nextDate.hour !== now.hour) {
-    return false;
-  }
-
-  if (nextDate.day !== now.day) {
-    return false;
-  }
-
-  if (nextDate.month !== now.month) {
-    return false;
-  }
-
-  return true;
+  return (
+    nextDate.hour === now.hour &&
+    nextDate.day === now.day &&
+    nextDate.month === now.month
+  );
 }
 
 export function isScheduledNow(

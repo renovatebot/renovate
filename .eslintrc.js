@@ -36,9 +36,7 @@ module.exports = {
     'import/no-named-as-default-member': 0,
     'import/no-extraneous-dependencies': [
       'error',
-      {
-        devDependencies: ['test/**/*', '**/*.spec.ts'],
-      },
+      { devDependencies: ['test/**/*', '**/*.spec.ts'] },
     ],
     'import/prefer-default-export': 0, // no benefit
 
