@@ -79,6 +79,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  atmos: {
+    asdfPluginUrl: 'https://github.com/cloudposse/asdf-atmos',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'cloudposse/atmos',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   awscli: {
     asdfPluginUrl: 'https://github.com/MetricMike/asdf-awscli',
     config: {
@@ -416,6 +424,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'casey/just',
     },
   },
+  k3s: {
+    asdfPluginUrl: 'https://github.com/dmpe/asdf-k3s',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'k3s-io/k3s',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   kind: {
     asdfPluginUrl: 'https://github.com/johnlayton/asdf-kind',
     config: {
@@ -510,11 +526,27 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'ocaml/ocaml',
     },
   },
+  oci: {
+    asdfPluginUrl: 'https://github.com/yasn77/asdf-oci',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'oracle/oci-cli',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   opentofu: {
     asdfPluginUrl: 'https://github.com/virtualroot/asdf-opentofu',
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'opentofu/opentofu',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  packer: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-hashicorp',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'hashicorp/packer',
       extractVersion: '^v(?<version>\\S+)',
     },
   },

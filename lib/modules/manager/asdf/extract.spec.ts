@@ -49,6 +49,7 @@ actionlint 0.7.0
 adr-tools 3.0.0
 argocd 2.5.4
 asdf-plugin-manager 1.1.1
+atmos 1.100.0
 awscli 2.8.6
 bun 0.2.2
 cargo-make 0.36.2
@@ -85,6 +86,7 @@ idris 1.3.4
 java adoptopenjdk-16.0.0+36
 julia 1.8.2
 just 1.7.0
+k3s 1.31.2+k3s1
 kind 0.19.0
 kotlin 1.7.20
 kubectl 1.26.3
@@ -97,7 +99,9 @@ minikube 1.33.1
 nim 1.6.8
 nodejs 18.12.0
 ocaml 4.14.0
+oci 3.50.0
 opentofu 1.6.0
+packer 1.11.2
 perl 5.37.5
 php 8.1.12
 pnpm 7.26.2
@@ -165,6 +169,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'asdf-community/asdf-plugin-manager',
             depName: 'asdf-plugin-manager',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.100.0',
+            datasource: 'github-releases',
+            packageName: 'cloudposse/atmos',
+            depName: 'atmos',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -407,6 +418,13 @@ dummy 1.2.3
             depName: 'just',
           },
           {
+            currentValue: '1.31.2+k3s1',
+            datasource: 'github-releases',
+            packageName: 'k3s-io/k3s',
+            depName: 'k3s',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '0.19.0',
             datasource: 'github-releases',
             packageName: 'kubernetes-sigs/kind',
@@ -487,10 +505,24 @@ dummy 1.2.3
             depName: 'ocaml',
           },
           {
+            currentValue: '3.50.0',
+            datasource: 'github-releases',
+            packageName: 'oracle/oci-cli',
+            depName: 'oci',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.6.0',
             datasource: 'github-releases',
             packageName: 'opentofu/opentofu',
             depName: 'opentofu',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.11.2',
+            datasource: 'github-releases',
+            packageName: 'hashicorp/packer',
+            depName: 'packer',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
