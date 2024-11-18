@@ -38,7 +38,6 @@ module.exports = {
       'error',
       {
         devDependencies: ['test/**/*', '**/*.spec.ts'],
-        packageManager: 'pnpm',
       },
     ],
     'import/prefer-default-export': 0, // no benefit
