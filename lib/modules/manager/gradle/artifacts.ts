@@ -152,7 +152,10 @@ export async function updateArtifacts({
   }
 
   const gradlewName = gradleWrapperFileName();
-  const gradlewFile = await findUpLocal(gradlewName, dirname(packageFileName));
+  const gradlewFile = await findUpLocal(
+    gradlewName.replace(new RegExp(`^\\./`), ''),
+    dirname(packageFileName),
+  );
   if (!gradlewFile) {
     logger.debug(
       'Found Gradle dependency lockfiles but no gradlew - aborting update',
