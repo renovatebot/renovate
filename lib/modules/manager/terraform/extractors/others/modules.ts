@@ -21,7 +21,9 @@ export const gitTagsRefMatchRegex = regEx(
 export const azureDevOpsSshRefMatchRegex = regEx(
   /(?:git::)?(?<url>git@ssh\.dev\.azure\.com:v3\/(?<organization>[^/]*)\/(?<project>[^/]*)\/(?<repository>[^/]*))(?<modulepath>.*)?\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
 );
-const hostnameMatchRegex = regEx(/^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/);
+export const hostnameMatchRegex = regEx(
+  /^(?<hostname>[a-zA-Z\d]([a-zA-Z\d-]*\.)+[a-zA-Z\d]+)/,
+);
 
 export class ModuleExtractor extends DependencyExtractor {
   getCheckList(): string[] {
