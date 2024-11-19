@@ -30,16 +30,8 @@ function _parse(version: string): number[] | null {
 
   const release = [];
   const { major, minor, patch } = groups;
-  if (typeof major === 'undefined') {
-    return null;
-  } else {
-    release.push(Number.parseInt(major, 10));
-  }
-  if (typeof minor === 'undefined') {
-    return null;
-  } else {
-    release.push(Number.parseInt(minor, 10));
-  }
+  release.push(Number.parseInt(major, 10));
+  release.push(Number.parseInt(minor, 10));
   // patch versions are optional.
   if (typeof patch !== 'undefined') {
     release.push(Number.parseInt(patch, 10));
@@ -92,6 +84,7 @@ function rust2npm(input: string): string | null {
   if (parsed.length === 2) {
     return '~' + parsed.join('.');
   }
+  // istanbul ignore next: unreachable, _parse returns length 2 or 3 only.
   throw new Error(`Unexpected releases length: ${parsed.join('.')}`);
 }
 
@@ -141,6 +134,7 @@ function getNewValue({
     currentVersion,
     newVersion,
   });
+  // istanbul ignore if: unreachable, input validated by rust2npm
   if (!newSemver) {
     logger.info(
       { currentValue, newSemver },
@@ -151,6 +145,7 @@ function getNewValue({
   // Transform a tilde range back into a major.minor version.
   if (newSemver.startsWith('~')) {
     const parsed = _parse(newSemver.substring(1));
+    // istanbul ignore if: unreachable sanity check
     if (!parsed || parsed.length !== 3) {
       logger.info(
         { currentValue, newSemver },
@@ -163,6 +158,7 @@ function getNewValue({
   // Transform an exact version back into a major.minor.patch version
   if (newSemver.startsWith('=')) {
     const newValue = newSemver.substring(1);
+    // istanbul ignore if: unreachable sanity check
     if (!_parse(newValue)) {
       logger.info(
         { currentValue, newSemver },
@@ -172,6 +168,7 @@ function getNewValue({
     }
     return newValue;
   }
+  // istanbul ignore if: unreachable sanity check
   if (!isVersion(newSemver)) {
     logger.info(
       { currentValue, newSemver },

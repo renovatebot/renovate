@@ -33,6 +33,29 @@ describe('modules/versioning/rust-toolchain/index', () => {
     ${'1.82-beta.12'}                                              | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     expect(versioning.isValid(version)).toBe(expected);
+    expect(versioning.isCompatible(version)).toBe(expected);
+  });
+
+  it.each`
+    version                                                        | expected
+    ${'1.82.0'}                                                    | ${true}
+    ${'1.82.42'}                                                   | ${true}
+    ${'1.82'}                                                      | ${false}
+    ${'v1.0'}                                                      | ${false}
+    ${'1'}                                                         | ${false}
+    ${'2'}                                                         | ${false}
+    ${'10'}                                                        | ${false}
+    ${'nightly'}                                                   | ${false}
+    ${'nightly-06"ENV GRADLE_VERSION=(?<currentValue>.*)-12-2024'} | ${false}
+    ${'beta'}                                                      | ${false}
+    ${'beta-06-12-2024'}                                           | ${false}
+    ${'stable'}                                                    | ${false}
+    ${'stable-06-12-2024'}                                         | ${false}
+    ${'1.82.0-beta.1'}                                             | ${false}
+    ${'1.82-beta.12'}                                              | ${false}
+  `('isVersion("$version") === $expected', ({ version, expected }) => {
+    expect(versioning.isVersion(version)).toBe(expected);
+    expect(versioning.isSingleVersion(version)).toBe(expected);
   });
 
   it.each`
@@ -105,6 +128,52 @@ describe('modules/versioning/rust-toolchain/index', () => {
       ),
     ).toEqual(['1.82.0', '1.82.4', '1.83.1', '2.80.5']);
   });
+
+  it.each`
+    version      | range       | expected
+    ${'1.82.0'}  | ${'1.83'}   | ${true}
+    ${'1.82.53'} | ${'1.83'}   | ${true}
+    ${'1.83.1'}  | ${'1.83.2'} | ${true}
+    ${'1.83.0'}  | ${'1.83'}   | ${false}
+    ${'1.83.1'}  | ${'1.83'}   | ${false}
+    ${'1.84.0'}  | ${'1.83'}   | ${false}
+    ${'1.83.3'}  | ${'1.83.2'} | ${false}
+  `(
+    'isLessThanRange("$version", "$range") === $expected',
+    ({ version, range, expected }) => {
+      expect(versioning.isLessThanRange).toBeDefined();
+      if (!versioning.isLessThanRange) {
+        throw new Error();
+      }
+      expect(versioning.isLessThanRange(version, range)).toBe(expected);
+    },
+  );
+
+  it.each`
+    versions                          | range       | expected
+    ${['1.82.0', '1.83.1', '1.83.2']} | ${'1.83'}   | ${'1.83.2'}
+    ${['1.82.0', '1.83.1', '1.83.3']} | ${'1.83.3'} | ${'1.83.3'}
+    ${['1.82.0', '1.83.1', '1.83.2']} | ${'1.84'}   | ${null}
+    ${['1.83.4']}                     | ${'1.83.3'} | ${null}
+  `(
+    'getSatisfyingVersion("$versions", "$range") === $expected',
+    ({ versions, range, expected }) => {
+      expect(versioning.getSatisfyingVersion(versions, range)).toBe(expected);
+    },
+  );
+
+  it.each`
+    versions                          | range       | expected
+    ${['1.82.0', '1.83.1', '1.83.2']} | ${'1.83'}   | ${'1.83.1'}
+    ${['1.82.0', '1.83.1', '1.83.3']} | ${'1.83.3'} | ${'1.83.3'}
+    ${['1.82.0', '1.83.1', '1.83.2']} | ${'1.84'}   | ${null}
+    ${['1.83.4']}                     | ${'1.83.3'} | ${null}
+  `(
+    'minSatisfyingVersion("$versions", "$range") === $expected',
+    ({ versions, range, expected }) => {
+      expect(versioning.minSatisfyingVersion(versions, range)).toBe(expected);
+    },
+  );
 
   it.each`
     currentValue | newVersion  | rangeStrategy | expected
