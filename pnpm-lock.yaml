@@ -198,8 +198,8 @@ importers:
         specifier: 11.8.6
         version: 11.8.6
       graph-data-structure:
-        specifier: 3.5.0
-        version: 3.5.0
+        specifier: 4.1.0
+        version: 4.1.0
       handlebars:
         specifier: 4.7.8
         version: 4.7.8
@@ -3617,8 +3617,8 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
-  graph-data-structure@3.5.0:
-    resolution: {integrity: sha512-AAgjRtBZC1acIExgK2otv2LDdcYeZdQFKiEStXRDTyaVs6sUUaGUif05pCczTqAU4ny82NQtM1p5PK7AQEYgRA==}
+  graph-data-structure@4.1.0:
+    resolution: {integrity: sha512-hGkRDE94buVERmJly5rqL9rZA+7F5t2PIBymMV3hCS96hPSaQQIojAEPkYsJb39+Avcq2amjS1NN5ldojKQajg==}
 
   grapheme-splitter@1.0.4:
     resolution: {integrity: sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==}
@@ -10444,7 +10444,7 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
-  graph-data-structure@3.5.0: {}
+  graph-data-structure@4.1.0: {}
 
   grapheme-splitter@1.0.4: {}
 
