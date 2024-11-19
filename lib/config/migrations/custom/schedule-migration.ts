@@ -1,5 +1,6 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
+import { CronPattern } from 'croner';
 import { regEx } from '../../../util/regex';
 import { AbstractMigration } from '../base/abstract-migration';
 
@@ -85,6 +86,7 @@ export class ScheduleMigration extends AbstractMigration {
         if (schedules[i].endsWith('days')) {
           schedules[i] = schedules[i].replace('days', 'day');
         }
+        schedules[i] = massageCronSchedule(schedules[i]);
       }
       if (is.string(value) && schedules.length === 1) {
         this.rewrite(schedules[0]);
@@ -92,5 +94,31 @@ export class ScheduleMigration extends AbstractMigration {
         this.rewrite(schedules);
       }
     }
+  }
+}
+
+function massageCronSchedule(schedule: string): string {
+  const parts = schedule.split(' ');
+  if (parts.length === 4 && parts[0] === '*') {
+    const addAtBack = parts.join(' ') + ' *';
+    const addAtFront = '* ' + parts.join(' ');
+    if (parseCron(addAtBack)) {
+      return addAtBack;
+    } else if (parseCron(addAtFront)) {
+      return addAtFront;
+    } else {
+      return schedule;
+    }
+  }
+
+  return schedule;
+}
+
+function parseCron(sch: string): boolean {
+  try {
+    new CronPattern(sch);
+    return true;
+  } catch {
+    return false;
   }
 }

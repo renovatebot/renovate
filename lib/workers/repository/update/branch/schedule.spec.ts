@@ -111,6 +111,8 @@ describe('workers/repository/update/branch/schedule', () => {
       expect(schedule.hasValidSchedule(['* 5 * * *'])[0]).toBeTrue();
       expect(schedule.hasValidSchedule(['* * * * * 6L'])[0]).toBeTrue();
       expect(schedule.hasValidSchedule(['* * * */2 6#1'])[0]).toBeTrue();
+      expect(schedule.hasValidSchedule(['2 3 5 11 *'])[0]).toBeFalse();
+      expect(schedule.hasValidSchedule(['2 3 5 11'])[0]).toBeFalse();
     });
 
     it('massages schedules', () => {
