@@ -28,8 +28,6 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
 
     ...(mr.labels && { labels: mr.labels }),
     ...(mr.sha && { sha: mr.sha }),
-    ...(mr.created_at && { createdAt: mr.created_at }),
-    ...(mr.closed_at && { closedAt: mr.closed_at }),
   };
 
   if (pr.title.startsWith(DRAFT_PREFIX)) {
