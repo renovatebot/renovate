@@ -4,9 +4,14 @@ When Renovate runs on a repository, the final config used is derived from the:
 
 - Default config
 - Global config
+  - File config
+  - Environment config
+  - CLI config
 - Inherited config
-- Repository config
 - Resolved presets referenced in config
+- Repository config
+
+This order is the order of precedence. Later configuration overwrites or merges with previous ones, depending whether the element is marked as mergable.
 
 <!-- prettier-ignore -->
 !!! note
