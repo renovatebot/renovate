@@ -11,6 +11,8 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
     state: mr.state === 'opened' ? 'open' : mr.state,
     number: mr.iid,
     title: mr.title,
+    hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
+
     ...(mr.target_branch && { targetBranch: mr.target_branch }),
 
     ...(mr.description && { bodyStruct: getPrBodyStruct(mr.description) }),
@@ -19,9 +21,7 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
       headPipelineStatus: mr.head_pipeline?.status,
     }),
     ...(mr.head_pipeline?.sha && { headPipelineSha: mr.head_pipeline?.sha }),
-    ...((mr.assignee?.id ?? mr.assignees?.[0]?.id) && {
-      hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
-    }),
+
     ...(is.nonEmptyArray(mr.reviewers) && {
       reviewers: mr.reviewers?.map(({ username }) => username),
     }),
