@@ -65,10 +65,7 @@ describe('modules/manager/nuget/util', () => {
       expect(registries![1]).toEqual({
         name: 'contoso.com',
         url: 'https://contoso.com/packages/',
-        sourceMappedPackagePatterns: [
-          'Contoso.*',
-          'NuGet.Common',
-        ],
+        sourceMappedPackagePatterns: ['Contoso.*', 'NuGet.Common'],
       });
     });
 
@@ -102,10 +99,7 @@ describe('modules/manager/nuget/util', () => {
       expect(registries![1]).toEqual({
         name: 'contoso.com',
         url: 'https://contoso.com/packages/',
-        sourceMappedPackagePatterns: [
-          'Contoso.*',
-          'NuGet.Common',
-        ],
+        sourceMappedPackagePatterns: ['Contoso.*', 'NuGet.Common'],
       });
     });
 
