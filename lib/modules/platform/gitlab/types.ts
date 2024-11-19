@@ -27,6 +27,8 @@ export interface GitLabMergeRequest {
   target_branch: string;
   description: string;
   diverged_commits_count: number;
+  created_at?: string;
+  closed_at?: string;
   merge_status: string;
   assignee?: GitLabUser;
   assignees?: GitLabUser[];

@@ -71,7 +71,7 @@ import type {
   MergeMethod,
   RepoResponse,
 } from './types';
-import { prInfo } from './utils';
+import { DRAFT_PREFIX, DRAFT_PREFIX_DEPRECATED, prInfo } from './utils';
 
 let config: {
   repository: string;
@@ -92,9 +92,6 @@ const defaults = {
 };
 
 export const id = 'gitlab';
-
-const DRAFT_PREFIX = 'Draft: ';
-const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
 
 let draftPrefix = DRAFT_PREFIX;
 
@@ -537,18 +534,6 @@ export async function getBranchStatus(
 
 // Pull Request
 
-function massagePr(prToModify: Pr): Pr {
-  const pr = prToModify;
-  if (pr.title.startsWith(DRAFT_PREFIX)) {
-    pr.title = pr.title.substring(DRAFT_PREFIX.length);
-    pr.isDraft = true;
-  } else if (pr.title.startsWith(DRAFT_PREFIX_DEPRECATED)) {
-    pr.title = pr.title.substring(DRAFT_PREFIX_DEPRECATED.length);
-    pr.isDraft = true;
-  }
-  return pr;
-}
-
 async function fetchPrList(): Promise<Pr[]> {
   const searchParams = {
     per_page: '100',
@@ -563,7 +548,7 @@ async function fetchPrList(): Promise<Pr[]> {
     const res = await gitlabApi.getJson<GitLabMergeRequest[]>(urlString, {
       paginate: true,
     });
-    return res.body.map((pr) => massagePr(prInfo(pr)));
+    return res.body.map((pr) => prInfo(pr));
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error fetching PR list');
     if (err.statusCode === 403) {
@@ -750,23 +735,28 @@ export async function createPr({
   }
   const description = sanitize(rawDescription);
   logger.debug(`Creating Merge Request: ${title}`);
-  const res = await gitlabApi.postJson<Pr & { iid: number }>(
-    `projects/${config.repository}/merge_requests`,
-    {
-      body: {
-        source_branch: sourceBranch,
-        target_branch: targetBranch,
-        remove_source_branch: true,
-        title,
-        description,
-        labels: (labels ?? []).join(','),
-        squash: config.squash,
+  const mr = (
+    await gitlabApi.postJson<GitLabMergeRequest & { iid: number; id: number }>(
+      `projects/${config.repository}/merge_requests`,
+      {
+        body: {
+          source_branch: sourceBranch,
+          target_branch: targetBranch,
+          remove_source_branch: true,
+          title,
+          description,
+          labels: (labels ?? []).join(','),
+          squash: config.squash,
+        },
       },
-    },
-  );
-  const pr = res.body;
-  pr.number = pr.iid;
-  pr.sourceBranch = sourceBranch;
+    )
+  ).body;
+  const pr = {
+    ...prInfo(mr),
+    iid: mr.iid,
+    id: mr.id,
+    sourceBranch: mr.source_branch ?? sourceBranch,
+  };
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
@@ -778,7 +768,7 @@ export async function createPr({
 
   await tryPrAutomerge(pr.iid, platformPrOptions);
 
-  return massagePr(pr);
+  return pr;
 }
 
 export async function getPr(iid: number): Promise<GitlabPr> {
@@ -786,9 +776,7 @@ export async function getPr(iid: number): Promise<GitlabPr> {
   const mr = await getMR(config.repository, iid);
 
   // Harmonize fields with GitHub
-  const pr: GitlabPr = prInfo(mr);
-
-  return massagePr(pr);
+  return prInfo(mr);
 }
 
 export async function updatePr({
@@ -937,14 +925,14 @@ export async function findPr({
     const mr = mrList[0];
 
     // only pass necessary info
-    const pr: GitlabPr = {
-      sourceBranch: mr.source_branch,
-      number: mr.iid,
-      state: 'open',
-      title: mr.title,
-    };
+    // const pr: GitlabPr = {
+    //   sourceBranch: mr.source_branch,
+    //   number: mr.iid,
+    //   state: 'open',
+    //   title: mr.title,
+    // };
 
-    return massagePr(pr);
+    return prInfo(mr);
   }
 
   const prList = await getPrList();
