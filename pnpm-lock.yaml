@@ -198,8 +198,8 @@ importers:
         specifier: 11.8.6
         version: 11.8.6
       graph-data-structure:
-        specifier: 4.1.0
-        version: 4.1.0
+        specifier: 4.2.0
+        version: 4.2.0
       handlebars:
         specifier: 4.7.8
         version: 4.7.8
@@ -1187,7 +1187,6 @@ packages:
 
   '@ls-lint/ls-lint@2.2.3':
     resolution: {integrity: sha512-ekM12jNm/7O2I/hsRv9HvYkRdfrHpiV1epVuI2NP+eTIcEgdIdKkKCs9KgQydu/8R5YXTov9aHdOgplmCHLupw==}
-    cpu: [x64, arm64, s390x]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -3617,8 +3616,8 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
-  graph-data-structure@4.1.0:
-    resolution: {integrity: sha512-hGkRDE94buVERmJly5rqL9rZA+7F5t2PIBymMV3hCS96hPSaQQIojAEPkYsJb39+Avcq2amjS1NN5ldojKQajg==}
+  graph-data-structure@4.2.0:
+    resolution: {integrity: sha512-DFGyFROTYJAXwLjBPvj6LYihF2zIUDKt6Rzgo18E+FFKtHm7dJnE/bMHVp6fji5IchykUg3ctS9gwS0L5azwDw==}
 
   grapheme-splitter@1.0.4:
     resolution: {integrity: sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==}
@@ -10444,7 +10443,7 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
-  graph-data-structure@4.1.0: {}
+  graph-data-structure@4.2.0: {}
 
   grapheme-splitter@1.0.4: {}
 
