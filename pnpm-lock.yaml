@@ -72,8 +72,8 @@ importers:
         specifier: 1.1.0
         version: 1.1.0
       '@renovatebot/kbpgp':
-        specifier: 4.0.0
-        version: 4.0.0
+        specifier: 4.0.1
+        version: 4.0.1
       '@renovatebot/osv-offline':
         specifier: 1.5.10
         version: 1.5.10(encoding@0.1.13)
@@ -1539,8 +1539,8 @@ packages:
   '@renovatebot/eslint-plugin@file:tools/eslint':
     resolution: {directory: tools/eslint, type: directory}
 
-  '@renovatebot/kbpgp@4.0.0':
-    resolution: {integrity: sha512-SaP18UVQC9whOZk2ZszDa9p0KxIV9S5K/ZVLI67X+2EjunmxbwonFgdJmxNW7mznOF0pPSjnGZAsWn0E3dQslw==}
+  '@renovatebot/kbpgp@4.0.1':
+    resolution: {integrity: sha512-Uj52QvCuIr9qwvbPR3fymQFMwn0MIKItZrEKywNoSF7K4UVfrtBW3DGVQ9KZ2D5tFR3LgrlPdhNSYEkEVAQ4OA==}
     engines: {node: ^20.9.0 || ^22.11.0, pnpm: ^9.0.0}
 
   '@renovatebot/osv-offline-db@1.6.0':
@@ -7903,8 +7903,9 @@ snapshots:
 
   '@renovatebot/eslint-plugin@file:tools/eslint': {}
 
-  '@renovatebot/kbpgp@4.0.0':
+  '@renovatebot/kbpgp@4.0.1':
     dependencies:
+      bn: 1.0.5
       bzip-deflate: 1.0.0
       iced-error: 0.0.13
       iced-lock: 2.0.1
