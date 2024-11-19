@@ -57,23 +57,19 @@ describe('modules/manager/nuget/util', () => {
 
       const registries = await getConfiguredRegistries('NuGet.config');
       expect(registries?.length).toBe(2);
-      expect(registries![0]).toEqual(
-        {
-          name: 'nuget.org',
-          url: 'https://api.nuget.org/v3/index.json',
-          sourceMappedPackagePatterns: ['*'],
-        },
-      );
-      expect(registries![1]).toEqual(
-        {
-          name: 'contoso.com',
-          url: 'https://contoso.com/packages/',
-          sourceMappedPackagePatterns: [
-            'Contoso.*',
-            'NuGet.Common',
-          ],
-        },
-      );
+      expect(registries![0]).toEqual({
+        name: 'nuget.org',
+        url: 'https://api.nuget.org/v3/index.json',
+        sourceMappedPackagePatterns: ['*'],
+      });
+      expect(registries![1]).toEqual({
+        name: 'contoso.com',
+        url: 'https://contoso.com/packages/',
+        sourceMappedPackagePatterns: [
+          'Contoso.*',
+          'NuGet.Common',
+        ],
+      });
     });
 
     it('reads nuget config file with default registry', async () => {
@@ -98,23 +94,19 @@ describe('modules/manager/nuget/util', () => {
 
       const registries = await getConfiguredRegistries('NuGet.config');
       expect(registries?.length).toBe(2);
-      expect(registries![0]).toEqual(
-        {
-          name: 'nuget.org',
-          url: 'https://api.nuget.org/v3/index.json',
-          sourceMappedPackagePatterns: ['*'],
-        },
-      );
-      expect(registries![1]).toEqual(
-        {
-          name: 'contoso.com',
-          url: 'https://contoso.com/packages/',
-          sourceMappedPackagePatterns: [
-            'Contoso.*',
-            'NuGet.Common',
-          ],
-        },
-      );
+      expect(registries![0]).toEqual({
+        name: 'nuget.org',
+        url: 'https://api.nuget.org/v3/index.json',
+        sourceMappedPackagePatterns: ['*'],
+      });
+      expect(registries![1]).toEqual({
+        name: 'contoso.com',
+        url: 'https://contoso.com/packages/',
+        sourceMappedPackagePatterns: [
+          'Contoso.*',
+          'NuGet.Common',
+        ],
+      });
     });
 
     it('reads nuget config file with default registry disabled and added sources', async () => {
@@ -180,18 +172,14 @@ describe('modules/manager/nuget/util', () => {
 
       const registries = await getConfiguredRegistries('NuGet.config');
       expect(registries?.length).toBe(2);
-      expect(registries![0]).toEqual(
-        {
-          name: 'nuget.org',
-          url: 'https://api.nuget.org/v3/index.json',
-        },
-      );
-      expect(registries![1]).toEqual(
-        {
-          name: 'contoso.com',
-          url: 'https://contoso.com/packages/',
-        },
-      );
+      expect(registries![0]).toEqual({
+        name: 'nuget.org',
+        url: 'https://api.nuget.org/v3/index.json',
+      });
+      expect(registries![1]).toEqual({
+        name: 'contoso.com',
+        url: 'https://contoso.com/packages/',
+      });
     });
 
     it('reads nuget config file with disabled source with value false', async () => {
@@ -212,18 +200,14 @@ describe('modules/manager/nuget/util', () => {
 
       const registries = await getConfiguredRegistries('NuGet.config');
       expect(registries?.length).toBe(2);
-      expect(registries![0]).toEqual(
-        {
-          name: 'nuget.org',
-          url: 'https://api.nuget.org/v3/index.json',
-        },
-      );
-      expect(registries![1]).toEqual(
-        {
-          name: 'contoso.com',
-          url: 'https://contoso.com/packages/',
-        },
-      );
+      expect(registries![0]).toEqual({
+        name: 'nuget.org',
+        url: 'https://api.nuget.org/v3/index.json',
+      });
+      expect(registries![1]).toEqual({
+        name: 'contoso.com',
+        url: 'https://contoso.com/packages/',
+      });
     });
 
     it('reads nuget config file without packageSources and ignores disabledPackageSources', async () => {
