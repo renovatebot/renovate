@@ -61,7 +61,7 @@ describe('workers/repository/process/fetch', () => {
       config.packageRules = [
         {
           matchPackageNames: ['foo'],
-          registryUrls: ['some-registry']
+          registryUrls: ['some-registry'],
         },
       ];
 
@@ -70,8 +70,16 @@ describe('workers/repository/process/fetch', () => {
           {
             packageFile: 'pom.xml',
             deps: [
-              { depName: 'foo', skipReason: 'unknown-registry', datasource: MavenDatasource.id },
-              { depName: 'baz', skipReason: 'unknown-registry', datasource: MavenDatasource.id },
+              {
+                depName: 'foo',
+                skipReason: 'unknown-registry',
+                datasource: MavenDatasource.id,
+              },
+              {
+                depName: 'baz',
+                skipReason: 'unknown-registry',
+                datasource: MavenDatasource.id,
+              },
             ],
           },
         ],
@@ -80,8 +88,11 @@ describe('workers/repository/process/fetch', () => {
       lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
       await fetchUpdates(config, packageFiles);
 
-      expect(packageFiles.maven[0].deps[0].skipReason).toBe(undefined);
+      // removes skipReason and finds correct updates if there is a matching package rule
+      expect(packageFiles.maven[0].deps[0].skipReason).toBeUndefined();
       expect(packageFiles.maven[0].deps[0].updates).toHaveLength(2);
+
+      // does not remove skipReason and does not find updates if there is no matching package rule
       expect(packageFiles.maven[0].deps[1].skipReason).toBe('unknown-registry');
       expect(packageFiles.maven[0].deps[1].updates).toHaveLength(0);
     });

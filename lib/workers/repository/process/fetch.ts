@@ -45,7 +45,11 @@ async function fetchDepUpdates(
   depConfig = await applyPackageRules(depConfig, 'pre-lookup');
   depConfig.packageName ??= depConfig.depName;
 
-  if (dep.skipReason === 'unknown-registry' && depConfig.registryUrls && depConfig.registryUrls.length > 0) {
+  if (
+    dep.skipReason === 'unknown-registry' &&
+    depConfig.registryUrls &&
+    depConfig.registryUrls.length > 0
+  ) {
     dep.skipReason = undefined;
   }
 
