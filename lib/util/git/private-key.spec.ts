@@ -35,7 +35,7 @@ describe('util/git/private-key', () => {
       exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
       exec.exec
         .calledWith(
-          `gpg --import ${upath.join(os.tmpdir() + '/git-private-gpg.key')}`,
+          `gpg --batch --no-tty --import ${upath.join(os.tmpdir() + '/git-private-gpg.key')}`,
         )
         .mockRejectedValueOnce({
           stderr: `something wrong`,
@@ -50,7 +50,7 @@ describe('util/git/private-key', () => {
       exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
       exec.exec
         .calledWith(
-          `gpg --import ${upath.join(os.tmpdir() + '/git-private-gpg.key')}`,
+          `gpg --batch --no-tty --import ${upath.join(os.tmpdir() + '/git-private-gpg.key')}`,
         )
         .mockResolvedValueOnce({
           stderr: `gpg: key ${publicKey}: secret key imported\nfoo\n`,

@@ -5,19 +5,19 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.7.2@sha256:3f4ec2df6cb8c532cc0a67ae0e3842d9a5a5618ab67d5b2e9ab8ed75e78db788 AS slim-base
+FROM ghcr.io/renovatebot/base-image:9.7.11@sha256:28986a516b41ee09aabf049cb39db062390f4d00cf425a744876ffc3c52a4715 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.7.2-full@sha256:ae9e09c0bc73eb9ccc1a1955a223e1ee3a116f0a930c3767e8233f4efec10f73 AS full-base
+FROM ghcr.io/renovatebot/base-image:9.7.11-full@sha256:168dcc7d0c03ba78e59866aee6e84f09e93ee66bf384b6d0d382024d637248fc AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.7.2@sha256:3f4ec2df6cb8c532cc0a67ae0e3842d9a5a5618ab67d5b2e9ab8ed75e78db788 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.7.11@sha256:28986a516b41ee09aabf049cb39db062390f4d00cf425a744876ffc3c52a4715 AS build
 
 # We want a specific node version here
 # renovate: datasource=node-version
@@ -94,6 +94,10 @@ COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renov
 
 # make our node binary available as last in path
 RUN ln -sf /usr/local/renovate/node /bin/node
+
+# ensure default base and cache directories exist.
+RUN mkdir -p /tmp/renovate/cache && \
+    chmod -R 775 /tmp/renovate
 
 # test
 RUN set -ex; \
