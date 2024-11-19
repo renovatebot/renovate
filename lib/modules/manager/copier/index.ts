@@ -4,6 +4,8 @@ export { updateArtifacts } from './artifacts';
 export { extractPackageFile } from './extract';
 export { updateDependency } from './update';
 
+export const url = 'https://copier.readthedocs.io';
+
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.copier-answers(\\..+)?\\.ya?ml'],
   versioning: pep440.id,

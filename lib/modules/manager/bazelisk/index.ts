@@ -4,12 +4,13 @@ import * as semverVersioning from '../../versioning/semver';
 
 export { extractPackageFile } from './extract';
 
+export const url = 'https://github.com/bazelbuild/bazelisk';
+export const categories: Category[] = ['bazel'];
+
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.bazelversion$'],
   pinDigests: false,
   versioning: semverVersioning.id,
 };
-
-export const categories: Category[] = ['bazel'];
 
 export const supportedDatasources = [GithubReleasesDatasource.id];

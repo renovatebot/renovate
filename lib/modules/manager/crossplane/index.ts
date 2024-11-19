@@ -3,7 +3,6 @@ import { DockerDatasource } from '../../datasource/docker';
 
 export { extractPackageFile } from './extract';
 
-export const displayName = 'Crossplane';
 export const url = 'https://docs.crossplane.io/';
 
 export const defaultConfig = {

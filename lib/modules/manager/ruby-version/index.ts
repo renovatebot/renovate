@@ -4,11 +4,12 @@ import * as rubyVersioning from '../../versioning/ruby';
 
 export { extractPackageFile } from './extract';
 
-export const supportedDatasources = [RubyVersionDatasource.id];
+export const displayName = '.ruby-version';
+export const categories: Category[] = ['ruby'];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.ruby-version$'],
   versioning: rubyVersioning.id,
 };
 
-export const categories: Category[] = ['ruby'];
+export const supportedDatasources = [RubyVersionDatasource.id];
