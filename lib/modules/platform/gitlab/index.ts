@@ -764,7 +764,6 @@ export async function createPr({
   const pr = res.body;
   pr.number = pr.iid;
   pr.sourceBranch = sourceBranch;
-
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
