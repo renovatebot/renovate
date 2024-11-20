@@ -28,7 +28,7 @@ export function incLimitedValue(key: Limit, incBy = 1): void {
   });
 }
 
-export function handleCommitsLimit(key: Limit): boolean {
+function handleCommitsLimit(key: Limit): boolean {
   const limit = limits.get(key);
   // TODO: fix me?
   // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
@@ -64,7 +64,7 @@ export function incCountValue(key: CountName, incBy = 1): void {
   });
 }
 
-export function handleOtherLimits(
+function handleOtherLimits(
   key: Exclude<CountName, 'HourlyPullRequests'>,
   config: BranchConfig,
 ): boolean {
@@ -177,13 +177,24 @@ export function hasMultipleLimits(
   return distinctLimits.size > 1;
 }
 
+export function isLimitReached(limit: 'Commits'): boolean;
 export function isLimitReached(
-  limit: 'Branches' | 'PullRequests' | 'Commits',
+  limit: 'Branches' | 'PullRequests',
+  config: BranchConfig,
+): boolean;
+export function isLimitReached(
+  limit: 'Commits' | 'Branches' | 'PullRequests',
   config?: BranchConfig,
 ): boolean {
   if (limit === 'Commits') {
     return handleCommitsLimit(limit);
   }
 
-  return handleOtherLimits(limit, config!);
+  if (config) {
+    return handleOtherLimits(limit, config);
+  }
+
+  throw new Error(
+    'Config is required for computing limits for Branches and PullRequests',
+  );
 }
