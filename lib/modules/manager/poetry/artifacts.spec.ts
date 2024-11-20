@@ -16,6 +16,7 @@ import { updateArtifacts } from '.';
 
 const pyproject1toml = Fixtures.get('pyproject.1.toml');
 const pyproject10toml = Fixtures.get('pyproject.10.toml');
+const pyproject13toml = Fixtures.get('pyproject.13.toml');
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
@@ -184,11 +185,6 @@ describe('modules/manager/poetry/artifacts', () => {
       hostRules.find.mockReturnValueOnce({ username: 'usernameTwo' });
       hostRules.find.mockReturnValueOnce({});
       hostRules.find.mockReturnValueOnce({ password: 'passwordFour' });
-      googleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
-        })),
-      );
       const updatedDeps = [{ depName: 'dep1' }];
       expect(
         await updateArtifacts({
@@ -206,23 +202,59 @@ describe('modules/manager/poetry/artifacts', () => {
           },
         },
       ]);
-      expect(hostRules.find.mock.calls).toHaveLength(9);
+      expect(hostRules.find.mock.calls).toHaveLength(7);
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'poetry update --lock --no-interaction dep1',
           options: {
             env: {
-              HOME: '/home/user',
-              HTTPS_PROXY: 'https://example.com',
-              HTTP_PROXY: 'http://example.com',
-              LANG: 'en_US.UTF-8',
-              LC_ALL: 'en_US',
-              NO_PROXY: 'localhost',
-              PATH: '/tmp/path',
-              POETRY_HTTP_BASIC_FOUR_OH_FOUR_PASSWORD: 'passwordFour',
               POETRY_HTTP_BASIC_ONE_PASSWORD: 'passwordOne',
               POETRY_HTTP_BASIC_ONE_USERNAME: 'usernameOne',
               POETRY_HTTP_BASIC_TWO_USERNAME: 'usernameTwo',
+              POETRY_HTTP_BASIC_FOUR_OH_FOUR_PASSWORD: 'passwordFour',
+            },
+          },
+        },
+      ]);
+    });
+
+    it('passes Google Artifact Registry credentials environment vars', async () => {
+      // poetry.lock
+      fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      // pyproject.lock
+      fs.getSiblingFileName.mockReturnValueOnce('pyproject.lock');
+      fs.readLocalFile.mockResolvedValueOnce('[metadata]\n');
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+      googleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        })),
+      );
+      const updatedDeps = [{ depName: 'dep1' }];
+      expect(
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps,
+          newPackageFileContent: pyproject13toml,
+          config,
+        }),
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pyproject.lock',
+            contents: 'New poetry.lock',
+          },
+        },
+      ]);
+      expect(hostRules.find.mock.calls).toHaveLength(3);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'poetry update --lock --no-interaction dep1',
+          options: {
+            env: {
               POETRY_HTTP_BASIC_SOME_GAR_REPO_USERNAME: 'oauth2accesstoken',
               POETRY_HTTP_BASIC_SOME_GAR_REPO_PASSWORD: 'some-token',
             },
@@ -240,13 +272,6 @@ describe('modules/manager/poetry/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('[metadata]\n');
       const execSnapshots = mockExecAll();
       fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
-      hostRules.find.mockReturnValueOnce({
-        username: 'usernameOne',
-        password: 'passwordOne',
-      });
-      hostRules.find.mockReturnValueOnce({ username: 'usernameTwo' });
-      hostRules.find.mockReturnValueOnce({});
-      hostRules.find.mockReturnValueOnce({ password: 'passwordFour' });
       googleAuth.mockImplementation(
         jest.fn().mockImplementation(() => ({
           getAccessToken: jest.fn().mockResolvedValue(undefined),
@@ -257,7 +282,7 @@ describe('modules/manager/poetry/artifacts', () => {
         await updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps,
-          newPackageFileContent: pyproject10toml,
+          newPackageFileContent: pyproject13toml,
           config,
         }),
       ).toEqual([
@@ -269,26 +294,9 @@ describe('modules/manager/poetry/artifacts', () => {
           },
         },
       ]);
-      expect(hostRules.find.mock.calls).toHaveLength(9);
+      expect(hostRules.find.mock.calls).toHaveLength(3);
       expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'poetry update --lock --no-interaction dep1',
-          options: {
-            env: {
-              HOME: '/home/user',
-              HTTPS_PROXY: 'https://example.com',
-              HTTP_PROXY: 'http://example.com',
-              LANG: 'en_US.UTF-8',
-              LC_ALL: 'en_US',
-              NO_PROXY: 'localhost',
-              PATH: '/tmp/path',
-              POETRY_HTTP_BASIC_FOUR_OH_FOUR_PASSWORD: 'passwordFour',
-              POETRY_HTTP_BASIC_ONE_PASSWORD: 'passwordOne',
-              POETRY_HTTP_BASIC_ONE_USERNAME: 'usernameOne',
-              POETRY_HTTP_BASIC_TWO_USERNAME: 'usernameTwo',
-            },
-          },
-        },
+        { cmd: 'poetry update --lock --no-interaction dep1' },
       ]);
     });
 

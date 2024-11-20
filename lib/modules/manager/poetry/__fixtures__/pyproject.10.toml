@@ -17,10 +17,6 @@ url = "last.url"
 name = "five"
 
 [[tool.poetry.source]]
-name = "some-gar-repo"
-url = "https://someregion-python.pkg.dev/some-project/some-repo/simple/"
-
-[[tool.poetry.source]]
 name = "invalid-url"
 url = "invalid-url"
 

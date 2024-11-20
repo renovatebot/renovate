@@ -1,0 +1,7 @@
+[[tool.poetry.source]]
+name = "some-gar-repo"
+url = "https://someregion-python.pkg.dev/some-project/some-repo/simple/"
+
+[build-system]
+requires = ["poetry_core>=1.0", "wheel"]
+build-backend = "poetry.masonry.api"
