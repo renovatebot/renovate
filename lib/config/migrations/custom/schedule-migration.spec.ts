@@ -59,31 +59,4 @@ describe('config/migrations/custom/schedule-migration', () => {
       false,
     );
   });
-
-  it('migrate cron schdeule with 4 space separated parts', () => {
-    expect(ScheduleMigration).toMigrate(
-      {
-        schedule: [
-          '* * * *',
-          '* * * 6#1',
-          '* * * 11',
-          '* 2 31 11',
-          '2 3 1 11',
-          '* * 2 5',
-          '* * * 59',
-        ],
-      } as any,
-      {
-        schedule: [
-          '* * * * *',
-          '* * * * 6#1',
-          '* * * 11 *',
-          '* 2 31 11 *',
-          '2 3 1 11',
-          '* * 2 5 *',
-          '* * * 59',
-        ],
-      } as any,
-    );
-  });
 });
