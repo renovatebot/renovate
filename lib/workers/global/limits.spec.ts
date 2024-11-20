@@ -5,7 +5,6 @@ import {
   hasMultipleLimits,
   incCountValue,
   incLimitedValue,
-  isCountReached,
   isLimitReached,
   resetAllLimits,
   setCount,
@@ -217,7 +216,7 @@ describe('workers/global/limits', () => {
     });
   });
 
-  describe('isCountReached', () => {
+  describe('isLimitReached', () => {
     it('returns false based on concurrent limits', () => {
       setCount('PullRequests', 1);
       setCount('HourlyPullRequests', 1);
@@ -240,10 +239,10 @@ describe('workers/global/limits', () => {
         },
       ]);
       expect(
-        isCountReached('Branches', partial<BranchConfig>({ upgrades })),
+        isLimitReached('Branches', partial<BranchConfig>({ upgrades })),
       ).toBe(false);
       expect(
-        isCountReached('PullRequests', partial<BranchConfig>({ upgrades })),
+        isLimitReached('PullRequests', partial<BranchConfig>({ upgrades })),
       ).toBe(false);
     });
 
@@ -269,10 +268,10 @@ describe('workers/global/limits', () => {
         },
       ]);
       expect(
-        isCountReached('Branches', partial<BranchConfig>({ upgrades })),
+        isLimitReached('Branches', partial<BranchConfig>({ upgrades })),
       ).toBe(true);
       expect(
-        isCountReached('PullRequests', partial<BranchConfig>({ upgrades })),
+        isLimitReached('PullRequests', partial<BranchConfig>({ upgrades })),
       ).toBe(true);
     });
 
@@ -298,10 +297,10 @@ describe('workers/global/limits', () => {
         },
       ]);
       expect(
-        isCountReached('Branches', partial<BranchConfig>({ upgrades })),
+        isLimitReached('Branches', partial<BranchConfig>({ upgrades })),
       ).toBe(true);
       expect(
-        isCountReached('PullRequests', partial<BranchConfig>({ upgrades })),
+        isLimitReached('PullRequests', partial<BranchConfig>({ upgrades })),
       ).toBe(true);
     });
   });

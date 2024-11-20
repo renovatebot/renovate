@@ -27,7 +27,7 @@ import { stripEmojis } from '../../../../util/emoji';
 import { fingerprint } from '../../../../util/fingerprint';
 import { getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
-import { incCountValue, isCountReached } from '../../../global/limits';
+import { incCountValue, isLimitReached } from '../../../global/limits';
 import type {
   BranchConfig,
   BranchUpgradeConfig,
@@ -482,7 +482,7 @@ export async function ensurePr(
       try {
         if (
           !dependencyDashboardCheck &&
-          isCountReached('PullRequests', prConfig) &&
+          isLimitReached('PullRequests', prConfig) &&
           !config.isVulnerabilityAlert
         ) {
           logger.debug('Skipping PR - limit reached');

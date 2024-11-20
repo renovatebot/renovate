@@ -28,7 +28,7 @@ export function incLimitedValue(key: Limit, incBy = 1): void {
   });
 }
 
-export function isLimitReached(key: Limit): boolean {
+export function handleCommitsLimit(key: Limit): boolean {
   const limit = limits.get(key);
   // TODO: fix me?
   // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
@@ -64,7 +64,7 @@ export function incCountValue(key: CountName, incBy = 1): void {
   });
 }
 
-export function isCountReached(
+export function handleOtherLimits(
   key: Exclude<CountName, 'HourlyPullRequests'>,
   config: BranchConfig,
 ): boolean {
@@ -175,4 +175,15 @@ export function hasMultipleLimits(
   }
 
   return distinctLimits.size > 1;
+}
+
+export function isLimitReached(
+  limit: 'Branches' | 'PullRequests' | 'Commits',
+  config?: BranchConfig,
+): boolean {
+  if (limit === 'Commits') {
+    return handleCommitsLimit(limit);
+  }
+
+  return handleOtherLimits(limit, config!);
 }

@@ -101,7 +101,7 @@ describe('workers/repository/update/pr/index', () => {
 
       it('aborts PR creation once limit is exceeded', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
-        limits.isCountReached.mockReturnValueOnce(true);
+        limits.isLimitReached.mockReturnValueOnce(true);
 
         config.fetchChangeLogs = 'pr';
 
@@ -114,7 +114,7 @@ describe('workers/repository/update/pr/index', () => {
 
       it('ignores PR limits on vulnerability alert', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
-        limits.isCountReached.mockReturnValueOnce(true);
+        limits.isLimitReached.mockReturnValueOnce(true);
 
         const prConfig = { ...config, isVulnerabilityAlert: true };
         delete prConfig.prTitle; // for coverage

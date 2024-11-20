@@ -34,7 +34,7 @@ import {
 import { coerceNumber } from '../../../../util/number';
 import { toMs } from '../../../../util/pretty-time';
 import * as template from '../../../../util/template';
-import { counts, isCountReached, isLimitReached } from '../../../global/limits';
+import { counts, isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelogs } from '../../changelog';
 import { ensurePr, getPlatformPrOptions } from '../pr';
@@ -216,7 +216,7 @@ export async function processBranch(
 
     if (
       !branchExists &&
-      isCountReached('Branches', branchConfig) &&
+      isLimitReached('Branches', branchConfig) &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
