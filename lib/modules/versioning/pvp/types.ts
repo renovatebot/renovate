@@ -1,9 +1,9 @@
-export type Range = {
+export interface Range {
   lower: string;
   upper: string;
-};
-export type Components = {
+}
+export interface Components {
   major: number[];
   minor: number[];
   patch: number[];
-};
+}

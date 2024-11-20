@@ -1,4 +1,4 @@
-import pvp, { extractAllComponents, getComponents, parseRange } from '.';
+import pvp from '.';
 
 describe('modules/versioning/pvp/index', () => {
   describe('.isGreaterThan(version, other)', () => {
@@ -17,15 +17,6 @@ describe('modules/versioning/pvp/index', () => {
       ${'1.0'}    | ${''}      | ${false}
     `('pvp.isGreaterThan($first, $second)', ({ first, second, expected }) => {
       expect(pvp.isGreaterThan(first, second)).toBe(expected);
-    });
-  });
-
-  describe('.parseRange(range)', () => {
-    it('should parse >=1.0 && <1.1', () => {
-      const parsed = parseRange('>=1.0 && <1.1');
-      expect(parsed).not.toBeNull();
-      expect(parsed!.lower).toBe('1.0');
-      expect(parsed!.upper).toBe('1.1');
     });
   });
 
@@ -135,16 +126,6 @@ describe('modules/versioning/pvp/index', () => {
     );
   });
 
-  describe('.extractAllComponents(version)', () => {
-    it('should return null when there are no numbers', () => {
-      expect(extractAllComponents('')).toBeNull();
-    });
-
-    it('should parse 3.0', () => {
-      expect(extractAllComponents('3.0')).toEqual([3, 0]);
-    });
-  });
-
   describe('.isValid(version)', () => {
     it.each`
       version            | expected
@@ -174,16 +155,6 @@ describe('modules/versioning/pvp/index', () => {
         ).toBe(expected);
       },
     );
-  });
-
-  describe('.getComponents(...)', () => {
-    it('"0" is valid major version', () => {
-      expect(getComponents('0')?.major).toEqual([0]);
-    });
-
-    it('returns null when no components could be extracted', () => {
-      expect(getComponents('')).toBeNull();
-    });
   });
 
   describe('.isSame(...)', () => {

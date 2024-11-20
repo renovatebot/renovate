@@ -2,7 +2,13 @@ import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
-import type { Components, Range } from './types';
+import { parseRange } from './range';
+import {
+  compareIntArray,
+  extractAllComponents,
+  getComponents,
+  plusOne,
+} from './util';
 
 export const id = 'pvp';
 export const displayName = 'Package Versioning Policy (Haskell)';
@@ -10,62 +16,7 @@ export const urls = [];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['auto'];
 
-// This range format was chosen because it is common in the ecosystem
-const gteAndLtRange = />=(?<lower>[\d.]+)&&<(?<upper>[\d.]+)/;
-const ltAndGteRange = /<(?<upper>[\d.]+)&&>=(?<lower>[\d.]+)/;
-
-export function parseRange(input: string): Range | null {
-  const noSpaces = input.replaceAll(' ', '');
-  let m = regEx(gteAndLtRange).exec(noSpaces);
-  if (!m?.groups) {
-    m = regEx(ltAndGteRange).exec(noSpaces);
-    if (!m?.groups) {
-      return null;
-    }
-  }
-  return {
-    lower: m.groups['lower'],
-    upper: m.groups['upper'],
-  };
-}
-
-export function extractAllComponents(version: string): number[] | null {
-  const versionMajor = version.split('.');
-  const versionIntMajor = versionMajor.map((x) => parseInt(x, 10));
-  const ret: number[] = [];
-  for (const l of versionIntMajor) {
-    if (l < 0 || !isFinite(l)) {
-      return null;
-    }
-    ret.push(l);
-  }
-  return ret;
-}
-
-function compareIntArray(
-  versionIntMajor: number[],
-  otherIntMajor: number[],
-): 'lt' | 'eq' | 'gt' {
-  for (
-    let i = 0;
-    i < Math.min(versionIntMajor.length, otherIntMajor.length);
-    i++
-  ) {
-    if (versionIntMajor[i] > otherIntMajor[i]) {
-      return 'gt';
-    }
-    if (versionIntMajor[i] < otherIntMajor[i]) {
-      return 'lt';
-    }
-  }
-  if (versionIntMajor.length === otherIntMajor.length) {
-    return 'eq';
-  }
-  if (versionIntMajor.length > otherIntMajor.length) {
-    return 'gt';
-  }
-  return 'lt';
-}
+const digitsAndDots = regEx(/^[\d.]+$/);
 
 function isGreaterThan(version: string, other: string): boolean {
   const versionIntMajor = extractAllComponents(version);
@@ -159,22 +110,6 @@ function isLessThanRange(version: string, range: string): boolean {
     return false;
   }
   return 'lt' === compareIntArray(compos, lower);
-}
-
-export function getComponents(splitOne: string): Components | null {
-  const c = extractAllComponents(splitOne);
-  if (c === null) {
-    return null;
-  }
-  return {
-    major: c.slice(0, 2),
-    minor: c.slice(2, 3),
-    patch: c.slice(3),
-  };
-}
-
-function plusOne(majorOne: number[]): string {
-  return `${majorOne[0]}.${majorOne[1] + 1}`;
 }
 
 function getNewValue({
@@ -277,8 +212,7 @@ function isValid(ver: string): boolean {
 
 function isSingleVersion(range: string): boolean {
   const noSpaces = range.trim();
-  const r = regEx(/^[\d.]+$/);
-  return noSpaces.startsWith('==') && r.test(noSpaces.slice(2));
+  return noSpaces.startsWith('==') && digitsAndDots.test(noSpaces.slice(2));
 }
 
 function equals(a: string, b: string): boolean {
