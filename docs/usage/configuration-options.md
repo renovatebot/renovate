@@ -3813,7 +3813,7 @@ It also means that if they rarely attempt between 9-11am then you'll often get n
 Similarly, if you set too restrictive of a Renovate `schedule` and the chance of Renovate running on your repo during those hours is low, then you might find your dependency updates regularly skipped.
 For this reason we recommend you allow a time window of at least 3-4 hours in any `schedule`, unless your instance of Renovate is expected to run more frequently than that.
 
-Renovate supports the standard [Cron syntax](https://www.npmjs.com/package/croner#pattern), as well as deprecated support for a subset of [Later syntax](https://github.com/breejs/later).
+Renovate supports the standard [Cron syntax](https://crontab.guru/crontab.5.html), as well as deprecated support for a subset of [Later syntax](https://github.com/breejs/later).
 We recommend you always use Cron syntax, due to its superior testing and robustness.
 Config support questions are no longer accepted for Later syntax problems - you will be recommended to use Cron instead.
 
