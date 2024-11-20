@@ -12,7 +12,7 @@ When Renovate runs on a repository, the final config used is derived from the:
 - Repository config
 
 The above is the order of precedence.
-Later configuration overwrites or merges with earlierones, depending whether the element is marked as "mergeable".
+Later configuration overwrites or merges with earlier ones, depending whether the element is marked as "mergeable".
 
 <!-- prettier-ignore -->
 !!! note
