@@ -49,7 +49,13 @@ export async function updateArtifacts(
       ],
     };
 
-    await exec('gleam deps update', execOptions);
+    // `gleam deps update` with no packages rebuilds the lock file
+    const packagesToUpdate = isLockFileMaintenance
+      ? []
+      : updatedDeps.map((dep) => dep.depName).filter(Boolean);
+
+    const updateCommand = ['gleam deps update', ...packagesToUpdate].join(' ');
+    await exec(updateCommand, execOptions);
     const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
     if (!newLockFileContent) {
       logger.debug(`No ${lockFileName} found`);
