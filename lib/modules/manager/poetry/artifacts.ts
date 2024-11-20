@@ -117,7 +117,10 @@ function getPoetrySources(content: string): PoetrySource[] {
   return sourceArray;
 }
 
-async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
+async function getMatchingHostRule(
+  url: string | undefined,
+  packageFileName: string,
+): Promise<HostRule> {
   const scopedMatch = find({ hostType: PypiDatasource.id, url });
   const hostRule = is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
   if (hostRule) {
@@ -126,7 +129,7 @@ async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
 
   const parsedUrl = parseUrl(url);
   if (!parsedUrl) {
-    logger.once.debug({ url }, 'Failed to parse URL');
+    logger.once.debug({ url, packageFileName }, 'Failed to parse URL');
     return {};
   }
 
@@ -138,7 +141,10 @@ async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
         password: accessToken,
       };
     }
-    logger.once.debug({ url }, 'Could not get Google access token');
+    logger.once.debug(
+      { url, packageFileName },
+      'Could not get Google access token',
+    );
   }
 
   return {};
@@ -146,12 +152,16 @@ async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
 
 async function getSourceCredentialVars(
   pyprojectContent: string,
+  packageFileName: string,
 ): Promise<NodeJS.ProcessEnv> {
   const poetrySources = getPoetrySources(pyprojectContent);
   const envVars: NodeJS.ProcessEnv = {};
 
   for (const source of poetrySources) {
-    const matchingHostRule = await getMatchingHostRule(source.url);
+    const matchingHostRule = await getMatchingHostRule(
+      source.url,
+      packageFileName,
+    );
     const formattedSourceName = source.name
       .replace(regEx(/(\.|-)+/g), '_')
       .toUpperCase();
@@ -215,7 +225,10 @@ export async function updateArtifacts({
       config.constraints?.poetry ??
       getPoetryRequirement(newPackageFileContent, existingLockFileContent);
     const extraEnv = {
-      ...(await getSourceCredentialVars(newPackageFileContent)),
+      ...(await getSourceCredentialVars(
+        newPackageFileContent,
+        packageFileName,
+      )),
       ...getGitEnvironmentVariables(['poetry']),
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
     };
