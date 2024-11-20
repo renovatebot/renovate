@@ -114,6 +114,7 @@ export async function getConfiguredRegistries(
           );
         }
       }
+      // child.name === 'remove' not supported
     }
   }
 
