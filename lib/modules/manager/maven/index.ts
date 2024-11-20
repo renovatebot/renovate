@@ -5,7 +5,7 @@ import * as mavenVersioning from '../../versioning/maven';
 export { extractAllPackageFiles } from './extract';
 export { bumpPackageVersion, updateDependency } from './update';
 
-export const url = 'https://maven.apache.org/index.html';
+export const url = 'https://maven.apache.org';
 export const categories: Category[] = ['java'];
 
 export const defaultConfig = {
