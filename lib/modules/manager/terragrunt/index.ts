@@ -11,7 +11,7 @@ export { extractPackageFile } from './extract';
 
 export const supportsLockFileMaintenance = true;
 
-export const url = 'https://terragrunt.gruntwork.io/docs/';
+export const url = 'https://terragrunt.gruntwork.io/docs';
 export const categories: Category[] = ['iac', 'terraform'];
 
 export const defaultConfig = {

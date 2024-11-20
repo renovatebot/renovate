@@ -6,7 +6,7 @@ export { updateArtifacts } from './artifacts';
 export const supportsLockFileMaintenance = true;
 
 export const displayName = 'vendir';
-export const url = 'https://carvel.dev/vendir/docs/latest/';
+export const url = 'https://carvel.dev/vendir/docs/latest';
 
 export const defaultConfig = {
   commitMessageTopic: 'vendir {{depName}}',

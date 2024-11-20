@@ -5,7 +5,7 @@ export { updateArtifacts } from './artifacts';
 
 export const supportsLockFileMaintenance = true;
 
-export const url = 'https://nix.dev/';
+export const url = 'https://nix.dev';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)flake\\.nix$'],

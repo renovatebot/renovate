@@ -4,7 +4,7 @@ import * as semverVersioning from '../../versioning/semver';
 export { extractPackageFile } from './extract';
 
 export const displayName = 'FVM';
-export const url = 'https://fvm.app/';
+export const url = 'https://fvm.app';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.fvm/fvm_config\\.json$', '(^|/)\\.fvmrc$'],

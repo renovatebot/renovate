@@ -12,7 +12,7 @@ import { systemManifestFileNameRegex } from './common';
 export { extractAllPackageFiles, extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 
-export const url = 'https://fluxcd.io/flux/';
+export const url = 'https://fluxcd.io/flux';
 export const categories: Category[] = ['cd', 'kubernetes'];
 
 export const defaultConfig = {

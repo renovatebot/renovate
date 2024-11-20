@@ -13,7 +13,7 @@ export { updateLockedDependency } from './update-locked';
 
 export const supportsLockFileMaintenance = true;
 
-export const url = 'https://python-poetry.org/docs/';
+export const url = 'https://python-poetry.org/docs';
 export const categories: Category[] = ['python'];
 
 export const defaultConfig = {

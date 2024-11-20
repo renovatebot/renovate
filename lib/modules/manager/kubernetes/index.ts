@@ -4,7 +4,7 @@ import { KubernetesApiDatasource } from '../../datasource/kubernetes-api';
 
 export { extractPackageFile } from './extract';
 
-export const url = 'https://kubernetes.io/docs/';
+export const url = 'https://kubernetes.io/docs';
 export const categories: Category[] = ['kubernetes'];
 
 export const defaultConfig = {

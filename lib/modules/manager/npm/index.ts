@@ -16,7 +16,7 @@ export { updateArtifacts } from './artifacts';
 export const supportsLockFileMaintenance = true;
 
 export const displayName = 'npm';
-export const url = 'https://docs.npmjs.com/';
+export const url = 'https://docs.npmjs.com';
 export const categories: Category[] = ['js'];
 
 export const defaultConfig = {

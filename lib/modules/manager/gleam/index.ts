@@ -5,7 +5,7 @@ export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 export { getRangeStrategy } from './range';
 
-export const url = 'https://gleam.run/documentation/';
+export const url = 'https://gleam.run/documentation';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)gleam.toml$'],

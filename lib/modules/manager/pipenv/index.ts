@@ -6,7 +6,7 @@ export { updateArtifacts } from './artifacts';
 
 export const supportsLockFileMaintenance = true;
 
-export const url = 'https://pipenv.pypa.io/en/latest/';
+export const url = 'https://pipenv.pypa.io/en/latest';
 export const categories: Category[] = ['python'];
 
 export const defaultConfig = {

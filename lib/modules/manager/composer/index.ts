@@ -17,7 +17,7 @@ export {
   updateLockedDependency,
 };
 
-export const url = 'https://getcomposer.org/doc/';
+export const url = 'https://getcomposer.org/doc';
 export const categories: Category[] = ['php'];
 
 export const defaultConfig = {

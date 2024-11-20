@@ -9,7 +9,7 @@ export { extractAllPackageFiles, extractPackageFile } from './extract';
 export { bumpPackageVersion } from './update';
 
 export const displayName = 'sbt';
-export const url = 'https://www.scala-sbt.org/';
+export const url = 'https://www.scala-sbt.org';
 export const categories: Category[] = ['java'];
 
 export const defaultConfig = {

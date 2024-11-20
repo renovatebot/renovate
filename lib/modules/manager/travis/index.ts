@@ -5,7 +5,7 @@ import * as nodeVersioning from '../../versioning/node';
 export { extractPackageFile } from './extract';
 
 export const displayName = 'Travis CI';
-export const url = 'https://docs.travis-ci.com/';
+export const url = 'https://docs.travis-ci.com';
 export const categories: Category[] = ['ci'];
 
 export const defaultConfig = {

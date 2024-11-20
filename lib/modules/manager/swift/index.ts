@@ -6,7 +6,7 @@ export { extractPackageFile } from './extract';
 export { getRangeStrategy } from './range';
 
 export const displayName = 'Swift Package Manager';
-export const url = 'https://www.swift.org/package-manager/';
+export const url = 'https://www.swift.org/package-manager';
 export const categories: Category[] = ['swift'];
 
 export const defaultConfig = {

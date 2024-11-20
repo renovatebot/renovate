@@ -7,7 +7,7 @@ export { extractPackageFile } from './extract';
 
 export const displayName = 'pip Requirements';
 export const url =
-  'https://pip.pypa.io/en/stable/reference/requirements-file-format/';
+  'https://pip.pypa.io/en/stable/reference/requirements-file-format';
 export const categories: Category[] = ['python'];
 
 export const defaultConfig = {

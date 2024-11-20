@@ -6,7 +6,7 @@ export { updateArtifacts } from './artifacts';
 
 export const supportsLockFileMaintenance = true;
 
-export const url = 'https://helmfile.readthedocs.io/';
+export const url = 'https://helmfile.readthedocs.io';
 export const categories: Category[] = ['cd', 'helm', 'kubernetes'];
 
 export const defaultConfig = {

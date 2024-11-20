@@ -8,7 +8,7 @@ export { bumpPackageVersion } from './update';
 export const supportsLockFileMaintenance = true;
 
 export const displayName = 'Helm v3';
-export const url = 'https://helm.sh/docs/';
+export const url = 'https://helm.sh/docs';
 export const categories: Category[] = ['helm', 'kubernetes'];
 
 export const defaultConfig = {

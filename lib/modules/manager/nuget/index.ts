@@ -8,7 +8,7 @@ export { updateArtifacts } from './artifacts';
 export { bumpPackageVersion } from './update';
 
 export const displayName = 'NuGet';
-export const url = 'https://learn.microsoft.com/en-us/nuget/';
+export const url = 'https://learn.microsoft.com/nuget';
 export const categories: Category[] = ['dotnet'];
 
 export const defaultConfig = {

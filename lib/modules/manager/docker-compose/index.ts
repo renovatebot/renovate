@@ -4,7 +4,7 @@ import { extractPackageFile } from './extract';
 
 export { extractPackageFile };
 
-export const url = 'https://docs.docker.com/compose/';
+export const url = 'https://docs.docker.com/compose';
 export const categories: Category[] = ['docker'];
 
 export const defaultConfig = {

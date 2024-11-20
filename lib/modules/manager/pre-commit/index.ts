@@ -3,7 +3,7 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 export { extractPackageFile } from './extract';
 
 export const displayName = 'pre-commit';
-export const url = 'https://pre-commit.com/';
+export const url = 'https://pre-commit.com';
 
 export const defaultConfig = {
   commitMessageTopic: 'pre-commit hook {{depName}}',

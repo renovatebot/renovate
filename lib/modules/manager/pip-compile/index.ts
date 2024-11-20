@@ -9,7 +9,7 @@ export const supportsLockFileMaintenance = true;
 
 export const displayName = 'pip-compile';
 export const url =
-  'https://pip-tools.readthedocs.io/en/latest/cli/pip-compile/';
+  'https://pip-tools.readthedocs.io/en/latest/cli/pip-compile';
 export const categories: Category[] = ['python'];
 
 export const defaultConfig = {

@@ -3,7 +3,7 @@ import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-
 import { GitTagsDatasource } from '../../datasource/git-tags';
 export { extractPackageFile } from './extract';
 
-export const url = 'https://learn.microsoft.com/azure/devops/pipelines/';
+export const url = 'https://learn.microsoft.com/azure/devops/pipelines';
 export const categories: Category[] = ['ci'];
 
 export const defaultConfig = {

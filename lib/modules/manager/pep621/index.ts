@@ -7,7 +7,7 @@ export { updateArtifacts } from './artifacts';
 export const supportsLockFileMaintenance = true;
 
 export const displayName = 'PEP 621';
-export const url = 'https://peps.python.org/pep-0621/';
+export const url = 'https://peps.python.org/pep-0621';
 export const categories: Category[] = ['python'];
 
 export const defaultConfig = {

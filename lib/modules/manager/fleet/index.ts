@@ -6,7 +6,7 @@ import { HelmDatasource } from '../../datasource/helm';
 export { extractPackageFile } from './extract';
 
 export const displayName = 'Rancher Fleet';
-export const url = 'https://fleet.rancher.io/';
+export const url = 'https://fleet.rancher.io';
 export const categories: Category[] = ['cd', 'kubernetes'];
 
 export const defaultConfig = {

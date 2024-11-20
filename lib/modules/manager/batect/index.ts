@@ -4,7 +4,7 @@ import { extractAllPackageFiles, extractPackageFile } from './extract';
 
 export { extractAllPackageFiles, extractPackageFile };
 
-export const url = 'https://batect.dev/docs/';
+export const url = 'https://batect.dev/docs';
 export const categories: Category[] = ['batect'];
 
 export const defaultConfig = {
