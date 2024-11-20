@@ -109,12 +109,13 @@ export function calcLimit(
     `${limitName} of the upgrades present in this branch`,
   );
 
-  let lowestLimit = Number.MAX_SAFE_INTEGER;
   if (hasMultipleLimits(upgrades, limitName)) {
-    logger.warn(
+    logger.once.debug(
       `Branch has multiple ${limitName} limits. The lowest among these will be selected.`,
     );
   }
+
+  let lowestLimit = Number.MAX_SAFE_INTEGER;
   for (const upgrade of upgrades) {
     let limit = upgrade[limitName];
 

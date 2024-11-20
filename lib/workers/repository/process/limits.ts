@@ -11,7 +11,7 @@ export async function getPrHourlyCount(
 ): Promise<number> {
   try {
     const prList = await platform.getPrList();
-    const currentHourStart = DateTime.local().startOf('hour');
+    const currentHourStart = DateTime.local().setZone('utc').startOf('hour');
     logger.debug(
       `Calculating PRs created so far in this hour currentHourStart=${String(currentHourStart)}`,
     );

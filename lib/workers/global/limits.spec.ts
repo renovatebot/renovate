@@ -87,7 +87,7 @@ describe('workers/global/limits', () => {
       const upgrades = partial<BranchUpgradeConfig>([
         {
           prHourlyLimit: 10,
-          branchConcurrentLimit: null as never,
+          branchConcurrentLimit: null,
           prConcurrentLimit: 12,
         },
       ]);
@@ -145,8 +145,8 @@ describe('workers/global/limits', () => {
         },
         {
           prHourlyLimit: 5,
-          branchConcurrentLimit: null as never,
-          prConcurrentLimit: undefined as never,
+          branchConcurrentLimit: null,
+          prConcurrentLimit: undefined,
         },
         {
           prHourlyLimit: 5,
@@ -207,7 +207,7 @@ describe('workers/global/limits', () => {
         },
         {
           prHourlyLimit: 0,
-          branchConcurrentLimit: null as never,
+          branchConcurrentLimit: null,
           prConcurrentLimit: 3,
         },
       ]);
@@ -235,7 +235,7 @@ describe('workers/global/limits', () => {
         },
         {
           prHourlyLimit: 0,
-          branchConcurrentLimit: null as never,
+          branchConcurrentLimit: null,
           prConcurrentLimit: 3,
         },
       ]);
@@ -264,7 +264,7 @@ describe('workers/global/limits', () => {
         },
         {
           prHourlyLimit: 2,
-          branchConcurrentLimit: null as never,
+          branchConcurrentLimit: null,
           prConcurrentLimit: 3,
         },
       ]);
@@ -293,7 +293,7 @@ describe('workers/global/limits', () => {
         },
         {
           prHourlyLimit: 5,
-          branchConcurrentLimit: null as never,
+          branchConcurrentLimit: null,
           prConcurrentLimit: 3,
         },
       ]);
