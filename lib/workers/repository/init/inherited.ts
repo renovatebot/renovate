@@ -93,7 +93,7 @@ export async function mergeInheritedConfig(
       'Found warnings in inherited configuration.',
     );
   }
-  const filteredConfig = removeGlobalConfig(inheritedConfig, true);
+  let filteredConfig = removeGlobalConfig(inheritedConfig, true);
   if (!dequal(inheritedConfig, filteredConfig)) {
     logger.debug(
       { inheritedConfig, filteredConfig },
@@ -105,11 +105,9 @@ export async function mergeInheritedConfig(
     return mergeChildConfig(config, filteredConfig);
   }
 
-  let returnConfig = filteredConfig;
-
   logger.debug('Resolving presets found in inherited config');
   const resolvedConfig = await resolveConfigPresets(
-    returnConfig,
+    filteredConfig,
     config,
     config.ignorePresets,
   );
@@ -130,13 +128,14 @@ export async function mergeInheritedConfig(
     );
   }
 
-  returnConfig = removeGlobalConfig(resolvedConfig, true);
-  if (!dequal(resolvedConfig, returnConfig)) {
+  // remove global config options once again, as resolved presets could have added some
+  filteredConfig = removeGlobalConfig(resolvedConfig, true);
+  if (!dequal(resolvedConfig, filteredConfig)) {
     logger.debug(
-      { inheritedConfig: resolvedConfig, filteredConfig: returnConfig },
+      { inheritedConfig: resolvedConfig, filteredConfig },
       'Removed global config from inherited config presets.',
     );
   }
 
-  return mergeChildConfig(config, returnConfig);
+  return mergeChildConfig(config, filteredConfig);
 }
