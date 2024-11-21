@@ -366,7 +366,7 @@ describe('modules/manager/gomod/update', () => {
 
     it('handles multiline replace update', () => {
       const fileContent = `
-      go 1.18
+      go 1.23
       replace (
         k8s.io/client-go => k8s.io/client-go v0.21.9
       )`;

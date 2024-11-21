@@ -2,7 +2,12 @@ import is from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger } from '../../../../test/util';
-import { parseGradle, parseKotlinSource, parseProps } from './parser';
+import {
+  parseGradle,
+  parseJavaToolchainVersion,
+  parseKotlinSource,
+  parseProps,
+} from './parser';
 import { GRADLE_PLUGINS, REGISTRY_URLS } from './parser/common';
 
 jest.mock('../../../util/fs');
@@ -1106,6 +1111,25 @@ describe('modules/manager/gradle/parser', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('Java language version', () => {
+    it.each`
+      input                                                                            | output
+      ${'java { toolchain { languageVersion = JavaLanguageVersion.of(22) } }'}         | ${'22'}
+      ${'java { toolchain.languageVersion.set(JavaLanguageVersion.of(16)) }'}          | ${'16'}
+      ${'java.toolchain { languageVersion.set(JavaLanguageVersion.of(17)) }'}          | ${'17'}
+      ${'java.toolchain.languageVersion = JavaLanguageVersion.of(21)'}                 | ${'21'}
+      ${'kotlin { jvmToolchain { languageVersion = JavaLanguageVersion.of(17) } }'}    | ${'17'}
+      ${'kotlin { jvmToolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }'} | ${'17'}
+      ${'kotlin.jvmToolchain { languageVersion.set(JavaLanguageVersion.of(8)) }'}      | ${'8'}
+      ${'kotlin { jvmToolchain(11) }'}                                                 | ${'11'}
+      ${'kotlin.jvmToolchain(16)'}                                                     | ${'16'}
+      ${'dependencies { implementation "com.google.protobuf:protobuf-java:2.17.0" }'}  | ${null}
+    `('$input', ({ input, output }) => {
+      const javaLanguageVersion = parseJavaToolchainVersion(input);
+      expect(javaLanguageVersion).toBe(output);
     });
   });
 });

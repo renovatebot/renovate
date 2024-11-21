@@ -37,6 +37,7 @@ env:
   SPARSE_CHECKOUT: |-
     .github/actions/
     data/
+    patches/
     tools/
     package.json
     pnpm-lock.yaml
@@ -683,7 +684,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@72750e92d57f4ec2412af2f4f63f57eafa626bb4 # v3.4.42
+        uses: containerbase/internal-tools@fd19a9e4e99f83adf8ec2529ef1276b626d6785f # v3.4.45
         with:
           command: docker-config
 

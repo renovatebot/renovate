@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import { isValid } from '../../versioning/ruby';
@@ -140,5 +141,58 @@ describe('modules/manager/bundler/extract', () => {
       { depName: 'sfn_my_dep1', currentValue: '"~> 1"' },
       { depName: 'sfn_my_dep2', currentValue: '"~> 1"' },
     ]);
+  });
+
+  it('parses source variable in Gemfile', async () => {
+    const sourceVariableGemfile = codeBlock`
+      foo = 'https://gems.foo.com'
+      bar = 'https://gems.bar.com'
+
+      source foo
+
+      source bar do
+        gem "some_internal_gem"
+      end
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(sourceVariableGemfile);
+    const res = await extractPackageFile(sourceVariableGemfile, 'Gemfile');
+    expect(res).toMatchObject({
+      registryUrls: ['https://gems.foo.com'],
+      deps: [
+        {
+          depName: 'some_internal_gem',
+          registryUrls: ['https://gems.bar.com'],
+        },
+      ],
+    });
+  });
+
+  it('parses inline source in Gemfile', async () => {
+    const sourceInlineGemfile = codeBlock`
+      baz = 'https://gems.baz.com'
+      gem "inline_source_gem", source: 'https://gems.foo.com'
+      gem 'inline_source_gem_with_version', "~> 1", source: 'https://gems.bar.com'
+      gem 'inline_source_gem_with_variable_source', source: baz
+      `;
+    fs.readLocalFile.mockResolvedValueOnce(sourceInlineGemfile);
+    const res = await extractPackageFile(sourceInlineGemfile, 'Gemfile');
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'inline_source_gem',
+          registryUrls: ['https://gems.foo.com'],
+        },
+        {
+          depName: 'inline_source_gem_with_version',
+          currentValue: '"~> 1"',
+          registryUrls: ['https://gems.bar.com'],
+        },
+        {
+          depName: 'inline_source_gem_with_variable_source',
+          registryUrls: ['https://gems.baz.com'],
+        },
+      ],
+    });
   });
 });
