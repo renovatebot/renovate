@@ -25,7 +25,6 @@ export interface GitLabMergeRequest {
   state: string;
   source_branch: string;
   target_branch: string;
-  created_at: string;
   description: string;
   diverged_commits_count: number;
   merge_status: string;
