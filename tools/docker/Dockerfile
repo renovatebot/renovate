@@ -97,7 +97,7 @@ RUN ln -sf /usr/local/renovate/node /bin/node
 
 # ensure default base and cache directories exist.
 RUN mkdir -p /tmp/renovate/cache && \
-    chmod -R 775 /tmp/renovate
+    chmod -R 777 /tmp/renovate
 
 # test
 RUN set -ex; \
