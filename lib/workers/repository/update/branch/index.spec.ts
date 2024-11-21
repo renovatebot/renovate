@@ -1632,7 +1632,7 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo {{{versioning}}}$'],
-        allowPostUpgradeCommandTemplating: true,
+        allowCommandTemplating: true,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1730,7 +1730,7 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^exit 1$'],
-        allowPostUpgradeCommandTemplating: true,
+        allowCommandTemplating: true,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1815,7 +1815,7 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo {{{versioning}}}$'],
-        allowPostUpgradeCommandTemplating: false,
+        allowCommandTemplating: false,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1917,7 +1917,7 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo {{{depName}}}$'],
-        allowPostUpgradeCommandTemplating: true,
+        allowCommandTemplating: true,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -2067,7 +2067,7 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        allowPostUpgradeCommandTemplating: true,
+        allowCommandTemplating: true,
         trustLevel: 'high',
         localDir: '/localDir',
       });

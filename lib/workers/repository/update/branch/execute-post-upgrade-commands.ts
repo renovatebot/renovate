@@ -31,9 +31,7 @@ export async function postUpgradeCommandsExecutor(
   let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
   const artifactErrors = [...(config.artifactErrors ?? [])];
   const allowedCommands = GlobalConfig.get('allowedCommands');
-  const allowPostUpgradeCommandTemplating = GlobalConfig.get(
-    'allowPostUpgradeCommandTemplating',
-  );
+  const allowCommandTemplating = GlobalConfig.get('allowCommandTemplating');
 
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
@@ -65,7 +63,7 @@ export async function postUpgradeCommandsExecutor(
       for (const cmd of commands) {
         if (allowedCommands!.some((pattern) => regEx(pattern).test(cmd))) {
           try {
-            const compiledCmd = allowPostUpgradeCommandTemplating
+            const compiledCmd = allowCommandTemplating
               ? compile(cmd, mergeChildConfig(config, upgrade))
               : cmd;
 

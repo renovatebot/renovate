@@ -107,7 +107,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'allowPostUpgradeCommandTemplating',
+    name: 'allowCommandTemplating',
     description:
       'Set this to `false` to disable template compilation for post-upgrade commands.',
     type: 'boolean',

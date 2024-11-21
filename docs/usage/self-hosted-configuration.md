@@ -17,11 +17,7 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 !!! note
     Config options with `type=string` are always non-mergeable, so `mergeable=false`.
 
-## allowCustomCrateRegistries
-
-## allowPlugins
-
-## allowPostUpgradeCommandTemplating
+## allowCommandTemplating
 
 Let's look at an example of configuring packages with existing Angular migrations.
 
@@ -58,8 +54,14 @@ npm ci --ignore-scripts
 npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
 ```
 
-If you wish to disable templating because of any security or performance concern, you may set `allowPostUpgradeCommandTemplating` to `false`.
+If you wish to disable templating because of any security or performance concern, you may set `allowCommandTemplating` to `false`.
 But before you disable templating completely, try the `allowedCommands` config option to limit what commands are allowed to run.
+
+This configuration option was previously named `allowPostUpgradeCommandTemplating`.
+
+## allowCustomCrateRegistries
+
+## allowPlugins
 
 ## allowScripts
 

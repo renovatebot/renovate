@@ -5,10 +5,10 @@ export class GlobalConfig {
   private static readonly OPTIONS: (keyof RepoGlobalConfig)[] = [
     'allowedCommands',
     'allowedEnv',
+    'allowCommandTemplating',
     'allowCustomCrateRegistries',
     'allowedHeaders',
     'allowPlugins',
-    'allowPostUpgradeCommandTemplating',
     'allowScripts',
     'binarySource',
     'cacheDir',

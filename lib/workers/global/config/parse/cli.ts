@@ -20,6 +20,10 @@ export function getConfig(input: string[]): AllConfig {
   const argv = input
     .map((a) =>
       a
+        .replace(
+          '--allow-post-upgrade-command-templating',
+          '--allow-command-templating',
+        )
         .replace('--allowed-post-upgrade-commands', '--allowed-commands')
         .replace('--endpoints=', '--host-rules=')
         .replace('--expose-env=true', '--trust-level=high')
