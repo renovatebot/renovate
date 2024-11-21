@@ -2947,6 +2947,7 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
+            description: 'a merge request',
             state: 'open',
           },
         ])
@@ -2969,6 +2970,7 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'Draft: foo',
+            description: 'a merge request',
             state: 'open',
           },
         ])
@@ -2991,6 +2993,7 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'WIP: foo',
+            description: 'a merge request',
             state: 'open',
           },
         ])
@@ -3013,6 +3016,7 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
+            description: 'a merge request',
             state: 'open',
             target_branch: 'branch-b',
           },
@@ -3042,6 +3046,7 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
+            description: 'a merge request',
             state: 'open',
           },
         ])
@@ -3073,6 +3078,7 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
+            description: 'a merge request',
             state: 'open',
           },
         ])
@@ -3100,6 +3106,7 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
+            description: 'a merge request',
             state: 'open',
           },
         ])
