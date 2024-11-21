@@ -63,9 +63,9 @@ function mockGenericPackage(opts: MockOpts = {}) {
   }
 
   if (html) {
-    scope.get(`/${packagePath}/index.html`).reply(200, html);
+    scope.get(`/${packagePath}/`).reply(200, html);
   } else if (html === null) {
-    scope.get(`/${packagePath}/index.html`).reply(404);
+    scope.get(`/${packagePath}/`).reply(404);
   }
 
   if (pom) {
@@ -129,7 +129,7 @@ describe('modules/datasource/maven/index', () => {
   it('returns null when metadata is not found', async () => {
     httpMock
       .scope(baseUrl)
-      .get('/org/example/package/index.html')
+      .get('/org/example/package/')
       .reply(404)
       .get('/org/example/package/maven-metadata.xml')
       .reply(404);
@@ -702,6 +702,21 @@ describe('modules/datasource/maven/index', () => {
         .head('/foo/bar/1.2.3/bar-1.2.3.pom')
         .reply(200);
       const releaseOrig: Release = { version: '1.2.3' };
+
+      const res = await postprocessRelease(
+        { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
+        releaseOrig,
+      );
+
+      expect(res).toBe(releaseOrig);
+    });
+
+    it('returns original value for 200 response with versionOrig', async () => {
+      httpMock
+        .scope(MAVEN_REPO)
+        .head('/foo/bar/1.2.3/bar-1.2.3.pom')
+        .reply(200);
+      const releaseOrig: Release = { version: '1.2', versionOrig: '1.2.3' };
 
       const res = await postprocessRelease(
         { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },

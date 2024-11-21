@@ -72,6 +72,7 @@ import type {
   RepoResponse,
 } from './types';
 import { prInfo } from './utils';
+import { DRAFT_PREFIX, DRAFT_PREFIX_DEPRECATED, prInfo } from './utils';
 
 let config: {
   repository: string;
@@ -92,9 +93,6 @@ const defaults = {
 };
 
 export const id = 'gitlab';
-
-const DRAFT_PREFIX = 'Draft: ';
-const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
 
 let draftPrefix = DRAFT_PREFIX;
 
@@ -563,7 +561,7 @@ async function fetchPrList(): Promise<Pr[]> {
     const res = await gitlabApi.getJson<GitLabMergeRequest[]>(urlString, {
       paginate: true,
     });
-    return res.body.map((pr) => massagePr(prInfo(pr)));
+    return res.body.map((pr) => prInfo(pr));
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error fetching PR list');
     if (err.statusCode === 403) {
@@ -786,8 +784,7 @@ export async function getPr(iid: number): Promise<GitlabPr> {
   const mr = await getMR(config.repository, iid);
 
   // Harmonize fields with GitHub
-  const pr: GitlabPr = prInfo(mr);
-  return massagePr(pr);
+  return prInfo(mr);
 }
 
 export async function updatePr({
@@ -932,18 +929,7 @@ export async function findPr({
       return null;
     }
 
-    // return the latest merge request
-    const mr = mrList[0];
-
-    // only pass necessary info
-    const pr: GitlabPr = {
-      sourceBranch: mr.source_branch,
-      number: mr.iid,
-      state: 'open',
-      title: mr.title,
-    };
-
-    return massagePr(pr);
+    return prInfo(mrList[0]);
   }
 
   const prList = await getPrList();

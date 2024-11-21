@@ -110,6 +110,7 @@ export function applyExtractVersion(
       return null;
     }
 
+    release.versionOrig = release.version;
     release.version = version;
     return release;
   });
