@@ -12,10 +12,9 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
     number: mr.iid,
     title: mr.title,
     hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
+    bodyStruct: getPrBodyStruct(mr.description),
 
     ...(mr.target_branch && { targetBranch: mr.target_branch }),
-
-    ...(mr.description && { bodyStruct: getPrBodyStruct(mr.description) }),
 
     ...(mr.head_pipeline?.status && {
       headPipelineStatus: mr.head_pipeline?.status,

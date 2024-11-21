@@ -64,6 +64,9 @@ exports[`modules/platform/gitlab/index createPr(branchName, title, body) uses de
 
 exports[`modules/platform/gitlab/index getBranchPr(branchName) should return the PR object 1`] = `
 {
+  "bodyStruct": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "hasAssignees": false,
   "number": 91,
   "sourceBranch": "some-branch",
@@ -75,6 +78,9 @@ exports[`modules/platform/gitlab/index getBranchPr(branchName) should return the
 
 exports[`modules/platform/gitlab/index getBranchPr(branchName) should strip deprecated draft prefix from title 1`] = `
 {
+  "bodyStruct": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "hasAssignees": false,
   "isDraft": true,
   "number": 91,
@@ -87,6 +93,9 @@ exports[`modules/platform/gitlab/index getBranchPr(branchName) should strip depr
 
 exports[`modules/platform/gitlab/index getBranchPr(branchName) should strip draft prefix from title 1`] = `
 {
+  "bodyStruct": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
   "hasAssignees": false,
   "isDraft": true,
   "number": 91,
