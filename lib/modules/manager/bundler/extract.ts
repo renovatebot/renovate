@@ -169,6 +169,14 @@ export async function extractPackageFile(
         const currentValue = gemMatch.currentValue;
         dep.currentValue = currentValue;
       }
+      if (gemMatch.groups?.registryUrl) {
+        const registryUrl = gemMatch.groups.registryUrl;
+        dep.registryUrls = [registryUrl];
+      }
+      if (gemMatch.groups?.sourceName) {
+        const registryUrl = variables[gemMatch.groups.sourceName];
+        dep.registryUrls = [registryUrl];
+      }
       dep.datasource = RubygemsDatasource.id;
       res.deps.push(dep);
     }
