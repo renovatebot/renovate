@@ -489,9 +489,11 @@ export async function getDependencyInfo(
     'distributionManagement.relocation',
   );
   if (relocation) {
-    const newGroup = relocation.valueWithPath('groupId') ?? dependency.group;
-    const newName = relocation.valueWithPath('artifactId') ?? dependency.name;
-    result.replacementName = newGroup + ':' + newName;
+    const relocationGroup =
+      relocation.valueWithPath('groupId') ?? dependency.group;
+    const relocationName =
+      relocation.valueWithPath('artifactId') ?? dependency.name;
+    result.replacementName = relocationGroup + ':' + relocationName;
     const relocationVersion = relocation.valueWithPath('version');
     result.replacementVersion = relocationVersion ?? version;
     result.deprecationMessage = relocation.valueWithPath('message');
