@@ -664,6 +664,21 @@ describe('modules/datasource/maven/index', () => {
       expect(res).toBe(releaseOrig);
     });
 
+    it('returns original value for 200 response with versionOrig', async () => {
+      httpMock
+        .scope(MAVEN_REPO)
+        .head('/foo/bar/1.2.3/bar-1.2.3.pom')
+        .reply(200);
+      const releaseOrig: Release = { version: '1.2', versionOrig: '1.2.3' };
+
+      const res = await postprocessRelease(
+        { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
+        releaseOrig,
+      );
+
+      expect(res).toBe(releaseOrig);
+    });
+
     it('returns original value for invalid configs', async () => {
       const releaseOrig: Release = { version: '1.2.3' };
       expect(
