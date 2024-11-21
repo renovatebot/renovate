@@ -27,7 +27,7 @@ Let's look at an example of configuring packages with existing Angular migration
 
 ```javascript
 module.exports = {
-  allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
+  allowedCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
 };
 ```
 
@@ -59,9 +59,24 @@ npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dir
 ```
 
 If you wish to disable templating because of any security or performance concern, you may set `allowPostUpgradeCommandTemplating` to `false`.
-But before you disable templating completely, try the `allowedPostUpgradeCommands` config option to limit what commands are allowed to run.
+But before you disable templating completely, try the `allowedCommands` config option to limit what commands are allowed to run.
 
 ## allowScripts
+
+## allowedCommands
+
+A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
+If this list is empty then no tasks will be executed.
+
+For example:
+
+```json
+{
+  "allowedCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
+}
+```
+
+This configuration option was formerly known as `allowedPostUpgradeCommands`.
 
 ## allowedEnv
 
@@ -127,19 +142,6 @@ Or with custom `allowedHeaders`:
 module.exports = {
   allowedHeaders: ['custom-header'],
 };
-```
-
-## allowedPostUpgradeCommands
-
-A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
-If this list is empty then no tasks will be executed.
-
-For example:
-
-```json
-{
-  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
-}
 ```
 
 ## autodiscover

@@ -131,13 +131,13 @@ export interface GlobalOnlyConfig {
 // Config options used within the repository worker, but not user configurable
 // The below should contain config options where globalOnly=true
 export interface RepoGlobalConfig {
+  allowedCommands?: string[];
   allowCustomCrateRegistries?: boolean;
   allowPlugins?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedEnv?: string[];
   allowedHeaders?: string[];
-  allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   cacheDir?: string;
   cacheHardTtlMinutes?: number;
