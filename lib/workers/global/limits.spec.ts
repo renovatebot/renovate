@@ -218,8 +218,8 @@ describe('workers/global/limits', () => {
 
   describe('isLimitReached', () => {
     it('returns false based on concurrent limits', () => {
-      setCount('PullRequests', 1);
-      setCount('HourlyPullRequests', 1);
+      setCount('ConcurrentPRs', 1);
+      setCount('HourlyPRs', 1);
       incCountValue('Branches'); // using incCountValue so it gets test coverage
       const upgrades = partial<BranchUpgradeConfig>([
         {
@@ -242,14 +242,14 @@ describe('workers/global/limits', () => {
         isLimitReached('Branches', partial<BranchConfig>({ upgrades })),
       ).toBe(false);
       expect(
-        isLimitReached('PullRequests', partial<BranchConfig>({ upgrades })),
+        isLimitReached('ConcurrentPRs', partial<BranchConfig>({ upgrades })),
       ).toBe(false);
     });
 
     it('returns true when hourly limit is reached', () => {
       setCount('Branches', 2);
-      setCount('PullRequests', 2);
-      setCount('HourlyPullRequests', 2);
+      setCount('ConcurrentPRs', 2);
+      setCount('HourlyPRs', 2);
       const upgrades = partial<BranchUpgradeConfig>([
         {
           prHourlyLimit: 10,
@@ -271,14 +271,14 @@ describe('workers/global/limits', () => {
         isLimitReached('Branches', partial<BranchConfig>({ upgrades })),
       ).toBe(true);
       expect(
-        isLimitReached('PullRequests', partial<BranchConfig>({ upgrades })),
+        isLimitReached('ConcurrentPRs', partial<BranchConfig>({ upgrades })),
       ).toBe(true);
     });
 
     it('returns true when concurrent limit is reached', () => {
       setCount('Branches', 3);
-      setCount('PullRequests', 3);
-      setCount('HourlyPullRequests', 4);
+      setCount('ConcurrentPRs', 3);
+      setCount('HourlyPRs', 4);
       const upgrades = partial<BranchUpgradeConfig>([
         {
           prHourlyLimit: 10,
@@ -300,7 +300,7 @@ describe('workers/global/limits', () => {
         isLimitReached('Branches', partial<BranchConfig>({ upgrades })),
       ).toBe(true);
       expect(
-        isLimitReached('PullRequests', partial<BranchConfig>({ upgrades })),
+        isLimitReached('ConcurrentPRs', partial<BranchConfig>({ upgrades })),
       ).toBe(true);
     });
   });

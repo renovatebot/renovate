@@ -482,7 +482,7 @@ export async function ensurePr(
       try {
         if (
           !dependencyDashboardCheck &&
-          isLimitReached('PullRequests', prConfig) &&
+          isLimitReached('ConcurrentPRs', prConfig) &&
           !config.isVulnerabilityAlert
         ) {
           logger.debug('Skipping PR - limit reached');
@@ -499,8 +499,8 @@ export async function ensurePr(
           milestone: config.milestone,
         });
 
-        incCountValue('PullRequests');
-        incCountValue('HourlyPullRequests');
+        incCountValue('ConcurrentPRs');
+        incCountValue('HourlyPRs');
         logger.info({ pr: pr?.number, prTitle }, 'PR created');
       } catch (err) {
         logger.debug({ err }, 'Pull request creation error');

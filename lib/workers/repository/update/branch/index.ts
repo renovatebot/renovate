@@ -211,7 +211,7 @@ export async function processBranch(
     }
 
     logger.debug(
-      `Open PR Count: ${counts.get('PullRequests')?.current}, Existing Branch Count: ${counts.get('Branches')?.current}, Hourly PR Count: ${counts.get('HourlyPullRequests')?.current}`,
+      `Open PR Count: ${counts.get('ConcurrentPRs')}, Existing Branch Count: ${counts.get('Branches')}, Hourly PR Count: ${counts.get('HourlyPRs')}`,
     );
 
     if (

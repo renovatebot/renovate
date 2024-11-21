@@ -133,13 +133,13 @@ export async function writeUpdates(
   );
 
   const concurrentPrsCount = await getConcurrentPrsCount(config, branches);
-  setCount('PullRequests', concurrentPrsCount);
+  setCount('ConcurrentPRs', concurrentPrsCount);
 
   const concurrentBranchesCount = await getConcurrentBranchesCount(branches);
   setCount('Branches', concurrentBranchesCount);
 
   const prsThisHourCount = await getPrHourlyCount(config);
-  setCount('HourlyPullRequests', prsThisHourCount);
+  setCount('HourlyPRs', prsThisHourCount);
 
   for (const branch of branches) {
     const { baseBranch, branchName } = branch;

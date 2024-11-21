@@ -28,8 +28,8 @@ export function incLimitedValue(key: Limit, incBy = 1): void {
   });
 }
 
-function handleCommitsLimit(key: Limit): boolean {
-  const limit = limits.get(key);
+function handleCommitsLimit(): boolean {
+  const limit = limits.get('Commits');
   // TODO: fix me?
   // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
   if (!limit || limit.max === null) {
@@ -39,33 +39,28 @@ function handleCommitsLimit(key: Limit): boolean {
   return max - current <= 0;
 }
 
-export type CountName = 'PullRequests' | 'HourlyPullRequests' | 'Branches';
-interface CountValue {
-  current: number;
-}
-type BranchLimitName =
-  | 'prHourlyLimit'
-  | 'branchConcurrentLimit'
-  | 'prConcurrentLimit';
+export type CountName = 'ConcurrentPRs' | 'HourlyPRs' | 'Branches';
 
-export const counts = new Map<CountName, CountValue>();
+type BranchLimitName =
+  | 'branchConcurrentLimit'
+  | 'prConcurrentLimit'
+  | 'prHourlyLimit';
+
+export const counts = new Map<CountName, number>();
 
 export function setCount(key: CountName, val: number): void {
   const count = val;
-  counts.set(key, { current: count });
+  counts.set(key, count);
   logger.debug(`${key} count = ${count}`);
 }
 
 export function incCountValue(key: CountName, incBy = 1): void {
-  const count = counts.get(key) ?? { current: 0 };
-  counts.set(key, {
-    ...count,
-    current: count.current + incBy,
-  });
+  const count = counts.get(key) ?? 0;
+  counts.set(key, count + incBy);
 }
 
 function handleOtherLimits(
-  key: Exclude<CountName, 'HourlyPullRequests'>,
+  key: Exclude<CountName, 'HourlyPRs'>,
   config: BranchConfig,
 ): boolean {
   const limitKey =
@@ -76,11 +71,11 @@ function handleOtherLimits(
   const limitValue = calcLimit(config.upgrades, limitKey);
 
   const hourlyPrCount =
-    counts.get('HourlyPullRequests')?.current ??
+    counts.get('HourlyPRs') ??
     // istanbul ignore next: should not happen
     0;
   const currentCount =
-    counts.get(key)?.current ??
+    counts.get(key) ??
     // istanbul ignore next: should not happen
     0;
 
@@ -179,15 +174,15 @@ export function hasMultipleLimits(
 
 export function isLimitReached(limit: 'Commits'): boolean;
 export function isLimitReached(
-  limit: 'Branches' | 'PullRequests',
+  limit: 'Branches' | 'ConcurrentPRs',
   config: BranchConfig,
 ): boolean;
 export function isLimitReached(
-  limit: 'Commits' | 'Branches' | 'PullRequests',
+  limit: 'Commits' | 'Branches' | 'ConcurrentPRs',
   config?: BranchConfig,
 ): boolean {
   if (limit === 'Commits') {
-    return handleCommitsLimit(limit);
+    return handleCommitsLimit();
   }
 
   if (config) {

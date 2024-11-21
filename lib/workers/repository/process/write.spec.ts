@@ -133,7 +133,7 @@ describe('workers/repository/process/write', () => {
       GlobalConfig.set({ dryRun: 'full' });
       config.baseBranches = ['main', 'dev'];
       await writeUpdates(config, branches);
-      expect(counts.get('Branches')?.current).toBe(1);
+      expect(counts.get('Branches')).toBe(1);
       expect(addMeta).toHaveBeenCalledWith({
         baseBranch: 'main',
         branch: branchName,

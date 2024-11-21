@@ -90,8 +90,8 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(res).toEqual({ type: 'with-pr', pr });
         expect(limits.incCountValue).toHaveBeenCalledTimes(2);
-        expect(limits.incCountValue).toHaveBeenCalledWith('PullRequests');
-        expect(limits.incCountValue).toHaveBeenCalledWith('HourlyPullRequests');
+        expect(limits.incCountValue).toHaveBeenCalledWith('ConcurrentPRs');
+        expect(limits.incCountValue).toHaveBeenCalledWith('HourlyPRs');
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: pr.number, prTitle },
           'PR created',
