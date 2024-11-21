@@ -140,7 +140,7 @@
   },
   "volta": {
     "node": "22.11.0",
-    "pnpm": "9.12.3"
+    "pnpm": "9.13.1"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.687.0",
@@ -203,9 +203,9 @@
     "glob": "11.0.0",
     "global-agent": "3.0.0",
     "good-enough-parser": "1.1.23",
-    "google-auth-library": "9.14.2",
+    "google-auth-library": "9.15.0",
     "got": "11.8.6",
-    "graph-data-structure": "3.5.0",
+    "graph-data-structure": "4.2.0",
     "handlebars": "4.7.8",
     "ignore": "6.0.2",
     "ini": "5.0.0",
@@ -351,7 +351,7 @@
     "typescript": "5.6.3",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@9.12.3",
+  "packageManager": "pnpm@9.13.1",
   "files": [
     "dist",
     "renovate-schema.json"

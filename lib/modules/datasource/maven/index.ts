@@ -254,7 +254,7 @@ export class MavenDatasource extends Datasource {
       { registryUrl, packageName }: PostprocessReleaseConfig,
       { version, versionOrig }: Release,
     ) =>
-      `postprocessRelease:${registryUrl}:${packageName}:${versionOrig ?? version}`,
+      `postprocessRelease:${registryUrl}:${packageName}:${versionOrig ? `${versionOrig}:${version}` : `${version}`}`,
     ttlMinutes: 24 * 60,
   })
   override async postprocessRelease(
