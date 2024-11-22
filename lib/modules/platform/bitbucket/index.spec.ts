@@ -1656,6 +1656,14 @@ describe('modules/platform/bitbucket/index', () => {
 
       expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
     });
+
+    it('converts source links', () => {
+      const prBody = '[source](https://bitbucket.org/foo/bar/tree/HEAD)';
+
+      expect(bitbucket.massageMarkdown(prBody)).toBe(
+        '[source](https://bitbucket.org/foo/bar/src/HEAD)',
+      );
+    });
   });
 
   describe('updatePr()', () => {
