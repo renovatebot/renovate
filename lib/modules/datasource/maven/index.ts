@@ -118,6 +118,7 @@ export class MavenDatasource extends Datasource {
 
   getReleasesFromMap(releaseMap: ReleaseMap): Release[] {
     const releases = Object.values(releaseMap).filter(is.truthy);
+    // istanbul ignore if: will be removed
     if (releases.length) {
       return releases;
     }
