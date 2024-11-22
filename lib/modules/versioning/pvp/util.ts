@@ -29,25 +29,25 @@ export function plusOne(majorOne: number[]): string {
 }
 
 export function compareIntArray(
-  versionIntMajor: number[],
-  otherIntMajor: number[],
+  versionPartsInt: number[],
+  otherPartsInt: number[],
 ): 'lt' | 'eq' | 'gt' {
   for (
     let i = 0;
-    i < Math.min(versionIntMajor.length, otherIntMajor.length);
+    i < Math.min(versionPartsInt.length, otherPartsInt.length);
     i++
   ) {
-    if (versionIntMajor[i] > otherIntMajor[i]) {
+    if (versionPartsInt[i] > otherPartsInt[i]) {
       return 'gt';
     }
-    if (versionIntMajor[i] < otherIntMajor[i]) {
+    if (versionPartsInt[i] < otherPartsInt[i]) {
       return 'lt';
     }
   }
-  if (versionIntMajor.length === otherIntMajor.length) {
+  if (versionPartsInt.length === otherPartsInt.length) {
     return 'eq';
   }
-  if (versionIntMajor.length > otherIntMajor.length) {
+  if (versionPartsInt.length > otherPartsInt.length) {
     return 'gt';
   }
   return 'lt';
