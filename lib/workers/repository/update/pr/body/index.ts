@@ -73,8 +73,8 @@ function massageUpdateMetadata(config: BranchConfig): void {
   });
 }
 
-function getSourceRootPath(sourceUrl: string) {
-  if (sourceUrl.startsWith('https://bitbucket.org/')) {
+function getSourceRootPath(sourceUrl: string | undefined): string {
+  if (sourceUrl?.startsWith('https://bitbucket.org/')) {
     return 'src';
   }
 
