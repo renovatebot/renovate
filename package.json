@@ -140,7 +140,7 @@
   },
   "volta": {
     "node": "22.11.0",
-    "pnpm": "9.13.1"
+    "pnpm": "9.13.2"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.687.0",
@@ -347,11 +347,11 @@
     "tmp-promise": "3.0.3",
     "ts-jest": "29.2.5",
     "ts-node": "10.9.2",
-    "type-fest": "4.26.1",
+    "type-fest": "4.27.0",
     "typescript": "5.6.3",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@9.13.1",
+  "packageManager": "pnpm@9.13.2",
   "files": [
     "dist",
     "renovate-schema.json"

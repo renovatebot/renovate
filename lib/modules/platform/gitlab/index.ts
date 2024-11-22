@@ -76,7 +76,7 @@ import { DRAFT_PREFIX, DRAFT_PREFIX_DEPRECATED, prInfo } from './utils';
 let config: {
   repository: string;
   email: string;
-  prList: any[] | undefined;
+  prList: GitlabPr[] | undefined;
   issueList: GitlabIssue[] | undefined;
   mergeMethod: MergeMethod;
   defaultBranch: string;
@@ -534,18 +534,6 @@ export async function getBranchStatus(
 
 // Pull Request
 
-function massagePr(prToModify: Pr): Pr {
-  const pr = prToModify;
-  if (pr.title.startsWith(DRAFT_PREFIX)) {
-    pr.title = pr.title.substring(DRAFT_PREFIX.length);
-    pr.isDraft = true;
-  } else if (pr.title.startsWith(DRAFT_PREFIX_DEPRECATED)) {
-    pr.title = pr.title.substring(DRAFT_PREFIX_DEPRECATED.length);
-    pr.isDraft = true;
-  }
-  return pr;
-}
-
 async function fetchPrList(): Promise<Pr[]> {
   const searchParams = {
     per_page: '100',
@@ -747,7 +735,7 @@ export async function createPr({
   }
   const description = sanitize(rawDescription);
   logger.debug(`Creating Merge Request: ${title}`);
-  const res = await gitlabApi.postJson<Pr & { iid: number }>(
+  const res = await gitlabApi.postJson<GitLabMergeRequest>(
     `projects/${config.repository}/merge_requests`,
     {
       body: {
@@ -761,21 +749,21 @@ export async function createPr({
       },
     },
   );
-  const pr = res.body;
-  pr.number = pr.iid;
-  pr.sourceBranch = sourceBranch;
+
+  const pr = prInfo(res.body);
+
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
   }
 
   if (platformPrOptions?.autoApprove) {
-    await approvePr(pr.iid);
+    await approvePr(pr.number);
   }
 
-  await tryPrAutomerge(pr.iid, platformPrOptions);
+  await tryPrAutomerge(pr.number, platformPrOptions);
 
-  return massagePr(pr);
+  return pr;
 }
 
 export async function getPr(iid: number): Promise<GitlabPr> {
