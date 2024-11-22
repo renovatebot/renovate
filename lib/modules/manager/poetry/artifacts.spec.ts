@@ -16,7 +16,14 @@ import { updateArtifacts } from '.';
 
 const pyproject1toml = Fixtures.get('pyproject.1.toml');
 const pyproject10toml = Fixtures.get('pyproject.10.toml');
-const pyproject13toml = Fixtures.get('pyproject.13.toml');
+const pyproject13toml = `[[tool.poetry.source]]
+name = "some-gar-repo"
+url = "https://someregion-python.pkg.dev/some-project/some-repo/simple/"
+
+[build-system]
+requires = ["poetry_core>=1.0", "wheel"]
+build-backend = "poetry.masonry.api"
+`;
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
