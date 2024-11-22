@@ -569,6 +569,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>.+)',
     },
   },
+  protoc: {
+    asdfPluginUrl: 'https://github.com/paxosglobal/asdf-protoc.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'protocolbuffers/protobuf',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   pulumi: {
     asdfPluginUrl: 'https://github.com/canha/asdf-pulumi.git',
     config: {
