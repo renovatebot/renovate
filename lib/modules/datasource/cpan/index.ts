@@ -107,8 +107,24 @@ export class CpanDatasource extends Datasource {
           changelogUrl: `https://metacpan.org/dist/${latestDistribution}/changes`,
           homepage: `https://metacpan.org/pod/${packageName}`,
         };
+
+        const latestVersionUrl = joinUrlParts(
+          registryUrl,
+          'v1/module/',
+          packageName,
+        );
+        const latestVersionRes = (
+          await this.http.getJson<MetaCpanApiFile>(latestVersionUrl)
+        ).body;
+        const latestVersion = latestVersionRes.module[0].version;
+
+        if (latestVersion) {
+          result.tags ??= {};
+          result.tags.latest ??= latestVersion;
+        }
       }
     }
+
     return result;
   }
 }

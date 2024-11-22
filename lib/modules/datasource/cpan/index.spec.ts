@@ -63,7 +63,16 @@ describe('modules/datasource/cpan/index', () => {
           (body) =>
             body.query.filtered.filter.and[0].term['module.name'] === 'Plack',
         )
-        .reply(200, Fixtures.get('Plack.json'));
+        .reply(200, Fixtures.get('Plack.json'))
+        .get('/v1/module/Plack')
+        .reply(200, {
+          module: [
+            {
+              name: 'Plack',
+              version: '1.0048',
+            },
+          ],
+        });
       const res = await getPkgReleases({
         datasource: CpanDatasource.id,
         packageName: 'Plack',
@@ -86,6 +95,7 @@ describe('modules/datasource/cpan/index', () => {
         releaseTimestamp: '2020-11-30T00:21:36.000Z',
         version: '1.0048',
       });
+      expect(res?.tags?.latest).toBe('1.0048');
     });
   });
 });
