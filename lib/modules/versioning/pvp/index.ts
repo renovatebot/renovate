@@ -3,12 +3,7 @@ import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { parseRange } from './range';
-import {
-  compareIntArray,
-  extractAllParts,
-  getParts,
-  plusOne,
-} from './util';
+import { compareIntArray, extractAllParts, getParts, plusOne } from './util';
 
 export const id = 'pvp';
 export const displayName = 'Package Versioning Policy (Haskell)';
