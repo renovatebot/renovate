@@ -31,14 +31,12 @@ function massageUpdateMetadata(config: BranchConfig): void {
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
     }
 
-    const sourceRootPath = getSourceRootPath(sourceUrl);
-
     const otherLinks = [];
     if (sourceUrl && (!!sourceDirectory || homepage)) {
       otherLinks.push(
         `[source](${
           sourceDirectory
-            ? joinUrlParts(sourceUrl, sourceRootPath, 'HEAD', sourceDirectory)
+            ? joinUrlParts(sourceUrl, 'tree/HEAD/', sourceDirectory)
             : sourceUrl
         })`,
       );
@@ -57,12 +55,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
     if (sourceUrl) {
       let fullUrl = sourceUrl;
       if (sourceDirectory) {
-        fullUrl = joinUrlParts(
-          sourceUrl,
-          sourceRootPath,
-          'HEAD',
-          sourceDirectory,
-        );
+        fullUrl = joinUrlParts(sourceUrl, 'tree/HEAD/', sourceDirectory);
       }
       references.push(`[source](${fullUrl})`);
     }
@@ -71,14 +64,6 @@ function massageUpdateMetadata(config: BranchConfig): void {
     }
     upgrade.references = references.join(', ');
   });
-}
-
-function getSourceRootPath(sourceUrl: string | undefined): string {
-  if (sourceUrl?.startsWith('https://bitbucket.org/')) {
-    return 'src';
-  }
-
-  return 'tree';
 }
 
 interface PrBodyConfig {
