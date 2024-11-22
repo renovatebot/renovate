@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
+import { normalizePythonDepName } from '../../datasource/pypi/common';
 
 export type PyProject = z.infer<typeof PyProjectSchema>;
 
@@ -65,7 +66,11 @@ const UvSource = z.union([
 
 const UvSchema = z.object({
   'dev-dependencies': DependencyListSchema,
-  sources: LooseRecord(z.string(), UvSource).optional(),
+  sources: LooseRecord(
+    // uv applies the same normalization as for Python dependencies on sources
+    z.string().transform((source) => normalizePythonDepName(source)),
+    UvSource,
+  ).optional(),
 });
 
 export const PyProjectSchema = z.object({
@@ -82,6 +87,13 @@ export const PyProjectSchema = z.object({
       requires: DependencyListSchema,
       'build-backend': z.string().optional(),
     })
+    .optional(),
+  'dependency-groups': z
+    .record(
+      z.string(),
+      // Skip non-string entries, like `{include-group = "typing"}`, as they are not dependencies.
+      LooseArray(z.string()),
+    )
     .optional(),
   tool: z
     .object({

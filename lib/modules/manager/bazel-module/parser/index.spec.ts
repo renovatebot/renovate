@@ -66,6 +66,10 @@ describe('modules/manager/bazel-module/parser/index', () => {
           {
             rule: fragments.string('git_override'),
             module_name: fragments.string('rules_foo'),
+            patches: fragments.array(
+              [fragments.string('//:rules_foo.patch')],
+              true,
+            ),
             commit: fragments.string(
               '6a2c2e22849b3e6b33d5ea9aa72222d4803a986a',
             ),
@@ -102,6 +106,10 @@ describe('modules/manager/bazel-module/parser/index', () => {
           {
             rule: fragments.string('archive_override'),
             module_name: fragments.string('rules_foo'),
+            urls: fragments.array(
+              [fragments.string('https://example.com/archive.tar.gz')],
+              true,
+            ),
           },
           true,
         ),

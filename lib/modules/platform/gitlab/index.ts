@@ -32,7 +32,6 @@ import {
   getQueryString,
   parseUrl,
 } from '../../../util/url';
-import { getPrBodyStruct } from '../pr-body';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -72,12 +71,12 @@ import type {
   MergeMethod,
   RepoResponse,
 } from './types';
-import { prInfo } from './utils';
+import { DRAFT_PREFIX, DRAFT_PREFIX_DEPRECATED, prInfo } from './utils';
 
 let config: {
   repository: string;
   email: string;
-  prList: any[] | undefined;
+  prList: GitlabPr[] | undefined;
   issueList: GitlabIssue[] | undefined;
   mergeMethod: MergeMethod;
   defaultBranch: string;
@@ -93,9 +92,6 @@ const defaults = {
 };
 
 export const id = 'gitlab';
-
-const DRAFT_PREFIX = 'Draft: ';
-const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
 
 let draftPrefix = DRAFT_PREFIX;
 
@@ -538,18 +534,6 @@ export async function getBranchStatus(
 
 // Pull Request
 
-function massagePr(prToModify: Pr): Pr {
-  const pr = prToModify;
-  if (pr.title.startsWith(DRAFT_PREFIX)) {
-    pr.title = pr.title.substring(DRAFT_PREFIX.length);
-    pr.isDraft = true;
-  } else if (pr.title.startsWith(DRAFT_PREFIX_DEPRECATED)) {
-    pr.title = pr.title.substring(DRAFT_PREFIX_DEPRECATED.length);
-    pr.isDraft = true;
-  }
-  return pr;
-}
-
 async function fetchPrList(): Promise<Pr[]> {
   const searchParams = {
     per_page: '100',
@@ -561,24 +545,10 @@ async function fetchPrList(): Promise<Pr[]> {
   const query = getQueryString(searchParams);
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
   try {
-    const res = await gitlabApi.getJson<
-      {
-        iid: number;
-        source_branch: string;
-        title: string;
-        state: string;
-        created_at: string;
-      }[]
-    >(urlString, { paginate: true });
-    return res.body.map((pr) =>
-      massagePr({
-        number: pr.iid,
-        sourceBranch: pr.source_branch,
-        title: pr.title,
-        state: pr.state === 'opened' ? 'open' : pr.state,
-        createdAt: pr.created_at,
-      }),
-    );
+    const res = await gitlabApi.getJson<GitLabMergeRequest[]>(urlString, {
+      paginate: true,
+    });
+    return res.body.map((pr) => prInfo(pr));
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error fetching PR list');
     if (err.statusCode === 403) {
@@ -765,7 +735,7 @@ export async function createPr({
   }
   const description = sanitize(rawDescription);
   logger.debug(`Creating Merge Request: ${title}`);
-  const res = await gitlabApi.postJson<Pr & { iid: number }>(
+  const res = await gitlabApi.postJson<GitLabMergeRequest>(
     `projects/${config.repository}/merge_requests`,
     {
       body: {
@@ -779,21 +749,21 @@ export async function createPr({
       },
     },
   );
-  const pr = res.body;
-  pr.number = pr.iid;
-  pr.sourceBranch = sourceBranch;
+
+  const pr = prInfo(res.body);
+
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
   }
 
   if (platformPrOptions?.autoApprove) {
-    await approvePr(pr.iid);
+    await approvePr(pr.number);
   }
 
-  await tryPrAutomerge(pr.iid, platformPrOptions);
+  await tryPrAutomerge(pr.number, platformPrOptions);
 
-  return massagePr(pr);
+  return pr;
 }
 
 export async function getPr(iid: number): Promise<GitlabPr> {
@@ -801,22 +771,7 @@ export async function getPr(iid: number): Promise<GitlabPr> {
   const mr = await getMR(config.repository, iid);
 
   // Harmonize fields with GitHub
-  const pr: GitlabPr = {
-    sourceBranch: mr.source_branch,
-    targetBranch: mr.target_branch,
-    number: mr.iid,
-    bodyStruct: getPrBodyStruct(mr.description),
-    state: mr.state === 'opened' ? 'open' : mr.state,
-    headPipelineStatus: mr.head_pipeline?.status,
-    headPipelineSha: mr.head_pipeline?.sha,
-    hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
-    reviewers: mr.reviewers?.map(({ username }) => username),
-    title: mr.title,
-    labels: mr.labels,
-    sha: mr.sha,
-  };
-
-  return massagePr(pr);
+  return prInfo(mr);
 }
 
 export async function updatePr({
@@ -981,18 +936,7 @@ export async function findPr({
       return null;
     }
 
-    // return the latest merge request
-    const mr = mrList[0];
-
-    // only pass necessary info
-    const pr: GitlabPr = {
-      sourceBranch: mr.source_branch,
-      number: mr.iid,
-      state: 'open',
-      title: mr.title,
-    };
-
-    return massagePr(pr);
+    return prInfo(mrList[0]);
   }
 
   const prList = await getPrList();

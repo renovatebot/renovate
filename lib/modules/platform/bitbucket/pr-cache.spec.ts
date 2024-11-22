@@ -89,6 +89,55 @@ describe('modules/platform/bitbucket/pr-cache', () => {
     });
   });
 
+  it('resets cache for not matching authors', async () => {
+    cache.platform = {
+      bitbucket: {
+        pullRequestsCache: {
+          items: {
+            '1': prInfo(pr1),
+          },
+          author: 'some-other-author',
+          updated_on: '2020-01-01T00:00:00.000Z',
+        },
+      },
+    };
+
+    httpMock
+      .scope('https://api.bitbucket.org')
+      .get(`/2.0/repositories/some-workspace/some-repo/pullrequests`)
+      .query(true)
+      .reply(200, {
+        values: [pr1],
+      });
+
+    const res = await BitbucketPrCache.getPrs(
+      http,
+      'some-workspace/some-repo',
+      'some-author',
+    );
+
+    expect(res).toMatchObject([
+      {
+        number: 1,
+        title: 'title',
+      },
+    ]);
+    expect(cache).toEqual({
+      httpCache: {},
+      platform: {
+        bitbucket: {
+          pullRequestsCache: {
+            author: 'some-author',
+            items: {
+              '1': prInfo(pr1),
+            },
+            updated_on: '2020-01-01T00:00:00.000Z',
+          },
+        },
+      },
+    });
+  });
+
   it('syncs cache', async () => {
     cache.platform = {
       bitbucket: {

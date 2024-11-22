@@ -3,26 +3,23 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { HostRule } from '../../../../types';
-import { detectPlatform } from '../../../../util/common';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
-import { parseGitUrl } from '../../../../util/git/url';
+import { getGitEnvironmentVariables } from '../../../../util/git/auth';
 import { find } from '../../../../util/host-rules';
 import { Result } from '../../../../util/result';
 import { parseUrl } from '../../../../util/url';
-import { GitRefsDatasource } from '../../../datasource/git-refs';
-import { GitTagsDatasource } from '../../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags';
 import { PypiDatasource } from '../../../datasource/pypi';
+import { getGoogleAuthTokenRaw } from '../../../datasource/util';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types';
-import { type PyProject, type UvGitSource, UvLockfileSchema } from '../schema';
+import { applyGitSource } from '../../util';
+import { type PyProject, UvLockfileSchema } from '../schema';
 import { depTypes, parseDependencyList } from '../utils';
 import type { PyProjectProcessor } from './types';
 
@@ -46,11 +43,14 @@ export class UvProcessor implements PyProjectProcessor {
     // Skip sources that do not make sense to handle (e.g. path).
     if (uv.sources) {
       for (const dep of deps) {
-        if (!dep.depName) {
+        // istanbul ignore if
+        if (!dep.packageName) {
           continue;
         }
 
-        const depSource = uv.sources[dep.depName];
+        // Using `packageName` as it applies PEP 508 normalization, which is
+        // also applied by uv when matching a source to a dependency.
+        const depSource = uv.sources[dep.packageName];
         if (depSource) {
           dep.depType = depTypes.uvSources;
           if ('url' in depSource) {
@@ -60,7 +60,13 @@ export class UvProcessor implements PyProjectProcessor {
           } else if ('workspace' in depSource) {
             dep.skipReason = 'inherited-dependency';
           } else {
-            applyGitSource(dep, depSource);
+            applyGitSource(
+              dep,
+              depSource.git,
+              depSource.rev,
+              depSource.tag,
+              depSource.branch,
+            );
           }
         }
       }
@@ -125,7 +131,8 @@ export class UvProcessor implements PyProjectProcessor {
       };
 
       const extraEnv = {
-        ...getUvExtraIndexUrl(updateArtifact.updatedDeps),
+        ...getGitEnvironmentVariables(['pep621']),
+        ...(await getUvExtraIndexUrl(updateArtifact.updatedDeps)),
       };
       const execOptions: ExecOptions = {
         cwdFile: packageFileName,
@@ -180,38 +187,6 @@ export class UvProcessor implements PyProjectProcessor {
   }
 }
 
-function applyGitSource(dep: PackageDependency, depSource: UvGitSource): void {
-  const { git, rev, tag, branch } = depSource;
-  if (tag) {
-    const platform = detectPlatform(git);
-    if (platform === 'github' || platform === 'gitlab') {
-      dep.datasource =
-        platform === 'github'
-          ? GithubTagsDatasource.id
-          : GitlabTagsDatasource.id;
-      const { protocol, source, full_name } = parseGitUrl(git);
-      dep.registryUrls = [`${protocol}://${source}`];
-      dep.packageName = full_name;
-    } else {
-      dep.datasource = GitTagsDatasource.id;
-      dep.packageName = git;
-    }
-    dep.currentValue = tag;
-    dep.skipReason = undefined;
-  } else if (rev) {
-    dep.datasource = GitRefsDatasource.id;
-    dep.packageName = git;
-    dep.currentDigest = rev;
-    dep.replaceString = rev;
-    dep.skipReason = undefined;
-  } else {
-    dep.datasource = GitRefsDatasource.id;
-    dep.packageName = git;
-    dep.currentValue = branch;
-    dep.skipReason = branch ? 'git-dependency' : 'unspecified-version';
-  }
-}
-
 function generateCMD(updatedDeps: Upgrade[]): string {
   const deps: string[] = [];
 
@@ -242,7 +217,7 @@ function getMatchingHostRule(url: string | undefined): HostRule {
   return find({ hostType: PypiDatasource.id, url });
 }
 
-function getUvExtraIndexUrl(deps: Upgrade[]): NodeJS.ProcessEnv {
+async function getUvExtraIndexUrl(deps: Upgrade[]): Promise<NodeJS.ProcessEnv> {
   const pyPiRegistryUrls = deps
     .filter((dep) => dep.datasource === PypiDatasource.id)
     .map((dep) => dep.registryUrls)
@@ -257,11 +232,21 @@ function getUvExtraIndexUrl(deps: Upgrade[]): NodeJS.ProcessEnv {
     }
 
     const rule = getMatchingHostRule(parsedUrl.toString());
-    if (rule.username) {
-      parsedUrl.username = rule.username;
-    }
-    if (rule.password) {
-      parsedUrl.password = rule.password;
+    if (rule.username || rule.password) {
+      if (rule.username) {
+        parsedUrl.username = rule.username;
+      }
+      if (rule.password) {
+        parsedUrl.password = rule.password;
+      }
+    } else if (parsedUrl.hostname.endsWith('.pkg.dev')) {
+      const accessToken = await getGoogleAuthTokenRaw();
+      if (accessToken) {
+        parsedUrl.username = 'oauth2accesstoken';
+        parsedUrl.password = accessToken;
+      } else {
+        logger.once.debug({ registryUrl }, 'Could not get Google access token');
+      }
     }
 
     extraIndexUrls.push(parsedUrl.toString());
