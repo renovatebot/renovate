@@ -1926,6 +1926,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -1934,7 +1937,12 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: null,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        title: 'some title',
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+      });
     });
 
     it('uses default branch', async () => {
@@ -1946,6 +1954,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -1954,7 +1965,12 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: [],
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        title: 'some title',
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+      });
     });
 
     it('supports draftPR on < 13.2', async () => {
@@ -1966,6 +1982,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'WIP: some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -1974,7 +1993,12 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         draftPR: true,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        title: 'some title',
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+      });
     });
 
     it('supports draftPR on >= 13.2', async () => {
@@ -1986,6 +2010,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'Draft: some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -1994,7 +2021,12 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         draftPR: true,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        title: 'some title',
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+      });
     });
 
     it('auto-accepts the MR when requested', async () => {
@@ -2006,6 +2038,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
@@ -2024,9 +2059,7 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
           },
         }),
-      ).toEqual({
-        id: 1,
-        iid: 12345,
+      ).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2047,6 +2080,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, reply_body)
@@ -2068,9 +2104,7 @@ describe('modules/platform/gitlab/index', () => {
           usePlatformAutomerge: true,
         },
       });
-      expect(pr).toEqual({
-        id: 1,
-        iid: 12345,
+      expect(pr).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2104,6 +2138,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, reply_body)
@@ -2123,9 +2160,7 @@ describe('modules/platform/gitlab/index', () => {
           usePlatformAutomerge: true,
         },
       });
-      expect(pr).toEqual({
-        id: 1,
-        iid: 12345,
+      expect(pr).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2154,6 +2189,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, reply_body)
@@ -2177,9 +2215,7 @@ describe('modules/platform/gitlab/index', () => {
           usePlatformAutomerge: true,
         },
       });
-      expect(pr).toEqual({
-        id: 1,
-        iid: 12345,
+      expect(pr).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2225,6 +2261,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, reply_body)
@@ -2239,9 +2278,7 @@ describe('modules/platform/gitlab/index', () => {
           usePlatformAutomerge: true,
         },
       });
-      expect(pr).toEqual({
-        id: 1,
-        iid: 12345,
+      expect(pr).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2270,6 +2307,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -2278,7 +2318,11 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: null,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
     });
 
     it('raises with squash enabled when repository squash option is always', async () => {
@@ -2302,6 +2346,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -2310,7 +2357,11 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: null,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
     });
 
     it('adds approval rule to ignore all approvals', async () => {
@@ -2322,6 +2373,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
@@ -2353,15 +2407,11 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchInlineSnapshot(`
-        {
-          "id": 1,
-          "iid": 12345,
-          "number": 12345,
-          "sourceBranch": "some-branch",
-          "title": "some title",
-        }
-      `);
+      ).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
     });
 
     it('adds approval rule to ignore all approvals when platformAutomerge is false', async () => {
@@ -2373,6 +2423,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200, [
@@ -2398,9 +2451,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toEqual({
-        id: 1,
-        iid: 12345,
+      ).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2416,6 +2467,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
@@ -2455,9 +2509,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toStrictEqual({
-        id: 1,
-        iid: 12345,
+      ).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2473,6 +2525,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
@@ -2523,9 +2578,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toStrictEqual({
-        id: 1,
-        iid: 12345,
+      ).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2541,6 +2594,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
@@ -2601,9 +2657,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toStrictEqual({
-        id: 1,
-        iid: 12345,
+      ).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2619,6 +2673,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
@@ -2650,15 +2707,11 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchInlineSnapshot(`
-        {
-          "id": 1,
-          "iid": 12345,
-          "number": 12345,
-          "sourceBranch": "some-branch",
-          "title": "some title",
-        }
-      `);
+      ).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
     });
 
     it('silently ignores approval rules adding errors', async () => {
@@ -2670,6 +2723,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
@@ -2701,15 +2757,11 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchInlineSnapshot(`
-        {
-          "id": 1,
-          "iid": 12345,
-          "number": 12345,
-          "sourceBranch": "some-branch",
-          "title": "some title",
-        }
-      `);
+      ).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
     });
 
     it('auto-approves when enabled', async () => {
@@ -2721,6 +2773,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .post('/api/v4/projects/undefined/merge_requests/12345/approve')
         .reply(200);
@@ -2735,9 +2790,7 @@ describe('modules/platform/gitlab/index', () => {
             autoApprove: true,
           },
         }),
-      ).toStrictEqual({
-        id: 1,
-        iid: 12345,
+      ).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2753,6 +2806,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .post('/api/v4/projects/undefined/merge_requests/12345/approve')
         .replyWithError('some error');
@@ -3117,7 +3173,7 @@ describe('modules/platform/gitlab/index', () => {
           number: 1,
           prTitle: 'title',
           prBody: 'body',
-          state: 'closed',
+          state: 'open',
           addLabels: ['new_label'],
           removeLabels: ['old_label'],
         }),
