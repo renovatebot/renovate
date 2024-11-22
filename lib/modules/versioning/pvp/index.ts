@@ -5,8 +5,8 @@ import type { NewValueConfig, VersioningApi } from '../types';
 import { parseRange } from './range';
 import {
   compareIntArray,
-  extractAllComponents,
-  getComponents,
+  extractAllParts,
+  getParts,
   plusOne,
 } from './util';
 
@@ -19,8 +19,8 @@ export const supportedRangeStrategies: RangeStrategy[] = ['auto'];
 const digitsAndDots = regEx(/^[\d.]+$/);
 
 function isGreaterThan(version: string, other: string): boolean {
-  const versionIntMajor = extractAllComponents(version);
-  const otherIntMajor = extractAllComponents(other);
+  const versionIntMajor = extractAllParts(version);
+  const otherIntMajor = extractAllParts(other);
   if (versionIntMajor === null || otherIntMajor === null) {
     return false;
   }
@@ -31,27 +31,27 @@ function getMajor(version: string): number | null {
   // This basically can't be implemented correctly, since
   // 1.1 and 1.10 become equal when converted to float.
   // Consumers should use isSame instead.
-  const components = getComponents(version);
-  if (components === null) {
+  const parts = getParts(version);
+  if (parts === null) {
     return null;
   }
-  return Number(components.major.join('.'));
+  return Number(parts.major.join('.'));
 }
 
 function getMinor(version: string): number | null {
-  const components = getComponents(version);
-  if (components === null || components.minor.length === 0) {
+  const parts = getParts(version);
+  if (parts === null || parts.minor.length === 0) {
     return null;
   }
-  return Number(components.minor.join('.'));
+  return Number(parts.minor.join('.'));
 }
 
 function getPatch(version: string): number | null {
-  const components = getComponents(version);
-  if (components === null || components.patch.length === 0) {
+  const parts = getParts(version);
+  if (parts === null || parts.patch.length === 0) {
     return null;
   }
-  return Number(components.patch[0] + '.' + components.patch.slice(1).join(''));
+  return Number(parts.patch[0] + '.' + parts.patch.slice(1).join(''));
 }
 
 function matches(version: string, range: string): boolean {
@@ -59,9 +59,9 @@ function matches(version: string, range: string): boolean {
   if (parsed === null) {
     return false;
   }
-  const ver = extractAllComponents(version);
-  const lower = extractAllComponents(parsed.lower);
-  const upper = extractAllComponents(parsed.upper);
+  const ver = extractAllParts(version);
+  const lower = extractAllParts(parsed.lower);
+  const upper = extractAllParts(parsed.upper);
   if (ver === null || lower === null || upper === null) {
     return false;
   }
@@ -104,8 +104,8 @@ function isLessThanRange(version: string, range: string): boolean {
   if (parsed === null) {
     return false;
   }
-  const compos = extractAllComponents(version);
-  const lower = extractAllComponents(parsed.lower);
+  const compos = extractAllParts(version);
+  const lower = extractAllParts(parsed.lower);
   if (compos === null || lower === null) {
     return false;
   }
@@ -140,7 +140,7 @@ function getNewValue({
     // the upper bound is already high enough
     return null;
   }
-  const compos = getComponents(newVersion);
+  const compos = getParts(newVersion);
   if (compos === null) {
     return null;
   }
@@ -161,17 +161,17 @@ function isSame(
   a: string,
   b: string,
 ): boolean {
-  const aComponents = getComponents(a);
-  const bComponents = getComponents(b);
-  if (aComponents === null || bComponents === null) {
+  const aParts = getParts(a);
+  const bParts = getParts(b);
+  if (aParts === null || bParts === null) {
     return false;
   }
   if (type === 'major') {
-    return 'eq' === compareIntArray(aComponents.major, bComponents.major);
+    return 'eq' === compareIntArray(aParts.major, bParts.major);
   } else if (type === 'minor') {
-    return 'eq' === compareIntArray(aComponents.minor, bComponents.minor);
+    return 'eq' === compareIntArray(aParts.minor, bParts.minor);
   } else {
-    return 'eq' === compareIntArray(aComponents.patch, bComponents.patch);
+    return 'eq' === compareIntArray(aParts.patch, bParts.patch);
   }
 }
 
@@ -181,10 +181,10 @@ function subset(subRange: string, superRange: string): boolean | undefined {
   if (sub === null || sup === null) {
     return undefined;
   }
-  const subLower = extractAllComponents(sub.lower);
-  const subUpper = extractAllComponents(sub.upper);
-  const supLower = extractAllComponents(sup.lower);
-  const supUpper = extractAllComponents(sup.upper);
+  const subLower = extractAllParts(sub.lower);
+  const subUpper = extractAllParts(sub.upper);
+  const supLower = extractAllParts(sup.lower);
+  const supUpper = extractAllParts(sup.upper);
   if (
     subLower === null ||
     subUpper === null ||
@@ -207,7 +207,7 @@ function isVersion(maybeRange: string | undefined | null): boolean {
 }
 
 function isValid(ver: string): boolean {
-  return extractAllComponents(ver) !== null || parseRange(ver) !== null;
+  return extractAllParts(ver) !== null || parseRange(ver) !== null;
 }
 
 function isSingleVersion(range: string): boolean {
@@ -216,12 +216,12 @@ function isSingleVersion(range: string): boolean {
 }
 
 function equals(a: string, b: string): boolean {
-  const aComponents = extractAllComponents(a);
-  const bComponents = extractAllComponents(b);
-  if (aComponents === null || bComponents === null) {
+  const aParts = extractAllParts(a);
+  const bParts = extractAllParts(b);
+  if (aParts === null || bParts === null) {
     return false;
   }
-  return 'eq' === compareIntArray(aComponents, bComponents);
+  return 'eq' === compareIntArray(aParts, bParts);
 }
 
 function sortVersions(a: string, b: string): number {

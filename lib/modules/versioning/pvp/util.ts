@@ -1,10 +1,9 @@
-import type { Components } from './types';
+import type { Parts } from './types';
 
-export function extractAllComponents(version: string): number[] | null {
-  const versionMajor = version.split('.');
-  const versionIntMajor = versionMajor.map((x) => parseInt(x, 10));
+export function extractAllParts(version: string): number[] | null {
+  const parts = version.split('.').map((x) => parseInt(x, 10));
   const ret: number[] = [];
-  for (const l of versionIntMajor) {
+  for (const l of parts) {
     if (l < 0 || !isFinite(l)) {
       return null;
     }
@@ -13,8 +12,8 @@ export function extractAllComponents(version: string): number[] | null {
   return ret;
 }
 
-export function getComponents(splitOne: string): Components | null {
-  const c = extractAllComponents(splitOne);
+export function getParts(splitOne: string): Parts | null {
+  const c = extractAllParts(splitOne);
   if (c === null) {
     return null;
   }

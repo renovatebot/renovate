@@ -1,11 +1,11 @@
 [Package Versioning Policy](https://pvp.haskell.org/) is used with Haskell.
-It's like semver, except that the first _two_ components are parts of the major
+It's like semver, except that the first _two_ parts are of the major
 version. That is, in `A.B.C`:
 
 - `A.B`: major version
 - `C`: minor
 
-The remaining components are all considered parts of the patch version, and
+The remaining parts are all considered of the patch version, and
 they will be concatenated to form a `number`, i.e. IEEE 754 double. This means
 that both `0.0.0.0.1` and `0.0.0.0.10` have patch version `0.1`.
 
