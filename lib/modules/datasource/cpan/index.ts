@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { joinUrlParts } from '../../../util/url';
 import * as perlVersioning from '../../versioning/perl';
@@ -108,19 +109,23 @@ export class CpanDatasource extends Datasource {
           homepage: `https://metacpan.org/pod/${packageName}`,
         };
 
-        const latestVersionUrl = joinUrlParts(
-          registryUrl,
-          'v1/module/',
-          packageName,
-        );
-        const latestVersionRes = (
-          await this.http.getJson<MetaCpanApiFile>(latestVersionUrl)
-        ).body;
-        const latestVersion = latestVersionRes.module[0].version;
+        try {
+          const latestVersionUrl = joinUrlParts(
+            registryUrl,
+            'v1/module/',
+            packageName,
+          );
+          const latestVersionRes = (
+            await this.http.getJson<MetaCpanApiFile>(latestVersionUrl)
+          ).body;
+          const latestVersion = latestVersionRes?.module?.[0]?.version;
 
-        if (latestVersion) {
-          result.tags ??= {};
-          result.tags.latest ??= latestVersion;
+          if (latestVersion) {
+            result.tags ??= {};
+            result.tags.latest ??= latestVersion;
+          }
+        } catch {
+          logger.debug(`Error while fetching latest tag for ${packageName}.`);
         }
       }
     }
