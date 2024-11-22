@@ -583,6 +583,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?(details|blockquote)>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
+    .replace(regEx(/\/tree\/HEAD/g), '/src/HEAD')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 }
 
