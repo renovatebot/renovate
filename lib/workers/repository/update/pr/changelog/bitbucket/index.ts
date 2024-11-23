@@ -44,11 +44,16 @@ export async function getReleaseNotesMd(
   const allFiles = rootFiles.filter((f) => f.type === 'commit_file');
 
   const files = allFiles.filter((f) =>
-    changelogFilenameRegex.test(f.path.split('/').pop() ?? ''),
+    changelogFilenameRegex.test(getFilenameFromPath(f.path)),
   );
 
   const changelogFile = files
-    .sort((a, b) => compareChangelogFilePath(a.path, b.path))
+    .sort((a, b) =>
+      compareChangelogFilePath(
+        getFilenameFromPath(a.path),
+        getFilenameFromPath(b.path),
+      ),
+    )
     .shift();
   if (is.nullOrUndefined(changelogFile)) {
     logger.trace('no changelog file found');
@@ -74,6 +79,10 @@ export async function getReleaseNotesMd(
 
   const changelogMd = `${fileRes.body}\n#\n##`;
   return { changelogFile: changelogFile.path, changelogMd };
+}
+
+function getFilenameFromPath(filePath: string): string {
+  return filePath.split('/').pop()!;
 }
 
 export function getReleaseList(
