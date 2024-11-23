@@ -55,8 +55,6 @@ const bitbucketHttp = new BitbucketHttp();
 
 const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
-export const BITBUCKET_WEB_ENDPOINT = 'https://bitbucket.org/';
-
 let config: Config = {} as any;
 
 const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };

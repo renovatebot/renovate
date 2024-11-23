@@ -1,7 +1,6 @@
 import type { RenovateConfig } from '../../../../../config/types';
 import type { PrDebugData } from '../../../../../modules/platform';
 import { platform } from '../../../../../modules/platform';
-import { BITBUCKET_WEB_ENDPOINT } from '../../../../../modules/platform/bitbucket';
 import { regEx } from '../../../../../util/regex';
 import { toBase64 } from '../../../../../util/string';
 import * as template from '../../../../../util/template';
@@ -75,7 +74,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
 }
 
 function getSourceRootPath(sourceUrl: string | undefined): string {
-  if (sourceUrl?.startsWith(BITBUCKET_WEB_ENDPOINT)) {
+  if (sourceUrl?.startsWith('https://bitbucket.org/')) {
     return 'src';
   }
 
