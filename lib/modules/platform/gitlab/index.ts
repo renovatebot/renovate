@@ -966,6 +966,10 @@ export async function setBranchStatus({
 }: BranchStatusConfig): Promise<void> {
   // First, get the branch commit SHA
   const branchSha = git.getBranchCommit(branchName);
+  if (!branchSha) {
+    logger.warn('Failed to get the branch commit SHA');
+    return;
+  }
   // Now, check the statuses for that commit
   // TODO: types (#22198)
   const url = `projects/${config.repository}/statuses/${branchSha!}`;
@@ -985,21 +989,29 @@ export async function setBranchStatus({
     options.target_url = targetUrl;
   }
 
-  if (branchSha) {
+  const retryTimes = parseInteger(
+    process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPS,
+    10,
+  );
+
+  for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
     const commitUrl = `projects/${config.repository}/repository/commits/${branchSha}`;
     await gitlabApi
       .getJsonSafe(commitUrl, LastPipelineId)
       .onValue((pipelineId) => {
         options.pipeline_id = pipelineId;
       });
-  }
-
-  try {
+    if (options.pipeline_id !== undefined) {
+      break;
+    }
+    logger.debug(`Pipeline not yet created. Retrying ${attempt}`);
     // give gitlab some time to create pipelines for the sha
     await setTimeout(
       parseInteger(process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
     );
+  }
 
+  try {
     await gitlabApi.postJson(url, { body: options });
 
     // update status cache

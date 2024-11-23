@@ -43,12 +43,12 @@ If set to any value, Renovate will stop using the Docker Hub API (`https://hub.d
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
 
-## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
+## `RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPS`
 
-If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergeable before trying to automerge.
-The formula for the delay between attempts is `RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY * attempt * attempt` milliseconds.
+If set to an positive integer, Renovate will use this as the number of attempts to check branch status before trying to add status check.
+The delay between attempts is `RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY` milliseconds.
 
-Default value: `5` (attempts results in max. 13.75 seconds timeout).
+Default value: `10` (attempts results in max. 10 seconds timeout).
 
 ## `RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY`
 
@@ -57,6 +57,13 @@ Adjust default time (in milliseconds) given to GitLab to create pipelines for a 
 Can be useful for slow-running, self-hosted GitLab instances that don't react fast enough for the default delay to help.
 
 Default value: `1000` (milliseconds).
+
+## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
+
+If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergeable before trying to automerge.
+The formula for the delay between attempts is `RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY * attempt * attempt` milliseconds.
+
+Default value: `5` (attempts results in max. 13.75 seconds timeout).
 
 ## `RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY`
 
