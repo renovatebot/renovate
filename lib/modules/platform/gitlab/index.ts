@@ -991,7 +991,7 @@ export async function setBranchStatus({
 
   const retryTimes = parseInteger(
     process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPS,
-    10,
+    2,
   );
 
   for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
