@@ -9,7 +9,7 @@ import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
 import { coerceString } from '../../../../../util/string';
-import { isHttpUrl } from '../../../../../util/url';
+import { isHttpUrl, joinUrlParts } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as bitbucket from './bitbucket';
 import * as gitea from './gitea';
@@ -359,7 +359,13 @@ export async function getReleaseNotesMd(
             if (word.includes(version) && !isHttpUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
               // TODO: fix url
-              const notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
+              const notesSourceUrl = joinUrlParts(
+                baseUrl,
+                repository,
+                getSourceRootPath(baseUrl),
+                'HEAD',
+                changelogFile,
+              );
               const mdHeadingLink = title
                 .filter((word) => !isHttpUrl(word))
                 .join('-')
@@ -478,4 +484,12 @@ export async function addReleaseNotes(
  */
 export function shouldSkipChangelogMd(repository: string): boolean {
   return repositoriesToSkipMdFetching.includes(repository);
+}
+
+function getSourceRootPath(baseUrl: string): string {
+  if (baseUrl.startsWith('https://bitbucket.org/')) {
+    return 'src';
+  }
+
+  return 'blob';
 }
