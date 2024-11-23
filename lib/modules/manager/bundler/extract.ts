@@ -20,7 +20,7 @@ const gemGitRefsMatchRegex = regEx(
   `^\\s*gem\\s+(['"])(?<depName>[^'"]+)['"]((\\s*,\\s*git:\\s*['"](?<gitUrl>[^'"]+)['"])|(\\s*,\\s*github:\\s*['"](?<repoName>[^'"]+)['"]))(\\s*,\\s*branch:\\s*['"](?<branchName>[^'"]+)['"])?(\\s*,\\s*ref:\\s*['"](?<refName>[^'"]+)['"])?(\\s*,\\s*tag:\\s*['"](?<tagName>[^'"]+)['"])?`,
 );
 const gemMatchRegex = regEx(
-  `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?`,
+  `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?(\\s*,\\s*source:\\s*(['"](?<registryUrl>[^'"]+)['"]|(?<sourceName>[^'"]+)))?`,
 );
 
 export async function extractPackageFile(

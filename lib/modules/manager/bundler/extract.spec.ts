@@ -31,12 +31,6 @@ const sourceBlockWithGroupsGemfile = Fixtures.get(
   'Gemfile.sourceBlockWithGroups',
 );
 
-const gitRefGemfile = codeBlock`
-gem 'foo', git: 'https://github.com/foo/foo', ref: 'fd184883048b922b176939f851338d0a4971a532'
-gem 'bar', git: 'https://github.com/bar/bar', tag: 'v1.0.0'
-gem 'baz', github: 'baz/baz', branch: 'master'
-`;
-
 describe('modules/manager/bundler/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
@@ -203,6 +197,12 @@ describe('modules/manager/bundler/extract', () => {
   });
 
   it('parses git refs in Gemfile', async () => {
+    const gitRefGemfile = codeBlock`
+      gem 'foo', git: 'https://github.com/foo/foo', ref: 'fd184883048b922b176939f851338d0a4971a532'
+      gem 'bar', git: 'https://github.com/bar/bar', tag: 'v1.0.0'
+      gem 'baz', github: 'baz/baz', branch: 'master'
+      `;
+
     fs.readLocalFile.mockResolvedValueOnce(gitRefGemfile);
     const res = await extractPackageFile(gitRefGemfile, 'Gemfile');
     expect(res).toMatchObject({
