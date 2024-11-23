@@ -28,7 +28,7 @@ export async function getReleaseNotesMd(
     repository,
     'src',
     'HEAD',
-    sourceDirectory || '',
+    sourceDirectory ?? '',
   );
 
   const rootFiles = (
@@ -44,7 +44,7 @@ export async function getReleaseNotesMd(
   const allFiles = rootFiles.filter((f) => f.type === 'commit_file');
 
   const files = allFiles.filter((f) =>
-    changelogFilenameRegex.test(f.path.split('/').pop()),
+    changelogFilenameRegex.test(f.path.split('/').pop() ?? ''),
   );
 
   const changelogFile = files
