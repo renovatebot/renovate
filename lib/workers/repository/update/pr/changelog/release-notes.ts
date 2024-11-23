@@ -18,6 +18,7 @@ import * as gitlab from './gitlab';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
+  ChangeLogPlatform,
   ChangeLogProject,
   ChangeLogRelease,
   ChangeLogResult,
@@ -362,7 +363,7 @@ export async function getReleaseNotesMd(
               const notesSourceUrl = joinUrlParts(
                 baseUrl,
                 repository,
-                getSourceRootPath(baseUrl),
+                getSourceRootPath(project.type),
                 'HEAD',
                 changelogFile,
               );
@@ -486,10 +487,11 @@ export function shouldSkipChangelogMd(repository: string): boolean {
   return repositoriesToSkipMdFetching.includes(repository);
 }
 
-function getSourceRootPath(baseUrl: string): string {
-  if (baseUrl.startsWith('https://bitbucket.org/')) {
-    return 'src';
+function getSourceRootPath(type: ChangeLogPlatform): string {
+  switch (type) {
+    case 'bitbucket':
+      return 'src';
+    default:
+      return 'blob';
   }
-
-  return 'blob';
 }
