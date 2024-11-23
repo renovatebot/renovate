@@ -100,7 +100,7 @@ function getNewValue({
     } else {
       newSemver = newSemver.replace(regEx(/~\s*(\d+\.\d+\.\d)/), '~> $1');
     }
-    if (npm.isVersion(newSemver)) {
+    if (npm.isVersion(newSemver) && !newSemver.startsWith('v')) {
       newSemver = `== ${newSemver}`;
     }
   }
