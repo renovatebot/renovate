@@ -972,7 +972,7 @@ export async function setBranchStatus({
   }
   // Now, check the statuses for that commit
   // TODO: types (#22198)
-  const url = `projects/${config.repository}/statuses/${branchSha!}`;
+  const url = `projects/${config.repository}/statuses/${branchSha}`;
   let state = 'success';
   if (renovateState === 'yellow') {
     state = 'pending';
