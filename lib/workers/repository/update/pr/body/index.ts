@@ -1,6 +1,7 @@
 import type { RenovateConfig } from '../../../../../config/types';
 import type { PrDebugData } from '../../../../../modules/platform';
 import { platform } from '../../../../../modules/platform';
+import { BITBUCKET_WEB_ENDPOINT } from '../../../../../modules/platform/bitbucket';
 import { regEx } from '../../../../../util/regex';
 import { toBase64 } from '../../../../../util/string';
 import * as template from '../../../../../util/template';
@@ -31,12 +32,14 @@ function massageUpdateMetadata(config: BranchConfig): void {
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
     }
 
+    const sourceRootPath = getSourceRootPath(sourceUrl);
+
     const otherLinks = [];
     if (sourceUrl && (!!sourceDirectory || homepage)) {
       otherLinks.push(
         `[source](${
           sourceDirectory
-            ? joinUrlParts(sourceUrl, 'tree/HEAD/', sourceDirectory)
+            ? joinUrlParts(sourceUrl, sourceRootPath, 'HEAD', sourceDirectory)
             : sourceUrl
         })`,
       );
@@ -55,7 +58,12 @@ function massageUpdateMetadata(config: BranchConfig): void {
     if (sourceUrl) {
       let fullUrl = sourceUrl;
       if (sourceDirectory) {
-        fullUrl = joinUrlParts(sourceUrl, 'tree/HEAD/', sourceDirectory);
+        fullUrl = joinUrlParts(
+          sourceUrl,
+          sourceRootPath,
+          'HEAD',
+          sourceDirectory,
+        );
       }
       references.push(`[source](${fullUrl})`);
     }
@@ -64,6 +72,14 @@ function massageUpdateMetadata(config: BranchConfig): void {
     }
     upgrade.references = references.join(', ');
   });
+}
+
+function getSourceRootPath(sourceUrl: string | undefined): string {
+  if (sourceUrl?.startsWith(BITBUCKET_WEB_ENDPOINT)) {
+    return 'src';
+  }
+
+  return 'tree';
 }
 
 interface PrBodyConfig {
