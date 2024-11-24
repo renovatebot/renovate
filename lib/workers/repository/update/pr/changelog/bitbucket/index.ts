@@ -27,8 +27,7 @@ export async function getReleaseNotesMd(
     apiBaseUrl,
     '2.0/repositories',
     repository,
-    'src',
-    'HEAD',
+    'src/HEAD',
     sourceDirectory ?? '',
   );
 
