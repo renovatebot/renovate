@@ -13,4 +13,9 @@
   "hammer_backend_redis": {:hex, :hammer_backend_redis, "6.1.5", "344dbbf6610d205760ec37e2848bff2aab5a2de182bb5cdaa72cc2fd19d74535", [:mix], [{:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: false]}], "hexpm", "19c205c8de0e2e5817f2250100281c58e717cb11ff1bb410bf661ee78c24e79b"},
   "public": {:hex, :public, "1.6.14", "344dbbf6610d205760ec37e2848bff2aab5a2de182bb5cdaa72cc2fd19d74535", [:mix], [{:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: false]}], "hexpm", "19c205c8de0e2e5817f2250100281c58e717cb11ff1bb410bf661ee78c24e79b"},
   "a_transient_dependency": {:hex, :a_transient_dependency, "1.6.14", "344dbbf6610d205760ec37e2848bff2aab5a2de182bb5cdaa72cc2fd19d74535", [:mix], [{:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: false]}], "hexpm", "19c205c8de0e2e5817f2250100281c58e717cb11ff1bb410bf661ee78c24e79b"}
+  "basic_dep": {:git, "https://github.com/user/repo.git", "d2a084a3d2f2ab27b76192c71ccf0cfbd9276a5c", []},
+  "branch_dep": {:git, "https://github.com/user/repo.git", "3a9c2168ee9f35642aa378d3dc2a8b8e5265e6c2", [branch: "main"]},
+  "commit_dep": {:git, "https://github.com/user/repo.git", "abc1239d7a49d7b7aea5a31a70431f2db4e67ac0", [ref: "abc123"]},
+  "make_dep": {:git, "https://github.com/user/repo.git", "abc1239d7a49d7b7aea5a31a70431f2db4e67ac0", [ref: "abc123"]},
+  "tag_dep": {:git, "https://github.com/user/repo.git", "7e1ff6c2e62c7708db564f25b4b13944f6df8d4d", [tag: "v1.0.0"]},
 }

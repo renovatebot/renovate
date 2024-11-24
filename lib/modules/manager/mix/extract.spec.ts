@@ -1,11 +1,19 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
+import { codeBlock } from 'common-tags';
+import { fs } from '../../../../test/util';
+import { valid } from 'semver';
+
+jest.mock('../../../util/fs');
+
+const mixExs = Fixtures.get("mix.exs")
+const mixLock = Fixtures.get("mix.lock")
 
 describe('modules/manager/mix/extract', () => {
-  beforeEach(() => {
-    GlobalConfig.set({ localDir: '' });
-  });
+  // beforeEach(() => {
+  //   GlobalConfig.set({ localDir: '' });
+  // });
 
   describe('extractPackageFile()', () => {
     it('returns empty for invalid dependency file', async () => {
@@ -14,7 +22,7 @@ describe('modules/manager/mix/extract', () => {
     });
 
     it('extracts all dependencies when no lockfile', async () => {
-      const res = await extractPackageFile(Fixtures.get('mix.exs'), 'mix.exs');
+      const res = await extractPackageFile(mixExs, 'mix.exs');
       expect(res?.deps).toEqual([
         {
           currentValue: '~> 0.8.1',
@@ -97,8 +105,8 @@ describe('modules/manager/mix/extract', () => {
 
     it('extracts all dependencies and adds the locked version if lockfile present', async () => {
       // allows fetching the sibling mix.lock file
-      GlobalConfig.set({ localDir: 'lib/modules/manager/mix/__fixtures__' });
-      const res = await extractPackageFile(Fixtures.get('mix.exs'), 'mix.exs');
+      fs.readLocalFile.mockResolvedValue(mixLock);
+      const res = await extractPackageFile(mixExs, 'mix.exs');
       expect(res?.deps).toEqual([
         {
           currentValue: '~> 0.8.1',
@@ -190,5 +198,64 @@ describe('modules/manager/mix/extract', () => {
         },
       ]);
     });
+    it('skips git dependencies that are not semver for mix.exs',async()=>{
+
+      const lock = codeBlock`
+     %{
+        "basic_dep": {:git, "https://github.com/user/repo.git", "d2a084a3d2f2ab27b76192c71ccf0cfbd9276a5c", []},
+        "branch_dep": {:git, "https://github.com/user/repo.git", "3a9c2168ee9f35642aa378d3dc2a8b8e5265e6c2", [branch: "main"]},
+        "commit_dep": {:git, "https://github.com/user/repo.git", "abc1239d7a49d7b7aea5a31a70431f2db4e67ac0", [ref: "abc123"]},
+        "make_dep": {:git, "https://github.com/user/repo.git", "abc1239d7a49d7b7aea5a31a70431f2db4e67ac0", [ref: "abc123"]},
+        "non_semver_tag": {:git, "https://github.com/user/repo.git", "7e1ff6c2e62c7708db564f25b4b13944f6df8d4d", [tag: "non-semver-tag]},
+        
+      }
+      `
+
+      fs.readLocalFile.mockResolvedValue(lock);
+      const content = codeBlock`
+      defp deps() do
+        [
+          {:basic_dep, git: "https://github.com/user/repo.git"},
+          {:branch_dep, git: "https://github.com/user/repo.git", branch: "main-not-semver"},
+          {:commit_dep, git: "https://github.com/user/repo.git", ref: "abc123notsemver"},
+          {:make_dep, git: "https://github.com/user/repo.git", ref: "abc123", manager: :make},
+          {:non_semver_tag, git: "https://github.com/user/repo.git", tag: "not-semver-tag"},
+          {:semver_tag, git: "https://github.com/user/repo.git", tag: "v0.1.0"},
+        ]
+      end
+      `
+      const res = (await extractPackageFile(content, 'mix.exs'))!.deps
+      const skipFor = ['basic_dep','branch_dep','commit_dep','make_dep','non_semver_tag']
+      const skipped = res.filter(x=>x.skipReason)
+      expect(skipped).toHaveLength(5)
+      expect(res.every(x=>skipFor.includes(x.depName!)))
+      expect(skipped.every(x=>x.skipReason==='unsupported'))
+      expect(res).toHaveLength(6)
+    } );
+    it('skips git dependencies that are not semver for mix.lock',async()=>{
+      const content = codeBlock`
+     %{
+        "basic_dep": {:git, "https://github.com/user/repo.git", "d2a084a3d2f2ab27b76192c71ccf0cfbd9276a5c", []},
+        "branch_dep": {:git, "https://github.com/user/repo.git", "3a9c2168ee9f35642aa378d3dc2a8b8e5265e6c2", [branch: "main"]},
+        "commit_dep": {:git, "https://github.com/user/repo.git", "abc1239d7a49d7b7aea5a31a70431f2db4e67ac0", [ref: "abc123"]},
+        "make_dep": {:git, "https://github.com/user/repo.git", "abc1239d7a49d7b7aea5a31a70431f2db4e67ac0", [ref: "abc123"]},
+        "non_semver_tag": {:git, "https://github.com/user/repo.git", "7e1ff6c2e62c7708db564f25b4b13944f6df8d4d", [tag: "non-semver-tag]},
+        "semver_tag": {:git, "https://github.com/user/repo.git", "7e1ff6c2e62c7708db564f25b4b13944f6df8d4d", [tag: "v1.0.0"]},
+      }
+      `
+      const res = (await extractPackageFile(content, 'mix.lock'))!.deps
+      const skipFor = ['basic_dep','branch_dep','commit_dep','make_dep','non_semver_tag']
+      const skipped = res.filter(x=>x.skipReason)
+      expect(skipped).toHaveLength(5)
+      expect(res.every(x=>skipFor.includes(x.depName!)))
+      expect(skipped.every(x=>x.skipReason==='unsupported'))
+      expect(res).toHaveLength(6)
+    } );
+    it('things', async ()=>{
+      const x = !!valid("v1.2.3");
+      console.log(x)
+      return x
+    });
   });
+  
 });
