@@ -18,6 +18,7 @@ import type * as _git from '../../../util/git';
 import type { LongCommitSha } from '../../../util/git/types';
 import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
+import { getPrBodyStruct } from '../pr-body';
 
 jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/git');
@@ -3012,6 +3013,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 1,
           source_branch: 'branch-a',
           title: 'title',
+          description: 'body',
           state: 'opened',
         });
       await expect(
@@ -3040,6 +3042,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 1,
           source_branch: 'branch-a',
           title: 'Draft: title',
+          description: 'body',
           state: 'opened',
         });
       await expect(
@@ -3068,6 +3071,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 1,
           source_branch: 'branch-a',
           title: 'WIP: title',
+          description: 'body',
           state: 'opened',
         });
       await expect(
@@ -3097,6 +3101,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 1,
           source_branch: 'branch-a',
           title: 'branch a pr',
+          description: 'body',
           state: 'opened',
           target_branch: 'branch-new',
         });
@@ -3131,6 +3136,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 1,
           source_branch: 'branch-a',
           title: 'title',
+          description: 'body',
           state: 'opened',
         })
         .post('/api/v4/projects/undefined/merge_requests/1/approve')
@@ -3168,6 +3174,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 1,
           source_branch: 'branch-a',
           title: 'title',
+          description: 'a merge requbody',
           state: 'closed',
         });
       await expect(
@@ -3201,6 +3208,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 1,
           source_branch: 'branch-a',
           title: 'title',
+          description: 'body',
           state: 'opened',
         });
       await expect(
@@ -3227,6 +3235,7 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
+            description: 'a merge request',
             state: 'opened',
           },
         ])
@@ -3235,6 +3244,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 1,
           source_branch: 'branch-a',
           title: 'new_title',
+          description: 'body',
           state: 'opened',
         });
       await gitlab.updatePr({
@@ -3245,6 +3255,7 @@ describe('modules/platform/gitlab/index', () => {
       const prList = await gitlab.getPrList();
       const updatedPr = prList.find((pr) => pr.number === 1);
       expect(updatedPr?.title).toBe('new_title');
+      expect(updatedPr?.bodyStruct).toMatchObject(getPrBodyStruct('body'));
     });
   });
 
