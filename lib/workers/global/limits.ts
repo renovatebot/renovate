@@ -59,7 +59,7 @@ export function incCountValue(key: CountName, incBy = 1): void {
   counts.set(key, count + incBy);
 }
 
-function handleOtherLimits(
+function handleConcurrentLimits(
   key: Exclude<CountName, 'HourlyPRs'>,
   config: BranchConfig,
 ): boolean {
@@ -79,16 +79,16 @@ function handleOtherLimits(
     // istanbul ignore next: should not happen
     0;
 
-  // assuming hourly limits will be lesser than concurrent ones as it's only logical
-  if (hourlyLimit === 0 || hourlyPrCount < hourlyLimit) {
-    if (limitValue === 0 || currentCount < limitValue) {
-      return false;
-    }
-
+  // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
+  if (hourlyLimit && hourlyPrCount >= hourlyLimit) {
     return true;
   }
 
-  return true;
+  if (limitValue && currentCount >= limitValue) {
+    return true;
+  }
+
+  return false;
 }
 
 export function calcLimit(
@@ -186,7 +186,7 @@ export function isLimitReached(
   }
 
   if (config) {
-    return handleOtherLimits(limit, config);
+    return handleConcurrentLimits(limit, config);
   }
 
   // istanbul ignore next: should not happen
