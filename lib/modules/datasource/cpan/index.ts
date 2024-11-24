@@ -83,7 +83,7 @@ export class CpanDatasource extends Datasource {
         if (!latestDistribution) {
           latestDistribution = release.distribution;
         }
-        if (release.isLatest) {
+        if (!latestVersion && release.isLatest) {
           latestVersion = release.version;
         }
       }
