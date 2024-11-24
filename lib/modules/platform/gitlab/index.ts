@@ -818,7 +818,7 @@ export async function updatePr({
     )
   ).body;
 
-  const updatedPr: Pr = massagePr(prInfo(updatedPrInfo));
+  const updatedPr: Pr = prInfo(updatedPrInfo);
 
   if (config.prList) {
     const existingIndex = config.prList.findIndex(
