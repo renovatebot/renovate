@@ -7,7 +7,6 @@ import * as packageCache from '../../../../../util/cache/package';
 import type { PackageCacheNamespace } from '../../../../../util/cache/package/types';
 import { memoize } from '../../../../../util/memoize';
 import { regEx } from '../../../../../util/regex';
-import * as template from '../../../../../util/template';
 import { parseUrl, trimSlashes } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { slugifyUrl } from './common';
@@ -76,9 +75,7 @@ export abstract class ChangeLogSource {
     const sourceUrl = config.sourceUrl!;
     const packageName = config.packageName!;
     const depName = config.depName!;
-    const sourceDirectory = config.sourceDirectory
-      ? template.compile(config.sourceDirectory, config)
-      : config.sourceDirectory;
+    const sourceDirectory = config.sourceDirectory;
     const versioningApi = allVersioning.get(versioning);
 
     if (this.shouldSkipPackage(config)) {
