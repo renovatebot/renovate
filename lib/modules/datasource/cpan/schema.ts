@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { LooseArray } from '../../../util/schema-utils';
-import type { Release } from '../types';
+import type { CpanRelease } from './types';
 
 /**
  * https://fastapi.metacpan.org/v1/file/_mapping
@@ -31,7 +31,7 @@ const MetaCpanApiFileSchema = z
       deprecated,
       maturity,
       status,
-    }): (Release & { distribution: string }) | undefined => {
+    }): CpanRelease | undefined => {
       return {
         version: module[0].version,
         distribution,
@@ -56,7 +56,7 @@ export const MetaCpanApiFileSearchResponse = z
       ),
     }),
   })
-  .transform((data): (Release & { distribution: string })[] => {
+  .transform((data): CpanRelease[] => {
     // Extract all hits and filter out ones where _source transformed to undefined
     return data.hits.hits
       .map((hit) => hit._source)
