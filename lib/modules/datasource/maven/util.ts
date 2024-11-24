@@ -493,10 +493,13 @@ export async function getDependencyInfo(
       relocation.valueWithPath('groupId') ?? dependency.group;
     const relocationName =
       relocation.valueWithPath('artifactId') ?? dependency.name;
-    result.replacementName = relocationGroup + ':' + relocationName;
+    result.replacementName = `${relocationGroup}:${relocationName}`;
     const relocationVersion = relocation.valueWithPath('version');
     result.replacementVersion = relocationVersion ?? version;
-    result.deprecationMessage = relocation.valueWithPath('message');
+    const relocationMessage = relocation.valueWithPath('message');
+    if (relocationMessage) {
+      result.deprecationMessage = relocationMessage;
+    }
   }
 
   const groupId = pomContent.valueWithPath('groupId');
