@@ -2,8 +2,9 @@ import { cache } from '../../../util/cache/package/decorator';
 import { joinUrlParts } from '../../../util/url';
 import * as perlVersioning from '../../versioning/perl';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { MetaCpanApiFileSearchResponse } from './schema';
+import type { CpanRelease } from './types';
 
 export class CpanDatasource extends Datasource {
   static readonly id = 'cpan';
@@ -38,7 +39,7 @@ export class CpanDatasource extends Datasource {
     let result: ReleaseResult | null = null;
     const searchUrl = joinUrlParts(registryUrl, 'v1/file/_search');
 
-    let releases: (Release & { distribution: string })[] | null = null;
+    let releases: CpanRelease[] | null = null;
     try {
       const body = {
         query: {
