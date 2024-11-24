@@ -89,7 +89,7 @@ describe('modules/datasource/maven/s3', () => {
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
           },
-          'Dependency lookup authorization failed. Please correct AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars',
+          'Maven S3 lookup error: credentials provider error, check "AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY" variables',
         );
       });
 
@@ -108,7 +108,7 @@ describe('modules/datasource/maven/s3', () => {
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
           },
-          'Dependency lookup failed. Please a correct AWS_REGION env var',
+          'Maven S3 lookup error: missing region, check "AWS_REGION" variable',
         );
       });
 
@@ -127,7 +127,7 @@ describe('modules/datasource/maven/s3', () => {
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
           },
-          'S3 url not found',
+          'Maven S3 lookup error: object not found',
         );
       });
 
@@ -146,7 +146,7 @@ describe('modules/datasource/maven/s3', () => {
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
           },
-          'S3 url not found',
+          'Maven S3 lookup error: object not found',
         );
       });
 
@@ -163,10 +163,10 @@ describe('modules/datasource/maven/s3', () => {
         expect(res).toBeNull();
         expect(logger.debug).toHaveBeenCalledWith(
           {
+            err: expect.objectContaining({ message: 'Unknown error' }),
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
-            message: 'Unknown error',
           },
-          'Unknown S3 download error',
+          'Maven S3 lookup error: unknown error',
         );
       });
 
@@ -178,9 +178,6 @@ describe('modules/datasource/maven/s3', () => {
           })
           .resolvesOnce({});
         expect(await get('org.example:package', baseUrlS3)).toBeNull();
-        expect(logger.debug).toHaveBeenCalledWith(
-          "Expecting Readable response type got 'undefined' type instead",
-        );
       });
     });
   });

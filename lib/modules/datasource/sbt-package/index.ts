@@ -1,5 +1,4 @@
 import * as upath from 'upath';
-import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
@@ -10,8 +9,7 @@ import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { MavenDatasource } from '../maven';
 import { MAVEN_REPO } from '../maven/common';
-import { downloadHttpProtocol } from '../maven/util';
-import { normalizeDate } from '../metadata';
+import { downloadHttpContent, downloadMavenXml } from '../maven/util';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
@@ -88,8 +86,11 @@ export class SbtPackageDatasource extends MavenDatasource {
     let dependencyUrl: string | undefined;
     let packageUrls: string[] | undefined;
     for (const packageRootUrl of packageRootUrls) {
-      const res = await downloadHttpProtocol(this.http, packageRootUrl);
-      if (!res) {
+      const packageRootContent = await downloadHttpContent(
+        this.http,
+        packageRootUrl,
+      );
+      if (!packageRootContent) {
         continue;
       }
 
@@ -103,7 +104,7 @@ export class SbtPackageDatasource extends MavenDatasource {
       dependencyUrl = trimTrailingSlash(packageRootUrl);
 
       const rootPath = new URL(packageRootUrl).pathname;
-      const artifactSubdirs = extractPageLinks(res.body, (href) => {
+      const artifactSubdirs = extractPageLinks(packageRootContent, (href) => {
         const path = href.replace(rootPath, '');
 
         if (
@@ -149,15 +150,15 @@ export class SbtPackageDatasource extends MavenDatasource {
 
     const allVersions = new Set<string>();
     for (const pkgUrl of packageUrls) {
-      const res = await downloadHttpProtocol(this.http, pkgUrl);
+      const packageContent = await downloadHttpContent(this.http, pkgUrl);
       // istanbul ignore if
-      if (!res) {
+      if (!packageContent) {
         invalidPackageUrls.add(pkgUrl);
         continue;
       }
 
       const rootPath = new URL(pkgUrl).pathname;
-      const versions = extractPageLinks(res.body, (href) => {
+      const versions = extractPageLinks(packageContent, (href) => {
         const path = href.replace(rootPath, '');
         if (path.startsWith('.')) {
           return null;
@@ -274,38 +275,41 @@ export class SbtPackageDatasource extends MavenDatasource {
           continue;
         }
 
-        const res = await downloadHttpProtocol(this.http, pomUrl);
-        const content = res?.body;
-        if (!content) {
-          invalidPomFiles.add(pomUrl);
-          continue;
+        const pomFileResult = await downloadMavenXml(this.http, pomUrl);
+        const pomInfoResult = await pomFileResult
+          .transform(async ({ data: pomXml, lastModified }) => {
+            const result: PomInfo = {};
+
+            if (lastModified) {
+              result.releaseTimestamp = lastModified;
+            }
+
+            const homepage = pomXml.valueWithPath('url');
+            if (homepage) {
+              result.homepage = homepage;
+            }
+
+            const sourceUrl = pomXml.valueWithPath('scm.url');
+            if (sourceUrl) {
+              result.sourceUrl = sourceUrl
+                .replace(regEx(/^scm:/), '')
+                .replace(regEx(/^git:/), '')
+                .replace(regEx(/^git@github.com:/), 'https://github.com/')
+                .replace(regEx(/\.git$/), '');
+            }
+
+            await saveCache();
+
+            return result;
+          })
+          .onError(() => {
+            invalidPomFiles.add(pomUrl);
+          });
+
+        const result = pomInfoResult.unwrapOrNull();
+        if (result) {
+          return result;
         }
-
-        const result: PomInfo = {};
-
-        const releaseTimestamp = normalizeDate(res.headers['last-modified']);
-        if (releaseTimestamp) {
-          result.releaseTimestamp = releaseTimestamp;
-        }
-
-        const pomXml = new XmlDocument(content);
-
-        const homepage = pomXml.valueWithPath('url');
-        if (homepage) {
-          result.homepage = homepage;
-        }
-
-        const sourceUrl = pomXml.valueWithPath('scm.url');
-        if (sourceUrl) {
-          result.sourceUrl = sourceUrl
-            .replace(regEx(/^scm:/), '')
-            .replace(regEx(/^git:/), '')
-            .replace(regEx(/^git@github.com:/), 'https://github.com/')
-            .replace(regEx(/\.git$/), '');
-        }
-
-        await saveCache();
-        return result;
       }
     }
 

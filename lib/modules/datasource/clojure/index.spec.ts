@@ -229,8 +229,8 @@ describe('modules/datasource/clojure/index', () => {
     mockGenericPackage({ pom });
 
     httpMock
-      .scope('https://repo.maven.apache.org')
-      .get('/maven2/org/example/package/maven-metadata.xml')
+      .scope('https://repo.maven.apache.org/maven2')
+      .get('/org/example/package/maven-metadata.xml')
       .reply(200, '###');
 
     const { sourceUrl } = (await get())!;

@@ -6,6 +6,7 @@ import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { Result } from '../../../util/result';
 import { ensureTrailingSlash } from '../../../util/url';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
@@ -22,9 +23,9 @@ import type {
 import { MAVEN_REPO } from './common';
 import type { MavenDependency, ReleaseMap } from './types';
 import {
-  checkResource,
   createUrlForDependencyPom,
   downloadHttpProtocol,
+  downloadMaven,
   downloadMavenXml,
   getDependencyInfo,
   getDependencyParts,
@@ -101,27 +102,29 @@ export class MavenDatasource extends Datasource {
       return cachedVersions;
     }
 
-    const { isCacheable, xml: mavenMetadata } = await downloadMavenXml(
-      this.http,
-      metadataUrl,
-    );
-    if (!mavenMetadata) {
-      return {};
-    }
+    const metadataXmlResult = await downloadMavenXml(this.http, metadataUrl);
 
-    const versions = extractVersions(mavenMetadata);
-    const releaseMap = versions.reduce(
-      (acc, version) => ({ ...acc, [version]: null }),
-      {},
-    );
-    const cachePrivatePackages = GlobalConfig.get(
-      'cachePrivatePackages',
-      false,
-    );
-    if (cachePrivatePackages || isCacheable) {
-      await packageCache.set(cacheNamespace, cacheKey, releaseMap, 30);
-    }
-    return releaseMap;
+    return metadataXmlResult
+      .transform(async (value): Promise<ReleaseMap> => {
+        const versions = extractVersions(value.data);
+        const releaseMap = versions.reduce(
+          (acc, version) => ({ ...acc, [version]: null }),
+          {},
+        );
+
+        const cachePrivatePackages = GlobalConfig.get(
+          'cachePrivatePackages',
+          false,
+        );
+
+        if (cachePrivatePackages || value.isCacheable) {
+          await packageCache.set(cacheNamespace, cacheKey, releaseMap, 30);
+        }
+
+        return releaseMap;
+      })
+      .catch((err) => Result.err(new Error(err.type)))
+      .unwrapOrThrow();
   }
 
   async addReleasesFromIndexPage(
@@ -144,9 +147,10 @@ export class MavenDatasource extends Datasource {
       let retryEarlier = false;
       try {
         const indexUrl = getMavenUrl(dependency, repoUrl, '');
-        const res = await downloadHttpProtocol(this.http, indexUrl);
+        const indexResult = await downloadHttpProtocol(this.http, indexUrl);
+        const res = indexResult.transform(({ data }) => data).unwrapOrNull();
         if (res) {
-          for (const line of res.body.split(newlineRegex)) {
+          for (const line of res.split(newlineRegex)) {
             const match = line.trim().match(mavenCentralHtmlVersionRegex);
             if (match) {
               const { version, releaseTimestamp: timestamp } =
@@ -275,17 +279,16 @@ export class MavenDatasource extends Datasource {
     );
 
     const artifactUrl = getMavenUrl(dependency, registryUrl, pomUrl);
+    const fetchResult = await downloadMaven(this.http, artifactUrl);
 
-    const res = await checkResource(this.http, artifactUrl);
+    return fetchResult
+      .transform((res): PostprocessReleaseResult => {
+        if (res.lastModified) {
+          release.releaseTimestamp = res.lastModified;
+        }
 
-    if (res === 'not-found' || res === 'error') {
-      return 'reject';
-    }
-
-    if (is.date(res)) {
-      release.releaseTimestamp = res.toISOString();
-    }
-
-    return release;
+        return release;
+      })
+      .unwrapOrElse('reject');
   }
 }
