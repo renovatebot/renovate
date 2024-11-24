@@ -1,10 +1,9 @@
-import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { joinUrlParts } from '../../../util/url';
 import * as perlVersioning from '../../versioning/perl';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import type { MetaCpanApiFile, MetaCpanApiFileSearchResult } from './types';
+import { MetaCpanApiFileSearchResponse } from './schema';
 
 export class CpanDatasource extends Datasource {
   static readonly id = 'cpan';
@@ -39,7 +38,7 @@ export class CpanDatasource extends Datasource {
     let result: ReleaseResult | null = null;
     const searchUrl = joinUrlParts(registryUrl, 'v1/file/_search');
 
-    let hits: MetaCpanApiFile[] | null = null;
+    let releases: (Release & { distribution: string })[] | null = null;
     try {
       const body = {
         query: {
@@ -61,74 +60,47 @@ export class CpanDatasource extends Datasource {
           'date',
           'deprecated',
           'maturity',
+          'status',
         ],
         sort: [{ date: 'desc' }],
       };
-      const res = await this.http.postJson<MetaCpanApiFileSearchResult>(
-        searchUrl,
-        { body },
-      );
-      hits = res.body?.hits?.hits?.map(({ _source }) => _source);
+
+      releases = (
+        await this.http.postJson(
+          searchUrl,
+          { body },
+          MetaCpanApiFileSearchResponse,
+        )
+      ).body;
     } catch (err) {
       this.handleGenericErrors(err);
     }
 
     let latestDistribution: string | null = null;
-    if (hits) {
-      const releases: Release[] = [];
-      for (const hit of hits) {
-        const {
-          module,
-          distribution,
-          date: releaseTimestamp,
-          deprecated: isDeprecated,
-          maturity,
-        } = hit;
-        const version = module.find(
-          ({ name }) => name === packageName,
-        )?.version;
-        if (version) {
-          // https://metacpan.org/pod/CPAN::DistnameInfo#maturity
-          const isStable = maturity === 'released';
-          releases.push({
-            isDeprecated,
-            isStable,
-            releaseTimestamp,
-            version,
-          });
-
-          if (!latestDistribution) {
-            latestDistribution = distribution;
-          }
+    let latestVersion: string | null = null;
+    if (releases) {
+      for (const release of releases) {
+        if (!latestDistribution) {
+          latestDistribution = release.distribution;
         }
-      }
-      if (releases.length > 0 && latestDistribution) {
-        result = {
-          releases,
-          changelogUrl: `https://metacpan.org/dist/${latestDistribution}/changes`,
-          homepage: `https://metacpan.org/pod/${packageName}`,
-        };
-
-        try {
-          const latestVersionUrl = joinUrlParts(
-            registryUrl,
-            'v1/module/',
-            packageName,
-          );
-          const latestVersionRes = (
-            await this.http.getJson<MetaCpanApiFile>(latestVersionUrl)
-          ).body;
-          const latestVersion = latestVersionRes?.module?.[0]?.version;
-
-          if (latestVersion) {
-            result.tags ??= {};
-            result.tags.latest ??= latestVersion;
-          }
-        } catch {
-          logger.debug(`Error while fetching latest tag for ${packageName}.`);
+        if (release.isLatest) {
+          latestVersion = release.version;
         }
       }
     }
+    if (releases.length > 0 && latestDistribution) {
+      result = {
+        releases,
+        changelogUrl: `https://metacpan.org/dist/${latestDistribution}/changes`,
+        homepage: `https://metacpan.org/pod/${packageName}`,
+      };
+
+      if (latestVersion) {
+        result.tags ??= {};
+        result.tags.latest = latestVersion;
+      }
+    }
+
     return result;
   }
 }
