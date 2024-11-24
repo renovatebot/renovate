@@ -111,7 +111,7 @@ export function cronMatches(
     return false;
   }
 
-  let nextDate: DateTime = DateTime.fromJSDate(nextRun);
+  let nextDate = DateTime.fromJSDate(nextRun);
   if (timezone) {
     nextDate = nextDate.setZone(timezone);
   }
