@@ -36,7 +36,11 @@ function massageUpdateMetadata(config: BranchConfig): void {
       otherLinks.push(
         `[source](${
           sourceDirectory
-            ? joinUrlParts(sourceUrl, 'tree/HEAD/', sourceDirectory)
+            ? joinUrlParts(
+                sourceUrl,
+                'tree/HEAD/',
+                template.compile(sourceDirectory, upgrade),
+              )
             : sourceUrl
         })`,
       );
@@ -55,7 +59,11 @@ function massageUpdateMetadata(config: BranchConfig): void {
     if (sourceUrl) {
       let fullUrl = sourceUrl;
       if (sourceDirectory) {
-        fullUrl = joinUrlParts(sourceUrl, 'tree/HEAD/', sourceDirectory);
+        fullUrl = joinUrlParts(
+          sourceUrl,
+          'tree/HEAD/',
+          template.compile(sourceDirectory, upgrade),
+        );
       }
       references.push(`[source](${fullUrl})`);
     }
