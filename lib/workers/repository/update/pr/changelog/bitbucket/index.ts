@@ -48,9 +48,7 @@ export async function getReleaseNotesMd(
   );
 
   const changelogFile = files
-    .sort((a, b) =>
-      compareChangelogFilePath(path.basename(a.path), path.basename(b.path)),
-    )
+    .sort((a, b) => compareChangelogFilePath(a.path, b.path))
     .shift();
   if (is.nullOrUndefined(changelogFile)) {
     logger.trace('no changelog file found');
