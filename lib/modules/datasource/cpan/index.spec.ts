@@ -63,16 +63,7 @@ describe('modules/datasource/cpan/index', () => {
           (body) =>
             body.query.filtered.filter.and[0].term['module.name'] === 'Plack',
         )
-        .reply(200, Fixtures.get('Plack.json'))
-        .get('/v1/module/Plack')
-        .reply(200, {
-          module: [
-            {
-              name: 'Plack',
-              version: '1.0048',
-            },
-          ],
-        });
+        .reply(200, Fixtures.get('Plack.json'));
       const res = await getPkgReleases({
         datasource: CpanDatasource.id,
         packageName: 'Plack',
