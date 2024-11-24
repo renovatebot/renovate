@@ -245,7 +245,7 @@
                "maturity" : "released",
                "module" : [
                   {
-                     "version" : "1.0039",
+                     "version" : "1.0038",
                      "name" : "Plack"
                   }
                ],
