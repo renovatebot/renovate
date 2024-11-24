@@ -1,5 +1,4 @@
 import cronstrue from 'cronstrue';
-import { logger } from '../../../../../test/util';
 import type { RenovateConfig } from '../../../../config/types';
 import * as schedule from './schedule';
 
@@ -471,17 +470,6 @@ describe('workers/repository/update/branch/schedule', () => {
         jest.setSystemTime(new Date(datetime));
         expect(schedule.isScheduledNow(config)).toBe(expected);
       });
-    });
-
-    it('logs warning if cron schedule is invalid', () => {
-      config.schedule = ['* * * *'];
-      expect(schedule.isScheduledNow(config)).toBeTrue();
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        {
-          message: `CronPattern: invalid configuration format ('* * * *'), exactly five or six space separated parts are required.`,
-        },
-        'Cron schedule * * * * is invalid.',
-      );
     });
   });
 

@@ -18,10 +18,6 @@ function parseCron(scheduleText: string): CronPattern | undefined {
   try {
     return new CronPattern(scheduleText);
   } catch (err) {
-    logger.warn(
-      { message: err.message },
-      `Cron schedule ${scheduleText} is invalid.`,
-    );
     return undefined;
   }
 }
