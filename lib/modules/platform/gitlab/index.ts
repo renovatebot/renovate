@@ -818,7 +818,7 @@ export async function updatePr({
     )
   ).body;
 
-  const updatedPr: Pr = prInfo(updatedPrInfo);
+  const updatedPr = prInfo(updatedPrInfo);
 
   if (config.prList) {
     const existingIndex = config.prList.findIndex(
