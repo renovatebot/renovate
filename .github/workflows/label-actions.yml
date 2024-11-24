@@ -21,3 +21,4 @@ jobs:
       - uses: dessant/label-actions@102faf474a544be75fbaf4df54e73d3c515a0e65 # v4.0.1
         with:
           github-token: ${{ github.token }}
+          exclude-any-issue-labels: ['action-label-check']
