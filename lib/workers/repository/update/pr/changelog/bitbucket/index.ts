@@ -1,3 +1,4 @@
+import path from 'node:path';
 import is from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
@@ -44,15 +45,12 @@ export async function getReleaseNotesMd(
   const allFiles = rootFiles.filter((f) => f.type === 'commit_file');
 
   const files = allFiles.filter((f) =>
-    changelogFilenameRegex.test(getFilenameFromPath(f.path)),
+    changelogFilenameRegex.test(path.basename(f.path)),
   );
 
   const changelogFile = files
     .sort((a, b) =>
-      compareChangelogFilePath(
-        getFilenameFromPath(a.path),
-        getFilenameFromPath(b.path),
-      ),
+      compareChangelogFilePath(path.basename(a.path), path.basename(b.path)),
     )
     .shift();
   if (is.nullOrUndefined(changelogFile)) {
@@ -79,10 +77,6 @@ export async function getReleaseNotesMd(
 
   const changelogMd = `${fileRes.body}\n#\n##`;
   return { changelogFile: changelogFile.path, changelogMd };
-}
-
-function getFilenameFromPath(filePath: string): string {
-  return filePath.split('/').pop()!;
 }
 
 export function getReleaseList(
