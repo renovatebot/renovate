@@ -1187,10 +1187,11 @@ describe('modules/platform/gitlab/index', () => {
       expect(timers.setTimeout.mock.calls[0][0]).toBe(delay);
     });
 
-    it('do RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPS attemps when set', async () => {
+    it('do RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS attemps when set', async () => {
       const delay = 1000;
       const retry = 5;
-      process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPS = String(retry);
+      process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS =
+        String(retry);
 
       const scope = await initRepo();
       scope

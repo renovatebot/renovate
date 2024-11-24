@@ -990,7 +990,7 @@ export async function setBranchStatus({
   }
 
   const retryTimes = parseInteger(
-    process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPS,
+    process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS,
     2,
   );
 
