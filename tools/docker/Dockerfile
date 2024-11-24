@@ -5,19 +5,19 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.7.12@sha256:a193c1b54ac89ff8fa7f923df2ed692586f50afba54f5484ed2043cca8a93560 AS slim-base
+FROM ghcr.io/renovatebot/base-image:9.10.0@sha256:8d2882ef06158bf71a0ac95085582c0bbbf775d51c3ac567639fa718d4dac091 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.7.12-full@sha256:ec2fdc88c130002a1491d9b6c21341a70aa8ae67369291b3d29c75b96b186eb4 AS full-base
+FROM ghcr.io/renovatebot/base-image:9.10.0-full@sha256:d39f9b1f282850a2e397db6c03b6eef0f1e6eb44e984a4f344e05a45ea3bc895 AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.7.12@sha256:a193c1b54ac89ff8fa7f923df2ed692586f50afba54f5484ed2043cca8a93560 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.10.0@sha256:8d2882ef06158bf71a0ac95085582c0bbbf775d51c3ac567639fa718d4dac091 AS build
 
 # We want a specific node version here
 # renovate: datasource=node-version
@@ -97,7 +97,7 @@ RUN ln -sf /usr/local/renovate/node /bin/node
 
 # ensure default base and cache directories exist.
 RUN mkdir -p /tmp/renovate/cache && \
-    chmod -R 775 /tmp/renovate
+    chmod -R 777 /tmp/renovate
 
 # test
 RUN set -ex; \
