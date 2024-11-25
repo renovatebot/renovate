@@ -2464,7 +2464,7 @@ Here's an example config to limit the "noisy" `aws-sdk` package to weekly update
   "packageRules": [
     {
       "matchPackageNames": ["aws-sdk"],
-      "schedule": ["* 21-24 * * 7"]
+      "schedule": ["* 21-23 * * 7"]
     }
   ]
 }

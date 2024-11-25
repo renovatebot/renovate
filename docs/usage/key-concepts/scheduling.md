@@ -99,7 +99,7 @@ Some config examples:
 
 ```json title="Renovate should run outside of common office hours"
 {
-  "schedule": ["* 22-23 * * 1-5", "* 0-4 * * 1-5", "* * * * 6,7"]
+  "schedule": ["* 0-4,22-23 * * 1-5", "* * * * 6,7"]
 }
 ```
 
