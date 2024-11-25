@@ -34,7 +34,7 @@ import {
 import { coerceNumber } from '../../../../util/number';
 import { toMs } from '../../../../util/pretty-time';
 import * as template from '../../../../util/template';
-import { counts, isLimitReached } from '../../../global/limits';
+import { getCount, isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelogs } from '../../changelog';
 import { ensurePr, getPlatformPrOptions } from '../pr';
@@ -211,7 +211,7 @@ export async function processBranch(
     }
 
     logger.debug(
-      `Open PR Count: ${counts.get('ConcurrentPRs')}, Existing Branch Count: ${counts.get('Branches')}, Hourly PR Count: ${counts.get('HourlyPRs')}`,
+      `Open PR Count: ${getCount('ConcurrentPRs')}, Existing Branch Count: ${getCount('Branches')}, Hourly PR Count: ${getCount('HourlyPRs')}`,
     );
 
     if (

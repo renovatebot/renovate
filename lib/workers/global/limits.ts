@@ -48,6 +48,16 @@ type BranchLimitName =
 
 export const counts = new Map<CountName, number>();
 
+export function getCount(key: CountName): number {
+  const count = counts.get(key);
+  // istanbul ignore if: should not happen
+  if (!count) {
+    logger.warn(`Could not compute the count of ${key}, returning zero.`);
+    return 0;
+  }
+  return count;
+}
+
 export function setCount(key: CountName, val: number): void {
   const count = val;
   counts.set(key, count);
@@ -55,7 +65,7 @@ export function setCount(key: CountName, val: number): void {
 }
 
 export function incCountValue(key: CountName, incBy = 1): void {
-  const count = counts.get(key) ?? 0;
+  const count = getCount(key) ?? 0;
   counts.set(key, count + incBy);
 }
 
@@ -70,14 +80,8 @@ function handleConcurrentLimits(
   const hourlyLimit = calcLimit(config.upgrades, 'prHourlyLimit');
   const limitValue = calcLimit(config.upgrades, limitKey);
 
-  const hourlyPrCount =
-    counts.get('HourlyPRs') ??
-    // istanbul ignore next: should not happen
-    0;
-  const currentCount =
-    counts.get(key) ??
-    // istanbul ignore next: should not happen
-    0;
+  const hourlyPrCount = getCount('HourlyPRs');
+  const currentCount = getCount(key);
 
   // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
   if (hourlyLimit && hourlyPrCount >= hourlyLimit) {
