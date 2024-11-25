@@ -2,12 +2,19 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
+import { isVersion } from '../../versioning/semver';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { type ProjectDescriptor, ProjectDescriptorToml } from './schema';
+import {
+  type ProjectDescriptor,
+  ProjectDescriptorToml,
+  isBuildpackByName,
+  isBuildpackByURI,
+} from './schema';
+import { BuildpacksRegistryDatasource } from '../../datasource/buildpacks-registry';
 
 const dockerPrefix = regEx(/^docker:\/?\//);
 const dockerRef = regEx(
@@ -19,6 +26,27 @@ function isDockerRef(ref: string): boolean {
     return true;
   }
   return false;
+}
+const buildpackRegistryPrefix = regEx(/^urn:cnb:registry:/)
+const buildpackRegistryId = regEx(
+  /^[a-z0-9\-.]+\/[a-z0-9\-.]+(?:@(?<version>.+))?$/,
+);
+
+function isBuildpackRegistryId(ref: string | undefined): boolean {
+  if (ref === undefined) {
+    return false;
+  }
+  const bpRegistryMatch = buildpackRegistryId.exec(ref);
+  if (!bpRegistryMatch) {
+    return false;
+  } else if (!bpRegistryMatch.groups?.version) {
+    return true;
+  }
+  return isVersion(bpRegistryMatch.groups.version);
+}
+
+function isBuildpackRegistryRef(ref: string): boolean {
+  return isBuildpackRegistryId(ref) || ref.startsWith('urn:cnb:registry:');
 }
 
 function parseProjectToml(
@@ -49,7 +77,7 @@ export function extractPackageFile(
   if (!descriptor) {
     return null;
   }
-
+  
   if (
     descriptor.io?.buildpacks?.builder &&
     isDockerRef(descriptor.io.buildpacks.builder)
@@ -67,16 +95,16 @@ export function extractPackageFile(
       },
       'Cloud Native Buildpacks builder',
     );
-
+  
     deps.push({ ...dep, commitMessageTopic: 'builder {{depName}}' });
   }
-
+  
   if (
     descriptor.io?.buildpacks?.group &&
     is.array(descriptor.io.buildpacks.group)
   ) {
     for (const group of descriptor.io.buildpacks.group) {
-      if (group.uri && isDockerRef(group.uri)) {
+      if (isBuildpackByURI(group) && isDockerRef(group.uri)) {
         const dep = getDep(
           group.uri.replace(dockerPrefix, ''),
           true,
@@ -90,8 +118,33 @@ export function extractPackageFile(
           },
           'Cloud Native Buildpack',
         );
-
+  
         deps.push(dep);
+      } else if (isBuildpackByURI(group) && isBuildpackRegistryRef(group.uri)) {
+        const dependency = group.uri.replace(buildpackRegistryPrefix, '')
+        
+        if(dependency.includes('@')) {
+          const version = dependency.split('@')[1]
+          const dep: PackageDependency = {
+            datasource: BuildpacksRegistryDatasource.id,
+            currentValue: version,
+            packageName: dependency.split('@')[0],
+            replaceString: `urn:cnb:registry:${dependency}`,
+          };
+          deps.push(dep);
+        }
+      } else if (isBuildpackByName(group)) {
+        const version = group.version;
+
+        if (version) {
+          const dep: PackageDependency = {
+            datasource: BuildpacksRegistryDatasource.id,
+            currentValue: version,
+            packageName: group.id,
+            replaceString: `${version}`,
+          };
+          deps.push(dep);
+        }
       }
     }
   }

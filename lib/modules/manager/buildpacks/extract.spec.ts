@@ -23,6 +23,7 @@ describe('modules/manager/buildpacks/extract', () => {
 [_]
 schema-version = "0.2"
 
+# valid cases
 [io.buildpacks]
 builder = "registry.corp/builder/noble:1.1.1"
 
@@ -36,16 +37,22 @@ uri = "buildpacks/nodejs:3.3.3"
 uri = "example/foo@1.0.0"
 
 [[io.buildpacks.group]]
-uri = "example/registry-cnb"
+uri = "urn:cnb:registry:example/bar@1.2.3"
 
 [[io.buildpacks.group]]
-uri = "urn:cnb:registry:example/foo@1.0.0"
-
-[[io.buildpacks.group]]
-uri = "some-bp@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+uri = "cnbs/some-bp@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 
 [[io.buildpacks.group]]
 uri = "cnbs/some-bp:some-tag@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+
+[[io.buildpacks.group]]
+id = "example/tee"
+version = "2.3.4"
+
+#invalid cases
+
+[[io.buildpacks.group]]
+uri = "example/registry-cnb"
 
 [[io.buildpacks.group]]
 uri = "from=builder:foobar"
@@ -54,10 +61,14 @@ uri = "from=builder:foobar"
 uri = "file://local.oci"
 
 [[io.buildpacks.group]]
-uri = "foo://fake.oci"`,
+uri = "foo://fake.oci"
+
+[[io.buildpacks.group]]
+id = "not/valid"`,
         'project.toml',
         {},
       );
+      expect(res?.deps).toHaveLength(8);
       expect(res?.deps).toEqual([
         {
           autoReplaceStringTemplate:
@@ -85,14 +96,26 @@ uri = "foo://fake.oci"`,
           replaceString: 'buildpacks/nodejs:3.3.3',
         },
         {
+          datasource: 'buildpacks-registry',
+          currentValue: '1.0.0',
+          packageName: 'example/foo',
+          replaceString: 'urn:cnb:registry:example/foo@1.0.0',
+        },
+        {
+          datasource: 'buildpacks-registry',
+          currentValue: '1.2.3',
+          packageName: 'example/bar',
+          replaceString: 'urn:cnb:registry:example/bar@1.2.3',
+        },
+        {
           autoReplaceStringTemplate:
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           currentDigest:
             'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
           datasource: 'docker',
-          depName: 'some-bp',
+          depName: 'cnbs/some-bp',
           replaceString:
-            'some-bp@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            'cnbs/some-bp@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
         },
         {
           autoReplaceStringTemplate:
@@ -104,6 +127,12 @@ uri = "foo://fake.oci"`,
           depName: 'cnbs/some-bp',
           replaceString:
             'cnbs/some-bp:some-tag@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+        },
+        {
+          datasource: 'buildpacks-registry',
+          currentValue: '2.3.4',
+          packageName: 'example/tee',
+          replaceString: '2.3.4',
         },
       ]);
     });
