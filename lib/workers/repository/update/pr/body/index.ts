@@ -33,7 +33,6 @@ function massageUpdateMetadata(config: BranchConfig): void {
     }
 
     let sourceRootPath = 'tree';
-
     if (sourceUrl) {
       const sourcePlatform = detectPlatform(sourceUrl);
       if (sourcePlatform === 'bitbucket') {
