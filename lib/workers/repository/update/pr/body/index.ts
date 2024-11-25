@@ -32,10 +32,13 @@ function massageUpdateMetadata(config: BranchConfig): void {
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
     }
 
-    const sourcePlatform = detectPlatform(sourceUrl);
     let sourceRootPath = 'tree';
-    if (sourcePlatform === 'bitbucket') {
-      sourceRootPath = 'src';
+
+    if (sourceUrl) {
+      const sourcePlatform = detectPlatform(sourceUrl);
+      if (sourcePlatform === 'bitbucket') {
+        sourceRootPath = 'src';
+      }
     }
 
     const otherLinks = [];
