@@ -93,16 +93,16 @@ Some config examples:
 
 ```json title="Renovate should run each day before 4 am"
 {
-  "schedule": ["before 4am"]
+  "schedule": ["* 0-3 * * *"]
 }
 ```
 
 ```json title="Renovate should run outside of common office hours"
 {
   "schedule": [
-    "after 10pm every weekday",
-    "before 5am every weekday",
-    "every weekend"
+    "* 22-23 * * 1-5", // after 10pm every weekday
+    "* 0-4 * * 1-5", // before 5am every weekday
+    "* * * * 6,7" // every weekend
   ]
 }
 ```
@@ -122,7 +122,7 @@ The scheduling feature can be very useful for "noisy" packages that are updated 
   "packageRules": [
     {
       "matchPackageNames": ["aws-sdk"],
-      "schedule": ["after 9pm on sunday"]
+      "schedule": ["* 21-24 * * 7"] // after 9pm on sunday
     }
   ]
 }
