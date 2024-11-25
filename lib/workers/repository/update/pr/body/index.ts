@@ -1,6 +1,7 @@
 import type { RenovateConfig } from '../../../../../config/types';
 import type { PrDebugData } from '../../../../../modules/platform';
 import { platform } from '../../../../../modules/platform';
+import { detectPlatform } from '../../../../../util/common';
 import { regEx } from '../../../../../util/regex';
 import { toBase64 } from '../../../../../util/string';
 import * as template from '../../../../../util/template';
@@ -31,7 +32,11 @@ function massageUpdateMetadata(config: BranchConfig): void {
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
     }
 
-    const sourceRootPath = getSourceRootPath(sourceUrl);
+    const sourcePlatform = detectPlatform(sourceUrl);
+    let sourceRootPath = 'tree';
+    if (sourcePlatform === 'bitbucket') {
+      sourceRootPath = 'src';
+    }
 
     const otherLinks = [];
     if (sourceUrl && (!!sourceDirectory || homepage)) {
@@ -71,14 +76,6 @@ function massageUpdateMetadata(config: BranchConfig): void {
     }
     upgrade.references = references.join(', ');
   });
-}
-
-function getSourceRootPath(sourceUrl: string | undefined): string {
-  if (sourceUrl?.startsWith('https://bitbucket.org/')) {
-    return 'src';
-  }
-
-  return 'tree';
 }
 
 interface PrBodyConfig {
