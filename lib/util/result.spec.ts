@@ -240,9 +240,8 @@ describe('util/result', () => {
       });
 
       it('converts error to Result', () => {
-        const result = Result.err<string>('oops').catch(() =>
-          Result.ok<number>(42),
-        );
+        const error: Result<number, string> = Result.err<string>('oops');
+        const result = error.catch((_err) => Result.ok<number>(42));
         expect(result).toEqual(Result.ok(42));
       });
 
@@ -600,15 +599,15 @@ describe('util/result', () => {
 
     describe('Catch', () => {
       it('converts error to AsyncResult', async () => {
-        const result = await Result.err<string>('oops').catch(() =>
-          AsyncResult.ok(42),
-        );
+        const error: Result<number, string> = Result.err<string>('oops');
+        const result = await error.catch(() => AsyncResult.ok(42));
         expect(result).toEqual(Result.ok(42));
       });
 
       it('converts error to Promise', async () => {
         const fallback = Promise.resolve(Result.ok(42));
-        const result = await Result.err<string>('oops').catch(() => fallback);
+        const error: Result<number, string> = Result.err<string>('oops');
+        const result = await error.catch(() => fallback);
         expect(result).toEqual(Result.ok(42));
       });
 
@@ -619,9 +618,9 @@ describe('util/result', () => {
       });
 
       it('converts AsyncResult error to Result', async () => {
-        const result = await AsyncResult.err<string>('oops').catch(() =>
-          AsyncResult.ok<number>(42),
-        );
+        const error: AsyncResult<number, string> =
+          AsyncResult.err<string>('oops');
+        const result = await error.catch(() => AsyncResult.ok<number>(42));
         expect(result).toEqual(Result.ok(42));
       });
     });

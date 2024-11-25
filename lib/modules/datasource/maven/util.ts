@@ -307,12 +307,8 @@ export function getMavenUrl(
 
 export async function downloadMavenXml(
   http: Http,
-  pkgUrl: URL | null,
+  pkgUrl: URL,
 ): Promise<MavenXml> {
-  if (!pkgUrl) {
-    return {};
-  }
-
   const protocol = pkgUrl.protocol;
 
   if (protocol === 'http:' || protocol === 'https:') {
