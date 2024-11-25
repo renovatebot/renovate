@@ -65,7 +65,7 @@ export function setCount(key: CountName, val: number): void {
 }
 
 export function incCountValue(key: CountName, incBy = 1): void {
-  const count = getCount(key) ?? 0;
+  const count = getCount(key);
   counts.set(key, count + incBy);
 }
 
