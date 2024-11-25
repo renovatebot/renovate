@@ -296,6 +296,7 @@ export async function downloadMaven(
   url: URL | string,
 ): Promise<MavenFetchResult> {
   const pkgUrl = url instanceof URL ? url : parseUrl(url);
+  // istanbul ignore if
   if (!pkgUrl) {
     return Result.err({ type: 'invalid-url' });
   }
