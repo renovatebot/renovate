@@ -118,7 +118,7 @@ The scheduling feature can be very useful for "noisy" packages that are updated 
   "packageRules": [
     {
       "matchPackageNames": ["aws-sdk"],
-      "schedule": ["* 21-24 * * 7"]
+      "schedule": ["* 21-23 * * 7"]
     }
   ]
 }
