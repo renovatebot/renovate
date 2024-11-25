@@ -106,9 +106,9 @@ describe('documentation', () => {
         );
       });
 
-      it('has sub-headers sorted alphabetically', async () => {
-        const parentNames = getParentNames();
-        for (const parentName of parentNames) {
+      test.each([...getParentNames()])(
+        '%s has sub-headers sorted alphabetically',
+        async (parentName: string) => {
           expect(
             await getConfigOptionSubHeaders(
               'configuration-options.md',
@@ -122,8 +122,8 @@ describe('documentation', () => {
               )
             ).sort(),
           );
-        }
-      });
+        },
+      );
     });
 
     describe('docs/usage/self-hosted-configuration.md', () => {
