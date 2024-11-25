@@ -811,10 +811,30 @@ export async function updatePr({
     body.remove_labels = removeLabels;
   }
 
-  await gitlabApi.putJson(
-    `projects/${config.repository}/merge_requests/${iid}`,
-    { body },
-  );
+  const updatedPrInfo = (
+    await gitlabApi.putJson<GitLabMergeRequest>(
+      `projects/${config.repository}/merge_requests/${iid}`,
+      { body },
+    )
+  ).body;
+
+  const updatedPr = prInfo(updatedPrInfo);
+
+  if (config.prList) {
+    const existingIndex = config.prList.findIndex(
+      (pr) => pr.number === updatedPr.number,
+    );
+    // istanbul ignore if: should not happen
+    if (existingIndex === -1) {
+      logger.warn(
+        { pr: updatedPr },
+        'Possible error: Updated PR was not found in the PRs that were returned from getPrList().',
+      );
+      config.prList.push(updatedPr);
+    } else {
+      config.prList[existingIndex] = updatedPr;
+    }
+  }
 
   if (platformPrOptions?.autoApprove) {
     await approvePr(iid);
