@@ -52,10 +52,10 @@ Default value: `5` (attempts results in max. 13.75 seconds timeout).
 
 ## `RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS`
 
-If set to an positive integer, Renovate will use this as the number of attempts to check branch status before trying to add status check.
+If set to a positive integer, Renovate will use this as the number of attempts to check branch status before trying to add a status check.
 The delay between attempts is `RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY` milliseconds.
 
-Default value: `2` (attempts results in max. 2 seconds timeout).
+Default value: `2` (attempts results in maximum 2 seconds timeout).
 
 ## `RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY`
 
