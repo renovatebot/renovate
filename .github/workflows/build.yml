@@ -31,7 +31,7 @@ concurrency:
 env:
   DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
   NODE_VERSION: 22
-  PDM_VERSION: 2.20.1 # renovate: datasource=pypi depName=pdm
+  PDM_VERSION: 2.21.0 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -438,7 +438,7 @@ jobs:
           merge-multiple: true
 
       - name: Codecov
-        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4.6.0
+        uses: codecov/codecov-action@015f24e6818733317a2da2edd6290ab26238649a # v5.0.7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: coverage/lcov
@@ -684,7 +684,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@fd19a9e4e99f83adf8ec2529ef1276b626d6785f # v3.4.45
+        uses: containerbase/internal-tools@31a3e9d4b6ed727e2560431aed392a64e67d7284 # v3.4.47
         with:
           command: docker-config
 
