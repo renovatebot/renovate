@@ -1127,7 +1127,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(res).toBeNull();
     });
 
-    it('handled bitbucket link', async () => {
+    it('handles bitbucket release notes link', async () => {
       httpMock
         .scope('https://api.bitbucket.org')
         .get('/2.0/repositories/some-org/some-repo/src/HEAD?pagelen=100')
@@ -1145,7 +1145,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           gitRef: '1.6.9',
         }),
       );
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         notesSourceUrl:
           'https://bitbucket.org/some-org/some-repo/src/HEAD/CHANGELOG.md',
         url: 'https://bitbucket.org/some-org/some-repo/src/HEAD/CHANGELOG.md#169-fiery-basilisk-2018-02-02',
