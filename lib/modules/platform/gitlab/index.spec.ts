@@ -18,6 +18,7 @@ import type * as _git from '../../../util/git';
 import type { LongCommitSha } from '../../../util/git/types';
 import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
+import { getPrBodyStruct } from '../pr-body';
 
 jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/git');
@@ -3004,11 +3005,17 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'branch-a',
             title: 'branch a pr',
             description: 'a merge request',
-            state: 'open',
+            state: 'opened',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200);
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'title',
+          description: 'body',
+          state: 'opened',
+        });
       await expect(
         gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' }),
       ).toResolve();
@@ -3027,11 +3034,17 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'branch-a',
             title: 'Draft: foo',
             description: 'a merge request',
-            state: 'open',
+            state: 'opened',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200);
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'Draft: title',
+          description: 'body',
+          state: 'opened',
+        });
       await expect(
         gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' }),
       ).toResolve();
@@ -3050,11 +3063,17 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'branch-a',
             title: 'WIP: foo',
             description: 'a merge request',
-            state: 'open',
+            state: 'opened',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200);
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'WIP: title',
+          description: 'body',
+          state: 'opened',
+        });
       await expect(
         gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' }),
       ).toResolve();
@@ -3073,19 +3092,25 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'branch-a',
             title: 'branch a pr',
             description: 'a merge request',
-            state: 'open',
+            state: 'opened',
             target_branch: 'branch-b',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200);
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'branch a pr',
+          description: 'body',
+          state: 'opened',
+          target_branch: 'branch-new',
+        });
       await expect(
         gitlab.updatePr({
           number: 1,
           prTitle: 'title',
           prBody: 'body',
-          state: 'closed',
-          targetBranch: 'branch-b',
+          targetBranch: 'branch-new',
         }),
       ).toResolve();
     });
@@ -3103,11 +3128,17 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'branch-a',
             title: 'branch a pr',
             description: 'a merge request',
-            state: 'open',
+            state: 'opened',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200)
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'title',
+          description: 'body',
+          state: 'opened',
+        })
         .post('/api/v4/projects/undefined/merge_requests/1/approve')
         .reply(200);
       await expect(
@@ -3135,11 +3166,17 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'branch-a',
             title: 'branch a pr',
             description: 'a merge request',
-            state: 'open',
+            state: 'opened',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200);
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'title',
+          description: 'a merge requbody',
+          state: 'closed',
+        });
       await expect(
         gitlab.updatePr({
           number: 1,
@@ -3163,11 +3200,17 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'branch-a',
             title: 'branch a pr',
             description: 'a merge request',
-            state: 'open',
+            state: 'opened',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200);
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'title',
+          description: 'body',
+          state: 'opened',
+        });
       await expect(
         gitlab.updatePr({
           number: 1,
@@ -3178,6 +3221,41 @@ describe('modules/platform/gitlab/index', () => {
           removeLabels: ['old_label'],
         }),
       ).toResolve();
+    });
+
+    it('updates runtime pr list when pr is updated', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch-a',
+            title: 'branch a pr',
+            description: 'a merge request',
+            state: 'opened',
+          },
+        ])
+        .put('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'new_title',
+          description: 'body',
+          state: 'opened',
+        });
+      await gitlab.updatePr({
+        number: 1,
+        prTitle: 'new_title',
+        prBody: 'body',
+      });
+      const prList = await gitlab.getPrList();
+      const updatedPr = prList.find((pr) => pr.number === 1);
+      expect(updatedPr?.title).toBe('new_title');
+      expect(updatedPr?.bodyStruct).toMatchObject(getPrBodyStruct('body'));
     });
   });
 

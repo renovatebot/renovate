@@ -1,3 +1,4 @@
+import path from 'node:path';
 import is from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
@@ -18,15 +19,16 @@ const bitbucketHttp = new BitbucketHttp(id);
 export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
-  _sourceDirectory?: string,
+  sourceDirectory?: string,
 ): Promise<ChangeLogFile | null> {
   logger.trace('bitbucket.getReleaseNotesMd()');
 
   const repositorySourceURl = joinUrlParts(
     apiBaseUrl,
-    `2.0/repositories`,
+    '2.0/repositories',
     repository,
-    'src',
+    'src/HEAD',
+    sourceDirectory ?? '',
   );
 
   const rootFiles = (
@@ -41,7 +43,9 @@ export async function getReleaseNotesMd(
 
   const allFiles = rootFiles.filter((f) => f.type === 'commit_file');
 
-  const files = allFiles.filter((f) => changelogFilenameRegex.test(f.path));
+  const files = allFiles.filter((f) =>
+    changelogFilenameRegex.test(path.basename(f.path)),
+  );
 
   const changelogFile = files
     .sort((a, b) => compareChangelogFilePath(a.path, b.path))
@@ -59,7 +63,10 @@ export async function getReleaseNotesMd(
 
   const fileRes = await bitbucketHttp.get(
     joinUrlParts(
-      repositorySourceURl,
+      apiBaseUrl,
+      '2.0/repositories',
+      repository,
+      'src',
       changelogFile.commit.hash,
       changelogFile.path,
     ),
