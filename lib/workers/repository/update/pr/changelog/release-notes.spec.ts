@@ -1130,7 +1130,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     it('handled bitbucket link', async () => {
       httpMock
         .scope('https://api.bitbucket.org')
-        .get('/2.0/repositories/some-org/some-repo/src?pagelen=100')
+        .get('/2.0/repositories/some-org/some-repo/src/HEAD?pagelen=100')
         .reply(200, bitbucketTreeResponse)
         .get('/2.0/repositories/some-org/some-repo/src/abcd/CHANGELOG.md')
         .reply(200, angularJsChangelogMd);
