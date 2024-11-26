@@ -5,14 +5,14 @@ import type { ExecOptions } from '../../../util/exec/types';
 import { readLocalFile, writeLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { getNodeToolConstraint } from './post-update/node-version';
+import { processHostRules } from './post-update/rules';
+import { lazyLoadPackageJson } from './post-update/utils';
 import {
   getNpmrcContent,
   resetNpmrcContent,
   updateNpmrcContent,
-} from './post-update';
-import { getNodeToolConstraint } from './post-update/node-version';
-import { processHostRules } from './post-update/rules';
-import { lazyLoadPackageJson } from './post-update/utils';
+} from './utils';
 
 // eg. 8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589
 const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
