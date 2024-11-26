@@ -129,7 +129,7 @@ export function extractPackageFile(
             datasource: BuildpacksRegistryDatasource.id,
             currentValue: version,
             packageName: dependency.split('@')[0],
-            replaceString: `urn:cnb:registry:${dependency}`,
+            replaceString: `${dependency}`,
           };
           deps.push(dep);
         }

@@ -99,13 +99,13 @@ id = "not/valid"`,
           datasource: 'buildpacks-registry',
           currentValue: '1.0.0',
           packageName: 'example/foo',
-          replaceString: 'urn:cnb:registry:example/foo@1.0.0',
+          replaceString: 'example/foo@1.0.0',
         },
         {
           datasource: 'buildpacks-registry',
           currentValue: '1.2.3',
           packageName: 'example/bar',
-          replaceString: 'urn:cnb:registry:example/bar@1.2.3',
+          replaceString: 'example/bar@1.2.3',
         },
         {
           autoReplaceStringTemplate:
