@@ -91,6 +91,7 @@ You don't want to get too far behind, so how about we update `eslint` packages o
 {
   "packageRules": [
     {
+      "description": "Schedule updates on first day of each month",
       "matchPackageNames": ["/eslint/"],
       "groupName": "eslint",
       "schedule": ["* * 1 * *"]
@@ -105,6 +106,7 @@ Or perhaps at least weekly:
 {
   "packageRules": [
     {
+      "description": "Schedule updates on Monday mornings(before 4 AM)",
       "matchPackageNames": ["/eslint/"],
       "groupName": "eslint",
       "schedule": ["* 0-3 * * 1"]
@@ -165,6 +167,7 @@ Let's automerge it if all the linting updates pass:
 {
   "packageRules": [
     {
+      "description": "Schedule updates on Monday mornings(before 4 AM)",
       "matchPackageNames": ["/eslint/"],
       "groupName": "eslint",
       "schedule": ["* 0-3 * * 1"],
