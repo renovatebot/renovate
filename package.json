@@ -188,7 +188,7 @@
     "deepmerge": "4.3.1",
     "dequal": "2.0.3",
     "detect-indent": "6.1.0",
-    "diff": "5.2.0",
+    "diff": "7.0.0",
     "editorconfig": "2.0.0",
     "email-addresses": "5.0.0",
     "emoji-regex": "10.4.0",
