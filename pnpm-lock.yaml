@@ -87,8 +87,8 @@ importers:
         specifier: 4.6.0
         version: 4.6.0
       '@yarnpkg/core':
-        specifier: 4.1.4
-        version: 4.1.4(typanion@3.14.0)
+        specifier: 4.1.6
+        version: 4.1.6(typanion@3.14.0)
       '@yarnpkg/parsers':
         specifier: 3.0.2
         version: 3.0.2
@@ -2304,8 +2304,8 @@ packages:
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
-  '@yarnpkg/core@4.1.4':
-    resolution: {integrity: sha512-aaftrtm5sfwMlqmj3CYqp1a1Lbd0UR7dOk3K5pMCV3VTDwXWQWw9uwGm4QpE5YairVG30jpOdbTLUcoota55HQ==}
+  '@yarnpkg/core@4.1.6':
+    resolution: {integrity: sha512-iF8LOSd4K0RVSB56c4IMYcXp6aiCT3wyWfMmiYSAiLm8tepwEtBOcrL9gzTzrT09NnDRz1CV/YB7iwfnUOMsAg==}
     engines: {node: '>=18.12.0'}
 
   '@yarnpkg/fslib@3.1.1':
@@ -2322,8 +2322,8 @@ packages:
     resolution: {integrity: sha512-/HcYgtUSiJiot/XWGLOlGxPYUG65+/31V8oqk17vZLW1xlCoR4PampyePljOxY2n8/3jz9+tIFzICsyGujJZoA==}
     engines: {node: '>=18.12.0'}
 
-  '@yarnpkg/shell@4.1.0':
-    resolution: {integrity: sha512-vm0QqqCBuNrVZbzk1gre0G/FUoT8naCYu/gjz+WlmBKPgV5MmFe2Bdm4ApGLQqvg6eS94TXmUpjSHdBzzN3P0Q==}
+  '@yarnpkg/shell@4.1.1':
+    resolution: {integrity: sha512-0aS71iJrNQ4cezU5BJ5JpBTXkFQPKkzOEpDtMQm8E2H3g9PLxUe/5VdA60bZq/4N/qazLLYEOngcFZ6QRpraVQ==}
     engines: {node: '>=18.12.0'}
     hasBin: true
 
@@ -2851,10 +2851,6 @@ packages:
   cronstrue@2.51.0:
     resolution: {integrity: sha512-7EG9VaZZ5SRbZ7m25dmP6xaS0qe9ay6wywMskFOU/lMDKa+3gZr2oeT5OUfXwRP/Bcj8wxdYJ65AHU70CI3tsw==}
     hasBin: true
-
-  cross-spawn@7.0.3:
-    resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
-    engines: {node: '>= 8'}
 
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
@@ -8916,7 +8912,7 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@yarnpkg/core@4.1.4(typanion@3.14.0)':
+  '@yarnpkg/core@4.1.6(typanion@3.14.0)':
     dependencies:
       '@arcanis/slice-ansi': 1.1.1
       '@types/semver': 7.5.8
@@ -8924,12 +8920,12 @@ snapshots:
       '@yarnpkg/fslib': 3.1.1
       '@yarnpkg/libzip': 3.1.0(@yarnpkg/fslib@3.1.1)
       '@yarnpkg/parsers': 3.0.2
-      '@yarnpkg/shell': 4.1.0(typanion@3.14.0)
+      '@yarnpkg/shell': 4.1.1(typanion@3.14.0)
       camelcase: 5.3.1
       chalk: 3.0.0
       ci-info: 4.1.0
       clipanion: 4.0.0-rc.4(typanion@3.14.0)
-      cross-spawn: 7.0.3
+      cross-spawn: 7.0.6
       diff: 5.2.0
       dotenv: 16.4.5
       fast-glob: 3.3.2
@@ -8962,13 +8958,13 @@ snapshots:
       js-yaml: 3.14.1
       tslib: 2.8.1
 
-  '@yarnpkg/shell@4.1.0(typanion@3.14.0)':
+  '@yarnpkg/shell@4.1.1(typanion@3.14.0)':
     dependencies:
       '@yarnpkg/fslib': 3.1.1
       '@yarnpkg/parsers': 3.0.2
       chalk: 3.0.0
       clipanion: 4.0.0-rc.4(typanion@3.14.0)
-      cross-spawn: 7.0.3
+      cross-spawn: 7.0.6
       fast-glob: 3.3.2
       micromatch: 4.0.8
       tslib: 2.8.1
@@ -9542,12 +9538,6 @@ snapshots:
   croner@9.0.0: {}
 
   cronstrue@2.51.0: {}
-
-  cross-spawn@7.0.3:
-    dependencies:
-      path-key: 3.1.1
-      shebang-command: 2.0.0
-      which: 2.0.2
 
   cross-spawn@7.0.6:
     dependencies:
