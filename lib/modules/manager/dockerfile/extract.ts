@@ -422,7 +422,7 @@ export function extractPackageFile(
       }
     }
 
-    const runMountFromRegex = new RegExp(
+    const runMountFromRegex = regEx(
       '^[ \\t]*RUN(?:' +
       escapeChar +
       '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--mount=(?:\\S*=\\S*,)*from=(?<image>[^, ]+)',
