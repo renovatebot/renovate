@@ -130,6 +130,8 @@ export function setNpmrc(input?: string): void {
     const existingNpmrc = npmrc;
     npmrcRaw = input;
     logger.debug('Setting npmrc');
+    // eslint-disable-next-line
+    console.log('input', input);
     npmrc = ini.parse(input.replace(regEx(/\\n/g), '\n'));
     const exposeAllEnv = GlobalConfig.get('exposeAllEnv');
     for (const [key, val] of Object.entries(npmrc)) {

@@ -245,7 +245,7 @@ export async function writeUpdatedPackageFiles(
   }
 }
 
-async function getNpmrcContent(dir: string): Promise<string | null> {
+export async function getNpmrcContent(dir: string): Promise<string | null> {
   const npmrcFilePath = upath.join(dir, '.npmrc');
   let originalNpmrcContent: string | null = null;
   try {
@@ -259,7 +259,7 @@ async function getNpmrcContent(dir: string): Promise<string | null> {
   return originalNpmrcContent;
 }
 
-async function updateNpmrcContent(
+export async function updateNpmrcContent(
   dir: string,
   originalContent: string | null,
   additionalLines: string[],
@@ -279,7 +279,7 @@ async function updateNpmrcContent(
   }
 }
 
-async function resetNpmrcContent(
+export async function resetNpmrcContent(
   dir: string,
   originalContent: string | null,
 ): Promise<void> {
