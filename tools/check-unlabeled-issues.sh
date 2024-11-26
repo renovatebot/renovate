@@ -10,7 +10,7 @@ HAS_ISSUES_MISSING_LABELS=false
 
 ISSUE_BODY="# Label check action\n"
 
-REPO='renovatebot/renovate'
+REPO='ph1l1pf/renovate-test'
 
 ISSUE_TITLE="Found other non-labled issues"
 
