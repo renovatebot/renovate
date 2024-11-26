@@ -164,7 +164,7 @@ describe('modules/manager/kustomize/extract', () => {
       expect(pkg).toEqual(sample);
     });
 
-    it('should extract out the version of an http base from version param', () => {
+    it('should extract out the version of an http base from first version param', () => {
       const base = 'https://github.com/user/test-repo.git';
       const version = 'v1.0.0';
       const sample = {
@@ -173,7 +173,20 @@ describe('modules/manager/kustomize/extract', () => {
         depName: 'user/test-repo',
       };
 
-      const pkg = extractResource(`${base}?version=${version}`);
+      const pkg = extractResource(`${base}?version=${version}&version=v0`);
+      expect(pkg).toEqual(sample);
+    });
+
+    it('should extract out the version of an http base from first ref param', () => {
+      const base = 'https://github.com/user/test-repo.git';
+      const version = 'v1.0.0';
+      const sample = {
+        currentValue: version,
+        datasource: GithubTagsDatasource.id,
+        depName: 'user/test-repo',
+      };
+
+      const pkg = extractResource(`${base}?ref=${version}&ref=v0`);
       expect(pkg).toEqual(sample);
     });
   });
