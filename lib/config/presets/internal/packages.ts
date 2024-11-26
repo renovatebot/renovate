@@ -19,6 +19,7 @@ export const presets: Record<string, Preset> = {
   atlaskit: {
     description: 'All @atlaskit packages published by Atlassian.',
     matchPackageNames: ['@atlaskit/**'],
+    sourceDirectory: "design-system/{{ lookup (split packageName '/') 1 }}",
     sourceUrl: 'https://bitbucket.org/atlassian/atlassian-frontend-mirror',
   },
   emberTemplateLint: {
