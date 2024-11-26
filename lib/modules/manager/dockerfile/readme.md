@@ -38,7 +38,6 @@ FROM node:20.9.0
 COPY --from alpine:3.19.4 /bin/sh /usr/local/sh
 ```
 
-
 #### `RUN --mount` support
 
 Images referenced in `RUN --mount` directives are also supported.
@@ -48,7 +47,6 @@ FROM python:3.12
 RUN --mount=from=ghcr.io/astral-sh/uv:0.5,source=/uv,target=/bin/uv \
     uv venv
 ```
-
 
 #### `syntax` support
 

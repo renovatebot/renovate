@@ -424,8 +424,8 @@ export function extractPackageFile(
 
     const runMountFromRegex = regEx(
       '^[ \\t]*RUN(?:' +
-      escapeChar +
-      '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--mount=(?:\\S*=\\S*,)*from=(?<image>[^, ]+)',
+        escapeChar +
+        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--mount=(?:\\S*=\\S*,)*from=(?<image>[^, ]+)',
       'im',
     );
     const runMountFromMatch = instruction.match(runMountFromRegex);

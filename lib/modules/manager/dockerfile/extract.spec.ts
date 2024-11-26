@@ -35,9 +35,9 @@ describe('modules/manager/dockerfile/extract', () => {
     it('handles run --mount=from', () => {
       const res = extractPackageFile(
         'RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv uv pip install numpy\n' +
-        'RUN --mount=type=cache,from=example.com/cache/image,target=/root/.cache pip install numpy\n',
+          'RUN --mount=type=cache,from=example.com/cache/image,target=/root/.cache pip install numpy\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -59,7 +59,7 @@ describe('modules/manager/dockerfile/extract', () => {
           depName: 'example.com/cache/image',
           depType: 'final',
           replaceString: 'example.com/cache/image',
-        }
+        },
       ]);
     });
 
