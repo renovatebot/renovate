@@ -1,8 +1,11 @@
+import type { JSONataManagerConfig } from './jsonata/types';
 import type { RegexManagerConfig } from './regex/types';
 
-export interface CustomExtractConfig extends Partial<RegexManagerConfig> {}
+export interface CustomExtractConfig
+  extends Partial<RegexManagerConfig>,
+    Partial<JSONataManagerConfig> {}
 
-export type CustomManagerName = 'regex';
+export type CustomManagerName = 'regex' | 'jsonata';
 
 export interface CustomManager extends Partial<RegexManagerConfig> {
   customType: CustomManagerName;
