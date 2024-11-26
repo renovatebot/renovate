@@ -480,28 +480,23 @@ export class Result<T extends Val, E extends Val = Error> {
   }
 
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: E) => Result<U, E | EE>,
-  ): Result<T | U, E | EE>;
+    fn: (err: E) => Result<U, EE>,
+  ): Result<T | U, EE>;
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: E) => AsyncResult<U, E | EE>,
-  ): AsyncResult<T | U, E | EE>;
+    fn: (err: E) => AsyncResult<U, EE>,
+  ): AsyncResult<T | U, EE>;
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: E) => Promise<Result<U, E | EE>>,
-  ): AsyncResult<T | U, E | EE>;
+    fn: (err: E) => Promise<Result<U, EE>>,
+  ): AsyncResult<T | U, EE>;
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (
-      err: E,
-    ) =>
-      | Result<U, E | EE>
-      | AsyncResult<U, E | EE>
-      | Promise<Result<U, E | EE>>,
-  ): Result<T | U, E | EE> | AsyncResult<T | U, E | EE> {
+    fn: (err: E) => Result<U, EE> | AsyncResult<U, EE> | Promise<Result<U, EE>>,
+  ): Result<T | U, EE> | AsyncResult<T | U, EE> {
     if (this.res.ok) {
-      return this;
+      return this as never;
     }
 
     if (this.res._uncaught) {
-      return this;
+      return this as never;
     }
 
     try {
@@ -833,25 +828,23 @@ export class AsyncResult<T extends Val, E extends Val>
   }
 
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: NonNullable<E>) => Result<U, E | EE>,
-  ): AsyncResult<T | U, E | EE>;
+    fn: (err: NonNullable<E>) => Result<U, EE>,
+  ): AsyncResult<T | U, EE>;
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: NonNullable<E>) => AsyncResult<U, E | EE>,
-  ): AsyncResult<T | U, E | EE>;
+    fn: (err: NonNullable<E>) => AsyncResult<U, EE>,
+  ): AsyncResult<T | U, EE>;
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: NonNullable<E>) => Promise<Result<U, E | EE>>,
-  ): AsyncResult<T | U, E | EE>;
+    fn: (err: NonNullable<E>) => Promise<Result<U, EE>>,
+  ): AsyncResult<T | U, EE>;
   catch<U extends Val = T, EE extends Val = E>(
     fn: (
       err: NonNullable<E>,
-    ) =>
-      | Result<U, E | EE>
-      | AsyncResult<U, E | EE>
-      | Promise<Result<U, E | EE>>,
-  ): AsyncResult<T | U, E | EE> {
-    const caughtAsyncResult = this.asyncResult.then((result) =>
-      // eslint-disable-next-line promise/no-nesting
-      result.catch(fn as never),
+    ) => Result<U, EE> | AsyncResult<U, EE> | Promise<Result<U, EE>>,
+  ): AsyncResult<T | U, EE> {
+    const caughtAsyncResult: Promise<Result<T, EE>> = this.asyncResult.then(
+      (result) =>
+        // eslint-disable-next-line promise/no-nesting
+        result.catch(fn as never),
     );
     return AsyncResult.wrap(caughtAsyncResult);
   }
