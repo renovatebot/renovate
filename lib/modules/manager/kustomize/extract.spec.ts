@@ -148,6 +148,34 @@ describe('modules/manager/kustomize/extract', () => {
       const pkg = extractResource(`${base}?ref=${version}`);
       expect(pkg).toEqual(sample);
     });
+
+    it('should extract out the version of an http base with additional params', () => {
+      const base = 'https://github.com/user/test-repo.git';
+      const version = 'v1.0.0';
+      const sample = {
+        currentValue: version,
+        datasource: GithubTagsDatasource.id,
+        depName: 'user/test-repo',
+      };
+
+      const pkg = extractResource(
+        `${base}?timeout=120&ref=${version}&submodules=false&version=v1`,
+      );
+      expect(pkg).toEqual(sample);
+    });
+
+    it('should extract out the version of an http base from version param', () => {
+      const base = 'https://github.com/user/test-repo.git';
+      const version = 'v1.0.0';
+      const sample = {
+        currentValue: version,
+        datasource: GithubTagsDatasource.id,
+        depName: 'user/test-repo',
+      };
+
+      const pkg = extractResource(`${base}?version=${version}`);
+      expect(pkg).toEqual(sample);
+    });
   });
 
   describe('extractHelmChart', () => {
