@@ -1058,6 +1058,20 @@ describe('modules/platform/gitlab/index', () => {
   describe('setBranchStatus', () => {
     const states: BranchStatus[] = ['green', 'yellow', 'red'];
 
+    it('should log message that branch commit SHA not found', async () => {
+      git.getBranchCommit.mockReturnValue(null);
+      await gitlab.setBranchStatus({
+        branchName: 'some-branch',
+        context: 'some-context',
+        description: 'some-description',
+        state: 'green',
+        url: 'some-url',
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to get the branch commit SHA',
+      );
+    });
+
     it.each(states)('sets branch status %s', async (state) => {
       const scope = await initRepo();
       scope
