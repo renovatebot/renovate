@@ -5,8 +5,8 @@ import { z } from 'zod';
  */
 export const BuildpacksRegistryResponseSchema = z.object({
   latest: z.object({
-    homepage: z.string(),
-  }),
+    homepage: z.string().optional(),
+  }).optional(),
   versions: z
     .object({
       version: z.string(),
