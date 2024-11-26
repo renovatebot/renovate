@@ -1,18 +1,17 @@
 # Renovate configuration overview
 
-When Renovate runs on a repository, the final config used is derived from the:
+When Renovate runs on a repository, the final config used is derived from the following config locations. The below is the order of precedence:
 
-- Default config
-- Global config
-  - File config
-  - Environment config
-  - CLI config
-- Inherited config
-- Resolved presets referenced in config
-- Repository config
+1. Default config
+2. Global config
+2.1 File config
+2.2 Environment config
+2.3 CLI config
+3. Inherited config
+4. Resolved presets referenced in config
+5. Repository config
 
-The above is the order of precedence.
-Later configuration overwrites or merges with earlier ones, depending whether the element is marked as "mergeable".
+Items with a higher number override items that have lower numbers. If the item has the mergeable property, it will merge with lower numbers instead.
 
 <!-- prettier-ignore -->
 !!! note
