@@ -51,7 +51,6 @@ export async function updateArtifacts({
   const pkgFileDir = upath.dirname(packageFileName);
   const { additionalNpmrcContent } = processHostRules();
   const npmrcContent = await getNpmrcContent(pkgFileDir);
-  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
   const lazyPkgJson = lazyLoadPackageJson(pkgFileDir);
   const cmd = `corepack use ${depName}@${newVersion}`;
 
@@ -75,6 +74,7 @@ export async function updateArtifacts({
     userConfiguredEnv: config.env,
   };
 
+  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
   try {
     await exec(cmd, execOptions);
     await resetNpmrcContent(pkgFileDir, npmrcContent);
