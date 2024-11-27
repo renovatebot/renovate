@@ -61,7 +61,7 @@ if [ -z "$ISSUE_NUMBER" ]; then
   # Create a new issue (with the list of issues in it).
   gh issue create --repo $REPO --label "$LABEL_CHECK_ACTION" --title "$ISSUE_TITLE" --body "$(echo -e "$ISSUE_BODY")" || { echo "Failed to create issue"; exit 1; }
 else
-  # Update the existing issue with the list of issues
+  # Edit the open issue, and update the list of issues.
   gh issue edit "$ISSUE_NUMBER" --repo $REPO --title "$ISSUE_TITLE" --body "$(echo -e "$ISSUE_BODY")" || { echo "Failed to update issue"; exit 1; }
 
   # Re-open the issue.
