@@ -33,7 +33,7 @@ for FILTER in "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FILTER"; do
     ISSUE_COUNT=$(echo "$ISSUES_MISSING_LABEL" | jq '. | length')
     ISSUE_SINGULAR_PLURAL=$(if [ "$ISSUE_COUNT" -eq 1 ]; then echo "issue"; else echo "issues"; fi)
 
-    # Append the list of issues to the new issue body
+    # Append the "list of issues without labels" to the issue body
     ISSUE_BODY="$ISSUE_BODY## Found $ISSUE_COUNT $ISSUE_SINGULAR_PLURAL missing \`$LABEL_TYPE:\` labels:\n$FORMATTED_OUTPUT\n"
   fi
 done
