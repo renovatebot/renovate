@@ -29,7 +29,7 @@ for FILTER in "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FILTER"; do
     # Create a list of issue numbers
     FORMATTED_OUTPUT=$(echo "$ISSUES_MISSING_LABEL" | jq -r '.[].number' | sed 's/^/- #/')
 
-    # Count the number of issues to determine if it's singular or plural
+    # Count the issues and decide if the output should be singular or plural
     ISSUE_COUNT=$(echo "$ISSUES_MISSING_LABEL" | jq '. | length')
     ISSUE_SINGULAR_PLURAL=$(if [ "$ISSUE_COUNT" -eq 1 ]; then echo "issue"; else echo "issues"; fi)
 
