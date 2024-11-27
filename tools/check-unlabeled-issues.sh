@@ -26,7 +26,7 @@ for FILTER in "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FILTER"; do
   if [ "$ISSUES_MISSING_LABEL" != "[]" ]; then
     HAS_ISSUES_MISSING_LABELS=true
 
-    # Format the output to be a list of issue numbers
+    # Create a list of issue numbers
     FORMATTED_OUTPUT=$(echo "$ISSUES_MISSING_LABEL" | jq -r '.[].number' | sed 's/^/- #/')
 
     # Count the number of issues to determine if it's singular or plural
