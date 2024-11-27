@@ -214,17 +214,13 @@ describe('modules/manager/pep621/processors/uv', () => {
       },
       {
         depName: 'dep3',
-        registryUrls: [
-          'https://baz.com/simple',
-          'https://pypi.org/pypi/'
-        ],
+        registryUrls: ['https://baz.com/simple', 'https://pypi.org/pypi/'],
         packageName: 'dep3',
       },
     ]);
   });
 
-
-it('override implicit default index', () => {
+  it('override implicit default index', () => {
     const pyproject = {
       tool: {
         uv: {
@@ -256,22 +252,18 @@ it('override implicit default index', () => {
     expect(result).toEqual([
       {
         depName: 'dep1',
-        registryUrls: [
-          'https://foo.com/simple',
-        ],
+        registryUrls: ['https://foo.com/simple'],
         packageName: 'dep1',
       },
       {
         depName: 'dep2',
-        registryUrls: [
-          'https://foo.com/simple',
-        ],
+        registryUrls: ['https://foo.com/simple'],
         packageName: 'dep2',
       },
     ]);
   });
 
-it('override explicit default index', () => {
+  it('override explicit default index', () => {
     const pyproject = {
       tool: {
         uv: {
@@ -307,9 +299,7 @@ it('override explicit default index', () => {
       {
         depName: 'dep1',
         depType: depTypes.uvSources,
-        registryUrls: [
-          'https://foo.com/simple',
-        ],
+        registryUrls: ['https://foo.com/simple'],
         packageName: 'dep1',
       },
       {
@@ -532,9 +522,7 @@ it('override explicit default index', () => {
           packageName: 'dep6',
           depType: depTypes.dependencies,
           datasource: PypiDatasource.id,
-          registryUrls: [
-            'https://pinned.com/simple',
-          ],
+          registryUrls: ['https://pinned.com/simple'],
         },
       ];
       const result = await processor.updateArtifacts(
@@ -548,16 +536,18 @@ it('override explicit default index', () => {
           tool: {
             uv: {
               sources: {
-                dep6: {index : 'pinned-index'},
+                dep6: { index: 'pinned-index' },
               },
-              index: [{
-                name: 'pinned-index',
-                url: 'https://pinned.com/simple',
-                default: false,
-                explicit: true,
-              }]
-            }
-          }
+              index: [
+                {
+                  name: 'pinned-index',
+                  url: 'https://pinned.com/simple',
+                  default: false,
+                  explicit: true,
+                },
+              ],
+            },
+          },
         },
       );
       expect(result).toEqual([
@@ -583,8 +573,8 @@ it('override explicit default index', () => {
               GIT_CONFIG_VALUE_2: 'https://example.com/',
               UV_EXTRA_INDEX_URL:
                 'https://foobar.com/ https://user:pass@example.com/ https://oauth2accesstoken:some-token@someregion-python.pkg.dev/some-project/some-repo/',
-              UV_INDEX_PINNED_INDEX_USERNAME: "user",
-              UV_INDEX_PINNED_INDEX_PASSWORD: "pass",
+              UV_INDEX_PINNED_INDEX_USERNAME: 'user',
+              UV_INDEX_PINNED_INDEX_PASSWORD: 'pass',
             },
           },
         },

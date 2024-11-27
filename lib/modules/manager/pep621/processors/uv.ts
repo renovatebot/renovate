@@ -32,8 +32,12 @@ export class UvProcessor implements PyProjectProcessor {
       return deps;
     }
 
-    const hasExplicitDefault = uv.index?.some((index) => index.default && index.explicit);
-    const defaultIndex = uv.index?.find((index) => index.default && !index.explicit);
+    const hasExplicitDefault = uv.index?.some(
+      (index) => index.default && index.explicit,
+    );
+    const defaultIndex = uv.index?.find(
+      (index) => index.default && !index.explicit,
+    );
     const implicitIndexes = uv.index
       ?.filter((index) => !index.explicit && index.name !== defaultIndex?.name)
       ?.map(({ url }) => url);
@@ -99,7 +103,7 @@ export class UvProcessor implements PyProjectProcessor {
             // If there are implicit indexes, check them first and fall back
             // to the default.
             dep.registryUrls = implicitIndexes.concat(
-              dep.registryUrls ?? 'https://pypi.org/pypi/'
+              dep.registryUrls ?? 'https://pypi.org/pypi/',
             );
           }
         }
