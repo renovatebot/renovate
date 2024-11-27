@@ -64,6 +64,7 @@ export class UvProcessor implements PyProjectProcessor {
         if (depSource) {
           // Dependency is pinned to a specific source.
           dep.depType = depTypes.uvSources;
+          /* istanbul ignore else  */
           if ('index' in depSource) {
             const index = uv.index?.find(
               ({ name }) => name === depSource.index,
