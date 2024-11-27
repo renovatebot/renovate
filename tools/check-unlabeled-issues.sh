@@ -71,7 +71,7 @@ fi
 # Provide an output in the action itself
 echo -e "$ISSUE_BODY"
 
-# Fail the action if there are issues missing the correct labels
+# Log a message and "fail" the Action if there are issues with missing labels
 echo "Found issues missing labels. Please check the issue(s) above."
 
 exit 1
