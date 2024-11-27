@@ -61,6 +61,12 @@ describe('modules/manager/kustomize/extract', () => {
       expect(res).toBeNull();
     });
 
+    it('should return null for an http base without ref/version', () => {
+      const base = 'https://github.com/user/test-repo.git';
+      const res = extractResource(`${base}?timeout=10s`);
+      expect(res).toBeNull();
+    });
+
     it('should extract out the version of an http base', () => {
       const base = 'https://github.com/user/test-repo.git';
       const version = 'v1.0.0';

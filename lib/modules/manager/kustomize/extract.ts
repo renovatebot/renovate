@@ -58,6 +58,9 @@ export function extractResource(base: string): PackageDependency | null {
     ? params.version[0]
     : params.version;
   const currentValue = refParam ?? versionParam;
+  if (!currentValue) {
+    return null;
+  }
 
   if (regEx(/(?:github\.com)(:|\/)/).test(path)) {
     return {
