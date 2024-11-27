@@ -12,7 +12,7 @@ ISSUE_BODY="# Label check action\n"
 
 REPO='renovatebot/renovate'
 
-ISSUE_TITLE="Found other non-labled issues"
+ISSUE_TITLE="Issues with missing labels"
 
 for FILTER in "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FILTER"; do
   # Extract the label type from the filter
