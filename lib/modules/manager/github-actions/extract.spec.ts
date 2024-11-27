@@ -308,7 +308,7 @@ describe('modules/manager/github-actions/extract', () => {
 "`;
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
-      expect(res?.deps).toMatchObject([
+      expect(res).toMatchObject({ deps: [
         {
           replaceString:
             'actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1',
