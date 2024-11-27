@@ -45,7 +45,7 @@ fi
 
 LABEL_CHECK_ACTION="Label check action"
 
-# check if label "Label check action" exists
+# Check if the "Label check action" label is present.
 LABEL_CHECKACTION_EXISTS=$(gh label list --repo $REPO | grep "$LABEL_CHECK_ACTION" || true) || { echo "Failed to fetch existing label"; exit 1; }
 if [ -z "$LABEL_CHECKACTION_EXISTS" ]; then
   echo "Label '$LABEL_CHECK_ACTION' does not exist. Will create it."
