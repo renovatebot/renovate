@@ -4,9 +4,9 @@ When Renovate runs on a repository, the final config used is derived from the fo
 
 1. Default config
 2. Global config
-2.1 File config
-2.2 Environment config
-2.3 CLI config
+   2.1 File config
+   2.2 Environment config
+   2.3 CLI config
 3. Inherited config
 4. Resolved presets referenced in config
 5. Repository config
