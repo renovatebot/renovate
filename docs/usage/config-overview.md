@@ -11,7 +11,8 @@ When Renovate runs on a repository, the final config used is derived from the fo
 4. Resolved presets referenced in config
 5. Repository config
 
-Items with a higher number override items that have lower numbers. If the item has the mergeable property, it will merge with lower numbers instead.
+Items with a higher number override items that have lower numbers.
+If the item has the `mergeable` property, it will merge with lower numbers instead.
 
 <!-- prettier-ignore -->
 !!! note
