@@ -49,7 +49,7 @@ LABEL_CHECK_ACTION="Label check action"
 LABEL_CHECKACTION_EXISTS=$(gh label list --repo $REPO | grep "$LABEL_CHECK_ACTION" || true) || { echo "Failed to fetch existing label"; exit 1; }
 if [ -z "$LABEL_CHECKACTION_EXISTS" ]; then
   echo "Label '$LABEL_CHECK_ACTION' does not exist. Will create it."
-  # Create a new label "Label check action"
+  # Create the "Label check action" label.
   gh label create "$LABEL_CHECK_ACTION" --description "This label is used for the issue that lists invalid issues." --repo $REPO || { echo "Failed to create label"; exit 1; }
 fi
 
