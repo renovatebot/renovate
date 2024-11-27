@@ -1,4 +1,4 @@
-name: 'Check unlabeled issues'
+name: 'Find issues with missing labels'
 
 on:
   schedule:
