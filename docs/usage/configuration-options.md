@@ -2465,7 +2465,7 @@ Here's an example config to limit the "noisy" `aws-sdk` package to weekly update
     {
       "description": "Schedule aws-sdk updates on Sunday nights (9 PM - 12 AM)",
       "matchPackageNames": ["aws-sdk"],
-      "schedule": ["* 21-23 * * 7"]
+      "schedule": ["* 21-23 * * 0"]
     }
   ]
 }

@@ -5,10 +5,10 @@ import type { Preset } from '../types';
 const daily = ['* 0-3 * * *'];
 const earlyMondays = ['* 0-3 * * 1'];
 const monthly = ['* 0-3 1 * *'];
-const nonOfficeHours = ['* 0-4,22-23 * * 1-5', '* * * * 6,7'];
+const nonOfficeHours = ['* 0-4,22-23 * * 1-5', '* * * * 0,6'];
 const quarterly = ['* * 1 */3 *'];
 const weekdays = ['* * * * 1-5'];
-const weekends = ['* * * * 6,7'];
+const weekends = ['* * * * 0,6'];
 const yearly = ['* * 1 */12 *'];
 
 export const presets: Record<string, Preset> = {
