@@ -32,6 +32,12 @@ export class UvProcessor implements PyProjectProcessor {
       return deps;
     }
 
+    const hasExplicitDefault = uv.index?.some((index) => index.default && index.explicit);
+    const defaultIndex = uv.index?.find((index) => index.default && !index.explicit);
+    const implicitIndexes = uv.index
+      ?.filter((index) => !index.explicit && index.name !== defaultIndex?.name)
+      ?.map(({ url }) => url);
+
     deps.push(
       ...parseDependencyList(
         depTypes.uvDevDependencies,
@@ -41,7 +47,7 @@ export class UvProcessor implements PyProjectProcessor {
 
     // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
     // Skip sources that do not make sense to handle (e.g. path).
-    if (uv.sources) {
+    if (uv.sources || defaultIndex || implicitIndexes) {
       for (const dep of deps) {
         // istanbul ignore if
         if (!dep.packageName) {
@@ -50,8 +56,9 @@ export class UvProcessor implements PyProjectProcessor {
 
         // Using `packageName` as it applies PEP 508 normalization, which is
         // also applied by uv when matching a source to a dependency.
-        const depSource = uv.sources[dep.packageName];
+        const depSource = uv.sources?.[dep.packageName];
         if (depSource) {
+          // Dependency is pinned to a specific source.
           dep.depType = depTypes.uvSources;
           if ('index' in depSource) {
             const index = uv.index?.find(
@@ -76,6 +83,24 @@ export class UvProcessor implements PyProjectProcessor {
             dep.skipReason = 'inherited-dependency';
           } else {
             dep.skipReason = 'unknown-registry';
+          }
+        } else {
+          // Dependency is not pinned to a specific source, so we need to
+          // determine the source based on the index configuration.
+          if (hasExplicitDefault) {
+            // don't fall back to pypi if there is an explicit default index
+            dep.registryUrls = [];
+          } else if (defaultIndex) {
+            // There is a default index configured, so use it.
+            dep.registryUrls = [defaultIndex.url];
+          }
+
+          if (implicitIndexes) {
+            // If there are implicit indexes, check them first and fall back
+            // to the default.
+            dep.registryUrls = implicitIndexes.concat(
+              dep.registryUrls ?? 'https://pypi.org/pypi/'
+            );
           }
         }
       }
