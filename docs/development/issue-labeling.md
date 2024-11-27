@@ -224,7 +224,7 @@ Apply the `self-hosted` label when an issue is applicable only to users who self
 
 ## Automated check for Issues with missing labels
 
-We have a GitHub Action (`find-issues-with-missing labels.yml`) to find issues on our repository that are missing labels.
+We have a GitHub Action (`find-issues-with-missing-labels.yml`) to find issues on our repository that are missing labels.
 Any Issues with missing labels will be put in a list in a new "error" Issue.
 
 The Action runs each week.
