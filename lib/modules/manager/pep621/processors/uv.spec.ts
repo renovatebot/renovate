@@ -150,6 +150,176 @@ describe('modules/manager/pep621/processors/uv', () => {
     ]);
   });
 
+  it('pinned to non-default index', () => {
+    const pyproject = {
+      tool: {
+        uv: {
+          sources: {
+            dep1: { index: 'foo' },
+            dep2: { index: 'bar' },
+          },
+          index: [
+            {
+              name: 'foo',
+              url: 'https://foo.com/simple',
+              default: false,
+              explicit: true,
+            },
+            {
+              name: 'bar',
+              url: 'https://bar.com/simple',
+              default: false,
+              explicit: true,
+            },
+            {
+              name: 'baz',
+              url: 'https://baz.com/simple',
+              default: false,
+              explicit: false,
+            },
+          ],
+        },
+      },
+    };
+
+    const dependencies = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+      },
+      {
+        depName: 'dep2',
+        packageName: 'dep2',
+      },
+      {
+        depName: 'dep3',
+        packageName: 'dep3',
+      },
+    ];
+
+    const result = processor.process(pyproject, dependencies);
+
+    expect(result).toEqual([
+      {
+        depName: 'dep1',
+        depType: depTypes.uvSources,
+        registryUrls: ['https://foo.com/simple'],
+        packageName: 'dep1',
+      },
+      {
+        depName: 'dep2',
+        depType: depTypes.uvSources,
+        registryUrls: ['https://bar.com/simple'],
+        packageName: 'dep2',
+      },
+      {
+        depName: 'dep3',
+        registryUrls: [
+          'https://baz.com/simple',
+          'https://pypi.org/pypi/'
+        ],
+        packageName: 'dep3',
+      },
+    ]);
+  });
+
+
+it('override implicit default index', () => {
+    const pyproject = {
+      tool: {
+        uv: {
+          index: [
+            {
+              name: 'foo',
+              url: 'https://foo.com/simple',
+              default: true,
+              explicit: false,
+            },
+          ],
+        },
+      },
+    };
+
+    const dependencies = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+      },
+      {
+        depName: 'dep2',
+        packageName: 'dep2',
+      },
+    ];
+
+    const result = processor.process(pyproject, dependencies);
+
+    expect(result).toEqual([
+      {
+        depName: 'dep1',
+        registryUrls: [
+          'https://foo.com/simple',
+        ],
+        packageName: 'dep1',
+      },
+      {
+        depName: 'dep2',
+        registryUrls: [
+          'https://foo.com/simple',
+        ],
+        packageName: 'dep2',
+      },
+    ]);
+  });
+
+it('override explicit default index', () => {
+    const pyproject = {
+      tool: {
+        uv: {
+          sources: {
+            dep1: { index: 'foo' },
+          },
+          index: [
+            {
+              name: 'foo',
+              url: 'https://foo.com/simple',
+              default: true,
+              explicit: true,
+            },
+          ],
+        },
+      },
+    };
+
+    const dependencies = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+      },
+      {
+        depName: 'dep2',
+        packageName: 'dep2',
+      },
+    ];
+
+    const result = processor.process(pyproject, dependencies);
+
+    expect(result).toEqual([
+      {
+        depName: 'dep1',
+        depType: depTypes.uvSources,
+        registryUrls: [
+          'https://foo.com/simple',
+        ],
+        packageName: 'dep1',
+      },
+      {
+        depName: 'dep2',
+        registryUrls: [],
+        packageName: 'dep2',
+      },
+    ]);
+  });
+
   describe('updateArtifacts()', () => {
     it('returns null if there is no lock file', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
@@ -303,6 +473,11 @@ describe('modules/manager/pep621/processors/uv', () => {
         username: 'user',
         password: 'pass',
       });
+      hostRules.add({
+        matchHost: 'https://pinned.com/simple',
+        username: 'user',
+        password: 'pass',
+      });
       googleAuth.mockImplementationOnce(
         jest.fn().mockImplementationOnce(() => ({
           getAccessToken: jest.fn().mockResolvedValue('some-token'),
@@ -353,6 +528,14 @@ describe('modules/manager/pep621/processors/uv', () => {
             'https://someregion-python.pkg.dev/some-project/some-repo/',
           ],
         },
+        {
+          packageName: 'dep6',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: [
+            'https://pinned.com/simple',
+          ],
+        },
       ];
       const result = await processor.updateArtifacts(
         {
@@ -361,7 +544,21 @@ describe('modules/manager/pep621/processors/uv', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        {
+          tool: {
+            uv: {
+              sources: {
+                dep6: {index : 'pinned-index'},
+              },
+              index: [{
+                name: 'pinned-index',
+                url: 'https://pinned.com/simple',
+                default: false,
+                explicit: true,
+              }]
+            }
+          }
+        },
       );
       expect(result).toEqual([
         {
@@ -374,10 +571,10 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4 --upgrade-package dep5',
+          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4 --upgrade-package dep5 --upgrade-package dep6',
           options: {
             env: {
-              GIT_CONFIG_COUNT: '3',
+              GIT_CONFIG_COUNT: '6',
               GIT_CONFIG_KEY_0: 'url.https://user:pass@example.com/.insteadOf',
               GIT_CONFIG_KEY_1: 'url.https://user:pass@example.com/.insteadOf',
               GIT_CONFIG_KEY_2: 'url.https://user:pass@example.com/.insteadOf',
@@ -386,6 +583,8 @@ describe('modules/manager/pep621/processors/uv', () => {
               GIT_CONFIG_VALUE_2: 'https://example.com/',
               UV_EXTRA_INDEX_URL:
                 'https://foobar.com/ https://user:pass@example.com/ https://oauth2accesstoken:some-token@someregion-python.pkg.dev/some-project/some-repo/',
+              UV_INDEX_PINNED_INDEX_USERNAME: "user",
+              UV_INDEX_PINNED_INDEX_PASSWORD: "pass",
             },
           },
         },
