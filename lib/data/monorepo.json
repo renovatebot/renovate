@@ -571,6 +571,7 @@
     "apache-camel": "/^org.apache.camel:/",
     "aws-java-sdk": "/^com.amazonaws:aws-java-sdk-/",
     "aws-java-sdk-v2": "/^software.amazon.awssdk:/",
+    "axis2": "/^org.apache.axis2:/",
     "babel6": "/^babel6$/",
     "clarity": ["/^@cds//", "/^@clr//"],
     "embroider": "/^@embroider//",
