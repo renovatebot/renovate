@@ -1,4 +1,5 @@
-import { HeadObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { Readable } from 'node:stream';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { DateTime } from 'luxon';
@@ -129,8 +130,6 @@ describe('modules/datasource/maven/index', () => {
   it('returns null when metadata is not found', async () => {
     httpMock
       .scope(baseUrl)
-      .get('/org/example/package/')
-      .reply(404)
       .get('/org/example/package/maven-metadata.xml')
       .reply(404);
 
@@ -669,10 +668,7 @@ describe('modules/datasource/maven/index', () => {
 
   describe('post-fetch release validation', () => {
     it('returns null for 404', async () => {
-      httpMock
-        .scope(MAVEN_REPO)
-        .head('/foo/bar/1.2.3/bar-1.2.3.pom')
-        .reply(404);
+      httpMock.scope(MAVEN_REPO).get('/foo/bar/1.2.3/bar-1.2.3.pom').reply(404);
 
       const res = await postprocessRelease(
         { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
@@ -685,7 +681,7 @@ describe('modules/datasource/maven/index', () => {
     it('returns null for unknown error', async () => {
       httpMock
         .scope(MAVEN_REPO)
-        .head('/foo/bar/1.2.3/bar-1.2.3.pom')
+        .get('/foo/bar/1.2.3/bar-1.2.3.pom')
         .replyWithError('unknown error');
 
       const res = await postprocessRelease(
@@ -697,10 +693,7 @@ describe('modules/datasource/maven/index', () => {
     });
 
     it('returns original value for 200 response', async () => {
-      httpMock
-        .scope(MAVEN_REPO)
-        .head('/foo/bar/1.2.3/bar-1.2.3.pom')
-        .reply(200);
+      httpMock.scope(MAVEN_REPO).get('/foo/bar/1.2.3/bar-1.2.3.pom').reply(200);
       const releaseOrig: Release = { version: '1.2.3' };
 
       const res = await postprocessRelease(
@@ -712,10 +705,7 @@ describe('modules/datasource/maven/index', () => {
     });
 
     it('returns original value for 200 response with versionOrig', async () => {
-      httpMock
-        .scope(MAVEN_REPO)
-        .head('/foo/bar/1.2.3/bar-1.2.3.pom')
-        .reply(200);
+      httpMock.scope(MAVEN_REPO).get('/foo/bar/1.2.3/bar-1.2.3.pom').reply(200);
       const releaseOrig: Release = { version: '1.2', versionOrig: '1.2.3' };
 
       const res = await postprocessRelease(
@@ -745,7 +735,7 @@ describe('modules/datasource/maven/index', () => {
     it('adds releaseTimestamp', async () => {
       httpMock
         .scope(MAVEN_REPO)
-        .head('/foo/bar/1.2.3/bar-1.2.3.pom')
+        .get('/foo/bar/1.2.3/bar-1.2.3.pom')
         .reply(200, '', { 'Last-Modified': '2024-01-01T00:00:00.000Z' });
 
       const res = await postprocessRelease(
@@ -766,13 +756,22 @@ describe('modules/datasource/maven/index', () => {
         s3mock.reset();
       });
 
+      function body(input: string): never {
+        const result = new Readable();
+        result.push(input);
+        result.push(null);
+        return result as never;
+      }
+
       it('checks package', async () => {
         s3mock
-          .on(HeadObjectCommand, {
+          .on(GetObjectCommand, {
             Bucket: 'bucket',
             Key: 'foo/bar/1.2.3/bar-1.2.3.pom',
           })
-          .resolvesOnce({});
+          .resolvesOnce({
+            Body: body('foo'),
+          });
 
         const res = await postprocessRelease(
           { datasource, packageName: 'foo:bar', registryUrl: 's3://bucket' },
@@ -784,11 +783,12 @@ describe('modules/datasource/maven/index', () => {
 
       it('supports timestamp', async () => {
         s3mock
-          .on(HeadObjectCommand, {
+          .on(GetObjectCommand, {
             Bucket: 'bucket',
             Key: 'foo/bar/1.2.3/bar-1.2.3.pom',
           })
           .resolvesOnce({
+            Body: body('foo'),
             LastModified: DateTime.fromISO(
               '2024-01-01T00:00:00.000Z',
             ).toJSDate(),
@@ -807,7 +807,7 @@ describe('modules/datasource/maven/index', () => {
 
       it('returns null for deleted object', async () => {
         s3mock
-          .on(HeadObjectCommand, {
+          .on(GetObjectCommand, {
             Bucket: 'bucket',
             Key: 'foo/bar/1.2.3/bar-1.2.3.pom',
           })
@@ -825,7 +825,7 @@ describe('modules/datasource/maven/index', () => {
 
       it('returns null for NotFound response', async () => {
         s3mock
-          .on(HeadObjectCommand, {
+          .on(GetObjectCommand, {
             Bucket: 'bucket',
             Key: 'foo/bar/1.2.3/bar-1.2.3.pom',
           })
@@ -843,7 +843,7 @@ describe('modules/datasource/maven/index', () => {
 
       it('returns null for NoSuchKey response', async () => {
         s3mock
-          .on(HeadObjectCommand, {
+          .on(GetObjectCommand, {
             Bucket: 'bucket',
             Key: 'foo/bar/1.2.3/bar-1.2.3.pom',
           })
@@ -861,7 +861,7 @@ describe('modules/datasource/maven/index', () => {
 
       it('returns null for unknown error', async () => {
         s3mock
-          .on(HeadObjectCommand, {
+          .on(GetObjectCommand, {
             Bucket: 'bucket',
             Key: 'foo/bar/1.2.3/bar-1.2.3.pom',
           })

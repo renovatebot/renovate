@@ -142,6 +142,9 @@ export class Result<T extends Val, E extends Val = Error> {
   static wrap<T extends Val, E extends Val = Error>(
     callback: () => RawValue<T>,
   ): Result<T, E>;
+  static wrap<T extends Val, E extends Val = Error>(
+    callback: () => Promise<RawValue<T>>,
+  ): AsyncResult<T, E>;
   static wrap<T extends Val, E extends Val = Error, EE extends Val = never>(
     promise: Promise<Result<T, EE>>,
   ): AsyncResult<T, E | EE>;
@@ -165,11 +168,15 @@ export class Result<T extends Val, E extends Val = Error> {
     }
 
     if (input instanceof Promise) {
-      return AsyncResult.wrap(input as never);
+      return AsyncResult.wrap(input);
     }
 
     try {
       const result = input();
+      if (result instanceof Promise) {
+        return AsyncResult.wrap(result);
+      }
+
       return Result.ok(result);
     } catch (error) {
       return Result.err(error);
@@ -307,7 +314,10 @@ export class Result<T extends Val, E extends Val = Error> {
 
   /**
    * Returns a discriminated union for type-safe consumption of the result.
-   * When error was uncaught during transformation, it's being re-thrown here.
+   *
+   * Unlike the similar construct in Rust, it's pretty safe use.
+   * The only side effect is re-throw of errors that weren't caught
+   * in `.transform()` or `.catch()`.
    *
    *   ```ts
    *
