@@ -58,7 +58,7 @@ ISSUE_NUMBER=$(echo "$LABEL_CHECK_ISSUE_EXISTS" | jq -r '.[].number')
 
 if [ -z "$ISSUE_NUMBER" ]; then
 
-  # Create a new issue with the list of issues
+  # Create a new issue (with the list of issues in it).
   gh issue create --repo $REPO --label "$LABEL_CHECK_ACTION" --title "$ISSUE_TITLE" --body "$(echo -e "$ISSUE_BODY")" || { echo "Failed to create issue"; exit 1; }
 else
   # Update the existing issue with the list of issues
