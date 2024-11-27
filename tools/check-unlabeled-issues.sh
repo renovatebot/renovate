@@ -64,7 +64,7 @@ else
   # Update the existing issue with the list of issues
   gh issue edit "$ISSUE_NUMBER" --repo $REPO --title "$ISSUE_TITLE" --body "$(echo -e "$ISSUE_BODY")" || { echo "Failed to update issue"; exit 1; }
 
-  # Reopen the issue
+  # Re-open the issue.
   gh issue reopen "$ISSUE_NUMBER" --repo $REPO || { echo "Failed to reopen issue"; exit 1; }
 fi
 
