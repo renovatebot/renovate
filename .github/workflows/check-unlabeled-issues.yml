@@ -19,4 +19,4 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Search for issues with missing labels
-        run: bash ./tools/check-unlabeled-issues.sh
+        run: bash ./tools/check-for-issues-with-missing-labels.sh
