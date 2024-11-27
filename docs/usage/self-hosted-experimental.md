@@ -73,6 +73,14 @@ See [issue 8660](https://github.com/renovatebot/renovate/issues/8660) for backgr
 
 Skip initializing `RE2` for regular expressions and instead use Node-native `RegExp` instead.
 
+## `RENOVATE_X_MAVEN_LOOKUP_ASSUME_SPECIFICATION_COMPLIANT`
+
+If set to any value, Renovate assumes that the looked up [Maven Metadata](https://maven.apache.org/repositories/metadata.html) conforms to specification.
+Enabling this will:
+
+- not use the HTML index page for lookup
+- not check if looked up `.pom` files exist
+
 ## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
 
 If set to any value, Renovate will download `nupkg` files for determining package metadata.

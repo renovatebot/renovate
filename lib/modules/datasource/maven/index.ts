@@ -129,7 +129,10 @@ export class MavenDatasource extends Datasource {
     dependency: MavenDependency,
     repoUrl: string,
   ): Promise<ReleaseMap> {
-    if (!repoUrl.startsWith(MAVEN_REPO)) {
+    if (
+      process.env.RENOVATE_X_MAVEN_LOOKUP_ASSUME_SPECIFICATION_COMPLIANT ||
+      !repoUrl.startsWith(MAVEN_REPO)
+    ) {
       return inputReleaseMap;
     }
 
@@ -261,7 +264,11 @@ export class MavenDatasource extends Datasource {
     { packageName, registryUrl }: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
-    if (!packageName || !registryUrl) {
+    if (
+      process.env.RENOVATE_X_MAVEN_LOOKUP_ASSUME_SPECIFICATION_COMPLIANT ||
+      !packageName ||
+      !registryUrl
+    ) {
       return release;
     }
 
