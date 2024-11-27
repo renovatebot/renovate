@@ -106,7 +106,7 @@ describe('documentation', () => {
         );
       });
 
-      test.each([...getParentNames()])(
+      it.each([...getParentNames()])(
         '%s has sub-headers sorted alphabetically',
         async (parentName: string) => {
           expect(
