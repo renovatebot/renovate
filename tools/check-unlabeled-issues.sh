@@ -68,7 +68,7 @@ else
   gh issue reopen "$ISSUE_NUMBER" --repo $REPO || { echo "Failed to reopen issue"; exit 1; }
 fi
 
-# Provide an output in the action itself
+# Show the list of "issues with missing labels" in the logs.
 echo -e "$ISSUE_BODY"
 
 # Log a message and "fail" the Action if there are issues with missing labels
