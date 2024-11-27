@@ -1,23 +1,23 @@
-# syntax=docker/dockerfile:1.11.0@sha256:1f2be5a2aa052cbd9aedf893d17c63277c3d1c51b3fb0f3b029c6b34f658d057
+# syntax=docker/dockerfile:1.12.0@sha256:db1ff77fb637a5955317c7a3a62540196396d565f3dd5742e76dddbb6d75c4c5
 
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.4.2@sha256:97c636dc4f50a9022da73a932a8ba0edcbb61bdaabcc15aef40c50dfd54ddefd AS slim-base
+FROM ghcr.io/renovatebot/base-image:9.11.3@sha256:ab2d4b9fccf67319a396dc4de146d8bc2e57e5e152946663ab8160f83125b077 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.4.2-full@sha256:e5cb475d681965bad3fc3ccfd9d23f8bab57a9efaf654fb9076584ac933e32b2 AS full-base
+FROM ghcr.io/renovatebot/base-image:9.11.3-full@sha256:2b2dff67edfded6909bcd201d3f561cdd9275c1fe50e844f14b34bc69cbc16af AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.4.2@sha256:97c636dc4f50a9022da73a932a8ba0edcbb61bdaabcc15aef40c50dfd54ddefd AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.11.3@sha256:ab2d4b9fccf67319a396dc4de146d8bc2e57e5e152946663ab8160f83125b077 AS build
 
 # We want a specific node version here
 # renovate: datasource=node-version
@@ -94,6 +94,10 @@ COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renov
 
 # make our node binary available as last in path
 RUN ln -sf /usr/local/renovate/node /bin/node
+
+# ensure default base and cache directories exist.
+RUN mkdir -p /tmp/renovate/cache && \
+    chmod -R 777 /tmp/renovate
 
 # test
 RUN set -ex; \

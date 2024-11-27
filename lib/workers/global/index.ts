@@ -17,7 +17,7 @@ import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
 import { exportStats, finalizeReport } from '../../instrumentation/reporting';
-import { getProblems, logger, setMeta } from '../../logger';
+import { getProblems, logLevel, logger, setMeta } from '../../logger';
 import { setGlobalLogLevelRemaps } from '../../logger/remap';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
@@ -228,10 +228,9 @@ export async function start(): Promise<number> {
     }
   } finally {
     await globalFinalize(config!);
-    const logLevel = process.env.LOG_LEVEL ?? 'info';
-    if (logLevel === 'info') {
+    if (logLevel() === 'info') {
       logger.info(
-        `Renovate was run at log level "${logLevel}". Set LOG_LEVEL=debug in environment variables to see extended debug logs.`,
+        `Renovate was run at log level "${logLevel()}". Set LOG_LEVEL=debug in environment variables to see extended debug logs.`,
       );
     }
   }

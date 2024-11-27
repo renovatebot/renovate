@@ -9,6 +9,7 @@ import { get } from '../../../modules/manager';
 import { detectSemanticCommits } from '../../../util/git/semantic';
 import { applyPackageRules } from '../../../util/package-rules';
 import { regEx } from '../../../util/regex';
+import * as template from '../../../util/template';
 import { parseUrl } from '../../../util/url';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchName } from './branch-name';
@@ -56,6 +57,12 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
         '',
       ); // remove everything up to the last slash
     }
+  }
+  if (updateConfig.sourceDirectory) {
+    updateConfig.sourceDirectory = template.compile(
+      updateConfig.sourceDirectory,
+      updateConfig,
+    );
   }
   generateBranchName(updateConfig);
   return updateConfig;

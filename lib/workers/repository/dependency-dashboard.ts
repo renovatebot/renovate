@@ -249,10 +249,7 @@ export async function ensureDependencyDashboard(
   // Check packageFiles for any deprecations
   let hasDeprecations = false;
   const deprecatedPackages: Record<string, Record<string, boolean>> = {};
-  logger.debug(
-    { packageFiles },
-    'Checking packageFiles for deprecated packages',
-  );
+  logger.debug('Checking packageFiles for deprecated packages');
   if (is.nonEmptyObject(packageFiles)) {
     for (const [manager, fileNames] of Object.entries(packageFiles)) {
       for (const fileName of fileNames) {

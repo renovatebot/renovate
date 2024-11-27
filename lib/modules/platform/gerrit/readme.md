@@ -61,15 +61,3 @@ For example, if you want to use the [Merge Confidence](../../../merge-confidence
 
 - Creating issues (not a Gerrit concept)
 - Dependency Dashboard (needs issues first)
-
-## Known problems
-
-### PR title is different from first commit message
-
-Sometimes the PR title passed to the Gerrit platform code is different from the first line of the commit message.
-For example:
-
-- Commit-Message=`Update keycloak.version to v21`
-- Pull-Request-Title=`Update keycloak.version to v21 (major)`
-
-In this case the Gerrit-Platform implementation tries to detect this and change the commit-message in a second patch-set.

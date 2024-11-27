@@ -18,6 +18,7 @@ export interface ParseGradleResult {
   deps: PackageDependency<GradleManagerData>[];
   urls: PackageRegistry[];
   vars: PackageVariables;
+  javaLanguageVersion?: string;
 }
 
 export interface GradleCatalog {
@@ -80,6 +81,7 @@ export interface Ctx {
   globalVars: PackageVariables;
   deps: PackageDependency<GradleManagerData>[];
   registryUrls: PackageRegistry[];
+  javaLanguageVersion?: string;
 
   varTokens: lexer.Token[];
   tmpKotlinImportStore: lexer.Token[][];
