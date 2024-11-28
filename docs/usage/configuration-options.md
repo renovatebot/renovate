@@ -799,7 +799,7 @@ It will be compiled using Handlebars and the regex `groups` result.
 
 ### matchQueries
 
-Each `matchQueries` must be a valid regular expression, optionally with named capture groups.
+Each `matchQueries` must be a valid regular expression(escaped).
 
 Example:
 

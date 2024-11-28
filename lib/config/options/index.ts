@@ -2739,20 +2739,9 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'matchStrings',
-    description:
-      'Regex capture rule to use. Valid only within a `customManagers` object.',
-    type: 'array',
-    subType: 'string',
-    format: 'regex',
-    parents: ['customManagers'],
-    cli: false,
-    env: false,
-  },
-  {
     name: 'matchQueries',
     description:
-      'JSON query to use. Valid only within a `customManagers` object of type `jsonata`.',
+      'JSONata query to use. Valid only within a `customManagers` object of type `jsonata`.',
     type: 'array',
     subType: 'string',
     parents: ['customManagers'],
