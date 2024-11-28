@@ -1,11 +1,11 @@
-import { logger } from '../../../../logger';
+import { logger } from '../../../../../test/util';
 import type { JsonataExtractConfig } from './types';
 import { defaultConfig, extractPackageFile } from '.';
 
 describe('modules/manager/custom/jsonata/index', () => {
   it('has default config', () => {
     expect(defaultConfig).toEqual({
-      fileMatch: [],
+      pinDigests: false,
     });
   });
 
@@ -192,16 +192,15 @@ describe('modules/manager/custom/jsonata/index', () => {
   });
 
   it('returns null when content is not json', async () => {
-    jest.mock('renovate/lib/logger');
     const res = await extractPackageFile(
       'not-json',
       'foo-file',
       {} as JsonataExtractConfig,
     );
     expect(res).toBeNull();
-    expect(logger.warn).toHaveBeenCalledWith(
+    expect(logger.logger.warn).toHaveBeenCalledWith(
       expect.anything(),
-      `error parsing 'foo-file'`,
+      `Error parsing 'foo-file'`,
     );
   });
 
@@ -216,28 +215,26 @@ describe('modules/manager/custom/jsonata/index', () => {
   });
 
   it('returns null if invalid template', async () => {
-    jest.mock('renovate/lib/logger');
     const config = {
       matchQueries: [`{"depName": "foo"}`],
       versioningTemplate: '{{#if versioning}}{{versioning}}{{else}}semver', // invalid template
     };
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res).toBeNull();
-    expect(logger.warn).toHaveBeenCalledWith(
+    expect(logger.logger.warn).toHaveBeenCalledWith(
       expect.anything(),
       'Error compiling template for JSONata manager',
     );
   });
 
   it('extracts and does not apply a registryUrlTemplate if the result is an invalid url', async () => {
-    jest.mock('renovate/lib/logger');
     const config = {
       matchQueries: [`{"depName": "foo"}`],
       registryUrlTemplate: 'this-is-not-a-valid-url-{{depName}}',
     };
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res).not.toBeNull();
-    expect(logger.warn).toHaveBeenCalledWith(
+    expect(logger.logger.warn).toHaveBeenCalledWith(
       { value: 'this-is-not-a-valid-url-foo' },
       'Invalid json manager registryUrl',
     );
@@ -257,7 +254,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     };
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res?.deps).toHaveLength(2);
-    expect(logger.warn).toHaveBeenCalledWith(
+    expect(logger.logger.warn).toHaveBeenCalledWith(
       { err: expect.any(Object) },
       `Failed to compile JSONata query: {. Excluding it from queries.`,
     );

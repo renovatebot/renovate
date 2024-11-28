@@ -1,87 +1,34 @@
-import is from '@sindresorhus/is';
-import jsonata from 'jsonata';
+import type { Category } from '../../../../constants';
 import { logger } from '../../../../logger';
-import type { PackageDependency, PackageFileContent } from '../../types';
+import type { PackageFileContent } from '../../types';
 import type { JSONataManagerTemplates, JsonataExtractConfig } from './types';
-import { createDependency } from './utils';
+import { handleMatching, validMatchFields } from './utils';
 
-export const supportedDatasources: string[] = ['*'];
+export const categories: Category[] = ['custom'];
 
 export const defaultConfig = {
-  fileMatch: [],
+  pinDigests: false,
 };
-
-const validMatchFields = [
-  'depName',
-  'packageName',
-  'currentValue',
-  'currentDigest',
-  'datasource',
-  'versioning',
-  'extractVersion',
-  'registryUrl',
-  'depType',
-];
-
-async function handleMatching(
-  json: unknown,
-  packageFile: string,
-  config: JsonataExtractConfig,
-): Promise<PackageDependency[]> {
-  // Pre-compile all JSONata expressions once
-  const compiledExpressions = config.matchQueries
-    .map((query) => {
-      try {
-        return jsonata(query);
-      } catch (err) {
-        logger.warn(
-          { err },
-          `Failed to compile JSONata query: ${query}. Excluding it from queries.`,
-        );
-        return null;
-      }
-    })
-    .filter((expr) => expr !== null);
-
-  // Execute all expressions in parallel
-  const results = await Promise.all(
-    compiledExpressions.map(async (expr) => {
-      const result = (await expr.evaluate(json)) ?? [];
-      return is.array(result) ? result : [result];
-    }),
-  );
-
-  // Flatten results and create dependencies
-  return results
-    .flat()
-    .map((queryResult) => {
-      return createDependency(queryResult as Record<string, string>, config);
-    })
-    .filter((dep) => dep !== null);
-}
+export const supportedDatasources = ['*'];
+export const displayName = 'Jsonata';
 
 export async function extractPackageFile(
   content: string,
   packageFile: string,
   config: JsonataExtractConfig,
 ): Promise<PackageFileContent | null> {
-  let deps: PackageDependency[];
-
   let json;
   try {
     json = JSON.parse(content);
   } catch (err) {
     logger.warn(
-      { err, content, fileName: packageFile },
-      `error parsing '${packageFile}'`,
+      { err, fileName: packageFile },
+      `Error parsing '${packageFile}'`,
     );
     return null;
   }
 
-  deps = await handleMatching(json, packageFile, config);
-
-  // filter all null values
-  deps = deps.filter(is.truthy);
+  const deps = await handleMatching(json, packageFile, config);
   if (deps.length) {
     const res: PackageFileContent & JSONataManagerTemplates = {
       deps,

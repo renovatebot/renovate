@@ -1,4 +1,6 @@
 import { URL } from 'url';
+import is from '@sindresorhus/is';
+import jsonata from 'jsonata';
 import { logger } from '../../../../logger';
 import * as template from '../../../../util/template';
 import type { PackageDependency } from '../../types';
@@ -17,6 +19,43 @@ export const validMatchFields = [
 ] as const;
 
 type ValidMatchFields = (typeof validMatchFields)[number];
+
+export async function handleMatching(
+  json: unknown,
+  packageFile: string,
+  config: JsonataExtractConfig,
+): Promise<PackageDependency[]> {
+  // Pre-compile all JSONata expressions once
+  const compiledExpressions = config.matchQueries
+    .map((query) => {
+      try {
+        return jsonata(query);
+      } catch (err) {
+        logger.warn(
+          { err },
+          `Failed to compile JSONata query: ${query}. Excluding it from queries.`,
+        );
+        return null;
+      }
+    })
+    .filter((expr) => expr !== null);
+
+  // Execute all expressions in parallel
+  const results = await Promise.all(
+    compiledExpressions.map(async (expr) => {
+      const result = (await expr.evaluate(json)) ?? [];
+      return is.array(result) ? result : [result];
+    }),
+  );
+
+  // Flatten results and create dependencies
+  return results
+    .flat()
+    .map((queryResult) => {
+      return createDependency(queryResult as Record<string, string>, config);
+    })
+    .filter((dep) => dep !== null);
+}
 
 export function createDependency(
   queryResult: Record<string, string>,
