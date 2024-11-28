@@ -1,8 +1,9 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
-import { getDep } from '../dockerfile/extract';
+import { BuildpacksRegistryDatasource } from '../../datasource/buildpacks-registry';
 import { isVersion } from '../../versioning/semver';
+import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -14,7 +15,6 @@ import {
   isBuildpackByName,
   isBuildpackByURI,
 } from './schema';
-import { BuildpacksRegistryDatasource } from '../../datasource/buildpacks-registry';
 
 const dockerPrefix = regEx(/^docker:\/?\//);
 const dockerRef = regEx(
@@ -27,7 +27,7 @@ function isDockerRef(ref: string): boolean {
   }
   return false;
 }
-const buildpackRegistryPrefix = regEx(/^urn:cnb:registry:/)
+const buildpackRegistryPrefix = regEx(/^urn:cnb:registry:/);
 const buildpackRegistryId = regEx(
   /^[a-z0-9\-.]+\/[a-z0-9\-.]+(?:@(?<version>.+))?$/,
 );
@@ -77,7 +77,7 @@ export function extractPackageFile(
   if (!descriptor) {
     return null;
   }
-  
+
   if (
     descriptor.io?.buildpacks?.builder &&
     isDockerRef(descriptor.io.buildpacks.builder)
@@ -95,10 +95,10 @@ export function extractPackageFile(
       },
       'Cloud Native Buildpacks builder',
     );
-  
+
     deps.push({ ...dep, commitMessageTopic: 'builder {{depName}}' });
   }
-  
+
   if (
     descriptor.io?.buildpacks?.group &&
     is.array(descriptor.io.buildpacks.group)
@@ -118,13 +118,13 @@ export function extractPackageFile(
           },
           'Cloud Native Buildpack',
         );
-  
+
         deps.push(dep);
       } else if (isBuildpackByURI(group) && isBuildpackRegistryRef(group.uri)) {
-        const dependency = group.uri.replace(buildpackRegistryPrefix, '')
-        
-        if(dependency.includes('@')) {
-          const version = dependency.split('@')[1]
+        const dependency = group.uri.replace(buildpackRegistryPrefix, '');
+
+        if (dependency.includes('@')) {
+          const version = dependency.split('@')[1];
           const dep: PackageDependency = {
             datasource: BuildpacksRegistryDatasource.id,
             currentValue: version,
