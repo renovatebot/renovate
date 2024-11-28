@@ -14,7 +14,6 @@ import { getS3Client, parseS3Url } from '../../../util/s3';
 import { streamToString } from '../../../util/streams';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
-import type { ReleaseResult } from '../types';
 import { getGoogleAuthToken } from '../util';
 import { MAVEN_REPO } from './common';
 import type {
