@@ -103,7 +103,7 @@ export class UvProcessor implements PyProjectProcessor {
             // If there are implicit indexes, check them first and fall back
             // to the default.
             dep.registryUrls = implicitIndexUrls.concat(
-              dep.registryUrls ?? new PypiDatasource().defaultRegistryUrls,
+              dep.registryUrls ?? PypiDatasource.defaultURL,
             );
           }
         }
