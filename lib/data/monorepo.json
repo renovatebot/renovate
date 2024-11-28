@@ -255,6 +255,7 @@
       "https://github.com/dotnet/aspnetcore",
       "https://github.com/dotnet/efcore",
       "https://github.com/dotnet/extensions",
+      "https://github.com/dotnet/fsharp",
       "https://github.com/dotnet/maui",
       "https://github.com/dotnet/roslyn",
       "https://github.com/dotnet/runtime",
@@ -267,6 +268,7 @@
     "dropwizard": "https://github.com/dropwizard/dropwizard",
     "duende-identityserver": "https://github.com/DuendeSoftware/IdentityServer",
     "elastic-apm-agent-rum-js": "https://github.com/elastic/apm-agent-rum-js",
+    "elastic-ecs-dotnet": "https://github.com/elastic/ecs-dotnet",
     "electron-forge": [
       "https://github.com/electron-userland/electron-forge",
       "https://github.com/electron/forge"

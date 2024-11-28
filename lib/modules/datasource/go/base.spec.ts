@@ -16,14 +16,17 @@ const hostRules = mocked(_hostRules);
 describe('modules/datasource/go/base', () => {
   describe('simple cases', () => {
     it.each`
-      module                                  | datasource          | packageName
-      ${'gopkg.in/foo'}                       | ${'github-tags'}    | ${'go-foo/foo'}
-      ${'gopkg.in/foo/bar'}                   | ${'github-tags'}    | ${'foo/bar'}
-      ${'github.com/foo/bar'}                 | ${'github-tags'}    | ${'foo/bar'}
-      ${'bitbucket.org/foo/bar'}              | ${'bitbucket-tags'} | ${'foo/bar'}
-      ${'code.cloudfoundry.org/lager'}        | ${'github-tags'}    | ${'cloudfoundry/lager'}
-      ${'dev.azure.com/foo/bar/_git/baz.git'} | ${'git-tags'}       | ${'https://dev.azure.com/foo/bar/_git/baz'}
-      ${'dev.azure.com/foo/bar/baz.git'}      | ${'git-tags'}       | ${'https://dev.azure.com/foo/bar/_git/baz'}
+      module                                              | datasource          | packageName
+      ${'gopkg.in/foo'}                                   | ${'github-tags'}    | ${'go-foo/foo'}
+      ${'gopkg.in/foo/bar'}                               | ${'github-tags'}    | ${'foo/bar'}
+      ${'github.com/foo/bar'}                             | ${'github-tags'}    | ${'foo/bar'}
+      ${'bitbucket.org/foo/bar'}                          | ${'bitbucket-tags'} | ${'foo/bar'}
+      ${'code.cloudfoundry.org/lager'}                    | ${'github-tags'}    | ${'cloudfoundry/lager'}
+      ${'dev.azure.com/foo/bar/_git/baz.git'}             | ${'git-tags'}       | ${'https://dev.azure.com/foo/bar/_git/baz'}
+      ${'dev.azure.com/foo/bar/baz.git'}                  | ${'git-tags'}       | ${'https://dev.azure.com/foo/bar/_git/baz'}
+      ${'gitea.com/go-chi/cache'}                         | ${'gitea-tags'}     | ${'go-chi/cache'}
+      ${'code.forgejo.org/go-chi/cache'}                  | ${'gitea-tags'}     | ${'go-chi/cache'}
+      ${'codeberg.org/eviedelta/detctime/durationparser'} | ${'gitea-tags'}     | ${'eviedelta/detctime'}
     `(
       '$module -> $datasource: $packageName',
       async ({ module, datasource, packageName }) => {

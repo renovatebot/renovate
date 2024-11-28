@@ -122,7 +122,7 @@ If enabled Renovate tries to determine PR assignees by matching rules defined in
 Read the docs for your platform for details on syntax and allowed file locations:
 
 - [GitHub Docs, About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)
-- [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/code_owners.html)
+- [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
 
 ## assigneesSampleSize
@@ -2463,8 +2463,9 @@ Here's an example config to limit the "noisy" `aws-sdk` package to weekly update
 {
   "packageRules": [
     {
+      "description": "Schedule aws-sdk updates on Sunday nights (9 PM - 12 AM)",
       "matchPackageNames": ["aws-sdk"],
-      "schedule": ["after 9pm on sunday"]
+      "schedule": ["* 21-23 * * 0"]
     }
   ]
 }
@@ -3836,12 +3837,14 @@ Here are some example schedules and their Cron equivalent:
 <!-- prettier-ignore -->
 !!! note
     For Cron schedules, you _must_ use the `*` wildcard for the minutes value, as Renovate doesn't support minute granularity.
+    And the cron schedule must have five comma separated parts.
 
 One example might be that you don't want Renovate to run during your typical business hours, so that your build machines don't get clogged up testing `package.json` updates.
 You could then configure a schedule like this at the repository level:
 
 ```json
 {
+  "description": "Schedule on weekdays at night (10 PM - 4 AM) and anytime on weekends",
   "schedule": ["* 22-23,0-4 * * *", "* * * * 0,6"]
 }
 ```
