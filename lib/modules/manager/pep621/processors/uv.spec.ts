@@ -157,7 +157,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           sources: {
             dep1: { index: 'foo' },
             dep2: { index: 'bar' },
-            dep3: { non_existent_future_source: {} },
+            dep3: { non_existent_future_source: {} } as any,
           },
           index: [
             {
