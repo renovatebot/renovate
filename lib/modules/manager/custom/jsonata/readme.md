@@ -2,9 +2,9 @@ The `jsonata` manager is designed to allow users to manually configure Renovate 
 
 This manager is unique in Renovate in that:
 
-- It is configurable via [JSONata](https://jsonata.org/) queries.
-- Through the use of the `customManagers` config, multiple "JSONata managers" can be created for the same repository.
-- It can extract any `datasource`.
+- It is configurable via [JSONata](https://jsonata.org/) queries
+- Through the use of the `customManagers` config, multiple "JSONata managers" can be created for the same repository
+- It can extract any `datasource`
 
 To configure it, use the following syntax:
 

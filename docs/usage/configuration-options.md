@@ -803,12 +803,13 @@ Each `matchQueries` must be a valid regular expression, optionally with named ca
 
 Example:
 
-````json
+```json
 {
   "matchQueries": [
     "packages.{ \"depName\": package, \"currentValue\": version }"
   ]
 }
+```
 
 ### matchStrings
 
@@ -822,7 +823,7 @@ Example:
     "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
   ]
 }
-````
+```
 
 ### matchStringsStrategy
 
