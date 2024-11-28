@@ -48,16 +48,15 @@ Renovate does not support:
 
 ### Gradle Plugin Support
 
-Renovate can also update [Gradle plugins](https://docs.gradle.org/current/userguide/plugins.html). It supports the
-`id(<pluginId>)` syntax as well as the `kotlin(<kotlinPluginId>)` shortcut for `id(org.jetbrains.kotlin.<kotlinPluginId>)`.
+Renovate can also update [Gradle plugins](https://docs.gradle.org/current/userguide/plugins.html).
+It supports the `id(<pluginId>)` syntax as well as the `kotlin(<kotlinPluginId>)` shortcut for `id(org.jetbrains.kotlin.<kotlinPluginId>)`.
 
 For specifying `packageRules` it is important to know how `depName` and `packageName` are defined for a Gradle plugin:
 
 - The `depName` field is equal to `<pluginId>`
 - The `packageName` field is equal to `<pluginId>:<pluginId>.gradle.plugin`
 
-This is a direct consequence of the [Plugin Marker Artifact](https://docs.gradle.org/current/userguide/plugins.html#sec:plugin_markers)
-naming convention.
+This is a direct consequence of the [Plugin Marker Artifact](https://docs.gradle.org/current/userguide/plugins.html#sec:plugin_markers) naming convention.
 
 ## Gradle Wrapper
 
