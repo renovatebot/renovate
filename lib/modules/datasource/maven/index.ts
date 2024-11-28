@@ -18,7 +18,7 @@ import type {
   ReleaseResult,
 } from '../types';
 import { MAVEN_REPO } from './common';
-import type { MavenDependency, ReleaseMap } from './types';
+import type { MavenDependency } from './types';
 import {
   checkResource,
   createUrlForDependencyPom,
@@ -76,15 +76,15 @@ export class MavenDatasource extends Datasource {
     super(id);
   }
 
-  async fetchReleasesFromMetadata(
+  async fetchVersionsFromMetadata(
     dependency: MavenDependency,
     repoUrl: string,
-  ): Promise<ReleaseMap> {
+  ): Promise<string[]> {
     const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
 
     const cacheNamespace = 'datasource-maven:metadata-xml';
-    const cacheKey = metadataUrl.toString();
-    const cachedVersions = await packageCache.get<ReleaseMap>(
+    const cacheKey = `v2:${metadataUrl}`;
+    const cachedVersions = await packageCache.get<string[]>(
       cacheNamespace,
       cacheKey,
     );
@@ -98,31 +98,19 @@ export class MavenDatasource extends Datasource {
       metadataUrl,
     );
     if (!mavenMetadata) {
-      return {};
+      return [];
     }
 
     const versions = extractVersions(mavenMetadata);
-    const releaseMap = versions.reduce(
-      (acc, version) => ({ ...acc, [version]: null }),
-      {},
-    );
     const cachePrivatePackages = GlobalConfig.get(
       'cachePrivatePackages',
       false,
     );
     if (cachePrivatePackages || isCacheable) {
-      await packageCache.set(cacheNamespace, cacheKey, releaseMap, 30);
+      await packageCache.set(cacheNamespace, cacheKey, versions, 30);
     }
-    return releaseMap;
-  }
 
-  getReleasesFromMap(releaseMap: ReleaseMap): Release[] {
-    const releases = Object.values(releaseMap).filter(is.truthy);
-    // istanbul ignore if: will be removed
-    if (releases.length) {
-      return releases;
-    }
-    return Object.keys(releaseMap).map((version) => ({ version }));
+    return versions;
   }
 
   async getReleases({
@@ -139,14 +127,14 @@ export class MavenDatasource extends Datasource {
 
     logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
 
-    const releaseMap = await this.fetchReleasesFromMetadata(
+    const metadataVersions = await this.fetchVersionsFromMetadata(
       dependency,
       repoUrl,
     );
-    const releases = this.getReleasesFromMap(releaseMap);
-    if (!releases?.length) {
+    if (!metadataVersions?.length) {
       return null;
     }
+    const releases = metadataVersions.map((version) => ({ version }));
 
     logger.debug(
       `Found ${releases.length} new releases for ${dependency.display} in repository ${repoUrl}`,
