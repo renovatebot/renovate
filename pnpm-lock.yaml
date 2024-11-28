@@ -343,8 +343,8 @@ importers:
         specifier: 11.5.0
         version: 11.5.0
       openpgp:
-        specifier: 6.0.0
-        version: 6.0.0
+        specifier: 6.0.1
+        version: 6.0.1
       re2:
         specifier: 1.21.4
         version: 1.21.4
@@ -4934,8 +4934,8 @@ packages:
     resolution: {integrity: sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ==}
     engines: {node: '>=12'}
 
-  openpgp@6.0.0:
-    resolution: {integrity: sha512-8YMuhOV6bP8+J4bCHltvRwol1sBJhxAcJXvwEKpcK65lKpQ0VUbymQR/EuGrzxYnatNSyMyrMgip4j/F0vhZvg==}
+  openpgp@6.0.1:
+    resolution: {integrity: sha512-3lReDKjgWsKFArZT4Y/yj7/Q0q6/VhXarn4WqKEkyiBWckNjrThSGoB1t0IKo3Ke0ClvBpyQfTwumkGUkxOwww==}
     engines: {node: '>= 18.0.0'}
 
   optionator@0.9.4:
@@ -11974,7 +11974,7 @@ snapshots:
     dependencies:
       mimic-fn: 4.0.0
 
-  openpgp@6.0.0:
+  openpgp@6.0.1:
     optional: true
 
   optionator@0.9.4:
