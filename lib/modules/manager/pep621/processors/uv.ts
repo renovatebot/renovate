@@ -38,7 +38,7 @@ export class UvProcessor implements PyProjectProcessor {
     const defaultIndex = uv.index?.find(
       (index) => index.default && !index.explicit,
     );
-    const implicitIndexes = uv.index
+    const implicitIndexUrls = uv.index
       ?.filter((index) => !index.explicit && index.name !== defaultIndex?.name)
       ?.map(({ url }) => url);
 
@@ -51,7 +51,7 @@ export class UvProcessor implements PyProjectProcessor {
 
     // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
     // Skip sources that do not make sense to handle (e.g. path).
-    if (uv.sources || defaultIndex || implicitIndexes) {
+    if (uv.sources || defaultIndex || implicitIndexUrls) {
       for (const dep of deps) {
         // istanbul ignore if
         if (!dep.packageName) {
@@ -99,11 +99,11 @@ export class UvProcessor implements PyProjectProcessor {
             dep.registryUrls = [defaultIndex.url];
           }
 
-          if (implicitIndexes) {
+          if (implicitIndexUrls) {
             // If there are implicit indexes, check them first and fall back
             // to the default.
-            dep.registryUrls = implicitIndexes.concat(
-              dep.registryUrls ?? 'https://pypi.org/pypi/',
+            dep.registryUrls = implicitIndexUrls.concat(
+              dep.registryUrls ?? new PypiDatasource().defaultRegistryUrls,
             );
           }
         }
