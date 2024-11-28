@@ -157,6 +157,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           sources: {
             dep1: { index: 'foo' },
             dep2: { index: 'bar' },
+            dep3: { non_existent_future_source: {} },
           },
           index: [
             {
@@ -195,6 +196,10 @@ describe('modules/manager/pep621/processors/uv', () => {
         depName: 'dep3',
         packageName: 'dep3',
       },
+      {
+        depName: 'dep4',
+        packageName: 'dep4',
+      },
     ];
 
     const result = processor.process(pyproject, dependencies);
@@ -214,8 +219,14 @@ describe('modules/manager/pep621/processors/uv', () => {
       },
       {
         depName: 'dep3',
-        registryUrls: ['https://baz.com/simple', 'https://pypi.org/pypi/'],
+        depType: depTypes.uvSources,
         packageName: 'dep3',
+        skipReason: 'unknown-registry',
+      },
+      {
+        depName: 'dep4',
+        registryUrls: ['https://baz.com/simple', 'https://pypi.org/pypi/'],
+        packageName: 'dep4',
       },
     ]);
   });
