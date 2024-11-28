@@ -4,6 +4,7 @@ import { BuildpacksRegistryDatasource } from '.';
 
 const baseUrl = 'https://registry.buildpacks.io/api/v1/buildpacks/';
 const herokuJSON = `{"latest":{"version":"0.17.1","namespace":"heroku","name":"python","description":"Heroku's buildpack for Python applications.","homepage":"https://github.com/heroku/buildpacks-python","licenses":["BSD-3-Clause"],"stacks":["*"],"id":"75946bf8-3f6a-4af0-a757-614bebfdfcd6"},"versions":[{"version":"0.17.1","_link":"https://registry.buildpacks.io//api/v1/buildpacks/heroku/python/0.17.1"},{"version":"0.17.0","_link":"https://registry.buildpacks.io//api/v1/buildpacks/heroku/python/0.17.0"}]}`;
+const invalidResult = `{}`
 
 describe('modules/datasource/buildpacks-registry/index', () => {
   describe('getReleases', () => {
@@ -26,6 +27,22 @@ describe('modules/datasource/buildpacks-registry/index', () => {
         sourceUrl: 'https://github.com/heroku/buildpacks-python',
       };
       expect(res).toEqual(expectedResponse);
+    });
+    it('returns null on empty result', async () => {
+      httpMock.scope(baseUrl).get('/heroku/empty').reply(200, invalidResult);
+      const res = await getPkgReleases({
+          datasource: BuildpacksRegistryDatasource.id,
+          packageName: 'heroku/empty',
+        });
+      expect(res).toBeNull();
+    });
+    it('handles not found', async () => {
+      httpMock.scope(baseUrl).get('/heroku/notexisting').reply(404);
+      const res = await getPkgReleases({
+          datasource: BuildpacksRegistryDatasource.id,
+          packageName: 'heroku/notexisting',
+        });
+      expect(res).toBeNull();
     });
   });
 });

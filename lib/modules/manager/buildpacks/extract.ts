@@ -32,10 +32,7 @@ const buildpackRegistryId = regEx(
   /^[a-z0-9\-.]+\/[a-z0-9\-.]+(?:@(?<version>.+))?$/,
 );
 
-function isBuildpackRegistryId(ref: string | undefined): boolean {
-  if (ref === undefined) {
-    return false;
-  }
+function isBuildpackRegistryId(ref: string): boolean {
   const bpRegistryMatch = buildpackRegistryId.exec(ref);
   if (!bpRegistryMatch) {
     return false;
