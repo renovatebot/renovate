@@ -337,12 +337,12 @@ export class Result<T extends Val, E extends Val = Error> {
    *
    *   ```ts
    *
-   *   const value = Result.err('bar').unwrapOrElse('foo');
+   *   const value = Result.err('bar').unwrapOr('foo');
    *   expect(val).toBe('foo');
    *
    *   ```
    */
-  unwrapOrElse(fallback: T): T {
+  unwrapOr(fallback: T): T {
     if (this.res.ok) {
       return this.res.val;
     }
@@ -706,14 +706,14 @@ export class AsyncResult<T extends Val, E extends Val>
    *
    *   ```ts
    *
-   *   const val = await Result.wrap(readFile('foo.txt')).unwrapOrElse('bar');
+   *   const val = await Result.wrap(readFile('foo.txt')).unwrapOr('bar');
    *   expect(val).toBe('bar');
    *   expect(err).toBeUndefined();
    *
    *   ```
    */
-  unwrapOrElse(fallback: T): Promise<T> {
-    return this.asyncResult.then<T>((res) => res.unwrapOrElse(fallback));
+  unwrapOr(fallback: T): Promise<T> {
+    return this.asyncResult.then<T>((res) => res.unwrapOr(fallback));
   }
 
   /**
