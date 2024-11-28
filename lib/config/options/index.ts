@@ -2733,7 +2733,7 @@ const options: RenovateOptions[] = [
     description:
       'Custom manager to use. Valid only within a `customManagers` object.',
     type: 'string',
-    allowedValues: ['regex'],
+    allowedValues: ['regex', 'jsonata'],
     parents: ['customManagers'],
     cli: false,
     env: false,

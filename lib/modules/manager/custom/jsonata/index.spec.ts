@@ -65,8 +65,6 @@ describe('modules/manager/custom/jsonata/index', () => {
         (dep) => dep.extractVersion === 'custom-extract-version',
       ),
     ).toHaveLength(1);
-    // eslint-disable-next-line
-    console.log(res?.deps);
     expect(
       res?.deps.filter((dep) =>
         dep.registryUrls?.includes('https://registry.npmjs.org/'),
