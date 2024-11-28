@@ -21,7 +21,7 @@ describe('modules/manager/custom/jsonata/index', () => {
         "data_source": "nuget",
         "versioning": "maven",
         "extract_version": "custom-extract-version",
-        "registry_url": "http://brr.brr",
+        "registry_url": "https://brr.brr",
         "dep_type": "dev"
       }
       ]
@@ -83,7 +83,7 @@ describe('modules/manager/custom/jsonata/index', () => {
         "data_source": "nuget",
         "versioning": "maven",
         "extract_version": "custom-extract-version",
-        "registry_url": "http://brr.brr",
+        "registry_url": "https://brr.brr",
         "dep_type": "dev"
       },
       {
@@ -118,7 +118,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       extractVersionTemplate:
         '{{#if extractVersion}}{{extractVersion}}{{else}}default-extract-version{{/if}}',
       registryUrlTemplate:
-        '{{#if registryUrl}}{{registryUrl}}{{else}}http://default.registry.url{{/if}}',
+        '{{#if registryUrl}}{{registryUrl}}{{else}}https://default.registry.url{{/if}}',
       depTypeTemplate:
         '{{#if depType}}{{depType}}{{else}}default-dep-type{{/if}}',
     };
@@ -148,7 +148,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       ),
     ).toHaveLength(1);
     expect(
-      res?.deps.filter((dep) => dep.registryUrls?.includes('http://brr.brr/')),
+      res?.deps.filter((dep) => dep.registryUrls?.includes('https://brr.brr/')),
     ).toHaveLength(1);
     expect(res?.deps.filter((dep) => dep.depType === 'dev')).toHaveLength(1);
 
@@ -177,7 +177,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     ).toHaveLength(1);
     expect(
       res?.deps.filter((dep) =>
-        dep.registryUrls?.includes('http://default.registry.url/'),
+        dep.registryUrls?.includes('https://default.registry.url/'),
       ),
     ).toHaveLength(1);
     expect(
