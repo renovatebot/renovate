@@ -21,7 +21,7 @@ describe('modules/manager/custom/jsonata/index', () => {
         "data_source": "nuget",
         "versioning": "maven",
         "extract_version": "custom-extract-version",
-        "registry_url": "https://brr.brr",
+        "registry_url": "https://registry.npmjs.org",
         "dep_type": "dev"
       }
       ]
@@ -65,8 +65,12 @@ describe('modules/manager/custom/jsonata/index', () => {
         (dep) => dep.extractVersion === 'custom-extract-version',
       ),
     ).toHaveLength(1);
+    // eslint-disable-next-line
+    console.log(res?.deps);
     expect(
-      res?.deps.filter((dep) => dep.registryUrls?.includes('http://brr.brr/')),
+      res?.deps.filter((dep) =>
+        dep.registryUrls?.includes('https://registry.npmjs.org/'),
+      ),
     ).toHaveLength(1);
     expect(res?.deps.filter((dep) => dep.depType === 'dev')).toHaveLength(1);
   });
@@ -83,7 +87,7 @@ describe('modules/manager/custom/jsonata/index', () => {
         "data_source": "nuget",
         "versioning": "maven",
         "extract_version": "custom-extract-version",
-        "registry_url": "https://brr.brr",
+        "registry_url": "https://registry.npmjs.org",
         "dep_type": "dev"
       },
       {
@@ -148,7 +152,9 @@ describe('modules/manager/custom/jsonata/index', () => {
       ),
     ).toHaveLength(1);
     expect(
-      res?.deps.filter((dep) => dep.registryUrls?.includes('https://brr.brr/')),
+      res?.deps.filter((dep) =>
+        dep.registryUrls?.includes('https://registry.npmjs.org/'),
+      ),
     ).toHaveLength(1);
     expect(res?.deps.filter((dep) => dep.depType === 'dev')).toHaveLength(1);
 
