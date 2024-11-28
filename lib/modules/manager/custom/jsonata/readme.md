@@ -1,17 +1,18 @@
-The `json-jsonata` manager is designed to allow users to manually configure Renovate for how to find dependencies in JSON files that aren't detected by the built-in package managers.
+The `jsonata` manager is designed to allow users to manually configure Renovate for how to find dependencies in JSON files that aren't detected by the built-in package managers.
 
 This manager is unique in Renovate in that:
 
 - It is configurable via [JSONata](https://jsonata.org/) queries.
-- Through the use of the `jsonataManagers` config, multiple "JSONata managers" can be created for the same repository.
+- Through the use of the `customManagers` config, multiple "JSONata managers" can be created for the same repository.
 - It can extract any `datasource`.
 
 To configure it, use the following syntax:
 
-```
+```javascript
 {
-  "jsonataManagers": [
+  "customManagers": [
     {
+      "type": "jsonata",
       "fileMatch": ["<file match pattern>"],
       "matchQueries": ['<query>'],
       ...
@@ -36,9 +37,9 @@ Where `<query>` is a [JSONata](https://docs.jsonata.org/overview.html) query tha
 }
 ```
 
-The meaning of each field is the same as the meaning of the capturing groups for regex managers.
+The meaning of each field is the same as the meaning of the capturing groups for the `regex` manager.
 
-The following configuration is also available for each `jsonManager` element, again with the same meaning as for the regex manager:
+The following configuration is also available for each `jsonata` manager's element, again with the same meaning as for the regex manager:
 
 - `depNameTemplate`.
 - `packageNameTemplate`.

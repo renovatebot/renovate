@@ -245,6 +245,18 @@ describe('modules/manager/custom/jsonata/index', () => {
     expect(res?.deps).toHaveLength(2);
   });
 
+  it('excludes and warns if invalid jsonata query found', async () => {
+    const config = {
+      matchQueries: ['{', `{"depName": "foo"}`, `{"depName": "bar"}`],
+    };
+    const res = await extractPackageFile('{}', 'unused', config);
+    expect(res?.deps).toHaveLength(2);
+    expect(logger.warn).toHaveBeenCalledWith(
+      { err: expect.any(Object) },
+      `Failed to compile JSONata query: {. Excluding it from queries.`,
+    );
+  });
+
   it('extracts dependency with autoReplaceStringTemplate', async () => {
     const config = {
       matchQueries: [`{"depName": "foo"}`],

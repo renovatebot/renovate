@@ -13,7 +13,6 @@ export interface JSONataManagerTemplates {
 }
 
 export interface JSONataManagerConfig extends JSONataManagerTemplates {
-  // fileMatch: string[];
   matchQueries: string[];
   autoReplaceStringTemplate?: string;
 }

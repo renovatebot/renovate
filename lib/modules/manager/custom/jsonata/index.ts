@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import jsonata from 'jsonata';
 import { logger } from '../../../../logger';
-import type { PackageDependency, PackageFile, Result } from '../../types';
+import type { PackageDependency, PackageFileContent } from '../../types';
 import type { JSONataManagerTemplates, JsonataExtractConfig } from './types';
 import { createDependency } from './utils';
 
@@ -10,14 +10,6 @@ export const supportedDatasources: string[] = ['*'];
 export const defaultConfig = {
   fileMatch: [],
 };
-
-export interface CustomPackageFile extends PackageFile {
-  matchQueries: string[];
-}
-
-export function testJsonQuery(query: string): void {
-  jsonata(query);
-}
 
 const validMatchFields = [
   'depName',
@@ -31,24 +23,48 @@ const validMatchFields = [
   'depType',
 ];
 
-function handleMatching(
+async function handleMatching(
   json: unknown,
   packageFile: string,
   config: JsonataExtractConfig,
-): PackageDependency[] {
-  return config.matchQueries
-    .flatMap((matchQuery) => jsonata(matchQuery).evaluate(json) ?? [])
-    .map((queryResult) =>
-      createDependency(queryResult as Record<string, string>, config),
-    )
-    .filter(is.truthy);
+): Promise<PackageDependency[]> {
+  // Pre-compile all JSONata expressions once
+  const compiledExpressions = config.matchQueries
+    .map((query) => {
+      try {
+        return jsonata(query);
+      } catch (err) {
+        logger.warn(
+          { err },
+          `Failed to compile JSONata query: ${query}. Excluding it from queries.`,
+        );
+        return null;
+      }
+    })
+    .filter((expr) => expr !== null);
+
+  // Execute all expressions in parallel
+  const results = await Promise.all(
+    compiledExpressions.map(async (expr) => {
+      const result = (await expr.evaluate(json)) ?? [];
+      return is.array(result) ? result : [result];
+    }),
+  );
+
+  // Flatten results and create dependencies
+  return results
+    .flat()
+    .map((queryResult) => {
+      return createDependency(queryResult as Record<string, string>, config);
+    })
+    .filter((dep) => dep !== null);
 }
 
-export function extractPackageFile(
+export async function extractPackageFile(
   content: string,
   packageFile: string,
   config: JsonataExtractConfig,
-): Result<PackageFile | null> {
+): Promise<PackageFileContent | null> {
   let deps: PackageDependency[];
 
   let json;
@@ -62,12 +78,12 @@ export function extractPackageFile(
     return null;
   }
 
-  deps = handleMatching(json, packageFile, config);
+  deps = await handleMatching(json, packageFile, config);
 
   // filter all null values
   deps = deps.filter(is.truthy);
   if (deps.length) {
-    const res: CustomPackageFile & JSONataManagerTemplates = {
+    const res: PackageFileContent & JSONataManagerTemplates = {
       deps,
       matchQueries: config.matchQueries,
     };
