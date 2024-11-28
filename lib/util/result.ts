@@ -142,6 +142,9 @@ export class Result<T extends Val, E extends Val = Error> {
   static wrap<T extends Val, E extends Val = Error>(
     callback: () => RawValue<T>,
   ): Result<T, E>;
+  static wrap<T extends Val, E extends Val = Error>(
+    callback: () => Promise<RawValue<T>>,
+  ): AsyncResult<T, E>;
   static wrap<T extends Val, E extends Val = Error, EE extends Val = never>(
     promise: Promise<Result<T, EE>>,
   ): AsyncResult<T, E | EE>;
@@ -157,6 +160,7 @@ export class Result<T extends Val, E extends Val = Error> {
     input:
       | SafeParseReturnType<Input, T>
       | (() => RawValue<T>)
+      | (() => Promise<RawValue<T>>)
       | Promise<Result<T, EE>>
       | Promise<RawValue<T>>,
   ): Result<T, ZodError<Input>> | Result<T, E | EE> | AsyncResult<T, E | EE> {
@@ -170,6 +174,11 @@ export class Result<T extends Val, E extends Val = Error> {
 
     try {
       const result = input();
+
+      if (result instanceof Promise) {
+        return AsyncResult.wrap(result);
+      }
+
       return Result.ok(result);
     } catch (error) {
       return Result.err(error);
