@@ -1,11 +1,9 @@
 import is from '@sindresorhus/is';
-import { DateTime } from 'luxon';
 import type { XmlDocument } from 'xmldoc';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
-import { newlineRegex, regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
@@ -24,7 +22,6 @@ import type { MavenDependency, ReleaseMap } from './types';
 import {
   checkResource,
   createUrlForDependencyPom,
-  downloadHttpProtocol,
   downloadMavenXml,
   getDependencyInfo,
   getDependencyParts,
@@ -54,11 +51,6 @@ function extractVersions(metadata: XmlDocument): string[] {
   }
   return elements.map((el) => el.val);
 }
-
-const mavenCentralHtmlVersionRegex = regEx(
-  '^<a href="(?<version>[^"]+)/" title="(?:[^"]+)/">(?:[^"]+)/</a>\\s+(?<releaseTimestamp>\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d)\\s+-$',
-  'i',
-);
 
 export const defaultRegistryUrls = [MAVEN_REPO];
 
@@ -124,72 +116,9 @@ export class MavenDatasource extends Datasource {
     return releaseMap;
   }
 
-  async addReleasesFromIndexPage(
-    inputReleaseMap: ReleaseMap,
-    dependency: MavenDependency,
-    repoUrl: string,
-  ): Promise<ReleaseMap> {
-    if (!repoUrl.startsWith(MAVEN_REPO)) {
-      return inputReleaseMap;
-    }
-
-    const cacheNs = 'datasource-maven:index-html-releases';
-    const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
-    let workingReleaseMap = await packageCache.get<ReleaseMap>(
-      cacheNs,
-      cacheKey,
-    );
-    if (!workingReleaseMap) {
-      workingReleaseMap = {};
-      let retryEarlier = false;
-      try {
-        const indexUrl = getMavenUrl(dependency, repoUrl, '');
-        const res = await downloadHttpProtocol(this.http, indexUrl);
-        if (res) {
-          for (const line of res.body.split(newlineRegex)) {
-            const match = line.trim().match(mavenCentralHtmlVersionRegex);
-            if (match) {
-              const { version, releaseTimestamp: timestamp } =
-                match?.groups ?? /* istanbul ignore next: hard to test */ {};
-              if (version && timestamp) {
-                const date = DateTime.fromFormat(
-                  timestamp,
-                  'yyyy-MM-dd HH:mm',
-                  {
-                    zone: 'UTC',
-                  },
-                );
-                if (date.isValid) {
-                  const releaseTimestamp = date.toISO();
-                  workingReleaseMap[version] = { version, releaseTimestamp };
-                }
-              }
-            }
-          }
-        }
-      } catch (err) /* istanbul ignore next */ {
-        retryEarlier = true;
-        logger.debug(
-          { dependency, err },
-          'Failed to get releases from package index page',
-        );
-      }
-      const cacheTTL = retryEarlier
-        ? /* istanbul ignore next: hard to test */ 60
-        : 24 * 60;
-      await packageCache.set(cacheNs, cacheKey, workingReleaseMap, cacheTTL);
-    }
-
-    const releaseMap = { ...inputReleaseMap };
-    for (const version of Object.keys(releaseMap)) {
-      releaseMap[version] ||= workingReleaseMap[version] ?? null;
-    }
-
-    return releaseMap;
-  }
-
   getReleasesFromMap(releaseMap: ReleaseMap): Release[] {
     const releases = Object.values(releaseMap).filter(is.truthy);
+    // istanbul ignore if: will be removed
     if (releases.length) {
       return releases;
     }
@@ -210,9 +139,7 @@ export class MavenDatasource extends Datasource {
 
     logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
 
-    let releaseMap = await this.fetchReleasesFromMetadata(dependency, repoUrl);
-    releaseMap = await this.addReleasesFromIndexPage(
-      releaseMap,
+    const releaseMap = await this.fetchReleasesFromMetadata(
       dependency,
       repoUrl,
     );

@@ -2463,8 +2463,9 @@ Here's an example config to limit the "noisy" `aws-sdk` package to weekly update
 {
   "packageRules": [
     {
+      "description": "Schedule aws-sdk updates on Sunday nights (9 PM - 12 AM)",
       "matchPackageNames": ["aws-sdk"],
-      "schedule": ["after 9pm on sunday"]
+      "schedule": ["* 21-23 * * 0"]
     }
   ]
 }
@@ -3843,6 +3844,7 @@ You could then configure a schedule like this at the repository level:
 
 ```json
 {
+  "description": "Schedule on weekdays at night (10 PM - 4 AM) and anytime on weekends",
   "schedule": ["* 22-23,0-4 * * *", "* * * * 0,6"]
 }
 ```
