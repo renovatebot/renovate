@@ -31,16 +31,27 @@ describe('util/result', () => {
     });
 
     describe('Wrapping', () => {
-      it('wraps callback', () => {
+      it('wraps callback returning value', () => {
         const res = Result.wrap(() => 42);
         expect(res).toEqual(Result.ok(42));
       });
 
-      it('handles callback error', () => {
+      it('handles throw in callback', () => {
         const res = Result.wrap(() => {
           throw 'oops';
         });
         expect(res).toEqual(Result.err('oops'));
+      });
+
+      it('wraps callback returning promise', () => {
+        const res = Result.wrap(() => Promise.resolve(42));
+        expect(res).toEqual(AsyncResult.ok(42));
+      });
+
+      it('wraps callback returning failed promise', () => {
+        const err = new Error('unknown');
+        const res = Result.wrap(() => Promise.reject(err));
+        expect(res).toEqual(AsyncResult.err(err));
       });
 
       it('wraps nullable callback', () => {
