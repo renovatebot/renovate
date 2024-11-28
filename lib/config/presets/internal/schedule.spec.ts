@@ -89,6 +89,7 @@ describe('config/presets/internal/schedule', () => {
     it.each`
       datetime                     | expected
       ${'2017-01-01T00:50:00.000'} | ${true}
+      ${'2017-01-02T00:50:00.000'} | ${false}
       ${'2017-04-01T01:50:00.000'} | ${true}
       ${'2017-07-01T02:50:00.000'} | ${true}
       ${'2017-10-01T03:50:00.000'} | ${true}
