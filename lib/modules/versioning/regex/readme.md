@@ -51,3 +51,17 @@ Here is another example, this time for handling Bitnami Docker images, which use
   ]
 }
 ```
+
+Here is another example, this time for handling `ghcr.io/linuxserver/openssh-server` Docker images, which use `patch`, `build` and `revision` indicators with string prefixes:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNamees": ["ghcr.io/linuxserver/openssh-server"],
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)_p(?<patch>\\d+)-r(?<build>\\d)-ls(?<revision>.+)$"
+    }
+  ]
+}
+```
