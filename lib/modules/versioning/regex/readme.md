@@ -12,7 +12,8 @@ The valid capture groups for `regex` versioning are:
 
 The compatibility concept was originally introduced for Docker versioning but sometimes package authors may use/misuse suffixes to mean compatibility in other versioning schemes.
 
-**Important: all capture groups must contain only purely numeric values.** So even if there is a string prefix which is identical in all available versions, it must not be part of the capture group. For example a `build` capture group containing `r4` cannot be evaluated as number; Renovate cannot compare the `build` in this case. The capture group must be `4` instead.
+**Important: all capture groups must contain only purely numeric values.**
+Even if there is a string prefix which is identical in all available versions, it must not be part of the capture group. For example a `build` capture group containing `r4` cannot be evaluated as number; Renovate cannot compare the `build` in this case. The capture group must be `4` instead.
 
 Here is an example of using `regex` versioning to correct behavior of the `guava` Maven package, which misuses suffixes as compatibility indicators:
 
