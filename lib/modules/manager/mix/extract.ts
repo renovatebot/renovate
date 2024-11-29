@@ -4,9 +4,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexDatasource } from '../../datasource/hex';
-import * as semver from '../../versioning/semver';
 import type { PackageDependency, PackageFileContent } from '../types';
-import {api as gitVersioning} from '../../versioning/git'
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
@@ -16,11 +14,11 @@ const gitRegexp = regEx(/git:\s*"(?<value>[^"]+)"/);
 const githubRegexp = regEx(/github:\s*"(?<value>[^"]+)"/);
 const refRegexp = regEx(/ref:\s*"(?<value>[^"]+)"/);
 const branchOrTagRegexp = regEx(/(?:branch|tag):\s*"(?<value>[^"]+)"/);
-const organizationRegexp = regEx(/organization:\s*"(?<value>[^"]+)"/); // HEX only
+const organizationRegexp = regEx(/organization:\s*"(?<value>[^"]+)"/);
 const commentMatchRegExp = regEx(/#.*$/);
 const lockedVersionRegExp = regEx(
-  /^\s+"(?<app>\w+)".*?"(?<lockedVersion>v?\d+\.\d+\.\d+)"/,
-); // wrong regex for semver v#.#.#
+  /^\s+"(?<app>\w+)".*?"(?<lockedVersion>\d+\.\d+\.\d+)"/,
+);
 
 export async function extractPackageFile(
   content: string,
@@ -48,21 +46,26 @@ export async function extractPackageFile(
         const organization = organizationRegexp.exec(opts)?.groups?.value;
 
         let dep: PackageDependency;
-        dep = handleGitDependecy({
-          branchOrTag,
-          git,
-          github,
-          ref,
-        }) ?? {
-          currentValue: requirement,
-          datasource: HexDatasource.id,
-          packageName: organization ? `${app}:${organization}` : app,
-          // this was the original
-          currentVersion: requirement?.startsWith('==')
-            ? requirement.replace(regEx(/^==\s*/), '')
-            : undefined,
-        };
-        dep.depName = app;
+
+        if (git ?? github) {
+          dep = {
+            depName: app,
+            currentDigest: ref,
+            currentValue: branchOrTag,
+            datasource: git ? GitTagsDatasource.id : GithubTagsDatasource.id,
+            packageName: git ?? github,
+          };
+        } else {
+          dep = {
+            depName: app,
+            currentValue: requirement,
+            datasource: HexDatasource.id,
+            packageName: organization ? `${app}:${organization}` : app,
+          };
+          if (requirement?.startsWith('==')) {
+            dep.currentVersion = requirement.replace(regEx(/^==\s*/), '');
+          }
+        }
 
         deps.set(app, dep);
         logger.trace({ dep }, `setting ${app}`);
@@ -82,9 +85,6 @@ export async function extractPackageFile(
       if (groups?.app && groups?.lockedVersion) {
         const dep = deps.get(groups.app);
         if (!dep) {
-          logger.debug(
-            `${groups.app} exists in deps() but is missing in lockfile.`,
-          );
           continue;
         }
         dep.lockedVersion = groups.lockedVersion;
@@ -100,47 +100,4 @@ export async function extractPackageFile(
     deps: depsArray,
     lockFiles: lockFileContent ? [lockFileName] : undefined,
   };
-}
-
-function handleGitDependecy(args: {
-  // app: string,
-  ref?: string;
-  branchOrTag?: string;
-  git?: string;
-  github?: string;
-}): PackageDependency | undefined {
-  const { ref, branchOrTag, git, github } = args;
-
-  // not a git dep
-  if (!(git ?? github)) return undefined;
-
-  // const containsManager = app === 'make_dep' // TODO add supporting regex
-  // let skipReason: SkipReason = !(ref || branchOrTag) || containsManager ? undefined: "unsupported"
-  // one of branch, ref or tag
-  const isSemverVersion = semver.isVersion((ref ?? branchOrTag)!);
-
-  const dep: PackageDependency = {
-    // skipReason: "git-plugin",
-    
-    currentValue: branchOrTag,
-    datasource: git ? GitTagsDatasource.id : GithubTagsDatasource.id,
-    packageName: git ?? github,
-  };
-
-  if (isSemverVersion && ref) { // ref is semver tag
-    dep.currentValue = ref;
-    dep.versioning = semver.id;
-  } else if (isSemverVersion) { // ref is semver branch
-    dep.currentValue = branchOrTag;
-    dep.versioning = semver.id;
-  } else if(gitVersioning.isVersion(ref)) { // ref is SHA
-    dep.currentDigest = ref
-  } else {
-    // dep.skipReason = 'unsupported';
-    dep.warnings = [{message:"hahsa",topic:"topic"}]
-    dep.currentValue = branchOrTag
-    dep.currentDigest = ref
-  }
-
-  return dep;
 }
