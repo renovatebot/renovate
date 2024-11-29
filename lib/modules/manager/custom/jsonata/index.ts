@@ -1,5 +1,6 @@
 import type { Category } from '../../../../constants';
 import { logger } from '../../../../logger';
+import { parseJson } from '../../../../util/common';
 import type { PackageFileContent } from '../../types';
 import type { JSONataManagerTemplates, JsonataExtractConfig } from './types';
 import { handleMatching, validMatchFields } from './utils';
@@ -10,7 +11,7 @@ export const defaultConfig = {
   pinDigests: false,
 };
 export const supportedDatasources = ['*'];
-export const displayName = 'Jsonata';
+export const displayName = 'JSONata';
 
 export async function extractPackageFile(
   content: string,
@@ -19,7 +20,7 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   let json;
   try {
-    json = JSON.parse(content);
+    json = parseJson(content, packageFile);
   } catch (err) {
     logger.warn(
       { err, fileName: packageFile },
@@ -28,11 +29,15 @@ export async function extractPackageFile(
     return null;
   }
 
+  if (!json) {
+    return null;
+  }
+
   const deps = await handleMatching(json, packageFile, config);
   if (deps.length) {
     const res: PackageFileContent & JSONataManagerTemplates = {
       deps,
-      matchQueries: config.matchQueries,
+      matchStrings: config.matchStrings,
     };
     // copy over templates for autoreplace
     for (const field of validMatchFields.map(

@@ -27,7 +27,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       ]
     }`;
     const config = {
-      matchQueries: [
+      matchStrings: [
         `packages.{
             "depName": dep_name,
             "packageName": package_name,
@@ -92,7 +92,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       }]
     }`;
     const config = {
-      matchQueries: [
+      matchStrings: [
         `packages.{
             "depName": dep_name,
             "packageName": package_name,
@@ -202,9 +202,18 @@ describe('modules/manager/custom/jsonata/index', () => {
     );
   });
 
+  it('returns null when no content', async () => {
+    const res = await extractPackageFile(
+      '',
+      'foo-file',
+      {} as JsonataExtractConfig,
+    );
+    expect(res).toBeNull();
+  });
+
   it('returns null if no dependencies found', async () => {
     const config = {
-      matchQueries: [
+      matchStrings: [
         'packages.{ "depName": package, "currentValue": version, "versioning ": versioning }',
       ],
     };
@@ -214,7 +223,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('returns null if invalid template', async () => {
     const config = {
-      matchQueries: [`{"depName": "foo"}`],
+      matchStrings: [`{"depName": "foo"}`],
       versioningTemplate: '{{#if versioning}}{{versioning}}{{else}}semver', // invalid template
     };
     const res = await extractPackageFile('{}', 'unused', config);
@@ -227,7 +236,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('extracts and does not apply a registryUrlTemplate if the result is an invalid url', async () => {
     const config = {
-      matchQueries: [`{"depName": "foo"}`],
+      matchStrings: [`{"depName": "foo"}`],
       registryUrlTemplate: 'this-is-not-a-valid-url-{{depName}}',
     };
     const res = await extractPackageFile('{}', 'unused', config);
@@ -238,9 +247,9 @@ describe('modules/manager/custom/jsonata/index', () => {
     );
   });
 
-  it('extracts multiple dependencies with multiple matchQueries', async () => {
+  it('extracts multiple dependencies with multiple matchStrings', async () => {
     const config = {
-      matchQueries: [`{"depName": "foo"}`, `{"depName": "bar"}`],
+      matchStrings: [`{"depName": "foo"}`, `{"depName": "bar"}`],
     };
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res?.deps).toHaveLength(2);
@@ -248,7 +257,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('excludes and warns if invalid jsonata query found', async () => {
     const config = {
-      matchQueries: ['{', `{"depName": "foo"}`, `{"depName": "bar"}`],
+      matchStrings: ['{', `{"depName": "foo"}`, `{"depName": "bar"}`],
     };
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res?.deps).toHaveLength(2);
@@ -260,7 +269,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('extracts dependency with autoReplaceStringTemplate', async () => {
     const config = {
-      matchQueries: [`{"depName": "foo"}`],
+      matchStrings: [`{"depName": "foo"}`],
       autoReplaceStringTemplate: 'auto-replace-string-template',
     };
     const res = await extractPackageFile('{}', 'values.yaml', config);

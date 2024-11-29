@@ -14,7 +14,7 @@ To configure it, use the following syntax:
     {
       "type": "jsonata",
       "fileMatch": ["<file match pattern>"],
-      "matchQueries": ['<query>'],
+      "matchStrings": ['<query>'],
       ...
     }
   ]

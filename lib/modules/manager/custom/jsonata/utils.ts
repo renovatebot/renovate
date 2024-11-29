@@ -26,7 +26,7 @@ export async function handleMatching(
   config: JsonataExtractConfig,
 ): Promise<PackageDependency[]> {
   // Pre-compile all JSONata expressions once
-  const compiledExpressions = config.matchQueries
+  const compiledExpressions = config.matchStrings
     .map((query) => {
       try {
         return jsonata(query);

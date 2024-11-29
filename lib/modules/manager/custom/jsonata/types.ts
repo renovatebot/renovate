@@ -13,7 +13,7 @@ export interface JSONataManagerTemplates {
 }
 
 export interface JSONataManagerConfig extends JSONataManagerTemplates {
-  matchQueries: string[];
+  matchStrings: string[];
   autoReplaceStringTemplate?: string;
 }
 
@@ -21,5 +21,5 @@ export interface JsonataExtractConfig
   extends ExtractConfig,
     JSONataManagerTemplates {
   autoReplaceStringTemplate?: string;
-  matchQueries: string[];
+  matchStrings: string[];
 }

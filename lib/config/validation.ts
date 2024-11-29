@@ -530,7 +530,6 @@ export async function validateConfig(
                 'customType',
                 'description',
                 'fileMatch',
-                'matchQueries',
                 'matchStrings',
                 'matchStringsStrategy',
                 'depNameTemplate',

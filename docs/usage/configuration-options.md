@@ -797,30 +797,37 @@ It will be compiled using Handlebars and the regex `groups` result.
 If `extractVersion` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
-### matchQueries
-
-Each `matchQueries` must be a valid regular expression(escaped).
+Each `matchQueries` must be a valid jsonata query(escaped).
 
 Example:
 
 ```json
 {
-  "matchQueries": [
-    "packages.{ \"depName\": package, \"currentValue\": version }"
-  ]
+  "matchQueries": []
 }
 ```
 
 ### matchStrings
 
-Each `matchStrings` must be a valid regular expression, optionally with named capture groups.
+Each `matchStrings` must be one of thes two:
+
+1. a valid regular expression, optionally with named capture groups
+2. a valid [JSONata](https://docs.jsonata.org/overview.html) query(escaped)
 
 Example:
 
-```json
+```json title="matchStrings with a valid regular expression"
 {
   "matchStrings": [
     "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
+  ]
+}
+```
+
+```json title="matchStrings with a valid jsonata query"
+{
+  "matchStrings": [
+    "packages.{ \"depName\": package, \"currentValue\": version }"
   ]
 }
 ```
