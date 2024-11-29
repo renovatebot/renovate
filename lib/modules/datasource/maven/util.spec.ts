@@ -2,13 +2,13 @@ import type Request from 'got/dist/source/core';
 import { partial } from '../../../../test/util';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { Http, HttpError } from '../../../util/http';
+import type { MavenFetchError } from './types';
 import {
   checkResource,
   downloadHttpProtocol,
   downloadMavenXml,
   downloadS3Protocol,
 } from './util';
-import { MavenFetchError } from './types';
 
 const http = new Http('test');
 
