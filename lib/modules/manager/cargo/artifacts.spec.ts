@@ -11,6 +11,7 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import { ExecError } from '../../../util/exec/exec-error';
 import * as _hostRules from '../../../util/host-rules';
+import { CrateDatasource } from '../../datasource/crate';
 import type { UpdateArtifactsConfig } from '../types';
 import * as cargo from '.';
 
@@ -132,6 +133,7 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -290,18 +292,21 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
+        datasource: CrateDatasource.id,
       },
       {
         depName: 'dep2',
         packageName: 'dep2',
         lockedVersion: '1.0.0',
         newVersion: '1.0.2',
+        datasource: CrateDatasource.id,
       },
       {
         depName: 'dep3',
         packageName: 'dep3',
         lockedVersion: '1.0.0',
         newVersion: '1.0.3',
+        datasource: CrateDatasource.id,
       },
     ];
 
