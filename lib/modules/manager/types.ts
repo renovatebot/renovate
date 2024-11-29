@@ -64,7 +64,6 @@ export interface PackageFileContent<T = Record<string, any>>
   packageFileVersion?: string;
   skipInstalls?: boolean | null;
   matchStrings?: string[];
-  matchQueries?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
 }
 
