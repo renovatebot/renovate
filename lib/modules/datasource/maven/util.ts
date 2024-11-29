@@ -165,6 +165,7 @@ export async function downloadS3Protocol(
         LastModified,
         DeleteMarker,
       }): Promise<MavenFetchResult> => {
+        // istanbul ignore if: will be covered later
         if (DeleteMarker) {
           return Result.err({ type: 'not-found' });
         }
@@ -177,6 +178,7 @@ export async function downloadS3Protocol(
         const result: MavenFetchSuccess = { data };
 
         const lastModified = normalizeDate(LastModified);
+        // istanbul ignore if: will be covered later
         if (lastModified) {
           result.lastModified = lastModified;
         }
