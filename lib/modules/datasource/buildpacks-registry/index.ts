@@ -6,6 +6,7 @@ import { Datasource } from '../datasource';
 import { ReleasesConfig } from '../schema';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { BuildpacksRegistryResponseSchema } from './schema';
+import urlJoin from 'url-join';
 
 export class BuildpacksRegistryDatasource extends Datasource {
   static readonly id = 'buildpacks-registry';
@@ -33,7 +34,7 @@ export class BuildpacksRegistryDatasource extends Datasource {
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const result = Result.parse(config, ReleasesConfig)
       .transform(({ packageName, registryUrl }) => {
-        const url = `${registryUrl}api/v1/buildpacks/${packageName}`;
+        const url = urlJoin(registryUrl, 'api', 'v1', 'buildpacks', packageName);
 
         return this.http.getJsonSafe(url, BuildpacksRegistryResponseSchema);
       })

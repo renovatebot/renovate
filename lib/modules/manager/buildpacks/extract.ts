@@ -27,7 +27,7 @@ function isDockerRef(ref: string): boolean {
   }
   return false;
 }
-const buildpackRegistryPrefix = regEx(/^urn:cnb:registry:/);
+const buildpackRegistryPrefix = 'urn:cnb:registry:';
 const buildpackRegistryId = regEx(
   /^[a-z0-9\-.]+\/[a-z0-9\-.]+(?:@(?<version>.+))?$/,
 );
@@ -43,7 +43,7 @@ function isBuildpackRegistryId(ref: string): boolean {
 }
 
 function isBuildpackRegistryRef(ref: string): boolean {
-  return isBuildpackRegistryId(ref) || ref.startsWith('urn:cnb:registry:');
+  return isBuildpackRegistryId(ref) || ref.startsWith(buildpackRegistryPrefix);
 }
 
 function parseProjectToml(

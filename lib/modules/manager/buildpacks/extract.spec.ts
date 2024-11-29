@@ -68,7 +68,6 @@ id = "not/valid"`,
         'project.toml',
         {},
       );
-      expect(res?.deps).toHaveLength(8);
       expect(res?.deps).toEqual([
         {
           autoReplaceStringTemplate:

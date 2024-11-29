@@ -15,16 +15,6 @@ describe('modules/datasource/buildpacks-registry/schema', () => {
       },
       versions: [
         {
-          version: '0.4.0',
-          _link:
-            'https://registry.buildpacks.io//api/v1/buildpacks/heroku/python/0.4.0',
-        },
-        {
-          version: '0.3.0',
-          _link:
-            'https://registry.buildpacks.io//api/v1/buildpacks/heroku/python/0.3.0',
-        },
-        {
           version: '0.2.0',
           _link:
             'https://registry.buildpacks.io//api/v1/buildpacks/heroku/python/0.2.0',
@@ -41,12 +31,6 @@ describe('modules/datasource/buildpacks-registry/schema', () => {
         homepage: 'https://github.com/heroku/buildpacks-python',
       },
       versions: [
-        {
-          version: '0.4.0',
-        },
-        {
-          version: '0.3.0',
-        },
         {
           version: '0.2.0',
         },
