@@ -46,7 +46,10 @@ describe('modules/datasource/maven/s3', () => {
           Bucket: 'repobucket',
           Key: 'org/example/package/maven-metadata.xml',
         })
-        .resolvesOnce({ Body: meta as never });
+        .resolvesOnce({
+          Body: meta as never,
+          LastModified: new Date('2020-01-01T00:00Z'),
+        });
 
       const res = await get('org.example:package', baseUrlS3);
 
@@ -148,6 +151,19 @@ describe('modules/datasource/maven/s3', () => {
           },
           'Maven S3 lookup error: object not found',
         );
+      });
+
+      it('returns null for Deleted marker', async () => {
+        s3mock
+          .on(GetObjectCommand, {
+            Bucket: 'repobucket',
+            Key: 'org/example/package/maven-metadata.xml',
+          })
+          .resolvesOnce({ DeleteMarker: true });
+
+        const res = await get('org.example:package', baseUrlS3);
+
+        expect(res).toBeNull();
       });
 
       it('returns null for unknown error', async () => {
