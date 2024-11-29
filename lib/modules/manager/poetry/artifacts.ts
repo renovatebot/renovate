@@ -94,7 +94,7 @@ export function getPoetryRequirement(
   return null;
 }
 
-function getPoetrySources(content: string): PoetrySource[] {
+function getPoetrySources(content: string, fileName: string): PoetrySource[] {
   let pyprojectFile: PoetryFile;
   try {
     pyprojectFile = parseToml(content) as PoetryFile;
@@ -103,7 +103,7 @@ function getPoetrySources(content: string): PoetrySource[] {
     return [];
   }
   if (!pyprojectFile.tool?.poetry) {
-    logger.debug(`{$fileName} contains no poetry section`);
+    logger.debug(`${fileName} contains no poetry section`);
     return [];
   }
 
@@ -117,10 +117,7 @@ function getPoetrySources(content: string): PoetrySource[] {
   return sourceArray;
 }
 
-async function getMatchingHostRule(
-  url: string | undefined,
-  packageFileName: string,
-): Promise<HostRule> {
+async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
   const scopedMatch = find({ hostType: PypiDatasource.id, url });
   const hostRule = is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
   if (hostRule) {
@@ -129,7 +126,7 @@ async function getMatchingHostRule(
 
   const parsedUrl = parseUrl(url);
   if (!parsedUrl) {
-    logger.once.debug({ url, packageFileName }, 'Failed to parse URL');
+    logger.once.debug({ url }, 'Failed to parse URL');
     return {};
   }
 
@@ -141,10 +138,7 @@ async function getMatchingHostRule(
         password: accessToken,
       };
     }
-    logger.once.debug(
-      { url, packageFileName },
-      'Could not get Google access token',
-    );
+    logger.once.debug({ url }, 'Could not get Google access token');
   }
 
   return {};
@@ -154,14 +148,11 @@ async function getSourceCredentialVars(
   pyprojectContent: string,
   packageFileName: string,
 ): Promise<NodeJS.ProcessEnv> {
-  const poetrySources = getPoetrySources(pyprojectContent);
+  const poetrySources = getPoetrySources(pyprojectContent, packageFileName);
   const envVars: NodeJS.ProcessEnv = {};
 
   for (const source of poetrySources) {
-    const matchingHostRule = await getMatchingHostRule(
-      source.url,
-      packageFileName,
-    );
+    const matchingHostRule = await getMatchingHostRule(source.url);
     const formattedSourceName = source.name
       .replace(regEx(/(\.|-)+/g), '_')
       .toUpperCase();
