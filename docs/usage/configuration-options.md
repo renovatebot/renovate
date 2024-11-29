@@ -801,8 +801,8 @@ It will be compiled using Handlebars and the regex `groups` result.
 
 Each `matchStrings` must be one of the two:
 
-1. a valid regular expression, optionally with named capture groups
-2. a valid [JSONata](https://docs.jsonata.org/overview.html) query (escaped)
+1. a valid regular expression, optionally with named capture groups (if using `customType=regex`)
+2. a valid, escaped [JSONata](https://docs.jsonata.org/overview.html) query (if using customType=json)
 
 Example:
 
