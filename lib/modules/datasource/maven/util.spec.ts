@@ -8,6 +8,7 @@ import {
   downloadMavenXml,
   downloadS3Protocol,
 } from './util';
+import { MavenFetchError } from './types';
 
 const http = new Http('test');
 
@@ -67,7 +68,10 @@ describe('modules/datasource/maven/util', () => {
         get: () => Promise.reject(httpError({ message: HOST_DISABLED })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
-      expect(res).toBeNull();
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'host-disabled' } satisfies MavenFetchError,
+      });
     });
 
     it('returns empty for host error', async () => {
@@ -75,7 +79,10 @@ describe('modules/datasource/maven/util', () => {
         get: () => Promise.reject(httpError({ code: 'ETIMEDOUT' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
-      expect(res).toBeNull();
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'host-error' } satisfies MavenFetchError,
+      });
     });
 
     it('returns empty for temporary error', async () => {
@@ -83,7 +90,10 @@ describe('modules/datasource/maven/util', () => {
         get: () => Promise.reject(httpError({ code: 'ECONNRESET' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
-      expect(res).toBeNull();
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'temporary-error' } satisfies MavenFetchError,
+      });
     });
 
     it('returns empty for connection error', async () => {
@@ -91,7 +101,10 @@ describe('modules/datasource/maven/util', () => {
         get: () => Promise.reject(httpError({ code: 'ECONNREFUSED' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
-      expect(res).toBeNull();
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'connection-error' } satisfies MavenFetchError,
+      });
     });
 
     it('returns empty for unsupported error', async () => {
@@ -100,7 +113,10 @@ describe('modules/datasource/maven/util', () => {
           Promise.reject(httpError({ name: 'UnsupportedProtocolError' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
-      expect(res).toBeNull();
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'unsupported-host' } satisfies MavenFetchError,
+      });
     });
   });
 
