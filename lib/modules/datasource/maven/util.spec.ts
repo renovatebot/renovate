@@ -8,6 +8,7 @@ import {
   downloadMavenXml,
   downloadS3Protocol,
 } from './util';
+import { MavenFetchError } from './types';
 
 const http = new Http('test');
 
@@ -55,9 +56,12 @@ describe('modules/datasource/maven/util', () => {
   });
 
   describe('downloadS3Protocol', () => {
-    it('returns null for non-S3 URLs', async () => {
+    it('fails for non-S3 URLs', async () => {
       const res = await downloadS3Protocol(new URL('http://not-s3.com/'));
-      expect(res).toBeNull();
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'invalid-url' } satisfies MavenFetchError,
+      });
     });
   });
 

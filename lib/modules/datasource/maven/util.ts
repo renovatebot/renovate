@@ -20,6 +20,8 @@ import type {
   DependencyInfo,
   HttpResourceCheckResult,
   MavenDependency,
+  MavenFetchResult,
+  MavenFetchSuccess,
   MavenXml,
 } from './types';
 
@@ -142,42 +144,97 @@ function isS3NotFound(err: Error): boolean {
   return err.message === 'NotFound' || err.message === 'NoSuchKey';
 }
 
-export async function downloadS3Protocol(pkgUrl: URL): Promise<string | null> {
+export async function downloadS3Protocol(
+  pkgUrl: URL,
+): Promise<MavenFetchResult> {
   logger.trace({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
-  try {
-    const s3Url = parseS3Url(pkgUrl);
-    if (s3Url === null) {
-      return null;
-    }
-    const { Body: res } = await getS3Client().send(new GetObjectCommand(s3Url));
-    if (res instanceof Readable) {
-      return streamToString(res);
-    }
-    logger.debug(
-      `Expecting Readable response type got '${typeof res}' type instead`,
-    );
-  } catch (err) {
-    const failedUrl = pkgUrl.toString();
-    if (err.name === 'CredentialsProviderError') {
-      logger.debug(
-        { failedUrl },
-        'Dependency lookup authorization failed. Please correct AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars',
-      );
-    } else if (err.message === 'Region is missing') {
-      logger.debug(
-        { failedUrl },
-        'Dependency lookup failed. Please a correct AWS_REGION env var',
-      );
-    } else if (isS3NotFound(err)) {
-      logger.trace({ failedUrl }, `S3 url not found`);
-    } else {
-      logger.debug(
-        { failedUrl, message: err.message },
-        'Unknown S3 download error',
-      );
-    }
+
+  const s3Url = parseS3Url(pkgUrl);
+  if (!s3Url) {
+    return Result.err({ type: 'invalid-url' });
   }
-  return null;
+
+  return await Result.wrap(() => {
+    const command = new GetObjectCommand(s3Url);
+    const client = getS3Client();
+    return client.send(command);
+  })
+    .transform(
+      async ({
+        Body,
+        LastModified,
+        DeleteMarker,
+      }): Promise<MavenFetchResult> => {
+        if (DeleteMarker) {
+          return Result.err({ type: 'not-found' });
+        }
+
+        if (!(Body instanceof Readable)) {
+          return Result.err({ type: 'unsupported-format' });
+        }
+
+        const data = await streamToString(Body);
+        const result: MavenFetchSuccess = { data };
+
+        const lastModified = normalizeDate(LastModified);
+        if (lastModified) {
+          result.lastModified = lastModified;
+        }
+
+        return Result.ok(result);
+      },
+    )
+    .catch((err): MavenFetchResult => {
+      if (!(err instanceof Error)) {
+        return Result.err(err);
+      }
+
+      if (err.name === 'CredentialsProviderError') {
+        return Result.err({ type: 'credentials-error' });
+      }
+
+      if (err.message === 'Region is missing') {
+        return Result.err({ type: 'missing-aws-region' });
+      }
+
+      if (isS3NotFound(err)) {
+        return Result.err({ type: 'not-found' });
+      }
+
+      return Result.err({ type: 'unknown', err });
+    })
+    .onError((err) => {
+      const failedUrl = pkgUrl.toString();
+
+      if (err.type === 'credentials-error') {
+        logger.debug(
+          { failedUrl },
+          'Maven S3 lookup error: credentials provider error, check "AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY" variables',
+        );
+        return;
+      }
+
+      if (err.type === 'missing-aws-region') {
+        logger.debug(
+          { failedUrl },
+          'Maven S3 lookup error: missing region, check "AWS_REGION" variable',
+        );
+        return;
+      }
+
+      if (err.type === 'not-found') {
+        logger.trace({ failedUrl }, 'Maven S3 lookup error: object not found');
+        return;
+      }
+
+      if (err.type === 'unknown') {
+        logger.debug(
+          { failedUrl, err: err.err },
+          'Maven S3 lookup error: unknown error',
+        );
+        return;
+      }
+    });
 }
 
 export async function downloadArtifactRegistryProtocol(
@@ -334,10 +391,12 @@ export async function downloadMavenXml(
   }
 
   if (protocol === 's3:') {
-    const res = await downloadS3Protocol(pkgUrl);
-    if (res) {
-      return { xml: new XmlDocument(res) };
-    }
+    const rawResult = await downloadS3Protocol(pkgUrl);
+    const xmlResult = rawResult.transform(({ isCacheable, data }): MavenXml => {
+      const xml = new XmlDocument(data);
+      return { xml };
+    });
+    return xmlResult.unwrapOr({});
   }
 
   logger.debug(
