@@ -16,14 +16,7 @@ describe('modules/datasource/buildpacks-registry/index', () => {
       });
       const expectedResponse = {
         registryUrl: 'https://registry.buildpacks.io/',
-        releases: [
-          {
-            version: '0.17.0',
-          },
-          {
-            version: '0.17.1',
-          },
-        ],
+        releases: [{ version: '0.17.0' }, { version: '0.17.1' }],
         sourceUrl: 'https://github.com/heroku/buildpacks-python',
       };
       expect(res).toEqual(expectedResponse);
@@ -32,18 +25,18 @@ describe('modules/datasource/buildpacks-registry/index', () => {
     it('returns null on empty result', async () => {
       httpMock.scope(baseUrl).get('/heroku/empty').reply(200, emptResult);
       const res = await getPkgReleases({
-          datasource: BuildpacksRegistryDatasource.id,
-          packageName: 'heroku/empty',
-        });
+        datasource: BuildpacksRegistryDatasource.id,
+        packageName: 'heroku/empty',
+      });
       expect(res).toBeNull();
     });
 
     it('handles not found', async () => {
       httpMock.scope(baseUrl).get('/heroku/notexisting').reply(404);
       const res = await getPkgReleases({
-          datasource: BuildpacksRegistryDatasource.id,
-          packageName: 'heroku/notexisting',
-        });
+        datasource: BuildpacksRegistryDatasource.id,
+        packageName: 'heroku/notexisting',
+      });
       expect(res).toBeNull();
     });
   });
