@@ -20,7 +20,6 @@ import type {
   ReleaseResult,
 } from '../types';
 import { extractPageLinks, getLatestVersion } from './util';
-import { MavenFetchResult, MavenFetchSuccess } from '../maven/types';
 
 interface ScalaDepCoordinate {
   groupId: string;
