@@ -101,7 +101,7 @@ export class GerritScm extends DefaultGitScm {
       targetBranch: commit.baseBranch,
     };
     const existingChange = await client
-      .findChanges(repository, searchConfig, true)
+      .findChanges(repository, searchConfig, true, ['DETAILED_LABELS'])
       .then((res) => res.pop());
 
     let hasChanges = true;

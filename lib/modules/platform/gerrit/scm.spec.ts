@@ -277,6 +277,7 @@ describe('modules/platform/gerrit/scm', () => {
           targetBranch: 'main',
         },
         true,
+        ['DETAILED_LABELS'],
       );
     });
 

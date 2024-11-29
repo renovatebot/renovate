@@ -393,10 +393,20 @@ describe('modules/platform/gerrit/client', () => {
 
   describe('approveChange()', () => {
     it('already approved - do nothing', async () => {
-      const change = partial<GerritChange>({});
+      const change = partial<GerritChange>({
+        labels: {
+          'Code-Review': {
+            all: [{ value: 2 }],
+          },
+        },
+      });
       httpMock
         .scope(gerritEndpointUrl)
-        .get((url) => url.includes('/a/changes/123456?o='))
+        .get(
+          (url) =>
+            url.includes('/a/changes/123456?o=') &&
+            url.includes('o=DETAILED_LABELS'),
+        )
         .reply(200, gerritRestResponse(change), jsonResultHeader);
       await expect(client.approveChange(123456)).toResolve();
     });
@@ -405,17 +415,53 @@ describe('modules/platform/gerrit/client', () => {
       const change = partial<GerritChange>({ labels: {} });
       httpMock
         .scope(gerritEndpointUrl)
-        .get((url) => url.includes('/a/changes/123456?o='))
+        .get(
+          (url) =>
+            url.includes('/a/changes/123456?o=') &&
+            url.includes('o=DETAILED_LABELS'),
+        )
         .reply(200, gerritRestResponse(change), jsonResultHeader);
 
       await expect(client.approveChange(123456)).toResolve();
     });
 
     it('not already approved - approve now', async () => {
-      const change = partial<GerritChange>({ labels: { 'Code-Review': {} } });
+      const change = partial<GerritChange>({
+        labels: { 'Code-Review': { all: [] } },
+      });
       httpMock
         .scope(gerritEndpointUrl)
-        .get((url) => url.includes('/a/changes/123456?o='))
+        .get(
+          (url) =>
+            url.includes('/a/changes/123456?o=') &&
+            url.includes('o=DETAILED_LABELS'),
+        )
+        .reply(200, gerritRestResponse(change), jsonResultHeader);
+      const approveMock = httpMock
+        .scope(gerritEndpointUrl)
+        .post('/a/changes/123456/revisions/current/review', {
+          labels: { 'Code-Review': +2 },
+        })
+        .reply(200, gerritRestResponse(''), jsonResultHeader);
+      await expect(client.approveChange(123456)).toResolve();
+      expect(approveMock.isDone()).toBeTrue();
+    });
+
+    it('not already approved because of +1 - approve now', async () => {
+      const change = partial<GerritChange>({
+        labels: {
+          'Code-Review': {
+            all: [{ value: 1 }],
+          },
+        },
+      });
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get(
+          (url) =>
+            url.includes('/a/changes/123456?o=') &&
+            url.includes('o=DETAILED_LABELS'),
+        )
         .reply(200, gerritRestResponse(change), jsonResultHeader);
       const approveMock = httpMock
         .scope(gerritEndpointUrl)
@@ -432,7 +478,7 @@ describe('modules/platform/gerrit/client', () => {
     it('label not exists', () => {
       expect(
         client.wasApprovedBy(partial<GerritChange>({}), 'user'),
-      ).toBeUndefined();
+      ).toBeFalse();
     });
 
     it('not approved by anyone', () => {
@@ -440,12 +486,29 @@ describe('modules/platform/gerrit/client', () => {
         client.wasApprovedBy(
           partial<GerritChange>({
             labels: {
-              'Code-Review': {},
+              'Code-Review': {
+                all: [],
+              },
             },
           }),
           'user',
         ),
-      ).toBeUndefined();
+      ).toBeFalse();
+    });
+
+    it('not approved but with +1', () => {
+      expect(
+        client.wasApprovedBy(
+          partial<GerritChange>({
+            labels: {
+              'Code-Review': {
+                all: [{ value: 1, username: 'user' }],
+              },
+            },
+          }),
+          'user',
+        ),
+      ).toBeFalse();
     });
 
     it('approved by given user', () => {
@@ -454,10 +517,7 @@ describe('modules/platform/gerrit/client', () => {
           partial<GerritChange>({
             labels: {
               'Code-Review': {
-                approved: {
-                  _account_id: 1,
-                  username: 'user',
-                },
+                all: [{ value: 2, username: 'user' }],
               },
             },
           }),
@@ -472,10 +532,7 @@ describe('modules/platform/gerrit/client', () => {
           partial<GerritChange>({
             labels: {
               'Code-Review': {
-                approved: {
-                  _account_id: 1,
-                  username: 'other',
-                },
+                all: [{ value: 2, username: 'other' }],
               },
             },
           }),

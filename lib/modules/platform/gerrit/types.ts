@@ -77,6 +77,8 @@ export interface GerritChangeMessageInfo {
 export interface GerritLabelInfo {
   approved?: GerritAccountInfo;
   rejected?: GerritAccountInfo;
+  /** List of votes. Only set when o=DETAILED_LABELS. */
+  all?: GerritApprovalInfo[];
 }
 
 export interface GerritActionInfo {
@@ -98,4 +100,9 @@ export interface GerritMergeableInfo {
     | 'MERGE_ALWAYS'
     | 'CHERRY_PICK';
   mergeable: boolean;
+}
+
+export interface GerritApprovalInfo {
+  value?: number;
+  username?: string;
 }

@@ -58,12 +58,14 @@ class GerritClient {
     repository: string,
     findPRConfig: GerritFindPRConfig,
     refreshCache?: boolean,
+    extraOptions?: string[],
   ): Promise<GerritChange[]> {
     const filters = GerritClient.buildSearchFilters(repository, findPRConfig);
+    const options = [...this.requestDetails, ...(extraOptions ?? [])];
     const changes = await this.gerritHttp.getJson<GerritChange[]>(
       `a/changes/?q=` +
         filters.join('+') +
-        this.requestDetails.map((det) => `&o=${det}`).join(''),
+        options.map((det) => `&o=${det}`).join(''),
       { memCache: !refreshCache },
     );
     logger.trace(
@@ -72,10 +74,13 @@ class GerritClient {
     return changes.body;
   }
 
-  async getChange(changeNumber: number): Promise<GerritChange> {
+  async getChange(
+    changeNumber: number,
+    extraOptions?: string[],
+  ): Promise<GerritChange> {
+    const options = [...this.requestDetails, ...(extraOptions ?? [])];
     const changes = await this.gerritHttp.getJson<GerritChange>(
-      `a/changes/${changeNumber}?` +
-        this.requestDetails.map((det) => `o=${det}`).join('&'),
+      `a/changes/${changeNumber}?` + options.map((det) => `o=${det}`).join('&'),
     );
     return changes.body;
   }
@@ -189,15 +194,20 @@ class GerritClient {
   }
 
   async checkIfApproved(changeId: number): Promise<boolean> {
-    const change = await client.getChange(changeId);
-    const reviewLabels = change?.labels?.['Code-Review'];
-    return reviewLabels === undefined || reviewLabels.approved !== undefined;
+    const change = await client.getChange(changeId, ['DETAILED_LABELS']);
+    const reviewLabel = change?.labels?.['Code-Review'];
+    return (
+      reviewLabel === undefined ||
+      Boolean(reviewLabel.all?.some((label) => label.value === 2))
+    );
   }
 
-  wasApprovedBy(change: GerritChange, username: string): boolean | undefined {
-    return (
-      change.labels?.['Code-Review'].approved &&
-      change.labels['Code-Review'].approved.username === username
+  wasApprovedBy(change: GerritChange, username: string): boolean {
+    const reviewLabel = change?.labels?.['Code-Review'];
+    return Boolean(
+      reviewLabel?.all?.some(
+        (label) => label.value === 2 && label.username === username,
+      ),
     );
   }
 
