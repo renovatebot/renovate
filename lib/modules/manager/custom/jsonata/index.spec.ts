@@ -198,7 +198,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     expect(res).toBeNull();
     expect(logger.logger.warn).toHaveBeenCalledWith(
       expect.anything(),
-      `Error parsing 'foo-file'`,
+      'File is not a valid JSON file.',
     );
   });
 
@@ -243,7 +243,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     expect(res).not.toBeNull();
     expect(logger.logger.warn).toHaveBeenCalledWith(
       { value: 'this-is-not-a-valid-url-foo' },
-      'Invalid json manager registryUrl',
+      'Invalid JSONata manager registryUrl',
     );
   });
 

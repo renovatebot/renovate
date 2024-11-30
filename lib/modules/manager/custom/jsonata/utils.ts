@@ -71,7 +71,7 @@ export function createDependency(
           const url = new URL(value).toString();
           dependency.registryUrls = [url];
         } catch {
-          logger.warn({ value }, 'Invalid json manager registryUrl');
+          logger.warn({ value }, 'Invalid JSONata manager registryUrl');
         }
         break;
       default:

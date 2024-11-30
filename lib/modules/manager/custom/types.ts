@@ -5,7 +5,7 @@ export interface CustomExtractConfig
   extends Partial<RegexManagerConfig>,
     Partial<JSONataManagerConfig> {}
 
-export type CustomManagerName = 'regex' | 'jsonata';
+export type CustomManagerName = 'jsonata' | 'regex';
 
 export interface CustomManager extends Partial<RegexManagerConfig> {
   customType: CustomManagerName;

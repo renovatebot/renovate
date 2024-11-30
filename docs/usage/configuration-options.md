@@ -777,6 +777,19 @@ Example:
 }
 ```
 
+```json
+{
+  "customManagers": [
+    {
+      "customType": "jsonata",
+      "matchStrings": [
+        "packages.{ \"depName\": package, \"currentValue\": version }"
+      ]
+    }
+  ]
+}
+```
+
 ### datasourceTemplate
 
 If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field.
@@ -802,7 +815,7 @@ It will be compiled using Handlebars and the regex `groups` result.
 Each `matchStrings` must be one of the two:
 
 1. a valid regular expression, optionally with named capture groups (if using `customType=regex`)
-2. a valid, escaped [JSONata](https://docs.jsonata.org/overview.html) query (if using customType=json)
+2. a valid, escaped [JSONata](https://docs.jsonata.org/overview.html) query (if using `customType=json`)
 
 Example:
 
@@ -814,7 +827,7 @@ Example:
 }
 ```
 
-```json title="matchStrings with a valid jsonata query"
+```json title="matchStrings with a valid JSONata query"
 {
   "matchStrings": [
     "packages.{ \"depName\": package, \"currentValue\": version }"
