@@ -644,7 +644,10 @@ describe('modules/manager/pep621/processors/uv', () => {
           packageName: 'dep3',
           depType: depTypes.dependencies,
           datasource: PypiDatasource.id,
-          registryUrls: ['https://implicit.com/simple'],
+          registryUrls: [
+            'https://implicit.com/simple',
+            'https://pypi.org/pypi/',
+          ],
         },
       ];
       const result = await processor.updateArtifacts(
