@@ -277,7 +277,6 @@ describe('modules/platform/gerrit/scm', () => {
           targetBranch: 'main',
         },
         true,
-        ['DETAILED_LABELS'],
       );
     });
 
@@ -370,7 +369,6 @@ describe('modules/platform/gerrit/scm', () => {
         },
       });
       clientMock.findChanges.mockResolvedValueOnce([existingChange]);
-      clientMock.wasApprovedBy.mockReturnValueOnce(true);
       git.prepareCommit.mockResolvedValueOnce({
         commitSha: 'commitSha' as LongCommitSha,
         parentCommitSha: 'parentSha' as LongCommitSha,
@@ -386,6 +384,7 @@ describe('modules/platform/gerrit/scm', () => {
           message: 'commit msg',
           files: [],
           prTitle: 'pr title',
+          autoApprove: true,
         }),
       ).toBe('commitSha');
       expect(git.prepareCommit).toHaveBeenCalledWith({
@@ -397,6 +396,7 @@ describe('modules/platform/gerrit/scm', () => {
           'Renovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
         ],
         prTitle: 'pr title',
+        autoApprove: true,
         force: true,
       });
       expect(git.fetchRevSpec).toHaveBeenCalledWith('refs/changes/1/2');
@@ -405,10 +405,6 @@ describe('modules/platform/gerrit/scm', () => {
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',
       });
-      expect(clientMock.wasApprovedBy).toHaveBeenCalledWith(
-        existingChange,
-        'user',
-      );
       expect(clientMock.approveChange).toHaveBeenCalledWith(123456);
     });
   });

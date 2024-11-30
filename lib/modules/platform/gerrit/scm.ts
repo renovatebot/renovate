@@ -101,7 +101,7 @@ export class GerritScm extends DefaultGitScm {
       targetBranch: commit.baseBranch,
     };
     const existingChange = await client
-      .findChanges(repository, searchConfig, true, ['DETAILED_LABELS'])
+      .findChanges(repository, searchConfig, true)
       .then((res) => res.pop());
 
     let hasChanges = true;
@@ -135,11 +135,8 @@ export class GerritScm extends DefaultGitScm {
           files: commit.files,
         });
         if (pushResult) {
-          //existingChange was the old change before commit/push. we need to approve again, if it was previously approved from renovate
-          if (
-            existingChange &&
-            client.wasApprovedBy(existingChange, username)
-          ) {
+          // New patchsets dismisses the approval, so we need to approve it again
+          if (existingChange && commit.autoApprove) {
             await client.approveChange(existingChange._number);
           }
           return commitSha;

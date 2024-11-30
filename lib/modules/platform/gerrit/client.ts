@@ -58,14 +58,12 @@ class GerritClient {
     repository: string,
     findPRConfig: GerritFindPRConfig,
     refreshCache?: boolean,
-    extraOptions?: string[],
   ): Promise<GerritChange[]> {
     const filters = GerritClient.buildSearchFilters(repository, findPRConfig);
-    const options = [...this.requestDetails, ...(extraOptions ?? [])];
     const changes = await this.gerritHttp.getJson<GerritChange[]>(
       `a/changes/?q=` +
         filters.join('+') +
-        options.map((det) => `&o=${det}`).join(''),
+        this.requestDetails.map((det) => `&o=${det}`).join(''),
       { memCache: !refreshCache },
     );
     logger.trace(
@@ -199,15 +197,6 @@ class GerritClient {
     return (
       reviewLabel === undefined ||
       Boolean(reviewLabel.all?.some((label) => label.value === 2))
-    );
-  }
-
-  wasApprovedBy(change: GerritChange, username: string): boolean {
-    const reviewLabel = change?.labels?.['Code-Review'];
-    return Boolean(
-      reviewLabel?.all?.some(
-        (label) => label.value === 2 && label.username === username,
-      ),
     );
   }
 
