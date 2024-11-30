@@ -610,17 +610,11 @@ describe('modules/platform/gerrit/index', () => {
       await expect(
         gerrit.addReviewers(123456, ['user1', 'user2']),
       ).resolves.toBeUndefined();
-      expect(clientMock.addReviewer).toHaveBeenCalledTimes(2);
-      expect(clientMock.addReviewer).toHaveBeenNthCalledWith(
-        1,
-        123456,
+      expect(clientMock.addReviewers).toHaveBeenCalledTimes(1);
+      expect(clientMock.addReviewers).toHaveBeenCalledWith(123456, [
         'user1',
-      );
-      expect(clientMock.addReviewer).toHaveBeenNthCalledWith(
-        2,
-        123456,
         'user2',
-      );
+      ]);
     });
   });
 

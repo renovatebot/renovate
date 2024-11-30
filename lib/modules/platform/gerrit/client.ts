@@ -114,7 +114,7 @@ class GerritClient {
     const message = this.normalizeMessage(fullMessage);
     await this.gerritHttp.postJson(
       `a/changes/${changeNumber}/revisions/current/review`,
-      { body: { message, tag } },
+      { body: { message, tag, notify: 'NONE' } },
     );
   }
 
@@ -149,18 +149,25 @@ class GerritClient {
   ): Promise<void> {
     await this.gerritHttp.postJson(
       `a/changes/${changeNumber}/revisions/current/review`,
-      { body: { labels: { [label]: value } } },
+      { body: { labels: { [label]: value }, notify: 'NONE' } },
     );
   }
 
-  async addReviewer(changeNumber: number, reviewer: string): Promise<void> {
-    await this.gerritHttp.postJson(`a/changes/${changeNumber}/reviewers`, {
-      body: { reviewer },
-    });
+  async addReviewers(changeNumber: number, reviewers: string[]): Promise<void> {
+    await this.gerritHttp.postJson(
+      `a/changes/${changeNumber}/revisions/current/review`,
+      {
+        body: {
+          reviewers: reviewers.map((r) => ({ reviewer: r })),
+          notify: 'OWNER_REVIEWERS', // Avoids notifying cc's
+        },
+      },
+    );
   }
 
   async addAssignee(changeNumber: number, assignee: string): Promise<void> {
     await this.gerritHttp.putJson<GerritAccountInfo>(
+      // TODO: refactor this as this API removed in Gerrit 3.8
       `a/changes/${changeNumber}/assignee`,
       {
         body: { assignee },
