@@ -436,3 +436,7 @@ export function findIssue(title: string): Promise<Issue | null> {
 export function getIssueList(): Promise<Issue[]> {
   return Promise.resolve([]);
 }
+
+export async function approvePr(number: number): Promise<void> {
+  await client.approveChange(number);
+}

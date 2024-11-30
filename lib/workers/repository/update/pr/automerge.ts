@@ -69,6 +69,12 @@ export async function checkAutoMerge(
       prAutomergeBlockReason: 'PlatformNotReady',
     };
   }
+  // Usually the PR will already be approved, this is a last resort in case the
+  // approval was lost for some reason
+  if (config.autoApprove && platform.approvePr) {
+    logger.debug('Auto-approving PR if needed before automerge');
+    await platform.approvePr(pr.number);
+  }
   const branchStatus = await resolveBranchStatus(
     branchName,
     !!config.internalChecksAsSuccess,

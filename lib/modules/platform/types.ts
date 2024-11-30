@@ -282,6 +282,7 @@ export interface Platform {
 
   maxBodyLength(): number;
   labelCharLimit?(): number;
+  approvePr?(number: number): Promise<void>;
 }
 
 export interface PlatformScm {
