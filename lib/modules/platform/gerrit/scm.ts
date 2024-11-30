@@ -131,7 +131,7 @@ export class GerritScm extends DefaultGitScm {
       if (hasChanges || commit.force) {
         const pushResult = await git.pushCommit({
           sourceRef: commit.branchName,
-          targetRef: `refs/for/${commit.baseBranch!}`,
+          targetRef: `refs/for/${commit.baseBranch!}%notify=NONE`,
           files: commit.files,
         });
         if (pushResult) {

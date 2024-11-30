@@ -340,9 +340,7 @@ export async function addReviewers(
   number: number,
   reviewers: string[],
 ): Promise<void> {
-  for (const reviewer of reviewers) {
-    await client.addReviewer(number, reviewer);
-  }
+  await client.addReviewers(number, reviewers);
 }
 
 /**
