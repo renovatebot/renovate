@@ -282,6 +282,10 @@ export interface Platform {
 
   maxBodyLength(): number;
   labelCharLimit?(): number;
+  /**
+   * For platforms that support `autoApprove`. It should handle when the PR
+   * is already be approved.
+   */
   approvePr?(number: number): Promise<void>;
 }
 
