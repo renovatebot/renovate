@@ -13,5 +13,5 @@ export const categories: Category[] = ['ci'];
 export const supportedDatasources = [DockerDatasource.id];
 
 export const urls = [
-  'https://support.atlassian.com/bitbucket-cloud/docs/bitbucket-pipelines-configuration-reference/',
+  '[Bitbucket Pipelines Configuration Reference](https://support.atlassian.com/bitbucket-cloud/docs/bitbucket-pipelines-configuration-reference/)',
 ];

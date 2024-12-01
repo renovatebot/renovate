@@ -10,10 +10,10 @@ import type { NewValueConfig, VersioningApi } from '../types';
 export const id = 'composer';
 export const displayName = 'Composer';
 export const urls = [
-  'https://getcomposer.org/doc/articles/versions.md',
-  'https://packagist.org/packages/composer/semver',
-  'https://madewithlove.be/tilde-and-caret-constraints/',
-  'https://semver.mwl.be',
+  '[Composer Versioning Documentation](https://getcomposer.org/doc/articles/versions.md)',
+  '[Composer Semver Package](https://packagist.org/packages/composer/semver)',
+  '[Tilde and Caret Constraints - Made with Love](https://madewithlove.be/tilde-and-caret-constraints/)',
+  '[Semantic Versioning - MWL](https://semver.mwl.be)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [

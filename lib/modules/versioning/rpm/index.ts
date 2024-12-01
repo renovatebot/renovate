@@ -7,9 +7,9 @@ import type { VersioningApi } from '../types';
 export const id = 'rpm';
 export const displayName = 'RPM version';
 export const urls = [
-  'https://docs.fedoraproject.org/en-US/packaging-guidelines/Versioning/',
-  'https://fedoraproject.org/wiki/Package_Versioning_Examples',
-  'https://fedoraproject.org/wiki/User:Tibbs/TildeCaretVersioning',
+  '[Fedora Packaging Guidelines - Versioning](https://docs.fedoraproject.org/en-US/packaging-guidelines/Versioning/)',
+  '[Fedora Package Versioning Examples](https://fedoraproject.org/wiki/Package_Versioning_Examples)',
+  '[Tilde and Caret Versioning - Fedora Wiki](https://fedoraproject.org/wiki/User:Tibbs/TildeCaretVersioning)',
 ];
 export const supportsRanges = false;
 

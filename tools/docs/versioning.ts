@@ -12,7 +12,7 @@ import {
   replaceContent,
 } from './utils';
 
-type Versioning = {
+export type Versioning = {
   id: string;
   displayName: string;
   urls?: string[];

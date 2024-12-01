@@ -8,7 +8,7 @@ import { RollingReleasesData } from './common';
 export const id = 'debian';
 export const displayName = 'Debian';
 export const urls = [
-  'https://debian.pages.debian.net/distro-info-data/debian.csv',
+  '[Debian Distribution Information CSV](https://debian.pages.debian.net/distro-info-data/debian.csv)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['pin'];

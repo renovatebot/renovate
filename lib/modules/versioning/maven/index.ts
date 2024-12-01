@@ -19,9 +19,9 @@ import {
 export const id = 'maven';
 export const displayName = 'Maven';
 export const urls = [
-  'https://maven.apache.org/pom.html#Dependency_Version_Requirement_Specification',
-  'https://octopus.com/blog/maven-versioning-explained',
-  'https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html',
+  '[Maven POM Dependency Version Requirement Specification](https://maven.apache.org/pom.html#Dependency_Version_Requirement_Specification)',
+  '[Maven Versioning Explained - Octopus Blog](https://octopus.com/blog/maven-versioning-explained)',
+  '[Maven Enforcer Rules for Version Ranges](https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [

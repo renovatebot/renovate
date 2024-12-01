@@ -8,7 +8,7 @@ import { hashicorp2npm, npm2hashicorp } from './convertor';
 export const id = 'hashicorp';
 export const displayName = 'Hashicorp';
 export const urls = [
-  'https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version',
+  '[Specifying a Required Terraform Version - Terraform Documentation](https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [

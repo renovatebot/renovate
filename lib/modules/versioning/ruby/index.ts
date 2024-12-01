@@ -18,9 +18,9 @@ import { parse as parseVersion } from './version';
 export const id = 'ruby';
 export const displayName = 'Ruby';
 export const urls = [
-  'https://guides.rubygems.org/patterns/',
-  'https://bundler.io/v1.5/gemfile.html',
-  'https://www.devalot.com/articles/2012/04/gem-versions.html',
+  '[RubyGems Patterns Guide](https://guides.rubygems.org/patterns/)',
+  '[Bundler Gemfile Documentation](https://bundler.io/man/bundle-config.1.html)',
+  '[Understanding Gem Versions - Devalot](https://www.devalot.com/articles/2012/04/gem-versions.html)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
