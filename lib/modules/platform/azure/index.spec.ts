@@ -1149,7 +1149,7 @@ describe('modules/platform/azure/index', () => {
       const updateFn = jest
         .fn(() => prUpdateResult)
         .mockName('createPullRequestReviewer');
-      azureApi.gitApi.mockImplementationOnce(
+      azureApi.gitApi.mockImplementation(
         () =>
           ({
             createPullRequest: jest.fn(() => prResult),
@@ -1293,7 +1293,7 @@ describe('modules/platform/azure/index', () => {
         isRequired: false,
       };
       const updateFn = jest.fn(() => prUpdateResult);
-      azureApi.gitApi.mockImplementationOnce(
+      azureApi.gitApi.mockImplementation(
         () =>
           ({
             updatePullRequest: jest.fn(() => prResult),
@@ -1301,6 +1301,82 @@ describe('modules/platform/azure/index', () => {
             getPullRequestById: jest.fn(() => ({
               pullRequestId: prResult.pullRequestId,
               createdBy: prResult.createdBy,
+            })),
+          }) as any,
+      );
+      const pr = await azure.updatePr({
+        number: prResult.pullRequestId,
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        platformPrOptions: { autoApprove: true },
+      });
+      expect(updateFn).toHaveBeenCalled();
+      expect(pr).toMatchSnapshot();
+    });
+
+    it('should not re-approve if the PR is already approved', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const prResult = {
+        pullRequestId: 456,
+        createdBy: {
+          id: 123,
+          url: 'user-url',
+        },
+      };
+      const prUpdateResult = {
+        reviewerUrl: prResult.createdBy.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
+      };
+      const updateFn = jest.fn(() => prUpdateResult);
+      azureApi.gitApi.mockImplementation(
+        () =>
+          ({
+            updatePullRequest: jest.fn(() => prResult),
+            createPullRequestReviewer: updateFn,
+            getPullRequestById: jest.fn(() => ({
+              pullRequestId: prResult.pullRequestId,
+              createdBy: prResult.createdBy,
+              reviewers: [{ vote: AzurePrVote.Approved, id: 123 }],
+            })),
+          }) as any,
+      );
+      const pr = await azure.updatePr({
+        number: prResult.pullRequestId,
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        platformPrOptions: { autoApprove: true },
+      });
+      expect(updateFn).not.toHaveBeenCalled();
+      expect(pr).toMatchSnapshot();
+    });
+
+    it('should re-approve if the PR was approved by another user', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const prResult = {
+        pullRequestId: 456,
+        createdBy: {
+          id: 123,
+          url: 'user-url',
+        },
+      };
+      const prUpdateResult = {
+        reviewerUrl: prResult.createdBy.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
+      };
+      const updateFn = jest.fn(() => prUpdateResult);
+      azureApi.gitApi.mockImplementation(
+        () =>
+          ({
+            updatePullRequest: jest.fn(() => prResult),
+            createPullRequestReviewer: updateFn,
+            getPullRequestById: jest.fn(() => ({
+              pullRequestId: prResult.pullRequestId,
+              createdBy: prResult.createdBy,
+              reviewers: [{ vote: AzurePrVote.Approved, id: 321 }],
             })),
           }) as any,
       );

@@ -513,18 +513,7 @@ export async function createPr({
     );
   }
   if (platformPrOptions?.autoApprove) {
-    await azureApiGit.createPullRequestReviewer(
-      {
-        reviewerUrl: pr.createdBy!.url,
-        vote: AzurePrVote.Approved,
-        isFlagged: false,
-        isRequired: false,
-      },
-      config.repoId,
-      // TODO #22198
-      pr.pullRequestId!,
-      pr.createdBy!.id!,
-    );
+    await approvePr(pr);
   }
   await Promise.all(
     labels!.map((label) =>
@@ -581,19 +570,7 @@ export async function updatePr({
     objToUpdate.status = PullRequestStatus.Abandoned;
   }
   if (platformPrOptions?.autoApprove) {
-    const pr = await azureApiGit.getPullRequestById(prNo, config.project);
-    await azureApiGit.createPullRequestReviewer(
-      {
-        reviewerUrl: pr.createdBy!.url,
-        vote: AzurePrVote.Approved,
-        isFlagged: false,
-        isRequired: false,
-      },
-      config.repoId,
-      // TODO #22198
-      pr.pullRequestId!,
-      pr.createdBy!.id!,
-    );
+    await approvePr(prNo);
   }
 
   const updatedPr = await azureApiGit.updatePullRequest(
@@ -1014,4 +991,38 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${prNumber}`);
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
+}
+
+export async function approvePr(
+  prNumberOrPr: number | GitPullRequest,
+): Promise<void> {
+  const azureApiGit = await azureApi.gitApi();
+  const pr =
+    typeof prNumberOrPr === 'number'
+      ? await azureApiGit.getPullRequestById(prNumberOrPr, config.project)
+      : prNumberOrPr;
+
+  const isApproved = pr.reviewers?.some(
+    (reviewer) =>
+      reviewer.vote === AzurePrVote.Approved &&
+      reviewer.id === pr.createdBy?.id,
+  );
+
+  if (isApproved) {
+    logger.debug('PR is already approved');
+    return;
+  }
+
+  await azureApiGit.createPullRequestReviewer(
+    {
+      reviewerUrl: pr.createdBy!.url,
+      vote: AzurePrVote.Approved,
+      isFlagged: false,
+      isRequired: false,
+    },
+    config.repoId,
+    // TODO #22198
+    pr.pullRequestId!,
+    pr.createdBy!.id!,
+  );
 }

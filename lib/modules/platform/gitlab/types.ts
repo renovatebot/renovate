@@ -77,3 +77,7 @@ export interface GitlabUserStatus {
   emoji?: string;
   availability: 'not_set' | 'busy';
 }
+
+export interface GitLabMergeRequestApprovals {
+  approved_by?: { user?: GitLabUser }[];
+}
