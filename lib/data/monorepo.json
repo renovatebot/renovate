@@ -340,6 +340,7 @@
       "https://github.com/facebook/jest",
       "https://github.com/jestjs/jest"
     ],
+    "jetty": "https://github.com/jetty/jetty.project",
     "jna": "https://github.com/java-native-access/jna",
     "json-smart-v2": "https://github.com/netplex/json-smart-v2",
     "jsplumb": "https://github.com/jsplumb/jsplumb",
@@ -574,6 +575,7 @@
   "patternGroups": {
     "angularmaterial": ["/^@angular/material/", "/^@angular/cdk/"],
     "apache-camel": "/^org.apache.camel:/",
+    "apache-poi": "/^org.apache.poi:/",
     "aws-java-sdk": "/^com.amazonaws:aws-java-sdk-/",
     "aws-java-sdk-v2": "/^software.amazon.awssdk:/",
     "babel6": "/^babel6$/",

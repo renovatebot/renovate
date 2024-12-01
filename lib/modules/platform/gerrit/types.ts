@@ -77,6 +77,8 @@ export interface GerritChangeMessageInfo {
 export interface GerritLabelInfo {
   approved?: GerritAccountInfo;
   rejected?: GerritAccountInfo;
+  /** If true, the label blocks submit operation. If not set, the default is false. */
+  blocking?: boolean;
   /** List of votes. Only set when o=DETAILED_LABELS. */
   all?: GerritApprovalInfo[];
 }
