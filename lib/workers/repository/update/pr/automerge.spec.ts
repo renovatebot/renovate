@@ -124,6 +124,19 @@ describe('workers/repository/update/pr/automerge', () => {
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
 
+    it('should attempt to auto-approve if supported', async () => {
+      config.autoApprove = true;
+      config.automerge = true;
+      config.pruneBranchAfterAutomerge = true;
+      platform.approvePr.mockResolvedValueOnce();
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      platform.mergePr.mockResolvedValueOnce(true);
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual({ automerged: true, branchRemoved: true });
+      expect(platform.approvePr).toHaveBeenCalledTimes(1);
+      expect(platform.mergePr).toHaveBeenCalledTimes(1);
+    });
+
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automerge = true;
       scm.isBranchConflicted.mockResolvedValueOnce(true);
