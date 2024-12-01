@@ -52,6 +52,7 @@ export interface GerritChange {
    */
   revisions: Record<string, GerritRevisionInfo>;
   problems: unknown[];
+  owner: GerritAccountInfo;
 }
 
 export interface GerritCommitInfo {
