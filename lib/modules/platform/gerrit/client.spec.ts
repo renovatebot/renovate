@@ -4,8 +4,8 @@ import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import type { FindPRConfig } from '../types';
 import { client } from './client';
-import type {
-  GerritAccountInfo,
+import {
+  type GerritAccountInfo,
   type GerritChange,
   type GerritChangeMessageInfo,
   type GerritFindPRConfig,
