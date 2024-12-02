@@ -193,11 +193,9 @@ class GerritClient {
 
   async approveChange(changeId: number): Promise<void> {
     const isApproved = await this.checkIfApproved(changeId);
-    if (isApproved) {
-      logger.debug(`Change is already approved`);
-      return;
+    if (!isApproved) {
+      await this.setLabel(changeId, 'Code-Review', +2);
     }
-    await this.setLabel(changeId, 'Code-Review', +2);
   }
 
   async checkIfApproved(changeId: number): Promise<boolean> {
@@ -205,12 +203,7 @@ class GerritClient {
     const reviewLabel = change?.labels?.['Code-Review'];
     return (
       reviewLabel === undefined ||
-      Boolean(
-        reviewLabel.all?.some(
-          (label) =>
-            label.value === 2 && label.username === change.owner.username,
-        ),
-      )
+      Boolean(reviewLabel.all?.some((label) => label.value === 2))
     );
   }
 

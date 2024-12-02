@@ -5,7 +5,6 @@ import { setBaseUrl } from '../../../util/http/gerrit';
 import type { FindPRConfig } from '../types';
 import { client } from './client';
 import {
-  type GerritAccountInfo,
   type GerritChange,
   type GerritChangeMessageInfo,
   type GerritFindPRConfig,
@@ -400,14 +399,12 @@ describe('modules/platform/gerrit/client', () => {
 
   describe('approveChange()', () => {
     it('already approved - do nothing', async () => {
-      const owner = partial<GerritAccountInfo>({ username: 'user' });
       const change = partial<GerritChange>({
         labels: {
           'Code-Review': {
-            all: [{ value: 2, username: owner.username }],
+            all: [{ value: 2 }],
           },
         },
-        owner,
       });
       httpMock
         .scope(gerritEndpointUrl)
@@ -464,35 +461,6 @@ describe('modules/platform/gerrit/client', () => {
             all: [{ value: 1 }],
           },
         },
-      });
-      httpMock
-        .scope(gerritEndpointUrl)
-        .get(
-          (url) =>
-            url.includes('/a/changes/123456?o=') &&
-            url.includes('o=DETAILED_LABELS'),
-        )
-        .reply(200, gerritRestResponse(change), jsonResultHeader);
-      const approveMock = httpMock
-        .scope(gerritEndpointUrl)
-        .post('/a/changes/123456/revisions/current/review', {
-          labels: { 'Code-Review': +2 },
-          notify: 'NONE',
-        })
-        .reply(200, gerritRestResponse(''), jsonResultHeader);
-      await expect(client.approveChange(123456)).toResolve();
-      expect(approveMock.isDone()).toBeTrue();
-    });
-
-    it('already approved by another user - approve again', async () => {
-      const owner = partial<GerritAccountInfo>({ username: 'user' });
-      const change = partial<GerritChange>({
-        labels: {
-          'Code-Review': {
-            all: [{ value: 2, username: 'other user' }],
-          },
-        },
-        owner,
       });
       httpMock
         .scope(gerritEndpointUrl)
