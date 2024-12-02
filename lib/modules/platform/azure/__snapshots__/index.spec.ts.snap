@@ -217,10 +217,6 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOpti
 ]
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOptions) should not re-approve if the PR is already approved 1`] = `undefined`;
-
-exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOptions) should re-approve if the PR was approved by another user 1`] = `undefined`;
-
 exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOptions) should re-approve the PR 1`] = `undefined`;
 
 exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOptions) should reopen the PR 1`] = `

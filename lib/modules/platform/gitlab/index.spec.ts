@@ -128,18 +128,9 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it(`should reuse existing gitAuthor`, async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .get('/api/v4/user')
-        .reply(200, {
-          email: 'different@email.com',
-          name: 'Different Name',
-          id: 1,
-        })
-        .get('/api/v4/version')
-        .reply(200, {
-          version: '13.3.6-ee',
-        });
+      httpMock.scope(gitlabApiHost).get('/api/v4/version').reply(200, {
+        version: '13.3.6-ee',
+      });
       expect(
         await gitlab.initPlatform({
           token: 'some-token',
@@ -1909,7 +1900,6 @@ describe('modules/platform/gitlab/index', () => {
       .get('/api/v4/user')
       .reply(200, {
         email: 'a@b.com',
-        id: 1,
         name: 'Renovate Bot',
       })
       .get('/api/v4/version')
@@ -2788,10 +2778,6 @@ describe('modules/platform/gitlab/index', () => {
           target_branch: 'master',
           description: 'the-body',
         })
-        .get('/api/v4/projects/undefined/merge_requests/12345/approvals')
-        .reply(200, {
-          approved_by: [],
-        })
         .post('/api/v4/projects/undefined/merge_requests/12345/approve')
         .reply(200);
       expect(
@@ -2825,8 +2811,6 @@ describe('modules/platform/gitlab/index', () => {
           target_branch: 'master',
           description: 'the-body',
         })
-        .get('/api/v4/projects/undefined/merge_requests/12345/approvals')
-        .replyWithError('some error')
         .post('/api/v4/projects/undefined/merge_requests/12345/approve')
         .replyWithError('some error');
       await expect(
@@ -3154,104 +3138,6 @@ describe('modules/platform/gitlab/index', () => {
           title: 'title',
           description: 'body',
           state: 'opened',
-        })
-        .get('/api/v4/projects/undefined/merge_requests/1/approvals')
-        .reply(200, {
-          approved_by: [],
-        })
-        .post('/api/v4/projects/undefined/merge_requests/1/approve')
-        .reply(200);
-      await expect(
-        gitlab.updatePr({
-          number: 1,
-          prTitle: 'title',
-          prBody: 'body',
-          platformPrOptions: {
-            autoApprove: true,
-          },
-        }),
-      ).toResolve();
-    });
-
-    it('does not auto-approve if already approved', async () => {
-      await initPlatform('13.3.6-ee');
-      httpMock
-        .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
-        )
-        .reply(200, [
-          {
-            iid: 1,
-            source_branch: 'branch-a',
-            title: 'branch a pr',
-            description: 'a merge request',
-            state: 'opened',
-          },
-        ])
-        .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200, {
-          iid: 1,
-          source_branch: 'branch-a',
-          title: 'title',
-          description: 'body',
-          state: 'opened',
-        })
-        .get('/api/v4/projects/undefined/merge_requests/1/approvals')
-        .reply(200, {
-          approved_by: [
-            {
-              user: {
-                id: 1,
-              },
-            },
-          ],
-        });
-      await expect(
-        gitlab.updatePr({
-          number: 1,
-          prTitle: 'title',
-          prBody: 'body',
-          platformPrOptions: {
-            autoApprove: true,
-          },
-        }),
-      ).toResolve();
-    });
-
-    it('auto-approves if approved by another user', async () => {
-      await initPlatform('13.3.6-ee');
-      httpMock
-        .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
-        )
-        .reply(200, [
-          {
-            iid: 1,
-            source_branch: 'branch-a',
-            title: 'branch a pr',
-            description: 'a merge request',
-            state: 'opened',
-          },
-        ])
-        .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200, {
-          iid: 1,
-          source_branch: 'branch-a',
-          title: 'title',
-          description: 'body',
-          state: 'opened',
-        })
-        .get('/api/v4/projects/undefined/merge_requests/1/approvals')
-        .reply(200, {
-          approved_by: [
-            {
-              user: {
-                id: 2,
-              },
-            },
-          ],
         })
         .post('/api/v4/projects/undefined/merge_requests/1/approve')
         .reply(200);

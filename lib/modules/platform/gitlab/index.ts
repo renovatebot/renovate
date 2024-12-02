@@ -65,7 +65,6 @@ import { getMR, updateMR } from './merge-request';
 import { LastPipelineId } from './schema';
 import type {
   GitLabMergeRequest,
-  GitLabMergeRequestApprovals,
   GitlabComment,
   GitlabIssue,
   GitlabPr,
@@ -95,7 +94,6 @@ const defaults = {
 export const id = 'gitlab';
 
 let draftPrefix = DRAFT_PREFIX;
-let renovateUserId: number;
 
 export async function initPlatform({
   endpoint,
@@ -116,22 +114,19 @@ export async function initPlatform({
   };
   let gitlabVersion: string;
   try {
-    const user = (
-      await gitlabApi.getJson<{
-        email: string;
-        name: string;
-        id: number;
-        commit_email?: string;
-      }>(`user`, { token })
-    ).body;
-
-    renovateUserId = user.id;
     if (!gitAuthor) {
+      const user = (
+        await gitlabApi.getJson<{
+          email: string;
+          name: string;
+          id: number;
+          commit_email?: string;
+        }>(`user`, { token })
+      ).body;
       platformConfig.gitAuthor = `${user.name} <${
         user.commit_email ?? user.email
       }>`;
     }
-
     // istanbul ignore if: experimental feature
     if (process.env.RENOVATE_X_PLATFORM_VERSION) {
       gitlabVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
@@ -716,26 +711,6 @@ async function tryPrAutomerge(
 }
 
 async function approvePr(pr: number): Promise<void> {
-  try {
-    const { body: approvals } =
-      await gitlabApi.getJson<GitLabMergeRequestApprovals>(
-        `projects/${config.repository}/merge_requests/${pr}/approvals`,
-      );
-
-    const isApproved = approvals.approved_by?.some(
-      (approval) => approval.user?.id === renovateUserId,
-    );
-
-    if (isApproved) {
-      logger.debug('MR is already approved');
-      return;
-    }
-  } catch (err) {
-    logger.warn(
-      { err },
-      'GitLab: Error checking if the merge request is approved',
-    );
-  }
   try {
     await gitlabApi.postJson(
       `projects/${config.repository}/merge_requests/${pr}/approve`,
