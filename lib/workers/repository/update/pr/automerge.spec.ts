@@ -128,12 +128,12 @@ describe('workers/repository/update/pr/automerge', () => {
       config.autoApprove = true;
       config.automerge = true;
       config.pruneBranchAfterAutomerge = true;
-      platform.approvePr.mockResolvedValueOnce();
+      platform.approvePrForAutomerge.mockResolvedValueOnce();
       platform.getBranchStatus.mockResolvedValueOnce('green');
       platform.mergePr.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
       expect(res).toEqual({ automerged: true, branchRemoved: true });
-      expect(platform.approvePr).toHaveBeenCalledTimes(1);
+      expect(platform.approvePrForAutomerge).toHaveBeenCalledTimes(1);
       expect(platform.mergePr).toHaveBeenCalledTimes(1);
     });
 

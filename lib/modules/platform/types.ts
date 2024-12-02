@@ -283,10 +283,10 @@ export interface Platform {
   maxBodyLength(): number;
   labelCharLimit?(): number;
   /**
-   * For platforms that support `autoApprove`. It should handle when the PR
-   * is already be approved.
+   * Platforms that support `autoApprove` can implement this function. It will be
+   * invoked during automerge before the PR branch status is checked.
    */
-  approvePr?(number: number): Promise<void>;
+  approvePrForAutomerge?(number: number): Promise<void>;
 }
 
 export interface PlatformScm {
