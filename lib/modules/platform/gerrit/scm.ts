@@ -129,16 +129,16 @@ export class GerritScm extends DefaultGitScm {
         hasChanges = await git.hasDiff('HEAD', 'FETCH_HEAD'); //avoid empty patchsets
       }
       if (hasChanges || commit.force) {
+        const pushOptions = ['notify=NONE'];
+        if (commit.autoApprove) {
+          pushOptions.push('l=Code-Review+2');
+        }
         const pushResult = await git.pushCommit({
           sourceRef: commit.branchName,
-          targetRef: `refs/for/${commit.baseBranch!}%notify=NONE`,
+          targetRef: `refs/for/${commit.baseBranch!}%${pushOptions.join(',')}`,
           files: commit.files,
         });
         if (pushResult) {
-          // New patchsets dismisses the approval, so we need to approve it again
-          if (existingChange && commit.autoApprove) {
-            await client.approveChange(existingChange._number);
-          }
           return commitSha;
         }
       }

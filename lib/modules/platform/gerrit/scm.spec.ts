@@ -403,9 +403,8 @@ describe('modules/platform/gerrit/scm', () => {
       expect(git.pushCommit).toHaveBeenCalledWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
-        targetRef: 'refs/for/main%notify=NONE',
+        targetRef: 'refs/for/main%notify=NONE,l=Code-Review+2',
       });
-      expect(clientMock.approveChange).toHaveBeenCalledWith(123456);
     });
   });
 });
