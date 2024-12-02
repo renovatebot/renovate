@@ -4,11 +4,11 @@ import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import type { FindPRConfig } from '../types';
 import { client } from './client';
-import {
-  type GerritChange,
-  type GerritChangeMessageInfo,
-  type GerritFindPRConfig,
-  type GerritMergeableInfo,
+import type {
+  GerritChange,
+  GerritChangeMessageInfo,
+  GerritFindPRConfig,
+  GerritMergeableInfo,
 } from './types';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate/';
