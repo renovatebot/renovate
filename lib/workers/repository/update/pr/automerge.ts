@@ -69,8 +69,6 @@ export async function checkAutoMerge(
       prAutomergeBlockReason: 'PlatformNotReady',
     };
   }
-  // Usually the PR will already be approved, this is a last resort in case the
-  // approval was lost for some reason
   if (config.autoApprove && platform.approvePrForAutomerge) {
     logger.debug('Auto-approving PR for automerge');
     await platform.approvePrForAutomerge(pr.number);
