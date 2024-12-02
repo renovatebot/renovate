@@ -17,8 +17,8 @@ Renovate will then extract the `docker` dependencies for the referenced `HelmRel
 
 In addition, for the `flux` manager to properly link `HelmRelease` and `HelmRepository` resources, _both_ of the following conditions must be met:
 
-1. The `HelmRelease` resource must either have its `metadata.namespace` property set or its `spec.chart.spec.sourceRef.namespace` / `spec.chartRef.namespace` property set
-2. The referenced `HelmRepository` and `HelmChart` (when using `chartRef`) resources must have its `metadata.namespace` property set
+1. The `HelmRelease` resource must either have its `metadata.namespace` property set or its `spec.chart.spec.sourceRef.namespace` property (when not using `chartRef`) set
+2. The referenced `HelmRepository` and `HelmChart` (when using `chartRef`) resources must have their `metadata.namespace` property set
 
 Namespaces will not be inferred from the context (e.g. from the parent `Kustomization`).
 

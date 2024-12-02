@@ -14,6 +14,7 @@ import { extractAllPackageFiles, extractPackageFile } from '.';
 
 const config: ExtractConfig = {};
 const adminConfig: RepoGlobalConfig = { localDir: '' };
+const fixtureHelmSource = Fixtures.get('helmSource.yaml');
 const fixtureHelmChart = Fixtures.get('helmChart.yaml');
 const fixtureHelmChartRefRelease = Fixtures.get('helmChartRefRelease.yaml');
 
@@ -246,7 +247,7 @@ describe('modules/manager/flux/extract', () => {
     it('does not match HelmRelease resources without a sourceRef', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('helmSource.yaml')}
+          ${fixtureHelmSource}
           ---
           apiVersion: helm.toolkit.fluxcd.io/v2beta1
           kind: HelmRelease
@@ -276,7 +277,7 @@ describe('modules/manager/flux/extract', () => {
     it('does not match HelmRelease resources without a namespace', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('helmSource.yaml')}
+          ${fixtureHelmSource}
           ---
           apiVersion: helm.toolkit.fluxcd.io/v2beta1
           kind: HelmRelease
@@ -292,35 +293,6 @@ describe('modules/manager/flux/extract', () => {
         'test.yaml',
       );
       expect(result).toBeNull();
-    });
-
-    it('does not match HelmRelease resources using chartRef without a namespace', () => {
-      const result = extractPackageFile(
-        codeBlock`
-          ${fixtureHelmChart}
-          ---
-          apiVersion: helm.toolkit.fluxcd.io/v2
-          kind: HelmRelease
-          metadata:
-            name: sealed-secrets
-            namespace: kube-system
-          spec:
-            chartRef:
-              kind: HelmChart
-              name: sealed-secrets
-        `,
-        'test.yaml',
-      );
-      expect(result).toEqual({
-        deps: [
-          {
-            currentValue: '2.0.2',
-            datasource: HelmDatasource.id,
-            depName: 'sealed-secrets',
-            skipReason: 'unknown-registry',
-          },
-        ],
-      });
     });
 
     it('ignores HelmRepository resources without a namespace', () => {
@@ -372,7 +344,7 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
-    it('ignores HelmRelease resources using a chartRef without a HelmChart', () => {
+    it('ignores HelmRelease resources using an invalid chartRef', () => {
       const result = extractPackageFile(
         fixtureHelmChartRefRelease,
         'test.yaml',
@@ -380,22 +352,25 @@ describe('modules/manager/flux/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('extracts HelmRelease resources using a chartRef without a valid HelmRepository', () => {
+    it('ignores HelmRelease resources using a chartRef targetting a HelmChart', () => {
       const result = extractPackageFile(
         codeBlock`
           ${fixtureHelmChartRefRelease}
           ---
           ${fixtureHelmChart}
+          ---
+          ${fixtureHelmSource}
         `,
         'test.yaml',
       );
+      // HelmRelease is ignored, only HelmChart itself is processed (-> no duplicates expected)
       expect(result).toEqual({
         deps: [
           {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
-            skipReason: 'unknown-registry',
+            registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
           },
         ],
       });
@@ -419,6 +394,7 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml',
       );
+      // HelmRelease is ignored, only OCIRepository itself is processed (-> no duplicates expected)
       expect(result).toEqual({
         deps: [
           {
@@ -429,6 +405,115 @@ describe('modules/manager/flux/extract', () => {
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
             replaceString: 'v1.8.2',
+          },
+        ],
+      });
+    });
+
+    it('extracts HelmChart version', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          ${fixtureHelmSource}
+          ---
+          ${fixtureHelmChart}
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
+          },
+        ],
+      });
+    });
+
+    it('does not match HelmChart resources without a namespace', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          ${fixtureHelmSource}
+          ---
+          apiVersion: source.toolkit.fluxcd.io/v1
+          kind: HelmChart
+          metadata:
+            name: sealed-secrets
+          spec:
+            interval: 10m
+            chart: sealed-secrets
+            sourceRef:
+              kind: HelmRepository
+              name: sealed-secrets
+            version: "2.0.2"
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
+    });
+
+    it('ignores HelmChart resources using git sources', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1
+          kind: HelmChart
+          metadata:
+            name: sealed-secrets
+            namespace: kube-system
+          spec:
+            interval: 10m
+            chart: ./helm/sealed-secrets
+            sourceRef:
+              kind: GitRepository
+              name: sealed-secrets
+        `,
+        'test.yaml',
+      );
+      expect(result).toBeNull();
+    });
+
+    it('ignores HelmChart resources using bucket sources', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1
+          kind: Bucket
+          metadata:
+            name: sealed-secrets
+            namespace: kube-system
+          spec:
+            interval: 5m0s
+            endpoint: sealed-secrets.example.com
+            bucketName: example
+          ---
+          apiVersion: source.toolkit.fluxcd.io/v1
+          kind: HelmChart
+          metadata:
+            name: sealed-secrets
+            namespace: kube-system
+          spec:
+            interval: 10m
+            chart: ./helm/sealed-secrets
+            sourceRef:
+              kind: Bucket
+              name: sealed-secrets
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: './helm/sealed-secrets',
+            skipReason: 'unsupported-datasource',
           },
         ],
       });
@@ -985,7 +1070,7 @@ describe('modules/manager/flux/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('should handle HelmRepository with chartRef', async () => {
+    it('should pick correct package file when using HelmRepository with chartRef', async () => {
       const result = await extractAllPackageFiles(config, [
         'lib/modules/manager/flux/__fixtures__/helmChartRefRelease.yaml',
         'lib/modules/manager/flux/__fixtures__/helmChart.yaml',
@@ -1001,8 +1086,7 @@ describe('modules/manager/flux/extract', () => {
               registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
             },
           ],
-          packageFile:
-            'lib/modules/manager/flux/__fixtures__/helmChartRefRelease.yaml',
+          packageFile: 'lib/modules/manager/flux/__fixtures__/helmChart.yaml',
         },
       ]);
     });

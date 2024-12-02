@@ -11,6 +11,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
+import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
 import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import { extractImage } from '../kustomize/extract';
@@ -21,12 +22,11 @@ import type {
   PackageFileContent,
 } from '../types';
 import {
-  collectHelmReposAndCharts,
+  collectHelmRepos,
   isSystemManifest,
-  resolveHelmReleaseManifest,
   systemManifestHeaderRegex,
 } from './common';
-import { FluxResource, type HelmChart, type HelmRepository } from './schema';
+import { FluxResource, type HelmRepository } from './schema';
 import type {
   FluxManagerData,
   FluxManifest,
@@ -106,6 +106,39 @@ function resolveGitRepositoryPerSourceTag(
   }
 }
 
+function resolveHelmRepository(
+  dep: PackageDependency,
+  matchingRepositories: HelmRepository[],
+  registryAliases: Record<string, string> | undefined,
+): void {
+  if (matchingRepositories.length) {
+    dep.registryUrls = matchingRepositories
+      .map((repo) => {
+        if (repo.spec.type === 'oci' || isOCIRegistry(repo.spec.url)) {
+          // Change datasource to Docker
+          dep.datasource = DockerDatasource.id;
+          // Ensure the URL is a valid OCI path
+          dep.packageName = getDep(
+            `${removeOCIPrefix(repo.spec.url)}/${dep.depName}`,
+            false,
+            registryAliases,
+          ).depName;
+          return null;
+        } else {
+          return repo.spec.url;
+        }
+      })
+      .filter(is.string);
+
+    // if registryUrls is empty, delete it from dep
+    if (!dep.registryUrls?.length) {
+      delete dep.registryUrls;
+    }
+  } else {
+    dep.skipReason = 'unknown-registry';
+  }
+}
+
 function resolveSystemManifest(
   manifest: SystemFluxManifest,
 ): PackageDependency<FluxManagerData>[] {
@@ -124,68 +157,81 @@ function resolveSystemManifest(
 function resolveResourceManifest(
   manifest: ResourceFluxManifest,
   helmRepositories: HelmRepository[],
-  helmCharts: HelmChart[],
   registryAliases: Record<string, string> | undefined,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
   for (const resource of manifest.resources) {
     switch (resource.kind) {
       case 'HelmRelease': {
-        if (resource.spec.chartRef?.kind === 'OCIRepository') {
+        if (resource.spec.chartRef) {
           logger.trace(
-            'HelmRelease referencing an OCIRepository was found, skipping as version will be handled via OCIRepository resource directly',
+            'HelmRelease using chartRef was found, skipping as version will be handled via referenced resource directly',
           );
           continue;
         }
-
-        const resolvedRelease = resolveHelmReleaseManifest(
-          resource,
-          helmRepositories,
-          helmCharts,
-        );
-        if (!resolvedRelease) {
-          // failed to extract the dependency itself
+        if (!resource.spec.chart) {
           logger.debug('invalid or incomplete HelmRelease spec, skipping');
           continue;
         }
-        const { name: chartName, dep, matchingRepositories } = resolvedRelease;
 
-        if (dep.depName?.startsWith('./')) {
+        const chartSpec = resource.spec.chart.spec;
+        const chartName = chartSpec.chart;
+
+        const dep: PackageDependency = {
+          depName: chartName,
+          currentValue: resource.spec.chart.spec.version,
+          datasource: HelmDatasource.id,
+        };
+
+        if (chartName.startsWith('./')) {
           dep.skipReason = 'local-chart';
           delete dep.datasource;
           deps.push(dep);
           continue;
         }
 
-        if (matchingRepositories.length) {
-          dep.registryUrls = matchingRepositories
-            .map((repo) => {
-              if (repo.spec.type === 'oci' || isOCIRegistry(repo.spec.url)) {
-                // Change datasource to Docker
-                dep.datasource = DockerDatasource.id;
-                // Ensure the URL is a valid OCI path
-                dep.packageName = getDep(
-                  `${removeOCIPrefix(repo.spec.url)}/${chartName}`,
-                  false,
-                  registryAliases,
-                ).depName;
-                return null;
-              } else {
-                return repo.spec.url;
-              }
-            })
-            .filter(is.string);
+        const matchingRepositories = helmRepositories.filter(
+          (rep) =>
+            rep.kind === chartSpec.sourceRef?.kind &&
+            rep.metadata.name === chartSpec.sourceRef.name &&
+            rep.metadata.namespace ===
+              (chartSpec.sourceRef.namespace ?? resource.metadata?.namespace),
+        );
+        resolveHelmRepository(dep, matchingRepositories, registryAliases);
+        deps.push(dep);
+        break;
+      }
 
-          // if registryUrls is empty, delete it from dep
-          if (!dep.registryUrls?.length) {
-            delete dep.registryUrls;
-          }
+      case 'HelmChart': {
+        if (resource.spec.sourceRef.kind === 'GitRepository') {
+          logger.trace(
+            'HelmChart using GitRepository was found, skipping as version will be handled via referenced resource directly',
+          );
+          continue;
+        }
+
+        const dep: PackageDependency = {
+          depName: resource.spec.chart,
+        };
+
+        if (resource.spec.sourceRef.kind === 'HelmRepository') {
+          dep.currentValue = resource.spec.version;
+          dep.datasource = HelmDatasource.id;
+
+          const matchingRepositories = helmRepositories.filter(
+            (rep) =>
+              rep.kind === resource.spec.sourceRef?.kind &&
+              rep.metadata.name === resource.spec.sourceRef.name &&
+              rep.metadata.namespace === resource.metadata?.namespace,
+          );
+          resolveHelmRepository(dep, matchingRepositories, registryAliases);
         } else {
-          dep.skipReason = 'unknown-registry';
+          dep.skipReason = 'unsupported-datasource';
         }
         deps.push(dep);
         break;
       }
+
       case 'GitRepository': {
         const dep: PackageDependency = {
           depName: resource.metadata.name,
@@ -259,7 +305,7 @@ export function extractPackageFile(
   if (!manifest) {
     return null;
   }
-  const [helmRepositories, helmCharts] = collectHelmReposAndCharts([manifest]);
+  const helmRepositories = collectHelmRepos([manifest]);
   let deps: PackageDependency[] | null = null;
   switch (manifest.kind) {
     case 'system':
@@ -269,7 +315,6 @@ export function extractPackageFile(
       deps = resolveResourceManifest(
         manifest,
         helmRepositories,
-        helmCharts,
         config?.registryAliases,
       );
       break;
@@ -294,7 +339,7 @@ export async function extractAllPackageFiles(
     }
   }
 
-  const [helmRepositories, helmCharts] = collectHelmReposAndCharts(manifests);
+  const helmRepositories = collectHelmRepos(manifests);
 
   for (const manifest of manifests) {
     let deps: PackageDependency[] | null = null;
@@ -306,7 +351,6 @@ export async function extractAllPackageFiles(
         deps = resolveResourceManifest(
           manifest,
           helmRepositories,
-          helmCharts,
           config.registryAliases,
         );
         break;

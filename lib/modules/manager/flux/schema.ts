@@ -58,12 +58,10 @@ export const HelmChart = KubernetesResource.extend({
   spec: z.object({
     chart: z.string(),
     version: z.string().optional(),
-    sourceRef: z
-      .object({
-        kind: z.string().optional(),
-        name: z.string().optional(),
-      })
-      .optional(),
+    sourceRef: z.object({
+      kind: z.string().optional(),
+      name: z.string().optional(),
+    }),
   }),
 });
 export type HelmChart = z.infer<typeof HelmChart>;
