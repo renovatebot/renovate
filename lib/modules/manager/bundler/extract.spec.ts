@@ -171,14 +171,21 @@ describe('modules/manager/bundler/extract', () => {
   it('parses inline source in Gemfile', async () => {
     const sourceInlineGemfile = codeBlock`
       baz = 'https://gems.baz.com'
+      gem 'inline_gem'
       gem "inline_source_gem", source: 'https://gems.foo.com'
       gem 'inline_source_gem_with_version', "~> 1", source: 'https://gems.bar.com'
       gem 'inline_source_gem_with_variable_source', source: baz
+      gem "inline_source_gem_with_require_after", source: 'https://gems.foo.com', require: %w[inline_source_gem]
+      gem "inline_source_gem_with_require_before", require: %w[inline_source_gem], source: 'https://gems.foo.com'
+      gem "inline_source_gem_with_group_before", group: :production, source: 'https://gems.foo.com'
       `;
     fs.readLocalFile.mockResolvedValueOnce(sourceInlineGemfile);
     const res = await extractPackageFile(sourceInlineGemfile, 'Gemfile');
     expect(res).toMatchObject({
       deps: [
+        {
+          depName: 'inline_gem',
+        },
         {
           depName: 'inline_source_gem',
           registryUrls: ['https://gems.foo.com'],
@@ -191,6 +198,18 @@ describe('modules/manager/bundler/extract', () => {
         {
           depName: 'inline_source_gem_with_variable_source',
           registryUrls: ['https://gems.baz.com'],
+        },
+        {
+          depName: 'inline_source_gem_with_require_after',
+          registryUrls: ['https://gems.foo.com'],
+        },
+        {
+          depName: 'inline_source_gem_with_require_before',
+          registryUrls: ['https://gems.foo.com'],
+        },
+        {
+          depName: 'inline_source_gem_with_group_before',
+          registryUrls: ['https://gems.foo.com'],
         },
       ],
     });
