@@ -17,7 +17,7 @@ const variableMatchRegex = regEx(
   `^(?<key>\\w+)\\s*=\\s*['"](?<value>[^'"]+)['"]`,
 );
 const gemMatchRegex = regEx(
-  `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>['"][^'"]+['"]))?`,
+  `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?`,
 );
 const sourceMatchRegex = regEx(
   `source:\\s*(['"](?<registryUrl>[^'"]+)['"]|(?<sourceName>[^'"]+))?`,

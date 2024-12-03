@@ -250,4 +250,29 @@ describe('modules/manager/bundler/extract', () => {
       ],
     });
   });
+
+  it('parses multiple current values Gemfile', async () => {
+    const multipleValuesGemfile = codeBlock`
+      gem 'gem_without_values'
+      gem 'gem_with_one_value', ">= 3.0.5"
+      gem 'gem_with_multiple_values', ">= 3.0.5", "< 3.2"
+    `;
+    fs.readLocalFile.mockResolvedValueOnce(multipleValuesGemfile);
+    const res = await extractPackageFile(multipleValuesGemfile, 'Gemfile');
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'gem_without_values',
+        },
+        {
+          depName: 'gem_with_one_value',
+          currentValue: '">= 3.0.5"',
+        },
+        {
+          depName: 'gem_with_multiple_values',
+          currentValue: '">= 3.0.5", "< 3.2"',
+        },
+      ],
+    });
+  });
 });

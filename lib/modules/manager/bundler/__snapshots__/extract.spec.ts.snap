@@ -1609,7 +1609,7 @@ exports[`modules/manager/bundler/extract extractPackageFile() parses rails Gemfi
       },
     },
     {
-      "currentValue": "">= 3.0.5"",
+      "currentValue": "">= 3.0.5", "< 3.2"",
       "datasource": "rubygems",
       "depName": "listen",
       "lockedVersion": "3.1.5",
