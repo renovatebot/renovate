@@ -442,6 +442,7 @@
     "pollyjs": "https://github.com/Netflix/pollyjs",
     "pothos": "https://github.com/hayes/pothos",
     "pouchdb": "https://github.com/pouchdb/pouchdb",
+    "powermock": "https://github.com/powermock/powermock",
     "prisma": "https://github.com/prisma/prisma",
     "prometheus-net": "https://github.com/prometheus-net/prometheus-net",
     "promster": "https://github.com/tdeekens/promster",
