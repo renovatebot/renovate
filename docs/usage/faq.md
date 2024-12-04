@@ -36,7 +36,9 @@ This means the Mend Renovate App can lag a few hours to a week behind the open s
 
 Major releases of Renovate are held back until the maintainers are reasonably confident that it works for most users.
 
-See the [Renovate Version](mend-hosted/hosted-apps-config.md#renovate-version) section of `Mend-hosted Apps Configuration` for more information.
+## How can I see which version the Mend Renovate app is using?
+
+See the [Mend-hosted Apps Configuration](mend-hosted/hosted-apps-config.md#which-version-is-the-mend-renovate-app-using) for details.
 
 ## Renovate core features not supported on all platforms
 
