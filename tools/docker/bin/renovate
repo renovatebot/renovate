@@ -5,4 +5,9 @@ if [[ -f "/usr/local/etc/env" && -z "${CONTAINERBASE_ENV+x}" ]]; then
   . /usr/local/etc/env
 fi
 
+if [[ ! -d "/tmp/containerbase" ]]; then
+  # initialize all prepared tools
+  containerbase-cli init tool all
+fi
+
 /usr/local/renovate/node --use-openssl-ca "${RENOVATE_NODE_ARGS[@]}" /usr/local/renovate/dist/renovate.js "$@"

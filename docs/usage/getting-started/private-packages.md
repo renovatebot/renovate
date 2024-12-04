@@ -36,7 +36,7 @@ However if you do still use them, private modules should work if you configure `
 It is strongly recommended not to use private modules on a private registry and a warning will be logged if that is found.
 Credentials stored on disk (e.g. in `~/.npmrc`) are no longer supported.
 
-The recommended way of using local presets is to configure then using "local" presets, e.g. `"extends": ["local>myorg/renovate-config"]`, and ensure that the platform token has access to that repo.
+The recommended way of using local presets is to configure them using "local" presets, e.g. `"extends": ["local>myorg/renovate-config"]`, and ensure that the platform token has access to that repo.
 
 It's not recommended that you use a private repository to host your config while then extending it from a public repository.
 If your preset doesn't have secrets then you should make it public, while if it does have secrets then it's better to split your preset between a public one which all repos extend, and a private one with secrets which only other private repos extend.
@@ -611,7 +611,7 @@ If you need to provide credentials to the Mend Renovate App, please do this:
    }
    ```
 
-For more details, see [Using Secrets with Mend Cloud Apps](../mend-hosted/app-secrets.md).
+For more details, see [Using Secrets with Mend Cloud Apps](../mend-hosted/credentials.md).
 
 ### Access to GitHub Actions Secrets
 

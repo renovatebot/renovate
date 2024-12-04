@@ -122,7 +122,7 @@ If enabled Renovate tries to determine PR assignees by matching rules defined in
 Read the docs for your platform for details on syntax and allowed file locations:
 
 - [GitHub Docs, About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)
-- [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/code_owners.html)
+- [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
 
 ## assigneesSampleSize
@@ -394,7 +394,12 @@ If `true`, Renovate removes special characters when slugifying the branch name:
 - only alphabetic characters are allowed
 - hyphens `-` are used to separate sections
 
-The default `false` behavior will mean that special characters like `.` may end up in the branch name.
+The default `false` behavior will mean that special characters like `.` and `/` may end up in the branch name.
+
+<!-- prettier-ignore -->
+!!! note
+    Renovate will not apply any search/replace to the `branchPrefix` part of the branch name.
+    If you don't want any `/` in your branch name then you will also need to change `branchPrefix` from the default `renovate/` value to something like `renovate-`.
 
 ## branchPrefix
 
@@ -1486,7 +1491,13 @@ You can't use other filenames because Renovate only checks the default filename 
 
 ## gitAuthor
 
-You can customize the Git author that's used whenever Renovate creates a commit.
+You can customize the Git author that's used whenever Renovate creates a commit, although we do not recommend this.
+When this field is unset (default), Renovate will use its platform credentials (e.g. token) to learn/discover its account's git author automatically.
+
+<!-- prettier-ignore -->
+!!! note
+    If running as a GitHub App and using `platformCommit`, GitHub itself sets the git author in commits so you should not configure this field.
+
 The `gitAuthor` option accepts a [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant string.
 It's recommended to include a name followed by an email address, e.g.
 
@@ -1502,6 +1513,7 @@ Development Bot <dev-bot@my-software-company.com>
 ## gitIgnoredAuthors
 
 Specify commit authors ignored by Renovate.
+This field accepts [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant strings.
 
 By default, Renovate will treat any PR as modified if another Git author has added to the branch.
 When a PR is considered modified, Renovate won't perform any further commits such as if it's conflicted or needs a version update.
@@ -2480,8 +2492,9 @@ Here's an example config to limit the "noisy" `aws-sdk` package to weekly update
 {
   "packageRules": [
     {
+      "description": "Schedule aws-sdk updates on Sunday nights (9 PM - 12 AM)",
       "matchPackageNames": ["aws-sdk"],
-      "schedule": ["after 9pm on sunday"]
+      "schedule": ["* 21-23 * * 0"]
     }
   ]
 }
@@ -3346,6 +3359,10 @@ It does not apply when you use a Personal Access Token as credential.
 When `platformCommit` is enabled, Renovate will create commits with GitHub's API instead of using `git` directly.
 This way Renovate can use GitHub's [Commit signing support for bots and other GitHub Apps](https://github.blog/2019-08-15-commit-signing-support-for-bots-and-other-github-apps/) feature.
 
+<!-- prettier-ignore -->
+!!! note
+    When using platform commits, GitHub determines the git author string to use and Renovate's own gitAuthor is ignored.
+
 ## postUpdateOptions
 
 Table with options:
@@ -3657,6 +3674,7 @@ By default this label is `"rebase"` but you can configure it to anything you wan
 Possible values and meanings:
 
 - `auto`: Renovate will autodetect the best setting. It will use `behind-base-branch` if configured to automerge or repository has been set to require PRs to be up to date. Otherwise, `conflicted` will be used instead
+- `automerging`: Renovate will use `behind-base-branch` if configured to automerge, Otherwise, `never` will be used instead
 - `never`: Renovate will never rebase the branch or update it unless manually requested
 - `conflicted`: Renovate will rebase only if the branch is conflicted
 - `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch
@@ -3795,7 +3813,7 @@ If enabled Renovate tries to determine PR reviewers by matching rules defined in
 Read the docs for your platform for details on syntax and allowed file locations:
 
 - [GitHub Docs, About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)
-- [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/code_owners.html)
+- [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
 
 ## reviewersSampleSize
@@ -3848,12 +3866,14 @@ Here are some example schedules and their Cron equivalent:
 <!-- prettier-ignore -->
 !!! note
     For Cron schedules, you _must_ use the `*` wildcard for the minutes value, as Renovate doesn't support minute granularity.
+    And the cron schedule must have five comma separated parts.
 
 One example might be that you don't want Renovate to run during your typical business hours, so that your build machines don't get clogged up testing `package.json` updates.
 You could then configure a schedule like this at the repository level:
 
 ```json
 {
+  "description": "Schedule on weekdays at night (10 PM - 4 AM) and anytime on weekends",
   "schedule": ["* 22-23,0-4 * * *", "* * * * 0,6"]
 }
 ```

@@ -52,3 +52,15 @@ export const ReplacementsSchema = z
     all: AllSchema,
   })
   .catchall(RuleSetSchema);
+
+export const ChangelogUrlsSchema = z
+  .object({
+    $schema: z.string(),
+  })
+  .catchall(z.record(z.string(), z.string().url()));
+
+export const SourceUrlsSchema = z
+  .object({
+    $schema: z.string(),
+  })
+  .catchall(z.record(z.string(), z.string().url()));

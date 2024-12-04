@@ -1011,10 +1011,11 @@ export async function updatePr({
       };
     }
 
-    const { body: updatedPr } = await bitbucketServerHttp.putJson<{
-      version: number;
-      state: string;
-    }>(
+    const { body: updatedPr } = await bitbucketServerHttp.putJson<
+      BbsRestPr & {
+        version: number;
+      }
+    >(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
       { body },
     );
@@ -1028,6 +1029,9 @@ export async function updatePr({
       ['closed']: 'DECLINED',
     }[state!];
 
+    let finalState: 'open' | 'closed' =
+      currentState === 'OPEN' ? 'open' : 'closed';
+
     if (
       newState &&
       ['OPEN', 'DECLINED'].includes(currentState) &&
@@ -1040,7 +1044,26 @@ export async function updatePr({
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/${command}?version=${updatedPr.version}`,
       );
 
+      finalState = state!;
+
       updatePrVersion(pr.number, updatedStatePr.version);
+    }
+
+    if (config.prList) {
+      const bbsPr = utils.prInfo(updatedPr);
+      const existingIndex = config.prList.findIndex(
+        (item) => item.number === prNo,
+      );
+      // istanbul ignore if: should never happen
+      if (existingIndex === -1) {
+        logger.warn(
+          { pr: bbsPr },
+          'Possible error: Updated PR was not found in the PRs that were returned from getPrList().',
+        );
+        config.prList.push({ ...bbsPr, state: finalState });
+      } else {
+        config.prList[existingIndex] = { ...bbsPr, state: finalState };
+      }
     }
   } catch (err) {
     logger.debug({ err, prNo }, `Failed to update PR`);

@@ -187,29 +187,6 @@ describe('modules/platform/gerrit/index', () => {
       gerrit.writeToConfig({ labels: {} });
     });
 
-    it('updatePr() - new prTitle => copy to commit msg', async () => {
-      const oldSubject = 'old title';
-      const oldMessage = `${oldSubject}\n\nsome body\n\nChange-Id: ...`;
-      const change = partial<GerritChange>({
-        subject: oldSubject,
-        current_revision: 'some-revision',
-        revisions: {
-          'some-revision': partial<GerritRevisionInfo>({
-            commit: {
-              message: oldMessage,
-            },
-          }),
-        },
-      });
-      clientMock.getChange.mockResolvedValueOnce(change);
-      await gerrit.updatePr({ number: 123456, prTitle: 'new title' });
-      expect(clientMock.updateChangeSubject).toHaveBeenCalledWith(
-        123456,
-        oldMessage,
-        'new title',
-      );
-    });
-
     it('updatePr() - auto approve enabled', async () => {
       const change = partial<GerritChange>({
         current_revision: 'some-revision',
@@ -332,7 +309,7 @@ describe('modules/platform/gerrit/index', () => {
       ]);
     });
 
-    it('createPr() - update body/title WITHOUT approve', async () => {
+    it('createPr() - update body WITHOUT approve', async () => {
       const pr = await gerrit.createPr({
         sourceBranch: 'source',
         targetBranch: 'target',
@@ -349,11 +326,6 @@ describe('modules/platform/gerrit/index', () => {
         TAG_PULL_REQUEST_BODY,
       );
       expect(clientMock.approveChange).not.toHaveBeenCalled();
-      expect(clientMock.updateChangeSubject).toHaveBeenCalledWith(
-        123456,
-        message,
-        'title',
-      );
     });
 
     it('createPr() - update body and approve', async () => {
@@ -373,7 +345,6 @@ describe('modules/platform/gerrit/index', () => {
         TAG_PULL_REQUEST_BODY,
       );
       expect(clientMock.approveChange).toHaveBeenCalledWith(123456);
-      expect(clientMock.setCommitMessage).not.toHaveBeenCalled();
     });
   });
 
@@ -482,6 +453,26 @@ describe('modules/platform/gerrit/index', () => {
         gerrit.getBranchStatus('renovate/dependency-1.x'),
       ).resolves.toBe('red');
     });
+
+    it('getBranchStatus() - branchname/changes found and hasBlockingLabels but no problems => red', async () => {
+      const submittableChange = partial<GerritChange>({
+        submittable: true,
+        problems: [],
+      });
+      const changeWithProblems = { ...submittableChange };
+      changeWithProblems.submittable = false;
+      changeWithProblems.problems = [];
+      changeWithProblems.labels = {
+        Verified: { blocking: true },
+      };
+      clientMock.findChanges.mockResolvedValueOnce([
+        changeWithProblems,
+        submittableChange,
+      ]);
+      await expect(
+        gerrit.getBranchStatus('renovate/dependency-1.x'),
+      ).resolves.toBe('red');
+    });
   });
 
   describe('getBranchStatusCheck()', () => {
@@ -524,6 +515,14 @@ describe('modules/platform/gerrit/index', () => {
           label: 'Renovate-Merge-Confidence',
           labelValue: { approved: partial<GerritAccountInfo>({}) },
           expectedState: 'green' as BranchStatus,
+        },
+        {
+          label: 'Renovate-Merge-Confidence',
+          labelValue: {
+            approved: partial<GerritAccountInfo>({}),
+            rejected: partial<GerritAccountInfo>({}),
+          },
+          expectedState: 'red' as BranchStatus,
         },
       ])('$ctx/$labels', async ({ label, labelValue, expectedState }) => {
         const change = partial<GerritChange>({
@@ -639,17 +638,11 @@ describe('modules/platform/gerrit/index', () => {
       await expect(
         gerrit.addReviewers(123456, ['user1', 'user2']),
       ).resolves.toBeUndefined();
-      expect(clientMock.addReviewer).toHaveBeenCalledTimes(2);
-      expect(clientMock.addReviewer).toHaveBeenNthCalledWith(
-        1,
-        123456,
+      expect(clientMock.addReviewers).toHaveBeenCalledTimes(1);
+      expect(clientMock.addReviewers).toHaveBeenCalledWith(123456, [
         'user1',
-      );
-      expect(clientMock.addReviewer).toHaveBeenNthCalledWith(
-        2,
-        123456,
         'user2',
-      );
+      ]);
     });
   });
 

@@ -4,6 +4,7 @@ zlib/[~1.2.3, loose=False]
 fake/8.62.134@test/dev
 cairo/1.17.2#aff2d03608351db075ec1348a3afc9ff
 cairo/1.17.2@_/_#aff2d03608351db075ec1348a3afc9ff
+Fake/8.62.134@
 
 [build_requires]
 7zip/[>1.1 <2.1, include_prerelease=True]
