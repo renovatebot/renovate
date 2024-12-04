@@ -9,6 +9,7 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { UpdateArtifactsConfig, Upgrade } from '../types';
+import * as rules from './post-update/rules';
 import { updateArtifacts } from '.';
 
 jest.mock('../../../util/exec/env');
@@ -38,6 +39,8 @@ const validDepUpdate = {
 } satisfies Upgrade<Record<string, unknown>>;
 
 describe('modules/manager/npm/artifacts', () => {
+  const spyProcessHostRules = jest.spyOn(rules, 'processHostRules');
+
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
@@ -46,6 +49,10 @@ describe('modules/manager/npm/artifacts', () => {
     });
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
+    spyProcessHostRules.mockReturnValue({
+      additionalNpmrcContent: [],
+      additionalYarnRcYml: undefined,
+    });
   });
 
   it('returns null if no packageManager updates present', async () => {
@@ -98,6 +105,7 @@ describe('modules/manager/npm/artifacts', () => {
 
   it('returns updated package.json', async () => {
     fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // for npmrc
       .mockResolvedValueOnce('{}') // for node constraints
       .mockResolvedValue('some new content'); // for updated package.json
     const execSnapshots = mockExecAll();
@@ -124,7 +132,9 @@ describe('modules/manager/npm/artifacts', () => {
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce('some new content');
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // for npmrc
+      .mockResolvedValueOnce('some new content');
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
@@ -171,7 +181,9 @@ describe('modules/manager/npm/artifacts', () => {
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce('some new content');
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // for npmrc
+      .mockResolvedValueOnce('some new content');
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
