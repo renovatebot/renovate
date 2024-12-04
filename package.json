@@ -347,7 +347,7 @@
     "tmp-promise": "3.0.3",
     "ts-jest": "29.2.5",
     "ts-node": "10.9.2",
-    "type-fest": "4.28.1",
+    "type-fest": "4.29.0",
     "typescript": "5.7.2",
     "unified": "9.2.2"
   },
@@ -364,7 +364,7 @@
       "safe-json-stringify"
     ],
     "overrides": {
-      "@semantic-release/github>@octokit/plugin-paginate-rest": "11.3.5"
+      "@semantic-release/github>@octokit/plugin-paginate-rest": "11.3.6"
     }
   }
 }
