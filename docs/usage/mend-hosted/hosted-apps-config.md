@@ -25,7 +25,7 @@ This means the Mend Renovate App can lag a few hours to a week behind the open s
 
 Major releases of Renovate are held back until the maintainers are reasonably certain it works for most users.
 
-### Which version the Mend Renovate app is using?
+### Which version is the Mend Renovate app using?
 
 Follow these steps to see which version the Mend Renovate app used for a specific job:
 
