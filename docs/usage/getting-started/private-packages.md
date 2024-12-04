@@ -485,7 +485,7 @@ private-package==1.2.3
 ```json
 {
   "pip-compile": {
-    "fileMatch": ["requirements.txt"]
+    "fileMatch": ["requirements.in"]
   },
   "hostRules": [
     {
