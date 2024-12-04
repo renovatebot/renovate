@@ -1,4 +1,5 @@
 {
+  "$schema": "../../tools/schemas/changelog-urls-schema.json",
   "npm": {
     "babel-preset-react-app": "https://github.com/facebook/create-react-app/releases",
     "firebase": "https://firebase.google.com/support/release-notes/js",

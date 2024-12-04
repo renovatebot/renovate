@@ -249,10 +249,7 @@ export async function ensureDependencyDashboard(
   // Check packageFiles for any deprecations
   let hasDeprecations = false;
   const deprecatedPackages: Record<string, Record<string, boolean>> = {};
-  logger.debug(
-    { packageFiles },
-    'Checking packageFiles for deprecated packages',
-  );
+  logger.debug('Checking packageFiles for deprecated packages');
   if (is.nonEmptyObject(packageFiles)) {
     for (const [manager, fileNames] of Object.entries(packageFiles)) {
       for (const fileName of fileNames) {
@@ -286,6 +283,11 @@ export async function ensureDependencyDashboard(
   }
   let issueBody = '';
 
+  if (config.dependencyDashboardHeader?.length) {
+    issueBody +=
+      template.compile(config.dependencyDashboardHeader, config) + '\n\n';
+  }
+
   if (configMigrationRes.result === 'pr-exists') {
     issueBody +=
       '## Config Migration Needed\n\n' +
@@ -299,11 +301,6 @@ export async function ensureDependencyDashboard(
       '## Config Migration Needed\n\n' +
       ' - [ ] <!-- create-config-migration-pr --> Select this checkbox to let Renovate create an automated Config Migration PR.' +
       '\n\n';
-  }
-
-  if (config.dependencyDashboardHeader?.length) {
-    issueBody +=
-      template.compile(config.dependencyDashboardHeader, config) + '\n\n';
   }
 
   issueBody = appendRepoProblems(config, issueBody);

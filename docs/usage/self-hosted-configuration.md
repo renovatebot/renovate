@@ -1109,11 +1109,12 @@ Defines how the report is exposed:
 
 ## repositories
 
-Elements in the `repositories` array can be an object if you wish to define more settings:
+Elements in the `repositories` array can be an object if you wish to define more settings.
+Example:
 
 ```js
 {
-  repositories: [{ repository: 'g/r1', bumpVersion: true }, 'g/r2'];
+  repositories: [{ repository: 'g/r1', bumpVersion: 'patch' }, 'g/r2'];
 }
 ```
 
@@ -1242,12 +1243,9 @@ Otherwise, it will default to `RenovateBot/${renovateVersion} (https://github.co
 
 ## username
 
-You may need to set a `username` if you:
-
-- use the Bitbucket platform, or
-- use a self-hosted GitHub App with CLI (required)
-
-If you're using a Personal Access Token (PAT) to authenticate then you should not set a `username`.
+The only time where `username` is required is if using `username` + `password` credentials for the `bitbucket` platform.
+You don't need to configure `username` directly if you have already configured `token`.
+Renovate will use the token to discover its username on the platform, including if you're running Renovate as a GitHub App.
 
 ## writeDiscoveredRepos
 
