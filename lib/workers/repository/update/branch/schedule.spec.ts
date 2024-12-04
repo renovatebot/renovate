@@ -322,6 +322,10 @@ describe('workers/repository/update/branch/schedule', () => {
         ${'after 4pm'}            | ${'Asia/Singapore'} | ${'2017-06-30T16:01:00.000+0800'} | ${true}
         ${'before 4am on Monday'} | ${'Asia/Tokyo'}     | ${'2017-06-26T03:59:00.000+0900'} | ${true}
         ${'before 4am on Monday'} | ${'Asia/Tokyo'}     | ${'2017-06-26T04:01:00.000+0900'} | ${false}
+        ${'* 16-23 * * *'}        | ${'Asia/Singapore'} | ${'2017-06-30T15:59:00.000+0800'} | ${false}
+        ${'* 16-23 * * *'}        | ${'Asia/Singapore'} | ${'2017-06-30T16:01:00.000+0800'} | ${true}
+        ${'* 0-3 * * 1'}          | ${'Asia/Tokyo'}     | ${'2017-06-26T03:58:00.000+0900'} | ${true}
+        ${'* 0-3 * * 1'}          | ${'Asia/Tokyo'}     | ${'2017-06-26T04:01:00.000+0900'} | ${false}
       `('$sched, $tz, $datetime', ({ sched, tz, datetime, expected }) => {
         config.schedule = [sched];
         config.timezone = tz;
