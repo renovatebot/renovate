@@ -3850,6 +3850,12 @@ You could then configure a schedule like this at the repository level:
 This would mean that Renovate can run for 7 hours each night, plus all the time on weekends.
 Note how the above example makes use of the "OR" logic of combining multiple schedules in the array.
 
+<!-- prettier-ignore -->
+!!! note
+    When both day of week and day of month are restricted in the schedule e.g "* * 1-7 * 4".
+    The behavior is to run when both the day of the month and day of week match
+    ie. in the above example the repository will be scheduled on a Thursday which falls in the first week of the month.
+
 It's common to use `schedule` in combination with [`timezone`](#timezone).
 You should configure [`updateNotScheduled=false`](#updatenotscheduled) if you want the schedule more strictly enforced so that _updates_ to existing branches aren't pushed out of schedule.
 You can also configure [`automergeSchedule`](#automergeschedule) to limit the hours in which branches/PRs are _automerged_ (if [`automerge`](#automerge) is configured).

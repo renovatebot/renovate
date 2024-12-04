@@ -299,15 +299,17 @@ describe('workers/repository/update/branch/schedule', () => {
       });
     });
 
-    describe('complex cron schedules', () => {
+    describe('handles schedule with DOM and DOW using AND logic', () => {
       it.each`
-        sched            | datetime                          | expected
-        ${'* * 1-7 * 0'} | ${'2024-10-04T10:50:00.000+0900'} | ${true}
-        ${'* * 1-7 * 0'} | ${'2024-10-13T10:50:00.000+0900'} | ${true}
-        ${'* * 1-7 * 0'} | ${'2024-10-16T10:50:00.000+0900'} | ${false}
-      `('$sched, $tz, $datetime', ({ sched, tz, datetime, expected }) => {
-        config.schedule = [sched];
-        config.timezone = 'Asia/Tokyo';
+        datetime                     | expected
+        ${'2017-06-01T01:00:00.000'} | ${true}
+        ${'2017-06-15T01:01:00.000'} | ${true}
+        ${'2017-06-16T03:00:00.000'} | ${false}
+        ${'2017-06-04T04:01:00.000'} | ${false}
+        ${'2017-06-08T04:01:00.000'} | ${false}
+        ${'2017-06-29T04:01:00.000'} | ${false}
+      `('$sched, $tz, $datetime', ({ datetime, expected }) => {
+        config.schedule = ['* 0-5 1-7,15-22 * 4'];
         jest.setSystemTime(new Date(datetime));
         expect(schedule.isScheduledNow(config)).toBe(expected);
       });
