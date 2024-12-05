@@ -25,7 +25,7 @@ export async function extractPackageFile(
   } catch (err) {
     logger.warn(
       { err, fileName: packageFile },
-      'File is not a valid JSON file.',
+      'Invalid JSON file(parsing failed)',
     );
     return null;
   }

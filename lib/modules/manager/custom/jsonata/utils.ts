@@ -31,10 +31,7 @@ export async function handleMatching(
       try {
         return jsonata(query);
       } catch (err) {
-        logger.warn(
-          { err },
-          `Failed to compile JSONata query: ${query}. Excluding it from queries.`,
-        );
+        logger.warn({ query, err }, 'Failed to compile JSONata query');
         return null;
       }
     })
@@ -71,7 +68,7 @@ export function createDependency(
           const url = new URL(value).toString();
           dependency.registryUrls = [url];
         } catch {
-          logger.warn({ value }, 'Invalid JSONata manager registryUrl');
+          logger.warn({ url: value }, 'Invalid JSONata manager registryUrl');
         }
         break;
       default:

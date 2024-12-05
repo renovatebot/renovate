@@ -198,7 +198,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     expect(res).toBeNull();
     expect(logger.logger.warn).toHaveBeenCalledWith(
       expect.anything(),
-      'File is not a valid JSON file.',
+      'Invalid JSON file(parsing failed)',
     );
   });
 
@@ -242,7 +242,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res).not.toBeNull();
     expect(logger.logger.warn).toHaveBeenCalledWith(
-      { value: 'this-is-not-a-valid-url-foo' },
+      { url: 'this-is-not-a-valid-url-foo' },
       'Invalid JSONata manager registryUrl',
     );
   });
@@ -262,8 +262,8 @@ describe('modules/manager/custom/jsonata/index', () => {
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res?.deps).toHaveLength(2);
     expect(logger.logger.warn).toHaveBeenCalledWith(
-      { err: expect.any(Object) },
-      `Failed to compile JSONata query: {. Excluding it from queries.`,
+      { err: expect.any(Object), query: '{' },
+      'Failed to compile JSONata query',
     );
   });
 
