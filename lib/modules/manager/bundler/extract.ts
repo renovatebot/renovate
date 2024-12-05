@@ -25,6 +25,7 @@ const sourceMatchRegex = regEx(
 const gitRefsMatchRegex = regEx(
   `((git:\\s*['"](?<gitUrl>[^'"]+)['"])|(\\s*,\\s*github:\\s*['"](?<repoName>[^'"]+)['"]))(\\s*,\\s*branch:\\s*['"](?<branchName>[^'"]+)['"])?(\\s*,\\s*ref:\\s*['"](?<refName>[^'"]+)['"])?(\\s*,\\s*tag:\\s*['"](?<tagName>[^'"]+)['"])?`,
 );
+const pathMatchRegex = regEx(`path:\\s*['"](?<path>[^'"]+)['"]`);
 
 export async function extractPackageFile(
   content: string,
@@ -147,6 +148,11 @@ export async function extractPackageFile(
       if (gemMatch.currentValue) {
         const currentValue = gemMatch.currentValue;
         dep.currentValue = currentValue;
+      }
+
+      const pathMatch = pathMatchRegex.exec(line)?.groups;
+      if (pathMatch) {
+        dep.skipReason = 'internal-package';
       }
 
       const sourceMatch = sourceMatchRegex.exec(line)?.groups;
