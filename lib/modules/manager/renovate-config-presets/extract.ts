@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
-import { parsePreset } from '../../../config/presets';
+import { parsePreset } from '../../../config/presets/parse';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
