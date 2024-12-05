@@ -68,6 +68,7 @@ export function extractPackageFile(
     const datasource = supportedPresetSources.find(
       (source) => source.source === parsedPreset.presetSource,
     )?.datasource;
+    // istanbul ignore next: never happens but required for type narrowing
     if (!datasource) {
       throw new Error(`Datasource not found for ${parsedPreset.presetSource}`);
     }
