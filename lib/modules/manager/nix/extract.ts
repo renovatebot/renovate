@@ -26,7 +26,7 @@ export async function extractPackageFile(
 
   const flakeLockParsed = NixFlakeLock.safeParse(lockContents);
   if (!flakeLockParsed.success) {
-    logger.error(
+    logger.debug(
       { packageLockFile, error: flakeLockParsed.error },
       `invalid flake.lock file`,
     );
@@ -44,9 +44,9 @@ export async function extractPackageFile(
     // skip all locked nodes which are not in the flake.nix and cannot be updated
     const rootInputs = flakeLock.nodes['root'].inputs;
     if (!rootInputs || !(depName in rootInputs)) {
-      logger.error(
+      logger.debug(
         { packageLockFile, error: flakeLockParsed.error },
-        `invalid flake.lock file because cannot find "root" node`,
+        `flake.lock file cannot find "root" node or reference to ${depName}`,
       );
       continue;
     }
