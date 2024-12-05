@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { getSiblingFileName } from '../../../util/fs';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -13,19 +13,20 @@ const lockableHTTPTarballProtocol = regEx(
   '^https://(?<domain>[^/]+)/(?<owner>[^/]+)/(?<repo>[^/]+)/archive/(?<rev>.+).tar.gz$',
 );
 
-export function extractPackageFile(
+export async function extractPackageFile(
   content: string,
   packageFile: string,
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
   const packageLockFile = getSiblingFileName(packageFile, 'flake.lock');
+  const lockContents = await readLocalFile(packageLockFile);
 
   logger.trace(`nix.extractPackageFile(${packageLockFile})`);
 
   const deps: PackageDependency[] = [];
 
-  const flakeLockParsed = NixFlakeLock.safeParse(content);
+  const flakeLockParsed = NixFlakeLock.safeParse(lockContents);
   if (!flakeLockParsed.success) {
-    logger.debug(
+    logger.error(
       { packageLockFile, error: flakeLockParsed.error },
       `invalid flake.lock file`,
     );
@@ -43,7 +44,7 @@ export function extractPackageFile(
     // skip all locked nodes which are not in the flake.nix and cannot be updated
     const rootInputs = flakeLock.nodes['root'].inputs;
     if (!rootInputs || !(depName in rootInputs)) {
-      logger.debug(
+      logger.error(
         { packageLockFile, error: flakeLockParsed.error },
         `invalid flake.lock file because cannot find "root" node`,
       );
