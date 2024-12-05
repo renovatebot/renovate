@@ -130,16 +130,7 @@ function createLookupTasks(
         };
       }
 
-      const uniqueDeps = new Set<string>();
       for (const dep of packageFile.deps) {
-        if (dep.depName) {
-          if (uniqueDeps.has(dep.depName)) {
-            continue;
-          }
-
-          uniqueDeps.add(dep.depName);
-        }
-
         lookupTasks.push(
           lookup(packageFileConfig, dep).then((result) => ({
             packageFile,
