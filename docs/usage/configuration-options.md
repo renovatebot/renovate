@@ -3854,9 +3854,10 @@ Note how the above example makes use of the "OR" logic of combining multiple sch
 
 <!-- prettier-ignore -->
 !!! note
-    When both day of week and day of month are restricted in the schedule e.g "* * 1-7 * 4".
+    When both day of week and day of month are restricted in the schedule.
     The behavior is to run when both the day of the month and day of week match
-    ie. in the above example the repository will be scheduled on a Thursday which falls in the first week of the month.
+    Example:
+    `* * 1-7 * 4` this schedule will be triggered on a Thursday which falls in the first week of the month.
 
 It's common to use `schedule` in combination with [`timezone`](#timezone).
 You should configure [`updateNotScheduled=false`](#updatenotscheduled) if you want the schedule more strictly enforced so that _updates_ to existing branches aren't pushed out of schedule.
