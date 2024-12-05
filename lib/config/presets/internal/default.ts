@@ -96,7 +96,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         automerge: true,
-        matchCurrentVersion: '!/^0/"',
+        matchCurrentVersion: '!/^0/',
         matchUpdateTypes: ['minor', 'patch'],
       },
     ],
