@@ -2246,6 +2246,7 @@ Supported lock files:
 - `pubspec.lock`
 - `pyproject.toml`
 - `requirements.txt`
+- `uv.lock`
 - `yarn.lock`
 
 Support for new lock files may be added via feature request.
