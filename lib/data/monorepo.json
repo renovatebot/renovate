@@ -55,6 +55,10 @@
       "https://github.com/awslabs/aws-sdk-rust"
     ],
     "awsappsync": "https://github.com/awslabs/aws-mobile-appsync-sdk-js",
+    "axis2": [
+      "https://gitbox.apache.org/repos/asf?p=axis-axis2-java-core.git;a=summary",
+      "https://github.com/apache/axis-axis2-java-core"
+    ],
     "azure-functions-dotnet-worker": "https://github.com/Azure/azure-functions-dotnet-worker",
     "azure azure-libraries-for-net": "https://github.com/Azure/azure-libraries-for-net",
     "azure azure-sdk-for-net": "https://github.com/Azure/azure-sdk-for-net",
@@ -255,6 +259,7 @@
       "https://github.com/dotnet/aspnetcore",
       "https://github.com/dotnet/efcore",
       "https://github.com/dotnet/extensions",
+      "https://github.com/dotnet/fsharp",
       "https://github.com/dotnet/maui",
       "https://github.com/dotnet/roslyn",
       "https://github.com/dotnet/runtime",
@@ -267,6 +272,7 @@
     "dropwizard": "https://github.com/dropwizard/dropwizard",
     "duende-identityserver": "https://github.com/DuendeSoftware/IdentityServer",
     "elastic-apm-agent-rum-js": "https://github.com/elastic/apm-agent-rum-js",
+    "elastic-ecs-dotnet": "https://github.com/elastic/ecs-dotnet",
     "electron-forge": [
       "https://github.com/electron-userland/electron-forge",
       "https://github.com/electron/forge"
@@ -294,6 +300,7 @@
     ],
     "formatjs": "https://github.com/formatjs/formatjs",
     "framework7": "https://github.com/framework7io/framework7",
+    "funogram": "https://github.com/Dolfik1/Funogram",
     "gatsby": "https://github.com/gatsbyjs/gatsby",
     "gitbeaker": "https://github.com/jdalrymple/gitbeaker",
     "github-workflows-kt": "https://github.com/typesafegithub/github-workflows-kt",
@@ -334,6 +341,7 @@
       "https://github.com/facebook/jest",
       "https://github.com/jestjs/jest"
     ],
+    "jetty": "https://github.com/jetty/jetty.project",
     "jna": "https://github.com/java-native-access/jna",
     "json-smart-v2": "https://github.com/netplex/json-smart-v2",
     "jsplumb": "https://github.com/jsplumb/jsplumb",
@@ -434,6 +442,7 @@
     "pollyjs": "https://github.com/Netflix/pollyjs",
     "pothos": "https://github.com/hayes/pothos",
     "pouchdb": "https://github.com/pouchdb/pouchdb",
+    "powermock": "https://github.com/powermock/powermock",
     "prisma": "https://github.com/prisma/prisma",
     "prometheus-net": "https://github.com/prometheus-net/prometheus-net",
     "promster": "https://github.com/tdeekens/promster",
@@ -497,6 +506,7 @@
     "swashbuckle-aspnetcore": "https://github.com/domaindrivendev/Swashbuckle.AspNetCore",
     "system.io.abstractions": "https://github.com/System-IO-Abstractions/System.IO.Abstractions/",
     "tamagui": "https://github.com/tamagui/tamagui",
+    "tanstack-form": "https://github.com/TanStack/form",
     "tanstack-query": "https://github.com/TanStack/query",
     "tanstack-router": "https://github.com/TanStack/router",
     "tanstack-table": "https://github.com/TanStack/table",
@@ -531,6 +541,7 @@
     "unhead": "https://github.com/unjs/unhead",
     "unocss": "https://github.com/unocss/unocss",
     "uppy": "https://github.com/transloadit/uppy",
+    "vaadin-hilla": "https://github.com/vaadin/hilla",
     "vaadinWebComponents": "https://github.com/vaadin/web-components",
     "visx": "https://github.com/airbnb/visx",
     "vitest": "https://github.com/vitest-dev/vitest",
@@ -568,6 +579,7 @@
   "patternGroups": {
     "angularmaterial": ["/^@angular/material/", "/^@angular/cdk/"],
     "apache-camel": "/^org.apache.camel:/",
+    "apache-poi": "/^org.apache.poi:/",
     "aws-java-sdk": "/^com.amazonaws:aws-java-sdk-/",
     "aws-java-sdk-v2": "/^software.amazon.awssdk:/",
     "babel6": "/^babel6$/",

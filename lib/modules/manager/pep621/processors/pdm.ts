@@ -77,7 +77,7 @@ export class PdmProcessor implements PyProjectProcessor {
       const lockFileMapping = Result.parse(
         lockFileContent,
         PdmLockfileSchema.transform(({ lock }) => lock),
-      ).unwrapOrElse({});
+      ).unwrapOr({});
 
       for (const dep of deps) {
         const packageName = dep.packageName;
