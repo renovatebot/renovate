@@ -13,6 +13,31 @@ describe('modules/manager/circleci/extract', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
 
+    it('handles registry alias', () => {
+      const res = extractPackageFile(
+        'executors:\n  my-executor:\n    docker:\n      - image: quay.io/myName/myPackage:0.6.2',
+        '',
+        {
+          registryAliases: {
+            'quay.io': 'my-quay-mirror.registry.com',
+            'index.docker.io': 'my-docker-mirror.registry.com',
+          },
+        },
+      );
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            'quay.io/myName/myPackage:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '0.6.2',
+          datasource: 'docker',
+          depName: 'my-quay-mirror.registry.com/myName/myPackage',
+          depType: 'docker',
+          replaceString: 'quay.io/myName/myPackage:0.6.2',
+        },
+      ]);
+    });
+
     it('extracts multiple image and resolves yaml anchors', () => {
       const res = extractPackageFile(file1);
       expect(res?.deps).toEqual([
