@@ -119,7 +119,7 @@ export async function extractPackageFile(
           datasource: GitRefsDatasource.id,
           // type tarball always contains this link
           packageName: (
-            flakeOriginal.url ?? /* istanbul ignore next */ ''
+            flakeOriginal.url!
           ).replace(
             lockableHTTPTarballProtocol,
             'https://$<domain>/$<owner>/$<repo>',
