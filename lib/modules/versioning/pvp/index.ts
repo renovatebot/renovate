@@ -7,7 +7,7 @@ import { compareIntArray, extractAllParts, getParts, plusOne } from './util';
 
 export const id = 'pvp';
 export const displayName = 'Package Versioning Policy (Haskell)';
-export const urls = [];
+export const urls = ['https://pvp.haskell.org'];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['auto'];
 
