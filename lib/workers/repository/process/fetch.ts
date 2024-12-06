@@ -23,7 +23,6 @@ type LookupResult = Result<PackageDependency, Error>;
 
 interface LookupTaskResult {
   packageFile: PackageFile;
-  manager: string;
   result: LookupResult;
 }
 
@@ -134,7 +133,6 @@ function createLookupTasks(
         lookupTasks.push(
           lookup(packageFileConfig, dep).then((result) => ({
             packageFile,
-            manager: managerConfig.manager,
             result,
           })),
         );
@@ -160,20 +158,17 @@ export async function fetchUpdates(
 
   const errors: Error[] = [];
 
-  type Manager = string;
   type PackageDeps = WeakMap<PackageFile, PackageDependency[]>;
-  type ManagerPackageDeps = Record<Manager, PackageDeps>;
-  const managerPackageDeps: ManagerPackageDeps = {};
+  const packageDeps: PackageDeps = new WeakMap();
 
   // Separate good results from errors
-  for (const { packageFile, manager, result } of fetchResults) {
+  for (const { packageFile, result } of fetchResults) {
     const { val: dep, err } = result.unwrap();
     if (dep) {
-      managerPackageDeps[manager] ??= new WeakMap();
-      let deps = managerPackageDeps[manager].get(packageFile);
+      let deps = packageDeps.get(packageFile);
       if (!deps) {
         deps = [];
-        managerPackageDeps[manager].set(packageFile, deps);
+        packageDeps.set(packageFile, deps);
       }
       deps.push(dep);
     } else {
@@ -186,9 +181,9 @@ export async function fetchUpdates(
   }
 
   // Assign fetched deps back to packageFiles
-  for (const [manager, packageFiles] of Object.entries(managerPackageFiles)) {
+  for (const packageFiles of Object.values(managerPackageFiles)) {
     for (const packageFile of packageFiles) {
-      const packageFileDeps = managerPackageDeps[manager]?.get(packageFile);
+      const packageFileDeps = packageDeps.get(packageFile);
       if (packageFileDeps) {
         packageFile.deps = packageFileDeps;
       }
