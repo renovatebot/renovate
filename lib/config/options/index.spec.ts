@@ -41,4 +41,10 @@ describe('config/options/index', () => {
         }
       });
   });
+
+  it('should not contain duplicate option names', () => {
+    const optsNames = getOptions().map((option) => option.name);
+    const optsNameSet = new Set(optsNames);
+    expect(optsNames).toHaveLength(optsNameSet.size);
+  });
 });

@@ -30,7 +30,7 @@ export async function extractPackageFile(
   const lockfileMapping = Result.parse(
     lockContents,
     Lockfile.transform(({ lock }) => lock),
-  ).unwrapOrElse({});
+  ).unwrapOr({});
 
   let pythonVersion: string | undefined;
   filterMap(res.deps, (dep) => {

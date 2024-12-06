@@ -86,6 +86,7 @@ describe('modules/datasource/cpan/index', () => {
         releaseTimestamp: '2020-11-30T00:21:36.000Z',
         version: '1.0048',
       });
+      expect(res?.tags?.latest).toBe('1.0048');
     });
   });
 });

@@ -56,6 +56,13 @@ describe('modules/manager/conan/extract', () => {
           replaceString: 'cairo/1.17.2@_/_#aff2d03608351db075ec1348a3afc9ff',
         },
         {
+          currentValue: '8.62.134',
+          depName: 'Fake',
+          depType: 'requires',
+          packageName: 'Fake/8.62.134@_/_',
+          replaceString: 'Fake/8.62.134',
+        },
+        {
           currentValue: '[>1.1 <2.1, include_prerelease=True]',
           depName: '7zip',
           depType: 'build_requires',

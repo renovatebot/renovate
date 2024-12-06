@@ -347,7 +347,7 @@ const staticGroups = {
     packageRules: [
       {
         commitMessageTopic: 'Node.js',
-        matchDatasources: ['docker'],
+        matchDatasources: ['docker', 'node-version'],
         matchPackageNames: [
           '/(?:^|/)node$/', // node or ends with "/node, except those below"
           '!calico/node',

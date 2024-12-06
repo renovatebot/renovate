@@ -5,6 +5,11 @@ if [[ -f "/usr/local/etc/env" && -z "${CONTAINERBASE_ENV+x}" ]]; then
   . /usr/local/etc/env
 fi
 
+if [[ ! -d "/tmp/containerbase" ]]; then
+  # initialize all prepared tools
+  containerbase-cli init tool all
+fi
+
 if [[ "${1:0:1}" = '-' ]]; then
   # assume $1 is renovate flag
   set -- renovate "$@"

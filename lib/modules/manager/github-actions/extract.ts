@@ -15,7 +15,7 @@ import type { Workflow } from './types';
 
 const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
-  /^\s+-?\s+?uses\s*: (?<replaceString>['"]?(?<registryUrl>https:\/\/[.\w-]+\/)?(?<depName>[\w-]+\/[.\w-]+)(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:\s+#\s*(((?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+)?)@?(?<tag>([\w-]*-)?v?\d+(?:\.\d+(?:\.\d+)?)?)|(?:ratchet:exclude)))?)/,
+  /^\s+-?\s+?uses\s*: (?<replaceString>['"]?(?<registryUrl>https:\/\/[.\w-]+\/)?(?<depName>[\w-]+\/[.\w-]+)(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:(?<commentWhiteSpaces>\s+)#\s*(((?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+)?)@?(?<tag>([\w-]*-)?v?\d+(?:\.\d+(?:\.\d+)?)?)|(?:ratchet:exclude)))?)/,
 );
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
@@ -72,6 +72,7 @@ function extractWithRegex(content: string): PackageDependency[] {
         tag,
         replaceString,
         registryUrl = '',
+        commentWhiteSpaces = ' ',
       } = tagMatch.groups;
       let quotes = '';
       if (replaceString.indexOf("'") >= 0) {
@@ -87,7 +88,7 @@ function extractWithRegex(content: string): PackageDependency[] {
         versioning: dockerVersioning.id,
         depType: 'action',
         replaceString,
-        autoReplaceStringTemplate: `${quotes}${registryUrl}{{depName}}${path}@{{#if newDigest}}{{newDigest}}${quotes}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quotes}{{/unless}}`,
+        autoReplaceStringTemplate: `${quotes}${registryUrl}{{depName}}${path}@{{#if newDigest}}{{newDigest}}${quotes}{{#if newValue}}${commentWhiteSpaces}# {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quotes}{{/unless}}`,
         ...(registryUrl
           ? detectDatasource(registryUrl)
           : customRegistryUrlsPackageDependency),

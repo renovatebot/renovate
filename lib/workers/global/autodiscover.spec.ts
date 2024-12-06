@@ -167,9 +167,11 @@ describe('workers/global/autodiscover', () => {
     hostRules.find = jest.fn(() => ({
       token: 'abc',
     }));
+    // retains order
     const expectedRepositories = [
-      'another-project/repo',
       'department/dev/aProject',
+      'another-project/repo',
+      'department/dev/bProject',
     ];
     ghApi.getRepos = jest.fn(() =>
       Promise.resolve([

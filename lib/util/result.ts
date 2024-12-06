@@ -142,6 +142,9 @@ export class Result<T extends Val, E extends Val = Error> {
   static wrap<T extends Val, E extends Val = Error>(
     callback: () => RawValue<T>,
   ): Result<T, E>;
+  static wrap<T extends Val, E extends Val = Error>(
+    callback: () => Promise<RawValue<T>>,
+  ): AsyncResult<T, E>;
   static wrap<T extends Val, E extends Val = Error, EE extends Val = never>(
     promise: Promise<Result<T, EE>>,
   ): AsyncResult<T, E | EE>;
@@ -157,6 +160,7 @@ export class Result<T extends Val, E extends Val = Error> {
     input:
       | SafeParseReturnType<Input, T>
       | (() => RawValue<T>)
+      | (() => Promise<RawValue<T>>)
       | Promise<Result<T, EE>>
       | Promise<RawValue<T>>,
   ): Result<T, ZodError<Input>> | Result<T, E | EE> | AsyncResult<T, E | EE> {
@@ -170,6 +174,11 @@ export class Result<T extends Val, E extends Val = Error> {
 
     try {
       const result = input();
+
+      if (result instanceof Promise) {
+        return AsyncResult.wrap(result);
+      }
+
       return Result.ok(result);
     } catch (error) {
       return Result.err(error);
@@ -337,12 +346,12 @@ export class Result<T extends Val, E extends Val = Error> {
    *
    *   ```ts
    *
-   *   const value = Result.err('bar').unwrapOrElse('foo');
+   *   const value = Result.err('bar').unwrapOr('foo');
    *   expect(val).toBe('foo');
    *
    *   ```
    */
-  unwrapOrElse(fallback: T): T {
+  unwrapOr(fallback: T): T {
     if (this.res.ok) {
       return this.res.val;
     }
@@ -480,28 +489,23 @@ export class Result<T extends Val, E extends Val = Error> {
   }
 
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: E) => Result<U, E | EE>,
-  ): Result<T | U, E | EE>;
+    fn: (err: E) => Result<U, EE>,
+  ): Result<T | U, EE>;
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: E) => AsyncResult<U, E | EE>,
-  ): AsyncResult<T | U, E | EE>;
+    fn: (err: E) => AsyncResult<U, EE>,
+  ): AsyncResult<T | U, EE>;
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: E) => Promise<Result<U, E | EE>>,
-  ): AsyncResult<T | U, E | EE>;
+    fn: (err: E) => Promise<Result<U, EE>>,
+  ): AsyncResult<T | U, EE>;
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (
-      err: E,
-    ) =>
-      | Result<U, E | EE>
-      | AsyncResult<U, E | EE>
-      | Promise<Result<U, E | EE>>,
-  ): Result<T | U, E | EE> | AsyncResult<T | U, E | EE> {
+    fn: (err: E) => Result<U, EE> | AsyncResult<U, EE> | Promise<Result<U, EE>>,
+  ): Result<T | U, EE> | AsyncResult<T | U, EE> {
     if (this.res.ok) {
-      return this;
+      return this as never;
     }
 
     if (this.res._uncaught) {
-      return this;
+      return this as never;
     }
 
     try {
@@ -711,14 +715,14 @@ export class AsyncResult<T extends Val, E extends Val>
    *
    *   ```ts
    *
-   *   const val = await Result.wrap(readFile('foo.txt')).unwrapOrElse('bar');
+   *   const val = await Result.wrap(readFile('foo.txt')).unwrapOr('bar');
    *   expect(val).toBe('bar');
    *   expect(err).toBeUndefined();
    *
    *   ```
    */
-  unwrapOrElse(fallback: T): Promise<T> {
-    return this.asyncResult.then<T>((res) => res.unwrapOrElse(fallback));
+  unwrapOr(fallback: T): Promise<T> {
+    return this.asyncResult.then<T>((res) => res.unwrapOr(fallback));
   }
 
   /**
@@ -833,25 +837,23 @@ export class AsyncResult<T extends Val, E extends Val>
   }
 
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: NonNullable<E>) => Result<U, E | EE>,
-  ): AsyncResult<T | U, E | EE>;
+    fn: (err: NonNullable<E>) => Result<U, EE>,
+  ): AsyncResult<T | U, EE>;
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: NonNullable<E>) => AsyncResult<U, E | EE>,
-  ): AsyncResult<T | U, E | EE>;
+    fn: (err: NonNullable<E>) => AsyncResult<U, EE>,
+  ): AsyncResult<T | U, EE>;
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: NonNullable<E>) => Promise<Result<U, E | EE>>,
-  ): AsyncResult<T | U, E | EE>;
+    fn: (err: NonNullable<E>) => Promise<Result<U, EE>>,
+  ): AsyncResult<T | U, EE>;
   catch<U extends Val = T, EE extends Val = E>(
     fn: (
       err: NonNullable<E>,
-    ) =>
-      | Result<U, E | EE>
-      | AsyncResult<U, E | EE>
-      | Promise<Result<U, E | EE>>,
-  ): AsyncResult<T | U, E | EE> {
-    const caughtAsyncResult = this.asyncResult.then((result) =>
-      // eslint-disable-next-line promise/no-nesting
-      result.catch(fn as never),
+    ) => Result<U, EE> | AsyncResult<U, EE> | Promise<Result<U, EE>>,
+  ): AsyncResult<T | U, EE> {
+    const caughtAsyncResult: Promise<Result<T, EE>> = this.asyncResult.then(
+      (result) =>
+        // eslint-disable-next-line promise/no-nesting
+        result.catch(fn as never),
     );
     return AsyncResult.wrap(caughtAsyncResult);
   }

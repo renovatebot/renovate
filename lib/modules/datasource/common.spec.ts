@@ -103,7 +103,10 @@ describe('modules/datasource/common', () => {
       };
       const res = applyExtractVersion(releaseResult, '^v(?<version>.+)$');
       expect(res).toEqual({
-        releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
+        releases: [
+          { version: '1.0.0', versionOrig: 'v1.0.0' },
+          { version: '2.0.0', versionOrig: 'v2.0.0' },
+        ],
       });
     });
 
@@ -113,7 +116,7 @@ describe('modules/datasource/common', () => {
       };
       const result = applyExtractVersion(releaseResult, '^v(?<version>.+)$');
       expect(result).toEqual({
-        releases: [{ version: '1.0.0' }],
+        releases: [{ version: '1.0.0', versionOrig: 'v1.0.0' }],
       });
     });
   });

@@ -505,11 +505,14 @@ exports[`modules/manager/bundler/extract extractPackageFile() parse mastodon Gem
       },
     },
     {
-      "datasource": "rubygems",
+      "currentDigest": "0b799ead604f900ed50685e9b2d469cd2befba5b",
+      "datasource": "git-refs",
       "depName": "health_check",
       "managerData": {
         "lineNumber": 53,
       },
+      "packageName": "https://github.com/ianheggie/health_check",
+      "sourceUrl": "https://github.com/ianheggie/health_check",
     },
     {
       "currentValue": "'~> 4.3'",
@@ -539,12 +542,15 @@ exports[`modules/manager/bundler/extract extractPackageFile() parse mastodon Gem
       },
     },
     {
+      "currentDigest": "54b17ba8c7d8d20a16dfc65d1775241833219cf2",
       "currentValue": "'~> 0.6'",
-      "datasource": "rubygems",
+      "datasource": "git-refs",
       "depName": "http_parser.rb",
       "managerData": {
         "lineNumber": 57,
       },
+      "packageName": "https://github.com/tmm1/http_parser.rb",
+      "sourceUrl": "https://github.com/tmm1/http_parser.rb",
     },
     {
       "currentValue": "'~> 1.3'",
@@ -591,11 +597,14 @@ exports[`modules/manager/bundler/extract extractPackageFile() parse mastodon Gem
       },
     },
     {
-      "datasource": "rubygems",
+      "currentDigest": "fd184883048b922b176939f851338d0a4971a532",
+      "datasource": "git-refs",
       "depName": "nilsimsa",
       "managerData": {
         "lineNumber": 63,
       },
+      "packageName": "https://github.com/witgo/nilsimsa",
+      "sourceUrl": "https://github.com/witgo/nilsimsa",
     },
     {
       "currentValue": "'~> 1.10'",
@@ -660,11 +669,14 @@ exports[`modules/manager/bundler/extract extractPackageFile() parse mastodon Gem
       },
     },
     {
-      "datasource": "rubygems",
+      "currentDigest": "58465d2e213991f8afb13b984854a49fcdcc980c",
+      "datasource": "git-refs",
       "depName": "posix-spawn",
       "managerData": {
         "lineNumber": 71,
       },
+      "packageName": "https://github.com/rtomayko/posix-spawn",
+      "sourceUrl": "https://github.com/rtomayko/posix-spawn",
     },
     {
       "currentValue": "'~> 2.1'",
@@ -899,11 +911,14 @@ exports[`modules/manager/bundler/extract extractPackageFile() parse mastodon Gem
       },
     },
     {
-      "datasource": "rubygems",
+      "currentDigest": "e742697a0906e74e8bb777ef98137bc3955d981d",
+      "datasource": "git-refs",
       "depName": "json-ld",
       "managerData": {
         "lineNumber": 99,
       },
+      "packageName": "https://github.com/ruby-rdf/json-ld.git",
+      "sourceUrl": "https://github.com/ruby-rdf/json-ld",
     },
     {
       "currentValue": "'~> 3.0'",
@@ -1494,11 +1509,13 @@ exports[`modules/manager/bundler/extract extractPackageFile() parses rails Gemfi
       },
     },
     {
-      "datasource": "rubygems",
+      "datasource": "git-refs",
       "depName": "webpacker",
       "managerData": {
         "lineNumber": 16,
       },
+      "packageName": "https://github.com/rails/webpacker",
+      "sourceUrl": "https://github.com/rails/webpacker",
     },
     {
       "currentValue": ""~> 3.1.11"",
@@ -1681,7 +1698,8 @@ exports[`modules/manager/bundler/extract extractPackageFile() parses rails Gemfi
       },
     },
     {
-      "datasource": "rubygems",
+      "currentValue": "update-pg",
+      "datasource": "git-refs",
       "depName": "queue_classic",
       "depTypes": [
         "job",
@@ -1689,6 +1707,8 @@ exports[`modules/manager/bundler/extract extractPackageFile() parses rails Gemfi
       "managerData": {
         "lineNumber": 54,
       },
+      "packageName": "https://github.com/rafaelfranca/queue_classic",
+      "sourceUrl": "https://github.com/rafaelfranca/queue_classic",
     },
     {
       "datasource": "rubygems",
@@ -1791,7 +1811,8 @@ exports[`modules/manager/bundler/extract extractPackageFile() parses rails Gemfi
       },
     },
     {
-      "datasource": "rubygems",
+      "currentValue": "close-race",
+      "datasource": "git-refs",
       "depName": "websocket-client-simple",
       "depTypes": [
         "cable",
@@ -1799,6 +1820,8 @@ exports[`modules/manager/bundler/extract extractPackageFile() parses rails Gemfi
       "managerData": {
         "lineNumber": 71,
       },
+      "packageName": "https://github.com/matthewd/websocket-client-simple",
+      "sourceUrl": "https://github.com/matthewd/websocket-client-simple",
     },
     {
       "datasource": "rubygems",
@@ -2024,15 +2047,19 @@ exports[`modules/manager/bundler/extract extractPackageFile() parses rails Gemfi
       },
     },
     {
-      "datasource": "rubygems",
+      "currentValue": "master",
+      "datasource": "git-refs",
       "depName": "activerecord-jdbcsqlite3-adapter",
       "lockedVersion": "52.1-java",
       "managerData": {
         "lineNumber": 129,
       },
+      "packageName": "https://github.com/jruby/activerecord-jdbc-adapter",
+      "sourceUrl": "https://github.com/jruby/activerecord-jdbc-adapter",
     },
     {
-      "datasource": "rubygems",
+      "currentValue": "master",
+      "datasource": "git-refs",
       "depName": "activerecord-jdbcmysql-adapter",
       "depTypes": [
         "db",
@@ -2041,9 +2068,12 @@ exports[`modules/manager/bundler/extract extractPackageFile() parses rails Gemfi
       "managerData": {
         "lineNumber": 131,
       },
+      "packageName": "https://github.com/jruby/activerecord-jdbc-adapter",
+      "sourceUrl": "https://github.com/jruby/activerecord-jdbc-adapter",
     },
     {
-      "datasource": "rubygems",
+      "currentValue": "master",
+      "datasource": "git-refs",
       "depName": "activerecord-jdbcpostgresql-adapter",
       "depTypes": [
         "db",
@@ -2052,6 +2082,8 @@ exports[`modules/manager/bundler/extract extractPackageFile() parses rails Gemfi
       "managerData": {
         "lineNumber": 132,
       },
+      "packageName": "https://github.com/jruby/activerecord-jdbc-adapter",
+      "sourceUrl": "https://github.com/jruby/activerecord-jdbc-adapter",
     },
     {
       "currentValue": "">= 1.3.0"",
@@ -2104,11 +2136,14 @@ exports[`modules/manager/bundler/extract extractPackageFile() parses rails Gemfi
       },
     },
     {
-      "datasource": "rubygems",
+      "currentValue": "master",
+      "datasource": "git-refs",
       "depName": "activerecord-oracle_enhanced-adapter",
       "managerData": {
         "lineNumber": 154,
       },
+      "packageName": "https://github.com/rsim/oracle-enhanced",
+      "sourceUrl": "https://github.com/rsim/oracle-enhanced",
     },
     {
       "datasource": "rubygems",

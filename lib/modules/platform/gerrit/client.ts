@@ -18,7 +18,7 @@ const QUOTES_REGEX = regEx('"', 'g');
 class GerritClient {
   private requestDetails = [
     'SUBMITTABLE', //include the submittable field in ChangeInfo, which can be used to tell if the change is reviewed and ready for submit.
-    'CHECK', // include potential problems with the change.
+    'CHECK', // include potential consistency problems with the change (not related to labels)
     'MESSAGES',
     'DETAILED_ACCOUNTS',
     'LABELS',
@@ -98,25 +98,6 @@ class GerritClient {
     return change.body;
   }
 
-  async setCommitMessage(changeNumber: number, message: string): Promise<void> {
-    await this.gerritHttp.putJson(`a/changes/${changeNumber}/message`, {
-      body: { message },
-    });
-  }
-
-  async updateChangeSubject(
-    number: number,
-    currentMessage: string,
-    newSubject: string,
-  ): Promise<void> {
-    // Replace first line of the commit message with the new subject
-    const newMessage = currentMessage.replace(
-      new RegExp(`^.*$`, 'm'),
-      newSubject,
-    );
-    await this.setCommitMessage(number, newMessage);
-  }
-
   async getMessages(changeNumber: number): Promise<GerritChangeMessageInfo[]> {
     const messages = await this.gerritHttp.getJson<GerritChangeMessageInfo[]>(
       `a/changes/${changeNumber}/messages`,
@@ -133,7 +114,7 @@ class GerritClient {
     const message = this.normalizeMessage(fullMessage);
     await this.gerritHttp.postJson(
       `a/changes/${changeNumber}/revisions/current/review`,
-      { body: { message, tag } },
+      { body: { message, tag, notify: 'NONE' } },
     );
   }
 
@@ -168,18 +149,25 @@ class GerritClient {
   ): Promise<void> {
     await this.gerritHttp.postJson(
       `a/changes/${changeNumber}/revisions/current/review`,
-      { body: { labels: { [label]: value } } },
+      { body: { labels: { [label]: value }, notify: 'NONE' } },
     );
   }
 
-  async addReviewer(changeNumber: number, reviewer: string): Promise<void> {
-    await this.gerritHttp.postJson(`a/changes/${changeNumber}/reviewers`, {
-      body: { reviewer },
-    });
+  async addReviewers(changeNumber: number, reviewers: string[]): Promise<void> {
+    await this.gerritHttp.postJson(
+      `a/changes/${changeNumber}/revisions/current/review`,
+      {
+        body: {
+          reviewers: reviewers.map((r) => ({ reviewer: r })),
+          notify: 'OWNER_REVIEWERS', // Avoids notifying cc's
+        },
+      },
+    );
   }
 
   async addAssignee(changeNumber: number, assignee: string): Promise<void> {
     await this.gerritHttp.putJson<GerritAccountInfo>(
+      // TODO: refactor this as this API removed in Gerrit 3.8
       `a/changes/${changeNumber}/assignee`,
       {
         body: { assignee },

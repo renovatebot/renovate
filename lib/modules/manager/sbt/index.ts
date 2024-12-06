@@ -8,12 +8,9 @@ import * as ivyVersioning from '../../versioning/ivy';
 export { extractAllPackageFiles, extractPackageFile } from './extract';
 export { bumpPackageVersion } from './update';
 
-export const supportedDatasources = [
-  MavenDatasource.id,
-  SbtPackageDatasource.id,
-  SbtPluginDatasource.id,
-  GithubReleasesDatasource.id, // For sbt itself
-];
+export const displayName = 'sbt';
+export const url = 'https://www.scala-sbt.org';
+export const categories: Category[] = ['java'];
 
 export const defaultConfig = {
   fileMatch: [
@@ -25,4 +22,9 @@ export const defaultConfig = {
   versioning: ivyVersioning.id,
 };
 
-export const categories: Category[] = ['java'];
+export const supportedDatasources = [
+  MavenDatasource.id,
+  SbtPackageDatasource.id,
+  SbtPluginDatasource.id,
+  GithubReleasesDatasource.id, // For sbt itself
+];

@@ -4,10 +4,11 @@ import { extractPackageFile } from './extract';
 
 export { extractPackageFile };
 
+export const url = 'https://docs.drone.io';
+export const categories: Category[] = ['ci'];
+
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.drone\\.yml$'],
 };
-
-export const categories: Category[] = ['ci'];
 
 export const supportedDatasources = [DockerDatasource.id];

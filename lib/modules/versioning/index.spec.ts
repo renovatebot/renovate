@@ -86,6 +86,7 @@ describe('modules/versioning/index', () => {
       'toString',
       'valueOf',
       'subset',
+      'isSame',
     ];
     const npmApi = Object.keys(allVersioning.get(semverVersioning.id))
       .filter((val) => !optionalFunctions.includes(val))

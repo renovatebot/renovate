@@ -25,7 +25,7 @@ export default async function updateDependency({
   const submoduleGit = Git(upath.join(localDir, upgrade.depName));
 
   try {
-    await git.submoduleUpdate(['--init', upgrade.depName!]);
+    await git.submoduleUpdate(['--checkout', '--init', upgrade.depName!]);
     await submoduleGit.checkout([upgrade.newDigest!]);
     if (upgrade.newValue && upgrade.currentValue !== upgrade.newValue) {
       await git.subModule([

@@ -89,12 +89,21 @@ describe('workers/repository/update/pr/body/index', () => {
         homepage: 'https://example.com',
       };
 
+      const upgradeBitbucket = {
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        sourceUrl: 'https://bitbucket.org/foo/bar',
+        sourceDirectory: '/baz',
+        changelogUrl: 'https://bitbucket.org/foo/bar/src/main/CHANGELOG.md',
+        homepage: 'https://example.com',
+      };
+
       getPrBody(
         {
           manager: 'some-manager',
           baseBranch: 'base',
           branchName: 'some-branch',
-          upgrades: [upgrade, upgrade1],
+          upgrades: [upgrade, upgrade1, upgradeBitbucket],
         },
         {
           debugData: {
@@ -127,6 +136,15 @@ describe('workers/repository/update/pr/body/index', () => {
           '[homepage](https://example.com), [source](https://github.com/foo/bar)',
         homepage: 'https://example.com',
         sourceUrl: 'https://github.com/foo/bar',
+      });
+      expect(upgradeBitbucket).toMatchObject({
+        branchName: 'some-branch',
+        depNameLinked:
+          '[undefined](https://example.com) ([source](https://bitbucket.org/foo/bar/src/HEAD/baz), [changelog](https://bitbucket.org/foo/bar/src/main/CHANGELOG.md))',
+        references:
+          '[homepage](https://example.com), [source](https://bitbucket.org/foo/bar/src/HEAD/baz), [changelog](https://bitbucket.org/foo/bar/src/main/CHANGELOG.md)',
+        homepage: 'https://example.com',
+        sourceUrl: 'https://bitbucket.org/foo/bar',
       });
     });
 

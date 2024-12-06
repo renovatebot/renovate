@@ -147,6 +147,7 @@ export const exposedConfigOptions = [
   'semanticCommitType',
   'separateMajorMinor',
   'separateMinorPatch',
+  'sourceDirectory',
 ];
 
 export const allowedFields = {

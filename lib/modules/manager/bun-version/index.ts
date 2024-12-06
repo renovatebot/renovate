@@ -4,14 +4,14 @@ import { id, isValid } from '../../versioning/npm';
 
 import type { PackageDependency, PackageFileContent } from '../types';
 
-export const supportedDatasources = [NpmDatasource.id];
+export const categories: Category[] = ['js'];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.bun-version$'],
   versioning: id,
 };
 
-export const categories: Category[] = ['js'];
+export const supportedDatasources = [NpmDatasource.id];
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   if (!content) {

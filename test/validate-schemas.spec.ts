@@ -18,7 +18,7 @@ describe('validate-schemas', () => {
     );
 
     for (const schemaFile of schemaFiles) {
-      const correspondingDatFileName = schemaFile.replace('-schema', '');
+      const correspondingDataFileName = schemaFile.replace('-schema', '');
       const schemaName = `${schemaFile
         .replace('.json', '')
         .split('-')
@@ -26,7 +26,7 @@ describe('validate-schemas', () => {
         .join('')}` as keyof typeof Schemas;
       schemasAndJsonFiles.push({
         schemaName,
-        dataFileName: correspondingDatFileName,
+        dataFileName: correspondingDataFileName,
       });
     }
 

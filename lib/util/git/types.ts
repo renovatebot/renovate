@@ -83,6 +83,8 @@ export interface CommitFilesConfig {
   message: string | string[];
   force?: boolean;
   platformCommit?: PlatformCommitOptions;
+  /** Only needed by Gerrit platform */
+  prTitle?: string;
 }
 
 export interface PushFilesConfig {

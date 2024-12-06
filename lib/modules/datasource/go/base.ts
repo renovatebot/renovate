@@ -12,6 +12,7 @@ import {
 } from '../../../util/url';
 import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { GitTagsDatasource } from '../git-tags';
+import { GiteaTagsDatasource } from '../gitea-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { DataSource } from './types';
@@ -94,13 +95,45 @@ export class BaseGoDatasource {
       }
     }
 
+    //#region known gitea compatible hosts
+    if (goModule.startsWith('gitea.com/')) {
+      const split = goModule.split('/');
+      const packageName = `${split[1]}/${split[2]}`;
+      return {
+        datasource: GiteaTagsDatasource.id,
+        packageName,
+        registryUrl: 'https://gitea.com',
+      };
+    }
+
+    if (goModule.startsWith('code.forgejo.org/')) {
+      const split = goModule.split('/');
+      const packageName = `${split[1]}/${split[2]}`;
+      return {
+        datasource: GiteaTagsDatasource.id,
+        packageName,
+        registryUrl: 'https://code.forgejo.org',
+      };
+    }
+
+    if (goModule.startsWith('codeberg.org/')) {
+      const split = goModule.split('/');
+      const packageName = `${split[1]}/${split[2]}`;
+      return {
+        datasource: GiteaTagsDatasource.id,
+        packageName,
+        registryUrl: 'https://codeberg.org',
+      };
+    }
+    //#endregion
+
     return await BaseGoDatasource.goGetDatasource(goModule);
   }
 
   private static async goGetDatasource(
     goModule: string,
   ): Promise<DataSource | null> {
-    const goModuleUrl = goModule.replace(/\.git\/v2$/, '');
+    const goModuleUrl = goModule.replace(/\.git(\/[a-z0-9/]*)?$/, '');
     const pkgUrl = `https://${goModuleUrl}?go-get=1`;
     const { body: html } = await BaseGoDatasource.http.get(pkgUrl);
 

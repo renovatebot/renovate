@@ -19,12 +19,13 @@ export {
   updateLockedDependency,
 };
 
+export const url = 'https://bundler.io/docs.html';
+export const categories: Category[] = ['ruby'];
+
 export const defaultConfig = {
   fileMatch: ['(^|/)Gemfile$'],
   versioning: rubyVersioning.id,
 };
-
-export const categories: Category[] = ['ruby'];
 
 export const supportedDatasources = [
   RubygemsDatasource.id,

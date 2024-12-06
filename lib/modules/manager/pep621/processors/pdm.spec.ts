@@ -4,6 +4,7 @@ import { fs, mockedFunction } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
+import * as hostRules from '../../../../util/host-rules';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
@@ -286,6 +287,65 @@ describe('modules/manager/pep621/processors/pdm', () => {
           cmd: 'pdm update --no-sync --update-eager',
           options: {
             cwd: '/tmp/github/some/repo/folder',
+          },
+        },
+      ]);
+    });
+
+    it('sets Git environment variables', async () => {
+      hostRules.add({
+        matchHost: 'https://example.com',
+        username: 'user',
+        password: 'pass',
+      });
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+      // pdm
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
+      });
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'folder/pyproject.toml',
+          newPackageFileContent: '',
+          config: {
+            updateType: 'lockFileMaintenance',
+          },
+          updatedDeps: [],
+        },
+        {},
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'pdm.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'pdm update --no-sync --update-eager',
+          options: {
+            cwd: '/tmp/github/some/repo/folder',
+            env: {
+              GIT_CONFIG_COUNT: '3',
+              GIT_CONFIG_KEY_0: 'url.https://user:pass@example.com/.insteadOf',
+              GIT_CONFIG_KEY_1: 'url.https://user:pass@example.com/.insteadOf',
+              GIT_CONFIG_KEY_2: 'url.https://user:pass@example.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'ssh://git@example.com/',
+              GIT_CONFIG_VALUE_1: 'git@example.com:',
+              GIT_CONFIG_VALUE_2: 'https://example.com/',
+            },
           },
         },
       ]);

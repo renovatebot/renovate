@@ -43,6 +43,7 @@ const initPlatform = jest.spyOn(platform, 'initPlatform');
 describe('workers/global/index', () => {
   beforeEach(() => {
     logger.getProblems.mockImplementation(() => []);
+    logger.logLevel.mockImplementation(() => 'info');
     initPlatform.mockImplementation((input) => Promise.resolve(input));
     delete process.env.AWS_SECRET_ACCESS_KEY;
     delete process.env.AWS_SESSION_TOKEN;

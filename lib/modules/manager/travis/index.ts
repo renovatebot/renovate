@@ -4,7 +4,9 @@ import * as nodeVersioning from '../../versioning/node';
 
 export { extractPackageFile } from './extract';
 
-export const supportedDatasources = [NodeVersionDatasource.id];
+export const displayName = 'Travis CI';
+export const url = 'https://docs.travis-ci.com';
+export const categories: Category[] = ['ci'];
 
 export const defaultConfig = {
   fileMatch: ['^\\.travis\\.ya?ml$'],
@@ -14,4 +16,4 @@ export const defaultConfig = {
   versioning: nodeVersioning.id,
 };
 
-export const categories: Category[] = ['ci'];
+export const supportedDatasources = [NodeVersionDatasource.id];

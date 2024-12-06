@@ -3,8 +3,9 @@ import { Ctx } from '../context';
 import type { RecordFragment } from '../fragments';
 import { mavenRules } from './maven';
 import { moduleRules } from './module';
+import { ociRules } from './oci';
 
-const rule = q.alt<Ctx>(moduleRules, mavenRules);
+const rule = q.alt<Ctx>(moduleRules, mavenRules, ociRules);
 
 const query = q.tree<Ctx>({
   type: 'root-tree',

@@ -359,7 +359,6 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "depType": "dependencies",
       "managerData": {
         "nestedVersion": true,
-        "sourceName": undefined,
       },
       "versioning": "poetry",
     },
@@ -370,7 +369,6 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "depType": "dependencies",
       "managerData": {
         "nestedVersion": true,
-        "sourceName": undefined,
       },
       "versioning": "poetry",
     },
@@ -399,7 +397,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "depName": "extra_dep1",
       "depType": "extras",
       "managerData": {
-        "nestedVersion": false,
+        "nestedVersion": true,
       },
       "packageName": "extra-dep1",
       "versioning": "poetry",
@@ -410,7 +408,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "depName": "extra_dep2",
       "depType": "extras",
       "managerData": {
-        "nestedVersion": false,
+        "nestedVersion": true,
       },
       "packageName": "extra-dep2",
       "versioning": "poetry",
@@ -421,9 +419,53 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "depName": "extra_dep3",
       "depType": "extras",
       "managerData": {
-        "nestedVersion": false,
+        "nestedVersion": true,
       },
       "packageName": "extra-dep3",
+      "versioning": "poetry",
+    },
+    {
+      "currentValue": "^3.0",
+      "datasource": "pypi",
+      "depName": "required_dev_dep",
+      "depType": "dev-dependencies",
+      "managerData": {
+        "nestedVersion": true,
+      },
+      "packageName": "required-dev-dep",
+      "versioning": "poetry",
+    },
+    {
+      "currentValue": "^3.0",
+      "datasource": "pypi",
+      "depName": "optional_dev_dep",
+      "depType": "dev-dependencies",
+      "managerData": {
+        "nestedVersion": true,
+      },
+      "packageName": "optional-dev-dep",
+      "versioning": "poetry",
+    },
+    {
+      "currentValue": "^3.0",
+      "datasource": "pypi",
+      "depName": "required_group_dep",
+      "depType": "group1",
+      "managerData": {
+        "nestedVersion": true,
+      },
+      "packageName": "required-group-dep",
+      "versioning": "poetry",
+    },
+    {
+      "currentValue": "^3.0",
+      "datasource": "pypi",
+      "depName": "optional_group_dep",
+      "depType": "group1",
+      "managerData": {
+        "nestedVersion": true,
+      },
+      "packageName": "optional-group-dep",
       "versioning": "poetry",
     },
   ],
@@ -509,39 +551,6 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     },
     "packageName": "dev-dep2",
     "skipReason": "invalid-version",
-  },
-  {
-    "currentValue": "^0.8.3",
-    "datasource": "pypi",
-    "depName": "extra_dep1",
-    "depType": "extras",
-    "managerData": {
-      "nestedVersion": false,
-    },
-    "packageName": "extra-dep1",
-    "versioning": "poetry",
-  },
-  {
-    "currentValue": "^0.9.4",
-    "datasource": "pypi",
-    "depName": "extra_dep2",
-    "depType": "extras",
-    "managerData": {
-      "nestedVersion": false,
-    },
-    "packageName": "extra-dep2",
-    "versioning": "poetry",
-  },
-  {
-    "currentValue": "^0.4.0",
-    "datasource": "pypi",
-    "depName": "extra_dep3",
-    "depType": "extras",
-    "managerData": {
-      "nestedVersion": false,
-    },
-    "packageName": "extra-dep3",
-    "versioning": "poetry",
   },
 ]
 `;

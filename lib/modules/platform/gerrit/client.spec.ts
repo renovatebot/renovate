@@ -208,39 +208,6 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 
-  describe('setCommitMessage()', () => {
-    it('setCommitMessage', async () => {
-      const change = partial<GerritChange>({});
-      httpMock
-        .scope(gerritEndpointUrl)
-        .put('/a/changes/123456/message', { message: 'new message' })
-        .reply(200, gerritRestResponse(change), jsonResultHeader);
-      await expect(client.setCommitMessage(123456, 'new message')).toResolve();
-    });
-  });
-
-  describe('updateChangeSubject', () => {
-    it('updateChangeSubject - success', async () => {
-      const change = partial<GerritChange>({});
-      const newSubject = 'new subject';
-      const previousSubject = 'some subject';
-      const previousBody = `some body\n\nChange-Id: some-change-id\n`;
-      httpMock
-        .scope(gerritEndpointUrl)
-        .put('/a/changes/123456/message', {
-          message: `${newSubject}\n\n${previousBody}`,
-        })
-        .reply(200, gerritRestResponse(change), jsonResultHeader);
-      await expect(
-        client.updateChangeSubject(
-          123456,
-          `${previousSubject}\n\n${previousBody}`,
-          'new subject',
-        ),
-      ).toResolve();
-    });
-  });
-
   describe('getMessages()', () => {
     it('no messages', async () => {
       httpMock
@@ -276,6 +243,7 @@ describe('modules/platform/gerrit/client', () => {
         .post('/a/changes/123456/revisions/current/review', {
           message: 'message',
           tag: 'tag',
+          notify: 'NONE',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
       await expect(client.addMessage(123456, 'message', 'tag')).toResolve();
@@ -286,6 +254,7 @@ describe('modules/platform/gerrit/client', () => {
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
           message: 'message',
+          notify: 'NONE',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
       await expect(client.addMessage(123456, 'message')).toResolve();
@@ -298,6 +267,7 @@ describe('modules/platform/gerrit/client', () => {
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
           message: okMessage,
+          notify: 'NONE',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
       await expect(client.addMessage(123456, tooBigMessage)).toResolve();
@@ -344,6 +314,7 @@ describe('modules/platform/gerrit/client', () => {
         .post('/a/changes/123456/revisions/current/review', {
           message: 'new trimmed message',
           tag: 'TAG',
+          notify: 'NONE',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
 
@@ -380,6 +351,7 @@ describe('modules/platform/gerrit/client', () => {
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
           labels: { 'Code-Review': 2 },
+          notify: 'NONE',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
       await expect(client.setLabel(123456, 'Code-Review', +2)).toResolve();
@@ -390,11 +362,12 @@ describe('modules/platform/gerrit/client', () => {
     it('add', async () => {
       httpMock
         .scope(gerritEndpointUrl)
-        .post('/a/changes/123456/reviewers', {
-          reviewer: 'username',
+        .post('/a/changes/123456/revisions/current/review', {
+          reviewers: [{ reviewer: 'user1' }, { reviewer: 'user2' }],
+          notify: 'OWNER_REVIEWERS',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
-      await expect(client.addReviewer(123456, 'username')).toResolve();
+      await expect(client.addReviewers(123456, ['user1', 'user2'])).toResolve();
     });
   });
 
@@ -454,6 +427,7 @@ describe('modules/platform/gerrit/client', () => {
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
           labels: { 'Code-Review': +2 },
+          notify: 'NONE',
         })
         .reply(200, gerritRestResponse(''), jsonResultHeader);
       await expect(client.approveChange(123456)).toResolve();

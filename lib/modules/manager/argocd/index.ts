@@ -6,13 +6,12 @@ import { HelmDatasource } from '../../datasource/helm';
 export { extractPackageFile } from './extract';
 
 export const displayName = 'Argo CD';
-export const url = 'https://argo-cd.readthedocs.io/';
+export const url = 'https://argo-cd.readthedocs.io';
+export const categories: Category[] = ['kubernetes', 'cd'];
 
 export const defaultConfig = {
   fileMatch: [],
 };
-
-export const categories: Category[] = ['kubernetes', 'cd'];
 
 export const supportedDatasources = [
   DockerDatasource.id,

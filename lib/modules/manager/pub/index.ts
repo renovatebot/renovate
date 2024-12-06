@@ -7,17 +7,19 @@ import * as npmVersioning from '../../versioning/npm';
 export { updateArtifacts } from './artifacts';
 export { extractPackageFile } from './extract';
 
-export const supportedDatasources = [
-  DartDatasource.id,
-  DartVersionDatasource.id,
-  FlutterVersionDatasource.id,
-];
-
 export const supportsLockFileMaintenance = true;
+
+export const displayName = 'pub';
+export const url = 'https://dart.dev/tools/pub/packages';
+export const categories: Category[] = ['dart'];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)pubspec\\.ya?ml$'],
   versioning: npmVersioning.id,
 };
 
-export const categories: Category[] = ['dart'];
+export const supportedDatasources = [
+  DartDatasource.id,
+  DartVersionDatasource.id,
+  FlutterVersionDatasource.id,
+];

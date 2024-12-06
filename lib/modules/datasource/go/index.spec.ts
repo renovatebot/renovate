@@ -10,6 +10,7 @@ const hostRules = mocked(_hostRules);
 
 const getReleasesDirectMock = jest.fn();
 
+const getDigestGiteaMock = jest.fn();
 const getDigestGithubMock = jest.fn();
 const getDigestGitlabMock = jest.fn();
 const getDigestGitMock = jest.fn();
@@ -19,6 +20,7 @@ jest.mock('./releases-direct', () => {
     GoDirectDatasource: jest.fn().mockImplementation(() => {
       return {
         git: { getDigest: (...args: any[]) => getDigestGitMock(...args) },
+        gitea: { getDigest: (...args: any[]) => getDigestGiteaMock(...args) },
         github: { getDigest: (...args: any[]) => getDigestGithubMock(...args) },
         gitlab: { getDigest: (...args: any[]) => getDigestGitlabMock(...args) },
         bitbucket: {
@@ -189,9 +191,18 @@ describe('modules/datasource/go/index', () => {
         },
         undefined,
       );
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
+      expect(res).toBe('123');
+    });
+
+    it('support gitea digest', async () => {
+      getDigestGiteaMock.mockResolvedValueOnce('123');
+      const res = await datasource.getDigest(
+        {
+          packageName: 'gitea.com/go-chi/cache',
+        },
+        undefined,
+      );
+      expect(res).toBe('123');
     });
 
     describe('GOPROXY', () => {

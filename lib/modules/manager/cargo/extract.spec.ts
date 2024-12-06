@@ -136,6 +136,7 @@ replace-with = "private-crates"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'private-crates',
           },
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
@@ -148,6 +149,7 @@ replace-with = "private-crates"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'mcorbin',
           },
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
@@ -212,6 +214,7 @@ replace-with = "mcorbin"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'private-crates',
           },
         },
         {
@@ -221,6 +224,7 @@ replace-with = "mcorbin"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'mcorbin',
           },
         },
         {
@@ -302,6 +306,7 @@ replace-with = "mcorbin"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'private-crates',
           },
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
@@ -314,6 +319,7 @@ replace-with = "mcorbin"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'mcorbin',
           },
           registryUrls: ['https://github.com/mcorbin/testregistry'],
         },
@@ -437,6 +443,7 @@ replace-with = "mine"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'private-crates',
           },
           skipReason: 'unknown-registry',
         },
@@ -447,6 +454,7 @@ replace-with = "mine"`,
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'mcorbin',
           },
           skipReason: 'unknown-registry',
         },
@@ -493,6 +501,7 @@ replace-with = "mcorbin"
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'private-crates',
           },
           skipReason: 'unknown-registry',
         },
@@ -503,6 +512,7 @@ replace-with = "mcorbin"
           depType: 'dependencies',
           managerData: {
             nestedVersion: true,
+            registryName: 'mcorbin',
           },
           skipReason: 'unknown-registry',
         },
@@ -618,6 +628,22 @@ replace-with = "mcorbin"
         name = "test"
         version = "0.1.0"
         edition = "2021"
+        [dependencies]
+        syn = "2.0"
+        `;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res?.packageFileVersion).toBe('0.1.0');
+    });
+
+    it('should extract project version from workspace', async () => {
+      const cargotoml = codeBlock`
+        [package]
+        name = "test"
+        version.workspace = true
+        edition = "2021"
+        [workspace.package]
+        version = "0.1.0"
         [dependencies]
         syn = "2.0"
         `;

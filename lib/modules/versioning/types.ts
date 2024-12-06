@@ -129,6 +129,12 @@ export interface VersioningApi {
    * Return whether unstable-to-unstable upgrades within the same major version are allowed.
    */
   allowUnstableMajorUpgrades?: boolean;
+
+  /**
+   * Check whether the `type` in the `a` and `b` version numbers match.
+   * Both `a` and `b` must pass `isVersion`.
+   */
+  isSame?(type: 'major' | 'minor' | 'patch', a: string, b: string): boolean;
 }
 
 export interface VersioningApiConstructor {

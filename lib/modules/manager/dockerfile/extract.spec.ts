@@ -32,6 +32,40 @@ describe('modules/manager/dockerfile/extract', () => {
       ]);
     });
 
+    it('handles run --mount=from', () => {
+      const res = extractPackageFile(
+        'FROM scratch as build\n' +
+          'FROM scratch as final\n' +
+          'RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv uv pip install numpy\n' +
+          'RUN --mount=type=cache,from=example.com/cache/image,target=/root/.cache pip install numpy\n' +
+          'RUN --mount=type=bind,from=build,source=/project/dist/lib.whl,target=/dist/lib.whl pip install /dist/lib.whl\n',
+        '',
+        {},
+      )?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: undefined,
+          datasource: 'docker',
+          depName: 'ghcr.io/astral-sh/uv',
+          depType: 'stage',
+          replaceString: 'ghcr.io/astral-sh/uv',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: undefined,
+          datasource: 'docker',
+          depName: 'example.com/cache/image',
+          depType: 'final',
+          replaceString: 'example.com/cache/image',
+        },
+      ]);
+    });
+
     it('is case insensitive', () => {
       const res = extractPackageFile('From node\n', '', {})?.deps;
       expect(res).toEqual([
@@ -463,7 +497,7 @@ describe('modules/manager/dockerfile/extract', () => {
 
     it('detects ["stage"] and ["final"] deps of docker multi-stage build.', () => {
       const res = extractPackageFile(
-        'FROM node:8.15.1-alpine as skippedfrom\nFROM golang:1.7.3 as builder\n\n# comment\nWORKDIR /go/src/github.com/alexellis/href-counter/\nRUN go get -d -v golang.org/x/net/html  \nCOPY app.go    .\nRUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .\n\nFROM alpine:latest  \nRUN apk --no-cache add ca-certificates\nWORKDIR /root/\nCOPY --from=builder /go/src/github.com/alexellis/href-counter/app .\nCMD ["./app"]\n',
+        'FROM node:8.15.1-alpine as skippedfrom\nFROM golang:1.23.3 as builder\n\n# comment\nWORKDIR /go/src/github.com/alexellis/href-counter/\nRUN go get -d -v golang.org/x/net/html  \nCOPY app.go    .\nRUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .\n\nFROM alpine:latest  \nRUN apk --no-cache add ca-certificates\nWORKDIR /root/\nCOPY --from=builder /go/src/github.com/alexellis/href-counter/app .\nCMD ["./app"]\n',
         '',
         {},
       )?.deps;
@@ -482,11 +516,11 @@ describe('modules/manager/dockerfile/extract', () => {
           autoReplaceStringTemplate:
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           currentDigest: undefined,
-          currentValue: '1.7.3',
+          currentValue: '1.23.3',
           datasource: 'docker',
           depName: 'golang',
           depType: 'stage',
-          replaceString: 'golang:1.7.3',
+          replaceString: 'golang:1.23.3',
         },
         {
           autoReplaceStringTemplate:

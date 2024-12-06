@@ -1,4 +1,4 @@
-import { Graph } from 'graph-data-structure';
+import { Graph, topologicalSort } from 'graph-data-structure';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../types';
@@ -9,11 +9,11 @@ export function sortPackageFiles(
   packageFiles: Map<string, PackageFile>,
 ): PackageFile[] {
   const result: PackageFile[] = [];
-  const graph: ReturnType<typeof Graph> = Graph();
+  const graph = new Graph();
   depsBetweenFiles.forEach(({ sourceFile, outputFile }) => {
     graph.addEdge(sourceFile, outputFile);
   });
-  const sorted = graph.topologicalSort();
+  const sorted = topologicalSort(graph);
   for (const file of sorted) {
     if (packageFiles.has(file)) {
       const packageFile = packageFiles.get(file)!;

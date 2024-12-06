@@ -68,6 +68,8 @@ export const OciImageManifest = ManifestObject.extend({
       'application/vnd.oci.image.config.v1+json',
       'application/vnd.cncf.helm.config.v1+json',
       'application/vnd.devcontainers',
+      'application/vnd.oci.empty.v1+json',
+      'application/vnd.cncf.flux.config.v1+json',
     ]),
   }),
   annotations: z.record(z.string()).nullish(),
