@@ -29,12 +29,9 @@ The Renovate team only fixes bugs in an older version if:
 If you're using the Mend Renovate App, you don't need to do anything, as the Renovate maintainers update it regularly.
 If you're self hosting Renovate, use the latest release if possible.
 
-## When is the Mend Renovate App updated with new Renovate versions?
+## When is the Mend Renovate App updated with a new Renovate versions?
 
-The Renovate version on the Mend-hosted does not follow any release schedule or release cadence, but the maintainers try to update at least once a week.
-This means the Mend Renovate App can lag a few hours to a week behind the open source version.
-
-Major releases of Renovate are held back until the maintainers are reasonably confident that it works for most users.
+See the [Renovate version](mend-hosted/hosted-apps-config.md#renovate-version) section of `Mend-hosted Apps Configuration` for details.
 
 ## How can I see which version the Mend Renovate app is using?
 
