@@ -1,6 +1,12 @@
 # Renovate configuration overview
 
-When Renovate runs on a repository, the final config used is derived from the following config locations. The below is the order of precedence:
+Each time Renovate runs on a repository it reads the configuration files listed below and creates a final config.
+This final config describes what Renovate will do during its run.
+
+The final config is internal to Renovate, and is _not_ saved or cached for a later run.
+But you can always find the final config in Renovate's logs.
+
+Renovate reads the configuration files in this order (from from top to bottom):
 
 1. Default config
 2. Global config
