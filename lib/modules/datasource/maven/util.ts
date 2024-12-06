@@ -14,10 +14,10 @@ import { getS3Client, parseS3Url } from '../../../util/s3';
 import { streamToString } from '../../../util/streams';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
-import type { ReleaseResult } from '../types';
 import { getGoogleAuthToken } from '../util';
 import { MAVEN_REPO } from './common';
 import type {
+  DependencyInfo,
   HttpResourceCheckResult,
   MavenDependency,
   MavenXml,
@@ -307,12 +307,8 @@ export function getMavenUrl(
 
 export async function downloadMavenXml(
   http: Http,
-  pkgUrl: URL | null,
+  pkgUrl: URL,
 ): Promise<MavenXml> {
-  if (!pkgUrl) {
-    return {};
-  }
-
   const protocol = pkgUrl.protocol;
 
   if (protocol === 'http:' || protocol === 'https:') {
@@ -449,8 +445,8 @@ export async function getDependencyInfo(
   repoUrl: string,
   version: string,
   recursionLimit = 5,
-): Promise<Partial<ReleaseResult>> {
-  const result: Partial<ReleaseResult> = {};
+): Promise<DependencyInfo> {
+  const result: DependencyInfo = {};
   const path = await createUrlForDependencyPom(
     http,
     version,

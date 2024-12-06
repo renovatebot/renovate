@@ -32,8 +32,9 @@ If you're self hosting Renovate, use the latest release if possible.
 ## When is the Mend Renovate App updated with new Renovate versions?
 
 The Renovate maintainers manually update the app.
-The maintainers don't follow any release schedule or release cadence.
+The maintainers don't follow any release schedule or release cadence, but try to update at least once a week.
 This means the Mend Renovate App can lag a few hours to a week behind the open source version.
+
 Major releases of Renovate are held back until the maintainers are reasonably certain it works for most users.
 
 ## How can I see which version the Mend Renovate app is using?
@@ -51,7 +52,7 @@ Follow these steps to see which version the Mend Renovate app is on:
    ```
    INFO: Repository started
    {
-     "renovateVersion": "38.120.1"
+     "renovateVersion": "39.11.5"
    }
    ```
 

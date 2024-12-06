@@ -152,6 +152,60 @@ describe('modules/datasource/docker/schema', () => {
     });
   });
 
+  it('parses OCI flux artifact', () => {
+    const manifest = {
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.manifest.v1+json',
+      config: {
+        mediaType: 'application/vnd.cncf.flux.config.v1+json',
+        digest:
+          'sha256:7cd37ea18409c76d241ad0d4ed484e206275be3535782be144ae257d54dd8d50',
+        size: 233,
+      },
+      layers: [
+        {
+          mediaType: 'application/vnd.cncf.flux.content.v1.tar+gzip',
+          digest:
+            'sha256:243a01363756cd6bc04243680d4c9aeac274523f298f9525823db9ae7e188a3c',
+          size: 1113,
+        },
+      ],
+      annotations: {
+        'org.opencontainers.image.source':
+          'https://github.com/renovatebot/renovate',
+      },
+    };
+    expect(OciImageManifest.parse(manifest)).toMatchObject({
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.manifest.v1+json',
+      config: {
+        mediaType: 'application/vnd.cncf.flux.config.v1+json',
+        digest:
+          'sha256:7cd37ea18409c76d241ad0d4ed484e206275be3535782be144ae257d54dd8d50',
+        size: 233,
+      },
+      annotations: {
+        'org.opencontainers.image.source':
+          'https://github.com/renovatebot/renovate',
+      },
+    });
+
+    expect(Manifest.parse(manifest)).toMatchObject({
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.manifest.v1+json',
+      config: {
+        mediaType: 'application/vnd.cncf.flux.config.v1+json',
+        digest:
+          'sha256:7cd37ea18409c76d241ad0d4ed484e206275be3535782be144ae257d54dd8d50',
+        size: 233,
+      },
+      annotations: {
+        'org.opencontainers.image.source':
+          'https://github.com/renovatebot/renovate',
+      },
+    });
+  });
+
   it('parses distribution manifest', () => {
     const manifest = {
       schemaVersion: 2,
