@@ -167,5 +167,5 @@ export const miseTooling: Record<string, ToolingDefinition> = {
       packageName: 'ziglang/zig',
       datasource: GithubTagsDatasource.id,
     },
-  }
+  },
 };
