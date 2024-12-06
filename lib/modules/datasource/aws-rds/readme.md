@@ -101,7 +101,7 @@ Here is the Renovate configuration to use Terraform, `aws-rds` and Aurora MySQL:
 }
 ```
 
-The above configuration will ...insert explanation of bits below...
+The above configuration is an example of updating an AWS RDS version inside a Terraform file, using a custom manager.
 
 ```
 # renovate:rdsFilter=[{"Name":"engine","Values":["aurora-mysql"]},{"Name":"engine-version","Values":["8.0"]}] depName=aurora-mysql versioning=loose
