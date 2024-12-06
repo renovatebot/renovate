@@ -1,25 +1,27 @@
-# syntax=docker/dockerfile:1.10.0@sha256:865e5dd094beca432e8c0a1d5e1c465db5f998dca4e439981029b3b81fb39ed5
+# syntax=docker/dockerfile:1.12.0@sha256:db1ff77fb637a5955317c7a3a62540196396d565f3dd5742e76dddbb6d75c4c5
 
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:7.27.4@sha256:a9dd9c744714c4041caabb99f1625e1526617c94f245f09dfab0c4c3c148ff2c AS slim-base
+FROM ghcr.io/renovatebot/base-image:9.15.0@sha256:12891c6b442e0a45e4bdf119c2122bb4d11d8755af96394dfc13785bfbfd4544 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:7.27.4-full@sha256:4ea198276d6ff16e8b4584ce8db54f52cee7e1a500b2cf4fcebc72df969443c8 AS full-base
+FROM ghcr.io/renovatebot/base-image:9.15.0-full@sha256:c7c8712b552fca3a140098fe1f515914bda1ffc15a9693da717d57d02a10b5f7 AS full-base
+
+ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:7.27.4@sha256:a9dd9c744714c4041caabb99f1625e1526617c94f245f09dfab0c4c3c148ff2c AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.15.0@sha256:12891c6b442e0a45e4bdf119c2122bb4d11d8755af96394dfc13785bfbfd4544 AS build
 
 # We want a specific node version here
 # renovate: datasource=node-version
-RUN install-tool node 20.17.0
+RUN install-tool node 22.11.0
 
 WORKDIR /usr/local/renovate
 
@@ -90,11 +92,18 @@ ARG RENOVATE_VERSION
 
 COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
+# make our node binary available as last in path
+RUN ln -sf /usr/local/renovate/node /bin/node
+
+# ensure default base and cache directories exist.
+RUN mkdir -p /tmp/renovate/cache && \
+    chmod -R 777 /tmp/renovate
+
 # test
 RUN set -ex; \
   renovate --version; \
   pushd /usr/local/renovate/; \
-  ./node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
+  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
   true
 
 LABEL \
@@ -102,4 +111,4 @@ LABEL \
   org.label-schema.version="${RENOVATE_VERSION}"
 
 # Numeric user ID for the ubuntu user. Used to indicate a non-root user to OpenShift
-USER 1000
+USER 12021

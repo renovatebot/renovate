@@ -27,6 +27,35 @@
 
     The Renovate team
 
+'auto:not-minimal-reproduction':
+  comment: >
+    Hi there,
+
+
+    We appreciate the effort you put into creating a reproduction. But your reproduction is not minimal yet, or is missing fields we ask for in our template.
+
+
+    Please re-read the steps and documentation given in the previous message, and try again to create a minimal reproduction.
+
+
+    Thanks, the Renovate team
+
+'auto:environment':
+  comment: >
+    Hi there,
+
+
+    We need more information about your environment.
+
+
+    Please explain in detail how you are running Renovate. For example:
+      - Are you running via an official Renovate image, or using the Renovate npm package?
+      - Which exact image tag are you running?
+      - Which config/parameters are you using when running the image?
+      - Which config are you using in your CI/CD pipeline, if relevant?
+
+    Thanks, the Renovate team
+
 'auto:logs':
   comment: >
     Hi there,
@@ -113,7 +142,7 @@
     Hi there,
 
 
-    Please give us specific logs, so we can help you more.
+    A maintainer wants you to find and share a specific log message (`packageFiles with updates`) from your repository or environment.
 
 
     If you self-host Renovate: make sure you run Renovate with `LOG_LEVEL=debug` to get the debug log messages! Next, open the debug-level logs and search for `packageFiles with updates`. This text marks the start of a structured log message that shows every package file, dependency, and update that Renovate found.
@@ -139,6 +168,19 @@
 
 
     If you're not sure, it's acceptable to paste the full logs, including into a gist. Please try to explain the problem in enough detail to give us starting points to debug. If you only paste the full log, and do nothing else, it is likely that we will take longer to help you, or we may not start to help you at all.
+
+
+    Thanks, the Renovate team
+
+'auto:too-much-redacting':
+  comment: >
+    Hi there,
+
+
+    You redacted too much information from your config or logs. This makes it hard for us to pinpoint the problem.
+
+
+    Please only redact truly sensitive information. Or consider an enterprise support contract, if Open Source support does not suit you.
 
 
     Thanks, the Renovate team
@@ -313,7 +355,7 @@
 
     Thanks, the Renovate team.
   close: true
-  close-reason: 'not planned'
+  close-reason: 'outdated'
 
 'auto:bad-vibes':
   comment: >
@@ -376,50 +418,15 @@
 
     Thanks, the Renovate team
 
-'auto:bug-to-idea':
+'auto:meaningful-title':
   comment: >
     Hi there,
 
 
-    A maintainer reviewed the information, and decided that this is not a bug. To avoid confusing others, we will close this Discussion. Please keep reading as there is good news too!
+    Please give your discussion a meaningful title. This helps others understand what your discussion is about, and increases the chances of getting help.
 
 
-    The good news is that the maintainer likes your idea, in general. Please create a new [Suggest an Idea](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea) Discussion. Feel free to copy/paste what you need from this Discussion. Please focus on the feature request: explain what Renovate should do, and how Renovate can know when/what to do. We may convert that Discussion to an Issue when it is ready. Note that you will still have to wait for a maintainer, or someone else, to do the work needed for your feature.
-
-
-    Why are we closing your Discussion? For us, bug reports are about things that are not working as intended, or things that are not working as described in the docs. What you found may be bad behavior, but we do not think it is a bug.
-
-
-    For more details, please read [our development docs about bug handling](https://github.com/renovatebot/renovate/blob/main/docs/development/bug-handling.md).
-
-
-    Thanks, the Renovate team
-
-'auto:bug-invalid':
-  comment: >
-    Hi there,
-
-
-    A maintainer decided this is not a bug, and behaving as designed. The maintainer will explain why this behavior is correct. To avoid confusing future readers, we will close this Discussion.
-
-
-    We want Bug-type Discussions to be about things that we rate as bugs. For more details, please read [our development docs about bug handling](https://github.com/renovatebot/renovate/blob/main/docs/development/bug-handling.md).
-
-
-    If this bug report makes you think of an idea for a new feature, or how to improve a current feature, feel free to create a new [Suggest an Idea](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea) Discussion.
-
-
-    Thanks, the Renovate team
-
-'auto:bug-converted':
-  comment: >
-    Hi there,
-
-
-    A maintainer confirmed this is a bug, and converted this Discussion to an Issue. If you have more thoughts/info about the bug, please post them in the Issue.
-
-
-    We will close this Discussion, as we want new info to go in the Issue.
+    Do not use titles like "Need config help", "Renovate is not working", etc. Try to summarize the specifics of your problem or question in the title.
 
 
     Thanks, the Renovate team
@@ -440,19 +447,24 @@
 
     Thanks, the Renovate team
 
-'auto:no-slas':
+'auto:no-pings':
   comment: >
     Hi there,
 
 
-    Please remember that there are no Service Level Agreements (SLAs) or roadmap commitments in Open Source projects like Renovate. The maintainers and contributors work on bugs/features/docs at their own pace. This means that sometimes you will have to wait for things to happen, or to get a response.
+    Please do not post comments like: "Any update on this?" or "When will this be fixed?".
 
 
-    Please avoid comments like: "Any update on this?" or "When will this be fixed?". Do not chase a maintainer to get answers quickly. We will block you if you nudge us frequently.
+    If you're asking because **you want to know if there's been some progress**, then please know that we work in the open in this repo. If there was an update to this Discussion or Issue, you would see it already. So please don't ask "just in case".
 
 
-    Please read our [Code of Conduct, how we prioritize work](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#how-we-prioritize-work) to learn more about how we prioritize what to work on.
-    If you are a paying Mend.io customer, please tell your support or customer contact that this issue is important to you.
+    If you're asking because **you want to get our attention**, then please don't do that either. It wastes maintainer time and pollutes the repo. You're welcome to fix issues yourself, hire someone to help you, or _wait_ for someone else to do the work. You're _not_ welcome to post the equivalent of "Hey, someone else should really do something about this".
+
+
+    If you are a paying Mend.io customer, contact your support or customer success representative, and tell them this issue is important to you.
+
+
+    We expect everyone to follow these rules, no matter if you use the free tiers, or are a paying Mend customer. Please read our [Code of Conduct, how we prioritize work](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#how-we-prioritize-work) to learn more about how we prioritize what to work on.
 
 
     Thanks, the Renovate team
@@ -472,6 +484,35 @@
 
 
     To summarize: please reduce the complexity of your discussion, to increase the chances of getting help.
+
+
+    Thanks, the Renovate team
+
+'auto:enterprise-support':
+  comment: >
+    Hi there,
+
+
+    The maintainers have labeled this discussion as a use case specific to "enterprise" users. Enterprise users typically self-host Renovate and have advanced requirements like custom certificates, HTTP proxies, private registries, air gapping, etc.
+
+
+    Such cases usually need a lot of back-and-forth to resolve, because the problem is related to the user's environment.
+    Usually the user's environment can not be reproduced publicly, which means that maintainer debugging is not possible.
+
+
+    The maintainers decided their time is best spent on issues that help large numbers of users. This means enterprise-specific issues affecting one user (or a small number of users), are not a priority. If we can help you quickly, we will. But if you see this message, then a maintainer believes this is not a quick fix. The maintainers will not actively work on this issue, unless new information is found.
+
+
+    If you are an enterprise user, please consider the following options:
+
+      - Troubleshoot and contribute a fix yourself, or
+      - [Hire a consultant](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#getting-more-help) to help you, or
+      - Consider an [Enterprise support contract from Mend.io](https://mend.io/mend-renovate/), or
+      - Wait for a community member to help you, if they have the same problem
+
+
+    If you choose to wait, then this discussion can remain open indefinitely.
+    But please be patient, do not nudge or bump this discussion just to get attention.
 
 
     Thanks, the Renovate team

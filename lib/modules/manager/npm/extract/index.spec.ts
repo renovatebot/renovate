@@ -1052,6 +1052,14 @@ describe('modules/manager/npm/extract/index', () => {
               depType: 'dependencies',
               prettyDepType: 'dependency',
             },
+            {
+              currentValue: '0.7.0',
+              datasource: 'npm',
+              depName: 'express>cookie',
+              packageName: 'cookie',
+              depType: 'pnpm.overrides',
+              prettyDepType: 'overrides',
+            },
           ],
           extractedConstraints: {},
           managerData: {

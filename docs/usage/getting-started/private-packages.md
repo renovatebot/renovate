@@ -36,7 +36,7 @@ However if you do still use them, private modules should work if you configure `
 It is strongly recommended not to use private modules on a private registry and a warning will be logged if that is found.
 Credentials stored on disk (e.g. in `~/.npmrc`) are no longer supported.
 
-The recommended way of using local presets is to configure then using "local" presets, e.g. `"extends": ["local>myorg/renovate-config"]`, and ensure that the platform token has access to that repo.
+The recommended way of using local presets is to configure them using "local" presets, e.g. `"extends": ["local>myorg/renovate-config"]`, and ensure that the platform token has access to that repo.
 
 It's not recommended that you use a private repository to host your config while then extending it from a public repository.
 If your preset doesn't have secrets then you should make it public, while if it does have secrets then it's better to split your preset between a public one which all repos extend, and a private one with secrets which only other private repos extend.
@@ -499,7 +499,7 @@ private-package==1.2.3
 
 #### Packages that Renovate needs
 
-Renovate relies on `pip`'s integration with the Python [keyring](https://pypi.org/project/keyring/) package along with the [keyrigs.envvars](https://pypi.org/project/keyrings.envvars/) backend for this.
+Renovate relies on `pip`'s integration with the Python [keyring](https://pypi.org/project/keyring/) package along with the [keyrings.envvars](https://pypi.org/project/keyrings.envvars/) backend for this.
 
 ##### Self-hosting Renovate
 
@@ -511,7 +511,7 @@ But if you are self-hosting Renovate and:
 - _not_ running Renovate in a Containerbase environment
 - or, _not_ using the Docker sidecar container
 
-Then you must install the Python keyring package and the keyrigs.envvars package into your self-hosted environment.
+Then you must install the Python keyring package and the keyrings.envvars package into your self-hosted environment.
 
 ### poetry
 
@@ -611,7 +611,7 @@ If you need to provide credentials to the Mend Renovate App, please do this:
    }
    ```
 
-For more details, see [Using Secrets with Mend Cloud Apps](../mend-hosted/app-secrets.md).
+For more details, see [Using Secrets with Mend Cloud Apps](../mend-hosted/credentials.md).
 
 ### Access to GitHub Actions Secrets
 

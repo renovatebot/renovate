@@ -126,11 +126,19 @@ function resolveResourceManifest(
   for (const resource of manifest.resources) {
     switch (resource.kind) {
       case 'HelmRelease': {
+        const depName = resource.spec.chart.spec.chart;
         const dep: PackageDependency = {
-          depName: resource.spec.chart.spec.chart,
+          depName,
           currentValue: resource.spec.chart.spec.version,
           datasource: HelmDatasource.id,
         };
+
+        if (depName.startsWith('./')) {
+          dep.skipReason = 'local-chart';
+          delete dep.datasource;
+          deps.push(dep);
+          continue;
+        }
 
         const matchingRepositories = helmRepositories.filter(
           (rep) =>

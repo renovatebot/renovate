@@ -182,24 +182,6 @@ kind: ConfigMap
             depName: 'busybox',
             replaceString: 'busybox',
           },
-          {
-            autoReplaceStringTemplate:
-              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-            currentDigest: undefined,
-            currentValue: undefined,
-            datasource: 'docker',
-            depName: '{{',
-            replaceString: '{{',
-          },
-          {
-            autoReplaceStringTemplate:
-              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-            currentDigest: undefined,
-            currentValue: undefined,
-            datasource: 'docker',
-            depName: '{{',
-            replaceString: '{{',
-          },
         ],
       });
     });

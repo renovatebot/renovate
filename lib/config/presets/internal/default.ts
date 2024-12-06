@@ -96,7 +96,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         automerge: true,
-        matchCurrentVersion: '>= 1.0.0',
+        matchCurrentVersion: '!/^0/',
         matchUpdateTypes: ['minor', 'patch'],
       },
     ],
@@ -572,6 +572,19 @@ export const presets: Record<string, Preset> = {
           'import',
           'parent',
         ],
+        semanticCommitType: 'fix',
+      },
+      {
+        matchDepTypes: [
+          'project.dependencies',
+          'project.optional-dependencies',
+        ],
+        matchManagers: ['pep621'],
+        semanticCommitType: 'fix',
+      },
+      {
+        matchDepTypes: ['dependencies', 'extras'],
+        matchManagers: ['poetry'],
         semanticCommitType: 'fix',
       },
     ],

@@ -61,6 +61,8 @@ export interface Release {
   isStable?: boolean;
   releaseTimestamp?: string | null;
   version: string;
+  /** The original value to which `extractVersion` was applied */
+  versionOrig?: string;
   newDigest?: string | undefined;
   constraints?: Record<string, string[]>;
   dependencies?: Record<string, string>;
@@ -69,6 +71,7 @@ export interface Release {
   sourceUrl?: string | undefined;
   sourceDirectory?: string;
   currentAge?: string;
+  isLatest?: boolean;
 }
 
 export interface ReleaseResult {
@@ -94,6 +97,8 @@ export interface PostprocessReleaseConfig {
   packageName: string;
   registryUrl: string | null;
 }
+
+export type PostprocessReleaseResult = Release | 'reject';
 
 export type RegistryStrategy = 'first' | 'hunt' | 'merge';
 export type SourceUrlSupport = 'package' | 'release' | 'none';
@@ -158,8 +163,8 @@ export interface DatasourceApi extends ModuleApi {
    *
    * In other cases, the original `Release` parameter should be returned.
    */
-  postprocessRelease?(
+  postprocessRelease(
     config: PostprocessReleaseConfig,
     release: Release,
-  ): Promise<Release | null>;
+  ): Promise<PostprocessReleaseResult>;
 }

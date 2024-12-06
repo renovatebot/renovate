@@ -1,7 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { parseSingleYaml } from '../../../util/yaml';
 import type { GitlabPipeline } from '../gitlabci/types';
-import { replaceReferenceTags } from '../gitlabci/utils';
 import {
   filterIncludeFromGitlabPipeline,
   isGitlabIncludeComponent,
@@ -12,7 +11,7 @@ import {
 
 // TODO: use schema (#9610)
 const pipeline = parseSingleYaml<GitlabPipeline>(
-  replaceReferenceTags(codeBlock`
+  codeBlock`
     include:
     - project: mikebryant/include-source-example
       file: /template.yaml
@@ -25,7 +24,7 @@ const pipeline = parseSingleYaml<GitlabPipeline>(
 
     script:
     - !reference [.setup, script]
-    - !reference [arbitrary job name with space and no starting dot, nested1, nested2, nested3]`),
+    - !reference [arbitrary job name with space and no starting dot, nested1, nested2, nested3]`,
 );
 const includeLocal = { local: 'something' };
 const includeProject = { project: 'something' };
@@ -37,7 +36,15 @@ describe('modules/manager/gitlabci/common', () => {
       const filtered_pipeline = filterIncludeFromGitlabPipeline(pipeline);
       expect(filtered_pipeline).not.toHaveProperty('include');
       expect(filtered_pipeline).toEqual({
-        script: [null, null],
+        script: [
+          ['.setup', 'script'],
+          [
+            'arbitrary job name with space and no starting dot',
+            'nested1',
+            'nested2',
+            'nested3',
+          ],
+        ],
       });
     });
   });

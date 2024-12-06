@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import jsonata from 'jsonata';
 import { logger } from '../../../logger';
+import { getExpression } from '../../../util/jsonata';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { fetchers } from './formats';
@@ -46,8 +46,25 @@ export class CustomDatasource extends Datasource {
     logger.trace({ data }, `Custom manager fetcher '${format}' returned data.`);
 
     for (const transformTemplate of transformTemplates) {
-      const expression = jsonata(transformTemplate);
-      data = await expression.evaluate(data);
+      const expression = getExpression(transformTemplate);
+
+      if (expression instanceof Error) {
+        logger.once.warn(
+          { errorMessage: expression.message },
+          `Invalid JSONata expression: ${transformTemplate}`,
+        );
+        return null;
+      }
+
+      try {
+        data = await expression.evaluate(data);
+      } catch (err) {
+        logger.once.warn(
+          { err },
+          `Error while evaluating JSONata expression: ${transformTemplate}`,
+        );
+        return null;
+      }
     }
 
     try {

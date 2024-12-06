@@ -54,6 +54,15 @@ const staticGroups = {
       },
     ],
   },
+  atlaskit: {
+    description: 'Group all Atlassian `@atlaskit` packages together.',
+    packageRules: [
+      {
+        extends: ['packages:atlaskit'],
+        groupName: 'Atlassian Atlaskit packages',
+      },
+    ],
+  },
   codemirror: {
     description: 'Group CodeMirror packages together.',
     packageRules: [
@@ -338,7 +347,7 @@ const staticGroups = {
     packageRules: [
       {
         commitMessageTopic: 'Node.js',
-        matchDatasources: ['docker'],
+        matchDatasources: ['docker', 'node-version'],
         matchPackageNames: [
           '/(?:^|/)node$/', // node or ends with "/node, except those below"
           '!calico/node',

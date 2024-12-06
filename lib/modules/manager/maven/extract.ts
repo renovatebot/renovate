@@ -26,6 +26,11 @@ function parsePom(raw: string, packageFile: string): XmlDocument | null {
   let project: XmlDocument;
   try {
     project = new XmlDocument(raw);
+    if (raw.includes('\r\n')) {
+      logger.warn(
+        'Your pom.xml contains windows line endings. This is not supported and may result in parsing issues.',
+      );
+    }
   } catch {
     logger.debug({ packageFile }, `Failed to parse as XML`);
     return null;

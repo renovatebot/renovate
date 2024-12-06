@@ -16,6 +16,10 @@ export const presets: Record<string, Preset> = {
     description: 'All packages published by Apollo GraphQL.',
     matchSourceUrls: ['https://github.com/apollographql/**'],
   },
+  atlaskit: {
+    description: 'All @atlaskit packages published by Atlassian.',
+    matchPackageNames: ['@atlaskit/**'],
+  },
   emberTemplateLint: {
     description: 'All ember-template-lint packages.',
     matchPackageNames: ['ember-template-lint**'],

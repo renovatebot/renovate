@@ -259,14 +259,14 @@ export function isDynamicInstall(
 
 function isStable(
   version: string,
-  versioning: allVersioning.VersioningApi,
+  versioningApi: allVersioning.VersioningApi,
   latest?: string,
 ): boolean {
-  if (!versioning.isStable(version)) {
+  if (!versioningApi.isStable(version)) {
     return false;
   }
   if (is.string(latest)) {
-    if (versioning.isGreaterThan(version, latest)) {
+    if (versioningApi.isGreaterThan(version, latest)) {
       return false;
     }
   }

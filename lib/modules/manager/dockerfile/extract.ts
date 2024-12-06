@@ -422,6 +422,41 @@ export function extractPackageFile(
       }
     }
 
+    const runMountFromRegex = regEx(
+      '^[ \\t]*RUN(?:' +
+        escapeChar +
+        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--mount=(?:\\S*=\\S*,)*from=(?<image>[^, ]+)',
+      'im',
+    );
+    const runMountFromMatch = instruction.match(runMountFromRegex);
+    if (runMountFromMatch?.groups?.image) {
+      if (stageNames.includes(runMountFromMatch.groups.image)) {
+        logger.debug(
+          { image: runMountFromMatch.groups.image },
+          'Skipping alias RUN --mount=from',
+        );
+      } else {
+        const dep = getDep(
+          runMountFromMatch.groups.image,
+          true,
+          config.registryAliases,
+        );
+        const lineNumberRanges: number[][] = [
+          [lineNumberInstrStart, lineNumber],
+        ];
+        processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
+        logger.debug(
+          {
+            depName: dep.depName,
+            currentValue: dep.currentValue,
+            currentDigest: dep.currentDigest,
+          },
+          'Dockerfile RUN --mount=from',
+        );
+        deps.push(dep);
+      }
+    }
+
     lineNumber += 1;
   }
 
