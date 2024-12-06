@@ -1,6 +1,6 @@
 ### Unsupported Config
 
-- [Local presets](../../config-presets/#local-presets)
-- [HTTP URLs presets](../../config-presets/#fetching-presets-from-an-http-server)
-- [`package.json` file config](../../configuration-options/) (deprecated)
-- [`npm` hosted presets](../../config-presets/#npm-hosted-presets) (deprecated)
+- [Local presets](../../../config-presets.md#local-presets)
+- [HTTP URLs presets](../../../config-presets.md#fetching-presets-from-an-http-server)
+- [`package.json` file config](../../../configuration-options.md) (deprecated)
+- [`npm` hosted presets](../../../config-presets.md#npm-hosted-presets) (deprecated)

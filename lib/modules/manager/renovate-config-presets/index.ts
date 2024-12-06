@@ -5,7 +5,7 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 
 export { extractPackageFile } from './extract';
 
-export const url = '../../config-presets/';
+export const url = '../../../config-presets.md';
 
 export const defaultConfig = {
   fileMatch: configFileNames
