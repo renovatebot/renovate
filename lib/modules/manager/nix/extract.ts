@@ -34,6 +34,7 @@ export async function extractPackageFile(
   }
 
   const flakeLock = flakeLockParsed.data;
+  const rootInputs = flakeLock.nodes['root'].inputs;
 
   for (const [depName, flakeInput] of Object.entries(flakeLock.nodes)) {
     // the root input is a magic string for the entrypoint and only references other flake inputs
@@ -42,7 +43,6 @@ export async function extractPackageFile(
     }
 
     // skip all locked nodes which are not in the flake.nix and cannot be updated
-    const rootInputs = flakeLock.nodes['root'].inputs;
     if (!rootInputs || !(depName in rootInputs)) {
       logger.debug(
         { packageLockFile, error: flakeLockParsed.error },
