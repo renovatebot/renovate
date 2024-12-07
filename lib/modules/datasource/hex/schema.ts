@@ -58,15 +58,15 @@ export const HexRelease = z
       ? normalizeKeys(hexResponse.meta.links)
       : undefined;
 
-      if (normalizedLinks?.github) {
-        releaseResult.sourceUrl = normalizedLinks.github;
-      }
+    if (normalizedLinks?.github) {
+      releaseResult.sourceUrl = normalizedLinks.github;
+    }
 
     return releaseResult;
   });
 
-  function normalizeKeys(obj: Record<string, any>): Record<string, any> {
-    return Object.fromEntries(
-      Object.entries(obj).map(([key, value]) => [key.toLowerCase(), value]),
-    );
-  }
+function normalizeKeys(obj: Record<string, any>): Record<string, any> {
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => [key.toLowerCase(), value]),
+  );
+}
