@@ -5,6 +5,11 @@ import { id as versioning } from '../../versioning/loose';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
+const TASKS_URL_BASE =
+  'https://raw.githubusercontent.com/renovatebot/azure-devops-marketplace/main';
+const BUILT_IN_TASKS_URL = `${TASKS_URL_BASE}/azure-pipelines-builtin-tasks.json`;
+const MARKETPLACE_TASKS_URL = `${TASKS_URL_BASE}/azure-pipelines-marketplace-tasks.json`;
+
 export class AzurePipelinesTasksDatasource extends Datasource {
   static readonly id = 'azure-pipelines-tasks';
 
@@ -19,16 +24,26 @@ export class AzurePipelinesTasksDatasource extends Datasource {
   async getReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const platform = GlobalConfig.get('platform');
     const endpoint = GlobalConfig.get('endpoint');
-    const auth = Buffer.from(`renovate:${process.env.RENOVATE_TOKEN}`).toString(
-      'base64',
-    );
-    const opts: HttpOptions = {
-      headers: { authorization: `Basic ${auth}` },
-    };
-    const versions = (
-      await this.getTasks(`${endpoint}/_apis/distributedtask/tasks/`, opts)
-    )[packageName.toLowerCase()];
+
+    let versions;
+
+    if (platform === 'azure' && endpoint) {
+      const auth = Buffer.from(
+        `renovate:${process.env.RENOVATE_TOKEN}`,
+      ).toString('base64');
+      const opts: HttpOptions = {
+        headers: { authorization: `Basic ${auth}` },
+      };
+      versions = (
+        await this.getTasks(`${endpoint}/_apis/distributedtask/tasks/`, opts)
+      )[packageName.toLowerCase()];
+    } else {
+      versions =
+        (await this.getTasks(BUILT_IN_TASKS_URL))[packageName.toLowerCase()] ??
+        (await this.getTasks(MARKETPLACE_TASKS_URL))[packageName.toLowerCase()];
+    }
 
     if (versions) {
       const releases = versions.map((version) => ({ version }));
@@ -45,7 +60,7 @@ export class AzurePipelinesTasksDatasource extends Datasource {
   })
   async getTasks(
     url: string,
-    opts: HttpOptions,
+    opts?: HttpOptions,
   ): Promise<Record<string, string[]>> {
     const { body } = await this.http.getJson<Record<string, string[]>>(
       url,
