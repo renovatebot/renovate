@@ -299,7 +299,7 @@ describe('workers/repository/update/branch/schedule', () => {
       });
     });
 
-    describe('handles schedule with DOM and DOW using AND logic', () => {
+    describe('handles schedule with Day Of Month and Day Of Week using AND logic', () => {
       it.each`
         datetime                     | expected
         ${'2017-06-01T01:00:00.000'} | ${true}
