@@ -8,11 +8,21 @@ export const HexRelease = z
     html_url: z.string().optional(),
     meta: z
       .object({
-        links: z.record(z.unknown()).transform(links => Object.fromEntries(
-          Object.entries(links).map(([key, value]) => [key.toLowerCase(), value]),
-        )).pipe(z.object({
-          github: z.string(),
-        })),
+        links: z
+          .record(z.unknown())
+          .transform((links) =>
+            Object.fromEntries(
+              Object.entries(links).map(([key, value]) => [
+                key.toLowerCase(),
+                value,
+              ]),
+            ),
+          )
+          .pipe(
+            z.object({
+              github: z.string(),
+            }),
+          ),
       })
       .nullable()
       .catch(null),
@@ -58,6 +68,6 @@ export const HexRelease = z
     if (hexResponse.meta?.links?.github) {
       releaseResult.sourceUrl = hexResponse.meta.links.github;
     }
-    
+
     return releaseResult;
   });
