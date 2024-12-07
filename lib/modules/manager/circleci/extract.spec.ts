@@ -24,7 +24,7 @@ describe('modules/manager/circleci/extract', () => {
           },
         },
       );
-      expect(res?.deps).toEqual([
+      expect(res).toEqual([
         {
           autoReplaceStringTemplate:
             'quay.io/myName/myPackage:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
