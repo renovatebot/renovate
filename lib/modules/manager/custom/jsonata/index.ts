@@ -19,7 +19,7 @@ export async function extractPackageFile(
   packageFile: string,
   config: JsonataExtractConfig,
 ): Promise<PackageFileContent | null> {
-  let json;
+  let json: unknown;
   try {
     json = parseJson(content, packageFile);
   } catch (err) {

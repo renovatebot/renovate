@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { logger } from '../../../../../test/util';
 import type { JsonataExtractConfig } from './types';
 import { defaultConfig, extractPackageFile } from '.';
@@ -10,7 +11,7 @@ describe('modules/manager/custom/jsonata/index', () => {
   });
 
   it('extracts data when no templates are used', async () => {
-    const json = `
+    const json = codeBlock`
     {
     "packages": [
       {
@@ -44,37 +45,26 @@ describe('modules/manager/custom/jsonata/index', () => {
     const res = await extractPackageFile(json, 'unused', config);
 
     expect(res?.deps).toHaveLength(1);
-    expect(res?.deps.filter((dep) => dep.depName === 'foo')).toHaveLength(1);
-    expect(res?.deps.filter((dep) => dep.packageName === 'fii')).toHaveLength(
-      1,
-    );
-    expect(
-      res?.deps.filter((dep) => dep.currentValue === '1.2.3'),
-    ).toHaveLength(1);
-    expect(
-      res?.deps.filter((dep) => dep.currentDigest === '1234'),
-    ).toHaveLength(1);
-    expect(res?.deps.filter((dep) => dep.datasource === 'nuget')).toHaveLength(
-      1,
-    );
-    expect(res?.deps.filter((dep) => dep.versioning === 'maven')).toHaveLength(
-      1,
-    );
-    expect(
-      res?.deps.filter(
-        (dep) => dep.extractVersion === 'custom-extract-version',
-      ),
-    ).toHaveLength(1);
-    expect(
-      res?.deps.filter((dep) =>
-        dep.registryUrls?.includes('https://registry.npmjs.org/'),
-      ),
-    ).toHaveLength(1);
-    expect(res?.deps.filter((dep) => dep.depType === 'dev')).toHaveLength(1);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'foo',
+          packageName: 'fii',
+          currentValue: '1.2.3',
+          currentDigest: '1234',
+          datasource: 'nuget',
+          versioning: 'maven',
+          extractVersion: 'custom-extract-version',
+          registryUrls: ['https://registry.npmjs.org/'],
+          depType: 'dev',
+        },
+      ],
+      matchStrings: config.matchStrings,
+    });
   });
 
   it('applies templates', async () => {
-    const json = `
+    const json = codeBlock`
     {
     "packages": [
       {
@@ -127,66 +117,68 @@ describe('modules/manager/custom/jsonata/index', () => {
     const res = await extractPackageFile(json, 'unused', config);
 
     expect(res?.deps).toHaveLength(2);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'foo',
+          packageName: 'fii',
+          currentValue: '1.2.3',
+          currentDigest: '1234',
+          datasource: 'nuget',
+          versioning: 'maven',
+          extractVersion: 'custom-extract-version',
+          registryUrls: ['https://registry.npmjs.org/'],
+          depType: 'dev',
+        },
+        {
+          depName: 'default-dep-name',
+          packageName: 'default-package-name',
+          currentValue: 'default-current-value',
+          currentDigest: 'default-current-digest',
+          datasource: 'default-datasource',
+          versioning: 'default-versioning',
+          extractVersion: 'default-extract-version',
+          registryUrls: ['https://default.registry.url/'],
+          depType: 'default-dep-type',
+        },
+      ],
+      matchStrings: config.matchStrings,
+    });
+  });
 
-    expect(res?.deps.filter((dep) => dep.depName === 'foo')).toHaveLength(1);
-    expect(res?.deps.filter((dep) => dep.packageName === 'fii')).toHaveLength(
-      1,
-    );
-    expect(
-      res?.deps.filter((dep) => dep.currentValue === '1.2.3'),
-    ).toHaveLength(1);
-    expect(
-      res?.deps.filter((dep) => dep.currentDigest === '1234'),
-    ).toHaveLength(1);
-    expect(res?.deps.filter((dep) => dep.datasource === 'nuget')).toHaveLength(
-      1,
-    );
-    expect(res?.deps.filter((dep) => dep.versioning === 'maven')).toHaveLength(
-      1,
-    );
-    expect(
-      res?.deps.filter(
-        (dep) => dep.extractVersion === 'custom-extract-version',
-      ),
-    ).toHaveLength(1);
-    expect(
-      res?.deps.filter((dep) =>
-        dep.registryUrls?.includes('https://registry.npmjs.org/'),
-      ),
-    ).toHaveLength(1);
-    expect(res?.deps.filter((dep) => dep.depType === 'dev')).toHaveLength(1);
+  it('logs warning if query result does not match schema', async () => {
+    const json = codeBlock`
+    {
+    "packages": [
+      {
+        "dep_name": "foo",
+        "package_name": "fii",
+        "current_value": 1,
+        "current_digest": "1234",
+        "data_source": "nuget",
+        "versioning": "maven",
+        "extract_version": "custom-extract-version",
+        "registry_url": "https://registry.npmjs.org",
+        "dep_type": "dev"
+      }
+     ]
+    }`;
+    const config = {
+      matchStrings: [
+        `packages.{
+            "depName": dep_name,
+            "currentValue": current_value,
+            "datasource": data_source
+        }`,
+      ],
+    };
+    const res = await extractPackageFile(json, 'unused', config);
 
-    expect(
-      res?.deps.filter((dep) => dep.depName === 'default-dep-name'),
-    ).toHaveLength(1);
-    expect(
-      res?.deps.filter((dep) => dep.packageName === 'default-package-name'),
-    ).toHaveLength(1);
-    expect(
-      res?.deps.filter((dep) => dep.currentValue === 'default-current-value'),
-    ).toHaveLength(1);
-    expect(
-      res?.deps.filter((dep) => dep.currentDigest === 'default-current-digest'),
-    ).toHaveLength(1);
-    expect(
-      res?.deps.filter((dep) => dep.datasource === 'default-datasource'),
-    ).toHaveLength(1);
-    expect(
-      res?.deps.filter((dep) => dep.versioning === 'default-versioning'),
-    ).toHaveLength(1);
-    expect(
-      res?.deps.filter(
-        (dep) => dep.extractVersion === 'default-extract-version',
-      ),
-    ).toHaveLength(1);
-    expect(
-      res?.deps.filter((dep) =>
-        dep.registryUrls?.includes('https://default.registry.url/'),
-      ),
-    ).toHaveLength(1);
-    expect(
-      res?.deps.filter((dep) => dep.depType === 'default-dep-type'),
-    ).toHaveLength(1);
+    expect(res).toBeNull();
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      expect.anything(),
+      'Error while parsing dep info',
+    );
   });
 
   it('returns null when content is not json', async () => {
