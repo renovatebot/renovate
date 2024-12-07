@@ -2,7 +2,7 @@ import { execSync } from 'node:child_process';
 import { glob } from 'glob';
 import { logger } from '../../../logger';
 import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
-import type { PlatformScm } from '../types';
+import type { PlatformScm, ScmStats } from '../types';
 
 let fileList: string[] | undefined;
 export class LocalFs implements PlatformScm {
@@ -58,5 +58,9 @@ export class LocalFs implements PlatformScm {
 
   mergeToLocal(branchName: string): Promise<void> {
     return Promise.resolve();
+  }
+
+  getStats(): Promise<ScmStats | null> {
+    return Promise.resolve(null);
   }
 }
