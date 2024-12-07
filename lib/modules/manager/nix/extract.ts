@@ -117,9 +117,7 @@ export async function extractPackageFile(
           replaceString: flakeLocked.rev,
           datasource: GitRefsDatasource.id,
           // type tarball always contains this link
-          packageName: (
-            flakeOriginal.url!
-          ).replace(
+          packageName: (flakeOriginal.url!).replace(
             lockableHTTPTarballProtocol,
             'https://$<domain>/$<owner>/$<repo>',
           ),
