@@ -44,7 +44,6 @@ describe('modules/manager/custom/jsonata/index', () => {
     };
     const res = await extractPackageFile(json, 'unused', config);
 
-    expect(res?.deps).toHaveLength(1);
     expect(res).toMatchObject({
       deps: [
         {
@@ -116,7 +115,6 @@ describe('modules/manager/custom/jsonata/index', () => {
     };
     const res = await extractPackageFile(json, 'unused', config);
 
-    expect(res?.deps).toHaveLength(2);
     expect(res).toMatchObject({
       deps: [
         {
