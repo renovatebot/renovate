@@ -1,6 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
+  RenovateConfig,
   UpdateType,
   UserEnv,
   ValidationMessage,
@@ -286,6 +287,8 @@ export interface ManagerApi extends ModuleApi {
   updateLockedDependency?(
     config: UpdateLockedConfig,
   ): Result<UpdateLockedResult>;
+
+  preflight?(config: RenovateConfig): Result<RenovateConfig>;
 }
 
 // TODO: name and properties used by npm manager
