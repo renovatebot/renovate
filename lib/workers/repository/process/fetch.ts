@@ -1,7 +1,7 @@
 // TODO #22198
 import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { ManagerConfig, RenovateConfig } from '../../../config/types';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getDefaultConfig } from '../../../modules/datasource';
 import { getDefaultVersioning } from '../../../modules/datasource/common';
@@ -29,21 +29,23 @@ interface LookupTaskResult {
 type LookupTask = Promise<LookupTaskResult>;
 
 async function lookup(
-  packageFileConfig: ManagerConfig & PackageFile,
+  packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency,
 ): Promise<LookupResult> {
   const dep = clone(indep);
-  dep.updates = [];
 
-  if (dep.skipReason) {
-    return Result.ok(dep);
-  }
+  dep.updates = [];
 
   if (is.string(dep.depName)) {
     dep.depName = dep.depName.trim();
   }
 
   dep.packageName ??= dep.depName;
+
+  if (dep.skipReason) {
+    return Result.ok(dep);
+  }
+
   if (!is.nonEmptyString(dep.packageName)) {
     dep.skipReason = 'invalid-name';
     return Result.ok(dep);
