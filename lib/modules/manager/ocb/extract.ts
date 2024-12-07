@@ -52,7 +52,7 @@ export function extractPackageFile(
   deps.push(...processModule(definition.extensions, 'extensions'));
   deps.push(...processModule(definition.processors, 'processors'));
   deps.push(...processModule(definition.receivers, 'receivers'));
-
+  deps.push(...processModule(definition.providers,'providers'));
   return {
     packageFileVersion: definition.dist.version,
     deps,
