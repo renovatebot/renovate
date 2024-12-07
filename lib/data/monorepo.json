@@ -358,6 +358,7 @@
     "lexical": "https://github.com/facebook/lexical",
     "linguijs": "https://github.com/lingui/js-lingui",
     "log4j2": "https://github.com/apache/logging-log4j2",
+    "logback": "https://github.com/qos-ch/logback",
     "loopback": [
       "https://github.com/strongloop/loopback-next",
       "https://github.com/loopbackio/loopback-next"
@@ -479,6 +480,7 @@
     "sanity": "https://github.com/sanity-io/sanity",
     "serilog-ui": "https://github.com/serilog-contrib/serilog-ui",
     "scaffdog": "https://github.com/scaffdog/scaffdog",
+    "sea-orm": "https://github.com/SeaQL/sea-orm",
     "secretlint": "https://github.com/secretlint/secretlint",
     "sendgrid-nodejs": "https://github.com/sendgrid/sendgrid-nodejs",
     "sentry-dotnet": "https://github.com/getsentry/sentry-dotnet",
