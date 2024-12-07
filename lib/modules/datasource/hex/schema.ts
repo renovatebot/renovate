@@ -8,10 +8,11 @@ export const HexRelease = z
     html_url: z.string().optional(),
     meta: z
       .object({
-        links: z.union([
-          z.object({ Github: z.string() }),
-          z.object({ GitHub: z.string() }),
-        ]),
+        links: z.record(z.unknown()).transform(links => Object.fromEntries(
+          Object.entries(links).map(([key, value]) => [key.toLowerCase(), value]),
+        )).pipe(z.object({
+          github: z.string(),
+        })),
       })
       .nullable()
       .catch(null),
@@ -54,19 +55,9 @@ export const HexRelease = z
       releaseResult.homepage = hexResponse.html_url;
     }
 
-    const normalizedLinks = hexResponse.meta?.links
-      ? normalizeKeys(hexResponse.meta.links)
-      : undefined;
-
-    if (normalizedLinks?.github) {
-      releaseResult.sourceUrl = normalizedLinks.github;
+    if (hexResponse.meta?.links?.github) {
+      releaseResult.sourceUrl = hexResponse.meta.links.github;
     }
-
+    
     return releaseResult;
   });
-
-function normalizeKeys(obj: Record<string, any>): Record<string, any> {
-  return Object.fromEntries(
-    Object.entries(obj).map(([key, value]) => [key.toLowerCase(), value]),
-  );
-}
