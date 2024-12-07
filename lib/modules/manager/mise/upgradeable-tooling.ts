@@ -146,4 +146,26 @@ export const miseTooling: Record<string, ToolingDefinition> = {
       versioning: semverVersioning.id,
     },
   },
+  rust: {
+    misePluginUrl: 'https://mise.jdx.dev/lang/rust.html',
+    config: {
+      packageName: 'rust-lang/rust',
+      datasource: GithubTagsDatasource.id,
+    },
+  },
+  swift: {
+    misePluginUrl: 'https://mise.jdx.dev/lang/swift.html',
+    config: {
+      packageName: 'swift-lang/swift',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^swift-(?<version>\\S+)',
+    },
+  },
+  zig: {
+    misePluginUrl: 'https://mise.jdx.dev/lang/zig.html',
+    config: {
+      packageName: 'ziglang/zig',
+      datasource: GithubTagsDatasource.id,
+    },
+  },
 };
