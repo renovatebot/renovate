@@ -63,20 +63,6 @@ To configure it, use the following syntax:
 
 Where `<query>` is a [JSONata](https://docs.jsonata.org/overview.html) query that transform the contents into a JSON object with the following schema:
 
-```json5
-{
-  depName: '<dep-name>',
-  packageName: '<package-name>', // fallback to depName
-  currentValue: '<current-value>',
-  currentDigest: '<current-digest>', // optional
-  datasource: '<data-source>',
-  versioning: '<versioning>', // optional
-  extractVersion: '<extract-version>', // optional
-  registryUrl: '<registry-url>', // optional
-  depType: '<dep-type>', // optional
-}
-```
-
 To be effective with the JSONata manager, you should understand jsonata queries. But enough examples may compensate for lack of experience.
 
 #### Example queries
