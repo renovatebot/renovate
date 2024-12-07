@@ -24,18 +24,20 @@ describe('modules/manager/circleci/extract', () => {
           },
         },
       );
-      expect(res).toEqual([
-        {
-          autoReplaceStringTemplate:
-            'quay.io/myName/myPackage:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '0.6.2',
-          datasource: 'docker',
-          depName: 'my-quay-mirror.registry.com/myName/myPackage',
-          depType: 'docker',
-          replaceString: 'quay.io/myName/myPackage:0.6.2',
-        },
-      ]);
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'quay.io/myName/myPackage:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.6.2',
+            datasource: 'docker',
+            depName: 'my-quay-mirror.registry.com/myName/myPackage',
+            depType: 'docker',
+            replaceString: 'quay.io/myName/myPackage:0.6.2',
+          },
+        ],
+      });
     });
 
     it('extracts multiple image and resolves yaml anchors', () => {
