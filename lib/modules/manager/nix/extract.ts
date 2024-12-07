@@ -35,7 +35,7 @@ export async function extractPackageFile(
 
   const flakeLock = flakeLockParsed.data;
 
-  for (const depName of Object.keys(flakeLock.nodes)) {
+  for (const [depName, flakeInput] of Object.entries(flakeLock.nodes)) {
     // the root input is a magic string for the entrypoint and only references other flake inputs
     if (depName === 'root') {
       continue;
@@ -51,7 +51,6 @@ export async function extractPackageFile(
       continue;
     }
 
-    const flakeInput = flakeLock.nodes[depName];
     const flakeLocked = flakeInput.locked;
     const flakeOriginal = flakeInput.original;
 
