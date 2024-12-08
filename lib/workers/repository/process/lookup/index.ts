@@ -754,8 +754,6 @@ export async function lookupUpdates(
         rollbackPrs: config.rollbackPrs,
         isVulnerabilityAlert: config.isVulnerabilityAlert,
         updatePinnedDependencies: config.updatePinnedDependencies,
-        unconstrainedValue:
-          !!config.lockedVersion && is.undefined(config.currentValue),
         err,
       },
       'lookupUpdates error',
