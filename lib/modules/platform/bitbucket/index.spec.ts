@@ -1918,94 +1918,111 @@ describe('modules/platform/bitbucket/index', () => {
     });
   });
 
-  // describe('maintains pr cache integrity at runtime', () => {
-  //   // eslint-disable-next-line
-  //   it.only('pr cache gets updated after a pr is created', async () => {
-  //     // memCacheInit();
-  //     const projectReviewer = {
-  //       type: 'default_reviewer',
-  //       reviewer_type: 'project',
-  //       user: {
-  //         display_name: 'Bob Smith',
-  //         uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
-  //         account_id: '123',
-  //       },
-  //     };
-  //     const repoReviewer = {
-  //       type: 'default_reviewer',
-  //       reviewer_type: 'repository',
-  //       user: {
-  //         display_name: 'Jane Smith',
-  //         uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
-  //         account_id: '456',
-  //       },
-  //     };
-  //     // getprlist
-  //     const scope = httpMock.scope(baseUrl);
-  //     scope.get('/2.0/user').reply(200, { uuid: '12345' });
-  //     await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
-  //     await initRepoMock(undefined, null, scope);
-  //     scope
-  //       .get(`/2.0/repositories/some/repo/pullrequests`)
-  //       .query(true)
-  //       .reply(200, {
-  //         values: [
-  //           {
-  //             id: 1,
-  //             author: { uuid: '12345' },
-  //             source: { branch: { name: 'branch-a' } },
-  //             destination: { branch: { name: 'branch-b' } },
-  //             state: 'OPEN',
-  //           },
-  //         ],
-  //       })
-  //       .get(
-  //         '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100',
-  //       )
-  //       .reply(200, {
-  //         values: [projectReviewer, repoReviewer],
-  //       })
-  //       .post('/2.0/repositories/some/repo/pullrequests')
-  //       .reply(200, { id: 5 });
-  //     // .get(`/2.0/repositories/some/repo/pullrequests`)
-  //     // .query(true)
-  //     // .reply(200, {
-  //     //   values: [{ id: 5 }],
-  //     // });
+  describe('maintains pr cache integrity at runtime', () => {
+    it('pr cache gets updated after a pr is created', async () => {
+      const projectReviewer = {
+        type: 'default_reviewer',
+        reviewer_type: 'project',
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
+      };
+      const repoReviewer = {
+        type: 'default_reviewer',
+        reviewer_type: 'repository',
+        user: {
+          display_name: 'Jane Smith',
+          uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+          account_id: '456',
+        },
+      };
 
-  //     const initialPrList = await bitbucket.getPrList();
-  //     // eslint-disable-next-line
-  //     console.log(initialPrList);
-  //     expect(1).toBe(1);
+      const scope = httpMock.scope(baseUrl);
+      scope.get('/2.0/user').reply(200, { uuid: '12345' });
+      await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
+      await initRepoMock(undefined, null, scope);
+      scope
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [
+            {
+              id: 1,
+              author: { uuid: '12345' },
+              source: { branch: { name: 'branch-a' } },
+              destination: { branch: { name: 'branch-b' } },
+              state: 'OPEN',
+            },
+          ],
+        })
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100',
+        )
+        .reply(200, {
+          values: [projectReviewer, repoReviewer],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 });
 
-  //     // use cache not http mock
-  //     const initialPrList2 = await bitbucket.getPrList();
-  //     // eslint-disable-next-line
-  //     console.log(initialPrList2);
-  //     expect(1).toBe(1);
-  //     //createpr
+      await bitbucket.getPrList(); // cache is now initialized
 
-  //     // await bitbucket.createPr({
-  //     //   sourceBranch: 'branch',
-  //     //   targetBranch: 'master',
-  //     //   prTitle: 'title',
-  //     //   prBody: 'body',
-  //     //   platformPrOptions: {
-  //     //     bbUseDefaultReviewers: true,
-  //     //   },
-  //     // });
+      await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformPrOptions: {
+          bbUseDefaultReviewers: true,
+        },
+      });
 
-  //     // const newPrList = await bitbucket.getPrList();
-  //     // expect(newPrList.find((pr) => pr.number === 5)).toBeDefined();
-  //     // getprlist again
-  //   });
+      const newPrList = await bitbucket.getPrList();
+      expect(newPrList).toHaveLength(2);
+    });
 
-  //   // it('pr cache gets updated after a pr is updated', async () => {
-  //   // getprlist
-  //   // updatepr
-  //   // getprlist again
-  //   // });
-  // });
+    it('pr cache gets updated after a pr is updated', async () => {
+      const reviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+      };
+      const scope = httpMock.scope(baseUrl);
+      scope.get('/2.0/user').reply(200, { uuid: '12345' });
+      await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
+      await initRepoMock(undefined, null, scope);
+      scope
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [
+            {
+              id: 5,
+              author: { uuid: '12345' },
+              source: { branch: { name: 'branch-a' } },
+              destination: { branch: { name: 'branch-b' } },
+              state: 'OPEN',
+              title: 'title',
+            },
+          ],
+        })
+        .get('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200, { reviewers: [reviewer] })
+        .put('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200, { id: 5, title: 'newTitle' });
+
+      await bitbucket.getPrList(); // cache is now initialized
+      await bitbucket.updatePr({
+        number: 5,
+        prTitle: 'newTitle',
+        prBody: 'body',
+        targetBranch: 'new_base',
+      });
+
+      const newPrList = await bitbucket.getPrList();
+      expect(newPrList.find((pr) => pr.title === 'newTitle')).toBeDefined();
+    });
+  });
 
   describe('mergePr()', () => {
     it('posts Merge with optional merge strategy', async () => {
