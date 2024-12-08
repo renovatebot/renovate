@@ -74,19 +74,19 @@ export class BitbucketPrCache {
     return prCache.getPrs();
   }
 
-  private addPr(pr: Pr): void {
+  private setPr(pr: Pr): void {
     logger.debug(`Adding PR #${pr.number} to the PR cache`);
     this.cache.items[pr.number] = pr;
   }
 
-  static async addPr(
+  static async setPr(
     http: BitbucketHttp,
     repo: string,
     author: string | null,
     item: Pr,
   ): Promise<void> {
     const prCache = await BitbucketPrCache.init(http, repo, author);
-    prCache.addPr(item);
+    prCache.setPr(item);
   }
 
   private reconcile(rawItems: PrResponse[]): void {
