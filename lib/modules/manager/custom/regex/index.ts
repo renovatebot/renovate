@@ -2,9 +2,9 @@ import is from '@sindresorhus/is';
 import type { Category } from '../../../../constants';
 import type {
   ExtractConfig,
+  MaybePromise,
   PackageDependency,
   PackageFileContent,
-  Result,
 } from '../../types';
 import { handleAny, handleCombination, handleRecursive } from './strategies';
 import type { RegexManagerConfig, RegexManagerTemplates } from './types';
@@ -22,7 +22,7 @@ export function extractPackageFile(
   content: string,
   packageFile: string,
   config: ExtractConfig,
-): Result<PackageFileContent | null> {
+): MaybePromise<PackageFileContent | null> {
   let deps: PackageDependency[];
   switch (config.matchStringsStrategy) {
     default:
