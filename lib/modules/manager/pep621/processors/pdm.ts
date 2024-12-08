@@ -77,7 +77,7 @@ export class PdmProcessor implements PyProjectProcessor {
       const lockFileMapping = Result.parse(
         lockFileContent,
         PdmLockfileSchema.transform(({ lock }) => lock),
-      ).unwrapOrElse({});
+      ).unwrapOr({});
 
       for (const dep of deps) {
         const packageName = dep.packageName;
@@ -193,6 +193,7 @@ function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
         );
         break;
       }
+      case depTypes.dependencyGroups:
       case depTypes.pdmDevDependencies: {
         if (is.nullOrUndefined(dep.managerData?.depGroup)) {
           logger.once.warn(
