@@ -4,12 +4,17 @@ import { parseSingleYaml } from '../../../util/yaml';
 import { OrbDatasource } from '../../datasource/orb';
 import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import { CircleCiFile, type CircleCiJob } from './schema';
 
 export function extractPackageFile(
   content: string,
   packageFile?: string,
+  config?: ExtractConfig,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
@@ -38,7 +43,7 @@ export function extractPackageFile(
     for (const job of environments) {
       for (const dockerElement of coerceArray(job.docker)) {
         deps.push({
-          ...getDep(dockerElement.image),
+          ...getDep(dockerElement.image, true, config?.registryAliases),
           depType: 'docker',
         });
       }
@@ -46,7 +51,7 @@ export function extractPackageFile(
 
     for (const alias of coerceArray(parsed.aliases)) {
       deps.push({
-        ...getDep(alias.image),
+        ...getDep(alias.image, true, config?.registryAliases),
         depType: 'docker',
       });
     }
