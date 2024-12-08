@@ -104,6 +104,7 @@ exports[`modules/datasource/hex/index getReleases processes a private repo with 
       "version": "0.1.1",
     },
   ],
+  "sourceUrl": "https://github.com/renovate_test/private_package",
 }
 `;
 

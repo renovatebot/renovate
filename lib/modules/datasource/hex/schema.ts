@@ -8,9 +8,21 @@ export const HexRelease = z
     html_url: z.string().optional(),
     meta: z
       .object({
-        links: z.object({
-          Github: z.string(),
-        }),
+        links: z
+          .record(z.string())
+          .transform((links) =>
+            Object.fromEntries(
+              Object.entries(links).map(([key, value]) => [
+                key.toLowerCase(),
+                value,
+              ]),
+            ),
+          )
+          .pipe(
+            z.object({
+              github: z.string(),
+            }),
+          ),
       })
       .nullable()
       .catch(null),
@@ -53,8 +65,8 @@ export const HexRelease = z
       releaseResult.homepage = hexResponse.html_url;
     }
 
-    if (hexResponse.meta?.links?.Github) {
-      releaseResult.sourceUrl = hexResponse.meta.links.Github;
+    if (hexResponse.meta?.links?.github) {
+      releaseResult.sourceUrl = hexResponse.meta.links.github;
     }
 
     return releaseResult;
