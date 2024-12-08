@@ -1064,6 +1064,85 @@ describe('modules/platform/bitbucket/index', () => {
       });
       expect(pr).toBeNull();
     });
+
+    it('returns the newest (by number) pr when many created for same branchs and title', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests')
+        .query(true)
+        .reply(200, {
+          values: [
+            {
+              id: 1,
+              source: { branch: { name: 'branch' } },
+              destination: { branch: { name: 'master' } },
+              title: 'title',
+              state: 'open',
+            },
+            {
+              id: 3,
+              source: { branch: { name: 'branch' } },
+              destination: { branch: { name: 'master' } },
+              title: 'title',
+              state: 'open',
+            },
+            {
+              id: 2,
+              source: { branch: { name: 'branch' } },
+              destination: { branch: { name: 'master' } },
+              title: 'title',
+              state: 'open',
+            },
+          ],
+        });
+
+      const pr = await bitbucket.findPr({
+        branchName: 'branch',
+        state: 'open',
+        includeOtherAuthors: false,
+      });
+      expect(pr?.number).toBe(3);
+    });
+
+    it('returns the newest (by number) pr when many created for same branchs and title - includeOtherAuthors', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/pullrequests?q=source.branch.name="branch"&state=open',
+        )
+        .reply(200, {
+          values: [
+            {
+              id: 1,
+              source: { branch: { name: 'branch' } },
+              destination: { branch: { name: 'master' } },
+              title: 'title',
+              state: 'open',
+            },
+            {
+              id: 3,
+              source: { branch: { name: 'branch' } },
+              destination: { branch: { name: 'master' } },
+              title: 'title',
+              state: 'open',
+            },
+            {
+              id: 2,
+              source: { branch: { name: 'branch' } },
+              destination: { branch: { name: 'master' } },
+              title: 'title',
+              state: 'open',
+            },
+          ],
+        });
+
+      const pr = await bitbucket.findPr({
+        branchName: 'branch',
+        state: 'open',
+        includeOtherAuthors: true,
+      });
+      expect(pr?.number).toBe(3);
+    });
   });
 
   describe('createPr()', () => {
