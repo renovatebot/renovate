@@ -9,7 +9,7 @@ export const HexRelease = z
     meta: z
       .object({
         links: z
-          .record(z.unknown())
+          .record(z.string())
           .transform((links) =>
             Object.fromEntries(
               Object.entries(links).map(([key, value]) => [
