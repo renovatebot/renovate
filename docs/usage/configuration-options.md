@@ -2246,6 +2246,7 @@ Supported lock files:
 - `pubspec.lock`
 - `pyproject.toml`
 - `requirements.txt`
+- `uv.lock`
 - `yarn.lock`
 
 Support for new lock files may be added via feature request.
@@ -2463,8 +2464,9 @@ Here's an example config to limit the "noisy" `aws-sdk` package to weekly update
 {
   "packageRules": [
     {
+      "description": "Schedule aws-sdk updates on Sunday nights (9 PM - 12 AM)",
       "matchPackageNames": ["aws-sdk"],
-      "schedule": ["after 9pm on sunday"]
+      "schedule": ["* 21-23 * * 0"]
     }
   ]
 }
@@ -3611,7 +3613,7 @@ Behavior:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, and update nothing otherwise
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `cargo`, `composer`, `npm`, `yarn`, `pnpm`, `terraform` and `poetry` so far
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `cargo`, `composer`, `gleam`, `npm`, `yarn`, `pnpm`, `terraform` and `poetry` so far
 - `in-range-only` = Update the lock file when in-range updates are available, ignore package file updates
 
 Renovate's `"auto"` strategy works like this for npm:
@@ -3783,7 +3785,7 @@ If enabled Renovate tries to determine PR reviewers by matching rules defined in
 Read the docs for your platform for details on syntax and allowed file locations:
 
 - [GitHub Docs, About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)
-- [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/code_owners.html)
+- [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
 
 ## reviewersSampleSize
@@ -3843,6 +3845,7 @@ You could then configure a schedule like this at the repository level:
 
 ```json
 {
+  "description": "Schedule on weekdays at night (10 PM - 4 AM) and anytime on weekends",
   "schedule": ["* 22-23,0-4 * * *", "* * * * 0,6"]
 }
 ```
