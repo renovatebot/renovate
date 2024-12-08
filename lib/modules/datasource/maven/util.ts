@@ -166,10 +166,18 @@ export async function downloadS3Protocol(
         DeleteMarker,
       }): Promise<MavenFetchResult> => {
         if (DeleteMarker) {
+          logger.trace(
+            { failedUrl: pkgUrl.toString() },
+            'Maven S3 lookup error: DeleteMarker encountered',
+          );
           return Result.err({ type: 'not-found' });
         }
 
         if (!(Body instanceof Readable)) {
+          logger.debug(
+            { failedUrl: pkgUrl.toString() },
+            'Maven S3 lookup error: unsupported Body type',
+          );
           return Result.err({ type: 'unsupported-format' });
         }
 
@@ -189,51 +197,31 @@ export async function downloadS3Protocol(
         return Result.err(err);
       }
 
-      if (err.name === 'CredentialsProviderError') {
-        return Result.err({ type: 'credentials-error' });
-      }
-
-      if (err.message === 'Region is missing') {
-        return Result.err({ type: 'missing-aws-region' });
-      }
-
-      if (isS3NotFound(err)) {
-        return Result.err({ type: 'not-found' });
-      }
-
-      return Result.err({ type: 'unknown', err });
-    })
-    .onError((err) => {
       const failedUrl = pkgUrl.toString();
 
-      if (err.type === 'credentials-error') {
+      if (err.name === 'CredentialsProviderError') {
         logger.debug(
           { failedUrl },
           'Maven S3 lookup error: credentials provider error, check "AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY" variables',
         );
-        return;
+        return Result.err({ type: 'credentials-error' });
       }
 
-      if (err.type === 'missing-aws-region') {
+      if (err.message === 'Region is missing') {
         logger.debug(
           { failedUrl },
           'Maven S3 lookup error: missing region, check "AWS_REGION" variable',
         );
-        return;
+        return Result.err({ type: 'missing-aws-region' });
       }
 
-      if (err.type === 'not-found') {
+      if (isS3NotFound(err)) {
         logger.trace({ failedUrl }, 'Maven S3 lookup error: object not found');
-        return;
+        return Result.err({ type: 'not-found' });
       }
 
-      if (err.type === 'unknown') {
-        logger.debug(
-          { failedUrl, err: err.err },
-          'Maven S3 lookup error: unknown error',
-        );
-        return;
-      }
+      logger.debug({ failedUrl, err }, 'Maven S3 lookup error: unknown error');
+      return Result.err({ type: 'unknown', err });
     });
 }
 
