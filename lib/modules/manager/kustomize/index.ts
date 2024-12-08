@@ -5,12 +5,13 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
 export { extractPackageFile } from './extract';
 
+export const url = 'https://kubectl.docs.kubernetes.io/references/kustomize';
+export const categories: Category[] = ['kubernetes'];
+
 export const defaultConfig = {
   fileMatch: ['(^|/)kustomization\\.ya?ml$'],
   pinDigests: false,
 };
-
-export const categories: Category[] = ['kubernetes'];
 
 export const supportedDatasources = [
   DockerDatasource.id,

@@ -99,7 +99,7 @@ export class UvProcessor implements PyProjectProcessor {
             dep.registryUrls = [defaultIndex.url];
           }
 
-          if (implicitIndexUrls) {
+          if (implicitIndexUrls?.length) {
             // If there are implicit indexes, check them first and fall back
             // to the default.
             dep.registryUrls = implicitIndexUrls.concat(
@@ -290,7 +290,18 @@ async function getUvExtraIndexUrl(
       const sources = project.tool?.uv?.sources;
       return !sources || !(dep.packageName! in sources);
     })
-    .flatMap((dep) => dep.registryUrls);
+    .flatMap((dep) => dep.registryUrls)
+    .filter(is.string)
+    .filter((registryUrl) => {
+      // Check if the registry URL is not the default one and not already configured
+      const configuredIndexUrls =
+        project.tool?.uv?.index?.map(({ url }) => url) ?? [];
+      return (
+        registryUrl !== PypiDatasource.defaultURL &&
+        !configuredIndexUrls.includes(registryUrl)
+      );
+    });
+
   const registryUrls = new Set(pyPiRegistryUrls);
   const extraIndexUrls: string[] = [];
 

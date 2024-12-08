@@ -592,6 +592,120 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
+    it('dont propagate uv.tool.index into UV_EXTRA_INDEX_URL', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      hostRules.add({
+        matchHost: 'https://example.com',
+        username: 'user',
+        password: 'pass',
+      });
+      hostRules.add({
+        matchHost: 'https://pinned.com/simple',
+        username: 'user',
+        password: 'pass',
+      });
+      hostRules.add({
+        matchHost: 'https://implicit.com/simple',
+        username: 'user',
+        password: 'pass',
+      });
+      googleAuth.mockImplementation(
+        jest.fn().mockImplementation(() => ({
+          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        })),
+      );
+      fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+      // uv
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }, { version: '0.2.28' }],
+      });
+
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://example.com/simple'],
+        },
+        {
+          packageName: 'dep2',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://pinned.com/simple'],
+        },
+        {
+          packageName: 'dep3',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: [
+            'https://implicit.com/simple',
+            'https://pypi.org/pypi/',
+          ],
+        },
+      ];
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        {
+          tool: {
+            uv: {
+              sources: {
+                dep2: { index: 'pinned-index' },
+              },
+              index: [
+                {
+                  name: 'pinned-index',
+                  url: 'https://pinned.com/simple',
+                  default: false,
+                  explicit: true,
+                },
+                {
+                  name: 'implicit-index',
+                  url: 'https://implicit.com/simple',
+                  default: false,
+                  explicit: false,
+                },
+              ],
+            },
+          },
+        },
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3',
+          options: {
+            env: {
+              UV_EXTRA_INDEX_URL: 'https://user:pass@example.com/simple',
+              UV_INDEX_PINNED_INDEX_USERNAME: 'user',
+              UV_INDEX_PINNED_INDEX_PASSWORD: 'pass',
+              UV_INDEX_IMPLICIT_INDEX_USERNAME: 'user',
+              UV_INDEX_IMPLICIT_INDEX_PASSWORD: 'pass',
+            },
+          },
+        },
+      ]);
+    });
+
     it('continues if Google auth is not configured', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);

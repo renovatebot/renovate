@@ -1,6 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
 import type { logger as _logger } from '../../../logger';
-import { reset as memCacheReset } from '../../../util/cache/memory';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { Platform, PlatformResult, RepoParams } from '../types';
@@ -26,10 +25,12 @@ describe('modules/platform/bitbucket/index', () => {
   let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;
   let logger: jest.Mocked<typeof _logger>;
+  let memCache: typeof import('../../../util/cache/memory');
 
   beforeEach(async () => {
     // reset module
     jest.resetModules();
+    memCache = await import('../../../util/cache/memory');
     hostRules = jest.requireMock('../../../util/host-rules');
     bitbucket = await import('.');
     logger = (await import('../../../logger')).logger as any;
@@ -44,7 +45,7 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     setBaseUrl(baseUrl);
-    memCacheReset();
+    memCache.init();
   });
 
   async function initRepoMock(
@@ -499,7 +500,6 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .get('/2.0/repositories/some/repo/refs/branches/branch')
-        .twice()
         .reply(200, {
           name: 'branch',
           target: {
@@ -1612,7 +1612,6 @@ describe('modules/platform/bitbucket/index', () => {
           created_on: '2018-07-02T07:02:25.275030+00:00',
         })
         .get('/2.0/repositories/some/repo/pullrequests/5')
-        .twice()
         .reply(200, pr);
       expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
