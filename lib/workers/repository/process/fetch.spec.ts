@@ -50,7 +50,33 @@ describe('workers/repository/process/fetch', () => {
         ],
       };
       await fetchUpdates(config, packageFiles);
-      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles).toEqual({
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'abcd',
+                packageName: 'abcd',
+                skipReason: 'ignored',
+                updates: [],
+              },
+              {
+                depName: 'foo',
+                packageName: 'foo',
+                skipReason: 'disabled',
+                updates: [],
+              },
+              {
+                depName: 'skipped',
+                packageName: 'skipped',
+                skipReason: 'some-reason',
+                updates: [],
+              },
+            ],
+            packageFile: 'package.json',
+          },
+        ],
+      });
       expect(packageFiles.npm[0].deps[0].skipReason).toBe('ignored');
       expect(packageFiles.npm[0].deps[0].updates).toHaveLength(0);
       expect(packageFiles.npm[0].deps[1].skipReason).toBe('disabled');
@@ -71,7 +97,22 @@ describe('workers/repository/process/fetch', () => {
       };
       lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
       await fetchUpdates(config, packageFiles);
-      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles).toEqual({
+        maven: [
+          {
+            deps: [
+              {
+                datasource: 'maven',
+                depName: 'bbb',
+                packageName: 'bbb',
+                updates: ['a', 'b'],
+              },
+            ],
+            extractedConstraints: { other: 'constraint', some: 'constraint' },
+            packageFile: 'pom.xml',
+          },
+        ],
+      });
     });
 
     it('skips deps with empty names', async () => {
