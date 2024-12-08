@@ -10,8 +10,7 @@ import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { MavenDatasource } from '../maven';
 import { MAVEN_REPO } from '../maven/common';
-import { downloadHttpProtocol } from '../maven/util';
-import { normalizeDate } from '../metadata';
+import { downloadHttpContent, downloadHttpProtocol } from '../maven/util';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
@@ -88,8 +87,11 @@ export class SbtPackageDatasource extends MavenDatasource {
     let dependencyUrl: string | undefined;
     let packageUrls: string[] | undefined;
     for (const packageRootUrl of packageRootUrls) {
-      const res = await downloadHttpProtocol(this.http, packageRootUrl);
-      if (!res) {
+      const packageRootContent = await downloadHttpContent(
+        this.http,
+        packageRootUrl,
+      );
+      if (!packageRootContent) {
         continue;
       }
 
@@ -103,7 +105,7 @@ export class SbtPackageDatasource extends MavenDatasource {
       dependencyUrl = trimTrailingSlash(packageRootUrl);
 
       const rootPath = new URL(packageRootUrl).pathname;
-      const artifactSubdirs = extractPageLinks(res.body, (href) => {
+      const artifactSubdirs = extractPageLinks(packageRootContent, (href) => {
         const path = href.replace(rootPath, '');
 
         if (
@@ -149,15 +151,15 @@ export class SbtPackageDatasource extends MavenDatasource {
 
     const allVersions = new Set<string>();
     for (const pkgUrl of packageUrls) {
-      const res = await downloadHttpProtocol(this.http, pkgUrl);
+      const packageContent = await downloadHttpContent(this.http, pkgUrl);
       // istanbul ignore if
-      if (!res) {
+      if (!packageContent) {
         invalidPackageUrls.add(pkgUrl);
         continue;
       }
 
       const rootPath = new URL(pkgUrl).pathname;
-      const versions = extractPageLinks(res.body, (href) => {
+      const versions = extractPageLinks(packageContent, (href) => {
         const path = href.replace(rootPath, '');
         if (path.startsWith('.')) {
           return null;
@@ -275,20 +277,20 @@ export class SbtPackageDatasource extends MavenDatasource {
         }
 
         const res = await downloadHttpProtocol(this.http, pomUrl);
-        const content = res?.body;
-        if (!content) {
+        const { val } = res.unwrap();
+        if (!val) {
           invalidPomFiles.add(pomUrl);
           continue;
         }
 
         const result: PomInfo = {};
 
-        const releaseTimestamp = normalizeDate(res.headers['last-modified']);
+        const releaseTimestamp = val.lastModified;
         if (releaseTimestamp) {
           result.releaseTimestamp = releaseTimestamp;
         }
 
-        const pomXml = new XmlDocument(content);
+        const pomXml = new XmlDocument(val.data);
 
         const homepage = pomXml.valueWithPath('url');
         if (homepage) {
