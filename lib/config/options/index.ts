@@ -2733,7 +2733,7 @@ const options: RenovateOptions[] = [
     description:
       'Custom manager to use. Valid only within a `customManagers` object.',
     type: 'string',
-    allowedValues: ['regex'],
+    allowedValues: ['jsonata', 'regex'],
     parents: ['customManagers'],
     cli: false,
     env: false,
@@ -2741,10 +2741,9 @@ const options: RenovateOptions[] = [
   {
     name: 'matchStrings',
     description:
-      'Regex capture rule to use. Valid only within a `customManagers` object.',
+      'Regex pattern or JSONata query to use. Valid only within a `customManagers` object.',
     type: 'array',
     subType: 'string',
-    format: 'regex',
     parents: ['customManagers'],
     cli: false,
     env: false,
