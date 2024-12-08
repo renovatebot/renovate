@@ -17,6 +17,9 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   const lockFileName = packageFileName.replace(regEx(/\.nix$/), '.lock');
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const isLockFileMaintenance =
+    config.updateType === 'lockFileMaintenance' || config.isLockFileMaintenance;
+
   if (!existingLockFileContent) {
     logger.debug('No flake.lock found');
     return null;
@@ -35,7 +38,7 @@ export async function updateArtifacts({
     cmd += `--extra-access-tokens github.com=${token} `;
   }
 
-  if (config.isLockFileMaintenance) {
+  if (isLockFileMaintenance) {
     cmd += 'flake update';
   } else {
     const inputs = updatedDeps

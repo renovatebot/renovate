@@ -48,7 +48,10 @@ export async function updateArtifacts(
   };
 
   try {
-    if (config.isLockFileMaintenance) {
+    if (
+      config.updateType === 'lockFileMaintenance' ||
+      config.isLockFileMaintenance
+    ) {
       await exec('jb update', execOptions);
     } else {
       const dependencyUrls = updatedDeps.map(dependencyUrl);
