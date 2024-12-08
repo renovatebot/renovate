@@ -919,7 +919,7 @@ export async function createPr({
       )
     ).body;
     const pr = utils.prInfo(prRes);
-    await BitbucketPrCache.addPr(
+    await BitbucketPrCache.setPr(
       bitbucketHttp,
       config.repository,
       renovateUserUuid,
@@ -949,7 +949,7 @@ export async function createPr({
         )
       ).body;
       const pr = utils.prInfo(prRes);
-      await BitbucketPrCache.addPr(
+      await BitbucketPrCache.setPr(
         bitbucketHttp,
         config.repository,
         renovateUserUuid,
@@ -1072,7 +1072,7 @@ export async function updatePr({
   }
 
   // update pr cache
-  await BitbucketPrCache.addPr(
+  await BitbucketPrCache.setPr(
     bitbucketHttp,
     config.repository,
     renovateUserUuid,
