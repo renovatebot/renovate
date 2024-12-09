@@ -110,7 +110,11 @@ export class MavenDatasource extends Datasource {
           return versions;
         },
       )
-      .catch((err) => Result.err(new Error(err.type)))
+      .onError((err) => {
+        logger.debug(
+          `Maven: error fetching versions for "${dependency.display}": ${err.type}`,
+        );
+      })
       .unwrapOr([]);
   }
 
