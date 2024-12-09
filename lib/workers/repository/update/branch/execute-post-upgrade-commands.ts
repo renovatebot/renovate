@@ -30,19 +30,15 @@ export async function postUpgradeCommandsExecutor(
 ): Promise<PostUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
   const artifactErrors = [...(config.artifactErrors ?? [])];
-  const allowedPostUpgradeCommands = GlobalConfig.get(
-    'allowedPostUpgradeCommands',
-  );
-  const allowPostUpgradeCommandTemplating = GlobalConfig.get(
-    'allowPostUpgradeCommandTemplating',
-  );
+  const allowedCommands = GlobalConfig.get('allowedCommands');
+  const allowCommandTemplating = GlobalConfig.get('allowCommandTemplating');
 
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
     logger.trace(
       {
         tasks: upgrade.postUpgradeTasks,
-        allowedCommands: allowedPostUpgradeCommands,
+        allowedCommands,
       },
       `Checking for post-upgrade tasks`,
     );
@@ -65,13 +61,9 @@ export async function postUpgradeCommandsExecutor(
       }
 
       for (const cmd of commands) {
-        if (
-          allowedPostUpgradeCommands!.some((pattern) =>
-            regEx(pattern).test(cmd),
-          )
-        ) {
+        if (allowedCommands!.some((pattern) => regEx(pattern).test(cmd))) {
           try {
-            const compiledCmd = allowPostUpgradeCommandTemplating
+            const compiledCmd = allowCommandTemplating
               ? compile(cmd, mergeChildConfig(config, upgrade))
               : cmd;
 
@@ -94,14 +86,14 @@ export async function postUpgradeCommandsExecutor(
           logger.warn(
             {
               cmd,
-              allowedPostUpgradeCommands,
+              allowedCommands,
             },
-            'Post-upgrade task did not match any on allowedPostUpgradeCommands list',
+            'Post-upgrade task did not match any on allowedCommands list',
           );
           artifactErrors.push({
             lockFile: upgrade.packageFile,
             stderr: sanitize(
-              `Post-upgrade command '${cmd}' has not been added to the allowed list in allowedPostUpgradeCommands`,
+              `Post-upgrade command '${cmd}' has not been added to the allowed list in allowedCommands`,
             ),
           });
         }
