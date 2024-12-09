@@ -111,7 +111,7 @@ export class MavenDatasource extends Datasource {
         },
       )
       .catch((err) => Result.err(new Error(err.type)))
-      .unwrapOrThrow();
+      .unwrapOr([]);
   }
 
   async getReleases({
