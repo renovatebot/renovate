@@ -1,4 +1,3 @@
-import type { XmlDocument } from 'xmldoc';
 import type { Result } from '../../../util/result';
 import type { ReleaseResult } from '../types';
 
@@ -8,13 +7,6 @@ export interface MavenDependency {
   name?: string;
   dependencyUrl: string;
 }
-
-export interface MavenXml {
-  isCacheable?: boolean;
-  xml?: XmlDocument;
-}
-
-export type HttpResourceCheckResult = 'found' | 'not-found' | 'error' | Date;
 
 export type DependencyInfo = Pick<
   ReleaseResult,

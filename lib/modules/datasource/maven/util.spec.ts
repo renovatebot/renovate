@@ -4,7 +4,6 @@ import { HOST_DISABLED } from '../../../constants/error-messages';
 import { Http, HttpError } from '../../../util/http';
 import type { MavenFetchError } from './types';
 import {
-  checkResource,
   downloadHttpProtocol,
   downloadMavenXml,
   downloadS3Protocol,
@@ -46,17 +45,20 @@ function httpError({
 
 describe('modules/datasource/maven/util', () => {
   describe('downloadMavenXml', () => {
-    it('returns empty object for unsupported protocols', async () => {
+    it('returns error for unsupported protocols', async () => {
       const res = await downloadMavenXml(
         http,
         new URL('unsupported://server.com/'),
       );
-      expect(res).toEqual({});
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'unsupported-protocol' } satisfies MavenFetchError,
+      });
     });
   });
 
   describe('downloadS3Protocol', () => {
-    it('fails for non-S3 URLs', async () => {
+    it('returns error for non-S3 URLs', async () => {
       const res = await downloadS3Protocol(new URL('http://not-s3.com/'));
       expect(res.unwrap()).toEqual({
         ok: false,
@@ -120,18 +122,6 @@ describe('modules/datasource/maven/util', () => {
         ok: false,
         err: { type: 'unsupported-host' } satisfies MavenFetchError,
       });
-    });
-  });
-
-  describe('checkResource', () => {
-    it('returns not found for unsupported protocols', async () => {
-      const res = await checkResource(http, 'unsupported://server.com/');
-      expect(res).toBe('not-found');
-    });
-
-    it('returns error for invalid URLs', async () => {
-      const res = await checkResource(http, 'not-a-valid-url');
-      expect(res).toBe('error');
     });
   });
 });
