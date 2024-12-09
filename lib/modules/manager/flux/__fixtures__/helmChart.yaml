@@ -1,0 +1,14 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmChart
+metadata:
+  name: sealed-secrets
+  namespace: kube-system
+spec:
+  interval: 10m
+  chart: sealed-secrets
+  sourceRef:
+    kind: HelmRepository
+    name: sealed-secrets
+  version: "2.0.2"
+  valuesFiles:
+    - values-prod.yaml
