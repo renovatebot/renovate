@@ -35,7 +35,8 @@ If you are using a self-hosted Bitrise and use not the default registry, you wil
   "hostRules": [
     {
       "hostType": "bitrise",
-      "matchHost": "https://api.github.com/repos/my-org/my-repo/contents"
+      "matchHost": "https://api.github.com/repos/my-org/my-repo/contents",
+      "token": "< Github.com token >"
     }
   ]
 }
