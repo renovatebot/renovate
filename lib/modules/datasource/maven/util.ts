@@ -320,12 +320,16 @@ export async function downloadMavenXml(
   url: URL | string,
 ): Promise<MavenFetchResult<XmlDocument>> {
   const rawResult = await downloadMaven(http, url);
-  const xmlResult = rawResult.transform((result) => ({
-    ...result,
-    data: new XmlDocument(result.data),
-  }));
-
-  return xmlResult;
+  return rawResult.transform((result): MavenFetchResult<XmlDocument> => {
+    try {
+      return Result.ok({
+        ...result,
+        data: new XmlDocument(result.data),
+      });
+    } catch (err) {
+      return Result.err({ type: 'xml-parse-error', err });
+    }
+  });
 }
 
 export function getDependencyParts(packageName: string): MavenDependency {

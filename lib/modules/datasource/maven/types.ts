@@ -33,6 +33,7 @@ export type MavenFetchError =
   | { type: 'unsupported-protocol' }
   | { type: 'credentials-error' }
   | { type: 'missing-aws-region' }
+  | { type: 'xml-parse-error'; err: Error }
   | { type: 'unknown'; err: Error };
 
 export type MavenFetchResult<T = string> = Result<
