@@ -333,7 +333,7 @@
       "https://github.com/FasterXML/jackson-databind",
       "https://github.com/FasterXML/jackson-dataformats-binary",
       "https://github.com/FasterXML/jackson-dataformats-text",
-      "https://github.com/FasterXML/jackson-jaxrs-profile",
+      "https://github.com/FasterXML/jackson-jaxrs-providers",
       "https://github.com/FasterXML/jackson-module-kotlin"
     ],
     "jasmine": "https://github.com/jasmine/jasmine",
