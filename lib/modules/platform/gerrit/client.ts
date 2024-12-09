@@ -72,10 +72,13 @@ class GerritClient {
     return changes.body;
   }
 
-  async getChange(changeNumber: number): Promise<GerritChange> {
+  async getChange(
+    changeNumber: number,
+    extraOptions?: string[],
+  ): Promise<GerritChange> {
+    const options = [...this.requestDetails, ...(extraOptions ?? [])];
     const changes = await this.gerritHttp.getJson<GerritChange>(
-      `a/changes/${changeNumber}?` +
-        this.requestDetails.map((det) => `o=${det}`).join('&'),
+      `a/changes/${changeNumber}?` + options.map((det) => `o=${det}`).join('&'),
     );
     return changes.body;
   }
@@ -196,15 +199,11 @@ class GerritClient {
   }
 
   async checkIfApproved(changeId: number): Promise<boolean> {
-    const change = await client.getChange(changeId);
-    const reviewLabels = change?.labels?.['Code-Review'];
-    return reviewLabels === undefined || reviewLabels.approved !== undefined;
-  }
-
-  wasApprovedBy(change: GerritChange, username: string): boolean | undefined {
+    const change = await client.getChange(changeId, ['DETAILED_LABELS']);
+    const reviewLabel = change?.labels?.['Code-Review'];
     return (
-      change.labels?.['Code-Review'].approved &&
-      change.labels['Code-Review'].approved.username === username
+      reviewLabel === undefined ||
+      Boolean(reviewLabel.all?.some((label) => label.value === 2))
     );
   }
 
