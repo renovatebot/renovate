@@ -315,6 +315,72 @@ describe('modules/datasource/maven/index', () => {
     expect(res?.sourceUrl).toBe('https://github.com/example/test');
   });
 
+  describe('supports relocation', () => {
+    it('with only groupId present', async () => {
+      const pom = `
+        <project>
+          <distributionManagement>
+            <relocation>
+              <groupId>io.example</groupId>
+            </relocation>
+          </distributionManagement>
+        </project>
+      `;
+      mockGenericPackage({ pom, html: null });
+
+      const res = await get();
+
+      expect(res).toMatchObject({
+        replacementName: 'io.example:package',
+        replacementVersion: '2.0.0',
+      });
+    });
+
+    it('with only artifactId present', async () => {
+      const pom = `
+        <project>
+          <distributionManagement>
+            <relocation>
+              <artifactId>foo</artifactId>
+            </relocation>
+          </distributionManagement>
+        </project>
+      `;
+      mockGenericPackage({ pom, html: null });
+
+      const res = await get();
+
+      expect(res).toMatchObject({
+        replacementName: 'org.example:foo',
+        replacementVersion: '2.0.0',
+      });
+    });
+
+    it('with all elments present', async () => {
+      const pom = `
+        <project>
+          <distributionManagement>
+            <relocation>
+              <groupId>io.example</groupId>
+              <artifactId>foo</artifactId>
+              <version>1.2.3</version>
+              <message>test relocation</message>
+            </relocation>
+          </distributionManagement>
+        </project>
+      `;
+      mockGenericPackage({ pom, html: null });
+
+      const res = await get();
+
+      expect(res).toMatchObject({
+        replacementName: 'io.example:foo',
+        replacementVersion: '1.2.3',
+        deprecationMessage: 'test relocation',
+      });
+    });
+  });
+
   it('removes authentication header after redirect', async () => {
     const frontendHost = 'frontend_for_private_s3_repository';
     const frontendUrl = `https://${frontendHost}/maven2`;
