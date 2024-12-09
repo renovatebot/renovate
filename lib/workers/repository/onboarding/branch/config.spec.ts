@@ -117,6 +117,40 @@ describe('workers/repository/onboarding/branch/config', () => {
       });
     });
 
+    it('handles not overwriting explicit onboarding extends version', async () => {
+      config.repository = 'org/group/repo';
+      config.onboardingConfig!.extends = ['local>org/renovate-config#v1.23.0'];
+      mockedPresets.getPreset.mockImplementation(({ repo }) => {
+        if (repo === 'org/group/renovate-config') {
+          return Promise.resolve({ enabled: true });
+        }
+        return Promise.reject(new Error(PRESET_DEP_NOT_FOUND));
+      });
+      const onboardingConfig = await getOnboardingConfig(config);
+      expect(mockedPresets.getPreset).toHaveBeenCalledTimes(0);
+      expect(onboardingConfig).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        extends: ['local>org/renovate-config#v1.23.0'],
+      });
+    });
+
+    it('handles not overwriting explicit empty onboarding extends', async () => {
+      config.repository = 'org/group/repo';
+      config.onboardingConfig!.extends = [];
+      mockedPresets.getPreset.mockImplementation(({ repo }) => {
+        if (repo === 'org/group2/renovate-config') {
+          return Promise.resolve({ enabled: true });
+        }
+        return Promise.reject(new Error(PRESET_DEP_NOT_FOUND));
+      });
+      const onboardingConfig = await getOnboardingConfig(config);
+      expect(mockedPresets.getPreset).toHaveBeenCalledTimes(0);
+      expect(onboardingConfig).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        extends: [],
+      });
+    });
+
     it('handles not finding any preset', async () => {
       mockedPresets.getPreset.mockRejectedValue(
         new Error(PRESET_DEP_NOT_FOUND),
