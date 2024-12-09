@@ -29,36 +29,13 @@ The Renovate team only fixes bugs in an older version if:
 If you're using the Mend Renovate App, you don't need to do anything, as the Renovate maintainers update it regularly.
 If you're self hosting Renovate, use the latest release if possible.
 
-## When is the Mend Renovate App updated with new Renovate versions?
+## When is the Mend Renovate App updated with a new Renovate versions?
 
-The Renovate maintainers manually update the app.
-The maintainers don't follow any release schedule or release cadence, but try to update at least once a week.
-This means the Mend Renovate App can lag a few hours to a week behind the open source version.
-
-Major releases of Renovate are held back until the maintainers are reasonably certain it works for most users.
+See the [Renovate version](mend-hosted/hosted-apps-config.md#renovate-version) section of `Mend-hosted Apps Configuration` for details.
 
 ## How can I see which version the Mend Renovate app is using?
 
-Follow these steps to see which version the Mend Renovate app is on:
-
-1. Go to the [Mend Developer Portal](https://developer.mend.io/)
-1. Sign in to the Renovate app with your GitHub or Bitbucket account
-1. Select your organization
-1. Select a installed repository
-1. Select a job from the _Recent jobs_ overview
-1. Select the _Info_ Log Level from the dropdown menu
-1. You should see something like this:
-
-   ```
-   INFO: Repository started
-   {
-     "renovateVersion": "39.11.5"
-   }
-   ```
-
-<!-- prettier-ignore -->
-!!! tip
-    The PRs that Renovate creates have a link to the "repository job log" in the footer of the PR body text.
+See the [Mend-hosted Apps Configuration](mend-hosted/hosted-apps-config.md#which-version-is-the-mend-renovate-app-using) for details.
 
 ## Renovate core features not supported on all platforms
 
