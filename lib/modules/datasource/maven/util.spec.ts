@@ -55,6 +55,22 @@ describe('modules/datasource/maven/util', () => {
         err: { type: 'unsupported-protocol' } satisfies MavenFetchError,
       });
     });
+
+    it('returns error for xml parse error', async () => {
+      const http = partial<Http>({
+        get: () =>
+          Promise.resolve({
+            statusCode: 200,
+            body: 'invalid xml',
+            headers: {},
+          }),
+      });
+      const res = await downloadMavenXml(http, 'https://example.com/');
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'xml-parse-error', err: expect.any(Error) },
+      });
+    });
   });
 
   describe('downloadS3Protocol', () => {
