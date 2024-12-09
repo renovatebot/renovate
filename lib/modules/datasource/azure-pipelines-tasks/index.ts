@@ -28,8 +28,6 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     const platform = GlobalConfig.get('platform');
     const endpoint = GlobalConfig.get('endpoint');
 
-    let versions;
-
     if (platform === 'azure' && endpoint) {
       const auth = Buffer.from(
         `renovate:${process.env.RENOVATE_TOKEN}`,
@@ -79,7 +77,7 @@ export class AzurePipelinesTasksDatasource extends Datasource {
         return result;
       }
     } else {
-      versions =
+      const versions =
         (await this.getTasks<Record<string, string[]>>(BUILT_IN_TASKS_URL))[
           packageName.toLowerCase()
         ] ??
