@@ -71,73 +71,92 @@ export async function downloadHttpProtocol(
   http: Http,
   pkgUrl: URL | string,
   opts: HttpOptions = {},
-): Promise<HttpResponse | null> {
+): Promise<MavenFetchResult> {
   const url = pkgUrl.toString();
-  const res = await Result.wrap(http.get(url, opts))
-    .onError((err) => {
+  const fetchResult = await Result.wrap<HttpResponse, Error>(
+    http.get(url, opts),
+  )
+    .transform((res): MavenFetchSuccess => {
+      const result: MavenFetchSuccess = { data: res.body };
+
+      if (!res.authorization) {
+        result.isCacheable = true;
+      }
+
+      const lastModified = normalizeDate(res?.headers?.['last-modified']);
+      if (lastModified) {
+        result.lastModified = lastModified;
+      }
+
+      return result;
+    })
+    .catch((err): MavenFetchResult => {
       // istanbul ignore next: never happens, needs for type narrowing
       if (!(err instanceof HttpError)) {
-        return;
+        return Result.err({ type: 'unknown', err });
       }
 
       const failedUrl = url;
       if (err.message === HOST_DISABLED) {
         logger.trace({ failedUrl }, 'Host disabled');
-        return;
+        return Result.err({ type: 'host-disabled' });
       }
 
       if (isNotFoundError(err)) {
         logger.trace({ failedUrl }, `Url not found`);
-        return;
+        return Result.err({ type: 'not-found' });
       }
 
       if (isHostError(err)) {
         logger.debug(`Cannot connect to host ${failedUrl}`);
-        return;
+        return Result.err({ type: 'host-error' });
       }
 
       if (isPermissionsIssue(err)) {
         logger.debug(
           `Dependency lookup unauthorized. Please add authentication with a hostRule for ${failedUrl}`,
         );
-        return;
+        return Result.err({ type: 'permission-issue' });
       }
 
       if (isTemporaryError(err)) {
         logger.debug({ failedUrl, err }, 'Temporary error');
-        return;
+        if (getHost(url) === getHost(MAVEN_REPO)) {
+          return Result.err({ type: 'maven-central-temporary-error', err });
+        } else {
+          return Result.err({ type: 'temporary-error' });
+        }
       }
 
       if (isConnectionError(err)) {
         logger.debug(`Connection refused to maven registry ${failedUrl}`);
-        return;
+        return Result.err({ type: 'connection-error' });
       }
 
       if (isUnsupportedHostError(err)) {
         logger.debug(`Unsupported host ${failedUrl}`);
-        return;
+        return Result.err({ type: 'unsupported-host' });
       }
 
       logger.info({ failedUrl, err }, 'Unknown HTTP download error');
-    })
-    .catch((err): Result<HttpResponse | 'silent-error', ExternalHostError> => {
-      if (
-        err instanceof HttpError &&
-        isTemporaryError(err) &&
-        getHost(url) === getHost(MAVEN_REPO)
-      ) {
-        return Result.err(new ExternalHostError(err));
-      }
+      return Result.err({ type: 'unknown', err });
+    });
 
-      return Result.ok('silent-error');
-    })
-    .unwrapOrThrow();
-
-  if (res === 'silent-error') {
-    return null;
+  const { err } = fetchResult.unwrap();
+  if (err?.type === 'maven-central-temporary-error') {
+    throw new ExternalHostError(err.err);
   }
 
-  return res;
+  return fetchResult;
+}
+
+export async function downloadHttpContent(
+  http: Http,
+  pkgUrl: URL | string,
+  opts: HttpOptions = {},
+): Promise<string | null> {
+  const fetchResult = await downloadHttpProtocol(http, pkgUrl, opts);
+  return fetchResult.transform(({ data }) => data).unwrapOrNull();
 }
 
 function isS3NotFound(err: Error): boolean {
@@ -228,7 +247,7 @@ export async function downloadS3Protocol(
 export async function downloadArtifactRegistryProtocol(
   http: Http,
   pkgUrl: URL,
-): Promise<HttpResponse | null> {
+): Promise<MavenFetchResult> {
   const opts: HttpOptions = {};
   const host = pkgUrl.host;
   const path = pkgUrl.pathname;
@@ -357,25 +376,21 @@ export async function downloadMavenXml(
   const protocol = pkgUrl.protocol;
 
   if (protocol === 'http:' || protocol === 'https:') {
-    const res = await downloadHttpProtocol(http, pkgUrl);
-    const body = res?.body;
-    if (body) {
-      return {
-        xml: new XmlDocument(body),
-        isCacheable: !res.authorization,
-      };
-    }
+    const rawResult = await downloadHttpProtocol(http, pkgUrl);
+    const xmlResult = rawResult.transform(({ isCacheable, data }): MavenXml => {
+      const xml = new XmlDocument(data);
+      return { isCacheable, xml };
+    });
+    return xmlResult.unwrapOr({});
   }
 
   if (protocol === 'artifactregistry:') {
-    const res = await downloadArtifactRegistryProtocol(http, pkgUrl);
-    const body = res?.body;
-    if (body) {
-      return {
-        xml: new XmlDocument(body),
-        isCacheable: !res.authorization,
-      };
-    }
+    const rawResult = await downloadArtifactRegistryProtocol(http, pkgUrl);
+    const xmlResult = rawResult.transform(({ isCacheable, data }): MavenXml => {
+      const xml = new XmlDocument(data);
+      return { isCacheable, xml };
+    });
+    return xmlResult.unwrapOr({});
   }
 
   if (protocol === 's3:') {
