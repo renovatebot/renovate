@@ -92,6 +92,18 @@ describe('modules/manager/mix/extract', () => {
           depName: 'public',
           packageName: 'public',
         },
+        {
+          currentValue: '~> 2.0.0',
+          datasource: 'hex',
+          depName: 'gun',
+          packageName: 'grpc_gun',
+        },
+        {
+          currentValue: '~> 1.0.0',
+          datasource: 'hex',
+          depName: 'another_gun',
+          packageName: 'gun_atom',
+        },
       ]);
     });
 
@@ -187,6 +199,20 @@ describe('modules/manager/mix/extract', () => {
           depName: 'public',
           packageName: 'public',
           lockedVersion: '1.6.14',
+        },
+        {
+          currentValue: '~> 2.0.0',
+          datasource: 'hex',
+          depName: 'gun',
+          packageName: 'grpc_gun',
+          lockedVersion: '2.0.0',
+        },
+        {
+          currentValue: '~> 1.0.0',
+          datasource: 'hex',
+          depName: 'another_gun',
+          packageName: 'gun_atom',
+          lockedVersion: '1.0.0',
         },
       ]);
     });

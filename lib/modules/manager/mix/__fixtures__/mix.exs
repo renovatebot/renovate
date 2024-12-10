@@ -32,6 +32,8 @@ defmodule MyProject.MixProject do
         optional: true},
       {:hammer_backend_redis, "~> 6.1"},
       {:public, "== 1.6.14"},
+      {:gun, "~> 2.0.0", hex: "grpc_gun"},
+      {:another_gun, "~> 1.0.0", hex: :gun_atom},
     ]
   end
 end
