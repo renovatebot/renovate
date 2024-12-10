@@ -46,9 +46,7 @@ export async function extractPackageFile(
         const branchOrTag = branchOrTagRegexp.exec(opts)?.groups?.value;
         const organization = organizationRegexp.exec(opts)?.groups?.value;
         const hexGroups = hexRegexp.exec(opts)?.groups;
-        const hex =
-          hexGroups?.strValue ??
-          hexGroups?.atomValue;
+        const hex = hexGroups?.strValue ?? hexGroups?.atomValue;
 
         let dep: PackageDependency;
 
