@@ -4,6 +4,7 @@ The information on this page is for the Mend-hosted cloud apps:
 
 - Renovate App on GitHub
 - Mend App on Bitbucket
+- Mend App on Azure DevOps
 
 If you self-host, you can skip reading this page.
 
