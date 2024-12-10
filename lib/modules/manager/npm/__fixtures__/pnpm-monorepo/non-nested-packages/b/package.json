@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@demo/non-nested-b": "file:",
     "chalk": "^2.4.1"
   }
 }
