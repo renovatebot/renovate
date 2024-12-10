@@ -149,9 +149,9 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/org/example/example_2.12/')
         .reply(200, `<a href='1.2.3/'>1.2.3/</a>`)
         .get('/org/example/example_2.12/1.2.3/example-1.2.3.pom')
-        .reply(200, ``)
+        .reply(404)
         .get('/org/example/example_2.12/1.2.3/example_2.12-1.2.3.pom')
-        .reply(200, ``);
+        .reply(404);
 
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
@@ -267,7 +267,7 @@ describe('modules/datasource/sbt-package/index', () => {
           `,
         )
         .get('/org/example/example_2.13/1.2.3/example_2.13-1.2.3.pom')
-        .reply(200);
+        .reply(404);
 
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
