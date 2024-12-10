@@ -293,6 +293,46 @@ const staticGroups = {
       },
     ],
   },
+  kiota: {
+    description: 'Group Kiota packages together.',
+    packageRules: [
+      {
+        description: 'Groups Kiota Node.JS packages together.',
+        groupName: 'Kiota',
+        groupSlug: 'kiota-node',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@microsoft/kiota**'],
+      },
+      {
+        description: 'Groups Kiota .NET packages together.',
+        groupName: 'Kiota',
+        groupSlug: 'kiota-dotnet',
+        matchDatasources: ['nuget'],
+        matchPackageNames: ['Microsoft.Kiota**', 'Microsoft.OpenApi.Kiota**'],
+      },
+      {
+        description: 'Groups Kiota Java packages together.',
+        groupName: 'Kiota',
+        groupSlug: 'kiota-java',
+        matchDatasources: ['maven'],
+        matchPackageNames: ['com.microsoft.kiota**'],
+      },
+      {
+        description: 'Groups Kiota Python packages together.',
+        groupName: 'Kiota',
+        groupSlug: 'kiota-python',
+        matchDatasources: ['pypi'],
+        matchPackageNames: ['microsoft-kiota**'],
+      },
+      {
+        description: 'Groups Kiota Go packages together.',
+        groupName: 'Kiota',
+        groupSlug: 'kiota-go',
+        matchDatasources: ['go'],
+        matchPackageNames: ['github.com/microsoft/kiota**'],
+      },
+    ],
+  },
   kubernetes: {
     description: 'Group Kubernetes packages together.',
     packageRules: [
@@ -461,6 +501,7 @@ const staticGroups = {
       'group:jestPlusTSJest',
       'group:jestPlusTypes',
       'group:jwtFramework',
+      'group:kiota',
       'group:kubernetes',
       'group:phpstan',
       'group:polymer',
