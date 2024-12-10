@@ -358,6 +358,7 @@
     "lexical": "https://github.com/facebook/lexical",
     "linguijs": "https://github.com/lingui/js-lingui",
     "log4j2": "https://github.com/apache/logging-log4j2",
+    "logback": "https://github.com/qos-ch/logback",
     "loopback": [
       "https://github.com/strongloop/loopback-next",
       "https://github.com/loopbackio/loopback-next"

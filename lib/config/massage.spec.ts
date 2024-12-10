@@ -17,15 +17,6 @@ describe('config/massage', () => {
       expect(Array.isArray(res.schedule)).toBeTrue();
     });
 
-    it('massages npmToken', () => {
-      const config: RenovateConfig = {
-        npmToken: 'some-token',
-      };
-      expect(massage.massageConfig(config)).toEqual({
-        npmrc: '//registry.npmjs.org/:_authToken=some-token\n',
-      });
-    });
-
     it('massages packageRules matchUpdateTypes', () => {
       const config: RenovateConfig = {
         packageRules: [

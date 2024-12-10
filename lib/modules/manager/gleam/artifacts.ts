@@ -52,7 +52,7 @@ export async function updateArtifacts(
     // `gleam deps update` with no packages rebuilds the lock file
     const packagesToUpdate = isLockFileMaintenance
       ? []
-      : updatedDeps.map((dep) => dep.depName).filter(Boolean);
+      : updatedDeps.map((dep) => dep.depName).filter(is.string);
 
     const updateCommand = ['gleam deps update', ...packagesToUpdate].join(' ');
     await exec(updateCommand, execOptions);
