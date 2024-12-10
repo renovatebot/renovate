@@ -16,16 +16,6 @@ describe('modules/manager/gleam/range', () => {
     expect(getRangeStrategy(config)).toBe('widen');
   });
 
-  it('returns widen if update-lockfile', () => {
-    const config: RangeConfig = { rangeStrategy: 'update-lockfile' };
-    expect(getRangeStrategy(config)).toBe('widen');
-  });
-
-  it('returns widen if in-range-only', () => {
-    const config: RangeConfig = { rangeStrategy: 'in-range-only' };
-    expect(getRangeStrategy(config)).toBe('widen');
-  });
-
   it('defaults to widen', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',

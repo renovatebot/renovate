@@ -140,7 +140,7 @@
   },
   "volta": {
     "node": "22.11.0",
-    "pnpm": "9.14.2"
+    "pnpm": "9.14.4"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.699.0",
@@ -212,7 +212,7 @@
     "json-dup-key-validator": "1.0.3",
     "json-stringify-pretty-compact": "3.0.0",
     "json5": "2.2.3",
-    "jsonata": "2.0.5",
+    "jsonata": "2.0.6",
     "jsonc-parser": "3.3.1",
     "klona": "2.0.6",
     "luxon": "3.5.0",
@@ -336,7 +336,7 @@
     "jest-mock-extended": "3.0.7",
     "jest-snapshot": "29.7.0",
     "markdownlint-cli2": "0.15.0",
-    "memfs": "4.14.0",
+    "memfs": "4.14.1",
     "nock": "13.5.6",
     "npm-run-all2": "7.0.1",
     "nyc": "17.1.0",
@@ -347,11 +347,11 @@
     "tmp-promise": "3.0.3",
     "ts-jest": "29.2.5",
     "ts-node": "10.9.2",
-    "type-fest": "4.29.0",
+    "type-fest": "4.30.0",
     "typescript": "5.7.2",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@9.14.2",
+  "packageManager": "pnpm@9.14.4",
   "files": [
     "dist",
     "renovate-schema.json"

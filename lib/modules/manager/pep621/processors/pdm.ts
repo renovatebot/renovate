@@ -193,6 +193,7 @@ function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
         );
         break;
       }
+      case depTypes.dependencyGroups:
       case depTypes.pdmDevDependencies: {
         if (is.nullOrUndefined(dep.managerData?.depGroup)) {
           logger.once.warn(

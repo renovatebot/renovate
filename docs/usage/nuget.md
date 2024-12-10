@@ -130,6 +130,23 @@ If you use Azure DevOps:
     The username of the PAT must match the username of the _user of the PAT_.
     The generated `nuget.config` forces the basic authentication, which cannot be overridden externally!
 
+## Ignoring package files when using presets
+
+Because `nuget` manager has a dedicated `ignorePaths` entry in the `:ignoreModulesAndTests` preset, if you're using any presets that extend it (like `config:recommended`), you need to put your `ignorePaths` inside the `nuget` section for it to be merged.
+For example:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "nuget": {
+    "ignorePaths": ["IgnoreThisPackage/**"]
+  }
+}
+```
+
+Otherwise, all `nuget.ignorePaths` values in `:ignoreModulesAndTests` will override values you put inside `ignorePaths` at the top-level config.
+
 ## Future work
 
 We welcome contributions or feature requests to support more patterns or use cases.
