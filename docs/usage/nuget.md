@@ -132,7 +132,8 @@ If you use Azure DevOps:
 
 ## Ignoring package files when using presets
 
-Because `nuget` manager has a dedicated `ignorePaths` entry in the `:ignoreModulesAndTests` preset, if you're using any presets that extend it (like `config:recommended`), you need to put your `ignorePaths` inside the `nuget` section for it to be merged. For example:
+Because `nuget` manager has a dedicated `ignorePaths` entry in the `:ignoreModulesAndTests` preset, if you're using any presets that extend it (like `config:recommended`), you need to put your `ignorePaths` inside the `nuget` section for it to be merged.
+For example:
 
 ```json
 {
@@ -144,7 +145,7 @@ Because `nuget` manager has a dedicated `ignorePaths` entry in the `:ignoreModul
 }
 ```
 
-Otherwise, your entries will be ignored.
+Otherwise, all `nuget.ignorePaths` values in `:ignoreModulesAndTests` will override values you put inside `ignorePaths` at the top-level config.
 
 ## Future work
 
