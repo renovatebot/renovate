@@ -725,8 +725,8 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: {
+          updateType: 'lockFileMaintenance',
           ...config,
-          isLockFileMaintenance: true,
         },
       }),
     ).toEqual([

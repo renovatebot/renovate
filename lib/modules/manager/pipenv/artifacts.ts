@@ -135,7 +135,10 @@ export async function updateArtifacts({
   }
   try {
     await writeLocalFile(pipfileName, newPipfileContent);
-    if (config.isLockFileMaintenance) {
+    if (
+      config.updateType === 'lockFileMaintenance' ||
+      config.isLockFileMaintenance
+    ) {
       await deleteLocalFile(lockFileName);
     }
     const cmd = 'pipenv lock';

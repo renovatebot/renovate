@@ -34,7 +34,6 @@ const dockerAdminConfig = {
 process.env.CONTAINERBASE = 'true';
 
 const config: UpdateArtifactsConfig = {};
-const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 const updateInputCmd = `nix \
 --extra-experimental-features 'nix-command flakes' \
 flake lock --update-input nixpkgs`;
@@ -294,7 +293,7 @@ describe('modules/manager/nix/artifacts', () => {
       packageFileName: 'flake.nix',
       updatedDeps: [{ depName: 'nixpkgs' }],
       newPackageFileContent: '{}',
-      config: lockMaintenanceConfig,
+      config: { updateType: 'lockFileMaintenance', ...config },
     });
 
     expect(res).toEqual([
