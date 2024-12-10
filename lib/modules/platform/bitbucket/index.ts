@@ -312,16 +312,18 @@ export async function findPr({
       return null;
     }
 
-    return utils.prInfo(prs[0]);
+    return utils.prInfo(prs.sort((a, b) => b.id - a.id)[0]);
   }
 
   const prList = await getPrList();
-  const pr = prList.find(
-    (p) =>
-      p.sourceBranch === branchName &&
-      (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-      matchesState(p.state, state),
-  );
+  const pr = prList
+    .sort((a, b) => b.number - a.number)
+    .find(
+      (p) =>
+        p.sourceBranch === branchName &&
+        (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
+        matchesState(p.state, state),
+    );
 
   if (!pr) {
     return null;
