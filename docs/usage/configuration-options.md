@@ -3160,7 +3160,6 @@ Managers which do not support replacement:
 
 - `bazel`
 - `git-submodules`
-- `gomod`
 - `gradle`
 - `homebrew`
 - `maven`
