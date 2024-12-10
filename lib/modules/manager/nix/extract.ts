@@ -37,7 +37,10 @@ export async function extractPackageFile(
   const rootInputs = flakeLock.nodes['root'].inputs;
 
   if (!rootInputs) {
-    logger.debug({ packageLockFile, error: flakeLockParsed.error }, `flake.lock is missing "root" node`);
+    logger.debug(
+      { packageLockFile, error: flakeLockParsed.error },
+      `flake.lock is missing "root" node`,
+    );
     return null;
   }
 
