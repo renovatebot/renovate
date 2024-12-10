@@ -1,5 +1,6 @@
 import { Readable } from 'node:stream';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { sdkStreamMixin } from '@smithy/util-stream';
 import { mockClient } from 'aws-sdk-client-mock';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { DateTime } from 'luxon';
@@ -712,11 +713,11 @@ describe('modules/datasource/maven/index', () => {
         s3mock.reset();
       });
 
-      function body(input: string): never {
+      function body(input: string) {
         const result = new Readable();
         result.push(input);
         result.push(null);
-        return result as never;
+        return sdkStreamMixin(result);
       }
 
       it('checks package', async () => {
