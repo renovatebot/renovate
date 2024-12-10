@@ -1,76 +1,26 @@
 import is from '@sindresorhus/is';
 import ignore from 'ignore';
 import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
+import type { FileOwnerRule, Pr } from '../../../../modules/platform';
+import { platform } from '../../../../modules/platform';
 import { readLocalFile } from '../../../../util/fs';
 import { getBranchFiles } from '../../../../util/git';
 import { newlineRegex, regEx } from '../../../../util/regex';
 
-interface FileOwnerRule {
-  usernames: string[];
-  pattern: string;
-  score: number;
-  match: (path: string) => boolean;
-}
-
-class CodeOwnersParser {
-  private currentSection: { name: string; defaultUsers: string[] };
-  private internalRules: FileOwnerRule[];
-
-  constructor() {
-    this.currentSection = { name: '', defaultUsers: [] };
-    this.internalRules = [];
-  }
-
-  private changeCurrentSection(line: string): void {
-    const [name, ...usernames] = line.split(regEx(/\s+/));
-    this.currentSection = { name, defaultUsers: usernames };
-  }
-
-  private addRule(rule: FileOwnerRule): void {
-    this.internalRules.push(rule);
-  }
-
-  private extractOwnersFromLine(
-    line: string,
-    defaultUsernames: string[],
-  ): FileOwnerRule {
-    const [pattern, ...usernames] = line.split(regEx(/\s+/));
-    const matchPattern = ignore().add(pattern);
-    return {
-      usernames: usernames.length > 0 ? usernames : defaultUsernames,
-      pattern,
-      score: pattern.length,
-      match: (path: string) => matchPattern.ignores(path),
-    };
-  }
-
-  parseLine(line: string): CodeOwnersParser {
-    if (CodeOwnersParser.isSectionHeader(line)) {
-      this.changeCurrentSection(line);
-    } else {
-      const rule = this.extractOwnersFromLine(
-        line,
-        this.currentSection.defaultUsers,
-      );
-      this.addRule(rule);
-    }
-
-    return this;
-  }
-
-  get rules(): FileOwnerRule[] {
-    return this.internalRules;
-  }
-
-  static isSectionHeader(line: string): boolean {
-    return line.startsWith('[') || line.startsWith('^[');
-  }
-}
-
 interface FileOwnersScore {
   file: string;
   userScoreMap: Map<string, number>;
+}
+
+function extractOwnersFromLine(line: string): FileOwnerRule {
+  const [pattern, ...usernames] = line.split(regEx(/\s+/));
+  const matchPattern = ignore().add(pattern);
+  return {
+    usernames,
+    pattern,
+    score: pattern.length,
+    match: (path: string) => matchPattern.ignores(path),
+  };
 }
 
 function matchFileToOwners(
@@ -122,21 +72,17 @@ function getOwnerList(filesWithOwners: FileOwnersScore[]): OwnerFileScore[] {
 function extractRulesFromCodeOwnersFile(
   codeOwnersFile: string,
 ): FileOwnerRule[] {
-  const parser = new CodeOwnersParser();
-
-  const cleanedLines = codeOwnersFile
-    .split(newlineRegex)
-    // Remove comments
-    .map((line) => line.split('#')[0])
-    // Remove empty lines
-    .map((line) => line.trim())
-    .filter(is.nonEmptyString);
-
-  for (const line of cleanedLines) {
-    parser.parseLine(line);
-  }
-
-  return parser.rules;
+  return (
+    codeOwnersFile
+      .split(newlineRegex)
+      // Remove comments
+      .map((line) => line.split('#')[0])
+      // Remove empty lines
+      .map((line) => line.trim())
+      .filter(is.nonEmptyString)
+      // Extract pattern & usernames
+      .map(extractOwnersFromLine)
+  );
 }
 
 export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
@@ -166,7 +112,9 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     }
 
     // Convert CODEOWNERS file into list of matching rules
-    const fileOwnerRules = extractRulesFromCodeOwnersFile(codeOwnersFile);
+    const fileOwnerRules = platform.extractRulesFromCodeOwnersFile
+      ? platform.extractRulesFromCodeOwnersFile(codeOwnersFile)
+      : extractRulesFromCodeOwnersFile(codeOwnersFile);
 
     logger.debug(
       { prFiles, fileOwnerRules },

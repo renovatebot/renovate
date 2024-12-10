@@ -1,12 +1,19 @@
 import { codeBlock } from 'common-tags';
 import { mock } from 'vitest-mock-extended';
 import type { Pr } from '../../../../modules/platform';
+import { platform } from '../../../../modules/platform';
+import * as gitlab from '../../../../modules/platform/gitlab';
 import { codeOwnersForPr } from './code-owners';
 import { fs, git } from '~test/util';
 
 vi.mock('../../../../util/fs');
+vi.mock('../../../../modules/platform');
 
 describe('workers/repository/update/pr/code-owners', () => {
+  beforeAll(() => {
+    platform.extractRulesFromCodeOwnersFile = undefined;
+  });
+
   describe('codeOwnersForPr', () => {
     let pr: Pr;
 
@@ -170,6 +177,11 @@ describe('workers/repository/update/pr/code-owners', () => {
     });
 
     describe('supports Gitlab sections', () => {
+      beforeAll(() => {
+        platform.extractRulesFromCodeOwnersFile =
+          gitlab.extractRulesFromCodeOwnersFile;
+      });
+
       it('returns section code owner', async () => {
         fs.readLocalFile.mockResolvedValueOnce(
           ['[team] @jimmy', '*'].join('\n'),
