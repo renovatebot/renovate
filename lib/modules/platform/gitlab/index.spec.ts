@@ -51,6 +51,7 @@ describe('modules/platform/gitlab/index', () => {
       token: '123test',
     });
     delete process.env.GITLAB_IGNORE_REPO_URL;
+    delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS;
     delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY;
     delete process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS;
     delete process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY;
@@ -1205,8 +1206,7 @@ describe('modules/platform/gitlab/index', () => {
     it('do RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS attemps when set', async () => {
       const delay = 1000;
       const retry = 5;
-      process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS =
-        String(retry);
+      process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS = `${retry}`;
 
       const scope = await initRepo();
       scope
