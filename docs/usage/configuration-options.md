@@ -771,9 +771,8 @@ Example:
       "customType": "regex",
       "fileMatch": ["values.yaml$"],
       "matchStrings": [
-        "image:\\s+(?<depName>my\\.old\\.registry/aRepository/andImage):(?<currentValue>[^\\s]+)"
-      ],
-      "datasource": "docker"
+        "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
+      ]
     }
   ]
 }
