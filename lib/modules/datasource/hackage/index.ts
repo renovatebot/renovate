@@ -30,7 +30,7 @@ export class HackageDatasource extends Datasource {
     const keys = Object.keys(res.body);
     return {
       releases: keys.map((version) =>
-        versionToRelease(version, config.packageName, config.registryUrl!),
+        versionToRelease(version, config.packageName, config.registryUrl),
       ),
     };
   }
