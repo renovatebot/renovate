@@ -220,6 +220,13 @@ export interface AutodiscoverConfig {
   projects?: string[];
 }
 
+export interface FileOwnerRule {
+  usernames: string[];
+  pattern: string;
+  score: number;
+  match: (path: string) => boolean;
+}
+
 export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
@@ -279,6 +286,7 @@ export interface Platform {
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
+  extractRulesFromCodeOwnersFile?(fileContent: string): FileOwnerRule[];
 
   maxBodyLength(): number;
   labelCharLimit?(): number;
