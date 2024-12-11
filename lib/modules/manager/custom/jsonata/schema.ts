@@ -10,7 +10,7 @@ const DepObjectSchema = z.object({
   depType: z.string().optional(),
   registryUrl: z.string().optional(),
   extractVersion: z.string().optional(),
-  indentation: z.number().optional(),
+  indentation: z.string().optional(),
 });
 
 export const QueryResultZodSchema = z.array(DepObjectSchema);
