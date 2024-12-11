@@ -31,11 +31,15 @@ export function extractPackageFile(
   packageFile: string,
 ): PackageFileContent | null {
   logger.trace(`renovate-config-presets.extractPackageFile(${packageFile})`);
-  let config: RenovateConfig;
+  let config: RenovateConfig | null;
   try {
-    config = parseJson(content, packageFile) as RenovateConfig;
+    config = parseJson(content, packageFile) as RenovateConfig | null;
   } catch {
     logger.debug({ packageFile }, 'Invalid JSON5');
+    return null;
+  }
+
+  if (is.nullOrUndefined(config)) {
     return null;
   }
 
