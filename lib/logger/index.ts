@@ -119,12 +119,21 @@ export class RenovateLogger implements Logger {
     private meta: Record<string, unknown>,
   ) {
     for (const level of loggerLevels) {
-      this.setupLoggerLevel(level);
+      this.logger[level] = this.logFactory(level) as never;
+      this.logger.once[level] = this.logOnceFn(level);
     }
   }
 
   addStream(stream: bunyan.Stream): void {
     this.bunyanLogger.addStream(withSanitizer(stream));
+  }
+
+  childLogger(): RenovateLogger {
+    return new RenovateLogger(
+      this.bunyanLogger.child({}),
+      this.context,
+      this.meta,
+    );
   }
 
   once = this.logger.once;
@@ -160,18 +169,13 @@ export class RenovateLogger implements Logger {
     }
   }
 
-  private setupLoggerLevel(level: bunyan.LogLevelString): void {
-    this.logger[level] = this.createLogFactory(level) as never;
-    this.logger.once[level] = this.createLogOnceFunction(level);
-  }
-
-  private createLogFactory(
+  private logFactory(
     level: bunyan.LogLevelString,
   ): (p1: unknown, p2: unknown) => void {
     return logFactory(this.bunyanLogger, level, this.meta, this.context);
   }
 
-  private createLogOnceFunction(
+  private logOnceFn(
     level: bunyan.LogLevelString,
   ): (p1: string | Record<string, any>, p2?: string) => void {
     const logOnceFn = (p1: string | Record<string, any>, p2?: string): void => {
