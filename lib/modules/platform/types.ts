@@ -282,6 +282,11 @@ export interface Platform {
 
   maxBodyLength(): number;
   labelCharLimit?(): number;
+  /**
+   * Platforms that support `autoApprove` can implement this function. It will be
+   * invoked during automerge before the PR branch status is checked.
+   */
+  approvePrForAutomerge?(number: number): Promise<void>;
 }
 
 export interface PlatformScm {
