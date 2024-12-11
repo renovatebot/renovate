@@ -1013,21 +1013,26 @@ export async function setBranchStatus({
     2,
   );
 
-  for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
-    const commitUrl = `projects/${config.repository}/repository/commits/${branchSha}`;
-    await gitlabApi
-      .getJsonSafe(commitUrl, LastPipelineId)
-      .onValue((pipelineId) => {
-        options.pipeline_id = pipelineId;
-      });
-    if (options.pipeline_id !== undefined) {
-      break;
+  try {
+    for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
+      const commitUrl = `projects/${config.repository}/repository/commits/${branchSha}`;
+      await gitlabApi
+        .getJsonSafe(commitUrl, LastPipelineId)
+        .onValue((pipelineId) => {
+          options.pipeline_id = pipelineId;
+        });
+      if (options.pipeline_id !== undefined) {
+        break;
+      }
+      logger.debug(`Pipeline not yet created. Retrying ${attempt}`);
+      // give gitlab some time to create pipelines for the sha
+      await setTimeout(
+        parseInteger(process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
+      );
     }
-    logger.debug(`Pipeline not yet created. Retrying ${attempt}`);
-    // give gitlab some time to create pipelines for the sha
-    await setTimeout(
-      parseInteger(process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
-    );
+  } catch (err) {
+    logger.debug({ err });
+    logger.warn('Failed to retrieve commit pipeline');
   }
 
   try {
