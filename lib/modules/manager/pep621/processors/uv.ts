@@ -32,6 +32,16 @@ export class UvProcessor implements PyProjectProcessor {
       return deps;
     }
 
+    const hasExplicitDefault = uv.index?.some(
+      (index) => index.default && index.explicit,
+    );
+    const defaultIndex = uv.index?.find(
+      (index) => index.default && !index.explicit,
+    );
+    const implicitIndexUrls = uv.index
+      ?.filter((index) => !index.explicit && index.name !== defaultIndex?.name)
+      ?.map(({ url }) => url);
+
     deps.push(
       ...parseDependencyList(
         depTypes.uvDevDependencies,
@@ -41,7 +51,7 @@ export class UvProcessor implements PyProjectProcessor {
 
     // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
     // Skip sources that do not make sense to handle (e.g. path).
-    if (uv.sources) {
+    if (uv.sources || defaultIndex || implicitIndexUrls) {
       for (const dep of deps) {
         // istanbul ignore if
         if (!dep.packageName) {
@@ -50,22 +60,50 @@ export class UvProcessor implements PyProjectProcessor {
 
         // Using `packageName` as it applies PEP 508 normalization, which is
         // also applied by uv when matching a source to a dependency.
-        const depSource = uv.sources[dep.packageName];
+        const depSource = uv.sources?.[dep.packageName];
         if (depSource) {
+          // Dependency is pinned to a specific source.
           dep.depType = depTypes.uvSources;
-          if ('url' in depSource) {
-            dep.skipReason = 'unsupported-url';
-          } else if ('path' in depSource) {
-            dep.skipReason = 'path-dependency';
-          } else if ('workspace' in depSource) {
-            dep.skipReason = 'inherited-dependency';
-          } else {
+          if ('index' in depSource) {
+            const index = uv.index?.find(
+              ({ name }) => name === depSource.index,
+            );
+            if (index) {
+              dep.registryUrls = [index.url];
+            }
+          } else if ('git' in depSource) {
             applyGitSource(
               dep,
               depSource.git,
               depSource.rev,
               depSource.tag,
               depSource.branch,
+            );
+          } else if ('url' in depSource) {
+            dep.skipReason = 'unsupported-url';
+          } else if ('path' in depSource) {
+            dep.skipReason = 'path-dependency';
+          } else if ('workspace' in depSource) {
+            dep.skipReason = 'inherited-dependency';
+          } else {
+            dep.skipReason = 'unknown-registry';
+          }
+        } else {
+          // Dependency is not pinned to a specific source, so we need to
+          // determine the source based on the index configuration.
+          if (hasExplicitDefault) {
+            // don't fall back to pypi if there is an explicit default index
+            dep.registryUrls = [];
+          } else if (defaultIndex) {
+            // There is a default index configured, so use it.
+            dep.registryUrls = [defaultIndex.url];
+          }
+
+          if (implicitIndexUrls?.length) {
+            // If there are implicit indexes, check them first and fall back
+            // to the default.
+            dep.registryUrls = implicitIndexUrls.concat(
+              dep.registryUrls ?? PypiDatasource.defaultURL,
             );
           }
         }
@@ -132,7 +170,8 @@ export class UvProcessor implements PyProjectProcessor {
 
       const extraEnv = {
         ...getGitEnvironmentVariables(['pep621']),
-        ...(await getUvExtraIndexUrl(updateArtifact.updatedDeps)),
+        ...(await getUvExtraIndexUrl(project, updateArtifact.updatedDeps)),
+        ...(await getUvIndexCredentials(project)),
       };
       const execOptions: ExecOptions = {
         cwdFile: packageFileName,
@@ -217,11 +256,52 @@ function getMatchingHostRule(url: string | undefined): HostRule {
   return find({ hostType: PypiDatasource.id, url });
 }
 
-async function getUvExtraIndexUrl(deps: Upgrade[]): Promise<NodeJS.ProcessEnv> {
+async function getUsernamePassword(
+  url: URL,
+): Promise<{ username?: string; password?: string }> {
+  const rule = getMatchingHostRule(url.toString());
+  if (rule.username || rule.password) {
+    return rule;
+  }
+
+  if (url.hostname.endsWith('.pkg.dev')) {
+    const accessToken = await getGoogleAuthTokenRaw();
+    if (accessToken) {
+      return {
+        username: 'oauth2accesstoken',
+        password: accessToken,
+      };
+    } else {
+      logger.once.debug({ url }, 'Could not get Google access token');
+    }
+  }
+
+  return {};
+}
+
+async function getUvExtraIndexUrl(
+  project: PyProject,
+  deps: Upgrade[],
+): Promise<NodeJS.ProcessEnv> {
   const pyPiRegistryUrls = deps
     .filter((dep) => dep.datasource === PypiDatasource.id)
-    .map((dep) => dep.registryUrls)
-    .flat();
+    .filter((dep) => {
+      // Remove dependencies that are pinned to a specific index
+      const sources = project.tool?.uv?.sources;
+      return !sources || !(dep.packageName! in sources);
+    })
+    .flatMap((dep) => dep.registryUrls)
+    .filter(is.string)
+    .filter((registryUrl) => {
+      // Check if the registry URL is not the default one and not already configured
+      const configuredIndexUrls =
+        project.tool?.uv?.index?.map(({ url }) => url) ?? [];
+      return (
+        registryUrl !== PypiDatasource.defaultURL &&
+        !configuredIndexUrls.includes(registryUrl)
+      );
+    });
+
   const registryUrls = new Set(pyPiRegistryUrls);
   const extraIndexUrls: string[] = [];
 
@@ -231,21 +311,13 @@ async function getUvExtraIndexUrl(deps: Upgrade[]): Promise<NodeJS.ProcessEnv> {
       continue;
     }
 
-    const rule = getMatchingHostRule(parsedUrl.toString());
-    if (rule.username || rule.password) {
-      if (rule.username) {
-        parsedUrl.username = rule.username;
+    const { username, password } = await getUsernamePassword(parsedUrl);
+    if (username || password) {
+      if (username) {
+        parsedUrl.username = username;
       }
-      if (rule.password) {
-        parsedUrl.password = rule.password;
-      }
-    } else if (parsedUrl.hostname.endsWith('.pkg.dev')) {
-      const accessToken = await getGoogleAuthTokenRaw();
-      if (accessToken) {
-        parsedUrl.username = 'oauth2accesstoken';
-        parsedUrl.password = accessToken;
-      } else {
-        logger.once.debug({ registryUrl }, 'Could not get Google access token');
+      if (password) {
+        parsedUrl.password = password;
       }
     }
 
@@ -255,4 +327,38 @@ async function getUvExtraIndexUrl(deps: Upgrade[]): Promise<NodeJS.ProcessEnv> {
   return {
     UV_EXTRA_INDEX_URL: extraIndexUrls.join(' '),
   };
+}
+
+async function getUvIndexCredentials(
+  project: PyProject,
+): Promise<NodeJS.ProcessEnv> {
+  const uv_indexes = project.tool?.uv?.index;
+
+  if (is.nullOrUndefined(uv_indexes)) {
+    return {};
+  }
+
+  const entries = [];
+
+  for (const { name, url } of uv_indexes) {
+    const parsedUrl = parseUrl(url);
+    // istanbul ignore if
+    if (!parsedUrl) {
+      continue;
+    }
+
+    const { username, password } = await getUsernamePassword(parsedUrl);
+
+    const NAME = name.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+
+    if (username) {
+      entries.push([`UV_INDEX_${NAME}_USERNAME`, username]);
+    }
+
+    if (password) {
+      entries.push([`UV_INDEX_${NAME}_PASSWORD`, password]);
+    }
+  }
+
+  return Object.fromEntries(entries);
 }
