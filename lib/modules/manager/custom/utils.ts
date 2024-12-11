@@ -17,7 +17,7 @@ export const validMatchFields = [
 
 export type ValidMatchFields = (typeof validMatchFields)[number];
 
-function isValidDependency({
+export function isValidDependency({
   depName,
   currentValue,
   currentDigest,
