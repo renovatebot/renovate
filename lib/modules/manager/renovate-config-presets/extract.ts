@@ -51,7 +51,7 @@ export function extractPackageFile(
       (source) => source.source === parsedPreset.presetSource,
     )?.datasource;
 
-    if (!is.nullOrUndefined(datasource)) {
+    if (is.nullOrUndefined(datasource)) {
       if (parsedPreset.presetSource !== 'internal') {
         deps.push({
           depName: parsedPreset.repo,
