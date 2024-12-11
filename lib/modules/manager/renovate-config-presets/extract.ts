@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import JSON5 from 'json5';
 import { parsePreset } from '../../../config/presets/parse';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import { parseJson } from '../../../util/common';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
@@ -33,7 +33,7 @@ export function extractPackageFile(
   logger.trace(`renovate-config-presets.extractPackageFile(${packageFile})`);
   let config: RenovateConfig;
   try {
-    config = JSON5.parse<RenovateConfig>(content);
+    config = parseJson(content, packageFile) as RenovateConfig;
   } catch {
     logger.debug({ packageFile }, 'Invalid JSON5');
     return null;

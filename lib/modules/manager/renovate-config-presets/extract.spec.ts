@@ -4,11 +4,13 @@ import { extractPackageFile } from '.';
 describe('modules/manager/renovate-config-presets/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty file', () => {
-      expect(extractPackageFile('', '')).toBeNull();
+      expect(extractPackageFile('', 'renovate.json')).toBeNull();
     });
 
     it('returns null for invalid file', () => {
-      expect(extractPackageFile('this-is-not-json', '')).toBeNull();
+      expect(
+        extractPackageFile('this-is-not-json', 'renovate.json'),
+      ).toBeNull();
     });
 
     it('returns null for a config file without presets', () => {
@@ -19,7 +21,7 @@ describe('modules/manager/renovate-config-presets/extract', () => {
               "draftPR": true
             }
           `,
-          '',
+          'renovate.json',
         ),
       ).toBeNull();
     });
@@ -32,7 +34,7 @@ describe('modules/manager/renovate-config-presets/extract', () => {
               "extends": ["config:recommended", ":label(test)", "helpers:pinGitHubActionDigests"]
             }
           `,
-          '',
+          'renovate.json',
         ),
       ).toBeNull();
     });
@@ -50,7 +52,7 @@ describe('modules/manager/renovate-config-presets/extract', () => {
               ]
             }
           `,
-          '',
+          'renovate.json',
         ),
       ).toEqual({
         deps: [
@@ -87,7 +89,7 @@ describe('modules/manager/renovate-config-presets/extract', () => {
               ]
             }
           `,
-          '',
+          'renovate.json',
         ),
       ).toEqual({
         deps: [
@@ -120,7 +122,7 @@ describe('modules/manager/renovate-config-presets/extract', () => {
               ]
             }
           `,
-          '',
+          'renovate.json',
         ),
       ).toEqual({
         deps: [
@@ -161,7 +163,7 @@ describe('modules/manager/renovate-config-presets/extract', () => {
               ]
             }
           `,
-          '',
+          'renovate.json',
         ),
       ).toEqual({
         deps: [
@@ -202,7 +204,7 @@ describe('modules/manager/renovate-config-presets/extract', () => {
               ]
             }
           `,
-          '',
+          'renovate.json',
         ),
       ).toEqual({
         deps: [
@@ -241,7 +243,7 @@ describe('modules/manager/renovate-config-presets/extract', () => {
               ],
             }
           `,
-          '',
+          'renovate.json5',
         ),
       ).toEqual({
         deps: [
