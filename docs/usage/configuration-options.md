@@ -769,9 +769,11 @@ Example:
   "customManagers": [
     {
       "customType": "regex",
+      "fileMatch": ["values.yaml$"],
       "matchStrings": [
-        "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
-      ]
+        "image:\\s+(?<depName>my\\.old\\.registry/aRepository/andImage):(?<currentValue>[^\\s]+)"
+      ],
+      "datasource": "docker"
     }
   ]
 }
