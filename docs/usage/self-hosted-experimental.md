@@ -57,6 +57,8 @@ The delay between attempts is `RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY` millisecon
 
 Default value: `2` (attempts results in maximum 2 seconds timeout).
 
+!!! warning Increasing this value too much penalizes projects that do not have defined pipelines, Renovate will systematically wait `RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS * RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY` milliseconds on these projects and slow down the Renovate analyzes.
+
 ## `RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY`
 
 Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.
