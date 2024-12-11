@@ -52,7 +52,8 @@ To configure it, use the following syntax:
 {
   "customManagers": [
     {
-      "type": "jsonata",
+      "customType": "jsonata",
+      "fileFormat": "json",
       "fileMatch": ["<file match pattern>"],
       "matchStrings": ['<query>'],
       ...

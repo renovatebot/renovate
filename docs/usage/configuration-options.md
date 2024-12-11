@@ -698,22 +698,22 @@ You can define custom managers to handle:
 - Proprietary file formats or conventions
 - Popular file formats not yet supported as a manager by Renovate
 
-Currently we only have one custom manager.
+Currently we only have two custom managers.
 The `regex` manager which is based on using Regular Expression named capture groups.
+The `jsonata` manager which is based on using JSONata queries.
 
-You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
+You must have capture/extract the following three fields _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
 
 - `datasource`
 - `depName` and / or `packageName`
 - `currentValue`
 
-Use named capture group matching _or_ set a corresponding template.
 We recommend you use only _one_ of these methods, or you'll get confused.
 
 We recommend that you also tell Renovate what `versioning` to use.
 If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
 
-For more details and examples about it, see our [documentation for the `regex` manager](modules/manager/regex/index.md).
+For more details and examples about it, see our documentation for the [`regex` manager](modules/manager/regex/index.md) and the [`JSONata` manager](modules/manager/jsonata/index.md).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
 <!-- prettier-ignore -->
@@ -755,6 +755,10 @@ This will lead to following update where `1.21-alpine` is the newest version of 
 image: my.new.registry/aRepository/andImage:1.21-alpine
 ```
 
+<!-- prettier-ignore -->
+!!! note
+    Can only be used with the custom regex maanger.
+
 ### currentValueTemplate
 
 If the `currentValue` for a dependency is not captured with a named group then it can be defined in config using this field.
@@ -769,6 +773,7 @@ Example:
   "customManagers": [
     {
       "customType": "regex",
+      "fileMatch": ["Dockerfile"],
       "matchStrings": [
         "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
       ]
@@ -782,6 +787,8 @@ Example:
   "customManagers": [
     {
       "customType": "jsonata",
+      "fileFormat": "json",
+      "fileMatch": ["file.json"],
       "matchStrings": [
         "packages.{ \"depName\": package, \"currentValue\": version }"
       ]
@@ -843,6 +850,10 @@ Three options are available:
 - `any` (default)
 - `recursive`
 - `combination`
+
+<!--prettier-ignore-->
+!!! note
+    Only to be used with custom regex manager.
 
 #### any
 
