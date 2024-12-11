@@ -7,7 +7,9 @@ export interface CustomExtractConfig
 
 export type CustomManagerName = 'jsonata' | 'regex';
 
-export interface CustomManager extends Partial<RegexManagerConfig> {
+export interface CustomManager
+  extends Partial<RegexManagerConfig>,
+    Partial<JSONataManagerConfig> {
   customType: CustomManagerName;
   fileMatch: string[];
 }
