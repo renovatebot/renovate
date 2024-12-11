@@ -328,9 +328,12 @@
     "istanbuljs": "https://github.com/istanbuljs/istanbuljs",
     "jackson": [
       "https://github.com/FasterXML/jackson",
+      "https://github.com/FasterXML/jackson-annotations",
+      "https://github.com/FasterXML/jackson-core",
       "https://github.com/FasterXML/jackson-databind",
       "https://github.com/FasterXML/jackson-dataformats-binary",
       "https://github.com/FasterXML/jackson-dataformats-text",
+      "https://github.com/FasterXML/jackson-jaxrs-providers",
       "https://github.com/FasterXML/jackson-module-kotlin"
     ],
     "jasmine": "https://github.com/jasmine/jasmine",
@@ -543,6 +546,7 @@
     "unhead": "https://github.com/unjs/unhead",
     "unocss": "https://github.com/unocss/unocss",
     "uppy": "https://github.com/transloadit/uppy",
+    "utopia": "https://github.com/juhaku/utoipa",
     "vaadin-hilla": "https://github.com/vaadin/hilla",
     "vaadinWebComponents": "https://github.com/vaadin/web-components",
     "visx": "https://github.com/airbnb/visx",
