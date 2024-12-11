@@ -88,7 +88,7 @@ Pinning your development dependencies means you, and your team, are using the sa
 This makes the developer-tool side of your builds reproducible.
 Debugging faulty versions of your tools is easier, because you can use Git to check out different versions of the tools.
 
-### Why updating often is easier, faster and safer
+## Why updating often is easier, faster and safer
 
 You may think that updating takes too much time.
 But updating regularly actually _saves_ you time, because:
