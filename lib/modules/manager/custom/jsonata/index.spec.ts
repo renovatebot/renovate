@@ -28,6 +28,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       ]
     }`;
     const config = {
+      fileFormat: 'json',
       matchStrings: [
         `packages.{
             "depName": dep_name,
@@ -81,6 +82,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       }]
     }`;
     const config = {
+      fileFormat: 'json',
       matchStrings: [
         `packages.{
             "depName": dep_name,
@@ -162,6 +164,7 @@ describe('modules/manager/custom/jsonata/index', () => {
      ]
     }`;
     const config = {
+      fileFormat: 'json',
       matchStrings: [
         `packages.{
             "depName": dep_name,
@@ -193,16 +196,18 @@ describe('modules/manager/custom/jsonata/index', () => {
   });
 
   it('returns null when no content', async () => {
-    const res = await extractPackageFile(
-      '',
-      'foo-file',
-      {} as JsonataExtractConfig,
-    );
+    const res = await extractPackageFile('', 'foo-file', {
+      fileFormat: 'json',
+      matchStrings: [
+        'packages.{ "depName": package, "currentValue": version, "versioning ": versioning }',
+      ],
+    } as JsonataExtractConfig);
     expect(res).toBeNull();
   });
 
   it('returns null if no dependencies found', async () => {
     const config = {
+      fileFormat: 'json',
       matchStrings: [
         'packages.{ "depName": package, "currentValue": version, "versioning ": versioning }',
       ],
@@ -213,6 +218,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('returns null if invalid template', async () => {
     const config = {
+      fileFormat: 'json',
       matchStrings: [`{"depName": "foo"}`],
       versioningTemplate: '{{#if versioning}}{{versioning}}{{else}}semver', // invalid template
     };
@@ -226,6 +232,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('extracts and does not apply a registryUrlTemplate if the result is an invalid url', async () => {
     const config = {
+      fileFormat: 'json',
       matchStrings: [`{"depName": "foo"}`],
       registryUrlTemplate: 'this-is-not-a-valid-url-{{depName}}',
     };
@@ -239,6 +246,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('extracts multiple dependencies with multiple matchStrings', async () => {
     const config = {
+      fileFormat: 'json',
       matchStrings: [`{"depName": "foo"}`, `{"depName": "bar"}`],
     };
     const res = await extractPackageFile('{}', 'unused', config);
@@ -247,6 +255,7 @@ describe('modules/manager/custom/jsonata/index', () => {
 
   it('excludes and warns if invalid jsonata query found', async () => {
     const config = {
+      fileFormat: 'json',
       matchStrings: ['{', `{"depName": "foo"}`, `{"depName": "bar"}`],
     };
     const res = await extractPackageFile('{}', 'unused', config);
@@ -255,14 +264,5 @@ describe('modules/manager/custom/jsonata/index', () => {
       { err: expect.any(Object), query: '{' },
       'Failed to compile JSONata query',
     );
-  });
-
-  it('extracts dependency with autoReplaceStringTemplate', async () => {
-    const config = {
-      matchStrings: [`{"depName": "foo"}`],
-      autoReplaceStringTemplate: 'auto-replace-string-template',
-    };
-    const res = await extractPackageFile('{}', 'values.yaml', config);
-    expect(res?.autoReplaceStringTemplate).toBe('auto-replace-string-template');
   });
 });

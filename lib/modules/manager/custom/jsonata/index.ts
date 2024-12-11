@@ -3,8 +3,8 @@ import type { Category } from '../../../../constants';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
 import type { PackageFileContent } from '../../types';
-import type { JSONataManagerTemplates, JsonataExtractConfig } from './types';
-import { handleMatching, validMatchFields } from './utils';
+import type { JsonataExtractConfig } from './types';
+import { handleMatching } from './utils';
 
 export const categories: Category[] = ['custom'];
 
@@ -21,7 +21,15 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   let json: unknown;
   try {
-    json = parseJson(content, packageFile);
+    switch (config.fileFormat) {
+      case 'json':
+        json = parseJson(content, packageFile);
+        break;
+      default:
+        throw new Error(
+          'Invalid file format. JSONata only supports json files currently.',
+        );
+    }
   } catch (err) {
     logger.warn(
       { err, fileName: packageFile },
@@ -39,20 +47,8 @@ export async function extractPackageFile(
     return null;
   }
 
-  const res: PackageFileContent & JSONataManagerTemplates = {
+  return {
     deps,
     matchStrings: config.matchStrings,
   };
-  // copy over templates for autoreplace
-  for (const field of validMatchFields.map(
-    (f) => `${f}Template` as keyof JSONataManagerTemplates,
-  )) {
-    if (config[field]) {
-      res[field] = config[field];
-    }
-  }
-  if (config.autoReplaceStringTemplate) {
-    res.autoReplaceStringTemplate = config.autoReplaceStringTemplate;
-  }
-  return res;
 }
