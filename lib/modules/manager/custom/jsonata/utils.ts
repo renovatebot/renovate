@@ -4,68 +4,53 @@ import { logger } from '../../../../logger';
 import * as template from '../../../../util/template';
 import { parseUrl } from '../../../../util/url';
 import type { PackageDependency } from '../../types';
+import type { ValidMatchFields } from '../utils';
+import { checkIsValidDependency, validMatchFields } from '../utils';
 import { QueryResultZodSchema } from './schema';
 import type { JSONataManagerTemplates, JsonataExtractConfig } from './types';
-
-export const validMatchFields = [
-  'depName',
-  'packageName',
-  'currentValue',
-  'currentDigest',
-  'datasource',
-  'versioning',
-  'extractVersion',
-  'registryUrl',
-  'depType',
-] as const;
-
-type ValidMatchFields = (typeof validMatchFields)[number];
 
 export async function handleMatching(
   json: unknown,
   packageFile: string,
   config: JsonataExtractConfig,
 ): Promise<PackageDependency[]> {
-  // Pre-compile all JSONata expressions once
-  const compiledExpressions = config.matchStrings
-    .map((query) => {
-      try {
-        return jsonata(query);
-      } catch (err) {
-        logger.warn({ query, err }, 'Failed to compile JSONata query');
-        return null;
-      }
-    })
-    .filter((expr) => expr !== null);
+  const results: Record<string, string>[] = [];
+  const { matchStrings: jsonataQueries = [] } = config;
+  for (const query of jsonataQueries) {
+    // won't fail as this is verified during config validation
+    const jsonataExpression = jsonata(query);
+    // this does not throw error, just returns undefined if no matches
+    let queryResult = (await jsonataExpression.evaluate(json)) ?? [];
 
-  // Execute all expressions in parallel
-  const results = await Promise.all(
-    compiledExpressions.map(async (expr) => {
-      try {
-        // can either be a single object, an array of objects or undefined (no match)
-        let result = (await expr.evaluate(json)) ?? [];
-        if (is.emptyObject(result) || is.emptyArray(result)) {
-          return [];
-        }
+    if (is.emptyObject(queryResult) || is.emptyArray(queryResult)) {
+      logger.warn(
+        {
+          jsonataQuery: query,
+          packageFile,
+        },
+        'The jsonata query returned no matches. Possible error, please check your query',
+      );
+      continue;
+    }
 
-        result = is.array(result) ? result : [result];
+    queryResult = is.array(queryResult) ? queryResult : [queryResult];
+    const parsed = QueryResultZodSchema.safeParse(queryResult);
+    if (parsed.success) {
+      results.concat(structuredClone(parsed.data));
+    } else {
+      logger.warn(
+        { err: parsed.error, jsonataQuery: query, packageFile, queryResult },
+        'Query results failed schema validation',
+      );
+    }
+  }
 
-        QueryResultZodSchema.parse(result);
-        return structuredClone(result);
-      } catch (err) {
-        logger.warn({ err }, 'Error while parsing dep info');
-        return [];
-      }
-    }),
-  );
-
-  // Flatten results and create dependencies
   return results
-    .flat()
-    .map((queryResult) => {
-      return createDependency(queryResult, config);
-    })
-    .filter((dep) => dep !== null);
+    .map((dep) => createDependency(dep, config))
+    .filter(is.truthy)
+    .filter((dep) =>
+      checkIsValidDependency(dep, packageFile, 'custom.jsonata'),
+    );
 }
 
 export function createDependency(
