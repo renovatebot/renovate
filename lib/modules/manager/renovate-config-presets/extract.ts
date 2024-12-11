@@ -47,11 +47,11 @@ export function extractPackageFile(
 
   for (const preset of config.extends ?? []) {
     const parsedPreset = parsePreset(preset);
-    if (
-      !supportedPresetSources.some(
-        (source) => source.source === parsedPreset.presetSource,
-      )
-    ) {
+    const datasource = supportedPresetSources.find(
+      (source) => source.source === parsedPreset.presetSource,
+    )?.datasource;
+
+    if (!is.nullOrUndefined(datasource)) {
       if (parsedPreset.presetSource !== 'internal') {
         deps.push({
           depName: parsedPreset.repo,
@@ -69,13 +69,6 @@ export function extractPackageFile(
       continue;
     }
 
-    const datasource = supportedPresetSources.find(
-      (source) => source.source === parsedPreset.presetSource,
-    )?.datasource;
-    // istanbul ignore next: never happens but required for type narrowing
-    if (!datasource) {
-      throw new Error(`Datasource not found for ${parsedPreset.presetSource}`);
-    }
     deps.push({
       depName: parsedPreset.repo,
       datasource,
