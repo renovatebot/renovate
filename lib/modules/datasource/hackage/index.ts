@@ -44,8 +44,6 @@ export function versionToRelease(
 ): Release {
   return {
     version,
-    releaseTimestamp: null,
-    isStable: true,
     changelogUrl: joinUrlParts(
       registryUrl,
       'package',
