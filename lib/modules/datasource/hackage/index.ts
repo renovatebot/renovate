@@ -17,12 +17,13 @@ export class HackageDatasource extends Datasource {
   override readonly defaultRegistryUrls = ['https://hackage.haskell.org/'];
 
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    if (!is.nonEmptyString(config.registryUrl)) {
+    const { registryUrl, packageName } = config;
+    if (!is.nonEmptyString(registryUrl)) {
       return null;
     }
-    const massagedPackageName = encodeURIComponent(config.packageName);
+    const massagedPackageName = encodeURIComponent(packageName);
     const url = joinUrlParts(
-      config.registryUrl,
+      registryUrl,
       'package',
       `${massagedPackageName}.json`,
     );
@@ -30,7 +31,7 @@ export class HackageDatasource extends Datasource {
     const keys = Object.keys(res.body);
     return {
       releases: keys.map((version) =>
-        versionToRelease(version, config.packageName, config.registryUrl),
+        versionToRelease(version, packageName, registryUrl),
       ),
     };
   }
