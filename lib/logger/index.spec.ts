@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 import { partial } from '../../test/util';
 import { add } from '../util/host-rules';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize';
+import type { RenovateLogger } from '.';
 import {
   addMeta,
   addStream,
@@ -57,6 +58,18 @@ describe('logger/index', () => {
     expect(logLevel()).toBeDefined(); // depends on passed env
     expect(() => levels('stdout', 'debug')).not.toThrow();
     expect(logLevel()).toBe('debug');
+  });
+
+  it('should create a child logger', () => {
+    const childLogger = (logger as RenovateLogger).childLogger();
+    const loggerSpy = jest.spyOn(logger, 'debug');
+    const childDebugSpy = jest.spyOn(childLogger, 'debug');
+
+    childLogger.debug('test');
+
+    expect(loggerSpy).toHaveBeenCalledTimes(0);
+    expect(childDebugSpy).toHaveBeenCalledTimes(1);
+    expect(childDebugSpy).toHaveBeenCalledWith('test');
   });
 
   it('saves problems', () => {

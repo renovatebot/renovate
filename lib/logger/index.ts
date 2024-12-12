@@ -158,14 +158,14 @@ export class RenovateLogger implements Logger {
     );
   }
 
-  once = this.logger.once;
-
   trace = this.log.bind(this, 'trace');
   debug = this.log.bind(this, 'debug');
   info = this.log.bind(this, 'info');
   warn = this.log.bind(this, 'warn');
   error = this.log.bind(this, 'error');
   fatal = this.log.bind(this, 'fatal');
+
+  once = this.logger.once;
 
   get logContext(): string {
     return this.context;
