@@ -37,13 +37,6 @@ function createDefaultStreams(
   problems: ProblemStream,
   logFile: string | undefined,
 ): bunyan.Stream[] {
-  const problemsStream: bunyan.Stream = {
-    name: 'problems',
-    level: 'warn' as bunyan.LogLevel,
-    stream: problems as any,
-    type: 'raw',
-  };
-
   const stdout: bunyan.Stream = {
     name: 'stdout',
     level: stdoutLevel,
@@ -58,6 +51,13 @@ function createDefaultStreams(
     stdout.stream = prettyStdOut;
     stdout.type = 'raw';
   }
+
+  const problemsStream: bunyan.Stream = {
+    name: 'problems',
+    level: 'warn' as bunyan.LogLevel,
+    stream: problems as any,
+    type: 'raw',
+  };
 
   // istanbul ignore next: not easily testable
   const logFileStream: bunyan.Stream | undefined = is.string(logFile)
