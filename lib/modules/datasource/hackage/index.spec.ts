@@ -48,8 +48,6 @@ describe('modules/datasource/hackage/index', () => {
         releases: [
           {
             changelogUrl: baseUrl + 'package/base-4.20.0.1/changelog',
-            isStable: true,
-            sourceUrl: baseUrl + 'package/base-4.20.0.1/src',
             version: '4.20.0.1',
           },
         ],

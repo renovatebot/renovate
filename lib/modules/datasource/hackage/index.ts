@@ -50,11 +50,5 @@ export function versionToRelease(
       `${packageName}-${version}`,
       'changelog',
     ),
-    sourceUrl: joinUrlParts(
-      registryUrl,
-      'package',
-      `${packageName}-${version}`,
-      'src',
-    ),
   };
 }
