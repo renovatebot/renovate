@@ -29,7 +29,7 @@ It is up to you to either finish the job and merge the PR, or rename it and clos
 <!-- prettier-ignore -->
 !!! warning
     Do _not_ amend Renovate's commits, because Renovate will rebase over your amended commit.
-    Keep your work safe and always push your own _new_ commit to any Renovate branch.
+    Keep your work safe and never push your own _new_ commit to any Renovate branch.
 
 ## Rebasing conflicted PRs
 
