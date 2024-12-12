@@ -63,13 +63,13 @@ describe('logger/index', () => {
   it('should create a child logger', () => {
     const childLogger = (logger as RenovateLogger).childLogger();
     const loggerSpy = jest.spyOn(logger, 'debug');
-    const childDebugSpy = jest.spyOn(childLogger, 'debug');
+    const childLoggerSpy = jest.spyOn(childLogger, 'debug');
 
     childLogger.debug('test');
 
     expect(loggerSpy).toHaveBeenCalledTimes(0);
-    expect(childDebugSpy).toHaveBeenCalledTimes(1);
-    expect(childDebugSpy).toHaveBeenCalledWith('test');
+    expect(childLoggerSpy).toHaveBeenCalledTimes(1);
+    expect(childLoggerSpy).toHaveBeenCalledWith('test');
   });
 
   it('saves problems', () => {
