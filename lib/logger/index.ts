@@ -59,6 +59,7 @@ function createDefaultStreams(
     stdout.type = 'raw';
   }
 
+  // istanbul ignore next: not easily testable
   const logFileStream: bunyan.Stream | undefined = is.string(logFile)
     ? createLogFileStream(logFile)
     : undefined;
