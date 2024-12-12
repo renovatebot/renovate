@@ -3,8 +3,8 @@ import type { RenovateConfig } from '../../../config/types';
 import { getEnabledManagersList } from '../../../modules/manager';
 import { isCustomManager } from '../../../modules/manager/custom';
 import type { RegexManagerTemplates } from '../../../modules/manager/custom/regex/types';
-import { validMatchFields } from '../../../modules/manager/custom/regex/utils';
 import type { CustomExtractConfig } from '../../../modules/manager/custom/types';
+import { validMatchFields } from '../../../modules/manager/custom/utils';
 import type { WorkerExtractConfig } from '../../types';
 
 export interface FingerprintExtractConfig {
