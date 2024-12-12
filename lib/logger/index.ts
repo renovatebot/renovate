@@ -17,76 +17,88 @@ import {
   withSanitizer,
 } from './utils';
 
-const logContext: string = getEnv('LOG_CONTEXT') ?? nanoid();
 const problems = new ProblemStream();
-
 let stdoutLevel = validateLogLevel(getEnv('LOG_LEVEL'), 'info');
-const stdout: bunyan.Stream = {
-  name: 'stdout',
-  level: stdoutLevel,
-  stream: process.stdout,
-};
+
+export function getProblems(): BunyanRecord[] {
+  return problems.getProblems();
+}
+
+export function clearProblems(): void {
+  return problems.clearProblems();
+}
 
 export function logLevel(): bunyan.LogLevelString {
   return stdoutLevel;
 }
 
-// istanbul ignore if: not testable
-if (getEnv('LOG_FORMAT') !== 'json') {
-  // TODO: typings (#9615)
-  const prettyStdOut = new RenovateStream() as any;
-  prettyStdOut.pipe(process.stdout);
-  stdout.stream = prettyStdOut;
-  stdout.type = 'raw';
+function createDefaultStreams(
+  stdoutLevel: bunyan.LogLevelString,
+  problems: ProblemStream,
+  logFile: string | undefined,
+): bunyan.Stream[] {
+  const problemsStream: bunyan.Stream = {
+    name: 'problems',
+    level: 'warn' as bunyan.LogLevel,
+    stream: problems as any,
+    type: 'raw',
+  };
+
+  const stdout: bunyan.Stream = {
+    name: 'stdout',
+    level: stdoutLevel,
+    stream: process.stdout,
+  };
+
+  // istanbul ignore if: not testable
+  if (getEnv('LOG_FORMAT') !== 'json') {
+    // TODO: typings (#9615)
+    const prettyStdOut = new RenovateStream() as any;
+    prettyStdOut.pipe(process.stdout);
+    stdout.stream = prettyStdOut;
+    stdout.type = 'raw';
+  }
+
+  const logFileStream: bunyan.Stream | undefined = is.string(logFile)
+    ? createLogFileStream(logFile)
+    : undefined;
+
+  return [stdout, problemsStream, logFileStream].filter(
+    Boolean,
+  ) as bunyan.Stream[];
 }
 
-const bunyanLogger = bunyan.createLogger({
-  name: 'renovate',
-  serializers: {
-    body: configSerializer,
-    cmd: cmdSerializer,
-    config: configSerializer,
-    migratedConfig: configSerializer,
-    originalConfig: configSerializer,
-    presetConfig: configSerializer,
-    oldConfig: configSerializer,
-    newConfig: configSerializer,
-    err: errSerializer,
-  },
-  streams: [
-    stdout,
-    {
-      name: 'problems',
-      level: 'warn' as bunyan.LogLevel,
-      stream: problems as any,
-      type: 'raw',
-    },
-  ].map(withSanitizer),
-});
+// istanbul ignore next: not easily testable
+export function createLogFileStream(logFile: string): bunyan.Stream {
+  // Ensure log file directory exists
+  const directoryName = upath.dirname(logFile);
+  fs.ensureDirSync(directoryName);
 
-const logFactory = (
+  return {
+    name: 'logfile',
+    path: logFile,
+    level: validateLogLevel(getEnv('LOG_FILE_LEVEL'), 'debug'),
+  };
+}
+
+type loggerFunction = (p1: string | Record<string, any>, p2?: string) => void;
+
+function logFactory(
   bunyanLogger: bunyan,
   _level: bunyan.LogLevelString,
   curMeta: Record<string, unknown>,
   logContext: string,
-): ((p1: unknown, p2: unknown) => void) => {
-  return (p1: any, p2: any): void => {
+): loggerFunction {
+  return function (p1: string | Record<string, any>, p2?: string): void {
+    const meta: Record<string, unknown> = {
+      logContext,
+      ...curMeta,
+      ...toMeta(p1),
+    };
+    const msg = getMessage(p1, p2);
     let level = _level;
-    if (p2) {
-      // meta and msg provided
-      const msg = p2;
-      const meta: Record<string, unknown> = { logContext, ...curMeta, ...p1 };
-      const remappedLevel = getRemappedLevel(msg);
-      // istanbul ignore if: not testable
-      if (remappedLevel) {
-        meta.oldLevel = level;
-        level = remappedLevel;
-      }
-      bunyanLogger[level](meta, msg);
-    } else if (is.string(p1)) {
-      // only message provided
-      const msg = p1;
-      const meta: Record<string, unknown> = { logContext, ...curMeta };
+
+    if (is.string(msg)) {
       const remappedLevel = getRemappedLevel(msg);
       // istanbul ignore if: not testable
       if (remappedLevel) {
@@ -95,11 +107,21 @@ const logFactory = (
       }
       bunyanLogger[level](meta, msg);
     } else {
-      // only meta provided
-      bunyanLogger[level]({ logContext, ...curMeta, ...p1 });
+      bunyanLogger[level](meta);
     }
   };
-};
+}
+
+function getMessage(
+  p1: string | Record<string, any>,
+  p2?: string,
+): string | undefined {
+  return is.string(p1) ? p1 : p2;
+}
+
+function toMeta(p1: string | Record<string, any>): Record<string, unknown> {
+  return is.object(p1) ? p1 : {};
+}
 
 const loggerLevels: bunyan.LogLevelString[] = [
   'trace',
@@ -169,15 +191,11 @@ export class RenovateLogger implements Logger {
     }
   }
 
-  private logFactory(
-    level: bunyan.LogLevelString,
-  ): (p1: unknown, p2: unknown) => void {
+  private logFactory(level: bunyan.LogLevelString): loggerFunction {
     return logFactory(this.bunyanLogger, level, this.meta, this.context);
   }
 
-  private logOnceFn(
-    level: bunyan.LogLevelString,
-  ): (p1: string | Record<string, any>, p2?: string) => void {
+  private logOnceFn(level: bunyan.LogLevelString): loggerFunction {
     const logOnceFn = (p1: string | Record<string, any>, p2?: string): void => {
       once(() => {
         this.log(level, p1, p2);
@@ -200,22 +218,31 @@ export class RenovateLogger implements Logger {
   }
 }
 
+const defaultStreams = createDefaultStreams(
+  stdoutLevel,
+  problems,
+  getEnv('LOG_FILE'),
+);
+const bunyanLogger = bunyan.createLogger({
+  name: 'renovate',
+  serializers: {
+    body: configSerializer,
+    cmd: cmdSerializer,
+    config: configSerializer,
+    migratedConfig: configSerializer,
+    originalConfig: configSerializer,
+    presetConfig: configSerializer,
+    oldConfig: configSerializer,
+    newConfig: configSerializer,
+    err: errSerializer,
+  },
+  streams: defaultStreams.map(withSanitizer),
+});
+
+const logContext: string = getEnv('LOG_CONTEXT') ?? nanoid();
 const loggerInternal = new RenovateLogger(bunyanLogger, logContext, {});
+
 export const logger: Logger = loggerInternal;
-
-const logFile = getEnv('LOG_FILE');
-// istanbul ignore if: not easily testable
-if (is.string(logFile)) {
-  // ensure log file directory exists
-  const directoryName = upath.dirname(logFile);
-  fs.ensureDirSync(directoryName);
-
-  addStream({
-    name: 'logfile',
-    path: logFile,
-    level: validateLogLevel(getEnv('LOG_FILE_LEVEL'), 'debug'),
-  });
-}
 
 export function setContext(value: string): void {
   loggerInternal.logContext = value;
@@ -260,12 +287,4 @@ export function levels(
   if (name === 'stdout') {
     stdoutLevel = level;
   }
-}
-
-export function getProblems(): BunyanRecord[] {
-  return problems.getProblems();
-}
-
-export function clearProblems(): void {
-  return problems.clearProblems();
 }
