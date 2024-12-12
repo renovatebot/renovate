@@ -2389,6 +2389,7 @@ const options: RenovateOptions[] = [
       'gomodTidyE',
       'gomodUpdateImportPaths',
       'gomodSkipVendor',
+      'gomodVendor',
       'helmUpdateSubChartArchives',
       'npmDedupe',
       'pnpmDedupe',
