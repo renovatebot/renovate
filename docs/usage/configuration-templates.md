@@ -58,6 +58,25 @@ It can be empty in some cases, like if the action/topic doesn't change a package
 `commitBody` is used if you wish to add multi-line commit messages, such as for the `Signed-off-by` fields, or adding `[skip-ci]`, etc.
 It is appended to the generated `commitMessage`, separated by a newline.
 
+If you configuration uses [groups](https://docs.renovatebot.com/configuration-options/#group) you need to put the above configuration options under the `group` property and might also need to
+enable [`prTitleStrict`](https://docs.renovatebot.com/configuration-options/#prtitlestrict).
+Example:
+```json
+{
+  "matchDatasources": ["npm"],
+  "matchPackageNames": ["*"],
+  "matchUpdateTypes": ["major"],
+  "groupName": "frontend_major",
+  "prTitleStrict": true,
+  "group": {
+    "commitMessagePrefix": "[RENOVATE]",
+    "commitMessageTopic": "FE major dependencies",
+    "commitMessageExtra": "",
+    "commitMessageSuffix": ""
+  }
+}
+```
+
 ## PR Title
 
 Because commit messages match with the PR title, the PR title template defaults to `null` and inherits/copies the value from `commitMessage`.
