@@ -31,7 +31,10 @@
     "aspnet extensions": "https://github.com/aspnet/Extensions",
     "aspnet-api-versioning": "https://github.com/Microsoft/aspnet-api-versioning",
     "aspnet-health-checks": "https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks",
-    "astro": "https://github.com/withastro/astro",
+    "astro": [
+      "https://github.com/withastro/adapters",
+      "https://github.com/withastro/astro"
+    ],
     "auto": "https://github.com/intuit/auto",
     "autofixture": "https://github.com/AutoFixture/AutoFixture",
     "automapper-dotnet": [
