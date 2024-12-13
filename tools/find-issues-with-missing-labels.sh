@@ -39,21 +39,11 @@ for FILTER in "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FILTER"; do
 done
 
 if [ "$HAS_ISSUES_MISSING_LABELS" = false ]; then
-  echo "Found no issues with missing labels. Exiting the action."
+  echo "Found no issues with missing labels. Exiting the action with success."
   exit 0
 fi
 
-LABEL_CHECK_ACTION="Label check action"
-
-# Check if the "Label check action" label is present.
-LABEL_CHECKACTION_EXISTS=$(gh label list --repo $REPO | grep "$LABEL_CHECK_ACTION" || true) || { echo "Failed to fetch existing label"; exit 1; }
-if [ -z "$LABEL_CHECKACTION_EXISTS" ]; then
-  echo "Label '$LABEL_CHECK_ACTION' does not exist. Will create it."
-  # Create the "Label check action" label.
-  gh label create "$LABEL_CHECK_ACTION" --description "This is for the GitHub Action that finds issues without a label. Do not use this label yourself." --repo $REPO || { echo "Failed to create label"; exit 1; }
-fi
-
-LABEL_CHECK_ISSUE_EXISTS=$(gh search issues --label "$LABEL_CHECK_ACTION" --repo $REPO --json number) || { echo "Failed to fetch existing label check issue"; exit 1; }
+LABEL_CHECK_ISSUE_EXISTS=$(gh search issues --repo $REPO --json "number,author,title" | jq --arg title "$ISSUE_TITLE" 'map(select(.title == $title and .author.type == "Bot"))') || { echo "Failed to fetch existing label check issue"; exit 1; }
 ISSUE_NUMBER=$(echo "$LABEL_CHECK_ISSUE_EXISTS" | jq -r '.[].number')
 
 if [ -z "$ISSUE_NUMBER" ]; then
@@ -72,7 +62,7 @@ fi
 echo -e "$ISSUE_BODY"
 
 # Log a message and "fail" the Action if there are issues with missing labels
-echo "Found issues missing labels. Please check the issue(s) above."
+echo "Found issues missing labels. Please check the issue(s) above. Exiting the action with failure."
 
 exit 1
 
