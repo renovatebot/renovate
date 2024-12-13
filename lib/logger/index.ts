@@ -73,7 +73,7 @@ export function createLogFileStream(logFile: string): bunyan.Stream {
   };
 }
 
-export function createSanitizerLogger(streams: bunyan.Stream[]): bunyan {
+export function sanitizedLogger(streams: bunyan.Stream[]): bunyan {
   return bunyan.createLogger({
     name: 'renovate',
     serializers: {
@@ -97,7 +97,7 @@ const defaultStreams = createDefaultStreams(
   getEnv('LOG_FILE'),
 );
 
-const bunyanLogger = createSanitizerLogger(defaultStreams);
+const bunyanLogger = sanitizedLogger(defaultStreams);
 const logContext: string = getEnv('LOG_CONTEXT') ?? nanoid();
 const loggerInternal = new RenovateLogger(bunyanLogger, logContext, {});
 
