@@ -111,14 +111,19 @@ const staticGroups = {
   },
   fusionjs: {
     description: 'Group Fusion.js packages together.',
-    matchPackageNames: [
-      'fusion-cli',
-      'fusion-core',
-      'fusion-test-utils',
-      'fusion-tokens',
-      'fusion-plugin-**',
-      'fusion-react**',
-      'fusion-apollo**',
+    packageRules: [
+      {
+        groupName: 'Fusion.js packages',
+        matchPackageNames: [
+          'fusion-cli',
+          'fusion-core',
+          'fusion-test-utils',
+          'fusion-tokens',
+          'fusion-plugin-**',
+          'fusion-react**',
+          'fusion-apollo**',
+        ],
+      },
     ],
   },
   githubArtifactActions: {
