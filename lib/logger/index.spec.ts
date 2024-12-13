@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import { partial } from '../../test/util';
 import { add } from '../util/host-rules';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize';
-import type { RenovateLogger } from '.';
+import type { RenovateLogger } from './renovate-logger';
 import {
   addMeta,
   addStream,

@@ -1,5 +1,4 @@
 import { once, reset } from './once';
-import type { RenovateLogger } from '.';
 import { logger } from '.';
 
 jest.unmock('.');
@@ -56,7 +55,7 @@ describe('logger/once', () => {
 
   describe('logger', () => {
     it('logs once per function call', () => {
-      const debug = jest.spyOn((logger as RenovateLogger).logger, 'debug');
+      const debug = jest.spyOn(logger, 'debug');
 
       function doSomething() {
         logger.once.debug('test');
@@ -69,8 +68,8 @@ describe('logger/once', () => {
     });
 
     it('distincts between log levels', () => {
-      const debug = jest.spyOn((logger as RenovateLogger).logger, 'debug');
-      const info = jest.spyOn((logger as RenovateLogger).logger, 'info');
+      const debug = jest.spyOn(logger, 'debug');
+      const info = jest.spyOn(logger, 'info');
 
       function doSomething() {
         logger.once.debug('test');
@@ -85,7 +84,7 @@ describe('logger/once', () => {
     });
 
     it('distincts between different log statements', () => {
-      const debug = jest.spyOn((logger as RenovateLogger).logger, 'debug');
+      const debug = jest.spyOn(logger, 'debug');
 
       function doSomething() {
         logger.once.debug('foo');
@@ -102,7 +101,7 @@ describe('logger/once', () => {
     });
 
     it('allows mixing single-time and regular logging', () => {
-      const debug = jest.spyOn((logger as RenovateLogger).logger, 'debug');
+      const debug = jest.spyOn(logger, 'debug');
 
       function doSomething() {
         logger.once.debug('foo');
@@ -124,7 +123,7 @@ describe('logger/once', () => {
     });
 
     it('supports reset method', () => {
-      const debug = jest.spyOn((logger as RenovateLogger).logger, 'debug');
+      const debug = jest.spyOn(logger, 'debug');
 
       function doSomething() {
         logger.once.debug('foo');

@@ -6,9 +6,8 @@ import upath from 'upath';
 import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
-import { once, reset as onceReset } from './once';
 import { RenovateStream } from './pretty-stdout';
-import { getRemappedLevel } from './remap';
+import { RenovateLogger } from './renovate-logger';
 import type { BunyanRecord, Logger } from './types';
 import {
   ProblemStream,
@@ -20,19 +19,11 @@ import {
 const problems = new ProblemStream();
 let stdoutLevel = validateLogLevel(getEnv('LOG_LEVEL'), 'info');
 
-export function getProblems(): BunyanRecord[] {
-  return problems.getProblems();
-}
-
-export function clearProblems(): void {
-  return problems.clearProblems();
-}
-
 export function logLevel(): bunyan.LogLevelString {
   return stdoutLevel;
 }
 
-function createDefaultStreams(
+export function createDefaultStreams(
   stdoutLevel: bunyan.LogLevelString,
   problems: ProblemStream,
   logFile: string | undefined,
@@ -82,141 +73,22 @@ export function createLogFileStream(logFile: string): bunyan.Stream {
   };
 }
 
-type loggerFunction = (p1: string | Record<string, any>, p2?: string) => void;
-
-function logFactory(
-  bunyanLogger: bunyan,
-  _level: bunyan.LogLevelString,
-  curMeta: Record<string, unknown>,
-  logContext: string,
-): loggerFunction {
-  return function (p1: string | Record<string, any>, p2?: string): void {
-    const meta: Record<string, unknown> = {
-      logContext,
-      ...curMeta,
-      ...toMeta(p1),
-    };
-    const msg = getMessage(p1, p2);
-    let level = _level;
-
-    if (is.string(msg)) {
-      const remappedLevel = getRemappedLevel(msg);
-      // istanbul ignore if: not testable
-      if (remappedLevel) {
-        meta.oldLevel = level;
-        level = remappedLevel;
-      }
-      bunyanLogger[level](meta, msg);
-    } else {
-      bunyanLogger[level](meta);
-    }
-  };
-}
-
-function getMessage(
-  p1: string | Record<string, any>,
-  p2?: string,
-): string | undefined {
-  return is.string(p1) ? p1 : p2;
-}
-
-function toMeta(p1: string | Record<string, any>): Record<string, unknown> {
-  return is.object(p1) ? p1 : {};
-}
-
-const loggerLevels: bunyan.LogLevelString[] = [
-  'trace',
-  'debug',
-  'info',
-  'warn',
-  'error',
-  'fatal',
-];
-
-export class RenovateLogger implements Logger {
-  logger: Logger = { once: { reset: onceReset } } as any;
-
-  constructor(
-    private readonly bunyanLogger: bunyan,
-    private context: string,
-    private meta: Record<string, unknown>,
-  ) {
-    for (const level of loggerLevels) {
-      this.logger[level] = this.logFactory(level) as never;
-      this.logger.once[level] = this.logOnceFn(level);
-    }
-  }
-
-  addStream(stream: bunyan.Stream): void {
-    this.bunyanLogger.addStream(withSanitizer(stream));
-  }
-
-  childLogger(): RenovateLogger {
-    return new RenovateLogger(
-      this.bunyanLogger.child({}),
-      this.context,
-      this.meta,
-    );
-  }
-
-  trace = this.log.bind(this, 'trace');
-  debug = this.log.bind(this, 'debug');
-  info = this.log.bind(this, 'info');
-  warn = this.log.bind(this, 'warn');
-  error = this.log.bind(this, 'error');
-  fatal = this.log.bind(this, 'fatal');
-
-  once = this.logger.once;
-
-  get logContext(): string {
-    return this.context;
-  }
-
-  set logContext(context: string) {
-    this.context = context;
-  }
-
-  setMeta(obj: Record<string, unknown>): void {
-    this.meta = { ...obj };
-  }
-
-  addMeta(obj: Record<string, unknown>): void {
-    this.meta = { ...this.meta, ...obj };
-  }
-
-  removeMeta(fields: string[]): void {
-    for (const key of Object.keys(this.meta)) {
-      if (fields.includes(key)) {
-        delete this.meta[key];
-      }
-    }
-  }
-
-  private logFactory(level: bunyan.LogLevelString): loggerFunction {
-    return logFactory(this.bunyanLogger, level, this.meta, this.context);
-  }
-
-  private logOnceFn(level: bunyan.LogLevelString): loggerFunction {
-    const logOnceFn = (p1: string | Record<string, any>, p2?: string): void => {
-      once(() => {
-        this.log(level, p1, p2);
-      }, logOnceFn);
-    };
-    return logOnceFn;
-  }
-
-  private log(
-    level: bunyan.LogLevelString,
-    p1: string | Record<string, any>,
-    p2?: string,
-  ): void {
-    const logFn = this.logger[level];
-    if (is.string(p1)) {
-      logFn(p1);
-    } else {
-      logFn(p1, p2);
-    }
-  }
+export function createSanitizerLogger(streams: bunyan.Stream[]): bunyan {
+  return bunyan.createLogger({
+    name: 'renovate',
+    serializers: {
+      body: configSerializer,
+      cmd: cmdSerializer,
+      config: configSerializer,
+      migratedConfig: configSerializer,
+      originalConfig: configSerializer,
+      presetConfig: configSerializer,
+      oldConfig: configSerializer,
+      newConfig: configSerializer,
+      err: errSerializer,
+    },
+    streams: streams.map(withSanitizer),
+  });
 }
 
 const defaultStreams = createDefaultStreams(
@@ -224,22 +96,8 @@ const defaultStreams = createDefaultStreams(
   problems,
   getEnv('LOG_FILE'),
 );
-const bunyanLogger = bunyan.createLogger({
-  name: 'renovate',
-  serializers: {
-    body: configSerializer,
-    cmd: cmdSerializer,
-    config: configSerializer,
-    migratedConfig: configSerializer,
-    originalConfig: configSerializer,
-    presetConfig: configSerializer,
-    oldConfig: configSerializer,
-    newConfig: configSerializer,
-    err: errSerializer,
-  },
-  streams: defaultStreams.map(withSanitizer),
-});
 
+const bunyanLogger = createSanitizerLogger(defaultStreams);
 const logContext: string = getEnv('LOG_CONTEXT') ?? nanoid();
 const loggerInternal = new RenovateLogger(bunyanLogger, logContext, {});
 
@@ -288,4 +146,12 @@ export function levels(
   if (name === 'stdout') {
     stdoutLevel = level;
   }
+}
+
+export function getProblems(): BunyanRecord[] {
+  return problems.getProblems();
+}
+
+export function clearProblems(): void {
+  return problems.clearProblems();
 }
