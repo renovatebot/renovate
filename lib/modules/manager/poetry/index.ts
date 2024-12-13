@@ -11,6 +11,15 @@ export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 export { updateLockedDependency } from './update-locked';
 
+export const supportsLockFileMaintenance = true;
+
+export const url = 'https://python-poetry.org/docs';
+export const categories: Category[] = ['python'];
+
+export const defaultConfig = {
+  fileMatch: ['(^|/)pyproject\\.toml$'],
+};
+
 export const supportedDatasources = [
   PypiDatasource.id,
   GithubTagsDatasource.id,
@@ -19,11 +28,3 @@ export const supportedDatasources = [
   GitRefsDatasource.id,
   GitTagsDatasource.id,
 ];
-
-export const supportsLockFileMaintenance = true;
-
-export const defaultConfig = {
-  fileMatch: ['(^|/)pyproject\\.toml$'],
-};
-
-export const categories: Category[] = ['python'];

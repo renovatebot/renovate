@@ -1,14 +1,16 @@
 import type Request from 'got/dist/source/core';
 import { partial } from '../../../../test/util';
 import { HOST_DISABLED } from '../../../constants/error-messages';
-import { type Http, HttpError } from '../../../util/http';
-import { parseUrl } from '../../../util/url';
+import { Http, HttpError } from '../../../util/http';
+import type { MavenFetchError } from './types';
 import {
   checkResource,
   downloadHttpProtocol,
   downloadMavenXml,
   downloadS3Protocol,
 } from './util';
+
+const http = new Http('test');
 
 function httpError({
   name,
@@ -46,26 +48,20 @@ describe('modules/datasource/maven/util', () => {
   describe('downloadMavenXml', () => {
     it('returns empty object for unsupported protocols', async () => {
       const res = await downloadMavenXml(
-        null as never, // #22198
-        parseUrl('unsupported://server.com/'),
-      );
-      expect(res).toEqual({});
-    });
-
-    it('returns empty object for invalid URLs', async () => {
-      const res = await downloadMavenXml(
-        null as never, // #22198
-        null,
+        http,
+        new URL('unsupported://server.com/'),
       );
       expect(res).toEqual({});
     });
   });
 
   describe('downloadS3Protocol', () => {
-    it('returns null for non-S3 URLs', async () => {
-      // #22198
-      const res = await downloadS3Protocol(parseUrl('http://not-s3.com/')!);
-      expect(res).toBeNull();
+    it('fails for non-S3 URLs', async () => {
+      const res = await downloadS3Protocol(new URL('http://not-s3.com/'));
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'invalid-url' } satisfies MavenFetchError,
+      });
     });
   });
 
@@ -75,7 +71,10 @@ describe('modules/datasource/maven/util', () => {
         get: () => Promise.reject(httpError({ message: HOST_DISABLED })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
-      expect(res).toBeNull();
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'host-disabled' } satisfies MavenFetchError,
+      });
     });
 
     it('returns empty for host error', async () => {
@@ -83,7 +82,10 @@ describe('modules/datasource/maven/util', () => {
         get: () => Promise.reject(httpError({ code: 'ETIMEDOUT' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
-      expect(res).toBeNull();
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'host-error' } satisfies MavenFetchError,
+      });
     });
 
     it('returns empty for temporary error', async () => {
@@ -91,7 +93,10 @@ describe('modules/datasource/maven/util', () => {
         get: () => Promise.reject(httpError({ code: 'ECONNRESET' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
-      expect(res).toBeNull();
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'temporary-error' } satisfies MavenFetchError,
+      });
     });
 
     it('returns empty for connection error', async () => {
@@ -99,7 +104,10 @@ describe('modules/datasource/maven/util', () => {
         get: () => Promise.reject(httpError({ code: 'ECONNREFUSED' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
-      expect(res).toBeNull();
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'connection-error' } satisfies MavenFetchError,
+      });
     });
 
     it('returns empty for unsupported error', async () => {
@@ -108,24 +116,21 @@ describe('modules/datasource/maven/util', () => {
           Promise.reject(httpError({ name: 'UnsupportedProtocolError' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
-      expect(res).toBeNull();
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'unsupported-host' } satisfies MavenFetchError,
+      });
     });
   });
 
   describe('checkResource', () => {
     it('returns not found for unsupported protocols', async () => {
-      const res = await checkResource(
-        null as never, // #22198
-        'unsupported://server.com/',
-      );
+      const res = await checkResource(http, 'unsupported://server.com/');
       expect(res).toBe('not-found');
     });
 
     it('returns error for invalid URLs', async () => {
-      const res = await checkResource(
-        null as never, // #22198
-        'not-a-valid-url',
-      );
+      const res = await checkResource(http, 'not-a-valid-url');
       expect(res).toBe('error');
     });
   });
