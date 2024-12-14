@@ -769,6 +769,7 @@ Example:
   "customManagers": [
     {
       "customType": "regex",
+      "fileMatch": ["values.yaml$"],
       "matchStrings": [
         "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
       ]
@@ -3691,6 +3692,7 @@ This feature works with the following managers:
 
 - [`ansible`](modules/manager/ansible/index.md)
 - [`bitbucket-pipelines`](modules/manager/bitbucket-pipelines/index.md)
+- [`circleci`](modules/manager/circleci/index.md)
 - [`docker-compose`](modules/manager/docker-compose/index.md)
 - [`dockerfile`](modules/manager/dockerfile/index.md)
 - [`droneci`](modules/manager/droneci/index.md)
@@ -3852,6 +3854,11 @@ You could then configure a schedule like this at the repository level:
 
 This would mean that Renovate can run for 7 hours each night, plus all the time on weekends.
 Note how the above example makes use of the "OR" logic of combining multiple schedules in the array.
+
+<!-- prettier-ignore -->
+!!! note
+    If both the day of the week _and_ the day of the month are restricted in the schedule, then Renovate only runs when both the day of the month _and_ day of the week match!
+    For example: `* * 1-7 * 4` means Renovate only runs on the _first_ Thursday of the month.
 
 It's common to use `schedule` in combination with [`timezone`](#timezone).
 You should configure [`updateNotScheduled=false`](#updatenotscheduled) if you want the schedule more strictly enforced so that _updates_ to existing branches aren't pushed out of schedule.
