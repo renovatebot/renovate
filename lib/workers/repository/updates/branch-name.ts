@@ -63,7 +63,6 @@ export function generateBranchName(update: RenovateConfig): void {
     );
     update.groupName = update.sharedVariableName;
   }
-  update.groupName ??= update.sharedVariableName;
   if (update.groupName) {
     update.groupName = template.compile(update.groupName, update);
     logger.trace('Using group branchName template');
