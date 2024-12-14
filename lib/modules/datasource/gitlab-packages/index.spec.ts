@@ -8,7 +8,7 @@ describe('modules/datasource/gitlab-packages/index', () => {
     it('returns package from custom registry', async () => {
       const body = [
         {
-          version: 'v1.0.0',
+          version: '1.0.0',
           created_at: '2020-03-04T12:01:37.000-06:00',
           name: 'mypkg',
         },
@@ -48,7 +48,7 @@ describe('modules/datasource/gitlab-packages/index', () => {
     it('returns conan package from custom registry', async () => {
       const body = [
         {
-          version: 'v1.0.0',
+          version: '1.0.0',
           created_at: '2020-03-04T12:01:37.000-06:00',
           name: 'myconanpkg/1.0.0@mycompany/stable',
           conan_package_name: 'myconanpkg',
