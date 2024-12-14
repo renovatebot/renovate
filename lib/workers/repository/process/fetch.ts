@@ -172,6 +172,9 @@ export async function fetchUpdates(
         deps = [];
         packageDeps.set(packageFile, deps);
       }
+      if (dep.skipReason && !dep.skipStage) {
+        dep.skipStage = 'lookup';
+      }
       deps.push(dep);
     } else {
       errors.push(err);

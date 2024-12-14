@@ -769,6 +769,7 @@ Example:
   "customManagers": [
     {
       "customType": "regex",
+      "fileMatch": ["values.yaml$"],
       "matchStrings": [
         "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
       ]
