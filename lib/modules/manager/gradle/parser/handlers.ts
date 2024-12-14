@@ -40,7 +40,7 @@ export function handleAssignment(ctx: Ctx): Ctx {
     // = string value
     const dep = parseDependencyString(valTokens[0].value);
     if (dep) {
-      dep.groupName = key;
+      dep.sharedVariableName = key;
       dep.managerData = {
         fileReplacePosition: valTokens[0].offset + dep.depName!.length + 1,
         packageFile: ctx.packageFile,
@@ -82,7 +82,7 @@ export function handleDepString(ctx: Ctx): Ctx {
         fileReplacePosition = varData.fileReplacePosition;
         if (varData.value === dep.currentValue) {
           dep.managerData = { fileReplacePosition, packageFile };
-          dep.groupName = varData.key;
+          dep.sharedVariableName = varData.key;
         }
       }
     }
@@ -102,7 +102,7 @@ export function handleDepString(ctx: Ctx): Ctx {
         fileReplacePosition =
           lastToken.offset + lastToken.value.lastIndexOf(dep.currentValue);
       }
-      delete dep.groupName;
+      delete dep.sharedVariableName;
     } else {
       dep.skipReason = 'contains-variable';
     }
@@ -143,7 +143,7 @@ export function handleKotlinShortNotationDep(ctx: Ctx): Ctx {
   } else if (versionTokens[0].type === 'symbol') {
     const varData = findVariable(versionTokens[0].value, ctx);
     if (varData) {
-      dep.groupName = varData.key;
+      dep.sharedVariableName = varData.key;
       dep.currentValue = varData.value;
       dep.managerData = {
         fileReplacePosition: varData.fileReplacePosition,
@@ -181,7 +181,7 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
   } else if (versionTokens[0].type === 'symbol') {
     const varData = findVariable(versionTokens[0].value, ctx);
     if (varData) {
-      dep.groupName = varData.key;
+      dep.sharedVariableName = varData.key;
       dep.managerData = {
         fileReplacePosition: varData.fileReplacePosition,
         packageFile: varData.packageFile,
@@ -190,7 +190,7 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
   } else {
     // = string value
     if (methodName?.[0]?.value === 'dependencySet') {
-      dep.groupName = `${groupId}:${version}`;
+      dep.sharedVariableName = `${groupId}:${version}`;
     }
     dep.managerData = {
       fileReplacePosition: versionTokens[0].offset,
@@ -231,7 +231,7 @@ export function handlePlugin(ctx: Ctx): Ctx {
   } else if (pluginVersion[0].type === 'symbol') {
     const varData = findVariable(pluginVersion[0].value, ctx);
     if (varData) {
-      dep.groupName = varData.key;
+      dep.sharedVariableName = varData.key;
       dep.currentValue = varData.value;
       dep.managerData = {
         fileReplacePosition: varData.fileReplacePosition,
@@ -413,7 +413,7 @@ export function handleImplicitGradlePlugin(ctx: Ctx): Ctx {
   } else if (versionTokens[0].type === 'symbol') {
     const varData = findVariable(versionTokens[0].value, ctx);
     if (varData) {
-      dep.groupName = varData.key;
+      dep.sharedVariableName = varData.key;
       dep.currentValue = varData.value;
       dep.managerData = {
         fileReplacePosition: varData.fileReplacePosition,

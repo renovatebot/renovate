@@ -188,27 +188,27 @@ describe('modules/manager/gradle/extract', () => {
           {
             depName: 'javax.cache:cache-api',
             currentValue: '1.1.0',
-            groupName: 'Libraries.jCache',
+            sharedVariableName: 'Libraries.jCache',
           },
           {
             depName: 'com.android.tools.build:gradle',
             currentValue: '4.1.2',
-            groupName: 'Libraries.Android.Tools.version',
+            sharedVariableName: 'Libraries.Android.Tools.version',
           },
           {
             depName: 'androidx.test:core',
             currentValue: '1.3.0-rc01',
-            groupName: 'Libraries.Test.version',
+            sharedVariableName: 'Libraries.Test.version',
           },
           {
             depName: 'androidx.test.espresso:espresso-core',
             currentValue: '3.3.0-rc01',
-            groupName: 'Libraries.Test.Espresso.version',
+            sharedVariableName: 'Libraries.Test.Espresso.version',
           },
           {
             depName: 'androidx.test:core-ktx',
             currentValue: '1.3.0-rc01',
-            groupName: 'Libraries.Test.version',
+            sharedVariableName: 'Libraries.Test.version',
           },
         ],
       },
@@ -218,7 +218,7 @@ describe('modules/manager/gradle/extract', () => {
           {
             depName: 'org.jetbrains.kotlin:kotlin-stdlib',
             currentValue: '1.8.10',
-            groupName: 'GradleDeps.Kotlin.version',
+            sharedVariableName: 'GradleDeps.Kotlin.version',
           },
         ],
       },
@@ -228,12 +228,12 @@ describe('modules/manager/gradle/extract', () => {
           {
             depName: 'com.fasterxml.jackson.core:jackson-annotations',
             currentValue: '2.9.10',
-            groupName: 'Versions.jackson',
+            sharedVariableName: 'Versions.jackson',
           },
           {
             depName: 'io.reactivex.rxjava2:rxjava',
             currentValue: '1.2.3',
-            groupName: 'Versions.rxjava',
+            sharedVariableName: 'Versions.rxjava',
           },
         ],
       },
@@ -513,7 +513,7 @@ describe('modules/manager/gradle/extract', () => {
           deps: [
             {
               depName: 'io.gitlab.arturbosch.detekt:detekt-formatting',
-              groupName: 'detekt',
+              sharedVariableName: 'detekt',
               currentValue: '1.17.0',
               managerData: {
                 fileReplacePosition: 21,
@@ -522,7 +522,7 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'io.kotest:kotest-assertions-core-jvm',
-              groupName: 'kotest',
+              sharedVariableName: 'kotest',
               currentValue: '4.6.0',
               managerData: {
                 fileReplacePosition: 51,
@@ -531,7 +531,7 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'io.kotest:kotest-runner-junit5',
-              groupName: 'kotest',
+              sharedVariableName: 'kotest',
               currentValue: '4.6.0',
               managerData: {
                 fileReplacePosition: 51,
@@ -655,7 +655,7 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'com.squareup.retrofit2:retrofit',
-              groupName: 'retro.fit',
+              sharedVariableName: 'retro.fit',
               currentValue: '2.8.2',
               managerData: {
                 fileReplacePosition: 42,
@@ -765,7 +765,7 @@ describe('modules/manager/gradle/extract', () => {
           deps: [
             {
               depName: 'io.gitlab.arturbosch.detekt:detekt-formatting',
-              groupName: 'detekt',
+              sharedVariableName: 'detekt',
               currentValue: '1.18.1',
               managerData: {
                 fileReplacePosition: 21,
@@ -784,7 +784,7 @@ describe('modules/manager/gradle/extract', () => {
                 fileReplacePosition: 21,
                 packageFile: 'gradle/libs.versions.toml',
               },
-              groupName: 'detekt',
+              sharedVariableName: 'detekt',
               fileReplacePosition: 21,
             },
           ],
@@ -808,7 +808,7 @@ describe('modules/manager/gradle/extract', () => {
           deps: [
             {
               depName: 'junit:junit',
-              groupName: 'junit',
+              sharedVariableName: 'junit',
               currentValue: '1.4.9',
               managerData: {
                 fileReplacePosition: 124,
@@ -818,7 +818,7 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'mocha-junit:mocha-junit',
-              groupName: 'mocha.junit.reporter',
+              sharedVariableName: 'mocha.junit.reporter',
               currentValue: '2.0.2',
               managerData: {
                 fileReplacePosition: 82,
@@ -1020,7 +1020,7 @@ describe('modules/manager/gradle/extract', () => {
               depName: 'org.apache.lucene:lucene-core',
               depType: 'dependencies',
               fileReplacePosition: 22,
-              groupName: 'org.apache.lucene:*',
+              sharedVariableName: 'org.apache.lucene:*',
               lockedVersion: '1.2.3',
               managerData: {
                 fileReplacePosition: 22,
@@ -1031,7 +1031,7 @@ describe('modules/manager/gradle/extract', () => {
               depName: 'org.apache.lucene:lucene-codecs',
               depType: 'dependencies',
               fileReplacePosition: 22,
-              groupName: 'org.apache.lucene:*',
+              sharedVariableName: 'org.apache.lucene:*',
               lockedVersion: '1.2.3',
               managerData: {
                 fileReplacePosition: 22,
@@ -1128,7 +1128,7 @@ describe('modules/manager/gradle/extract', () => {
               depName: 'org.apache.lucene:a.c',
               currentValue: '2',
               lockedVersion: '1',
-              groupName: 'org.apache.lucene:a.*',
+              sharedVariableName: 'org.apache.lucene:a.*',
               fileReplacePosition: 65,
               depType: 'dependencies',
             },
@@ -1140,7 +1140,7 @@ describe('modules/manager/gradle/extract', () => {
               depName: 'org.apache.lucene:a.d',
               currentValue: '2',
               lockedVersion: '1',
-              groupName: 'org.apache.lucene:a.*',
+              sharedVariableName: 'org.apache.lucene:a.*',
               fileReplacePosition: 65,
               depType: 'dependencies',
             },
@@ -1152,7 +1152,7 @@ describe('modules/manager/gradle/extract', () => {
               depName: 'org.apache.lucene:d',
               currentValue: '3',
               lockedVersion: '1',
-              groupName: 'org.apache.lucene:*',
+              sharedVariableName: 'org.apache.lucene:*',
               fileReplacePosition: 39,
               depType: 'dependencies',
             },
@@ -1164,7 +1164,7 @@ describe('modules/manager/gradle/extract', () => {
               depName: 'org.apache.lucene:e.f',
               currentValue: '3',
               lockedVersion: '1',
-              groupName: 'org.apache.lucene:*',
+              sharedVariableName: 'org.apache.lucene:*',
               fileReplacePosition: 39,
               depType: 'dependencies',
             },
@@ -1176,7 +1176,7 @@ describe('modules/manager/gradle/extract', () => {
               depName: 'org.apache.foo-bar:a',
               currentValue: '5',
               lockedVersion: '1',
-              groupName: 'org.apache.foo*:*',
+              sharedVariableName: 'org.apache.foo*:*',
               fileReplacePosition: 113,
               depType: 'dependencies',
             },

@@ -50,6 +50,7 @@ export interface BranchUpgradeConfig
   group?: GroupConfig;
   groupName?: string;
   groupSlug?: string;
+
   manager: string;
   packageFile?: string;
   lockFile?: string;
