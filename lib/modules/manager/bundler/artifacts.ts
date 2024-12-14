@@ -94,7 +94,7 @@ export async function updateArtifacts(
     const commands: string[] = [];
 
     if (
-      updatedDeps.some(dep => dep.updateType === 'lockFileMaintenance') ||
+      updatedDeps.some((dep) => dep.updateType === 'lockFileMaintenance') ||
       config.isLockFileMaintenance
     ) {
       commands.push('bundler lock --update');
