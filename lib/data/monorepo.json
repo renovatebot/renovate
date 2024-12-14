@@ -321,6 +321,7 @@
     "grpc-java": "https://github.com/grpc/grpc-java",
     "gstreamer-rust": "https://gitlab.freedesktop.org/gstreamer/gstreamer-rs",
     "guava": "https://github.com/google/guava",
+    "happy-dom": "https://github.com/capricorn86/happy-dom",
     "Hangfire": "https://github.com/HangfireIO/Hangfire",
     "hickory-dns": "https://github.com/hickory-dns/hickory-dns",
     "infrastructure-ui": "https://github.com/instructure/instructure-ui",
