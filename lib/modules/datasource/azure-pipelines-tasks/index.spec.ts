@@ -2,6 +2,7 @@ import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
+import type { AzurePipelinesTask, AzurePipelinesTaskVersion } from './types';
 import { AzurePipelinesTasksDatasource } from '.';
 
 const gitHubHost = 'https://raw.githubusercontent.com';
@@ -111,6 +112,48 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
         { isDeprecated: true, version: '1.2.3' },
         { isDeprecated: undefined, version: '2.247.1' },
       ],
+    });
+  });
+
+  describe('compare semver', () => {
+    it.each`
+      a                              | exp
+      ${[]}                          | ${[]}
+      ${['']}                        | ${['']}
+      ${['', '']}                    | ${['', '']}
+      ${['1.0.0']}                   | ${['1.0.0']}
+      ${['1.0.1', '1.1.0', '1.0.0']} | ${['1.0.0', '1.0.1', '1.1.0']}
+    `('when versions is $a', ({ a, exp }) => {
+      const azureVersions = a.map((x: string) => {
+        const splitted = x.split('.');
+
+        const version =
+          splitted.length === 3
+            ? {
+                major: Number(splitted[0]),
+                minor: Number(splitted[1]),
+                patch: Number(splitted[2]),
+              }
+            : null;
+
+        return {
+          name: '',
+          deprecated: false,
+          version,
+        } as AzurePipelinesTask;
+      });
+
+      const azureSortedVersions = azureVersions.sort(
+        AzurePipelinesTasksDatasource.compareSemanticVersions('version'),
+      );
+
+      expect(
+        azureSortedVersions.map((x: AzurePipelinesTask) =>
+          x.version === null
+            ? ''
+            : `${x.version.major}.${x.version.minor}.${x.version.patch}`,
+        ),
+      ).toStrictEqual(exp);
     });
   });
 });

@@ -40,33 +40,14 @@ export class AzurePipelinesTasksDatasource extends Datasource {
         opts,
       );
 
-      const compareSemanticVersions = (key: string) => (a: any, b: any) => {
-        const a1Version: AzurePipelinesTaskVersion = a[key];
-        const b1Version: AzurePipelinesTaskVersion = b[key];
-
-        const a1 = `${a1Version.major}.${a1Version.minor}.${a1Version.patch}`;
-        const b1 = `${b1Version.major}.${b1Version.minor}.${b1Version.patch}`;
-
-        const len = Math.min(a1.length, b1.length);
-
-        for (let i = 0; i < len; i++) {
-          const a2 = +a1[i] || 0;
-          const b2 = +b1[i] || 0;
-
-          if (a2 !== b2) {
-            return a2 > b2 ? 1 : -1;
-          }
-        }
-
-        return b1.length - a1.length;
-      };
-
       if (results.value) {
         const result: ReleaseResult = { releases: [] };
 
         results.value
           .filter((task) => task.name === packageName)
-          .sort(compareSemanticVersions('version'))
+          .sort(
+            AzurePipelinesTasksDatasource.compareSemanticVersions('version'),
+          )
           .forEach((task) => {
             result.releases.push({
               version: `${task.version.major}.${task.version.minor}.${task.version.patch}`,
@@ -103,4 +84,31 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     const { body } = await this.http.getJson<ResT>(url, opts);
     return body;
   }
+
+  static compareSemanticVersions = (key: string) => (a: any, b: any) => {
+    const a1Version = a[key] as AzurePipelinesTaskVersion;
+    const b1Version = b[key] as AzurePipelinesTaskVersion;
+
+    const a1 =
+      a1Version === null
+        ? ''
+        : `${a1Version.major}.${a1Version.minor}.${a1Version.patch}`;
+    const b1 =
+      b1Version === null
+        ? ''
+        : `${b1Version.major}.${b1Version.minor}.${b1Version.patch}`;
+
+    const len = Math.min(a1.length, b1.length);
+
+    for (let i = 0; i < len; i++) {
+      const a2 = +a1[i] || 0;
+      const b2 = +b1[i] || 0;
+
+      if (a2 !== b2) {
+        return a2 > b2 ? 1 : -1;
+      }
+    }
+
+    return b1.length - a1.length;
+  };
 }
