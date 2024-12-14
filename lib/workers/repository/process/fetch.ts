@@ -21,6 +21,13 @@ import type { LookupUpdateConfig, UpdateResult } from './lookup/types';
 
 type LookupResult = Result<PackageDependency, Error>;
 
+interface LookupTaskResult {
+  packageFile: PackageFile;
+  result: LookupResult;
+}
+
+type LookupTask = Promise<LookupTaskResult>;
+
 async function lookup(
   packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency,
@@ -106,63 +113,89 @@ async function lookup(
   });
 }
 
-async function fetchManagerPackagerFileUpdates(
+function createLookupTasks(
   config: RenovateConfig,
-  managerConfig: RenovateConfig,
-  pFile: PackageFile,
-): Promise<void> {
-  const { packageFile } = pFile;
-  const packageFileConfig = mergeChildConfig(managerConfig, pFile);
-  if (pFile.extractedConstraints) {
-    packageFileConfig.constraints = {
-      ...pFile.extractedConstraints,
-      ...config.constraints,
-    };
+  managerPackageFiles: Record<string, PackageFile[]>,
+): LookupTask[] {
+  const lookupTasks: LookupTask[] = [];
+
+  for (const [manager, packageFiles] of Object.entries(managerPackageFiles)) {
+    const managerConfig = getManagerConfig(config, manager);
+
+    for (const packageFile of packageFiles) {
+      const packageFileConfig = mergeChildConfig(managerConfig, packageFile);
+      if (packageFile.extractedConstraints) {
+        packageFileConfig.constraints = {
+          ...packageFile.extractedConstraints,
+          ...config.constraints,
+        };
+      }
+
+      for (const dep of packageFile.deps) {
+        lookupTasks.push(
+          lookup(packageFileConfig, dep).then((result) => ({
+            packageFile,
+            result,
+          })),
+        );
+      }
+    }
   }
-  const { manager } = packageFileConfig;
-  const queue = pFile.deps.map(
-    (dep) => async (): Promise<PackageDependency> => {
-      const updates = await lookup(packageFileConfig, dep);
-      return updates.unwrapOrThrow();
-    },
-  );
-  logger.trace(
-    { manager, packageFile, queueLength: queue.length },
-    'fetchManagerPackagerFileUpdates starting with concurrency',
-  );
 
-  pFile.deps = await p.all(queue);
-  logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
-}
-
-async function fetchManagerUpdates(
-  config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]>,
-  manager: string,
-): Promise<void> {
-  const managerConfig = getManagerConfig(config, manager);
-  const queue = packageFiles[manager].map(
-    (pFile) => (): Promise<void> =>
-      fetchManagerPackagerFileUpdates(config, managerConfig, pFile),
-  );
-  logger.trace(
-    { manager, queueLength: queue.length },
-    'fetchManagerUpdates starting',
-  );
-  await p.all(queue);
-  logger.trace({ manager }, 'fetchManagerUpdates finished');
+  return lookupTasks;
 }
 
 export async function fetchUpdates(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]>,
+  managerPackageFiles: Record<string, PackageFile[]>,
 ): Promise<void> {
-  const managers = Object.keys(packageFiles);
-  const allManagerJobs = managers.map((manager) =>
-    fetchManagerUpdates(config, packageFiles, manager),
+  logger.debug(
+    { baseBranch: config.baseBranch },
+    'Starting package releases lookups',
   );
-  await Promise.all(allManagerJobs);
-  PackageFiles.add(config.baseBranch!, { ...packageFiles });
+
+  const allTasks = createLookupTasks(config, managerPackageFiles);
+
+  const fetchResults = await Promise.all(allTasks);
+
+  const errors: Error[] = [];
+
+  type PackageDeps = WeakMap<PackageFile, PackageDependency[]>;
+  const packageDeps: PackageDeps = new WeakMap();
+
+  // Separate good results from errors
+  for (const { packageFile, result } of fetchResults) {
+    const { val: dep, err } = result.unwrap();
+    if (dep) {
+      let deps = packageDeps.get(packageFile);
+      if (!deps) {
+        deps = [];
+        packageDeps.set(packageFile, deps);
+      }
+      if (dep.skipReason && !dep.skipStage) {
+        dep.skipStage = 'lookup';
+      }
+      deps.push(dep);
+    } else {
+      errors.push(err);
+    }
+  }
+
+  if (errors.length) {
+    p.handleMultipleErrors(errors);
+  }
+
+  // Assign fetched deps back to packageFiles
+  for (const packageFiles of Object.values(managerPackageFiles)) {
+    for (const packageFile of packageFiles) {
+      const packageFileDeps = packageDeps.get(packageFile);
+      if (packageFileDeps) {
+        packageFile.deps = packageFileDeps;
+      }
+    }
+  }
+
+  PackageFiles.add(config.baseBranch!, { ...managerPackageFiles });
   logger.debug(
     { baseBranch: config.baseBranch },
     'Package releases lookups complete',

@@ -128,6 +128,10 @@ export async function extract(
         for (const file of files) {
           for (const dep of file.deps) {
             delete dep.updates;
+            if (dep.skipStage && dep.skipStage !== 'extract') {
+              delete dep.skipReason;
+              delete dep.skipStage;
+            }
           }
         }
       }
