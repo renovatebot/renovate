@@ -114,7 +114,10 @@ module.exports = {
       },
     ],
     '@typescript-eslint/prefer-optional-chain': 2,
-    '@typescript-eslint/prefer-nullish-coalescing': 2,
+    '@typescript-eslint/prefer-nullish-coalescing': [
+      2,
+      { ignoreMixedLogicalExpressions: true },
+    ],
     curly: [2, 'all'],
     'require-await': 2,
     // next 2 rules disabled due to https://github.com/microsoft/TypeScript/issues/20024
