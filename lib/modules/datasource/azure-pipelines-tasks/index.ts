@@ -1,5 +1,6 @@
 import { GlobalConfig } from '../../../config/global';
 import { cache } from '../../../util/cache/package/decorator';
+import * as hostRules from '../../../util/host-rules';
 import type { HttpOptions } from '../../../util/http/types';
 import { id as versioning } from '../../versioning/loose';
 import { Datasource } from '../datasource';
@@ -27,11 +28,13 @@ export class AzurePipelinesTasksDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const platform = GlobalConfig.get('platform');
     const endpoint = GlobalConfig.get('endpoint');
+    const { token } = hostRules.find({
+      hostType: AzurePipelinesTasksDatasource.id,
+      url: endpoint,
+    });
 
-    if (platform === 'azure' && endpoint) {
-      const auth = Buffer.from(
-        `renovate:${process.env.RENOVATE_TOKEN}`,
-      ).toString('base64');
+    if (platform === 'azure' && endpoint && token) {
+      const auth = Buffer.from(`renovate:${token}`).toString('base64');
       const opts: HttpOptions = {
         headers: { authorization: `Basic ${auth}` },
       };

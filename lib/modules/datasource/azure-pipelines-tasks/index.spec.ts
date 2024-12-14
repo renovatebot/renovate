@@ -2,6 +2,7 @@ import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
+import * as hostRules from '../../../util/host-rules';
 import type { AzurePipelinesTask } from './types';
 import { AzurePipelinesTasksDatasource } from '.';
 
@@ -14,6 +15,7 @@ const marketplaceTasksPath =
 describe('modules/datasource/azure-pipelines-tasks/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
+    hostRules.clear();
   });
 
   it('returns null for unknown task', async () => {
@@ -78,6 +80,12 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
       endpoint: 'https://my.custom.domain',
     });
 
+    hostRules.add({
+      hostType: AzurePipelinesTasksDatasource.id,
+      matchHost: 'my.custom.domain',
+      token: '123test',
+    });
+
     httpMock
       .scope('https://my.custom.domain')
       .get('/_apis/distributedtask/tasks/')
@@ -95,6 +103,12 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
     GlobalConfig.set({
       platform: 'azure',
       endpoint: 'https://my.custom.domain',
+    });
+
+    hostRules.add({
+      hostType: AzurePipelinesTasksDatasource.id,
+      matchHost: 'my.custom.domain',
+      token: '123test',
     });
 
     httpMock
