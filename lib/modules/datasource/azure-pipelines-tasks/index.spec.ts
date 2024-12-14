@@ -2,7 +2,7 @@ import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
-import type { AzurePipelinesTask, AzurePipelinesTaskVersion } from './types';
+import type { AzurePipelinesTask } from './types';
 import { AzurePipelinesTasksDatasource } from '.';
 
 const gitHubHost = 'https://raw.githubusercontent.com';
