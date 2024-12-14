@@ -145,7 +145,6 @@ describe('modules/manager/gomod/artifacts', () => {
 
   it('returns updated go.sum', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
@@ -191,7 +190,6 @@ describe('modules/manager/gomod/artifacts', () => {
 
   it('runs go mod vendor with gomodVendor', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce('New go.mod');
 
