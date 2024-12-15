@@ -40,7 +40,7 @@ describe('util/toml', () => {
       python = "^3.12"
       {%+ endif -%}
     `;
-    expect(parseToml(input)).toStrictEqual({
+    expect(parseToml(input, { removeTemplates: true })).toStrictEqual({
       project: { name: '' },
       tool: {
         poetry: {
