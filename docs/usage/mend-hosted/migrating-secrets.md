@@ -8,7 +8,7 @@ They can be referenced from the Renovate config files inside the repo using `{{ 
 
 ## Old method
 
-This method will is deprecated:
+This method is deprecated:
 
 ```json title="Put encrypted secret in Renovate config"
 {
