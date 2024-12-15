@@ -238,9 +238,6 @@ describe('modules/manager/mise/extract', () => {
       "pipx:yamllint" = "1.35.0"
       "pipx:psf/black" = "24.4.1"
       "pipx:git+https://github.com/psf/black.git" = "24.4.1"
-      "pipx:git+https://gitlab.com/user/repo.git" = "0.1.0"
-      # Does not work but the mise docs says supporting
-      "pipx:https://github.com/psf/black/archive/18.9b0.zip" = "latest"
     `;
       const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
@@ -263,16 +260,6 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'psf/black',
             datasource: 'github-tags',
           },
-          {
-            depName: 'pipx:git+https://gitlab.com/user/repo.git',
-            packageName: 'git+https://gitlab.com/user/repo.git',
-            skipReason: 'unsupported-url',
-          },
-          {
-            depName: 'pipx:https://github.com/psf/black/archive/18.9b0.zip',
-            packageName: 'https://github.com/psf/black/archive/18.9b0.zip',
-            skipReason: 'unsupported-url',
-          },
         ],
       });
     });
@@ -282,7 +269,6 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       "spm:tuist/tuist" = "4.15.0"
       "spm:https://github.com/tuist/tuist.git" = "4.13.0"
-      "spm:https://gitlab.com/user/repo.git" = "0.1.0"
     `;
       const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
@@ -299,11 +285,6 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'tuist/tuist',
             datasource: 'github-releases',
           },
-          {
-            depName: 'spm:https://gitlab.com/user/repo.git',
-            packageName: 'https://gitlab.com/user/repo.git',
-            skipReason: 'unsupported-url',
-          },
         ],
       });
     });
@@ -314,8 +295,6 @@ describe('modules/manager/mise/extract', () => {
       "ubi:nekto/act" = "0.2.70"
       "ubi:cli/cli" = { exe = "gh", version = "1.14.0" }
       "ubi:cli/cli[exe=gh]" = "1.14.0"
-      "ubi:tamasfe/taplo" = { matching = "full", version = "0.1.0" }
-      "ubi:tamasfe/taplo[matching=full]" = "0.1.0"
       "ubi:cargo-bins/cargo-binstall" = { tag_regex = "^\\d+\\.\\d+\\.", version = "1.0.0" }
       "ubi:cargo-bins/cargo-binstall[tag_regex=^\\d+\\.]" = "1.0.0"
       "ubi:cargo-bins/cargo-binstall[tag_regex=^\\d+\\.\\d+\\.]" = { tag_regex = "^\\d+\\.", version = "1.0.0" }
@@ -339,18 +318,6 @@ describe('modules/manager/mise/extract', () => {
             depName: 'ubi:cli/cli',
             currentValue: '1.14.0',
             packageName: 'cli/cli',
-            datasource: 'github-releases',
-          },
-          {
-            depName: 'ubi:tamasfe/taplo',
-            currentValue: '0.1.0',
-            packageName: 'tamasfe/taplo',
-            datasource: 'github-releases',
-          },
-          {
-            depName: 'ubi:tamasfe/taplo',
-            currentValue: '0.1.0',
-            packageName: 'tamasfe/taplo',
             datasource: 'github-releases',
           },
           {

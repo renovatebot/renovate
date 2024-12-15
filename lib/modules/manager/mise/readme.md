@@ -56,17 +56,17 @@ If you are wanting to add support for an existing `asdf-x` plugin to `mise`, you
 - asdf and vfox plugins are not supported unless they are in the default registry of mise.
 
 - Non-GitHub aqua backend package types.
-mise only supports http now (2024/12/07)
-<https://aquaproj.github.io/docs/reference/registry-config/#package-types>
-// ref: <https://github.com/jdx/mise/blob/d1b9749d8f3e13ef705c1ea471d96c5935b79136/src/aqua/aqua_registry.rs#L39-L45>
-<https://github.com/search?q=repo%3Aaquaproj%2Faqua-registry+%22type%3A+http%22&type=code>
+  mise only supports http now (2024/12/07)
+  <https://aquaproj.github.io/docs/reference/registry-config/#package-types>
+  // ref: <https://github.com/jdx/mise/blob/d1b9749d8f3e13ef705c1ea471d96c5935b79136/src/aqua/aqua_registry.rs#L39-L45>
+  <https://github.com/search?q=repo%3Aaquaproj%2Faqua-registry+%22type%3A+http%22&type=code>
 
 - aqua versions filter is not supported. use extractVersion manually.
 
 - ubi tag_regex is supported but not perfectly compatible, as re2 and rust regex engines are different.
 
 - cargo backend supports github installation but doesn't support it
-<https://mise.jdx.dev/dev-tools/backends/cargo.html#using-git>
+  <https://mise.jdx.dev/dev-tools/backends/cargo.html#using-git>
 
 - strips leading v from version
 
