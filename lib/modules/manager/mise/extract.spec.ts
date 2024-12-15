@@ -295,6 +295,9 @@ describe('modules/manager/mise/extract', () => {
       "ubi:nekto/act" = "0.2.70"
       "ubi:cli/cli" = { exe = "gh", version = "1.14.0" }
       "ubi:cli/cli[exe=gh]" = "1.14.0"
+      "ubi:cargo-bins/cargo-binstall" = { tag_regex = "^\\\\d+\\\\.\\\\d+\\\\.", version = "1.0.0" }
+      "ubi:cargo-bins/cargo-binstall[tag_regex=^\\\\d+\\\\.]" = "1.0.0"
+      'ubi:cargo-bins/cargo-binstall[tag_regex=^\\d+\\.\\d+\\.]' = { tag_regex = '^\\d+\\.', version = "1.0.0" }
     `;
       const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
@@ -316,6 +319,27 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '1.14.0',
             packageName: 'cli/cli',
             datasource: 'github-releases',
+          },
+          {
+            depName: 'ubi:cargo-bins/cargo-binstall',
+            currentValue: '1.0.0',
+            packageName: 'cargo-bins/cargo-binstall',
+            datasource: 'github-releases',
+            extractVersion: '(?<version>\\d+\\.\\d+\\.)',
+          },
+          {
+            depName: 'ubi:cargo-bins/cargo-binstall',
+            currentValue: '1.0.0',
+            packageName: 'cargo-bins/cargo-binstall',
+            datasource: 'github-releases',
+            extractVersion: '(?<version>\\d+\\.)',
+          },
+          {
+            depName: 'ubi:cargo-bins/cargo-binstall',
+            currentValue: '1.0.0',
+            packageName: 'cargo-bins/cargo-binstall',
+            datasource: 'github-releases',
+            extractVersion: '(?<version>\\d+\\.)',
           },
         ],
       });
