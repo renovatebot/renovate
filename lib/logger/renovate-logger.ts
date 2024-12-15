@@ -75,8 +75,28 @@ export class RenovateLogger implements Logger {
     }
   }
 
-  private logFactory(level: bunyan.LogLevelString): loggerFunction {
-    return logFactory(this.bunyanLogger, level, this.meta, this.context);
+  private logFactory(_level: bunyan.LogLevelString): loggerFunction {
+    return (p1: string | Record<string, any>, p2?: string): void => {
+      const meta: Record<string, unknown> = {
+        logContext: this.context,
+        ...this.meta,
+        ...toMeta(p1),
+      };
+      const msg = getMessage(p1, p2);
+      let level = _level;
+
+      if (is.string(msg)) {
+        const remappedLevel = getRemappedLevel(msg);
+        // istanbul ignore if: not testable
+        if (remappedLevel) {
+          meta.oldLevel = level;
+          level = remappedLevel;
+        }
+        this.bunyanLogger[level](meta, msg);
+      } else {
+        this.bunyanLogger[level](meta);
+      }
+    };
   }
 
   private logOnceFn(level: bunyan.LogLevelString): loggerFunction {
@@ -105,33 +125,4 @@ export class RenovateLogger implements Logger {
       logFn(p1, p2);
     }
   }
-}
-
-function logFactory(
-  bunyanLogger: bunyan,
-  _level: bunyan.LogLevelString,
-  curMeta: Record<string, unknown>,
-  logContext: string,
-): loggerFunction {
-  return function (p1: string | Record<string, any>, p2?: string): void {
-    const meta: Record<string, unknown> = {
-      logContext,
-      ...curMeta,
-      ...toMeta(p1),
-    };
-    const msg = getMessage(p1, p2);
-    let level = _level;
-
-    if (is.string(msg)) {
-      const remappedLevel = getRemappedLevel(msg);
-      // istanbul ignore if: not testable
-      if (remappedLevel) {
-        meta.oldLevel = level;
-        level = remappedLevel;
-      }
-      bunyanLogger[level](meta, msg);
-    } else {
-      bunyanLogger[level](meta);
-    }
-  };
 }

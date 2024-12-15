@@ -1,4 +1,5 @@
 import type { WriteStream } from 'node:fs';
+import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { partial } from '../../test/util';
 import { add } from '../util/host-rules';
@@ -18,16 +19,40 @@ import {
   setMeta,
 } from '.';
 
+const initialContext = 'initial_context';
+
 jest.unmock('.');
+jest.mock('nanoid', () => ({
+  nanoid: () => 'initial_context',
+}));
+
+const bunyanDebugSpy = jest.spyOn(bunyan.prototype, 'debug');
 
 describe('logger/index', () => {
+  beforeEach(() => {});
+
   it('inits', () => {
     expect(logger).toBeDefined();
   });
 
+  it('uses an auto-generated log context', () => {
+    logger.debug('');
+
+    expect(bunyanDebugSpy).toHaveBeenCalledWith(
+      { logContext: initialContext },
+      '',
+    );
+  });
+
   it('sets and gets context', () => {
-    setContext('123test');
-    expect(getContext()).toBe('123test');
+    const logContext = '123test';
+    const msg = 'test';
+    setContext(logContext);
+
+    logger.debug(msg);
+
+    expect(getContext()).toBe(logContext);
+    expect(bunyanDebugSpy).toHaveBeenCalledWith(expect.anything(), msg);
   });
 
   it('supports logging with metadata', () => {
@@ -42,16 +67,62 @@ describe('logger/index', () => {
     expect(() => logger.debug('some meta')).not.toThrow();
   });
 
-  it('sets meta', () => {
-    expect(() => setMeta({ any: 'test' })).not.toThrow();
-  });
+  describe('meta functions', () => {
+    beforeEach(() => {
+      setContext(initialContext);
+    });
 
-  it('adds meta', () => {
-    expect(() => addMeta({ new: 'test' })).not.toThrow();
-  });
+    it('sets meta', () => {
+      const logMeta = { baz: 'qux' };
+      const meta = { foo: 'bar' };
+      setMeta(meta);
 
-  it('removes meta', () => {
-    expect(() => removeMeta(['new'])).not.toThrow();
+      logger.debug(logMeta, '');
+
+      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+        { logContext: initialContext, ...meta, ...logMeta },
+        '',
+      );
+      expect(bunyanDebugSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('adds meta', () => {
+      const logMeta = { baz: 'qux' };
+      const meta = { foo: 'bar' };
+      addMeta(meta);
+
+      logger.debug(logMeta, '');
+
+      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+        { logContext: initialContext, ...meta, ...logMeta },
+        '',
+      );
+      expect(bunyanDebugSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('removes meta', () => {
+      const logMeta = { baz: 'qux' };
+      const meta = { foo: 'bar' };
+      setMeta(meta);
+
+      logger.debug(logMeta, '');
+
+      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+        { logContext: initialContext, ...meta, ...logMeta },
+        '',
+      );
+      expect(bunyanDebugSpy).toHaveBeenCalledTimes(1);
+
+      removeMeta(Object.keys(meta));
+
+      logger.debug(logMeta, '');
+
+      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+        { logContext: initialContext, ...logMeta },
+        '',
+      );
+      expect(bunyanDebugSpy).toHaveBeenCalledTimes(2);
+    });
   });
 
   it('sets level', () => {
