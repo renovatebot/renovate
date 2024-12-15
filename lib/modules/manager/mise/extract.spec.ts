@@ -347,24 +347,21 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('return null for unsupported backends', () => {
-      const content = codeBlock`
-      [tools]
-      "fake:tool" = "1.0.0"
-    `;
-      expect(extractPackageFile(content, miseFilename)).toBeNull();
-    });
-
     it('provides skipReason for lines with unsupported tooling', () => {
       const content = codeBlock`
       [tools]
       fake-tool = '1.0.0'
+      'fake:tool' = '1.0.0'
     `;
       const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
           {
             depName: 'fake-tool',
+            skipReason: 'unsupported-datasource',
+          },
+          {
+            depName: 'fake:tool',
             skipReason: 'unsupported-datasource',
           },
         ],
