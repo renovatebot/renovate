@@ -35,7 +35,7 @@ const backendDatasources = {
   cargo: [CrateDatasource.id, GitTagsDatasource.id, GitRefsDatasource.id],
   go: [GoDatasource.id],
   npm: [NpmDatasource.id],
-  pipx: [PypiDatasource.id, GithubTagsDatasource.id],
+  pipx: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],
   spm: [GithubReleasesDatasource.id],
   ubi: [GithubReleasesDatasource.id],
   // not supported

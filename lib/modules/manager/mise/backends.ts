@@ -122,11 +122,11 @@ export function createPipxToolConfig(
     let repoName: string | undefined;
     if (isGitSyntax) {
       repoName = pipxGitHubRegex.exec(name)?.groups?.repo;
-      // mise only supports specifying the version tag for github repos
+      // If the url is not a github repo, treat the version as a git ref
       if (is.undefined(repoName)) {
         return {
-          packageName: name,
-          skipReason: 'unsupported-url',
+          packageName: name.replace(/^git\+/, '').replaceAll(/\.git$/, ''),
+          datasource: GitRefsDatasource.id,
         };
       }
     } else {
