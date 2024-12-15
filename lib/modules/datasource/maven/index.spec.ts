@@ -713,7 +713,7 @@ describe('modules/datasource/maven/index', () => {
         s3mock.reset();
       });
 
-      function body(input: string) {
+      function body(input: string): ReturnType<typeof sdkStreamMixin> {
         const result = new Readable();
         result.push(input);
         result.push(null);
