@@ -28,4 +28,25 @@ describe('util/toml', () => {
 
     expect(() => parseToml(input)).toThrow(SyntaxError);
   });
+
+  it('should parse content with templates', () => {
+    const input = codeBlock`
+      [project]
+      name = "{{ value }}"
+
+      {# comment #}
+      [tool.poetry.dependencies]
+      {% if enabled %}
+      python = "^3.12"
+      {%+ endif -%}
+    `;
+    expect(parseToml(input)).toStrictEqual({
+      project: { name: '' },
+      tool: {
+        poetry: {
+          dependencies: { python: '^3.12' },
+        },
+      },
+    });
+  });
 });
