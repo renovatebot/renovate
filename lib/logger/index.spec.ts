@@ -52,7 +52,7 @@ describe('logger/index', () => {
     logger.debug(msg);
 
     expect(getContext()).toBe(logContext);
-    expect(bunyanDebugSpy).toHaveBeenCalledWith(expect.anything(), msg);
+    expect(bunyanDebugSpy).toHaveBeenCalledWith({ logContext }, msg);
   });
 
   it('supports logging with metadata', () => {
@@ -73,8 +73,8 @@ describe('logger/index', () => {
     });
 
     it('sets meta', () => {
-      const logMeta = { baz: 'qux' };
-      const meta = { foo: 'bar' };
+      const logMeta = { foo: 'foo' };
+      const meta = { bar: 'bar' };
       setMeta(meta);
 
       logger.debug(logMeta, '');
@@ -87,8 +87,8 @@ describe('logger/index', () => {
     });
 
     it('adds meta', () => {
-      const logMeta = { baz: 'qux' };
-      const meta = { foo: 'bar' };
+      const logMeta = { foo: 'foo' };
+      const meta = { bar: 'bar' };
       addMeta(meta);
 
       logger.debug(logMeta, '');
@@ -101,8 +101,8 @@ describe('logger/index', () => {
     });
 
     it('removes meta', () => {
-      const logMeta = { baz: 'qux' };
-      const meta = { foo: 'bar' };
+      const logMeta = { foo: 'foo' };
+      const meta = { bar: 'bar' };
       setMeta(meta);
 
       logger.debug(logMeta, '');
