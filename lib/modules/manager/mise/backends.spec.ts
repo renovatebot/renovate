@@ -110,6 +110,15 @@ describe('modules/manager/mise/backends', () => {
       });
     });
 
+    it('should create a tooling config for git url', () => {
+      expect(
+        createPipxToolConfig('git+https://gitlab.com/user/repo.git'),
+      ).toEqual({
+        packageName: 'https://gitlab.com/user/repo.git',
+        datasource: 'git-refs',
+      });
+    });
+
     it('provides skipReason for zip file url', () => {
       expect(
         createPipxToolConfig('https://github.com/psf/black/archive/18.9b0.zip'),
