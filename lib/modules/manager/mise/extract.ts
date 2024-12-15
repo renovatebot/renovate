@@ -20,7 +20,7 @@ import { parseTomlFile } from './utils';
 
 // Tool names can have options in the tool name
 // e.g. ubi:tamasfe/taplo[matching=full,exe=taplo]
-const optionInToolNameRegex = regEx(/^(?<name>.+)(?:\[(?<options>.+)\])?$/);
+const optionInToolNameRegex = regEx(/^(?<name>.+?)(?:\[(?<options>.+)\])?$/);
 
 export function extractPackageFile(
   content: string,
