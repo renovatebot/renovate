@@ -125,7 +125,7 @@ export function createPipxToolConfig(
       // If the url is not a github repo, treat the version as a git ref
       if (is.undefined(repoName)) {
         return {
-          packageName: name.replace(/^git\+/, '').replaceAll(/\.git$/, ''),
+          packageName: name.replace(/^git\+/g, '').replaceAll(/\.git$/g, ''),
           datasource: GitRefsDatasource.id,
         };
       }
