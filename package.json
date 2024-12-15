@@ -140,7 +140,7 @@
   },
   "volta": {
     "node": "22.11.0",
-    "pnpm": "9.14.4"
+    "pnpm": "9.15.0"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.699.0",
@@ -254,7 +254,7 @@
     "zod": "3.23.8"
   },
   "optionalDependencies": {
-    "better-sqlite3": "11.6.0",
+    "better-sqlite3": "11.7.0",
     "openpgp": "6.0.1",
     "re2": "1.21.4"
   },
@@ -352,7 +352,7 @@
     "typescript": "5.7.2",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@9.14.4",
+  "packageManager": "pnpm@9.15.0",
   "files": [
     "dist",
     "renovate-schema.json"

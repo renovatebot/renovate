@@ -57,6 +57,7 @@ export function parsePreset(input: string): ParsedPreset {
     'customManagers',
     'default',
     'docker',
+    'global',
     'group',
     'helpers',
     'mergeConfidence',
