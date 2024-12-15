@@ -1,7 +1,7 @@
 import { getStaticTOMLValue, parseTOML } from 'toml-eslint-parser';
 import { regEx } from './regex';
 
-interface TomlOptions {
+export interface TomlOptions {
   removeTemplates?: boolean;
 }
 
