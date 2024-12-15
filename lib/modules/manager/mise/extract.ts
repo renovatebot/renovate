@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import type { SkipReason } from '../../../types';
 import { regEx } from '../../../util/regex';
 import type { ToolingConfig } from '../asdf/upgradeable-tooling';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -124,7 +125,7 @@ function getToolConfig(
         createAquaToolConfig(toolName)
       );
     case 'cargo':
-      return createCargoToolConfig(toolName);
+      return createCargoToolConfig(toolName, version);
     case 'go':
       return createGoToolConfig(toolName);
     case 'npm':
@@ -178,15 +179,18 @@ function createDependency(
   version: string | null,
   config: ToolingConfig | SkippedToolingConfig | null,
 ): PackageDependency {
-  if (version === null) {
-    return { depName: name, skipReason: 'unspecified-version' };
-  }
+  let skipReason: SkipReason | undefined;
   if (config === null) {
-    return { depName: name, skipReason: 'unsupported-datasource' };
+    skipReason = 'unsupported-datasource';
+  }
+  if (version === null) {
+    skipReason = 'unspecified-version';
   }
   return {
     depName: name,
     currentValue: version,
+    ...(skipReason ? { skipReason } : {}),
+    // Spread the config last to override other properties
     ...config,
   };
 }

@@ -1,6 +1,8 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import { CrateDatasource } from '../../datasource/crate';
+import { GitRefsDatasource } from '../../datasource/git-refs';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GoDatasource } from '../../datasource/go';
@@ -28,25 +30,52 @@ export function createAquaToolConfig(name: string): ToolingConfig {
   };
 }
 
+const cargoGitVersionRegex = regEx(/^(?<type>tag|branch|rev):(?<version>.+)$/);
+
 /**
  * Create a tooling config for cargo backend
  * @link https://mise.jdx.dev/dev-tools/backends/cargo.html
  */
 export function createCargoToolConfig(
   name: string,
+  version: string,
 ): ToolingConfig | SkippedToolingConfig {
-  // TODO: support url syntax
-  // Avoid type narrowing to prevent type error
-  if ((is.urlString as (value: unknown) => boolean)(name)) {
+  // Avoid narrowing the type of name to never
+  if (!(is.urlString as (value: unknown) => boolean)(name)) {
     return {
       packageName: name,
-      skipReason: 'unsupported-url',
+      datasource: CrateDatasource.id,
     };
   }
-  return {
-    packageName: name,
-    datasource: CrateDatasource.id,
-  };
+  // tag: branch: or rev: is required for git repository url
+  // e.g. branch:main, tag:0.1.0, rev:abcdef
+  const matchGroups = cargoGitVersionRegex.exec(version)?.groups;
+  if (is.undefined(matchGroups)) {
+    return {
+      packageName: name,
+      skipReason: 'invalid-version',
+    };
+  }
+  const { type, version: gitVersion } = matchGroups;
+  switch (type as 'tag' | 'branch' | 'rev') {
+    case 'tag':
+      return {
+        packageName: name,
+        datasource: GitTagsDatasource.id,
+        currentValue: gitVersion,
+      };
+    case 'branch':
+      return {
+        packageName: name,
+        skipReason: 'unsupported-version',
+      };
+    case 'rev':
+      return {
+        packageName: name,
+        datasource: GitRefsDatasource.id,
+        currentValue: gitVersion,
+      };
+  }
 }
 
 /**

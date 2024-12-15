@@ -1,5 +1,7 @@
 import { deduplicateArray } from '../../../util/array';
 import { CrateDatasource } from '../../datasource/crate';
+import { GitRefsDatasource } from '../../datasource/git-refs';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GoDatasource } from '../../datasource/go';
@@ -30,7 +32,7 @@ const backendDatasources = {
   // Re-use the asdf datasources, as mise and asdf support the same plugins.
   asdf: asdfSupportedDatasources,
   aqua: [GithubTagsDatasource.id],
-  cargo: [CrateDatasource.id],
+  cargo: [CrateDatasource.id, GitTagsDatasource.id, GitRefsDatasource.id],
   go: [GoDatasource.id],
   npm: [NpmDatasource.id],
   pipx: [PypiDatasource.id, GithubTagsDatasource.id],

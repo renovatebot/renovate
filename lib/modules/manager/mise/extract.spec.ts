@@ -179,18 +179,20 @@ describe('modules/manager/mise/extract', () => {
           },
           {
             depName: 'cargo:https://github.com/username/demo1',
+            currentValue: 'v0.1.0',
             packageName: 'https://github.com/username/demo1',
-            skipReason: 'unsupported-url',
+            datasource: 'git-tags',
           },
           {
             depName: 'cargo:https://github.com/username/demo2',
             packageName: 'https://github.com/username/demo2',
-            skipReason: 'unsupported-url',
+            skipReason: 'unsupported-version',
           },
           {
             depName: 'cargo:https://github.com/username/demo3',
+            currentValue: 'abcdef',
             packageName: 'https://github.com/username/demo3',
-            skipReason: 'unsupported-url',
+            datasource: 'git-refs',
           },
         ],
       });

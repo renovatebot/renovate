@@ -20,18 +20,50 @@ describe('modules/manager/mise/backends', () => {
 
   describe('createCargoToolConfig()', () => {
     it('should create a tooling config for crate', () => {
-      expect(createCargoToolConfig('eza')).toEqual({
+      expect(createCargoToolConfig('eza', '')).toEqual({
         packageName: 'eza',
         datasource: 'crate',
       });
     });
 
-    it('provides skipReason for git repository url', () => {
+    it('should create a tooling config for git tag', () => {
       expect(
-        createCargoToolConfig('https://github.com/username/demo1'),
+        createCargoToolConfig('https://github.com/username/demo', 'tag:v0.1.0'),
       ).toEqual({
-        packageName: 'https://github.com/username/demo1',
-        skipReason: 'unsupported-url',
+        packageName: 'https://github.com/username/demo',
+        currentValue: 'v0.1.0',
+        datasource: 'git-tags',
+      });
+    });
+
+    it('should provide skipReason for git branch', () => {
+      expect(
+        createCargoToolConfig(
+          'https://github.com/username/demo',
+          'branch:main',
+        ),
+      ).toEqual({
+        packageName: 'https://github.com/username/demo',
+        skipReason: 'unsupported-version',
+      });
+    });
+
+    it('should create a tooling config for git rev', () => {
+      expect(
+        createCargoToolConfig('https://github.com/username/demo', 'rev:abcdef'),
+      ).toEqual({
+        packageName: 'https://github.com/username/demo',
+        currentValue: 'abcdef',
+        datasource: 'git-refs',
+      });
+    });
+
+    it('should provide skipReason for invalid version', () => {
+      expect(
+        createCargoToolConfig('https://github.com/username/demo', 'v0.1.0'),
+      ).toEqual({
+        packageName: 'https://github.com/username/demo',
+        skipReason: 'invalid-version',
       });
     });
   });
