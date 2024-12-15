@@ -14,9 +14,9 @@ export function parse(input: string, options?: TomlOptions): unknown {
 function massageContent(content: string, options?: TomlOptions): string {
   if (options?.removeTemplates) {
     return content
-      .replace(regEx(/{%.+?%}/gs), '')
-      .replace(regEx(/{{.+?}}/gs), '')
-      .replace(regEx(/{#.+?#}/gs), '');
+      .replaceAll(regEx(/{%.+?%}/s), '')
+      .replaceAll(regEx(/{{.+?}}/s), '')
+      .replaceAll(regEx(/{#.+?#}/s), '');
   }
   return content;
 }
