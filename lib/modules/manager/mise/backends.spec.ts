@@ -114,7 +114,7 @@ describe('modules/manager/mise/backends', () => {
       expect(
         createPipxToolConfig('git+https://gitlab.com/user/repo.git'),
       ).toEqual({
-        packageName: 'https://gitlab.com/user/repo.git',
+        packageName: 'https://gitlab.com/user/repo',
         datasource: 'git-refs',
       });
     });
