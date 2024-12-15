@@ -140,7 +140,7 @@
   },
   "volta": {
     "node": "22.11.0",
-    "pnpm": "9.14.4"
+    "pnpm": "9.15.0"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.699.0",
@@ -155,7 +155,7 @@
     "@opentelemetry/context-async-hooks": "1.28.0",
     "@opentelemetry/exporter-trace-otlp-http": "0.55.0",
     "@opentelemetry/instrumentation": "0.55.0",
-    "@opentelemetry/instrumentation-bunyan": "0.43.0",
+    "@opentelemetry/instrumentation-bunyan": "0.44.0",
     "@opentelemetry/instrumentation-http": "0.55.0",
     "@opentelemetry/resources": "1.28.0",
     "@opentelemetry/sdk-trace-base": "1.28.0",
@@ -205,7 +205,7 @@
     "good-enough-parser": "1.1.23",
     "google-auth-library": "9.15.0",
     "got": "11.8.6",
-    "graph-data-structure": "4.2.0",
+    "graph-data-structure": "4.3.0",
     "handlebars": "4.7.8",
     "ignore": "6.0.2",
     "ini": "5.0.0",
@@ -351,7 +351,7 @@
     "typescript": "5.7.2",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@9.14.4",
+  "packageManager": "pnpm@9.15.0",
   "files": [
     "dist",
     "renovate-schema.json"
