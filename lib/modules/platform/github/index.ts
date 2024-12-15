@@ -447,6 +447,7 @@ export async function initRepo({
   forkToken,
   renovateUsername,
   cloneSubmodules,
+  cloneSubmodulesFilter,
   ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
@@ -454,6 +455,7 @@ export async function initRepo({
   config = {
     repository,
     cloneSubmodules,
+    cloneSubmodulesFilter,
     ignorePrAuthor,
   } as any;
   // istanbul ignore if

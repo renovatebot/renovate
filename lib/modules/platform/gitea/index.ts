@@ -70,6 +70,7 @@ interface GiteaRepoConfig {
   labelList: Promise<Label[]> | null;
   defaultBranch: string;
   cloneSubmodules: boolean;
+  cloneSubmodulesFilter: string[] | undefined;
   hasIssuesEnabled: boolean;
 }
 
@@ -255,6 +256,7 @@ const platform: Platform = {
   async initRepo({
     repository,
     cloneSubmodules,
+    cloneSubmodulesFilter,
     gitUrl,
   }: RepoParams): Promise<RepoResult> {
     let repo: Repo;
@@ -262,6 +264,7 @@ const platform: Platform = {
     config = {} as any;
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
+    config.cloneSubmodulesFilter = cloneSubmodulesFilter;
 
     // Try to fetch information about repository
     try {
