@@ -390,7 +390,6 @@ describe('modules/manager/gomod/artifacts', () => {
     const baz = join('vendor/github.com/baz/baz/go.mod');
 
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
