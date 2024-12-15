@@ -3,6 +3,7 @@ import * as configPreset from './config';
 import * as customManagersPreset from './custom-managers';
 import * as defaultPreset from './default';
 import * as dockerPreset from './docker';
+import * as globalPreset from './global';
 import * as groupPreset from './group';
 import * as helpersPreset from './helpers';
 import * as mergeConfidence from './merge-confidence';
@@ -22,6 +23,7 @@ export const groups: Record<string, Record<string, Preset>> = {
   customManagers: customManagersPreset.presets,
   default: defaultPreset.presets,
   docker: dockerPreset.presets,
+  global: globalPreset.presets,
   group: groupPreset.presets,
   helpers: helpersPreset.presets,
   mergeConfidence: mergeConfidence.presets,

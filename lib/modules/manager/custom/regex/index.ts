@@ -6,9 +6,9 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../../types';
+import { validMatchFields } from '../utils';
 import { handleAny, handleCombination, handleRecursive } from './strategies';
 import type { RegexManagerConfig, RegexManagerTemplates } from './types';
-import { validMatchFields } from './utils';
 
 export const categories: Category[] = ['custom'];
 
