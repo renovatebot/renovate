@@ -119,24 +119,24 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'nekto/act',
         datasource: 'github-releases',
       });
+    });
 
-      it('should ignore options unless tag_regex is provided', () => {
-        expect(createUbiToolConfig('cli/cli', { exe: 'gh' } as any)).toEqual({
-          packageName: 'cli/cli',
-          datasource: 'github-releases',
-        });
+    it('should ignore options unless tag_regex is provided', () => {
+      expect(createUbiToolConfig('cli/cli', { exe: 'gh' } as any)).toEqual({
+        packageName: 'cli/cli',
+        datasource: 'github-releases',
       });
+    });
 
-      it('should set extractVersion if tag_regex is provided', () => {
-        expect(
-          createUbiToolConfig('cargo-bins/cargo-binstall', {
-            tag_regex: '^\\d+\\.\\d+\\.',
-          }),
-        ).toEqual({
-          packageName: 'cargo-bins/cargo-binstall',
-          datasource: 'github-releases',
-          extractVersion: '(?<version>^\\d+\\.\\d+\\.)',
-        });
+    it('should set extractVersion if tag_regex is provided', () => {
+      expect(
+        createUbiToolConfig('cargo-bins/cargo-binstall', {
+          tag_regex: '^\\d+\\.\\d+\\.',
+        }),
+      ).toEqual({
+        packageName: 'cargo-bins/cargo-binstall',
+        datasource: 'github-releases',
+        extractVersion: '(?<version>^\\d+\\.\\d+\\.)',
       });
     });
   });
