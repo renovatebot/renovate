@@ -1,10 +1,7 @@
 import type { Category } from '../../../constants';
 import { HackageDatasource } from '../../datasource/hackage';
 import * as pvpVersioning from '../../versioning/pvp';
-import type {
-  PackageDependency,
-  PackageFileContent,
-} from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { CabalDependency } from './extract';
 import { extractNamesAndRanges, findDepends } from './extract';
 
