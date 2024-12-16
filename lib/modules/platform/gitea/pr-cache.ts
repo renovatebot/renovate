@@ -133,7 +133,8 @@ export class GiteaPrCache {
       });
 
       const needNextPage = this.reconcile(res.body);
-      if (!needNextPage) {
+      const nextUrl: string | undefined = parseLinkHeader(res.headers.link)?.next?.url;
+      if (!needNextPage || res.body.length === 0 || nextUrl === undefined) {
         break;
       }
 
