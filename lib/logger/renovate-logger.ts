@@ -18,6 +18,7 @@ type LoggerFunction = (p1: string | Record<string, any>, p2?: string) => void;
 
 export class RenovateLogger implements Logger {
   readonly logger: Logger = { once: { reset: onceReset } } as any;
+  readonly once = this.logger.once;
 
   constructor(
     private readonly bunyanLogger: bunyan,
@@ -65,8 +66,6 @@ export class RenovateLogger implements Logger {
   fatal(p1: string | Record<string, any>, p2?: string): void {
     this.log('fatal', p1, p2);
   }
-
-  once = this.logger.once;
 
   addStream(stream: bunyan.Stream): void {
     this.bunyanLogger.addStream(withSanitizer(stream));

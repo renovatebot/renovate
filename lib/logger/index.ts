@@ -98,7 +98,7 @@ const defaultStreams = createDefaultStreams(
 );
 
 const bunyanLogger = serializedSanitizedLogger(defaultStreams);
-const logContext: string = getEnv('LOG_CONTEXT') ?? nanoid();
+const logContext = getEnv('LOG_CONTEXT') ?? nanoid();
 const loggerInternal = new RenovateLogger(bunyanLogger, logContext, {});
 
 export const logger: Logger = loggerInternal;
