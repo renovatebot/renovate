@@ -39,7 +39,7 @@ for FILTER in "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FILTER"; do
 done
 
 if [ "$HAS_ISSUES_MISSING_LABELS" = false ]; then
-  echo "Found no issues with missing labels. Exiting the action with success."
+  echo "All checked issues have labels. Exiting the action."
   exit 0
 fi
 
