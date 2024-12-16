@@ -218,6 +218,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.packageFile = '.gitlab-ci.yml';
       upgrade.autoReplaceStringTemplate =
         "'{{{depName}}}'\nref: {{{newValue}}}";
+      upgrade.datasourceTemplate = 'docker';
       upgrade.matchStringsStrategy = 'combination';
 
       // If the new "name" is not added to the matchStrings, the regex matcher fails to extract from `newContent` as
@@ -237,7 +238,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
-    it('fails with oldversion in depname', async () => {
+    it('fails with oldversion in depName', async () => {
       const yml =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
       upgrade.manager = 'regex';
@@ -252,6 +253,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.matchStrings = [
         'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
       ];
+      upgrade.datasourceTemplate = 'docker';
       const res = doAutoReplace(upgrade, yml, reuseExistingBranch);
       await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
     });
@@ -316,6 +318,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.matchStrings = [
         'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
       ];
+      upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(yml);
     });
@@ -1190,6 +1193,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.matchStrings = [
         'image:\\s*?\\\'?\\"?(?<depName>[^:\\\'\\"]+):(?<currentValue>[^@\\\'\\"]+)@?(?<currentDigest>[^\\s\\\'\\"]+)?\\"?\\\'?\\s*',
       ];
+      upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe('image: "some.other.url.com/some-new-repo:3.16"');
     });
@@ -1213,6 +1217,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.matchStrings = [
         'image:\\s*[\\\'\\"]?(?<depName>[^:]+):(?<currentValue>[^@]+)?@?(?<currentDigest>[^\\s\\\'\\"]+)?[\\\'\\"]?\\s*',
       ];
+      upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(
         'image: "some.other.url.com/some-new-repo:3.16@sha256:p0o9i8u7z6t5r4e3w2q1"',

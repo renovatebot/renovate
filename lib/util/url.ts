@@ -97,9 +97,13 @@ export function isHttpUrl(url: unknown): boolean {
   }
 }
 
-export function parseUrl(url: string | undefined | null): URL | null {
+export function parseUrl(url: URL | string | undefined | null): URL | null {
   if (!url) {
     return null;
+  }
+
+  if (url instanceof URL) {
+    return url;
   }
 
   try {

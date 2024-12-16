@@ -19,6 +19,7 @@ const commentMatchRegExp = regEx(/#.*$/);
 const lockedVersionRegExp = regEx(
   /^\s+"(?<app>\w+)".*?"(?<lockedVersion>\d+\.\d+\.\d+)"/,
 );
+const hexRegexp = regEx(/hex:\s*(?:"(?<strValue>[^"]+)"|:(?<atomValue>\w+))/);
 
 export async function extractPackageFile(
   content: string,
@@ -44,6 +45,8 @@ export async function extractPackageFile(
         const ref = refRegexp.exec(opts)?.groups?.value;
         const branchOrTag = branchOrTagRegexp.exec(opts)?.groups?.value;
         const organization = organizationRegexp.exec(opts)?.groups?.value;
+        const hexGroups = hexRegexp.exec(opts)?.groups;
+        const hex = hexGroups?.strValue ?? hexGroups?.atomValue;
 
         let dep: PackageDependency;
 
@@ -60,8 +63,14 @@ export async function extractPackageFile(
             depName: app,
             currentValue: requirement,
             datasource: HexDatasource.id,
-            packageName: organization ? `${app}:${organization}` : app,
           };
+          if (organization) {
+            dep.packageName = `${app}:${organization}`;
+          } else if (hex) {
+            dep.packageName = hex;
+          } else {
+            dep.packageName = app;
+          }
           if (requirement?.startsWith('==')) {
             dep.currentVersion = requirement.replace(regEx(/^==\s*/), '');
           }

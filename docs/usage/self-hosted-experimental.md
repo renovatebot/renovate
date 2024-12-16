@@ -39,6 +39,10 @@ This includes the following:
 
 If set to any value, Renovate will stop using the Docker Hub API (`https://hub.docker.com`) to fetch tags and instead use the normal Docker API for images pulled from `https://index.docker.io`.
 
+## `RENOVATE_X_ENCRYPTED_STRICT`
+
+If set to `"true"`, a config error Issue will be raised in case repository config contains `encrypted` objects without any `privateKey` defined.
+
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.

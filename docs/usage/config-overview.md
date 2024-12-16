@@ -171,6 +171,19 @@ Inherited config may use all Repository config settings, and any Global config o
 
 For information on how the Mend Renovate App supports Inherited config, see the dedicated "Mend Renovate App Config" section toward the end of this page.
 
+#### Presets handling
+
+If the inherited config contains `extends` presets, then Renovate will:
+
+1. Resolve the presets
+1. Add the resolved preset config to the beginning of the inherited config
+1. Merge the presets on top of the global config
+
+##### You can not ignore presets from inherited config
+
+You can _not_ use `ignorePresets` in your repository config to ignore presets _within_ inherited config.
+This is because inherited config is resolved _before_ the repository config.
+
 ### Repository config
 
 Repository config is the config loaded from a config file in the repository.
