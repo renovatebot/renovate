@@ -1,0 +1,9 @@
+[tool.poetry]
+name = "{{ name }}"
+
+{# comment #}
+[tool.poetry.dependencies]
+python = "^3.9"
+{% if foo %}
+dep1 = "^1.0.0"
+{% endif %}
