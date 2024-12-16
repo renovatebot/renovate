@@ -557,6 +557,43 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
     });
 
+    it('handles baseURL with slash at the end', async () => {
+      process.env.GOPROXY = `${baseUrl}/`;
+
+      httpMock
+        .scope(`${baseUrl}/gopkg.in/foo`)
+        .get('.v0/@v/list')
+        .reply(200, ['v0.1.0', 'v0.2.0', '  \n'].join('\n'))
+        .get('.v0/@v/v0.1.0.info')
+        .reply(200, { Version: 'v0.1.0', Time: '2017-01-01T00:00:00Z' })
+        .get('.v0/@v/v0.2.0.info')
+        .reply(200, { Version: 'v0.2.0', Time: '2017-02-01T00:00:00Z' })
+        .get('.v0/@latest')
+        .reply(200, { Version: 'v0.2.0' })
+        .get('.v1/@v/list')
+        .reply(200, ['v1.0.0', '\n'].join('\n'))
+        .get('.v1/@v/v1.0.0.info')
+        .reply(200, { Version: 'v1.0.0', Time: '2018-01-01T00:00:00Z' })
+        .get('.v1/@latest')
+        .reply(200, { Version: 'v1.0.0' })
+        .get('.v2/@v/list')
+        .reply(404);
+
+      const res = await datasource.getReleases({
+        packageName: 'gopkg.in/foo.v0',
+      });
+
+      expect(res).toEqual({
+        releases: [
+          { releaseTimestamp: '2017-01-01T00:00:00Z', version: 'v0.1.0' },
+          { releaseTimestamp: '2017-02-01T00:00:00Z', version: 'v0.2.0' },
+          { releaseTimestamp: '2018-01-01T00:00:00Z', version: 'v1.0.0' },
+        ],
+        sourceUrl: 'https://github.com/go-foo/foo',
+        tags: { latest: 'v1.0.0' },
+      });
+    });
+
     it('continues if package returns no releases', async () => {
       process.env.GOPROXY = baseUrl;
 
@@ -565,8 +602,6 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/@v/list')
         .reply(200)
         .get('/@latest')
-        .reply(404)
-        .get('/v2/@v/list')
         .reply(404);
 
       const res = await datasource.getReleases({
@@ -584,9 +619,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/@v/list')
         .reply(200)
         .get('/@latest')
-        .reply(200, { Version: 'v0.0.0-20230905200255-921286631fa9' })
-        .get('/v2/@v/list')
-        .reply(404);
+        .reply(200, { Version: 'v0.0.0-20230905200255-921286631fa9' });
 
       const res = await datasource.getReleases({
         packageName: 'github.com/google/btree',

@@ -1,11 +1,10 @@
 import is from '@sindresorhus/is';
-import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
+import { checkIsValidDependency } from '../utils';
 import type { RecursionParameter, RegexManagerConfig } from './types';
 import {
   createDependency,
-  isValidDependency,
   mergeExtractionTemplate,
   mergeGroups,
   regexMatchAll,
@@ -32,7 +31,7 @@ export function handleAny(
     )
     .filter(is.truthy)
     .filter((dep: PackageDependency) =>
-      checkIsValidDependency(dep, packageFile),
+      checkIsValidDependency(dep, packageFile, 'regex'),
     );
 }
 
@@ -61,7 +60,7 @@ export function handleCombination(
   return [createDependency(extraction, config)]
     .filter(is.truthy)
     .filter((dep: PackageDependency) =>
-      checkIsValidDependency(dep, packageFile),
+      checkIsValidDependency(dep, packageFile, 'regex'),
     );
 }
 
@@ -84,7 +83,7 @@ export function handleRecursive(
   })
     .filter(is.truthy)
     .filter((dep: PackageDependency) =>
-      checkIsValidDependency(dep, packageFile),
+      checkIsValidDependency(dep, packageFile, 'regex'),
     );
 }
 
@@ -115,24 +114,4 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
       combinedGroups: mergeGroups(combinedGroups, match.groups ?? {}),
     });
   });
-}
-
-function checkIsValidDependency(
-  dep: PackageDependency,
-  packageFile: string,
-): boolean {
-  const isValid = isValidDependency(dep);
-  if (!isValid) {
-    const meta = {
-      packageDependency: dep,
-      packageFile,
-    };
-    logger.trace(
-      meta,
-      'Discovered a package dependency by matching regex, but it did not pass validation. Discarding',
-    );
-    return isValid;
-  }
-
-  return isValid;
 }

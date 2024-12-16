@@ -175,6 +175,9 @@ export async function removeDanglingContainers(): Promise<void> {
     const containerLabel = getContainerLabel(
       GlobalConfig.get('dockerChildPrefix'),
     );
+    logger.debug(
+      `Removing dangling child containers with label ${containerLabel}`,
+    );
     const res = await rawExec(
       `docker ps --filter label=${containerLabel} -aq`,
       {

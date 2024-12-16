@@ -20,32 +20,41 @@ The first two required fields are `fileMatch` and `matchStrings`:
 - `fileMatch` works the same as any manager
 - `matchStrings` is a `regex` custom manager concept and is used for configuring a regular expression with named capture groups
 
-Before Renovate can look up a dependency and decide about updates, it needs this information about each dependency:
+#### Information that Renovate needs about the dependency
 
-- The dependency's name
-- Which `datasource` to use: npm, Docker, GitHub tags, and so on. For how to format this references see [datasource overview](../../datasource/index.md#supported-datasources)
-- Which version scheme to use: defaults to `semver-coerced`, but you may set another value like `pep440`. Supported versioning schemes can be found in the [versioning overview](../../versioning/index.md#supported-versioning)
+Before Renovate can look up a dependency and decide about updates, it must have this info about each dependency:
 
-Configuration-wise, it works like this:
+| Info type                                            | Required | Notes                                                     | Docs                                                                           |
+| :--------------------------------------------------- | :------- | :-------------------------------------------------------- | :----------------------------------------------------------------------------- |
+| Name of the dependency                               | Yes      |                                                           |                                                                                |
+| `datasource`                                         | Yes      | Example datasources: npm, Docker, GitHub tags, and so on. | [Supported datasources](../../datasource/index.md#supported-datasources)       |
+| Version scheme to use. Defaults to `semver-coerced`. | Yes      | You may set another version scheme, like `pep440`.        | [Supported versioning schemes](../../versioning/index.md#supported-versioning) |
 
-- You must capture the `currentValue` of the dependency in a named capture group
-- You must have either a `depName` or `packageName` capture group, or use on of the respective template fields ( `depNameTemplate` and `packageNameTemplate` )
-- You must have either a `datasource` capture group or a `datasourceTemplate` config field
-- You can optionally have a `depType` capture group or a `depTypeTemplate` config field
-- You can optionally have a `versioning` capture group or a `versioningTemplate` config field. If neither are present, Renovate will use `semver-coerced` as the default
-- You can optionally have an `extractVersion` capture group or an `extractVersionTemplate` config field
-- You can optionally have a `currentDigest` capture group
-- You can optionally have a `registryUrl` capture group or a `registryUrlTemplate` config field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array
-- You can optionally have an `indentation` capture group. It must be either empty or whitespace only, otherwise it will be reset to an empty string
+### Required capture groups
+
+You must:
+
+- Capture the `currentValue` of the dependency in a named capture group
+- Set a `depName` or `packageName` capture group. Or use a template field: `depNameTemplate` and `packageNameTemplate`
+- Set a `datasource` capture group, or a `datasourceTemplate` config field
+
+### Optional capture groups
+
+You may use any of these items:
+
+- A `depType` capture group, or a `depTypeTemplate` config field
+- A `versioning` capture group, or a `versioningTemplate` config field. If neither are present, Renovate defaults to `semver-coerced`
+- An `extractVersion` capture group, or an `extractVersionTemplate` config field
+- A `currentDigest` capture group
+- A `registryUrl` capture group, or a `registryUrlTemplate` config field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array
+- An `indentation` capture group. It must be either empty, or whitespace only (otherwise `indentation` will be reset to an empty string)
 
 ### Regular Expression Capture Groups
 
 To be effective with the regex manager, you should understand regular expressions and named capture groups.
 But enough examples may compensate for lack of experience.
 
-Take this `Dockerfile` as an example:
-
-```Dockerfile
+```Dockerfile title="Example Dockerfile"
 FROM node:12
 ENV YARN_VERSION=1.19.1
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
@@ -55,9 +64,7 @@ You would need to capture the `currentValue` with a named capture group, like th
 
 To update a version string multiple times in a line: use multiple `matchStrings`, one for each occurrence.
 
-Here is the full Renovate `.json5` config:
-
-```json5
+```json5 title="Full Renovate .json5 config"
 {
   customManagers: [
     {
@@ -75,20 +82,24 @@ Here is the full Renovate `.json5` config:
 }
 ```
 
-And an example how the `file-you-want-to-match` could look like:
-
-```text
+```text title="Example of how the file-you-want-to-match could look like"
 # renovate: datasource=github-tags depName=org/repo versioning=loose
 something:4.7.2    something-else:4.7.2
 ```
 
+#### Online regex testing tool tips
+
 If you're looking for an online regex testing tool that supports capture groups, try [regex101.com](<https://regex101.com/?flavor=javascript&flags=g&regex=ENV%20YARN_VERSION%3D(%3F%3CcurrentValue%3E.*%3F)%5Cn&testString=FROM%20node%3A12%0AENV%20YARN_VERSION%3D1.19.1%0ARUN%20curl%20-o-%20-L%20https%3A%2F%2Fyarnpkg.com%2Finstall.sh%20%7C%20bash%20-s%20--%20--version%20%24%7BYARN_VERSION%7D>).
 You must select the `ECMAScript (JavaScript)` flavor of regex.
-Be aware that backslashes (`'\'`) of the resulting regex have to still be escaped e.g. `\n\s` --> `\\n\\s`.
+Backslashes (`'\'`) of the resulting regex have to still be escaped e.g. `\n\s` --> `\\n\\s`.
 You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
 
+##### Renovate's regex differs from the online tools
+
 The `regex` manager uses [RE2](https://github.com/google/re2/wiki/WhyRE2) which **does not support** [backreferences and lookahead assertions](https://github.com/uhop/node-re2#limitations-things-re2-does-not-support).
-The `regex` manager matches are done per-file and not per-line, you should be aware when using the `^` and/or `$` regex assertions.
+
+The `regex` manager matches are done per-file, not per-line!
+Keep this in mind when using the `^` or `$` regex assertions.
 
 ### Configuration templates
 

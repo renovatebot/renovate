@@ -1,16 +1,18 @@
-import replacementGroups from '../../../data/replacements.json';
+import replacementGroupsJson from '../../../data/replacements.json';
 import type { Preset } from '../types';
 import type { PresetTemplate, Replacement } from './auto-generate-replacements';
 import { addPresets } from './auto-generate-replacements';
 
+const { $schema, ...replacementPresets } = replacementGroupsJson;
+
 /* eslint sort-keys: ["error", "asc", {"caseSensitive": false, "natural": true}] */
-export const presets: Record<string, Preset> = replacementGroups;
+export const presets: Record<string, Preset> = replacementPresets;
 
 const muiReplacement: Replacement[] = [
   [['@material-ui/codemod'], '@mui/codemod'],
   [['@material-ui/core'], '@mui/material'],
   [['@material-ui/icons'], '@mui/icons-material'],
-  [['@material-ui/lab'], '@mui/labs'],
+  [['@material-ui/lab'], '@mui/lab'],
   [['@material-ui/private-theming'], '@mui/private-theming'],
   [['@material-ui/styled-engine'], '@mui/styled-engine'],
   [['@material-ui/styled-engine-sc'], '@mui/styled-engine-sc'],

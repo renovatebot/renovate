@@ -4,6 +4,7 @@ import { mergeChildConfig } from '../../config';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { StageName } from '../../types/skip-reason';
+import { compile } from '../template';
 import matchers from './matchers';
 
 async function matchesRule(
@@ -57,6 +58,36 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         delete config.skipReason;
         delete config.skipStage;
       }
+      if (
+        is.string(toApply.overrideDatasource) &&
+        toApply.overrideDatasource !== config.datasource
+      ) {
+        logger.debug(
+          `Overriding datasource from ${config.datasource} to ${toApply.overrideDatasource} for ${config.depName}`,
+        );
+        config.datasource = toApply.overrideDatasource;
+      }
+      if (
+        is.string(toApply.overrideDepName) &&
+        toApply.overrideDepName !== config.depName
+      ) {
+        logger.debug(
+          `Overriding depName from ${config.depName} to ${toApply.overrideDepName}`,
+        );
+        config.depName = compile(toApply.overrideDepName, config);
+      }
+      if (
+        is.string(toApply.overridePackageName) &&
+        toApply.overridePackageName !== config.packageName
+      ) {
+        logger.debug(
+          `Overriding packageName from ${config.packageName} to ${toApply.overridePackageName} for ${config.depName}`,
+        );
+        config.packageName = compile(toApply.overridePackageName, config);
+      }
+      delete toApply.overrideDatasource;
+      delete toApply.overrideDepName;
+      delete toApply.overridePackageName;
       config = mergeChildConfig(config, toApply);
     }
   }

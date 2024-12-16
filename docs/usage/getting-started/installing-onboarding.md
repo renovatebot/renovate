@@ -67,6 +67,10 @@ Once you have enabled Renovate on a repository, you will get a "Configure Renova
 
 ![Onboarding PR from Renovate](../assets/images/onboarding.png){ loading=lazy }
 
+<!-- prettier-ignore -->
+!!! note
+    If you self-host Renovate, and want to add the rebase/retry checkbox to Renovate's onboarding PRs: enable the [`onboardingRebaseCheckbox` config option](../self-hosted-configuration.md#onboardingrebasecheckbox) first.
+
 ### No risk onboarding
 
 Conveniently, Renovate will not make any changes to your repository or raise any further Pull Requests until after you _merge_ the onboarding Pull Request.

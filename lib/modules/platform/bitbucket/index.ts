@@ -283,7 +283,7 @@ function matchesState(state: string, desiredState: string): boolean {
 }
 
 export async function getPrList(): Promise<Pr[]> {
-  logger.debug('getPrList()');
+  logger.trace('getPrList()');
   return await BitbucketPrCache.getPrs(
     bitbucketHttp,
     config.repository,

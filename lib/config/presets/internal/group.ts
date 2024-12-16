@@ -111,14 +111,19 @@ const staticGroups = {
   },
   fusionjs: {
     description: 'Group Fusion.js packages together.',
-    matchPackageNames: [
-      'fusion-cli',
-      'fusion-core',
-      'fusion-test-utils',
-      'fusion-tokens',
-      'fusion-plugin-**',
-      'fusion-react**',
-      'fusion-apollo**',
+    packageRules: [
+      {
+        groupName: 'Fusion.js packages',
+        matchPackageNames: [
+          'fusion-cli',
+          'fusion-core',
+          'fusion-test-utils',
+          'fusion-tokens',
+          'fusion-plugin-**',
+          'fusion-react**',
+          'fusion-apollo**',
+        ],
+      },
     ],
   },
   githubArtifactActions: {
@@ -347,7 +352,7 @@ const staticGroups = {
     packageRules: [
       {
         commitMessageTopic: 'Node.js',
-        matchDatasources: ['docker'],
+        matchDatasources: ['docker', 'node-version'],
         matchPackageNames: [
           '/(?:^|/)node$/', // node or ends with "/node, except those below"
           '!calico/node',
