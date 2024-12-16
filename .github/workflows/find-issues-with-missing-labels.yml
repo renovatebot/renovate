@@ -5,12 +5,12 @@ on:
     # Run every Sunday at midnight
     - cron: '0 0 * * 0'
 
-permissions:
-  issues: write
-
 jobs:
   check-unlabeled-issues:
     runs-on: ubuntu-latest
+
+    permissions:
+      issues: write
 
     env:
       GH_TOKEN: ${{ github.token }}
