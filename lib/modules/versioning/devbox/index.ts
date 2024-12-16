@@ -43,10 +43,13 @@ class DevboxVersioningApi extends GenericVersioningApi {
   protected override _compare(version: string, other: string): number {
     const parsed1 = this._parse(version);
     const parsed2 = this._parse(other);
+
     // Treat "latest" as * and always return equal
     if (other === 'latest' && parsed1) {
       return 0;
     }
+
+    // If either version is invalid, return unequal
     if (!(parsed1 && parsed2)) {
       return 1;
     }
