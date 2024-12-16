@@ -62,7 +62,7 @@ fi
 echo -e "$ISSUE_BODY"
 
 # Log a message and "fail" the Action if there are issues with missing labels
-echo "Found issues missing labels. Please check the issue(s) above. Exiting the action with failure."
+echo "Found issues without labels. Please check the issue(s) listed above. Exiting the action."
 
 exit 1
 
