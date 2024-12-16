@@ -10,9 +10,9 @@ Renovate reads the configuration files in this order (from from top to bottom):
 
 1. Default config
 2. Global config
-   2.1 File config
-   2.2 Environment config
-   2.3 CLI config
+   - File config
+   - Environment config
+   - CLI config
 3. Inherited config
 4. Resolved presets referenced in config
 5. Repository config
