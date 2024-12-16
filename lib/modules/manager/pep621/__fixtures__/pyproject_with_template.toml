@@ -1,0 +1,13 @@
+[project]
+name = "{{ name }}"
+dynamic = ["version"]
+requires-python = ">=3.7"
+license = {text = "MIT"}
+{# comment #}
+dependencies = [
+  "blinker",
+  {% if foo %}
+  "packaging>=20.9,!=22.0",
+  {% endif %}
+]
+readme = "README.md"

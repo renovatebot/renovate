@@ -605,5 +605,11 @@ describe('modules/manager/pep621/extract', () => {
         ],
       });
     });
+
+    it('should resolve dependencies with template', async () => {
+      const templatePyProject = Fixtures.get('pyproject_with_template.toml');
+      const res = await extractPackageFile(templatePyProject, 'pyproject.toml');
+      expect(res?.deps).toHaveLength(2);
+    });
   });
 });
