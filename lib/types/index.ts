@@ -1,6 +1,6 @@
 export type { CommitMessageJSON } from './commit-message-json';
 export type { HostRule, CombinedHostRule } from './host-rules';
-export type { SkipReason } from './skip-reason';
+export type { SkipReason, StageName } from './skip-reason';
 export type { RangeStrategy } from './versioning';
 export type { BranchStatus } from './branch-status';
 export type {

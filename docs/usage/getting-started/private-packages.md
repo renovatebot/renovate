@@ -499,7 +499,7 @@ private-package==1.2.3
 
 #### Packages that Renovate needs
 
-Renovate relies on `pip`'s integration with the Python [keyring](https://pypi.org/project/keyring/) package along with the [keyrigs.envvars](https://pypi.org/project/keyrings.envvars/) backend for this.
+Renovate relies on `pip`'s integration with the Python [keyring](https://pypi.org/project/keyring/) package along with the [keyrings.envvars](https://pypi.org/project/keyrings.envvars/) backend for this.
 
 ##### Self-hosting Renovate
 
@@ -511,7 +511,7 @@ But if you are self-hosting Renovate and:
 - _not_ running Renovate in a Containerbase environment
 - or, _not_ using the Docker sidecar container
 
-Then you must install the Python keyring package and the keyrigs.envvars package into your self-hosted environment.
+Then you must install the Python keyring package and the keyrings.envvars package into your self-hosted environment.
 
 ### poetry
 

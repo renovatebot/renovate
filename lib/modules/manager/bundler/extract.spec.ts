@@ -171,14 +171,22 @@ describe('modules/manager/bundler/extract', () => {
   it('parses inline source in Gemfile', async () => {
     const sourceInlineGemfile = codeBlock`
       baz = 'https://gems.baz.com'
+      gem 'inline_gem'
       gem "inline_source_gem", source: 'https://gems.foo.com'
       gem 'inline_source_gem_with_version', "~> 1", source: 'https://gems.bar.com'
       gem 'inline_source_gem_with_variable_source', source: baz
+      gem 'inline_source_gem_with_variable_source_and_require_after', source: baz, require: %w[inline_source_gem]
+      gem "inline_source_gem_with_require_after", source: 'https://gems.foo.com', require: %w[inline_source_gem]
+      gem "inline_source_gem_with_require_before", require: %w[inline_source_gem], source: 'https://gems.foo.com'
+      gem "inline_source_gem_with_group_before", group: :production, source: 'https://gems.foo.com'
       `;
     fs.readLocalFile.mockResolvedValueOnce(sourceInlineGemfile);
     const res = await extractPackageFile(sourceInlineGemfile, 'Gemfile');
     expect(res).toMatchObject({
       deps: [
+        {
+          depName: 'inline_gem',
+        },
         {
           depName: 'inline_source_gem',
           registryUrls: ['https://gems.foo.com'],
@@ -191,6 +199,22 @@ describe('modules/manager/bundler/extract', () => {
         {
           depName: 'inline_source_gem_with_variable_source',
           registryUrls: ['https://gems.baz.com'],
+        },
+        {
+          depName: 'inline_source_gem_with_variable_source_and_require_after',
+          registryUrls: ['https://gems.baz.com'],
+        },
+        {
+          depName: 'inline_source_gem_with_require_after',
+          registryUrls: ['https://gems.foo.com'],
+        },
+        {
+          depName: 'inline_source_gem_with_require_before',
+          registryUrls: ['https://gems.foo.com'],
+        },
+        {
+          depName: 'inline_source_gem_with_group_before',
+          registryUrls: ['https://gems.foo.com'],
         },
       ],
     });
@@ -227,6 +251,52 @@ describe('modules/manager/bundler/extract', () => {
           sourceUrl: 'https://github.com/baz/baz',
           currentValue: 'master',
           datasource: 'git-refs',
+        },
+      ],
+    });
+  });
+
+  it('parses multiple current values Gemfile', async () => {
+    const multipleValuesGemfile = codeBlock`
+      gem 'gem_without_values'
+      gem 'gem_with_one_value', ">= 3.0.5"
+      gem 'gem_with_multiple_values', ">= 3.0.5", "< 3.2"
+    `;
+    fs.readLocalFile.mockResolvedValueOnce(multipleValuesGemfile);
+    const res = await extractPackageFile(multipleValuesGemfile, 'Gemfile');
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'gem_without_values',
+        },
+        {
+          depName: 'gem_with_one_value',
+          currentValue: '">= 3.0.5"',
+        },
+        {
+          depName: 'gem_with_multiple_values',
+          currentValue: '">= 3.0.5", "< 3.2"',
+        },
+      ],
+    });
+  });
+
+  it('skips local gems in Gemfile', async () => {
+    const pathGemfile = codeBlock`
+      gem 'foo', path: 'vendor/foo'
+      gem 'bar'
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(pathGemfile);
+    const res = await extractPackageFile(pathGemfile, 'Gemfile');
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'foo',
+          skipReason: 'internal-package',
+        },
+        {
+          depName: 'bar',
         },
       ],
     });

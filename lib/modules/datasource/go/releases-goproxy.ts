@@ -213,9 +213,11 @@ export class GoProxyDatasource extends Datasource {
         major += 1; // v0 and v1 are the same module
       }
 
+      let releases: Release[] = [];
+
       try {
         const res = await this.listVersions(baseUrl, pkg);
-        const releases = await p.map(res, async (versionInfo) => {
+        releases = await p.map(res, async (versionInfo) => {
           const { version, newDigest, releaseTimestamp } = versionInfo;
 
           if (releaseTimestamp) {
@@ -257,6 +259,10 @@ export class GoProxyDatasource extends Datasource {
             result.releases.push(releaseFromLatest);
           }
         }
+      }
+
+      if (!releases.length) {
+        break;
       }
     }
 

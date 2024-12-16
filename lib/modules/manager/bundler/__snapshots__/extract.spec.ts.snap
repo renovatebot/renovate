@@ -542,12 +542,15 @@ exports[`modules/manager/bundler/extract extractPackageFile() parse mastodon Gem
       },
     },
     {
+      "currentDigest": "54b17ba8c7d8d20a16dfc65d1775241833219cf2",
       "currentValue": "'~> 0.6'",
-      "datasource": "rubygems",
+      "datasource": "git-refs",
       "depName": "http_parser.rb",
       "managerData": {
         "lineNumber": 57,
       },
+      "packageName": "https://github.com/tmm1/http_parser.rb",
+      "sourceUrl": "https://github.com/tmm1/http_parser.rb",
     },
     {
       "currentValue": "'~> 1.3'",
