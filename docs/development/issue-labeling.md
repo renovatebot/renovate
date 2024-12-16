@@ -231,5 +231,5 @@ The Action runs each week.
 
 ### Apply the correct labels manually
 
-The Action will not fix any badly labeled issues.
+The Action will _not_ fix any badly labeled issues.
 This means that you, or we, must apply the correct labels to any affected Issue.
