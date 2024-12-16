@@ -61,7 +61,7 @@ export function createDefaultStreams(
 }
 
 // istanbul ignore next: not easily testable
-export function createLogFileStream(logFile: string): bunyan.Stream {
+function createLogFileStream(logFile: string): bunyan.Stream {
   // Ensure log file directory exists
   const directoryName = upath.dirname(logFile);
   fs.ensureDirSync(directoryName);
@@ -73,7 +73,7 @@ export function createLogFileStream(logFile: string): bunyan.Stream {
   };
 }
 
-export function serializedSanitizedLogger(streams: bunyan.Stream[]): bunyan {
+function serializedSanitizedLogger(streams: bunyan.Stream[]): bunyan {
   return bunyan.createLogger({
     name: 'renovate',
     serializers: {

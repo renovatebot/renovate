@@ -29,8 +29,6 @@ jest.mock('nanoid', () => ({
 const bunyanDebugSpy = jest.spyOn(bunyan.prototype, 'debug');
 
 describe('logger/index', () => {
-  beforeEach(() => {});
-
   it('inits', () => {
     expect(logger).toBeDefined();
   });
