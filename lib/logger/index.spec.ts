@@ -144,12 +144,15 @@ describe('logger/index', () => {
   it('saves problems', () => {
     addSecret('p4$$w0rd');
     levels('stdout', 'fatal');
+    logger.fatal('fatal error');
+    logger.trace('for coverage');
     logger.error('some meta');
     logger.error({ some: 'meta', password: 'super secret' });
     logger.error({ some: 'meta' }, 'message');
     logger.warn('a warning with a p4$$w0rd');
     logger.info('ignored');
     expect(getProblems()).toMatchObject([
+      { msg: 'fatal error' },
       { msg: 'some meta' },
       { some: 'meta', password: '***********' },
       { some: 'meta', msg: 'message' },
