@@ -159,11 +159,11 @@ importers:
         specifier: 10.4.0
         version: 10.4.0
       emojibase:
-        specifier: 15.3.1
-        version: 15.3.1
+        specifier: 16.0.0
+        version: 16.0.0
       emojibase-regex:
-        specifier: 15.3.2
-        version: 15.3.2
+        specifier: 16.0.0
+        version: 16.0.0
       extract-zip:
         specifier: 2.0.1
         version: 2.0.1
@@ -524,8 +524,8 @@ importers:
         specifier: 8.0.0
         version: 8.0.0
       emojibase-data:
-        specifier: 15.3.2
-        version: 15.3.2(emojibase@15.3.1)
+        specifier: 16.0.2
+        version: 16.0.2(emojibase@16.0.0)
       eslint:
         specifier: 8.57.1
         version: 8.57.1
@@ -3090,16 +3090,17 @@ packages:
   emoji-regex@9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
 
-  emojibase-data@15.3.2:
-    resolution: {integrity: sha512-TpDyTDDTdqWIJixV5sTA6OQ0P0JfIIeK2tFRR3q56G9LK65ylAZ7z3KyBXokpvTTJ+mLUXQXbLNyVkjvnTLE+A==}
+  emojibase-data@16.0.2:
+    resolution: {integrity: sha512-vRM82rvhjB4z5jDvxYanK/CZVe1QCu9ihxockyNvitd/aFkTT6Y4eeBW49GoXv5JMCNFrzDarADWrv7tjLcefA==}
     peerDependencies:
       emojibase: '*'
 
-  emojibase-regex@15.3.2:
-    resolution: {integrity: sha512-ue6BVeb2qu33l97MkxcOoyMJlg6Tug3eTv2z1at+M9TjvlWKvdmAPvZIDG1JbT2RH3FSyJNLucO5K5H/yxT03w==}
+  emojibase-regex@16.0.0:
+    resolution: {integrity: sha512-ZMp31BkzBWNW+T73of6NURL6nXQa5GkfKneOkr3cEwBDVllbW/2nuva7NO0J3RjaQ07+SZQNgPTGZ4JlIhmM2Q==}
 
-  emojibase@15.3.1:
-    resolution: {integrity: sha512-GNsjHnG2J3Ktg684Fs/vZR/6XpOSkZPMAv85EHrr6br2RN2cJNwdS4am/3YSK3y+/gOv2kmoK3GGdahXdMxg2g==}
+  emojibase@16.0.0:
+    resolution: {integrity: sha512-Nw2m7JLIO4Ou2X/yZPRNscHQXVbbr6SErjkJ7EooG7MbR3yDZszCv9KTizsXFc7yZl0n3WF+qUKIC/Lw6H9xaQ==}
+    engines: {node: '>=18.12.0'}
 
   emojilib@2.4.0:
     resolution: {integrity: sha512-5U0rVMU5Y2n2+ykNLQqMoqklN9ICBT/KsvC1Gz6vqHbz2AXXGkG+Pm5rMWk/8Vjrr/mY9985Hi8DYzn1F09Nyw==}
@@ -9839,13 +9840,13 @@ snapshots:
 
   emoji-regex@9.2.2: {}
 
-  emojibase-data@15.3.2(emojibase@15.3.1):
+  emojibase-data@16.0.2(emojibase@16.0.0):
     dependencies:
-      emojibase: 15.3.1
+      emojibase: 16.0.0
 
-  emojibase-regex@15.3.2: {}
+  emojibase-regex@16.0.0: {}
 
-  emojibase@15.3.1: {}
+  emojibase@16.0.0: {}
 
   emojilib@2.4.0: {}
 
