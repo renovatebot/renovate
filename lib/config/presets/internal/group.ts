@@ -346,6 +346,16 @@ const staticGroups = {
       },
     ],
   },
+  micrometer: {
+    description:
+      "Group Micrometer packages together, e.g. 'io.micrometer:micrometer-core'.",
+    packageRules: [
+      {
+        groupName: 'micrometer',
+        matchPackageNames: ['io.micrometer:micrometer-**'],
+      },
+    ],
+  },
   nodeJs: {
     description:
       "Group anything that looks like Node.js together so that it's updated together.",
@@ -467,6 +477,7 @@ const staticGroups = {
       'group:jestPlusTypes',
       'group:jwtFramework',
       'group:kubernetes',
+      'group:micrometer',
       'group:phpstan',
       'group:polymer',
       'group:react',
