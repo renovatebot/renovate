@@ -3,7 +3,7 @@ import { regEx } from '../../../util/regex';
 const buildDependsRegex = regEx(
   /(?<buildDependsFieldName>build-depends[ \t]*:)/i,
 );
-function isNonASCII(str: string): bool {
+function isNonASCII(str: string): boolean {
   for (let i = 0; i < str.length; i++) {
     if (str.charCodeAt(i) > 127) {
       return true;
