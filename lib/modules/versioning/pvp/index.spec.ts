@@ -141,12 +141,12 @@ describe('modules/versioning/pvp/index', () => {
   describe('.getNewValue(newValueConfig)', () => {
     it.each`
       currentValue       | newVersion | rangeStrategy        | expected
-      ${'>=1.0 && <1.1'} | ${'1.1'}   | ${'auto'}            | ${'>=1.0 && <1.2'}
-      ${'>=1.2 && <1.3'} | ${'1.2.3'} | ${'auto'}            | ${null}
+      ${'>=1.0 && <1.1'} | ${'1.1'}   | ${'widen'}           | ${'>=1.0 && <1.2'}
+      ${'>=1.2 && <1.3'} | ${'1.2.3'} | ${'widen'}           | ${null}
       ${'>=1.0 && <1.1'} | ${'1.2.3'} | ${'update-lockfile'} | ${null}
-      ${'gibberish'}     | ${'1.2.3'} | ${'auto'}            | ${null}
-      ${'>=1.0 && <1.1'} | ${'0.9'}   | ${'auto'}            | ${null}
-      ${'>=1.0 && <1.1'} | ${''}      | ${'auto'}            | ${null}
+      ${'gibberish'}     | ${'1.2.3'} | ${'widen'}           | ${null}
+      ${'>=1.0 && <1.1'} | ${'0.9'}   | ${'widen'}           | ${null}
+      ${'>=1.0 && <1.1'} | ${''}      | ${'widen'}           | ${null}
     `(
       'pvp.getNewValue({currentValue: "$currentValue", newVersion: "$newVersion", rangeStrategy: "$rangeStrategy"}) === $expected',
       ({ currentValue, newVersion, rangeStrategy, expected }) => {
