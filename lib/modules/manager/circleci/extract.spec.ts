@@ -13,6 +13,33 @@ describe('modules/manager/circleci/extract', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
 
+    it('handles registry alias', () => {
+      const res = extractPackageFile(
+        'executors:\n  my-executor:\n    docker:\n      - image: quay.io/myName/myPackage:0.6.2',
+        '',
+        {
+          registryAliases: {
+            'quay.io': 'my-quay-mirror.registry.com',
+            'index.docker.io': 'my-docker-mirror.registry.com',
+          },
+        },
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'quay.io/myName/myPackage:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.6.2',
+            datasource: 'docker',
+            depName: 'my-quay-mirror.registry.com/myName/myPackage',
+            depType: 'docker',
+            replaceString: 'quay.io/myName/myPackage:0.6.2',
+          },
+        ],
+      });
+    });
+
     it('extracts multiple image and resolves yaml anchors', () => {
       const res = extractPackageFile(file1);
       expect(res?.deps).toEqual([
@@ -221,6 +248,66 @@ describe('modules/manager/circleci/extract', () => {
           replaceString: 'cimg/ruby:3.0.3-browsers',
         },
       ]);
+    });
+
+    it('extracts orb definitions', () => {
+      const res = extractPackageFile(codeBlock`
+      version: 2.1
+
+      orbs:
+        myorb:
+          orbs:
+            python: circleci/python@2.1.1
+
+          executors:
+            python:
+              docker:
+                - image: cimg/python:3.9
+
+          jobs:
+            test_image:
+              docker:
+                - image: cimg/python:3.7
+              steps:
+                - checkout
+
+      workflows:
+        Test:
+          jobs:
+            - myorb/test_image`);
+
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '2.1.1',
+            datasource: 'orb',
+            depName: 'python',
+            depType: 'orb',
+            packageName: 'circleci/python',
+            versioning: 'npm',
+          },
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '3.9',
+            datasource: 'docker',
+            depName: 'cimg/python',
+            depType: 'docker',
+            replaceString: 'cimg/python:3.9',
+          },
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '3.7',
+            datasource: 'docker',
+            depName: 'cimg/python',
+            depType: 'docker',
+            replaceString: 'cimg/python:3.7',
+          },
+        ],
+      });
     });
   });
 });

@@ -19,7 +19,9 @@
     "licenses": [
       "MIT"
     ],
-    "links": {},
+    "links": {
+      "GitHub": "https://github.com/renovate_test/private_package"
+    },
     "maintainers": []
   },
   "name": "private_package",

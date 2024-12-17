@@ -602,8 +602,6 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/@v/list')
         .reply(200)
         .get('/@latest')
-        .reply(404)
-        .get('/v2/@v/list')
         .reply(404);
 
       const res = await datasource.getReleases({
@@ -621,9 +619,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/@v/list')
         .reply(200)
         .get('/@latest')
-        .reply(200, { Version: 'v0.0.0-20230905200255-921286631fa9' })
-        .get('/v2/@v/list')
-        .reply(404);
+        .reply(200, { Version: 'v0.0.0-20230905200255-921286631fa9' });
 
       const res = await datasource.getReleases({
         packageName: 'github.com/google/btree',

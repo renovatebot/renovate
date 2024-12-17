@@ -6,10 +6,10 @@ import type {
   ExtractConfig,
   GlobalManagerConfig,
   ManagerApi,
+  MaybePromise,
   PackageFile,
   PackageFileContent,
   RangeConfig,
-  Result,
 } from './types';
 export { hashMap } from './fingerprint.generated';
 
@@ -65,7 +65,7 @@ export function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig,
-): Result<PackageFileContent | null> {
+): MaybePromise<PackageFileContent | null> {
   const m = managers.get(manager)! ?? customManagers.get(manager)!;
   if (!m) {
     return null;

@@ -31,7 +31,7 @@ export function handleAny(
     )
     .filter(is.truthy)
     .filter((dep: PackageDependency) =>
-      checkIsValidDependency(dep, packageFile, 'custom.regex'),
+      checkIsValidDependency(dep, packageFile, 'regex'),
     );
 }
 
@@ -60,7 +60,7 @@ export function handleCombination(
   return [createDependency(extraction, config)]
     .filter(is.truthy)
     .filter((dep: PackageDependency) =>
-      checkIsValidDependency(dep, packageFile, 'custom.regex'),
+      checkIsValidDependency(dep, packageFile, 'regex'),
     );
 }
 
@@ -83,7 +83,7 @@ export function handleRecursive(
   })
     .filter(is.truthy)
     .filter((dep: PackageDependency) =>
-      checkIsValidDependency(dep, packageFile, 'custom.regex'),
+      checkIsValidDependency(dep, packageFile, 'regex'),
     );
 }
 

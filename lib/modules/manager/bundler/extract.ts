@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { RubygemsDatasource } from '../../datasource/rubygems';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -11,6 +12,20 @@ import { extractLockFileEntries } from './locked-version';
 function formatContent(input: string): string {
   return input.replace(regEx(/^ {2}/), '') + '\n'; //remove leading whitespace and add a new line at the end
 }
+
+const variableMatchRegex = regEx(
+  `^(?<key>\\w+)\\s*=\\s*['"](?<value>[^'"]+)['"]`,
+);
+const gemMatchRegex = regEx(
+  `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?`,
+);
+const sourceMatchRegex = regEx(
+  `source:\\s*((?:['"](?<registryUrl>[^'"]+)['"])|(?<sourceName>\\w+))?`,
+);
+const gitRefsMatchRegex = regEx(
+  `((git:\\s*['"](?<gitUrl>[^'"]+)['"])|(\\s*,\\s*github:\\s*['"](?<repoName>[^'"]+)['"]))(\\s*,\\s*branch:\\s*['"](?<branchName>[^'"]+)['"])?(\\s*,\\s*ref:\\s*['"](?<refName>[^'"]+)['"])?(\\s*,\\s*tag:\\s*['"](?<tagName>[^'"]+)['"])?`,
+);
+const pathMatchRegex = regEx(`path:\\s*['"](?<path>[^'"]+)['"]`);
 
 export async function extractPackageFile(
   content: string,
@@ -114,9 +129,6 @@ export async function extractPackageFile(
       });
     }
 
-    const variableMatchRegex = regEx(
-      `^(?<key>\\w+)\\s*=\\s*['"](?<value>[^'"]+)['"]`,
-    );
     const variableMatch = variableMatchRegex.exec(line);
     if (variableMatch) {
       if (variableMatch.groups?.key) {
@@ -124,28 +136,56 @@ export async function extractPackageFile(
       }
     }
 
-    const gemMatchRegex = regEx(
-      `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?(\\s*,\\s*source:\\s*(['"](?<registryUrl>[^'"]+)['"]|(?<sourceName>[^'"]+)))?`,
-    );
-    const gemMatch = gemMatchRegex.exec(line);
+    const gemMatch = gemMatchRegex.exec(line)?.groups;
+
     if (gemMatch) {
       const dep: PackageDependency = {
-        depName: gemMatch.groups?.depName,
+        depName: gemMatch.depName,
         managerData: { lineNumber },
+        datasource: RubygemsDatasource.id,
       };
-      if (gemMatch.groups?.currentValue) {
-        const currentValue = gemMatch.groups.currentValue;
+
+      if (gemMatch.currentValue) {
+        const currentValue = gemMatch.currentValue;
         dep.currentValue = currentValue;
       }
-      if (gemMatch.groups?.registryUrl) {
-        const registryUrl = gemMatch.groups.registryUrl;
-        dep.registryUrls = [registryUrl];
+
+      const pathMatch = pathMatchRegex.exec(line)?.groups;
+      if (pathMatch) {
+        dep.skipReason = 'internal-package';
       }
-      if (gemMatch.groups?.sourceName) {
-        const registryUrl = variables[gemMatch.groups.sourceName];
-        dep.registryUrls = [registryUrl];
+
+      const sourceMatch = sourceMatchRegex.exec(line)?.groups;
+      if (sourceMatch) {
+        if (sourceMatch.registryUrl) {
+          dep.registryUrls = [sourceMatch.registryUrl];
+        } else if (sourceMatch.sourceName) {
+          dep.registryUrls = [variables[sourceMatch.sourceName]];
+        }
       }
-      dep.datasource = RubygemsDatasource.id;
+
+      const gitRefsMatch = gitRefsMatchRegex.exec(line)?.groups;
+      if (gitRefsMatch) {
+        if (gitRefsMatch.gitUrl) {
+          const gitUrl = gitRefsMatch.gitUrl;
+          dep.packageName = gitUrl;
+
+          if (gitUrl.startsWith('https://')) {
+            dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+          }
+        } else if (gitRefsMatch.repoName) {
+          dep.packageName = `https://github.com/${gitRefsMatch.repoName}`;
+          dep.sourceUrl = dep.packageName;
+        }
+        if (gitRefsMatch.refName) {
+          dep.currentDigest = gitRefsMatch.refName;
+        } else if (gitRefsMatch.branchName) {
+          dep.currentValue = gitRefsMatch.branchName;
+        } else if (gitRefsMatch.tagName) {
+          dep.currentValue = gitRefsMatch.tagName;
+        }
+        dep.datasource = GitRefsDatasource.id;
+      }
       res.deps.push(dep);
     }
 

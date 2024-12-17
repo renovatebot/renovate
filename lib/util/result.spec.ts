@@ -31,16 +31,27 @@ describe('util/result', () => {
     });
 
     describe('Wrapping', () => {
-      it('wraps callback', () => {
+      it('wraps callback returning value', () => {
         const res = Result.wrap(() => 42);
         expect(res).toEqual(Result.ok(42));
       });
 
-      it('handles callback error', () => {
+      it('handles throw in callback', () => {
         const res = Result.wrap(() => {
           throw 'oops';
         });
         expect(res).toEqual(Result.err('oops'));
+      });
+
+      it('wraps callback returning promise', () => {
+        const res = Result.wrap(() => Promise.resolve(42));
+        expect(res).toEqual(AsyncResult.ok(42));
+      });
+
+      it('wraps callback returning failed promise', () => {
+        const err = new Error('unknown');
+        const res = Result.wrap(() => Promise.reject(err));
+        expect(res).toEqual(AsyncResult.err(err));
       });
 
       it('wraps nullable callback', () => {
@@ -124,22 +135,22 @@ describe('util/result', () => {
 
       it('skips fallback for successful value', () => {
         const res: Result<number> = Result.ok(42);
-        expect(res.unwrapOrElse(-1)).toBe(42);
+        expect(res.unwrapOr(-1)).toBe(42);
       });
 
       it('uses fallback for error value', () => {
         const res: Result<number, string> = Result.err('oops');
-        expect(res.unwrapOrElse(42)).toBe(42);
+        expect(res.unwrapOr(42)).toBe(42);
       });
 
-      it('unwrapOrElse throws uncaught transform error', () => {
+      it('unwrapOr throws uncaught transform error', () => {
         const res = Result.ok(42);
         expect(() =>
           res
             .transform(() => {
               throw 'oops';
             })
-            .unwrapOrElse(0),
+            .unwrapOr(0),
         ).toThrow('oops');
       });
 
@@ -408,12 +419,12 @@ describe('util/result', () => {
 
       it('skips fallback for successful AsyncResult', async () => {
         const res = Result.wrap(Promise.resolve(42));
-        await expect(res.unwrapOrElse(0)).resolves.toBe(42);
+        await expect(res.unwrapOr(0)).resolves.toBe(42);
       });
 
       it('uses fallback for error AsyncResult', async () => {
         const res = Result.wrap(Promise.reject('oops'));
-        await expect(res.unwrapOrElse(42)).resolves.toBe(42);
+        await expect(res.unwrapOr(42)).resolves.toBe(42);
       });
 
       it('returns ok-value for unwrapOrThrow', async () => {
