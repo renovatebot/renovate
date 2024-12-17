@@ -217,6 +217,9 @@ export class GoProxyDatasource extends Datasource {
 
       try {
         const res = await this.listVersions(baseUrl, pkg);
+
+        // Artifactory returns all versions in any major (past and future),
+        // so starting from v2, we filter them in order to avoid the infinite loop
         const filteredReleases = res.filter(({ version }) => {
           if (major < 2) {
             return true;
