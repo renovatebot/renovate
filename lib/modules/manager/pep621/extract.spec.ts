@@ -607,8 +607,22 @@ describe('modules/manager/pep621/extract', () => {
     });
 
     it('should resolve dependencies with template', async () => {
-      const templatePyProject = Fixtures.get('pyproject_with_template.toml');
-      const res = await extractPackageFile(templatePyProject, 'pyproject.toml');
+      const content = codeBlock`
+        [project]
+        name = "{{ name }}"
+        dynamic = ["version"]
+        requires-python = ">=3.7"
+        license = {text = "MIT"}
+        {# comment #}
+        dependencies = [
+          "blinker",
+          {% if foo %}
+          "packaging>=20.9,!=22.0",
+          {% endif %}
+        ]
+        readme = "README.md"
+      `;
+      const res = await extractPackageFile(content, 'pyproject.toml');
       expect(res?.deps).toHaveLength(2);
     });
   });
