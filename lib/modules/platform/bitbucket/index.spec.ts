@@ -2011,7 +2011,8 @@ describe('modules/platform/bitbucket/index', () => {
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, { id: 5, title: 'newTitle' });
 
-      await bitbucket.getPrList(); // cache is now initialized
+      const oldPrList = await bitbucket.getPrList(); // cache is now initialized
+      expect(oldPrList.find((pr) => pr.title === 'title')).toBeDefined();
       await bitbucket.updatePr({
         number: 5,
         prTitle: 'newTitle',
