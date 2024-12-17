@@ -372,7 +372,7 @@ describe('modules/manager/helmfile/extract', () => {
       releases:
         - name: nested-example
           version: 1.2.3
-          chart: oci://ghcr.io/example/nested/path/chart
+          chart: oci-repo/nested/path/chart
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
@@ -385,9 +385,9 @@ describe('modules/manager/helmfile/extract', () => {
         deps: [
           {
             currentValue: '1.2.3',
-            depName: 'path/chart',
+            depName: 'nested/path/chart',
             datasource: 'docker',
-            packageName: 'ghcr.io/example/nested/path/chart',
+            packageName: 'ghcr.io/example/oci-repo/nested/path/chart',
           },
         ],
       });
