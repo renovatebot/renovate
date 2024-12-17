@@ -375,11 +375,7 @@ describe('modules/manager/helmfile/extract', () => {
           chart: oci-repo/nested/path/chart
       `;
       const fileName = 'helmfile.yaml';
-      const result = await extractPackageFile(content, fileName, {
-        registryAliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
-      });
+      const result = await extractPackageFile(content, fileName, {});
       expect(result).toMatchObject({
         datasource: 'helm',
         deps: [
