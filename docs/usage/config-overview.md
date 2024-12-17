@@ -1,12 +1,24 @@
 # Renovate configuration overview
 
-When Renovate runs on a repository, the final config used is derived from the:
+Each time Renovate runs on a repository it reads the configuration files listed below and creates a final config.
+This final config describes what Renovate will do during its run.
 
-- Default config
-- Global config
-- Inherited config
-- Repository config
-- Resolved presets referenced in config
+The final config is internal to Renovate, and is _not_ saved or cached for a later run.
+But you can always find the final config in Renovate's logs.
+
+Renovate reads the configuration files in this order (from from top to bottom):
+
+1. Default config
+2. Global config
+   - File config
+   - Environment config
+   - CLI config
+3. Inherited config
+4. Resolved presets referenced in config
+5. Repository config
+
+Items with a higher number override items that have lower numbers.
+If the item has the `mergeable` property, it will merge with lower numbers instead.
 
 <!-- prettier-ignore -->
 !!! note
