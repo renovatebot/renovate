@@ -18,6 +18,8 @@ import { Vulnerabilities } from './vulnerabilities';
 import type { WriteUpdateResult } from './write';
 import { writeUpdates } from './write';
 
+export const EXTRACT_CACHE_REVISION = 1;
+
 export interface ExtractResult {
   branches: BranchConfig[];
   branchList: string[];
@@ -69,7 +71,23 @@ export function isCacheExtractValid(
   configHash: string,
   cachedExtract?: BaseBranchCache,
 ): boolean {
-  if (!(cachedExtract?.sha && cachedExtract.configHash)) {
+  if (!cachedExtract) {
+    return false;
+  }
+
+  if (!cachedExtract.revision) {
+    logger.debug('Cached extract is missing revision, so cannot be used');
+    return false;
+  }
+
+  if (cachedExtract.revision !== EXTRACT_CACHE_REVISION) {
+    logger.debug(
+      `Extract cache revision has changed (old=${cachedExtract.revision}, new=${EXTRACT_CACHE_REVISION})`,
+    );
+    return false;
+  }
+
+  if (!(cachedExtract.sha && cachedExtract.configHash)) {
     return false;
   }
   if (cachedExtract.sha !== baseBranchSha) {
@@ -128,10 +146,6 @@ export async function extract(
         for (const file of files) {
           for (const dep of file.deps) {
             delete dep.updates;
-            if (dep.skipStage && dep.skipStage !== 'extract') {
-              delete dep.skipReason;
-              delete dep.skipStage;
-            }
           }
         }
       }
@@ -146,6 +160,7 @@ export async function extract(
     const { extractionFingerprints } = extractResult;
     // TODO: fix types (#22198)
     cache.scan[baseBranch!] = {
+      revision: EXTRACT_CACHE_REVISION,
       sha: baseBranchSha!,
       configHash,
       extractionFingerprints,
