@@ -1,4 +1,5 @@
 import {
+  countPackageNameLength,
   countPrecedingIndentation,
   extractNamesAndRanges,
   findExtents,
@@ -6,6 +7,28 @@ import {
 } from './extract';
 
 describe('modules/manager/haskell-cabal/extract', () => {
+  describe('countPackageNameLength', () => {
+    it.each`
+      input    | expected
+      ${'-'}   | ${null}
+      ${'-j'}  | ${null}
+      ${'-H'}  | ${null}
+      ${'j-'}  | ${null}
+      ${'3-'}  | ${null}
+      ${'-3'}  | ${null}
+      ${'3'}   | ${null}
+      ${'æ'}   | ${null}
+      ${'æe'}  | ${null}
+      ${'j'}   | ${1}
+      ${'H'}   | ${1}
+      ${'0ad'} | ${3}
+      ${'3d'}  | ${2}
+    `('matches $input', ({ input, expected }) => {
+      const maybeIndex = countPackageNameLength(input);
+      expect(maybeIndex).toStrictEqual(expected);
+    });
+  });
+
   describe('countPrecedingIndentation()', () => {
     it.each`
       content                                       | index | expected

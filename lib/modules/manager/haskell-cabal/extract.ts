@@ -3,7 +3,41 @@ import { regEx } from '../../../util/regex';
 const buildDependsRegex = regEx(
   /(?<buildDependsFieldName>build-depends[ \t]*:)/i,
 );
-const pkgNameRegex = regEx(/[A-z0-9-]+/);
+function isNonASCII(str: string): bool {
+  for (let i = 0; i < str.length; i++) {
+    if (str.charCodeAt(i) > 127) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function countPackageNameLength(input: string): number | null {
+  if (input.length < 1 || isNonASCII(input)) {
+    return null;
+  }
+  if (!regEx(/^[A-Za-z0-9]/).test(input[0])) {
+    // Must start with letter or number
+    return null;
+  }
+  let idx = 1;
+  while (idx < input.length) {
+    if (regEx(/[A-Za-z0-9-]/).test(input[idx])) {
+      idx++;
+    } else {
+      break;
+    }
+  }
+  if (!regEx(/[A-Za-z]/).test(input.slice(0, idx))) {
+    // Must contain a letter
+    return null;
+  }
+  if (idx - 1 < input.length && input[idx - 1] === '-') {
+    // Can't end in a hyphen
+    return null;
+  }
+  return idx;
+}
 
 export interface CabalDependency {
   packageName: string;
@@ -130,13 +164,12 @@ export function findDepends(
 export function splitSingleDependency(
   input: string,
 ): { name: string; range: string } | null {
-  const matchObj = pkgNameRegex.exec(input);
-  if (matchObj === null) {
+  const match = countPackageNameLength(input);
+  if (match === null) {
     return null;
   }
-  const match = matchObj.index;
-  const name: string = matchObj[0];
-  const range = input.slice(match + name.length).trim();
+  const name: string = input.slice(0, match);
+  const range = input.slice(match).trim();
   return { name, range };
 }
 
