@@ -18,7 +18,7 @@ import {
   localChartHasKustomizationsYaml,
 } from './utils';
 
-const isValidChartName = (name: string | undefined, oci: boolean): boolean {
+const isValidChartName = (name: string | undefined, oci: boolean): boolean => {
   if (oci) {
     return !!name && !regEx(/[!@#$%^&*(),.?":{}|<>A-Z]/).test(name);
   } else {
