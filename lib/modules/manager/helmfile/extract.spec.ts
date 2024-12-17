@@ -363,6 +363,36 @@ describe('modules/manager/helmfile/extract', () => {
       });
     });
 
+    it('allows OCI chart names containing forward slashes', async () => {
+      const content = `
+      repositories:
+        - name: oci-repo
+          url: ghcr.io/example/oci-repo
+          oci: true
+      releases:
+        - name: nested-example
+          version: 1.2.3
+          chart: oci://ghcr.io/example/nested/path/chart
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '1.2.3',
+            depName: 'path/chart',
+            datasource: 'docker',
+            packageName: 'ghcr.io/example/nested/path/chart',
+          },
+        ],
+      });
+    });
+
     it('parses a chart with an oci repository with ---', async () => {
       const content = codeBlock`
       repositories:
