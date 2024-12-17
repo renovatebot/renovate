@@ -217,10 +217,15 @@ export class GoProxyDatasource extends Datasource {
 
       try {
         const res = await this.listVersions(baseUrl, pkg);
-        const filteredReleases = res.filter(
-          ({ version }) =>
-            version.split(regEx(/[^\d]+/)).find(is.truthy) === major.toString(),
-        );
+        const filteredReleases = res.filter(({ version }) => {
+          if (major < 2) {
+            return true;
+          }
+
+          return (
+            version.split(regEx(/[^\d]+/)).find(is.truthy) === major.toString()
+          );
+        });
 
         releases = await p.map(filteredReleases, async (versionInfo) => {
           const { version, newDigest, releaseTimestamp } = versionInfo;
