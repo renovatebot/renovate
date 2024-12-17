@@ -168,6 +168,7 @@ describe('modules/datasource/hex/index', () => {
 
       expect(result).toEqual({
         homepage: 'https://hex.pm/packages/renovate_test/private_package',
+        sourceUrl: 'https://github.com/renovate_test/private_package',
         registryUrl: 'https://hex.pm',
         releases: [
           { releaseTimestamp: '2021-08-04T15:26:26.500Z', version: '0.1.0' },
