@@ -24,7 +24,6 @@ const pyproject11toml = Fixtures.get('pyproject.11.toml');
 const pyproject11tomlLock = Fixtures.get('pyproject.11.toml.lock');
 
 const pyproject12toml = Fixtures.get('pyproject.12.toml');
-const pyproject13toml = Fixtures.get('pyproject.13.toml');
 
 describe('modules/manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
@@ -499,7 +498,18 @@ describe('modules/manager/poetry/extract', () => {
     });
 
     it('parses package file with template', async () => {
-      const res = await extractPackageFile(pyproject13toml, filename);
+      const content = codeBlock`
+        [tool.poetry]
+        name = "{{ name }}"
+
+        {# comment #}
+        [tool.poetry.dependencies]
+        python = "^3.9"
+        {% if foo %}
+        dep1 = "^1.0.0"
+        {% endif %}
+      `;
+      const res = await extractPackageFile(content, filename);
       expect(res?.deps).toHaveLength(2);
       expect(res?.deps[0].depName).toBe('python');
       expect(res?.deps[1].depName).toBe('dep1');
