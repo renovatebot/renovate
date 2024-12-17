@@ -321,6 +321,7 @@
     "grpc-java": "https://github.com/grpc/grpc-java",
     "gstreamer-rust": "https://gitlab.freedesktop.org/gstreamer/gstreamer-rs",
     "guava": "https://github.com/google/guava",
+    "happy-dom": "https://github.com/capricorn86/happy-dom",
     "Hangfire": "https://github.com/HangfireIO/Hangfire",
     "hickory-dns": "https://github.com/hickory-dns/hickory-dns",
     "infrastructure-ui": "https://github.com/instructure/instructure-ui",
@@ -328,9 +329,12 @@
     "istanbuljs": "https://github.com/istanbuljs/istanbuljs",
     "jackson": [
       "https://github.com/FasterXML/jackson",
+      "https://github.com/FasterXML/jackson-annotations",
+      "https://github.com/FasterXML/jackson-core",
       "https://github.com/FasterXML/jackson-databind",
       "https://github.com/FasterXML/jackson-dataformats-binary",
       "https://github.com/FasterXML/jackson-dataformats-text",
+      "https://github.com/FasterXML/jackson-jaxrs-providers",
       "https://github.com/FasterXML/jackson-module-kotlin"
     ],
     "jasmine": "https://github.com/jasmine/jasmine",
@@ -357,6 +361,7 @@
     "lerna-lite": "https://github.com/lerna-lite/lerna-lite",
     "lexical": "https://github.com/facebook/lexical",
     "linguijs": "https://github.com/lingui/js-lingui",
+    "linkifyjs": "https://github.com/nfrasser/linkifyjs",
     "log4j2": "https://github.com/apache/logging-log4j2",
     "logback": "https://github.com/qos-ch/logback",
     "loopback": [
@@ -543,6 +548,7 @@
     "unhead": "https://github.com/unjs/unhead",
     "unocss": "https://github.com/unocss/unocss",
     "uppy": "https://github.com/transloadit/uppy",
+    "utoipa": "https://github.com/juhaku/utoipa",
     "vaadin-hilla": "https://github.com/vaadin/hilla",
     "vaadinWebComponents": "https://github.com/vaadin/web-components",
     "visx": "https://github.com/airbnb/visx",
