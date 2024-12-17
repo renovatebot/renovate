@@ -18,6 +18,7 @@ import { Vulnerabilities } from './vulnerabilities';
 import type { WriteUpdateResult } from './write';
 import { writeUpdates } from './write';
 
+// Increment this if needing to cache bust ALL extract caches
 export const EXTRACT_CACHE_REVISION = 1;
 
 export interface ExtractResult {
