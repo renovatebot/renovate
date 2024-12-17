@@ -326,7 +326,7 @@ describe('modules/datasource/maven/index', () => {
           </distributionManagement>
         </project>
       `;
-      mockGenericPackage({ pom, html: null });
+      mockGenericPackage({ pom });
 
       const res = await get();
 
@@ -346,7 +346,7 @@ describe('modules/datasource/maven/index', () => {
           </distributionManagement>
         </project>
       `;
-      mockGenericPackage({ pom, html: null });
+      mockGenericPackage({ pom });
 
       const res = await get();
 
@@ -369,7 +369,7 @@ describe('modules/datasource/maven/index', () => {
           </distributionManagement>
         </project>
       `;
-      mockGenericPackage({ pom, html: null });
+      mockGenericPackage({ pom });
 
       const res = await get();
 
