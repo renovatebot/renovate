@@ -2742,7 +2742,7 @@ const options: RenovateOptions[] = [
   {
     name: 'fileFormat',
     description:
-      'File format of the file which is targeted by the custom JSONata manager.',
+      'It specifies the syntax of the package file being managed by the custom JSONata manager.',
     type: 'string',
     allowedValues: ['json'],
     parents: ['customManagers'],

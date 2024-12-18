@@ -805,29 +805,6 @@ Example:
 }
 ```
 
-### fileFormat
-
-File format of the file being targeted by the custom JSONata manager.
-For example: if you are targeting a file like `.renovaterc` which allows both `yaml` and `json` syntax.
-The bot needs the `fileFormat` specified to ease the parsing of that file.
-
-Currently, only the `json` format is supported. We intend to support more format in the future.
-
-```json
-{
-  "customManagers": [
-    {
-      "customType": "jsonata",
-      "fileFormat": "json",
-      "fileMatch": ["file.json"],
-      "matchStrings": [
-        "packages.{ \"depName\": package, \"currentValue\": version }"
-      ]
-    }
-  ]
-}
-```
-
 ### datasourceTemplate
 
 If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field.
@@ -847,6 +824,28 @@ It will be compiled using Handlebars and the regex `groups` result.
 
 If `extractVersion` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
 It will be compiled using Handlebars and the regex `groups` result.
+
+### fileFormat
+
+It specifies the syntax of the package file being managed by the custom JSONata manager.
+This setting helps the system correctly parse and interpret the configuration file's contents.
+
+Currently, only the `json` format is supported. We intend to support more formats in the future.
+
+```json
+{
+  "customManagers": [
+    {
+      "customType": "jsonata",
+      "fileFormat": "json",
+      "fileMatch": [".renovaterc"],
+      "matchStrings": [
+        "packages.{ \"depName\": package, \"currentValue\": version }"
+      ]
+    }
+  ]
+}
+```
 
 ### matchStrings
 
