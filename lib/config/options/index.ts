@@ -52,6 +52,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     globalOnly: true,
     patternMatch: true,
+    mergeable: true,
   },
   {
     name: 'detectGlobalManagerConfig',
@@ -515,7 +516,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.0.11',
+    default: 'ghcr.io/containerbase/sidecar:13.4.5',
     globalOnly: true,
   },
   {
@@ -1135,6 +1136,7 @@ const options: RenovateOptions[] = [
     supportedManagers: [
       'ansible',
       'bitbucket-pipelines',
+      'buildpacks',
       'crossplane',
       'devcontainer',
       'docker-compose',

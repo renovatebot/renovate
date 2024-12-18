@@ -31,12 +31,13 @@ concurrency:
 env:
   DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
   NODE_VERSION: 22
-  PDM_VERSION: 2.20.0.post1 # renovate: datasource=pypi depName=pdm
+  PDM_VERSION: 2.22.0 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
     .github/actions/
     data/
+    patches/
     tools/
     package.json
     pnpm-lock.yaml
@@ -208,7 +209,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore eslint cache
-        uses: actions/cache/restore@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+        uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: .cache/eslint
           key: eslint-main-cache
@@ -227,7 +228,7 @@ jobs:
 
       - name: Save eslint cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+        uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: .cache/eslint
           key: eslint-main-cache
@@ -254,7 +255,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+        uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: .cache/prettier
           key: prettier-main-cache
@@ -279,7 +280,7 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+        uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: .cache/prettier
           key: prettier-main-cache
@@ -303,7 +304,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        uses: DavidAnson/markdownlint-cli2-action@db43aef879112c3119a410d69f66701e0d530809 # v17.0.0
+        uses: DavidAnson/markdownlint-cli2-action@eb5ca3ab411449c66620fe7f1b3c9e10547144b0 # v18.0.0
 
       - name: Lint fenced code blocks
         run: pnpm doc-fence-check
@@ -372,7 +373,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Cache jest
-        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: .cache/jest
           key: |
@@ -410,7 +411,7 @@ jobs:
 
       - name: Save coverage artifacts
         if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
@@ -437,7 +438,7 @@ jobs:
           merge-multiple: true
 
       - name: Codecov
-        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4.6.0
+        uses: codecov/codecov-action@7f8b4b4bde536c465e797be725718b88c5d95e0e # v5.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: coverage/lcov
@@ -566,7 +567,7 @@ jobs:
         run: pnpm test-e2e:pack
 
       - name: Upload
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
         with:
           name: renovate-package
           path: renovate-0.0.0-semantic-release.tgz
@@ -591,7 +592,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Setup PDM
-        uses: pdm-project/setup-pdm@568ddd69406b30de1774ec0044b73ae06e716aa4 # v4.1
+        uses: pdm-project/setup-pdm@b2472ca4258a9ea3aee813980a0100a2261a42fc # v4.2
         with:
           python-version-file: .python-version
           version: ${{ env.PDM_VERSION }}
@@ -610,7 +611,7 @@ jobs:
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
         with:
           name: docs
           path: tmp/docs/
@@ -683,7 +684,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@5da2b2ba4cbde318e17640f04c54306ddee36856 # v3.4.40
+        uses: containerbase/internal-tools@f022a1677af8af9a36c53589e1b07edb932a3c84 # v3.5.10
         with:
           command: docker-config
 

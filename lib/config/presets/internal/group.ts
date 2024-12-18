@@ -111,14 +111,19 @@ const staticGroups = {
   },
   fusionjs: {
     description: 'Group Fusion.js packages together.',
-    matchPackageNames: [
-      'fusion-cli',
-      'fusion-core',
-      'fusion-test-utils',
-      'fusion-tokens',
-      'fusion-plugin-**',
-      'fusion-react**',
-      'fusion-apollo**',
+    packageRules: [
+      {
+        groupName: 'Fusion.js packages',
+        matchPackageNames: [
+          'fusion-cli',
+          'fusion-core',
+          'fusion-test-utils',
+          'fusion-tokens',
+          'fusion-plugin-**',
+          'fusion-react**',
+          'fusion-apollo**',
+        ],
+      },
     ],
   },
   githubArtifactActions: {
@@ -341,13 +346,23 @@ const staticGroups = {
       },
     ],
   },
+  micrometer: {
+    description:
+      "Group Micrometer packages together, e.g. 'io.micrometer:micrometer-core'.",
+    packageRules: [
+      {
+        groupName: 'micrometer',
+        matchPackageNames: ['io.micrometer:micrometer-**'],
+      },
+    ],
+  },
   nodeJs: {
     description:
       "Group anything that looks like Node.js together so that it's updated together.",
     packageRules: [
       {
         commitMessageTopic: 'Node.js',
-        matchDatasources: ['docker'],
+        matchDatasources: ['docker', 'node-version'],
         matchPackageNames: [
           '/(?:^|/)node$/', // node or ends with "/node, except those below"
           '!calico/node',
@@ -462,6 +477,7 @@ const staticGroups = {
       'group:jestPlusTypes',
       'group:jwtFramework',
       'group:kubernetes',
+      'group:micrometer',
       'group:phpstan',
       'group:polymer',
       'group:react',

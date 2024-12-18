@@ -4,12 +4,13 @@ The information on this page is for the Mend-hosted cloud apps:
 
 - Renovate App on GitHub
 - Mend App on Bitbucket
+- Mend App on Azure DevOps
 
 If you self-host, you can skip reading this page.
 
 ## :warning: Migrate secrets in your Renovate config file :warning:
 
-The Mend-hosted cloud app will stop reading secrets from the Renovate config file in your repository on 01-Oct-2024.
+Use of encrypted secrets in the Mend Renovate cloud apps has been deprecated and soon the apps will stop reading secrets from the Renovate config file in your repository.
 You must migrate any secrets you currently keep in the Renovate config file, and put them in the app settings page on [developer.mend.io](https://developer.mend.io).
 To add secrets you must have admin-level rights.
 
@@ -31,6 +32,7 @@ To add a secret for the Mend cloud app:
    ![Credentials settings page](../assets/images/app-settings/app-credentials.png)
 
 4. Reference the secret from Renovate config files inside the repo.
+   Alternatively, you can use the Host Rules UI (see below).
 
    ```json
    {
@@ -42,6 +44,21 @@ To add a secret for the Mend cloud app:
      ]
    }
    ```
+
+### Adding a host rule through the UI
+
+You can centrally add/configure Host Rules through the Mend UI as an alternative to including them in Renovate presets.
+
+1. Open the _Credentials_ section of the settings page for the relevant Org or Repo.
+2. Select `ADD HOST RULE` to open the "Add a Host Rule" dialog box.
+
+   ![Add Host Rule](../assets/images/app-settings/add-host-rule.png)
+
+3. Fill out the details for your host rule.
+
+   As an example, if you are a Bitbucket or Azure DevOps user, and you want to specify a github.com token to fetch release notes and enable github-based datasources, you could create a host rule like this:
+
+   ![Host Rules dialog box](../assets/images/app-settings/host-rules.png)
 
 ## Organization secrets vs repository secrets
 

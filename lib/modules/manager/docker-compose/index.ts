@@ -4,10 +4,11 @@ import { extractPackageFile } from './extract';
 
 export { extractPackageFile };
 
+export const url = 'https://docs.docker.com/compose';
+export const categories: Category[] = ['docker'];
+
 export const defaultConfig = {
   fileMatch: ['(^|/)(?:docker-)?compose[^/]*\\.ya?ml$'],
 };
-
-export const categories: Category[] = ['docker'];
 
 export const supportedDatasources = [DockerDatasource.id];

@@ -79,6 +79,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  atmos: {
+    asdfPluginUrl: 'https://github.com/cloudposse/asdf-atmos',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'cloudposse/atmos',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   awscli: {
     asdfPluginUrl: 'https://github.com/MetricMike/asdf-awscli',
     config: {
@@ -357,26 +365,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: adoptOpenJreMatches.version,
         };
       }
-      const semeruJdkMatches = version.match(
-        /^semeru-openj9-(?<version>\d\S+)_openj9-(?<openj9>\d\S+)/,
-      )?.groups;
-      if (semeruJdkMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jdk',
-          currentValue: semeruJdkMatches.version,
-        };
-      }
-      const semeruJreMatches = version.match(
-        /^semeru-jre-openj9-(?<version>\d\S+)_openj9-\d\S+/,
-      )?.groups;
-      if (semeruJreMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jre',
-          currentValue: semeruJreMatches.version,
-        };
-      }
       const temurinJdkMatches = version.match(
         /^temurin-(?<version>\d\S+)/,
       )?.groups;
@@ -414,6 +402,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'casey/just',
+    },
+  },
+  k3s: {
+    asdfPluginUrl: 'https://github.com/dmpe/asdf-k3s',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'k3s-io/k3s',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   kind: {
@@ -510,11 +506,27 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'ocaml/ocaml',
     },
   },
+  oci: {
+    asdfPluginUrl: 'https://github.com/yasn77/asdf-oci',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'oracle/oci-cli',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   opentofu: {
     asdfPluginUrl: 'https://github.com/virtualroot/asdf-opentofu',
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'opentofu/opentofu',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  packer: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-hashicorp',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'hashicorp/packer',
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -555,6 +567,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubTagsDatasource.id,
       packageName: 'pre-commit/pre-commit',
       extractVersion: '^v(?<version>.+)',
+    },
+  },
+  protoc: {
+    asdfPluginUrl: 'https://github.com/paxosglobal/asdf-protoc.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'protocolbuffers/protobuf',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   pulumi: {
