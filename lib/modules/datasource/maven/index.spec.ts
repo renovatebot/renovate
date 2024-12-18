@@ -1,5 +1,6 @@
 import { HeadObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
+import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { DateTime } from 'luxon';
 import type { Release, ReleaseResult } from '..';
@@ -317,7 +318,7 @@ describe('modules/datasource/maven/index', () => {
 
   describe('supports relocation', () => {
     it('with only groupId present', async () => {
-      const pom = `
+      const pom = codeBlock`
         <project>
           <distributionManagement>
             <relocation>
@@ -337,7 +338,7 @@ describe('modules/datasource/maven/index', () => {
     });
 
     it('with only artifactId present', async () => {
-      const pom = `
+      const pom = codeBlock`
         <project>
           <distributionManagement>
             <relocation>
@@ -357,7 +358,7 @@ describe('modules/datasource/maven/index', () => {
     });
 
     it('with all elments present', async () => {
-      const pom = `
+      const pom = codeBlock`
         <project>
           <distributionManagement>
             <relocation>
