@@ -1,11 +1,9 @@
 import is from '@sindresorhus/is';
+import jsonata from 'jsonata';
 import { logger } from '../logger';
 import { allManagersList, getManagerList } from '../modules/manager';
 import { isCustomManager } from '../modules/manager/custom';
-import type {
-  RegexManagerConfig,
-  RegexManagerTemplates,
-} from '../modules/manager/custom/regex/types';
+import type { RegexManagerTemplates } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types';
 import { getExpression } from '../util/jsonata';
@@ -529,6 +527,7 @@ export async function validateConfig(
               const allowedKeys = [
                 'customType',
                 'description',
+                'fileFormat',
                 'fileMatch',
                 'matchStrings',
                 'matchStringsStrategy',
@@ -565,6 +564,13 @@ export async function validateConfig(
                     switch (customManager.customType) {
                       case 'regex':
                         validateRegexManagerFields(
+                          customManager,
+                          currentPath,
+                          errors,
+                        );
+                        break;
+                      case 'jsonata':
+                        validateJSONataManagerFields(
                           customManager,
                           currentPath,
                           errors,
@@ -865,21 +871,21 @@ export async function validateConfig(
   return { errors, warnings };
 }
 
-function hasField(
-  customManager: Partial<RegexManagerConfig>,
-  field: string,
-): boolean {
+function hasField(customManager: CustomManager, field: string): boolean {
   const templateField = `${field}Template` as keyof RegexManagerTemplates;
+  const fieldStr =
+    customManager.customType === 'regex' ? `(?<${field}>` : field;
+
   return !!(
     customManager[templateField] ??
     customManager.matchStrings?.some((matchString) =>
-      matchString.includes(`(?<${field}>`),
+      matchString.includes(fieldStr),
     )
   );
 }
 
 function validateRegexManagerFields(
-  customManager: Partial<RegexManagerConfig>,
+  customManager: CustomManager,
   currentPath: string,
   errors: ValidationMessage[],
 ): void {
@@ -920,6 +926,59 @@ function validateRegexManagerFields(
     errors.push({
       topic: 'Configuration Error',
       message: `Regex Managers must contain depName or packageName regex groups or templates`,
+    });
+  }
+}
+
+function validateJSONataManagerFields(
+  customManager: CustomManager,
+  currentPath: string,
+  errors: ValidationMessage[],
+): void {
+  if (!is.nonEmptyString(customManager.fileFormat)) {
+    errors.push({
+      topic: 'Configuration Error',
+      message: 'Each JSONata manager must contain a fileFormat field.',
+    });
+  }
+
+  if (is.nonEmptyArray(customManager.matchStrings)) {
+    for (const matchString of customManager.matchStrings) {
+      try {
+        jsonata(matchString);
+      } catch (err) {
+        logger.debug(
+          { err },
+          'customManager.matchStrings JSONata query validation error',
+        );
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid JSONata query for ${currentPath}: \`${matchString}\``,
+        });
+      }
+    }
+  } else {
+    errors.push({
+      topic: 'Configuration Error',
+      message: `Each Custom Manager must contain a non-empty matchStrings array`,
+    });
+  }
+
+  const mandatoryFields = ['currentValue', 'datasource'];
+  for (const field of mandatoryFields) {
+    if (!hasField(customManager, field)) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `JSONata Managers must contain ${field}Template configuration or ${field} in the query `,
+      });
+    }
+  }
+
+  const nameFields = ['depName', 'packageName'];
+  if (!nameFields.some((field) => hasField(customManager, field))) {
+    errors.push({
+      topic: 'Configuration Error',
+      message: `JSONata Managers must contain depName or packageName in the query or their templates`,
     });
   }
 }

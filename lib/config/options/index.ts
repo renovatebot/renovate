@@ -2740,6 +2740,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'fileFormat',
+    description:
+      'File format of the file which is targeted by the custom JSONata manager.',
+    type: 'string',
+    allowedValues: ['json'],
+    parents: ['customManagers'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchStrings',
     description:
       'Regex pattern or JSONata query to use. Valid only within a `customManagers` object.',
