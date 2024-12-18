@@ -17,7 +17,7 @@ export class BuildpacksRegistryDatasource extends Datasource {
 
   override readonly customRegistrySupport = false;
 
-  override readonly defaultRegistryUrls = ['https://registry.buildpacks.io/'];
+  override readonly defaultRegistryUrls = ['https://registry.buildpacks.io'];
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
