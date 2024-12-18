@@ -7,6 +7,7 @@ import * as bazelrc from './bazelrc';
 import type { RecordFragment } from './fragments';
 import { parse } from './parser';
 import { RuleToMavenPackageDep, fillRegistryUrls } from './parser/maven';
+import { RuleToDockerPackageDep } from './parser/oci';
 import { RuleToBazelModulePackageDep } from './rules';
 import * as rules from './rules';
 
@@ -18,9 +19,14 @@ export async function extractPackageFile(
     const records = parse(content);
     const pfc = await extractBazelPfc(records, packageFile);
     const mavenDeps = extractMavenDeps(records);
+    const dockerDeps = LooseArray(RuleToDockerPackageDep).parse(records);
 
     if (mavenDeps.length) {
       pfc.deps.push(...mavenDeps);
+    }
+
+    if (dockerDeps.length) {
+      pfc.deps.push(...dockerDeps);
     }
 
     return pfc.deps.length ? pfc : null;

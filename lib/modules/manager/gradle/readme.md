@@ -11,7 +11,7 @@ As the output of these commands can be very large, any text other than errors (i
 
 ### Dependency verification
 
-If Renovate finds a `gradle/verification-metadata.xml` file, it updates the content by using the `gradle --write-verification-metadata <hashTypes> dependencies` command.
+If Renovate finds a `gradle/verification-metadata.xml` file and either `<verify-metadata>true</verify-metadata>` or `<verify-signatures>true</verify-signatures>` (or both), it updates the content by using the `gradle --write-verification-metadata <hashTypes> dependencies` command.
 Renovate will check the file for existing hash types (like `sha256`) and use them as `<hashTypes>`.
 
 <!-- prettier-ignore -->

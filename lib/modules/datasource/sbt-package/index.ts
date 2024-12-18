@@ -2,6 +2,7 @@ import * as upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
+import { cache } from '../../../util/cache/package/decorator';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash, trimTrailingSlash } from '../../../util/url';
@@ -9,7 +10,7 @@ import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { MavenDatasource } from '../maven';
 import { MAVEN_REPO } from '../maven/common';
-import { downloadHttpProtocol } from '../maven/util';
+import { downloadHttpContent, downloadHttpProtocol } from '../maven/util';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
@@ -24,6 +25,12 @@ interface ScalaDepCoordinate {
   groupId: string;
   artifactId: string;
   scalaVersion?: string;
+}
+
+interface PomInfo {
+  homepage?: string;
+  sourceUrl?: string;
+  releaseTimestamp?: string;
 }
 
 export class SbtPackageDatasource extends MavenDatasource {
@@ -80,8 +87,11 @@ export class SbtPackageDatasource extends MavenDatasource {
     let dependencyUrl: string | undefined;
     let packageUrls: string[] | undefined;
     for (const packageRootUrl of packageRootUrls) {
-      const res = await downloadHttpProtocol(this.http, packageRootUrl);
-      if (!res) {
+      const packageRootContent = await downloadHttpContent(
+        this.http,
+        packageRootUrl,
+      );
+      if (!packageRootContent) {
         continue;
       }
 
@@ -95,7 +105,7 @@ export class SbtPackageDatasource extends MavenDatasource {
       dependencyUrl = trimTrailingSlash(packageRootUrl);
 
       const rootPath = new URL(packageRootUrl).pathname;
-      const artifactSubdirs = extractPageLinks(res.body, (href) => {
+      const artifactSubdirs = extractPageLinks(packageRootContent, (href) => {
         const path = href.replace(rootPath, '');
 
         if (
@@ -141,15 +151,15 @@ export class SbtPackageDatasource extends MavenDatasource {
 
     const allVersions = new Set<string>();
     for (const pkgUrl of packageUrls) {
-      const res = await downloadHttpProtocol(this.http, pkgUrl);
+      const packageContent = await downloadHttpContent(this.http, pkgUrl);
       // istanbul ignore if
-      if (!res) {
+      if (!packageContent) {
         invalidPackageUrls.add(pkgUrl);
         continue;
       }
 
       const rootPath = new URL(pkgUrl).pathname;
-      const versions = extractPageLinks(res.body, (href) => {
+      const versions = extractPageLinks(packageContent, (href) => {
         const path = href.replace(rootPath, '');
         if (path.startsWith('.')) {
           return null;
@@ -187,6 +197,11 @@ export class SbtPackageDatasource extends MavenDatasource {
       return null;
     }
 
+    const releases: Release[] = [...allVersions]
+      .sort(compare)
+      .map((version) => ({ version }));
+    const res: ReleaseResult = { releases, dependencyUrl };
+
     const latestVersion = getLatestVersion(versions);
     const pomInfo = await this.getPomInfo(
       registryUrl,
@@ -195,10 +210,15 @@ export class SbtPackageDatasource extends MavenDatasource {
       packageUrls,
     );
 
-    const releases: Release[] = [...allVersions]
-      .sort(compare)
-      .map((version) => ({ version }));
-    return { releases, dependencyUrl, ...pomInfo };
+    if (pomInfo?.homepage) {
+      res.homepage = pomInfo.homepage;
+    }
+
+    if (pomInfo?.sourceUrl) {
+      res.sourceUrl = pomInfo.sourceUrl;
+    }
+
+    return res;
   }
 
   async getPomInfo(
@@ -206,9 +226,7 @@ export class SbtPackageDatasource extends MavenDatasource {
     packageName: string,
     version: string | null,
     pkgUrls?: string[],
-  ): Promise<Pick<ReleaseResult, 'homepage' | 'sourceUrl'>> {
-    const result: Pick<ReleaseResult, 'homepage' | 'sourceUrl'> = {};
-
+  ): Promise<PomInfo | null> {
     const packageUrlsKey = `package-urls:${registryUrl}:${packageName}`;
     // istanbul ignore next: will be covered later
     const packageUrls =
@@ -220,12 +238,12 @@ export class SbtPackageDatasource extends MavenDatasource {
 
     // istanbul ignore if
     if (!packageUrls?.length) {
-      return result;
+      return null;
     }
 
     // istanbul ignore if
     if (!version) {
-      return result;
+      return null;
     }
 
     const invalidPomFilesKey = `invalid-pom-files:${registryUrl}:${packageName}:${version}`;
@@ -259,13 +277,20 @@ export class SbtPackageDatasource extends MavenDatasource {
         }
 
         const res = await downloadHttpProtocol(this.http, pomUrl);
-        const content = res?.body;
-        if (!content) {
+        const { val } = res.unwrap();
+        if (!val) {
           invalidPomFiles.add(pomUrl);
           continue;
         }
 
-        const pomXml = new XmlDocument(content);
+        const result: PomInfo = {};
+
+        const releaseTimestamp = val.lastModified;
+        if (releaseTimestamp) {
+          result.releaseTimestamp = releaseTimestamp;
+        }
+
+        const pomXml = new XmlDocument(val.data);
 
         const homepage = pomXml.valueWithPath('url');
         if (homepage) {
@@ -287,7 +312,7 @@ export class SbtPackageDatasource extends MavenDatasource {
     }
 
     await saveCache();
-    return result;
+    return null;
   }
 
   override async getReleases(
@@ -316,12 +341,33 @@ export class SbtPackageDatasource extends MavenDatasource {
     return null;
   }
 
-  // istanbul ignore next: to be rewritten
+  @cache({
+    namespace: 'datasource-sbt-package',
+    key: (
+      { registryUrl, packageName }: PostprocessReleaseConfig,
+      { version }: Release,
+    ) => `postprocessRelease:${registryUrl}:${packageName}:${version}`,
+    ttlMinutes: 30 * 24 * 60,
+  })
   override async postprocessRelease(
     config: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
-    const mavenResult = await super.postprocessRelease(config, release);
-    return mavenResult === 'reject' ? release : mavenResult;
+    // istanbul ignore if
+    if (!config.registryUrl) {
+      return release;
+    }
+
+    const res = await this.getPomInfo(
+      config.registryUrl,
+      config.packageName,
+      release.version,
+    );
+
+    if (res?.releaseTimestamp) {
+      release.releaseTimestamp = res.releaseTimestamp;
+    }
+
+    return release;
   }
 }

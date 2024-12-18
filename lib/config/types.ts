@@ -548,6 +548,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
   releaseTimestamp?: string | null;
   repository?: string;
+  currentVersionAgeInDays?: number;
   currentVersionTimestamp?: string;
   enabled?: boolean;
   skipReason?: SkipReason;
