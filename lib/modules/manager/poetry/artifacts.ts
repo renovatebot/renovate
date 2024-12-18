@@ -138,7 +138,7 @@ async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
         password: accessToken,
       };
     }
-    logger.once.debug(`Could not get Google access token (url=${url)`);
+    logger.once.debug(`Could not get Google access token (url=${url})`);
   }
 
   return {};
