@@ -706,7 +706,7 @@ You can define custom managers to handle:
 - Proprietary file formats or conventions
 - Popular file formats not yet supported as a manager by Renovate
 
-Currently we only have two custom managers.
+Currently we have two custom managers.
 The `regex` manager which is based on using Regular Expression named capture groups.
 The `jsonata` manager which is based on using JSONata queries.
 
@@ -830,7 +830,7 @@ It will be compiled using Handlebars and the regex `groups` result.
 It specifies the syntax of the package file being managed by the custom JSONata manager.
 This setting helps the system correctly parse and interpret the configuration file's contents.
 
-Currently, only the `json` format is supported. We intend to support more formats in the future.
+Currently, only the `json` format is supported.
 
 ```json
 {
