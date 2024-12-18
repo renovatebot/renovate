@@ -2857,6 +2857,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'cloneSubmodulesFilter',
+    description:
+      'List of submodules names or patterns to clone when cloneSubmodules=true.',
+    type: 'array',
+    subType: 'string',
+    default: ['*'],
+  },
+  {
     name: 'ignorePrAuthor',
     description:
       'Set to `true` to fetch the entire list of PRs instead of only those authored by the Renovate user.',
