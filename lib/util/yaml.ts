@@ -143,7 +143,7 @@ export function dump(obj: any, opts?: DumpOptions): string {
 function massageContent(content: string, options?: YamlOptions): string {
   if (options?.removeTemplates) {
     return content
-      .replace(regEx(/\s*{{.+?}}(:.*)?/gs), '')
+      .replace(regEx(/\n\s*{{.+?}}:\s*\n/gs), '')
       .replace(regEx(/{{`.+?`}}/gs), '')
       .replace(regEx(/{{.+?}}/gs), '')
       .replace(regEx(/{%`.+?`%}/gs), '')
