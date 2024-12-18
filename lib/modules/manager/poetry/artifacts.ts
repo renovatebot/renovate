@@ -126,7 +126,7 @@ async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
 
   const parsedUrl = parseUrl(url);
   if (!parsedUrl) {
-    logger.once.debug({ url }, 'Failed to parse URL');
+    logger.once.debug(`Failed to parse URL ${url}`);
     return {};
   }
 
@@ -138,7 +138,7 @@ async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
         password: accessToken,
       };
     }
-    logger.once.debug({ url }, 'Could not get Google access token');
+    logger.once.debug(`Could not get Google access token (url=${url)`);
   }
 
   return {};
