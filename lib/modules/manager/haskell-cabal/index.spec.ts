@@ -1,4 +1,4 @@
-import { extractPackageFile } from '.';
+import { extractPackageFile, getRangeStrategy } from '.';
 
 describe('modules/manager/haskell-cabal/index', () => {
   describe('extractPackageFile()', () => {
@@ -18,5 +18,16 @@ describe('modules/manager/haskell-cabal/index', () => {
         ).toStrictEqual(expected);
       },
     );
+  });
+
+  describe('getRangeStrategy()', () => {
+    it.each`
+      input        | expected
+      ${'auto'}    | ${'widen'}
+      ${'widen'}   | ${'widen'}
+      ${'replace'} | ${'replace'}
+    `('getRangeStrategy({ rangeStrategy: $input })', ({ input, expected }) => {
+      expect(getRangeStrategy({ rangeStrategy: input })).toBe(expected);
+    });
   });
 });

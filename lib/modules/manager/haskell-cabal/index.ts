@@ -49,7 +49,6 @@ export function extractPackageFile(content: string): PackageFileContent {
 }
 
 export function getRangeStrategy({
-  currentValue,
   rangeStrategy,
 }: RangeConfig): RangeStrategy {
   if (rangeStrategy === 'auto') {
