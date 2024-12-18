@@ -137,7 +137,6 @@ export function extractPackageFile(
             datasource: BuildpacksRegistryDatasource.id,
             currentValue: version,
             packageName: group.id,
-            replaceString: `${version}`,
           };
           deps.push(dep);
         }
