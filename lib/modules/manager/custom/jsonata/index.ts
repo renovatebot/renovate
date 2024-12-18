@@ -25,15 +25,11 @@ export async function extractPackageFile(
       case 'json':
         json = parseJson(content, packageFile);
         break;
-      default:
-        throw new Error(
-          'Invalid file format. JSONata only supports json files currently.',
-        );
     }
   } catch (err) {
     logger.warn(
-      { err, fileName: packageFile },
-      'Invalid JSON file(parsing failed)',
+      { err, fileName: packageFile, fileFormat: config.fileFormat },
+      'Error while parsing file',
     );
     return null;
   }

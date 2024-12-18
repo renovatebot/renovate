@@ -39,6 +39,8 @@ export function checkIsValidDependency(
   packageFile: string,
   manager: string,
 ): boolean {
+  // eslint-disable-next-line
+  console.log('checkIsValidDependency', dep);
   const isValid = isValidDependency(dep);
   if (!isValid) {
     const meta = {
@@ -50,8 +52,12 @@ export function checkIsValidDependency(
       meta,
       'Discovered a package dependency, but it did not pass validation. Discarding',
     );
+    // eslint-disable-next-line
+    console.log('checkIsValidDependency:: 1'), isValid;
     return isValid;
   }
 
+  // eslint-disable-next-line
+  console.log('checkIsValidDependency:: 2', isValid);
   return isValid;
 }

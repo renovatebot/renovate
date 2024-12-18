@@ -178,20 +178,18 @@ describe('modules/manager/custom/jsonata/index', () => {
     expect(res).toBeNull();
     expect(logger.logger.warn).toHaveBeenCalledWith(
       expect.anything(),
-      'Error while parsing dep info',
+      'Query results failed schema validation',
     );
   });
 
-  it('returns null when content is not json', async () => {
-    const res = await extractPackageFile(
-      'not-json',
-      'foo-file',
-      {} as JsonataExtractConfig,
-    );
+  it('returns null when content does not match specified file format', async () => {
+    const res = await extractPackageFile('not-json', 'foo-file', {
+      fileFormat: 'json',
+    } as JsonataExtractConfig);
     expect(res).toBeNull();
     expect(logger.logger.warn).toHaveBeenCalledWith(
       expect.anything(),
-      'Invalid JSON file(parsing failed)',
+      'Error while parsing file',
     );
   });
 
@@ -219,7 +217,9 @@ describe('modules/manager/custom/jsonata/index', () => {
   it('returns null if invalid template', async () => {
     const config = {
       fileFormat: 'json',
-      matchStrings: [`{"depName": "foo"}`],
+      matchStrings: [
+        `{"depName": "foo", "currentValue": "1.0.0", "datasource": "npm"}`,
+      ],
       versioningTemplate: '{{#if versioning}}{{versioning}}{{else}}semver', // invalid template
     };
     const res = await extractPackageFile('{}', 'unused', config);
@@ -233,7 +233,9 @@ describe('modules/manager/custom/jsonata/index', () => {
   it('extracts and does not apply a registryUrlTemplate if the result is an invalid url', async () => {
     const config = {
       fileFormat: 'json',
-      matchStrings: [`{"depName": "foo"}`],
+      matchStrings: [
+        `{"depName": "foo", "currentValue": "1.0.0", "datasource": "npm"}`,
+      ],
       registryUrlTemplate: 'this-is-not-a-valid-url-{{depName}}',
     };
     const res = await extractPackageFile('{}', 'unused', config);
@@ -248,21 +250,10 @@ describe('modules/manager/custom/jsonata/index', () => {
     const config = {
       fileFormat: 'json',
       matchStrings: [`{"depName": "foo"}`, `{"depName": "bar"}`],
+      currentValueTemplate: '1.0.0',
+      datasourceTemplate: 'npm',
     };
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res?.deps).toHaveLength(2);
-  });
-
-  it('excludes and warns if invalid jsonata query found', async () => {
-    const config = {
-      fileFormat: 'json',
-      matchStrings: ['{', `{"depName": "foo"}`, `{"depName": "bar"}`],
-    };
-    const res = await extractPackageFile('{}', 'unused', config);
-    expect(res?.deps).toHaveLength(2);
-    expect(logger.logger.warn).toHaveBeenCalledWith(
-      { err: expect.any(Object), query: '{' },
-      'Failed to compile JSONata query',
-    );
   });
 });

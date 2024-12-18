@@ -14,8 +14,8 @@ export async function handleMatching(
   packageFile: string,
   config: JsonataExtractConfig,
 ): Promise<PackageDependency[]> {
-  const results: Record<string, string>[] = [];
-  const { matchStrings: jsonataQueries = [] } = config;
+  let results: Record<string, string>[] = [];
+  const { matchStrings: jsonataQueries } = config;
   for (const query of jsonataQueries) {
     // won't fail as this is verified during config validation
     const jsonataExpression = jsonata(query);
@@ -36,7 +36,7 @@ export async function handleMatching(
     queryResult = is.array(queryResult) ? queryResult : [queryResult];
     const parsed = QueryResultZodSchema.safeParse(queryResult);
     if (parsed.success) {
-      results.concat(structuredClone(parsed.data));
+      results = results.concat(structuredClone(parsed.data));
     } else {
       logger.warn(
         { err: parsed.error, jsonataQuery: query, packageFile, queryResult },
