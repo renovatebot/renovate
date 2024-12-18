@@ -571,7 +571,7 @@ export async function lookupUpdates(
 
     if (isReplacementRulesConfigured(config)) {
       addReplacementUpdateIfValid(res.updates, config);
-    } else if (dependency?.replacementName && dependency?.replacementVersion) {
+    } else if (dependency?.replacementName && dependency.replacementVersion) {
       res.updates.push({
         updateType: 'replacement',
         newName: dependency.replacementName,
