@@ -24,7 +24,7 @@ function isValidChartName(name: string | undefined, oci: boolean): boolean {
   } else {
     return !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
   }
-};
+}
 
 function isLocalPath(possiblePath: string): boolean {
   return ['./', '../', '/'].some((localPrefix) =>
