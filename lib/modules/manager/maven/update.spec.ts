@@ -1,4 +1,5 @@
 // TODO #22198
+import { codeBlock } from 'common-tags';
 import { XmlDocument } from 'xmldoc';
 import { Fixtures } from '../../../../test/fixtures';
 import { bumpPackageVersion, updateDependency } from './update';
@@ -84,16 +85,24 @@ describe('modules/manager/maven/update', () => {
 
     it('should do replacement if version is first', () => {
       const res = updateDependency({
-        fileContent:
-          simpleContent.slice(0, 814) +
-          simpleContent.slice(890, 923) +
-          simpleContent.slice(814, 890) +
-          simpleContent.slice(923),
+        fileContent: codeBlock`
+            <project xmlns="http://maven.apache.org/POM/4.0.0">
+              <dependencyManagement>
+                <dependencies>
+                  <dependency>
+                    <version>0.0.1</version>
+                    <artifactId>foo</artifactId>
+                    <groupId>org.example</groupId>
+                  </dependency>
+                </dependencies>
+              </dependencyManagement>
+            </project>
+          `,
         upgrade: {
           updateType: 'replacement',
           depName: 'org.example:foo',
           currentValue: '0.0.1',
-          fileReplacePosition: 829,
+          fileReplacePosition: 132,
           newName: 'org.example.new:bar',
           newValue: '0.0.1',
         },
