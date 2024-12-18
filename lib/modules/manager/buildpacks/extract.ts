@@ -126,7 +126,6 @@ export function extractPackageFile(
             datasource: BuildpacksRegistryDatasource.id,
             currentValue: version,
             packageName: dependency.split('@')[0],
-            replaceString: `${dependency}`,
           };
           deps.push(dep);
         }
