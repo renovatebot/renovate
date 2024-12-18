@@ -95,16 +95,18 @@ id = "not/valid"`,
           replaceString: 'buildpacks/nodejs:3.3.3',
         },
         {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           datasource: 'buildpacks-registry',
           currentValue: '1.0.0',
           packageName: 'example/foo',
-          replaceString: 'example/foo@1.0.0',
         },
         {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           datasource: 'buildpacks-registry',
           currentValue: '1.2.3',
           packageName: 'example/bar',
-          replaceString: 'example/bar@1.2.3',
         },
         {
           autoReplaceStringTemplate:
@@ -131,7 +133,6 @@ id = "not/valid"`,
           datasource: 'buildpacks-registry',
           currentValue: '2.3.4',
           packageName: 'example/tee',
-          replaceString: '2.3.4',
         },
       ]);
     });

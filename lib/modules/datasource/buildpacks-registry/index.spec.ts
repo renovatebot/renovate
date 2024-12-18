@@ -39,7 +39,7 @@ describe('modules/datasource/buildpacks-registry/index', () => {
         packageName: 'heroku/python',
       });
       expect(res).toEqual({
-        registryUrl: 'https://registry.buildpacks.io/',
+        registryUrl: 'https://registry.buildpacks.io',
         releases: [{ version: '0.17.0' }, { version: '0.17.1' }],
         sourceUrl: 'https://github.com/heroku/buildpacks-python',
       });
