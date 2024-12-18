@@ -456,10 +456,18 @@ For `sbt` note that Renovate will update the version string only for packages th
 
 ## cloneSubmodules
 
-Enabling this option will mean that any detected Git submodules will be cloned at time of repository clone.
+Enabling this option will mean that detected Git submodules will be cloned at time of repository clone.
+By default all will be cloned, but this can be customized by configuring `cloneSubmodulesFilter` too.
 Submodules are always cloned recursively.
 
 Important: private submodules aren't supported by Renovate, unless the underlying `ssh` layer already has the correct permissions.
+
+## cloneSubmodulesFilter
+
+Use this option together with `cloneSubmodules` if you wish to clone only a subset of submodules.
+
+This config option supports regex and glob filters, including negative matches.
+For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ## commitBody
 
