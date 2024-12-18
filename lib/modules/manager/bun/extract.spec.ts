@@ -9,7 +9,7 @@ describe('modules/manager/bun/extract', () => {
       expect(await extractAllPackageFiles({}, ['package.json'])).toEqual([]);
     });
 
-    describe("when using the .lockb lockfile format", () => {
+    describe('when using the .lockb lockfile format', () => {
       it('ignores missing package.json file', async () => {
         expect(await extractAllPackageFiles({}, ['bun.lockb'])).toEqual([]);
       });
@@ -67,7 +67,7 @@ describe('modules/manager/bun/extract', () => {
       });
     });
 
-    describe("when using the .lock lockfile format", () => {
+    describe('when using the .lock lockfile format', () => {
       it('ignores missing package.json file', async () => {
         expect(await extractAllPackageFiles({}, ['bun.lock'])).toEqual([]);
       });

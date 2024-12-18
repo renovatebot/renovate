@@ -41,7 +41,7 @@ describe('modules/manager/bun/artifacts', () => {
       expect(await updateArtifacts(updateArtifact)).toBeNull();
     });
 
-    describe("when using .lockb lockfile format", () => {
+    describe('when using .lockb lockfile format', () => {
       it('skips if cannot read lock file', async () => {
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lockb'] },
@@ -135,7 +135,7 @@ describe('modules/manager/bun/artifacts', () => {
       });
     });
 
-    describe("when using .lock lockfile format", () => {
+    describe('when using .lock lockfile format', () => {
       it('skips if cannot read lock file', async () => {
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lock'] },
@@ -227,12 +227,12 @@ describe('modules/manager/bun/artifacts', () => {
           { artifactError: { lockFile: 'bun.lock', stderr: 'nope' } },
         ]);
       });
-    })
+    });
   });
 
   describe('bun command execution', () => {
     it('check install options with configs', async () => {
-      const lockfileFormats = ["bun.lockb", "bun.lock"];
+      const lockfileFormats = ['bun.lockb', 'bun.lock'];
       const testCases = [
         {
           allowScripts: undefined,
