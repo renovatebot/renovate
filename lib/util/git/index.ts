@@ -347,7 +347,7 @@ export async function getSubmodules(): Promise<string[]> {
 
 export async function cloneSubmodules(
   shouldClone: boolean,
-  cloneSubmodulesFilter: string[] = ['*'],
+  cloneSubmodulesFilter: string[] | undefined,
 ): Promise<void> {
   if (!shouldClone || submodulesInitizialized) {
     return;
@@ -356,7 +356,7 @@ export async function cloneSubmodules(
   await syncGit();
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
-    if (!matchRegexOrGlobList(submodule, cloneSubmodulesFilter)) {
+    if (!matchRegexOrGlobList(submodule, cloneSubmodulesFilter ?? ['*'])) {
       logger.debug(
         { cloneSubmodulesFilter },
         `Skipping submodule ${submodule}`,
