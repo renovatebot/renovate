@@ -2,7 +2,11 @@ import type { Category } from '../../../constants';
 import type { RangeStrategy } from '../../../types';
 import { HackageDatasource } from '../../datasource/hackage';
 import * as pvpVersioning from '../../versioning/pvp';
-import type { PackageDependency, PackageFileContent , RangeConfig } from '../types';
+import type {
+  PackageDependency,
+  PackageFileContent,
+  RangeConfig,
+} from '../types';
 import type { CabalDependency } from './extract';
 import { extractNamesAndRanges, findDepends } from './extract';
 
