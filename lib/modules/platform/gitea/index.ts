@@ -70,6 +70,7 @@ interface GiteaRepoConfig {
   labelList: Promise<Label[]> | null;
   defaultBranch: string;
   cloneSubmodules: boolean;
+  cloneSubmodulesFilter: string[] | undefined;
   hasIssuesEnabled: boolean;
 }
 
@@ -255,6 +256,7 @@ const platform: Platform = {
   async initRepo({
     repository,
     cloneSubmodules,
+    cloneSubmodulesFilter,
     gitUrl,
   }: RepoParams): Promise<RepoResult> {
     let repo: Repo;
@@ -262,6 +264,7 @@ const platform: Platform = {
     config = {} as any;
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
+    config.cloneSubmodulesFilter = cloneSubmodulesFilter;
 
     // Try to fetch information about repository
     try {
@@ -483,7 +486,7 @@ const platform: Platform = {
 
       // Add pull request to cache for further lookups / queries
       if (pr) {
-        await GiteaPrCache.addPr(giteaHttp, config.repository, botUserName, pr);
+        await GiteaPrCache.setPr(giteaHttp, config.repository, botUserName, pr);
       }
     }
 
@@ -580,7 +583,7 @@ const platform: Platform = {
         throw new Error('Can not parse newly created Pull Request');
       }
 
-      await GiteaPrCache.addPr(giteaHttp, config.repository, botUserName, pr);
+      await GiteaPrCache.setPr(giteaHttp, config.repository, botUserName, pr);
       return pr;
     } catch (err) {
       // When the user manually deletes a branch from Renovate, the PR remains but is no longer linked to any branch. In
@@ -673,7 +676,7 @@ const platform: Platform = {
     );
     const pr = toRenovatePR(gpr, botUserName);
     if (pr) {
-      await GiteaPrCache.addPr(giteaHttp, config.repository, botUserName, pr);
+      await GiteaPrCache.setPr(giteaHttp, config.repository, botUserName, pr);
     }
   },
 

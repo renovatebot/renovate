@@ -135,6 +135,7 @@ exports[`modules/platform/gitlab/index initRepo should fall back respecting when
   [
     {
       "cloneSubmodules": undefined,
+      "cloneSubmodulesFilter": undefined,
       "defaultBranch": "master",
       "ignorePrAuthor": undefined,
       "mergeMethod": "merge",
@@ -150,6 +151,7 @@ exports[`modules/platform/gitlab/index initRepo should use ssh_url_to_repo if gi
   [
     {
       "cloneSubmodules": undefined,
+      "cloneSubmodulesFilter": undefined,
       "defaultBranch": "master",
       "ignorePrAuthor": undefined,
       "mergeMethod": "merge",
