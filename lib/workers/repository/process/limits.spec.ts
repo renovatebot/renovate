@@ -13,7 +13,7 @@ beforeEach(() => {
     onboardingBranch: 'bar/configure',
     prHourlyLimit: 2,
     prConcurrentLimit: 10,
-    branchConcurrentLimit: null as never,
+    branchConcurrentLimit: null,
   });
 });
 

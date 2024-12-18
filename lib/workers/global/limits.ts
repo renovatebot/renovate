@@ -59,9 +59,8 @@ export function getCount(key: CountName): number {
 }
 
 export function setCount(key: CountName, val: number): void {
-  const count = val;
-  counts.set(key, count);
-  logger.debug(`${key} count = ${count}`);
+  counts.set(key, val);
+  logger.debug(`${key} count = ${val}`);
 }
 
 export function incCountValue(key: CountName, incBy = 1): void {
@@ -78,15 +77,15 @@ function handleConcurrentLimits(
 
   // calculate the limits for this branch
   const hourlyLimit = calcLimit(config.upgrades, 'prHourlyLimit');
-  const limitValue = calcLimit(config.upgrades, limitKey);
-
   const hourlyPrCount = getCount('HourlyPRs');
-  const currentCount = getCount(key);
 
   // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
   if (hourlyLimit && hourlyPrCount >= hourlyLimit) {
     return true;
   }
+
+  const limitValue = calcLimit(config.upgrades, limitKey);
+  const currentCount = getCount(key);
 
   if (limitValue && currentCount >= limitValue) {
     return true;
@@ -164,7 +163,7 @@ export function hasMultipleLimits(
     }
 
     // istanbul ignore if: should not happen as the limits are of type number
-    if (is.null_(limitValue)) {
+    if (limitValue === null) {
       limitValue = 0;
     }
 
