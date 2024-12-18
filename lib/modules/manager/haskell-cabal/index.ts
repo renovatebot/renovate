@@ -1,7 +1,8 @@
 import type { Category } from '../../../constants';
+import type { RangeStrategy } from '../../../types';
 import { HackageDatasource } from '../../datasource/hackage';
 import * as pvpVersioning from '../../versioning/pvp';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type { PackageDependency, PackageFileContent , RangeConfig } from '../types';
 import type { CabalDependency } from './extract';
 import { extractNamesAndRanges, findDepends } from './extract';
 
@@ -41,4 +42,14 @@ export function extractPackageFile(content: string): PackageFileContent {
     current = current.slice(maybeContent.lengthProcessed);
   }
   return { deps };
+}
+
+export function getRangeStrategy({
+  currentValue,
+  rangeStrategy,
+}: RangeConfig): RangeStrategy {
+  if (rangeStrategy === 'auto') {
+    return 'widen';
+  }
+  return rangeStrategy;
 }
