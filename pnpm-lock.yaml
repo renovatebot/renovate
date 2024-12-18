@@ -336,8 +336,8 @@ importers:
         specifier: 2.6.1
         version: 2.6.1
       zod:
-        specifier: 3.24.0
-        version: 3.24.0
+        specifier: 3.24.1
+        version: 3.24.1
     optionalDependencies:
       better-sqlite3:
         specifier: 11.7.0
@@ -6305,8 +6305,8 @@ packages:
     resolution: {integrity: sha512-GQHQqAopRhwU8Kt1DDM8NjibDXHC8eoh1erhGAJPEyveY9qqVeXvVikNKrDz69sHowPMorbPUrH/mx8c50eiBQ==}
     engines: {node: '>=18'}
 
-  zod@3.24.0:
-    resolution: {integrity: sha512-Hz+wiY8yD0VLA2k/+nsg2Abez674dDGTai33SwNvMPuf9uIrBC9eFgIMQxBBbHFxVXi8W+5nX9DcAh9YNSQm/w==}
+  zod@3.24.1:
+    resolution: {integrity: sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==}
 
   zwitch@1.0.5:
     resolution: {integrity: sha512-V50KMwwzqJV0NpZIZFwfOD5/lyny3WlSzRiXgA0G7VUnRlqttta1L6UQIHzd6EuBY/cHGfwTIck7w1yH6Q5zUw==}
@@ -8025,7 +8025,7 @@ snapshots:
       fs-extra: 11.2.0
       toml-eslint-parser: 0.10.0
       upath: 2.0.1
-      zod: 3.24.0
+      zod: 3.24.1
 
   '@renovatebot/eslint-plugin@file:tools/eslint': {}
 
@@ -13534,6 +13534,6 @@ snapshots:
 
   yoctocolors@2.1.1: {}
 
-  zod@3.24.0: {}
+  zod@3.24.1: {}
 
   zwitch@1.0.5: {}
