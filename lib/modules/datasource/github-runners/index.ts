@@ -19,7 +19,7 @@ export class GithubRunnersDatasource extends Datasource {
     ubuntu: [
       { version: '24.04' },
       { version: '22.04' },
-      { version: '20.04' },
+      { version: '20.04', isDeprecated: true },
       { version: '18.04', isDeprecated: true },
       { version: '16.04', isDeprecated: true },
     ],

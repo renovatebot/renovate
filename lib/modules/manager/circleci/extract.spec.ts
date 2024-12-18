@@ -249,5 +249,65 @@ describe('modules/manager/circleci/extract', () => {
         },
       ]);
     });
+
+    it('extracts orb definitions', () => {
+      const res = extractPackageFile(codeBlock`
+      version: 2.1
+
+      orbs:
+        myorb:
+          orbs:
+            python: circleci/python@2.1.1
+
+          executors:
+            python:
+              docker:
+                - image: cimg/python:3.9
+
+          jobs:
+            test_image:
+              docker:
+                - image: cimg/python:3.7
+              steps:
+                - checkout
+
+      workflows:
+        Test:
+          jobs:
+            - myorb/test_image`);
+
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '2.1.1',
+            datasource: 'orb',
+            depName: 'python',
+            depType: 'orb',
+            packageName: 'circleci/python',
+            versioning: 'npm',
+          },
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '3.9',
+            datasource: 'docker',
+            depName: 'cimg/python',
+            depType: 'docker',
+            replaceString: 'cimg/python:3.9',
+          },
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '3.7',
+            datasource: 'docker',
+            depName: 'cimg/python',
+            depType: 'docker',
+            replaceString: 'cimg/python:3.7',
+          },
+        ],
+      });
+    });
   });
 });
