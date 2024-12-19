@@ -543,6 +543,23 @@ export async function getDependencyInfo(
     }
   }
 
+  const relocation = pomContent.descendantWithPath(
+    'distributionManagement.relocation',
+  );
+  if (relocation) {
+    const relocationGroup =
+      relocation.valueWithPath('groupId') ?? dependency.group;
+    const relocationName =
+      relocation.valueWithPath('artifactId') ?? dependency.name;
+    result.replacementName = `${relocationGroup}:${relocationName}`;
+    const relocationVersion = relocation.valueWithPath('version');
+    result.replacementVersion = relocationVersion ?? version;
+    const relocationMessage = relocation.valueWithPath('message');
+    if (relocationMessage) {
+      result.deprecationMessage = relocationMessage;
+    }
+  }
+
   const groupId = pomContent.valueWithPath('groupId');
   if (groupId) {
     result.packageScope = groupId;
