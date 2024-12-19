@@ -4,7 +4,7 @@ exports[`modules/datasource/orb/index getReleases processes homeUrl 1`] = `
 {
   "homepage": "https://google.com",
   "isPrivate": false,
-  "registryUrl": "https://circleci.com/",
+  "registryUrl": "https://circleci.com",
   "releases": [
     {
       "releaseTimestamp": "2018-12-11T05:28:14.080Z",
@@ -53,7 +53,7 @@ exports[`modules/datasource/orb/index getReleases processes real data 1`] = `
 {
   "homepage": "https://circleci.com/developer/orbs/orb/hyper-expanse/library-release-workflows",
   "isPrivate": false,
-  "registryUrl": "https://circleci.com/",
+  "registryUrl": "https://circleci.com",
   "releases": [
     {
       "releaseTimestamp": "2018-12-11T05:28:14.080Z",
