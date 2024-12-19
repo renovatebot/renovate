@@ -127,7 +127,7 @@ export function parsePyProject(
   content: string,
 ): PyProject | null {
   try {
-    const jsonMap = parseToml(content);
+    const jsonMap = parseToml(content, { removeTemplates: true });
     return PyProjectSchema.parse(jsonMap);
   } catch (err) {
     logger.debug(

@@ -258,7 +258,7 @@ export const MultidocYaml = z.string().transform((str, ctx): JsonArray => {
 
 export const Toml = z.string().transform((str, ctx) => {
   try {
-    return parseToml(str);
+    return parseToml(str, { removeTemplates: true });
   } catch {
     ctx.addIssue({ code: 'custom', message: 'Invalid TOML' });
     return z.NEVER;
