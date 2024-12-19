@@ -1780,7 +1780,7 @@ describe('config/validation', () => {
 
     it('validates array type options', async () => {
       const config = {
-        allowedPostUpgradeCommands: ['cmd'],
+        allowedCommands: ['cmd'],
         checkedBranches: 'invalid-type',
         gitNoVerify: ['invalid'],
         mergeConfidenceDatasources: [1],
