@@ -6,6 +6,7 @@
 [![Build status](https://github.com/renovatebot/renovate/actions/workflows/build.yml/badge.svg)](https://github.com/renovatebot/renovate/actions/workflows/build.yml)
 ![Docker Pulls](https://img.shields.io/docker/pulls/renovate/renovate?color=turquoise)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/renovatebot/renovate/badge)](https://securityscorecards.dev/viewer/?uri=github.com/renovatebot/renovate)
+[![Gurubase](https://img.shields.io/badge/Gurubase-Ask%20Renovate%20CLI%20Guru-006BFF)](https://gurubase.io/g/renovate-cli)
 
 # What is the Mend Renovate CLI?
 
