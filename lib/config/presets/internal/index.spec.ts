@@ -30,7 +30,8 @@ describe('config/presets/internal/index', () => {
             const config = await resolveConfigPresets(
               massageConfig(presetConfig),
             );
-            const res = await validateConfig('repo', config, true);
+            const configType = groupName === 'global' ? 'global' : 'repo';
+            const res = await validateConfig(configType, config, true);
             expect(res.errors).toHaveLength(0);
             expect(res.warnings).toHaveLength(0);
           } catch (err) {
