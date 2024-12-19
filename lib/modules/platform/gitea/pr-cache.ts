@@ -115,13 +115,16 @@ export class GiteaPrCache {
   }
 
   private async sync(http: GiteaHttp): Promise<GiteaPrCache> {
-    const query = getQueryString({
+    const urlPath = `${API_PATH}/repos/${this.repo}/pulls`;
+    const queryParams = {
       state: 'all',
       sort: 'recentupdate',
-    });
+    };
 
+    let page: number = 1;
+    const query = getQueryString(queryParams);
     let url: string | undefined =
-      `${API_PATH}/repos/${this.repo}/pulls?${query}`;
+      `${urlPath}?${query}`;
 
     while (url) {
       const res: HttpResponse<PR[]> = await http.getJson<PR[]>(url, {
@@ -130,11 +133,17 @@ export class GiteaPrCache {
       });
 
       const needNextPage = this.reconcile(res.body);
-      if (!needNextPage) {
+      const nextUrl: string | undefined = parseLinkHeader(res.headers.link)?.next?.url;
+      if (!needNextPage || res.body.length === 0 || nextUrl === undefined) {
         break;
       }
 
-      url = parseLinkHeader(res.headers.link)?.next?.url;
+      page += 1;
+      const query = getQueryString({
+        ...queryParams,
+        page
+      });
+      url = `${urlPath}?${query}`;
     }
 
     return this;
