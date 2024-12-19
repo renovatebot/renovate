@@ -260,6 +260,19 @@ describe('modules/manager/custom/jsonata/index', () => {
       datasourceTemplate: 'npm',
     };
     const res = await extractPackageFile('{}', 'unused', config);
-    expect(res?.deps).toHaveLength(2);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'foo',
+          currentValue: '1.0.0',
+          datasource: 'npm',
+        },
+        {
+          depName: 'bar',
+          currentValue: '1.0.0',
+          datasource: 'npm',
+        },
+      ],
+    });
   });
 });
