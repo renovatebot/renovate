@@ -316,14 +316,12 @@ export async function findPr({
   }
 
   const prList = await getPrList();
-  const pr = prList
-    .sort((a, b) => b.number - a.number)
-    .find(
-      (p) =>
-        p.sourceBranch === branchName &&
-        (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-        matchesState(p.state, state),
-    );
+  const pr = prList.find(
+    (p) =>
+      p.sourceBranch === branchName &&
+      (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
+      matchesState(p.state, state),
+  );
 
   if (!pr) {
     return null;

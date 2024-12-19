@@ -166,8 +166,8 @@ describe('modules/platform/bitbucket/pr-cache', () => {
     );
 
     expect(res).toMatchObject([
-      { number: 1, title: 'title' },
       { number: 2, title: 'title' },
+      { number: 1, title: 'title' },
     ]);
     expect(cache).toEqual({
       httpCache: {},
@@ -175,8 +175,8 @@ describe('modules/platform/bitbucket/pr-cache', () => {
         bitbucket: {
           pullRequestsCache: {
             items: {
-              '1': prInfo(pr1),
               '2': prInfo(pr2),
+              '1': prInfo(pr1),
             },
             author: 'some-author',
             updated_on: '2023-01-01T00:00:00.000Z',

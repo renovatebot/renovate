@@ -62,7 +62,7 @@ export class BitbucketPrCache {
   }
 
   private getPrs(): Pr[] {
-    return Object.values(this.cache.items);
+    return Object.values(this.cache.items).sort((a, b) => b.number - a.number);
   }
 
   static async getPrs(
@@ -110,7 +110,6 @@ export class BitbucketPrCache {
         updated_on = rawItem.updated_on;
       }
     }
-
     this.cache.updated_on = updated_on;
   }
 
