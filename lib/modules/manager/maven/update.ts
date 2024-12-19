@@ -15,14 +15,54 @@ export function updateAtPosition(
   upgrade: Upgrade,
   endingAnchor: string,
 ): string | null {
-  const { depName, currentValue, newValue, fileReplacePosition } = upgrade;
-  const leftPart = fileContent.slice(0, fileReplacePosition);
+  const { depName, newName, currentValue, newValue, fileReplacePosition } =
+    upgrade;
+  let leftPart = fileContent.slice(0, fileReplacePosition);
   const rightPart = fileContent.slice(fileReplacePosition);
   const versionClosePosition = rightPart.indexOf(endingAnchor);
-  const restPart = rightPart.slice(versionClosePosition);
+  let restPart = rightPart.slice(versionClosePosition);
   const versionPart = rightPart.slice(0, versionClosePosition);
   const version = versionPart.trim();
-  if (version === newValue) {
+  if (newName) {
+    const blockStart = Math.max(
+      leftPart.lastIndexOf('<parent'),
+      leftPart.lastIndexOf('<dependency'),
+      leftPart.lastIndexOf('<plugin'),
+      leftPart.lastIndexOf('<extension'),
+    );
+    let leftBlock = leftPart.slice(blockStart);
+    const blockEnd = Math.min(
+      restPart.indexOf('</parent'),
+      restPart.indexOf('</dependency'),
+      restPart.indexOf('</plugin'),
+      restPart.indexOf('</extension'),
+    );
+    let rightBlock = restPart.slice(0, blockEnd);
+    const [groupId, artifactId] = depName!.split(':', 2);
+    const [newGroupId, newArtifactId] = newName.split(':', 2);
+    if (leftBlock.indexOf('<groupId') > 0) {
+      leftBlock = updateValue(leftBlock, 'groupId', groupId, newGroupId);
+    } else {
+      rightBlock = updateValue(rightBlock, 'groupId', groupId, newGroupId);
+    }
+    if (leftBlock.indexOf('<artifactId') > 0) {
+      leftBlock = updateValue(
+        leftBlock,
+        'artifactId',
+        artifactId,
+        newArtifactId,
+      );
+    } else {
+      rightBlock = updateValue(
+        rightBlock,
+        'artifactId',
+        artifactId,
+        newArtifactId,
+      );
+    }
+    leftPart = leftPart.slice(0, blockStart) + leftBlock;
+    restPart = rightBlock + restPart.slice(blockEnd);
+  } else if (version === newValue) {
     return fileContent;
   }
   if (version === currentValue || upgrade.groupName) {
@@ -38,10 +78,6 @@ export function updateDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig): string | null {
-  if (upgrade.updateType === 'replacement') {
-    logger.warn('maven manager does not support replacement updates yet');
-    return null;
-  }
   const offset = fileContent.indexOf('<');
   const spaces = fileContent.slice(0, offset);
   const restContent = fileContent.slice(offset);
@@ -140,4 +176,25 @@ function isSnapshot(
 ): boolean {
   const lastPart = prerelease?.at(-1);
   return is.string(lastPart) && lastPart.endsWith('SNAPSHOT');
+}
+
+function updateValue(
+  content: string,
+  nodeName: string,
+  oldValue: string,
+  newValue: string,
+): string {
+  const elementStart = content.indexOf('<' + nodeName);
+  const start = content.slice(elementStart).indexOf('>') + elementStart + 1;
+  const end = content.slice(start).indexOf('</' + nodeName) + start;
+  const elementContent = content.slice(start, end);
+  if (elementContent.trim() === oldValue) {
+    return (
+      content.slice(0, start) +
+      elementContent.replace(oldValue, newValue) +
+      content.slice(end)
+    );
+  }
+  logger.debug({ content, nodeName, oldValue, newValue }, 'Unknown value');
+  return content;
 }

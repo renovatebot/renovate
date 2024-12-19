@@ -1,4 +1,5 @@
 // TODO #22198
+import { codeBlock } from 'common-tags';
 import { XmlDocument } from 'xmldoc';
 import { Fixtures } from '../../../../test/fixtures';
 import { bumpPackageVersion, updateDependency } from './update';
@@ -10,12 +11,135 @@ const prereleaseContent = Fixtures.get(`prerelease.pom.xml`);
 
 describe('modules/manager/maven/update', () => {
   describe('updateDependency', () => {
-    it('should return null for replacement', () => {
+    it('should update version', () => {
       const res = updateDependency({
-        fileContent: '',
-        upgrade: { updateType: 'replacement' },
+        fileContent: simpleContent,
+        upgrade: {
+          updateType: 'patch',
+          depName: 'org.example:foo',
+          currentValue: '0.0.1',
+          fileReplacePosition: 905,
+          newValue: '0.0.2',
+        },
       });
-      expect(res).toBeNull();
+
+      const project = new XmlDocument(res!);
+      expect(
+        project.valueWithPath(
+          'dependencyManagement.dependencies.dependency.version',
+        ),
+      ).toBe('0.0.2');
+    });
+
+    it('should do simple replacement', () => {
+      const res = updateDependency({
+        fileContent: simpleContent,
+        upgrade: {
+          updateType: 'replacement',
+          depName: 'org.example:foo',
+          currentValue: '0.0.1',
+          fileReplacePosition: 905,
+          newName: 'org.example.new:foo',
+          newValue: '0.0.1',
+        },
+      });
+
+      const project = new XmlDocument(res!);
+      expect(
+        project.valueWithPath(
+          'dependencyManagement.dependencies.dependency.groupId',
+        ),
+      ).toBe('org.example.new');
+    });
+
+    it('should do full replacement', () => {
+      const res = updateDependency({
+        fileContent: simpleContent,
+        upgrade: {
+          updateType: 'replacement',
+          depName: 'org.example:foo',
+          currentValue: '0.0.1',
+          fileReplacePosition: 905,
+          newName: 'org.example.new:bar',
+          newValue: '0.0.2',
+        },
+      });
+
+      const project = new XmlDocument(res!);
+      expect(
+        project.valueWithPath(
+          'dependencyManagement.dependencies.dependency.groupId',
+        ),
+      ).toBe('org.example.new');
+      expect(
+        project.valueWithPath(
+          'dependencyManagement.dependencies.dependency.artifactId',
+        ),
+      ).toBe('bar');
+      expect(
+        project.valueWithPath(
+          'dependencyManagement.dependencies.dependency.version',
+        ),
+      ).toBe('0.0.2');
+    });
+
+    it('should do replacement if version is first', () => {
+      const res = updateDependency({
+        fileContent: codeBlock`
+            <project xmlns="http://maven.apache.org/POM/4.0.0">
+              <dependencyManagement>
+                <dependencies>
+                  <dependency>
+                    <version>0.0.1</version>
+                    <artifactId>foo</artifactId>
+                    <groupId>org.example</groupId>
+                  </dependency>
+                </dependencies>
+              </dependencyManagement>
+            </project>
+          `,
+        upgrade: {
+          updateType: 'replacement',
+          depName: 'org.example:foo',
+          currentValue: '0.0.1',
+          fileReplacePosition: 132,
+          newName: 'org.example.new:bar',
+          newValue: '0.0.1',
+        },
+      });
+
+      const project = new XmlDocument(res!);
+      expect(
+        project.valueWithPath(
+          'dependencyManagement.dependencies.dependency.groupId',
+        ),
+      ).toBe('org.example.new');
+      expect(
+        project.valueWithPath(
+          'dependencyManagement.dependencies.dependency.artifactId',
+        ),
+      ).toBe('bar');
+      expect(
+        project.valueWithPath(
+          'dependencyManagement.dependencies.dependency.version',
+        ),
+      ).toBe('0.0.1');
+    });
+
+    it('should ignore replacement if name does not match', () => {
+      const res = updateDependency({
+        fileContent: simpleContent,
+        upgrade: {
+          updateType: 'replacement',
+          depName: 'org.example.old:bar',
+          currentValue: '0.0.1',
+          fileReplacePosition: 905,
+          newName: 'org.example:foo',
+          newValue: '0.0.1',
+        },
+      });
+
+      expect(res).toBe(simpleContent);
     });
   });
 
