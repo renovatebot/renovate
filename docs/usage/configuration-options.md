@@ -710,7 +710,7 @@ Currently we have two custom managers.
 The `regex` manager which is based on using Regular Expression named capture groups.
 The `jsonata` manager which is based on using JSONata queries.
 
-You must have capture/extract the following three fields _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
+You must capture/extract the following three fields _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
 
 - `datasource`
 - `depName` and / or `packageName`
@@ -790,7 +790,7 @@ Example:
 }
 ```
 
-```json
+```json title="Parsing a JSON file with a custom manager"
 {
   "customManagers": [
     {
@@ -832,7 +832,7 @@ This setting helps the system correctly parse and interpret the configuration fi
 
 Currently, only the `json` format is supported.
 
-```json
+```json title="Parsing a JSON file with a custom manager"
 {
   "customManagers": [
     {

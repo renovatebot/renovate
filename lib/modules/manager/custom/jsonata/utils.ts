@@ -28,15 +28,15 @@ export async function handleMatching(
           jsonataQuery: query,
           packageFile,
         },
-        'The jsonata query returned no matches. Possible error, please check your query',
+        'The jsonata query returned no matches. Possible error, please check your query. Skipping',
       );
-      continue;
+      return [];
     }
 
     queryResult = is.array(queryResult) ? queryResult : [queryResult];
     const parsed = QueryResultZodSchema.safeParse(queryResult);
     if (parsed.success) {
-      results = results.concat(structuredClone(parsed.data));
+      results = results.concat(parsed.data);
     } else {
       logger.warn(
         { err: parsed.error, jsonataQuery: query, packageFile, queryResult },

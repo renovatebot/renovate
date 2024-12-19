@@ -10,6 +10,27 @@ describe('modules/manager/custom/jsonata/index', () => {
     });
   });
 
+  it('returns null when content does not match specified file format', async () => {
+    const res = await extractPackageFile('not-json', 'foo-file', {
+      fileFormat: 'json',
+    } as JsonataExtractConfig);
+    expect(res).toBeNull();
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      expect.anything(),
+      'Error while parsing file',
+    );
+  });
+
+  it('returns null when no content', async () => {
+    const res = await extractPackageFile('', 'foo-file', {
+      fileFormat: 'json',
+      matchStrings: [
+        'packages.{ "depName": package, "currentValue": version, "versioning ": versioning }',
+      ],
+    } as JsonataExtractConfig);
+    expect(res).toBeNull();
+  });
+
   it('extracts data when no templates are used', async () => {
     const json = codeBlock`
     {
@@ -59,7 +80,6 @@ describe('modules/manager/custom/jsonata/index', () => {
           depType: 'dev',
         },
       ],
-      matchStrings: config.matchStrings,
     });
   });
 
@@ -142,7 +162,6 @@ describe('modules/manager/custom/jsonata/index', () => {
           depType: 'default-dep-type',
         },
       ],
-      matchStrings: config.matchStrings,
     });
   });
 
@@ -182,27 +201,6 @@ describe('modules/manager/custom/jsonata/index', () => {
     );
   });
 
-  it('returns null when content does not match specified file format', async () => {
-    const res = await extractPackageFile('not-json', 'foo-file', {
-      fileFormat: 'json',
-    } as JsonataExtractConfig);
-    expect(res).toBeNull();
-    expect(logger.logger.warn).toHaveBeenCalledWith(
-      expect.anything(),
-      'Error while parsing file',
-    );
-  });
-
-  it('returns null when no content', async () => {
-    const res = await extractPackageFile('', 'foo-file', {
-      fileFormat: 'json',
-      matchStrings: [
-        'packages.{ "depName": package, "currentValue": version, "versioning ": versioning }',
-      ],
-    } as JsonataExtractConfig);
-    expect(res).toBeNull();
-  });
-
   it('returns null if no dependencies found', async () => {
     const config = {
       fileFormat: 'json',
@@ -211,6 +209,14 @@ describe('modules/manager/custom/jsonata/index', () => {
       ],
     };
     const res = await extractPackageFile('{}', 'unused', config);
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      {
+        packageFile: 'unused',
+        jsonataQuery:
+          'packages.{ "depName": package, "currentValue": version, "versioning ": versioning }',
+      },
+      'The jsonata query returned no matches. Possible error, please check your query. Skipping',
+    );
     expect(res).toBeNull();
   });
 

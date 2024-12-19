@@ -45,6 +45,5 @@ export async function extractPackageFile(
 
   return {
     deps,
-    matchStrings: config.matchStrings,
   };
 }
