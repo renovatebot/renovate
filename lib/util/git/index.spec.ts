@@ -271,6 +271,7 @@ describe('util/git/index', () => {
       await repo.commit('Add submodules');
       await git.initRepo({
         cloneSubmodules: true,
+        cloneSubmodulesFilter: ['file'],
         url: base.path,
       });
       await git.syncGit();

@@ -31,7 +31,7 @@ concurrency:
 env:
   DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
   NODE_VERSION: 22
-  PDM_VERSION: 2.22.0 # renovate: datasource=pypi depName=pdm
+  PDM_VERSION: 2.22.1 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -438,7 +438,7 @@ jobs:
           merge-multiple: true
 
       - name: Codecov
-        uses: codecov/codecov-action@7f8b4b4bde536c465e797be725718b88c5d95e0e # v5.1.1
+        uses: codecov/codecov-action@1e68e06f1dbfde0e4cefc87efeba9e4643565303 # v5.1.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: coverage/lcov

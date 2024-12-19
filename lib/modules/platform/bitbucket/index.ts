@@ -185,6 +185,7 @@ export async function getJsonFile(
 export async function initRepo({
   repository,
   cloneSubmodules,
+  cloneSubmodulesFilter,
   ignorePrAuthor,
   bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
@@ -262,6 +263,7 @@ export async function initRepo({
     ...config,
     url,
     cloneSubmodules,
+    cloneSubmodulesFilter,
   });
   const repoConfig: RepoResult = {
     defaultBranch: mainBranch,
@@ -1022,6 +1024,7 @@ export async function updatePr({
     )
   ).body;
 
+  let updatedPrRes: PrResponse;
   try {
     const body: any = {
       title,
@@ -1036,10 +1039,12 @@ export async function updatePr({
       };
     }
 
-    await bitbucketHttp.putJson(
-      `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-      { body },
-    );
+    updatedPrRes = (
+      await bitbucketHttp.putJson<PrResponse>(
+        `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+        { body },
+      )
+    ).body;
   } catch (err) {
     // Try sanitizing reviewers
     const sanitizedReviewers = await sanitizeReviewers(pr.reviewers, err);
@@ -1047,16 +1052,18 @@ export async function updatePr({
     if (sanitizedReviewers === undefined) {
       throw err;
     } else {
-      await bitbucketHttp.putJson(
-        `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-        {
-          body: {
-            title,
-            description: sanitize(description),
-            reviewers: sanitizedReviewers,
+      updatedPrRes = (
+        await bitbucketHttp.putJson<PrResponse>(
+          `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+          {
+            body: {
+              title,
+              description: sanitize(description),
+              reviewers: sanitizedReviewers,
+            },
           },
-        },
-      );
+        )
+      ).body;
     }
   }
 
@@ -1065,6 +1072,14 @@ export async function updatePr({
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/decline`,
     );
   }
+
+  // update pr cache
+  await BitbucketPrCache.setPr(
+    bitbucketHttp,
+    config.repository,
+    renovateUserUuid,
+    utils.prInfo({ ...updatedPrRes, ...(state && { state }) }),
+  );
 }
 
 export async function mergePr({

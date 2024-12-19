@@ -81,6 +81,7 @@ let config: {
   mergeMethod: MergeMethod;
   defaultBranch: string;
   cloneSubmodules: boolean | undefined;
+  cloneSubmodulesFilter: string[] | undefined;
   ignorePrAuthor: boolean | undefined;
   squash: boolean;
 } = {} as any;
@@ -299,6 +300,7 @@ function getRepoUrl(
 export async function initRepo({
   repository,
   cloneSubmodules,
+  cloneSubmodulesFilter,
   ignorePrAuthor,
   gitUrl,
   endpoint,
@@ -307,6 +309,7 @@ export async function initRepo({
   config = {} as any;
   config.repository = urlEscape(repository);
   config.cloneSubmodules = cloneSubmodules;
+  config.cloneSubmodulesFilter = cloneSubmodulesFilter;
   config.ignorePrAuthor = ignorePrAuthor;
 
   let res: HttpResponse<RepoResponse>;
