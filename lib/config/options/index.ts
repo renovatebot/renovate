@@ -2751,8 +2751,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'matchStrings',
-    description:
-      'Queries to use. Valid only within a `customManagers` object. See `customType` docs.',
+    description: 'Queries to use. Valid only within a `customManagers` object.',
     type: 'array',
     subType: 'string',
     parents: ['customManagers'],
