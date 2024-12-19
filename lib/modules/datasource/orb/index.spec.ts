@@ -103,8 +103,8 @@ describe('modules/datasource/orb/index', () => {
         packageName: 'hyper-expanse/library-release-workflows',
         registryUrls: ['https://cci.internal.dev'],
       });
-      expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
+      expect(res?.registryUrl).toBe('https://cci.internal.dev');
     });
   });
 });

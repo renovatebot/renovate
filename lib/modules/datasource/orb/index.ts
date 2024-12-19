@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { OrbResponse } from './types';
@@ -30,7 +31,7 @@ export class OrbDatasource extends Datasource {
   override readonly customRegistrySupport = true;
 
   override readonly defaultRegistryUrls = ['https://circleci.com/'];
-  override readonly registryStrategy = 'merge';
+  override readonly registryStrategy = 'hunt';
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -48,10 +49,7 @@ export class OrbDatasource extends Datasource {
     if (!registryUrl) {
       return null;
     }
-    const path = registryUrl.endsWith('/')
-      ? 'graphql-unstable'
-      : '/graphql-unstable';
-    const url = `${registryUrl}${path}`;
+    const url = joinUrlParts(registryUrl, 'graphql-unstable');
     const body = {
       query,
       variables: { packageName, maxVersions: MAX_VERSIONS },
