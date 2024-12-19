@@ -7,6 +7,16 @@ import type {
 import { regEx } from '../../util/regex';
 import type { ValidationMessage } from '../types';
 
+export function getParentName(parentPath: string | undefined): string {
+  return parentPath
+    ? parentPath
+        .replace(regEx(/\.?encrypted$/), '')
+        .replace(regEx(/\[\d+\]$/), '')
+        .split('.')
+        .pop()!
+    : '.';
+}
+
 export function validatePlainObject(
   val: Record<string, unknown>,
 ): true | string {

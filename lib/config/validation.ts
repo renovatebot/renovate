@@ -35,6 +35,7 @@ import * as managerValidator from './validation-helpers/managers';
 import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches';
 import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
 import {
+  getParentName,
   isFalseGlobal,
   validateNumber,
   validatePlainObject,
@@ -149,16 +150,6 @@ function initOptions(): void {
   }
 
   optionsInitialized = true;
-}
-
-export function getParentName(parentPath: string | undefined): string {
-  return parentPath
-    ? parentPath
-        .replace(regEx(/\.?encrypted$/), '')
-        .replace(regEx(/\[\d+\]$/), '')
-        .split('.')
-        .pop()!
-    : '.';
 }
 
 export async function validateConfig(
