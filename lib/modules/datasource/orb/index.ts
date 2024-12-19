@@ -27,9 +27,10 @@ export class OrbDatasource extends Datasource {
     super(OrbDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
 
   override readonly defaultRegistryUrls = ['https://circleci.com/'];
+  override readonly registryStrategy = 'merge';
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -47,7 +48,10 @@ export class OrbDatasource extends Datasource {
     if (!registryUrl) {
       return null;
     }
-    const url = `${registryUrl}graphql-unstable`;
+    const path = registryUrl.endsWith('/')
+      ? 'graphql-unstable'
+      : '/graphql-unstable';
+    const url = `${registryUrl}${path}`;
     const body = {
       query,
       variables: { packageName, maxVersions: MAX_VERSIONS },
