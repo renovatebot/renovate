@@ -360,8 +360,10 @@ The end-result looks like this:
 
 #### Yarn 2+
 
-Renovate doesn't support reading `npmRegistries` and `npmScopes` from `.yarnrc.yml`, so `hostRules` (or `npmToken`) and `npmrc` should be configured like above.
-Renovate updates `npmRegistries` in `.yarnrc.yml` with resolved `hostRules` before running Yarn.
+In Yarn 2+, a [.yarnrc.yml](https://yarnpkg.com/configuration/yarnrc) file can be used with to configure npm authentication for private registries via `npmRegistries` or via a top level `npmAuthToken`.
+
+Renovate updates `npmRegistries` in `.yarnrc.yml` with resolved `hostRules` before running Yarn, but does not overwrite `npmAuthToken`.
+
 For Renovate to overwrite existing `npmRegistries` entry, the key should match the `matchHost` minus the protocol (`http:` or `https:`) plus the trailing slash.
 
 For example, the Renovate configuration:
@@ -397,6 +399,16 @@ npmRegistries:
   https://npm.pkg.github.com:
     npmAuthToken: <Decrypted PAT Token>
 ```
+
+Thus, to allow for private registries to be used locally via the `NPM_TOKEN` environment variable _and_ with Renovate, your local `.yarnrc.yml` must contain:
+
+
+```yaml
+npmRegistries:
+   //npm.pkg.github.com/:
+    npmAuthToken: "${NPM_TOKEN}"
+```
+
 
 ### maven
 
