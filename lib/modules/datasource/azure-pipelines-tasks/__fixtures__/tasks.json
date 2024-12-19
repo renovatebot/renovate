@@ -1,0 +1,575 @@
+{
+  "count": 3,
+  "value": [
+    {
+      "visibility": [
+        "Build",
+        "Release"
+      ],
+      "runsOn": [
+        "Agent",
+        "DeploymentGroup"
+      ],
+      "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+      "name": "PowerShell",
+      "version": {
+        "major": 2,
+        "minor": 247,
+        "patch": 1,
+        "isTest": false
+      },
+      "serverOwned": true,
+      "contentsUploaded": true,
+      "iconUrl": "https://dev.azure.com/test_organization/_apis/distributedtask/tasks/e213ff0f-5d5c-4791-802d-52ea3e7be1f1/2.247.1/icon",
+      "minimumAgentVersion": "2.115.0",
+      "friendlyName": "PowerShell",
+      "description": "Run a PowerShell script on Linux, macOS, or Windows",
+      "category": "Utility",
+      "helpMarkDown": "[Learn more about this task](https://go.microsoft.com/fwlink/?LinkID=613736)",
+      "helpUrl": "https://docs.microsoft.com/azure/devops/pipelines/tasks/utility/powershell",
+      "releaseNotes": "Script task consistency. Added support for macOS and Linux.",
+      "definitionType": "task",
+      "showEnvironmentVariables": true,
+      "author": "Microsoft Corporation",
+      "demands": [],
+      "groups": [
+        {
+          "name": "preferenceVariables",
+          "displayName": "Preference Variables",
+          "isExpanded": false
+        },
+        {
+          "name": "advanced",
+          "displayName": "Advanced",
+          "isExpanded": false
+        }
+      ],
+      "inputs": [
+        {
+          "options": {
+            "filePath": "File Path",
+            "inline": "Inline"
+          },
+          "name": "targetType",
+          "label": "Type",
+          "defaultValue": "filePath",
+          "type": "radio",
+          "helpMarkDown": "Target script type: File Path or Inline"
+        },
+        {
+          "name": "filePath",
+          "label": "Script Path",
+          "defaultValue": "",
+          "required": true,
+          "type": "filePath",
+          "helpMarkDown": "Path of the script to execute. Must be a fully qualified path or relative to $(System.DefaultWorkingDirectory).",
+          "visibleRule": "targetType = filePath"
+        },
+        {
+          "name": "arguments",
+          "label": "Arguments",
+          "defaultValue": "",
+          "type": "string",
+          "helpMarkDown": "Arguments passed to the PowerShell script. Either ordinal parameters or named parameters.",
+          "visibleRule": "targetType = filePath"
+        },
+        {
+          "properties": {
+            "resizable": "true",
+            "rows": "10",
+            "maxLength": "20000"
+          },
+          "name": "script",
+          "label": "Script",
+          "defaultValue": "# Write your PowerShell commands here.\n\nWrite-Host \"Hello World\"\n",
+          "required": true,
+          "type": "multiLine",
+          "helpMarkDown": "",
+          "visibleRule": "targetType = inline"
+        },
+        {
+          "options": {
+            "default": "Default",
+            "stop": "Stop",
+            "continue": "Continue",
+            "silentlyContinue": "SilentlyContinue"
+          },
+          "name": "errorActionPreference",
+          "label": "ErrorActionPreference",
+          "defaultValue": "stop",
+          "type": "pickList",
+          "helpMarkDown": "When not `Default`, prepends the line `$ErrorActionPreference = 'VALUE'` at the top of your script.",
+          "groupName": "preferenceVariables"
+        },
+        {
+          "options": {
+            "default": "Default",
+            "stop": "Stop",
+            "continue": "Continue",
+            "silentlyContinue": "SilentlyContinue"
+          },
+          "name": "warningPreference",
+          "label": "WarningPreference",
+          "defaultValue": "default",
+          "type": "pickList",
+          "helpMarkDown": "When not `Default`, prepends the line `$WarningPreference = 'VALUE'` at the top of your script.",
+          "groupName": "preferenceVariables"
+        },
+        {
+          "options": {
+            "default": "Default",
+            "stop": "Stop",
+            "continue": "Continue",
+            "silentlyContinue": "SilentlyContinue"
+          },
+          "name": "informationPreference",
+          "label": "InformationPreference",
+          "defaultValue": "default",
+          "type": "pickList",
+          "helpMarkDown": "When not `Default`, prepends the line `$InformationPreference = 'VALUE'` at the top of your script.",
+          "groupName": "preferenceVariables"
+        },
+        {
+          "options": {
+            "default": "Default",
+            "stop": "Stop",
+            "continue": "Continue",
+            "silentlyContinue": "SilentlyContinue"
+          },
+          "name": "verbosePreference",
+          "label": "VerbosePreference",
+          "defaultValue": "default",
+          "type": "pickList",
+          "helpMarkDown": "When not `Default`, prepends the line `$VerbosePreference = 'VALUE'` at the top of your script.",
+          "groupName": "preferenceVariables"
+        },
+        {
+          "options": {
+            "default": "Default",
+            "stop": "Stop",
+            "continue": "Continue",
+            "silentlyContinue": "SilentlyContinue"
+          },
+          "name": "debugPreference",
+          "label": "DebugPreference",
+          "defaultValue": "default",
+          "type": "pickList",
+          "helpMarkDown": "When not `Default`, prepends the line `$DebugPreference = 'VALUE'` at the top of your script.",
+          "groupName": "preferenceVariables"
+        },
+        {
+          "options": {
+            "default": "Default",
+            "stop": "Stop",
+            "continue": "Continue",
+            "silentlyContinue": "SilentlyContinue"
+          },
+          "name": "progressPreference",
+          "label": "ProgressPreference",
+          "defaultValue": "silentlyContinue",
+          "type": "pickList",
+          "helpMarkDown": "When not `Default`, prepends the line `$ProgressPreference = 'VALUE'` at the top of your script.",
+          "groupName": "preferenceVariables"
+        },
+        {
+          "name": "failOnStderr",
+          "label": "Fail on Standard Error",
+          "defaultValue": "false",
+          "type": "boolean",
+          "helpMarkDown": "If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream. Otherwise the task will rely on the exit code to determine failure.",
+          "groupName": "advanced"
+        },
+        {
+          "name": "showWarnings",
+          "label": "Show warnings as Azure DevOps warnings",
+          "defaultValue": "false",
+          "type": "boolean",
+          "helpMarkDown": "If this is true, and your script writes a warnings - they are shown as warnings also in pipeline logs",
+          "groupName": "advanced"
+        },
+        {
+          "name": "ignoreLASTEXITCODE",
+          "label": "Ignore $LASTEXITCODE",
+          "defaultValue": "false",
+          "type": "boolean",
+          "helpMarkDown": "If this is false, the line `if ((Test-Path -LiteralPath variable:\\LASTEXITCODE)) { exit $LASTEXITCODE }` is appended to the end of your script. This will cause the last exit code from an external command to be propagated as the exit code of powershell. Otherwise the line is not appended to the end of your script.",
+          "groupName": "advanced"
+        },
+        {
+          "name": "pwsh",
+          "label": "Use PowerShell Core",
+          "defaultValue": "false",
+          "type": "boolean",
+          "helpMarkDown": "If this is true, then on Windows the task will use pwsh.exe from your PATH instead of powershell.exe.",
+          "groupName": "advanced"
+        },
+        {
+          "name": "workingDirectory",
+          "label": "Working Directory",
+          "defaultValue": "",
+          "type": "filePath",
+          "helpMarkDown": "Working directory where the script is run.",
+          "groupName": "advanced"
+        },
+        {
+          "name": "runScriptInSeparateScope",
+          "label": "Run script in the separate scope",
+          "defaultValue": "false",
+          "type": "boolean",
+          "helpMarkDown": "This input allows executing PowerShell scripts using '&' operator instead of the default '.'. If this input set to the true script will be executed in separate scope and globally scoped PowerShell variables won't be updated",
+          "groupName": "advanced"
+        }
+      ],
+      "satisfies": [],
+      "sourceDefinitions": [],
+      "dataSourceBindings": [],
+      "instanceNameFormat": "PowerShell Script",
+      "preJobExecution": {},
+      "execution": {
+        "PowerShell3": {
+          "target": "powershell.ps1",
+          "platforms": [
+            "windows"
+          ]
+        },
+        "Node10": {
+          "target": "powershell.js",
+          "argumentFormat": ""
+        },
+        "Node16": {
+          "target": "powershell.js",
+          "argumentFormat": ""
+        },
+        "Node20_1": {
+          "target": "powershell.js",
+          "argumentFormat": ""
+        }
+      },
+      "postJobExecution": {},
+      "_buildConfigMapping": {
+        "Default": "2.247.0",
+        "Node20-225": "2.247.1"
+      }
+    },
+    {
+      "visibility": [
+        "Build",
+        "Release"
+      ],
+      "runsOn": [
+        "Agent",
+        "DeploymentGroup"
+      ],
+      "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+      "name": "PowerShell",
+      "deprecated": true,
+      "version": {
+        "major": 1,
+        "minor": 2,
+        "patch": 3,
+        "isTest": false
+      },
+      "serverOwned": true,
+      "contentsUploaded": true,
+      "iconUrl": "https://dev.azure.com/test_organization/_apis/distributedtask/tasks/e213ff0f-5d5c-4791-802d-52ea3e7be1f1/1.2.3/icon",
+      "minimumAgentVersion": "1.102",
+      "friendlyName": "PowerShell",
+      "description": "Run a PowerShell script",
+      "category": "Utility",
+      "helpMarkDown": "[More Information](https://go.microsoft.com/fwlink/?LinkID=613736)",
+      "definitionType": "task",
+      "author": "Microsoft Corporation",
+      "demands": [
+        "DotNetFramework"
+      ],
+      "groups": [
+        {
+          "name": "advanced",
+          "displayName": "Advanced",
+          "isExpanded": false
+        }
+      ],
+      "inputs": [
+        {
+          "options": {
+            "inlineScript": "Inline Script",
+            "filePath": "File Path"
+          },
+          "name": "scriptType",
+          "label": "Type",
+          "defaultValue": "filePath",
+          "required": true,
+          "type": "pickList",
+          "helpMarkDown": "Type of the script: File Path or Inline Script"
+        },
+        {
+          "name": "scriptName",
+          "label": "Script Path",
+          "defaultValue": "",
+          "required": true,
+          "type": "filePath",
+          "helpMarkDown": "Path of the script to execute. Should be fully qualified path or relative to the default working directory.",
+          "visibleRule": "scriptType = filePath"
+        },
+        {
+          "name": "arguments",
+          "label": "Arguments",
+          "defaultValue": "",
+          "type": "string",
+          "helpMarkDown": "Arguments passed to the PowerShell script.  Either ordinal parameters or named parameters"
+        },
+        {
+          "name": "workingFolder",
+          "label": "Working folder",
+          "defaultValue": "",
+          "type": "filePath",
+          "helpMarkDown": "Current working directory when script is run.  Defaults to the folder where the script is located.",
+          "groupName": "advanced"
+        },
+        {
+          "properties": {
+            "resizable": "true",
+            "rows": "10",
+            "maxLength": "500"
+          },
+          "name": "inlineScript",
+          "label": "Inline Script",
+          "defaultValue": "# You can write your powershell scripts inline here. \n# You can also pass predefined and custom variables to this scripts using arguments\n\n Write-Host \"Hello World\"",
+          "required": true,
+          "type": "multiLine",
+          "helpMarkDown": "",
+          "visibleRule": "scriptType = inlineScript"
+        },
+        {
+          "name": "failOnStandardError",
+          "label": "Fail on Standard Error",
+          "defaultValue": "true",
+          "type": "boolean",
+          "helpMarkDown": "If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream. Otherwise the task will rely solely on $LASTEXITCODE and the exit code to determine failure.",
+          "groupName": "advanced"
+        }
+      ],
+      "satisfies": [],
+      "sourceDefinitions": [],
+      "dataSourceBindings": [],
+      "instanceNameFormat": "PowerShell Script",
+      "preJobExecution": {},
+      "execution": {
+        "PowerShellExe": {
+          "target": "$(scriptName)",
+          "argumentFormat": "$(arguments)",
+          "workingDirectory": "$(workingFolder)",
+          "inlineScript": "$(inlineScript)",
+          "scriptType": "$(scriptType)",
+          "failOnStandardError": "$(failOnStandardError)"
+        }
+      },
+      "postJobExecution": {},
+      "_buildConfigMapping": {}
+    },
+    {
+      "visibility": [
+        "Build",
+        "Release"
+      ],
+      "runsOn": [
+        "Agent",
+        "DeploymentGroup"
+      ],
+      "id": "72a1931b-effb-4d2e-8fd8-f8472a07cb62",
+      "name": "AzurePowerShell",
+      "version": {
+        "major": 5,
+        "minor": 248,
+        "patch": 3,
+        "isTest": false
+      },
+      "serverOwned": true,
+      "contentsUploaded": true,
+      "iconUrl": "https://dev.azure.com/test_organization/_apis/distributedtask/tasks/72a1931b-effb-4d2e-8fd8-f8472a07cb62/5.248.3/icon",
+      "minimumAgentVersion": "2.115.0",
+      "friendlyName": "Azure PowerShell",
+      "description": "Run a PowerShell script within an Azure environment",
+      "category": "Deploy",
+      "helpMarkDown": "[Learn more about this task](https://go.microsoft.com/fwlink/?LinkID=613749)",
+      "helpUrl": "https://aka.ms/azurepowershelltroubleshooting",
+      "releaseNotes": "Added support for Az Module and cross platform agents.",
+      "definitionType": "task",
+      "author": "Microsoft Corporation",
+      "demands": [],
+      "groups": [
+        {
+          "name": "AzurePowerShellVersionOptions",
+          "displayName": "Azure PowerShell version options",
+          "isExpanded": true
+        },
+        {
+          "name": "advanced",
+          "displayName": "Advanced",
+          "isExpanded": false
+        }
+      ],
+      "inputs": [
+        {
+          "aliases": [
+            "azureSubscription"
+          ],
+          "properties": {
+            "EndpointFilterRule": "ScopeLevel != AzureMLWorkspace"
+          },
+          "name": "ConnectedServiceNameARM",
+          "label": "Azure Subscription",
+          "defaultValue": "",
+          "required": true,
+          "type": "connectedService:AzureRM",
+          "helpMarkDown": "Azure Resource Manager subscription to configure before running PowerShell"
+        },
+        {
+          "options": {
+            "FilePath": "Script File Path",
+            "InlineScript": "Inline Script"
+          },
+          "name": "ScriptType",
+          "label": "Script Type",
+          "defaultValue": "FilePath",
+          "type": "radio",
+          "helpMarkDown": "Type of the script: File Path or Inline Script"
+        },
+        {
+          "name": "ScriptPath",
+          "label": "Script Path",
+          "defaultValue": "",
+          "type": "filePath",
+          "helpMarkDown": "Path of the script. Should be fully qualified path or relative to the default working directory.",
+          "visibleRule": "ScriptType = FilePath"
+        },
+        {
+          "properties": {
+            "resizable": "true",
+            "rows": "10",
+            "maxLength": "5000"
+          },
+          "name": "Inline",
+          "label": "Inline Script",
+          "defaultValue": "# You can write your azure powershell scripts inline here. \n# You can also pass predefined and custom variables to this script using arguments",
+          "type": "multiLine",
+          "helpMarkDown": "Enter the script to execute.",
+          "visibleRule": "ScriptType = InlineScript"
+        },
+        {
+          "properties": {
+            "editorExtension": "ms.vss-services-azure.parameters-grid"
+          },
+          "name": "ScriptArguments",
+          "label": "Script Arguments",
+          "defaultValue": "",
+          "type": "string",
+          "helpMarkDown": "Additional parameters to pass to PowerShell.  Can be either ordinal or named parameters.",
+          "visibleRule": "ScriptType = FilePath"
+        },
+        {
+          "options": {
+            "stop": "Stop",
+            "continue": "Continue",
+            "silentlyContinue": "SilentlyContinue"
+          },
+          "name": "errorActionPreference",
+          "label": "ErrorActionPreference",
+          "defaultValue": "stop",
+          "type": "pickList",
+          "helpMarkDown": "Select the value of the ErrorActionPreference variable for executing the script."
+        },
+        {
+          "name": "FailOnStandardError",
+          "label": "Fail on Standard Error",
+          "defaultValue": "false",
+          "type": "boolean",
+          "helpMarkDown": "If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream."
+        },
+        {
+          "aliases": [
+            "azurePowerShellVersion"
+          ],
+          "options": {
+            "LatestVersion": "Latest installed version",
+            "OtherVersion": "Specify other version"
+          },
+          "name": "TargetAzurePs",
+          "label": "Azure PowerShell Version",
+          "defaultValue": "OtherVersion",
+          "type": "radio",
+          "helpMarkDown": "In case of hosted agents, the supported Azure PowerShell Version is: 1.0.0, 1.6.0, 2.3.2, 2.6.0, 3.1.0 (Hosted VS2017 Queue).\nTo pick the latest version available on the agent, select \"Latest installed version\".\n\nFor private agents you can specify preferred version of Azure PowerShell using \"Specify version\"",
+          "groupName": "AzurePowerShellVersionOptions"
+        },
+        {
+          "aliases": [
+            "preferredAzurePowerShellVersion"
+          ],
+          "name": "CustomTargetAzurePs",
+          "label": "Preferred Azure PowerShell Version",
+          "defaultValue": "",
+          "required": true,
+          "type": "string",
+          "helpMarkDown": "Preferred Azure PowerShell Version needs to be a proper semantic version eg. 1.2.3. Regex like 2.\\*,2.3.\\* is not supported. The Hosted VS2017 Pool currently supports Az module version: 1.0.0, 1.6.0, 2.3.2, 2.6.0, 3.1.0",
+          "visibleRule": "TargetAzurePs = OtherVersion",
+          "groupName": "AzurePowerShellVersionOptions"
+        },
+        {
+          "name": "pwsh",
+          "label": "Use PowerShell Core",
+          "defaultValue": "false",
+          "type": "boolean",
+          "helpMarkDown": "If this is true, then on Windows the task will use pwsh.exe from your PATH instead of powershell.exe.",
+          "groupName": "advanced"
+        },
+        {
+          "name": "validateScriptSignature",
+          "label": "Validate script signature",
+          "defaultValue": "false",
+          "type": "boolean",
+          "helpMarkDown": "If this is true, then the task will first check to make sure specified script is signed and valid before executing it.",
+          "visibleRule": "ScriptType = FilePath",
+          "groupName": "advanced"
+        },
+        {
+          "name": "workingDirectory",
+          "label": "Working Directory",
+          "defaultValue": "",
+          "type": "filePath",
+          "helpMarkDown": "Working directory where the script is run.",
+          "groupName": "advanced"
+        }
+      ],
+      "satisfies": [],
+      "sourceDefinitions": [],
+      "dataSourceBindings": [],
+      "instanceNameFormat": "Azure PowerShell script: $(ScriptType)",
+      "preJobExecution": {},
+      "execution": {
+        "PowerShell3": {
+          "target": "azurepowershell.ps1",
+          "platforms": [
+            "windows"
+          ]
+        },
+        "Node16": {
+          "target": "azurepowershell.js",
+          "argumentFormat": ""
+        },
+        "Node10": {
+          "target": "azurepowershell.js",
+          "argumentFormat": ""
+        },
+        "Node20_1": {
+          "target": "azurepowershell.js",
+          "argumentFormat": ""
+        }
+      },
+      "postJobExecution": {},
+      "_buildConfigMapping": {
+        "Default": "5.248.2",
+        "Node20_229_2": "5.248.3"
+      }
+    }
+  ]
+}
