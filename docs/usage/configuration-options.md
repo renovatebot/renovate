@@ -854,6 +854,8 @@ Each `matchStrings` must be one of the two:
 1. a valid regular expression, optionally with named capture groups (if using `customType=regex`)
 2. a valid, escaped [JSONata](https://docs.jsonata.org/overview.html) query (if using `customType=json`)
 
+See [`customType`](#customtype) docs, to know more them.
+
 Example:
 
 ```json title="matchStrings with a valid regular expression"
