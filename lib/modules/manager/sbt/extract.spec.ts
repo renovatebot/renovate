@@ -116,7 +116,7 @@ describe('modules/manager/sbt/extract', () => {
         deps: [
           {
             currentValue: '1.2.3',
-            groupName: 'version',
+            sharedVariableName: 'version',
           },
         ],
       });
@@ -137,7 +137,7 @@ describe('modules/manager/sbt/extract', () => {
             datasource: 'sbt-plugin',
             depName: 'com.github.gseitz:sbt-release',
             depType: 'plugin',
-            groupName: 'sbtReleaseVersion',
+            sharedVariableName: 'sbtReleaseVersion',
             packageName: 'com.github.gseitz:sbt-release',
             registryUrls: [],
             variableName: 'sbtReleaseVersion',

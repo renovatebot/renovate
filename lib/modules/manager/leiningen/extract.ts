@@ -58,7 +58,7 @@ export function extractFromVectors(
             datasource: ClojureDatasource.id,
             depName,
             currentValue,
-            groupName: varName,
+            sharedVariableName: varName,
           });
         }
       } else {

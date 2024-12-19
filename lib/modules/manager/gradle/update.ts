@@ -23,7 +23,7 @@ export function updateDependency({
     if (version === newValue) {
       return fileContent;
     }
-    if (version === currentValue || upgrade.groupName) {
+    if (version === currentValue || upgrade.sharedVariableName) {
       // TODO: types (#22198)
       return `${leftPart}${newValue}${restPart}`;
     }
