@@ -66,18 +66,18 @@ export class GiteaPrCache {
     return prCache.getPrs();
   }
 
-  private addPr(item: Pr): void {
+  private setPr(item: Pr): void {
     this.cache.items[item.number] = item;
   }
 
-  static async addPr(
+  static async setPr(
     http: GiteaHttp,
     repo: string,
     author: string,
     item: Pr,
   ): Promise<void> {
     const prCache = await GiteaPrCache.init(http, repo, author);
-    prCache.addPr(item);
+    prCache.setPr(item);
   }
 
   private reconcile(rawItems: PR[]): boolean {

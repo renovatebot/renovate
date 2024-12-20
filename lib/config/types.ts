@@ -239,6 +239,7 @@ export interface RenovateConfig
   baseBranch?: string;
   defaultBranch?: string;
   branchList?: string[];
+  cloneSubmodulesFilter?: string[];
   description?: string | string[];
   force?: RenovateConfig;
   errors?: ValidationMessage[];
