@@ -314,7 +314,7 @@ export async function findPr({
       return null;
     }
 
-    return utils.prInfo(prs[0]);
+    return utils.prInfo(prs.sort((a, b) => b.id - a.id)[0]);
   }
 
   const prList = await getPrList();
