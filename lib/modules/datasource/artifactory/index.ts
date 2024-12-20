@@ -114,6 +114,8 @@ export class ArtifactoryDatasource extends Datasource {
   }
 
   private static parseReleaseTimestamp(rawText: string): string {
-    return rawText.split(regEx(/\s{2,}/)).filter(e => !isNaN(Date.parse(e))) + 'Z';
+    return (
+      rawText.split(regEx(/\s{2,}/)).filter(e => !isNaN(Date.parse(e)))[0] + 'Z'
+    );
   }
 }
