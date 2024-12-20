@@ -306,6 +306,9 @@ export interface RenovateConfig
   statusCheckNames?: Record<StatusCheckKey, string | null>;
   env?: UserEnv;
   logLevelRemap?: LogLevelRemap[];
+
+  branchTopic?: string;
+  additionalBranchPrefix?: string;
 }
 
 const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;
