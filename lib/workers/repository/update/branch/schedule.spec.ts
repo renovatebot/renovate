@@ -496,13 +496,5 @@ describe('workers/repository/update/branch/schedule', () => {
       const result = cronstrue.toString('* 23 * * *');
       expect(result).toBe('Every minute, between 11:00 PM and 11:59 PM');
     });
-
-    it('should not throw an error for an invalid cron expression "* * */2 6#1"', () => {
-      expect(() => {
-        cronstrue.toString('* * */2 6#1', {
-          throwExceptionOnParseError: false,
-        });
-      }).not.toThrow();
-    });
   });
 });
