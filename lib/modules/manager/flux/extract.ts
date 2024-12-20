@@ -22,7 +22,6 @@ import type {
   PackageFileContent,
 } from '../types';
 import {
-  collectHelmRepos,
   isSystemManifest,
   systemManifestHeaderRegex,
 } from './common';
@@ -305,7 +304,14 @@ export function extractPackageFile(
   if (!manifest) {
     return null;
   }
-  const helmRepositories = collectHelmRepos([manifest]);
+  const helmRepositories: HelmRepository[] = [];
+  if (manifest.kind === 'resource') {
+    for (const resource of manifest.resources) {
+      if (resource.kind === 'HelmRepository') {
+        helmRepositories.push(resource);
+      }
+    }
+  }
   let deps: PackageDependency[] | null = null;
   switch (manifest.kind) {
     case 'system':
@@ -339,7 +345,16 @@ export async function extractAllPackageFiles(
     }
   }
 
-  const helmRepositories = collectHelmRepos(manifests);
+  const helmRepositories: HelmRepository[] = [];
+  for (const manifest of manifests) {
+    if (manifest.kind === 'resource') {
+      for (const resource of manifest.resources) {
+        if (resource.kind === 'HelmRepository') {
+          helmRepositories.push(resource);
+        }
+      }
+    }
+  }
 
   for (const manifest of manifests) {
     let deps: PackageDependency[] | null = null;
