@@ -53,9 +53,11 @@ describe('workers/repository/update/pr/body/config-description', () => {
     it('renders UTC as the default timezone', () => {
       const res = getPrConfigDescription({
         ...config,
-        schedule: ['* 1 * * * *'],
+        schedule: ['* 1 * * *', '* * 2 * 1'],
       });
-      expect(res).toContain(`"* 1 * * * *" (UTC)`);
+      expect(res).toContain(
+        'Between 01:00 AM and 01:59 AM ("* 1 * * *"),On day 2 of the month, and on Monday ("* * 2 * 1") (UTC)',
+      );
     });
 
     it('renders undefined schedule', () => {
