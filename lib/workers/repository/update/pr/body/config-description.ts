@@ -75,17 +75,19 @@ function getReadableCronSchedule(scheduleText: string[]): string | null {
   // assuming if one schedule is cron the others in the array will be cron too
   try {
     new CronPattern(scheduleText[0]); // validate cron
-    const scheduleStr = scheduleText.map(
-      (cron) =>
-        capitalize(
-          cronstrue
-            .toString(cron, {
-              throwExceptionOnParseError: false,
-            })
-            .replace('Every minute, ', ''),
-        ) + ` ("${cron}")`,
-    );
-    return `${String(scheduleStr)}`;
+    return scheduleText
+      .map(
+        (cron) =>
+          capitalize(
+            cronstrue
+              .toString(cron, {
+                throwExceptionOnParseError: false,
+              })
+              .replace('Every minute, ', ''),
+          ) + ` ( ${String(cron)} )`,
+      )
+      .join(', ');
+    // return `${String(scheduleStr)}`;
   } catch {
     return null;
   }
