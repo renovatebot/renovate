@@ -18,8 +18,13 @@ import {
   localChartHasKustomizationsYaml,
 } from './utils';
 
-const isValidChartName = (name: string | undefined): boolean =>
-  !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
+function isValidChartName(name: string | undefined, oci: boolean): boolean {
+  if (oci) {
+    return !!name && !regEx(/[!@#$%^&*(),.?":{}|<>A-Z]/).test(name);
+  } else {
+    return !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
+  }
+}
 
 function isLocalPath(possiblePath: string): boolean {
   return ['./', '../', '/'].some((localPrefix) =>
@@ -118,7 +123,12 @@ export async function extractPackageFile(
 
       // By definition on helm the chart name should be lowercase letter + number + -
       // However helmfile support templating of that field
-      if (!isValidChartName(res.depName)) {
+      if (
+        !isValidChartName(
+          res.depName,
+          isOCIRegistry(dep.chart) || (registryData[repoName]?.oci ?? false),
+        )
+      ) {
         res.skipReason = 'unsupported-chart-type';
       }
 
