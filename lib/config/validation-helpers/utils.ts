@@ -1,10 +1,7 @@
 import is from '@sindresorhus/is';
 import jsonata from 'jsonata';
 import { logger } from '../../logger';
-import type {
-  RegexManagerConfig,
-  RegexManagerTemplates,
-} from '../../modules/manager/custom/regex/types';
+import type { RegexManagerTemplates } from '../../modules/manager/custom/regex/types';
 import type { CustomManager } from '../../modules/manager/custom/types';
 import { regEx } from '../../util/regex';
 import type { ValidationMessage } from '../types';
@@ -80,15 +77,14 @@ export function isFalseGlobal(
   return false;
 }
 
-function hasField(
-  customManager: Partial<RegexManagerConfig>,
-  field: string,
-): boolean {
+function hasField(customManager: CustomManager, field: string): boolean {
   const templateField = `${field}Template` as keyof RegexManagerTemplates;
+  const fieldStr =
+    customManager.customType === 'regex' ? `(?<${field}>` : field;
   return !!(
     customManager[templateField] ??
     customManager.matchStrings?.some((matchString) =>
-      matchString.includes(`(?<${field}>`),
+      matchString.includes(fieldStr),
     )
   );
 }
