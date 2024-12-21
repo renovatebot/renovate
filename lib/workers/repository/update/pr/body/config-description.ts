@@ -87,7 +87,6 @@ function getReadableCronSchedule(scheduleText: string[]): string | null {
           ) + ` ( ${String(cron)} )`,
       )
       .join(', ');
-    // return `${String(scheduleStr)}`;
   } catch {
     return null;
   }
