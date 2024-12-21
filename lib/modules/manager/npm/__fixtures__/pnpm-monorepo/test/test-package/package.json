@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@demo/test-package": "file:",
     "dotenv": "^9.0.2"
   }
 }
