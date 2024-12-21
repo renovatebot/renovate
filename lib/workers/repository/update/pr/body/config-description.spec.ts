@@ -53,6 +53,16 @@ describe('workers/repository/update/pr/body/config-description', () => {
     it('renders UTC as the default timezone', () => {
       const res = getPrConfigDescription({
         ...config,
+        schedule: ['* 1 * * *'],
+      });
+      expect(res).toContain(
+        'Between 01:00 AM and 01:59 AM ( * 1 * * * ) (UTC)',
+      );
+    });
+
+    it('summarizes cron schedules', () => {
+      const res = getPrConfigDescription({
+        ...config,
         schedule: ['* 1 * * *', '* * 2 * 1'],
       });
       expect(res).toContain(
