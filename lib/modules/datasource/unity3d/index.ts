@@ -68,19 +68,18 @@ export class Unity3dDatasource extends Datasource {
       homepage: Unity3dDatasource.homepage,
       registryUrl: translatedRegistryUrl,
     };
-    if (response.body.results) {
-      response.body.results.forEach((release) => {
-        result.releases.push({
-          version: withHash
-            ? `${release.version} (${release.shortRevision})`
-            : release.version,
-          releaseTimestamp: release.releaseDate,
-          changelogUrl: release.releaseNotes.url,
-          isStable: translatedRegistryUrl === Unity3dDatasource.streams.lts,
-          registryUrl: translatedRegistryUrl,
-        });
+
+    response.body.results.forEach((release) => {
+      result.releases.push({
+        version: withHash
+          ? `${release.version} (${release.shortRevision})`
+          : release.version,
+        releaseTimestamp: release.releaseDate,
+        changelogUrl: release.releaseNotes.url,
+        isStable: translatedRegistryUrl === Unity3dDatasource.streams.lts,
+        registryUrl: translatedRegistryUrl,
       });
-    }
+    });
 
     return result;
   }
