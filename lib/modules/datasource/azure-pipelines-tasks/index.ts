@@ -6,7 +6,7 @@ import type { HttpOptions } from '../../../util/http/types';
 import { id as versioning } from '../../versioning/loose';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { AzurePipelinesJSON, AzurePipelinesTaskVersion } from './types';
+import { AzurePipelinesJSON, AzurePipelinesTaskVersion } from './schema';
 
 const TASKS_URL_BASE =
   'https://raw.githubusercontent.com/renovatebot/azure-devops-marketplace/main';

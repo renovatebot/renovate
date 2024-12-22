@@ -3,7 +3,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
 import * as hostRules from '../../../util/host-rules';
-import { AzurePipelinesTask } from './types';
+import { AzurePipelinesTask } from './schema';
 import { AzurePipelinesTasksDatasource } from '.';
 
 const gitHubHost = 'https://raw.githubusercontent.com';
