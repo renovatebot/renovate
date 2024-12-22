@@ -2,7 +2,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import * as Unity3dVersioning from '../../versioning/unity3d';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { UnityReleasesJSON } from './types';
+import { UnityReleasesJSON } from './schema';
 
 export class Unity3dDatasource extends Datasource {
   static readonly baseUrl =
@@ -13,6 +13,11 @@ export class Unity3dDatasource extends Datasource {
     tech: `${Unity3dDatasource.baseUrl}?stream=TECH`,
     alpha: `${Unity3dDatasource.baseUrl}?stream=ALPHA`,
     beta: `${Unity3dDatasource.baseUrl}?stream=BETA`,
+  };
+  static readonly legacyStreams: Record<string, string> = {
+    lts: `${Unity3dDatasource.homepage}releases/editor/lts-releases.xml`,
+    stable: `${Unity3dDatasource.homepage}releases/editor/releases.xml`,
+    beta: `${Unity3dDatasource.homepage}releases/editor/beta/latest.xml`,
   };
 
   static readonly id = 'unity3d';
@@ -25,22 +30,43 @@ export class Unity3dDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is determined from the `pubDate` tag in the results.';
+    'The release timestamp is determined from the `releaseDate` field in the results.';
 
   constructor() {
     super(Unity3dDatasource.id);
+  }
+
+  translateStream(registryUrl: string): string {
+    const legacyKey = Object.keys(Unity3dDatasource.legacyStreams).find(
+      (key) => Unity3dDatasource.legacyStreams[key] === registryUrl,
+    );
+
+    if (legacyKey) {
+      if (legacyKey === 'stable') {
+        return Unity3dDatasource.streams.lts;
+      }
+
+      return Unity3dDatasource.streams[legacyKey];
+    }
+
+    return registryUrl;
   }
 
   async getByStream(
     registryUrl: string | undefined,
     withHash: boolean,
   ): Promise<ReleaseResult | null> {
-    const response = await this.http.getJson<UnityReleasesJSON>(registryUrl!);
+    const translatedRegistryUrl = this.translateStream(registryUrl!);
+
+    const response = await this.http.getJson(
+      translatedRegistryUrl,
+      UnityReleasesJSON,
+    );
 
     const result: ReleaseResult = {
       releases: [],
       homepage: Unity3dDatasource.homepage,
-      registryUrl,
+      registryUrl: translatedRegistryUrl,
     };
     if (response.body.results) {
       response.body.results.forEach((release) => {
@@ -50,8 +76,8 @@ export class Unity3dDatasource extends Datasource {
             : release.version,
           releaseTimestamp: release.releaseDate,
           changelogUrl: release.releaseNotes.url,
-          isStable: registryUrl === Unity3dDatasource.streams.lts,
-          registryUrl,
+          isStable: translatedRegistryUrl === Unity3dDatasource.streams.lts,
+          registryUrl: translatedRegistryUrl,
         });
       });
     }
