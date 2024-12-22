@@ -15,3 +15,5 @@ export const AzurePipelinesTask = z.object({
 export const AzurePipelinesJSON = z.object({
   value: AzurePipelinesTask.array(),
 });
+
+export const AzurePipelinesFallbackTasks = z.record(z.string().array());

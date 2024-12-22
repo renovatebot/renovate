@@ -6,7 +6,11 @@ import type { HttpOptions } from '../../../util/http/types';
 import { id as versioning } from '../../versioning/loose';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { AzurePipelinesJSON, AzurePipelinesTaskVersion } from './schema';
+import {
+  AzurePipelinesFallbackTasks,
+  AzurePipelinesJSON,
+  AzurePipelinesTaskVersion,
+} from './schema';
 
 const TASKS_URL_BASE =
   'https://raw.githubusercontent.com/renovatebot/azure-devops-marketplace/main';
@@ -52,7 +56,7 @@ export class AzurePipelinesTasksDatasource extends Datasource {
         .sort(AzurePipelinesTasksDatasource.compareSemanticVersions('version'))
         .forEach((task) => {
           result.releases.push({
-            version: `${task.version.major}.${task.version.minor}.${task.version.patch}`,
+            version: `${task.version!.major}.${task.version!.minor}.${task.version!.patch}`,
             isDeprecated: task.deprecated,
           });
         });
@@ -61,13 +65,17 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     } else {
       const versions =
         (
-          await this.getFallbackTasks<Record<string, string[]>>(
+          await this.getTasks(
             BUILT_IN_TASKS_URL,
+            {},
+            AzurePipelinesFallbackTasks,
           )
         )[packageName.toLowerCase()] ??
         (
-          await this.getFallbackTasks<Record<string, string[]>>(
+          await this.getTasks(
             MARKETPLACE_TASKS_URL,
+            {},
+            AzurePipelinesFallbackTasks,
           )
         )[packageName.toLowerCase()];
 
@@ -91,16 +99,6 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     schema: Schema,
   ): Promise<TypeOf<Schema>> {
     const { body } = await this.http.getJson(url, opts, schema);
-    return body;
-  }
-
-  @cache({
-    namespace: `datasource-${AzurePipelinesTasksDatasource.id}`,
-    key: (url: string) => url,
-    ttlMinutes: 24 * 60,
-  })
-  async getFallbackTasks<ResT>(url: string): Promise<ResT> {
-    const { body } = await this.http.getJson<ResT>(url);
     return body;
   }
 
