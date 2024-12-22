@@ -1,3 +1,4 @@
+import type { TypeOf, ZodType } from 'zod';
 import { GlobalConfig } from '../../../config/global';
 import { cache } from '../../../util/cache/package/decorator';
 import * as hostRules from '../../../util/host-rules';
@@ -5,7 +6,7 @@ import type { HttpOptions } from '../../../util/http/types';
 import { id as versioning } from '../../versioning/loose';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { AzurePipelinesJSON, AzurePipelinesTaskVersion } from './types';
+import { AzurePipelinesJSON, AzurePipelinesTaskVersion } from './types';
 
 const TASKS_URL_BASE =
   'https://raw.githubusercontent.com/renovatebot/azure-devops-marketplace/main';
@@ -38,36 +39,37 @@ export class AzurePipelinesTasksDatasource extends Datasource {
       const opts: HttpOptions = {
         headers: { authorization: `Basic ${auth}` },
       };
-      const results = await this.getTasks<AzurePipelinesJSON>(
+      const results = await this.getTasks(
         `${endpoint}/_apis/distributedtask/tasks/`,
         opts,
+        AzurePipelinesJSON,
       );
 
-      if (results.value) {
-        const result: ReleaseResult = { releases: [] };
+      const result: ReleaseResult = { releases: [] };
 
-        results.value
-          .filter((task) => task.name === packageName)
-          .sort(
-            AzurePipelinesTasksDatasource.compareSemanticVersions('version'),
-          )
-          .forEach((task) => {
-            result.releases.push({
-              version: `${task.version.major}.${task.version.minor}.${task.version.patch}`,
-              isDeprecated: task.deprecated,
-            });
+      results.value
+        .filter((task) => task.name === packageName)
+        .sort(AzurePipelinesTasksDatasource.compareSemanticVersions('version'))
+        .forEach((task) => {
+          result.releases.push({
+            version: `${task.version.major}.${task.version.minor}.${task.version.patch}`,
+            isDeprecated: task.deprecated,
           });
+        });
 
-        return result;
-      }
+      return result;
     } else {
       const versions =
-        (await this.getTasks<Record<string, string[]>>(BUILT_IN_TASKS_URL))[
-          packageName.toLowerCase()
-        ] ??
-        (await this.getTasks<Record<string, string[]>>(MARKETPLACE_TASKS_URL))[
-          packageName.toLowerCase()
-        ];
+        (
+          await this.getFallbackTasks<Record<string, string[]>>(
+            BUILT_IN_TASKS_URL,
+          )
+        )[packageName.toLowerCase()] ??
+        (
+          await this.getFallbackTasks<Record<string, string[]>>(
+            MARKETPLACE_TASKS_URL,
+          )
+        )[packageName.toLowerCase()];
 
       if (versions) {
         const releases = versions.map((version) => ({ version }));
@@ -83,21 +85,35 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     key: (url: string) => url,
     ttlMinutes: 24 * 60,
   })
-  async getTasks<ResT>(url: string, opts?: HttpOptions): Promise<ResT> {
-    const { body } = await this.http.getJson<ResT>(url, opts);
+  async getTasks<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+    url: string,
+    opts: HttpOptions,
+    schema: Schema,
+  ): Promise<TypeOf<Schema>> {
+    const { body } = await this.http.getJson(url, opts, schema);
+    return body;
+  }
+
+  @cache({
+    namespace: `datasource-${AzurePipelinesTasksDatasource.id}`,
+    key: (url: string) => url,
+    ttlMinutes: 24 * 60,
+  })
+  async getFallbackTasks<ResT>(url: string): Promise<ResT> {
+    const { body } = await this.http.getJson<ResT>(url);
     return body;
   }
 
   static compareSemanticVersions = (key: string) => (a: any, b: any) => {
-    const a1Version = a[key] as AzurePipelinesTaskVersion;
-    const b1Version = b[key] as AzurePipelinesTaskVersion;
+    const a1Version = AzurePipelinesTaskVersion.safeParse(a[key]).data;
+    const b1Version = AzurePipelinesTaskVersion.safeParse(b[key]).data;
 
     const a1 =
-      a1Version === null
+      a1Version === undefined
         ? ''
         : `${a1Version.major}.${a1Version.minor}.${a1Version.patch}`;
     const b1 =
-      b1Version === null
+      b1Version === undefined
         ? ''
         : `${b1Version.major}.${b1Version.minor}.${b1Version.patch}`;
 

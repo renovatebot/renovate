@@ -3,7 +3,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
 import * as hostRules from '../../../util/host-rules';
-import type { AzurePipelinesTask } from './types';
+import { AzurePipelinesTask } from './types';
 import { AzurePipelinesTasksDatasource } from '.';
 
 const gitHubHost = 'https://raw.githubusercontent.com';
@@ -150,11 +150,11 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
               }
             : null;
 
-        return {
+        return AzurePipelinesTask.parse({
           name: '',
           deprecated: false,
           version,
-        } as AzurePipelinesTask;
+        });
       });
 
       const azureSortedVersions = azureVersions.sort(
@@ -162,11 +162,13 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
       );
 
       expect(
-        azureSortedVersions.map((x: AzurePipelinesTask) =>
-          x.version === null
+        azureSortedVersions.map((x: any) => {
+          const data = AzurePipelinesTask.parse(x);
+
+          return data.version === null
             ? ''
-            : `${x.version.major}.${x.version.minor}.${x.version.patch}`,
-        ),
+            : `${data.version.major}.${data.version.minor}.${data.version.patch}`;
+        }),
       ).toStrictEqual(exp);
     });
   });

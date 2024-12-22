@@ -1,15 +1,17 @@
-export interface AzurePipelinesJSON {
-  value?: AzurePipelinesTask[];
-}
+import { z } from 'zod';
 
-export interface AzurePipelinesTask {
-  name: string;
-  deprecated?: boolean;
-  version: AzurePipelinesTaskVersion;
-}
+export const AzurePipelinesTaskVersion = z.object({
+  major: z.number(),
+  minor: z.number(),
+  patch: z.number(),
+});
 
-export interface AzurePipelinesTaskVersion {
-  major: number;
-  minor: number;
-  patch: number;
-}
+export const AzurePipelinesTask = z.object({
+  name: z.string(),
+  deprecated: z.boolean().optional(),
+  version: AzurePipelinesTaskVersion.nullable(),
+});
+
+export const AzurePipelinesJSON = z.object({
+  value: AzurePipelinesTask.array(),
+});
