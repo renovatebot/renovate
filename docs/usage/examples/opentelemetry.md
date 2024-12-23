@@ -196,7 +196,8 @@ The [spanmetrics connector](https://github.com/open-telemetry/opentelemetry-coll
 
 #### Calls metric
 
-At first there are the `traces_span_metrics_calls_total` metrics which display how often specific trace spans have been observed.
+At first there are the `traces_span_metrics_calls_total` metrics.
+These metrics show how often _specific_ trace spans have been observed.
 
 For example:
 
