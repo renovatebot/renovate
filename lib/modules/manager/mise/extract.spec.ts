@@ -4,7 +4,7 @@ import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
 
-const miseFilename = '.mise.toml';
+const miseFilename = 'mise.toml';
 
 const mise1toml = Fixtures.get('Mise.1.toml');
 
@@ -146,6 +146,7 @@ describe('modules/manager/mise/extract', () => {
       const content = codeBlock`
       [tools]
       "aqua:BurntSushi/ripgrep" = "14.1.0"
+      "aqua:cli/cli" = "v2.64.0"
     `;
       const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
@@ -155,6 +156,14 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '14.1.0',
             packageName: 'BurntSushi/ripgrep',
             datasource: 'github-tags',
+            extractVersion: '^v?(?<version>.+)',
+          },
+          {
+            depName: 'aqua:cli/cli',
+            currentValue: '2.64.0',
+            packageName: 'cli/cli',
+            datasource: 'github-tags',
+            extractVersion: '^v?(?<version>.+)',
           },
         ],
       });
@@ -294,7 +303,7 @@ describe('modules/manager/mise/extract', () => {
     it('extracts ubi backend tools', () => {
       const content = codeBlock`
       [tools]
-      "ubi:nekto/act" = "0.2.70"
+      "ubi:nekto/act" = "v0.2.70"
       "ubi:cli/cli" = { exe = "gh", version = "1.14.0" }
       "ubi:cli/cli[exe=gh]" = "1.14.0"
       "ubi:cargo-bins/cargo-binstall" = { tag_regex = "^\\\\d+\\\\.\\\\d+\\\\.", version = "1.0.0" }
@@ -309,39 +318,42 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '0.2.70',
             packageName: 'nekto/act',
             datasource: 'github-releases',
+            extractVersion: '^v?(?<version>.+)',
           },
           {
             depName: 'ubi:cli/cli',
             currentValue: '1.14.0',
             packageName: 'cli/cli',
             datasource: 'github-releases',
+            extractVersion: '^v?(?<version>.+)',
           },
           {
             depName: 'ubi:cli/cli',
             currentValue: '1.14.0',
             packageName: 'cli/cli',
             datasource: 'github-releases',
+            extractVersion: '^v?(?<version>.+)',
           },
           {
             depName: 'ubi:cargo-bins/cargo-binstall',
             currentValue: '1.0.0',
             packageName: 'cargo-bins/cargo-binstall',
             datasource: 'github-releases',
-            extractVersion: '(?<version>^\\d+\\.\\d+\\.)',
+            extractVersion: '^v?(?<version>^\\d+\\.\\d+\\.)',
           },
           {
             depName: 'ubi:cargo-bins/cargo-binstall',
             currentValue: '1.0.0',
             packageName: 'cargo-bins/cargo-binstall',
             datasource: 'github-releases',
-            extractVersion: '(?<version>^\\d+\\.)',
+            extractVersion: '^v?(?<version>^\\d+\\.)',
           },
           {
             depName: 'ubi:cargo-bins/cargo-binstall',
             currentValue: '1.0.0',
             packageName: 'cargo-bins/cargo-binstall',
             datasource: 'github-releases',
-            extractVersion: '(?<version>^\\d+\\.)',
+            extractVersion: '^v?(?<version>^\\d+\\.)',
           },
         ],
       });
@@ -421,7 +433,7 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('complete .mise.toml example', () => {
+    it('complete mise.toml example', () => {
       const result = extractPackageFile(mise1toml, miseFilename);
       expect(result).toMatchObject({
         deps: [

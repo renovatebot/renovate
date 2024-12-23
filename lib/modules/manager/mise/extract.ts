@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import type { SkipReason } from '../../../types';
 import { regEx } from '../../../util/regex';
 import type { ToolingConfig } from '../asdf/upgradeable-tooling';
 import type { PackageDependency, PackageFileContent } from '../types';
+import type { BackendToolingConfig } from './backends';
 import {
   createAquaToolConfig,
   createCargoToolConfig,
@@ -13,7 +13,6 @@ import {
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends';
-import type { SkippedToolingConfig } from './backends';
 import type { MiseToolOptionsSchema, MiseToolSchema } from './schema';
 import type { ToolingDefinition } from './upgradeable-tooling';
 import { asdfTooling, miseTooling } from './upgradeable-tooling';
@@ -45,11 +44,16 @@ export function extractPackageFile(
         optionInToolNameRegex.exec(name.trim())?.groups ?? {
           name: name.trim(),
         };
+      const delimiterIndex = name.indexOf(':');
+      const backend = name.substring(0, delimiterIndex);
+      const toolName = name.substring(delimiterIndex + 1);
       const options = parseOptions(
         optionsInName,
         is.nonEmptyObject(toolData) ? toolData : {},
       );
-      const toolConfig = getToolConfig(depName, version, options);
+      const toolConfig = is.null_(version)
+        ? null
+        : getToolConfig(backend, toolName, version, options);
       const dep = createDependency(depName, version, toolConfig);
       deps.push(dep);
     }
@@ -94,23 +98,15 @@ function parseOptions(
 }
 
 function getToolConfig(
-  name: string,
-  version: string | null,
+  backend: string,
+  toolName: string,
+  version: string,
   toolOptions: MiseToolOptionsSchema,
-): ToolingConfig | SkippedToolingConfig | null {
-  if (version === null) {
-    return null; // Early return if version is null
-  }
-
-  // If the tool name does not specify a backend, it should be a short name or an alias defined by users
-  const delimiterIndex = name.indexOf(':');
-  if (delimiterIndex === -1) {
-    return getRegistryToolConfig(name, version);
-  }
-
-  const backend = name.substring(0, delimiterIndex);
-  const toolName = name.substring(delimiterIndex + 1);
+): ToolingConfig | BackendToolingConfig | null {
   switch (backend) {
+    case '':
+      // If the tool name does not specify a backend, it should be a short name or an alias defined by users
+      return getRegistryToolConfig(toolName, version);
     // We can specify core, asdf, vfox, aqua backends for tools in the default registry
     // e.g. 'core:rust', 'asdf:rust', 'vfox:clang', 'aqua:act'
     case 'core':
@@ -122,7 +118,7 @@ function getToolConfig(
     case 'aqua':
       return (
         getRegistryToolConfig(toolName, version) ??
-        createAquaToolConfig(toolName)
+        createAquaToolConfig(toolName, version)
       );
     case 'cargo':
       return createCargoToolConfig(toolName, version);
@@ -135,7 +131,7 @@ function getToolConfig(
     case 'spm':
       return createSpmToolConfig(toolName);
     case 'ubi':
-      return createUbiToolConfig(toolName, toolOptions);
+      return createUbiToolConfig(toolName, version, toolOptions);
     default:
       // Unsupported backend
       return null;
@@ -168,28 +164,33 @@ function getConfigFromTooling(
   } // Return null if no toolDefinition is found
 
   return (
-    (typeof toolDefinition.config === 'function'
+    (is.function_(toolDefinition.config)
       ? toolDefinition.config(version)
       : toolDefinition.config) ?? null
-  ); // Ensure null is returned instead of undefined
+  );
 }
 
 function createDependency(
   name: string,
   version: string | null,
-  config: ToolingConfig | SkippedToolingConfig | null,
+  config: ToolingConfig | BackendToolingConfig | null,
 ): PackageDependency {
-  let skipReason: SkipReason | undefined;
-  if (config === null) {
-    skipReason = 'unsupported-datasource';
+  if (is.null_(config)) {
+    return {
+      depName: name,
+      skipReason: 'unsupported-datasource',
+    };
   }
-  if (version === null) {
-    skipReason = 'unspecified-version';
+  if (is.null_(version)) {
+    return {
+      depName: name,
+      skipReason: 'unspecified-version',
+    };
   }
+
   return {
     depName: name,
     currentValue: version,
-    ...(skipReason ? { skipReason } : {}),
     // Spread the config last to override other properties
     ...config,
   };

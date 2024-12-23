@@ -9,24 +9,32 @@ import { GoDatasource } from '../../datasource/go';
 import { NpmDatasource } from '../../datasource/npm';
 import { PypiDatasource } from '../../datasource/pypi';
 import { normalizePythonDepName } from '../../datasource/pypi/common';
-import type { ToolingConfig } from '../asdf/upgradeable-tooling';
 import type { PackageDependency } from '../types';
 import type { MiseToolOptionsSchema } from './schema';
 
-export type SkippedToolingConfig = Partial<PackageDependency> &
-  Required<Pick<PackageDependency, 'skipReason'>>;
+export type BackendToolingConfig = Omit<PackageDependency, 'depName'> &
+  Required<
+    | Pick<PackageDependency, 'packageName' | 'datasource'>
+    | Pick<PackageDependency, 'packageName' | 'skipReason'>
+  >;
 
 /**
  * Create a tooling config for aqua backend
  * @link https://mise.jdx.dev/dev-tools/backends/aqua.html
  */
-export function createAquaToolConfig(name: string): ToolingConfig {
+export function createAquaToolConfig(
+  name: string,
+  version: string,
+): BackendToolingConfig {
   // mise supports http aqua package type but we cannot determine it from the tool name
   // An error will be thrown afterwards if the package type is http
   // ref: https://github.com/jdx/mise/blob/d1b9749d8f3e13ef705c1ea471d96c5935b79136/src/aqua/aqua_registry.rs#L39-L45
   return {
     packageName: name,
     datasource: GithubTagsDatasource.id,
+    // Trim the leading 'v' from both the current and extracted version
+    currentValue: version.replace(/^v/, ''),
+    extractVersion: '^v?(?<version>.+)',
   };
 }
 
@@ -39,7 +47,7 @@ const cargoGitVersionRegex = regEx(/^(?<type>tag|branch|rev):(?<version>.+)$/);
 export function createCargoToolConfig(
   name: string,
   version: string,
-): ToolingConfig | SkippedToolingConfig {
+): BackendToolingConfig {
   // Avoid narrowing the type of name to never
   if (!(is.urlString as (value: unknown) => boolean)(name)) {
     return {
@@ -82,7 +90,7 @@ export function createCargoToolConfig(
  * Create a tooling config for go backend
  * @link https://mise.jdx.dev/dev-tools/backends/go.html
  */
-export function createGoToolConfig(name: string): ToolingConfig {
+export function createGoToolConfig(name: string): BackendToolingConfig {
   return {
     packageName: name,
     datasource: GoDatasource.id,
@@ -93,7 +101,7 @@ export function createGoToolConfig(name: string): ToolingConfig {
  * Create a tooling config for npm backend
  * @link https://mise.jdx.dev/dev-tools/backends/npm.html
  */
-export function createNpmToolConfig(name: string): ToolingConfig {
+export function createNpmToolConfig(name: string): BackendToolingConfig {
   return {
     packageName: name,
     datasource: NpmDatasource.id,
@@ -106,9 +114,7 @@ const pipxGitHubRegex = regEx(/^git\+https:\/\/github\.com\/(?<repo>.+)\.git$/);
  * Create a tooling config for pipx backend
  * @link https://mise.jdx.dev/dev-tools/backends/pipx.html
  */
-export function createPipxToolConfig(
-  name: string,
-): ToolingConfig | SkippedToolingConfig {
+export function createPipxToolConfig(name: string): BackendToolingConfig {
   const isGitSyntax = name.startsWith('git+');
   // Does not support zip file url
   // Avoid type narrowing to prevent type error
@@ -149,9 +155,7 @@ const spmGitHubRegex = regEx(/^https:\/\/github.com\/(?<repo>.+).git$/);
  * Create a tooling config for spm backend
  * @link https://mise.jdx.dev/dev-tools/backends/spm.html
  */
-export function createSpmToolConfig(
-  name: string,
-): ToolingConfig | SkippedToolingConfig {
+export function createSpmToolConfig(name: string): BackendToolingConfig {
   let repoName: string | undefined;
   // Avoid type narrowing to prevent type error
   if ((is.urlString as (value: unknown) => boolean)(name)) {
@@ -176,17 +180,20 @@ export function createSpmToolConfig(
  */
 export function createUbiToolConfig(
   name: string,
+  version: string,
   toolOptions: MiseToolOptionsSchema,
-): ToolingConfig {
+): BackendToolingConfig {
   return {
     packageName: name,
     datasource: GithubReleasesDatasource.id,
-    ...(toolOptions.tag_regex
-      ? {
-          // Filter versions by tag_regex if it is specified
-          // ref: https://mise.jdx.dev/dev-tools/backends/ubi.html#ubi-uses-weird-versions
-          extractVersion: `(?<version>${toolOptions.tag_regex})`,
-        }
-      : {}),
+    // Trim the leading 'v' from both the current and extracted version
+    currentValue: version.replace(/^v/, ''),
+    // Filter versions by tag_regex if it is specified
+    // ref: https://mise.jdx.dev/dev-tools/backends/ubi.html#ubi-uses-weird-versions
+    extractVersion: `^v?(?<version>${
+      is.string(toolOptions.tag_regex)
+        ? toolOptions.tag_regex.replace(/^\^?v?\??/, '')
+        : '.+'
+    })`,
   };
 }

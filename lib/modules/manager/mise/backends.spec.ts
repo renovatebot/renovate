@@ -11,16 +11,31 @@ import {
 describe('modules/manager/mise/backends', () => {
   describe('createAquaToolConfig()', () => {
     it('should create a tooling config', () => {
-      expect(createAquaToolConfig('BurntSushi/ripgrep')).toEqual({
+      expect(
+        createAquaToolConfig('BurntSushi/ripgrep', '14.1.1'),
+      ).toStrictEqual({
         packageName: 'BurntSushi/ripgrep',
         datasource: 'github-tags',
+        currentValue: '14.1.1',
+        extractVersion: '^v?(?<version>.+)',
+      });
+    });
+
+    it('should trim the leading v from version', () => {
+      expect(
+        createAquaToolConfig('BurntSushi/ripgrep', 'v14.1.1'),
+      ).toStrictEqual({
+        packageName: 'BurntSushi/ripgrep',
+        datasource: 'github-tags',
+        currentValue: '14.1.1',
+        extractVersion: '^v?(?<version>.+)',
       });
     });
   });
 
   describe('createCargoToolConfig()', () => {
     it('should create a tooling config for crate', () => {
-      expect(createCargoToolConfig('eza', '')).toEqual({
+      expect(createCargoToolConfig('eza', '')).toStrictEqual({
         packageName: 'eza',
         datasource: 'crate',
       });
@@ -29,7 +44,7 @@ describe('modules/manager/mise/backends', () => {
     it('should create a tooling config for git tag', () => {
       expect(
         createCargoToolConfig('https://github.com/username/demo', 'tag:v0.1.0'),
-      ).toEqual({
+      ).toStrictEqual({
         packageName: 'https://github.com/username/demo',
         currentValue: 'v0.1.0',
         datasource: 'git-tags',
@@ -42,7 +57,7 @@ describe('modules/manager/mise/backends', () => {
           'https://github.com/username/demo',
           'branch:main',
         ),
-      ).toEqual({
+      ).toStrictEqual({
         packageName: 'https://github.com/username/demo',
         skipReason: 'unsupported-version',
       });
@@ -51,7 +66,7 @@ describe('modules/manager/mise/backends', () => {
     it('should create a tooling config for git rev', () => {
       expect(
         createCargoToolConfig('https://github.com/username/demo', 'rev:abcdef'),
-      ).toEqual({
+      ).toStrictEqual({
         packageName: 'https://github.com/username/demo',
         currentValue: 'abcdef',
         datasource: 'git-refs',
@@ -61,7 +76,7 @@ describe('modules/manager/mise/backends', () => {
     it('should provide skipReason for invalid version', () => {
       expect(
         createCargoToolConfig('https://github.com/username/demo', 'v0.1.0'),
-      ).toEqual({
+      ).toStrictEqual({
         packageName: 'https://github.com/username/demo',
         skipReason: 'invalid-version',
       });
@@ -70,7 +85,7 @@ describe('modules/manager/mise/backends', () => {
 
   describe('createGoToolConfig()', () => {
     it('should create a tooling config', () => {
-      expect(createGoToolConfig('github.com/DarthSim/hivemind')).toEqual({
+      expect(createGoToolConfig('github.com/DarthSim/hivemind')).toStrictEqual({
         packageName: 'github.com/DarthSim/hivemind',
         datasource: 'go',
       });
@@ -79,7 +94,7 @@ describe('modules/manager/mise/backends', () => {
 
   describe('createNpmToolConfig()', () => {
     it('should create a tooling config', () => {
-      expect(createNpmToolConfig('prettier')).toEqual({
+      expect(createNpmToolConfig('prettier')).toStrictEqual({
         packageName: 'prettier',
         datasource: 'npm',
       });
@@ -88,14 +103,14 @@ describe('modules/manager/mise/backends', () => {
 
   describe('createPipxToolConfig()', () => {
     it('should create a tooling config for pypi package', () => {
-      expect(createPipxToolConfig('yamllint')).toEqual({
+      expect(createPipxToolConfig('yamllint')).toStrictEqual({
         packageName: 'yamllint',
         datasource: 'pypi',
       });
     });
 
     it('should create a tooling config for github shorthand', () => {
-      expect(createPipxToolConfig('psf/black')).toEqual({
+      expect(createPipxToolConfig('psf/black')).toStrictEqual({
         packageName: 'psf/black',
         datasource: 'github-tags',
       });
@@ -104,7 +119,7 @@ describe('modules/manager/mise/backends', () => {
     it('should create a tooling config for github url', () => {
       expect(
         createPipxToolConfig('git+https://github.com/psf/black.git'),
-      ).toEqual({
+      ).toStrictEqual({
         packageName: 'psf/black',
         datasource: 'github-tags',
       });
@@ -113,7 +128,7 @@ describe('modules/manager/mise/backends', () => {
     it('should create a tooling config for git url', () => {
       expect(
         createPipxToolConfig('git+https://gitlab.com/user/repo.git'),
-      ).toEqual({
+      ).toStrictEqual({
         packageName: 'https://gitlab.com/user/repo',
         datasource: 'git-refs',
       });
@@ -122,7 +137,7 @@ describe('modules/manager/mise/backends', () => {
     it('provides skipReason for zip file url', () => {
       expect(
         createPipxToolConfig('https://github.com/psf/black/archive/18.9b0.zip'),
-      ).toEqual({
+      ).toStrictEqual({
         packageName: 'https://github.com/psf/black/archive/18.9b0.zip',
         skipReason: 'unsupported-url',
       });
@@ -131,23 +146,25 @@ describe('modules/manager/mise/backends', () => {
 
   describe('createSpmToolConfig()', () => {
     it('should create a tooling config for github shorthand', () => {
-      expect(createSpmToolConfig('tuist/tuist')).toEqual({
+      expect(createSpmToolConfig('tuist/tuist')).toStrictEqual({
         packageName: 'tuist/tuist',
         datasource: 'github-releases',
       });
     });
 
     it('should create a tooling config for github url', () => {
-      expect(createSpmToolConfig('https://github.com/tuist/tuist.git')).toEqual(
-        {
-          packageName: 'tuist/tuist',
-          datasource: 'github-releases',
-        },
-      );
+      expect(
+        createSpmToolConfig('https://github.com/tuist/tuist.git'),
+      ).toStrictEqual({
+        packageName: 'tuist/tuist',
+        datasource: 'github-releases',
+      });
     });
 
     it('provides skipReason for other url', () => {
-      expect(createSpmToolConfig('https://gitlab.com/user/repo.git')).toEqual({
+      expect(
+        createSpmToolConfig('https://gitlab.com/user/repo.git'),
+      ).toStrictEqual({
         packageName: 'https://gitlab.com/user/repo.git',
         skipReason: 'unsupported-url',
       });
@@ -156,28 +173,70 @@ describe('modules/manager/mise/backends', () => {
 
   describe('createUbiToolConfig()', () => {
     it('should create a tooling config with empty options', () => {
-      expect(createUbiToolConfig('nekto/act', {})).toEqual({
+      expect(createUbiToolConfig('nekto/act', '0.2.70', {})).toStrictEqual({
         packageName: 'nekto/act',
         datasource: 'github-releases',
+        currentvalue: '0.2.70',
+        extractVersion: '^v?(?<version>.+)',
+      });
+    });
+
+    it('should trim the leading v from version', () => {
+      expect(createUbiToolConfig('cli/cli', 'v2.64.0', {})).toStrictEqual({
+        packageName: 'cli/cli',
+        datasource: 'github-releases',
+        currentvalue: '2.64.0',
+        extractVersion: '^v?(?<version>.+)',
       });
     });
 
     it('should ignore options unless tag_regex is provided', () => {
-      expect(createUbiToolConfig('cli/cli', { exe: 'gh' } as any)).toEqual({
+      expect(
+        createUbiToolConfig('cli/cli', '2.64.0', { exe: 'gh' } as any),
+      ).toStrictEqual({
         packageName: 'cli/cli',
         datasource: 'github-releases',
+        currentvalue: '2.64.0',
+        extractVersion: '^v?(?<version>.+)',
       });
     });
 
     it('should set extractVersion if tag_regex is provided', () => {
       expect(
-        createUbiToolConfig('cargo-bins/cargo-binstall', {
+        createUbiToolConfig('cargo-bins/cargo-binstall', '1.10.17', {
           tag_regex: '^\\d+\\.\\d+\\.',
         }),
-      ).toEqual({
+      ).toStrictEqual({
         packageName: 'cargo-bins/cargo-binstall',
         datasource: 'github-releases',
-        extractVersion: '(?<version>^\\d+\\.\\d+\\.)',
+        currentvalue: '1.10.17',
+        extractVersion: '^v?(?<version>\\d+\\.\\d+\\.)',
+      });
+    });
+
+    it('should trim the leading ^v from tag_regex', () => {
+      expect(
+        createUbiToolConfig('cargo-bins/cargo-binstall', '1.10.17', {
+          tag_regex: '^v\\d+\\.\\d+\\.',
+        }),
+      ).toStrictEqual({
+        packageName: 'cargo-bins/cargo-binstall',
+        datasource: 'github-releases',
+        currentvalue: '1.10.17',
+        extractVersion: '^v?(?<version>\\d+\\.\\d+\\.)',
+      });
+    });
+
+    it('should trim the leading ^v? from tag_regex', () => {
+      expect(
+        createUbiToolConfig('cargo-bins/cargo-binstall', '1.10.17', {
+          tag_regex: '^v?\\d+\\.\\d+\\.',
+        }),
+      ).toStrictEqual({
+        packageName: 'cargo-bins/cargo-binstall',
+        datasource: 'github-releases',
+        currentvalue: '1.10.17',
+        extractVersion: '^v?(?<version>\\d+\\.\\d+\\.)',
       });
     });
   });
