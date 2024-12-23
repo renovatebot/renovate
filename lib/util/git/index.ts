@@ -24,6 +24,7 @@ import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
 import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
+import { matchRegexOrGlobList } from '../string-match';
 import { parseGitAuthor } from './author';
 import {
   getCachedBehindBaseResult,
@@ -344,7 +345,10 @@ export async function getSubmodules(): Promise<string[]> {
   }
 }
 
-export async function cloneSubmodules(shouldClone: boolean): Promise<void> {
+export async function cloneSubmodules(
+  shouldClone: boolean,
+  cloneSubmodulesFilter: string[] | undefined,
+): Promise<void> {
   if (!shouldClone || submodulesInitizialized) {
     return;
   }
@@ -352,6 +356,13 @@ export async function cloneSubmodules(shouldClone: boolean): Promise<void> {
   await syncGit();
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
+    if (!matchRegexOrGlobList(submodule, cloneSubmodulesFilter ?? ['*'])) {
+      logger.debug(
+        { cloneSubmodulesFilter },
+        `Skipping submodule ${submodule}`,
+      );
+      continue;
+    }
     try {
       logger.debug(`Cloning git submodule at ${submodule}`);
       await gitRetry(() =>
@@ -458,7 +469,7 @@ export async function syncGit(): Promise<void> {
     throw err;
   }
   // This will only happen now if set in global config
-  await cloneSubmodules(!!config.cloneSubmodules);
+  await cloneSubmodules(!!config.cloneSubmodules, config.cloneSubmodulesFilter);
   try {
     const latestCommit = (await git.log({ n: 1 })).latest;
     logger.debug({ latestCommit }, 'latest repository commit');
