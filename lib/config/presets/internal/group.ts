@@ -111,14 +111,19 @@ const staticGroups = {
   },
   fusionjs: {
     description: 'Group Fusion.js packages together.',
-    matchPackageNames: [
-      'fusion-cli',
-      'fusion-core',
-      'fusion-test-utils',
-      'fusion-tokens',
-      'fusion-plugin-**',
-      'fusion-react**',
-      'fusion-apollo**',
+    packageRules: [
+      {
+        groupName: 'Fusion.js packages',
+        matchPackageNames: [
+          'fusion-cli',
+          'fusion-core',
+          'fusion-test-utils',
+          'fusion-tokens',
+          'fusion-plugin-**',
+          'fusion-react**',
+          'fusion-apollo**',
+        ],
+      },
     ],
   },
   githubArtifactActions: {
@@ -311,9 +316,10 @@ const staticGroups = {
           'k8s.io/cluster-bootstrap**',
           'k8s.io/code-generator**',
           'k8s.io/component-base**',
+          'k8s.io/component-helpers**',
           'k8s.io/controller-manager**',
           'k8s.io/cri-api**',
-          // 'k8s.io/csi-api', has not go.mod set up and does not follow the versioning of other repos
+          // 'k8s.io/csi-api', has no go.mod set up and does not follow the versioning of other repos
           'k8s.io/csi-translation-lib**',
           'k8s.io/kube-aggregator**',
           'k8s.io/kube-controller-manager**',
@@ -338,6 +344,16 @@ const staticGroups = {
       {
         extends: ['packages:linters'],
         groupName: 'linters',
+      },
+    ],
+  },
+  micrometer: {
+    description:
+      "Group Micrometer packages together, e.g. 'io.micrometer:micrometer-core'.",
+    packageRules: [
+      {
+        groupName: 'micrometer',
+        matchPackageNames: ['io.micrometer:micrometer-**'],
       },
     ],
   },
@@ -462,6 +478,7 @@ const staticGroups = {
       'group:jestPlusTypes',
       'group:jwtFramework',
       'group:kubernetes',
+      'group:micrometer',
       'group:phpstan',
       'group:polymer',
       'group:react',

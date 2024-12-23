@@ -33,7 +33,24 @@ describe('config/massage', () => {
         ],
       };
       const res = massage.massageConfig(config);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            separateMajorMinor: false,
+          },
+          {
+            matchPackageNames: ['foo'],
+            matchUpdateTypes: ['minor'],
+            semanticCommitType: 'feat',
+          },
+          {
+            matchPackageNames: ['foo'],
+            matchUpdateTypes: ['patch'],
+            semanticCommitType: 'fix',
+          },
+        ],
+      });
       expect(res.packageRules).toHaveLength(3);
     });
 
@@ -64,7 +81,18 @@ describe('config/massage', () => {
         ],
       };
       const res = massage.massageConfig(config);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        packageRules: [
+          {
+            lockFileMaintenance: {
+              enabled: true,
+            },
+            matchBaseBranches: ['release/ft10/1.9.x'],
+            matchManagers: ['helmv3'],
+            schedule: ['at any time'],
+          },
+        ],
+      });
       expect(res.packageRules).toHaveLength(1);
     });
   });
