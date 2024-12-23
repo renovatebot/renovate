@@ -17,7 +17,7 @@ services:
     image: jaegertracing/jaeger:2.1.0
     ports:
       - '16686:16686' # Web UI
-      - '4317' # OTLP GRPC
+      - '4317' # OTLP gRPC
       - '4318' # OTLP HTTP
 
   # Prometheus for storing metrics
@@ -28,13 +28,13 @@ services:
       - '4318' # OTLP HTTP
     command:
       - --web.enable-otlp-receiver
-      # We have to read these flags from the Dockerfile as `command` is overwriting the default flags
+      # Mirror these flags from the Dockerfile, because `command` overwrites the default flags.
       # https://github.com/prometheus/prometheus/blob/5b5fee08af4c73230b2dae35964816f7b3c29351/Dockerfile#L23-L24
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
 
   otel-collector:
-    # Using the Contrib version to get access to the spanmetrics connector
+    # Using the Contrib version to access the spanmetrics connector.
     # If you don't need the spanmetrics connector, you can use the standard version
     image: otel/opentelemetry-collector-contrib:0.116.1
     volumes:
@@ -103,8 +103,8 @@ service:
 
     metrics:
       receivers:
-        - otlp # allow to receive metrics directly from Renovate
-        - spanmetrics # allow receiving metrics calculated internally by the spanmetrics connector
+        - otlp # Receive metrics from Renovate.
+        - spanmetrics # Receive metrics calculated by the spanmetrics connector.
       processors: [batch]
       exporters:
         - otlphttp/prometheus
@@ -118,7 +118,11 @@ Start setup using this command inside the folder containing the files created in
 docker-compose up
 ```
 
-This command will start an [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector-contrib), an instance of [Jaeger for traces](https://www.jaegertracing.io/) as well Prometh.
+This command will start:
+
+- an [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector-contrib)
+- an instance of [Jaeger for traces](https://www.jaegertracing.io/)
+- and [Prometheus](https://prometheus.io/)
 
 Jaeger will be now reachable under [http://localhost:16686](http://localhost:16686).
 
@@ -195,8 +199,9 @@ The [spanmetrics connector](https://github.com/open-telemetry/opentelemetry-coll
 At first there are the `traces_span_metrics_calls_total` metrics which display how often specific trace spans have been observed.
 
 For example:
-`traces_span_metrics_calls_total{http_method="GET", job="renovatebot.com/renovate", service_name="renovate", span_kind="SPAN_KIND_INTERNAL", span_name="repositories", status_code="STATUS_CODE_UNSET"} 2` signals that 2 repositories have been renovated.
-`traces_span_metrics_calls_total{http_method="GET", job="renovatebot.com/renovate", service_name="renovate", span_kind="SPAN_KIND_INTERNAL", span_name="run", status_code="STATUS_CODE_UNSET"} 1` represents how often Renovate has been run.
+
+- `traces_span_metrics_calls_total{http_method="GET", job="renovatebot.com/renovate", service_name="renovate", span_kind="SPAN_KIND_INTERNAL", span_name="repositories", status_code="STATUS_CODE_UNSET"} 2` signals that 2 repositories have been renovated.
+- `traces_span_metrics_calls_total{http_method="GET", job="renovatebot.com/renovate", service_name="renovate", span_kind="SPAN_KIND_INTERNAL", span_name="run", status_code="STATUS_CODE_UNSET"} 1` represents how often Renovate has been run.
 
 If we combine this using the PrometheusQueryLanguage ( PromQL ), we can calculate the average count of repositories each Renovate run handles.
 
@@ -204,7 +209,7 @@ If we combine this using the PrometheusQueryLanguage ( PromQL ), we can calculat
 traces_span_metrics_calls_total{span_name="repository",service_name="renovate"} / traces_span_metrics_calls_total{span_name="run",service_name="renovate"}
 ```
 
-This metrics arge generated for http call spans too:
+These metrics are generated for HTTP call spans too:
 
 ```yaml
 traces_span_metrics_calls_total{http_host="prometheus-community.github.io:443", http_method="GET", http_status_code="200", job="renovatebot.com/renovate", service_name="renovate", span_kind="SPAN_KIND_CLIENT", span_name="GET", status_code="STATUS_CODE_UNSET"} 5
@@ -212,7 +217,7 @@ traces_span_metrics_calls_total{http_host="prometheus-community.github.io:443", 
 
 #### Latency buckets
 
-The second class of metrics exposed are the latency-focused buckets that allow creating [heatmaps](https://grafana.com/docs/grafana/latest/basics/intro-histograms/#heatmaps).
+The second class of metrics exposed are the latency-focused buckets, that allow creating [heatmaps](https://grafana.com/docs/grafana/latest/basics/intro-histograms/#heatmaps).
 A request is added to a backed if the latency is bigger than the bucket value (`le`). `request_duration => le`
 
 As an example if we receive a request which need `1.533s` to complete get following metrics:
