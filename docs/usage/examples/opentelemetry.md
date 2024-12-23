@@ -41,7 +41,7 @@ services:
       - ./otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
     ports:
       - '4318:4318' # OTLP HTTP ( exposed to the host )
-      - '4317:4317' # OTLP GRPC ( exposed to the host )
+      - '4317:4317' # OTLP gRPC ( exposed to the host )
     depends_on:
       - jaeger
       - prometheus
