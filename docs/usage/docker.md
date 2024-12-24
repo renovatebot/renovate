@@ -307,7 +307,7 @@ Renovate will get the credentials with the [`google-auth-library`](https://www.n
     service_account: ${{ env.SERVICE_ACCOUNT }}
 
 - name: renovate
-  uses: renovatebot/github-action@v41.0.6
+  uses: renovatebot/github-action@v41.0.7
   env:
     RENOVATE_HOST_RULES: |
       [
@@ -478,7 +478,7 @@ Make sure to install the Google Cloud SDK into the custom image, as you need the
 For example:
 
 ```Dockerfile
-FROM renovate/renovate:39.69.2
+FROM renovate/renovate:39.82.1
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

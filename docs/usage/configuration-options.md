@@ -3357,6 +3357,7 @@ Table with options:
 | `gomodTidyE`                 | Run `go mod tidy -e` after Go module updates.                                                                                                              |
 | `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
 | `gomodSkipVendor`            | Never run `go mod vendor` after Go module updates.                                                                                                         |
+| `gomodVendor`                | Always run `go mod vendor` after Go module updates even if vendor files aren't detected.                                                                   |
 | `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
 | `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                       |
 | `pnpmDedupe`                 | Run `pnpm dedupe --config.ignore-scripts=true` after `pnpm-lock.yaml` updates.                                                                             |

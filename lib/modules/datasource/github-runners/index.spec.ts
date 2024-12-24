@@ -58,6 +58,7 @@ describe('modules/datasource/github-runners/index', () => {
           { version: '2016', isDeprecated: true },
           { version: '2019' },
           { version: '2022' },
+          { version: '2025', isStable: false },
         ],
         sourceUrl: 'https://github.com/actions/runner-images',
       });
