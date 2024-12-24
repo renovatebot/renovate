@@ -67,6 +67,7 @@
   "keywords": [
     "automated",
     "azure",
+    "aws",
     "bazel",
     "bitbucket",
     "buildkite",
