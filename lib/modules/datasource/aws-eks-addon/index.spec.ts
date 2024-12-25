@@ -1,7 +1,7 @@
 import {
   type AddonInfo,
   DescribeAddonVersionsCommand,
-  DescribeAddonVersionsResponse,
+  type DescribeAddonVersionsResponse,
   EKSClient,
 } from '@aws-sdk/client-eks';
 import { mockClient } from 'aws-sdk-client-mock';

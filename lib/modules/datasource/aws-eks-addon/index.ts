@@ -1,10 +1,10 @@
 import {
-  AddonInfo,
-  AddonVersionInfo,
-  Compatibility,
+  type AddonInfo,
+  type AddonVersionInfo,
+  type Compatibility,
   DescribeAddonVersionsCommand,
-  DescribeAddonVersionsCommandInput,
-  DescribeAddonVersionsCommandOutput,
+  type DescribeAddonVersionsCommandInput,
+  type DescribeAddonVersionsCommandOutput,
   EKSClient,
 } from '@aws-sdk/client-eks';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
