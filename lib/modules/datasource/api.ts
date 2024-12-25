@@ -1,6 +1,6 @@
 import { ArtifactoryDatasource } from './artifactory';
-import { AwsMachineImageDatasource } from './aws-machine-image';
 import { AwsEKSAddonDataSource } from './aws-eks-addon';
+import { AwsMachineImageDatasource } from './aws-machine-image';
 import { AwsRdsDatasource } from './aws-rds';
 import { AzureBicepResourceDatasource } from './azure-bicep-resource';
 import { AzurePipelinesTasksDatasource } from './azure-pipelines-tasks';

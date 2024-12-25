@@ -6,6 +6,8 @@ import {
 } from '@aws-sdk/client-eks';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getPkgReleases } from '..';
+import { logger } from '../../../../test/util';
+
 import { AwsEKSAddonDataSource } from '.';
 
 const datasource = AwsEKSAddonDataSource.id;
@@ -37,6 +39,54 @@ function mockDescribeAddonVersionsCommandWithRegion(
     });
 }
 
+const addonInfo: AddonInfo = {
+  addonName: 'vpc-cni',
+  type: 'networking',
+  addonVersions: [
+    {
+      addonVersion: 'v1.19.0-eksbuild.1',
+      architecture: ['amd64', 'arm64'],
+      compatibilities: [
+        {
+          clusterVersion: '1.31',
+          defaultVersion: true,
+        },
+        {
+          clusterVersion: '1.30',
+          defaultVersion: true,
+        },
+        {
+          clusterVersion: '1.29',
+          defaultVersion: true,
+        },
+      ],
+    },
+    {
+      addonVersion: 'v1.18.1-eksbuild.1',
+      architecture: ['amd64', 'arm64'],
+      compatibilities: [
+        {
+          clusterVersion: '1.30',
+          defaultVersion: false,
+        },
+      ],
+    },
+    {
+      addonVersion: 'v1.18.2-eksbuild.1',
+      architecture: ['amd64', 'arm64'],
+      compatibilities: [
+        {
+          clusterVersion: '1.30',
+          platformVersions: ['*'],
+          defaultVersion: true,
+        },
+      ],
+    },
+  ],
+  publisher: 'eks',
+  owner: 'aws',
+};
+
 describe('modules/datasource/aws-eks-addon/index', () => {
   describe('getPkgReleases()', () => {
     it.each<{ des: string; req: DescribeAddonVersionsResponse }>`
@@ -57,6 +107,87 @@ describe('modules/datasource/aws-eks-addon/index', () => {
         kubernetesVersion: '1.30',
         addonName: 'non-existing-addon',
         maxResults: 1,
+      });
+    });
+
+    it('with addonName not supplied', async () => {
+      const res = await getPkgReleases({
+        datasource,
+        packageName:
+          '{"kubernetesVersion":"1.30"}',
+      });
+      expect(res).toBeNull()
+      expect(logger.logger.error).toHaveBeenCalledTimes(1)
+    });
+
+    it('with addonName only', async () => {
+      mockDescribeAddonVersionsCommand({addons: [addonInfo]})
+      const res = await getPkgReleases({
+        datasource,
+        packageName:
+          '{"addonName":"vpc-cni"}',
+      });
+      expect(res?.releases).toHaveLength(3);
+      expect(res).toEqual({
+        releases: [
+          {
+            version: 'v1.18.1-eksbuild.1',
+            "compatibleWith": [
+              "1.30"
+            ],
+            "default": false,
+          },
+          {
+            version: 'v1.18.2-eksbuild.1',
+            "compatibleWith": [
+              "1.30"
+            ],
+            "default": true,
+          },
+          {
+            version: 'v1.19.0-eksbuild.1',
+            "compatibleWith": [
+              "1.31", "1.30", "1.29"
+            ],
+            "default": true,
+          },
+        ],
+      });
+      expect(eksMock.call(0).args[0].input).toEqual({
+        addonName: 'vpc-cni',
+        maxResults: 1,
+      });
+    });
+
+    it('with addonName and default only config', async () => {
+      mockDescribeAddonVersionsCommand({addons: [addonInfo]})
+      const res = await getPkgReleases({
+        datasource,
+        packageName:
+          '{"addonName":"vpc-cni", "default":true}',
+      });
+      expect(eksMock.call(0).args[0].input).toEqual({
+        addonName: 'vpc-cni',
+        maxResults: 1,
+      });
+      expect(res?.releases).toHaveLength(2);
+      expect(res).toEqual({
+        releases: [
+          {
+            version: 'v1.18.2-eksbuild.1',
+            "compatibleWith": [
+              "1.30"
+            ],
+            "default": true,
+          },
+          {
+            version: 'v1.19.0-eksbuild.1',
+            "compatibleWith": [
+              "1.31", "1.30", "1.29"
+            ],
+            "default": true,
+          },
+        ],
       });
     });
 
@@ -108,9 +239,17 @@ describe('modules/datasource/aws-eks-addon/index', () => {
         releases: [
           {
             version: 'v1.18.1-eksbuild.1',
+            "compatibleWith": [
+              "1.30"
+            ],
+            "default": false,
           },
           {
             version: 'v1.18.2-eksbuild.1',
+            "compatibleWith": [
+              "1.30"
+            ],
+            "default": false,
           },
         ],
       });
@@ -118,10 +257,6 @@ describe('modules/datasource/aws-eks-addon/index', () => {
         kubernetesVersion: '1.30',
         addonName: 'vpc-cni',
         maxResults: 1,
-      });
-      expect(await eksMock.call(0).returnValue).toEqual({
-        addons: [vpcCniAddonInfo],
-        nextToken: 'mars-east-1',
       });
     });
   });

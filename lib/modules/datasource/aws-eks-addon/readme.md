@@ -2,6 +2,9 @@ This datasource returns the addon versions available for use on [AWS EKS](https:
 
 **AWS API configuration**
 
+- [Amazon EKS add-ons](https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html)
+- [Available Amazon EKS add-ons from AWS](https://docs.aws.amazon.com/eks/latest/userguide/workloads-add-ons-available-eks.html)
+
 Since the datasource uses the AWS SDK for JavaScript, you can configure it like other AWS Tools.
 You can use common AWS configuration options, for example:
 
@@ -47,6 +50,12 @@ For example:
 Although it's unlikely that EKS might support different addon versions across regions, you can optionally specify the `region` and/or `profile` in the minified JSON object to discover the addon versions specific to this region.
 
 ```yaml
+# discover kube-proxy addon versions without specifying a cluster version.
+{"addonName":"kube-proxy"}
+
+# discover kube-proxy default addon versions
+{"addonName":"kube-proxy", "default":true}
+
 # discover vpc-cni addon versions on Kubernetes 1.30 in us-east-1 region using environmental AWS credentials.
 {"kubernetesVersion":"1.30","addonName":"vpc-cni","region":"us-east-1"}
 
@@ -80,11 +89,11 @@ Here's an example of using the custom manager to configure this datasource:
 
 The configuration above matches every terraform file, and recognizes these lines:
 
-```yaml
+```hcl
 variable "vpc_cni_version" {
   type        = string
   description = "EKS vpc-cni add-on version"
   # renovate: eksAddonsFilter={"kubernetesVersion":"1.30","addonName":"vpc-cni"}
-  default = "v1.18.1-eksbuild.3"
+  default     = "v1.18.1-eksbuild.3"
 }
 ```

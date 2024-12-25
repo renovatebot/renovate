@@ -1,9 +1,14 @@
 import {
+  AddonInfo,
+  AddonVersionInfo,
+  Compatibility,
   DescribeAddonVersionsCommand,
   DescribeAddonVersionsCommandInput,
+  DescribeAddonVersionsCommandOutput,
   EKSClient,
 } from '@aws-sdk/client-eks';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
+import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -13,7 +18,7 @@ export class AwsEKSAddonDataSource extends Datasource {
   static readonly id = 'aws-eks-addon';
 
   override readonly caching = true;
-  private readonly eksClients: Record<string, EKSClient> = {};
+  private readonly clients: Record<string, EKSClient> = {};
 
   constructor() {
     super(AwsEKSAddonDataSource.id);
@@ -26,45 +31,55 @@ export class AwsEKSAddonDataSource extends Datasource {
   async getReleases({
                       packageName: serializedFilter,
                     }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const filter = EksAddonsFilter.safeParse(serializedFilter);
-    const eksClient = this.getEKSClient(filter);
+    const res = EksAddonsFilter.safeParse(serializedFilter);
+    if (!res.success) {
+      logger.error(
+        { err: res.error, serializedFilter },
+        'Error parsing eks-addons config.',
+      );
+      return null
+    }
 
-    const cmd = new DescribeAddonVersionsCommand(
-      this.getDescribeAddonsRequest(filter),
-    );
-    const response = await eksClient.send(cmd);
-    const addons = response.addons ?? [];
-    return {
-      releases: addons
-        .flatMap((addon) => addon.addonVersions)
-        .map((versionInfo) => ({
-          version: versionInfo?.addonVersion ?? '',
-        }))
-        .filter((release) => release.version),
-    };
-  }
+    const filter  = res.data;
 
-  private getDescribeAddonsRequest({
-                                     kubernetesVersion,
-                                     addonName,
-                                   }: EKSAddonsFilter): DescribeAddonVersionsCommandInput {
-    // this API is paginated, but we only ever care about a single addon at a time.
-    return {
-      kubernetesVersion,
-      addonName,
+    const input: DescribeAddonVersionsCommandInput = {
+      kubernetesVersion: filter?.kubernetesVersion,
+      addonName: filter?.addonName,
       maxResults: 1,
     };
+    const cmd = new DescribeAddonVersionsCommand(input)
+    const response : DescribeAddonVersionsCommandOutput = await this.getClient(filter).send(cmd)
+    const addons: AddonInfo[] = response.addons ?? [];
+    return {
+      releases: addons
+        .flatMap((addon : AddonInfo) : AddonVersionInfo[] | undefined => {
+          return addon.addonVersions
+        })
+        .map((versionInfo: AddonVersionInfo | undefined) => ({
+          version: versionInfo?.addonVersion ?? '',
+          default: versionInfo?.compatibilities?.some((comp : Compatibility) : boolean | undefined => comp.defaultVersion) ?? false,
+          compatibleWith : versionInfo?.compatibilities?.flatMap((comp: Compatibility) : string | undefined => comp.clusterVersion)
+        }))
+        .filter((release  ): boolean => {
+          return release.version !== ''
+        })
+        .filter((release  ): boolean => {
+          if (filter.default) {
+            return release.default && release.default === filter.default
+          }
+          return true
+        })
+    };
   }
 
-  private getEKSClient({ region, profile }: EKSAddonsFilter): EKSClient {
-    // we have two dimensions here, building a cache key for simplicity.
+  private getClient({ region, profile }: EksAddonsFilter): EKSClient {
     const cacheKey = `${region ?? 'default'}#${profile ?? 'default'}`;
-    if (!(cacheKey in this.eksClients)) {
-      this.eksClients[cacheKey] = new EKSClient({
-        region,
-        credentials: fromNodeProviderChain({ profile }),
-      });
+    if (!(cacheKey in this.clients)) {
+      this.clients[cacheKey] = new EKSClient({
+        region: region ?? undefined,
+        credentials: fromNodeProviderChain(profile ? { profile } : undefined)
+      })
     }
-    return this.eksClients[cacheKey];
+    return this.clients[cacheKey];
   }
 }
