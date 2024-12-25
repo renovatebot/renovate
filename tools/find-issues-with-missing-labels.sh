@@ -27,7 +27,7 @@ for FILTER in "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FILTER"; do
     HAS_ISSUES_MISSING_LABELS=true
 
     # Create a list of issue numbers
-    FORMATTED_OUTPUT=$(echo "$ISSUES_MISSING_LABEL" | jq -r '.[].number' | sed 's/^/- #/')
+    FORMATTED_OUTPUT=$(echo "$ISSUES_MISSING_LABEL" | jq -r '.[].number' | sed 's/^/- https:\/\/redirect.github.com\/renovatebot\/renovate\/issues\//')
 
     # Count the issues and decide if the output should be singular or plural
     ISSUE_COUNT=$(echo "$ISSUES_MISSING_LABEL" | jq '. | length')
