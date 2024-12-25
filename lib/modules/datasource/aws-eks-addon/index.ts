@@ -29,46 +29,52 @@ export class AwsEKSAddonDataSource extends Datasource {
     key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
   })
   async getReleases({
-                      packageName: serializedFilter,
-                    }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    packageName: serializedFilter,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const res = EksAddonsFilter.safeParse(serializedFilter);
     if (!res.success) {
       logger.error(
         { err: res.error, serializedFilter },
         'Error parsing eks-addons config.',
       );
-      return null
+      return null;
     }
 
-    const filter  = res.data;
+    const filter = res.data;
 
     const input: DescribeAddonVersionsCommandInput = {
       kubernetesVersion: filter?.kubernetesVersion,
       addonName: filter?.addonName,
       maxResults: 1,
     };
-    const cmd = new DescribeAddonVersionsCommand(input)
-    const response : DescribeAddonVersionsCommandOutput = await this.getClient(filter).send(cmd)
+    const cmd = new DescribeAddonVersionsCommand(input);
+    const response: DescribeAddonVersionsCommandOutput =
+      await this.getClient(filter).send(cmd);
     const addons: AddonInfo[] = response.addons ?? [];
     return {
       releases: addons
-        .flatMap((addon : AddonInfo) : AddonVersionInfo[] | undefined => {
-          return addon.addonVersions
+        .flatMap((addon: AddonInfo): AddonVersionInfo[] | undefined => {
+          return addon.addonVersions;
         })
         .map((versionInfo: AddonVersionInfo | undefined) => ({
           version: versionInfo?.addonVersion ?? '',
-          default: versionInfo?.compatibilities?.some((comp : Compatibility) : boolean | undefined => comp.defaultVersion) ?? false,
-          compatibleWith : versionInfo?.compatibilities?.flatMap((comp: Compatibility) : string | undefined => comp.clusterVersion)
+          default:
+            versionInfo?.compatibilities?.some(
+              (comp: Compatibility): boolean | undefined => comp.defaultVersion,
+            ) ?? false,
+          compatibleWith: versionInfo?.compatibilities?.flatMap(
+            (comp: Compatibility): string | undefined => comp.clusterVersion,
+          ),
         }))
-        .filter((release  ): boolean => {
-          return release.version !== ''
+        .filter((release): boolean => {
+          return release.version !== '';
         })
-        .filter((release  ): boolean => {
+        .filter((release): boolean => {
           if (filter.default) {
-            return release.default && release.default === filter.default
+            return release.default && release.default === filter.default;
           }
-          return true
-        })
+          return true;
+        }),
     };
   }
 
@@ -77,8 +83,8 @@ export class AwsEKSAddonDataSource extends Datasource {
     if (!(cacheKey in this.clients)) {
       this.clients[cacheKey] = new EKSClient({
         region: region ?? undefined,
-        credentials: fromNodeProviderChain(profile ? { profile } : undefined)
-      })
+        credentials: fromNodeProviderChain(profile ? { profile } : undefined),
+      });
     }
     return this.clients[cacheKey];
   }

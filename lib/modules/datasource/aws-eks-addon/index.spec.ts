@@ -113,43 +113,35 @@ describe('modules/datasource/aws-eks-addon/index', () => {
     it('with addonName not supplied', async () => {
       const res = await getPkgReleases({
         datasource,
-        packageName:
-          '{"kubernetesVersion":"1.30"}',
+        packageName: '{"kubernetesVersion":"1.30"}',
       });
-      expect(res).toBeNull()
-      expect(logger.logger.error).toHaveBeenCalledTimes(1)
+      expect(res).toBeNull();
+      expect(logger.logger.error).toHaveBeenCalledTimes(1);
     });
 
     it('with addonName only', async () => {
-      mockDescribeAddonVersionsCommand({addons: [addonInfo]})
+      mockDescribeAddonVersionsCommand({ addons: [addonInfo] });
       const res = await getPkgReleases({
         datasource,
-        packageName:
-          '{"addonName":"vpc-cni"}',
+        packageName: '{"addonName":"vpc-cni"}',
       });
       expect(res?.releases).toHaveLength(3);
       expect(res).toEqual({
         releases: [
           {
             version: 'v1.18.1-eksbuild.1',
-            "compatibleWith": [
-              "1.30"
-            ],
-            "default": false,
+            compatibleWith: ['1.30'],
+            default: false,
           },
           {
             version: 'v1.18.2-eksbuild.1',
-            "compatibleWith": [
-              "1.30"
-            ],
-            "default": true,
+            compatibleWith: ['1.30'],
+            default: true,
           },
           {
             version: 'v1.19.0-eksbuild.1',
-            "compatibleWith": [
-              "1.31", "1.30", "1.29"
-            ],
-            "default": true,
+            compatibleWith: ['1.31', '1.30', '1.29'],
+            default: true,
           },
         ],
       });
@@ -160,11 +152,10 @@ describe('modules/datasource/aws-eks-addon/index', () => {
     });
 
     it('with addonName and default only config', async () => {
-      mockDescribeAddonVersionsCommand({addons: [addonInfo]})
+      mockDescribeAddonVersionsCommand({ addons: [addonInfo] });
       const res = await getPkgReleases({
         datasource,
-        packageName:
-          '{"addonName":"vpc-cni", "default":true}',
+        packageName: '{"addonName":"vpc-cni", "default":true}',
       });
       expect(eksMock.call(0).args[0].input).toEqual({
         addonName: 'vpc-cni',
@@ -175,17 +166,13 @@ describe('modules/datasource/aws-eks-addon/index', () => {
         releases: [
           {
             version: 'v1.18.2-eksbuild.1',
-            "compatibleWith": [
-              "1.30"
-            ],
-            "default": true,
+            compatibleWith: ['1.30'],
+            default: true,
           },
           {
             version: 'v1.19.0-eksbuild.1',
-            "compatibleWith": [
-              "1.31", "1.30", "1.29"
-            ],
-            "default": true,
+            compatibleWith: ['1.31', '1.30', '1.29'],
+            default: true,
           },
         ],
       });
@@ -239,17 +226,13 @@ describe('modules/datasource/aws-eks-addon/index', () => {
         releases: [
           {
             version: 'v1.18.1-eksbuild.1',
-            "compatibleWith": [
-              "1.30"
-            ],
-            "default": false,
+            compatibleWith: ['1.30'],
+            default: false,
           },
           {
             version: 'v1.18.2-eksbuild.1',
-            "compatibleWith": [
-              "1.30"
-            ],
-            "default": false,
+            compatibleWith: ['1.30'],
+            default: false,
           },
         ],
       });
