@@ -70,6 +70,16 @@ describe('workers/repository/update/pr/body/config-description', () => {
       );
     });
 
+    it('displays later schedules', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        schedule: ['before 6am on Monday', 'after 3pm on Tuesday'],
+      });
+      expect(res).toContain(
+        '"before 6am on Monday,after 3pm on Tuesday" (UTC)',
+      );
+    });
+
     it('renders undefined schedule', () => {
       const res = getPrConfigDescription(config);
       expect(res).toContain(`At any time (no schedule defined).`);
