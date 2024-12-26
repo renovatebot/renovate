@@ -100,16 +100,6 @@
     </details>
 
 
-    ### Insufficient logs
-
-    <details><summary>Select me to read instructions</summary>
-
-
-    If you already gave us a log, and the Renovate team said it's not enough, then follow the instructions from the **No logs at all** section.
-
-    </details>
-
-
     ### Formatting your logs
 
     <details><summary>Select me to read instructions</summary>
@@ -134,6 +124,35 @@
 
     Good luck,
 
+
+    The Renovate team
+
+'auto:debug-logs':
+  comment: >
+    Hi there,
+
+    The logs you've provided are insufficient for troubleshooting. We specifically need **DEBUG** level logs to help diagnose your issue.
+
+    ### How to enable DEBUG logs
+
+    Add "logLevel": "debug" in your self-hosted configuration
+    Or
+    Add LOG_LEVEL=debug to your environment variables before invoking Renovate.
+
+
+    ### Sharing your DEBUG logs
+
+    Please format your logs using:
+
+        <details><summary>DEBUG logs</summary>
+
+        ```
+        Your DEBUG level logs here
+        ```
+
+        </details>
+
+    For large logs, please use [GitHub Gist](https://gist.github.com/) and share the link.
 
     The Renovate team
 
