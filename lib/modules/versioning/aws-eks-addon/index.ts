@@ -25,14 +25,14 @@ class AwsEKSAddonVersioningApi extends GenericVersioningApi {
       return null;
     }
     const [, prefix, suffix] = matches;
+    if (!suffix) {
+      return null;
+    }
     const release: number[] = prefix.split('.').map(Number);
     if (release.length !== 3) {
       return null;
     }
-    if (!suffix) {
-      return null;
-    }
-    return { release, suffix: suffix || '' };
+    return { release, suffix };
   }
 
   protected override _compare(version: string, other: string): number {

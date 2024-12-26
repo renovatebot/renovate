@@ -151,6 +151,24 @@ describe('modules/datasource/aws-eks-addon/index', () => {
       });
     });
 
+    it('with addon and profile', async () => {
+      mockDescribeAddonVersionsCommand({ addons: [] });
+      await getPkgReleases({
+        datasource,
+        packageName: '{"addonName":"vpc-cni-not-exist", "profile":"paradox"}',
+      });
+      expect(eksMock.calls()).toHaveLength(1);
+    });
+
+    it('with addon and region', async () => {
+      mockDescribeAddonVersionsCommand({ addons: [] });
+      await getPkgReleases({
+        datasource,
+        packageName: '{"addonName":"vpc-cni-not-exist", "region":"usa"}',
+      });
+      expect(eksMock.calls()).toHaveLength(1);
+    });
+
     it('with addonName and default only config', async () => {
       mockDescribeAddonVersionsCommand({ addons: [addonInfo] });
       const res = await getPkgReleases({
