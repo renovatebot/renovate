@@ -30,12 +30,18 @@ describe('modules/versioning/aws-eks-addon/index', () => {
   });
 
   describe('isCompatible(version)', () => {
-    it('should return false', () => {
-      expect(aws.isCompatible('v1.11.7')).toBeFalsy();
-      expect(aws.isCompatible('v1.11')).toBeFalsy();
-      expect(aws.isCompatible('v1.11.7-noneksbuild')).toBeFalsy();
-      expect(aws.isCompatible('v1.11.7-noneksbuild.1')).toBeFalsy();
-      expect(aws.isCompatible('v1.11.7-eksbuild')).toBeFalsy();
+    it.each`
+      input                      | expected
+      ${''}                      | ${false}
+      ${'abrakadabra'}           | ${false}
+      ${'v1.11.7'}               | ${false}
+      ${'v1.11.7.6'}             | ${false}
+      ${'v1.11.7-noneksbuild'}   | ${false}
+      ${'v1.11.7-noneksbuild.1'} | ${false}
+      ${'v1.11.7-eksbuild'}      | ${false}
+    `('isCompatible("$input") === $expected', ({ input, expected }) => {
+      const actual = aws.isCompatible(input);
+      expect(actual).toBe(expected);
     });
   });
 
