@@ -69,8 +69,7 @@ Here's an example of using the custom manager to configure this datasource:
 {
   "packageRules": [
     {
-      "matchDatasources": ["aws-eks-addon"],
-      "ignoreUnstable": false
+      "matchDatasources": ["aws-eks-addon"]
     }
   ],
   "customManagers": [
@@ -81,7 +80,7 @@ Here's an example of using the custom manager to configure this datasource:
         ".*# renovate: eksAddonsFilter=(?<packageName>.*?)\n.*?[a-zA-Z0-9-_:]*[ ]*?[:|=][ ]*?[\"|']?(?<currentValue>[a-zA-Z0-9-_.]+)[\"|']?.*"
       ],
       "datasourceTemplate": "aws-eks-addon",
-      "versioningTemplate": "semver"
+      "versioningTemplate": "aws-eks-addon" // Optional. Default value is 'aws-eks-addon'
     }
   ]
 }
@@ -93,7 +92,18 @@ The configuration above matches every terraform file, and recognizes these lines
 variable "vpc_cni_version" {
   type        = string
   description = "EKS vpc-cni add-on version"
+  # kubernetesVersion and addonName provided
   # renovate: eksAddonsFilter={"kubernetesVersion":"1.30","addonName":"vpc-cni"}
   default     = "v1.18.1-eksbuild.3"
 }
+```
+
+or
+
+```yml
+addons:
+  - name: vpc-cni
+    # only addon name and the supported default version
+    # renovate: eksAddonsFilter={"addonName":"vpc-cni", "default":true}
+    version: v1.18.5-eksbuild.1
 ```

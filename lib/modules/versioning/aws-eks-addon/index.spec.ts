@@ -30,7 +30,6 @@ describe('modules/versioning/aws-eks-addon/index', () => {
   });
 
   describe('isCompatible(version)', () => {
-
     it('should return false', () => {
       expect(aws.isCompatible('v1.11.7')).toBeFalsy();
       expect(aws.isCompatible('v1.11.7-noneksbuild')).toBeFalsy();
@@ -47,19 +46,50 @@ describe('modules/versioning/aws-eks-addon/index', () => {
     });
 
     it('should return false', () => {
-      expect(aws.isCompatible('v1.11.7-eksbuild.1', 'v1.11.7-noneksbuild.1')).toBeFalsy();
+      expect(
+        aws.isCompatible('v1.11.7-eksbuild.1', 'v1.11.7-noneksbuild.1'),
+      ).toBeFalsy();
     });
   });
 
   describe('isGreaterThan(version1, version2)', () => {
     it('should return true', () => {
-      expect(aws.isGreaterThan('v1.11.7-eksbuild.1', 'v1.11.7-eksbuild.0')).toBeTrue();
-      expect(aws.isGreaterThan('v1.20.7-eksbuild.2', 'v1.20.7-eksbuild.1')).toBeTrue();
+      expect(
+        aws.isGreaterThan('v1.11.7-eksbuild.1', 'v1.11.7-eksbuild.0'),
+      ).toBeTrue();
+      expect(
+        aws.isGreaterThan('v1.20.7-eksbuild.2', 'v1.20.7-eksbuild.1'),
+      ).toBeTrue();
+      expect(
+        aws.isGreaterThan('v1.22.7-eksbuild.2', 'v1.20.7-eksbuild.1'),
+      ).toBeTrue();
     });
 
     it('should return false', () => {
-      expect(aws.isGreaterThan('v1.20.7-eksbuild.1', 'v1.20.7-eksbuild.2')).toBeFalsy();
-      expect(aws.isGreaterThan('v1.20.7-eksbuild.1', 'v2.0.0-eksbuild.1')).toBeFalsy();
+      expect(
+        aws.isGreaterThan('v1.20.7-eksbuild.1', 'v1.20.7-eksbuild.2'),
+      ).toBeFalsy();
+      expect(
+        aws.isGreaterThan('v1.20.7-eksbuild.1', 'v2.0.0-eksbuild.1'),
+      ).toBeFalsy();
     });
+  });
+
+  it('getSatisfyingVersion', () => {
+    expect(
+      aws.getSatisfyingVersion(['v1.20.7-eksbuild.1'], 'v1.20.7-eksbuild.1'),
+    ).toBe('v1.20.7-eksbuild.1');
+    expect(
+      aws.getSatisfyingVersion(
+        ['v1.20.7-eksbuild.1', 'v1.20.7-eksbuild.2', 'v1.20.7-eksbuild.7'],
+        'v1.20.7-eksbuild.3',
+      ),
+    ).toBeNull();
+    expect(
+      aws.getSatisfyingVersion(
+        ['v1.20.7-eksbuild.1', 'v1.20.7-eksbuild.2'],
+        'v1.20.7-eksbuild.3',
+      ),
+    ).toBeNull();
   });
 });

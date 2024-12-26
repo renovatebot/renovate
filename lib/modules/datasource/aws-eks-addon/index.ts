@@ -10,6 +10,7 @@ import {
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { EksAddonsFilter } from './schema';
@@ -17,8 +18,14 @@ import { EksAddonsFilter } from './schema';
 export class AwsEKSAddonDataSource extends Datasource {
   static readonly id = 'aws-eks-addon';
 
+  override readonly defaultVersioning = awsEksAddonVersioning.id;
   override readonly caching = true;
   private readonly clients: Record<string, EKSClient> = {};
+
+  override readonly defaultConfig: Record<string, unknown> | undefined = {
+    commitMessageTopic: '{{datasource}}',
+    commitMessageExtra: '{{currentVersion}} to {{{newVersion}}}',
+  };
 
   constructor() {
     super(AwsEKSAddonDataSource.id);
@@ -41,12 +48,12 @@ export class AwsEKSAddonDataSource extends Datasource {
     }
 
     const filter = res.data;
-
     const input: DescribeAddonVersionsCommandInput = {
       kubernetesVersion: filter?.kubernetesVersion,
       addonName: filter?.addonName,
       maxResults: 1,
     };
+
     const cmd = new DescribeAddonVersionsCommand(input);
     const response: DescribeAddonVersionsCommandOutput =
       await this.getClient(filter).send(cmd);
@@ -66,9 +73,7 @@ export class AwsEKSAddonDataSource extends Datasource {
             (comp: Compatibility): string | undefined => comp.clusterVersion,
           ),
         }))
-        .filter((release): boolean => {
-          return release.version !== '';
-        })
+        .filter((release) => release.version && release.version !== '')
         .filter((release): boolean => {
           if (filter.default) {
             return release.default && release.default === filter.default;
