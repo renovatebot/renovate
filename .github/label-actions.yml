@@ -135,9 +135,7 @@
 
     ### How to enable DEBUG logs
 
-    Add "logLevel": "debug" in your self-hosted configuration
-    Or
-    Add LOG_LEVEL=debug to your environment variables before invoking Renovate.
+    Add `LOG_LEVEL=debug` to your environment variables before invoking Renovate.
 
 
     ### Sharing your DEBUG logs
