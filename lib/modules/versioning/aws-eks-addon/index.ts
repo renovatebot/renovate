@@ -42,12 +42,9 @@ class AwsEKSAddonVersioningApi extends GenericVersioningApi {
     }
     const parsed1: GenericVersion | null = this._parse(version);
     const parsed2: GenericVersion | null = this._parse(other);
-    // istanbul ignore if
-    if (!(parsed1 && parsed2)) {
-      return 1;
-    }
-    const suffix1 = coerceString(parsed1.suffix);
-    const suffix2 = coerceString(parsed2.suffix);
+
+    const suffix1 = coerceString(parsed1?.suffix);
+    const suffix2 = coerceString(parsed2?.suffix);
     return suffix1.localeCompare(suffix2);
   }
 

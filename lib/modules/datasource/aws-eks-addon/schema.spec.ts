@@ -9,6 +9,7 @@ describe('modules/datasource/aws-eks-addon/schema', () => {
       ${{ addonName: 'kube_proxy', default: 'abrakadabra' }}    | ${false}
       ${{ kubernetesVersion: '1.30' }}                          | ${false}
       ${{ addonName: 'kube-proxy', default: 'false' }}          | ${true}
+      ${{ addonName: 'kube-proxy', default: 'true' }}           | ${true}
       ${{ addonName: 'kube-proxy', default: false }}            | ${true}
       ${{ kubernetesVersion: '1.30', addonName: 'vpc-cni' }}    | ${true}
       ${{ addonName: 'vpc-cni' }}                               | ${true}

@@ -26,7 +26,7 @@ export class AwsMachineImageDatasource extends Datasource {
       Image: '```{{{newDigest}}}```',
     },
     digest: {
-      // Because newDigestShort will always be 'amazon-' we override to print the name of the AMI
+      // Because newDigestShort will allways be 'amazon-' we override to print the name of the AMI
       commitMessageExtra: 'to {{{newDigest}}}',
       prBodyColumns: ['Image'],
       prBodyDefinitions: {
