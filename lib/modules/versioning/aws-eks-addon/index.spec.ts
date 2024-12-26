@@ -39,6 +39,7 @@ describe('modules/versioning/aws-eks-addon/index', () => {
       ${'v1.11.7-noneksbuild'}   | ${false}
       ${'v1.11.7-noneksbuild.1'} | ${false}
       ${'v1.11.7-eksbuild'}      | ${false}
+      ${'v1.11.7.3-eksbuild.1'}  | ${false}
     `('isCompatible("$input") === $expected', ({ input, expected }) => {
       const actual = aws.isCompatible(input);
       expect(actual).toBe(expected);
