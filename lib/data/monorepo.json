@@ -55,10 +55,6 @@
       "https://github.com/awslabs/aws-sdk-rust"
     ],
     "awsappsync": "https://github.com/awslabs/aws-mobile-appsync-sdk-js",
-    "axis2": [
-      "https://gitbox.apache.org/repos/asf?p=axis-axis2-java-core.git;a=summary",
-      "https://github.com/apache/axis-axis2-java-core"
-    ],
     "azure-functions-dotnet-worker": "https://github.com/Azure/azure-functions-dotnet-worker",
     "azure azure-libraries-for-net": "https://github.com/Azure/azure-libraries-for-net",
     "azure azure-sdk-for-net": "https://github.com/Azure/azure-sdk-for-net",
