@@ -604,6 +604,10 @@
     "forge": "/^@forge//",
     "fullcalendar": "/^@fullcalendar//",
     "hotchocolate": "/^HotChocolate\\./",
+    "oracle-database": [
+      "/^com.oracle.database.jdbc:/",
+      "/^com.oracle.database.nls:/"
+    ],
     "prometheus-simpleclient": "/^io.prometheus:simpleclient/",
     "russh": ["/^russh$/", "/^russh-keys$/"],
     "spfx": ["/^@microsoft/sp-/", "/^@microsoft/eslint-.+-spfx$/"],
