@@ -51,16 +51,16 @@ Although it's unlikely that EKS might support different addon versions across re
 
 ```yaml
 # discover kube-proxy addon versions without specifying a cluster version.
-{"addonName":"kube-proxy"}
+renovate: eksAddonsFilter={"addonName":"kube-proxy"}
 
 # discover kube-proxy default addon versions
-{"addonName":"kube-proxy", "default":true}
+renovate: eksAddonsFilter={"addonName":"kube-proxy", "default":true}
 
 # discover vpc-cni addon versions on Kubernetes 1.30 in us-east-1 region using environmental AWS credentials.
-{"kubernetesVersion":"1.30","addonName":"vpc-cni","region":"us-east-1"}
+renovate: eksAddonsFilter={"kubernetesVersion":"1.30","addonName":"vpc-cni","region":"eu-west-1"}
 
 # discover vpc-cni addon versions on Kubernetes 1.30 in us-east-1 region using AWS credentials from `renovate-east` profile.
-{"kubernetesVersion":"1.30","addonName":"vpc-cni","region":"us-east-1","profile":"renovate-east"}
+renovate: eksAddonsFilter={"kubernetesVersion":"1.30","addonName":"vpc-cni","region":"us-east-1","profile":"renovate-east"}
 ```
 
 Here's an example of using the custom manager to configure this datasource:
