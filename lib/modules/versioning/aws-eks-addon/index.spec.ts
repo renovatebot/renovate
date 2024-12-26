@@ -64,12 +64,8 @@ describe('modules/versioning/aws-eks-addon/index', () => {
       expect(
         aws.isGreaterThan('v1.22.7-eksbuild.2', 'v1.20.7-eksbuild.1'),
       ).toBeTrue();
-      expect(
-        aws.isGreaterThan('v1.22.7-eksbuild.2', 'v1.22.7'),
-      ).toBeTrue();
-      expect(
-        aws.isGreaterThan('v1.20.7-eksbuild.1', 'v2.0.0'),
-      ).toBeTrue();
+      expect(aws.isGreaterThan('v1.22.7-eksbuild.2', 'v1.22.7')).toBeTrue();
+      expect(aws.isGreaterThan('v1.20.7-eksbuild.1', 'v2.0.0')).toBeTrue();
     });
 
     it('should return false', () => {
