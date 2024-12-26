@@ -1,4 +1,4 @@
-This datasource returns the addon versions available for use on [AWS EKS](https://aws.amazon.com/eks/) via the AWS API.
+This `datasource` returns the addon versions available for use on [AWS EKS](https://aws.amazon.com/eks/) via the AWS API.
 
 **AWS API configuration**
 
@@ -65,7 +65,7 @@ renovate: eksAddonsFilter={"kubernetesVersion":"1.30","addonName":"vpc-cni","reg
 
 Here's an example of using the custom manager to configure this datasource:
 
-```json
+```js
 {
   "packageRules": [
     {

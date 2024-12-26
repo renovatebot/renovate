@@ -2,7 +2,7 @@ Renovate's AWS EKS Addon versioning to support on EKS Addon updates.
 
 At the moment every ESK Addon that matches the regex `^[vV]?(\d+(?:\.\d+)*)(-eksbuild\.\d+)?$` is considered a valid "release".
 
-## Key Points about EKS Addon Versioning:
+**Key Points about EKS Addon Versioning**
 
 1. Versioning Scheme: Add-ons typically follow a semantic versioning scheme (e.g., Major.Minor.Patch). This helps in understanding the significance of changes between versions:
 
