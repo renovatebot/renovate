@@ -36,6 +36,7 @@ defmodule MyProject.MixProject do
       {:another_gun, "~> 0.4.0", hex: :raygun},
       {:credo, "~> 1.7", only:
         [:test,
+        # prod,
         :dev],
         runtime: false}
     ]
