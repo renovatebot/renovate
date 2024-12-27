@@ -27,7 +27,7 @@ defmodule MyProject.MixProject do
       {:secret, "~> 1.0", organization: "acme"},
       {:also_secret, "~> 1.0", only: [:dev, :test], organization: "acme", runtime: false},
       {:metrics, ">0.2.0 and <=1.0.0"},
-      {:jason, ">= 1.0.0"},
+      {:jason, ">= 1.0.0", only: :prod},
       {:hackney, "~> 1.0",
         optional: true},
       {:hammer_backend_redis, "~> 6.1", only: [:dev, :prod, :test]},
@@ -38,7 +38,8 @@ defmodule MyProject.MixProject do
         [:test,
         # prod,
         :dev],
-        runtime: false}
+        runtime: false},
+      {:floki, "== 0.37.0", only: :test},
     ]
   end
 end

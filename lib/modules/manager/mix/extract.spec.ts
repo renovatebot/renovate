@@ -125,6 +125,14 @@ describe('modules/manager/mix/extract', () => {
           depType: 'devDependencies',
           packageName: "credo",
         },
+        {
+          currentValue: "== 0.37.0",
+          currentVersion: "0.37.0",
+          datasource: "hex",
+          depName: "floki",
+          depType: "devDependencies",
+          packageName: "floki",
+        },
       ]);
     });
 
@@ -256,6 +264,16 @@ describe('modules/manager/mix/extract', () => {
           depType: 'devDependencies',
           packageName: "credo",
           lockedVersion: "1.7.10",
+
+        },
+        {
+          currentValue: "== 0.37.0",
+          currentVersion: "0.37.0",
+          datasource: "hex",
+          depName: "floki",
+          depType: "devDependencies",
+          lockedVersion: "0.37.0",
+          packageName: "floki",
         },
       ]);
     });
