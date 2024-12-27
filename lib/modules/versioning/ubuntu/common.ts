@@ -1,7 +1,7 @@
 import { regEx } from '../../../util/regex';
 
 function isDatedCodeName(input: string): boolean {
-  return regEx(/^(?<codename>\w+)-(?<date>\d{8})$/).test(input);
+  return regEx(/^(?<codename>\w+)-(?<date>\d{8})(\.\d{1,2})?$/).test(input);
 }
 
 function getDatedContainerImageCodename(version: string): null | string {
