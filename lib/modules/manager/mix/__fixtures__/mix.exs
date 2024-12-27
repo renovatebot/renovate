@@ -30,10 +30,14 @@ defmodule MyProject.MixProject do
       {:jason, ">= 1.0.0"},
       {:hackney, "~> 1.0",
         optional: true},
-      {:hammer_backend_redis, "~> 6.1"},
+      {:hammer_backend_redis, "~> 6.1", only: [:dev, :prod, :test]},
       {:castore, "== 1.0.10"},
       {:gun, "~> 2.0.0", hex: "grpc_gun"},
       {:another_gun, "~> 0.4.0", hex: :raygun},
+      {:credo, "~> 1.7", only:
+        [:test,
+        :dev],
+        runtime: false}
     ]
   end
 end

@@ -104,6 +104,12 @@ describe('modules/manager/mix/extract', () => {
           depName: 'another_gun',
           packageName: 'raygun',
         },
+        {
+          currentValue: "~> 1.7",
+          datasource: "hex",
+          depName: "credo",
+          packageName: "credo",
+        },
       ]);
     });
 
@@ -213,6 +219,13 @@ describe('modules/manager/mix/extract', () => {
           depName: 'another_gun',
           packageName: 'raygun',
           lockedVersion: '0.4.0',
+        },
+        {
+          currentValue: "~> 1.7",
+          datasource: "hex",
+          depName: "credo",
+          packageName: "credo",
+          lockedVersion: "1.7.10",
         },
       ]);
     });
