@@ -45,7 +45,6 @@ import * as unity3d from './unity3d';
 const api = new Map<string, VersioningApi | VersioningApiConstructor>();
 export default api;
 
-api.set(awsEksAddon.id, awsEksAddon.api);
 api.set(amazonMachineImage.id, amazonMachineImage.api);
 api.set(azureRestApi.id, azureRestApi.api);
 api.set(bazelModule.id, bazelModule.api);
