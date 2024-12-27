@@ -175,16 +175,16 @@ function createDependency(
   version: string | null,
   config: ToolingConfig | BackendToolingConfig | null,
 ): PackageDependency {
-  if (is.null_(config)) {
-    return {
-      depName: name,
-      skipReason: 'unsupported-datasource',
-    };
-  }
   if (is.null_(version)) {
     return {
       depName: name,
       skipReason: 'unspecified-version',
+    };
+  }
+  if (is.null_(config)) {
+    return {
+      depName: name,
+      skipReason: 'unsupported-datasource',
     };
   }
 
