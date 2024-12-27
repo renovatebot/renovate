@@ -45,7 +45,7 @@ export class AwsEKSDataSource extends Datasource {
     const res = EksFilter.safeParse(serializedFilter);
     if (!res.success) {
       logger.error(
-        { err: res.error, serializedFilter },
+        { err: res.error.message, serializedFilter },
         'Error parsing eks config.',
       );
       return null;

@@ -11,6 +11,10 @@ import { AwsEKSDataSource } from '.';
 const datasource = AwsEKSDataSource.id;
 const eksMock = mockClient(EKSClient);
 
+function mockClusterVersionsResponse(input : DescribeClusterVersionsCommandOutput) {
+  return eksMock.on(DescribeClusterVersionsCommand).resolves(input);
+}
+
 describe('modules/datasource/aws-eks/index', () => {
   beforeEach(() => {
     eksMock.reset();
@@ -33,7 +37,7 @@ describe('modules/datasource/aws-eks/index', () => {
         ],
       };
 
-      eksMock.on(DescribeClusterVersionsCommand).resolves(mockResponse);
+      mockClusterVersionsResponse(mockResponse);
 
       const result = await getPkgReleases({ datasource, packageName: '{}' });
 
@@ -71,7 +75,7 @@ describe('modules/datasource/aws-eks/index', () => {
           },
         ],
       };
-      eksMock.on(DescribeClusterVersionsCommand).resolves(mockResponse);
+      mockClusterVersionsResponse(mockResponse);
 
       const actual = await getPkgReleases({
         datasource,
@@ -108,7 +112,7 @@ describe('modules/datasource/aws-eks/index', () => {
           },
         ],
       };
-      eksMock.on(DescribeClusterVersionsCommand).resolves(mockResponse);
+      mockClusterVersionsResponse(mockResponse);
 
       const actual = await getPkgReleases({
         datasource,
@@ -133,7 +137,24 @@ describe('modules/datasource/aws-eks/index', () => {
         $metadata: {},
         clusterVersions: [],
       };
-      eksMock.on(DescribeClusterVersionsCommand).resolves(mockResponse);
+      mockClusterVersionsResponse(mockResponse);
+
+      const actual = await getPkgReleases({
+        datasource,
+        packageName: '{"profile":"not-exist-profile"}',
+      });
+
+      expect(eksMock.calls()).toHaveLength(1);
+      expect(eksMock.call(0).args[0].input).toEqual({});
+      expect(actual).toBeNull();
+    });
+
+    it('should return undefined response', async () => {
+      const mockResponse: DescribeClusterVersionsCommandOutput = {
+        $metadata: {},
+        clusterVersions: undefined,
+      };
+      mockClusterVersionsResponse(mockResponse);
 
       const actual = await getPkgReleases({
         datasource,
