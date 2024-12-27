@@ -45,8 +45,8 @@ export function extractPackageFile(
           name: name.trim(),
         };
       const delimiterIndex = name.indexOf(':');
-      const backend = name.substring(0, delimiterIndex);
-      const toolName = name.substring(delimiterIndex + 1);
+      const backend = depName.substring(0, delimiterIndex);
+      const toolName = depName.substring(delimiterIndex + 1);
       const options = parseOptions(
         optionsInName,
         is.nonEmptyObject(toolData) ? toolData : {},
