@@ -26,6 +26,10 @@ export class AwsEKSDataSource extends Datasource {
   override readonly defaultConfig: Record<string, unknown> | undefined = {
     commitMessageTopic: '{{{datasource}}}',
     commitMessageExtra: '{{{currentVersion}}} to {{{newVersion}}}',
+    prBodyColumns: ['Data', 'Update'],
+    prBodyDefinitions: {
+      Package: '```{{{datasource}}}```',
+    },
   };
 
   constructor() {
