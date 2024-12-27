@@ -45,6 +45,8 @@ renovate: eksFilter={"region":"eu-west-1"}
 renovate: eksFilter={"region":"us-east-1","profile":"renovate-east"}
 ```
 
+Example configuration
+
 ```json
 {
   "packageRules": [
@@ -65,7 +67,7 @@ renovate: eksFilter={"region":"us-east-1","profile":"renovate-east"}
         ".*# renovate: eksFilter=(?<packageName>.*?)\n.*?[a-zA-Z0-9-_:]*[ ]*?[:|=][ ]*?[\"|']?(?<currentValue>[a-zA-Z0-9-_.]+)[\"|']?.*"
       ],
       "datasourceTemplate": "aws-eks",
-      "versioningTemplate": "loose" // aws-eks versioning is not yet supported
+      "versioningTemplate": "loose"
     }
   ]
 }
