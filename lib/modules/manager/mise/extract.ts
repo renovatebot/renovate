@@ -7,6 +7,7 @@ import type { BackendToolingConfig } from './backends';
 import {
   createAquaToolConfig,
   createCargoToolConfig,
+  createDotnetToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
@@ -122,6 +123,8 @@ function getToolConfig(
       );
     case 'cargo':
       return createCargoToolConfig(toolName, version);
+    case 'dotnet':
+      return createDotnetToolConfig(toolName);
     case 'go':
       return createGoToolConfig(toolName);
     case 'npm':

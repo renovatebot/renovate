@@ -11,6 +11,7 @@ import { PypiDatasource } from '../../datasource/pypi';
 import { normalizePythonDepName } from '../../datasource/pypi/common';
 import type { PackageDependency } from '../types';
 import type { MiseToolOptionsSchema } from './schema';
+import { NugetDatasource } from '../../datasource/nuget';
 
 export type BackendToolingConfig = Omit<PackageDependency, 'depName'> &
   Required<
@@ -84,6 +85,19 @@ export function createCargoToolConfig(
         currentValue: gitVersion,
       };
   }
+}
+
+/**
+ * Create a tooling config for dotnet backend
+ * @link https://mise.jdx.dev/dev-tools/backends/dotnet.html
+ */
+export function createDotnetToolConfig(
+  name: string,
+): BackendToolingConfig {
+  return {
+    packageName: name,
+    datasource: NugetDatasource.id,
+  };
 }
 
 /**

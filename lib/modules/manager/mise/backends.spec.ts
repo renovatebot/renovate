@@ -1,6 +1,7 @@
 import {
   createAquaToolConfig,
   createCargoToolConfig,
+  createDotnetToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
@@ -79,6 +80,15 @@ describe('modules/manager/mise/backends', () => {
       ).toStrictEqual({
         packageName: 'https://github.com/username/demo',
         skipReason: 'invalid-version',
+      });
+    });
+  });
+
+  describe('createDotnetToolConfig()', () => {
+    it('should create a tooling config', () => {
+      expect(createDotnetToolConfig('GitVersion.Tool')).toStrictEqual({
+        packageName: 'GitVersion.Tool',
+        datasource: 'nuget',
       });
     });
   });

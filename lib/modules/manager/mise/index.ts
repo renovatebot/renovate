@@ -8,6 +8,7 @@ import { GoDatasource } from '../../datasource/go';
 import { JavaVersionDatasource } from '../../datasource/java-version';
 import { NodeVersionDatasource } from '../../datasource/node-version';
 import { NpmDatasource } from '../../datasource/npm';
+import { NugetDatasource } from '../../datasource/nuget';
 import { PypiDatasource } from '../../datasource/pypi';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { supportedDatasources as asdfSupportedDatasources } from '../asdf';
@@ -33,6 +34,7 @@ const backendDatasources = {
   asdf: asdfSupportedDatasources,
   aqua: [GithubTagsDatasource.id],
   cargo: [CrateDatasource.id, GitTagsDatasource.id, GitRefsDatasource.id],
+  dotnet: [NugetDatasource.id],
   go: [GoDatasource.id],
   npm: [NpmDatasource.id],
   pipx: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],

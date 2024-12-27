@@ -207,6 +207,24 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts dotnet backend tool', () => {
+      const content = codeBlock`
+      [tools]
+      "dotnet:GitVersion.Tool" = "5.12.0"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'dotnet:GitVersion.Tool',
+            currentValue: '5.12.0',
+            packageName: 'GitVersion.Tool',
+            datasource: 'nuget',
+          },
+        ],
+      });
+    });
+
     it('extracts go backend tool', () => {
       const content = codeBlock`
       [tools]
