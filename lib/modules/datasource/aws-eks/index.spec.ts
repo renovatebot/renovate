@@ -12,7 +12,7 @@ const datasource = AwsEKSDataSource.id;
 const eksMock = mockClient(EKSClient);
 
 function mockClusterVersionsResponse(
-  input: DescribeClusterVersionsCommandOutput
+  input: DescribeClusterVersionsCommandOutput,
 ) {
   return eksMock.on(DescribeClusterVersionsCommand).resolves(input);
 }
