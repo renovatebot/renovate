@@ -326,6 +326,7 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'focal-20230816'}   | ${'jammy-20230716'}      | ${false}
     ${'zesty-20170517.1'} | ${'jammy-20240627.1'}    | ${false}
     ${'jammy-20240627.3'} | ${'jammy-20240627.1'}    | ${true}
+    ${'jammy-20240627.3'} | ${'jammy-20240627.4'}    | ${false}
     ${'jammy-20240627.1'} | ${'precise-20150228.11'} | ${true}
     ${'jammy-20240627'}   | ${'precise-20150228.11'} | ${true}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
