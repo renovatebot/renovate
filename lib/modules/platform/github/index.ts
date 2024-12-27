@@ -1694,13 +1694,21 @@ async function tryPrAutomerge(
         { prNumber, errors: res.errors },
         'GitHub-native automerge: fail',
       );
+      if (platformPrOptions.automergeFailureComment === 'on-error') {
+        logger.warn('This automerge request failed');
+        await addComment(
+          prNumber,
+          'The Automerge Request for this PR has failed. Please attend.',
+        );
+        return;
+      }
       return;
     }
-
     logger.debug(`GitHub-native automerge: success...PrNo: ${prNumber}`);
   } catch (err) /* istanbul ignore next: missing test #22198 */ {
     logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
   }
+  return;
 }
 
 // Creates PR and returns PR number

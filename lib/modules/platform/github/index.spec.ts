@@ -467,6 +467,7 @@ describe('modules/platform/github/index', () => {
           isArchived: false,
           nameWithOwner: repository,
           autoMergeAllowed: true,
+          automergeFailureComment: 'never',
           hasIssuesEnabled: true,
           mergeCommitAllowed: true,
           rebaseMergeAllowed: true,
@@ -2798,6 +2799,18 @@ describe('modules/platform/github/index', () => {
         platformPrOptions: { usePlatformAutomerge: true },
       };
 
+      const prConfigComment: CreatePRConfig = {
+        sourceBranch: 'some-branch',
+        targetBranch: 'dev',
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        labels: ['deps', 'renovate'],
+        platformPrOptions: {
+          usePlatformAutomerge: true,
+          automergeFailureComment: 'on-error',
+        },
+      };
+
       const mockScope = async (repoOpts: any = {}): Promise<httpMock.Scope> => {
         const scope = httpMock.scope(githubApiHost);
         initRepoMock(scope, 'some/repo', repoOpts);
@@ -2966,6 +2979,26 @@ describe('modules/platform/github/index', () => {
         const scope = await mockScope();
         scope.post('/graphql').reply(200, graphqlAutomergeErrorResp);
         const pr = await github.createPr(prConfig);
+        expect(pr).toMatchObject({ number: 123 });
+        expect(httpMock.getTrace()).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          graphqlAutomerge,
+        ]);
+      });
+
+      it('should handle GraphQL errors with automergeFailureComment', async () => {
+        const scope = await mockScope({ automergeFailureComment: 'on-error' });
+        initRepoMock(scope, 'some/repo');
+        scope
+          .get('/repos/some/repo/issues/42/comments?per_page=100')
+          .reply(200, [])
+          .post('/repos/some/repo/issues/42/comments')
+          .reply(200);
+        await github.initRepo({ repository: 'some/repo' });
+        scope.post('/graphql').reply(200, graphqlAutomergeErrorResp);
+        const pr = await github.createPr(prConfigComment);
         expect(pr).toMatchObject({ number: 123 });
         expect(httpMock.getTrace()).toMatchObject([
           graphqlGetRepo,
