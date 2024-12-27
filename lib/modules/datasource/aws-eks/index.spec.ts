@@ -11,7 +11,9 @@ import { AwsEKSDataSource } from '.';
 const datasource = AwsEKSDataSource.id;
 const eksMock = mockClient(EKSClient);
 
-function mockClusterVersionsResponse(input : DescribeClusterVersionsCommandOutput) {
+function mockClusterVersionsResponse(
+  input: DescribeClusterVersionsCommandOutput
+) {
   return eksMock.on(DescribeClusterVersionsCommand).resolves(input);
 }
 
