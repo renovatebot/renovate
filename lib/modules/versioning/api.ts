@@ -1,4 +1,3 @@
-import * as awsEksAddon from './aws-eks-addon';
 import * as amazonMachineImage from './aws-machine-image';
 import * as azureRestApi from './azure-rest-api';
 import * as bazelModule from './bazel-module';

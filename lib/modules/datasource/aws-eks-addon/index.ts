@@ -10,7 +10,7 @@ import {
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
-import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon';
+// import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { EksAddonsFilter } from './schema';
@@ -18,7 +18,7 @@ import { EksAddonsFilter } from './schema';
 export class AwsEKSAddonDataSource extends Datasource {
   static readonly id = 'aws-eks-addon';
 
-  override readonly defaultVersioning = awsEksAddonVersioning.id;
+  // override readonly defaultVersioning = awsEksAddonVersioning.id;
   override readonly caching = true;
   private readonly clients: Record<string, EKSClient> = {};
 
