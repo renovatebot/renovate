@@ -8,6 +8,7 @@ import {
   createAquaToolConfig,
   createCargoToolConfig,
   createDotnetToolConfig,
+  createGemToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
@@ -125,6 +126,8 @@ function getToolConfig(
       return createCargoToolConfig(toolName, version);
     case 'dotnet':
       return createDotnetToolConfig(toolName);
+    case 'gem':
+      return createGemToolConfig(toolName);
     case 'go':
       return createGoToolConfig(toolName);
     case 'npm':

@@ -225,6 +225,24 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts gem backend tool', () => {
+      const content = codeBlock`
+      [tools]
+      "gem:rubocop" = "1.69.2"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'gem:rubocop',
+            currentValue: '1.69.2',
+            packageName: 'rubocop',
+            datasource: 'rubygems',
+          },
+        ],
+      });
+    });
+
     it('extracts go backend tool', () => {
       const content = codeBlock`
       [tools]

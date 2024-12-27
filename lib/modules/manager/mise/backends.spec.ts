@@ -93,6 +93,15 @@ describe('modules/manager/mise/backends', () => {
     });
   });
 
+  describe('createGemToolConfig()', () => {
+    it('should create a tooling config', () => {
+      expect(createGoToolConfig('rubocop')).toStrictEqual({
+        packageName: 'rubocop',
+        datasource: 'rubygems',
+      });
+    });
+  });
+
   describe('createGoToolConfig()', () => {
     it('should create a tooling config', () => {
       expect(createGoToolConfig('github.com/DarthSim/hivemind')).toStrictEqual({

@@ -11,6 +11,7 @@ import { NpmDatasource } from '../../datasource/npm';
 import { NugetDatasource } from '../../datasource/nuget';
 import { PypiDatasource } from '../../datasource/pypi';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
+import { RubygemsDatasource } from '../../datasource/rubygems';
 import { supportedDatasources as asdfSupportedDatasources } from '../asdf';
 
 export { extractPackageFile } from './extract';
@@ -35,6 +36,7 @@ const backendDatasources = {
   aqua: [GithubTagsDatasource.id],
   cargo: [CrateDatasource.id, GitTagsDatasource.id, GitRefsDatasource.id],
   dotnet: [NugetDatasource.id],
+  gem: [RubygemsDatasource.id],
   go: [GoDatasource.id],
   npm: [NpmDatasource.id],
   pipx: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],

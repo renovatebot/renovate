@@ -12,6 +12,7 @@ import { normalizePythonDepName } from '../../datasource/pypi/common';
 import type { PackageDependency } from '../types';
 import type { MiseToolOptionsSchema } from './schema';
 import { NugetDatasource } from '../../datasource/nuget';
+import { RubygemsDatasource } from '../../datasource/rubygems';
 
 export type BackendToolingConfig = Omit<PackageDependency, 'depName'> &
   Required<
@@ -97,6 +98,19 @@ export function createDotnetToolConfig(
   return {
     packageName: name,
     datasource: NugetDatasource.id,
+  };
+}
+
+/**
+ * Create a tooling config for gem backend
+ * @link https://mise.jdx.dev/dev-tools/backends/gem.html
+ */
+export function createGemToolConfig(
+  name: string,
+): BackendToolingConfig {
+  return {
+    packageName: name,
+    datasource: RubygemsDatasource.id,
   };
 }
 
