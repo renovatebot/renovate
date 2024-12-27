@@ -50,16 +50,10 @@ renovate: eksFilter={"region":"us-east-1","profile":"renovate-east"}
   "packageRules": [
     {
       "matchDatasources": ["aws-eks"],
-      "prBodyColumns": [
-        "Package",
-        "Update",
-        "Change",
-        "Sources",
-        "Changelog"
-      ],
+      "prBodyColumns": ["Package", "Update", "Change", "Sources", "Changelog"],
       "prBodyDefinitions": {
         "Sources": "[▶️](https://github.com/aws/eks-distro/)",
-        "Changelog": "[▶️](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-{{{newVersion}}}.md)",
+        "Changelog": "[▶️](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-{{{newVersion}}}.md)"
       }
     }
   ],

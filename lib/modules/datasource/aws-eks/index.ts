@@ -4,7 +4,7 @@ import {
   type DescribeClusterVersionsCommandInput,
   type DescribeClusterVersionsCommandOutput,
   EKSClient,
-} from "@aws-sdk/client-eks";
+} from '@aws-sdk/client-eks';
 
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { logger } from '../../../logger';
@@ -51,12 +51,17 @@ export class AwsEKSDataSource extends Datasource {
     const input: DescribeClusterVersionsCommandInput = {
       defaultOnly: res.data.default ?? undefined,
     };
-    const cmd = new DescribeClusterVersionsCommand(input)
-    const response: DescribeClusterVersionsCommandOutput = await this.getClient(res.data).send(cmd)
+    const cmd = new DescribeClusterVersionsCommand(input);
+    const response: DescribeClusterVersionsCommandOutput = await this.getClient(
+      res.data,
+    ).send(cmd);
     const results: ClusterVersionInformation[] = response.clusterVersions ?? [];
     return {
       releases: results
-        .filter((el): el is ClusterVersionInformation & { clusterVersion: string } => Boolean(el.clusterVersion))
+        .filter(
+          (el): el is ClusterVersionInformation & { clusterVersion: string } =>
+            Boolean(el.clusterVersion),
+        )
         .map((el) => ({
           version: el.clusterVersion,
         })),

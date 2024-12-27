@@ -20,11 +20,15 @@ describe('modules/datasource/aws-eks/index', () => {
     it('should return releases when the response is valid', async () => {
       const mockResponse: DescribeClusterVersionsCommandOutput = {
         $metadata: {},
-        clusterVersions : [
+        clusterVersions: [
           {
             clusterVersion: '1.21',
-            releaseDate: new Date(new Date().setMonth(new Date().getMonth() - 24)),
-            endOfStandardSupportDate: new Date(new Date().setMonth(new Date().getMonth() + 10)),
+            releaseDate: new Date(
+              new Date().setMonth(new Date().getMonth() - 24),
+            ),
+            endOfStandardSupportDate: new Date(
+              new Date().setMonth(new Date().getMonth() + 10),
+            ),
           },
         ],
       };
@@ -33,7 +37,7 @@ describe('modules/datasource/aws-eks/index', () => {
 
       const result = await getPkgReleases({ datasource, packageName: '{}' });
 
-      expect(result?.releases).toHaveLength(1)
+      expect(result?.releases).toHaveLength(1);
       expect(result).toEqual({
         releases: [
           {
@@ -48,7 +52,10 @@ describe('modules/datasource/aws-eks/index', () => {
 
     it('should return null and log an error when the filter is invalid', async () => {
       const invalidFilter = '{ invalid json }';
-      const actual = await getPkgReleases({ datasource, packageName: invalidFilter });
+      const actual = await getPkgReleases({
+        datasource,
+        packageName: invalidFilter,
+      });
       expect(actual).toBeNull();
       expect(logger.logger.error).toHaveBeenCalledTimes(1);
     });
@@ -66,12 +73,13 @@ describe('modules/datasource/aws-eks/index', () => {
       };
       eksMock.on(DescribeClusterVersionsCommand).resolves(mockResponse);
 
-      const actual = await getPkgReleases(
-        { datasource, packageName: '{"default":"true", "region":"eu-west-1"}' }
-      );
+      const actual = await getPkgReleases({
+        datasource,
+        packageName: '{"default":"true", "region":"eu-west-1"}',
+      });
 
       expect(eksMock.calls()).toHaveLength(1);
-      expect(eksMock.call(0).args[0].input).toEqual({"defaultOnly": true});
+      expect(eksMock.call(0).args[0].input).toEqual({ defaultOnly: true });
 
       expect(actual).toEqual({
         releases: [
@@ -102,12 +110,14 @@ describe('modules/datasource/aws-eks/index', () => {
       };
       eksMock.on(DescribeClusterVersionsCommand).resolves(mockResponse);
 
-      const actual = await getPkgReleases(
-        { datasource, packageName: '{"default":"false", "region":"eu-west-1", "profile":"admin"}' }
-      );
+      const actual = await getPkgReleases({
+        datasource,
+        packageName:
+          '{"default":"false", "region":"eu-west-1", "profile":"admin"}',
+      });
 
       expect(eksMock.calls()).toHaveLength(1);
-      expect(eksMock.call(0).args[0].input).toEqual({"defaultOnly": false});
+      expect(eksMock.call(0).args[0].input).toEqual({ defaultOnly: false });
 
       expect(actual).toEqual({
         releases: [
@@ -125,9 +135,10 @@ describe('modules/datasource/aws-eks/index', () => {
       };
       eksMock.on(DescribeClusterVersionsCommand).resolves(mockResponse);
 
-      const actual = await getPkgReleases(
-        { datasource, packageName: '{"profile":"not-exist-profile"}' }
-      );
+      const actual = await getPkgReleases({
+        datasource,
+        packageName: '{"profile":"not-exist-profile"}',
+      });
 
       expect(eksMock.calls()).toHaveLength(1);
       expect(eksMock.call(0).args[0].input).toEqual({});
