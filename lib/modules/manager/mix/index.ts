@@ -5,6 +5,7 @@ import { HexDatasource } from '../../datasource/hex';
 
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
+export { getRangeStrategy } from './range';
 
 export const url = 'https://hexdocs.pm/mix/Mix.html';
 export const categories: Category[] = ['elixir'];
