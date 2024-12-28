@@ -310,6 +310,25 @@ describe('modules/manager/mix/artifacts', () => {
     expect(fs.readLocalFile).toHaveBeenCalledWith('subdir/mix.lock', 'utf8');
   });
 
+  it('returns updated mix.lock in umbrella project', async () => {
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'docker',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    });
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
+    mockExecAll();
+    expect(
+      await updateArtifacts({
+        packageFileName: 'subdir/mix.exs',
+        updatedDeps: [{ depName: 'plug' }],
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toBeNull();
+    expect(fs.readLocalFile).toHaveBeenCalledWith('mix.lock', 'utf8');
+  });
+
   it('catches write errors', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
