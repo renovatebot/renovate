@@ -7,7 +7,7 @@ import type { Pr } from '../../../modules/platform/types';
 import * as _cache from '../../../util/cache/repository';
 import type { LongCommitSha } from '../../../util/git/types';
 import * as _merge from '../init/merge';
-import { validateReconfigureBranch } from '.';
+import { checkReconfigureBranch } from '.';
 
 jest.mock('../../../util/cache/repository');
 jest.mock('../../../util/fs');
@@ -39,7 +39,7 @@ describe('workers/repository/reconfigure/index', () => {
 
   it('no effect when running with platform=local', async () => {
     GlobalConfig.set({ platform: 'local' });
-    await validateReconfigureBranch(config);
+    await checkReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith(
       'Not attempting to reconfigure when running with local platform',
     );
@@ -47,14 +47,14 @@ describe('workers/repository/reconfigure/index', () => {
 
   it('no effect on repo with no reconfigure branch', async () => {
     scm.branchExists.mockResolvedValueOnce(false);
-    await validateReconfigureBranch(config);
+    await checkReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith('No reconfigure branch found');
   });
 
   it('logs error if config file search fails', async () => {
     const err = new Error();
     merge.detectConfigFile.mockRejectedValueOnce(err as never);
-    await validateReconfigureBranch(config);
+    await checkReconfigureBranch(config);
     expect(logger.error).toHaveBeenCalledWith(
       { err },
       'Error while searching for config file in reconfigure branch',
@@ -63,7 +63,7 @@ describe('workers/repository/reconfigure/index', () => {
 
   it('throws error if config file not found in reconfigure branch', async () => {
     merge.detectConfigFile.mockResolvedValue(null);
-    await validateReconfigureBranch(config);
+    await checkReconfigureBranch(config);
     expect(logger.warn).toHaveBeenCalledWith(
       'No config file found in reconfigure branch',
     );
@@ -72,7 +72,7 @@ describe('workers/repository/reconfigure/index', () => {
   it('logs error if config file is unreadable', async () => {
     const err = new Error();
     fs.readLocalFile.mockRejectedValueOnce(err as never);
-    await validateReconfigureBranch(config);
+    await checkReconfigureBranch(config);
     expect(logger.error).toHaveBeenCalledWith(
       { err },
       'Error while reading config file',
@@ -80,7 +80,7 @@ describe('workers/repository/reconfigure/index', () => {
   });
 
   it('throws error if config file is empty', async () => {
-    await validateReconfigureBranch(config);
+    await checkReconfigureBranch(config);
     expect(logger.warn).toHaveBeenCalledWith('Empty or invalid config file');
   });
 
@@ -90,7 +90,7 @@ describe('workers/repository/reconfigure/index', () => {
             "name":
         }
         `);
-    await validateReconfigureBranch(config);
+    await checkReconfigureBranch(config);
     expect(logger.error).toHaveBeenCalledWith(
       { err: expect.any(Object) },
       'Error while parsing config file',
@@ -109,7 +109,7 @@ describe('workers/repository/reconfigure/index', () => {
             "enabledManagers": ["docker"]
         }
         `);
-    await validateReconfigureBranch(config);
+    await checkReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith(
       { errors: expect.any(String) },
       'Validation Errors',
@@ -129,7 +129,7 @@ describe('workers/repository/reconfigure/index', () => {
         }
         `);
     platform.findPr.mockResolvedValueOnce(mock<Pr>({ number: 1 }));
-    await validateReconfigureBranch(config);
+    await checkReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith(
       { errors: expect.any(String) },
       'Validation Errors',
@@ -148,7 +148,7 @@ describe('workers/repository/reconfigure/index', () => {
     `;
     merge.detectConfigFile.mockResolvedValue('package.json');
     fs.readLocalFile.mockResolvedValueOnce(pJson).mockResolvedValueOnce(pJson);
-    await validateReconfigureBranch(config);
+    await checkReconfigureBranch(config);
     expect(platform.setBranchStatus).toHaveBeenCalledWith({
       branchName: 'prefix/reconfigure',
       context: 'renovate/config-validation',
@@ -165,7 +165,7 @@ describe('workers/repository/reconfigure/index', () => {
       },
     });
 
-    await validateReconfigureBranch({
+    await checkReconfigureBranch({
       ...config,
       statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
         configValidation: null,
@@ -185,7 +185,7 @@ describe('workers/repository/reconfigure/index', () => {
       },
     });
 
-    await validateReconfigureBranch({
+    await checkReconfigureBranch({
       ...config,
       statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
         configValidation: '',
@@ -204,7 +204,7 @@ describe('workers/repository/reconfigure/index', () => {
         isConfigValid: false,
       },
     });
-    await validateReconfigureBranch(config);
+    await checkReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith(
       'Skipping validation check as branch sha is unchanged',
     );
@@ -218,7 +218,7 @@ describe('workers/repository/reconfigure/index', () => {
       },
     });
     platform.getBranchStatusCheck.mockResolvedValueOnce('green');
-    await validateReconfigureBranch(config);
+    await checkReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith(
       'Skipping validation check because status check already exists.',
     );
@@ -231,7 +231,7 @@ describe('workers/repository/reconfigure/index', () => {
             "enabledManagers": ["npm",]
         }
         `);
-    await validateReconfigureBranch(config);
+    await checkReconfigureBranch(config);
     expect(platform.setBranchStatus).toHaveBeenCalledWith({
       branchName: 'prefix/reconfigure',
       context: 'renovate/config-validation',
