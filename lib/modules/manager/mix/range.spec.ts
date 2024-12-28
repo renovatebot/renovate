@@ -45,4 +45,3 @@ describe('modules/manager/mix/range', () => {
     expect(getRangeStrategy(config)).toBe('update-lockfile');
   });
 });
-
