@@ -6,6 +6,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   findLocalSiblingOrParent,
+  getSiblingFileName,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -31,8 +32,18 @@ export async function updateArtifacts({
     return null;
   }
 
-  const lockFileName =
-    (await findLocalSiblingOrParent(packageFileName, 'mix.lock')) ?? 'mix.lock';
+  let lockFileName = getSiblingFileName(packageFileName, 'mix.lock');
+  let isUmbrella = false;
+
+  let existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  if (!existingLockFileContent) {
+    lockFileName =
+      (await findLocalSiblingOrParent(packageFileName, 'mix.lock')) ?? 'mix.lock';
+    existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+    isUmbrella = !!existingLockFileContent;
+  }
+
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
   } catch (err) {
@@ -47,7 +58,6 @@ export async function updateArtifacts({
     ];
   }
 
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No mix.lock found');
     return null;
