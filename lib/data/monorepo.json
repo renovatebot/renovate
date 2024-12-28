@@ -55,10 +55,6 @@
       "https://github.com/awslabs/aws-sdk-rust"
     ],
     "awsappsync": "https://github.com/awslabs/aws-mobile-appsync-sdk-js",
-    "axis2": [
-      "https://gitbox.apache.org/repos/asf?p=axis-axis2-java-core.git;a=summary",
-      "https://github.com/apache/axis-axis2-java-core"
-    ],
     "azure-functions-dotnet-worker": "https://github.com/Azure/azure-functions-dotnet-worker",
     "azure azure-libraries-for-net": "https://github.com/Azure/azure-libraries-for-net",
     "azure azure-sdk-for-net": "https://github.com/Azure/azure-sdk-for-net",
@@ -598,6 +594,7 @@
     "apache-poi": "/^org.apache.poi:/",
     "aws-java-sdk": "/^com.amazonaws:aws-java-sdk-/",
     "aws-java-sdk-v2": "/^software.amazon.awssdk:/",
+    "axis2": "/^org.apache.axis2:/",
     "babel6": "/^babel6$/",
     "clarity": ["/^@cds//", "/^@clr//"],
     "embroider": "/^@embroider//",
