@@ -2,6 +2,7 @@ import {
   createAquaToolConfig,
   createCargoToolConfig,
   createDotnetToolConfig,
+  createGemToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
@@ -95,7 +96,7 @@ describe('modules/manager/mise/backends', () => {
 
   describe('createGemToolConfig()', () => {
     it('should create a tooling config', () => {
-      expect(createGoToolConfig('rubocop')).toStrictEqual({
+      expect(createGemToolConfig('rubocop')).toStrictEqual({
         packageName: 'rubocop',
         datasource: 'rubygems',
       });

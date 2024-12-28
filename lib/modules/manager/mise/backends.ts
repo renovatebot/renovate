@@ -7,12 +7,12 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GoDatasource } from '../../datasource/go';
 import { NpmDatasource } from '../../datasource/npm';
+import { NugetDatasource } from '../../datasource/nuget';
 import { PypiDatasource } from '../../datasource/pypi';
 import { normalizePythonDepName } from '../../datasource/pypi/common';
+import { RubygemsDatasource } from '../../datasource/rubygems';
 import type { PackageDependency } from '../types';
 import type { MiseToolOptionsSchema } from './schema';
-import { NugetDatasource } from '../../datasource/nuget';
-import { RubygemsDatasource } from '../../datasource/rubygems';
 
 export type BackendToolingConfig = Omit<PackageDependency, 'depName'> &
   Required<
@@ -92,9 +92,7 @@ export function createCargoToolConfig(
  * Create a tooling config for dotnet backend
  * @link https://mise.jdx.dev/dev-tools/backends/dotnet.html
  */
-export function createDotnetToolConfig(
-  name: string,
-): BackendToolingConfig {
+export function createDotnetToolConfig(name: string): BackendToolingConfig {
   return {
     packageName: name,
     datasource: NugetDatasource.id,
@@ -105,9 +103,7 @@ export function createDotnetToolConfig(
  * Create a tooling config for gem backend
  * @link https://mise.jdx.dev/dev-tools/backends/gem.html
  */
-export function createGemToolConfig(
-  name: string,
-): BackendToolingConfig {
+export function createGemToolConfig(name: string): BackendToolingConfig {
   return {
     packageName: name,
     datasource: RubygemsDatasource.id,
