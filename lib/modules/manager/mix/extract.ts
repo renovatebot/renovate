@@ -61,7 +61,7 @@ export async function extractPackageFile(
 
         const dep: PackageDependency = {
           depName: app,
-          depType: 'dependencies',
+          depType: 'prod',
         };
 
         if (git ?? github) {
@@ -86,7 +86,7 @@ export async function extractPackageFile(
         }
 
         if (onlyValue !== undefined && !onlyEnvironments.includes('prod')) {
-          dep.depType = 'devDependencies';
+          dep.depType = 'dev';
         }
 
         deps.set(app, dep);
