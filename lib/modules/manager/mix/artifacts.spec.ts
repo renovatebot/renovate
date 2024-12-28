@@ -163,7 +163,7 @@ describe('modules/manager/mix/artifacts', () => {
     ]);
   });
 
-  it('authenticates to private repositories in updated dependecies', async () => {
+  it('authenticates to private repositories in updated dependencies', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     GlobalConfig.set({
       ...adminConfig,
