@@ -855,9 +855,10 @@ export async function findPr({
 
   if (includeOtherAuthors) {
     const repo = config.parentRepo ?? config.repository;
+    const org = repo?.split('/')[0];
     // PR might have been created by anyone, so don't use the cached Renovate PR list
     const { body: prList } = await githubApi.getJson<GhRestPr[]>(
-      `repos/${repo}/pulls?head=${repo}:${branchName}&state=open`,
+      `repos/${repo}/pulls?head=${org}:${branchName}&state=open`,
       { cacheProvider: repoCacheProvider },
     );
 
