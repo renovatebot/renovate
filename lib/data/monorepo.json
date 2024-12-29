@@ -584,7 +584,7 @@
     "hapijs": "https://github.com/hapijs/",
     "lodash": "https://github.com/lodash/",
     "ngrx": "https://github.com/ngrx/",
-    "nrwl": "https://github.com/nrwl/",
+    "nx": "https://github.com/nrwl/nx",
     "octokit": "https://github.com/octokit/",
     "semantic-release": "https://github.com/semantic-release/",
     "swc": "https://github.com/swc-project/"
