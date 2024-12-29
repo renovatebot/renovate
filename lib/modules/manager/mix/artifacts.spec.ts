@@ -90,26 +90,30 @@ describe('modules/manager/mix/artifacts', () => {
   });
 
   it('returns null if no updatedDeps and no lockFileMaintenance', async () => {
-    expect(await updateArtifacts({
-      packageFileName: 'mix.exs',
-      updatedDeps: [],
-      newPackageFileContent: '{}',
-      config,
-    })).toBeNull();
+    expect(
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toBeNull();
   });
 
-    it('returns null if using lockFileMaintenance in umbrella project', async () => {
+  it('returns null if using lockFileMaintenance in umbrella project', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('apps/foo/mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     fs.readLocalFile.mockResolvedValueOnce(null);
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
-    expect(await updateArtifacts({
-      packageFileName: 'apps/foo/mix.exs',
-      updatedDeps: [],
-      newPackageFileContent: '{}',
-      config: {...config, updateType: 'lockFileMaintenance'},
-    })).toBeNull();
+    expect(
+      await updateArtifacts({
+        packageFileName: 'apps/foo/mix.exs',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: { ...config, updateType: 'lockFileMaintenance' },
+      }),
+    ).toBeNull();
   });
 
   it('returns updated mix.lock', async () => {
@@ -125,9 +129,11 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
 
     // erlang
-    getPkgReleases.mockResolvedValueOnce({releases: [{ version: '25.0.0.0' }]});
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '25.0.0.0' }],
+    });
     // elixir
-    getPkgReleases.mockResolvedValueOnce({releases: [{ version: '1.13.4' }]});
+    getPkgReleases.mockResolvedValueOnce({ releases: [{ version: '1.13.4' }] });
 
     expect(
       await updateArtifacts({
@@ -188,9 +194,13 @@ describe('modules/manager/mix/artifacts', () => {
     hostRules.find.mockReturnValueOnce({});
 
     // erlang
-    getPkgReleases.mockResolvedValueOnce({releases: [{ version: '25.0.0.0' }]});
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '25.0.0.0' }],
+    });
     // elixir
-    getPkgReleases.mockResolvedValueOnce({releases: [{ version: 'v1.13.4' }]});
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: 'v1.13.4' }],
+    });
 
     const result = await updateArtifacts({
       packageFileName: 'mix.exs',
@@ -244,9 +254,11 @@ describe('modules/manager/mix/artifacts', () => {
     hostRules.find.mockReturnValueOnce({ token: 'does_not_match_org_token' });
 
     // erlang
-    getPkgReleases.mockResolvedValueOnce({releases: [{ version: '25.0.0.0' }]});
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '25.0.0.0' }],
+    });
     // elixir
-    getPkgReleases.mockResolvedValueOnce({releases: [{ version: '1.13.4' }]});
+    getPkgReleases.mockResolvedValueOnce({ releases: [{ version: '1.13.4' }] });
 
     const result = await updateArtifacts({
       packageFileName: 'mix.exs',
@@ -285,9 +297,11 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
 
     // erlang
-    getPkgReleases.mockResolvedValueOnce({releases: [{ version: '25.0.0.0' }]});
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '25.0.0.0' }],
+    });
     // elixir
-    getPkgReleases.mockResolvedValueOnce({releases: [{ version: '1.13.4' }]});
+    getPkgReleases.mockResolvedValueOnce({ releases: [{ version: '1.13.4' }] });
 
     const execSnapshots = mockExecAll();
     expect(
@@ -323,9 +337,11 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
 
     // erlang
-    getPkgReleases.mockResolvedValueOnce({releases: [{ version: '25.0.0.0' }]});
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '25.0.0.0' }],
+    });
     // elixir
-    getPkgReleases.mockResolvedValueOnce({releases: [{ version: '1.13.4' }]});
+    getPkgReleases.mockResolvedValueOnce({ releases: [{ version: '1.13.4' }] });
 
     const execSnapshots = mockExecAll();
     expect(
@@ -359,25 +375,29 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
 
     // erlang
-    getPkgReleases.mockResolvedValueOnce({releases: [{ version: '25.0.0.0' }]});
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '25.0.0.0' }],
+    });
     // elixir
-    getPkgReleases.mockResolvedValueOnce({releases: [{ version: '1.13.4' }]});
+    getPkgReleases.mockResolvedValueOnce({ releases: [{ version: '1.13.4' }] });
 
     const execSnapshots = mockExecAll();
-    expect(await updateArtifacts({
-      packageFileName: 'mix.exs',
-      updatedDeps: [],
-      newPackageFileContent: '{}',
-      config: {...config, updateType: 'lockFileMaintenance'},
-    })).toEqual([
-        {
-          file: {
-            path: 'mix.lock',
-            type: 'addition',
-            contents: 'New mix.lock',
-          },
+    expect(
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: { ...config, updateType: 'lockFileMaintenance' },
+      }),
+    ).toEqual([
+      {
+        file: {
+          path: 'mix.lock',
+          type: 'addition',
+          contents: 'New mix.lock',
         },
-      ]);
+      },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
 
@@ -387,12 +407,14 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
 
     mockExecAll();
-    expect(await updateArtifacts({
-      packageFileName: 'mix.exs',
-      updatedDeps: [],
-      newPackageFileContent: '{}',
-      config: {...config, updateType: 'lockFileMaintenance'},
-    })).toBeNull();
+    expect(
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: { ...config, updateType: 'lockFileMaintenance' },
+      }),
+    ).toBeNull();
   });
 
   it('catches write errors', async () => {
