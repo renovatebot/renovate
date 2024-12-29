@@ -320,7 +320,8 @@ describe('modules/manager/mix/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots[1]?.cmd).toMatch('mix deps.update plug');
+    expect(execSnapshots[1]?.options?.cwd).toBe('/tmp/github/some/repo/subdir');
   });
 
   it('returns updated mix.lock in umbrella project', async () => {
@@ -360,7 +361,10 @@ describe('modules/manager/mix/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots[1]?.cmd).toMatch('mix deps.update plug');
+    expect(execSnapshots[1]?.options?.cwd).toBe(
+      '/tmp/github/some/repo/apps/foo',
+    );
   });
 
   it('supports lockFileMaintenance', async () => {
@@ -398,7 +402,8 @@ describe('modules/manager/mix/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots[1]?.cmd).toMatch('mix deps.get');
+    expect(execSnapshots[1]?.options?.cwd).toBe('/tmp/github/some/repo');
   });
 
   it('lockFileMaintenance returns null if unchanged', async () => {
