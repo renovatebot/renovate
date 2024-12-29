@@ -2,6 +2,7 @@ import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { GerritHttp } from '../../../util/http/gerrit';
 import { regEx } from '../../../util/regex';
+import { getQueryString } from '../../../util/url';
 import type {
   GerritAccountInfo,
   GerritBranchInfo,
@@ -77,8 +78,9 @@ class GerritClient {
     extraOptions?: string[],
   ): Promise<GerritChange> {
     const options = [...this.requestDetails, ...(extraOptions ?? [])];
+    const queryString = getQueryString({ o: options });
     const changes = await this.gerritHttp.getJson<GerritChange>(
-      `a/changes/${changeNumber}?` + options.map((det) => `o=${det}`).join('&'),
+      `a/changes/${changeNumber}?${queryString}`,
     );
     return changes.body;
   }
@@ -203,7 +205,7 @@ class GerritClient {
     const reviewLabel = change?.labels?.['Code-Review'];
     return (
       reviewLabel === undefined ||
-      Boolean(reviewLabel.all?.some((label) => label.value === 2))
+      reviewLabel.all?.some((label) => label.value === 2) === true
     );
   }
 

@@ -128,7 +128,6 @@ describe('workers/repository/update/pr/automerge', () => {
       config.autoApprove = true;
       config.automerge = true;
       config.pruneBranchAfterAutomerge = true;
-      platform.approvePrForAutomerge.mockResolvedValueOnce();
       platform.getBranchStatus.mockResolvedValueOnce('green');
       platform.mergePr.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
