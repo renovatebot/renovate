@@ -18,6 +18,9 @@ import { Vulnerabilities } from './vulnerabilities';
 import type { WriteUpdateResult } from './write';
 import { writeUpdates } from './write';
 
+// Increment this if needing to cache bust ALL extract caches
+export const EXTRACT_CACHE_REVISION = 1;
+
 export interface ExtractResult {
   branches: BranchConfig[];
   branchList: string[];
@@ -69,7 +72,23 @@ export function isCacheExtractValid(
   configHash: string,
   cachedExtract?: BaseBranchCache,
 ): boolean {
-  if (!(cachedExtract?.sha && cachedExtract.configHash)) {
+  if (!cachedExtract) {
+    return false;
+  }
+
+  if (!cachedExtract.revision) {
+    logger.debug('Cached extract is missing revision, so cannot be used');
+    return false;
+  }
+
+  if (cachedExtract.revision !== EXTRACT_CACHE_REVISION) {
+    logger.debug(
+      `Extract cache revision has changed (old=${cachedExtract.revision}, new=${EXTRACT_CACHE_REVISION})`,
+    );
+    return false;
+  }
+
+  if (!(cachedExtract.sha && cachedExtract.configHash)) {
     return false;
   }
   if (cachedExtract.sha !== baseBranchSha) {
@@ -117,7 +136,7 @@ export async function extract(
   const baseBranchSha = await scm.getBranchCommit(baseBranch!);
   let packageFiles: Record<string, PackageFile[]>;
   const cache = getCache();
-  cache.scan ||= {};
+  cache.scan ??= {};
   const cachedExtract = cache.scan[baseBranch!];
   const configHash = fingerprint(generateFingerprintConfig(config));
   // istanbul ignore if
@@ -142,6 +161,7 @@ export async function extract(
     const { extractionFingerprints } = extractResult;
     // TODO: fix types (#22198)
     cache.scan[baseBranch!] = {
+      revision: EXTRACT_CACHE_REVISION,
       sha: baseBranchSha!,
       configHash,
       extractionFingerprints,

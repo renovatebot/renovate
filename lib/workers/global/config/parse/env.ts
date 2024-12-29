@@ -142,7 +142,7 @@ export async function getConfig(
     }
   }
 
-  config.hostRules ||= [];
+  config.hostRules ??= [];
 
   options.forEach((option) => {
     if (option.env !== false) {
