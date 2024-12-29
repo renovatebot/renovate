@@ -41,7 +41,8 @@ export async function updateArtifacts({
   let existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     lockFileName =
-      (await findLocalSiblingOrParent(packageFileName, 'mix.lock')) ?? 'mix.lock';
+      (await findLocalSiblingOrParent(packageFileName, 'mix.lock')) ??
+      'mix.lock';
     existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
     isUmbrella = !!existingLockFileContent;
   }
@@ -136,7 +137,7 @@ export async function updateArtifacts({
 
   let command;
   if (isLockFileMaintenance) {
-    command = 'mix deps.get'
+    command = 'mix deps.get';
   } else {
     command = [
       'mix',
