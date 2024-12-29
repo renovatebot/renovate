@@ -708,6 +708,13 @@ describe('modules/platform/gerrit/index', () => {
     //TODO: add some tests for Gerrit-specific replacements..
   });
 
+  describe('approvePrForAutomerge()', () => {
+    it('approvePrForAutomerge() - calls approveChange', async () => {
+      await expect(gerrit.approvePrForAutomerge(123456)).toResolve();
+      expect(clientMock.approveChange).toHaveBeenCalledWith(123456);
+    });
+  });
+
   describe('currently unused/not-implemented functions', () => {
     it('deleteLabel()', async () => {
       await expect(
