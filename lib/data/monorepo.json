@@ -435,6 +435,8 @@
     "opentelemetry-java-contrib": "https://github.com/open-telemetry/opentelemetry-java-contrib",
     "opentelemetry-js": "https://github.com/open-telemetry/opentelemetry-js",
     "opentelemetry-js-contrib": "https://github.com/open-telemetry/opentelemetry-js-contrib",
+    "opentelemetry-python": "https://github.com/open-telemetry/opentelemetry-python",
+    "opentelemetry-python-contrib": "https://github.com/open-telemetry/opentelemetry-python-contrib",
     "opentelemetry-rust": "https://github.com/open-telemetry/opentelemetry-rust",
     "opentelemetry-rust-contrib": "https://github.com/open-telemetry/opentelemetry-rust-contrib",
     "orleans": "https://github.com/dotnet/orleans",
@@ -584,7 +586,7 @@
     "hapijs": "https://github.com/hapijs/",
     "lodash": "https://github.com/lodash/",
     "ngrx": "https://github.com/ngrx/",
-    "nrwl": "https://github.com/nrwl/",
+    "nx": "https://github.com/nrwl/nx",
     "octokit": "https://github.com/octokit/",
     "semantic-release": "https://github.com/semantic-release/",
     "swc": "https://github.com/swc-project/"

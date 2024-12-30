@@ -74,6 +74,7 @@ const renamedMonorepos: Record<string, string> = {
   Steeltoe: 'steeltoe',
   stryker: 'stryker-js',
   Swashbuckle: 'swashbuckle-aspnetcore',
+  nrwl: 'nx',
 };
 
 for (const [from, to] of Object.entries(renamedMonorepos)) {
