@@ -2002,7 +2002,7 @@ const options: RenovateOptions[] = [
     description:
       'If an error occurs while automerging, a comment will be created to signal the user. Only used if `automergeFailureComment=on-error`.',
     type: 'string',
-    default: 'none',
+    default: 'never',
   },
   {
     name: 'ignoreTests',

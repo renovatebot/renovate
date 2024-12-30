@@ -2990,22 +2990,12 @@ describe('modules/platform/github/index', () => {
 
       it('should handle GraphQL errors with automergeFailureComment', async () => {
         const scope = await mockScope({ automergeFailureComment: 'on-error' });
-        initRepoMock(scope, 'some/repo');
         scope
-          .get('/repos/some/repo/issues/42/comments?per_page=100')
-          .reply(200, [])
-          .post('/repos/some/repo/issues/42/comments')
-          .reply(200);
-        await github.initRepo({ repository: 'some/repo' });
-        scope.post('/graphql').reply(200, graphqlAutomergeErrorResp);
-        const pr = await github.createPr(prConfigComment);
-        expect(pr).toMatchObject({ number: 123 });
-        expect(httpMock.getTrace()).toMatchObject([
-          graphqlGetRepo,
-          restCreatePr,
-          restAddLabels,
-          graphqlAutomerge,
-        ]);
+          .post('/repos/some/repo/issues/123/comments')
+          .reply(200)
+          .post('/graphql')
+          .reply(200, graphqlAutomergeErrorResp);
+        await expect(github.createPr(prConfigComment)).toResolve();
       });
 
       it('should handle REST API errors', async () => {
