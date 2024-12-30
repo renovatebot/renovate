@@ -3,7 +3,6 @@ import JSON5 from 'json5';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
 import { logger } from '../../../logger';
-import type { Pr } from '../../../modules/platform';
 import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
 import { scm } from '../../../modules/platform/scm';
@@ -35,13 +34,9 @@ async function setBranchStatus(
   });
 }
 
-interface ValidateReconfigureBranch {
-  status: boolean;
-}
 export async function validateReconfigureBranch(
   config: RenovateConfig,
-  reconfigurePr: Pr | null,
-): Promise<ValidateReconfigureBranch> {
+): Promise<void> {
   logger.debug('validateReconfigureBranch()');
 
   const context = config.statusCheckNames?.configValidation;
@@ -57,7 +52,7 @@ export async function validateReconfigureBranch(
   // only use valid cached information
   if (reconfigureCache?.reconfigureBranchSha === branchSha) {
     logger.debug('Skipping validation check as branch sha is unchanged');
-    return { status: reconfigureCache?.isConfigValid };
+    return;
   }
 
   if (context) {
@@ -71,7 +66,7 @@ export async function validateReconfigureBranch(
       logger.debug(
         'Skipping validation check because status check already exists.',
       );
-      return { status: validationStatus === 'green' };
+      return;
     }
   } else {
     logger.debug(
@@ -99,7 +94,7 @@ export async function validateReconfigureBranch(
     );
     setReconfigureBranchCache(branchSha, false);
     await scm.checkoutBranch(config.defaultBranch!);
-    return { status: false };
+    return;
   }
 
   let configFileRaw: string | null = null;
@@ -119,7 +114,7 @@ export async function validateReconfigureBranch(
     );
     setReconfigureBranchCache(branchSha, false);
     await scm.checkoutBranch(config.baseBranch!);
-    return { status: false };
+    return;
   }
 
   let configFileParsed: any;
@@ -139,7 +134,7 @@ export async function validateReconfigureBranch(
     );
     setReconfigureBranchCache(branchSha, false);
     await scm.checkoutBranch(config.baseBranch!);
-    return { status: false };
+    return;
   }
 
   // perform validation and provide a passing or failing check run based on result
@@ -152,6 +147,12 @@ export async function validateReconfigureBranch(
       { errors: validationResult.errors.map((err) => err.message).join(', ') },
       'Validation Errors',
     );
+
+    const reconfigurePr = await platform.findPr({
+      branchName,
+      state: 'open',
+      includeOtherAuthors: true,
+    });
 
     // add comment to reconfigure PR if it exists
     if (reconfigurePr) {
@@ -172,7 +173,7 @@ export async function validateReconfigureBranch(
     await setBranchStatus(branchName, 'Validation Failed', 'red', context);
     setReconfigureBranchCache(branchSha, false);
     await scm.checkoutBranch(config.baseBranch!);
-    return { status: false };
+    return;
   }
 
   // passing check
@@ -180,5 +181,5 @@ export async function validateReconfigureBranch(
 
   setReconfigureBranchCache(branchSha, true);
   await scm.checkoutBranch(config.baseBranch!);
-  return { status: true };
+  return;
 }
