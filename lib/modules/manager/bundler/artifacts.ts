@@ -1,4 +1,3 @@
-import { lt } from '@renovatebot/ruby-semver';
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import {
@@ -32,14 +31,16 @@ import {
 const hostConfigVariablePrefix = 'BUNDLE_';
 
 function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
-  if (!hostRule.resolvedHost || hostRule.resolvedHost.includes('-')) {
+  if (!hostRule.resolvedHost) {
     return {};
   }
   const varName = hostConfigVariablePrefix.concat(
     hostRule.resolvedHost
-      .split('.')
-      .map((term) => term.toUpperCase())
-      .join('__'),
+      .toUpperCase()
+        .split('.')
+        .join('__')
+        .split('-')
+        .join('___'),
   );
   return {
     [varName]: `${getAuthenticationHeaderValue(hostRule)}`,
@@ -149,46 +150,11 @@ export async function updateArtifacts(
       {} as Record<string, string>,
     );
 
-    // Detect hosts with a hyphen '-' in the url.
-    // Those cannot be added with environment variables but need to be added
-    // with the bundler config
-    const bundlerHostRulesAuthCommands: string[] = bundlerHostRules.reduce(
-      (authCommands: string[], hostRule) => {
-        if (hostRule.resolvedHost?.includes('-')) {
-          // TODO: fix me, hostrules can missing all auth
-          const creds = getAuthenticationHeaderValue(hostRule);
-          authCommands.push(`${quote(hostRule.resolvedHost)} ${quote(creds)}`);
-        }
-        return authCommands;
-      },
-      [],
-    );
-
     const bundler = getBundlerConstraint(
       updateArtifact,
       existingLockFileContent,
     );
     const preCommands = ['ruby --version'];
-
-    // Bundler < 2 has a different config option syntax than >= 2
-    if (
-      bundlerHostRulesAuthCommands &&
-      bundler &&
-      isValid(bundler) &&
-      lt(bundler, '2')
-    ) {
-      preCommands.push(
-        ...bundlerHostRulesAuthCommands.map(
-          (authCommand) => `bundler config --local ${authCommand}`,
-        ),
-      );
-    } else if (bundlerHostRulesAuthCommands) {
-      preCommands.push(
-        ...bundlerHostRulesAuthCommands.map(
-          (authCommand) => `bundler config set --local ${authCommand}`,
-        ),
-      );
-    }
 
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
