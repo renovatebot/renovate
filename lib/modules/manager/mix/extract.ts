@@ -20,8 +20,8 @@ const lockedVersionRegExp = regEx(
   /^\s+"(?<app>\w+)".*?"(?<lockedVersion>\d+\.\d+\.\d+)"/,
 );
 const hexRegexp = regEx(/hex:\s*(?:"(?<strValue>[^"]+)"|:(?<atomValue>\w+))/);
-const onlyValueRegexp = /only:\s*(?<only>\[[^\]]*\]|:\w+)/;
-const onlyEnvironmentsRegexp = /:(\w+)/gm;
+const onlyValueRegexp = regEx(/only:\s*(?<only>\[[^\]]*\]|:\w+)/);
+const onlyEnvironmentsRegexp = regEx(/:(\w+)/gm);
 
 export async function extractPackageFile(
   content: string,
