@@ -36,10 +36,10 @@ function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
   const varName = hostConfigVariablePrefix.concat(
     hostRule.resolvedHost
       .toUpperCase()
-        .split('.')
-        .join('__')
-        .split('-')
-        .join('___'),
+      .split('.')
+      .join('__')
+      .split('-')
+      .join('___'),
   );
   return {
     [varName]: `${getAuthenticationHeaderValue(hostRule)}`,
