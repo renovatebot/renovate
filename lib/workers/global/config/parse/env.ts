@@ -244,7 +244,10 @@ async function parseAndValidateOrExit(
   }
 
   try {
-    const config = parseJson(env[configEnvKey], `${configEnvKey}.env.json5`) as AllConfig;
+    const config = parseJson(
+      env[configEnvKey],
+      `${configEnvKey}.env.json5`,
+    ) as AllConfig;
     logger.debug({ config }, `Detected config in env ${configEnvKey}`);
 
     return await migrateAndValidateConfig(config, `${configEnvKey}`);
