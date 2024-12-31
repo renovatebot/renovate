@@ -25,7 +25,7 @@ function getDatedContainerImageVersion(version: string): null | number {
 
 function getDatedContainerImageSuffix(version: string): null | string {
   const groups = regex.exec(version);
-  if (!groups?.groups) {
+  if (!groups?.groups?.suffix) {
     return null;
   }
 
