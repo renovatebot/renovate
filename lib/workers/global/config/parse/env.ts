@@ -3,6 +3,7 @@ import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
+import { parseJson } from '../../../../util/common';
 import { coersions } from './coersions';
 import type { ParseConfigOptions } from './types';
 import { migrateAndValidateConfig } from './util';
@@ -243,7 +244,7 @@ async function parseAndValidateOrExit(
   }
 
   try {
-    const config = JSON5.parse(env[configEnvKey]);
+    const config = parseJson(env[configEnvKey], '.json5') as AllConfig;
     logger.debug({ config }, `Detected config in env ${configEnvKey}`);
 
     return await migrateAndValidateConfig(config, `${configEnvKey}`);
