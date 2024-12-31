@@ -16,7 +16,6 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { newlineRegex, regEx } from '../../../util/regex';
-import { isValid } from '../../versioning/ruby';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   getBundlerConstraint,
