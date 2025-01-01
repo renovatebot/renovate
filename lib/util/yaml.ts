@@ -143,7 +143,7 @@ export function dump(obj: any, opts?: DumpOptions): string {
 
 function getShortHash(data: any): string {
 
-  return crypto.createHash('sha256').update(data).digest('hex').substring(0,7);
+  return crypto.createHash('sha256').update(data).digest('hex').substring(0, 7);
 }
 
 function massageContent(content: string, options?: YamlOptions): string {
