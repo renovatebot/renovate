@@ -1,5 +1,6 @@
 import type {
   CreateNodeOptions,
+  Document,
   DocumentOptions,
   ParseOptions,
   SchemaOptions,

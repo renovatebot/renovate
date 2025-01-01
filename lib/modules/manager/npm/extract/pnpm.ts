@@ -12,7 +12,6 @@ import {
 } from '../../../../util/fs';
 import { parseSingleYaml } from '../../../../util/yaml';
 import type {
-  ExtractConfig,
   PackageDependency,
   PackageFile,
   PackageFileContent,
@@ -97,8 +96,8 @@ export async function detectPnpmWorkspaces(
   const packagePathCache = new Map<string, string[] | null>();
 
   for (const p of packageFiles) {
-    const { packageFile, managerData } = p;
-    const { pnpmShrinkwrap } = managerData as NpmManagerData;
+    const { packageFile, managerData = {} } = p;
+    const { pnpmShrinkwrap } = managerData as Partial<NpmManagerData>;
 
     // check if pnpmShrinkwrap-file has already been provided
     if (pnpmShrinkwrap) {
@@ -243,6 +242,7 @@ type PnpmCatalog = { name: string; dependencies: NpmPackageDependency };
 export function extractPnpmWorkspaceFile(
   content: string,
   packageFile: string,
+  // TODO: consider config: ExtractConfig here
 ): PackageFile | null {
   logger.trace(`pnpm.extractPnpmWorkspaceFile(${packageFile})`);
 
@@ -272,13 +272,13 @@ export function extractPnpmWorkspaceFile(
 function extractPnpmCatalogDeps(
   catalogs: Array<PnpmCatalog>,
 ): PackageFileContent<NpmManagerData> | null {
-  const CATALOG_DEPENDENCY = 'catalogDependency';
+  const CATALOG_DEPENDENCY = 'pnpm.catalog';
 
   const deps: PackageDependency[] = [];
 
   for (const catalog of catalogs) {
     for (const [key, val] of Object.entries(catalog.dependencies)) {
-      const depName = parseDepName('catalog', key);
+      const depName = parseDepName(CATALOG_DEPENDENCY, key);
       let dep: PackageDependency = {
         depType: CATALOG_DEPENDENCY,
         // TODO(fpapado): consider how users might be able to match on specific
@@ -315,7 +315,7 @@ function extractPnpmCatalogDeps(
   };
 }
 
-const pnpmCatalogsSchema = z.object({
+export const pnpmCatalogsSchema = z.object({
   catalog: z.optional(z.record(z.string())),
   catalogs: z.optional(z.record(z.record(z.string()))),
 });
