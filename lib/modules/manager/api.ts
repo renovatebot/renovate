@@ -78,7 +78,6 @@ import * as pipCompile from './pip-compile';
 import * as pip_requirements from './pip_requirements';
 import * as pip_setup from './pip_setup';
 import * as pipenv from './pipenv';
-import * as pnpmCatalog from './pnpm-catalog';
 import * as poetry from './poetry';
 import * as preCommit from './pre-commit';
 import * as pub from './pub';
