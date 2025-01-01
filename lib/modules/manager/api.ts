@@ -176,7 +176,6 @@ api.set('mix', mix);
 api.set('nix', nix);
 api.set('nodenv', nodenv);
 api.set('npm', npm);
-api.set('pnpmCatalog', pnpmCatalog);
 api.set('nuget', nuget);
 api.set('nvm', nvm);
 api.set('ocb', ocb);
