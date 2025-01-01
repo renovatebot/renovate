@@ -181,11 +181,11 @@ describe('util/yaml', () => {
       ).toEqual([
         {
           myObject: {
-            aString: null,
+            aString: "d1ddada",
           },
         },
         {
-          foo: null,
+          foo: "06de5ba",
         },
       ]);
     });
@@ -273,25 +273,97 @@ services:
       ).toThrow();
     });
 
-    it('should parse content with template', () => {
+    it('should parse content with basic templates', () => {
       expect(
         parseSingleYaml(
           codeBlock`
-      myObject:
-        aString: {{value}}
-        {% if test.enabled %}
-        myNestedObject:
-          aNestedString: {{value}}
-        {% endif %}
-      `,
+            object:
+              string: {{value}}
+              number: 42
+              stringTemplated: {{\`value\`}}
+              numberTemplated: {{42}}
+              list:
+            {% if test.enabled %}
+                - {{value}}
+            {% endif %}
+                - listEntry
+          `,
           { removeTemplates: true },
         ),
       ).toEqual({
-        myObject: {
-          aString: null,
-          myNestedObject: {
-            aNestedString: null,
+        "object": {
+          // Hash for `{{value}}`
+          "string": "f00c233",
+          "number": 42,
+          // Hash for `{{\`value\`}}`
+          "stringTemplated": "7379d56",
+          // Hash for `{{42}}`
+          "numberTemplated": "df35179",
+          "list": [
+            "f00c233",
+            "listEntry",
+          ],
+        },
+      });
+    });
+
+    it('should parse content with templated yaml keys', () => {
+      expect(
+        parseSingleYaml(
+          codeBlock`
+            object:
+              string: "string"
+              {{aKey}}:
+                string: "string"
+                number: 12
+              {{anotherKey}}:
+                string: "another string"
+                number: 30
+              number: 42
+          `,
+          { removeTemplates: true },
+        ),
+      ).toEqual({
+        "object": {
+          "string": "string",
+          // Hash for `{{aKey}}`
+          "94fdf85": {
+            "string": "string",
+            "number": 12,
           },
+          // Hash for `{{anotherKey}}`
+          "8904e7f": {
+            "string": "another string",
+            "number": 30,
+          },
+          "number": 42,
+        },
+      });
+    });
+
+    it('should parse content with templated value in objects', () => {
+      expect(
+        parseSingleYaml(
+          codeBlock`
+            object:
+              string: "string"
+              childObject:
+                {{value}}
+                key: value
+              anotherChildObject:
+                {{value}}
+              number: 42
+          `,
+          { removeTemplates: true },
+        ),
+      ).toEqual({
+        "object": {
+          "string": "string",
+          "childObject": {
+            "key": "value",
+          },
+          "anotherChildObject": null,
+          "number": 42,
         },
       });
     });

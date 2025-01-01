@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import type {
   CreateNodeOptions,
   DocumentOptions,
@@ -140,12 +141,25 @@ export function dump(obj: any, opts?: DumpOptions): string {
   return stringify(obj, opts);
 }
 
+function getShortHash(data: any): string {
+
+  return crypto
+    .createHash('sha256')
+    .update(data)
+    .digest('hex')
+    .substring(0,7);
+}
+
 function massageContent(content: string, options?: YamlOptions): string {
   if (options?.removeTemplates) {
     return content
-      .replace(regEx(/\s+{{.+?}}:.+/gs), '')
-      .replace(regEx(/{{`.+?`}}/gs), '')
-      .replace(regEx(/{{.+?}}/gs), '')
+      // NOTE: It seems safe to empty a line that only
+      // contains a Jinja2 tag entry.
+      .replace(regEx(/^(\s*)?{{.+?}}$/gm), '')
+      // NOTE: In order to keep a proper Yaml syntax before
+      // the parsing, we're remplacing each of the remaining
+      // Jinja2 by a hash of the whole matched tag.
+      .replace(regEx(/{{.+?}}/g), getShortHash)
       .replace(regEx(/{%`.+?`%}/gs), '')
       .replace(regEx(/{%.+?%}/g), '');
   }

@@ -6,6 +6,7 @@ const yamlFile1 = Fixtures.get('docker-compose.1.yml');
 const yamlFile3 = Fixtures.get('docker-compose.3.yml');
 const yamlFile3NoVersion = Fixtures.get('docker-compose.3-no-version.yml');
 const yamlFile3DefaultValue = Fixtures.get('docker-compose.3-default-val.yml');
+const yamlFile4Templated = Fixtures.get('docker-compose.4.yml.j2');
 
 describe('modules/manager/docker-compose/extract', () => {
   describe('extractPackageFile()', () => {
@@ -54,6 +55,23 @@ describe('modules/manager/docker-compose/extract', () => {
         ]
       `);
       expect(res?.deps).toHaveLength(1);
+    });
+
+    it('extracts can parse a templated yaml file', () => {
+      const res = extractPackageFile(yamlFile4Templated, '', {});
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'node',
+            currentValue: '42.0.0',
+            currentDigest: undefined,
+            replaceString: 'node:42.0.0',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
+      });
     });
 
     it('extracts can parse yaml tags for version 3', () => {
