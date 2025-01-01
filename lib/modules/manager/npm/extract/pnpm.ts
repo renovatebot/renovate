@@ -281,12 +281,20 @@ function extractPnpmCatalogDeps(
       const depName = parseDepName(CATALOG_DEPENDENCY, key);
       let dep: PackageDependency = {
         depType: CATALOG_DEPENDENCY,
-        // TODO(fpapado): consider how users might be able to match on specific
-        // catalogs, such as catalog.default.react or catalog.react17.react
+        // TODO(fpapado): for PR discussion, consider how users might be able to
+        // match on specific catalogs for their config.
+        //
+        // For example, we could change depType to `pnpm.catalog.${string}`, so
+        // that users can match use `{matchDepTypes: ["pnpm.catalog.default"]}`,
+        // `{matchDepTypes: ["pnpm.catalog.react17"]}` and so on.
+        //
+        // Another option would be to mess with depName/packageName.
+        //
+        // Is there precedence for something similar?
         depName,
         managerData: {
-          // we assign the name of the catalog, in order to know what fields to
-          // update later on
+          // We assign the name of the catalog, in order to know which fields to
+          // update later on.
           catalogName: catalog.name,
         },
       };
@@ -297,12 +305,7 @@ function extractPnpmCatalogDeps(
       // TODO: fix type #22198
       dep = {
         ...dep,
-        ...extractDependency(
-          CATALOG_DEPENDENCY,
-          depName,
-          // FIXME(fpapado): small crime with `val!`
-          val!,
-        ),
+        ...extractDependency(CATALOG_DEPENDENCY, depName, val!),
         prettyDepType: CATALOG_DEPENDENCY,
       };
       dep.prettyDepType = CATALOG_DEPENDENCY;
