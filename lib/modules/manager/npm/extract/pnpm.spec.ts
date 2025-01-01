@@ -309,8 +309,8 @@ describe('modules/manager/npm/extract/pnpm', () => {
             currentValue: '18.3.0',
             datasource: 'npm',
             depName: 'react',
-            depType: 'catalogDependency',
-            prettyDepType: 'catalogDependency',
+            depType: 'pnpm.catalog',
+            prettyDepType: 'pnpm.catalog',
             managerData: {
               catalogName: 'default',
             },
@@ -319,8 +319,8 @@ describe('modules/manager/npm/extract/pnpm', () => {
             currentValue: '17.0.2',
             datasource: 'npm',
             depName: 'react',
-            depType: 'catalogDependency',
-            prettyDepType: 'catalogDependency',
+            depType: 'pnpm.catalog',
+            prettyDepType: 'pnpm.catalog',
             managerData: {
               catalogName: 'react17',
             },
