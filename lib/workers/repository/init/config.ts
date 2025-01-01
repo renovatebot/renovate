@@ -14,19 +14,19 @@ export async function getRepoConfig(
   let config = { ...config_ };
   config.baseBranch = config.defaultBranch;
   config = await mergeInheritedConfig(config);
-  config = await mergeRepoEnvConfig(config, process.env);
+  config = await mergeStaticRepoEnvConfig(config, process.env);
   config = await checkOnboardingBranch(config);
   config = await mergeRenovateConfig(config);
   return config;
 }
 
-export async function mergeRepoEnvConfig(
+export async function mergeStaticRepoEnvConfig(
   config: AllConfig,
   env: NodeJS.ProcessEnv,
 ): Promise<AllConfig> {
   const repoEnvConfig = await parseAndValidateOrExit(
     env,
-    'RENOVATE_REPO_CONFIG',
+    'RENOVATE_STATIC_REPO_CONFIG',
   );
 
   if (!is.nonEmptyObject(repoEnvConfig)) {

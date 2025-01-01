@@ -1,5 +1,5 @@
 import type { AllConfig } from '../../../config/types';
-import { mergeRepoEnvConfig } from './config';
+import { mergeStaticRepoEnvConfig } from './config';
 
 describe('workers/repository/init/config', () => {
   describe('mergeRepoEnvConfig()', () => {
@@ -19,7 +19,7 @@ describe('workers/repository/init/config', () => {
       },
       {
         name: 'it merges env with the current config',
-        env: { RENOVATE_REPO_CONFIG: '{"dependencyDashboard":true}' },
+        env: { RENOVATE_STATIC_REPO_CONFIG: '{"dependencyDashboard":true}' },
         currentConfig: { repositories: ['some/repo'] },
         wantConfig: {
           dependencyDashboard: true,
@@ -37,7 +37,7 @@ describe('workers/repository/init/config', () => {
     it.each(testCases)(
       '$name',
       async ({ env, currentConfig, wantConfig }: MergeRepoEnvTestCase) => {
-        const got = await mergeRepoEnvConfig(currentConfig, env);
+        const got = await mergeStaticRepoEnvConfig(currentConfig, env);
 
         expect(got).toEqual(wantConfig);
       },
