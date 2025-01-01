@@ -2426,6 +2426,7 @@ Renovate only queries the OSV database for dependencies that use one of these da
 
 - [`crate`](./modules/datasource/crate/index.md)
 - [`go`](./modules/datasource/go/index.md)
+- [`hackage`](./modules/datasource/hackage/index.md)
 - [`hex`](./modules/datasource/hex/index.md)
 - [`maven`](./modules/datasource/maven/index.md)
 - [`npm`](./modules/datasource/npm/index.md)
