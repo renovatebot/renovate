@@ -4,8 +4,8 @@ import { logger } from '../../../../../logger';
 import { parseSingleYaml } from '../../../../../util/yaml';
 import type { UpdateDependencyConfig } from '../../../types';
 import { pnpmCatalogsSchema } from '../../extract/pnpm';
+import { getNewGitValue, getNewNpmAliasValue } from './common';
 
-// TODO(fpapado): move this somewhere else, e.g. npm/update/dependency/pnpm
 export function updatePnpmCatalogDependency({
   fileContent,
   upgrade,
@@ -23,29 +23,8 @@ export function updatePnpmCatalogDependency({
 
   let { newValue } = upgrade;
 
-  // Handle git tags or digests
-  if (upgrade.currentRawValue) {
-    if (upgrade.currentDigest) {
-      logger.debug('Updating package.json git digest');
-      newValue = upgrade.currentRawValue.replace(
-        upgrade.currentDigest,
-        // TODO #22198
-
-        upgrade.newDigest!.substring(0, upgrade.currentDigest.length),
-      );
-    } else {
-      logger.debug('Updating package.json git version tag');
-      newValue = upgrade.currentRawValue.replace(
-        upgrade.currentValue,
-        upgrade.newValue,
-      );
-    }
-  }
-
-  // Handle aliases
-  if (upgrade.npmPackageAlias) {
-    newValue = `npm:${upgrade.packageName}@${newValue}`;
-  }
+  newValue = getNewGitValue(upgrade) ?? newValue;
+  newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
 
   logger.info(
     `npm.updatePnpmCatalogDependency(): ${depType}:${managerData?.catalogName}.${depName} = ${newValue}`,

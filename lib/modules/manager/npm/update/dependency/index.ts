@@ -11,6 +11,7 @@ import type {
   RecursiveOverride,
 } from '../../extract/types';
 import type { NpmDepType, NpmManagerData } from '../../types';
+import { getNewGitValue, getNewNpmAliasValue } from './common';
 import { updatePnpmCatalogDependency } from './pnpm';
 
 function renameObjKey(
@@ -123,26 +124,9 @@ export function updateDependency({
   const { depType, managerData } = upgrade;
   const depName: string = managerData?.key || upgrade.depName;
   let { newValue } = upgrade;
-  if (upgrade.currentRawValue) {
-    if (upgrade.currentDigest) {
-      logger.debug('Updating package.json git digest');
-      newValue = upgrade.currentRawValue.replace(
-        upgrade.currentDigest,
-        // TODO #22198
 
-        upgrade.newDigest!.substring(0, upgrade.currentDigest.length),
-      );
-    } else {
-      logger.debug('Updating package.json git version tag');
-      newValue = upgrade.currentRawValue.replace(
-        upgrade.currentValue,
-        upgrade.newValue,
-      );
-    }
-  }
-  if (upgrade.npmPackageAlias) {
-    newValue = `npm:${upgrade.packageName}@${newValue}`;
-  }
+  newValue = getNewGitValue(upgrade) ?? newValue;
+  newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
 
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
   try {
