@@ -42,9 +42,15 @@ export function updatePnpmCatalogDependency({
     return null;
   }
 
+  // In pnpm-workspace.yaml, the default catalog can be either `catalog` or
+  // `catalog.default`, but not both (pnpm throws outright with a config error).
+  // Thus, we must check which entry is being used, to reference it from the
+  // right place.
+  const usesImplicitDefaultCatalog = parsedContents.catalog !== undefined;
+
   // Save the old version
   const oldVersion =
-    catalogName === 'default'
+    catalogName === 'default' && usesImplicitDefaultCatalog
       ? parsedContents.catalog?.[depName!]
       : parsedContents.catalogs?.[catalogName]?.[depName!];
 
@@ -53,10 +59,7 @@ export function updatePnpmCatalogDependency({
     return fileContent;
   }
 
-  if (catalogName === 'default') {
-    // TODO: We should check whether `catalogs\n:default:\npkg: 1.0.0` is valid,
-    // because in that case we need to know whether it was set in `catalog` or
-    // `catalogs\ndefault`
+  if (catalogName === 'default' && usesImplicitDefaultCatalog) {
     document.setIn(['catalog', depName], newValue);
   } else {
     document.setIn(['catalogs', catalogName, depName], newValue);
