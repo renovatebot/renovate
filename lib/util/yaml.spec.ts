@@ -181,11 +181,11 @@ describe('util/yaml', () => {
       ).toEqual([
         {
           myObject: {
-            aString: "d1ddada",
+            aString: 'd1ddada',
           },
         },
         {
-          foo: "06de5ba",
+          foo: '06de5ba',
         },
       ]);
     });
@@ -291,18 +291,15 @@ services:
           { removeTemplates: true },
         ),
       ).toEqual({
-        "object": {
+        object: {
           // Hash for `{{value}}`
-          "string": "string",
-          "number": 42,
+          string: 'string',
+          number: 42,
           // Hash for `{{value}}`
-          "stringTemplated": "f00c233",
+          stringTemplated: 'f00c233',
           // Hash for `{{42}}`
-          "numberTemplated": "df35179",
-          "list": [
-            "f00c233",
-            "listEntry",
-          ],
+          numberTemplated: 'df35179',
+          list: ['f00c233', 'listEntry'],
         },
       });
     });
@@ -324,19 +321,19 @@ services:
           { removeTemplates: true },
         ),
       ).toEqual({
-        "object": {
-          "string": "string",
+        object: {
+          string: 'string',
           // Hash for `{{aKey}}`
-          "94fdf85": {
-            "string": "string",
-            "number": 12,
+          '94fdf85': {
+            string: 'string',
+            number: 12,
           },
           // Hash for `{{anotherKey}}`
-          "8904e7f": {
-            "string": "another string",
-            "number": 30,
+          '8904e7f': {
+            string: 'another string',
+            number: 30,
           },
-          "number": 42,
+          number: 42,
         },
       });
     });
@@ -357,13 +354,13 @@ services:
           { removeTemplates: true },
         ),
       ).toEqual({
-        "object": {
-          "string": "string",
-          "childObject": {
-            "key": "value",
+        object: {
+          string: 'string',
+          childObject: {
+            key: 'value',
           },
-          "anotherChildObject": null,
-          "number": 42,
+          anotherChildObject: null,
+          number: 42,
         },
       });
     });
