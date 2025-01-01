@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
-import { parseDocument } from 'yaml';
 import { logger } from '../../../../../logger';
-import { parseSingleYaml } from '../../../../../util/yaml';
+import { parseSingleYamlDocument } from '../../../../../util/yaml';
 import type { UpdateDependencyConfig } from '../../../types';
 import { pnpmCatalogsSchema } from '../../extract/pnpm';
 import { getNewGitValue, getNewNpmAliasValue } from './common';
@@ -30,19 +29,20 @@ export function updatePnpmCatalogDependency({
     `npm.updatePnpmCatalogDependency(): ${depType}:${managerData?.catalogName}.${depName} = ${newValue}`,
   );
 
-  // Save the old version
+  let document;
   let parsedContents;
 
   try {
-    // TODO: we should move pnpmCatalogsSchema around to a common/shared location in the npm manager
-    parsedContents = parseSingleYaml(fileContent, {
-      customSchema: pnpmCatalogsSchema,
-    });
+    // TODO: we should move pnpmCatalogsSchema around to a common/shared
+    // location in the npm manager
+    document = parseSingleYamlDocument(fileContent);
+    parsedContents = pnpmCatalogsSchema.parse(document.toJS());
   } catch (err) {
     logger.debug({ err }, 'Could not parse pnpm-workspace YAML file.');
     return null;
   }
 
+  // Save the old version
   const oldVersion =
     catalogName === 'default'
       ? parsedContents.catalog?.[depName!]
@@ -52,13 +52,6 @@ export function updatePnpmCatalogDependency({
     logger.trace('Version is already updated');
     return fileContent;
   }
-
-  // TODO: Consider separating `parseSingleYaml` and
-  // `parseSingleYamlDocument`/`yamlDocumentToJS`, so that we can keep the unified API
-  const document = parseDocument(fileContent, {
-    uniqueKeys: false,
-    strict: false,
-  });
 
   if (catalogName === 'default') {
     // TODO: We should check whether `catalogs\n:default:\npkg: 1.0.0` is valid,
