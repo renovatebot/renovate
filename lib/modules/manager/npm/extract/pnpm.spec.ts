@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs, getFixturePath, logger, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
@@ -7,6 +8,7 @@ import type { NpmManagerData } from '../types';
 import {
   detectPnpmWorkspaces,
   extractPnpmFilters,
+  extractPnpmWorkspaceFile,
   findPnpmWorkspace,
   getPnpmLock,
 } from './pnpm';
@@ -282,6 +284,64 @@ describe('modules/manager/npm/extract/pnpm', () => {
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await getPnpmLock('package.json');
       expect(res.lockedVersionsWithPath).toBeUndefined();
+    });
+  });
+
+  describe('.extractPnpmWorkspaceFile()', () => {
+    it('ignores invalid pnpm-workspace.yaml file', () => {
+      expect(extractPnpmWorkspaceFile('', 'pnpm-workspace.yaml')).toBeNull();
+    });
+
+    it('handles empty catalog entries', () => {
+      expect(
+        extractPnpmWorkspaceFile(
+          codeBlock`
+        catalog:
+        catalogs:
+      `,
+          'pnpm-workspace.yaml',
+        ),
+      ).toBeNull();
+    });
+
+    it('parses valid pnpm-workspace.yaml file', () => {
+      expect(
+        extractPnpmWorkspaceFile(
+          codeBlock`
+          catalog:
+            react: 18.3.0
+
+          catalogs:
+            react17:
+              react: 17.0.2
+        `,
+          'pnpm-workspace.yaml',
+        ),
+      ).toMatchObject({
+        deps: [
+          {
+            currentValue: '18.3.0',
+            datasource: 'npm',
+            depName: 'react',
+            depType: 'catalogDependency',
+            prettyDepType: 'catalogDependency',
+            managerData: {
+              catalogName: 'default',
+            },
+          },
+          {
+            currentValue: '17.0.2',
+            datasource: 'npm',
+            depName: 'react',
+            depType: 'catalogDependency',
+            prettyDepType: 'catalogDependency',
+            managerData: {
+              catalogName: 'react17',
+            },
+          },
+        ],
+        packageFile: 'pnpm-workspace.yaml',
+      });
     });
   });
 });
