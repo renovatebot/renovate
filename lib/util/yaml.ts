@@ -156,6 +156,7 @@ function massageContent(content: string, options?: YamlOptions): string {
       // NOTE: It seems safe to empty a line that only
       // contains a Jinja2 tag entry.
       .replace(regEx(/^(\s*)?{{.+?}}$/gm), '')
+      .replace(regEx(/{{`.+?`}}/gs), '')
       // NOTE: In order to keep a proper Yaml syntax before
       // the parsing, we're remplacing each of the remaining
       // Jinja2 by a hash of the whole matched tag.

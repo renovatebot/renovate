@@ -278,9 +278,9 @@ services:
         parseSingleYaml(
           codeBlock`
             object:
-              string: {{value}}
+              string: "string"
               number: 42
-              stringTemplated: {{\`value\`}}
+              stringTemplated: "{{value}}"
               numberTemplated: {{42}}
               list:
             {% if test.enabled %}
@@ -293,10 +293,10 @@ services:
       ).toEqual({
         "object": {
           // Hash for `{{value}}`
-          "string": "f00c233",
+          "string": "string",
           "number": 42,
-          // Hash for `{{\`value\`}}`
-          "stringTemplated": "7379d56",
+          // Hash for `{{value}}`
+          "stringTemplated": "f00c233",
           // Hash for `{{42}}`
           "numberTemplated": "df35179",
           "list": [
