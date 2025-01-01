@@ -33,8 +33,6 @@ export function updatePnpmCatalogDependency({
   let parsedContents;
 
   try {
-    // TODO: we should move pnpmCatalogsSchema around to a common/shared
-    // location in the npm manager
     document = parseSingleYamlDocument(fileContent);
     parsedContents = pnpmCatalogsSchema.parse(document.toJS());
   } catch (err) {
