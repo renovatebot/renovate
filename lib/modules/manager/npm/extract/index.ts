@@ -230,7 +230,8 @@ export async function extractAllPackageFiles(
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else
     if (content) {
-      // TODO(fpapado): consider whether to do this here, or in the postExtract step
+      // TODO(fpapado): for PR dicussion, consider this vs. a post hook, where
+      // we look for pnpm-workspace.yaml in the siblings
       if (packageFile === 'pnpm-workspace.yaml') {
         const deps = extractPnpmWorkspaceFile(content, packageFile);
         if (deps) {
