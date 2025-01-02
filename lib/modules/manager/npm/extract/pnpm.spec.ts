@@ -296,9 +296,9 @@ describe('modules/manager/npm/extract/pnpm', () => {
       expect(
         extractPnpmWorkspaceFile(
           codeBlock`
-        catalog:
-        catalogs:
-      `,
+            catalog:
+            catalogs:
+          `,
           'pnpm-workspace.yaml',
         ),
       ).toBeNull();
@@ -308,13 +308,13 @@ describe('modules/manager/npm/extract/pnpm', () => {
       expect(
         extractPnpmWorkspaceFile(
           codeBlock`
-          catalog:
-            react: 18.3.0
+            catalog:
+              react: 18.3.0
 
-          catalogs:
-            react17:
-              react: 17.0.2
-        `,
+            catalogs:
+              react17:
+                react: 17.0.2
+          `,
           'pnpm-workspace.yaml',
         ),
       ).toMatchObject({
