@@ -12,7 +12,7 @@ export const urls = [];
 export const supportsRanges = false;
 
 const versionPattern = regEx(
-  '^[vV]?(\\d+(?:\\.\\d+)*)(?<metadata>-eksbuild\\.\\d+)?$',
+  '^v?(\\d+(?:\\.\\d+)*)(?<metadata>-eksbuild\\.\\d+)?$',
 );
 
 class AwsEKSAddonVersioningApi extends GenericVersioningApi {
@@ -20,7 +20,7 @@ class AwsEKSAddonVersioningApi extends GenericVersioningApi {
     if (!version) {
       return null;
     }
-    const matches: RegExpExecArray | null = versionPattern.exec(version);
+    const matches = versionPattern.exec(version);
     if (!matches) {
       return null;
     }
@@ -49,8 +49,8 @@ class AwsEKSAddonVersioningApi extends GenericVersioningApi {
   }
 
   override isCompatible(version: string, current: string): boolean {
-    const parsed1: GenericVersion | null = this._parse(version);
-    const parsed2: GenericVersion | null = this._parse(current);
+    const parsed1 = this._parse(version);
+    const parsed2 = this._parse(current);
     return !!(parsed1 && parsed2);
   }
 }
