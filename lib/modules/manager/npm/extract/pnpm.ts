@@ -338,5 +338,3 @@ function parsePnpmCatalogs(content: string): Array<PnpmCatalog> {
     })),
   ];
 }
-
-// TODO: When extracting, use {depType: 'catalogDependency', depName: 'name.packageName'}
