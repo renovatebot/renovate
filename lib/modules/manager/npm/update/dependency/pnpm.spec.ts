@@ -146,6 +146,135 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     expect(testContent).toEqual(expected);
   });
 
+  it('replaces a github dependency value', () => {
+    const upgrade = {
+      depType: 'pnpm.catalog',
+      depName: 'gulp',
+      currentValue: 'v4.0.0-alpha.2',
+      currentRawValue: 'gulpjs/gulp#v4.0.0-alpha.2',
+      newValue: 'v4.0.0',
+      managerData: {
+        catalogName: 'default',
+      },
+    };
+    const pnpmWorkspaceYaml = yamlCodeBlock`
+      packages:
+        - pkg-a
+
+      catalog:
+        gulp: gulpjs/gulp#v4.0.0-alpha.2
+    `;
+    const expected = yamlCodeBlock`
+      packages:
+        - pkg-a
+
+      catalog:
+        gulp: gulpjs/gulp#v4.0.0
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(expected);
+  });
+
+  it('replaces a npm package alias', () => {
+    const upgrade = {
+      depType: 'pnpm.catalog',
+      depName: 'hapi',
+      npmPackageAlias: true,
+      packageName: '@hapi/hapi',
+      currentValue: '18.3.0',
+      newValue: '18.3.1',
+      managerData: {
+        catalogName: 'default',
+      },
+    };
+    const pnpmWorkspaceYaml = yamlCodeBlock`
+      packages:
+        - pkg-a
+
+      catalog:
+        hapi: npm:@hapi/hapi@18.3.0
+    `;
+    const expected = yamlCodeBlock`
+      packages:
+        - pkg-a
+
+      catalog:
+        hapi: npm:@hapi/hapi@18.3.1
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(expected);
+  });
+
+  it('replaces a github short hash', () => {
+    const upgrade = {
+      depType: 'pnpm.catalog',
+      depName: 'gulp',
+      currentDigest: 'abcdef7',
+      currentRawValue: 'gulpjs/gulp#abcdef7',
+      newDigest: '0000000000111111111122222222223333333333',
+      managerData: {
+        catalogName: 'default',
+      },
+    };
+    const pnpmWorkspaceYaml = yamlCodeBlock`
+      packages:
+        - pkg-a
+
+      catalog:
+        gulp: gulpjs/gulp#abcdef7
+    `;
+    const expected = yamlCodeBlock`
+      packages:
+        - pkg-a
+
+      catalog:
+        gulp: gulpjs/gulp#0000000
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(expected);
+  });
+
+  it('replaces a github fully specified version', () => {
+    const upgrade = {
+      depType: 'pnpm.catalog',
+      depName: 'n',
+      currentValue: 'v1.0.0',
+      currentRawValue: 'git+https://github.com/owner/n#v1.0.0',
+      newValue: 'v1.1.0',
+      managerData: {
+        catalogName: 'default',
+      },
+    };
+    const pnpmWorkspaceYaml = yamlCodeBlock`
+      packages:
+        - pkg-a
+
+      catalog:
+        n: git+https://github.com/owner/n#v1.0.0
+    `;
+    const expected = yamlCodeBlock`
+      packages:
+        - pkg-a
+
+      catalog:
+        n: git+https://github.com/owner/n#v1.1.0
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(expected);
+  });
+
   it('returns null if the dependency is not present in the target catalog', () => {
     const upgrade = {
       depType: 'pnpm.catalog',
