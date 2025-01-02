@@ -242,7 +242,6 @@ type PnpmCatalog = { name: string; dependencies: NpmPackageDependency };
 export function extractPnpmWorkspaceFile(
   content: string,
   packageFile: string,
-  // TODO: consider config: ExtractConfig here
 ): PackageFile | null {
   logger.trace(`pnpm.extractPnpmWorkspaceFile(${packageFile})`);
 
