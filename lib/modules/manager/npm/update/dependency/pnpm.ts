@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { stringify } from 'yaml';
 import { logger } from '../../../../../logger';
 import { parseSingleYamlDocument } from '../../../../../util/yaml';
 import type { UpdateDependencyConfig } from '../../../types';
@@ -15,7 +16,7 @@ export function updatePnpmCatalogDependency({
 
   if (!is.string(catalogName)) {
     logger.error(
-      'No catalogName was found; this is likely an extractoin error.',
+      'No catalogName was found; this is likely an extraction error.',
     );
     return null;
   }
@@ -25,7 +26,7 @@ export function updatePnpmCatalogDependency({
   newValue = getNewGitValue(upgrade) ?? newValue;
   newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
 
-  logger.info(
+  logger.debug(
     `npm.updatePnpmCatalogDependency(): ${depType}:${managerData?.catalogName}.${depName} = ${newValue}`,
   );
 
@@ -57,11 +58,19 @@ export function updatePnpmCatalogDependency({
     return fileContent;
   }
 
+  // TODO: handle depName === oldValue
+  // The old value is the name of the dependency itself
+
+  if (oldVersion === undefined) {
+    // There is some subtlety here
+    return null;
+  }
+
   if (catalogName === 'default' && usesImplicitDefaultCatalog) {
     document.setIn(['catalog', depName], newValue);
   } else {
     document.setIn(['catalogs', catalogName, depName], newValue);
   }
 
-  return document.toString();
+  return stringify(document);
 }
