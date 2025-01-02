@@ -58,19 +58,47 @@ export function updatePnpmCatalogDependency({
     return fileContent;
   }
 
-  // TODO: handle depName === oldValue
-  // The old value is the name of the dependency itself
+  // Update the value
+  const path = getDepPath({
+    depName: depName!,
+    catalogName,
+    usesImplicitDefaultCatalog,
+  });
 
-  if (oldVersion === undefined) {
-    // There is some subtlety here
+  if (!document.hasIn(path)) {
     return null;
   }
 
-  if (catalogName === 'default' && usesImplicitDefaultCatalog) {
-    document.setIn(['catalog', depName], newValue);
-  } else {
-    document.setIn(['catalogs', catalogName, depName], newValue);
+  document.setIn(path, newValue);
+
+  // Update the name, for replacements
+  if (upgrade.newName) {
+    const newPath = getDepPath({
+      depName: upgrade.newName,
+      catalogName,
+      usesImplicitDefaultCatalog,
+    });
+    const oldValue = document.getIn(path);
+
+    document.deleteIn(path);
+    document.setIn(newPath, oldValue);
   }
 
   return stringify(document);
+}
+
+function getDepPath({
+  catalogName,
+  depName,
+  usesImplicitDefaultCatalog,
+}: {
+  usesImplicitDefaultCatalog: boolean;
+  catalogName: string;
+  depName: string;
+}): string[] {
+  if (catalogName === 'default' && usesImplicitDefaultCatalog) {
+    return ['catalog', depName];
+  } else {
+    return ['catalogs', catalogName, depName];
+  }
 }

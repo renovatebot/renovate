@@ -115,12 +115,15 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     expect(testContent).toEqual(expected);
   });
 
-  it.failing('replaces package', () => {
+  it('replaces package', () => {
     const upgrade = {
       depType: 'pnpm.catalog',
       depName: 'config',
       newName: 'abc',
       newValue: '2.0.0',
+      managerData: {
+        catalogName: 'default',
+      },
     };
     const pnpmWorkspaceYaml = yamlCodeBlock`
       packages:
