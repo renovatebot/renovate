@@ -12,26 +12,23 @@ export const urls = [];
 export const supportsRanges = false;
 
 const versionPattern = regEx(
-  '^v?(\\d+(?:\\.\\d+)*)(?<metadata>-eksbuild\\.\\d+)?$',
+  '^v?(?<major>\\d+)\\.(?<minor>\\d+)?\\.(?<patch>\\d+)?(?<metadata>-eksbuild\\.\\d+)?$',
 );
 
-class AwsEKSAddonVersioningApi extends GenericVersioningApi {
+export class AwsEKSAddonVersioningApi extends GenericVersioningApi {
   protected _parse(version: string): GenericVersion | null {
     if (!version) {
       return null;
     }
     const matches = versionPattern.exec(version);
-    if (!matches) {
+    if (!matches?.groups?.metadata) {
       return null;
     }
-    const [, prefix, suffix] = matches;
-    if (!suffix) {
+    const [, major, minor, patch, suffix] = matches;
+    if (!major || !minor || !patch || !suffix) {
       return null;
     }
-    const release: number[] = prefix.split('.').map(Number);
-    if (release.length !== 3) {
-      return null;
-    }
+    const release: number[] = [Number(major), Number(minor), Number(patch)];
     return { release, suffix };
   }
 
