@@ -247,7 +247,11 @@ const config: JestConfig = {
 
 export default config;
 
-type RunsOn = 'ubuntu-latest' | 'windows-latest' | 'macos-latest';
+type RunsOn =
+  | 'ubuntu-latest'
+  | 'windows-latest'
+  | 'macos-latest'
+  | `windows-2025`;
 
 interface ShardGroup {
   /**
@@ -386,6 +390,7 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
 
   if (process.env.ALL_PLATFORMS === 'true') {
     // shardGrouping['windows-latest'] = scheduleItems(shardKeys, 8);
+    shardGrouping['windows-2025'] = scheduleItems(shardKeys, 8);
     shardGrouping['macos-latest'] = scheduleItems(shardKeys, 4);
   }
 
@@ -396,7 +401,7 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
     const total = groups.length;
     for (let idx = 0; idx < groups.length; idx += 1) {
       const number = idx + 1;
-      const platform = os.replace(/-latest$/, '');
+      const platform = os.replace(/-[a-z0-9]+$/, '');
       const name =
         platform === 'ubuntu'
           ? `test (${number}/${total})`
