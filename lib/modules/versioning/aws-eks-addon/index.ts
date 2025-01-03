@@ -12,7 +12,7 @@ export const urls = [];
 export const supportsRanges = false;
 
 const versionPattern = regEx(
-  '^v?(?<major>\\d+)\\.(?<minor>\\d+)?\\.(?<patch>\\d+)?(?<metadata>-eksbuild\\.\\d+)?$',
+  '^v?(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<metadata>-eksbuild\\.\\d+)?$',
 );
 
 export class AwsEKSAddonVersioningApi extends GenericVersioningApi {
@@ -21,14 +21,14 @@ export class AwsEKSAddonVersioningApi extends GenericVersioningApi {
       return null;
     }
     const matches = versionPattern.exec(version);
-    if (!matches?.groups?.metadata) {
+    if (!matches?.groups) {
       return null;
     }
-    const [, major, minor, patch, suffix] = matches;
-    if (!major || !minor || !patch || !suffix) {
+    const { major, minor, patch, metadata: suffix } = matches.groups;
+    if (!suffix) {
       return null;
     }
-    const release: number[] = [Number(major), Number(minor), Number(patch)];
+    const release = [Number(major), Number(minor), Number(patch)];
     return { release, suffix };
   }
 
