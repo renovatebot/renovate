@@ -1248,6 +1248,11 @@ export async function getIssue(number: number): Promise<Issue | null> {
     return issue;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, number }, 'Error getting issue');
+    // istanbul ignore if
+    if (err.message === 'Response Code 410(Gone)') {
+      logger.debug(`Issue #${number} has been deleted`);
+      GithubIssueCache.deleteIssue(number);
+    }
     return null;
   }
 }
