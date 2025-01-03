@@ -57,6 +57,7 @@ export function getPlatformPrOptions(
   return {
     autoApprove: !!config.autoApprove,
     automergeStrategy: config.automergeStrategy,
+    automergeFailureComment: config.automergeFailureComment,
     azureWorkItemId: config.azureWorkItemId ?? 0,
     bbAutoResolvePrTasks: !!config.bbAutoResolvePrTasks,
     bbUseDefaultReviewers: !!config.bbUseDefaultReviewers,

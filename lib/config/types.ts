@@ -34,6 +34,7 @@ export interface RenovateSharedConfig {
   addLabels?: string[];
   autoReplaceGlobalMatch?: boolean;
   automerge?: boolean;
+  autoMergeFailureComment?: string;
   automergeSchedule?: string[];
   automergeStrategy?: MergeStrategy;
   branchName?: string;

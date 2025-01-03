@@ -116,6 +116,7 @@ export interface BranchConfig
     LegacyAdminConfig,
     PlatformPrOptions {
   automergeComment?: string;
+  automergeFailureComment?: string;
   automergeType?: string;
   automergedPreviously?: boolean;
   baseBranch: string;

@@ -100,6 +100,7 @@ export interface Issue {
 export type PlatformPrOptions = {
   autoApprove?: boolean;
   automergeStrategy?: MergeStrategy;
+  automergeFailureComment?: string;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   bbAutoResolvePrTasks?: boolean;

@@ -467,6 +467,7 @@ describe('modules/platform/github/index', () => {
           isArchived: false,
           nameWithOwner: repository,
           autoMergeAllowed: true,
+          automergeFailureComment: 'never',
           hasIssuesEnabled: true,
           mergeCommitAllowed: true,
           rebaseMergeAllowed: true,
@@ -2798,6 +2799,18 @@ describe('modules/platform/github/index', () => {
         platformPrOptions: { usePlatformAutomerge: true },
       };
 
+      const prConfigComment: CreatePRConfig = {
+        sourceBranch: 'some-branch',
+        targetBranch: 'dev',
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        labels: ['deps', 'renovate'],
+        platformPrOptions: {
+          usePlatformAutomerge: true,
+          automergeFailureComment: 'on-error',
+        },
+      };
+
       const mockScope = async (repoOpts: any = {}): Promise<httpMock.Scope> => {
         const scope = httpMock.scope(githubApiHost);
         initRepoMock(scope, 'some/repo', repoOpts);
@@ -2973,6 +2986,16 @@ describe('modules/platform/github/index', () => {
           restAddLabels,
           graphqlAutomerge,
         ]);
+      });
+
+      it('should handle GraphQL errors with automergeFailureComment', async () => {
+        const scope = await mockScope({ automergeFailureComment: 'on-error' });
+        scope
+          .post('/repos/some/repo/issues/123/comments')
+          .reply(200)
+          .post('/graphql')
+          .reply(200, graphqlAutomergeErrorResp);
+        await expect(github.createPr(prConfigComment)).toResolve();
       });
 
       it('should handle REST API errors', async () => {
