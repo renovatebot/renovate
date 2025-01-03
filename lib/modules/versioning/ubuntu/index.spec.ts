@@ -5,84 +5,88 @@ describe('modules/versioning/ubuntu/index', () => {
   const dt = DateTime.fromISO('2022-04-20');
 
   it.each`
-    version             | expected
-    ${undefined}        | ${false}
-    ${null}             | ${false}
-    ${''}               | ${false}
-    ${'xenial'}         | ${true}
-    ${'04.10'}          | ${true}
-    ${'05.04'}          | ${true}
-    ${'05.10'}          | ${true}
-    ${'6.06'}           | ${true}
-    ${'6.10'}           | ${true}
-    ${'7.04'}           | ${true}
-    ${'7.10'}           | ${true}
-    ${'8.04'}           | ${true}
-    ${'8.10'}           | ${true}
-    ${'9.04'}           | ${true}
-    ${'9.10'}           | ${true}
-    ${'10.04.4'}        | ${true}
-    ${'10.10'}          | ${true}
-    ${'11.04'}          | ${true}
-    ${'11.10'}          | ${true}
-    ${'12.04.5'}        | ${true}
-    ${'12.10'}          | ${true}
-    ${'13.04'}          | ${true}
-    ${'13.10'}          | ${true}
-    ${'14.04.6'}        | ${true}
-    ${'14.10'}          | ${true}
-    ${'15.04'}          | ${true}
-    ${'15.10'}          | ${true}
-    ${'16.04.7'}        | ${true}
-    ${'16.10'}          | ${true}
-    ${'17.04'}          | ${true}
-    ${'17.10'}          | ${true}
-    ${'18.04.5'}        | ${true}
-    ${'18.10'}          | ${true}
-    ${'19.04'}          | ${true}
-    ${'19.10'}          | ${true}
-    ${'20.04'}          | ${true}
-    ${'20.10'}          | ${true}
-    ${'2020.04'}        | ${false}
-    ${'xenial'}         | ${true}
-    ${'warty'}          | ${true}
-    ${'hoary'}          | ${true}
-    ${'breezy'}         | ${true}
-    ${'dapper'}         | ${true}
-    ${'edgy'}           | ${true}
-    ${'feisty'}         | ${true}
-    ${'gutsy'}          | ${true}
-    ${'hardy'}          | ${true}
-    ${'intrepid'}       | ${true}
-    ${'jaunty'}         | ${true}
-    ${'karmic'}         | ${true}
-    ${'lucid.4'}        | ${false}
-    ${'maverick'}       | ${true}
-    ${'natty'}          | ${true}
-    ${'oneiric'}        | ${true}
-    ${'precise.5'}      | ${false}
-    ${'quantal'}        | ${true}
-    ${'raring'}         | ${true}
-    ${'saucy'}          | ${true}
-    ${'trusty.6'}       | ${false}
-    ${'utopic'}         | ${true}
-    ${'vivid'}          | ${true}
-    ${'wily'}           | ${true}
-    ${'xenial.7'}       | ${false}
-    ${'yakkety'}        | ${true}
-    ${'zesty'}          | ${true}
-    ${'artful'}         | ${true}
-    ${'bionic.5'}       | ${false}
-    ${'cosmic'}         | ${true}
-    ${'disco'}          | ${true}
-    ${'eoan'}           | ${true}
-    ${'focal'}          | ${true}
-    ${'groovy'}         | ${true}
-    ${'hirsute'}        | ${true}
-    ${'impish'}         | ${true}
-    ${'jammy'}          | ${true}
-    ${'jammy-20230816'} | ${true}
-    ${'jammy-2023086'}  | ${false}
+    version                   | expected
+    ${undefined}              | ${false}
+    ${null}                   | ${false}
+    ${''}                     | ${false}
+    ${'xenial'}               | ${true}
+    ${'04.10'}                | ${true}
+    ${'05.04'}                | ${true}
+    ${'05.10'}                | ${true}
+    ${'6.06'}                 | ${true}
+    ${'6.10'}                 | ${true}
+    ${'7.04'}                 | ${true}
+    ${'7.10'}                 | ${true}
+    ${'8.04'}                 | ${true}
+    ${'8.10'}                 | ${true}
+    ${'9.04'}                 | ${true}
+    ${'9.10'}                 | ${true}
+    ${'10.04.4'}              | ${true}
+    ${'10.10'}                | ${true}
+    ${'11.04'}                | ${true}
+    ${'11.10'}                | ${true}
+    ${'12.04.5'}              | ${true}
+    ${'12.10'}                | ${true}
+    ${'13.04'}                | ${true}
+    ${'13.10'}                | ${true}
+    ${'14.04.6'}              | ${true}
+    ${'14.10'}                | ${true}
+    ${'15.04'}                | ${true}
+    ${'15.10'}                | ${true}
+    ${'16.04.7'}              | ${true}
+    ${'16.10'}                | ${true}
+    ${'17.04'}                | ${true}
+    ${'17.10'}                | ${true}
+    ${'18.04.5'}              | ${true}
+    ${'18.10'}                | ${true}
+    ${'19.04'}                | ${true}
+    ${'19.10'}                | ${true}
+    ${'20.04'}                | ${true}
+    ${'20.10'}                | ${true}
+    ${'2020.04'}              | ${false}
+    ${'xenial'}               | ${true}
+    ${'warty'}                | ${true}
+    ${'hoary'}                | ${true}
+    ${'breezy'}               | ${true}
+    ${'dapper'}               | ${true}
+    ${'edgy'}                 | ${true}
+    ${'feisty'}               | ${true}
+    ${'gutsy'}                | ${true}
+    ${'hardy'}                | ${true}
+    ${'intrepid'}             | ${true}
+    ${'jaunty'}               | ${true}
+    ${'karmic'}               | ${true}
+    ${'lucid.4'}              | ${false}
+    ${'maverick'}             | ${true}
+    ${'natty'}                | ${true}
+    ${'oneiric'}              | ${true}
+    ${'precise.5'}            | ${false}
+    ${'quantal'}              | ${true}
+    ${'raring'}               | ${true}
+    ${'saucy'}                | ${true}
+    ${'trusty.6'}             | ${false}
+    ${'utopic'}               | ${true}
+    ${'vivid'}                | ${true}
+    ${'wily'}                 | ${true}
+    ${'xenial.7'}             | ${false}
+    ${'yakkety'}              | ${true}
+    ${'zesty'}                | ${true}
+    ${'artful'}               | ${true}
+    ${'bionic.5'}             | ${false}
+    ${'cosmic'}               | ${true}
+    ${'disco'}                | ${true}
+    ${'eoan'}                 | ${true}
+    ${'focal'}                | ${true}
+    ${'groovy'}               | ${true}
+    ${'hirsute'}              | ${true}
+    ${'impish'}               | ${true}
+    ${'jammy'}                | ${true}
+    ${'jammy-20230816'}       | ${true}
+    ${'jammy-20230816'}       | ${true}
+    ${'yakkety-20160806.1'}   | ${true}
+    ${'utopic-20150228.11'}   | ${true}
+    ${'utopic-20150228.11.1'} | ${false}
+    ${'oracular-20240811.'}   | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     expect(ubuntu.isValid(version)).toBe(expected);
   });
@@ -272,51 +276,59 @@ describe('modules/versioning/ubuntu/index', () => {
   );
 
   it.each`
-    a                   | b                   | expected
-    ${'20.04'}          | ${'2020.04'}        | ${false}
-    ${'17.10'}          | ${'artful'}         | ${true}
-    ${'xenial'}         | ${'artful'}         | ${false}
-    ${'17.04'}          | ${'artful'}         | ${false}
-    ${'artful'}         | ${'17.10'}          | ${true}
-    ${'16.04'}          | ${'xenial'}         | ${true}
-    ${'focal'}          | ${'20.04'}          | ${true}
-    ${'20.04'}          | ${'focal'}          | ${true}
-    ${'19.10'}          | ${'19.10'}          | ${true}
-    ${'jammy'}          | ${'jammy-20230816'} | ${false}
-    ${'jammy-20230816'} | ${'jammy-20230816'} | ${true}
-    ${'jammy-20230716'} | ${'jammy-20230816'} | ${false}
+    a                     | b                      | expected
+    ${'20.04'}            | ${'2020.04'}           | ${false}
+    ${'17.10'}            | ${'artful'}            | ${true}
+    ${'xenial'}           | ${'artful'}            | ${false}
+    ${'17.04'}            | ${'artful'}            | ${false}
+    ${'artful'}           | ${'17.10'}             | ${true}
+    ${'16.04'}            | ${'xenial'}            | ${true}
+    ${'focal'}            | ${'20.04'}             | ${true}
+    ${'20.04'}            | ${'focal'}             | ${true}
+    ${'19.10'}            | ${'19.10'}             | ${true}
+    ${'jammy'}            | ${'jammy-20230816'}    | ${false}
+    ${'jammy-20230816'}   | ${'jammy-20230816'}    | ${true}
+    ${'jammy-20230716'}   | ${'jammy-20230816'}    | ${false}
+    ${'jammy-20230716.1'} | ${'jammy-20230716.1'}  | ${true}
+    ${'jammy-20230716.1'} | ${'jammy-20230716.2'}  | ${false}
+    ${'jammy-20230716.1'} | ${'jammy-20230816.11'} | ${false}
   `('equals($a, $b) === $expected', ({ a, b, expected }) => {
     expect(ubuntu.equals(a, b)).toBe(expected);
   });
 
   it.each`
-    a                   | b                   | expected
-    ${'20.04'}          | ${'20.10'}          | ${false}
-    ${'20.10'}          | ${'20.04'}          | ${true}
-    ${'19.10'}          | ${'20.04'}          | ${false}
-    ${'20.04'}          | ${'19.10'}          | ${true}
-    ${'16.04'}          | ${'16.04.7'}        | ${false}
-    ${'16.04.7'}        | ${'16.04'}          | ${true}
-    ${'16.04.1'}        | ${'16.04.7'}        | ${false}
-    ${'16.04.7'}        | ${'16.04.1'}        | ${true}
-    ${'19.10.1'}        | ${'20.04.1'}        | ${false}
-    ${'20.04.1'}        | ${'19.10.1'}        | ${true}
-    ${'xxx'}            | ${'yyy'}            | ${false}
-    ${'focal'}          | ${'groovy'}         | ${false}
-    ${'groovy'}         | ${'focal'}          | ${true}
-    ${'eoan'}           | ${'focal'}          | ${false}
-    ${'focal'}          | ${'eoan'}           | ${true}
-    ${'vivid'}          | ${'saucy'}          | ${true}
-    ${'impish'}         | ${'focal'}          | ${true}
-    ${'eoan'}           | ${'quantal'}        | ${true}
-    ${'focal'}          | ${'lucid'}          | ${true}
-    ${'eoan'}           | ${'focal'}          | ${false}
-    ${'focal'}          | ${'eoan'}           | ${true}
-    ${'jammy'}          | ${'focal'}          | ${true}
-    ${'jammy-20230816'} | ${'focal'}          | ${true}
-    ${'jammy-20230816'} | ${'jammy-20230716'} | ${true}
-    ${'jammy-20230716'} | ${'jammy-20230816'} | ${false}
-    ${'focal-20230816'} | ${'jammy-20230716'} | ${false}
+    a                     | b                        | expected
+    ${'20.04'}            | ${'20.10'}               | ${false}
+    ${'20.10'}            | ${'20.04'}               | ${true}
+    ${'19.10'}            | ${'20.04'}               | ${false}
+    ${'20.04'}            | ${'19.10'}               | ${true}
+    ${'16.04'}            | ${'16.04.7'}             | ${false}
+    ${'16.04.7'}          | ${'16.04'}               | ${true}
+    ${'16.04.1'}          | ${'16.04.7'}             | ${false}
+    ${'16.04.7'}          | ${'16.04.1'}             | ${true}
+    ${'19.10.1'}          | ${'20.04.1'}             | ${false}
+    ${'20.04.1'}          | ${'19.10.1'}             | ${true}
+    ${'xxx'}              | ${'yyy'}                 | ${false}
+    ${'focal'}            | ${'groovy'}              | ${false}
+    ${'groovy'}           | ${'focal'}               | ${true}
+    ${'eoan'}             | ${'focal'}               | ${false}
+    ${'focal'}            | ${'eoan'}                | ${true}
+    ${'vivid'}            | ${'saucy'}               | ${true}
+    ${'impish'}           | ${'focal'}               | ${true}
+    ${'eoan'}             | ${'quantal'}             | ${true}
+    ${'focal'}            | ${'lucid'}               | ${true}
+    ${'eoan'}             | ${'focal'}               | ${false}
+    ${'focal'}            | ${'eoan'}                | ${true}
+    ${'jammy'}            | ${'focal'}               | ${true}
+    ${'jammy-20230816'}   | ${'focal'}               | ${true}
+    ${'jammy-20230816'}   | ${'jammy-20230716'}      | ${true}
+    ${'jammy-20230716'}   | ${'jammy-20230816'}      | ${false}
+    ${'focal-20230816'}   | ${'jammy-20230716'}      | ${false}
+    ${'zesty-20170517.1'} | ${'jammy-20240627.1'}    | ${false}
+    ${'jammy-20240627.3'} | ${'jammy-20240627.1'}    | ${true}
+    ${'jammy-20240627.3'} | ${'jammy-20240627.4'}    | ${false}
+    ${'jammy-20240627.1'} | ${'precise-20150228.11'} | ${true}
+    ${'jammy-20240627'}   | ${'precise-20150228.11'} | ${true}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(ubuntu.isGreaterThan(a, b)).toBe(expected);
   });
