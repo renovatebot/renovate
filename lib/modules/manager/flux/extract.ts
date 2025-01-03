@@ -21,7 +21,10 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types';
-import { isSystemManifest, systemManifestHeaderRegex } from './common';
+import {
+  isSystemManifest,
+  systemManifestHeaderRegex,
+} from './common';
 import { FluxResource, type HelmRepository } from './schema';
 import type {
   FluxManagerData,
@@ -102,6 +105,39 @@ function resolveGitRepositoryPerSourceTag(
   }
 }
 
+function resolveHelmRepository(
+  dep: PackageDependency,
+  matchingRepositories: HelmRepository[],
+  registryAliases: Record<string, string> | undefined,
+): void {
+  if (matchingRepositories.length) {
+    dep.registryUrls = matchingRepositories
+      .map((repo) => {
+        if (repo.spec.type === 'oci' || isOCIRegistry(repo.spec.url)) {
+          // Change datasource to Docker
+          dep.datasource = DockerDatasource.id;
+          // Ensure the URL is a valid OCI path
+          dep.packageName = getDep(
+            `${removeOCIPrefix(repo.spec.url)}/${dep.depName}`,
+            false,
+            registryAliases,
+          ).depName;
+          return null;
+        } else {
+          return repo.spec.url;
+        }
+      })
+      .filter(is.string);
+
+    // if registryUrls is empty, delete it from dep
+    if (!dep.registryUrls?.length) {
+      delete dep.registryUrls;
+    }
+  } else {
+    dep.skipReason = 'unknown-registry';
+  }
+}
+
 function resolveSystemManifest(
   manifest: SystemFluxManifest,
 ): PackageDependency<FluxManagerData>[] {
@@ -126,14 +162,27 @@ function resolveResourceManifest(
   for (const resource of manifest.resources) {
     switch (resource.kind) {
       case 'HelmRelease': {
-        const depName = resource.spec.chart.spec.chart;
+        if (resource.spec.chartRef) {
+          logger.trace(
+            'HelmRelease using chartRef was found, skipping as version will be handled via referenced resource directly',
+          );
+          continue;
+        }
+        if (!resource.spec.chart) {
+          logger.debug('invalid or incomplete HelmRelease spec, skipping');
+          continue;
+        }
+
+        const chartSpec = resource.spec.chart.spec;
+        const chartName = chartSpec.chart;
+
         const dep: PackageDependency = {
-          depName,
+          depName: chartName,
           currentValue: resource.spec.chart.spec.version,
           datasource: HelmDatasource.id,
         };
 
-        if (depName.startsWith('./')) {
+        if (chartName.startsWith('./')) {
           dep.skipReason = 'local-chart';
           delete dep.datasource;
           deps.push(dep);
@@ -142,43 +191,46 @@ function resolveResourceManifest(
 
         const matchingRepositories = helmRepositories.filter(
           (rep) =>
-            rep.kind === resource.spec.chart.spec.sourceRef?.kind &&
-            rep.metadata.name === resource.spec.chart.spec.sourceRef.name &&
+            rep.kind === chartSpec.sourceRef?.kind &&
+            rep.metadata.name === chartSpec.sourceRef.name &&
             rep.metadata.namespace ===
-              (resource.spec.chart.spec.sourceRef.namespace ??
-                resource.metadata?.namespace),
+              (chartSpec.sourceRef.namespace ?? resource.metadata?.namespace),
         );
-        if (matchingRepositories.length) {
-          dep.registryUrls = matchingRepositories
-            .map((repo) => {
-              if (repo.spec.type === 'oci' || isOCIRegistry(repo.spec.url)) {
-                // Change datasource to Docker
-                dep.datasource = DockerDatasource.id;
-                // Ensure the URL is a valid OCI path
-                dep.packageName = getDep(
-                  `${removeOCIPrefix(repo.spec.url)}/${
-                    resource.spec.chart.spec.chart
-                  }`,
-                  false,
-                  registryAliases,
-                ).depName;
-                return null;
-              } else {
-                return repo.spec.url;
-              }
-            })
-            .filter(is.string);
+        resolveHelmRepository(dep, matchingRepositories, registryAliases);
+        deps.push(dep);
+        break;
+      }
 
-          // if registryUrls is empty, delete it from dep
-          if (!dep.registryUrls?.length) {
-            delete dep.registryUrls;
-          }
+      case 'HelmChart': {
+        if (resource.spec.sourceRef.kind === 'GitRepository') {
+          logger.trace(
+            'HelmChart using GitRepository was found, skipping as version will be handled via referenced resource directly',
+          );
+          continue;
+        }
+
+        const dep: PackageDependency = {
+          depName: resource.spec.chart,
+        };
+
+        if (resource.spec.sourceRef.kind === 'HelmRepository') {
+          dep.currentValue = resource.spec.version;
+          dep.datasource = HelmDatasource.id;
+
+          const matchingRepositories = helmRepositories.filter(
+            (rep) =>
+              rep.kind === resource.spec.sourceRef?.kind &&
+              rep.metadata.name === resource.spec.sourceRef.name &&
+              rep.metadata.namespace === resource.metadata?.namespace,
+          );
+          resolveHelmRepository(dep, matchingRepositories, registryAliases);
         } else {
-          dep.skipReason = 'unknown-registry';
+          dep.skipReason = 'unsupported-datasource';
         }
         deps.push(dep);
         break;
       }
+
       case 'GitRepository': {
         const dep: PackageDependency = {
           depName: resource.metadata.name,
