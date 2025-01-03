@@ -634,6 +634,25 @@ export async function validateConfig(
                   message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                 });
               }
+            } else if (key === 'encrypted') {
+              const res = validatePlainObject(val);
+              if (res !== true) {
+                errors.push({
+                  topic: 'Configuration Error',
+                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
+                });
+              }
+
+              const privateKey =
+                configType === 'global'
+                  ? config.privateKey
+                  : GlobalConfig.get('privateKey');
+              if (!is.nonEmptyString(privateKey)) {
+                errors.push({
+                  topic: 'Configuration Error',
+                  message: `No privateKey found in hosted config. \`encrypted\` object cannot be used without a privateKey.`,
+                });
+              }
             } else if (key === 'env') {
               const allowedEnvVars =
                 configType === 'global'
