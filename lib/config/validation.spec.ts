@@ -943,6 +943,47 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
+    it('errors if encrypted object found without privateKey', async () => {
+      const config = {
+        encrypted: {
+          npmToken:
+            'xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA==',
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message: `No privateKey found in hosted config. \`encrypted\` object cannot be used without a privateKey.`,
+        },
+      ]);
+    });
+
+    it('errors if invalid encrypted object', async () => {
+      GlobalConfig.set({ privateKey: 'some-private-key' });
+      const config = {
+        encrypted: {
+          npmToken: 1,
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid `encrypted.encrypted.npmToken` configuration: value is not a string',
+        },
+      ]);
+    });
+
     it('errors if registryAliases depth is more than 1', async () => {
       const config = {
         registryAliases: {
@@ -1422,6 +1463,26 @@ describe('config/validation', () => {
         {
           message: 'Invalid configuration option: logFileLevel',
           topic: 'Configuration Error',
+        },
+      ]);
+    });
+
+    it('errors if encrypted object found without privateKey', async () => {
+      const config = {
+        encrypted: {
+          npmToken:
+            'xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA==',
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message: `No privateKey found in hosted config. \`encrypted\` object cannot be used without a privateKey.`,
         },
       ]);
     });

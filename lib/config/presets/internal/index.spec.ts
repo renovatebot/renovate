@@ -1,5 +1,6 @@
 import { resolveConfigPresets } from '../';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import { GlobalConfig } from '../../global';
 import { massageConfig } from '../../massage';
 import { validateConfig } from '../../validation';
 import * as npm from '../npm';
@@ -27,6 +28,11 @@ describe('config/presets/internal/index', () => {
       if (presetName !== 'description' && !ignoredPresets.includes(preset)) {
         it(`${preset} validates`, async () => {
           try {
+            if (preset === 'default:githubComToken') {
+              GlobalConfig.set({
+                privateKey: 'some-private-key',
+              });
+            }
             const config = await resolveConfigPresets(
               massageConfig(presetConfig),
             );
