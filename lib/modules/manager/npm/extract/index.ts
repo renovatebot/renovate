@@ -17,6 +17,7 @@ import type {
 import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getExtractedConstraints } from './common/dependency';
 import { extractPackageJson } from './common/package-file';
+import { extractPnpmWorkspaceFile } from './pnpm';
 import { postExtract } from './post';
 import type { NpmPackage } from './types';
 import { isZeroInstall } from './yarn';
@@ -229,12 +230,24 @@ export async function extractAllPackageFiles(
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else
     if (content) {
-      const deps = await extractPackageFile(content, packageFile, config);
-      if (deps) {
-        npmFiles.push({
-          ...deps,
-          packageFile,
-        });
+      // TODO(fpapado): for PR dicussion, consider this vs. a post hook, where
+      // we look for pnpm-workspace.yaml in the siblings
+      if (packageFile === 'pnpm-workspace.yaml') {
+        const deps = extractPnpmWorkspaceFile(content, packageFile);
+        if (deps) {
+          npmFiles.push({
+            ...deps,
+            packageFile,
+          });
+        }
+      } else {
+        const deps = await extractPackageFile(content, packageFile, config);
+        if (deps) {
+          npmFiles.push({
+            ...deps,
+            packageFile,
+          });
+        }
       }
     } else {
       logger.debug({ packageFile }, `No content found`);

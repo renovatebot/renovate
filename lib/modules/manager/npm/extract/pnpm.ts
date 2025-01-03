@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
 import upath from 'upath';
+import { z } from 'zod';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import {
@@ -10,10 +11,19 @@ import {
   readLocalFile,
 } from '../../../../util/fs';
 import { parseSingleYaml } from '../../../../util/yaml';
-import type { PackageFile } from '../../types';
+import type {
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../../types';
 import type { PnpmDependencySchema, PnpmLockFile } from '../post-update/types';
 import type { NpmManagerData } from '../types';
-import type { LockFile, PnpmWorkspaceFile } from './types';
+import { extractDependency, parseDepName } from './common/dependency';
+import type {
+  LockFile,
+  NpmPackageDependency,
+  PnpmWorkspaceFile,
+} from './types';
 
 function isPnpmLockfile(obj: any): obj is PnpmLockFile {
   return is.plainObject(obj) && 'lockfileVersion' in obj;
@@ -86,8 +96,8 @@ export async function detectPnpmWorkspaces(
   const packagePathCache = new Map<string, string[] | null>();
 
   for (const p of packageFiles) {
-    const { packageFile, managerData } = p;
-    const { pnpmShrinkwrap } = managerData as NpmManagerData;
+    const { packageFile, managerData = {} } = p;
+    const { pnpmShrinkwrap } = managerData as Partial<NpmManagerData>;
 
     // check if pnpmShrinkwrap-file has already been provided
     if (pnpmShrinkwrap) {
@@ -221,4 +231,109 @@ function getLockedDependencyVersions(
   }
 
   return res;
+}
+
+/**
+ * A pnpm catalog is either the default catalog (catalog:, catlog:default), or a
+ * named one (under catalogs:)
+ */
+type PnpmCatalog = { name: string; dependencies: NpmPackageDependency };
+
+export function extractPnpmWorkspaceFile(
+  content: string,
+  packageFile: string,
+): PackageFile | null {
+  logger.trace(`pnpm.extractPnpmWorkspaceFile(${packageFile})`);
+
+  let pnpmCatalogs: Array<PnpmCatalog>;
+  try {
+    pnpmCatalogs = parsePnpmCatalogs(content);
+  } catch {
+    logger.debug({ packageFile }, `Invalid pnpm workspace YAML.`);
+    return null;
+  }
+
+  const extracted = extractPnpmCatalogDeps(pnpmCatalogs);
+
+  if (!extracted) {
+    logger.debug({ packageFile }, 'No dependencies found');
+    return null;
+  }
+
+  logger.debug(extracted, 'Extracted catalog dependencies.');
+
+  return {
+    ...extracted,
+    packageFile,
+  };
+}
+
+function extractPnpmCatalogDeps(
+  catalogs: Array<PnpmCatalog>,
+): PackageFileContent<NpmManagerData> | null {
+  const CATALOG_DEPENDENCY = 'pnpm.catalog';
+
+  const deps: PackageDependency[] = [];
+
+  for (const catalog of catalogs) {
+    for (const [key, val] of Object.entries(catalog.dependencies)) {
+      const depName = parseDepName(CATALOG_DEPENDENCY, key);
+      let dep: PackageDependency = {
+        depType: CATALOG_DEPENDENCY,
+        // TODO(fpapado): for PR discussion, consider how users might be able to
+        // match on specific catalogs for their config.
+        //
+        // For example, we could change depType to `pnpm.catalog.${string}`, so
+        // that users can match use `{matchDepTypes: ["pnpm.catalog.default"]}`,
+        // `{matchDepTypes: ["pnpm.catalog.react17"]}` and so on.
+        //
+        // Another option would be to mess with depName/packageName.
+        //
+        // Is there precedence for something similar?
+        depName,
+        managerData: {
+          // We assign the name of the catalog, in order to know which fields to
+          // update later on.
+          catalogName: catalog.name,
+        },
+      };
+      if (depName !== key) {
+        dep.managerData!.key = key;
+      }
+
+      // TODO: fix type #22198
+      dep = {
+        ...dep,
+        ...extractDependency(CATALOG_DEPENDENCY, depName, val!),
+        prettyDepType: CATALOG_DEPENDENCY,
+      };
+      dep.prettyDepType = CATALOG_DEPENDENCY;
+      deps.push(dep);
+    }
+  }
+
+  return {
+    deps,
+  };
+}
+
+export const pnpmCatalogsSchema = z.object({
+  catalog: z.optional(z.record(z.string())),
+  catalogs: z.optional(z.record(z.record(z.string()))),
+});
+
+function parsePnpmCatalogs(content: string): Array<PnpmCatalog> {
+  const { catalog: defaultCatalogDeps, catalogs: namedCatalogs } =
+    parseSingleYaml(content, { customSchema: pnpmCatalogsSchema });
+
+  return [
+    {
+      name: 'default',
+      dependencies: defaultCatalogDeps ?? {},
+    },
+    ...Object.entries(namedCatalogs ?? {}).map(([name, dependencies]) => ({
+      name,
+      dependencies,
+    })),
+  ];
 }

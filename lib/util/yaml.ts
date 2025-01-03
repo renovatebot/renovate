@@ -1,5 +1,6 @@
 import type {
   CreateNodeOptions,
+  Document,
   DocumentOptions,
   ParseOptions,
   SchemaOptions,
@@ -17,6 +18,13 @@ interface YamlOptions<
     DocumentOptions,
     SchemaOptions {
   customSchema?: Schema;
+  removeTemplates?: boolean;
+}
+
+interface YamlParseDocumentOptions
+  extends ParseOptions,
+    DocumentOptions,
+    SchemaOptions {
   removeTemplates?: boolean;
 }
 
@@ -117,6 +125,29 @@ export function parseSingleYaml<ResT = unknown>(
   content: string,
   options?: YamlOptions<ResT>,
 ): ResT {
+  const rawDocument = parseSingleYamlDocument(content, options);
+
+  const document = rawDocument.toJS({ maxAliasCount: 10000 });
+  const schema = options?.customSchema;
+  if (!schema) {
+    return document as ResT;
+  }
+
+  return schema.parse(document);
+}
+
+/**
+ * Parse a YAML string into a Document representation.
+ *
+ * Only a single document is supported.
+ *
+ * @param content
+ * @param options
+ */
+export function parseSingleYamlDocument(
+  content: string,
+  options?: YamlParseDocumentOptions,
+): Document {
   const massagedContent = massageContent(content, options);
   const rawDocument = parseDocument(
     massagedContent,
@@ -127,13 +158,7 @@ export function parseSingleYaml<ResT = unknown>(
     throw new AggregateError(rawDocument.errors, 'Failed to parse YAML file');
   }
 
-  const document = rawDocument.toJS({ maxAliasCount: 10000 });
-  const schema = options?.customSchema;
-  if (!schema) {
-    return document as ResT;
-  }
-
-  return schema.parse(document);
+  return rawDocument;
 }
 
 export function dump(obj: any, opts?: DumpOptions): string {
