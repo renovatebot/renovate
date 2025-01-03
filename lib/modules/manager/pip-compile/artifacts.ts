@@ -110,7 +110,10 @@ export async function updateArtifacts({
     try {
       await writeLocalFile(inputFileName, newInputContent);
       // TODO(not7cd): use --upgrade option instead deleting
-      if (config.isLockFileMaintenance) {
+      if (
+        config.updateType === 'lockFileMaintenance' ||
+        config.isLockFileMaintenance
+      ) {
         await deleteLocalFile(outputFileName);
       }
       const compileArgs = extractHeaderCommand(existingOutput, outputFileName);
