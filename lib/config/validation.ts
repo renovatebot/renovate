@@ -645,8 +645,9 @@ export async function validateConfig(
 
               const privateKey =
                 configType === 'global'
-                  ? config.privateKey
-                  : GlobalConfig.get('privateKey');
+                  ? (config.privateKey ?? config.privateKeyOld)
+                  : (GlobalConfig.get('privateKey') ??
+                    GlobalConfig.get('privateKeyOld'));
               if (!is.nonEmptyString(privateKey)) {
                 errors.push({
                   topic: 'Configuration Error',
