@@ -12,7 +12,7 @@ import type {
 } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
 import type { LongCommitSha } from '../../../util/git/types';
-import { isLimitReached } from '../../global/limits';
+import { counts } from '../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import * as _branchWorker from '../update/branch';
 import * as _limits from './limits';
@@ -32,8 +32,9 @@ const repoCache = mocked(_repoCache);
 
 branchWorker.processBranch = jest.fn();
 
-limits.getPrsRemaining = jest.fn().mockResolvedValue(99);
-limits.getBranchesRemaining = jest.fn().mockResolvedValue(99);
+limits.getConcurrentPrsCount = jest.fn().mockResolvedValue(0);
+limits.getConcurrentBranchesCount = jest.fn().mockResolvedValue(0);
+limits.getPrHourlyCount = jest.fn().mockResolvedValue(0);
 
 let config: RenovateConfig;
 
@@ -104,22 +105,35 @@ describe('workers/repository/process/write', () => {
 
     it('increments branch counter', async () => {
       const branchName = 'branchName';
-      const branches: BranchConfig[] = [
-        { baseBranch: 'main', branchName, upgrades: [], manager: 'npm' },
-        { baseBranch: 'dev', branchName, upgrades: [], manager: 'npm' },
-      ];
+      const branches = partial<BranchConfig[]>([
+        {
+          baseBranch: 'main',
+          branchName,
+          upgrades: partial<BranchUpgradeConfig>([{ prConcurrentLimit: 10 }]),
+          manager: 'npm',
+        },
+        {
+          baseBranch: 'dev',
+          branchName,
+          upgrades: partial<BranchUpgradeConfig>([{ prConcurrentLimit: 10 }]),
+          manager: 'npm',
+        },
+      ]);
       repoCache.getCache.mockReturnValueOnce({});
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
         result: 'pr-created',
       });
-      scm.branchExists.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
-      limits.getBranchesRemaining.mockResolvedValueOnce(1);
-      expect(isLimitReached('Branches')).toBeFalse();
+
+      limits.getConcurrentPrsCount.mockResolvedValue(0);
+      limits.getConcurrentBranchesCount.mockResolvedValue(0);
+      limits.getPrHourlyCount.mockResolvedValue(0);
+
+      scm.branchExists.mockResolvedValueOnce(false).mockResolvedValue(true);
       GlobalConfig.set({ dryRun: 'full' });
       config.baseBranches = ['main', 'dev'];
       await writeUpdates(config, branches);
-      expect(isLimitReached('Branches')).toBeTrue();
+      expect(counts.get('Branches')).toBe(1);
       expect(addMeta).toHaveBeenCalledWith({
         baseBranch: 'main',
         branch: branchName,
