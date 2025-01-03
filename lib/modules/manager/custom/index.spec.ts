@@ -10,6 +10,8 @@ describe('modules/manager/custom/index', () => {
       expect(customManager.isCustomManager('npm')).toBe(false);
       expect(customManager.isCustomManager('regex')).toBe(true);
       expect(customManager.isCustomManager('custom.regex')).toBe(false);
+      expect(customManager.isCustomManager('jsonata')).toBe(true);
+      expect(customManager.isCustomManager('custom.jsonata')).toBe(false);
     });
   });
 });
