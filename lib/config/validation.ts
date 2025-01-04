@@ -645,14 +645,23 @@ export async function validateConfig(
 
               const privateKey =
                 configType === 'global'
-                  ? (config.privateKey ?? config.privateKeyOld)
-                  : (GlobalConfig.get('privateKey') ??
-                    GlobalConfig.get('privateKeyOld'));
+                  ? config.privateKey
+                  : GlobalConfig.get('privateKey');
               if (!is.nonEmptyString(privateKey)) {
-                errors.push({
-                  topic: 'Configuration Error',
-                  message: `No privateKey found in hosted config. \`encrypted\` object cannot be used without a privateKey.`,
-                });
+                if (process.env.MEND_HOSTED === 'true') {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Mend-hosted Renovate Apps no longer support the use of encrypted secrets in Renovate file config (ie. renovate.json).
+Please migrate all secrets to the Developer Portal using the web UI available at https://developer.mend.io/
+
+Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migrating-secrets/`,
+                  });
+                } else {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `No privateKey found in hosted config. \`encrypted\` object cannot be used without a privateKey.`,
+                  });
+                }
               }
             } else if (key === 'env') {
               const allowedEnvVars =
