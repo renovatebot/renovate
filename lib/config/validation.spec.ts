@@ -946,8 +946,7 @@ describe('config/validation', () => {
     it('errors if encrypted object found without privateKey', async () => {
       const config = {
         encrypted: {
-          npmToken:
-            'xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA==',
+          npmToken: 'xxT19RIdhAh=exampletoken',
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
@@ -966,10 +965,10 @@ describe('config/validation', () => {
     it('errors with Mend-specific message when encrypted field found in config', async () => {
       const config = {
         encrypted: {
-          npmToken:
-            'xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA==',
+          npmToken: 'xxT19RIdhAh=exampletoken',
         },
       };
+      process.env.MEND_HOSTED = 'true';
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
         config,
@@ -984,6 +983,7 @@ Please migrate all secrets to the Developer Portal using the web UI available at
 Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migrating-secrets/`,
         },
       ]);
+      process.env.MEND_HOSTED = undefined;
     });
 
     it('errors if invalid encrypted object', async () => {
@@ -1493,8 +1493,7 @@ Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migr
     it('errors if encrypted object found without privateKey', async () => {
       const config = {
         encrypted: {
-          npmToken:
-            'xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA==',
+          npmToken: 'xxT19RIdhAh=exampletoken',
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
