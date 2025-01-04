@@ -137,13 +137,12 @@ export function findDepends(
   content: string,
 ): { buildDependsContent: string; lengthProcessed: number } | null {
   const matchObj = buildDependsRegex.exec(content);
-  if (matchObj === null) {
+  if (!matchObj?.groups) {
     return null;
   }
-
   const indent = countPrecedingIndentation(content, matchObj.index);
   const ourIdx: number =
-    matchObj.index + matchObj.groups!['buildDependsFieldName'].length;
+    matchObj.index + matchObj.groups['buildDependsFieldName'].length;
   const extent: number = findExtents(indent + 1, content.slice(ourIdx));
   return {
     buildDependsContent: content.slice(ourIdx, ourIdx + extent),

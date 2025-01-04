@@ -9,20 +9,23 @@ import {
 describe('modules/manager/haskell-cabal/extract', () => {
   describe('countPackageNameLength', () => {
     it.each`
-      input    | expected
-      ${'-'}   | ${null}
-      ${'-j'}  | ${null}
-      ${'-H'}  | ${null}
-      ${'j-'}  | ${null}
-      ${'3-'}  | ${null}
-      ${'-3'}  | ${null}
-      ${'3'}   | ${null}
-      ${'æ'}   | ${null}
-      ${'æe'}  | ${null}
-      ${'j'}   | ${1}
-      ${'H'}   | ${1}
-      ${'0ad'} | ${3}
-      ${'3d'}  | ${2}
+      input       | expected
+      ${'-'}      | ${null}
+      ${'-j'}     | ${null}
+      ${'-H'}     | ${null}
+      ${'j-'}     | ${null}
+      ${'3-'}     | ${null}
+      ${'-3'}     | ${null}
+      ${'3'}      | ${null}
+      ${'æ'}      | ${null}
+      ${'æe'}     | ${null}
+      ${'j'}      | ${1}
+      ${'H'}      | ${1}
+      ${'0ad'}    | ${3}
+      ${'3d'}     | ${2}
+      ${'aeson'}  | ${5}
+      ${'lens'}   | ${4}
+      ${'parsec'} | ${6}
     `('matches $input', ({ input, expected }) => {
       const maybeIndex = countPackageNameLength(input);
       expect(maybeIndex).toStrictEqual(expected);
@@ -70,17 +73,22 @@ describe('modules/manager/haskell-cabal/extract', () => {
       'splitSingleDependency($depLine)',
       ({ depLine, expectedName, expectedRange }) => {
         const res = splitSingleDependency(depLine);
-        expect(res?.name).toBe(expectedName);
-        expect(res?.range).toBe(expectedRange);
+        expect(res?.name).toEqual(expectedName);
+        expect(res?.range).toEqual(expectedRange);
       },
     );
+
+    // The first hyphen makes the package name invalid
+    expect(splitSingleDependency('-invalid-package-name')).toBeNull();
   });
 
   describe('extractNamesAndRanges()', () => {
     it('trims replaceString', () => {
       const res = extractNamesAndRanges(' a , b ');
-      expect(res).toHaveLength(2);
-      expect(res[0].replaceString).toBe('a');
+      expect(res).toEqual([
+        { currentValue: '', packageName: 'a', replaceString: 'a' },
+        { currentValue: '', packageName: 'b', replaceString: 'b' },
+      ]);
     });
   });
 });

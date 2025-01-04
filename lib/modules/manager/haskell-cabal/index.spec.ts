@@ -1,3 +1,4 @@
+import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile, getRangeStrategy } from '.';
 
 describe('modules/manager/haskell-cabal/index', () => {
@@ -18,6 +19,19 @@ describe('modules/manager/haskell-cabal/index', () => {
         ).toStrictEqual(expected);
       },
     );
+
+    const minimalCabalFile = Fixtures.get('minimal.cabal');
+    expect(extractPackageFile(minimalCabalFile).deps).toStrictEqual([
+      {
+        autoReplaceStringTemplate: '{{{depName}}} {{{newValue}}}',
+        currentValue: '>=4.20',
+        datasource: 'hackage',
+        depName: 'base',
+        packageName: 'base',
+        replaceString: 'base>=4.20',
+        versioning: 'pvp',
+      },
+    ]);
   });
 
   describe('getRangeStrategy()', () => {

@@ -1,0 +1,7 @@
+cabal-version: 3.4
+name: minimal
+version: 0.1.0.0
+
+executable my-cli-entry-point
+  main-is: Main.hs
+  build-depends: base>=4.20
