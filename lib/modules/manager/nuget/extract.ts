@@ -1,9 +1,8 @@
 import is from '@sindresorhus/is';
-import type { XmlElement, XmlNode } from 'xmldoc';
-import { XmlDocument } from 'xmldoc';
+import type { XmlNode } from 'xmldoc';
+import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
-import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
 import { getDep } from '../dockerfile/extract';
@@ -37,12 +36,13 @@ const elemNames = new Set([
   'GlobalPackageReference',
 ]);
 
-function isXmlElem(node: XmlNode): boolean {
-  return hasKey('name', node);
+function isXmlElem(node: XmlNode): node is XmlElement {
+  return node instanceof XmlElement;
 }
 
 function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
   const results: NugetPackageDependency[] = [];
+  const vars = new Map<string, string>();
   const todo: XmlElement[] = [xmlNode];
   while (todo.length) {
     const child = todo.pop()!;
@@ -58,22 +58,44 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
 
     if (elemNames.has(name)) {
       const depName = attr?.Include || attr?.Update;
-      const version =
+
+      let groupName: string | undefined;
+
+      let currentValue: string | undefined =
         attr?.Version ??
         attr?.version ??
         child.valueWithPath('Version') ??
         attr?.VersionOverride ??
         child.valueWithPath('VersionOverride');
-      const currentValue = is.nonEmptyStringAndNotWhitespace(version)
-        ? checkVersion.exec(version)?.groups?.currentValue?.trim()
+
+      currentValue = currentValue
+        ?.trim()
+        ?.replace(/^\$\((\w+)\)$/, (match, key) => {
+          const val = vars.get(key);
+          if (val) {
+            groupName = key;
+            return val;
+          }
+          return match;
+        });
+
+      currentValue = is.nonEmptyStringAndNotWhitespace(currentValue)
+        ? checkVersion.exec(currentValue)?.groups?.currentValue?.trim()
         : undefined;
+
       if (depName && currentValue) {
-        results.push({
+        const dep: NugetPackageDependency = {
           datasource: NugetDatasource.id,
           depType: 'nuget',
           depName,
           currentValue,
-        });
+        };
+
+        if (groupName) {
+          dep.groupName = groupName;
+        }
+
+        results.push(dep);
       }
     } else if (name === 'Sdk') {
       const depName = attr?.Name;
@@ -101,8 +123,21 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
             });
           }
         }
+
+        const propertyGroup = child.childNamed('PropertyGroup');
+        if (propertyGroup) {
+          for (const propChild of propertyGroup.children) {
+            if (isXmlElem(propChild)) {
+              const { name, val } = propChild;
+              if (!['Version', 'TargetFramework'].includes(name)) {
+                vars.set(name, val);
+              }
+            }
+          }
+        }
       }
-      todo.push(...(child.children.filter(isXmlElem) as XmlElement[]));
+
+      todo.push(...child.children.filter(isXmlElem));
     }
   }
   return results;
