@@ -1,0 +1,7 @@
+{
+  "name": "nodejs",
+  "summary": "Event-driven I/O framework for the V8 JavaScript engine",
+  "homepage_url": "https://nodejs.org",
+  "license": "MIT",
+  "releases": []
+}

@@ -85,4 +85,16 @@ describe('modules/datasource/devbox/index', () => {
     });
     expect(res?.releases).toHaveLength(19);
   });
+
+  it('processes empty data', async () => {
+    httpMock
+      .scope(defaultRegistryUrl)
+      .get(getPath(packageName))
+      .reply(200, Fixtures.get('releases-empty.json'));
+    const res = await getPkgReleases({
+      datasource,
+      packageName,
+    });
+    expect(res).toBeNull();
+  });
 });
