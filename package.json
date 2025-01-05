@@ -168,7 +168,7 @@
     "@renovatebot/pep440": "4.0.1",
     "@renovatebot/ruby-semver": "4.0.0",
     "@sindresorhus/is": "4.6.0",
-    "@yarnpkg/core": "4.1.6",
+    "@yarnpkg/core": "4.2.0",
     "@yarnpkg/parsers": "3.0.2",
     "agentkeepalive": "4.6.0",
     "aggregate-error": "3.1.0",
