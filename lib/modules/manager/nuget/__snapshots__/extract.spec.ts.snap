@@ -93,12 +93,6 @@ exports[`modules/manager/nuget/extract extractPackageFile() extracts all depende
     "depType": "nuget",
   },
   {
-    "currentValue": "4.1.0",
-    "datasource": "nuget",
-    "depName": "Autofac.Extensions.DependencyInjection",
-    "depType": "nuget",
-  },
-  {
     "currentValue": "4.5.0",
     "datasource": "nuget",
     "depName": "Autofac",

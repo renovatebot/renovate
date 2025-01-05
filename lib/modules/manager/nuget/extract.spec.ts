@@ -57,7 +57,7 @@ describe('modules/manager/nuget/extract', () => {
       const sample = Fixtures.get(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(17);
+      expect(res?.deps).toHaveLength(16);
     });
 
     it('extracts msbuild sdk from the Sdk attr of Project element', async () => {
