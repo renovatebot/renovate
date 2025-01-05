@@ -185,8 +185,8 @@ function updateValue(
   newValue: string,
 ): string {
   const elementStart = content.indexOf('<' + nodeName);
-  const start = content.slice(elementStart).indexOf('>') + elementStart + 1;
-  const end = content.slice(start).indexOf('</' + nodeName) + start;
+  const start = content.indexOf('>', elementStart) + 1;
+  const end = content.indexOf('</' + nodeName, start);
   const elementContent = content.slice(start, end);
   if (elementContent.trim() === oldValue) {
     return (
