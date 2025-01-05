@@ -840,6 +840,63 @@ describe('workers/repository/process/vulnerabilities', () => {
       ]);
     });
 
+    it('returns packageRules for Hackage', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        hackage: [
+          {
+            deps: [
+              {
+                depName: 'aeson',
+                currentValue: '0.4.0.0',
+                datasource: 'hackage',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'HSEC-2023-0001',
+          summary: 'Hash flooding vulnerability in aeson',
+          details:
+            '# Hash flooding vulnerability in aeson\n\n*aeson* was vulnerable to hash flooding (a.k.a. hash DoS).  The\nissue is a consequence of the HashMap implementation from\n*unordered-containers*.  It results in a denial of service through\nCPU consumption.  This technique has been used in real-world attacks\nagainst a variety of languages, libraries and frameworks over the\nyears.\n',
+          aliases: ['CVE-2022-3433'],
+          modified: '2023-06-13T09:03:52Z',
+          affected: [
+            {
+              package: {
+                ecosystem: 'Hackage',
+                name: 'aeson',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0.4.0.0' }, { fixed: '2.0.1.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['hackage'],
+          matchPackageNames: ['aeson'],
+          matchCurrentVersion: '0.4.0.0',
+          allowedVersions: '>= 2.0.1.0',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
     it('filters not applicable vulnerability based on last_affected version', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         poetry: [

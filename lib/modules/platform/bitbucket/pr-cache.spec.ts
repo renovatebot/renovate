@@ -166,8 +166,8 @@ describe('modules/platform/bitbucket/pr-cache', () => {
     );
 
     expect(res).toMatchObject([
-      { number: 1, title: 'title' },
       { number: 2, title: 'title' },
+      { number: 1, title: 'title' },
     ]);
     expect(cache).toEqual({
       httpCache: {},
