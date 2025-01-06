@@ -4,8 +4,11 @@ import type { Ctx } from '../types';
 import {
   GRADLE_PLUGINS,
   cleanupTempVars,
+  qArtifactId,
+  qGroupId,
   qTemplateString,
   qValueMatcher,
+  qVersion,
   storeInTokenMap,
   storeVarToken,
 } from './common';
@@ -15,18 +18,6 @@ import {
   handleKotlinShortNotationDep,
   handleLongFormDep,
 } from './handlers';
-
-const qGroupId = qValueMatcher.handler((ctx) =>
-  storeInTokenMap(ctx, 'groupId'),
-);
-
-const qArtifactId = qValueMatcher.handler((ctx) =>
-  storeInTokenMap(ctx, 'artifactId'),
-);
-
-const qVersion = qValueMatcher.handler((ctx) =>
-  storeInTokenMap(ctx, 'version'),
-);
 
 // "foo:bar:1.2.3"
 // "foo:bar:$baz"
