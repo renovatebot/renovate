@@ -28,11 +28,6 @@ describe('config/presets/internal/index', () => {
       if (presetName !== 'description' && !ignoredPresets.includes(preset)) {
         it(`${preset} validates`, async () => {
           try {
-            if (preset === 'default:githubComToken') {
-              GlobalConfig.set({
-                privateKey: 'some-private-key',
-              });
-            }
             const config = await resolveConfigPresets(
               massageConfig(presetConfig),
             );

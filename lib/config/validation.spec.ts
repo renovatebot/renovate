@@ -943,70 +943,6 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
-    it('errors if encrypted object found without privateKey', async () => {
-      const config = {
-        encrypted: {
-          npmToken: 'xxT19RIdhAh=exampletoken',
-        },
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
-        {
-          topic: 'Configuration Error',
-          message: `No privateKey found in hosted config. \`encrypted\` object cannot be used without a privateKey.`,
-        },
-      ]);
-    });
-
-    it('errors with Mend-specific message when encrypted field found in config', async () => {
-      const config = {
-        encrypted: {
-          npmToken: 'xxT19RIdhAh=exampletoken',
-        },
-      };
-      process.env.MEND_HOSTED = 'true';
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
-        {
-          topic: 'Configuration Error',
-          message: `Mend-hosted Renovate Apps no longer support the use of encrypted secrets in Renovate file config (ie. renovate.json).
-Please migrate all secrets to the Developer Portal using the web UI available at https://developer.mend.io/
-
-Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migrating-secrets/`,
-        },
-      ]);
-      process.env.MEND_HOSTED = undefined;
-    });
-
-    it('errors if invalid encrypted object', async () => {
-      GlobalConfig.set({ privateKey: 'some-private-key' });
-      const config = {
-        encrypted: {
-          npmToken: 1,
-        },
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        config,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
-        {
-          topic: 'Configuration Error',
-          message:
-            'Invalid `encrypted.encrypted.npmToken` configuration: value is not a string',
-        },
-      ]);
-    });
-
     it('errors if registryAliases depth is more than 1', async () => {
       const config = {
         registryAliases: {
@@ -1486,25 +1422,6 @@ Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migr
         {
           message: 'Invalid configuration option: logFileLevel',
           topic: 'Configuration Error',
-        },
-      ]);
-    });
-
-    it('errors if encrypted object found without privateKey', async () => {
-      const config = {
-        encrypted: {
-          npmToken: 'xxT19RIdhAh=exampletoken',
-        },
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
-        {
-          topic: 'Configuration Error',
-          message: `No privateKey found in hosted config. \`encrypted\` object cannot be used without a privateKey.`,
         },
       ]);
     });
