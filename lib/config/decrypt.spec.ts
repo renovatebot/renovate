@@ -13,7 +13,7 @@ describe('config/decrypt', () => {
       config = {};
       GlobalConfig.reset();
       delete process.env.MEND_HOSTED;
-      delete process.env.MEND_HOSTED;
+      delete process.env.RENOVATE_X_ENCRYPTED_STRICT;
     });
 
     it('returns empty with no privateKey', async () => {
