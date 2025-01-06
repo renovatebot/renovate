@@ -87,7 +87,13 @@ describe('modules/datasource/devbox/index', () => {
   });
 
   it('processes empty data', async () => {
-    httpMock.scope(defaultRegistryUrl).get(getPath(packageName)).reply(200, '');
+    httpMock.scope(defaultRegistryUrl).get(getPath(packageName)).reply(200, {
+      name: 'nodejs',
+      summary: 'Event-driven I/O framework for the V8 JavaScript engine',
+      homepage_url: 'https://nodejs.org',
+      license: 'MIT',
+      releases: [],
+    });
     const res = await getPkgReleases({
       datasource,
       packageName,
