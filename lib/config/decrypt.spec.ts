@@ -26,5 +26,15 @@ describe('config/decrypt', () => {
         'config-validation',
       );
     });
+
+    // coverage
+    it('throws exception if encrypted found but no privateKey- Mend Hosted', async () => {
+      config.encrypted = { a: '1' };
+
+      process.env.MEND_HOSTED = 'true';
+      await expect(decryptConfig(config, repository)).rejects.toThrow(
+        'config-validation',
+      );
+    });
   });
 });
