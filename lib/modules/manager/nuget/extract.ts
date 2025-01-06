@@ -28,7 +28,7 @@ import { applyRegistries, findVersion, getConfiguredRegistries } from './util';
  * so we don't include it in the extracting regexp
  */
 const checkVersion = regEx(
-  `^\\s*(?:[[])?(?:(?<currentValue>[^"(,[\\]]+)\\s*(?:,\\s*[)\\]]|])?)\\s*$`,
+  /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/,
 );
 const elemNames = new Set([
   'PackageReference',
@@ -62,6 +62,12 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
         continue;
       }
 
+      const dep: NugetPackageDependency = {
+        datasource: NugetDatasource.id,
+        depType: 'nuget',
+        depName,
+      };
+
       let currentValue: string | undefined =
         attr?.Version ??
         attr?.version ??
@@ -69,15 +75,13 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
         attr?.VersionOverride ??
         child.valueWithPath('VersionOverride');
 
+      if (!is.nonEmptyStringAndNotWhitespace(currentValue)) {
+        dep.skipReason = 'invalid-version';
+      }
+
       currentValue = checkVersion
         .exec(currentValue)
         ?.groups?.currentValue?.trim();
-
-      const dep: NugetPackageDependency = {
-        datasource: NugetDatasource.id,
-        depType: 'nuget',
-        depName,
-      };
 
       if (currentValue) {
         dep.currentValue = currentValue;

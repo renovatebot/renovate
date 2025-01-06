@@ -19,6 +19,7 @@ exports[`modules/manager/nuget/extract extractPackageFile() extracts all depende
     "datasource": "nuget",
     "depName": "NotUpdatable3",
     "depType": "nuget",
+    "skipReason": "invalid-version",
   },
   {
     "datasource": "nuget",
