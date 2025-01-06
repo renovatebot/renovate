@@ -15,6 +15,7 @@ import type {
 import { extractMsbuildGlobalManifest } from './extract/global-manifest';
 import type { DotnetToolsManifest, NugetPackageDependency } from './types';
 import { applyRegistries, findVersion, getConfiguredRegistries } from './util';
+import { SkipReason } from '../../../types';
 
 /**
  * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
@@ -58,23 +59,34 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
 
     if (elemNames.has(name)) {
       const depName = attr?.Include || attr?.Update;
-      const version =
+      if (!depName) {
+        continue;
+      }
+
+      let currentValue: string | undefined =
         attr?.Version ??
         attr?.version ??
         child.valueWithPath('Version') ??
         attr?.VersionOverride ??
         child.valueWithPath('VersionOverride');
-      const currentValue = is.nonEmptyStringAndNotWhitespace(version)
-        ? checkVersion.exec(version)?.groups?.currentValue?.trim()
-        : undefined;
-      if (depName && currentValue) {
-        results.push({
-          datasource: NugetDatasource.id,
-          depType: 'nuget',
-          depName,
-          currentValue,
-        });
+
+      currentValue = checkVersion
+        .exec(currentValue)
+        ?.groups?.currentValue?.trim();
+
+      const dep: NugetPackageDependency = {
+        datasource: NugetDatasource.id,
+        depType: 'nuget',
+        depName,
+      };
+
+      if (currentValue) {
+        dep.currentValue = currentValue;
+      } else {
+        dep.skipReason = 'invalid-version';
       }
+
+      results.push(dep);
     } else if (name === 'Sdk') {
       const depName = attr?.Name;
       const version = attr?.Version;
