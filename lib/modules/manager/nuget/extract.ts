@@ -15,7 +15,6 @@ import type {
 import { extractMsbuildGlobalManifest } from './extract/global-manifest';
 import type { DotnetToolsManifest, NugetPackageDependency } from './types';
 import { applyRegistries, findVersion, getConfiguredRegistries } from './util';
-import { SkipReason } from '../../../types';
 
 /**
  * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
