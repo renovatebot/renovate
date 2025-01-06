@@ -87,10 +87,7 @@ describe('modules/datasource/devbox/index', () => {
   });
 
   it('processes empty data', async () => {
-    httpMock
-      .scope(defaultRegistryUrl)
-      .get(getPath(packageName))
-      .reply(200, Fixtures.get('releases-empty.json'));
+    httpMock.scope(defaultRegistryUrl).get(getPath(packageName)).reply(200, '');
     const res = await getPkgReleases({
       datasource,
       packageName,
