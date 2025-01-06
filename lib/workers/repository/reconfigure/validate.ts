@@ -137,11 +137,10 @@ export async function validateReconfigureBranch(
     return;
   }
 
-  // perform validation and provide a passing or failing check run based on result
+  // perform validation and provide a passing or failing check based on result
   const validationResult = await validateConfig('repo', configFileParsed);
 
   // failing check
-  // what happens when a status check is failed with errors and a comment is added but then the errors are resolved and a new commit is created .. is the comment deleted? test it
   if (validationResult.errors.length > 0) {
     logger.debug(
       { errors: validationResult.errors.map((err) => err.message).join(', ') },
