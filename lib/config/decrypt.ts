@@ -130,12 +130,15 @@ export async function decryptConfig(
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
   const privateKey = GlobalConfig.get('privateKey');
+  // eslint-disable-next-line
+  console.log(GlobalConfig.get());
   const privateKeyOld = GlobalConfig.get('privateKeyOld');
   for (const [key, val] of Object.entries(config)) {
     if (key === 'encrypted' && is.object(val)) {
       logger.debug({ config: val }, 'Found encrypted config');
 
       const encryptedWarning = GlobalConfig.get('encryptedWarning');
+      // istanbul ignore if: todo
       if (is.string(encryptedWarning)) {
         logger.once.warn(encryptedWarning);
       }
@@ -174,15 +177,11 @@ export async function decryptConfig(
           }
         }
       } else {
-        if (process.env.RENOVATE_X_ENCRYPTED_STRICT === 'false') {
-          logger.error('Found encrypted data but no privateKey');
-        } else {
-          const error = new Error(CONFIG_VALIDATION);
-          error.validationSource = 'config';
-          error.validationError = 'Encrypted config unsupported';
-          error.validationMessage = `This config contains an encrypted object at location \`$.${key}\` but no privateKey is configured. To support encrypted config, the Renovate administrator must configure a \`privateKey\` in Global Configuration.`;
-          throw error;
-        }
+        const error = new Error(CONFIG_VALIDATION);
+        error.validationSource = 'config';
+        error.validationError = 'Encrypted config unsupported';
+        error.validationMessage = `This config contains an encrypted object at location \`$.${key}\` but no privateKey is configured. To support encrypted config, the Renovate administrator must configure a \`privateKey\` in Global Configuration.`;
+        throw error;
       }
       delete decryptedConfig.encrypted;
     } else if (is.array(val)) {

@@ -13,10 +13,7 @@ import type {
   RenovateConfig,
   RenovateRepository,
 } from '../../config/types';
-import {
-  CONFIG_PRESETS_INVALID,
-  CONFIG_VALIDATION,
-} from '../../constants/error-messages';
+import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
 import { exportStats, finalizeReport } from '../../instrumentation/reporting';
@@ -148,9 +145,6 @@ export async function start(): Promise<number> {
         );
       }
 
-      // istanbul ignore next
-      checkEncryptedObject(config);
-
       // Set allowedHeaders in case hostRules headers are configured in file config
       GlobalConfig.set({
         allowedHeaders: config.allowedHeaders,
@@ -253,30 +247,4 @@ export async function start(): Promise<number> {
     return 1;
   }
   return 0;
-}
-
-function checkEncryptedObject(config: AllConfig): void {
-  for (const [key, val] of Object.entries(config)) {
-    if (key === 'encrypted' && is.object(val)) {
-      if (!config.privateKey) {
-        if (process.env.RENOVATE_X_ENCRYPTED_STRICT === 'false') {
-          logger.error('Found encrypted data but no privateKey');
-        } else {
-          const error = new Error(CONFIG_VALIDATION);
-          error.validationSource = 'config';
-          error.validationError = 'Encrypted config unsupported';
-          error.validationMessage = `This config contains an encrypted object at location \`$.${key}\` but no privateKey is configured. To support encrypted config, the Renovate administrator must configure a \`privateKey\` in Global Configuration.`;
-          throw error;
-        }
-      }
-    } else if (is.array(val)) {
-      for (const item of val) {
-        if (is.object(item) && !is.array(item)) {
-          checkEncryptedObject(item as AllConfig);
-        }
-      }
-    } else if (is.object(val) && key !== 'content') {
-      checkEncryptedObject(val as AllConfig);
-    }
-  }
 }
