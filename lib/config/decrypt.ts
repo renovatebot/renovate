@@ -136,7 +136,6 @@ export async function decryptConfig(
       logger.debug({ config: val }, 'Found encrypted config');
 
       const encryptedWarning = GlobalConfig.get('encryptedWarning');
-      // istanbul ignore if: todo
       if (is.string(encryptedWarning)) {
         logger.once.warn(encryptedWarning);
       }
