@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { parse } from '../../../util/html';
@@ -118,7 +117,7 @@ export class ArtifactoryDatasource extends Datasource {
     return (
       rawText
         .split(regEx(/\s{2,}/))
-        .filter((e) => DateTime.fromFormat(e, 'dd-LLL-yyyy HH:mm').isValid)[0] +
+        .filter((e) => !isNaN(Date.parse(e)))[0] +
       'Z'
     );
   }
