@@ -1166,10 +1166,10 @@ describe('modules/platform/gitea/index', () => {
 
       const res = await gitea.getPrList();
       expect(res).toMatchObject([
-        { number: 1, title: 'Some PR' },
-        { number: 2, title: 'Other PR' },
-        { number: 3, title: 'Draft PR' },
         { number: 4, title: 'Merged PR' },
+        { number: 3, title: 'Draft PR' },
+        { number: 2, title: 'Other PR' },
+        { number: 1, title: 'Some PR' },
       ]);
     });
 
@@ -1209,10 +1209,10 @@ describe('modules/platform/gitea/index', () => {
       const res = await gitea.getPrList();
 
       expect(res).toMatchObject([
-        { number: 1, title: 'Some PR' },
-        { number: 2, title: 'Other PR' },
-        { number: 3, title: 'Draft PR' },
         { number: 4, title: 'Merged PR' },
+        { number: 3, title: 'Draft PR' },
+        { number: 2, title: 'Other PR' },
+        { number: 1, title: 'Some PR' },
       ]);
     });
 
@@ -1244,16 +1244,16 @@ describe('modules/platform/gitea/index', () => {
       await initFakeRepo(scope);
 
       const res1 = await gitea.getPrList();
-      expect(res1).toMatchObject([{ number: 1 }, { number: 2 }]);
+      expect(res1).toMatchObject([{ number: 2 }, { number: 1 }]);
 
       memCache.set('gitea-pr-cache-synced', false);
 
       const res2 = await gitea.getPrList();
       expect(res2).toMatchObject([
-        { number: 1 },
-        { number: 2 },
-        { number: 3 },
         { number: 4 },
+        { number: 3 },
+        { number: 2 },
+        { number: 1 },
       ]);
     });
   });

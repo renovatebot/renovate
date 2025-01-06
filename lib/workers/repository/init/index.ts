@@ -72,6 +72,6 @@ export async function initRepo(
       'Full resolved config and hostRules including presets',
     );
   }
-  await cloneSubmodules(!!config.cloneSubmodules);
+  await cloneSubmodules(!!config.cloneSubmodules, config.cloneSubmodulesFilter);
   return config;
 }

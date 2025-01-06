@@ -306,7 +306,11 @@ describe('workers/global/config/parse/env', () => {
 
       it('crashes', async () => {
         const envParam: NodeJS.ProcessEnv = { RENOVATE_CONFIG: '!@#' };
-        await env.getConfig(envParam);
+        processExit.mockImplementationOnce(() => {
+          throw new Error('terminate function to simulate process.exit call');
+        });
+
+        await expect(env.getConfig(envParam)).toReject();
         expect(processExit).toHaveBeenCalledWith(1);
       });
 
