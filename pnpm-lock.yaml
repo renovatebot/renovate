@@ -379,6 +379,9 @@ importers:
       '@semantic-release/exec':
         specifier: 6.0.3
         version: 6.0.3(semantic-release@24.2.0(typescript@5.7.2))
+      '@smithy/util-stream':
+        specifier: 3.3.4
+        version: 3.3.4
       '@swc/core':
         specifier: 1.10.4
         version: 1.10.4
