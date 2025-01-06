@@ -21,10 +21,10 @@ describe('config/decrypt', () => {
       expect(res).toMatchObject(config);
     });
 
-    it('warns if no privateKey found', async () => {
+    it('warns if encryptedWarning is configured and encrypted object found', async () => {
       config.encrypted = { a: '1' };
       GlobalConfig.set({ encryptedWarning: 'text' });
-
+      process.env.RENOVATE_X_ENCRYPTED_STRICT = 'false';
       const res = await decryptConfig(config, repository);
 
       expect(logger.logger.once.warn).toHaveBeenCalledWith('text');
@@ -34,7 +34,6 @@ describe('config/decrypt', () => {
 
     it('throws exception if encrypted found but no privateKey', async () => {
       config.encrypted = { a: '1' };
-      process.env.RENOVATE_X_ENCRYPTED_STRICT = 'true';
 
       await expect(decryptConfig(config, repository)).rejects.toThrow(
         'config-validation',

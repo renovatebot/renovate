@@ -174,14 +174,14 @@ export async function decryptConfig(
           }
         }
       } else {
-        if (process.env.RENOVATE_X_ENCRYPTED_STRICT === 'true') {
+        if (process.env.RENOVATE_X_ENCRYPTED_STRICT === 'false') {
+          logger.error('Found encrypted data but no privateKey');
+        } else {
           const error = new Error(CONFIG_VALIDATION);
           error.validationSource = 'config';
           error.validationError = 'Encrypted config unsupported';
           error.validationMessage = `This config contains an encrypted object at location \`$.${key}\` but no privateKey is configured. To support encrypted config, the Renovate administrator must configure a \`privateKey\` in Global Configuration.`;
           throw error;
-        } else {
-          logger.error('Found encrypted data but no privateKey');
         }
       }
       delete decryptedConfig.encrypted;
