@@ -130,8 +130,6 @@ export async function decryptConfig(
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
   const privateKey = GlobalConfig.get('privateKey');
-  // eslint-disable-next-line
-  console.log(GlobalConfig.get());
   const privateKeyOld = GlobalConfig.get('privateKeyOld');
   for (const [key, val] of Object.entries(config)) {
     if (key === 'encrypted' && is.object(val)) {
