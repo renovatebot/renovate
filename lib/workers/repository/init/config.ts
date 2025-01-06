@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../config';
 import type { AllConfig, RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
 import { parseAndValidateOrExit } from '../../global/config/parse/env';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { mergeInheritedConfig } from './inherited';
@@ -33,6 +32,5 @@ export async function mergeStaticRepoEnvConfig(
     return config;
   }
 
-  logger.debug({ repoEnvConfig }, 'detected repo env config');
   return mergeChildConfig(config, repoEnvConfig);
 }
