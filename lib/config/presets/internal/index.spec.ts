@@ -1,6 +1,5 @@
 import { resolveConfigPresets } from '../';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import { GlobalConfig } from '../../global';
 import { massageConfig } from '../../massage';
 import { validateConfig } from '../../validation';
 import * as npm from '../npm';
