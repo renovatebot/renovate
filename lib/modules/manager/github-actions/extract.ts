@@ -10,7 +10,11 @@ import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { Workflow } from './types';
 
 const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"]+)\s*$/);
@@ -44,7 +48,10 @@ function detectCustomGitHubRegistryUrlsForActions(): PackageDependency {
   return {};
 }
 
-function extractWithRegex(content: string): PackageDependency[] {
+function extractWithRegex(
+  content: string,
+  config: ExtractConfig,
+): PackageDependency[] {
   const customRegistryUrlsPackageDependency =
     detectCustomGitHubRegistryUrlsForActions();
   logger.trace('github-actions.extractWithRegex()');
@@ -57,7 +64,7 @@ function extractWithRegex(content: string): PackageDependency[] {
     const dockerMatch = dockerActionRe.exec(line);
     if (dockerMatch) {
       const [, currentFrom] = dockerMatch;
-      const dep = getDep(currentFrom);
+      const dep = getDep(currentFrom, true, config.registryAliases);
       dep.depType = 'docker';
       deps.push(dep);
       continue;
@@ -126,11 +133,14 @@ function detectDatasource(registryUrl: string): PackageDependency {
   };
 }
 
-function extractContainer(container: unknown): PackageDependency | undefined {
+function extractContainer(
+  container: unknown,
+  registryAliases: Record<string, string> | undefined,
+): PackageDependency | undefined {
   if (is.string(container)) {
-    return getDep(container);
+    return getDep(container, true, registryAliases);
   } else if (is.plainObject(container) && is.string(container.image)) {
-    return getDep(container.image);
+    return getDep(container.image, true, registryAliases);
   }
   return undefined;
 }
@@ -181,6 +191,7 @@ function extractRunners(runner: unknown): PackageDependency[] {
 function extractWithYAMLParser(
   content: string,
   packageFile: string,
+  config: ExtractConfig,
 ): PackageDependency[] {
   logger.trace('github-actions.extractWithYAMLParser()');
   const deps: PackageDependency[] = [];
@@ -198,14 +209,14 @@ function extractWithYAMLParser(
   }
 
   for (const job of Object.values(pkg?.jobs ?? {})) {
-    const dep = extractContainer(job?.container);
+    const dep = extractContainer(job?.container, config.registryAliases);
     if (dep) {
       dep.depType = 'container';
       deps.push(dep);
     }
 
     for (const service of Object.values(job?.services ?? {})) {
-      const dep = extractContainer(service);
+      const dep = extractContainer(service, config.registryAliases);
       if (dep) {
         dep.depType = 'service';
         deps.push(dep);
@@ -221,11 +232,12 @@ function extractWithYAMLParser(
 export function extractPackageFile(
   content: string,
   packageFile: string,
+  config: ExtractConfig = {}, // TODO: enforce ExtractConfig
 ): PackageFileContent | null {
   logger.trace(`github-actions.extractPackageFile(${packageFile})`);
   const deps = [
-    ...extractWithRegex(content),
-    ...extractWithYAMLParser(content, packageFile),
+    ...extractWithRegex(content, config),
+    ...extractWithYAMLParser(content, packageFile, config),
   ];
   if (!deps.length) {
     return null;

@@ -55,10 +55,7 @@
       "https://github.com/awslabs/aws-sdk-rust"
     ],
     "awsappsync": "https://github.com/awslabs/aws-mobile-appsync-sdk-js",
-    "axis2": [
-      "https://gitbox.apache.org/repos/asf?p=axis-axis2-java-core.git;a=summary",
-      "https://github.com/apache/axis-axis2-java-core"
-    ],
+    "axum": "https://github.com/tokio-rs/axum",
     "azure-functions-dotnet-worker": "https://github.com/Azure/azure-functions-dotnet-worker",
     "azure azure-libraries-for-net": "https://github.com/Azure/azure-libraries-for-net",
     "azure azure-sdk-for-net": "https://github.com/Azure/azure-sdk-for-net",
@@ -439,6 +436,8 @@
     "opentelemetry-java-contrib": "https://github.com/open-telemetry/opentelemetry-java-contrib",
     "opentelemetry-js": "https://github.com/open-telemetry/opentelemetry-js",
     "opentelemetry-js-contrib": "https://github.com/open-telemetry/opentelemetry-js-contrib",
+    "opentelemetry-python": "https://github.com/open-telemetry/opentelemetry-python",
+    "opentelemetry-python-contrib": "https://github.com/open-telemetry/opentelemetry-python-contrib",
     "opentelemetry-rust": "https://github.com/open-telemetry/opentelemetry-rust",
     "opentelemetry-rust-contrib": "https://github.com/open-telemetry/opentelemetry-rust-contrib",
     "orleans": "https://github.com/dotnet/orleans",
@@ -509,6 +508,7 @@
     "skiasharp": "https://github.com/mono/SkiaSharp",
     "slack-net": "https://github.com/soxtoby/SlackNet",
     "slf4j": "https://github.com/qos-ch/slf4j",
+    "slim-message-bus": "https://github.com/zarusz/SlimMessageBus",
     "spectre-console": "https://github.com/spectreconsole/spectre.console",
     "springfox": "https://github.com/springfox/springfox",
     "steeltoe": "https://github.com/SteeltoeOSS/steeltoe",
@@ -587,7 +587,7 @@
     "hapijs": "https://github.com/hapijs/",
     "lodash": "https://github.com/lodash/",
     "ngrx": "https://github.com/ngrx/",
-    "nrwl": "https://github.com/nrwl/",
+    "nx": "https://github.com/nrwl/nx",
     "octokit": "https://github.com/octokit/",
     "semantic-release": "https://github.com/semantic-release/",
     "swc": "https://github.com/swc-project/"
@@ -598,12 +598,17 @@
     "apache-poi": "/^org.apache.poi:/",
     "aws-java-sdk": "/^com.amazonaws:aws-java-sdk-/",
     "aws-java-sdk-v2": "/^software.amazon.awssdk:/",
+    "axis2": "/^org.apache.axis2:/",
     "babel6": "/^babel6$/",
     "clarity": ["/^@cds//", "/^@clr//"],
     "embroider": "/^@embroider//",
     "forge": "/^@forge//",
     "fullcalendar": "/^@fullcalendar//",
     "hotchocolate": "/^HotChocolate\\./",
+    "oracle-database": [
+      "/^com.oracle.database.jdbc:/",
+      "/^com.oracle.database.nls:/"
+    ],
     "prometheus-simpleclient": "/^io.prometheus:simpleclient/",
     "russh": ["/^russh$/", "/^russh-keys$/"],
     "spfx": ["/^@microsoft/sp-/", "/^@microsoft/eslint-.+-spfx$/"],

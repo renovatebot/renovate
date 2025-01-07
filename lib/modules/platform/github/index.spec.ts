@@ -2568,7 +2568,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get('/repos/some/repo/pulls?head=some/repo:branch&state=open')
+        .get('/repos/some/repo/pulls?head=some:branch&state=open')
         .reply(200, [
           {
             number: 1,
@@ -2598,7 +2598,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get('/repos/some/repo/pulls?head=some/repo:branch&state=open')
+        .get('/repos/some/repo/pulls?head=some:branch&state=open')
         .reply(200, []);
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.findPr({
