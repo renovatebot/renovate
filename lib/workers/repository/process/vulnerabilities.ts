@@ -35,6 +35,7 @@ export class Vulnerabilities {
   > = {
     crate: 'crates.io',
     go: 'Go',
+    hackage: 'Hackage',
     hex: 'Hex',
     maven: 'Maven',
     npm: 'npm',
