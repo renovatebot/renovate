@@ -5,6 +5,7 @@ import {
   GRADLE_PLUGINS,
   cleanupTempVars,
   qArtifactId,
+  qDotOrBraceExpr,
   qGroupId,
   qTemplateString,
   qValueMatcher,
@@ -195,4 +196,6 @@ export const qDependencies = q.alt(
   qKotlinShortNotationDependencies,
   qKotlinMapNotationDependencies,
   qImplicitGradlePlugin,
+  // avoid heuristic matching of gradle feature variant capabilities
+  qDotOrBraceExpr('java', q.sym<Ctx>('registerFeature').tree()),
 );
