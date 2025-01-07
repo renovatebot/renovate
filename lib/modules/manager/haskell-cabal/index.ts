@@ -10,6 +10,9 @@ import type {
 import type { CabalDependency } from './extract';
 import { extractNamesAndRanges, findDepends } from './extract';
 
+// This manager has been tested on
+// https://github.com/ysangkok/haskell-tz
+
 export const defaultConfig = {
   fileMatch: ['\\.cabal$'],
   pinDigests: false,

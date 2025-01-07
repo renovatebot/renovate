@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { extractPackageFile, getRangeStrategy } from '.';
 
 const minimalCabalFile = codeBlock`
