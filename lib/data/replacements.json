@@ -756,7 +756,7 @@
     "description": "`dgs-framework` migrated to new `spring-graphql` starters.",
     "packageRules": [
       {
-        "matchCurrentVersion": ">=9.2.2",
+        "matchCurrentVersion": "[9.2.2,)",
         "matchDatasources": ["maven"],
         "matchPackageNames": [
           "com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter",
