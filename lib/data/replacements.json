@@ -23,6 +23,7 @@
       "replacements:k8s-registry-move",
       "replacements:mem-rename",
       "replacements:middie-to-scoped",
+      "replacements:netflix-dgs-spring-starters",
       "replacements:now-to-vercel",
       "replacements:npm-run-all-to-maintenance-fork",
       "replacements:opencost-registry-move",
@@ -748,6 +749,18 @@
         "matchPackageNames": ["middie"],
         "replacementName": "@fastify/middie",
         "replacementVersion": "8.0.0"
+      }
+    ]
+  },
+  "netflix-dgs-spring-starters": {
+    "description": "`dgs-framework` migrated to new `spring-graphql` starters.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=9.2.2",
+        "matchDatasources": ["maven", "gradle"],
+        "matchPackageNames": ["com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter", "com.netflix.graphql.dgs:graphql-dgs-webflux-starter"],
+        "replacementName": "com.netflix.graphql.dgs:dgs-starter",
+        "replacementVersion": "10.0.1"
       }
     ]
   },
