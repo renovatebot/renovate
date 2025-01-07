@@ -13,7 +13,7 @@ There is a web UI with functionality to view and interact with installed reposit
 
 ## Accessing Mend Cloud via the Web UI
 
-Users can access the cloud-hosted Renovate service via the Developer Portal at https://developer.mend.io/.
+Users can access the cloud-hosted Renovate service via the Developer Portal at [https://developer.mend.io/](https://developer.mend.io/).
 Developers can log in with credentials from their cloud-based Git repository.
 
 ![Developer Portal sign-in screen](../assets/images/portal-sign-in.jpg)
@@ -41,7 +41,7 @@ Mend Cloud has free and paid Renovate plans. Details of the plans are shown in t
 | Merge Confidence Workflows    | Not included     | Not included   | Included          | Included     |
 | Mend.io Helpdesk Support      | Not included     | Not included   | Not Included      | Included     |
 
-(*1) Bitbucket repositories on the Renovate Enterprise plan are scheduled to run every 4 hours, to avoid hitting rate limits on GitHub APIs.
+(1) Bitbucket repositories on the Renovate Enterprise plan are scheduled to run every 4 hours, to avoid hitting rate limits on GitHub APIs.
 
 ### Plan descriptions
 
