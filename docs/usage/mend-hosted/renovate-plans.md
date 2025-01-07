@@ -16,7 +16,7 @@ There is a web UI with functionality to view and interact with installed reposit
 Users can access the cloud-hosted Renovate service via the Developer Portal at [https://developer.mend.io/](https://developer.mend.io/).
 Developers can log in with credentials from their cloud-based Git repository.
 
-![Developer Portal sign-in screen](../assets/images/portal-sign-in.jpg)
+![Developer Portal sign-in screen](../assets/images/portal-sign-in.png)
 
 Features of the Developer Portal include:
 
