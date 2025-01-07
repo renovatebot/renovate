@@ -50,15 +50,4 @@ Mend Cloud has free and paid Renovate plans. Details of the plans are shown in t
 
 **OSS Select (Free)** - This is a premium plan granted for free to selected OSS Orgs. If you would like your Org to be considered for the free OSS Select plan, create a “[Suggest an Idea](https://github.com/renovatebot/renovate/discussions/categories/suggest-an-idea)” item on the Renovate discussions board on GitHub. Acceptance is at the discretion of Mend.io.
 
-**Enterprise** - A supported, paid plan available for purchase through Mend.io. See options below.
-
-### Purchase Renovate Enterprise Plan
-
-Options to purchase the Renovate Enterprise plan include:
-
-- Contact Mend at [sales@mend.io](mailto:sales@mend.io) for purchase details via invoice.
-- Customers who are using AWS or Azure Marketplaces can purchase the Enterprise Plan directly using the links below.
-  - [Mend AppSec Platform on AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-yinerd2u4nhw4?sr=0-1&ref_=beagle&applicationId=AWSMPContessa)
-  - [Mend AppSec Platform on Azure Marketplace](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/whitesource-software.whitesource_enterprise?tab=Overview)
-
-Once sales have been finalized, the specific Orgs will be enabled with the Renovate Enterprise plan by Mend.io staff.
+**Enterprise** - A supported, paid plan available for purchase through Mend.io. Contact Mend at [sales@mend.io](mailto:sales@mend.io) for purchase details.
