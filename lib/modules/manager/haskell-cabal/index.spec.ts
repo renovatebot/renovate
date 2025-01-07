@@ -1,6 +1,7 @@
 import { extractPackageFile, getRangeStrategy } from '.';
 
-const minimalCabalFile = `cabal-version: 3.4
+const minimalCabalFile = codeBlock`
+cabal-version: 3.4
 name: minimal
 version: 0.1.0.0
 
