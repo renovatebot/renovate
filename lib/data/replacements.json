@@ -757,7 +757,7 @@
     "packageRules": [
       {
         "matchCurrentVersion": ">=9.2.2",
-        "matchDatasources": ["maven", "gradle"],
+        "matchDatasources": ["maven"],
         "matchPackageNames": [
           "com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter",
           "com.netflix.graphql.dgs:graphql-dgs-webflux-starter"
