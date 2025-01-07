@@ -21,10 +21,7 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types';
-import {
-  isSystemManifest,
-  systemManifestHeaderRegex,
-} from './common';
+import { isSystemManifest, systemManifestHeaderRegex } from './common';
 import { FluxResource, type HelmRepository } from './schema';
 import type {
   FluxManagerData,
