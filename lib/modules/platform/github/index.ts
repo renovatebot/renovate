@@ -1231,7 +1231,6 @@ export async function getIssueList(): Promise<Issue[]> {
 }
 
 export async function getIssue(number: number): Promise<Issue | null> {
-  // istanbul ignore if
   if (config.hasIssuesEnabled === false) {
     return null;
   }
@@ -1246,10 +1245,9 @@ export async function getIssue(number: number): Promise<Issue | null> {
     );
     GithubIssueCache.updateIssue(issue);
     return issue;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     logger.debug({ err, number }, 'Error getting issue');
-    // istanbul ignore if
-    if (err.message === 'Response Code 410(Gone)') {
+    if (err.response?.statusCode === 410) {
       logger.debug(`Issue #${number} has been deleted`);
       GithubIssueCache.deleteIssue(number);
     }
