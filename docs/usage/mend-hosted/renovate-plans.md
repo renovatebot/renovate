@@ -7,8 +7,7 @@ Mend provides cloud hosting services for running Renovate on repositories hosted
 - Azure DevOps
 
 Mend Cloud will regularly schedule Renovate jobs against all installed repositories.
-It also listens to webhooks and enqueues a Renovate job when relevant changes occur in a repo,
-or when actions are triggered from the Renovate PRs or Dashboard issue.
+It also listens to webhooks and enqueues a Renovate job when relevant changes occur in a repo, or when actions are triggered from the Renovate PRs or Dashboard issue.
 There is a web UI with functionality to view and interact with installed repositories, their jobs and job logs.
 
 ## Accessing Mend Cloud via the Web UI
