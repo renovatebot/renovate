@@ -82,9 +82,8 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
 
       let groupName: string | undefined;
 
-      currentValue = checkVersion
-        .exec(currentValue)
-        ?.groups?.currentValue?.trim()
+      currentValue = currentValue
+        ?.trim()
         ?.replace(/^\$\((\w+)\)$/, (match, key) => {
           const val = vars.get(key);
           if (val) {
@@ -93,6 +92,10 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
           }
           return match;
         });
+
+      currentValue = checkVersion
+        .exec(currentValue)
+        ?.groups?.currentValue?.trim();
 
       if (currentValue) {
         dep.currentValue = currentValue;
