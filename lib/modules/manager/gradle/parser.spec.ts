@@ -770,6 +770,17 @@ describe('modules/manager/gradle/parser', () => {
       const { deps } = parseGradle(input);
       expect(deps).toMatchObject([output].filter(is.truthy));
     });
+
+    it('handles 3 independent dependencies mismatched as groupId, artifactId, version', () => {
+      const { deps } = parseGradle(
+        'someConfig("foo:bar:1.2.3", "foo:baz:4.5.6", "foo:qux:7.8.9")',
+      );
+      expect(deps).toMatchObject([
+        { depName: 'foo:bar', currentValue: '1.2.3' },
+        { depName: 'foo:baz', currentValue: '4.5.6' },
+        { depName: 'foo:qux', currentValue: '7.8.9' },
+      ]);
+    });
   });
 
   describe('calculations', () => {
