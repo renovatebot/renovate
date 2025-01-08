@@ -30,6 +30,7 @@ import {
 const hostConfigVariablePrefix = 'BUNDLE_';
 
 function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
+  // istanbul ignore if: doesn't happen in practice
   if (!hostRule.resolvedHost) {
     return {};
   }
