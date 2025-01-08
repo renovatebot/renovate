@@ -6,7 +6,7 @@ import * as devboxVersioning from '../../versioning/devbox';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
-import type { DevboxResponse } from './types';
+import { DevboxResponse } from './schema';
 
 export class DevboxDatasource extends Datasource {
   static readonly id = datasource;
@@ -37,8 +37,8 @@ export class DevboxDatasource extends Datasource {
     const devboxPkgUrl = joinUrlParts(registryUrl!, `/pkg?name=${packageName}`);
 
     try {
-      const response = await this.http.getJson<DevboxResponse>(devboxPkgUrl);
-      res.homepage = response?.body?.homepage_url;
+      const response = await this.http.getJson(devboxPkgUrl, DevboxResponse);
+      res.homepage = response?.body?.homepage_url || 'https://www.nixhub.io/';
       res.releases = response?.body?.releases.map((release) => ({
         version: release.version,
         releaseTimestamp: release.last_updated,
