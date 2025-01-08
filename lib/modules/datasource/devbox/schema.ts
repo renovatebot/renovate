@@ -9,7 +9,7 @@ export const DevboxResponse = z
   .object({
     name: z.string(),
     summary: z.string().optional(),
-    homepage_url: z.string().optional().default('https://www.nixhub.io/'),
+    homepage_url: z.string().catch(`https://www.nixhub.io/`),
     license: z.string().optional(),
     releases: DevboxRelease.array(),
   })

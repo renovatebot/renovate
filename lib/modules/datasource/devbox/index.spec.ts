@@ -6,7 +6,7 @@ import { datasource, defaultRegistryUrl } from './common';
 const packageName = 'nodejs';
 
 function getPath(packageName: string): string {
-  return `/pkg?name=${packageName}`;
+  return `/pkg?name=${encodeURIComponent(packageName)}`;
 }
 
 const sampleReleases = [
