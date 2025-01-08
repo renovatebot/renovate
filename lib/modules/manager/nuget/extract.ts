@@ -93,6 +93,10 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
           return match;
         });
 
+      if (groupName) {
+        dep.groupName = groupName;
+      }
+
       currentValue = checkVersion
         .exec(currentValue)
         ?.groups?.currentValue?.trim();
@@ -101,10 +105,6 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
         dep.currentValue = currentValue;
       } else {
         dep.skipReason = 'invalid-version';
-      }
-
-      if (groupName) {
-        dep.groupName = groupName;
       }
 
       results.push(dep);
