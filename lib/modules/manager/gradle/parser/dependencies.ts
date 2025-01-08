@@ -4,6 +4,7 @@ import type { Ctx } from '../types';
 import {
   GRADLE_PLUGINS,
   cleanupTempVars,
+  qDotOrBraceExpr,
   qTemplateString,
   qValueMatcher,
   storeInTokenMap,
@@ -204,4 +205,6 @@ export const qDependencies = q.alt(
   qKotlinShortNotationDependencies,
   qKotlinMapNotationDependencies,
   qImplicitGradlePlugin,
+  // avoid heuristic matching of gradle feature variant capabilities
+  qDotOrBraceExpr('java', q.sym<Ctx>('registerFeature').tree()),
 );

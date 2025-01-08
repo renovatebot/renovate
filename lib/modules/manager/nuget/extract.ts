@@ -27,7 +27,7 @@ import { applyRegistries, findVersion, getConfiguredRegistries } from './util';
  * so we don't include it in the extracting regexp
  */
 const checkVersion = regEx(
-  `^\\s*(?:[[])?(?:(?<currentValue>[^"(,[\\]]+)\\s*(?:,\\s*[)\\]]|])?)\\s*$`,
+  /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/,
 );
 const elemNames = new Set([
   'PackageReference',
@@ -59,7 +59,15 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
     if (elemNames.has(name)) {
       const depName = attr?.Include || attr?.Update;
 
-      let groupName: string | undefined;
+      if (!depName) {
+        continue;
+      }
+
+      const dep: NugetPackageDependency = {
+        datasource: NugetDatasource.id,
+        depType: 'nuget',
+        depName,
+      };
 
       let currentValue: string | undefined =
         attr?.Version ??
@@ -68,8 +76,15 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
         attr?.VersionOverride ??
         child.valueWithPath('VersionOverride');
 
-      currentValue = currentValue
-        ?.trim()
+      if (!is.nonEmptyStringAndNotWhitespace(currentValue)) {
+        dep.skipReason = 'invalid-version';
+      }
+
+      let groupName: string | undefined;
+
+      currentValue = checkVersion
+        .exec(currentValue)
+        ?.groups?.currentValue?.trim()
         ?.replace(/^\$\((\w+)\)$/, (match, key) => {
           const val = vars.get(key);
           if (val) {
@@ -79,24 +94,17 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
           return match;
         });
 
-      currentValue = is.nonEmptyStringAndNotWhitespace(currentValue)
-        ? checkVersion.exec(currentValue)?.groups?.currentValue?.trim()
-        : undefined;
-
-      if (depName && currentValue) {
-        const dep: NugetPackageDependency = {
-          datasource: NugetDatasource.id,
-          depType: 'nuget',
-          depName,
-          currentValue,
-        };
-
-        if (groupName) {
-          dep.groupName = groupName;
-        }
-
-        results.push(dep);
+      if (currentValue) {
+        dep.currentValue = currentValue;
+      } else {
+        dep.skipReason = 'invalid-version';
       }
+
+      if (groupName) {
+        dep.groupName = groupName;
+      }
+
+      results.push(dep);
     } else if (name === 'Sdk') {
       const depName = attr?.Name;
       const version = attr?.Version;

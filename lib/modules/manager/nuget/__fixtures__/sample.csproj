@@ -11,6 +11,7 @@
     <Folder Include="wwwroot\" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Version="1.2.3" />
     <PackageReference Include="Autofac" Version="$(AutofacVersion)" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="$(UnknownVariable)" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="1.1.2" />
