@@ -34,15 +34,15 @@ export class DevboxDatasource extends Datasource {
 
     logger.trace({ registryUrl, packageName }, 'fetching devbox release');
 
-    const devboxPkgUrl = joinUrlParts(registryUrl!, `/pkg?name=${packageName}`);
+    const devboxPkgUrl = joinUrlParts(
+      registryUrl!,
+      `/pkg?name=${encodeURIComponent(packageName)}`,
+    );
 
     try {
       const response = await this.http.getJson(devboxPkgUrl, DevboxResponse);
-      res.homepage = response?.body?.homepage_url || 'https://www.nixhub.io/';
-      res.releases = response?.body?.releases.map((release) => ({
-        version: release.version,
-        releaseTimestamp: release.last_updated,
-      }));
+      res.releases = response.body.releases;
+      res.homepage = response.body.homepage;
     } catch (err) {
       // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {

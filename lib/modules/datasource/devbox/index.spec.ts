@@ -9,6 +9,21 @@ function getPath(packageName: string): string {
   return `/pkg?name=${packageName}`;
 }
 
+const sampleReleases = [
+  {
+    version: '22.2.0',
+    last_updated: '2024-05-22T06:18:38Z',
+  },
+  {
+    version: '22.0.0',
+    last_updated: '2024-05-12T16:19:40Z',
+  },
+  {
+    version: '21.7.3',
+    last_updated: '2024-04-19T21:36:04Z',
+  },
+];
+
 describe('modules/datasource/devbox/index', () => {
   describe('getReleases', () => {
     it('throws for error', async () => {
@@ -69,39 +84,35 @@ describe('modules/datasource/devbox/index', () => {
   });
 
   it('processes real data', async () => {
-    httpMock
-      .scope(defaultRegistryUrl)
-      .get(getPath(packageName))
-      .reply(200, {
-        name: 'nodejs',
-        summary: 'Event-driven I/O framework for the V8 JavaScript engine',
-        homepage_url: 'https://nodejs.org',
-        license: 'MIT',
-        releases: [
-          {
-            version: '22.2.0',
-            last_updated: '2024-05-22T06:18:38Z',
-          },
-          {
-            version: '22.0.0',
-            last_updated: '2024-05-12T16:19:40Z',
-          },
-          {
-            version: '21.7.3',
-            last_updated: '2024-04-19T21:36:04Z',
-          },
-        ],
-      });
+    httpMock.scope(defaultRegistryUrl).get(getPath(packageName)).reply(200, {
+      name: 'nodejs',
+      summary: 'Event-driven I/O framework for the V8 JavaScript engine',
+      homepage_url: 'https://nodejs.org',
+      license: 'MIT',
+      releases: sampleReleases,
+    });
     const res = await getPkgReleases({
       datasource,
       packageName,
     });
-    expect(res?.homepage).toBe('https://nodejs.org');
-    expect(res?.releases[0]).toEqual({
-      version: '21.7.3',
-      releaseTimestamp: '2024-04-19T21:36:04.000Z',
+    expect(res).toEqual({
+      homepage: 'https://nodejs.org',
+      registryUrl: 'https://search.devbox.sh/v2',
+      releases: [
+        {
+          version: '21.7.3',
+          releaseTimestamp: '2024-04-19T21:36:04.000Z',
+        },
+        {
+          version: '22.0.0',
+          releaseTimestamp: '2024-05-12T16:19:40.000Z',
+        },
+        {
+          version: '22.2.0',
+          releaseTimestamp: '2024-05-22T06:18:38.000Z',
+        },
+      ],
     });
-    expect(res?.releases).toHaveLength(3);
   });
 
   it('processes empty data', async () => {
@@ -117,5 +128,32 @@ describe('modules/datasource/devbox/index', () => {
       packageName,
     });
     expect(res).toBeNull();
+  });
+
+  it('returns null when no body is returned', async () => {
+    httpMock
+      .scope(defaultRegistryUrl)
+      .get(getPath(packageName))
+      .reply(200, undefined);
+    const res = await getPkgReleases({
+      datasource,
+      packageName,
+    });
+    expect(res).toBeNull();
+  });
+
+  it('falls back to a default homepage_url', async () => {
+    httpMock.scope(defaultRegistryUrl).get(getPath(packageName)).reply(200, {
+      name: 'nodejs',
+      summary: 'Event-driven I/O framework for the V8 JavaScript engine',
+      homepage_url: undefined,
+      license: 'MIT',
+      releases: sampleReleases,
+    });
+    const res = await getPkgReleases({
+      datasource,
+      packageName,
+    });
+    expect(res?.homepage).toBe('https://www.nixhub.io/');
   });
 });

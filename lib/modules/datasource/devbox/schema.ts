@@ -5,10 +5,19 @@ export const DevboxRelease = z.object({
   last_updated: z.string(),
 });
 
-export const DevboxResponse = z.object({
-  name: z.string(),
-  summary: z.string(),
-  homepage_url: z.string(),
-  license: z.string(),
-  releases: DevboxRelease.array(),
-});
+export const DevboxResponse = z
+  .object({
+    name: z.string(),
+    summary: z.string().optional(),
+    homepage_url: z.string().optional().default('https://www.nixhub.io/'),
+    license: z.string().optional(),
+    releases: DevboxRelease.array(),
+  })
+  .transform((response) => ({
+    name: response.name,
+    homepage: response.homepage_url,
+    releases: response.releases.map((release) => ({
+      version: release.version,
+      releaseTimestamp: release.last_updated,
+    })),
+  }));
