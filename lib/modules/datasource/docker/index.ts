@@ -831,7 +831,7 @@ export class DockerDatasource extends Datasource {
       // TODO: types (#22198)
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`,
     );
-    const newTag = newValue ?? 'latest';
+    const newTag = is.nonEmptyString(newValue) ? newValue : 'latest';
     let digest: string | null = null;
     try {
       let architecture: string | null | undefined = null;
