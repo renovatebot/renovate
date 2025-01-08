@@ -37,7 +37,10 @@ export function commitFilesToBranch(
   logger.debug(`${fileLength} file(s) to commit`);
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
-    logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
+    logger.info(
+      { branch: config.branchName },
+      'DRY-RUN: Would commit files to branch',
+    );
     return Promise.resolve(null);
   }
   // istanbul ignore if

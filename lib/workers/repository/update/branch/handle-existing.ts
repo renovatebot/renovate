@@ -30,7 +30,8 @@ export async function handleClosedPr(
     if (!config.suppressNotifications!.includes('prIgnoreNotification')) {
       if (GlobalConfig.get('dryRun')) {
         logger.info(
-          `DRY-RUN: Would ensure closed PR comment in PR #${pr.number}`,
+          { prNumber: pr.number },
+          'DRY-RUN: Would ensure closed PR comment',
         );
       } else {
         await ensureComment({
@@ -42,7 +43,10 @@ export async function handleClosedPr(
     }
     if (await scm.branchExists(config.branchName)) {
       if (GlobalConfig.get('dryRun')) {
-        logger.info('DRY-RUN: Would delete branch ' + config.branchName);
+        logger.info(
+          { branch: config.branchName },
+          'DRY-RUN: Would delete branch',
+        );
       } else {
         await scm.deleteBranch(config.branchName);
       }
@@ -71,7 +75,8 @@ export async function handleModifiedPr(
     logger.debug('Manual rebase has been requested for PR');
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        `DRY-RUN: Would remove edited/blocked PR comment in PR #${pr.number}`,
+        { prNumber: pr.number },
+        'DRY-RUN: Would remove edited/blocked PR comment in PR',
       );
       return;
     }
@@ -84,7 +89,8 @@ export async function handleModifiedPr(
   } else {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        `DRY-RUN: Would ensure edited/blocked PR comment in PR #${pr.number}`,
+        { prNumber: pr.number },
+        'DRY-RUN: Would ensure edited/blocked PR comment in PR',
       );
       return;
     }

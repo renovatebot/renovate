@@ -484,7 +484,8 @@ export class Vulnerabilities {
     } = vul;
     if (is.nullOrUndefined(fixedVersion)) {
       logger.info(
-        `No fixed version available for vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`,
+        { vulnerabilityId: vulnerability.id, packageName, version: depVersion },
+        'No fixed version available for vulnerability',
       );
       return null;
     }

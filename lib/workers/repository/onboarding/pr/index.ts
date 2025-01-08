@@ -124,7 +124,10 @@ If you need any further assistance then you can also [request help here](${
   let configDesc = '';
   if (GlobalConfig.get('dryRun')) {
     // TODO: types (#22198)
-    logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch!}`);
+    logger.info(
+      { branch: config.onboardingBranch },
+      'DRY-RUN: Would check branch',
+    );
   } else {
     configDesc = getConfigDesc(config, packageFiles!);
   }

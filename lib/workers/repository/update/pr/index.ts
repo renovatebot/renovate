@@ -453,7 +453,10 @@ export async function ensurePr(
       }
 
       if (GlobalConfig.get('dryRun')) {
-        logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
+        logger.info(
+          { prNumber: existingPr.number },
+          'DRY-RUN: Would update PR',
+        );
         return { type: 'with-pr', pr: existingPr };
       } else {
         await platform.updatePr(updatePrConfig);
@@ -476,7 +479,7 @@ export async function ensurePr(
     }
     let pr: Pr | null;
     if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would create PR: ' + prTitle);
+      logger.info({ prTitle }, 'DRY-RUN: Would create PR');
       pr = { number: 0 } as never;
     } else {
       try {
@@ -537,7 +540,10 @@ export async function ensurePr(
       content = platform.massageMarkdown(content);
       logger.debug('Adding branch automerge failure message to PR');
       if (GlobalConfig.get('dryRun')) {
-        logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);
+        logger.info(
+          { prNumber: pr.number },
+          'DRY-RUN: Would add comment to PR',
+        );
       } else {
         await ensureComment({
           number: pr.number,

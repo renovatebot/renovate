@@ -68,7 +68,7 @@ export async function bake(
         logger.debug(`Error occured:\n ${result.stderr}`);
         const delay = opts.delay ? toMs(opts.delay) : null;
         if (delay) {
-          logger.info(`Retrying in ${opts.delay} ...`);
+          logger.info({ delay: opts.delay }, 'Retrying ...');
           await setTimeout(delay);
         }
       } else {
@@ -97,7 +97,7 @@ export function sign(
     exitOnError?: boolean;
   },
 ): void {
-  logger.info(`Signing ${image} ...`);
+  logger.info({ image }, 'Signing image ...');
   const result = exec('cosign', ['sign', '--yes', image]);
   if (result.signal) {
     logger.error(`Signal received: ${result.signal}`);

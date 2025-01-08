@@ -30,7 +30,10 @@ export async function setArtifactErrorStatus(
   if (existingState !== state) {
     logger.debug(`Updating status check state to failed`);
     if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would set branch status in ' + config.branchName);
+      logger.info(
+        { branch: config.branchName },
+        'DRY-RUN: Would set branch status',
+      );
     } else {
       await platform.setBranchStatus({
         branchName: config.branchName,

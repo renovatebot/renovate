@@ -131,7 +131,7 @@ export async function migrationPrExists(
 async function handlePr(config: RenovateConfig, pr: Pr): Promise<void> {
   if (await scm.branchExists(pr.sourceBranch)) {
     if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would delete branch ' + pr.sourceBranch);
+      logger.info({ branch: pr.sourceBranch }, 'DRY-RUN: Would delete branch');
     } else {
       await scm.deleteBranch(pr.sourceBranch);
     }

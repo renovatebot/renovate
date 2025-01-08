@@ -1295,7 +1295,8 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-edited',
       });
       expect(logger.info).toHaveBeenCalledWith(
-        `DRY-RUN: Would ensure edited/blocked PR comment in PR #${pr.number}`,
+        { prNumber: 1 },
+        'DRY-RUN: Would ensure edited/blocked PR comment in PR',
       );
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
@@ -1340,7 +1341,8 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: null,
       });
       expect(logger.info).toHaveBeenCalledWith(
-        `DRY-RUN: Would remove edited/blocked PR comment in PR #${pr.number}`,
+        { prNumber: pr.number },
+        'DRY-RUN: Would remove edited/blocked PR comment in PR',
       );
     });
 
@@ -1387,7 +1389,8 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: null,
       });
       expect(logger.info).toHaveBeenCalledWith(
-        'DRY-RUN: Would ensure comment removal in PR #undefined',
+        { prNumber: undefined },
+        'DRY-RUN: Would ensure comment removal in PR',
       );
     });
 

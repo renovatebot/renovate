@@ -90,7 +90,7 @@ async function cleanUpBranches(
       } else if (branchIsModified) {
         logger.debug('Orphan Branch is modified - skipping branch deletion');
       } else if (GlobalConfig.get('dryRun')) {
-        logger.info(`DRY-RUN: Would delete orphan branch ${branchName}`);
+        logger.info({ branchName }, 'DRY-RUN: Would delete orphan branch');
       } else {
         logger.info({ branch: branchName }, `Deleting orphan branch`);
         await scm.deleteBranch(branchName);

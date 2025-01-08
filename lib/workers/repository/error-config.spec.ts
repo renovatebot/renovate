@@ -118,7 +118,8 @@ Message: some-message
 
       expect(res).toBeUndefined();
       expect(logger.info).toHaveBeenCalledWith(
-        `DRY-RUN: Would update PR #${pr.number}`,
+        { prNumber: 1 },
+        'DRY-RUN: Would update PR',
       );
     });
 

@@ -69,9 +69,8 @@ async function rebaseCheck(
     // istanbul ignore if
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        `DRY-RUN: Would delete label ${config.rebaseLabel!} from #${
-          branchPr.number
-        }`,
+        { rebaseLevel: config.rebaseLabel, prNumber: branchPr.number },
+        'DRY-RUN: Would delete rebase label from PR',
       );
     } else {
       await platform.deleteLabel(branchPr.number, config.rebaseLabel!);
@@ -552,7 +551,8 @@ export async function processBranch(
         // istanbul ignore if
         if (GlobalConfig.get('dryRun')) {
           logger.info(
-            `DRY-RUN: Would ensure comment removal in PR #${branchPr.number}`,
+            { prNumber: branchPr.number },
+            'DRY-RUN: Would ensure comment removal in PR',
           );
         } else {
           // Remove artifacts error comment only if this run has successfully updated artifacts
@@ -625,7 +625,7 @@ export async function processBranch(
     }
     if (commitSha) {
       const action = branchExists ? 'updated' : 'created';
-      logger.info({ commitSha }, `Branch ${action}`);
+      logger.info({ commitSha, action }, 'Branch processing complete');
     }
     // Set branch statuses
     await setArtifactErrorStatus(config);
@@ -659,7 +659,10 @@ export async function processBranch(
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
         if (GlobalConfig.get('dryRun')) {
-          logger.info('DRY-RUN: Would delete branch' + config.branchName);
+          logger.info(
+            { branch: config.branchName },
+            'DRY-RUN: Would delete branch',
+          );
         } else {
           await deleteBranchSilently(config.branchName);
         }
@@ -882,7 +885,8 @@ export async function processBranch(
         ) {
           if (GlobalConfig.get('dryRun')) {
             logger.info(
-              `DRY-RUN: Would ensure lock file error comment in PR #${pr.number}`,
+              { prNumber: pr.number },
+              'DRY-RUN: Would ensure lock file error comment in PR',
             );
           } else {
             await ensureComment({
