@@ -21,7 +21,11 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types';
-import { isSystemManifest, systemManifestHeaderRegex } from './common';
+import {
+  collectHelmRepos,
+  isSystemManifest,
+  systemManifestHeaderRegex,
+} from './common';
 import { FluxResource, type HelmRepository } from './schema';
 import type {
   FluxManagerData,
@@ -171,15 +175,14 @@ function resolveResourceManifest(
         }
 
         const chartSpec = resource.spec.chart.spec;
-        const chartName = chartSpec.chart;
-
+        const depName = chartSpec.chart;
         const dep: PackageDependency = {
-          depName: chartName,
+          depName,
           currentValue: resource.spec.chart.spec.version,
           datasource: HelmDatasource.id,
         };
 
-        if (chartName.startsWith('./')) {
+        if (depName.startsWith('./')) {
           dep.skipReason = 'local-chart';
           delete dep.datasource;
           deps.push(dep);
@@ -301,14 +304,7 @@ export function extractPackageFile(
   if (!manifest) {
     return null;
   }
-  const helmRepositories: HelmRepository[] = [];
-  if (manifest.kind === 'resource') {
-    for (const resource of manifest.resources) {
-      if (resource.kind === 'HelmRepository') {
-        helmRepositories.push(resource);
-      }
-    }
-  }
+  const helmRepositories = collectHelmRepos([manifest]);
   let deps: PackageDependency[] | null = null;
   switch (manifest.kind) {
     case 'system':
@@ -342,16 +338,7 @@ export async function extractAllPackageFiles(
     }
   }
 
-  const helmRepositories: HelmRepository[] = [];
-  for (const manifest of manifests) {
-    if (manifest.kind === 'resource') {
-      for (const resource of manifest.resources) {
-        if (resource.kind === 'HelmRepository') {
-          helmRepositories.push(resource);
-        }
-      }
-    }
-  }
+  const helmRepositories = collectHelmRepos(manifests);
 
   for (const manifest of manifests) {
     let deps: PackageDependency[] | null = null;
