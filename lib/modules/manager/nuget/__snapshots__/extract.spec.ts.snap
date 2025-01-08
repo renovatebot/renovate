@@ -124,16 +124,17 @@ exports[`modules/manager/nuget/extract extractPackageFile() extracts all depende
     "depType": "nuget",
   },
   {
-    "currentValue": "1.1.2",
     "datasource": "nuget",
     "depName": "Microsoft.AspNetCore.Hosting",
     "depType": "nuget",
+    "skipReason": "invalid-version",
   },
   {
+    "currentValue": "4.5.0",
     "datasource": "nuget",
     "depName": "Autofac.Extensions.DependencyInjection",
     "depType": "nuget",
-    "skipReason": "invalid-version",
+    "groupName": "AutofacVersion",
   },
   {
     "currentValue": "4.5.0",
