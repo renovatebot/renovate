@@ -28,7 +28,7 @@ import { applyRegistries, findVersion, getConfiguredRegistries } from './util';
  * so we don't include it in the extracting regexp
  */
 const checkVersion = regEx(
-  `^\\s*(?:[[])?(?:(?<currentValue>[^"(,[\\]]+)\\s*(?:,\\s*[)\\]]|])?)\\s*$`,
+  /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/,
 );
 const elemNames = new Set([
   'PackageReference',
@@ -58,23 +58,38 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
 
     if (elemNames.has(name)) {
       const depName = attr?.Include || attr?.Update;
-      const version =
+      if (!depName) {
+        continue;
+      }
+
+      const dep: NugetPackageDependency = {
+        datasource: NugetDatasource.id,
+        depType: 'nuget',
+        depName,
+      };
+
+      let currentValue: string | undefined =
         attr?.Version ??
         attr?.version ??
         child.valueWithPath('Version') ??
         attr?.VersionOverride ??
         child.valueWithPath('VersionOverride');
-      const currentValue = is.nonEmptyStringAndNotWhitespace(version)
-        ? checkVersion.exec(version)?.groups?.currentValue?.trim()
-        : undefined;
-      if (depName && currentValue) {
-        results.push({
-          datasource: NugetDatasource.id,
-          depType: 'nuget',
-          depName,
-          currentValue,
-        });
+
+      if (!is.nonEmptyStringAndNotWhitespace(currentValue)) {
+        dep.skipReason = 'invalid-version';
       }
+
+      currentValue = checkVersion
+        .exec(currentValue)
+        ?.groups?.currentValue?.trim();
+
+      if (currentValue) {
+        dep.currentValue = currentValue;
+      } else {
+        dep.skipReason = 'invalid-version';
+      }
+
+      results.push(dep);
     } else if (name === 'Sdk') {
       const depName = attr?.Name;
       const version = attr?.Version;
