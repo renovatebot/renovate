@@ -90,7 +90,7 @@ export class DebDatasource extends Datasource {
         await extract(compressedFile, compression, extractedFile);
         lastTimestamp = await getFileCreationTime(extractedFile);
       } catch (error) {
-        logger.error(
+        logger.warn(
           {
             compressedFile,
             componentUrl,

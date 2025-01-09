@@ -161,7 +161,7 @@ export function getProjectAndRepo(str: string): {
     };
   }
   const msg = `Azure repository can be only structured this way : 'repository' or 'projectName/repository'!`;
-  logger.error({ repository: str }, msg);
+  logger.warn({ repository: str }, msg);
   throw new Error(msg);
 }
 
