@@ -11,6 +11,7 @@ import { API_PATH, toRenovatePR } from './utils';
 
 export class GiteaPrCache {
   private cache: GiteaPrCacheData;
+  private items: Pr[] = [];
 
   private constructor(
     private repo: string,
@@ -31,6 +32,7 @@ export class GiteaPrCache {
     }
     repoCache.platform.gitea.pullRequestsCache = pullRequestCache;
     this.cache = pullRequestCache;
+    this.updateItems();
   }
 
   static forceSync(): void {
@@ -54,7 +56,7 @@ export class GiteaPrCache {
   }
 
   private getPrs(): Pr[] {
-    return Object.values(this.cache.items);
+    return this.items;
   }
 
   static async getPrs(
@@ -66,18 +68,19 @@ export class GiteaPrCache {
     return prCache.getPrs();
   }
 
-  private addPr(item: Pr): void {
+  private setPr(item: Pr): void {
     this.cache.items[item.number] = item;
+    this.updateItems();
   }
 
-  static async addPr(
+  static async setPr(
     http: GiteaHttp,
     repo: string,
     author: string,
     item: Pr,
   ): Promise<void> {
     const prCache = await GiteaPrCache.init(http, repo, author);
-    prCache.addPr(item);
+    prCache.setPr(item);
   }
 
   private reconcile(rawItems: PR[]): boolean {
@@ -137,6 +140,16 @@ export class GiteaPrCache {
       url = parseLinkHeader(res.headers.link)?.next?.url;
     }
 
+    this.updateItems();
+
     return this;
+  }
+
+  /**
+   * Ensure the pr cache starts with the most recent PRs.
+   * JavaScript ensures that the cache is sorted by PR number.
+   */
+  private updateItems(): void {
+    this.items = Object.values(this.cache.items).reverse();
   }
 }

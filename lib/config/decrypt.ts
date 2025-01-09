@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { logger } from '../logger';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
@@ -173,7 +174,21 @@ export async function decryptConfig(
           }
         }
       } else {
-        logger.error('Found encrypted data but no privateKey');
+        if (process.env.RENOVATE_X_ENCRYPTED_STRICT === 'true') {
+          const error = new Error(CONFIG_VALIDATION);
+          error.validationSource = 'config';
+          error.validationError = 'Encrypted config unsupported';
+          error.validationMessage = `This config contains an encrypted object at location \`$.${key}\` but no privateKey is configured. To support encrypted config, the Renovate administrator must configure a \`privateKey\` in Global Configuration.`;
+          if (process.env.MEND_HOSTED === 'true') {
+            error.validationMessage = `Mend-hosted Renovate Apps no longer support the use of encrypted secrets in Renovate file config (e.g. renovate.json).
+Please migrate all secrets to the Developer Portal using the web UI available at https://developer.mend.io/
+
+Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migrating-secrets/`;
+          }
+          throw error;
+        } else {
+          logger.error('Found encrypted data but no privateKey');
+        }
       }
       delete decryptedConfig.encrypted;
     } else if (is.array(val)) {
