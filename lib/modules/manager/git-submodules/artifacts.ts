@@ -7,7 +7,7 @@ export default function updateArtifacts({
   const res: UpdateArtifactsResult[] = [];
   updatedDeps.forEach((dep) => {
     // TODO: types (#22198)
-    logger.info({ name: dep.depName }, 'Updating git-submodule');
+    logger.debug(`Updating submodule ${dep.depName}`);
     res.push({
       file: { type: 'addition', path: dep.depName!, contents: '' },
     });

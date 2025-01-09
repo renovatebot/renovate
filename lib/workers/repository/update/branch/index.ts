@@ -625,7 +625,7 @@ export async function processBranch(
     }
     if (commitSha) {
       const action = branchExists ? 'updated' : 'created';
-      logger.info({ commitSha, action }, 'Branch processing complete');
+      logger.info({ commitSha }, `Branch ${action}`);
     }
     // Set branch statuses
     await setArtifactErrorStatus(config);

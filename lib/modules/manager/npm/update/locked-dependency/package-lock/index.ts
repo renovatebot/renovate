@@ -48,9 +48,8 @@ export async function updateLockedDependency(
       currentVersion,
     );
     if (lockedDeps.some((dep) => dep.bundled)) {
-      logger.info(
-        { depName, currentVersion },
-        'Package is bundled and cannot be updated',
+      logger.debug(
+        `Package ${depName}@${currentVersion} is bundled and cannot be updated`,
       );
       return { status: 'update-failed' };
     }

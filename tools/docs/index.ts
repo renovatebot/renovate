@@ -17,7 +17,7 @@ import { generateVersioning } from './versioning';
 export async function generateDocs(root = 'tmp', pack = true): Promise<void> {
   try {
     const dist = `${root}/docs`;
-    logger.info({ distFolder: dist }, 'generating docs to dist folder');
+    logger.info(`generating docs to '${dist}'`);
 
     await fs.mkdir(`${dist}/`, { recursive: true });
 

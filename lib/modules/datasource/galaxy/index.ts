@@ -63,9 +63,8 @@ export class GalaxyDatasource extends Datasource {
       }
     }
     if (body.results.length === 0) {
-      logger.info(
-        { dependency: packageName, url: galaxyAPIUrl },
-        `Received no results from galaxy api`,
+      logger.debug(
+        `Received no results for ${packageName} from ${galaxyAPIUrl} `,
       );
       return null;
     }

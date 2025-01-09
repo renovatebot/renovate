@@ -21,7 +21,7 @@ const program = new Command('pnpm release:prepare')
 void (async () => {
   await program.parseAsync();
   const opts = program.opts();
-  logger.info({ version: opts.version }, 'Publishing release...');
+  logger.info(`Publishing v${opts.version}...`);
   const meta = await bake('push', opts);
 
   if (meta?.['push-slim']?.['containerimage.digest']) {

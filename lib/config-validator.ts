@@ -76,7 +76,7 @@ type PackageJson = {
         }
         const parsedContent = await getParsedContent(file);
         try {
-          logger.info({ file }, 'Validating config file');
+          logger.info(`Validating ${file}`);
           await validate('global', file, parsedContent, strict);
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
@@ -97,7 +97,7 @@ type PackageJson = {
         }
         const parsedContent = await getParsedContent(file);
         try {
-          logger.info({ file }, 'Validating repository config file');
+          logger.info(`Validating ${file}`);
           await validate('repo', file, parsedContent, strict);
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
@@ -140,7 +140,7 @@ type PackageJson = {
       const fileConfig = await getFileConfig(process.env);
       if (!dequal(fileConfig, {})) {
         const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
-        logger.info({ file }, 'Validating global config file');
+        logger.info(`Validating ${file}`);
         try {
           await validate('global', file, fileConfig, strict);
         } catch (err) {
