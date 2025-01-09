@@ -69,14 +69,15 @@ const BazelDepToPackageDep = RecordFragmentSchema.extend({
       value: z.literal('bazel_dep'),
     }),
     name: StringFragmentSchema,
-    version: StringFragmentSchema,
+    version: StringFragmentSchema.optional(),
   }),
 }).transform(
   ({ children: { rule, name, version } }): BasePackageDep => ({
     datasource: BazelDatasource.id,
     depType: rule.value,
     depName: name.value,
-    currentValue: version.value,
+    currentValue: version?.value,
+    skipReason: version ? undefined : 'unspecified-version',
   }),
 );
 

@@ -93,6 +93,39 @@ describe('modules/manager/bazel-module/extract', () => {
       );
     });
 
+    it('returns bazel_dep with no version and git_override', async () => {
+      const input = codeBlock`
+        bazel_dep(name = "rules_foo")
+        git_override(
+            module_name = "rules_foo",
+            commit = "850cb49c8649e463b80ef7984e7c744279746170",
+            remote = "https://github.com/example/rules_foo.git",
+        )
+        `;
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+      if (!result) {
+        throw new Error('Expected a result.');
+      }
+      expect(result.deps).toHaveLength(2);
+      expect(result.deps).toEqual(
+        expect.arrayContaining([
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'rules_foo',
+            skipReason: 'git-dependency',
+          },
+          {
+            datasource: GithubTagsDatasource.id,
+            depType: 'git_override',
+            depName: 'rules_foo',
+            currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
+            packageName: 'example/rules_foo',
+          },
+        ]),
+      );
+    });
+
     it('returns dependencies and custom registry URLs when specified in a bazelrc', async () => {
       const packageFile = 'extract/multiple-bazelrcs/MODULE.bazel';
       const input = Fixtures.get(packageFile);
@@ -149,6 +182,38 @@ describe('modules/manager/bazel-module/extract', () => {
       );
     });
 
+    it('returns bazel_dep with no version and archive_override dependencies', async () => {
+      const input = codeBlock`
+        bazel_dep(name = "rules_foo")
+        archive_override(
+          module_name = "rules_foo",
+          urls = [
+            "https://example.com/archive.tar.gz",
+          ],
+        )
+      `;
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+      if (!result) {
+        throw new Error('Expected a result.');
+      }
+      expect(result.deps).toHaveLength(2);
+      expect(result.deps).toEqual(
+        expect.arrayContaining([
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'rules_foo',
+            skipReason: 'file-dependency',
+          },
+          {
+            depType: 'archive_override',
+            depName: 'rules_foo',
+            skipReason: 'unsupported-datasource',
+          },
+        ]),
+      );
+    });
+
     it('returns bazel_dep and local_path_override dependencies', async () => {
       const input = codeBlock`
         bazel_dep(name = "rules_foo", version = "1.2.3")
@@ -180,9 +245,39 @@ describe('modules/manager/bazel-module/extract', () => {
       );
     });
 
-    it('returns bazel_dep and single_version_override dependencies if a version is specified', async () => {
+    it('returns bazel_dep with no version and local_path_override dependencies', async () => {
       const input = codeBlock`
-        bazel_dep(name = "rules_foo", version = "1.2.3")
+        bazel_dep(name = "rules_foo")
+        local_path_override(
+          module_name = "rules_foo",
+          urls = "/path/to/repo",
+        )
+      `;
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+      if (!result) {
+        throw new Error('Expected a result.');
+      }
+      expect(result.deps).toHaveLength(2);
+      expect(result.deps).toEqual(
+        expect.arrayContaining([
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'rules_foo',
+            skipReason: 'local-dependency',
+          },
+          {
+            depType: 'local_path_override',
+            depName: 'rules_foo',
+            skipReason: 'unsupported-datasource',
+          },
+        ]),
+      );
+    });
+
+    it('returns bazel_dep with no version and single_version_override dependencies if a version is specified', async () => {
+      const input = codeBlock`
+        bazel_dep(name = "rules_foo")
         single_version_override(
           module_name = "rules_foo",
           version = "1.2.3",
@@ -200,7 +295,6 @@ describe('modules/manager/bazel-module/extract', () => {
             datasource: BazelDatasource.id,
             depType: 'bazel_dep',
             depName: 'rules_foo',
-            currentValue: '1.2.3',
             skipReason: 'is-pinned',
             registryUrls: ['https://example.com/custom_registry'],
           },
@@ -233,6 +327,29 @@ describe('modules/manager/bazel-module/extract', () => {
           depType: 'bazel_dep',
           depName: 'rules_foo',
           currentValue: '1.2.3',
+          registryUrls: ['https://example.com/custom_registry'],
+        },
+      ]);
+    });
+
+    it('returns bazel_dep with no version dependency if single_version_override does not have a version', async () => {
+      const input = codeBlock`
+        bazel_dep(name = "rules_foo")
+        single_version_override(
+          module_name = "rules_foo",
+          registry = "https://example.com/custom_registry",
+        )
+      `;
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+      if (!result) {
+        throw new Error('Expected a result.');
+      }
+      expect(result.deps).toEqual([
+        {
+          datasource: BazelDatasource.id,
+          depType: 'bazel_dep',
+          depName: 'rules_foo',
+          skipReason: 'unspecified-version',
           registryUrls: ['https://example.com/custom_registry'],
         },
       ]);
