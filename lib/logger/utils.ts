@@ -317,10 +317,7 @@ export function validateLogLevel(
       },
     ],
   });
-  logger.fatal(
-    { logLevel: logLevelToCheck },
-    'Invalid log level. terminating...',
-  );
+  logger.fatal({ logLevel: logLevelToCheck }, 'Invalid log level');
   process.exit(1);
 }
 
