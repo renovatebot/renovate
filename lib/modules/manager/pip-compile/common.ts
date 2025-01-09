@@ -217,7 +217,7 @@ export function extractPythonVersion(
   if (match?.groups === undefined) {
     logger.warn(
       { fileName, content },
-      'pip-compile: failed to extract Python version from header',
+      'pip-compile: failed to extract Python version from header in file',
     );
     return undefined;
   }

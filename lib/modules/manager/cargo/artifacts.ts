@@ -135,7 +135,7 @@ async function updateArtifactsImpl(
         // If there is a dependency without a locked version then log a warning
         // and perform a regular workspace lockfile update.
         logger.warn(
-          { depName: missingDep.depName },
+          { dependency: missingDep.depName },
           'Missing locked version for dependency',
         );
         await cargoUpdate(
