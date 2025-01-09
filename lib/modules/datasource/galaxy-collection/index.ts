@@ -65,8 +65,8 @@ export class GalaxyCollectionDatasource extends Datasource {
       .getJsonSafe(baseUrl, GalaxyV3)
       .onError((err) => {
         logger.warn(
-          { datasource: this.id, packageName, err },
-          `Error fetching ${baseUrl}`,
+          { url: baseUrl, datasource: this.id, packageName, err },
+          'Error fetching from url',
         );
       })
       .unwrap();
@@ -80,8 +80,8 @@ export class GalaxyCollectionDatasource extends Datasource {
       .getJsonSafe(versionsUrl, GalaxyV3Versions)
       .onError((err) => {
         logger.warn(
-          { datasource: this.id, packageName, err },
-          `Error fetching ${versionsUrl}`,
+          { url: versionsUrl, datasource: this.id, packageName, err },
+          'Error fetching from url',
         );
       })
       .unwrap();
@@ -136,8 +136,8 @@ export class GalaxyCollectionDatasource extends Datasource {
       .getJsonSafe(detailedVersionUrl, GalaxyV3DetailedVersion)
       .onError((err) => {
         logger.warn(
-          { datasource: this.id, packageName, err },
-          `Error fetching ${versionsUrl}`,
+          { url: versionsUrl, datasource: this.id, packageName, err },
+          'Error fetching from url',
         );
       })
       .unwrap();

@@ -57,7 +57,7 @@ export class GalaxyDatasource extends Datasource {
       if (!body.results.length) {
         logger.warn(
           { dependency: packageName, userName },
-          `Multiple results from galaxy for ${packageName}, none match`,
+          `Multiple results from galaxy for the package but, none match`,
         );
         return null;
       }
