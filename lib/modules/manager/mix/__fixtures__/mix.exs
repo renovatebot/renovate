@@ -27,13 +27,19 @@ defmodule MyProject.MixProject do
       {:secret, "~> 1.0", organization: "acme"},
       {:also_secret, "~> 1.0", only: [:dev, :test], organization: "acme", runtime: false},
       {:metrics, ">0.2.0 and <=1.0.0"},
-      {:jason, ">= 1.0.0"},
+      {:jason, ">= 1.0.0", only: :prod},
       {:hackney, "~> 1.0",
         optional: true},
-      {:hammer_backend_redis, "~> 6.1"},
+      {:hammer_backend_redis, "~> 6.1", only: [:dev, :prod, :test]},
       {:castore, "== 1.0.10"},
       {:gun, "~> 2.0.0", hex: "grpc_gun"},
       {:another_gun, "~> 0.4.0", hex: :raygun},
+      {:credo, "~> 1.7", only:
+        [:test,
+        # prod,
+        :dev],
+        runtime: false},
+      {:floki, "== 0.37.0", only: :test},
     ]
   end
 end
