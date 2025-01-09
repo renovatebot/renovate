@@ -731,8 +731,8 @@ describe('workers/repository/update/pr/index', () => {
         });
 
         expect(logger.logger.error).toHaveBeenCalledWith(
-          { err },
-          'Failed to ensure PR: ' + prTitle,
+          { err, prTitle },
+          'Failed to ensure PR',
         );
       });
 

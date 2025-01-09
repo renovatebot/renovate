@@ -40,10 +40,10 @@ function build(): void {
   const res = exec('pnpm', ['build']);
 
   if (res.signal) {
-    logger.error(`Signal received: ${res.signal}`);
+    logger.error({ signal: res.signal }, 'Signal received');
     process.exit(-1);
   } else if (res.status && res.status !== 0) {
-    logger.error(`Error occured:\n${res.stderr || res.stdout}`);
+    logger.error({ error: res.stderr || res.stdout }, 'Error occured');
     process.exit(res.status);
   } else {
     logger.debug(`Build succeeded:\n${res.stdout || res.stderr}`);

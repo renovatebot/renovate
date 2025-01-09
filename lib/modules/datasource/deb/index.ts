@@ -92,11 +92,12 @@ export class DebDatasource extends Datasource {
       } catch (error) {
         logger.error(
           {
+            compressedFile,
             componentUrl,
             compression,
             error: error.message,
           },
-          `Failed to extract package file from ${compressedFile}`,
+          'Failed to extract package file from compressed file',
         );
       } finally {
         await fs.rmCache(compressedFile);
