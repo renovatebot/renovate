@@ -1361,9 +1361,12 @@ export async function ensureComment({
   if (topic) {
     logger.debug(`Ensuring comment "${massagedTopic!}" in #${number}`);
     body = `### ${topic}\n\n${sanitizedContent}`;
-    body = body
-      .replace(regEx(/Pull Request/g), 'Merge Request')
-      .replace(regEx(/PR/g), 'MR');
+    body = smartTruncate(
+      body
+        .replace(regEx(/Pull Request/g), 'Merge Request')
+        .replace(regEx(/PR/g), 'MR'),
+      maxBodyLength(),
+    );
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body.startsWith(`### ${massagedTopic!}\n\n`)) {
         commentId = comment.id;
@@ -1372,7 +1375,7 @@ export async function ensureComment({
     });
   } else {
     logger.debug(`Ensuring content-only comment in #${number}`);
-    body = `${sanitizedContent}`;
+    body = smartTruncate(`${sanitizedContent}`, maxBodyLength());
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body === body) {
         commentId = comment.id;
