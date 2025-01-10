@@ -154,6 +154,6 @@ describe('modules/datasource/devbox/index', () => {
       datasource,
       packageName,
     });
-    expect(res?.homepage).toBe('https://www.nixhub.io/');
+    expect(res?.homepage).toBeUndefined();
   });
 });
