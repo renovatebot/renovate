@@ -2,56 +2,73 @@ import { DateTime } from 'luxon';
 
 export type Timestamp = string & { __timestamp: never };
 
+const timezoneOffset = new Date().getTimezoneOffset() * 60000;
+
+const millenium = 946684800000; // 2000-01-01T00:00:00.000Z
+const tomorrowOffset = 86400000; // 24 * 60 * 60 * 1000;
+
+function isValid(date: DateTime): boolean {
+  const tomorrow = DateTime.now().toMillis() + tomorrowOffset; // 24 * 60 * 60 * 1000;
+  const ts = date.toMillis();
+  return date.isValid && ts > millenium && ts < tomorrow;
+}
+
 export function asTimestamp(input: unknown): Timestamp | null {
   if (input instanceof Date) {
-    return input.toISOString() as Timestamp;
+    const date = DateTime.fromJSDate(input, { zone: 'UTC' });
+    if (isValid(date)) {
+      return date.toISO() as Timestamp;
+    }
+
+    return null;
   }
 
-  if (
-    typeof input === 'number' &&
-    !Number.isNaN(input) &&
-    input > 0 &&
-    input <= Date.now() + 24 * 60 * 60 * 1000 // ignore values from the future
-  ) {
-    return new Date(input).toISOString() as Timestamp;
+  if (typeof input === 'number') {
+    const millisDate = DateTime.fromMillis(input, { zone: 'UTC' });
+    if (isValid(millisDate)) {
+      return millisDate.toISO() as Timestamp;
+    }
+
+    const secondsDate = DateTime.fromSeconds(input, { zone: 'UTC' });
+    if (isValid(secondsDate)) {
+      return secondsDate.toISO() as Timestamp;
+    }
+
+    return null;
   }
 
   if (typeof input === 'string') {
-    /**
-     * First, try to parse ISO format
-     */
     const isoDate = DateTime.fromISO(input, { zone: 'UTC' });
-    if (isoDate.isValid) {
+    if (isValid(isoDate)) {
       return isoDate.toISO() as Timestamp;
     }
 
-    /**
-     * Second, try to parse number-like dates,
-     * which is useful for parsing dates from versions, e.g. `1.2.3-20250101120000`
-     */
+    const httpDate = DateTime.fromHTTP(input, { zone: 'UTC' });
+    if (isValid(httpDate)) {
+      return httpDate.toISO() as Timestamp;
+    }
+
+    const sqlDate = DateTime.fromSQL(input, { zone: 'UTC' });
+    if (isValid(sqlDate)) {
+      return sqlDate.toISO() as Timestamp;
+    }
+
     const numberLikeDate = DateTime.fromFormat(input, 'yyyyMMddHHmmss', {
       zone: 'UTC',
     });
-    if (numberLikeDate.isValid) {
+    if (isValid(numberLikeDate)) {
       return numberLikeDate.toISO() as Timestamp;
     }
 
-    /**
-     * Third, parse with more permissive Date constructor.
-     *
-     * In order to avoid timezone issues,
-     * here we ignore hours, minutes, seconds and milliseconds.
-     */
-    try {
-      const fallbackDate = new Date(input);
-      const year = fallbackDate.getUTCFullYear();
-      const month = fallbackDate.getUTCMonth();
-      const day = fallbackDate.getUTCDate();
-      const utc = Date.UTC(year, month, day);
-      return new Date(utc).toISOString() as Timestamp;
-    } catch {
-      return null;
+    const fallbackDate = DateTime.fromMillis(
+      Date.parse(input) - timezoneOffset,
+      { zone: 'UTC' },
+    );
+    if (isValid(fallbackDate)) {
+      return fallbackDate.toISO() as Timestamp;
     }
+
+    return null;
   }
 
   return null;
