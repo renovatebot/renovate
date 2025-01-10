@@ -8,9 +8,12 @@ const millenium = 946684800000; // 2000-01-01T00:00:00.000Z
 const tomorrowOffset = 86400000; // 24 * 60 * 60 * 1000;
 
 function isValid(date: DateTime): boolean {
+  if (!date.isValid) {
+    return false;
+  }
   const tomorrow = DateTime.now().toMillis() + tomorrowOffset; // 24 * 60 * 60 * 1000;
   const ts = date.toMillis();
-  return date.isValid && ts > millenium && ts < tomorrow;
+  return ts > millenium && ts < tomorrow;
 }
 
 export function asTimestamp(input: unknown): Timestamp | null {
