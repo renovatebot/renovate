@@ -1,12 +1,13 @@
 import { stripIndent } from 'common-tags';
 import {
+  parseGcv,
   parseLockFile,
   parsePropsFile,
   usesGcv,
 } from './consistent-versions-plugin';
 
 describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
-  it('gradle-consistent-versions plugin works for sub folders', () => {
+  it('works for sub folders', () => {
     const fsMock = {
       'mysub/build.gradle.kts': `(this file contains) 'com.palantir.consistent-versions'`,
       'mysub/versions.props': `org.apache.lucene:* = 1.2.3`,
@@ -44,7 +45,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
     expect(usesGcv('versions.props', fsMock)).toBeTrue();
   });
 
-  it('gradle-consistent-versions plugin correct position for CRLF and LF', () => {
+  it('correct position for CRLF and LF', () => {
     const crlfProps = parsePropsFile(`a.b:c.d=1\r\na.b:c.e=2`);
     expect(crlfProps).toBeArrayOfSize(2);
     expect(crlfProps[0].has('a.b:c.e')).toBeTrue();
@@ -56,7 +57,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
     expect(lfProps[0].get('a.b:c.e')).toMatchObject({ filePos: 18 });
   });
 
-  it('gradle-consistent-versions plugin test bogus input lines', () => {
+  it('test bogus input lines', () => {
     const parsedProps = parsePropsFile(stripIndent`
       # comment:foo.bar = 1
       123.foo:bar = 2
@@ -91,5 +92,97 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
     expect(parsedLock.get('this.is:valid.test.dep')).toMatchObject({
       depType: 'test',
     });
+  });
+
+  it('supports multiple levels of glob', () => {
+    const fsMock = {
+      'versions.props': stripIndent`
+          org.apache.* = 4
+          org.apache.lucene:* = 3
+          org.apache.lucene:a.* = 2
+          org.apache.lucene:a.b = 1
+          org.apache.foo*:* = 5
+        `,
+      'versions.lock': stripIndent`
+          # Run ./gradlew --write-locks to regenerate this file
+          org.apache.solr:x.y:1 (10 constraints: 95be0c15)
+          org.apache.lucene:a.b:1 (10 constraints: 95be0c15)
+          org.apache.lucene:a.c:1 (10 constraints: 95be0c15)
+          org.apache.lucene:a.d:1 (10 constraints: 95be0c15)
+          org.apache.lucene:d:1 (10 constraints: 95be0c15)
+          org.apache.lucene:e.f:1 (10 constraints: 95be0c15)
+          org.apache.foo-bar:a:1 (10 constraints: 95be0c15)
+        `,
+    };
+    const res = parseGcv('versions.props', fsMock);
+
+    // Each lock dep is only present once, with highest prio for exact prop match, then globs from longest to shortest
+    expect(res).toStrictEqual([
+      {
+        managerData: {
+          packageFile: 'versions.props',
+          fileReplacePosition: 91,
+        },
+        depName: 'org.apache.lucene:a.b',
+        currentValue: '1',
+        lockedVersion: '1',
+        depType: 'dependencies',
+      },
+      {
+        managerData: {
+          packageFile: 'versions.props',
+          fileReplacePosition: 65,
+        },
+        depName: 'org.apache.lucene:a.c',
+        currentValue: '2',
+        lockedVersion: '1',
+        groupName: 'org.apache.lucene:a.*',
+        depType: 'dependencies',
+      },
+      {
+        managerData: {
+          packageFile: 'versions.props',
+          fileReplacePosition: 65,
+        },
+        depName: 'org.apache.lucene:a.d',
+        currentValue: '2',
+        lockedVersion: '1',
+        groupName: 'org.apache.lucene:a.*',
+        depType: 'dependencies',
+      },
+      {
+        managerData: {
+          packageFile: 'versions.props',
+          fileReplacePosition: 39,
+        },
+        depName: 'org.apache.lucene:d',
+        currentValue: '3',
+        lockedVersion: '1',
+        groupName: 'org.apache.lucene:*',
+        depType: 'dependencies',
+      },
+      {
+        managerData: {
+          packageFile: 'versions.props',
+          fileReplacePosition: 39,
+        },
+        depName: 'org.apache.lucene:e.f',
+        currentValue: '3',
+        lockedVersion: '1',
+        groupName: 'org.apache.lucene:*',
+        depType: 'dependencies',
+      },
+      {
+        managerData: {
+          fileReplacePosition: 113,
+          packageFile: 'versions.props',
+        },
+        depName: 'org.apache.foo-bar:a',
+        currentValue: '5',
+        lockedVersion: '1',
+        groupName: 'org.apache.foo*:*',
+        depType: 'dependencies',
+      },
+    ]);
   });
 });
