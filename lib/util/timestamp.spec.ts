@@ -37,6 +37,12 @@ describe('util/timestamp', () => {
       expect(asTimestamp('2021/01/01')).toBe('2021-01-01T00:00:00.000Z');
     });
 
+    it('returns UTC dates for local dates', () => {
+      expect(asTimestamp('2021-01-02T00:00:00+05:30')).toBe(
+        '2021-01-01T18:30:00.000Z',
+      );
+    });
+
     it('returns null for invalid inputs', () => {
       expect(asTimestamp(null)).toBeNull();
       expect(asTimestamp(undefined)).toBeNull();
