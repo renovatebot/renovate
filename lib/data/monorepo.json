@@ -512,6 +512,7 @@
     "slack-net": "https://github.com/soxtoby/SlackNet",
     "slf4j": "https://github.com/qos-ch/slf4j",
     "slim-message-bus": "https://github.com/zarusz/SlimMessageBus",
+    "smithy": "https://github.com/smithy-lang/smithy-typescript",
     "spectre-console": "https://github.com/spectreconsole/spectre.console",
     "springfox": "https://github.com/springfox/springfox",
     "steeltoe": "https://github.com/SteeltoeOSS/steeltoe",
