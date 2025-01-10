@@ -40,7 +40,7 @@ export function calculateLibYears(
           }
           // Set the highest libYears for the dep
           const depLibYears = Math.max(
-            ...(dep.updates ?? []).map((update) => update.libYears ?? 0),
+            ...dep.updates.map((update) => update.libYears ?? 0),
             0,
           );
           fileLibYears += depLibYears;
