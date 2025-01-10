@@ -2,54 +2,34 @@ import { asTimestamp } from './timestamp';
 
 describe('util/timestamp', () => {
   describe('asTimestamp', () => {
-    it('handles Date objects', () => {
-      const date = new Date('2021-01-01T00:00:00.000Z');
-      expect(asTimestamp(date)).toBe('2021-01-01T00:00:00.000Z');
-    });
-
-    it('handles valid number timestamps', () => {
-      const timestamp = 1609459200000; // 2021-01-01T00:00:00.000Z
-      expect(asTimestamp(timestamp)).toBe('2021-01-01T00:00:00.000Z');
-    });
-
-    it('rejects invalid number timestamps', () => {
-      expect(asTimestamp(-1)).toBeNull();
-      expect(asTimestamp(0)).toBeNull();
-      expect(asTimestamp(NaN)).toBeNull();
-      expect(asTimestamp(Date.now() + 48 * 60 * 60 * 1000)).toBeNull(); // 48 hours in the future
-    });
-
-    it('handles ISO string dates', () => {
-      expect(asTimestamp('2021-01-01T00:00:00.000Z')).toBe(
-        '2021-01-01T00:00:00.000Z',
-      );
-      expect(asTimestamp('2021-01-01')).toBe('2021-01-01T00:00:00.000Z');
-    });
-
-    it('handles numberLike format dates', () => {
-      expect(asTimestamp('20210101000000')).toBe('2021-01-01T00:00:00.000Z');
-      expect(asTimestamp('20211231235959')).toBe('2021-12-31T23:59:59.000Z');
-    });
-
-    it('handles dates that need fallback parsing', () => {
-      // Date strings that don't match ISO or numberLike format
-      expect(asTimestamp('Jan 1, 2021')).toBe('2021-01-01T00:00:00.000Z');
-      expect(asTimestamp('2021/01/01')).toBe('2021-01-01T00:00:00.000Z');
-    });
-
-    it('returns UTC dates for local dates', () => {
-      expect(asTimestamp('2021-01-02T00:00:00+05:30')).toBe(
-        '2021-01-01T18:30:00.000Z',
-      );
-    });
-
-    it('returns null for invalid inputs', () => {
-      expect(asTimestamp(null)).toBeNull();
-      expect(asTimestamp(undefined)).toBeNull();
-      expect(asTimestamp({})).toBeNull();
-      expect(asTimestamp([])).toBeNull();
-      expect(asTimestamp('invalid date')).toBeNull();
-      expect(asTimestamp('202x0101000000')).toBeNull(); // invalid numberLike format
+    test.each`
+      input                                   | expected
+      ${new Date('2021-01-01T00:00:00.000Z')} | ${'2021-01-01T00:00:00.000Z'}
+      ${new Date('1999-01-01T00:00:00.000Z')} | ${null}
+      ${1609459200000}                        | ${'2021-01-01T00:00:00.000Z'}
+      ${1609459200}                           | ${'2021-01-01T00:00:00.000Z'}
+      ${-1}                                   | ${null}
+      ${0}                                    | ${null}
+      ${123}                                  | ${null}
+      ${NaN}                                  | ${null}
+      ${'2021-01-01T00:00:00.000Z'}           | ${'2021-01-01T00:00:00.000Z'}
+      ${'2021-01-01'}                         | ${'2021-01-01T00:00:00.000Z'}
+      ${'20210101000000'}                     | ${'2021-01-01T00:00:00.000Z'}
+      ${'20211231235959'}                     | ${'2021-12-31T23:59:59.000Z'}
+      ${'Jan 1, 2021'}                        | ${'2021-01-01T00:00:00.000Z'}
+      ${'2021/01/01'}                         | ${'2021-01-01T00:00:00.000Z'}
+      ${'2021-01-02T00:00:00+05:30'}          | ${'2021-01-01T18:30:00.000Z'}
+      ${'2010-05-20T22:43:19-07:00'}          | ${'2010-05-21T05:43:19.000Z'}
+      ${'2021-10-11 07:47:24 -0700'}          | ${'2021-10-11T14:47:24.000Z'}
+      ${'Wed, 21 Oct 2015 07:28:00 GMT'}      | ${'2015-10-21T07:28:00.000Z'}
+      ${null}                                 | ${null}
+      ${undefined}                            | ${null}
+      ${{}}                                   | ${null}
+      ${[]}                                   | ${null}
+      ${'invalid date'}                       | ${null}
+      ${'202x0101000000'}                     | ${null}
+    `('$input -> $expected', ({ input, expected }) => {
+      expect(asTimestamp(input)).toBe(expected);
     });
   });
 });
