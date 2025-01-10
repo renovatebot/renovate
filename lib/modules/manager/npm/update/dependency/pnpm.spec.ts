@@ -40,7 +40,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
       catalog:
         react: 19.0.0
-    `;);
+    `);
   });
 
   it('handles explicit default catalog dependency', () => {
@@ -60,19 +60,18 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         default:
           react: 18.3.1
     `;
-    const expected = yamlCodeBlock`
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(yamlCodeBlock`
       packages:
         - pkg-a
 
       catalogs:
         default:
           react: 19.0.0
-    `;
-    const testContent = npmUpdater.updateDependency({
-      fileContent: pnpmWorkspaceYaml,
-      upgrade,
-    });
-    expect(testContent).toEqual(expected);
+    `);
   });
 
   it('handles explicit named catalog dependency', () => {
@@ -95,7 +94,11 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         react17:
           react: 17.0.0
     `;
-    const expected = yamlCodeBlock`
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(yamlCodeBlock`
       packages:
         - pkg-a
 
@@ -106,12 +109,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         react17:
           react: 19.0.0
 
-    `;
-    const testContent = npmUpdater.updateDependency({
-      fileContent: pnpmWorkspaceYaml,
-      upgrade,
-    });
-    expect(testContent).toEqual(expected);
+    `);
   });
 
   it('replaces package', () => {
@@ -131,18 +129,17 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       catalog:
         config: 1.21.0
     `;
-    const expected = yamlCodeBlock`
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(yamlCodeBlock`
       packages:
         - pkg-a
 
       catalog:
         abc: 2.0.0
-    `;
-    const testContent = npmUpdater.updateDependency({
-      fileContent: pnpmWorkspaceYaml,
-      upgrade,
-    });
-    expect(testContent).toEqual(expected);
+    `);
   });
 
   it('replaces a github dependency value', () => {
@@ -163,18 +160,17 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       catalog:
         gulp: gulpjs/gulp#v4.0.0-alpha.2
     `;
-    const expected = yamlCodeBlock`
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(yamlCodeBlock`
       packages:
         - pkg-a
 
       catalog:
         gulp: gulpjs/gulp#v4.0.0
-    `;
-    const testContent = npmUpdater.updateDependency({
-      fileContent: pnpmWorkspaceYaml,
-      upgrade,
-    });
-    expect(testContent).toEqual(expected);
+    `);
   });
 
   it('replaces a npm package alias', () => {
@@ -196,18 +192,17 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       catalog:
         hapi: npm:@hapi/hapi@18.3.0
     `;
-    const expected = yamlCodeBlock`
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(yamlCodeBlock`
       packages:
         - pkg-a
 
       catalog:
         hapi: npm:@hapi/hapi@18.3.1
-    `;
-    const testContent = npmUpdater.updateDependency({
-      fileContent: pnpmWorkspaceYaml,
-      upgrade,
-    });
-    expect(testContent).toEqual(expected);
+    `);
   });
 
   it('replaces a github short hash', () => {
@@ -228,18 +223,17 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       catalog:
         gulp: gulpjs/gulp#abcdef7
     `;
-    const expected = yamlCodeBlock`
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(yamlCodeBlock`
       packages:
         - pkg-a
 
       catalog:
         gulp: gulpjs/gulp#0000000
-    `;
-    const testContent = npmUpdater.updateDependency({
-      fileContent: pnpmWorkspaceYaml,
-      upgrade,
-    });
-    expect(testContent).toEqual(expected);
+    `);
   });
 
   it('replaces a github fully specified version', () => {
@@ -260,18 +254,17 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       catalog:
         n: git+https://github.com/owner/n#v1.0.0
     `;
-    const expected = yamlCodeBlock`
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(yamlCodeBlock`
       packages:
         - pkg-a
 
       catalog:
         n: git+https://github.com/owner/n#v1.1.0
-    `;
-    const testContent = npmUpdater.updateDependency({
-      fileContent: pnpmWorkspaceYaml,
-      upgrade,
-    });
-    expect(testContent).toEqual(expected);
+    `);
   });
 
   it('returns null if the dependency is not present in the target catalog', () => {
