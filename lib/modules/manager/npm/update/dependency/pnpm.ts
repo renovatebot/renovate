@@ -26,7 +26,7 @@ export function updatePnpmCatalogDependency({
   newValue = getNewGitValue(upgrade) ?? newValue;
   newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
 
-  logger.debug(
+  logger.trace(
     `npm.updatePnpmCatalogDependency(): ${depType}:${managerData?.catalogName}.${depName} = ${newValue}`,
   );
 

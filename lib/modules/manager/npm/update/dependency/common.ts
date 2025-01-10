@@ -1,9 +1,9 @@
 import { logger } from '../../../../../logger';
 import type { Upgrade } from '../../../types';
 
-export function getNewGitValue(upgrade: Upgrade): string | undefined {
+export function getNewGitValue(upgrade: Upgrade): string | null {
   if (!upgrade.currentRawValue) {
-    return;
+    return null;
   }
   if (upgrade.currentDigest) {
     logger.debug('Updating git digest');
@@ -25,9 +25,9 @@ export function getNewGitValue(upgrade: Upgrade): string | undefined {
 export function getNewNpmAliasValue(
   value: string | undefined,
   upgrade: Upgrade,
-): string | undefined {
+): string | null {
   if (!upgrade.npmPackageAlias) {
-    return;
+    return null;
   }
   return `npm:${upgrade.packageName}@${value}`;
 }

@@ -245,9 +245,9 @@ export function extractPnpmWorkspaceFile(
 ): PackageFile | null {
   logger.trace(`pnpm.extractPnpmWorkspaceFile(${packageFile})`);
 
-  let pnpmCatalogs: Array<PnpmCatalog>;
+  const pnpmCatalogs: PnpmCatalog[] = [];
   try {
-    pnpmCatalogs = parsePnpmCatalogs(content);
+    pnpmCatalogs.push(...parsePnpmCatalogs(content));
   } catch {
     logger.debug({ packageFile }, `Invalid pnpm workspace YAML.`);
     return null;
@@ -256,11 +256,9 @@ export function extractPnpmWorkspaceFile(
   const extracted = extractPnpmCatalogDeps(pnpmCatalogs);
 
   if (!extracted) {
-    logger.debug({ packageFile }, 'No dependencies found');
     return null;
   }
 
-  logger.debug(extracted, 'Extracted catalog dependencies.');
 
   return {
     ...extracted,
@@ -269,7 +267,7 @@ export function extractPnpmWorkspaceFile(
 }
 
 function extractPnpmCatalogDeps(
-  catalogs: Array<PnpmCatalog>,
+  catalogs: PnpmCatalog[],
 ): PackageFileContent<NpmManagerData> | null {
   const CATALOG_DEPENDENCY = 'pnpm.catalog';
 
@@ -322,18 +320,27 @@ export const pnpmCatalogsSchema = z.object({
   catalogs: z.optional(z.record(z.record(z.string()))),
 });
 
-function parsePnpmCatalogs(content: string): Array<PnpmCatalog> {
+function parsePnpmCatalogs(content: string): PnpmCatalog[] {
   const { catalog: defaultCatalogDeps, catalogs: namedCatalogs } =
     parseSingleYaml(content, { customSchema: pnpmCatalogsSchema });
 
-  return [
+  const result = [
     {
       name: 'default',
       dependencies: defaultCatalogDeps ?? {},
-    },
-    ...Object.entries(namedCatalogs ?? {}).map(([name, dependencies]) => ({
+    }
+  ]
+
+  if (!namedCatalogs) {
+    return result;
+  }
+
+  for (const [name, dependencies] of Object.entries(namedCatalogs)) {
+    result.push({
       name,
       dependencies,
-    })),
-  ];
+    });
+  }
+
+  return result
 }

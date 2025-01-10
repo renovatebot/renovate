@@ -30,18 +30,17 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       catalog:
         react: 18.3.1
     `;
-    const expected = yamlCodeBlock`
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(yamlCodeBlock`
       packages:
         - pkg-a
 
       catalog:
         react: 19.0.0
-    `;
-    const testContent = npmUpdater.updateDependency({
-      fileContent: pnpmWorkspaceYaml,
-      upgrade,
-    });
-    expect(testContent).toEqual(expected);
+    `;);
   });
 
   it('handles explicit default catalog dependency', () => {
