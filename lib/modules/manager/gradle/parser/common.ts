@@ -267,23 +267,13 @@ export const qTemplateString = q
       ctx.tmpTokenStore.templateTokens = [];
       return ctx;
     },
-    search: q.alt(
-      qStringValue.handler((ctx) => {
+    search: q
+      .alt(qStringValue, qPropertyAccessIdentifier, qVariableAccessIdentifier)
+      .handler((ctx) => {
         ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
         ctx.varTokens = [];
         return ctx;
       }),
-      qPropertyAccessIdentifier.handler((ctx) => {
-        ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
-        ctx.varTokens = [];
-        return ctx;
-      }),
-      qVariableAccessIdentifier.handler((ctx) => {
-        ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
-        ctx.varTokens = [];
-        return ctx;
-      }),
-    ),
   })
   .handler((ctx) => {
     ctx.varTokens = ctx.tmpTokenStore.templateTokens!;
