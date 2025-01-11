@@ -494,8 +494,8 @@ importers:
         specifier: 0.2.6
         version: 0.2.6
       '@types/unist':
-        specifier: 2.0.11
-        version: 2.0.11
+        specifier: 3.0.3
+        version: 3.0.3
       '@types/url-join':
         specifier: 4.0.3
         version: 4.0.3
@@ -2171,6 +2171,9 @@ packages:
 
   '@types/unist@2.0.11':
     resolution: {integrity: sha512-CmBKiL6NNo/OqgmMn95Fk9Whlp2mtvIv+KNpQKN2F4SjvrEesubTRWGYSg+BnWZOnlCaSTU1sMpsBOzgbYhnsA==}
+
+  '@types/unist@3.0.3':
+    resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
 
   '@types/url-join@4.0.3':
     resolution: {integrity: sha512-3l1qMm3wqO0iyC5gkADzT95UVW7C/XXcdvUcShOideKF0ddgVRErEQQJXBd2kvQm+aSgqhBGHGB38TgMeT57Ww==}
@@ -8894,6 +8897,8 @@ snapshots:
   '@types/treeify@1.0.3': {}
 
   '@types/unist@2.0.11': {}
+
+  '@types/unist@3.0.3': {}
 
   '@types/url-join@4.0.3': {}
 
