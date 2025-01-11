@@ -9,7 +9,7 @@ const HelmReleaseSchema = z.object({
   version: z.string(),
   created: z.string().nullable().catch(null),
   digest: z.string().optional().catch(undefined),
-  home: z.string().optional(),
+  home: z.string().optional().catch(undefined),
   sources: z.array(z.string()).catch([]),
   urls: z.array(z.string()).catch([]),
 });
