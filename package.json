@@ -349,7 +349,7 @@
     "ts-node": "10.9.2",
     "type-fest": "4.32.0",
     "typescript": "5.7.3",
-    "unified": "9.2.2"
+    "unified": "11.0.5"
   },
   "packageManager": "pnpm@9.15.3",
   "files": [
