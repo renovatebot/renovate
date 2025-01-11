@@ -407,8 +407,8 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      expect(logger.logger.info).toHaveBeenCalledWith(
-        `No fixed version available for vulnerability GHSA-xxxx-yyyy-zzzz in fake 4.17.11`,
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'No fixed version available for vulnerability GHSA-xxxx-yyyy-zzzz in fake 4.17.11',
       );
     });
 
@@ -449,13 +449,8 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      expect(logger.logger.info).toHaveBeenCalledWith(
-        {
-          vulnerabilityId: 'GHSA-xxxx-yyyy-zzzz',
-          packageName: 'fake',
-          version: '1.5.1',
-        },
-        'No fixed version available for vulnerability',
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'No fixed version available for vulnerability GHSA-xxxx-yyyy-zzzz in fake 1.5.1',
       );
     });
 
