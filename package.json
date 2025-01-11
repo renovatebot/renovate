@@ -204,7 +204,7 @@
     "global-agent": "3.0.0",
     "good-enough-parser": "1.1.23",
     "google-auth-library": "9.15.0",
-    "got": "11.8.6",
+    "got": "14.4.5",
     "graph-data-structure": "4.3.0",
     "handlebars": "4.7.8",
     "ignore": "6.0.2",
