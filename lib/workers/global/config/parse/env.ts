@@ -121,16 +121,10 @@ export async function getConfig(
   inputEnv: NodeJS.ProcessEnv,
   configEnvKey = 'RENOVATE_CONFIG',
 ): Promise<AllConfig> {
-  let env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
-  env = massageConvertedExperimentalVars(env);
-  env = renameEnvKeys(env);
-  // massage the values of migrated configuration keys
-  env = massageEnvKeyValues(env);
-
-  const options = getOptions();
-
+  const env = prepareEnv(inputEnv);
   const config = await parseAndValidateOrExit(env, configEnvKey);
 
+  const options = getOptions();
   config.hostRules ??= [];
 
   for (const option of options) {
@@ -235,7 +229,15 @@ export async function getConfig(
   return config;
 }
 
-async function parseAndValidateOrExit(
+export function prepareEnv(inputEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  let env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
+  env = massageConvertedExperimentalVars(env);
+  env = renameEnvKeys(env);
+  // massage the values of migrated configuration keys
+  return massageEnvKeyValues(env);
+}
+
+export async function parseAndValidateOrExit(
   env: NodeJS.ProcessEnv,
   configEnvKey: string,
 ): Promise<AllConfig> {

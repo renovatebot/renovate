@@ -90,13 +90,14 @@ export class DebDatasource extends Datasource {
         await extract(compressedFile, compression, extractedFile);
         lastTimestamp = await getFileCreationTime(extractedFile);
       } catch (error) {
-        logger.error(
+        logger.warn(
           {
+            compressedFile,
             componentUrl,
             compression,
             error: error.message,
           },
-          `Failed to extract package file from ${compressedFile}`,
+          'Failed to extract package file from compressed file',
         );
       } finally {
         await fs.rmCache(compressedFile);
