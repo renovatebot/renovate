@@ -54,7 +54,10 @@ export const ConanLatestRevision = z
 export const ConanProperties = z
   .object({
     properties: z.object({
-      'conan.package.url': z.string().array(),
+      'conan.package.url': z.union([
+        z.string().transform((url) => [url]),
+        z.string().array(),
+      ]),
     }),
   })
   .transform(({ properties }) => {
