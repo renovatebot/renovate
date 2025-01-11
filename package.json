@@ -226,7 +226,7 @@
     "node-html-parser": "6.1.13",
     "p-all": "3.0.0",
     "p-map": "4.0.0",
-    "p-queue": "6.6.2",
+    "p-queue": "8.0.1",
     "p-throttle": "4.1.1",
     "parse-link-header": "2.0.0",
     "prettier": "3.4.2",
