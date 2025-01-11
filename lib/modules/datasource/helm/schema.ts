@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { LooseRecord, Yaml } from '../../../util/schema-utils';
-import type { Release } from '../types';
 import { detectPlatform } from '../../../util/common';
 import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
+import { LooseRecord, Yaml } from '../../../util/schema-utils';
+import type { Release } from '../types';
 
 const HelmReleaseSchema = z.object({
   version: z.string(),
