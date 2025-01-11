@@ -1,9 +1,9 @@
-import { stripIndent } from 'common-tags';
+import { codeBlock } from 'common-tags';
 import { parseCatalog } from './catalog';
 
 describe('modules/manager/gradle/extract/catalog', () => {
   it('supports versions declared as single string', () => {
-    const input = stripIndent`
+    const input = codeBlock`
       [versions]
       kotlin = "1.5.21"
       retro_fit = "2.8.2"
@@ -118,7 +118,7 @@ describe('modules/manager/gradle/extract/catalog', () => {
   });
 
   it('deletes commit message for plugins with version reference', () => {
-    const input = stripIndent`
+    const input = codeBlock`
       [versions]
       detekt = "1.18.1"
 
@@ -156,7 +156,7 @@ describe('modules/manager/gradle/extract/catalog', () => {
   });
 
   it('changes the dependency version, not the comment version', () => {
-    const input = stripIndent`
+    const input = codeBlock`
       [versions]
       # Releases: http://someWebsite.com/junit/1.4.9
       mocha-junit-reporter = "2.0.2"

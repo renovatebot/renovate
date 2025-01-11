@@ -1,4 +1,4 @@
-import { codeBlock, stripIndent } from 'common-tags';
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger, partial } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
@@ -793,7 +793,7 @@ describe('modules/manager/gradle/extract', () => {
     it('parses versions files', async () => {
       const fsMock = {
         'versions.props': `org.apache.lucene:* = 1.2.3`,
-        'versions.lock': stripIndent`
+        'versions.lock': codeBlock`
           # Run ./gradlew --write-locks to regenerate this file
           org.apache.lucene:lucene-core:1.2.3 (10 constraints: 95be0c15)
           org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)
@@ -843,7 +843,7 @@ describe('modules/manager/gradle/extract', () => {
     it('plugin not used due to lockfile not a GCV lockfile', async () => {
       const fsMock = {
         'versions.props': `org.apache.lucene:* = 1.2.3`,
-        'versions.lock': stripIndent`
+        'versions.lock': codeBlock`
           This is NOT a lock file
         `,
       };

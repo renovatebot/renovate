@@ -1,4 +1,4 @@
-import { stripIndent } from 'common-tags';
+import { codeBlock } from 'common-tags';
 import {
   parseGcv,
   parseLockFile,
@@ -11,7 +11,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
     const fsMock = {
       'mysub/build.gradle.kts': `(this file contains) 'com.palantir.consistent-versions'`,
       'mysub/versions.props': `org.apache.lucene:* = 1.2.3`,
-      'mysub/versions.lock': stripIndent`
+      'mysub/versions.lock': codeBlock`
         # Run ./gradlew --write-locks to regenerate this file
         org.apache.lucene:lucene-core:1.2.3`,
       'othersub/build.gradle.kts': `nothing here`,
@@ -25,7 +25,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
     const fsMock = {
       'build.gradle.kts': `(this file contains) 'com.palantir.consistent-versions'`,
       'versions.props': `org.apache.lucene:* = 1.2.3`,
-      'versions.lock': stripIndent`
+      'versions.lock': codeBlock`
         # Run ./gradlew writeVersionsLock to regenerate this file
         org.apache.lucene:lucene-core:1.2.3`,
     };
@@ -37,7 +37,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
     const fsMock = {
       'build.gradle.kts': `(this file contains) 'com.palantir.consistent-versions'`,
       'versions.props': `org.apache.lucene:* = 1.2.3`,
-      'versions.lock': stripIndent`
+      'versions.lock': codeBlock`
         # Run ./gradlew writeVersionsLocks to regenerate this file
         org.apache.lucene:lucene-core:1.2.3`,
     };
@@ -58,7 +58,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
   });
 
   it('test bogus input lines', () => {
-    const parsedProps = parsePropsFile(stripIndent`
+    const parsedProps = parsePropsFile(codeBlock`
       # comment:foo.bar = 1
       123.foo:bar = 2
       this has:spaces = 3
@@ -72,7 +72,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
     expect(parsedProps[0]).toMatchObject({ size: 1 }); // no 7 is valid exact dep
     expect(parsedProps[1]).toMatchObject({ size: 1 }); // no 8 is valid glob dep
 
-    const parsedLock = parseLockFile(stripIndent`
+    const parsedLock = parseLockFile(codeBlock`
       # comment:foo.bar:1 (10 constraints: 95be0c15)
       123.foo:bar:2 (10 constraints: 95be0c15)
       this has:spaces:3 (10 constraints: 95be0c15)
@@ -96,14 +96,14 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
 
   it('supports multiple levels of glob', () => {
     const fsMock = {
-      'versions.props': stripIndent`
+      'versions.props': codeBlock`
           org.apache.* = 4
           org.apache.lucene:* = 3
           org.apache.lucene:a.* = 2
           org.apache.lucene:a.b = 1
           org.apache.foo*:* = 5
         `,
-      'versions.lock': stripIndent`
+      'versions.lock': codeBlock`
           # Run ./gradlew --write-locks to regenerate this file
           org.apache.solr:x.y:1 (10 constraints: 95be0c15)
           org.apache.lucene:a.b:1 (10 constraints: 95be0c15)
