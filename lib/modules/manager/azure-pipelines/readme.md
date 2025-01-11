@@ -42,7 +42,7 @@ resources:
       ref: refs/tags/v0.5.1
   containers:
     - container: linux
-      image: ubuntu:24.04
+      image: ubuntu:25.04
     - container: python
       image: python:3.13@sha256:cea505b81701dd9e46b8dde96eaa8054c4bd2035dbb660edeb7af947ed38a0ad
 
