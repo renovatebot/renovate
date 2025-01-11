@@ -1,31 +1,45 @@
 import { z } from 'zod';
 import { LooseRecord, Yaml } from '../../../util/schema-utils';
 import type { Release } from '../types';
-import { githubRelease, isPossibleChartRepo } from './common';
+import { detectPlatform } from '../../../util/common';
+import { parseGitUrl } from '../../../util/git/url';
+import { regEx } from '../../../util/regex';
 
 const HelmReleaseSchema = z.object({
   version: z.string(),
   created: z.string().nullable().catch(null),
   digest: z.string().optional().catch(undefined),
   home: z.string().optional(),
-  sources: z.array(z.string()).optional(),
-  urls: z.array(z.string()),
+  sources: z.array(z.string()).catch([]),
+  urls: z.array(z.string()).catch([]),
 });
 type HelmRelease = z.infer<typeof HelmReleaseSchema>;
 
-function getSourceUrl(release: HelmRelease): string | null {
+const chartRepo = regEx(/charts?|helm|helm-charts/i);
+
+function isPossibleChartRepo(url: string): boolean {
+  if (detectPlatform(url) === null) {
+    return false;
+  }
+
+  const parsed = parseGitUrl(url);
+  return chartRepo.test(parsed.name);
+}
+
+const githubRelease = regEx(
+  /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//,
+);
+
+function getSourceUrl(release: HelmRelease): string | undefined {
   // it's a github release :)
-  const releaseMatch = githubRelease.exec(release.urls[0]);
+  const [githubUrl] = release.urls;
+  const releaseMatch = githubRelease.exec(githubUrl);
   if (releaseMatch) {
     return releaseMatch[1];
   }
 
   if (release.home && isPossibleChartRepo(release.home)) {
     return release.home;
-  }
-
-  if (!release.sources?.length) {
-    return null;
   }
 
   for (const url of release.sources) {
