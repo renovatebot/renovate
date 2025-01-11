@@ -152,6 +152,7 @@ function setInheritedHostRules(config: RenovateConfig): void {
       try {
         hostRules.add(rule);
       } catch (err) {
+        // istanbul ignore next
         logger.warn(
           { err, config: rule },
           'Error setting hostRule from config',
