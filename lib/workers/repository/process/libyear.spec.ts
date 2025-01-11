@@ -4,10 +4,6 @@ import { calculateLibYears } from './libyear';
 
 describe('workers/repository/process/libyear', () => {
   describe('calculateLibYears', () => {
-    beforeEach(() => {
-      logger.logger.debug.mockClear();
-    });
-
     it('returns early if no packageFiles', () => {
       calculateLibYears(undefined);
       expect(logger.logger.debug).not.toHaveBeenCalled();
