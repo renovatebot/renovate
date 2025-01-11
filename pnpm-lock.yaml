@@ -461,8 +461,8 @@ importers:
         specifier: 0.5.3
         version: 0.5.3
       '@types/mdast':
-        specifier: 3.0.15
-        version: 3.0.15
+        specifier: 4.0.4
+        version: 4.0.4
       '@types/moo':
         specifier: 0.5.10
         version: 0.5.10
@@ -2105,6 +2105,9 @@ packages:
 
   '@types/mdast@3.0.15':
     resolution: {integrity: sha512-LnwD+mUEfxWMa1QpDraczIn6k0Ee3SMicuYSSzS6ZYl2gKS09EClnJYGd8Du6rfc5r/GZEk5o1mRb8TaTj03sQ==}
+
+  '@types/mdast@4.0.4':
+    resolution: {integrity: sha512-kGaNbPh1k7AFzgpud/gMdvIm5xuECykRR+JnWKQno9TAXVa6WIVCGTPvYGekIDL4uwCZQSYbUxNBSb1aUo79oA==}
 
   '@types/mdurl@2.0.0':
     resolution: {integrity: sha512-RGdgjQUZba5p6QEFAVx2OGb8rQDL/cPRG7GiedRzMcJ1tYnUANBncjbSB1NRGwbvjcPeikRABz2nshyPk1bhWg==}
@@ -8839,6 +8842,10 @@ snapshots:
       '@types/node': 20.17.11
 
   '@types/mdast@3.0.15':
+    dependencies:
+      '@types/unist': 2.0.11
+
+  '@types/mdast@4.0.4':
     dependencies:
       '@types/unist': 2.0.11
 
