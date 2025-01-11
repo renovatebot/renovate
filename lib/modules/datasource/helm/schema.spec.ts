@@ -2,7 +2,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import { HelmRepositorySchema } from './schema';
 
 describe('modules/datasource/helm/schema', () => {
-  describe('findSourceUrl', () => {
+  describe('sourceUrl', () => {
     it('works', () => {
       const repo = HelmRepositorySchema.parse(Fixtures.get('sample.yaml'));
       expect(repo).toMatchObject({

@@ -13,7 +13,7 @@ const HelmReleaseSchema = z.object({
 });
 type HelmRelease = z.infer<typeof HelmReleaseSchema>;
 
-export function findSourceUrl(release: HelmRelease): string | null {
+function getSourceUrl(release: HelmRelease): string | null {
   // it's a github release :)
   const releaseMatch = githubRelease.exec(release.urls[0]);
   if (releaseMatch) {
@@ -47,7 +47,7 @@ export const HelmRepositorySchema = Yaml.pipe(
         .transform((helmReleases) => {
           const latestRelease = helmReleases[0];
           const homepage = latestRelease.home;
-          const sourceUrl = findSourceUrl(latestRelease);
+          const sourceUrl = getSourceUrl(latestRelease);
           const releases = helmReleases.map(
             ({
               version,
