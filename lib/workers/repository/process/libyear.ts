@@ -15,27 +15,27 @@ export function calculateLibYears(
       for (const dep of file.deps) {
         if (dep.updates?.length) {
           for (const update of dep.updates) {
-            if (update.releaseTimestamp) {
-              if (dep.currentVersionTimestamp) {
-                // timestamps are in ISO format
-                const currentVersionDate = DateTime.fromISO(
-                  dep.currentVersionTimestamp,
-                );
-                const releaseDate = DateTime.fromISO(update.releaseTimestamp);
-                const libYears = releaseDate.diff(
-                  currentVersionDate,
-                  'years',
-                ).years;
-                if (libYears >= 0) {
-                  update.libYears = libYears;
-                }
-              } else {
-                logger.debug(`No currentVersionTimestamp for ${dep.depName}`);
-              }
-            } else {
+            if (!update.releaseTimestamp) {
               logger.debug(
                 `No releaseTimestamp for ${dep.depName} update to ${update.newVersion}`,
               );
+              continue;
+            }
+            if (!dep.currentVersionTimestamp) {
+              logger.debug(`No currentVersionTimestamp for ${dep.depName}`);
+              continue;
+            }
+            // timestamps are in ISO format
+            const currentVersionDate = DateTime.fromISO(
+              dep.currentVersionTimestamp,
+            );
+            const releaseDate = DateTime.fromISO(update.releaseTimestamp);
+            const libYears = releaseDate.diff(
+              currentVersionDate,
+              'years',
+            ).years;
+            if (libYears >= 0) {
+              update.libYears = libYears;
             }
           }
           // Set the highest libYears for the dep
@@ -51,9 +51,9 @@ export function calculateLibYears(
     }
   }
   // Sum up the libYears for the repo
-  const totalLibYears = Object.values(managerLibYears).reduce(
-    (acc, libYears) => acc + libYears,
-    0,
-  );
+  let totalLibYears = 0;
+  for (const libYears of Object.values(managerLibYears)) {
+    totalLibYears += libYears;
+  }
   logger.debug({ managerLibYears, totalLibYears }, 'Repository libYears');
 }
