@@ -1,121 +1,9 @@
-import is from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import { parseSingleYaml } from '../../../util/yaml';
-import { GitTagsDatasource } from '../../datasource/git-tags';
-import { id as dockerVersioning } from '../../versioning/docker';
-import { id as semverVersioning } from '../../versioning/semver';
-import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type {
-  BatectConfig,
-  BatectFileInclude,
-  BatectGitInclude,
-  BatectInclude,
-  ExtractionResult,
-} from './types';
-
-function loadConfig(content: string): BatectConfig {
-  const config = parseSingleYaml(content);
-
-  if (typeof config !== 'object') {
-    throw new Error(
-      `Configuration file does not contain a YAML object (it is ${typeof config}).`,
-    );
-  }
-
-  return config as BatectConfig;
-}
-
-function extractImages(config: BatectConfig): string[] {
-  if (config.containers === undefined) {
-    return [];
-  }
-
-  return Object.values(config.containers)
-    .map((container) => container.image)
-    .filter(is.string);
-}
-
-function createImageDependency(tag: string): PackageDependency {
-  return {
-    ...getDep(tag),
-    versioning: dockerVersioning,
-  };
-}
-
-function extractImageDependencies(config: BatectConfig): PackageDependency[] {
-  const images = extractImages(config);
-  const deps = images.map((image) => createImageDependency(image));
-
-  logger.trace({ deps }, 'Loaded images from Batect configuration file');
-
-  return deps;
-}
-
-function includeIsGitInclude(
-  include: BatectInclude,
-): include is BatectGitInclude {
-  return typeof include === 'object' && include.type === 'git';
-}
-
-function extractGitBundles(config: BatectConfig): BatectGitInclude[] {
-  if (config.include === undefined) {
-    return [];
-  }
-
-  return config.include.filter(includeIsGitInclude);
-}
-
-function createBundleDependency(bundle: BatectGitInclude): PackageDependency {
-  return {
-    depName: bundle.repo,
-    currentValue: bundle.ref,
-    versioning: semverVersioning,
-    datasource: GitTagsDatasource.id,
-    commitMessageTopic: 'bundle {{depName}}',
-  };
-}
-
-function extractBundleDependencies(config: BatectConfig): PackageDependency[] {
-  const bundles = extractGitBundles(config);
-  const deps = bundles.map((bundle) => createBundleDependency(bundle));
-
-  logger.trace({ deps }, 'Loaded bundles from Batect configuration file');
-
-  return deps;
-}
-
-function includeIsStringFileInclude(include: BatectInclude): include is string {
-  return typeof include === 'string';
-}
-
-function includeIsObjectFileInclude(
-  include: BatectInclude,
-): include is BatectFileInclude {
-  return typeof include === 'object' && include.type === 'file';
-}
-
-function extractReferencedConfigFiles(
-  config: BatectConfig,
-  fileName: string,
-): string[] {
-  if (config.include === undefined) {
-    return [];
-  }
-
-  const dirName = upath.dirname(fileName);
-
-  const paths = [
-    ...config.include.filter(includeIsStringFileInclude),
-    ...config.include
-      .filter(includeIsObjectFileInclude)
-      .map((include) => include.path),
-  ].filter((p) => p !== undefined && p !== null);
-
-  return paths.map((p) => upath.join(dirName, p));
-}
+import type { ExtractConfig, PackageFile } from '../types';
+import { BatectConfigSchema } from './schema';
+import type { ExtractionResult } from './types';
 
 export function extractPackageFile(
   content: string,
@@ -124,15 +12,13 @@ export function extractPackageFile(
   logger.trace(`batect.extractPackageFile(${packageFile})`);
 
   try {
-    const config = loadConfig(content);
-    const deps = [
-      ...extractImageDependencies(config),
-      ...extractBundleDependencies(config),
-    ];
+    const { imageDependencies, bundleDependencies, fileIncludes } =
+      BatectConfigSchema.parse(content);
+    const deps = [...imageDependencies, ...bundleDependencies];
 
-    const referencedConfigFiles = extractReferencedConfigFiles(
-      config,
-      packageFile,
+    const dirName = upath.dirname(packageFile);
+    const referencedConfigFiles = fileIncludes.map((file) =>
+      upath.join(dirName, file),
     );
 
     return { deps, referencedConfigFiles };
