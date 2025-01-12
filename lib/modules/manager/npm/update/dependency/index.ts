@@ -117,7 +117,7 @@ export function updateDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig): string | null {
-  if (upgrade.depType === 'pnpm.catalog') {
+  if (upgrade.depType?.startsWith('pnpm.catalog')) {
     return updatePnpmCatalogDependency({ fileContent, upgrade });
   }
 

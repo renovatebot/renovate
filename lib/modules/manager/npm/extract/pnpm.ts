@@ -264,32 +264,28 @@ export function extractPnpmWorkspaceFile(
   };
 }
 
+/**
+ * In order to facilitate matching on specific catalogs, we structure the
+ * depType as `pnpm.catalog.default`, `pnpm.catalog.react17`, and so on.
+ */
+function getCatalogDepType(name: string): string {
+  const CATALOG_DEPENDENCY = 'pnpm.catalog';
+  return `${CATALOG_DEPENDENCY}.${name}`;
+}
+
 function extractPnpmCatalogDeps(
   catalogs: PnpmCatalog[],
 ): PackageFileContent<NpmManagerData> | null {
-  const CATALOG_DEPENDENCY = 'pnpm.catalog';
-
   const deps: PackageDependency[] = [];
 
   for (const catalog of catalogs) {
     for (const [key, val] of Object.entries(catalog.dependencies)) {
-      const depName = parseDepName(CATALOG_DEPENDENCY, key);
+      const depType = getCatalogDepType(catalog.name);
+      const depName = parseDepName(depType, key);
       let dep: PackageDependency = {
-        depType: CATALOG_DEPENDENCY,
-        // TODO(fpapado): for PR discussion, consider how users might be able to
-        // match on specific catalogs for their config.
-        //
-        // For example, we could change depType to `pnpm.catalog.${string}`, so
-        // that users can match use `{matchDepTypes: ["pnpm.catalog.default"]}`,
-        // `{matchDepTypes: ["pnpm.catalog.react17"]}` and so on.
-        //
-        // Another option would be to mess with depName/packageName.
-        //
-        // Is there precedence for something similar?
+        depType,
         depName,
         managerData: {
-          // We assign the name of the catalog, in order to know which fields to
-          // update later on.
           catalogName: catalog.name,
         },
       };
@@ -300,10 +296,9 @@ function extractPnpmCatalogDeps(
       // TODO: fix type #22198
       dep = {
         ...dep,
-        ...extractDependency(CATALOG_DEPENDENCY, depName, val!),
-        prettyDepType: CATALOG_DEPENDENCY,
+        ...extractDependency(depType, depName, val!),
+        prettyDepType: depType,
       };
-      dep.prettyDepType = CATALOG_DEPENDENCY;
       deps.push(dep);
     }
   }

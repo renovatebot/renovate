@@ -4,7 +4,7 @@ import * as npmUpdater from '../..';
 describe('modules/manager/npm/update/dependency/pnpm', () => {
   it('handles implicit default catalog dependency', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
       managerData: {
@@ -33,7 +33,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('handles explicit default catalog dependency', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
       managerData: {
@@ -64,7 +64,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('handles explicit named catalog dependency', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.react17',
       depName: 'react',
       newValue: '19.0.0',
       managerData: {
@@ -102,7 +102,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('replaces package', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'config',
       newName: 'abc',
       newValue: '2.0.0',
@@ -132,7 +132,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('replaces a github dependency value', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'gulp',
       currentValue: 'v4.0.0-alpha.2',
       currentRawValue: 'gulpjs/gulp#v4.0.0-alpha.2',
@@ -163,7 +163,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('replaces a npm package alias', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'hapi',
       npmPackageAlias: true,
       packageName: '@hapi/hapi',
@@ -195,7 +195,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('replaces a github short hash', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'gulp',
       currentDigest: 'abcdef7',
       currentRawValue: 'gulpjs/gulp#abcdef7',
@@ -226,7 +226,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('replaces a github fully specified version', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'n',
       currentValue: 'v1.0.0',
       currentRawValue: 'git+https://github.com/owner/n#v1.0.0',
@@ -257,7 +257,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('returns null if the dependency is not present in the target catalog', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'react-not',
       newValue: '19.0.0',
       managerData: {
@@ -280,7 +280,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('returns null if catalogs are missing', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
       managerData: {
@@ -300,7 +300,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('returns null if empty file', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
       managerData: {
@@ -316,7 +316,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('preserves literal whitespace', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
       managerData: {
@@ -345,7 +345,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('preserves single quote style', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
       managerData: {
@@ -374,7 +374,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('preserves double quote style', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
       managerData: {
@@ -406,7 +406,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     // dependencies in catalogs.
     // @see https://github.com/pnpm/pnpm/issues/8245#issuecomment-2371335323
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
       managerData: {
@@ -437,7 +437,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('preserves whitespace with anchors', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
       managerData: {
@@ -466,7 +466,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('preserves quotation style with anchors', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
       managerData: {
@@ -495,7 +495,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('preserves formatting in flow style syntax', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
       managerData: {
@@ -526,7 +526,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
   it('does not replace aliases', () => {
     const upgrade = {
-      depType: 'pnpm.catalog',
+      depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
       managerData: {
