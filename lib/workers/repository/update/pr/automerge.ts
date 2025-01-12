@@ -96,8 +96,7 @@ export async function checkAutoMerge(
     // istanbul ignore if
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        { prNumber: pr.number },
-        'DRY-RUN: Would add PR automerge comment to PR',
+        `DRY-RUN: Would add PR automerge comment to PR #${pr.number}`,
       );
       return {
         automerged: false,
@@ -123,8 +122,9 @@ export async function checkAutoMerge(
   if (GlobalConfig.get('dryRun')) {
     // TODO: types (#22198)
     logger.info(
-      { prNumber: pr.number, automergeStrategy },
-      'DRY-RUN: Would merge PR with configured automergeStrategy',
+      `DRY-RUN: Would merge PR #${
+        pr.number
+      } with strategy "${automergeStrategy!}"`,
     );
     return {
       automerged: false,

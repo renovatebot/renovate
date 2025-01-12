@@ -69,8 +69,9 @@ async function rebaseCheck(
     // istanbul ignore if
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        { rebaseLevel: config.rebaseLabel, prNumber: branchPr.number },
-        'DRY-RUN: Would delete rebase label from PR',
+        `DRY-RUN: Would delete label ${config.rebaseLabel!} from #${
+          branchPr.number
+        }`,
       );
     } else {
       await platform.deleteLabel(branchPr.number, config.rebaseLabel!);
@@ -551,8 +552,7 @@ export async function processBranch(
         // istanbul ignore if
         if (GlobalConfig.get('dryRun')) {
           logger.info(
-            { prNumber: branchPr.number },
-            'DRY-RUN: Would ensure comment removal in PR',
+            `DRY-RUN: Would ensure comment removal in PR #${branchPr.number}`,
           );
         } else {
           // Remove artifacts error comment only if this run has successfully updated artifacts
@@ -659,10 +659,7 @@ export async function processBranch(
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
         if (GlobalConfig.get('dryRun')) {
-          logger.info(
-            { branch: config.branchName },
-            'DRY-RUN: Would delete branch',
-          );
+          logger.info('DRY-RUN: Would delete branch' + config.branchName);
         } else {
           await deleteBranchSilently(config.branchName);
         }
@@ -885,8 +882,7 @@ export async function processBranch(
         ) {
           if (GlobalConfig.get('dryRun')) {
             logger.info(
-              { prNumber: pr.number },
-              'DRY-RUN: Would ensure lock file error comment in PR',
+              `DRY-RUN: Would ensure lock file error comment in PR #${pr.number}`,
             );
           } else {
             await ensureComment({

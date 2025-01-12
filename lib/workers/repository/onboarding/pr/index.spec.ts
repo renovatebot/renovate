@@ -258,8 +258,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       GlobalConfig.set({ dryRun: 'full' });
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(logger.info).toHaveBeenCalledWith(
-        { branch: 'renovate/configure' },
-        'DRY-RUN: Would check branch',
+        'DRY-RUN: Would check branch renovate/configure',
       );
       expect(logger.info).toHaveBeenLastCalledWith(
         'DRY-RUN: Would create onboarding PR',
@@ -276,8 +275,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       );
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(logger.info).toHaveBeenCalledWith(
-        { branch: 'renovate/configure' },
-        'DRY-RUN: Would check branch',
+        'DRY-RUN: Would check branch renovate/configure',
       );
       expect(logger.info).toHaveBeenLastCalledWith(
         'DRY-RUN: Would update onboarding PR',

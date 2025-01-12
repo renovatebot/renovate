@@ -57,10 +57,7 @@ export async function addParticipants(
       }
       if (assignees.length > 0) {
         if (GlobalConfig.get('dryRun')) {
-          logger.info(
-            { prNumber: pr.number },
-            'DRY-RUN: Would add assignees to PR',
-          );
+          logger.info(`DRY-RUN: Would add assignees to PR #${pr.number}`);
         } else {
           await platform.addAssignees(pr.number, assignees);
           logger.debug({ assignees }, 'Added assignees');
@@ -101,10 +98,7 @@ export async function addParticipants(
       }
       if (reviewers.length > 0) {
         if (GlobalConfig.get('dryRun')) {
-          logger.info(
-            { prNumber: pr.number },
-            'DRY-RUN: Would add reviewers to PR',
-          );
+          logger.info(`DRY-RUN: Would add reviewers to PR #${pr.number}`);
         } else {
           await platform.addReviewers(pr.number, reviewers);
           logger.debug({ reviewers }, 'Added reviewers');

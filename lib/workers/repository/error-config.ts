@@ -91,7 +91,7 @@ async function raiseWarningIssue(
 async function handleOnboardingPr(pr: Pr, issueMessage: string): Promise<void> {
   logger.debug('Updating onboarding PR with config error notice');
   if (GlobalConfig.get('dryRun')) {
-    logger.info({ prNumber: pr.number }, 'DRY-RUN: Would update PR');
+    logger.info(`DRY-RUN: Would update PR #${pr.number}`);
     return;
   }
 
