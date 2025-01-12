@@ -36,8 +36,8 @@ export interface LockFile {
 
 export interface PnpmWorkspaceFile {
   packages: string[];
-  catalog?: Partial<Record<string, string>>;
-  catalogs?: Partial<Record<string, Partial<Record<string, string>>>>;
+  catalog?: Record<string, string>;
+  catalogs?: Record<string, Record<string, string>>;
 }
 
 /**
