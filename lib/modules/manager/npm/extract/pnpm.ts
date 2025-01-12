@@ -19,11 +19,7 @@ import type {
 import type { PnpmDependencySchema, PnpmLockFile } from '../post-update/types';
 import type { NpmManagerData } from '../types';
 import { extractDependency, parseDepName } from './common/dependency';
-import type {
-  LockFile,
-  NpmPackageDependency,
-  PnpmWorkspaceFile,
-} from './types';
+import type { LockFile, PnpmCatalog, PnpmWorkspaceFile } from './types';
 
 function isPnpmLockfile(obj: any): obj is PnpmLockFile {
   return is.plainObject(obj) && 'lockfileVersion' in obj;
@@ -233,12 +229,6 @@ function getLockedDependencyVersions(
   return res;
 }
 
-/**
- * A pnpm catalog is either the default catalog (catalog:, catlog:default), or a
- * named one (under catalogs:)
- */
-type PnpmCatalog = { name: string; dependencies: NpmPackageDependency };
-
 export function extractPnpmWorkspaceFile(
   content: string,
   packageFile: string,
@@ -258,7 +248,6 @@ export function extractPnpmWorkspaceFile(
   if (!extracted) {
     return null;
   }
-
 
   return {
     ...extracted,
@@ -328,8 +317,8 @@ function parsePnpmCatalogs(content: string): PnpmCatalog[] {
     {
       name: 'default',
       dependencies: defaultCatalogDeps ?? {},
-    }
-  ]
+    },
+  ];
 
   if (!namedCatalogs) {
     return result;
@@ -342,5 +331,5 @@ function parsePnpmCatalogs(content: string): PnpmCatalog[] {
     });
   }
 
-  return result
+  return result;
 }

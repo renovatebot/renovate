@@ -40,6 +40,15 @@ export interface PnpmWorkspaceFile {
   catalogs?: Partial<Record<string, Partial<Record<string, string>>>>;
 }
 
+/**
+ * A pnpm catalog is either the default catalog (catalog:, catalogs:default), or
+ * a named one (catalogs:<name>)
+ */
+export interface PnpmCatalog {
+  name: string;
+  dependencies: NpmPackageDependency;
+}
+
 export type OverrideDependency = Record<string, RecursiveOverride>;
 
 export type RecursiveOverride = string | { [_: string]: RecursiveOverride };
