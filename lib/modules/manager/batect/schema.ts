@@ -4,6 +4,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { id as semverVersioning } from '../../versioning/semver';
 import { getDep } from '../dockerfile/extract';
+import type { PackageDependency } from '../types';
 
 export const BatectConfigSchema = Yaml.pipe(
   z.object({
@@ -34,24 +35,22 @@ export const BatectConfigSchema = Yaml.pipe(
     versioning: dockerVersioning,
   }));
 
-  const gitIncludes = [];
-  const fileIncludes = [];
+  const bundleDependencies: PackageDependency[] = [];
+  const fileIncludes: string[] = [];
 
   for (const item of include) {
     if (item.type === 'git') {
-      gitIncludes.push(item);
+      bundleDependencies.push({
+        depName: item.repo,
+        currentValue: item.ref,
+        versioning: semverVersioning,
+        datasource: GitTagsDatasource.id,
+        commitMessageTopic: 'bundle {{depName}}',
+      });
     } else {
       fileIncludes.push(item.path);
     }
   }
-
-  const bundleDependencies = gitIncludes.map((bundle) => ({
-    depName: bundle.repo,
-    currentValue: bundle.ref,
-    versioning: semverVersioning,
-    datasource: GitTagsDatasource.id,
-    commitMessageTopic: 'bundle {{depName}}',
-  }));
 
   return {
     imageDependencies,
