@@ -17,7 +17,7 @@ import type {
 import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getExtractedConstraints } from './common/dependency';
 import { extractPackageJson } from './common/package-file';
-import { extractPnpmWorkspaceFile } from './pnpm';
+import { extractPnpmWorkspaceFile, isPnpmWorkspaceYaml } from './pnpm';
 import { postExtract } from './post';
 import type { NpmPackage } from './types';
 import { isZeroInstall } from './yarn';
@@ -230,9 +230,9 @@ export async function extractAllPackageFiles(
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else
     if (content) {
-      // TODO(fpapado): for PR dicussion, consider this vs. a post hook, where
-      // we look for pnpm-workspace.yaml in the siblings
-      if (packageFile === 'pnpm-workspace.yaml') {
+      // We duck-type the content here, to allow users to rename the
+      // pnpm-workspace.yaml file.
+      if (isPnpmWorkspaceYaml(content)) {
         const deps = extractPnpmWorkspaceFile(content, packageFile);
         if (deps) {
           npmFiles.push({

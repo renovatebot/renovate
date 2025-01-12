@@ -6,6 +6,12 @@ export const PnpmCatalogsSchema = z.object({
   catalogs: z.optional(z.record(z.record(z.string()))),
 });
 
+export const PnpmWorkspaceFileSchema = z
+  .object({
+    packages: z.array(z.string()),
+  })
+  .and(PnpmCatalogsSchema);
+
 export const PackageManagerSchema = z
   .string()
   .transform((val) => val.split('@'))
