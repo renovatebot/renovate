@@ -327,12 +327,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
   });
 
   it('preserves formatting in flow style syntax', () => {
-    // Context: YAML has different representations for collections. Depending on
-    // the replacement method, the formatting of those blocks might change. It
-    // is an explicit goal to _not_ affect formatting, outside of changing the
-    // intended version.
-    //
-    // TODO(fpapado): consider enumerating the options
     const upgrade = {
       depType: 'pnpm.catalog',
       depName: 'react',

@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import { CST, Parser } from 'yaml';
+import type { Document } from 'yaml';
+import { CST, isCollection, isPair, isScalar, parseDocument } from 'yaml';
 import { logger } from '../../../../../logger';
-import { parseSingleYaml } from '../../../../../util/yaml';
 import type { UpdateDependencyConfig } from '../../../types';
 import { pnpmCatalogsSchema } from '../../extract/pnpm';
 import { getNewGitValue, getNewNpmAliasValue } from './common';
@@ -30,21 +30,18 @@ export function updatePnpmCatalogDependency({
     `npm.updatePnpmCatalogDependency(): ${depType}:${managerData?.catalogName}.${depName} = ${newValue}`,
   );
 
-  let cstDocument: CST.Token;
+  let document;
   let parsedContents;
 
   try {
-    // In order to preserve the original formatting as much as possible, we use
-    // the CST directly. Using the AST (result of parseDocument) from 'yaml'
+    // In order to preserve the original formatting as much as possible, we want
+    // manipulate the CST directly. Using the AST (the result of parseDocument)
     // does not guarantee that formatting would be the same after
     // stringification. However, the CST is more annoying to query for certain
-    // values. Thus, we parse both as a CST and as a JS representation; the
-    // former for manipulation, and the latter for querying/validation. It is a bit
-    // wasteful, but it works.
-    cstDocument = Array.from(new Parser().parse(fileContent))[0];
-    parsedContents = parseSingleYaml(fileContent, {
-      customSchema: pnpmCatalogsSchema,
-    });
+    // values. Thus, we use both an annotated AST and a JS representation; the
+    // former for manipulation, and the latter for querying/validation.
+    document = parseDocument(fileContent, { keepSourceTokens: true });
+    parsedContents = pnpmCatalogsSchema.parse(document.toJS());
   } catch (err) {
     logger.debug({ err }, 'Could not parse pnpm-workspace YAML file.');
     return null;
@@ -52,11 +49,10 @@ export function updatePnpmCatalogDependency({
 
   // In pnpm-workspace.yaml, the default catalog can be either `catalog` or
   // `catalog.default`, but not both (pnpm throws outright with a config error).
-  // Thus, we must check which entry is being used, to reference it from the
-  // right place.
+  // Thus, we must check which entry is being used, to reference it from / set
+  // it in the right place.
   const usesImplicitDefaultCatalog = parsedContents.catalog !== undefined;
 
-  // Save the old version
   const oldVersion =
     catalogName === 'default' && usesImplicitDefaultCatalog
       ? parsedContents.catalog?.[depName!]
@@ -74,40 +70,57 @@ export function updatePnpmCatalogDependency({
     usesImplicitDefaultCatalog,
   });
 
-  const doc = changeDependencyIn(cstDocument, path, {
+  const modifiedDocument = changeDependencyIn(document, path, {
     newValue,
     newName: upgrade.newName,
   });
 
-  if (!doc) {
+  if (!modifiedDocument) {
+    // Case where we are explicitly unable to substitute the key/value, for
+    // example if the value was an alias.
     return null;
   }
 
-  return CST.stringify(doc);
+  if (!modifiedDocument.contents?.srcToken) {
+    // This should not happen in practice, but we leave it to satisfy the types.
+    return null;
+  }
+
+  return CST.stringify(modifiedDocument.contents.srcToken);
 }
 
+/**
+ * Change the scalar name and/or value of a collection item in a YAML document,
+ * while keeping formatting consistent. Mutates the given document.
+ */
 function changeDependencyIn(
-  doc: CST.Token,
+  document: Document,
   path: string[],
   { newName, newValue }: { newName?: string; newValue?: string },
-): CST.Document | null {
-  if (doc.type !== 'document') {
+): Document | null {
+  const parentPath = path.slice(0, -1);
+  const relevantItemKey = path.at(-1);
+
+  const parentNode = document.getIn(parentPath);
+
+  if (!parentNode || !isCollection(parentNode)) {
     return null;
   }
 
-  const relevantNode = findInYamlCst(doc, path);
+  const relevantNode = parentNode.items.find(
+    (item) =>
+      isPair(item) && isScalar(item.key) && item.key.value === relevantItemKey,
+  );
 
-  if (!relevantNode) {
+  if (!relevantNode || !isPair(relevantNode)) {
     return null;
   }
 
   if (newName) {
-    // TODO(fpapado): Think about this codepath a bit; can anchors / aliases appear in
-    // key positions?
-    if (!CST.isScalar(relevantNode.key)) {
+    if (!CST.isScalar(relevantNode.srcToken?.key)) {
       return null;
     }
-    CST.setScalarValue(relevantNode.key, newName);
+    CST.setScalarValue(relevantNode.srcToken.key, newName);
   }
 
   if (newValue) {
@@ -116,44 +129,13 @@ function changeDependencyIn(
     // and replacing either the referrent anchor or the alias would be wrong in
     // the general case. We leave this up to the user, e.g. via a Regex custom
     // manager.
-    if (!CST.isScalar(relevantNode.value)) {
+    if (!CST.isScalar(relevantNode.srcToken?.value)) {
       return null;
     }
-    CST.setScalarValue(relevantNode.value, newValue);
+    CST.setScalarValue(relevantNode.srcToken.value, newValue);
   }
 
-  return doc;
-}
-
-/**
- * Find the collection item in a nested YAML collection, starting from a YAML root.
- */
-function findInYamlCst(
-  root: CST.CollectionItem,
-  path: string[],
-): CST.CollectionItem | null {
-  let currentNode = root;
-
-  for (const segment of path) {
-    if (!CST.isCollection(currentNode?.value)) {
-      return null;
-    }
-    const newNode = currentNode.value.items.find((item) => {
-      if (!CST.isScalar(item.key)) {
-        return false;
-      }
-      const scalar = CST.resolveAsScalar(item.key);
-      return scalar.value === segment;
-    });
-
-    if (!newNode) {
-      return null;
-    }
-
-    currentNode = newNode;
-  }
-
-  return currentNode;
+  return document;
 }
 
 function getDepPath({
