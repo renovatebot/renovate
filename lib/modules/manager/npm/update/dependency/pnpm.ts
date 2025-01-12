@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import { stringify } from 'yaml';
+import { CST, Parser } from 'yaml';
 import { logger } from '../../../../../logger';
-import { parseSingleYamlDocument } from '../../../../../util/yaml';
+import { parseSingleYaml } from '../../../../../util/yaml';
 import type { UpdateDependencyConfig } from '../../../types';
 import { pnpmCatalogsSchema } from '../../extract/pnpm';
 import { getNewGitValue, getNewNpmAliasValue } from './common';
@@ -30,12 +30,21 @@ export function updatePnpmCatalogDependency({
     `npm.updatePnpmCatalogDependency(): ${depType}:${managerData?.catalogName}.${depName} = ${newValue}`,
   );
 
-  let document;
+  let cstDocument: CST.Token;
   let parsedContents;
 
   try {
-    document = parseSingleYamlDocument(fileContent);
-    parsedContents = pnpmCatalogsSchema.parse(document.toJS());
+    // In order to preserve the original formatting as much as possible, we use
+    // the CST directly. Using the AST (result of parseDocument) from 'yaml'
+    // does not guarantee that formatting would be the same after
+    // stringification. However, the CST is more annoying to query for certain
+    // values. Thus, we parse both as a CST and as a JS representation; the
+    // former for manipulation, and the latter for querying/validation. It is a bit
+    // wasteful, but it works.
+    cstDocument = Array.from(new Parser().parse(fileContent))[0];
+    parsedContents = parseSingleYaml(fileContent, {
+      customSchema: pnpmCatalogsSchema,
+    });
   } catch (err) {
     logger.debug({ err }, 'Could not parse pnpm-workspace YAML file.');
     return null;
@@ -65,26 +74,86 @@ export function updatePnpmCatalogDependency({
     usesImplicitDefaultCatalog,
   });
 
-  if (!document.hasIn(path)) {
+  const doc = changeDependencyIn(cstDocument, path, {
+    newValue,
+    newName: upgrade.newName,
+  });
+
+  if (!doc) {
     return null;
   }
 
-  document.setIn(path, newValue);
+  return CST.stringify(doc);
+}
 
-  // Update the name, for replacements
-  if (upgrade.newName) {
-    const newPath = getDepPath({
-      depName: upgrade.newName,
-      catalogName,
-      usesImplicitDefaultCatalog,
-    });
-    const oldValue = document.getIn(path);
-
-    document.deleteIn(path);
-    document.setIn(newPath, oldValue);
+function changeDependencyIn(
+  doc: CST.Token,
+  path: string[],
+  { newName, newValue }: { newName?: string; newValue?: string },
+): CST.Document | null {
+  if (doc.type !== 'document') {
+    return null;
   }
 
-  return stringify(document);
+  const relevantNode = findInYamlCst(doc, path);
+
+  if (!relevantNode) {
+    return null;
+  }
+
+  if (newName) {
+    // TODO(fpapado): Think about this codepath a bit; can anchors / aliases appear in
+    // key positions?
+    if (!CST.isScalar(relevantNode.key)) {
+      return null;
+    }
+    CST.setScalarValue(relevantNode.key, newName);
+  }
+
+  if (newValue) {
+    // We only support scalar values when substituting. This explicitly avoids
+    // substituting aliases, since those can be resolved from a shared location,
+    // and replacing either the referrent anchor or the alias would be wrong in
+    // the general case. We leave this up to the user, e.g. via a Regex custom
+    // manager.
+    if (!CST.isScalar(relevantNode.value)) {
+      return null;
+    }
+    CST.setScalarValue(relevantNode.value, newValue);
+  }
+
+  return doc;
+}
+
+/**
+ * Find the collection item in a nested YAML collection, starting from a YAML root.
+ */
+function findInYamlCst(
+  root: CST.CollectionItem,
+  path: string[],
+): CST.CollectionItem | null {
+  let currentNode = root;
+
+  for (const segment of path) {
+    if (!CST.isCollection(currentNode?.value)) {
+      return null;
+    }
+    const newNode = currentNode.value.items.find((item) => {
+      if (!CST.isScalar(item.key)) {
+        return false;
+      }
+      const scalar = CST.resolveAsScalar(item.key);
+      return scalar.value === segment;
+    });
+
+    if (!newNode) {
+      return null;
+    }
+
+    currentNode = newNode;
+  }
+
+  return currentNode;
 }
 
 function getDepPath({
