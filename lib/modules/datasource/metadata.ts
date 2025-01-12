@@ -64,6 +64,9 @@ function massageGitAtUrl(url: string): string {
   return massagedUrl;
 }
 
+/**
+ * @deprecated Use `asTimestamp` instead
+ */
 export function normalizeDate(input: any): string | null {
   if (
     typeof input === 'number' &&
