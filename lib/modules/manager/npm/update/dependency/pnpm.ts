@@ -3,7 +3,7 @@ import type { Document } from 'yaml';
 import { CST, isCollection, isPair, isScalar, parseDocument } from 'yaml';
 import { logger } from '../../../../../logger';
 import type { UpdateDependencyConfig } from '../../../types';
-import { pnpmCatalogsSchema } from '../../extract/pnpm';
+import { PnpmCatalogsSchema } from '../../schema';
 import { getNewGitValue, getNewNpmAliasValue } from './common';
 
 export function updatePnpmCatalogDependency({
@@ -41,7 +41,7 @@ export function updatePnpmCatalogDependency({
     // values. Thus, we use both an annotated AST and a JS representation; the
     // former for manipulation, and the latter for querying/validation.
     document = parseDocument(fileContent, { keepSourceTokens: true });
-    parsedContents = pnpmCatalogsSchema.parse(document.toJS());
+    parsedContents = PnpmCatalogsSchema.parse(document.toJS());
   } catch (err) {
     logger.debug({ err }, 'Could not parse pnpm-workspace YAML file.');
     return null;

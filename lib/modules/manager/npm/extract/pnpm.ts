@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
 import upath from 'upath';
-import { z } from 'zod';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import {
@@ -17,6 +16,7 @@ import type {
   PackageFileContent,
 } from '../../types';
 import type { PnpmDependencySchema, PnpmLockFile } from '../post-update/types';
+import { PnpmCatalogsSchema } from '../schema';
 import type { NpmManagerData } from '../types';
 import { extractDependency, parseDepName } from './common/dependency';
 import type { LockFile, PnpmCatalog, PnpmWorkspaceFile } from './types';
@@ -304,14 +304,9 @@ function extractPnpmCatalogDeps(
   };
 }
 
-export const pnpmCatalogsSchema = z.object({
-  catalog: z.optional(z.record(z.string())),
-  catalogs: z.optional(z.record(z.record(z.string()))),
-});
-
 function parsePnpmCatalogs(content: string): PnpmCatalog[] {
   const { catalog: defaultCatalogDeps, catalogs: namedCatalogs } =
-    parseSingleYaml(content, { customSchema: pnpmCatalogsSchema });
+    parseSingleYaml(content, { customSchema: PnpmCatalogsSchema });
 
   const result = [
     {
