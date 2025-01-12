@@ -1,18 +1,6 @@
 import { codeBlock } from 'common-tags';
 import * as npmUpdater from '../..';
 
-/**
- * Per the YAML spec, a document ends with a newline. The 'yaml' library always
- * uses that when serialising, but `codeBlock` strips the last indentation. This
- * helper makes assertions simpler.
- */
-function yamlCodeBlock(
-  literals: TemplateStringsArray,
-  ...placeholders: any[]
-): string {
-  return codeBlock(literals, placeholders) + '\n';
-}
-
 describe('modules/manager/npm/update/dependency/pnpm', () => {
   it('handles implicit default catalog dependency', () => {
     const upgrade = {
@@ -23,7 +11,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'default',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
 
@@ -34,7 +22,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       fileContent: pnpmWorkspaceYaml,
       upgrade,
     });
-    expect(testContent).toEqual(yamlCodeBlock`
+    expect(testContent).toEqual(codeBlock`
       packages:
         - pkg-a
 
@@ -52,7 +40,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'default',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
 
@@ -64,7 +52,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       fileContent: pnpmWorkspaceYaml,
       upgrade,
     });
-    expect(testContent).toEqual(yamlCodeBlock`
+    expect(testContent).toEqual(codeBlock`
       packages:
         - pkg-a
 
@@ -83,7 +71,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'react17',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
 
@@ -98,7 +86,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       fileContent: pnpmWorkspaceYaml,
       upgrade,
     });
-    expect(testContent).toEqual(yamlCodeBlock`
+    expect(testContent).toEqual(codeBlock`
       packages:
         - pkg-a
 
@@ -122,7 +110,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'default',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
 
@@ -133,7 +121,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       fileContent: pnpmWorkspaceYaml,
       upgrade,
     });
-    expect(testContent).toEqual(yamlCodeBlock`
+    expect(testContent).toEqual(codeBlock`
       packages:
         - pkg-a
 
@@ -153,7 +141,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'default',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
 
@@ -164,7 +152,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       fileContent: pnpmWorkspaceYaml,
       upgrade,
     });
-    expect(testContent).toEqual(yamlCodeBlock`
+    expect(testContent).toEqual(codeBlock`
       packages:
         - pkg-a
 
@@ -185,7 +173,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'default',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
 
@@ -196,7 +184,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       fileContent: pnpmWorkspaceYaml,
       upgrade,
     });
-    expect(testContent).toEqual(yamlCodeBlock`
+    expect(testContent).toEqual(codeBlock`
       packages:
         - pkg-a
 
@@ -216,7 +204,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'default',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
 
@@ -227,7 +215,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       fileContent: pnpmWorkspaceYaml,
       upgrade,
     });
-    expect(testContent).toEqual(yamlCodeBlock`
+    expect(testContent).toEqual(codeBlock`
       packages:
         - pkg-a
 
@@ -247,7 +235,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'default',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
 
@@ -258,7 +246,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       fileContent: pnpmWorkspaceYaml,
       upgrade,
     });
-    expect(testContent).toEqual(yamlCodeBlock`
+    expect(testContent).toEqual(codeBlock`
       packages:
         - pkg-a
 
@@ -276,7 +264,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'default',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
 
@@ -299,7 +287,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'default',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
     `;
@@ -326,41 +314,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     expect(testContent).toBeNull();
   });
 
-  it('preserves formatting in flow style syntax', () => {
-    const upgrade = {
-      depType: 'pnpm.catalog',
-      depName: 'react',
-      newValue: '19.0.0',
-      managerData: {
-        catalogName: 'react17',
-      },
-    };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
-      packages:
-        - pkg-a
-
-      catalogs: {
-        react17: {
-          react: 18.3.1
-        }
-      }
-    `;
-    const testContent = npmUpdater.updateDependency({
-      fileContent: pnpmWorkspaceYaml,
-      upgrade,
-    });
-    expect(testContent).toEqual(yamlCodeBlock`
-      packages:
-        - pkg-a
-
-      catalogs: {
-        react17: {
-          react: 19.0.0
-        }
-      }
-    `);
-  });
-
   it('preserves literal whitespace', () => {
     const upgrade = {
       depType: 'pnpm.catalog',
@@ -370,7 +323,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'default',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
 
@@ -381,7 +334,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       fileContent: pnpmWorkspaceYaml,
       upgrade,
     });
-    expect(testContent).toEqual(yamlCodeBlock`
+    expect(testContent).toEqual(codeBlock`
       packages:
         - pkg-a
 
@@ -399,7 +352,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'default',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
 
@@ -410,7 +363,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       fileContent: pnpmWorkspaceYaml,
       upgrade,
     });
-    expect(testContent).toEqual(yamlCodeBlock`
+    expect(testContent).toEqual(codeBlock`
       packages:
         - pkg-a
 
@@ -428,7 +381,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'default',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
 
@@ -439,7 +392,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       fileContent: pnpmWorkspaceYaml,
       upgrade,
     });
-    expect(testContent).toEqual(yamlCodeBlock`
+    expect(testContent).toEqual(codeBlock`
       packages:
         - pkg-a
 
@@ -449,7 +402,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
   });
 
   it('preserves anchors, replacing only the value', () => {
-    // At the time of writing, this pattern is the current way to sync
+    // At the time of writing, this pattern is the recommended way to sync
     // dependencies in catalogs.
     // @see https://github.com/pnpm/pnpm/issues/8245#issuecomment-2371335323
     const upgrade = {
@@ -460,7 +413,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'default',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
 
@@ -472,7 +425,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       fileContent: pnpmWorkspaceYaml,
       upgrade,
     });
-    expect(testContent).toEqual(yamlCodeBlock`
+    expect(testContent).toEqual(codeBlock`
       packages:
         - pkg-a
 
@@ -491,7 +444,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'default',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
 
@@ -502,7 +455,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       fileContent: pnpmWorkspaceYaml,
       upgrade,
     });
-    expect(testContent).toEqual(yamlCodeBlock`
+    expect(testContent).toEqual(codeBlock`
       packages:
         - pkg-a
 
@@ -520,7 +473,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         catalogName: 'default',
       },
     };
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       packages:
         - pkg-a
 
@@ -531,12 +484,43 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       fileContent: pnpmWorkspaceYaml,
       upgrade,
     });
-    expect(testContent).toEqual(yamlCodeBlock`
+    expect(testContent).toEqual(codeBlock`
       packages:
         - pkg-a
 
       catalog:
         react: &react "19.0.0"
+    `);
+  });
+
+  it('preserves formatting in flow style syntax', () => {
+    const upgrade = {
+      depType: 'pnpm.catalog',
+      depName: 'react',
+      newValue: '19.0.0',
+      managerData: {
+        catalogName: 'default',
+      },
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      packages:
+        - pkg-a
+
+      catalog: {
+        "react": "18.3.1"
+      }
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(codeBlock`
+      packages:
+        - pkg-a
+
+      catalog: {
+        "react": "19.0.0"
+      }
     `);
   });
 
@@ -552,7 +536,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     // In the general case, we do not know whether we should replace the anchor
     // that an alias is resolved from. We leave this up to the user, e.g. via a
     // Regex custom manager.
-    const pnpmWorkspaceYaml = yamlCodeBlock`
+    const pnpmWorkspaceYaml = codeBlock`
       __deps:
         react: &react 18.3.1
 
