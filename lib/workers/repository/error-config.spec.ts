@@ -117,7 +117,9 @@ Message: some-message
       const res = await raiseConfigWarningIssue(config, error);
 
       expect(res).toBeUndefined();
-      expect(logger.info).toHaveBeenCalledWith('DRY-RUN: Would update PR #1');
+      expect(logger.info).toHaveBeenCalledWith(
+        `DRY-RUN: Would update PR #${pr.number}`,
+      );
     });
 
     it('disable issue creation on config failure', async () => {

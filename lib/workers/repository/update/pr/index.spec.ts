@@ -516,7 +516,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(logger.logger.info).toHaveBeenCalledWith(
-          'DRY-RUN: Would update PR #123',
+          `DRY-RUN: Would update PR #${pr.number}`,
         );
       });
 
