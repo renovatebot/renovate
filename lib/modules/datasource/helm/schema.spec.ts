@@ -1,10 +1,13 @@
 import { Fixtures } from '../../../../test/fixtures';
+import { Yaml } from '../../../util/schema-utils';
 import { HelmRepositorySchema } from './schema';
 
 describe('modules/datasource/helm/schema', () => {
   describe('sourceUrl', () => {
     it('works', () => {
-      const repo = HelmRepositorySchema.parse(Fixtures.get('sample.yaml'));
+      const repo = Yaml.pipe(HelmRepositorySchema).parse(
+        Fixtures.get('sample.yaml'),
+      );
       expect(repo).toMatchObject({
         airflow: {
           homepage:
