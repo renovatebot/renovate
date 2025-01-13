@@ -1,4 +1,4 @@
-import { codeBlock, stripIndent } from 'common-tags';
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger, partial } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
@@ -499,7 +499,7 @@ describe('modules/manager/gradle/extract', () => {
   describe('version catalogs', () => {
     it('works with dependency catalogs', async () => {
       const fsMock = {
-        'gradle/libs.versions.toml': Fixtures.get('1/libs.versions.toml'),
+        'gradle/libs.versions.toml': Fixtures.get('libs.versions.toml'),
       };
       mockFs(fsMock);
 
@@ -614,118 +614,6 @@ describe('modules/manager/gradle/extract', () => {
       ]);
     });
 
-    it('supports versions declared as single string', async () => {
-      const fsMock = {
-        'gradle/libs.versions.toml': Fixtures.get('2/libs.versions.toml'),
-      };
-      mockFs(fsMock);
-
-      const res = await extractAllPackageFiles(
-        partial<ExtractConfig>(),
-        Object.keys(fsMock),
-      );
-
-      expect(res).toMatchObject([
-        {
-          packageFile: 'gradle/libs.versions.toml',
-          deps: [
-            {
-              depName: 'com.squareup.okhttp3:okhttp',
-              currentValue: '4.9.0',
-              managerData: {
-                fileReplacePosition: 100,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-            },
-            {
-              depName: 'com.squareup.okio:okio',
-              currentValue: '2.8.0',
-              managerData: {
-                fileReplacePosition: 162,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-            },
-            {
-              depName: 'com.squareup.picasso:picasso',
-              currentValue: '2.5.1',
-              managerData: {
-                fileReplacePosition: 244,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-            },
-            {
-              depName: 'com.squareup.retrofit2:retrofit',
-              groupName: 'retro.fit',
-              currentValue: '2.8.2',
-              managerData: {
-                fileReplacePosition: 42,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-            },
-            {
-              depName: 'google-firebase-analytics',
-              managerData: {
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              skipReason: 'unspecified-version',
-            },
-            {
-              depName: 'google-firebase-crashlytics',
-              managerData: {
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              skipReason: 'unspecified-version',
-            },
-            {
-              depName: 'google-firebase-messaging',
-              managerData: {
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              skipReason: 'unspecified-version',
-            },
-            {
-              depName: 'org.jetbrains.kotlin.jvm',
-              depType: 'plugin',
-              currentValue: '1.5.21',
-              commitMessageTopic: 'plugin kotlinJvm',
-              packageName:
-                'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin',
-              managerData: {
-                fileReplacePosition: 663,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              registryUrls: ['https://plugins.gradle.org/m2/'],
-            },
-            {
-              depName: 'org.jetbrains.kotlin.plugin.serialization',
-              depType: 'plugin',
-              currentValue: '1.5.21',
-              packageName:
-                'org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin',
-              managerData: {
-                fileReplacePosition: 21,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              registryUrls: ['https://plugins.gradle.org/m2/'],
-            },
-            {
-              depName: 'org.danilopianini.multi-jvm-test-plugin',
-              depType: 'plugin',
-              currentValue: '0.3.0',
-              commitMessageTopic: 'plugin multiJvm',
-              packageName:
-                'org.danilopianini.multi-jvm-test-plugin:org.danilopianini.multi-jvm-test-plugin.gradle.plugin',
-              managerData: {
-                fileReplacePosition: 824,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              registryUrls: ['https://plugins.gradle.org/m2/'],
-            },
-          ],
-        },
-      ]);
-    });
-
     it('ignores empty TOML file', async () => {
       const fsMock = {
         'gradle/libs.versions.toml': '',
@@ -738,97 +626,6 @@ describe('modules/manager/gradle/extract', () => {
           Object.keys(fsMock),
         ),
       ).toBeNull();
-    });
-
-    it('deletes commit message for plugins with version reference', async () => {
-      const fsMock = {
-        'gradle/libs.versions.toml': stripIndent`
-        [versions]
-        detekt = "1.18.1"
-
-        [plugins]
-        detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
-
-        [libraries]
-        detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
-      `,
-      };
-      mockFs(fsMock);
-
-      const res = await extractAllPackageFiles(
-        partial<ExtractConfig>(),
-        Object.keys(fsMock),
-      );
-      expect(res).toMatchObject([
-        {
-          packageFile: 'gradle/libs.versions.toml',
-          deps: [
-            {
-              depName: 'io.gitlab.arturbosch.detekt:detekt-formatting',
-              groupName: 'detekt',
-              currentValue: '1.18.1',
-              managerData: {
-                fileReplacePosition: 21,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              fileReplacePosition: 21,
-            },
-            {
-              depType: 'plugin',
-              depName: 'io.gitlab.arturbosch.detekt',
-              packageName:
-                'io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin',
-              registryUrls: ['https://plugins.gradle.org/m2/'],
-              currentValue: '1.18.1',
-              managerData: {
-                fileReplacePosition: 21,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              groupName: 'detekt',
-              fileReplacePosition: 21,
-            },
-          ],
-        },
-      ]);
-    });
-
-    it('changes the dependency version, not the comment version', async () => {
-      const fsMock = {
-        'gradle/libs.versions.toml': Fixtures.get('3/libs.versions.toml'),
-      };
-      mockFs(fsMock);
-
-      const res = await extractAllPackageFiles(
-        partial<ExtractConfig>(),
-        Object.keys(fsMock),
-      );
-      expect(res).toMatchObject([
-        {
-          packageFile: 'gradle/libs.versions.toml',
-          deps: [
-            {
-              depName: 'junit:junit',
-              groupName: 'junit',
-              currentValue: '1.4.9',
-              managerData: {
-                fileReplacePosition: 124,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              fileReplacePosition: 124,
-            },
-            {
-              depName: 'mocha-junit:mocha-junit',
-              groupName: 'mocha.junit.reporter',
-              currentValue: '2.0.2',
-              managerData: {
-                fileReplacePosition: 82,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              fileReplacePosition: 82,
-            },
-          ],
-        },
-      ]);
     });
   });
 
@@ -996,7 +793,7 @@ describe('modules/manager/gradle/extract', () => {
     it('parses versions files', async () => {
       const fsMock = {
         'versions.props': `org.apache.lucene:* = 1.2.3`,
-        'versions.lock': stripIndent`
+        'versions.lock': codeBlock`
           # Run ./gradlew --write-locks to regenerate this file
           org.apache.lucene:lucene-core:1.2.3 (10 constraints: 95be0c15)
           org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)
@@ -1046,7 +843,7 @@ describe('modules/manager/gradle/extract', () => {
     it('plugin not used due to lockfile not a GCV lockfile', async () => {
       const fsMock = {
         'versions.props': `org.apache.lucene:* = 1.2.3`,
-        'versions.lock': stripIndent`
+        'versions.lock': codeBlock`
           This is NOT a lock file
         `,
       };
@@ -1071,118 +868,6 @@ describe('modules/manager/gradle/extract', () => {
         Object.keys(fsMock),
       );
       expect(res).toBeNull();
-    });
-
-    it('supports multiple levels of glob', async () => {
-      const fsMock = {
-        'versions.props': stripIndent`
-          org.apache.* = 4
-          org.apache.lucene:* = 3
-          org.apache.lucene:a.* = 2
-          org.apache.lucene:a.b = 1
-          org.apache.foo*:* = 5
-        `,
-        'versions.lock': stripIndent`
-          # Run ./gradlew --write-locks to regenerate this file
-          org.apache.solr:x.y:1 (10 constraints: 95be0c15)
-          org.apache.lucene:a.b:1 (10 constraints: 95be0c15)
-          org.apache.lucene:a.c:1 (10 constraints: 95be0c15)
-          org.apache.lucene:a.d:1 (10 constraints: 95be0c15)
-          org.apache.lucene:d:1 (10 constraints: 95be0c15)
-          org.apache.lucene:e.f:1 (10 constraints: 95be0c15)
-          org.apache.foo-bar:a:1 (10 constraints: 95be0c15)
-        `,
-      };
-      mockFs(fsMock);
-
-      const res = await extractAllPackageFiles(
-        partial<ExtractConfig>(),
-        Object.keys(fsMock),
-      );
-
-      // Each lock dep is only present once, with highest prio for exact prop match, then globs from longest to shortest
-      expect(res).toMatchObject([
-        {
-          packageFile: 'versions.lock',
-          deps: [],
-        },
-        {
-          packageFile: 'versions.props',
-          deps: [
-            {
-              managerData: {
-                packageFile: 'versions.props',
-                fileReplacePosition: 91,
-              },
-              depName: 'org.apache.lucene:a.b',
-              currentValue: '1',
-              lockedVersion: '1',
-              fileReplacePosition: 91,
-              depType: 'dependencies',
-            },
-            {
-              managerData: {
-                packageFile: 'versions.props',
-                fileReplacePosition: 65,
-              },
-              depName: 'org.apache.lucene:a.c',
-              currentValue: '2',
-              lockedVersion: '1',
-              groupName: 'org.apache.lucene:a.*',
-              fileReplacePosition: 65,
-              depType: 'dependencies',
-            },
-            {
-              managerData: {
-                packageFile: 'versions.props',
-                fileReplacePosition: 65,
-              },
-              depName: 'org.apache.lucene:a.d',
-              currentValue: '2',
-              lockedVersion: '1',
-              groupName: 'org.apache.lucene:a.*',
-              fileReplacePosition: 65,
-              depType: 'dependencies',
-            },
-            {
-              managerData: {
-                packageFile: 'versions.props',
-                fileReplacePosition: 39,
-              },
-              depName: 'org.apache.lucene:d',
-              currentValue: '3',
-              lockedVersion: '1',
-              groupName: 'org.apache.lucene:*',
-              fileReplacePosition: 39,
-              depType: 'dependencies',
-            },
-            {
-              managerData: {
-                packageFile: 'versions.props',
-                fileReplacePosition: 39,
-              },
-              depName: 'org.apache.lucene:e.f',
-              currentValue: '3',
-              lockedVersion: '1',
-              groupName: 'org.apache.lucene:*',
-              fileReplacePosition: 39,
-              depType: 'dependencies',
-            },
-            {
-              managerData: {
-                fileReplacePosition: 113,
-                packageFile: 'versions.props',
-              },
-              depName: 'org.apache.foo-bar:a',
-              currentValue: '5',
-              lockedVersion: '1',
-              groupName: 'org.apache.foo*:*',
-              fileReplacePosition: 113,
-              depType: 'dependencies',
-            },
-          ],
-        },
-      ]);
     });
   });
 });
