@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { detectPlatform } from '../../../util/common';
 import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
-import { LooseRecord, Yaml } from '../../../util/schema-utils';
+import { LooseRecord } from '../../../util/schema-utils';
 import type { Release } from '../types';
 
 const HelmReleaseSchema = z.object({
