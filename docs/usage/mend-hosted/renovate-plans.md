@@ -36,7 +36,7 @@ The resources, scheduling and concurrency of Renovate jobs is determined by the 
 Details of the Mend Renovate Cloud versions are shown in the table below.
 
 |                               | Mend Renovate Community Cloud (Free) | Mend Renovate Enterprise Cloud |
-| ----------------------------- |--------------------------------------|--------------------------------|
+| ----------------------------- | ------------------------------------ | ------------------------------ |
 | Concurrent jobs per Org       | 1                                    | 16                             |
 | Job scheduling (active repos) | Every 4 hours                        | Hourly (\*1)                   |
 | Job runner CPUs               | 1 CPU                                | 2 CPU                          |
