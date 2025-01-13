@@ -13,7 +13,6 @@ import { extractNamesAndRanges, findDepends } from './extract';
 export const defaultConfig = {
   fileMatch: ['\\.cabal$'],
   pinDigests: false,
-  versioning: pvpVersioning.id,
 };
 
 export const categories: Category[] = ['haskell'];
