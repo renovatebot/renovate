@@ -231,7 +231,7 @@ function getLockedDependencyVersions(
 
 export function isPnpmWorkspaceYaml(content: string): boolean {
   try {
-    parseSingleYaml(content, { customSchema: PnpmCatalogsSchema });
+    parseSingleYaml(content, { customSchema: PnpmWorkspaceFileSchema });
     return true;
   } catch {
     return false;
