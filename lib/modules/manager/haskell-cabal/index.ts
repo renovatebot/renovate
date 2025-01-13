@@ -36,7 +36,7 @@ export function extractPackageFile(content: string): PackageFileContent {
         currentValue: cabalDep.currentValue,
         datasource: HackageDatasource.id,
         packageName: cabalDep.packageName,
-        versioning: 'pvp',
+        versioning: pvpVersioning.id,
         replaceString: cabalDep.replaceString.trim(),
         autoReplaceStringTemplate: '{{{depName}}} {{{newValue}}}',
       };
