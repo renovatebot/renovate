@@ -52,8 +52,8 @@ function getSourceUrl(release: HelmRelease): string | undefined {
   return release.sources[0];
 }
 
-export const HelmRepositorySchema = Yaml.pipe(
-  z.object({
+export const HelmRepositorySchema = z
+  .object({
     entries: LooseRecord(
       z.string(),
       HelmReleaseSchema.array()
@@ -76,7 +76,7 @@ export const HelmRepositorySchema = Yaml.pipe(
           return { homepage, sourceUrl, releases };
         }),
     ),
-  }),
-).transform(({ entries }) => entries);
+  })
+  .transform(({ entries }) => entries);
 
 export type HelmRepositoryData = z.infer<typeof HelmRepositorySchema>;

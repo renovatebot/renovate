@@ -1,6 +1,5 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
-import { Result } from '../../../util/result';
 import { ensureTrailingSlash } from '../../../util/url';
 import * as helmVersioning from '../../versioning/helm';
 import { Datasource } from '../datasource';
@@ -35,12 +34,12 @@ export class HelmDatasource extends Datasource {
     key: (helmRepository: string) => `repository-data:${helmRepository}`,
   })
   async getRepositoryData(helmRepository: string): Promise<HelmRepositoryData> {
-    const { val, err } = await Result.wrap(
-      this.http.get('index.yaml', {
-        baseUrl: ensureTrailingSlash(helmRepository),
-      }),
-    )
-      .transform(({ body }) => HelmRepositorySchema.parse(body))
+    const { val, err } = await this.http
+      .getYamlSafe(
+        'index.yaml',
+        { baseUrl: ensureTrailingSlash(helmRepository) },
+        HelmRepositorySchema,
+      )
       .unwrap();
 
     if (err) {
