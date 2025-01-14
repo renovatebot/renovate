@@ -20,7 +20,6 @@ export const url = 'https://docs.npmjs.com';
 export const categories: Category[] = ['js'];
 
 export const defaultConfig = {
-  // TODO(fpapado): for PR dicussion, consider this vs. a post hook
   fileMatch: ['(^|/)package\\.json$', '(^|/)pnpm-workspace\\.yaml$'],
   digest: {
     prBodyDefinitions: {
