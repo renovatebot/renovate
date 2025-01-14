@@ -296,8 +296,8 @@ describe('workers/repository/process/vulnerabilities', () => {
         packageFiles,
       );
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        { err },
-        'Error fetching vulnerability information for lodash',
+        { err, packageName: 'lodash' },
+        'Error fetching vulnerability information for package',
       );
     });
 
