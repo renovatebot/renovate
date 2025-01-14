@@ -214,7 +214,8 @@ export class DebDatasource extends Datasource {
       return response.statusCode !== 304;
     } catch (error) {
       logger.warn(
-        `Could not determine if ${packageUrl} is modified since ${lastDownloadTimestamp.toUTCString()}: ${error.message}`,
+        { packageUrl, lastDownloadTimestamp, errorMessage: error.message },
+        'Could not determine if package file is modified since last download',
       );
       return true; // Assume it needs to be downloaded if check fails
     }
