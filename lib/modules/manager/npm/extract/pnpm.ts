@@ -258,17 +258,11 @@ export async function extractPnpmWorkspaceFile(
 
   const deps = extractPnpmCatalogDeps(pnpmCatalogs);
 
-  if (!deps) {
-    return null;
-  }
-
   let pnpmShrinkwrap;
   const filePath = getSiblingFileName(packageFile, 'pnpm-lock.yaml');
 
   if (await readLocalFile(filePath, 'utf8')) {
     pnpmShrinkwrap = filePath;
-  } else {
-    pnpmShrinkwrap = undefined;
   }
 
   return {
@@ -291,7 +285,7 @@ function getCatalogDepType(name: string): string {
 
 function extractPnpmCatalogDeps(
   catalogs: PnpmCatalog[],
-): PackageDependency<NpmManagerData>[] | null {
+): PackageDependency<NpmManagerData>[] {
   const deps: PackageDependency<NpmManagerData>[] = [];
 
   for (const catalog of catalogs) {
