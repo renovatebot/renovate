@@ -30,6 +30,7 @@ export interface LockFile {
     string,
     Record<string, Record<string, string>>
   >;
+  lockedVersionsWithCatalog?: Record<string, Record<string, string>>;
   lockfileVersion?: number; // cache version for Yarn
   isYarn1?: boolean;
 }

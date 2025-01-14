@@ -280,6 +280,16 @@ describe('modules/manager/npm/extract/pnpm', () => {
       expect(Object.keys(res.lockedVersionsWithPath!)).toHaveLength(1);
     });
 
+    it('extracts version from catalogs', async () => {
+      const plocktest1Lock = Fixtures.get(
+        'lockfile-parsing/pnpm-lock-v9.yaml',
+        '..',
+      );
+      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(plocktest1Lock);
+      const res = await getPnpmLock('package.json');
+      expect(Object.keys(res.lockedVersionsWithCatalog!)).toHaveLength(1);
+    });
+
     it('returns empty if no deps', async () => {
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await getPnpmLock('package.json');

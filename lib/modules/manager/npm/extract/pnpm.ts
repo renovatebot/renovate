@@ -166,15 +166,37 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
       : parseFloat(lockParsed.lockfileVersion);
 
     const lockedVersions = getLockedVersions(lockParsed);
+    const lockedCatalogVersions = getLockedCatalogVersions(lockParsed);
 
     return {
       lockedVersionsWithPath: lockedVersions,
+      lockedVersionsWithCatalog: lockedCatalogVersions,
       lockfileVersion,
     };
   } catch (err) {
     logger.debug({ filePath, err }, 'Warning: Exception parsing pnpm lockfile');
     return { lockedVersions: {} };
   }
+}
+
+function getLockedCatalogVersions(
+  lockParsed: PnpmLockFile,
+): Record<string, Record<string, string>> {
+  const lockedVersions: Record<string, Record<string, string>> = {};
+
+  if (is.nonEmptyObject(lockParsed.catalogs)) {
+    for (const [catalog, dependencies] of Object.entries(lockParsed.catalogs)) {
+      const versions: Record<string, string> = {};
+
+      for (const [dep, versionCarrier] of Object.entries(dependencies)) {
+        versions[dep] = versionCarrier.version;
+      }
+
+      lockedVersions[catalog] = versions;
+    }
+  }
+
+  return lockedVersions;
 }
 
 function getLockedVersions(
@@ -184,10 +206,6 @@ function getLockedVersions(
     string,
     Record<string, Record<string, string>>
   > = {};
-
-  // TODO(fpapado): edit this to include catalogs, in two ways: resolving
-  // `pnpm.catalog.<name>` depTypes, and resolving `catalog:` dependencies to
-  // see whether they are locked.
 
   // monorepo
   if (is.nonEmptyObject(lockParsed.importers)) {
