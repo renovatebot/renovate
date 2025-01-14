@@ -4,7 +4,6 @@ import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, hostRules, mockedFunction } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import * as docker from '../../../util/exec/docker';
 import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
@@ -129,10 +128,22 @@ describe('modules/manager/mix/artifacts', () => {
 
     // erlang
     getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '25.0.0.0' }],
+      releases: [
+        { version: '22.3.4.26' },
+        { version: '23.1.1.0' },
+        { version: '24.3.4.1' },
+        { version: '24.3.4.2' },
+        { version: '25.0.0.0' },
+      ],
     });
     // elixir
-    getPkgReleases.mockResolvedValueOnce({ releases: [{ version: '1.13.4' }] });
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: 'v1.8.2' },
+        { version: 'v1.13.3' },
+        { version: 'v1.13.4' },
+      ],
+    });
 
     expect(
       await updateArtifacts({
@@ -193,11 +204,21 @@ describe('modules/manager/mix/artifacts', () => {
 
     // erlang
     getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '25.0.0.0' }],
+      releases: [
+        { version: '22.3.4.26' },
+        { version: '23.1.1.0' },
+        { version: '24.3.4.1' },
+        { version: '24.3.4.2' },
+        { version: '25.0.0.0' },
+      ],
     });
     // elixir
     getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: 'v1.13.4' }],
+      releases: [
+        { version: 'v1.8.2' },
+        { version: 'v1.13.3' },
+        { version: 'v1.13.4' },
+      ],
     });
 
     const result = await updateArtifacts({
@@ -253,10 +274,22 @@ describe('modules/manager/mix/artifacts', () => {
 
     // erlang
     getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '25.0.0.0' }],
+      releases: [
+        { version: '22.3.4.26' },
+        { version: '23.1.1.0' },
+        { version: '24.3.4.1' },
+        { version: '24.3.4.2' },
+        { version: '25.0.0.0' },
+      ],
     });
     // elixir
-    getPkgReleases.mockResolvedValueOnce({ releases: [{ version: '1.13.4' }] });
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: 'v1.8.2' },
+        { version: 'v1.13.3' },
+        { version: 'v1.13.4' },
+      ],
+    });
 
     const result = await updateArtifacts({
       packageFileName: 'mix.exs',
