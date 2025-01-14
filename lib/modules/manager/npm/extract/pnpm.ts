@@ -92,8 +92,8 @@ export async function detectPnpmWorkspaces(
   const packagePathCache = new Map<string, string[] | null>();
 
   for (const p of packageFiles) {
-    const { packageFile, managerData = {} } = p;
-    const { pnpmShrinkwrap } = managerData as Partial<NpmManagerData>;
+    const { packageFile, managerData } = p;
+    const pnpmShrinkwrap = managerData?.pnpmShrinkwrap;
 
     // check if pnpmShrinkwrap-file has already been provided
     if (pnpmShrinkwrap) {
@@ -326,12 +326,11 @@ function parsePnpmCatalogs(content: string): PnpmCatalog[] {
   const { catalog: defaultCatalogDeps, catalogs: namedCatalogs } =
     parseSingleYaml(content, { customSchema: PnpmCatalogsSchema });
 
-  const result = [
-    {
-      name: 'default',
-      dependencies: defaultCatalogDeps ?? {},
-    },
-  ];
+  const result = [];
+
+  if (defaultCatalogDeps !== undefined) {
+    result.push({ name: 'default', dependencies: defaultCatalogDeps });
+  }
 
   if (!namedCatalogs) {
     return result;
