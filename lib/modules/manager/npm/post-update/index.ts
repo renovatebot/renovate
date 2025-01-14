@@ -242,7 +242,12 @@ export async function writeUpdatedPackageFiles(
       await writeLocalFile(packageFile.path, packageFile.contents!);
       continue;
     }
-    if (!packageFile.path.endsWith('package.json')) {
+    if (
+      !(
+        packageFile.path.endsWith('package.json') ||
+        packageFile.path.endsWith('pnpm-workspace.yaml')
+      )
+    ) {
       continue;
     }
     logger.debug(`Writing ${packageFile.path}`);
@@ -608,6 +613,10 @@ export async function getAdditionalFiles(
       const existingContent = await getFile(
         pnpmShrinkwrap,
         config.reuseExistingBranch ? config.branchName : config.baseBranch,
+      );
+      logger.info(
+        { lockFile: res.lockFile, existingContent },
+        'FP: lockfile comparison',
       );
       if (res.lockFile === existingContent) {
         logger.debug("pnpm-lock.yaml hasn't changed");
