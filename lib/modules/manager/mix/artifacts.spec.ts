@@ -317,11 +317,7 @@ describe('modules/manager/mix/artifacts', () => {
   });
 
   it('returns updated mix.lock in subdir', async () => {
-    GlobalConfig.set({
-      ...adminConfig,
-      binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
-    });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.getSiblingFileName.mockReturnValueOnce('subdir/mix.lock');
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
@@ -350,16 +346,19 @@ describe('modules/manager/mix/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots[1]?.cmd).toMatch('mix deps.update plug');
-    expect(execSnapshots[1]?.options?.cwd).toBe('/tmp/github/some/repo/subdir');
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool erlang 25.0.0.0' },
+      { cmd: 'install-tool elixir 1.13.4' },
+      {
+        cmd: 'mix deps.update plug',
+        options: { cwd: '/tmp/github/some/repo/subdir' },
+      },
+    ]);
   });
 
   it('returns updated mix.lock in umbrella project', async () => {
-    GlobalConfig.set({
-      ...adminConfig,
-      binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
-    });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.getSiblingFileName.mockReturnValueOnce('apps/foo/mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     fs.readLocalFile.mockResolvedValueOnce(null);
@@ -390,18 +389,19 @@ describe('modules/manager/mix/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots[1]?.cmd).toMatch('mix deps.update plug');
-    expect(execSnapshots[1]?.options?.cwd).toBe(
-      '/tmp/github/some/repo/apps/foo',
-    );
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool erlang 25.0.0.0' },
+      { cmd: 'install-tool elixir 1.13.4' },
+      {
+        cmd: 'mix deps.update plug',
+        options: { cwd: '/tmp/github/some/repo/apps/foo' },
+      },
+    ]);
   });
 
   it('supports lockFileMaintenance', async () => {
-    GlobalConfig.set({
-      ...adminConfig,
-      binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
-    });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
@@ -430,8 +430,15 @@ describe('modules/manager/mix/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots[1]?.cmd).toMatch('mix deps.get');
-    expect(execSnapshots[1]?.options?.cwd).toBe('/tmp/github/some/repo');
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool erlang 25.0.0.0' },
+      { cmd: 'install-tool elixir 1.13.4' },
+      {
+        cmd: 'mix deps.get',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('lockFileMaintenance returns null if unchanged', async () => {
