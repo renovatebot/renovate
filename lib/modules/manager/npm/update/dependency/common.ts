@@ -10,7 +10,6 @@ export function getNewGitValue(upgrade: Upgrade): string | null {
     return upgrade.currentRawValue.replace(
       upgrade.currentDigest,
       // TODO #22198
-
       upgrade.newDigest!.substring(0, upgrade.currentDigest.length),
     );
   } else {

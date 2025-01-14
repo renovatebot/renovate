@@ -614,10 +614,6 @@ export async function getAdditionalFiles(
         pnpmShrinkwrap,
         config.reuseExistingBranch ? config.branchName : config.baseBranch,
       );
-      logger.info(
-        { lockFile: res.lockFile, existingContent },
-        'FP: lockfile comparison',
-      );
       if (res.lockFile === existingContent) {
         logger.debug("pnpm-lock.yaml hasn't changed");
       } else {
