@@ -285,7 +285,6 @@ export async function extractPnpmWorkspaceFile(
 
   return {
     deps,
-    // TODO(fpapado): Fill out more properties, similar to the rest of the npm manager
     managerData: {
       pnpmShrinkwrap,
     },
