@@ -16,7 +16,7 @@ import type {
   PackageFileContent,
 } from '../../types';
 import type { PnpmDependencySchema, PnpmLockFile } from '../post-update/types';
-import { PnpmCatalogsSchema } from '../schema';
+import { PnpmCatalogsSchema, PnpmWorkspaceFileSchema } from '../schema';
 import type { NpmManagerData } from '../types';
 import { extractDependency, parseDepName } from './common/dependency';
 import type { LockFile, PnpmCatalog, PnpmWorkspaceFile } from './types';
@@ -185,6 +185,10 @@ function getLockedVersions(
     Record<string, Record<string, string>>
   > = {};
 
+  // TODO(fpapado): edit this to include catalogs, in two ways: resolving
+  // `pnpm.catalog.<name>` depTypes, and resolving `catalog:` dependencies to
+  // see whether they are locked.
+
   // monorepo
   if (is.nonEmptyObject(lockParsed.importers)) {
     for (const [importer, imports] of Object.entries(lockParsed.importers)) {
@@ -238,10 +242,10 @@ export function isPnpmWorkspaceYaml(content: string): boolean {
   }
 }
 
-export function extractPnpmWorkspaceFile(
+export async function extractPnpmWorkspaceFile(
   content: string,
   packageFile: string,
-): PackageFile | null {
+): Promise<PackageFileContent<NpmManagerData> | null> {
   logger.trace(`pnpm.extractPnpmWorkspaceFile(${packageFile})`);
 
   const pnpmCatalogs: PnpmCatalog[] = [];
@@ -252,15 +256,27 @@ export function extractPnpmWorkspaceFile(
     return null;
   }
 
-  const extracted = extractPnpmCatalogDeps(pnpmCatalogs);
+  const deps = extractPnpmCatalogDeps(pnpmCatalogs);
 
-  if (!extracted) {
+  if (!deps) {
     return null;
   }
 
+  let pnpmShrinkwrap;
+  const filePath = getSiblingFileName(packageFile, 'pnpm-lock.yaml');
+
+  if (await readLocalFile(filePath, 'utf8')) {
+    pnpmShrinkwrap = filePath;
+  } else {
+    pnpmShrinkwrap = undefined;
+  }
+
   return {
-    ...extracted,
-    packageFile,
+    deps,
+    // TODO(fpapado): Fill out more properties, similar to the rest of the npm manager
+    managerData: {
+      pnpmShrinkwrap,
+    },
   };
 }
 
@@ -275,27 +291,16 @@ function getCatalogDepType(name: string): string {
 
 function extractPnpmCatalogDeps(
   catalogs: PnpmCatalog[],
-): PackageFileContent<NpmManagerData> | null {
-  const deps: PackageDependency[] = [];
+): PackageDependency<NpmManagerData>[] | null {
+  const deps: PackageDependency<NpmManagerData>[] = [];
 
   for (const catalog of catalogs) {
     for (const [key, val] of Object.entries(catalog.dependencies)) {
       const depType = getCatalogDepType(catalog.name);
       const depName = parseDepName(depType, key);
-      let dep: PackageDependency = {
+      const dep: PackageDependency<NpmManagerData> = {
         depType,
         depName,
-        managerData: {
-          catalogName: catalog.name,
-        },
-      };
-      if (depName !== key) {
-        dep.managerData!.key = key;
-      }
-
-      // TODO: fix type #22198
-      dep = {
-        ...dep,
         ...extractDependency(depType, depName, val!),
         prettyDepType: depType,
       };
@@ -303,9 +308,7 @@ function extractPnpmCatalogDeps(
     }
   }
 
-  return {
-    deps,
-  };
+  return deps;
 }
 
 function parsePnpmCatalogs(content: string): PnpmCatalog[] {

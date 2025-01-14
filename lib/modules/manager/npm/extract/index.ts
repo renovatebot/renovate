@@ -230,10 +230,13 @@ export async function extractAllPackageFiles(
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else
     if (content) {
-      // We duck-type the content here, to allow users to rename the
-      // pnpm-workspace.yaml file.
+      // pnpm workspace files are their own package file, defined via fileMatch.
+      // We duck-type the content here, to allow users to rename the file itself.
       if (isPnpmWorkspaceYaml(content)) {
-        const deps = extractPnpmWorkspaceFile(content, packageFile);
+        logger.trace(
+          `${packageFile} will be extracted as a pnpm workspace YAML file`,
+        );
+        const deps = await extractPnpmWorkspaceFile(content, packageFile);
         if (deps) {
           npmFiles.push({
             ...deps,
@@ -241,6 +244,7 @@ export async function extractAllPackageFiles(
           });
         }
       } else {
+        logger.trace(`${packageFile} will be extracted as a package.json file`);
         const deps = await extractPackageFile(content, packageFile, config);
         if (deps) {
           npmFiles.push({

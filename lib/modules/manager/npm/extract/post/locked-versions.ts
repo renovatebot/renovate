@@ -121,6 +121,7 @@ export async function getLockedVersions(
 
       for (const dep of packageFile.deps) {
         const { depName, depType } = dep;
+        // TODO(fpapado): Consider looking up `pnpm.catalogs.<name>` types here
         // TODO: types (#22198)
         const lockedVersion = semver.valid(
           lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[relativeDir]?.[

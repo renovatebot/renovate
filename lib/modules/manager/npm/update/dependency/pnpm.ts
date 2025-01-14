@@ -12,7 +12,7 @@ export function updatePnpmCatalogDependency({
 }: UpdateDependencyConfig): string | null {
   const { depType, managerData, depName } = upgrade;
 
-  const catalogName = managerData?.catalogName;
+  const catalogName = depType?.split('.').at(-1);
 
   if (!is.string(catalogName)) {
     logger.error(
