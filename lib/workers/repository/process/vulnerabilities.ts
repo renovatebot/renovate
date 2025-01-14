@@ -249,8 +249,8 @@ export class Vulnerabilities {
       return { vulnerabilities, versioningApi };
     } catch (err) {
       logger.warn(
-        { err },
-        `Error fetching vulnerability information for ${packageName}`,
+        { err, packageName },
+        'Error fetching vulnerability information for package',
       );
       return null;
     }

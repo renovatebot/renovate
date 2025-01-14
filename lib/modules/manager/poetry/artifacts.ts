@@ -19,7 +19,7 @@ import { Result } from '../../../util/result';
 import { parse as parseToml } from '../../../util/toml';
 import { parseUrl } from '../../../util/url';
 import { PypiDatasource } from '../../datasource/pypi';
-import { getGoogleAuthTokenRaw } from '../../datasource/util';
+import { getGoogleAuthHostRule } from '../../datasource/util';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { Lockfile, PoetrySchemaToml } from './schema';
 import type { PoetryFile, PoetrySource } from './types';
@@ -131,12 +131,9 @@ async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
   }
 
   if (parsedUrl.hostname.endsWith('.pkg.dev')) {
-    const accessToken = await getGoogleAuthTokenRaw();
-    if (accessToken) {
-      return {
-        username: 'oauth2accesstoken',
-        password: accessToken,
-      };
+    const hostRule = await getGoogleAuthHostRule();
+    if (hostRule) {
+      return hostRule;
     }
     logger.once.debug(`Could not get Google access token (url=${url})`);
   }

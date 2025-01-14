@@ -15,6 +15,7 @@ import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
 import { type HttpRequestStatsDataPoint, HttpStats } from '../stats';
 import { resolveBaseUrl } from '../url';
+import { parseSingleYaml } from '../yaml';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRule, findMatchingRule } from './host-rules';
@@ -38,7 +39,7 @@ export { RequestError as HttpError };
 export class EmptyResultError extends Error {}
 export type SafeJsonError = RequestError | ZodError | EmptyResultError;
 
-type JsonArgs<
+type HttpFnArgs<
   Opts extends HttpOptions,
   ResT = unknown,
   Schema extends ZodType<ResT> = ZodType<ResT>,
@@ -272,7 +273,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
   private async requestJson<ResT = unknown>(
     method: InternalHttpOptions['method'],
-    { url, httpOptions: requestOptions, schema }: JsonArgs<Opts, ResT>,
+    { url, httpOptions: requestOptions, schema }: HttpFnArgs<Opts, ResT>,
   ): Promise<HttpResponse<ResT>> {
     const { body, ...httpOptions } = { ...requestOptions };
     const opts: InternalHttpOptions = {
@@ -302,8 +303,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     arg1: string,
     arg2: Opts | ZodType<ResT> | undefined,
     arg3: ZodType<ResT> | undefined,
-  ): JsonArgs<Opts, ResT> {
-    const res: JsonArgs<Opts, ResT> = { url: arg1 };
+  ): HttpFnArgs<Opts, ResT> {
+    const res: HttpFnArgs<Opts, ResT> = { url: arg1 };
 
     if (arg2 instanceof ZodType) {
       res.schema = arg2;
@@ -326,6 +327,81 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       },
       ...opt,
     });
+  }
+
+  async getYaml<ResT>(url: string, options?: Opts): Promise<HttpResponse<ResT>>;
+  async getYaml<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+    url: string,
+    schema: Schema,
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  async getYaml<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+    url: string,
+    options: Opts,
+    schema: Schema,
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  async getYaml<ResT = unknown, Schema extends ZodType<ResT> = ZodType<ResT>>(
+    arg1: string,
+    arg2?: Opts | Schema,
+    arg3?: Schema,
+  ): Promise<HttpResponse<ResT>> {
+    const { url, httpOptions, schema } = this.resolveArgs<ResT>(
+      arg1,
+      arg2,
+      arg3,
+    );
+    const opts: InternalHttpOptions = {
+      ...httpOptions,
+      method: 'get',
+    };
+
+    const res = await this.get(url, opts);
+    if (!schema) {
+      const body = parseSingleYaml<ResT>(res.body);
+      return { ...res, body };
+    }
+
+    const body = await schema.parseAsync(parseSingleYaml(res.body));
+    return { ...res, body };
+  }
+
+  getYamlSafe<
+    ResT extends NonNullable<unknown>,
+    Schema extends ZodType<ResT> = ZodType<ResT>,
+  >(url: string, schema: Schema): AsyncResult<Infer<Schema>, SafeJsonError>;
+  getYamlSafe<
+    ResT extends NonNullable<unknown>,
+    Schema extends ZodType<ResT> = ZodType<ResT>,
+  >(
+    url: string,
+    options: Opts,
+    schema: Schema,
+  ): AsyncResult<Infer<Schema>, SafeJsonError>;
+  getYamlSafe<
+    ResT extends NonNullable<unknown>,
+    Schema extends ZodType<ResT> = ZodType<ResT>,
+  >(
+    arg1: string,
+    arg2: Opts | Schema,
+    arg3?: Schema,
+  ): AsyncResult<ResT, SafeJsonError> {
+    const url = arg1;
+    let schema: Schema;
+    let httpOptions: Opts | undefined;
+    if (arg3) {
+      schema = arg3;
+      httpOptions = arg2 as Opts;
+    } else {
+      schema = arg2 as Schema;
+    }
+
+    let res: AsyncResult<HttpResponse<ResT>, SafeJsonError>;
+    if (httpOptions) {
+      res = Result.wrap(this.getYaml<ResT>(url, httpOptions, schema));
+    } else {
+      res = Result.wrap(this.getYaml<ResT>(url, schema));
+    }
+
+    return res.transform((response) => Result.ok(response.body));
   }
 
   getJson<ResT>(url: string, options?: Opts): Promise<HttpResponse<ResT>>;
