@@ -353,6 +353,36 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `);
   });
 
+  it('preserves comments', () => {
+    const upgrade = {
+      depType: 'pnpm.catalog.default',
+      depName: 'react',
+      newValue: '19.0.0',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      packages:
+        - pkg-a
+
+      catalog:
+        react: 18.3.1 # This is a comment
+        # This is another comment
+        react-dom: 18.3.1
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(codeBlock`
+      packages:
+        - pkg-a
+
+      catalog:
+        react: 19.0.0 # This is a comment
+        # This is another comment
+        react-dom: 18.3.1
+    `);
+  });
+
   it('preserves double quote style', () => {
     const upgrade = {
       depType: 'pnpm.catalog.default',
@@ -473,6 +503,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         - pkg-a
 
       catalog: {
+        # This is a comment
         "react": "18.3.1"
       }
     `;
@@ -485,6 +516,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
         - pkg-a
 
       catalog: {
+        # This is a comment
         "react": "19.0.0"
       }
     `);
