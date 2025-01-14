@@ -91,6 +91,26 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `);
   });
 
+  it('does nothing if the new and old values match', () => {
+    const upgrade = {
+      depType: 'pnpm.catalog.default',
+      depName: 'react',
+      newValue: '19.0.0',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      packages:
+        - pkg-a
+
+      catalog:
+        react: 19.0.0
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toEqual(pnpmWorkspaceYaml);
+  });
+
   it('replaces package', () => {
     const upgrade = {
       depType: 'pnpm.catalog.default',
@@ -470,7 +490,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `);
   });
 
-  it('does not replace aliases', () => {
+  it('does not replace aliases in the value position', () => {
     const upgrade = {
       depType: 'pnpm.catalog.default',
       depName: 'react',
@@ -489,6 +509,29 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       catalog:
         react: *react
         react-dom: *react
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      upgrade,
+    });
+    expect(testContent).toBeNull();
+  });
+
+  it('does not replace aliases in the key position', () => {
+    const upgrade = {
+      depType: 'pnpm.catalog.default',
+      depName: 'react',
+      newName: 'react-x',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      __vars:
+        &r react: ""
+
+      packages:
+        - pkg-a
+
+      catalog:
+        *r: 18.0.0
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,

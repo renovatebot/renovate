@@ -14,6 +14,7 @@ export function updatePnpmCatalogDependency({
 
   const catalogName = depType?.split('.').at(-1);
 
+  // istanbul ignore if
   if (!is.string(catalogName)) {
     logger.error(
       'No catalogName was found; this is likely an extraction error.',
@@ -81,8 +82,8 @@ export function updatePnpmCatalogDependency({
     return null;
   }
 
+  // istanbul ignore if: this should not happen in practice, but we must satisfy th etypes
   if (!modifiedDocument.contents?.srcToken) {
-    // This should not happen in practice, but we leave it to satisfy the types.
     return null;
   }
 
@@ -117,6 +118,7 @@ function changeDependencyIn(
   }
 
   if (newName) {
+    // istanbul ignore if: the try..catch block above already throws if a key is an alias
     if (!CST.isScalar(relevantNode.srcToken?.key)) {
       return null;
     }
