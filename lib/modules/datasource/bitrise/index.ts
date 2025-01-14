@@ -103,8 +103,8 @@ export class BitriseDatasource extends Datasource {
       }
       if (body.encoding !== 'base64') {
         logger.warn(
-          { data: body, url: stepUrl },
-          `Got unexpected encoding for Bitrise step location '${body.encoding}'`,
+          { encoding: body.encoding, data: body, url: stepUrl },
+          `Got unexpected encoding for Bitrise step location`,
         );
         return null;
       }
