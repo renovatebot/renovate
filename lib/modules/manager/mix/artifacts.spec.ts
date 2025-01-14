@@ -139,9 +139,9 @@ describe('modules/manager/mix/artifacts', () => {
     // elixir
     getPkgReleases.mockResolvedValueOnce({
       releases: [
-        { version: 'v1.8.2' },
-        { version: 'v1.13.3' },
-        { version: 'v1.13.4' },
+        { version: '1.8.2' },
+        { version: '1.13.3' },
+        { version: '1.13.4' },
       ],
     });
 
@@ -215,9 +215,9 @@ describe('modules/manager/mix/artifacts', () => {
     // elixir
     getPkgReleases.mockResolvedValueOnce({
       releases: [
-        { version: 'v1.8.2' },
-        { version: 'v1.13.3' },
-        { version: 'v1.13.4' },
+        { version: '1.8.2' },
+        { version: '1.13.3' },
+        { version: '1.13.4' },
       ],
     });
 
@@ -285,9 +285,9 @@ describe('modules/manager/mix/artifacts', () => {
     // elixir
     getPkgReleases.mockResolvedValueOnce({
       releases: [
-        { version: 'v1.8.2' },
-        { version: 'v1.13.3' },
-        { version: 'v1.13.4' },
+        { version: '1.8.2' },
+        { version: '1.13.3' },
+        { version: '1.13.4' },
       ],
     });
 
