@@ -117,7 +117,6 @@ describe('modules/manager/mix/artifacts', () => {
   });
 
   it('returns updated mix.lock', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
@@ -180,7 +179,6 @@ describe('modules/manager/mix/artifacts', () => {
   });
 
   it('authenticates to private repositories in updated dependencies', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
@@ -286,7 +284,6 @@ describe('modules/manager/mix/artifacts', () => {
   });
 
   it('returns updated mix.lock in subdir', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
@@ -325,7 +322,6 @@ describe('modules/manager/mix/artifacts', () => {
   });
 
   it('returns updated mix.lock in umbrella project', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
@@ -368,7 +364,6 @@ describe('modules/manager/mix/artifacts', () => {
   });
 
   it('supports lockFileMaintenance', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
