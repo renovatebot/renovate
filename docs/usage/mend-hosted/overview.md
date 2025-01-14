@@ -51,3 +51,9 @@ Details of the Mend Renovate Cloud versions are shown in the table below.
 **Mend Renovate Community Cloud (Free)** - Available for free for all repositories.
 
 **Mend Renovate Enterprise Cloud** - Supported premium version. Contact Mend at [sales@mend.io](mailto:sales@mend.io) for purchase details.
+
+<!-- prettier-ignore -->
+!!! note
+    OSS-licensed orgs can request increased resources on Mend Renovate Community Cloud.
+    To request increased resources, create a “[Suggest an Idea](https://github.com/renovatebot/renovate/discussions/categories/suggest-an-idea)” item on the Renovate discussions board on GitHub.
+    Acceptance is at the discretion of Mend.io.
