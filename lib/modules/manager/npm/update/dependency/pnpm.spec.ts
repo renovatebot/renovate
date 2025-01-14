@@ -7,9 +7,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -36,9 +33,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -67,9 +61,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       depType: 'pnpm.catalog.react17',
       depName: 'react',
       newValue: '19.0.0',
-      managerData: {
-        catalogName: 'react17',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -106,9 +97,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       depName: 'config',
       newName: 'abc',
       newValue: '2.0.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -137,9 +125,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       currentValue: 'v4.0.0-alpha.2',
       currentRawValue: 'gulpjs/gulp#v4.0.0-alpha.2',
       newValue: 'v4.0.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -169,9 +154,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       packageName: '@hapi/hapi',
       currentValue: '18.3.0',
       newValue: '18.3.1',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -200,9 +182,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       currentDigest: 'abcdef7',
       currentRawValue: 'gulpjs/gulp#abcdef7',
       newDigest: '0000000000111111111122222222223333333333',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -231,9 +210,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       currentValue: 'v1.0.0',
       currentRawValue: 'git+https://github.com/owner/n#v1.0.0',
       newValue: 'v1.1.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -260,9 +236,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       depType: 'pnpm.catalog.default',
       depName: 'react-not',
       newValue: '19.0.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -283,9 +256,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -303,9 +273,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const testContent = npmUpdater.updateDependency({
       fileContent: null as never,
@@ -319,9 +286,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -348,9 +312,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -377,9 +338,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -409,9 +367,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -440,9 +395,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -469,9 +421,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -498,9 +447,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     const pnpmWorkspaceYaml = codeBlock`
       packages:
@@ -529,9 +475,6 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       depType: 'pnpm.catalog.default',
       depName: 'react',
       newValue: '19.0.0',
-      managerData: {
-        catalogName: 'default',
-      },
     };
     // In the general case, we do not know whether we should replace the anchor
     // that an alias is resolved from. We leave this up to the user, e.g. via a

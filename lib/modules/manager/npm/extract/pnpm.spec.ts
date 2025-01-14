@@ -288,13 +288,15 @@ describe('modules/manager/npm/extract/pnpm', () => {
   });
 
   describe('.extractPnpmWorkspaceFile()', () => {
-    it('ignores invalid pnpm-workspace.yaml file', () => {
-      expect(extractPnpmWorkspaceFile('', 'pnpm-workspace.yaml')).toBeNull();
+    it('ignores invalid pnpm-workspace.yaml file', async () => {
+      expect(
+        await extractPnpmWorkspaceFile('', 'pnpm-workspace.yaml'),
+      ).toBeNull();
     });
 
-    it('handles empty catalog entries', () => {
+    it('handles empty catalog entries', async () => {
       expect(
-        extractPnpmWorkspaceFile(
+        await extractPnpmWorkspaceFile(
           codeBlock`
             catalog:
             catalogs:
@@ -304,9 +306,9 @@ describe('modules/manager/npm/extract/pnpm', () => {
       ).toBeNull();
     });
 
-    it('parses valid pnpm-workspace.yaml file', () => {
+    it('parses valid pnpm-workspace.yaml file', async () => {
       expect(
-        extractPnpmWorkspaceFile(
+        await extractPnpmWorkspaceFile(
           codeBlock`
             catalog:
               react: 18.3.0
@@ -325,9 +327,6 @@ describe('modules/manager/npm/extract/pnpm', () => {
             depName: 'react',
             depType: 'pnpm.catalog.default',
             prettyDepType: 'pnpm.catalog.default',
-            managerData: {
-              catalogName: 'default',
-            },
           },
           {
             currentValue: '17.0.2',
@@ -335,12 +334,8 @@ describe('modules/manager/npm/extract/pnpm', () => {
             depName: 'react',
             depType: 'pnpm.catalog.react17',
             prettyDepType: 'pnpm.catalog.react17',
-            managerData: {
-              catalogName: 'react17',
-            },
           },
         ],
-        packageFile: 'pnpm-workspace.yaml',
       });
     });
   });
