@@ -10,7 +10,7 @@ import { PyProjectSchema } from './schema';
 import type { Pep508ParseResult, Pep621ManagerData } from './types';
 
 const pep508Regex = regEx(
-  /^(?<packageName>[A-Z0-9._-]+)\s*(\[(?<extras>[A-Z0-9\s,._-]+)\])?\s*(?:\(\s*(?<currentValue1>[^;]+)\s*\)|(?<currentValue2>[^;]+))?(;\s*(?<marker>.*))?/i,
+  /^(?<packageName>[A-Z0-9._-]+)\s*(\[(?<extras>[A-Z0-9\s,._-]+)\])?\s*(?<currentValue>[^;]+)?(;\s*(?<marker>.*))?/i,
 );
 
 export const depTypes = {
@@ -42,10 +42,15 @@ export function parsePEP508(
   const result: Pep508ParseResult = {
     packageName: regExpExec.groups.packageName,
   };
-  if (is.nonEmptyString(regExpExec.groups.currentValue1)) {
-    result.currentValue = regExpExec.groups.currentValue1;
-  } else if (is.nonEmptyString(regExpExec.groups.currentValue2)) {
-    result.currentValue = regExpExec.groups.currentValue2;
+  if (is.nonEmptyString(regExpExec.groups.currentValue)) {
+    if (
+      regExpExec.groups.currentValue.startsWith('(') &&
+      regExpExec.groups.currentValue.endsWith(')')
+    ) {
+      result.currentValue = regExpExec.groups.currentValue.slice(1, -1).trim();
+    } else {
+      result.currentValue = regExpExec.groups.currentValue;
+    }
   }
 
   if (is.nonEmptyString(regExpExec.groups.marker)) {
