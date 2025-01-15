@@ -11,7 +11,7 @@ import {
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import { PolicyEvaluationStatus } from "azure-devops-node-api/interfaces/PolicyInterfaces";
+import { PolicyEvaluationStatus } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -781,30 +781,45 @@ export async function mergePr({
       ? await getMergeStrategy(pr.targetRefName!)
       : mapMergeStrategy(strategy);
 
-
   let bypassPolicy: boolean | undefined;
 
   const bypassPolicyTypes = new Set(
     [
       platformOptions?.ignoreTests ? AzurePolicyTypeId.Build : [],
-      platformOptions?.azureBypassPolicyRequiredReviewers ? AzurePolicyTypeId.RequiredReviewers : [],
-      platformOptions?.azureBypassPolicyMinimumNumberOfReviewers ? AzurePolicyTypeId.MinimumNumberOfReviewers : [],
-      platformOptions?.azureBypassPolicyWorkItemLinking ? AzurePolicyTypeId.WorkItemLinking : [],
-      platformOptions?.azureBypassPolicyTypeUuids ?? []
-    ].flat()
+      platformOptions?.azureBypassPolicyRequiredReviewers
+        ? AzurePolicyTypeId.RequiredReviewers
+        : [],
+      platformOptions?.azureBypassPolicyMinimumNumberOfReviewers
+        ? AzurePolicyTypeId.MinimumNumberOfReviewers
+        : [],
+      platformOptions?.azureBypassPolicyWorkItemLinking
+        ? AzurePolicyTypeId.WorkItemLinking
+        : [],
+      platformOptions?.azureBypassPolicyTypeUuids ?? [],
+    ].flat(),
   );
 
   if (bypassPolicyTypes.size > 0) {
     const artifactId = `vstfs:///CodeReview/CodeReviewId/${config.project}/${pullRequestId}`;
-    const policyEvaluations = await azurePolicyApi.getPolicyEvaluations(config.project, artifactId);
+    const policyEvaluations = await azurePolicyApi.getPolicyEvaluations(
+      config.project,
+      artifactId,
+    );
 
     // only use bypass if all required policies are in approved state
     bypassPolicy = policyEvaluations
-      .filter((policy) => policy.configuration?.isEnabled && policy.configuration.isBlocking && !bypassPolicyTypes.has(policy.configuration.type?.id ?? ""))
+      .filter(
+        (policy) =>
+          policy.configuration?.isEnabled &&
+          policy.configuration.isBlocking &&
+          !bypassPolicyTypes.has(policy.configuration.type?.id ?? ''),
+      )
       .every((policy) => policy.status === PolicyEvaluationStatus.Approved);
   }
 
-  const bypassReason = bypassPolicy ? platformOptions?.azureBypassPolicyReason ?? "Renovate automerge" : undefined;
+  const bypassReason = bypassPolicy
+    ? (platformOptions?.azureBypassPolicyReason ?? 'Renovate automerge')
+    : undefined;
 
   const objToUpdate: GitPullRequest = {
     status: PullRequestStatus.Completed,
@@ -826,7 +841,7 @@ export async function mergePr({
       pr.lastMergeSourceCommit?.commitId
     } using mergeStrategy ${mergeStrategy} (${
       GitPullRequestMergeStrategy[mergeStrategy]
-    })${bypassPolicy ? " and bypassPolicies" : ""}`,
+    })${bypassPolicy ? ' and bypassPolicies' : ''}`,
   );
 
   try {

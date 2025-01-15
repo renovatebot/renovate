@@ -13,8 +13,9 @@ export const AzurePrVote = {
 } as const;
 
 export const AzurePolicyTypeId = {
-  RequiredReviewers: "fd2167ab-b0be-447a-8ec8-39368250530e",
-  MinimumNumberOfReviewers: "fa4e907d-c16b-4a4c-9dfa-4906e5d171dd",
-  Build: "0609b952-1397-4640-95ec-e00a01b2c241",
-  WorkItemLinking: "40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e",
+  RequiredReviewers: 'fd2167ab-b0be-447a-8ec8-39368250530e',
+  RequireAMergeStrategy: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+  MinimumNumberOfReviewers: 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd',
+  Build: '0609b952-1397-4640-95ec-e00a01b2c241',
+  WorkItemLinking: '40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e',
 } as const;

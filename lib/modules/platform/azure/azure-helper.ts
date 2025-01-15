@@ -13,8 +13,7 @@ import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
 } from './util';
-
-const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
+import { AzurePolicyTypeId } from './types';
 
 export async function getRefs(
   repoId: string,
@@ -151,7 +150,11 @@ export async function getMergeMethod(
   const policyConfigurations = (
     await (
       await azureApi.policyApi()
-    ).getPolicyConfigurations(project, undefined, mergePolicyGuid)
+    ).getPolicyConfigurations(
+      project,
+      undefined,
+      AzurePolicyTypeId.RequireAMergeStrategy,
+    )
   )
     .filter((p) => p.settings.scope.some(isRelevantScope))
     .map((p) => p.settings)[0];

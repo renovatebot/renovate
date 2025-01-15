@@ -1,4 +1,4 @@
-import {Readable} from 'node:stream';
+import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import type { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
@@ -9,16 +9,19 @@ import {
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import {
   type PolicyEvaluationRecord,
-  PolicyEvaluationStatus
-} from "azure-devops-node-api/interfaces/PolicyInterfaces";
-import {mockDeep} from 'jest-mock-extended';
-import {mocked, partial} from '../../../../test/util';
-import {REPOSITORY_ARCHIVED, REPOSITORY_NOT_FOUND,} from '../../../constants/error-messages';
-import type {logger as _logger} from '../../../logger';
+  PolicyEvaluationStatus,
+} from 'azure-devops-node-api/interfaces/PolicyInterfaces';
+import { mockDeep } from 'jest-mock-extended';
+import { mocked, partial } from '../../../../test/util';
+import {
+  REPOSITORY_ARCHIVED,
+  REPOSITORY_NOT_FOUND,
+} from '../../../constants/error-messages';
+import type { logger as _logger } from '../../../logger';
 import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
-import type {Platform, RepoParams} from '../types';
-import {AzurePolicyTypeId, AzurePrVote} from './types';
+import type { Platform, RepoParams } from '../types';
+import { AzurePolicyTypeId, AzurePrVote } from './types';
 
 jest.mock('./azure-got-wrapper');
 jest.mock('./azure-helper');
@@ -1905,7 +1908,7 @@ describe('modules/platform/azure/index', () => {
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
-      const bypassReasonMock = "Bypassed by Renovate";
+      const bypassReasonMock = 'Bypassed by Renovate';
 
       const updatePullRequestMock = jest.fn(() => ({
         status: PullRequestStatus.Completed,
@@ -1924,20 +1927,24 @@ describe('modules/platform/azure/index', () => {
       azureApi.policyApi.mockImplementationOnce(
         () =>
           ({
-            getPolicyEvaluations: jest.fn(() => ([{
-              configuration: {
-                settings: undefined,
-                isEnabled: true,
-                isBlocking: true,
-                type: {
-                  id: AzurePolicyTypeId.MinimumNumberOfReviewers
-                }
-              },
-              status: PolicyEvaluationStatus.Queued
-            }] satisfies PolicyEvaluationRecord[])),
+            getPolicyEvaluations: jest.fn(
+              () =>
+                [
+                  {
+                    configuration: {
+                      settings: undefined,
+                      isEnabled: true,
+                      isBlocking: true,
+                      type: {
+                        id: AzurePolicyTypeId.MinimumNumberOfReviewers,
+                      },
+                    },
+                    status: PolicyEvaluationStatus.Queued,
+                  },
+                ] satisfies PolicyEvaluationRecord[],
+            ),
           }) as any,
       );
-
 
       azureHelper.getMergeMethod = jest
         .fn()
@@ -1950,7 +1957,7 @@ describe('modules/platform/azure/index', () => {
         platformOptions: {
           azureBypassPolicyMinimumNumberOfReviewers: true,
           azureBypassPolicyReason: bypassReasonMock,
-        }
+        },
       });
 
       expect(updatePullRequestMock).toHaveBeenCalledWith(
@@ -1994,20 +2001,24 @@ describe('modules/platform/azure/index', () => {
       azureApi.policyApi.mockImplementationOnce(
         () =>
           ({
-            getPolicyEvaluations: jest.fn(() => ([{
-              configuration: {
-                settings: undefined,
-                isEnabled: true,
-                isBlocking: true,
-                type: {
-                  id: AzurePolicyTypeId.MinimumNumberOfReviewers
-                }
-              },
-              status: PolicyEvaluationStatus.Queued
-            }] satisfies PolicyEvaluationRecord[])),
+            getPolicyEvaluations: jest.fn(
+              () =>
+                [
+                  {
+                    configuration: {
+                      settings: undefined,
+                      isEnabled: true,
+                      isBlocking: true,
+                      type: {
+                        id: AzurePolicyTypeId.MinimumNumberOfReviewers,
+                      },
+                    },
+                    status: PolicyEvaluationStatus.Queued,
+                  },
+                ] satisfies PolicyEvaluationRecord[],
+            ),
           }) as any,
       );
-
 
       azureHelper.getMergeMethod = jest
         .fn()
