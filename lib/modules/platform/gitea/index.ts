@@ -592,7 +592,8 @@ const platform: Platform = {
       // would cause a HTTP 409 conflict error, which we hereby gracefully handle.
       if (err.statusCode === 409) {
         logger.warn(
-          `Attempting to gracefully recover from 409 Conflict response in createPr(${title}, ${sourceBranch})`,
+          { prTitle: title, sourceBranch },
+          'Attempting to gracefully recover from 409 Conflict response in createPr()',
         );
 
         // Refresh cached PR list and search for pull request with matching information
