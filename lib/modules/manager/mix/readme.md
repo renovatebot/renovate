@@ -11,9 +11,7 @@ The following `depTypes` are currently supported by the `mix` manager :
 
 We recommend you use [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance) for the `mix` manager.
 
-At the moment, without this setting, you will not benefit from updates that fall within the `mix.exs` ranges.
-
-`lockFileMaintenance=true` periodically refreshes your `mix.lock` files, ensuring all dependencies are updated to their latest allowed versions.
+`lockFileMaintenance=true` periodically refreshes your `mix.lock` files, ensuring all indirect dependencies are updated to their latest allowed versions.
 
 This option will be skipped in [umbrella projects](https://hexdocs.pm/elixir/dependencies-and-umbrella-projects.html#umbrella-projects), as they share a single
 `mix.lock` file for all applications `mix.exs` files.
