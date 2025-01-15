@@ -10,7 +10,7 @@ import { PyProjectSchema } from './schema';
 import type { Pep508ParseResult, Pep621ManagerData } from './types';
 
 const pep508Regex = regEx(
-  /^(?<packageName>[A-Z0-9._-]+)\s*(\[(?<extras>[A-Z0-9\s,._-]+)\])?\s*(?:\((?<currentValue1>[^;]+)\)|(?<currentValue2>[^;]+))?(;\s*(?<marker>.*))?/i,
+  /^(?<packageName>[A-Z0-9._-]+)\s*(\[(?<extras>[A-Z0-9\s,._-]+)\])?\s*(?:\(\s*(?<currentValue1>[^;]+)\s*\)|(?<currentValue2>[^;]+))?(;\s*(?<marker>.*))?/i,
 );
 
 export const depTypes = {
