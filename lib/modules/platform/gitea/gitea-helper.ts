@@ -394,10 +394,7 @@ export const renovateToGiteaStatusMapping: Record<
 function filterStatus(data: CommitStatus[]): CommitStatus[] {
   const ret: Record<string, CommitStatus> = {};
   for (const i of data) {
-    if (
-      !ret[i.context] ||
-      new Date(ret[i.context].created_at) < new Date(i.created_at)
-    ) {
+    if (!ret[i.context] || ret[i.context].id < i.id) {
       ret[i.context] = i;
     }
   }
