@@ -415,13 +415,14 @@ export async function getCombinedCommitStatus(
   });
 
   let worstState = 0;
-  for (const cs of filterStatus(res.body)) {
+  const statuses = filterStatus(res.body);
+  for (const cs of statuses) {
     worstState = Math.max(worstState, commitStatusStates.indexOf(cs.status));
   }
 
   return {
     worstStatus: commitStatusStates[worstState],
-    statuses: res.body,
+    statuses,
   };
 }
 
