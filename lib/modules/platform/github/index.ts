@@ -99,6 +99,9 @@ let platformConfig: PlatformConfig;
 
 const GitHubMaxPrBodyLen = 60000;
 
+// Logger saying we are using custom Renovate bot
+logger.debug('Custom version of Renovate bot is running - GitHub integration');
+
 export function resetConfigs(): void {
   config = {} as never;
   platformConfig = {
