@@ -9,6 +9,7 @@ import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
+  TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
 import type * as _git from '../../../util/git';
@@ -1308,6 +1309,18 @@ describe('modules/platform/gitea/index', () => {
       const res = await gitea.getPr(42);
 
       expect(res).toBeNull();
+    });
+
+    it('should throw temporary error for null pull request', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get('/repos/some/repo/pulls')
+        .query({ state: 'all', sort: 'recentupdate' })
+        .reply(200, [null]); // TODO: 404 should be handled
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+
+      await expect(gitea.getPr(42)).rejects.toThrow(TEMPORARY_ERROR);
     });
   });
 

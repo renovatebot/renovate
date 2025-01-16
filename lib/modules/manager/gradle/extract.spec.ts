@@ -188,27 +188,27 @@ describe('modules/manager/gradle/extract', () => {
           {
             depName: 'javax.cache:cache-api',
             currentValue: '1.1.0',
-            groupName: 'Libraries.jCache',
+            sharedVariableName: 'Libraries.jCache',
           },
           {
             depName: 'com.android.tools.build:gradle',
             currentValue: '4.1.2',
-            groupName: 'Libraries.Android.Tools.version',
+            sharedVariableName: 'Libraries.Android.Tools.version',
           },
           {
             depName: 'androidx.test:core',
             currentValue: '1.3.0-rc01',
-            groupName: 'Libraries.Test.version',
+            sharedVariableName: 'Libraries.Test.version',
           },
           {
             depName: 'androidx.test.espresso:espresso-core',
             currentValue: '3.3.0-rc01',
-            groupName: 'Libraries.Test.Espresso.version',
+            sharedVariableName: 'Libraries.Test.Espresso.version',
           },
           {
             depName: 'androidx.test:core-ktx',
             currentValue: '1.3.0-rc01',
-            groupName: 'Libraries.Test.version',
+            sharedVariableName: 'Libraries.Test.version',
           },
         ],
       },
@@ -218,7 +218,7 @@ describe('modules/manager/gradle/extract', () => {
           {
             depName: 'org.jetbrains.kotlin:kotlin-stdlib',
             currentValue: '1.8.10',
-            groupName: 'GradleDeps.Kotlin.version',
+            sharedVariableName: 'GradleDeps.Kotlin.version',
           },
         ],
       },
@@ -228,12 +228,12 @@ describe('modules/manager/gradle/extract', () => {
           {
             depName: 'com.fasterxml.jackson.core:jackson-annotations',
             currentValue: '2.9.10',
-            groupName: 'Versions.jackson',
+            sharedVariableName: 'Versions.jackson',
           },
           {
             depName: 'io.reactivex.rxjava2:rxjava',
             currentValue: '1.2.3',
-            groupName: 'Versions.rxjava',
+            sharedVariableName: 'Versions.rxjava',
           },
         ],
       },
@@ -513,7 +513,7 @@ describe('modules/manager/gradle/extract', () => {
           deps: [
             {
               depName: 'io.gitlab.arturbosch.detekt:detekt-formatting',
-              groupName: 'detekt',
+              sharedVariableName: 'detekt',
               currentValue: '1.17.0',
               managerData: {
                 fileReplacePosition: 21,
@@ -522,7 +522,7 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'io.kotest:kotest-assertions-core-jvm',
-              groupName: 'kotest',
+              sharedVariableName: 'kotest',
               currentValue: '4.6.0',
               managerData: {
                 fileReplacePosition: 51,
@@ -531,7 +531,7 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'io.kotest:kotest-runner-junit5',
-              groupName: 'kotest',
+              sharedVariableName: 'kotest',
               currentValue: '4.6.0',
               managerData: {
                 fileReplacePosition: 51,
@@ -626,6 +626,58 @@ describe('modules/manager/gradle/extract', () => {
           Object.keys(fsMock),
         ),
       ).toBeNull();
+    });
+
+    it('deletes commit message for plugins with version reference', async () => {
+      const fsMock = {
+        'gradle/libs.versions.toml': codeBlock`
+        [versions]
+        detekt = "1.18.1"
+
+        [plugins]
+        detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+
+        [libraries]
+        detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+      `,
+      };
+      mockFs(fsMock);
+
+      const res = await extractAllPackageFiles(
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
+      );
+      expect(res).toMatchObject([
+        {
+          packageFile: 'gradle/libs.versions.toml',
+          deps: [
+            {
+              depName: 'io.gitlab.arturbosch.detekt:detekt-formatting',
+              sharedVariableName: 'detekt',
+              currentValue: '1.18.1',
+              managerData: {
+                fileReplacePosition: 21,
+                packageFile: 'gradle/libs.versions.toml',
+              },
+              fileReplacePosition: 21,
+            },
+            {
+              depType: 'plugin',
+              depName: 'io.gitlab.arturbosch.detekt',
+              packageName:
+                'io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin',
+              registryUrls: ['https://plugins.gradle.org/m2/'],
+              currentValue: '1.18.1',
+              managerData: {
+                fileReplacePosition: 21,
+                packageFile: 'gradle/libs.versions.toml',
+              },
+              sharedVariableName: 'detekt',
+              fileReplacePosition: 21,
+            },
+          ],
+        },
+      ]);
     });
   });
 
@@ -817,7 +869,7 @@ describe('modules/manager/gradle/extract', () => {
               depName: 'org.apache.lucene:lucene-core',
               depType: 'dependencies',
               fileReplacePosition: 22,
-              groupName: 'org.apache.lucene:*',
+              sharedVariableName: 'org.apache.lucene:*',
               lockedVersion: '1.2.3',
               managerData: {
                 fileReplacePosition: 22,
@@ -828,7 +880,7 @@ describe('modules/manager/gradle/extract', () => {
               depName: 'org.apache.lucene:lucene-codecs',
               depType: 'dependencies',
               fileReplacePosition: 22,
-              groupName: 'org.apache.lucene:*',
+              sharedVariableName: 'org.apache.lucene:*',
               lockedVersion: '1.2.3',
               managerData: {
                 fileReplacePosition: 22,
@@ -868,6 +920,118 @@ describe('modules/manager/gradle/extract', () => {
         Object.keys(fsMock),
       );
       expect(res).toBeNull();
+    });
+
+    it('supports multiple levels of glob', async () => {
+      const fsMock = {
+        'versions.props': codeBlock`
+          org.apache.* = 4
+          org.apache.lucene:* = 3
+          org.apache.lucene:a.* = 2
+          org.apache.lucene:a.b = 1
+          org.apache.foo*:* = 5
+        `,
+        'versions.lock': codeBlock`
+          # Run ./gradlew --write-locks to regenerate this file
+          org.apache.solr:x.y:1 (10 constraints: 95be0c15)
+          org.apache.lucene:a.b:1 (10 constraints: 95be0c15)
+          org.apache.lucene:a.c:1 (10 constraints: 95be0c15)
+          org.apache.lucene:a.d:1 (10 constraints: 95be0c15)
+          org.apache.lucene:d:1 (10 constraints: 95be0c15)
+          org.apache.lucene:e.f:1 (10 constraints: 95be0c15)
+          org.apache.foo-bar:a:1 (10 constraints: 95be0c15)
+        `,
+      };
+      mockFs(fsMock);
+
+      const res = await extractAllPackageFiles(
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
+      );
+
+      // Each lock dep is only present once, with highest prio for exact prop match, then globs from longest to shortest
+      expect(res).toMatchObject([
+        {
+          packageFile: 'versions.lock',
+          deps: [],
+        },
+        {
+          packageFile: 'versions.props',
+          deps: [
+            {
+              managerData: {
+                packageFile: 'versions.props',
+                fileReplacePosition: 91,
+              },
+              depName: 'org.apache.lucene:a.b',
+              currentValue: '1',
+              lockedVersion: '1',
+              fileReplacePosition: 91,
+              depType: 'dependencies',
+            },
+            {
+              managerData: {
+                packageFile: 'versions.props',
+                fileReplacePosition: 65,
+              },
+              depName: 'org.apache.lucene:a.c',
+              currentValue: '2',
+              lockedVersion: '1',
+              sharedVariableName: 'org.apache.lucene:a.*',
+              fileReplacePosition: 65,
+              depType: 'dependencies',
+            },
+            {
+              managerData: {
+                packageFile: 'versions.props',
+                fileReplacePosition: 65,
+              },
+              depName: 'org.apache.lucene:a.d',
+              currentValue: '2',
+              lockedVersion: '1',
+              sharedVariableName: 'org.apache.lucene:a.*',
+              fileReplacePosition: 65,
+              depType: 'dependencies',
+            },
+            {
+              managerData: {
+                packageFile: 'versions.props',
+                fileReplacePosition: 39,
+              },
+              depName: 'org.apache.lucene:d',
+              currentValue: '3',
+              lockedVersion: '1',
+              sharedVariableName: 'org.apache.lucene:*',
+              fileReplacePosition: 39,
+              depType: 'dependencies',
+            },
+            {
+              managerData: {
+                packageFile: 'versions.props',
+                fileReplacePosition: 39,
+              },
+              depName: 'org.apache.lucene:e.f',
+              currentValue: '3',
+              lockedVersion: '1',
+              sharedVariableName: 'org.apache.lucene:*',
+              fileReplacePosition: 39,
+              depType: 'dependencies',
+            },
+            {
+              managerData: {
+                fileReplacePosition: 113,
+                packageFile: 'versions.props',
+              },
+              depName: 'org.apache.foo-bar:a',
+              currentValue: '5',
+              lockedVersion: '1',
+              sharedVariableName: 'org.apache.foo*:*',
+              fileReplacePosition: 113,
+              depType: 'dependencies',
+            },
+          ],
+        },
+      ]);
     });
   });
 });

@@ -249,8 +249,8 @@ export class Vulnerabilities {
       return { vulnerabilities, versioningApi };
     } catch (err) {
       logger.warn(
-        { err },
-        `Error fetching vulnerability information for ${packageName}`,
+        { err, packageName },
+        'Error fetching vulnerability information for package',
       );
       return null;
     }
@@ -483,7 +483,7 @@ export class Vulnerabilities {
       packageFileConfig,
     } = vul;
     if (is.nullOrUndefined(fixedVersion)) {
-      logger.info(
+      logger.debug(
         `No fixed version available for vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`,
       );
       return null;
