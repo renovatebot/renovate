@@ -11,7 +11,7 @@ const GithubGraphqlTag = z.object({
     z.object({
       type: z.literal('Commit'),
       oid: z.string(),
-      releaseTimestamp: TimestampSchema.nullable().catch(null),
+      releaseTimestamp: TimestampSchema,
     }),
     z.object({
       type: z.literal('Tag'),
@@ -19,7 +19,7 @@ const GithubGraphqlTag = z.object({
         oid: z.string(),
       }),
       tagger: z.object({
-        releaseTimestamp: TimestampSchema.nullable().catch(null),
+        releaseTimestamp: TimestampSchema,
       }),
     }),
   ]),

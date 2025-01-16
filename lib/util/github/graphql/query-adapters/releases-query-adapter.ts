@@ -33,7 +33,7 @@ const query = prepareQuery(`
 
 const GithubGraphqlRelease = z.object({
   version: z.string(),
-  releaseTimestamp: TimestampSchema.nullable().catch(null),
+  releaseTimestamp: TimestampSchema,
   isDraft: z.boolean(),
   isPrerelease: z.boolean(),
   url: z.string(),
