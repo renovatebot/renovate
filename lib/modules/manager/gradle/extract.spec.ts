@@ -924,14 +924,14 @@ describe('modules/manager/gradle/extract', () => {
 
     it('supports multiple levels of glob', async () => {
       const fsMock = {
-        'versions.props': stripIndent`
+        'versions.props': codeBlock`
           org.apache.* = 4
           org.apache.lucene:* = 3
           org.apache.lucene:a.* = 2
           org.apache.lucene:a.b = 1
           org.apache.foo*:* = 5
         `,
-        'versions.lock': stripIndent`
+        'versions.lock': codeBlock`
           # Run ./gradlew --write-locks to regenerate this file
           org.apache.solr:x.y:1 (10 constraints: 95be0c15)
           org.apache.lucene:a.b:1 (10 constraints: 95be0c15)
