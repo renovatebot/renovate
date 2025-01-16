@@ -224,7 +224,7 @@ function applyPropsInternal(
 
   let fileReplacePosition = dep.fileReplacePosition;
   let propSource = dep.propSource;
-  let groupName: string | null = null;
+  let sharedVariableName: string | null = null;
   const currentValue = dep.currentValue!.replace(
     regEx(/^\${[^}]*?}$/),
     (substr) => {
@@ -232,8 +232,8 @@ function applyPropsInternal(
       // TODO: wrong types here, props is already `MavenProp`
       const propValue = (props as any)[propKey] as MavenProp;
       if (propValue) {
-        if (!groupName) {
-          groupName = propKey;
+        if (!sharedVariableName) {
+          sharedVariableName = propKey;
         }
         fileReplacePosition = propValue.fileReplacePosition;
         propSource =
@@ -261,8 +261,8 @@ function applyPropsInternal(
     currentValue,
   };
 
-  if (groupName) {
-    result.groupName = groupName;
+  if (sharedVariableName) {
+    result.sharedVariableName = sharedVariableName;
   }
 
   if (propSource && depPackageFile !== propSource) {

@@ -50,7 +50,7 @@ describe('modules/manager/gradle/extract/catalog', () => {
       },
       {
         depName: 'com.squareup.retrofit2:retrofit',
-        groupName: 'retro.fit',
+        sharedVariableName: 'retro.fit',
         currentValue: '2.8.2',
         managerData: {
           fileReplacePosition: 42,
@@ -94,7 +94,7 @@ describe('modules/manager/gradle/extract/catalog', () => {
         depName: 'org.jetbrains.kotlin.plugin.serialization',
         depType: 'plugin',
         currentValue: '1.5.21',
-        groupName: 'kotlin',
+        sharedVariableName: 'kotlin',
         packageName:
           'org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin',
         managerData: {
@@ -133,7 +133,7 @@ describe('modules/manager/gradle/extract/catalog', () => {
     expect(res).toStrictEqual([
       {
         depName: 'io.gitlab.arturbosch.detekt:detekt-formatting',
-        groupName: 'detekt',
+        sharedVariableName: 'detekt',
         currentValue: '1.18.1',
         managerData: {
           fileReplacePosition: 21,
@@ -150,7 +150,7 @@ describe('modules/manager/gradle/extract/catalog', () => {
           fileReplacePosition: 21,
           packageFile: 'gradle/libs.versions.toml',
         },
-        groupName: 'detekt',
+        sharedVariableName: 'detekt',
       },
     ]);
   });
@@ -173,7 +173,7 @@ describe('modules/manager/gradle/extract/catalog', () => {
     expect(res).toStrictEqual([
       {
         depName: 'junit:junit',
-        groupName: 'junit',
+        sharedVariableName: 'junit',
         currentValue: '1.4.9',
         managerData: {
           fileReplacePosition: 124,
@@ -182,7 +182,7 @@ describe('modules/manager/gradle/extract/catalog', () => {
       },
       {
         depName: 'mocha-junit:mocha-junit',
-        groupName: 'mocha.junit.reporter',
+        sharedVariableName: 'mocha.junit.reporter',
         currentValue: '2.0.2',
         managerData: {
           fileReplacePosition: 82,

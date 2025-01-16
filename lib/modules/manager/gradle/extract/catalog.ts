@@ -188,7 +188,7 @@ function extractDependency({
   versionSubContent: string;
 }): PackageDependency<GradleManagerData> {
   if (is.string(descriptor)) {
-    const [groupName, name, currentValue] = descriptor.split(':');
+    const [group, name, currentValue] = descriptor.split(':');
     if (!currentValue) {
       return {
         depName,
@@ -196,7 +196,7 @@ function extractDependency({
       };
     }
     return {
-      depName: `${groupName}:${name}`,
+      depName: `${group}:${name}`,
       currentValue,
       managerData: {
         fileReplacePosition:
@@ -236,7 +236,7 @@ function extractDependency({
   }
 
   if (isVersionPointer(descriptor.version)) {
-    dependency.groupName = normalizeAlias(descriptor.version.ref);
+    dependency.sharedVariableName = normalizeAlias(descriptor.version.ref);
   }
 
   return dependency;
@@ -298,7 +298,7 @@ export function parseCatalog(
       dependency.skipReason = skipReason;
     }
     if (isVersionPointer(version) && dependency.commitMessageTopic) {
-      dependency.groupName = normalizeAlias(version.ref);
+      dependency.sharedVariableName = normalizeAlias(version.ref);
       delete dependency.commitMessageTopic;
     }
 
