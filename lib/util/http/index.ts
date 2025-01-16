@@ -406,6 +406,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
   /**
    * Request JSON and return the response without any validation.
+   *
+   * The usage of this method is discouraged, please use `getJson` instead.
    */
   getJsonUnchecked<ResT = unknown>(
     url: string,
