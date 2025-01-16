@@ -136,7 +136,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
         depName: 'org.apache.lucene:a.c',
         currentValue: '2',
         lockedVersion: '1',
-        groupName: 'org.apache.lucene:a.*',
+        sharedVariableName: 'org.apache.lucene:a.*',
         depType: 'dependencies',
       },
       {
@@ -147,7 +147,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
         depName: 'org.apache.lucene:a.d',
         currentValue: '2',
         lockedVersion: '1',
-        groupName: 'org.apache.lucene:a.*',
+        sharedVariableName: 'org.apache.lucene:a.*',
         depType: 'dependencies',
       },
       {
@@ -158,7 +158,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
         depName: 'org.apache.lucene:d',
         currentValue: '3',
         lockedVersion: '1',
-        groupName: 'org.apache.lucene:*',
+        sharedVariableName: 'org.apache.lucene:*',
         depType: 'dependencies',
       },
       {
@@ -169,7 +169,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
         depName: 'org.apache.lucene:e.f',
         currentValue: '3',
         lockedVersion: '1',
-        groupName: 'org.apache.lucene:*',
+        sharedVariableName: 'org.apache.lucene:*',
         depType: 'dependencies',
       },
       {
@@ -180,7 +180,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
         depName: 'org.apache.foo-bar:a',
         currentValue: '5',
         lockedVersion: '1',
-        groupName: 'org.apache.foo*:*',
+        sharedVariableName: 'org.apache.foo*:*',
         depType: 'dependencies',
       },
     ]);

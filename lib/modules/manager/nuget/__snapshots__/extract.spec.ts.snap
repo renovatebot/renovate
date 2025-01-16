@@ -134,14 +134,14 @@ exports[`modules/manager/nuget/extract extractPackageFile() extracts all depende
     "datasource": "nuget",
     "depName": "Autofac.Extensions.DependencyInjection",
     "depType": "nuget",
-    "groupName": "AutofacVersion",
+    "sharedVariableName": "AutofacVersion",
   },
   {
     "currentValue": "4.5.0",
     "datasource": "nuget",
     "depName": "Autofac",
     "depType": "nuget",
-    "groupName": "AutofacVersion",
+    "sharedVariableName": "AutofacVersion",
   },
 ]
 `;

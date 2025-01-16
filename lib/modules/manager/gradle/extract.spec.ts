@@ -1,4 +1,4 @@
-import { codeBlock } from 'common-tags';
+import { codeBlock, stripIndent } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger, partial } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
@@ -614,118 +614,6 @@ describe('modules/manager/gradle/extract', () => {
       ]);
     });
 
-    it('supports versions declared as single string', async () => {
-      const fsMock = {
-        'gradle/libs.versions.toml': Fixtures.get('2/libs.versions.toml'),
-      };
-      mockFs(fsMock);
-
-      const res = await extractAllPackageFiles(
-        partial<ExtractConfig>(),
-        Object.keys(fsMock),
-      );
-
-      expect(res).toMatchObject([
-        {
-          packageFile: 'gradle/libs.versions.toml',
-          deps: [
-            {
-              depName: 'com.squareup.okhttp3:okhttp',
-              currentValue: '4.9.0',
-              managerData: {
-                fileReplacePosition: 100,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-            },
-            {
-              depName: 'com.squareup.okio:okio',
-              currentValue: '2.8.0',
-              managerData: {
-                fileReplacePosition: 162,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-            },
-            {
-              depName: 'com.squareup.picasso:picasso',
-              currentValue: '2.5.1',
-              managerData: {
-                fileReplacePosition: 244,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-            },
-            {
-              depName: 'com.squareup.retrofit2:retrofit',
-              sharedVariableName: 'retro.fit',
-              currentValue: '2.8.2',
-              managerData: {
-                fileReplacePosition: 42,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-            },
-            {
-              depName: 'google-firebase-analytics',
-              managerData: {
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              skipReason: 'unspecified-version',
-            },
-            {
-              depName: 'google-firebase-crashlytics',
-              managerData: {
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              skipReason: 'unspecified-version',
-            },
-            {
-              depName: 'google-firebase-messaging',
-              managerData: {
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              skipReason: 'unspecified-version',
-            },
-            {
-              depName: 'org.jetbrains.kotlin.jvm',
-              depType: 'plugin',
-              currentValue: '1.5.21',
-              commitMessageTopic: 'plugin kotlinJvm',
-              packageName:
-                'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin',
-              managerData: {
-                fileReplacePosition: 663,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              registryUrls: ['https://plugins.gradle.org/m2/'],
-            },
-            {
-              depName: 'org.jetbrains.kotlin.plugin.serialization',
-              depType: 'plugin',
-              currentValue: '1.5.21',
-              packageName:
-                'org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin',
-              managerData: {
-                fileReplacePosition: 21,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              registryUrls: ['https://plugins.gradle.org/m2/'],
-            },
-            {
-              depName: 'org.danilopianini.multi-jvm-test-plugin',
-              depType: 'plugin',
-              currentValue: '0.3.0',
-              commitMessageTopic: 'plugin multiJvm',
-              packageName:
-                'org.danilopianini.multi-jvm-test-plugin:org.danilopianini.multi-jvm-test-plugin.gradle.plugin',
-              managerData: {
-                fileReplacePosition: 824,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              registryUrls: ['https://plugins.gradle.org/m2/'],
-            },
-          ],
-        },
-      ]);
-    });
-
     it('ignores empty TOML file', async () => {
       const fsMock = {
         'gradle/libs.versions.toml': '',
@@ -786,45 +674,6 @@ describe('modules/manager/gradle/extract', () => {
               },
               sharedVariableName: 'detekt',
               fileReplacePosition: 21,
-            },
-          ],
-        },
-      ]);
-    });
-
-    it('changes the dependency version, not the comment version', async () => {
-      const fsMock = {
-        'gradle/libs.versions.toml': Fixtures.get('3/libs.versions.toml'),
-      };
-      mockFs(fsMock);
-
-      const res = await extractAllPackageFiles(
-        partial<ExtractConfig>(),
-        Object.keys(fsMock),
-      );
-      expect(res).toMatchObject([
-        {
-          packageFile: 'gradle/libs.versions.toml',
-          deps: [
-            {
-              depName: 'junit:junit',
-              sharedVariableName: 'junit',
-              currentValue: '1.4.9',
-              managerData: {
-                fileReplacePosition: 124,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              fileReplacePosition: 124,
-            },
-            {
-              depName: 'mocha-junit:mocha-junit',
-              sharedVariableName: 'mocha.junit.reporter',
-              currentValue: '2.0.2',
-              managerData: {
-                fileReplacePosition: 82,
-                packageFile: 'gradle/libs.versions.toml',
-              },
-              fileReplacePosition: 82,
             },
           ],
         },

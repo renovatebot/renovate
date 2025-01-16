@@ -811,7 +811,7 @@ describe('modules/manager/gradle/parser', () => {
         {
           currentValue: '1.5.2.RELEASE',
           depName: 'org.springframework.boot:spring-boot-gradle-plugin',
-          groupName: 'springBootVersion',
+          sharedVariableName: 'springBootVersion',
           managerData: {
             fileReplacePosition: 53,
             packageFile: 'build.gradle',
