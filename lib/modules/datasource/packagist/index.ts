@@ -54,7 +54,8 @@ export class PackagistDatasource extends Datasource {
     schema: Schema,
   ): Promise<z.infer<Schema>> {
     const opts = PackagistDatasource.getHostOpts(url);
-    return await this.http.getJson(url, opts, schema);
+    const { body } = await this.http.getJson(url, opts, schema);
+    return body;
   }
 
   @cache({

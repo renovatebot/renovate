@@ -453,22 +453,16 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
    * @param url
    * @param schema Zod schema for the response
    */
-  getJsonSafe<
-    ResT extends NonNullable<unknown>,
-    Schema extends ZodType<ResT> = ZodType<ResT>,
-  >(url: string, schema: Schema): AsyncResult<Infer<Schema>, SafeJsonError>;
-  getJsonSafe<
-    ResT extends NonNullable<unknown>,
-    Schema extends ZodType<ResT> = ZodType<ResT>,
-  >(
+  getJsonSafe<ResT extends NonNullable<unknown>, Schema extends ZodType<ResT>>(
+    url: string,
+    schema: Schema,
+  ): AsyncResult<Infer<Schema>, SafeJsonError>;
+  getJsonSafe<ResT extends NonNullable<unknown>, Schema extends ZodType<ResT>>(
     url: string,
     options: Opts,
     schema: Schema,
   ): AsyncResult<Infer<Schema>, SafeJsonError>;
-  getJsonSafe<
-    ResT extends NonNullable<unknown>,
-    Schema extends ZodType<ResT> = ZodType<ResT>,
-  >(
+  getJsonSafe<ResT extends NonNullable<unknown>, Schema extends ZodType<ResT>>(
     arg1: string,
     arg2?: Opts | Schema,
     arg3?: Schema,
