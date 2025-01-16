@@ -730,9 +730,9 @@ describe('workers/repository/update/pr/index', () => {
           assignAutomerge: false,
         });
 
-        expect(logger.logger.error).toHaveBeenCalledWith(
-          { err },
-          'Failed to ensure PR: ' + prTitle,
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { err, prTitle },
+          'Failed to ensure PR',
         );
       });
 

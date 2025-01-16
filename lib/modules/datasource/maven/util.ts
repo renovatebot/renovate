@@ -12,8 +12,8 @@ import { Result } from '../../../util/result';
 import type { S3UrlParts } from '../../../util/s3';
 import { getS3Client, parseS3Url } from '../../../util/s3';
 import { streamToString } from '../../../util/streams';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url';
-import { normalizeDate } from '../metadata';
 import { getGoogleAuthToken } from '../util';
 import { MAVEN_REPO } from './common';
 import type {
@@ -83,7 +83,7 @@ export async function downloadHttpProtocol(
         result.isCacheable = true;
       }
 
-      const lastModified = normalizeDate(res?.headers?.['last-modified']);
+      const lastModified = asTimestamp(res?.headers?.['last-modified']);
       if (lastModified) {
         result.lastModified = lastModified;
       }
@@ -203,7 +203,7 @@ export async function downloadS3Protocol(
         const data = await streamToString(Body);
         const result: MavenFetchSuccess = { data };
 
-        const lastModified = normalizeDate(LastModified);
+        const lastModified = asTimestamp(LastModified);
         if (lastModified) {
           result.lastModified = lastModified;
         }
@@ -276,7 +276,7 @@ async function checkHttpResource(
     const res = await http.head(pkgUrl.toString());
     const timestamp = res?.headers?.['last-modified'];
     if (timestamp) {
-      const isoTimestamp = normalizeDate(timestamp);
+      const isoTimestamp = asTimestamp(timestamp);
       if (isoTimestamp) {
         const releaseDate = DateTime.fromISO(isoTimestamp, {
           zone: 'UTC',
