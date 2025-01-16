@@ -168,7 +168,9 @@ async function queryApi(
 
   let confidence: MergeConfidence = 'neutral';
   try {
-    const res = (await http.getJson<{ confidence: MergeConfidence }>(url)).body;
+    const res = (
+      await http.getJsonUnchecked<{ confidence: MergeConfidence }>(url)
+    ).body;
     if (isMergeConfidence(res.confidence)) {
       confidence = res.confidence;
     }

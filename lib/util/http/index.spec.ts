@@ -80,7 +80,7 @@ describe('util/http/index', () => {
       .get('/')
       .reply(200, '{ "test": true }', { etag: 'abc123' });
 
-    const res = await http.getJson('http://renovate.com');
+    const res = await http.getJsonUnchecked('http://renovate.com');
 
     expect(res).toEqual({
       authorization: false,

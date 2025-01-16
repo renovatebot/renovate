@@ -404,25 +404,48 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     return res.transform((response) => Result.ok(response.body));
   }
 
-  getJson<ResT>(url: string, options?: Opts): Promise<HttpResponse<ResT>>;
-  getJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  /**
+   * Request JSON and return the response without any validation.
+   */
+  getJsonUnchecked<ResT = unknown>(
+    url: string,
+    options?: Opts,
+  ): Promise<HttpResponse<ResT>> {
+    return this.requestJson<ResT>('get', { url, httpOptions: options });
+  }
+
+  /**
+   * Request JSON with a Zod schema for the response,
+   * throwing an error if the response is not valid.
+   *
+   * @param url
+   * @param schema Zod schema for the response
+   */
+  getJson<Schema extends ZodType<any, any, any>>(
     url: string,
     schema: Schema,
   ): Promise<HttpResponse<Infer<Schema>>>;
-  getJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  getJson<Schema extends ZodType<any, any, any>>(
     url: string,
     options: Opts,
     schema: Schema,
   ): Promise<HttpResponse<Infer<Schema>>>;
-  getJson<ResT = unknown, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  getJson<Schema extends ZodType<any, any, any>>(
     arg1: string,
     arg2?: Opts | Schema,
     arg3?: Schema,
-  ): Promise<HttpResponse<ResT>> {
-    const args = this.resolveArgs<ResT>(arg1, arg2, arg3);
-    return this.requestJson<ResT>('get', args);
+  ): Promise<HttpResponse<Infer<Schema>>> {
+    const args = this.resolveArgs<Infer<Schema>>(arg1, arg2, arg3);
+    return this.requestJson<Infer<Schema>>('get', args);
   }
 
+  /**
+   * Request JSON with a Zod schema for the response,
+   * wrapping response data in a `Result` class.
+   *
+   * @param url
+   * @param schema Zod schema for the response
+   */
   getJsonSafe<
     ResT extends NonNullable<unknown>,
     Schema extends ZodType<ResT> = ZodType<ResT>,
