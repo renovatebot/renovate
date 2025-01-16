@@ -1,4 +1,5 @@
 import { cache } from '../../../util/cache/package/decorator';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
 import { id as versioning } from '../../versioning/node';
 import { Datasource } from '../datasource';
@@ -53,7 +54,7 @@ export class NodeVersionDatasource extends Datasource {
       result.releases.push(
         ...resp.map(({ version, date, lts }) => ({
           version,
-          releaseTimestamp: date,
+          releaseTimestamp: asTimestamp(date),
           isStable: lts !== false,
         })),
       );

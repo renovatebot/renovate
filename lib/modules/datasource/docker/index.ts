@@ -10,6 +10,7 @@ import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { type AsyncResult, Result } from '../../../util/result';
 import { isDockerDigest } from '../../../util/string-match';
+import { asTimestamp } from '../../../util/timestamp';
 import {
   ensurePathPrefix,
   joinUrlParts,
@@ -1001,13 +1002,10 @@ export class DockerDatasource extends Datasource {
 
     const items = cache.getItems();
     return items.map(
-      ({
-        name: version,
-        tag_last_pushed: releaseTimestamp,
-        digest: newDigest,
-      }) => {
+      ({ name: version, tag_last_pushed, digest: newDigest }) => {
         const release: Release = { version };
 
+        const releaseTimestamp = asTimestamp(tag_last_pushed);
         if (releaseTimestamp) {
           release.releaseTimestamp = releaseTimestamp;
         }

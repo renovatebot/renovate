@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TimestampSchema } from '../../../util/timestamp';
 
 export const ReleaseResultZodSchema = z.object({
   releases: z.array(
@@ -6,7 +7,7 @@ export const ReleaseResultZodSchema = z.object({
       .object({
         version: z.string(),
         isDeprecated: z.boolean().optional(),
-        releaseTimestamp: z.string().optional(),
+        releaseTimestamp: TimestampSchema.nullable().catch(null),
         sourceUrl: z.string().optional(),
         sourceDirectory: z.string().optional(),
         changelogUrl: z.string().optional(),

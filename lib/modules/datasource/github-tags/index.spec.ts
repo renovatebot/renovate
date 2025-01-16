@@ -4,6 +4,7 @@ import { partial } from '../../../../test/util';
 import * as githubGraphql from '../../../util/github/graphql';
 import type { GithubTagItem } from '../../../util/github/graphql/types';
 import * as hostRules from '../../../util/host-rules';
+import type { Timestamp } from '../../../util/timestamp';
 import { GithubTagsDatasource } from '.';
 
 const githubApiHost = 'https://api.github.com';
@@ -55,13 +56,13 @@ describe('modules/datasource/github-tags/index', () => {
         {
           version: 'v1.0.0',
           gitRef: 'v1.0.0',
-          releaseTimestamp: '2021-01-01',
+          releaseTimestamp: '2021-01-01' as Timestamp,
           hash: '123',
         },
         {
           version: 'v2.0.0',
           gitRef: 'v2.0.0',
-          releaseTimestamp: '2022-01-01',
+          releaseTimestamp: '2022-01-01' as Timestamp,
           hash: 'abc',
         },
       ]);
@@ -74,13 +75,13 @@ describe('modules/datasource/github-tags/index', () => {
         {
           version: 'v1.0.0',
           gitRef: 'v1.0.0',
-          releaseTimestamp: '2021-01-01',
+          releaseTimestamp: '2021-01-01' as Timestamp,
           hash: '123',
         },
         partial<GithubTagItem>({
           version: 'v2.0.0',
           gitRef: 'v2.0.0',
-          releaseTimestamp: '2022-01-01',
+          releaseTimestamp: '2022-01-01' as Timestamp,
         }),
       ]);
       const res = await github.getDigest({ packageName }, 'v2.0.0');
@@ -92,13 +93,13 @@ describe('modules/datasource/github-tags/index', () => {
         {
           version: 'v1.0.0',
           gitRef: 'v1.0.0',
-          releaseTimestamp: '2021-01-01',
+          releaseTimestamp: '2021-01-01' as Timestamp,
           hash: '123',
         },
         {
           version: 'v2.0.0',
           gitRef: 'v2.0.0',
-          releaseTimestamp: '2022-01-01',
+          releaseTimestamp: '2022-01-01' as Timestamp,
           hash: 'abc',
         },
       ]);
@@ -121,13 +122,13 @@ describe('modules/datasource/github-tags/index', () => {
         {
           version: 'v1.0.0',
           gitRef: 'v1.0.0',
-          releaseTimestamp: '2021-01-01',
+          releaseTimestamp: '2021-01-01' as Timestamp,
           hash: '123',
         },
         {
           version: 'v2.0.0',
           gitRef: 'v2.0.0',
-          releaseTimestamp: '2022-01-01',
+          releaseTimestamp: '2022-01-01' as Timestamp,
           hash: 'abc',
         },
       ]);
@@ -135,7 +136,7 @@ describe('modules/datasource/github-tags/index', () => {
         {
           id: 1,
           version: 'v1.0.0',
-          releaseTimestamp: '2021-01-01',
+          releaseTimestamp: '2021-01-01' as Timestamp,
           isStable: true,
           url: 'https://example.com',
           name: 'some/dep2',
@@ -144,7 +145,7 @@ describe('modules/datasource/github-tags/index', () => {
         {
           id: 2,
           version: 'v2.0.0',
-          releaseTimestamp: '2022-01-01',
+          releaseTimestamp: '2022-01-01' as Timestamp,
           isStable: false,
           url: 'https://example.com',
           name: 'some/dep2',

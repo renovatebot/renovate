@@ -1,8 +1,9 @@
 import { z } from 'zod';
+import { TimestampSchema } from '../../../util/timestamp';
 
 export const DevboxRelease = z.object({
   version: z.string(),
-  last_updated: z.string(),
+  last_updated: TimestampSchema.nullable().catch(null),
 });
 
 export const DevboxResponse = z

@@ -23,6 +23,7 @@ import type {
   PackageRegistration,
   ServicesIndexRaw,
 } from './types';
+import { asTimestamp } from '../../../util/timestamp';
 
 export class NugetV3Api {
   static readonly cacheNamespace = 'datasource-nuget-v3';
@@ -159,14 +160,9 @@ export class NugetV3Api {
     let latestStable: string | null = null;
     let nupkgUrl: string | null = null;
     const releases = catalogEntries.map(
-      ({
-        version,
-        published: releaseTimestamp,
-        projectUrl,
-        listed,
-        packageContent,
-      }) => {
+      ({ version, published, projectUrl, listed, packageContent }) => {
         const release: Release = { version: removeBuildMeta(version) };
+        const releaseTimestamp = asTimestamp(published);
         if (releaseTimestamp) {
           release.releaseTimestamp = releaseTimestamp;
         }

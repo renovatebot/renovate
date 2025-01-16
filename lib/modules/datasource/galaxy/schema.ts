@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TimestampSchema } from '../../../util/timestamp';
 
 export type GalaxyV1 = z.infer<typeof GalaxyV1>;
 export const GalaxyV1 = z.object({
@@ -6,10 +7,15 @@ export const GalaxyV1 = z.object({
     z.object({
       summary_fields: z.object({
         versions: z.array(
-          z.object({
-            name: z.string(),
-            created: z.string().optional(),
-          }),
+          z
+            .object({
+              name: z.string(),
+              created: TimestampSchema.nullable().catch(null),
+            })
+            .transform(({ name, created }) => ({
+              version: name,
+              releaseTimestamp: created,
+            })),
         ),
       }),
       github_user: z.string().optional(),

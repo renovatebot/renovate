@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TimestampSchema } from '../../../util/timestamp';
 
 export const CommitSchema = z.object({
   sha: z.string(),
@@ -8,7 +9,7 @@ export const CommitsSchema = z.array(CommitSchema);
 
 const TagCommitSchema = z.object({
   sha: z.string(),
-  created: z.string().datetime({ offset: true }),
+  created: TimestampSchema.nullable().catch(null),
 });
 
 export const TagSchema = z.object({

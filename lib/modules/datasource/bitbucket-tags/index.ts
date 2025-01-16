@@ -1,6 +1,7 @@
 import { cache } from '../../../util/cache/package/decorator';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import { RepoInfo } from '../../platform/bitbucket/schema';
 import type { PagedResult } from '../../platform/bitbucket/types';
@@ -76,7 +77,7 @@ export class BitbucketTagsDatasource extends Datasource {
       releases: bitbucketTags.map(({ name, target }) => ({
         version: name,
         gitRef: name,
-        releaseTimestamp: target?.date,
+        releaseTimestamp: asTimestamp(target?.date),
       })),
     };
 
