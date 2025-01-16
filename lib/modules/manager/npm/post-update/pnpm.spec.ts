@@ -104,13 +104,13 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
       {
-        groupName: 'some-group',
+        sharedVariableName: 'some-group',
         packageName: 'some-dep',
         newVersion: '1.1.0',
         isLockfileUpdate: true,
       },
       {
-        groupName: 'some-group',
+        sharedVariableName: 'some-group',
         packageName: 'some-other-dep',
         newVersion: '1.1.0',
         isLockfileUpdate: false,

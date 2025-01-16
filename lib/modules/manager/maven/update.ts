@@ -25,7 +25,7 @@ export function updateAtPosition(
   if (version === newValue) {
     return fileContent;
   }
-  if (version === currentValue || upgrade.groupName) {
+  if (version === currentValue || upgrade.sharedVariableName) {
     // TODO: validate newValue (#22198)
     const replacedPart = versionPart.replace(version, newValue!);
     return leftPart + replacedPart + restPart;
