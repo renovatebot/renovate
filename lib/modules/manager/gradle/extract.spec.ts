@@ -1,4 +1,4 @@
-import { codeBlock, stripIndent } from 'common-tags';
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger, partial } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
@@ -630,7 +630,7 @@ describe('modules/manager/gradle/extract', () => {
 
     it('deletes commit message for plugins with version reference', async () => {
       const fsMock = {
-        'gradle/libs.versions.toml': stripIndent`
+        'gradle/libs.versions.toml': codeBlock`
         [versions]
         detekt = "1.18.1"
 
