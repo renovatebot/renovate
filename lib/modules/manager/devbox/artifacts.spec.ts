@@ -135,5 +135,46 @@ describe('modules/manager/devbox/artifacts', () => {
         },
       ]);
     });
+
+    it('returns null if devbox.lock not modified', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+        }),
+      );
+      mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce('New devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(devboxJson);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'devbox.json',
+          newPackageFileContent: devboxJson,
+          updatedDeps: [],
+          config: {},
+        }),
+      ).toBeNull();
+    });
+
+    it('returns an artifact error on failure', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'devbox.json',
+          newPackageFileContent: devboxJson,
+          updatedDeps: [],
+          config: {},
+        }),
+      ).toEqual([
+        {
+          artifactError: {
+            lockFile: 'devbox.lock',
+            stderr: "Cannot read properties of undefined (reading 'stdout')",
+          },
+        },
+      ]);
+    });
   });
 });
