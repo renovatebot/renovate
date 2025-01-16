@@ -2572,11 +2572,11 @@ describe('workers/repository/process/lookup/index', () => {
           { version: '1.4.4' },
           {
             version: '1.4.5',
-            releaseTimestamp: lastWeek.toISOString(),
+            releaseTimestamp: lastWeek.toISOString() as Timestamp,
           },
           {
             version: '1.4.6',
-            releaseTimestamp: yesterday.toISOString(),
+            releaseTimestamp: yesterday.toISOString() as Timestamp,
           },
         ],
       });
@@ -2616,11 +2616,11 @@ describe('workers/repository/process/lookup/index', () => {
           { version: '1.4.4' },
           {
             version: '1.4.5',
-            releaseTimestamp: lastWeek.toISOString(),
+            releaseTimestamp: lastWeek.toISOString() as Timestamp,
           },
           {
             version: '1.4.6',
-            releaseTimestamp: yesterday.toISOString(),
+            releaseTimestamp: yesterday.toISOString() as Timestamp,
           },
         ],
       });
