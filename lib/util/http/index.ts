@@ -408,6 +408,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
    * Request JSON and return the response without any validation.
    *
    * The usage of this method is discouraged, please use `getJson` instead.
+   *
+   * If you're new to Zod schema validation library:
+   * - consult the [documentation of Zod library](https://github.com/colinhacks/zod?tab=readme-ov-file#basic-usage)
+   * - search the Renovate codebase for 'zod' module usage
+   * - take a look at the `schema-utils.ts` file for Renovate-specific schemas and utilities
    */
   getJsonUnchecked<ResT = unknown>(
     url: string,
