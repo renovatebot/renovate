@@ -1,10 +1,7 @@
 import { z } from 'zod';
+import { toArray } from '../../../util/array';
 import { LooseArray, LooseRecord } from '../../../util/schema-utils';
 import { trimLeadingSlash } from '../../../util/url';
-
-function intoArray<T>(value: T): T[] {
-  return [value];
-}
 
 const LocalInclude = z
   .union([
@@ -17,7 +14,7 @@ const DocumentLocalIncludes = z
   .object({
     include: z.union([
       LooseArray(LocalInclude),
-      LocalInclude.transform(intoArray),
+      LocalInclude.transform(toArray),
     ]),
   })
   .transform(({ include }) => include);
@@ -57,7 +54,7 @@ const GitlabInclude = z
   .transform(({ component }) => component);
 
 const GitlabIncludes = z
-  .union([LooseArray(GitlabInclude), GitlabInclude.transform(intoArray)])
+  .union([LooseArray(GitlabInclude), GitlabInclude.transform(toArray)])
   .catch([]);
 
 export const GitlabDocument = z
