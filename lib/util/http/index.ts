@@ -329,37 +329,48 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     });
   }
 
-  async getYaml<ResT>(url: string, options?: Opts): Promise<HttpResponse<ResT>>;
-  async getYaml<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  /**
+   * @deprecated use `getYaml` instead
+   */
+  async getYamlUnchecked<ResT>(
+    url: string,
+    options?: Opts,
+  ): Promise<HttpResponse<ResT>> {
+    const res = await this.get(url, options);
+    const body = parseSingleYaml<ResT>(res.body);
+    return { ...res, body };
+  }
+
+  async getYaml<Schema extends ZodType<any, any, any>>(
     url: string,
     schema: Schema,
   ): Promise<HttpResponse<Infer<Schema>>>;
-  async getYaml<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  async getYaml<Schema extends ZodType<any, any, any>>(
     url: string,
     options: Opts,
     schema: Schema,
   ): Promise<HttpResponse<Infer<Schema>>>;
-  async getYaml<ResT = unknown, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  async getYaml<Schema extends ZodType<any, any, any>>(
     arg1: string,
     arg2?: Opts | Schema,
     arg3?: Schema,
-  ): Promise<HttpResponse<ResT>> {
-    const { url, httpOptions, schema } = this.resolveArgs<ResT>(
-      arg1,
-      arg2,
-      arg3,
-    );
+  ): Promise<HttpResponse<Infer<Schema>>> {
+    const url = arg1;
+    let schema: Schema;
+    let httpOptions: Opts | undefined;
+    if (arg3) {
+      schema = arg3;
+      httpOptions = arg2 as Opts;
+    } else {
+      schema = arg2 as Schema;
+    }
+
     const opts: InternalHttpOptions = {
       ...httpOptions,
       method: 'get',
     };
 
     const res = await this.get(url, opts);
-    if (!schema) {
-      const body = parseSingleYaml<ResT>(res.body);
-      return { ...res, body };
-    }
-
     const body = await schema.parseAsync(parseSingleYaml(res.body));
     return { ...res, body };
   }
@@ -396,9 +407,9 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     let res: AsyncResult<HttpResponse<ResT>, SafeJsonError>;
     if (httpOptions) {
-      res = Result.wrap(this.getYaml<ResT>(url, httpOptions, schema));
+      res = Result.wrap(this.getYaml(url, httpOptions, schema));
     } else {
-      res = Result.wrap(this.getYaml<ResT>(url, schema));
+      res = Result.wrap(this.getYaml(url, schema));
     }
 
     return res.transform((response) => Result.ok(response.body));
