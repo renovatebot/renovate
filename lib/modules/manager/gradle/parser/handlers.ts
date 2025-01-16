@@ -6,7 +6,7 @@ import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type { parseGradle as parseGradleCallback } from '../parser';
 import type { Ctx, GradleManagerData } from '../types';
-import { parseDependencyString } from '../utils';
+import { isDependencyString, parseDependencyString } from '../utils';
 import {
   GRADLE_PLUGINS,
   REGISTRY_URLS,
@@ -166,6 +166,22 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
   const artifactId = interpolateString(artifactIdTokens, ctx);
   const version = interpolateString(versionTokens, ctx);
   if (!groupId || !artifactId || !version) {
+    return ctx;
+  }
+
+  // Special handling: 3 independent dependencies mismatched as groupId, artifactId, version
+  if (
+    isDependencyString(groupId) &&
+    isDependencyString(artifactId) &&
+    isDependencyString(version)
+  ) {
+    ctx.tokenMap.templateStringTokens = groupIdTokens;
+    handleDepString(ctx);
+    ctx.tokenMap.templateStringTokens = artifactIdTokens;
+    handleDepString(ctx);
+    ctx.tokenMap.templateStringTokens = versionTokens;
+    handleDepString(ctx);
+
     return ctx;
   }
 

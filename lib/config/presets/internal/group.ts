@@ -316,9 +316,10 @@ const staticGroups = {
           'k8s.io/cluster-bootstrap**',
           'k8s.io/code-generator**',
           'k8s.io/component-base**',
+          'k8s.io/component-helpers**',
           'k8s.io/controller-manager**',
           'k8s.io/cri-api**',
-          // 'k8s.io/csi-api', has not go.mod set up and does not follow the versioning of other repos
+          // 'k8s.io/csi-api', has no go.mod set up and does not follow the versioning of other repos
           'k8s.io/csi-translation-lib**',
           'k8s.io/kube-aggregator**',
           'k8s.io/kube-controller-manager**',
@@ -450,7 +451,11 @@ const staticGroups = {
     packageRules: [
       {
         groupName: 'react monorepo',
-        matchPackageNames: ['@types/react', '@types/react-dom'],
+        matchPackageNames: [
+          '@types/react',
+          '@types/react-dom',
+          '@types/react-is',
+        ],
       },
     ],
   },

@@ -35,6 +35,7 @@ export class Vulnerabilities {
   > = {
     crate: 'crates.io',
     go: 'Go',
+    hackage: 'Hackage',
     hex: 'Hex',
     maven: 'Maven',
     npm: 'npm',
@@ -248,8 +249,8 @@ export class Vulnerabilities {
       return { vulnerabilities, versioningApi };
     } catch (err) {
       logger.warn(
-        { err },
-        `Error fetching vulnerability information for ${packageName}`,
+        { err, packageName },
+        'Error fetching vulnerability information for package',
       );
       return null;
     }

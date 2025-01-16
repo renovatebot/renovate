@@ -456,10 +456,18 @@ For `sbt` note that Renovate will update the version string only for packages th
 
 ## cloneSubmodules
 
-Enabling this option will mean that any detected Git submodules will be cloned at time of repository clone.
+Enabling this option will mean that detected Git submodules will be cloned at time of repository clone.
+By default all will be cloned, but this can be customized by configuring `cloneSubmodulesFilter` too.
 Submodules are always cloned recursively.
 
 Important: private submodules aren't supported by Renovate, unless the underlying `ssh` layer already has the correct permissions.
+
+## cloneSubmodulesFilter
+
+Use this option together with `cloneSubmodules` if you wish to clone only a subset of submodules.
+
+This config option supports regex and glob filters, including negative matches.
+For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ## commitBody
 
@@ -2418,6 +2426,7 @@ Renovate only queries the OSV database for dependencies that use one of these da
 
 - [`crate`](./modules/datasource/crate/index.md)
 - [`go`](./modules/datasource/go/index.md)
+- [`hackage`](./modules/datasource/hackage/index.md)
 - [`hex`](./modules/datasource/hex/index.md)
 - [`maven`](./modules/datasource/maven/index.md)
 - [`npm`](./modules/datasource/npm/index.md)
@@ -3349,6 +3358,7 @@ Table with options:
 | `gomodTidyE`                 | Run `go mod tidy -e` after Go module updates.                                                                                                              |
 | `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
 | `gomodSkipVendor`            | Never run `go mod vendor` after Go module updates.                                                                                                         |
+| `gomodVendor`                | Always run `go mod vendor` after Go module updates even if vendor files aren't detected.                                                                   |
 | `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
 | `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                       |
 | `pnpmDedupe`                 | Run `pnpm dedupe --config.ignore-scripts=true` after `pnpm-lock.yaml` updates.                                                                             |
@@ -3697,6 +3707,7 @@ This feature works with the following managers:
 - [`dockerfile`](modules/manager/dockerfile/index.md)
 - [`droneci`](modules/manager/droneci/index.md)
 - [`flux`](modules/manager/flux/index.md)
+- [`github-actions`](modules/manager/github-actions/index.md)
 - [`gitlabci`](modules/manager/gitlabci/index.md)
 - [`helm-requirements`](modules/manager/helm-requirements/index.md)
 - [`helm-values`](modules/manager/helm-values/index.md)

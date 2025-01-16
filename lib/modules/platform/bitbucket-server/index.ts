@@ -204,9 +204,8 @@ export async function getRawFile(
   if (isLastPage) {
     return lines.map(({ text }) => text).join('\n');
   }
-  const msg = `The file is too big (${size}B)`;
-  logger.warn({ size }, msg);
-  throw new Error(msg);
+  logger.warn({ size }, 'The file is too big');
+  throw new Error(`The file is too big (${size}B)`);
 }
 
 export async function getJsonFile(
@@ -223,6 +222,7 @@ export async function getJsonFile(
 export async function initRepo({
   repository,
   cloneSubmodules,
+  cloneSubmodulesFilter,
   ignorePrAuthor,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
@@ -274,6 +274,7 @@ export async function initRepo({
       url,
       extraCloneOpts: getExtraCloneOpts(opts),
       cloneSubmodules,
+      cloneSubmodulesFilter,
       fullClone: semver.lte(defaults.version, '8.0.0'),
     });
 

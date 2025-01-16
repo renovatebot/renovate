@@ -10,7 +10,7 @@ import { PyProjectSchema } from './schema';
 import type { Pep508ParseResult, Pep621ManagerData } from './types';
 
 const pep508Regex = regEx(
-  /^(?<packageName>[A-Z0-9._-]+)\s*(\[(?<extras>[A-Z0-9,._-]+)\])?\s*(?<currentValue>[^;]+)?(;\s*(?<marker>.*))?/i,
+  /^(?<packageName>[A-Z0-9._-]+)\s*(\[(?<extras>[A-Z0-9\s,._-]+)\])?\s*(?<currentValue>[^;]+)?(;\s*(?<marker>.*))?/i,
 );
 
 export const depTypes = {
@@ -49,7 +49,8 @@ export function parsePEP508(
     result.marker = regExpExec.groups.marker;
   }
   if (is.nonEmptyString(regExpExec.groups.extras)) {
-    result.extras = regExpExec.groups.extras.split(',');
+    // trim to remove allowed whitespace between brackets
+    result.extras = regExpExec.groups.extras.split(',').map((e) => e.trim());
   }
 
   return result;

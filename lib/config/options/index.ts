@@ -516,7 +516,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.4.5',
+    default: 'ghcr.io/containerbase/sidecar:13.5.8',
     globalOnly: true,
   },
   {
@@ -2390,6 +2390,7 @@ const options: RenovateOptions[] = [
       'gomodTidyE',
       'gomodUpdateImportPaths',
       'gomodSkipVendor',
+      'gomodVendor',
       'helmUpdateSubChartArchives',
       'npmDedupe',
       'pnpmDedupe',
@@ -2855,6 +2856,14 @@ const options: RenovateOptions[] = [
       'Set to `true` to initialize submodules during repository clone.',
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'cloneSubmodulesFilter',
+    description:
+      'List of submodules names or patterns to clone when cloneSubmodules=true.',
+    type: 'array',
+    subType: 'string',
+    default: ['*'],
   },
   {
     name: 'ignorePrAuthor',
