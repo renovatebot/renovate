@@ -2,9 +2,9 @@ import { codeBlock } from 'common-tags';
 import { getConfig } from '../../../config/defaults';
 import type { UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
+import type { Timestamp } from '../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
-import type { Timestamp } from '../../../util/timestamp';
 
 const {
   commitMessage,

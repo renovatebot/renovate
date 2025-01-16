@@ -5,8 +5,8 @@ import { GlobalConfig } from '../../../../../../config/global';
 import * as semverVersioning from '../../../../../../modules/versioning/semver';
 import * as githubGraphql from '../../../../../../util/github/graphql';
 import type { GithubTagItem } from '../../../../../../util/github/graphql/types';
-import type { Timestamp } from '../../../../../../util/timestamp';
 import * as hostRules from '../../../../../../util/host-rules';
+import type { Timestamp } from '../../../../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../../../../types';
 
 jest.mock('../../../../../../modules/datasource/npm');

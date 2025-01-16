@@ -3,9 +3,9 @@ import * as httpMock from '../../../../../../../test/http-mock';
 import { partial } from '../../../../../../../test/util';
 import * as semverVersioning from '../../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../../util/host-rules';
+import type { Timestamp } from '../../../../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../../../../types';
 import { GitLabChangeLogSource } from './source';
-import type { Timestamp } from '../../../../../../util/timestamp';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',

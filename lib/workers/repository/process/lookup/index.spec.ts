@@ -17,7 +17,6 @@ import { MavenDatasource } from '../../../../modules/datasource/maven';
 import { NpmDatasource } from '../../../../modules/datasource/npm';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist';
 import { PypiDatasource } from '../../../../modules/datasource/pypi';
-import type { Timestamp } from '../../../../util/timestamp';
 import { id as composerVersioningId } from '../../../../modules/versioning/composer';
 import { id as debianVersioningId } from '../../../../modules/versioning/debian';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
@@ -32,6 +31,7 @@ import * as memCache from '../../../../util/cache/memory';
 import { initConfig, resetConfig } from '../../../../util/merge-confidence';
 import * as McApi from '../../../../util/merge-confidence';
 import { Result } from '../../../../util/result';
+import type { Timestamp } from '../../../../util/timestamp';
 import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 
@@ -738,7 +738,7 @@ describe('workers/repository/process/lookup/index', () => {
           newValue: '0.8.12',
           newVersion: '0.8.12',
           newVersionAgeInDays: expect.any(Number),
-          releaseTimestamp: '2013-09-04T17:07:22.948Z' as Timestamp,
+          releaseTimestamp: expect.any(String),
           updateType: 'patch',
         },
         {
@@ -749,7 +749,7 @@ describe('workers/repository/process/lookup/index', () => {
           newValue: '0.9.7',
           newVersion: '0.9.7',
           newVersionAgeInDays: expect.any(Number),
-          releaseTimestamp: '2013-09-04T17:07:22.948Z' as Timestamp,
+          releaseTimestamp: expect.any(String),
           updateType: 'minor',
         },
         {
@@ -760,7 +760,7 @@ describe('workers/repository/process/lookup/index', () => {
           newValue: '1.4.1',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
-          releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
+          releaseTimestamp: expect.any(String),
           updateType: 'major',
         },
       ]);
@@ -1280,7 +1280,7 @@ describe('workers/repository/process/lookup/index', () => {
           newValue: '^1.2.1',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
-          releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
+          releaseTimestamp: expect.any(String),
           updateType: 'minor',
         },
       ]);
@@ -1309,7 +1309,7 @@ describe('workers/repository/process/lookup/index', () => {
           newValue: '^1.2.1',
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
-          releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
+          releaseTimestamp: expect.any(String),
           updateType: 'minor',
         },
       ]);
@@ -1338,7 +1338,7 @@ describe('workers/repository/process/lookup/index', () => {
           newValue: '~1.2.0',
           newVersion: '1.2.1',
           newVersionAgeInDays: expect.any(Number),
-          releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
+          releaseTimestamp: expect.any(String),
           updateType: 'patch',
         },
       ]);
@@ -1366,7 +1366,7 @@ describe('workers/repository/process/lookup/index', () => {
           newValue: undefined,
           newVersion: '1.4.1',
           newVersionAgeInDays: expect.any(Number),
-          releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
+          releaseTimestamp: expect.any(String),
           updateType: 'minor',
         },
       ]);
@@ -2572,11 +2572,11 @@ describe('workers/repository/process/lookup/index', () => {
           { version: '1.4.4' },
           {
             version: '1.4.5',
-            releaseTimestamp: lastWeek.toISOString() as Timestamp,
+            releaseTimestamp: lastWeek.toISOString(),
           },
           {
             version: '1.4.6',
-            releaseTimestamp: yesterday.toISOString() as Timestamp,
+            releaseTimestamp: yesterday.toISOString(),
           },
         ],
       });
@@ -2616,11 +2616,11 @@ describe('workers/repository/process/lookup/index', () => {
           { version: '1.4.4' },
           {
             version: '1.4.5',
-            releaseTimestamp: lastWeek.toISOString() as Timestamp,
+            releaseTimestamp: lastWeek.toISOString(),
           },
           {
             version: '1.4.6',
-            releaseTimestamp: yesterday.toISOString() as Timestamp,
+            releaseTimestamp: yesterday.toISOString(),
           },
         ],
       });

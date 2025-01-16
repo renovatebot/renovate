@@ -13,6 +13,7 @@ import type { Http } from '../../../util/http';
 import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import { api as versioning } from '../../versioning/nuget';
 import type { Release, ReleaseResult } from '../types';
@@ -23,7 +24,6 @@ import type {
   PackageRegistration,
   ServicesIndexRaw,
 } from './types';
-import { asTimestamp } from '../../../util/timestamp';
 
 export class NugetV3Api {
   static readonly cacheNamespace = 'datasource-nuget-v3';
