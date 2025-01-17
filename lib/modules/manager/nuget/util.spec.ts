@@ -369,7 +369,7 @@ describe('modules/manager/nuget/util', () => {
     it('parses', async () => {
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('global.json');
       fs.readLocalFile.mockResolvedValueOnce(
-        '{ "sdk": { "version": "5.0.100" }, "some": true }',
+        '{   /* This is comment */ "sdk": { "version": "5.0.100" }, "some": true }',
       );
       const globalJson = await findGlobalJson('project.csproj');
       expect(globalJson).toEqual({ sdk: { version: '5.0.100' } });
