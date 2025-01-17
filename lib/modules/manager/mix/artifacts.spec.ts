@@ -139,9 +139,9 @@ describe('modules/manager/mix/artifacts', () => {
     // elixir
     getPkgReleases.mockResolvedValueOnce({
       releases: [
-        { version: '1.8.2' },
-        { version: '1.13.3' },
-        { version: '1.13.4' },
+        { version: 'v1.8.2' },
+        { version: 'v1.13.3' },
+        { version: 'v1.13.4' },
       ],
     });
 
@@ -215,9 +215,9 @@ describe('modules/manager/mix/artifacts', () => {
     // elixir
     getPkgReleases.mockResolvedValueOnce({
       releases: [
-        { version: '1.8.2' },
-        { version: '1.13.3' },
-        { version: '1.13.4' },
+        { version: 'v1.8.2' },
+        { version: 'v1.13.3' },
+        { version: 'v1.13.4' },
       ],
     });
 
@@ -285,9 +285,9 @@ describe('modules/manager/mix/artifacts', () => {
     // elixir
     getPkgReleases.mockResolvedValueOnce({
       releases: [
-        { version: '1.8.2' },
-        { version: '1.13.3' },
-        { version: '1.13.4' },
+        { version: 'v1.8.2' },
+        { version: 'v1.13.3' },
+        { version: 'v1.13.4' },
       ],
     });
 
@@ -305,7 +305,7 @@ describe('modules/manager/mix/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool erlang 25.0.0.0' },
-      { cmd: 'install-tool elixir 1.13.4' },
+      { cmd: 'install-tool elixir v1.13.4' },
       {
         cmd: 'mix hex.organization auth an_organization --key an_organization_token',
       },
@@ -327,7 +327,9 @@ describe('modules/manager/mix/artifacts', () => {
       releases: [{ version: '25.0.0.0' }],
     });
     // elixir
-    getPkgReleases.mockResolvedValueOnce({ releases: [{ version: '1.13.4' }] });
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: 'v1.13.4' }],
+    });
 
     const execSnapshots = mockExecAll();
     expect(
@@ -349,7 +351,7 @@ describe('modules/manager/mix/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool erlang 25.0.0.0' },
-      { cmd: 'install-tool elixir 1.13.4' },
+      { cmd: 'install-tool elixir v1.13.4' },
       {
         cmd: 'mix deps.update plug',
         options: { cwd: '/tmp/github/some/repo/subdir' },
@@ -370,7 +372,9 @@ describe('modules/manager/mix/artifacts', () => {
       releases: [{ version: '25.0.0.0' }],
     });
     // elixir
-    getPkgReleases.mockResolvedValueOnce({ releases: [{ version: '1.13.4' }] });
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: 'v1.13.4' }],
+    });
 
     const execSnapshots = mockExecAll();
     expect(
@@ -392,7 +396,7 @@ describe('modules/manager/mix/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool erlang 25.0.0.0' },
-      { cmd: 'install-tool elixir 1.13.4' },
+      { cmd: 'install-tool elixir v1.13.4' },
       {
         cmd: 'mix deps.update plug',
         options: { cwd: '/tmp/github/some/repo/apps/foo' },
@@ -411,7 +415,9 @@ describe('modules/manager/mix/artifacts', () => {
       releases: [{ version: '25.0.0.0' }],
     });
     // elixir
-    getPkgReleases.mockResolvedValueOnce({ releases: [{ version: '1.13.4' }] });
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: 'v1.13.4' }],
+    });
 
     const execSnapshots = mockExecAll();
     expect(
@@ -433,7 +439,7 @@ describe('modules/manager/mix/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool erlang 25.0.0.0' },
-      { cmd: 'install-tool elixir 1.13.4' },
+      { cmd: 'install-tool elixir v1.13.4' },
       {
         cmd: 'mix deps.get',
         options: { cwd: '/tmp/github/some/repo' },
