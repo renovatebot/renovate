@@ -21,6 +21,21 @@ describe('modules/datasource/github-runners/index', () => {
       });
     });
 
+    it('returns releases for Ubuntu ARM64', async () => {
+      const res = await getPkgReleases({
+        datasource: GithubRunnersDatasource.id,
+        packageName: 'ubuntu_arm64',
+      });
+
+      expect(res).toMatchObject({
+        releases: [
+          { version: '22.04', isStable: false },
+          { version: '24.04', isStable: false },
+        ],
+        sourceUrl: 'https://github.com/actions/runner-images',
+      });
+    });
+
     it('returns releases for macOS', async () => {
       const res = await getPkgReleases({
         datasource: GithubRunnersDatasource.id,

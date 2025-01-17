@@ -30,6 +30,10 @@ jobs:
        labels: ubuntu-20.04-16core
   test10:
       runs-on: abc-123
+  test11:
+      runs-on: ubuntu-22.04-arm
+  test12:
+      runs-on: ubuntu-latest-arm
 `;
 
 describe('modules/manager/github-actions/extract', () => {
@@ -569,10 +573,18 @@ describe('modules/manager/github-actions/extract', () => {
           datasource: 'github-runners',
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
+        {
+          depName: 'ubuntu_arm64',
+          currentValue: '22.04',
+          replaceString: 'ubuntu-22.04-arm',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: 'ubuntu-{{newValue}}-arm',
+        },
       ]);
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners'),
-      ).toHaveLength(7);
+      ).toHaveLength(8);
     });
   });
 });

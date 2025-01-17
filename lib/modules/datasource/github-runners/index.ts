@@ -23,6 +23,10 @@ export class GithubRunnersDatasource extends Datasource {
       { version: '18.04', isDeprecated: true },
       { version: '16.04', isDeprecated: true },
     ],
+    ubuntu_arm64: [
+      { version: '24.04', isStable: false },
+      { version: '22.04', isStable: false },
+    ],
     macos: [
       { version: '15', isStable: false },
       { version: '15-large', isStable: false },
@@ -46,6 +50,13 @@ export class GithubRunnersDatasource extends Datasource {
     ],
   };
 
+  private static readonly supportsLatest: Record<string, boolean> = {
+    ubuntu: true,
+    ubuntu_arm64: false,
+    macos: true,
+    windows: true,
+  };
+
   public static isValidRunner(
     runnerName: string,
     runnerVersion: string,
@@ -59,7 +70,11 @@ export class GithubRunnersDatasource extends Datasource {
       ({ version }) => version === runnerVersion,
     );
 
-    return runnerVersion === 'latest' || versionExists;
+    return (
+      (runnerVersion === 'latest' &&
+        GithubRunnersDatasource.supportsLatest[runnerName]) ||
+      versionExists
+    );
   }
 
   override readonly defaultVersioning = dockerVersioningId;

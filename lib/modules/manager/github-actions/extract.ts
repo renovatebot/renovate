@@ -157,7 +157,17 @@ function extractRunner(runner: string): PackageDependency | null {
     return null;
   }
 
-  const { depName, currentValue } = runnerVersionGroups;
+  let { depName, currentValue } = runnerVersionGroups;
+  let replaceString = `${depName}-${currentValue}`;
+  let autoReplaceStringTemplate = '{{depName}}-{{newValue}}';
+
+  const armVersionMatch = currentValue.match(/^(?<version>\d+\.\d+)-arm$/);
+  if (depName === 'ubuntu' && armVersionMatch) {
+    depName = 'ubuntu_arm64';
+    currentValue = armVersionMatch.groups?.version ?? currentValue;
+    replaceString = `ubuntu-${currentValue}-arm`;
+    autoReplaceStringTemplate = 'ubuntu-{{newValue}}-arm';
+  }
 
   if (!GithubRunnersDatasource.isValidRunner(depName, currentValue)) {
     return null;
@@ -166,10 +176,10 @@ function extractRunner(runner: string): PackageDependency | null {
   const dependency: PackageDependency = {
     depName,
     currentValue,
-    replaceString: `${depName}-${currentValue}`,
+    replaceString,
     depType: 'github-runner',
     datasource: GithubRunnersDatasource.id,
-    autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+    autoReplaceStringTemplate,
   };
 
   if (!dockerVersioning.api.isValid(currentValue)) {
