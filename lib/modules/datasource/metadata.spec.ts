@@ -5,7 +5,6 @@ import {
   addMetaData,
   massageGithubUrl,
   massageUrl,
-  normalizeDate,
   shouldDeleteHomepage,
 } from './metadata';
 import { NpmDatasource } from './npm';
@@ -519,25 +518,6 @@ describe('modules/datasource/metadata', () => {
       changelogUrl:
         'https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt',
       sourceUrl: 'https://github.com/flyingcircusio/pycountry',
-    });
-  });
-
-  describe('normalizeDate()', () => {
-    it('works for number input', () => {
-      const now = Date.now();
-      expect(normalizeDate(now)).toBe(new Date(now).toISOString());
-    });
-
-    it('works for string input', () => {
-      expect(normalizeDate('2021-01-01')).toBe(
-        new Date('2021-01-01').toISOString(),
-      );
-    });
-
-    it('works for Date instance', () => {
-      expect(normalizeDate(new Date('2021-01-01'))).toBe(
-        new Date('2021-01-01').toISOString(),
-      );
     });
   });
 });

@@ -13,8 +13,7 @@ const artifactRegex = regEx(
 
 const versionLikeRegex = regEx('^(?<version>[-_.\\[\\](),a-zA-Z0-9+]+)');
 
-// Extracts version-like and range-like strings
-// from the beginning of input
+// Extracts version-like and range-like strings from the beginning of input
 export function versionLikeSubstring(
   input: string | null | undefined,
 ): string | null {
@@ -32,40 +31,32 @@ export function versionLikeSubstring(
 }
 
 export function isDependencyString(input: string): boolean {
-  const split = input?.split(':');
-  if (split?.length !== 3 && split?.length !== 4) {
+  const parts = input.split(':');
+  if (parts.length !== 3 && parts.length !== 4) {
     return false;
   }
-  // eslint-disable-next-line prefer-const
-  let [tempGroupId, tempArtifactId, tempVersionPart, optionalClassifier] =
-    split;
+  const [groupId, artifactId, versionPart, optionalClassifier] = parts;
 
   if (optionalClassifier && !artifactRegex.test(optionalClassifier)) {
     return false;
   }
 
-  if (
-    tempVersionPart !== versionLikeSubstring(tempVersionPart) &&
-    tempVersionPart.includes('@')
-  ) {
-    const versionSplit = tempVersionPart?.split('@');
-    if (versionSplit?.length !== 2) {
+  let version = versionPart;
+  if (versionPart.includes('@')) {
+    const [actualVersion, ...rest] = versionPart.split('@');
+    if (rest.length !== 1) {
       return false;
     }
-    [tempVersionPart] = versionSplit;
+    version = actualVersion;
   }
-  const [groupId, artifactId, versionPart] = [
-    tempGroupId,
-    tempArtifactId,
-    tempVersionPart,
-  ];
+
   return !!(
     groupId &&
     artifactId &&
-    versionPart &&
+    version &&
     artifactRegex.test(groupId) &&
     artifactRegex.test(artifactId) &&
-    versionPart === versionLikeSubstring(versionPart)
+    version === versionLikeSubstring(version)
   );
 }
 
@@ -75,18 +66,14 @@ export function parseDependencyString(
   if (!isDependencyString(input)) {
     return null;
   }
-  const [groupId, artifactId, FullValue] = input.split(':');
-  if (FullValue === versionLikeSubstring(FullValue)) {
-    return {
-      depName: `${groupId}:${artifactId}`,
-      currentValue: FullValue,
-    };
-  }
-  const [currentValue, dataType] = FullValue.split('@');
+
+  const [groupId, artifactId, fullValue] = input.split(':');
+  const [currentValue, dataType] = fullValue.split('@');
+
   return {
     depName: `${groupId}:${artifactId}`,
     currentValue,
-    dataType,
+    ...(dataType && { dataType }),
   };
 }
 

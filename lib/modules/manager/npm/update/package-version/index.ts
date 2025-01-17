@@ -35,7 +35,7 @@ export function bumpPackageVersion(
         parsedContent.optionalDependencies?.[mirrorPackage] ??
         parsedContent.peerDependencies?.[mirrorPackage];
       if (!newPjVersion) {
-        logger.warn('bumpVersion mirror package not found: ' + mirrorPackage);
+        logger.warn({ mirrorPackage }, 'bumpVersion mirror package not found');
         return { bumpedContent };
       }
     } else {

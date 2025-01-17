@@ -22,6 +22,8 @@ Namespaces will not be inferred from the context (e.g. from the parent `Kustomiz
 
 Renovate updates `HelmRelease` resources coming from `GitRepository` by updating the `GitRepository` resource.
 
+Renovate updates Docker dependencies inside `HelmRelease` `values` like the [`helm-values`](../helm-values/index.md) manager.
+
 ### GitRepository support
 
 Renovate can update `git` references from `GitRepository` resources.

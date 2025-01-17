@@ -33,7 +33,7 @@ describe('util/http/gerrit', () => {
       });
 
     const res = await api
-      .getJson('some-url', { headers: { a: 'b' } })
+      .getJsonUnchecked('some-url', { headers: { a: 'b' } })
       .then((res) => res.body);
     return expect(res).toEqual(body);
   });

@@ -18,7 +18,7 @@ describe('util/http/gitea', () => {
       .get('/pagination-example-1')
       .reply(200, { hello: 'world' });
 
-    const res = await giteaHttp.getJson('pagination-example-1', {
+    const res = await giteaHttp.getJsonUnchecked('pagination-example-1', {
       paginate: true,
     });
     expect(res.body).toEqual({ hello: 'world' });
@@ -34,9 +34,10 @@ describe('util/http/gitea', () => {
       .get('/pagination-example-1?page=3')
       .reply(200, ['mno', 'pqr']);
 
-    const res = await giteaHttp.getJson(`${baseUrl}/pagination-example-1`, {
-      paginate: true,
-    });
+    const res = await giteaHttp.getJsonUnchecked(
+      `${baseUrl}/pagination-example-1`,
+      { paginate: true },
+    );
 
     expect(res.body).toHaveLength(6);
     expect(res.body).toEqual(['abc', 'def', 'ghi', 'jkl', 'mno', 'pqr']);
@@ -52,7 +53,7 @@ describe('util/http/gitea', () => {
       .get('/pagination-example-2?page=3')
       .reply(200, { data: ['mno', 'pqr'] });
 
-    const res = await giteaHttp.getJson<{ data: string[] }>(
+    const res = await giteaHttp.getJsonUnchecked<{ data: string[] }>(
       'pagination-example-2',
       {
         paginate: true,
@@ -70,7 +71,7 @@ describe('util/http/gitea', () => {
       .get('/pagination-example-3?page=2')
       .reply(200, { data: [] });
 
-    const res = await giteaHttp.getJson<{ data: string[] }>(
+    const res = await giteaHttp.getJsonUnchecked<{ data: string[] }>(
       'pagination-example-3',
       {
         paginate: true,

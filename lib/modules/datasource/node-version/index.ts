@@ -46,7 +46,7 @@ export class NodeVersionDatasource extends Datasource {
     };
     try {
       const resp = (
-        await this.http.getJson<NodeRelease[]>(
+        await this.http.getJsonUnchecked<NodeRelease[]>(
           joinUrlParts(registryUrl, 'index.json'),
         )
       ).body;

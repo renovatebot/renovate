@@ -41,7 +41,7 @@ export class DartVersionDatasource extends Datasource {
     try {
       for (const channel of this.channels) {
         const resp = (
-          await this.http.getJson<DartResponse>(
+          await this.http.getJsonUnchecked<DartResponse>(
             `${registryUrl}/storage/v1/b/dart-archive/o?delimiter=%2F&prefix=channels%2F${channel}%2Frelease%2F&alt=json`,
           )
         ).body;

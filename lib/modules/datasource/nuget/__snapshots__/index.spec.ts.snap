@@ -34,7 +34,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v2) 1`]
       "version": "2.5.10.11092",
     },
     {
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "2.6.0.12051",
     },
     {
@@ -228,7 +227,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) fee
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "2.6.0.12051",
     },
     {
@@ -418,7 +416,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) fee
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "2.6.0.12051",
     },
     {
@@ -604,12 +601,10 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "2.0.1",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "2.0.1.1",
     },
     {
@@ -638,7 +633,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.0.0-rc",
     },
     {
@@ -651,12 +645,10 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.1.0-alpha1",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.1.0-rc1",
     },
     {
@@ -665,7 +657,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.1.1-rc1",
     },
     {
@@ -678,7 +669,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.2.0-rc1",
     },
     {
@@ -687,7 +677,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.2.1-rc1",
     },
     {
@@ -704,52 +693,42 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.3.0-alpha1",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.3.0-alpha2",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.3.0-alpha3",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.3.0-alpha4",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.3.0-beta1",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.3.0-beta2",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.3.0-beta3",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.3.0-rc1",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.3.0-rc2",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.3.0-rc3",
     },
     {
@@ -758,7 +737,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.3.1-rc1",
     },
     {
@@ -779,7 +757,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.3.5-alpha1",
     },
     {
@@ -800,7 +777,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.3.9-test-retry-archive",
     },
     {
@@ -817,112 +793,90 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-alpha1",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-alpha2",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-alpha3",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-alpha4",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-beta-14",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-beta1",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-beta10",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-beta11",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-beta12",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-beta13",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-beta2",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-beta3",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-beta4",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-beta5",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-beta6",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-beta7",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-beta8",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-beta9",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-betaV14",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-betaV15",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-rc1",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.0-rc2",
     },
     {
@@ -931,12 +885,10 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.1-dev-b4084",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.1-dev-b4085",
     },
     {
@@ -945,12 +897,10 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.2-rc1",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.2-rc2",
     },
     {
@@ -967,7 +917,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.5-beta1",
     },
     {
@@ -976,22 +925,18 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.6-beta1",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.6-beta2",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.6-beta3",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.4.6-rc1",
     },
     {
@@ -1028,97 +973,78 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-alpha01",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-alpha02",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-alpha03",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-alpha04",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-beta01",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-beta02",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-beta03",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-beta04",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-beta05",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-beta06",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-beta07",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-beta08",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-rc01",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-rc02",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-rc03",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-rc04",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-rc05",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-rc06",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.5.0-rc07",
     },
     {
@@ -1171,17 +1097,14 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.6.0-rc1",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.6.0-rc2",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.6.0-rc3",
     },
     {
@@ -1222,7 +1145,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "4.7.0-rc1",
     },
     {
@@ -1243,67 +1165,54 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "5.0.0-beta01",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "5.0.0-beta02",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "5.0.0-beta03",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "5.0.0-beta03-tryoutMutex",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "5.0.0-beta04",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "5.0.0-beta05",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "5.0.0-beta05-test",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "5.0.0-beta06",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "5.0.0-beta07",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "5.0.0-beta08",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "5.0.0-beta09",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "5.0.0-beta10",
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "5.0.0-beta11",
     },
   ],
@@ -1329,7 +1238,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) nus
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "2.6.0.12051",
     },
     {
@@ -1519,7 +1427,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) nus
     },
     {
       "isDeprecated": true,
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "2.6.0.12051",
     },
     {
@@ -1868,7 +1775,6 @@ exports[`modules/datasource/nuget/index getReleases returns deduplicated results
     {
       "isDeprecated": true,
       "registryUrl": "https://api.nuget.org/v3/index.json",
-      "releaseTimestamp": "1900-01-01T00:00:00.000Z",
       "version": "2.6.0.12051",
     },
     {

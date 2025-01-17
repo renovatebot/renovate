@@ -117,7 +117,7 @@ export async function initPlatform({
   try {
     if (!gitAuthor) {
       const user = (
-        await gitlabApi.getJson<{
+        await gitlabApi.getJsonUnchecked<{
           email: string;
           name: string;
           id: number;
@@ -133,7 +133,9 @@ export async function initPlatform({
       gitlabVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
     } else {
       const version = (
-        await gitlabApi.getJson<{ version: string }>('version', { token })
+        await gitlabApi.getJsonUnchecked<{ version: string }>('version', {
+          token,
+        })
       ).body;
       gitlabVersion = version.version;
     }
@@ -191,7 +193,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
       await pMap(
         urls,
         (url) =>
-          gitlabApi.getJson<RepoResponse[]>(url, {
+          gitlabApi.getJsonUnchecked<RepoResponse[]>(url, {
             paginate: true,
           }),
         {
@@ -226,7 +228,7 @@ export async function getRawFile(
   const url =
     `projects/${repo}/repository/files/${escapedFileName}?ref=` +
     (branchOrTag ?? `HEAD`);
-  const res = await gitlabApi.getJson<{ content: string }>(url);
+  const res = await gitlabApi.getJsonUnchecked<{ content: string }>(url);
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
   return str;
@@ -314,7 +316,7 @@ export async function initRepo({
 
   let res: HttpResponse<RepoResponse>;
   try {
-    res = await gitlabApi.getJson<RepoResponse>(
+    res = await gitlabApi.getJsonUnchecked<RepoResponse>(
       `projects/${config.repository}`,
     );
     if (res.body.archived) {
@@ -433,7 +435,7 @@ async function getStatus(
     }/repository/commits/${branchSha!}/statuses`;
 
     return (
-      await gitlabApi.getJson<GitlabBranchStatus[]>(url, {
+      await gitlabApi.getJsonUnchecked<GitlabBranchStatus[]>(url, {
         paginate: true,
         memCache: useCache,
       })
@@ -548,9 +550,12 @@ async function fetchPrList(): Promise<Pr[]> {
   const query = getQueryString(searchParams);
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
   try {
-    const res = await gitlabApi.getJson<GitLabMergeRequest[]>(urlString, {
-      paginate: true,
-    });
+    const res = await gitlabApi.getJsonUnchecked<GitLabMergeRequest[]>(
+      urlString,
+      {
+        paginate: true,
+      },
+    );
     return res.body.map((pr) => prInfo(pr));
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error fetching PR list');
@@ -571,7 +576,7 @@ export async function getPrList(): Promise<Pr[]> {
 async function ignoreApprovals(pr: number): Promise<void> {
   try {
     const url = `projects/${config.repository}/merge_requests/${pr}/approval_rules`;
-    const { body: rules } = await gitlabApi.getJson<
+    const { body: rules } = await gitlabApi.getJsonUnchecked<
       {
         name: string;
         rule_type: string;
@@ -655,7 +660,7 @@ async function tryPrAutomerge(
 
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
-        const { body } = await gitlabApi.getJson<{
+        const { body } = await gitlabApi.getJsonUnchecked<{
           merge_status: string;
           detailed_merge_status?: string;
           pipeline: {
@@ -929,7 +934,7 @@ export async function findPr({
 
   if (includeOtherAuthors) {
     // PR might have been created by anyone, so don't use the cached Renovate MR list
-    const response = await gitlabApi.getJson<GitLabMergeRequest[]>(
+    const response = await gitlabApi.getJsonUnchecked<GitLabMergeRequest[]>(
       `projects/${config.repository}/merge_requests?source_branch=${branchName}&state=opened`,
     );
 
@@ -1054,7 +1059,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
       searchParams.scope = 'created_by_me';
     }
     const query = getQueryString(searchParams);
-    const res = await gitlabApi.getJson<
+    const res = await gitlabApi.getJsonUnchecked<
       { iid: number; title: string; labels: string[] }[]
     >(`projects/${config.repository}/issues?${query}`, {
       memCache: false,
@@ -1080,7 +1085,7 @@ export async function getIssue(
 ): Promise<Issue | null> {
   try {
     const issueBody = (
-      await gitlabApi.getJson<{ description: string }>(
+      await gitlabApi.getJsonUnchecked<{ description: string }>(
         `projects/${config.repository}/issues/${number}`,
         { memCache: useCache },
       )
@@ -1127,7 +1132,7 @@ export async function ensureIssue({
     }
     if (issue) {
       const existingDescription = (
-        await gitlabApi.getJson<{ description: string }>(
+        await gitlabApi.getJsonUnchecked<{ description: string }>(
           `projects/${config.repository}/issues/${issue.iid}`,
         )
       ).body.description;
@@ -1302,7 +1307,7 @@ async function getComments(issueNo: number): Promise<GitlabComment[]> {
   logger.debug(`Getting comments for #${issueNo}`);
   const url = `projects/${config.repository}/merge_requests/${issueNo}/notes`;
   const comments = (
-    await gitlabApi.getJson<GitlabComment[]>(url, { paginate: true })
+    await gitlabApi.getJsonUnchecked<GitlabComment[]>(url, { paginate: true })
   ).body;
   logger.debug(`Found ${comments.length} comments`);
   return comments;
@@ -1361,9 +1366,12 @@ export async function ensureComment({
   if (topic) {
     logger.debug(`Ensuring comment "${massagedTopic!}" in #${number}`);
     body = `### ${topic}\n\n${sanitizedContent}`;
-    body = body
-      .replace(regEx(/Pull Request/g), 'Merge Request')
-      .replace(regEx(/PR/g), 'MR');
+    body = smartTruncate(
+      body
+        .replace(regEx(/Pull Request/g), 'Merge Request')
+        .replace(regEx(/PR/g), 'MR'),
+      maxBodyLength(),
+    );
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body.startsWith(`### ${massagedTopic!}\n\n`)) {
         commentId = comment.id;
@@ -1372,7 +1380,7 @@ export async function ensureComment({
     });
   } else {
     logger.debug(`Ensuring content-only comment in #${number}`);
-    body = `${sanitizedContent}`;
+    body = smartTruncate(`${sanitizedContent}`, maxBodyLength());
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body === body) {
         commentId = comment.id;

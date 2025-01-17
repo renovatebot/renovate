@@ -170,7 +170,7 @@ describe('modules/platform/azure/util', () => {
     it('should return an error', () => {
       expect(() => getProjectAndRepo('prjName/myRepoName/blalba')).toThrow(
         Error(
-          `prjName/myRepoName/blalba can be only structured this way : 'repository' or 'projectName/repository'!`,
+          `Azure repository can be only structured this way : 'repository' or 'projectName/repository'!`,
         ),
       );
     });

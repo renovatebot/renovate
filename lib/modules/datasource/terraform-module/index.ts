@@ -103,7 +103,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
         serviceDiscovery,
         repository,
       );
-      res = (await this.http.getJson<TerraformRelease>(pkgUrl)).body;
+      res = (await this.http.getJsonUnchecked<TerraformRelease>(pkgUrl)).body;
       const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
       if (returnedName !== repository) {
         logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
@@ -152,7 +152,8 @@ export class TerraformModuleDatasource extends TerraformDatasource {
         serviceDiscovery,
         `${repository}/versions`,
       );
-      res = (await this.http.getJson<TerraformModuleVersions>(pkgUrl)).body;
+      res = (await this.http.getJsonUnchecked<TerraformModuleVersions>(pkgUrl))
+        .body;
       if (res.modules.length < 1) {
         logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
         return null;

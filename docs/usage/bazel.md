@@ -145,6 +145,19 @@ archive_override(
 Renovate ignores [`multiple_version_override`](https://bazel.build/rules/lib/globals/module#multiple_version_override).
 `multiple_version_override` does not affect the processing of version updates for a module.
 
+### `git_repository`
+
+If Renovate finds a [`git_repository`](https://bazel.build/rules/lib/repo/git#git_repository), it evaluates the `commit` value at the specified `remote`.
+`remote` is limited to github repos: `https://github.com/<owner>/<repo>.git`
+
+```python
+git_repository(
+    name = "rules_foo",
+    remote = "https://github.com/fooexample/rules_foo.git",
+    commit = "8c94e11c2b05b6f25ced5f23cd07d0cfd36edc1a",
+)
+```
+
 ## Legacy `WORKSPACE` files
 
 Renovate extracts dependencies from the following repository rules:
@@ -160,7 +173,7 @@ Renovate extracts dependencies from the following repository rules:
 It also recognizes when these repository rule names are prefixed with an underscore.
 For example, `_http_archive` is treated the same as `http_archive`.
 
-### `git_repository`
+### `git_repository` (legacy)
 
 Renovate updates any `git_repository` declaration that has the following:
 

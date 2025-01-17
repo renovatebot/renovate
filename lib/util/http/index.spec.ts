@@ -80,7 +80,7 @@ describe('util/http/index', () => {
       .get('/')
       .reply(200, '{ "test": true }', { etag: 'abc123' });
 
-    const res = await http.getJson('http://renovate.com');
+    const res = await http.getJsonUnchecked('http://renovate.com');
 
     expect(res).toEqual({
       authorization: false,
@@ -340,6 +340,172 @@ describe('util/http/index', () => {
 
     afterEach(() => {
       memCache.reset();
+    });
+
+    describe('getPlain', () => {
+      it('gets plain text with correct headers', async () => {
+        httpMock.scope(baseUrl).get('/').reply(200, 'plain text response', {
+          'content-type': 'text/plain',
+        });
+
+        const res = await http.getPlain('http://renovate.com');
+        expect(res.body).toBe('plain text response');
+        expect(res.headers['content-type']).toBe('text/plain');
+      });
+
+      it('works with custom options', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/')
+          .matchHeader('custom', 'header')
+          .reply(200, 'plain text response');
+
+        const res = await http.getPlain('http://renovate.com', {
+          headers: { custom: 'header' },
+        });
+        expect(res.body).toBe('plain text response');
+      });
+    });
+
+    describe('getYamlUnchecked', () => {
+      it('parses yaml response without schema', async () => {
+        httpMock.scope(baseUrl).get('/').reply(200, 'x: 2\ny: 2');
+
+        const res = await http.getYamlUnchecked('http://renovate.com');
+        expect(res.body).toEqual({ x: 2, y: 2 });
+      });
+
+      it('parses yaml with options', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/')
+          .matchHeader('custom', 'header')
+          .reply(200, 'x: 2\ny: 2');
+
+        const res = await http.getYamlUnchecked('http://renovate.com', {
+          headers: { custom: 'header' },
+        });
+        expect(res.body).toEqual({ x: 2, y: 2 });
+      });
+
+      it('throws on invalid yaml', async () => {
+        httpMock.scope(baseUrl).get('/').reply(200, '!@#$%^');
+
+        await expect(
+          http.getYamlUnchecked('http://renovate.com'),
+        ).rejects.toThrow('Failed to parse YAML file');
+      });
+    });
+
+    describe('getYaml', () => {
+      it('parses yaml with schema validation', async () => {
+        httpMock.scope(baseUrl).get('/').reply(200, 'x: 2\ny: 2');
+
+        const res = await http.getYaml('http://renovate.com', SomeSchema);
+        expect(res.body).toBe('2 + 2 = 4');
+      });
+
+      it('parses yaml with options and schema', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/')
+          .matchHeader('custom', 'header')
+          .reply(200, 'x: 2\ny: 2');
+
+        const res = await http.getYaml(
+          'http://renovate.com',
+          { headers: { custom: 'header' } },
+          SomeSchema,
+        );
+        expect(res.body).toBe('2 + 2 = 4');
+      });
+
+      it('throws on schema validation failure', async () => {
+        httpMock.scope(baseUrl).get('/').reply(200, 'foo: bar');
+
+        await expect(
+          http.getYaml('http://renovate.com', SomeSchema),
+        ).rejects.toThrow(z.ZodError);
+      });
+
+      it('throws on invalid yaml', async () => {
+        httpMock.scope(baseUrl).get('/').reply(200, '!@#$%^');
+
+        await expect(
+          http.getYaml('http://renovate.com', SomeSchema),
+        ).rejects.toThrow('Failed to parse YAML file');
+      });
+    });
+
+    describe('getYamlSafe', () => {
+      it('returns successful result with schema validation', async () => {
+        httpMock.scope('http://example.com').get('/').reply(200, 'x: 2\ny: 2');
+
+        const { val, err } = await http
+          .getYamlSafe('http://example.com', SomeSchema)
+          .unwrap();
+
+        expect(val).toBe('2 + 2 = 4');
+        expect(err).toBeUndefined();
+      });
+
+      it('returns schema error result', async () => {
+        httpMock
+          .scope('http://example.com')
+          .get('/')
+          .reply(200, 'x: "2"\ny: "2"');
+
+        const { val, err } = await http
+          .getYamlSafe('http://example.com', SomeSchema)
+          .unwrap();
+
+        expect(val).toBeUndefined();
+        expect(err).toBeInstanceOf(ZodError);
+      });
+
+      it('returns error result for invalid yaml', async () => {
+        httpMock.scope('http://example.com').get('/').reply(200, '!@#$%^');
+
+        const { val, err } = await http
+          .getYamlSafe('http://example.com', SomeSchema)
+          .unwrap();
+
+        expect(val).toBeUndefined();
+        expect(err).toBeDefined();
+      });
+
+      it('returns error result for network errors', async () => {
+        httpMock
+          .scope('http://example.com')
+          .get('/')
+          .replyWithError('network error');
+
+        const { val, err } = await http
+          .getYamlSafe('http://example.com', SomeSchema)
+          .unwrap();
+
+        expect(val).toBeUndefined();
+        expect(err).toBeInstanceOf(HttpError);
+      });
+
+      it('works with options and schema', async () => {
+        httpMock
+          .scope('http://example.com')
+          .get('/')
+          .matchHeader('custom', 'header')
+          .reply(200, 'x: 2\ny: 2');
+
+        const { val, err } = await http
+          .getYamlSafe(
+            'http://example.com',
+            { headers: { custom: 'header' } },
+            SomeSchema,
+          )
+          .unwrap();
+
+        expect(val).toBe('2 + 2 = 4');
+        expect(err).toBeUndefined();
+      });
     });
 
     describe('getJson', () => {

@@ -75,7 +75,7 @@ export async function getPrCache(
       const perPage = isInitial ? 100 : 20;
       const urlPath = `repos/${repo}/pulls?per_page=${perPage}&state=all&sort=updated&direction=desc&page=${pageIdx}`;
 
-      const res = await http.getJson<GhRestPr[]>(urlPath, opts);
+      const res = await http.getJsonUnchecked<GhRestPr[]>(urlPath, opts);
       apiQuotaAffected = true;
       requestsTotal += 1;
 

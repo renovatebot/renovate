@@ -210,9 +210,10 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     }
 
     const apiBaseUrl = getApiBaseUrl(registryUrl);
-    const { body: currentRelease } = await this.http.getJson<GithubRestRelease>(
-      `${apiBaseUrl}repos/${repo}/releases/tags/${currentValue}`,
-    );
+    const { body: currentRelease } =
+      await this.http.getJsonUnchecked<GithubRestRelease>(
+        `${apiBaseUrl}repos/${repo}/releases/tags/${currentValue}`,
+      );
     const digestAsset = await this.findDigestAsset(
       currentRelease,
       currentDigest,
@@ -221,9 +222,10 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     if (!digestAsset || newValue === currentValue) {
       newDigest = currentDigest;
     } else {
-      const { body: newRelease } = await this.http.getJson<GithubRestRelease>(
-        `${apiBaseUrl}repos/${repo}/releases/tags/${newValue}`,
-      );
+      const { body: newRelease } =
+        await this.http.getJsonUnchecked<GithubRestRelease>(
+          `${apiBaseUrl}repos/${repo}/releases/tags/${newValue}`,
+        );
       newDigest = await this.mapDigestAssetToRelease(digestAsset, newRelease);
     }
     return newDigest;

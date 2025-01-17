@@ -13,6 +13,10 @@ spec:
         name: external-dns
       version: "1.7.0"
   interval: 1h0m0s
+  values:
+    image:
+      repository: k8s.gcr.io/external-dns/external-dns
+      tag: v0.13.4
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository

@@ -822,11 +822,13 @@ export async function mergePr({
 
     if (!isClosed) {
       logger.warn(
-        { pullRequestId, status: pr.status },
-        `Expected PR to have status ${
-          PullRequestStatus[PullRequestStatus.Completed]
-          // TODO #22198
-        }. However, it is ${PullRequestStatus[pr.status!]}.`,
+        {
+          pullRequestId,
+          status: pr.status,
+          expectedPRStatus: PullRequestStatus[PullRequestStatus.Completed],
+          actualPRStatus: PullRequestStatus[pr.status!],
+        },
+        'Expected PR to have completed status. However, the PR has a different status',
       );
     }
     return true;

@@ -296,8 +296,8 @@ describe('workers/repository/process/vulnerabilities', () => {
         packageFiles,
       );
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        { err },
-        'Error fetching vulnerability information for lodash',
+        { err, packageName: 'lodash' },
+        'Error fetching vulnerability information for package',
       );
     });
 
@@ -407,7 +407,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      expect(logger.logger.info).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'No fixed version available for vulnerability GHSA-xxxx-yyyy-zzzz in fake 4.17.11',
       );
     });
@@ -449,7 +449,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         config,
         packageFiles,
       );
-      expect(logger.logger.info).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'No fixed version available for vulnerability GHSA-xxxx-yyyy-zzzz in fake 1.5.1',
       );
     });
@@ -835,6 +835,63 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchPackageNames: ['lodash'],
           matchCurrentVersion: '4.17.10',
           allowedVersions: '>= 4.17.20',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('returns packageRules for Hackage', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        hackage: [
+          {
+            deps: [
+              {
+                depName: 'aeson',
+                currentValue: '0.4.0.0',
+                datasource: 'hackage',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'HSEC-2023-0001',
+          summary: 'Hash flooding vulnerability in aeson',
+          details:
+            '# Hash flooding vulnerability in aeson\n\n*aeson* was vulnerable to hash flooding (a.k.a. hash DoS).  The\nissue is a consequence of the HashMap implementation from\n*unordered-containers*.  It results in a denial of service through\nCPU consumption.  This technique has been used in real-world attacks\nagainst a variety of languages, libraries and frameworks over the\nyears.\n',
+          aliases: ['CVE-2022-3433'],
+          modified: '2023-06-13T09:03:52Z',
+          affected: [
+            {
+              package: {
+                ecosystem: 'Hackage',
+                name: 'aeson',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0.4.0.0' }, { fixed: '2.0.1.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['hackage'],
+          matchPackageNames: ['aeson'],
+          matchCurrentVersion: '0.4.0.0',
+          allowedVersions: '>= 2.0.1.0',
           isVulnerabilityAlert: true,
         },
       ]);

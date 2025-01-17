@@ -685,37 +685,41 @@ describe('modules/platform/gitea/gitea-helper', () => {
     });
 
     it('should properly determine worst commit status', async () => {
-      const statuses: {
-        status: CommitStatusType;
-        created_at: string;
+      const statuses: (Pick<CommitStatus, 'id' | 'status' | 'created_at'> & {
         expected: CommitStatusType;
-      }[] = [
+      })[] = [
         {
+          id: 122,
           status: 'unknown',
           created_at: '2020-03-25T01:00:00Z',
           expected: 'unknown',
         },
         {
+          id: 124,
           status: 'pending',
           created_at: '2020-03-25T03:00:00Z',
           expected: 'pending',
         },
         {
+          id: 125,
           status: 'warning',
           created_at: '2020-03-25T04:00:00Z',
           expected: 'warning',
         },
         {
+          id: 126,
           status: 'failure',
           created_at: '2020-03-25T05:00:00Z',
           expected: 'failure',
         },
         {
+          id: 123,
           status: 'success',
           created_at: '2020-03-25T02:00:00Z',
           expected: 'failure',
         },
         {
+          id: 127,
           status: 'success',
           created_at: '2020-03-25T06:00:00Z',
           expected: 'success',
@@ -726,13 +730,13 @@ describe('modules/platform/gitea/gitea-helper', () => {
         { ...mockCommitStatus, status: 'unknown' },
       ];
 
-      for (const statusElem of statuses) {
-        const { status, expected } = statusElem;
+      for (const { id, status, expected, created_at } of statuses) {
         // Add current status ot list of commit statuses, then mock the API to return the whole list
         commitStatuses.push({
           ...mockCommitStatus,
+          id,
           status,
-          created_at: statusElem.created_at,
+          created_at,
         });
         httpMock
           .scope(baseUrl)

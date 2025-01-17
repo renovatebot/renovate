@@ -52,7 +52,8 @@ export class NugetV3Api {
       );
       // istanbul ignore else: currently not testable
       if (!servicesIndexRaw) {
-        servicesIndexRaw = (await http.getJson<ServicesIndexRaw>(url)).body;
+        servicesIndexRaw = (await http.getJsonUnchecked<ServicesIndexRaw>(url))
+          .body;
         await packageCache.set(
           NugetV3Api.cacheNamespace,
           responseCacheKey,
@@ -132,7 +133,7 @@ export class NugetV3Api {
     let items = catalogPage.items;
     if (!items) {
       const url = catalogPage['@id'];
-      const catalogPageFull = await http.getJson<CatalogPage>(url);
+      const catalogPageFull = await http.getJsonUnchecked<CatalogPage>(url);
       items = catalogPageFull.body.items;
     }
     return items.map(({ catalogEntry }) => catalogEntry);
@@ -146,7 +147,8 @@ export class NugetV3Api {
   ): Promise<ReleaseResult | null> {
     const baseUrl = feedUrl.replace(regEx(/\/*$/), '');
     const url = `${baseUrl}/${pkgName.toLowerCase()}/index.json`;
-    const packageRegistration = await http.getJson<PackageRegistration>(url);
+    const packageRegistration =
+      await http.getJsonUnchecked<PackageRegistration>(url);
     const catalogPages = packageRegistration.body.items || [];
     const catalogPagesQueue = catalogPages.map(
       (page) => (): Promise<CatalogEntry[]> => this.getCatalogEntry(http, page),

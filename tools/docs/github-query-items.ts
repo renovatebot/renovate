@@ -63,7 +63,7 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
   const per_page = 100;
   try {
     const query = getQueryString({ q, per_page });
-    const res = await githubApi.getJson<GithubApiQueryResponse>(
+    const res = await githubApi.getJsonUnchecked<GithubApiQueryResponse>(
       gitHubApiUrl + query,
       {
         paginationField: 'items',

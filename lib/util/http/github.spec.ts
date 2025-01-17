@@ -107,7 +107,7 @@ describe('util/http/github', () => {
         })
         .get(`${url}&page=3`)
         .reply(200, ['e']);
-      const res = await githubApi.getJson(url, { paginate: true });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: true });
       expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
     });
 
@@ -133,7 +133,7 @@ describe('util/http/github', () => {
         )
         .get(`${url}?page=3`)
         .reply(200, { the_field: ['d'], total: 4 });
-      const res: any = await githubApi.getJson('some-url', {
+      const res = await githubApi.getJsonUnchecked<any>('some-url', {
         paginate: true,
         paginationField: 'the_field',
       });
@@ -169,7 +169,7 @@ describe('util/http/github', () => {
         })
         .get(`${url}&page=3`)
         .reply(200, ['e']);
-      const res = await githubApi.getJson(url, {
+      const res = await githubApi.getJsonUnchecked(url, {
         paginate: true,
         repository: 'some/repo',
       });
@@ -206,7 +206,7 @@ describe('util/http/github', () => {
         })
         .get(`${url}&page=3`)
         .reply(200, ['e']);
-      const res = await githubApi.getJson(url, {
+      const res = await githubApi.getJsonUnchecked(url, {
         paginate: true,
         repository: 'some/repo',
         baseUrl: 'https://github.domain.com',
@@ -225,7 +225,9 @@ describe('util/http/github', () => {
         .reply(200, ['a'], {
           link: `<${url}?page=34>; rel="last"`,
         });
-      const res = await githubApi.getJson('some-url', { paginate: true });
+      const res = await githubApi.getJsonUnchecked('some-url', {
+        paginate: true,
+      });
       expect(res).toBeDefined();
       expect(res.body).toEqual(['a']);
     });
@@ -253,7 +255,9 @@ describe('util/http/github', () => {
         })
         .get(`${apiUrl}&page=3`)
         .reply(200, ['e']);
-      const res = await githubApi.getJson(apiUrl, { paginate: true });
+      const res = await githubApi.getJsonUnchecked(apiUrl, {
+        paginate: true,
+      });
       expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
     });
 
@@ -273,7 +277,9 @@ describe('util/http/github', () => {
         })
         .get(`${apiUrl}&page=3`)
         .reply(200, ['e']);
-      const res = await githubApi.getJson(apiUrl, { paginate: true });
+      const res = await githubApi.getJsonUnchecked(apiUrl, {
+        paginate: true,
+      });
       expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
     });
 
@@ -295,7 +301,9 @@ describe('util/http/github', () => {
         })
         .get(`/${apiUrl}&page=3`)
         .reply(200, ['e']);
-      const res = await githubApi.getJson(apiUrl, { paginate: true });
+      const res = await githubApi.getJsonUnchecked(apiUrl, {
+        paginate: true,
+      });
       expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
     });
 
@@ -320,13 +328,13 @@ describe('util/http/github', () => {
             },
             headers,
           );
-        await githubApi.getJson(url);
+        await githubApi.getJsonUnchecked(url);
       }
 
       async function failWithError(error: string | Record<string, unknown>) {
         const url = '/some-url';
         httpMock.scope(githubApiHost).get(url).replyWithError(error);
-        await githubApi.getJson(url);
+        await githubApi.getJsonUnchecked(url);
       }
 
       it('should throw Not found', async () => {

@@ -28,11 +28,11 @@ export async function getReleaseNotesMd(
   logger.trace('github.getReleaseNotesMd()');
   const apiPrefix = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}`;
   const { default_branch: defaultBranch = 'HEAD' } = (
-    await http.getJson<{ default_branch: string }>(apiPrefix)
+    await http.getJsonUnchecked<{ default_branch: string }>(apiPrefix)
   ).body;
 
   // https://docs.github.com/en/rest/reference/git#get-a-tree
-  const res = await http.getJson<GithubGitTree>(
+  const res = await http.getJsonUnchecked<GithubGitTree>(
     `${apiPrefix}/git/trees/${defaultBranch}${
       sourceDirectory ? '?recursive=1' : ''
     }`,
@@ -73,7 +73,7 @@ export async function getReleaseNotesMd(
   }
 
   // https://docs.github.com/en/rest/reference/git#get-a-blob
-  const fileRes = await http.getJson<GithubGitBlob>(
+  const fileRes = await http.getJsonUnchecked<GithubGitBlob>(
     `${apiPrefix}/git/blobs/${sha}`,
   );
 

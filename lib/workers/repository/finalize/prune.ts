@@ -9,7 +9,7 @@ import { scm } from '../../../modules/platform/scm';
 import { getBranchList, setUserRepoConfig } from '../../../util/git';
 import { escapeRegExp, regEx } from '../../../util/regex';
 import { uniqueStrings } from '../../../util/string';
-import { getReconfigureBranchName } from '../reconfigure';
+import { getReconfigureBranchName } from '../reconfigure/utils';
 
 async function cleanUpBranches(
   config: RenovateConfig,

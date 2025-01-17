@@ -1531,6 +1531,57 @@ describe('modules/platform/github/index', () => {
     });
   });
 
+  describe('getIssue()', () => {
+    it('returns null if issues disabled', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo', { hasIssuesEnabled: false });
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getIssue(1);
+      expect(res).toBeNull();
+    });
+
+    it('returns issue', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      const issue = {
+        number: 1,
+        state: 'open',
+        title: 'title-1',
+        body: 'body-1',
+      };
+      scope
+        .get('/repos/some/repo/issues/1')
+        .reply(200, { ...issue, updated_at: '2022-01-01T00:00:00Z' });
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getIssue(1);
+      expect(res).toMatchObject({
+        ...issue,
+        lastModified: '2022-01-01T00:00:00Z',
+      });
+    });
+
+    it('returns null if issue not found', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/issues/1').reply(404);
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getIssue(1);
+      expect(res).toBeNull();
+    });
+
+    it('logs debug message if issue deleted', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/issues/1').reply(410);
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getIssue(1);
+      expect(res).toBeNull();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Issue #1 has been deleted',
+      );
+    });
+  });
+
   describe('findIssue()', () => {
     it('returns null if no issue', async () => {
       httpMock

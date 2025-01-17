@@ -46,7 +46,8 @@ export class GradleVersionDatasource extends Datasource {
 
     let releases: Release[];
     try {
-      const response = await this.http.getJson<GradleRelease[]>(registryUrl);
+      const response =
+        await this.http.getJsonUnchecked<GradleRelease[]>(registryUrl);
       releases = response.body
         .filter((release) => !release.snapshot && !release.nightly)
         .map((release) => {

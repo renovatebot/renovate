@@ -6,7 +6,6 @@ import { parseGitUrl } from '../../../util/git/url';
 import { GithubHttp } from '../../../util/http/github';
 import { fromBase64 } from '../../../util/string';
 import { joinUrlParts } from '../../../util/url';
-import { parseSingleYaml } from '../../../util/yaml';
 import { GithubContentResponse } from '../../platform/github/schema';
 import semver from '../../versioning/semver';
 import { Datasource } from '../datasource';
@@ -104,16 +103,14 @@ export class BitriseDatasource extends Datasource {
       }
       if (body.encoding !== 'base64') {
         logger.warn(
-          { data: body, url: stepUrl },
-          `Got unexpected encoding for Bitrise step location '${body.encoding}'`,
+          { encoding: body.encoding, data: body, url: stepUrl },
+          `Got unexpected encoding for Bitrise step location`,
         );
         return null;
       }
 
       const content = fromBase64(body.content);
-      const { published_at, source_code_url } = parseSingleYaml(content, {
-        customSchema: BitriseStepFile,
-      });
+      const { published_at, source_code_url } = BitriseStepFile.parse(content);
 
       result.releases.push({
         version: versionDir.name,

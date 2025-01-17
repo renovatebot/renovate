@@ -12,6 +12,7 @@ describe('config/decrypt', () => {
     beforeEach(() => {
       config = {};
       GlobalConfig.reset();
+      delete process.env.MEND_HOSTED;
       delete process.env.RENOVATE_X_ENCRYPTED_STRICT;
     });
 
@@ -34,8 +35,19 @@ describe('config/decrypt', () => {
 
     it('throws exception if encrypted found but no privateKey', async () => {
       config.encrypted = { a: '1' };
-      process.env.RENOVATE_X_ENCRYPTED_STRICT = 'true';
 
+      process.env.RENOVATE_X_ENCRYPTED_STRICT = 'true';
+      await expect(decryptConfig(config, repository)).rejects.toThrow(
+        'config-validation',
+      );
+    });
+
+    // coverage
+    it('throws exception if encrypted found but no privateKey- Mend Hosted', async () => {
+      config.encrypted = { a: '1' };
+
+      process.env.MEND_HOSTED = 'true';
+      process.env.RENOVATE_X_ENCRYPTED_STRICT = 'true';
       await expect(decryptConfig(config, repository)).rejects.toThrow(
         'config-validation',
       );

@@ -66,7 +66,10 @@ export async function extractAllPackageFiles(
       compileArgs = extractHeaderCommand(fileContent, fileMatch);
       compileDir = inferCommandExecDir(fileMatch, compileArgs.outputFile);
     } catch (error) {
-      logger.warn({ fileMatch }, `pip-compile: ${error.message}`);
+      logger.warn(
+        { fileMatch, errorMessage: error.message },
+        'pip-compile error',
+      );
       continue;
     }
     lockFileArgs.set(fileMatch, compileArgs);
@@ -212,7 +215,8 @@ export async function extractAllPackageFiles(
       }
       if (!sourceFiles) {
         logger.warn(
-          `pip-compile: ${packageFile.packageFile} references ${reqFile} which does not appear to be a requirements file managed by pip-compile`,
+          { packageFile: packageFile.packageFile, requirementsFile: reqFile },
+          'pip-compile: Package file references a file which does not appear to be a requirements file managed by pip-compile',
         );
         continue;
       }

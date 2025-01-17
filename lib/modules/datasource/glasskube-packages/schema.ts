@@ -1,12 +1,11 @@
 import { z } from 'zod';
-import { Yaml } from '../../../util/schema-utils';
 
-const GlasskubePackageVersions = z.object({
+export const GlasskubePackageVersions = z.object({
   latestVersion: z.string(),
   versions: z.array(z.object({ version: z.string() })),
 });
 
-const GlasskubePackageManifest = z.object({
+export const GlasskubePackageManifest = z.object({
   references: z.optional(
     z.array(
       z.object({
@@ -16,8 +15,3 @@ const GlasskubePackageManifest = z.object({
     ),
   ),
 });
-
-export const GlasskubePackageVersionsYaml = Yaml.pipe(GlasskubePackageVersions);
-export const GlasskubePackageManifestYaml = Yaml.pipe(GlasskubePackageManifest);
-
-export type GlasskubePackageVersions = z.infer<typeof GlasskubePackageVersions>;

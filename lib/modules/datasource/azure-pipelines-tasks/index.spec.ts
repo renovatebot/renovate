@@ -1,5 +1,9 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { GlobalConfig } from '../../../config/global';
+import * as hostRules from '../../../util/host-rules';
+import { AzurePipelinesTask } from './schema';
 import { AzurePipelinesTasksDatasource } from '.';
 
 const gitHubHost = 'https://raw.githubusercontent.com';
@@ -9,6 +13,11 @@ const marketplaceTasksPath =
   '/renovatebot/azure-devops-marketplace/main/azure-pipelines-marketplace-tasks.json';
 
 describe('modules/datasource/azure-pipelines-tasks/index', () => {
+  beforeEach(() => {
+    GlobalConfig.reset();
+    hostRules.clear();
+  });
+
   it('returns null for unknown task', async () => {
     httpMock
       .scope(gitHubHost)
@@ -63,5 +72,104 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
         packageName: 'automatedanalysis',
       }),
     ).toEqual({ releases: [{ version: '0.171.0' }, { version: '0.198.0' }] });
+  });
+
+  it('returns organization task with single version', async () => {
+    GlobalConfig.set({
+      platform: 'azure',
+      endpoint: 'https://my.custom.domain',
+    });
+
+    hostRules.add({
+      hostType: AzurePipelinesTasksDatasource.id,
+      matchHost: 'my.custom.domain',
+      token: '123test',
+    });
+
+    httpMock
+      .scope('https://my.custom.domain')
+      .get('/_apis/distributedtask/tasks/')
+      .reply(200, Fixtures.get('tasks.json'));
+
+    expect(
+      await getPkgReleases({
+        datasource: AzurePipelinesTasksDatasource.id,
+        packageName: 'AzurePowerShell',
+      }),
+    ).toEqual({ releases: [{ version: '5.248.3' }] });
+  });
+
+  it('returns organization task with multiple versions', async () => {
+    GlobalConfig.set({
+      platform: 'azure',
+      endpoint: 'https://my.custom.domain',
+    });
+
+    hostRules.add({
+      hostType: AzurePipelinesTasksDatasource.id,
+      matchHost: 'my.custom.domain',
+      token: '123test',
+    });
+
+    httpMock
+      .scope('https://my.custom.domain')
+      .get('/_apis/distributedtask/tasks/')
+      .reply(200, Fixtures.get('tasks.json'));
+
+    expect(
+      await getPkgReleases({
+        datasource: AzurePipelinesTasksDatasource.id,
+        packageName: 'PowerShell',
+      }),
+    ).toEqual({
+      releases: [
+        { isDeprecated: true, version: '1.2.3' },
+        { isDeprecated: undefined, version: '2.247.1' },
+      ],
+    });
+  });
+
+  describe('compare semver', () => {
+    it.each`
+      a                              | exp
+      ${[]}                          | ${[]}
+      ${['']}                        | ${['']}
+      ${['', '']}                    | ${['', '']}
+      ${['1.0.0']}                   | ${['1.0.0']}
+      ${['1.0.1', '1.1.0', '1.0.0']} | ${['1.0.0', '1.0.1', '1.1.0']}
+    `('when versions is $a', ({ a, exp }) => {
+      const azureVersions = a.map((x: string) => {
+        const splitted = x.split('.');
+
+        const version =
+          splitted.length === 3
+            ? {
+                major: Number(splitted[0]),
+                minor: Number(splitted[1]),
+                patch: Number(splitted[2]),
+              }
+            : null;
+
+        return AzurePipelinesTask.parse({
+          name: '',
+          deprecated: false,
+          version,
+        });
+      });
+
+      const azureSortedVersions = azureVersions.sort(
+        AzurePipelinesTasksDatasource.compareSemanticVersions('version'),
+      );
+
+      expect(
+        azureSortedVersions.map((x: any) => {
+          const data = AzurePipelinesTask.parse(x);
+
+          return data.version === null
+            ? ''
+            : `${data.version.major}.${data.version.minor}.${data.version.patch}`;
+        }),
+      ).toStrictEqual(exp);
+    });
   });
 });

@@ -392,5 +392,31 @@ describe('modules/manager/bazel-module/extract', () => {
         },
       ]);
     });
+
+    it('returns git_repository dependencies', async () => {
+      const input = codeBlock`
+        git_repository(
+            name = "rules_foo",
+            commit = "850cb49c8649e463b80ef7984e7c744279746170",
+            remote = "https://github.com/example/rules_foo.git",
+        )
+        `;
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+      if (!result) {
+        throw new Error('Expected a result.');
+      }
+      expect(result.deps).toHaveLength(1);
+      expect(result.deps).toEqual(
+        expect.arrayContaining([
+          {
+            datasource: GithubTagsDatasource.id,
+            depType: 'git_repository',
+            depName: 'rules_foo',
+            currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
+            packageName: 'example/rules_foo',
+          },
+        ]),
+      );
+    });
   });
 });

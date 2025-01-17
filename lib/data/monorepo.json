@@ -55,6 +55,7 @@
       "https://github.com/awslabs/aws-sdk-rust"
     ],
     "awsappsync": "https://github.com/awslabs/aws-mobile-appsync-sdk-js",
+    "axum": "https://github.com/tokio-rs/axum",
     "azure-functions-dotnet-worker": "https://github.com/Azure/azure-functions-dotnet-worker",
     "azure azure-libraries-for-net": "https://github.com/Azure/azure-libraries-for-net",
     "azure azure-sdk-for-net": "https://github.com/Azure/azure-sdk-for-net",
@@ -435,6 +436,8 @@
     "opentelemetry-java-contrib": "https://github.com/open-telemetry/opentelemetry-java-contrib",
     "opentelemetry-js": "https://github.com/open-telemetry/opentelemetry-js",
     "opentelemetry-js-contrib": "https://github.com/open-telemetry/opentelemetry-js-contrib",
+    "opentelemetry-python": "https://github.com/open-telemetry/opentelemetry-python",
+    "opentelemetry-python-contrib": "https://github.com/open-telemetry/opentelemetry-python-contrib",
     "opentelemetry-rust": "https://github.com/open-telemetry/opentelemetry-rust",
     "opentelemetry-rust-contrib": "https://github.com/open-telemetry/opentelemetry-rust-contrib",
     "orleans": "https://github.com/dotnet/orleans",
@@ -502,7 +505,10 @@
     "shiki": "https://github.com/shikijs/shiki",
     "shopify-app-bridge": "https://github.com/Shopify/app-bridge",
     "sitecore-jss": "https://github.com/Sitecore/jss",
-    "skiasharp": "https://github.com/mono/SkiaSharp",
+    "skiasharp": [
+      "https://github.com/mono/SkiaSharp",
+      "https://go.microsoft.com/fwlink/?linkid=868515"
+    ],
     "slack-net": "https://github.com/soxtoby/SlackNet",
     "slf4j": "https://github.com/qos-ch/slf4j",
     "slim-message-bus": "https://github.com/zarusz/SlimMessageBus",
@@ -514,6 +520,7 @@
     "strapi": "https://github.com/strapi/strapi",
     "strum": "https://github.com/Peternator7/strum",
     "stryker-js": "https://github.com/stryker-mutator/stryker-js",
+    "stylex-swc": "https://github.com/Dwlad90/stylex-swc-plugin",
     "surveyjs": "https://github.com/surveyjs/surveyjs",
     "swashbuckle-aspnetcore": "https://github.com/domaindrivendev/Swashbuckle.AspNetCore",
     "system.io.abstractions": "https://github.com/System-IO-Abstractions/System.IO.Abstractions/",
@@ -584,7 +591,7 @@
     "hapijs": "https://github.com/hapijs/",
     "lodash": "https://github.com/lodash/",
     "ngrx": "https://github.com/ngrx/",
-    "nrwl": "https://github.com/nrwl/",
+    "nx": "https://github.com/nrwl/nx",
     "octokit": "https://github.com/octokit/",
     "semantic-release": "https://github.com/semantic-release/",
     "swc": "https://github.com/swc-project/"

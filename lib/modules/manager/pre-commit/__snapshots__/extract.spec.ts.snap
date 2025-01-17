@@ -11,6 +11,14 @@ exports[`modules/manager/pre-commit/extract extractPackageFile() extracts from c
       "packageName": "pre-commit/pre-commit-hooks",
     },
     {
+      "currentValue": "==1.1.1",
+      "currentVersion": "1.1.1",
+      "datasource": "pypi",
+      "depName": "request",
+      "depType": "pre-commit-python",
+      "packageName": "request",
+    },
+    {
       "currentValue": "19.3b0",
       "datasource": "github-tags",
       "depName": "psf/black",

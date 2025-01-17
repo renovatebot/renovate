@@ -116,13 +116,13 @@ exports[`modules/manager/leiningen/extract extractPackageFile 1`] = `
       "datasource": "clojure",
       "depName": "clj-stacktrace:clj-stacktrace",
       "depType": "dependencies",
-      "groupName": "clj-stacktrace-version",
       "registryUrls": [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
         "https://blueant.com/archiva/snapshots",
         "https://blueant.com/archiva/internal",
       ],
+      "sharedVariableName": "clj-stacktrace-version",
     },
     {
       "currentValue": "0.12.0",

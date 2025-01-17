@@ -216,7 +216,8 @@ export function extractPythonVersion(
   const match = pythonVersionRegex.exec(content);
   if (match?.groups === undefined) {
     logger.warn(
-      `pip-compile: failed to extract Python version from header in ${fileName} ${content}`,
+      { fileName, content },
+      'pip-compile: failed to extract Python version from header in file',
     );
     return undefined;
   }

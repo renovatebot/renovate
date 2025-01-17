@@ -29,6 +29,7 @@ export const HelmRelease = KubernetesResource.extend({
           .optional(),
       }),
     }),
+    values: z.record(z.unknown()).optional(),
   }),
 });
 

@@ -117,7 +117,7 @@ export class JenkinsPluginsDatasource extends Datasource {
     try {
       logger.debug(`jenkins-plugins: Fetching Jenkins plugins from ${url}`);
       const startTime = Date.now();
-      response = (await this.http.getJson<T>(url)).body;
+      response = (await this.http.getJsonUnchecked<T>(url)).body;
       const durationMs = Math.round(Date.now() - startTime);
       logger.debug(
         { durationMs },

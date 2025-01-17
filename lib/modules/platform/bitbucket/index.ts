@@ -93,7 +93,7 @@ export async function initPlatform({
   }
   try {
     const { uuid } = (
-      await bitbucketHttp.getJson<Account>('/2.0/user', options)
+      await bitbucketHttp.getJsonUnchecked<Account>('/2.0/user', options)
     ).body;
     renovateUserUuid = uuid;
   } catch (err) {
@@ -212,7 +212,7 @@ export async function initRepo({
     if (bbUseDevelopmentBranch) {
       // Fetch Bitbucket development branch
       const developmentBranch = (
-        await bitbucketHttp.getJson<RepoBranchingModel>(
+        await bitbucketHttp.getJsonUnchecked<RepoBranchingModel>(
           `/2.0/repositories/${repository}/branching-model`,
         )
       ).body.development?.branch?.name;
@@ -304,7 +304,7 @@ export async function findPr({
   if (includeOtherAuthors) {
     // PR might have been created by anyone, so don't use the cached Renovate PR list
     const prs = (
-      await bitbucketHttp.getJson<PagedResult<PrResponse>>(
+      await bitbucketHttp.getJsonUnchecked<PagedResult<PrResponse>>(
         `/2.0/repositories/${config.repository}/pullrequests?q=source.branch.name="${branchName}"&state=open`,
       )
     ).body.values;
@@ -363,7 +363,7 @@ export async function findPr({
 // Gets details for a PR
 export async function getPr(prNo: number): Promise<Pr | null> {
   const pr = (
-    await bitbucketHttp.getJson<PrResponse>(
+    await bitbucketHttp.getJsonUnchecked<PrResponse>(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
     )
   ).body;
@@ -395,7 +395,7 @@ async function getBranchCommit(
 ): Promise<string | undefined> {
   try {
     const branch = (
-      await bitbucketHttp.getJson<BranchResponse>(
+      await bitbucketHttp.getJsonUnchecked<BranchResponse>(
         `/2.0/repositories/${config.repository}/refs/branches/${escapeHash(
           branchName,
         )}`,
@@ -424,7 +424,7 @@ async function getStatus(
 ): Promise<BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
   return (
-    await bitbucketHttp.getJson<PagedResult<BitbucketStatus>>(
+    await bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketStatus>>(
       `/2.0/repositories/${config.repository}/commit/${sha!}/statuses`,
       {
         paginate: true,
@@ -531,7 +531,7 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
     const filter = encodeURIComponent(filters.join(' AND '));
     return (
       (
-        await bitbucketHttp.getJson<{ values: BbIssue[] }>(
+        await bitbucketHttp.getJsonUnchecked<{ values: BbIssue[] }>(
           `/2.0/repositories/${config.repository}/issues?q=${filter}`,
         )
       ).body.values || /* istanbul ignore next */ []
@@ -677,7 +677,7 @@ export async function getIssueList(): Promise<Issue[]> {
     }
     const filter = encodeURIComponent(filters.join(' AND '));
     const url = `/2.0/repositories/${config.repository}/issues?q=${filter}`;
-    const res = await bitbucketHttp.getJson<{ values: Issue[] }>(url, {
+    const res = await bitbucketHttp.getJsonUnchecked<{ values: Issue[] }>(url, {
       cacheProvider: repoCacheProvider,
     });
     return res.body.values || [];
@@ -788,7 +788,7 @@ async function sanitizeReviewers(
         // Validate that each previous PR reviewer account is still active
         for (const reviewer of reviewers) {
           const reviewerUser = (
-            await bitbucketHttp.getJson<Account>(
+            await bitbucketHttp.getJsonUnchecked<Account>(
               `/2.0/users/${reviewer.uuid}`,
               { memCache: true },
             )
@@ -881,7 +881,7 @@ export async function createPr({
 
   if (platformPrOptions?.bbUseDefaultReviewers) {
     const reviewersResponse = (
-      await bitbucketHttp.getJson<PagedResult<EffectiveReviewer>>(
+      await bitbucketHttp.getJsonUnchecked<PagedResult<EffectiveReviewer>>(
         `/2.0/repositories/${config.repository}/effective-default-reviewers`,
         {
           paginate: true,
@@ -1019,7 +1019,7 @@ export async function updatePr({
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   // Updating a PR in Bitbucket will clear the reviewers if reviewers is not present
   const pr = (
-    await bitbucketHttp.getJson<PrResponse>(
+    await bitbucketHttp.getJsonUnchecked<PrResponse>(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
     )
   ).body;

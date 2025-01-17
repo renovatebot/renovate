@@ -106,6 +106,7 @@ export interface LookupUpdate {
   releaseTimestamp?: any;
   newVersionAgeInDays?: number;
   registryUrl?: string;
+  libYears?: number;
 }
 
 /**
@@ -119,7 +120,7 @@ export interface PackageDependency<T = Record<string, any>>
   depName?: string;
   depType?: string;
   fileReplacePosition?: number;
-  groupName?: string;
+  sharedVariableName?: string;
   lineNumber?: number;
   packageName?: string;
   target?: string;
@@ -144,6 +145,7 @@ export interface PackageDependency<T = Record<string, any>>
   digestOneAndOnly?: boolean;
   fixedVersion?: string;
   currentVersion?: string;
+  currentVersionTimestamp?: string;
   lockedVersion?: string;
   propSource?: string;
   registryUrls?: string[] | null;

@@ -13,6 +13,7 @@ import { extractAllDependencies } from '../extract';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
 import { branchifyUpgrades } from '../updates/branchify';
 import { fetchUpdates } from './fetch';
+import { calculateLibYears } from './libyear';
 import { sortBranches } from './sort';
 import { Vulnerabilities } from './vulnerabilities';
 import type { WriteUpdateResult } from './write';
@@ -211,6 +212,7 @@ export async function lookup(
 ): Promise<ExtractResult> {
   await fetchVulnerabilities(config, packageFiles);
   await fetchUpdates(config, packageFiles);
+  calculateLibYears(packageFiles);
   const { branches, branchList } = await branchifyUpgrades(
     config,
     packageFiles,

@@ -74,7 +74,9 @@ export class GitlabPackagesDatasource extends Datasource {
     let response: GitlabPackage[];
     try {
       response = (
-        await this.http.getJson<GitlabPackage[]>(apiUrl, { paginate: true })
+        await this.http.getJsonUnchecked<GitlabPackage[]>(apiUrl, {
+          paginate: true,
+        })
       ).body;
 
       result.releases = response

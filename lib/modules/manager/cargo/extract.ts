@@ -134,7 +134,7 @@ function resolveRegistryIndex(
       `Replacing index of cargo registry ${registryName} with ${replacementName}`,
     );
     if (originalNames.has(replacementName)) {
-      logger.warn(`${registryName} cargo registry resolves to itself`);
+      logger.warn({ registryName }, 'cargo registry resolves to itself');
       return null;
     }
     return resolveRegistryIndex(

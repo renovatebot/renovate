@@ -125,7 +125,7 @@ export class PodDatasource extends Datasource {
     packageName: string,
   ): Promise<T | null> {
     try {
-      const resp = await this.githubHttp.getJson<T>(url);
+      const resp = await this.githubHttp.getJsonUnchecked<T>(url);
       if (resp?.body) {
         return resp.body;
       }

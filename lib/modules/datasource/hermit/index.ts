@@ -125,7 +125,7 @@ export class HermitDatasource extends Datasource {
 
     const apiBaseUrl = getApiBaseUrl(`https://${host}`);
 
-    const indexRelease = await this.http.getJson<GithubRestRelease>(
+    const indexRelease = await this.http.getJsonUnchecked<GithubRestRelease>(
       `${apiBaseUrl}repos/${owner}/${repo}/releases/tags/index`,
     );
 

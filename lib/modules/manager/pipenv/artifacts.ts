@@ -72,7 +72,8 @@ export function addExtraEnvVariable(
     extraEnv[environmentVariableName] !== environmentValue
   ) {
     logger.warn(
-      `Possible misconfiguration, ${environmentVariableName} is already set to a different value`,
+      { envVar: environmentVariableName },
+      'Possible misconfiguration, environment variable already set to a different value',
     );
   }
   extraEnv[environmentVariableName] = environmentValue;

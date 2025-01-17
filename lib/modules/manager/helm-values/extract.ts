@@ -17,13 +17,9 @@ function getHelmDep(
   registry: string,
   repository: string,
   tag: string,
-  config: ExtractConfig,
+  registryAliases: Record<string, string> | undefined,
 ): PackageDependency {
-  const dep = getDep(
-    `${registry}${repository}:${tag}`,
-    false,
-    config.registryAliases,
-  );
+  const dep = getDep(`${registry}${repository}:${tag}`, false, registryAliases);
   dep.replaceString = tag;
   dep.versioning = dockerVersioning;
   dep.autoReplaceStringTemplate =
@@ -36,11 +32,17 @@ function getHelmDep(
  *
  * @param parsedContent
  */
-function findDependencies(
+export function findDependencies(
   parsedContent: Record<string, unknown> | HelmDockerImageDependency,
-  packageDependencies: Array<PackageDependency>,
-  config: ExtractConfig,
-): Array<PackageDependency> {
+  registryAliases: Record<string, string> | undefined,
+): PackageDependency[] {
+  return findDependenciesInternal(parsedContent, [], registryAliases);
+}
+export function findDependenciesInternal(
+  parsedContent: Record<string, unknown> | HelmDockerImageDependency,
+  packageDependencies: PackageDependency[],
+  registryAliases: Record<string, string> | undefined,
+): PackageDependency[] {
   if (!parsedContent || typeof parsedContent !== 'object') {
     return packageDependencies;
   }
@@ -53,14 +55,16 @@ function findDependencies(
       registry = registry ? `${registry}/` : '';
       const repository = String(currentItem.repository);
       const tag = `${currentItem.tag ?? currentItem.version}`;
-      packageDependencies.push(getHelmDep(registry, repository, tag, config));
+      packageDependencies.push(
+        getHelmDep(registry, repository, tag, registryAliases),
+      );
     } else if (matchesHelmValuesInlineImage(key, value)) {
-      packageDependencies.push(getDep(value, true, config.registryAliases));
+      packageDependencies.push(getDep(value, true, registryAliases));
     } else {
-      findDependencies(
+      findDependenciesInternal(
         value as Record<string, unknown>,
         packageDependencies,
-        config,
+        registryAliases,
       );
     }
   });
@@ -86,7 +90,7 @@ export function extractPackageFile(
     const deps: PackageDependency<Record<string, any>>[] = [];
 
     for (const con of parsedContent) {
-      deps.push(...findDependencies(con, [], config));
+      deps.push(...findDependencies(con, config.registryAliases));
     }
 
     if (deps.length) {

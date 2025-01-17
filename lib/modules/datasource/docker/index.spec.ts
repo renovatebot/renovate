@@ -98,10 +98,13 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, { token: 'some-token' });
 
       hostRules.find.mockReturnValue({});
-      const res = await getDigest({
-        datasource: 'docker',
-        packageName: 'some-dep',
-      });
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'some-dep',
+        },
+        '',
+      );
       expect(res).toBe('some-digest');
     });
 
