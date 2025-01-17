@@ -161,7 +161,9 @@ function extractRunner(runner: string): PackageDependency | null {
   let replaceString = `${depName}-${currentValue}`;
   let autoReplaceStringTemplate = '{{depName}}-{{newValue}}';
 
-  const armVersionMatch = currentValue.match(/^(?<version>\d+\.\d+)-arm$/);
+  const armVersionMatch = currentValue.match(
+    /^(?<version>[\\.A-Za-z0-9]+)-arm$/,
+  );
   if (depName === 'ubuntu' && armVersionMatch) {
     depName = 'ubuntu_arm64';
     currentValue = armVersionMatch.groups?.version ?? currentValue;
