@@ -1,8 +1,8 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export async function updateArtifacts(
@@ -32,15 +32,27 @@ export async function updateArtifacts(
   let cmd = '';
   if (updateConfig.config.isLockFileMaintenance) {
     cmd += 'devbox update';
-  } else {
+  } else if (is.nonEmptyArray(updateConfig.updatedDeps)) {
     cmd += 'devbox install';
+  } else {
+    logger.debug('No updated devbox packages - returning null');
+    return null;
+  }
+
+  const oldLockFileContent = await readLocalFile(lockFileName);
+  if (!oldLockFileContent) {
+    logger.debug(`No ${lockFileName} found`);
+    return null;
   }
 
   try {
     await exec(cmd, execOptions);
-    const status = await getRepoStatus();
+    const newLockFileContent = await readLocalFile(lockFileName);
 
-    if (!status.modified.includes(lockFileName)) {
+    if (
+      !newLockFileContent ||
+      Buffer.compare(oldLockFileContent, newLockFileContent) === 0
+    ) {
       return null;
     }
     logger.debug('Returning updated devbox.lock');
@@ -49,7 +61,7 @@ export async function updateArtifacts(
         file: {
           type: 'addition',
           path: lockFileName,
-          contents: await readLocalFile(lockFileName),
+          contents: newLockFileContent,
         },
       },
     ];

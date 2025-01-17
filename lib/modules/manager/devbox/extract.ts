@@ -4,16 +4,18 @@ import * as devboxVersioning from '../../versioning/devbox';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { DevboxFile } from './schema';
 
-function isValidDependency(dep: PackageDependency): boolean {
-  return !!dep.currentValue && devboxVersioning.api.isValid(dep.currentValue);
-}
-
-export function extractPackageFile(content: string): PackageFileContent | null {
+export function extractPackageFile(
+  content: string,
+  packageFile: string,
+): PackageFileContent | null {
   logger.trace('devbox.extractPackageFile()');
 
   const parsedFile = DevboxFile.safeParse(content);
   if (parsedFile.error) {
-    logger.debug({ error: parsedFile.error }, 'Error parsing devbox.json');
+    logger.debug(
+      { packageFile, error: parsedFile.error },
+      'Error parsing devbox.json',
+    );
     return null;
   }
 
@@ -56,14 +58,16 @@ function getDep(
     currentValue: version,
     datasource: DevboxDatasource.id,
     packageName,
-    versioning: devboxVersioning.id,
   };
-  if (!isValidDependency(dep)) {
+  if (!(dep.currentValue && devboxVersioning.api.isValid(dep.currentValue))) {
     logger.trace(
       { packageName },
       'Skipping invalid devbox dependency in devbox JSON file.',
     );
-    return null;
+    return {
+      ...dep,
+      skipReason: 'invalid-version',
+    };
   }
   return dep;
 }

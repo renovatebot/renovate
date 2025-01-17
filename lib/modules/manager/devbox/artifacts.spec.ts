@@ -56,18 +56,15 @@ describe('modules/manager/devbox/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
       const execSnapshots = mockExecAll();
-      git.getRepoStatus.mockResolvedValueOnce(
-        partial<StatusResult>({
-          modified: ['devbox.lock'],
-        }),
-      );
-      fs.readLocalFile.mockResolvedValueOnce('New devbox.lock');
-      fs.readLocalFile.mockResolvedValueOnce(devboxJson);
+      const oldLockFileContent = Buffer.from('Old devbox.lock');
+      const newLockFileContent = Buffer.from('New devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
       expect(
         await updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
-          updatedDeps: [],
+          updatedDeps: [{ manager: 'devbox', lockFiles: ['devbox.lock'] }],
           config: {},
         }),
       ).toEqual([
@@ -75,7 +72,7 @@ describe('modules/manager/devbox/artifacts', () => {
           file: {
             type: 'addition',
             path: 'devbox.lock',
-            contents: 'New devbox.lock',
+            contents: newLockFileContent,
           },
         },
       ]);
@@ -102,13 +99,15 @@ describe('modules/manager/devbox/artifacts', () => {
           modified: ['devbox.lock'],
         }),
       );
-      fs.readLocalFile.mockResolvedValueOnce('New devbox.lock');
-      fs.readLocalFile.mockResolvedValueOnce(devboxJson);
+      const oldLockFileContent = Buffer.from('old devbox.lock');
+      const newLockFileContent = Buffer.from('New devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
       expect(
         await updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
-          updatedDeps: [],
+          updatedDeps: [{}],
           config: {
             isLockFileMaintenance: true,
           },
@@ -118,7 +117,7 @@ describe('modules/manager/devbox/artifacts', () => {
           file: {
             type: 'addition',
             path: 'devbox.lock',
-            contents: 'New devbox.lock',
+            contents: newLockFileContent,
           },
         },
       ]);
@@ -136,7 +135,7 @@ describe('modules/manager/devbox/artifacts', () => {
       ]);
     });
 
-    it('returns null if devbox.lock not modified', async () => {
+    it('returns null if no changes are found', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
       git.getRepoStatus.mockResolvedValueOnce(
@@ -145,8 +144,6 @@ describe('modules/manager/devbox/artifacts', () => {
         }),
       );
       mockExecAll();
-      fs.readLocalFile.mockResolvedValueOnce('New devbox.lock');
-      fs.readLocalFile.mockResolvedValueOnce(devboxJson);
       expect(
         await updateArtifacts({
           packageFileName: 'devbox.json',
@@ -157,14 +154,80 @@ describe('modules/manager/devbox/artifacts', () => {
       ).toBeNull();
     });
 
-    it('returns an artifact error on failure', async () => {
+    it('returns null if devbox.lock not found after update', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+        }),
+      );
+      mockExecAll();
+      const oldLockFileContent = Buffer.from('Old devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
       expect(
         await updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
-          updatedDeps: [],
+          updatedDeps: [{}],
+          config: {},
+        }),
+      ).toBeNull();
+    });
+
+    it('returns null if devbox.lock not found', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+        }),
+      );
+      mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'devbox.json',
+          newPackageFileContent: devboxJson,
+          updatedDeps: [{}],
+          config: {},
+        }),
+      ).toBeNull();
+    });
+
+    it('returns null if no lock file changes are found', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+        }),
+      );
+      mockExecAll();
+      const oldLockFileContent = Buffer.from('Old devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'devbox.json',
+          newPackageFileContent: devboxJson,
+          updatedDeps: [{}],
+          config: {},
+        }),
+      ).toBeNull();
+    });
+
+    it('returns an artifact error on failure', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
+      const newLockFileContent = codeBlock`{}`;
+      const oldLockFileContent = Buffer.from('New devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'devbox.json',
+          newPackageFileContent: devboxJson,
+          updatedDeps: [{}],
           config: {},
         }),
       ).toEqual([

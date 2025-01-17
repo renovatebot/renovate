@@ -4,26 +4,29 @@ import { extractPackageFile } from '.';
 describe('modules/manager/devbox/extract', () => {
   describe('extractPackageFile', () => {
     it('returns null when the devbox JSON file is empty', () => {
-      const result = extractPackageFile('');
+      const result = extractPackageFile('', 'devbox.lock');
       expect(result).toBeNull();
     });
 
     it('returns null when the devbox JSON file is malformed', () => {
-      const result = extractPackageFile('malformed json}}}}}');
+      const result = extractPackageFile('malformed json}}}}}', 'devbox.lock');
       expect(result).toBeNull();
     });
 
     it('returns null when the devbox JSON file has no packages', () => {
-      const result = extractPackageFile('{}');
+      const result = extractPackageFile('{}', 'devbox.lock');
       expect(result).toBeNull();
     });
 
     it('returns a package dependency when the devbox JSON file has a single package', () => {
-      const result = extractPackageFile(codeBlock`
+      const result = extractPackageFile(
+        codeBlock`
         {
           "packages": ["nodejs@20.1.8"]
         }
-      `);
+      `,
+        'devbox.lock',
+      );
       expect(result).toEqual({
         deps: [
           {
@@ -31,20 +34,22 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'devbox',
             packageName: 'nodejs',
-            versioning: 'devbox',
           },
         ],
       });
     });
 
     it('returns a package dependency when the devbox JSON file has a single package with a version object', () => {
-      const result = extractPackageFile(codeBlock`
+      const result = extractPackageFile(
+        codeBlock`
         {
           "packages": {
             "nodejs": "20.1.8"
           }
         }
-      `);
+      `,
+        'devbox.lock',
+      );
       expect(result).toEqual({
         deps: [
           {
@@ -52,29 +57,44 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'devbox',
             packageName: 'nodejs',
-            versioning: 'devbox',
           },
         ],
       });
     });
 
     it('returns null when the devbox JSON file has a single package with a version object and a version range', () => {
-      const result = extractPackageFile(codeBlock`
+      const result = extractPackageFile(
+        codeBlock`
         {
           "packages": {
             "nodejs": "^20.1.8"
           }
         }
-      `);
-      expect(result).toBeNull();
+      `,
+        'devbox.lock',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '^20.1.8',
+            datasource: 'devbox',
+            depName: 'nodejs',
+            packageName: 'nodejs',
+            skipReason: 'invalid-version',
+          },
+        ],
+      });
     });
 
     it('returns a package dependency when the devbox JSON file has multiple packages', () => {
-      const result = extractPackageFile(codeBlock`
+      const result = extractPackageFile(
+        codeBlock`
         {
           "packages": ["nodejs@20.1.8", "yarn@1.22.10"]
         }
-      `);
+      `,
+        'devbox.lock',
+      );
       expect(result).toEqual({
         deps: [
           {
@@ -82,28 +102,29 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'devbox',
             packageName: 'nodejs',
-            versioning: 'devbox',
           },
           {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'devbox',
             packageName: 'yarn',
-            versioning: 'devbox',
           },
         ],
       });
     });
 
     it('returns a package dependency when the devbox JSON file has multiple packages with in a packages object', () => {
-      const result = extractPackageFile(codeBlock`
+      const result = extractPackageFile(
+        codeBlock`
         {
           "packages": {
             "nodejs": "20.1.8",
             "yarn": "1.22.10"
           }
         }
-      `);
+      `,
+        'devbox.lock',
+      );
       expect(result).toEqual({
         deps: [
           {
@@ -111,21 +132,20 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'devbox',
             packageName: 'nodejs',
-            versioning: 'devbox',
           },
           {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'devbox',
             packageName: 'yarn',
-            versioning: 'devbox',
           },
         ],
       });
     });
 
     it('returns a package dependency when the devbox JSON file has multiple packages with package objects', () => {
-      const result = extractPackageFile(codeBlock`
+      const result = extractPackageFile(
+        codeBlock`
         {
           "packages": {
             "nodejs": {
@@ -136,7 +156,9 @@ describe('modules/manager/devbox/extract', () => {
             }
           }
         }
-      `);
+      `,
+        'devbox.lock',
+      );
       expect(result).toEqual({
         deps: [
           {
@@ -144,21 +166,20 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'devbox',
             packageName: 'nodejs',
-            versioning: 'devbox',
           },
           {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'devbox',
             packageName: 'yarn',
-            versioning: 'devbox',
           },
         ],
       });
     });
 
     it('skips invalid dependencies', () => {
-      const result = extractPackageFile(codeBlock`
+      const result = extractPackageFile(
+        codeBlock`
         {
           "packages": {
             "nodejs": "20.1.8",
@@ -166,7 +187,9 @@ describe('modules/manager/devbox/extract', () => {
             "invalid": "invalid"
           }
         }
-      `);
+      `,
+        'devbox.lock',
+      );
       expect(result).toEqual({
         deps: [
           {
@@ -174,21 +197,27 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'devbox',
             packageName: 'nodejs',
-            versioning: 'devbox',
           },
           {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'devbox',
             packageName: 'yarn',
-            versioning: 'devbox',
+          },
+          {
+            currentValue: 'invalid',
+            datasource: 'devbox',
+            depName: 'invalid',
+            packageName: 'invalid',
+            skipReason: 'invalid-version',
           },
         ],
       });
     });
 
     it('skips invalid dependencies with package objects', () => {
-      const result = extractPackageFile(codeBlock`
+      const result = extractPackageFile(
+        codeBlock`
         {
           "packages": {
             "nodejs": "20.1.8",
@@ -198,7 +227,9 @@ describe('modules/manager/devbox/extract', () => {
             }
           }
         }
-      `);
+      `,
+        'devbox.lock',
+      );
       expect(result).toEqual({
         deps: [
           {
@@ -206,25 +237,33 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'devbox',
             packageName: 'nodejs',
-            versioning: 'devbox',
           },
           {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'devbox',
             packageName: 'yarn',
-            versioning: 'devbox',
+          },
+          {
+            currentValue: 'invalid',
+            datasource: 'devbox',
+            depName: 'invalid',
+            packageName: 'invalid',
+            skipReason: 'invalid-version',
           },
         ],
       });
     });
 
     it('skips invalid dependencies from the packages array', () => {
-      const result = extractPackageFile(codeBlock`
+      const result = extractPackageFile(
+        codeBlock`
         {
           "packages": ["nodejs@20.1.8", "yarn@1.22.10", "invalid@invalid"]
         }
-      `);
+      `,
+        'devbox.lock',
+      );
       expect(result).toEqual({
         deps: [
           {
@@ -232,14 +271,19 @@ describe('modules/manager/devbox/extract', () => {
             currentValue: '20.1.8',
             datasource: 'devbox',
             packageName: 'nodejs',
-            versioning: 'devbox',
           },
           {
             depName: 'yarn',
             currentValue: '1.22.10',
             datasource: 'devbox',
             packageName: 'yarn',
-            versioning: 'devbox',
+          },
+          {
+            currentValue: 'invalid',
+            datasource: 'devbox',
+            depName: 'invalid',
+            packageName: 'invalid',
+            skipReason: 'invalid-version',
           },
         ],
       });
