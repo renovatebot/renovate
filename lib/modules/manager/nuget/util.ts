@@ -2,10 +2,15 @@ import upath from 'upath';
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
-import { findUpLocal, readLocalFile } from '../../../util/fs';
+import {
+  findLocalSiblingOrParent,
+  findUpLocal,
+  readLocalFile,
+} from '../../../util/fs';
 import { minimatch } from '../../../util/minimatch';
 import { regEx } from '../../../util/regex';
 import { nugetOrg } from '../../datasource/nuget';
+import { GlobalJson } from './schema';
 import type { NugetPackageDependency, Registry } from './types';
 
 export async function readFileAsXmlDocument(
@@ -206,4 +211,32 @@ function sortPatterns(
   }
 
   return a[0].localeCompare(b[0]) * -1;
+}
+
+export async function findGlobalJson(
+  packageFile: string,
+): Promise<GlobalJson | null> {
+  const globalJsonPath = await findLocalSiblingOrParent(
+    packageFile,
+    'global.json',
+  );
+  if (!globalJsonPath) {
+    return null;
+  }
+
+  const content = await readLocalFile(globalJsonPath, 'utf8');
+  if (!content) {
+    logger.debug({ packageFile, globalJsonPath }, 'Failed to read global.json');
+    return null;
+  }
+
+  const result = await GlobalJson.safeParseAsync(content);
+  if (!result.success) {
+    logger.debug(
+      { packageFile, globalJsonPath, err: result.error },
+      'Failed to parse global.json',
+    );
+    return null;
+  }
+  return result.data;
 }
