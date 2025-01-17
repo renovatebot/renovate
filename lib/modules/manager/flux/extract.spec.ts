@@ -35,6 +35,16 @@ describe('modules/manager/flux/extract', () => {
             registryUrls: ['https://kubernetes-sigs.github.io/external-dns/'],
           },
           {
+            autoReplaceStringTemplate:
+              '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v0.13.4',
+            datasource: DockerDatasource.id,
+            depName: 'k8s.gcr.io/external-dns/external-dns',
+            replaceString: 'v0.13.4',
+            versioning: DockerDatasource.id,
+          },
+          {
             currentValue: 'v11.35.4',
             datasource: GithubTagsDatasource.id,
             depName: 'renovate-repo',
