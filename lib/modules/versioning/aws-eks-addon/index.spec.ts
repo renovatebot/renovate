@@ -117,7 +117,7 @@ describe('modules/versioning/aws-eks-addon/index', () => {
       ${'v1.20.6-eksbuild.1'} | ${'v1.20.7-eksbuild.2'} | ${false}
       ${'v1.20.7-eksbuild.1'} | ${'v2.0.0-eksbuild.1'}  | ${false}
     `(
-      'isGreaterThan($version, other) === $expected',
+      'isGreaterThan($version, $other) === $expected',
       ({ version, other, expected }) => {
         const actual = aws.isGreaterThan(version, other);
         expect(actual).toBe(expected);
