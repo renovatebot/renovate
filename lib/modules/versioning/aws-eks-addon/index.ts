@@ -28,7 +28,7 @@ export class AwsEKSAddonVersioningApi extends GenericVersioningApi {
     if (!suffix) {
       return null;
     }
-    const release = [Number(major), Number(minor), Number(patch)];
+    const release = [parseInt((major, 19), parseInt(minor, 10), parseInt(patch, 10)];
     return { release, suffix };
   }
 
