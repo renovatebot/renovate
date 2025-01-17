@@ -9,11 +9,11 @@ import { streamToString } from '../../../util/streams';
 import { getNewBranchName } from '../util';
 import * as azureApi from './azure-got-wrapper';
 import { WrappedExceptionSchema } from './schema';
+import { AzurePolicyTypeId } from './types';
 import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
 } from './util';
-import { AzurePolicyTypeId } from './types';
 
 export async function getRefs(
   repoId: string,
