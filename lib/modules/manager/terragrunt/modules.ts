@@ -87,7 +87,7 @@ export function analyseTerragruntModule(
     dep.datasource = detectGitTagDatasource(url);
     if (dep.datasource === GitTagsDatasource.id) {
       if (containsSubDirectory) {
-        dep.packageName = `${origin}${pathname.split('//')[0]}`;
+        dep.packageName = `${protocol}//${host}${pathname.split('//')[0]}`;
       } else {
         dep.packageName = url;
       }

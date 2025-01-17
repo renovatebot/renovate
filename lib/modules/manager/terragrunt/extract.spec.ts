@@ -201,6 +201,13 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'ssh://git@mygit.com/hashicorp/example',
           },
           {
+            currentValue: 'v1.0.4',
+            datasource: 'git-tags',
+            depName: 'mygit.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'ssh://git@mygit.com/hashicorp/example',
+          },
+          {
             skipReason: 'no-source',
           },
           {
@@ -255,7 +262,7 @@ describe('modules/manager/terragrunt/extract', () => {
           },
         ],
       });
-      expect(res?.deps).toHaveLength(36);
+      expect(res?.deps).toHaveLength(37);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
@@ -419,6 +426,13 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'ssh://git@mygit.com/hashicorp/example',
           },
           {
+            currentValue: 'v1.0.4',
+            datasource: 'git-tags',
+            depName: 'mygit.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'ssh://git@mygit.com/hashicorp/example',
+          },
+          {
             skipReason: 'no-source',
           },
           {
@@ -466,7 +480,7 @@ describe('modules/manager/terragrunt/extract', () => {
           },
         ],
       });
-      expect(res?.deps).toHaveLength(35);
+      expect(res?.deps).toHaveLength(36);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
@@ -630,6 +644,13 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'ssh://git@mygit.com/hashicorp/example',
           },
           {
+            currentValue: 'v1.0.4',
+            datasource: 'git-tags',
+            depName: 'mygit.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'ssh://git@mygit.com/hashicorp/example',
+          },
+          {
             skipReason: 'no-source',
           },
           {
@@ -677,7 +698,7 @@ describe('modules/manager/terragrunt/extract', () => {
           },
         ],
       });
-      expect(res?.deps).toHaveLength(35);
+      expect(res?.deps).toHaveLength(36);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
