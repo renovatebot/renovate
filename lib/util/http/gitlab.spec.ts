@@ -44,7 +44,9 @@ describe('util/http/gitlab', () => {
       })
       .get('/api/v4/some-url&page=3')
       .reply(200, ['d']);
-    const res = await gitlabApi.getJson('some-url', { paginate: true });
+    const res = await gitlabApi.getJsonUnchecked('some-url', {
+      paginate: true,
+    });
     expect(res.body).toHaveLength(4);
   });
 
@@ -64,7 +66,9 @@ describe('util/http/gitlab', () => {
       })
       .get('/api/v4/some-url&page=3')
       .reply(200, ['d']);
-    const res = await gitlabApi.getJson('some-url', { paginate: true });
+    const res = await gitlabApi.getJsonUnchecked('some-url', {
+      paginate: true,
+    });
     expect(res.body).toHaveLength(4);
   });
 
@@ -87,7 +91,9 @@ describe('util/http/gitlab', () => {
     httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(200, ['a'], {
       link: '<https://gitlab.com/api/v4/some-url&page=3>; rel="last"',
     });
-    const res = await gitlabApi.getJson('some-url', { paginate: true });
+    const res = await gitlabApi.getJsonUnchecked('some-url', {
+      paginate: true,
+    });
     expect(res.body).toHaveLength(1);
   });
 
@@ -140,7 +146,7 @@ describe('util/http/gitlab', () => {
 
     it('ParseError', async () => {
       httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(200, '{{');
-      await expect(gitlabApi.getJson('some-url')).rejects.toThrow(
+      await expect(gitlabApi.getJsonUnchecked('some-url')).rejects.toThrow(
         EXTERNAL_HOST_ERROR,
       );
     });
