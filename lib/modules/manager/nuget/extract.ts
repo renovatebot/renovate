@@ -80,21 +80,21 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
         dep.skipReason = 'invalid-version';
       }
 
-      let groupName: string | undefined;
+      let sharedVariableName: string | undefined;
 
       currentValue = currentValue
         ?.trim()
         ?.replace(/^\$\((\w+)\)$/, (match, key) => {
           const val = vars.get(key);
           if (val) {
-            groupName = key;
+            sharedVariableName = key;
             return val;
           }
           return match;
         });
 
-      if (groupName) {
-        dep.groupName = groupName;
+      if (sharedVariableName) {
+        dep.sharedVariableName = sharedVariableName;
       }
 
       currentValue = checkVersion
