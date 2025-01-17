@@ -164,7 +164,7 @@ export class GoProxyDatasource extends Datasource {
       '@v',
       `${version}.info`,
     );
-    const res = await this.http.getJson<VersionInfo>(url);
+    const res = await this.http.getJsonUnchecked<VersionInfo>(url);
 
     const result: Release = {
       version: res.body.Version,
@@ -187,7 +187,7 @@ export class GoProxyDatasource extends Datasource {
         this.encodeCase(packageName),
         '@latest',
       );
-      const res = await this.http.getJson<VersionInfo>(url);
+      const res = await this.http.getJsonUnchecked<VersionInfo>(url);
       return res.body.Version;
     } catch (err) {
       logger.trace({ err }, 'Failed to get latest version');
@@ -213,9 +213,24 @@ export class GoProxyDatasource extends Datasource {
         major += 1; // v0 and v1 are the same module
       }
 
+      let releases: Release[] = [];
+
       try {
         const res = await this.listVersions(baseUrl, pkg);
-        const releases = await p.map(res, async (versionInfo) => {
+
+        // Artifactory returns all versions in any major (past and future),
+        // so starting from v2, we filter them in order to avoid the infinite loop
+        const filteredReleases = res.filter(({ version }) => {
+          if (major < 2) {
+            return true;
+          }
+
+          return (
+            version.split(regEx(/[^\d]+/)).find(is.truthy) === major.toString()
+          );
+        });
+
+        releases = await p.map(filteredReleases, async (versionInfo) => {
           const { version, newDigest, releaseTimestamp } = versionInfo;
 
           if (releaseTimestamp) {
@@ -257,6 +272,10 @@ export class GoProxyDatasource extends Datasource {
             result.releases.push(releaseFromLatest);
           }
         }
+      }
+
+      if (!releases.length) {
+        break;
       }
     }
 

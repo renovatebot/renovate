@@ -4,6 +4,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { BazelDatasource } from '../../datasource/bazel';
+import { DockerDatasource } from '../../datasource/docker';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { MavenDatasource } from '../../datasource/maven';
 import * as parser from './parser';
@@ -290,6 +291,60 @@ describe('modules/manager/bazel-module/extract', () => {
       ]);
     });
 
+    it('returns oci.pull dependencies', async () => {
+      const input = codeBlock`
+        oci.pull(
+          name = "nginx_image",
+          digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+          image = "index.docker.io/library/nginx",
+          platforms = ["linux/amd64"],
+          tag = "1.27.1",
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+      if (!result) {
+        throw new Error('Expected a result.');
+      }
+      expect(result.deps).toEqual([
+        {
+          datasource: DockerDatasource.id,
+          depType: 'oci_pull',
+          depName: 'nginx_image',
+          packageName: 'index.docker.io/library/nginx',
+          currentValue: '1.27.1',
+          currentDigest:
+            'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
+        },
+      ]);
+    });
+
+    it('returns oci.pull dependencies without tags', async () => {
+      const input = codeBlock`
+        oci.pull(
+          name = "nginx_image",
+          digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+          image = "index.docker.io/library/nginx",
+          platforms = ["linux/amd64"],
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+      if (!result) {
+        throw new Error('Expected a result.');
+      }
+      expect(result.deps).toEqual([
+        {
+          datasource: DockerDatasource.id,
+          depType: 'oci_pull',
+          depName: 'nginx_image',
+          packageName: 'index.docker.io/library/nginx',
+          currentDigest:
+            'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
+        },
+      ]);
+    });
+
     it('returns maven.install and bazel_dep dependencies together', async () => {
       const input = codeBlock`
         bazel_dep(name = "bazel_jar_jar", version = "0.1.0")
@@ -336,6 +391,32 @@ describe('modules/manager/bazel-module/extract', () => {
           versioning: 'gradle',
         },
       ]);
+    });
+
+    it('returns git_repository dependencies', async () => {
+      const input = codeBlock`
+        git_repository(
+            name = "rules_foo",
+            commit = "850cb49c8649e463b80ef7984e7c744279746170",
+            remote = "https://github.com/example/rules_foo.git",
+        )
+        `;
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+      if (!result) {
+        throw new Error('Expected a result.');
+      }
+      expect(result.deps).toHaveLength(1);
+      expect(result.deps).toEqual(
+        expect.arrayContaining([
+          {
+            datasource: GithubTagsDatasource.id,
+            depType: 'git_repository',
+            depName: 'rules_foo',
+            currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
+            packageName: 'example/rules_foo',
+          },
+        ]),
+      );
     });
   });
 });

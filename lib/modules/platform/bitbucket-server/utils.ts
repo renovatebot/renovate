@@ -68,7 +68,7 @@ function callApi<T>(
       return bitbucketServerHttp.deleteJson<T>(apiUrl, options);
     case 'get':
     default:
-      return bitbucketServerHttp.getJson<T>(apiUrl, options);
+      return bitbucketServerHttp.getJsonUnchecked<T>(apiUrl, options);
   }
 }
 

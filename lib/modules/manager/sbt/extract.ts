@@ -218,7 +218,7 @@ function depHandler(ctx: Ctx): Ctx {
   }
 
   if (variableName) {
-    dep.groupName = variableName;
+    dep.sharedVariableName = variableName;
     dep.variableName = variableName;
   }
 

@@ -1,67 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/platform/gitlab/index createPr(branchName, title, body) raises with squash enabled when repository squash option is always 1`] = `
-{
-  "id": 1,
-  "iid": 12345,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-  "title": "some title",
-}
-`;
-
-exports[`modules/platform/gitlab/index createPr(branchName, title, body) raises with squash enabled when repository squash option is default_on 1`] = `
-{
-  "id": 1,
-  "iid": 12345,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-  "title": "some title",
-}
-`;
-
-exports[`modules/platform/gitlab/index createPr(branchName, title, body) returns the PR 1`] = `
-{
-  "id": 1,
-  "iid": 12345,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-  "title": "some title",
-}
-`;
-
-exports[`modules/platform/gitlab/index createPr(branchName, title, body) supports draftPR on < 13.2 1`] = `
-{
-  "id": 1,
-  "iid": 12345,
-  "isDraft": true,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-  "title": "some title",
-}
-`;
-
-exports[`modules/platform/gitlab/index createPr(branchName, title, body) supports draftPR on >= 13.2 1`] = `
-{
-  "id": 1,
-  "iid": 12345,
-  "isDraft": true,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-  "title": "some title",
-}
-`;
-
-exports[`modules/platform/gitlab/index createPr(branchName, title, body) uses default branch 1`] = `
-{
-  "id": 1,
-  "iid": 12345,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-  "title": "some title",
-}
-`;
-
 exports[`modules/platform/gitlab/index getBranchPr(branchName) should return the PR object 1`] = `
 {
   "bodyStruct": {
@@ -197,6 +135,7 @@ exports[`modules/platform/gitlab/index initRepo should fall back respecting when
   [
     {
       "cloneSubmodules": undefined,
+      "cloneSubmodulesFilter": undefined,
       "defaultBranch": "master",
       "ignorePrAuthor": undefined,
       "mergeMethod": "merge",
@@ -212,6 +151,7 @@ exports[`modules/platform/gitlab/index initRepo should use ssh_url_to_repo if gi
   [
     {
       "cloneSubmodules": undefined,
+      "cloneSubmodulesFilter": undefined,
       "defaultBranch": "master",
       "ignorePrAuthor": undefined,
       "mergeMethod": "merge",

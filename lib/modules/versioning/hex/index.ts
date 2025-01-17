@@ -31,7 +31,7 @@ function npm2hex(input: string): string {
     .map((str) => str.trim())
     .filter((str) => str !== '');
   let output = '';
-  const operators = ['^', '=', '>', '<', '<=', '>=', '~'];
+  const operators = ['^', '=', '>', '<', '<=', '>=', '~>'];
   for (let i = 0; i < res.length; i += 1) {
     if (i === res.length - 1) {
       output += res[i];

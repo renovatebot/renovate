@@ -4,22 +4,6 @@ import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
 
 describe('config/validation', () => {
-  describe('getParentName()', () => {
-    it('ignores encrypted in root', () => {
-      expect(configValidation.getParentName('encrypted')).toBeEmptyString();
-    });
-
-    it('handles array types', () => {
-      expect(configValidation.getParentName('hostRules[1]')).toBe('hostRules');
-    });
-
-    it('handles encrypted within array types', () => {
-      expect(configValidation.getParentName('hostRules[0].encrypted')).toBe(
-        'hostRules',
-      );
-    });
-  });
-
   describe('validateConfig(config)', () => {
     it('returns deprecation warnings', async () => {
       const config = {

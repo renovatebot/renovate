@@ -6,7 +6,6 @@ import { logger } from '../../../../logger';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getChildProcessEnv } from '../../../../util/exec/env';
 import {
-  deleteLocalFile,
   ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
@@ -23,7 +22,13 @@ import { scm } from '../../../platform/scm';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import { getZeroInstallPaths } from '../extract/yarn';
 import type { NpmManagerData } from '../types';
-import { composeLockFile, parseLockFile } from '../utils';
+import {
+  composeLockFile,
+  getNpmrcContent,
+  parseLockFile,
+  resetNpmrcContent,
+  updateNpmrcContent,
+} from '../utils';
 import * as npm from './npm';
 import * as pnpm from './pnpm';
 import { processHostRules } from './rules';
@@ -245,60 +250,6 @@ export async function writeUpdatedPackageFiles(
   }
 }
 
-async function getNpmrcContent(dir: string): Promise<string | null> {
-  const npmrcFilePath = upath.join(dir, '.npmrc');
-  let originalNpmrcContent: string | null = null;
-  try {
-    originalNpmrcContent = await readLocalFile(npmrcFilePath, 'utf8');
-  } catch /* istanbul ignore next */ {
-    originalNpmrcContent = null;
-  }
-  if (originalNpmrcContent) {
-    logger.debug(`npmrc file ${npmrcFilePath} found in repository`);
-  }
-  return originalNpmrcContent;
-}
-
-async function updateNpmrcContent(
-  dir: string,
-  originalContent: string | null,
-  additionalLines: string[],
-): Promise<void> {
-  const npmrcFilePath = upath.join(dir, '.npmrc');
-  const newNpmrc = originalContent
-    ? [originalContent, ...additionalLines]
-    : additionalLines;
-  try {
-    const newContent = newNpmrc.join('\n');
-    if (newContent !== originalContent) {
-      logger.debug(`Writing updated .npmrc file to ${npmrcFilePath}`);
-      await writeLocalFile(npmrcFilePath, `${newContent}\n`);
-    }
-  } catch /* istanbul ignore next */ {
-    logger.warn('Unable to write custom npmrc file');
-  }
-}
-
-async function resetNpmrcContent(
-  dir: string,
-  originalContent: string | null,
-): Promise<void> {
-  const npmrcFilePath = upath.join(dir, '.npmrc');
-  if (originalContent) {
-    try {
-      await writeLocalFile(npmrcFilePath, originalContent);
-    } catch /* istanbul ignore next */ {
-      logger.warn('Unable to reset npmrc to original contents');
-    }
-  } else {
-    try {
-      await deleteLocalFile(npmrcFilePath);
-    } catch /* istanbul ignore next */ {
-      logger.warn('Unable to delete custom npmrc');
-    }
-  }
-}
-
 // istanbul ignore next
 async function updateYarnOffline(
   lockFileDir: string,
@@ -361,7 +312,7 @@ export async function updateYarnBinary(
   let yarnrcYml = existingYarnrcYmlContent;
   try {
     const yarnrcYmlFilename = upath.join(lockFileDir, '.yarnrc.yml');
-    yarnrcYml ||= (await getFile(yarnrcYmlFilename)) ?? undefined;
+    yarnrcYml ??= (await getFile(yarnrcYmlFilename)) ?? undefined;
     const newYarnrcYml = await readLocalFile(yarnrcYmlFilename, 'utf8');
     if (!is.string(yarnrcYml) || !is.string(newYarnrcYml)) {
       return existingYarnrcYmlContent;
@@ -417,14 +368,6 @@ export async function getAdditionalFiles(
   }
   if (!config.updateLockFiles) {
     logger.debug('Skipping lock file generation');
-    return { artifactErrors, updatedArtifacts };
-  }
-  if (
-    config.reuseExistingBranch &&
-    !config.updatedPackageFiles?.length &&
-    config.upgrades?.every((upgrade) => upgrade.isLockfileUpdate)
-  ) {
-    logger.debug('Existing branch contains all necessary lock file updates');
     return { artifactErrors, updatedArtifacts };
   }
   logger.debug('Getting updated lock files');
