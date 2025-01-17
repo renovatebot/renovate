@@ -28,10 +28,7 @@ describe('modules/datasource/github-runners/index', () => {
       });
 
       expect(res).toMatchObject({
-        releases: [
-          { version: '22.04', isStable: false },
-          { version: '24.04', isStable: false },
-        ],
+        releases: [{ version: '22.04' }, { version: '24.04' }],
         sourceUrl: 'https://github.com/actions/runner-images',
       });
     });
