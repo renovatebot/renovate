@@ -9,6 +9,7 @@ import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
+  TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
 import type * as _git from '../../../util/git';
@@ -1166,10 +1167,10 @@ describe('modules/platform/gitea/index', () => {
 
       const res = await gitea.getPrList();
       expect(res).toMatchObject([
-        { number: 1, title: 'Some PR' },
-        { number: 2, title: 'Other PR' },
-        { number: 3, title: 'Draft PR' },
         { number: 4, title: 'Merged PR' },
+        { number: 3, title: 'Draft PR' },
+        { number: 2, title: 'Other PR' },
+        { number: 1, title: 'Some PR' },
       ]);
     });
 
@@ -1209,10 +1210,10 @@ describe('modules/platform/gitea/index', () => {
       const res = await gitea.getPrList();
 
       expect(res).toMatchObject([
-        { number: 1, title: 'Some PR' },
-        { number: 2, title: 'Other PR' },
-        { number: 3, title: 'Draft PR' },
         { number: 4, title: 'Merged PR' },
+        { number: 3, title: 'Draft PR' },
+        { number: 2, title: 'Other PR' },
+        { number: 1, title: 'Some PR' },
       ]);
     });
 
@@ -1244,16 +1245,16 @@ describe('modules/platform/gitea/index', () => {
       await initFakeRepo(scope);
 
       const res1 = await gitea.getPrList();
-      expect(res1).toMatchObject([{ number: 1 }, { number: 2 }]);
+      expect(res1).toMatchObject([{ number: 2 }, { number: 1 }]);
 
       memCache.set('gitea-pr-cache-synced', false);
 
       const res2 = await gitea.getPrList();
       expect(res2).toMatchObject([
-        { number: 1 },
-        { number: 2 },
-        { number: 3 },
         { number: 4 },
+        { number: 3 },
+        { number: 2 },
+        { number: 1 },
       ]);
     });
   });
@@ -1308,6 +1309,18 @@ describe('modules/platform/gitea/index', () => {
       const res = await gitea.getPr(42);
 
       expect(res).toBeNull();
+    });
+
+    it('should throw temporary error for null pull request', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get('/repos/some/repo/pulls')
+        .query({ state: 'all', sort: 'recentupdate' })
+        .reply(200, [null]); // TODO: 404 should be handled
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+
+      await expect(gitea.getPr(42)).rejects.toThrow(TEMPORARY_ERROR);
     });
   });
 

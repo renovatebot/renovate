@@ -73,7 +73,8 @@ export class GerritScm extends DefaultGitScm {
       return !mergeInfo.mergeable;
     } else {
       logger.warn(
-        `There is no open change with branch=${branch} and baseBranch=${baseBranch}`,
+        { branch, baseBranch },
+        'There is no open change with this branch',
       );
       return true;
     }

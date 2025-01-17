@@ -221,9 +221,12 @@ export async function start(): Promise<number> {
     await exportStats(config);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {
-      logger.fatal(err.message.substring(6));
+      logger.fatal(
+        { errorMessage: err.message.substring(6) },
+        'Initialization error',
+      );
     } else {
-      logger.fatal({ err }, `Fatal error: ${String(err.message)}`);
+      logger.fatal({ err }, 'Unknown error');
     }
     if (!config!) {
       // return early if we can't parse config options

@@ -629,7 +629,7 @@ export class DockerDatasource extends Datasource {
 
       // typescript issue :-/
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      const res = (await this.http.getJson<QuayRestDockerTags>(
+      const res = (await this.http.getJsonUnchecked<QuayRestDockerTags>(
         url,
       )) as HttpResponse<QuayRestDockerTags>;
       const pageTags = res.body.tags.map((tag) => tag.name);
@@ -671,7 +671,7 @@ export class DockerDatasource extends Datasource {
     do {
       let res: HttpResponse<{ tags: string[] }>;
       try {
-        res = await this.http.getJson<{ tags: string[] }>(url, {
+        res = await this.http.getJsonUnchecked<{ tags: string[] }>(url, {
           headers,
           noAuth: true,
         });
@@ -831,7 +831,7 @@ export class DockerDatasource extends Datasource {
       // TODO: types (#22198)
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`,
     );
-    const newTag = newValue ?? 'latest';
+    const newTag = is.nonEmptyString(newValue) ? newValue : 'latest';
     let digest: string | null = null;
     try {
       let architecture: string | null | undefined = null;

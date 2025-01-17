@@ -7,7 +7,9 @@ export const gitlabApi = new GitlabHttp();
 
 export async function getUserID(username: string): Promise<number> {
   const userInfo = (
-    await gitlabApi.getJson<{ id: number }[]>(`users?username=${username}`)
+    await gitlabApi.getJsonUnchecked<{ id: number }[]>(
+      `users?username=${username}`,
+    )
   ).body;
 
   if (is.emptyArray(userInfo)) {
@@ -22,7 +24,9 @@ export async function getUserID(username: string): Promise<number> {
 async function getMembers(group: string): Promise<GitLabUser[]> {
   const groupEncoded = encodeURIComponent(group);
   return (
-    await gitlabApi.getJson<GitLabUser[]>(`groups/${groupEncoded}/members`)
+    await gitlabApi.getJsonUnchecked<GitLabUser[]>(
+      `groups/${groupEncoded}/members`,
+    )
   ).body;
 }
 
@@ -39,7 +43,8 @@ export async function getMemberUsernames(group: string): Promise<string[]> {
 export async function isUserBusy(user: string): Promise<boolean> {
   try {
     const url = `/users/${user}/status`;
-    const userStatus = (await gitlabApi.getJson<GitlabUserStatus>(url)).body;
+    const userStatus = (await gitlabApi.getJsonUnchecked<GitlabUserStatus>(url))
+      .body;
     return userStatus.availability === 'busy';
   } catch (err) {
     logger.warn({ err }, 'Failed to get user status');
