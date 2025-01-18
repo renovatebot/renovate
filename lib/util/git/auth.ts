@@ -26,8 +26,8 @@ export function getGitAuthenticatedEnvironmentVariables(
 ): NodeJS.ProcessEnv {
   if (!token && !(username && password)) {
     logger.warn(
-      // TODO: types (#22198)
-      `Could not create environment variable for ${matchHost!} as neither token or username and password was set`,
+      { host: matchHost },
+      `Could not create environment variable for host as neither token or username and password was set`,
     );
     return { ...environmentVariables };
   }
@@ -41,9 +41,10 @@ export function getGitAuthenticatedEnvironmentVariables(
     gitConfigCount = parseInt(gitConfigCountEnvVariable, 10);
     if (Number.isNaN(gitConfigCount)) {
       logger.warn(
-        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer: ${String(
-          process.env.GIT_CONFIG_COUNT,
-        )}. Ignoring it.`,
+        {
+          GIT_CONFIG_COUNT: process.env.GIT_CONFIG_COUNT,
+        },
+        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer. Ignoring it.`,
       );
       gitConfigCount = 0;
     }

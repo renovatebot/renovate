@@ -23,6 +23,13 @@ For more information see [the OpenTelemetry docs](opentelemetry.md).
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
+## `RENOVATE_STATIC_REPO_CONFIG`
+
+If set to a _valid_ `JSON` string containing a _valid_ Renovate configuration, it will be applied to the repository config before resolving the actual configuration file within the repository.
+
+> [!warning]
+> An invalid value will result in the scan being aborted.
+
 ## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
 
 If set to any value, Renovate will skip attempting to get release labels (e.g. gitRef, sourceUrl) from manifest annotations for `https://index.docker.io`.
@@ -38,6 +45,10 @@ This includes the following:
 ## `RENOVATE_X_DOCKER_HUB_TAGS_DISABLE`
 
 If set to any value, Renovate will stop using the Docker Hub API (`https://hub.docker.com`) to fetch tags and instead use the normal Docker API for images pulled from `https://index.docker.io`.
+
+## `RENOVATE_X_ENCRYPTED_STRICT`
+
+If set to `"true"`, a config error Issue will be raised in case repository config contains `encrypted` objects without any `privateKey` defined.
 
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 
