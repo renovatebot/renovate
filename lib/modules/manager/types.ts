@@ -6,7 +6,12 @@ import type {
   ValidationMessage,
 } from '../../config/types';
 import type { Category } from '../../constants';
-import type { ModuleApi, RangeStrategy, SkipReason } from '../../types';
+import type {
+  ModuleApi,
+  RangeStrategy,
+  SkipReason,
+  StageName,
+} from '../../types';
 import type { FileChange } from '../../util/git/types';
 import type { MergeConfidence } from '../../util/merge-confidence/types';
 import type { CustomExtractConfig } from './custom/types';
@@ -101,6 +106,7 @@ export interface LookupUpdate {
   releaseTimestamp?: any;
   newVersionAgeInDays?: number;
   registryUrl?: string;
+  libYears?: number;
 }
 
 /**
@@ -114,7 +120,7 @@ export interface PackageDependency<T = Record<string, any>>
   depName?: string;
   depType?: string;
   fileReplacePosition?: number;
-  groupName?: string;
+  sharedVariableName?: string;
   lineNumber?: number;
   packageName?: string;
   target?: string;
@@ -139,11 +145,13 @@ export interface PackageDependency<T = Record<string, any>>
   digestOneAndOnly?: boolean;
   fixedVersion?: string;
   currentVersion?: string;
+  currentVersionTimestamp?: string;
   lockedVersion?: string;
   propSource?: string;
   registryUrls?: string[] | null;
   rangeStrategy?: RangeStrategy;
   skipReason?: SkipReason;
+  skipStage?: StageName;
   sourceLine?: number;
   newVersion?: string;
   updates?: LookupUpdate[];

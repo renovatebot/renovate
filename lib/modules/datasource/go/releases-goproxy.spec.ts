@@ -494,7 +494,10 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('.v2/@latest')
         .reply(200, { Version: 'v2.4.0' })
         .get('.v3/@v/list')
-        .reply(200, ['v3.0.0', 'v3.0.1', '  \n'].join('\n'))
+        .reply(
+          200,
+          ['v1.0.0', 'v2.0.0', 'v3.0.0', 'v3.0.1', 'v4.0.0', '  \n'].join('\n'),
+        )
         .get('.v3/@v/v3.0.0.info')
         .reply(200, { Version: 'v3.0.0', Time: '2022-05-21T10:33:21Z' })
         .get('.v3/@v/v3.0.1.info')
@@ -602,8 +605,6 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/@v/list')
         .reply(200)
         .get('/@latest')
-        .reply(404)
-        .get('/v2/@v/list')
         .reply(404);
 
       const res = await datasource.getReleases({
@@ -621,9 +622,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/@v/list')
         .reply(200)
         .get('/@latest')
-        .reply(200, { Version: 'v0.0.0-20230905200255-921286631fa9' })
-        .get('/v2/@v/list')
-        .reply(404);
+        .reply(200, { Version: 'v0.0.0-20230905200255-921286631fa9' });
 
       const res = await datasource.getReleases({
         packageName: 'github.com/google/btree',
