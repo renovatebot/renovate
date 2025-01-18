@@ -1091,6 +1091,10 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
         .reply(200, []);
 
       await expect(
@@ -1122,6 +1126,10 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
         .reply(200, []);
 
       await gitlab.setBranchStatus({
@@ -1132,7 +1140,7 @@ describe('modules/platform/gitlab/index', () => {
         url: 'some-url',
       });
 
-      expect(timers.setTimeout.mock.calls).toHaveLength(2);
+      expect(timers.setTimeout.mock.calls).toHaveLength(3);
       expect(timers.setTimeout.mock.calls[0][0]).toBe(1000);
     });
 
@@ -1149,6 +1157,10 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, {})
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+        )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
         .reply(200, [])
         .get(
@@ -1189,6 +1201,10 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
         .reply(200, []);
 
       await gitlab.setBranchStatus({
@@ -1199,7 +1215,7 @@ describe('modules/platform/gitlab/index', () => {
         url: 'some-url',
       });
 
-      expect(timers.setTimeout.mock.calls).toHaveLength(retry);
+      expect(timers.setTimeout.mock.calls).toHaveLength(retry + 1);
       expect(timers.setTimeout.mock.calls[0][0]).toBe(delay);
     });
 
@@ -1237,6 +1253,10 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
         .reply(200, []);
 
       await gitlab.setBranchStatus({
@@ -1247,7 +1267,7 @@ describe('modules/platform/gitlab/index', () => {
         url: 'some-url',
       });
 
-      expect(timers.setTimeout.mock.calls).toHaveLength(retry);
+      expect(timers.setTimeout.mock.calls).toHaveLength(retry + 1);
       expect(timers.setTimeout.mock.calls[0][0]).toBe(delay);
     });
   });
