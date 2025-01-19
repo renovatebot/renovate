@@ -62,7 +62,7 @@ describe('modules/manager/devbox/extract', () => {
       });
     });
 
-    it('returns null when the devbox JSON file has a single package with a version object and a version range', () => {
+    it('returns invalid-version when the devbox JSON file has a single package with an invalid version', () => {
       const result = extractPackageFile(
         codeBlock`
         {
@@ -177,7 +177,7 @@ describe('modules/manager/devbox/extract', () => {
       });
     });
 
-    it('skips invalid dependencies', () => {
+    it('returns invalid dependencies', () => {
       const result = extractPackageFile(
         codeBlock`
         {
@@ -215,7 +215,7 @@ describe('modules/manager/devbox/extract', () => {
       });
     });
 
-    it('skips invalid dependencies with package objects', () => {
+    it('returns invalid dependencies with package objects', () => {
       const result = extractPackageFile(
         codeBlock`
         {
@@ -255,11 +255,11 @@ describe('modules/manager/devbox/extract', () => {
       });
     });
 
-    it('skips invalid dependencies from the packages array', () => {
+    it('returns invalid dependencies from the packages array', () => {
       const result = extractPackageFile(
         codeBlock`
         {
-          "packages": ["nodejs@20.1.8", "yarn@1.22.10", "invalid@invalid"]
+          "packages": ["nodejs@20.1.8", "yarn@1.22.10", "invalid@invalid", "invalid"]
         }
       `,
         'devbox.lock',
@@ -285,8 +285,27 @@ describe('modules/manager/devbox/extract', () => {
             packageName: 'invalid',
             skipReason: 'invalid-version',
           },
+          {
+            currentValue: undefined,
+            datasource: 'devbox',
+            depName: 'invalid',
+            packageName: 'invalid',
+            skipReason: 'not-a-version',
+          },
         ],
       });
+    });
+
+    it('returns null if there are no dependencies', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        {
+          "packages": []
+        }
+      `,
+        'devbox.lock',
+      );
+      expect(result).toBeNull();
     });
   });
 });

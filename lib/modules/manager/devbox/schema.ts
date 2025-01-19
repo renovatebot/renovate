@@ -9,5 +9,3 @@ export const DevboxFile = Jsonc.pipe(
     ]),
   }),
 );
-
-export type DevboxFile = z.infer<typeof DevboxFile>;

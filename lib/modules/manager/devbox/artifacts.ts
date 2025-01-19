@@ -30,18 +30,21 @@ export async function updateArtifacts(
   };
 
   let cmd = '';
-  if (updateConfig.config.isLockFileMaintenance) {
+  if (
+    updateConfig.config.isLockFileMaintenance ||
+    updateConfig.config.updateType === 'lockFileMaintenance'
+  ) {
     cmd += 'devbox update';
   } else if (is.nonEmptyArray(updateConfig.updatedDeps)) {
     cmd += 'devbox install';
   } else {
-    logger.debug('No updated devbox packages - returning null');
+    logger.trace('No updated devbox packages - returning null');
     return null;
   }
 
   const oldLockFileContent = await readLocalFile(lockFileName);
   if (!oldLockFileContent) {
-    logger.debug(`No ${lockFileName} found`);
+    logger.trace(`No ${lockFileName} found`);
     return null;
   }
 
@@ -55,7 +58,7 @@ export async function updateArtifacts(
     ) {
       return null;
     }
-    logger.debug('Returning updated devbox.lock');
+    logger.trace('Returning updated devbox.lock');
     return [
       {
         file: {

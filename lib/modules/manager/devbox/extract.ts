@@ -24,7 +24,10 @@ export function extractPackageFile(
 
   if (Array.isArray(file.packages)) {
     for (const pkgStr of file.packages) {
-      const [pkgName, pkgVer] = pkgStr.split('@');
+      const [pkgName, pkgVer] = pkgStr.split('@') as [
+        string,
+        string | undefined,
+      ];
       const pkgDep = getDep(pkgName, pkgVer);
       if (pkgDep) {
         deps.push(pkgDep);
@@ -51,7 +54,7 @@ export function extractPackageFile(
 
 function getDep(
   packageName: string,
-  version: string,
+  version?: string,
 ): PackageDependency | null {
   const dep = {
     depName: packageName,
@@ -59,7 +62,17 @@ function getDep(
     datasource: DevboxDatasource.id,
     packageName,
   };
-  if (!(dep.currentValue && devboxVersioning.api.isValid(dep.currentValue))) {
+  if (!dep.currentValue) {
+    logger.trace(
+      { packageName },
+      'Skipping devbox dependency with no version in devbox JSON file.',
+    );
+    return {
+      ...dep,
+      skipReason: 'not-a-version',
+    };
+  }
+  if (!devboxVersioning.api.isValid(dep.currentValue)) {
     logger.trace(
       { packageName },
       'Skipping invalid devbox dependency in devbox JSON file.',
