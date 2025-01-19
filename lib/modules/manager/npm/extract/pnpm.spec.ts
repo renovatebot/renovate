@@ -327,7 +327,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
             dependencies:
               loose-envify: 1.4.0
       `;
-      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(lockfileContent);
+      fs.readLocalFile.mockResolvedValueOnce(lockfileContent);
       const res = await getPnpmLock('package.json');
       expect(Object.keys(res.lockedVersionsWithCatalog!)).toHaveLength(1);
     });
