@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
 import upath from 'upath';
+import type { z } from 'zod';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import {
@@ -16,7 +17,8 @@ import type {
   PackageFileContent,
 } from '../../types';
 import type { PnpmDependencySchema, PnpmLockFile } from '../post-update/types';
-import { PnpmCatalogsSchema, PnpmWorkspaceFileSchema } from '../schema';
+import type { PnpmCatalogsSchema } from '../schema';
+import { PnpmWorkspaceFileSchema } from '../schema';
 import type { NpmManagerData } from '../types';
 import { extractDependency, parseDepName } from './common/dependency';
 import type { LockFile, PnpmCatalog, PnpmWorkspaceFile } from './types';
@@ -251,28 +253,31 @@ function getLockedDependencyVersions(
   return res;
 }
 
-export function isPnpmWorkspaceYaml(content: string): boolean {
+export function tryParsePnpmWorkspaceYaml(content: string):
+  | {
+      success: true;
+      data: PnpmWorkspaceFile;
+    }
+  | { success: false; data?: never } {
   try {
-    parseSingleYaml(content, { customSchema: PnpmWorkspaceFileSchema });
-    return true;
+    const data = parseSingleYaml(content, {
+      customSchema: PnpmWorkspaceFileSchema,
+    });
+    return { success: true, data };
   } catch {
-    return false;
+    return { success: false };
   }
 }
 
+type PnpmCatalogs = z.TypeOf<typeof PnpmCatalogsSchema>;
+
 export async function extractPnpmWorkspaceFile(
-  content: string,
+  catalogs: PnpmCatalogs,
   packageFile: string,
 ): Promise<PackageFileContent<NpmManagerData> | null> {
   logger.trace(`pnpm.extractPnpmWorkspaceFile(${packageFile})`);
 
-  const pnpmCatalogs: PnpmCatalog[] = [];
-  try {
-    pnpmCatalogs.push(...parsePnpmCatalogs(content));
-  } catch {
-    logger.debug({ packageFile }, `Invalid pnpm workspace YAML.`);
-    return null;
-  }
+  const pnpmCatalogs = pnpmCatalogsToArray(catalogs);
 
   const deps = extractPnpmCatalogDeps(pnpmCatalogs);
 
@@ -322,10 +327,10 @@ function extractPnpmCatalogDeps(
   return deps;
 }
 
-function parsePnpmCatalogs(content: string): PnpmCatalog[] {
-  const { catalog: defaultCatalogDeps, catalogs: namedCatalogs } =
-    parseSingleYaml(content, { customSchema: PnpmCatalogsSchema });
-
+function pnpmCatalogsToArray({
+  catalog: defaultCatalogDeps,
+  catalogs: namedCatalogs,
+}: PnpmCatalogs): PnpmCatalog[] {
   const result = [];
 
   if (defaultCatalogDeps !== undefined) {

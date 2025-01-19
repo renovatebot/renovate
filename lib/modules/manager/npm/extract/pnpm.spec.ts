@@ -340,35 +340,30 @@ describe('modules/manager/npm/extract/pnpm', () => {
   });
 
   describe('.extractPnpmWorkspaceFile()', () => {
-    it('ignores invalid pnpm-workspace.yaml file', async () => {
-      expect(
-        await extractPnpmWorkspaceFile('', 'pnpm-workspace.yaml'),
-      ).toBeNull();
-    });
-
     it('handles empty catalog entries', async () => {
       expect(
         await extractPnpmWorkspaceFile(
-          codeBlock`
-            catalog:
-            catalogs:
-          `,
+          { catalog: {}, catalogs: {} },
           'pnpm-workspace.yaml',
         ),
-      ).toBeNull();
+      ).toMatchObject({
+        deps: [],
+      });
     });
 
     it('parses valid pnpm-workspace.yaml file', async () => {
       expect(
         await extractPnpmWorkspaceFile(
-          codeBlock`
-            catalog:
-              react: 18.3.0
-
-            catalogs:
-              react17:
-                react: 17.0.2
-          `,
+          {
+            catalog: {
+              react: '18.3.0',
+            },
+            catalogs: {
+              react17: {
+                react: '17.0.2',
+              },
+            },
+          },
           'pnpm-workspace.yaml',
         ),
       ).toMatchObject({

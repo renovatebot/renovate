@@ -17,7 +17,7 @@ import type {
 import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getExtractedConstraints } from './common/dependency';
 import { extractPackageJson } from './common/package-file';
-import { extractPnpmWorkspaceFile, isPnpmWorkspaceYaml } from './pnpm';
+import { extractPnpmWorkspaceFile, tryParsePnpmWorkspaceYaml } from './pnpm';
 import { postExtract } from './post';
 import type { NpmPackage } from './types';
 import { isZeroInstall } from './yarn';
@@ -232,9 +232,16 @@ export async function extractAllPackageFiles(
     if (content) {
       // pnpm workspace files are their own package file, defined via fileMatch.
       // We duck-type the content here, to allow users to rename the file itself.
-      if (isPnpmWorkspaceYaml(content)) {
-        logger.trace({packageFile}, `Extracting file as a pnpm workspace YAML file`);
-        const deps = await extractPnpmWorkspaceFile(content, packageFile);
+      const parsedPnpmWorkspaceYaml = tryParsePnpmWorkspaceYaml(content);
+      if (parsedPnpmWorkspaceYaml.success) {
+        logger.trace(
+          { packageFile },
+          `Extracting file as a pnpm workspace YAML file`,
+        );
+        const deps = await extractPnpmWorkspaceFile(
+          parsedPnpmWorkspaceYaml.data,
+          packageFile,
+        );
         if (deps) {
           npmFiles.push({
             ...deps,
