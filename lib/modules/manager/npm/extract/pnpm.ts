@@ -331,7 +331,7 @@ function pnpmCatalogsToArray({
   catalog: defaultCatalogDeps,
   catalogs: namedCatalogs,
 }: PnpmCatalogs): PnpmCatalog[] {
-  const result = [];
+  const result: PnpmCatalog[] = [];
 
   if (defaultCatalogDeps !== undefined) {
     result.push({ name: 'default', dependencies: defaultCatalogDeps });
