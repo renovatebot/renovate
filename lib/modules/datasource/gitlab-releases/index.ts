@@ -44,7 +44,7 @@ export class GitlabReleasesDatasource extends Datasource {
 
     try {
       const gitlabReleasesResponse = (
-        await this.http.getJson<GitlabRelease[]>(apiUrl)
+        await this.http.getJsonUnchecked<GitlabRelease[]>(apiUrl)
       ).body;
 
       return {

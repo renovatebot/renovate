@@ -44,7 +44,7 @@ export class FlutterVersionDatasource extends Datasource {
     };
     try {
       const resp = (
-        await this.http.getJson<FlutterResponse>(
+        await this.http.getJsonUnchecked<FlutterResponse>(
           `${registryUrl}/flutter_infra_release/releases/releases_linux.json`,
         )
       ).body;

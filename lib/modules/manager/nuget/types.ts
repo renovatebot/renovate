@@ -17,17 +17,6 @@ export interface Registry {
   readonly name?: string;
   sourceMappedPackagePatterns?: string[];
 }
-
-export interface MsbuildGlobalManifest {
-  readonly sdk?: MsbuildSdk;
-  readonly 'msbuild-sdks'?: Record<string, string>;
-}
-
-export interface MsbuildSdk {
-  readonly version: string;
-  readonly rollForward: string;
-}
-
 export interface ProjectFile {
   readonly isLeaf: boolean;
   readonly name: string;
