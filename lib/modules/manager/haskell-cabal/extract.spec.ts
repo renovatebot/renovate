@@ -2,9 +2,9 @@ import {
   countPackageNameLength,
   countPrecedingIndentation,
   extractNamesAndRanges,
+  findDepends,
   findExtents,
   splitSingleDependency,
-  findDepends,
 } from './extract';
 
 const commentCabalFile = `build-depends:
