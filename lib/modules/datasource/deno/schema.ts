@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { getSourceUrl as getGithubSourceUrl } from '../../../util/github/url';
 import { LooseArray } from '../../../util/schema-utils';
-import { TimestampSchema } from '../../../util/timestamp';
+import { MaybeTimestamp } from '../../../util/timestamp';
 import type { Release } from '../types';
 
 export const DenoApiTag = z.object({
@@ -32,7 +32,7 @@ export const DenoAPIUploadOptions = z.object({
 export const DenoAPIModuleVersionResponse = z
   .object({
     upload_options: DenoAPIUploadOptions,
-    uploaded_at: TimestampSchema,
+    uploaded_at: MaybeTimestamp,
     version: z.string(),
   })
   .transform(

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TimestampSchema } from '../../../util/timestamp';
+import { MaybeTimestamp } from '../../../util/timestamp';
 
 export const CommitSchema = z.object({
   sha: z.string(),
@@ -9,7 +9,7 @@ export const CommitsSchema = z.array(CommitSchema);
 
 const TagCommitSchema = z.object({
   sha: z.string(),
-  created: TimestampSchema,
+  created: MaybeTimestamp,
 });
 
 export const TagSchema = z.object({

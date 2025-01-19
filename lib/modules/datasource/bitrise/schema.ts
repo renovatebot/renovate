@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import { Yaml } from '../../../util/schema-utils';
-import { TimestampSchema } from '../../../util/timestamp';
+import { MaybeTimestamp } from '../../../util/timestamp';
 
 export const BitriseStepFile = Yaml.pipe(
   z.object({
-    published_at: TimestampSchema,
+    published_at: MaybeTimestamp,
     source_code_url: z.string().optional(),
   }),
 );

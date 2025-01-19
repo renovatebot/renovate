@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TimestampSchema } from '../../../timestamp';
+import { Timestamp } from '../../../timestamp';
 import type {
   GithubGraphqlDatasourceAdapter,
   GithubReleaseItem,
@@ -33,7 +33,7 @@ const query = prepareQuery(`
 
 const GithubGraphqlRelease = z.object({
   version: z.string(),
-  releaseTimestamp: TimestampSchema,
+  releaseTimestamp: Timestamp,
   isDraft: z.boolean(),
   isPrerelease: z.boolean(),
   url: z.string(),

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { LooseArray } from '../../../util/schema-utils';
-import { TimestampSchema } from '../../../util/timestamp';
+import { MaybeTimestamp } from '../../../util/timestamp';
 import type { CpanRelease } from './types';
 
 /**
@@ -15,7 +15,7 @@ const MetaCpanApiFileSchema = z
       }),
     ),
     distribution: z.string(),
-    date: TimestampSchema,
+    date: MaybeTimestamp,
     deprecated: z.boolean(),
     maturity: z.string(),
     status: z.union([

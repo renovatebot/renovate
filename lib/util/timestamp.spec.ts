@@ -1,4 +1,4 @@
-import { TimestampSchema, asTimestamp } from './timestamp';
+import { MaybeTimestamp, asTimestamp } from './timestamp';
 
 describe('util/timestamp', () => {
   describe('asTimestamp', () => {
@@ -33,7 +33,7 @@ describe('util/timestamp', () => {
       ${'202x0101000000'}                          | ${null}
     `('$input -> $expected', ({ input, expected }) => {
       expect(asTimestamp(input)).toBe(expected);
-      expect(TimestampSchema.parse(input)).toBe(expected);
+      expect(MaybeTimestamp.parse(input)).toBe(expected);
     });
   });
 });

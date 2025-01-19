@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TimestampSchema } from '../../../util/timestamp';
+import { MaybeTimestamp } from '../../../util/timestamp';
 
 export type GalaxyV3 = z.infer<typeof GalaxyV3>;
 export const GalaxyV3 = z.object({
@@ -15,7 +15,7 @@ export const GalaxyV3Versions = z
     data: z.array(
       z.object({
         version: z.string(),
-        created_at: TimestampSchema,
+        created_at: MaybeTimestamp,
       }),
     ),
   })

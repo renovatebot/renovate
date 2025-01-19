@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TimestampSchema } from '../../../util/timestamp';
+import { MaybeTimestamp } from '../../../util/timestamp';
 
 export type GalaxyV1 = z.infer<typeof GalaxyV1>;
 export const GalaxyV1 = z.object({
@@ -10,7 +10,7 @@ export const GalaxyV1 = z.object({
           z
             .object({
               name: z.string(),
-              created: TimestampSchema,
+              created: MaybeTimestamp,
             })
             .transform(({ name, created }) => ({
               version: name,

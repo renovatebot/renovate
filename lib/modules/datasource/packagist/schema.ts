@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import { LooseArray, LooseRecord } from '../../../util/schema-utils';
-import { TimestampSchema } from '../../../util/timestamp';
+import { MaybeTimestamp } from '../../../util/timestamp';
 import type { Release, ReleaseResult } from '../types';
 
 export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
@@ -45,7 +45,7 @@ export const ComposerRelease = z.object({
   version: z.string(),
   homepage: z.string().nullable().catch(null),
   source: z.object({ url: z.string() }).nullable().catch(null),
-  time: TimestampSchema,
+  time: MaybeTimestamp,
   require: z.object({ php: z.string() }).nullable().catch(null),
 });
 export type ComposerRelease = z.infer<typeof ComposerRelease>;
