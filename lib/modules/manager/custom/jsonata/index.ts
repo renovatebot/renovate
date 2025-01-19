@@ -27,7 +27,7 @@ export async function extractPackageFile(
         break;
     }
   } catch (err) {
-    logger.warn(
+    logger.debug(
       { err, fileName: packageFile, fileFormat: config.fileFormat },
       'Error while parsing file',
     );

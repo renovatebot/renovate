@@ -20,10 +20,14 @@ export async function handleMatching(
     // won't fail as this is verified during config validation
     const jsonataExpression = jsonata(query);
     // this does not throw error, just returns undefined if no matches
-    let queryResult = (await jsonataExpression.evaluate(json)) ?? [];
+    let queryResult = await jsonataExpression.evaluate(json);
 
-    if (is.emptyObject(queryResult) || is.emptyArray(queryResult)) {
-      logger.warn(
+    if (
+      !queryResult ||
+      is.emptyObject(queryResult) ||
+      is.emptyArray(queryResult)
+    ) {
+      logger.debug(
         {
           jsonataQuery: query,
           packageFile,
@@ -67,7 +71,7 @@ export function createDependency(
         const compiled = template.compile(tmpl, queryResult, false);
         updateDependency(field, compiled, dependency);
       } catch {
-        logger.warn(
+        logger.debug(
           { template: tmpl },
           'Error compiling template for JSONata manager',
         );
@@ -89,7 +93,7 @@ function updateDependency(
     case 'registryUrl': {
       const url = parseUrl(value)?.toString();
       if (!url) {
-        logger.warn({ url: value }, 'Invalid JSONata manager registryUrl');
+        logger.debug({ url: value }, 'Invalid JSONata manager registryUrl');
         break;
       }
       dependency.registryUrls = [url];

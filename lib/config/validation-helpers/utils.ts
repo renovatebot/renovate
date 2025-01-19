@@ -112,7 +112,8 @@ export function validateRegexManagerFields(
   } else {
     errors.push({
       topic: 'Configuration Error',
-      message: `Each Custom Manager must contain a non-empty matchStrings array`,
+      message:
+        'Each Custom Manager `matchStrings` array must have at least one item.',
     });
   }
 

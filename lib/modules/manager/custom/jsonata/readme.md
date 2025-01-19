@@ -1,12 +1,14 @@
 With `customManagers` using `JSONata` queries you can configure Renovate so it finds dependencies in JSON files, that are not detected by its other built-in package managers.
 
-Renovate uses the `jsonata` package to process the `json` file content. Read about the [jsonata query language](https://docs.jsonata.org/overview.html) in their readme.
+Renovate uses the `jsonata` package to process the `json` file content using the queries.
 
-The JSONata manager is unique in Renovate in because:
+For more on the jsonata query language, read the [jsonata query language site](https://docs.jsonata.org/overview.html).
 
-- It is configurable via [JSONata](https://jsonata.org/) queries
-- It can extract any `datasource`
-- By using the `customManagers` config, you can create multiple "JSONata managers" the same repository
+The JSONata manager is unique in Renovate, because:
+
+- It can be used with any `datasource`
+- It can be configured via [JSONata](https://jsonata.org/) queries
+- you can create multiple "JSONata managers" the same repository, using the `customManagers` config
 
 ### Required Fields
 
@@ -29,24 +31,24 @@ Before Renovate can look up a dependency and decide about updates, it must have 
 
 You must:
 
-- Capture the `currentValue` of the dependency
-- Capture the `depName` or `packageName`. Or use a template field: `depNameTemplate` and `packageNameTemplate`
-- Capture the `datasource`, or a use `datasourceTemplate` config field
+- Capture the `currentValue` of the dependency _or_ use the `currentValueTemplate` template field
+- Capture the `depName` or `packageName`. _Or_ use a template field: `depNameTemplate` and `packageNameTemplate`
+- Capture the `datasource`, _or_ use the `datasourceTemplate` template field
 
 #### Optional fields you can include in the resulting structure
 
 You may use any of these items:
 
-- `depType`, or a use `depTypeTemplate` config field
-- `versioning`, or a use `versioningTemplate` config field. If neither are present, Renovate defaults to `semver-coerced`
-- `extractVersion`, or use an `extractVersionTemplate` config field
+- `depType`, _or_ use the `depTypeTemplate` template field
+- `versioning`, _or_ the use `versioningTemplate` template field. If neither are present, Renovate defaults to `semver-coerced`
+- `extractVersion`, _or_ use the `extractVersionTemplate` template field
 - `currentDigest`
-- `registryUrl`, or a use `registryUrlTemplate` config field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array
-- `indentation`. It must be either empty, or whitespace only (otherwise `indentation` will be reset to an empty string)
+- `registryUrl`, _or_ use the `registryUrlTemplate` template field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array
+- `indentation`. Must be empty, _or_ whitespace. Else Renovate restes only `indentation` to an empty string
 
 ### Usage
 
-To configure it, use the following syntax:
+When you configure a JSONata manager, use the following syntax:
 
 ```javascript
 {
@@ -62,9 +64,28 @@ To configure it, use the following syntax:
 }
 ```
 
-Where `<query>` is a [JSONata](https://docs.jsonata.org/overview.html) query that transform the contents into a JSON object with the following schema:
+Overwrite the `<query>` placeholder text with your [JSONata](https://docs.jsonata.org/overview.html) query.
+The JSONata query transforms the content to a JSON object, similar to the this:
 
-To be effective with the JSONata manager, you should understand jsonata queries. But enough examples may compensate for lack of experience.
+```javascript dependencies information extracted usig jsonata query
+[
+  {
+    depName: 'some_dep',
+    currentValue: '1.0.0',
+    datasource: 'docker',
+    versioning: 'semver',
+  },
+];
+```
+
+Creating your Renovate JSONata manager config is easier if you understand JSONata queries.
+We recommend you follow these steps:
+
+1. Read the official JSONata query language docs
+2. Check our example queries below
+3. You're ready to make your own config
+
+Alternatively you can "try and error" to a working config, by adjusting our examples.
 
 #### Example queries
 
@@ -117,7 +138,7 @@ Query:
 *.{ "depName": package, "currentValue": version }
 ```
 
-```json title="The dependency name is in a JSON node name and the version is in a child leaf to that node"
+```json title="The dependency name is in a JSON node name, and the version is in a child leaf to that node"
 {
   "foo": {
     "version": "1.2.3"
@@ -134,7 +155,7 @@ Query:
 $each(function($v, $n) { { "depName": $n, "currentValue": $v.version } })
 ```
 
-```json title="The name of the dependency and the version are both value nodes of the same parent node"
+```json title="The dependency name and its version are both value nodes of the same parent node"
 {
   "packages": [
     {
@@ -155,7 +176,7 @@ Query:
 packages.{ "depName": package, "currentValue": version }
 ```
 
-```json title="The name of the dependency and the version are in the same string"
+```json title="The dependency name and version are part of the same string"
 {
   "packages": ["foo@1.2.3", "bar@4.5.6"]
 }
@@ -167,7 +188,7 @@ Query:
 $map($map(packages, function ($v) { $split($v, "@") }), function ($v) { { "depName": $v[0], "currentVersion": $v[1] } })
 ```
 
-```json title="JSONata manager config to extract deps from package.json file in the renovate repository"
+```json title="JSONata manager config to extract deps from a package.json file in the Renovate repository"
 {
   "customType": "jsonata",
   "fileMatch": ["package.json"],

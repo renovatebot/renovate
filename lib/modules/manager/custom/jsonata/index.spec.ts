@@ -15,7 +15,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       fileFormat: 'json',
     } as JsonataExtractConfig);
     expect(res).toBeNull();
-    expect(logger.logger.warn).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledWith(
       expect.anything(),
       'Error while parsing file',
     );
@@ -209,7 +209,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       ],
     };
     const res = await extractPackageFile('{}', 'unused', config);
-    expect(logger.logger.warn).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledWith(
       {
         packageFile: 'unused',
         jsonataQuery:
@@ -230,7 +230,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     };
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res).toBeNull();
-    expect(logger.logger.warn).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledWith(
       expect.anything(),
       'Error compiling template for JSONata manager',
     );
@@ -246,7 +246,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     };
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res).not.toBeNull();
-    expect(logger.logger.warn).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledWith(
       { url: 'this-is-not-a-valid-url-foo' },
       'Invalid JSONata manager registryUrl',
     );

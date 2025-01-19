@@ -706,9 +706,11 @@ You can define custom managers to handle:
 - Proprietary file formats or conventions
 - Popular file formats not yet supported as a manager by Renovate
 
-Currently we have two custom managers.
-The `regex` manager which is based on using Regular Expression named capture groups.
-The `jsonata` manager which is based on using JSONata queries.
+Renovate has two custom managers:
+| Custom manager | Matching engine |
+| -------------- | ---------------------------------------------- |
+| `regex` | Regular Expression, with named capture groups. |
+| `jsonata` | JSONata query. |
 
 You must capture/extract the following three fields _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
 
@@ -718,10 +720,10 @@ You must capture/extract the following three fields _or_ configure its correspon
 
 We recommend you use only _one_ of these methods, or you'll get confused.
 
-We recommend that you also tell Renovate what `versioning` to use.
+We also recommend that you also tell Renovate what `versioning` to use.
 If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
 
-For more details and examples about it, see our documentation for the [`regex` manager](modules/manager/regex/index.md) and the [`JSONata` manager](modules/manager/jsonata/index.md).
+For more details and examples regarding custom managers, see our documentation for the [`regex` manager](modules/manager/regex/index.md) and the [`JSONata` manager](modules/manager/jsonata/index.md).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
 <!-- prettier-ignore -->
@@ -765,7 +767,7 @@ image: my.new.registry/aRepository/andImage:1.21-alpine
 
 <!-- prettier-ignore -->
 !!! note
-    Can only be used with the custom regex maanger.
+    Can only be used with the custom regex manager.
 
 ### currentValueTemplate
 
@@ -807,7 +809,7 @@ Example:
 
 ### datasourceTemplate
 
-If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field.
+If the `datasource` for a dependency is not captured with a named group, then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
 ### depNameTemplate
@@ -822,15 +824,15 @@ It will be compiled using Handlebars and the regex `groups` result.
 
 ### extractVersionTemplate
 
-If `extractVersion` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
+If `extractVersion` cannot be captured with a named capture group in `matchString`, then it can be defined manually using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
 ### fileFormat
 
-It specifies the syntax of the package file being managed by the custom JSONata manager.
+`fileFormat` specifies the syntax of the package file that's managed by the custom JSONata manager.
 This setting helps the system correctly parse and interpret the configuration file's contents.
 
-Currently, only the `json` format is supported.
+Only the `json` format is supported.
 
 ```json title="Parsing a JSON file with a custom manager"
 {
@@ -849,12 +851,12 @@ Currently, only the `json` format is supported.
 
 ### matchStrings
 
-Each `matchStrings` must be one of the two:
+Each `matchStrings` must be one of the following:
 
-1. a valid regular expression, optionally with named capture groups (if using `customType=regex`)
-2. a valid, escaped [JSONata](https://docs.jsonata.org/overview.html) query (if using `customType=json`)
+1. A valid regular expression, which may optionally include named capture groups (if using `customType=regex`)
+2. Or, a valid, escaped [JSONata](https://docs.jsonata.org/overview.html) query (if using `customType=json`)
 
-See [`customType`](#customtype) docs, to know more them.
+Read the [`customType`](#customtype) docs, to learn more.
 
 Example:
 
@@ -885,7 +887,7 @@ Three options are available:
 
 <!--prettier-ignore-->
 !!! note
-    Only to be used with custom regex manager.
+    `matchStringsStrategy` can only be used in a custom regex manager config!
 
 #### any
 
