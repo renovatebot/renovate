@@ -707,10 +707,11 @@ You can define custom managers to handle:
 - Popular file formats not yet supported as a manager by Renovate
 
 Renovate has two custom managers:
-| Custom manager | Matching engine |
+
+| Custom manager | Matching engine                                |
 | -------------- | ---------------------------------------------- |
-| `regex` | Regular Expression, with named capture groups. |
-| `jsonata` | JSONata query. |
+| `regex`        | Regular Expression, with named capture groups. |
+| `jsonata`      | JSONata query.                                 |
 
 You must capture/extract the following three fields _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
 
