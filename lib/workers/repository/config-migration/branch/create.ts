@@ -1,14 +1,14 @@
-import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
+import { parseJson } from '../../../../util/common';
 import { readLocalFile } from '../../../../util/fs';
 import type { FileChange } from '../../../../util/git/types';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import { MigratedDataFactory, applyPrettierFormatting } from './migrated-data';
-import type { MigratedData, PrettierParser } from './migrated-data';
+import type { MigratedData } from './migrated-data';
 
 export async function createConfigMigrationBranch(
   config: Partial<RenovateConfig>,
@@ -38,23 +38,26 @@ export async function createConfigMigrationBranch(
   const contents =
     await MigratedDataFactory.applyPrettierFormatting(migratedConfigData);
 
-  const files = [
+  const files: FileChange[] = [
     {
       type: 'addition',
       path: configFileName,
       contents,
-    } satisfies FileChange,
+    },
   ];
 
   if (pJsonMigration) {
-    const pJson = JSON.parse((await readLocalFile('package.json', 'utf8'))!);
-    if (pJson.renovate) {
+    const pJson = parseJson(
+      await readLocalFile('package.json', 'utf8'),
+      'package.json',
+    ) as any;
+    if (pJson?.renovate) {
       delete pJson.renovate;
     }
     const pJsonContent = await applyPrettierFormatting(
       'package.json',
       JSON.stringify(pJson, undefined, migratedConfigData.indent.indent),
-      upath.extname('package.json').replace('.', '') as PrettierParser,
+      'json',
       migratedConfigData.indent,
     );
     files.push({
