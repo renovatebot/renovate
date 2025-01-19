@@ -233,9 +233,7 @@ export async function extractAllPackageFiles(
       // pnpm workspace files are their own package file, defined via fileMatch.
       // We duck-type the content here, to allow users to rename the file itself.
       if (isPnpmWorkspaceYaml(content)) {
-        logger.trace(
-          `${packageFile} will be extracted as a pnpm workspace YAML file`,
-        );
+        logger.trace({packageFile}, `Extracting file as a pnpm workspace YAML file`);
         const deps = await extractPnpmWorkspaceFile(content, packageFile);
         if (deps) {
           npmFiles.push({
@@ -244,7 +242,7 @@ export async function extractAllPackageFiles(
           });
         }
       } else {
-        logger.trace(`${packageFile} will be extracted as a package.json file`);
+        logger.trace({ packageFile }, `Extracting as a package.json file`);
         const deps = await extractPackageFile(content, packageFile, config);
         if (deps) {
           npmFiles.push({
