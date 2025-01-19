@@ -4,7 +4,16 @@ import {
   extractNamesAndRanges,
   findExtents,
   splitSingleDependency,
+  findDepends,
 } from './extract';
+
+const commentCabalFile = `build-depends:
+  -- leading
+ base,
+-- middle
+ other,
+ -- trailing
+ other2`;
 
 describe('modules/manager/haskell-cabal/extract', () => {
   describe('countPackageNameLength', () => {
@@ -89,6 +98,16 @@ describe('modules/manager/haskell-cabal/extract', () => {
         { currentValue: '', packageName: 'a', replaceString: 'a' },
         { currentValue: '', packageName: 'b', replaceString: 'b' },
       ]);
+    });
+  });
+
+  describe('findDepends()', () => {
+    it('strips comments', () => {
+      const res = findDepends(commentCabalFile + '\na: b');
+      expect(res).toEqual({
+        buildDependsContent: '\n base,\n other,\n other2',
+        lengthProcessed: commentCabalFile.length,
+      });
     });
   });
 });
