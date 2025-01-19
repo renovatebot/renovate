@@ -13,7 +13,7 @@ export const PythonRelease = z
     /** is latest major version, true for Python 2.7.18 and latest Python 3 */
     is_latest: z.boolean(),
     is_published: z.boolean(),
-    release_date: TimestampSchema.nullable().catch(null),
+    release_date: TimestampSchema,
     pre_release: z.boolean(),
     release_page: z.string().nullable(),
     show_on_download_page: z.boolean(),

@@ -6,7 +6,7 @@ export const ReleaseSchema = z.object({
   tag_name: z.string(),
   body: z.string(),
   prerelease: z.boolean(),
-  published_at: TimestampSchema.nullable().catch(null),
+  published_at: TimestampSchema,
 });
 
 export const ReleasesSchema = z.array(ReleaseSchema);

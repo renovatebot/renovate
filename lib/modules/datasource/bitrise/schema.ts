@@ -4,7 +4,7 @@ import { TimestampSchema } from '../../../util/timestamp';
 
 export const BitriseStepFile = Yaml.pipe(
   z.object({
-    published_at: TimestampSchema.nullable().catch(null),
+    published_at: TimestampSchema,
     source_code_url: z.string().optional(),
   }),
 );

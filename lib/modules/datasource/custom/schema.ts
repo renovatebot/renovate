@@ -7,7 +7,7 @@ export const ReleaseResultZodSchema = z.object({
       .object({
         version: z.string(),
         isDeprecated: z.boolean().optional(),
-        releaseTimestamp: TimestampSchema.nullable().catch(null),
+        releaseTimestamp: TimestampSchema,
         sourceUrl: z.string().optional(),
         sourceDirectory: z.string().optional(),
         changelogUrl: z.string().optional(),

@@ -16,7 +16,7 @@ export const EndoflifeDateVersions = z
   .object({
     cycle: z.string(),
     latest: z.optional(z.string()),
-    releaseDate: TimestampSchema.nullable().catch(null),
+    releaseDate: TimestampSchema,
     eol: z.optional(ExpireableField),
     discontinued: z.optional(ExpireableField),
   })

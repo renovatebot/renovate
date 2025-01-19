@@ -32,7 +32,7 @@ export const DenoAPIUploadOptions = z.object({
 export const DenoAPIModuleVersionResponse = z
   .object({
     upload_options: DenoAPIUploadOptions,
-    uploaded_at: TimestampSchema.nullable().catch(null),
+    uploaded_at: TimestampSchema,
     version: z.string(),
   })
   .transform(

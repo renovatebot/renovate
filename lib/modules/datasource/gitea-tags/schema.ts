@@ -9,7 +9,7 @@ export const CommitsSchema = z.array(CommitSchema);
 
 const TagCommitSchema = z.object({
   sha: z.string(),
-  created: TimestampSchema.nullable().catch(null),
+  created: TimestampSchema,
 });
 
 export const TagSchema = z.object({

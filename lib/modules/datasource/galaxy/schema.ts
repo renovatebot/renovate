@@ -10,7 +10,7 @@ export const GalaxyV1 = z.object({
           z
             .object({
               name: z.string(),
-              created: TimestampSchema.nullable().catch(null),
+              created: TimestampSchema,
             })
             .transform(({ name, created }) => ({
               version: name,

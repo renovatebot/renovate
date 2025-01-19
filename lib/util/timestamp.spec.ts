@@ -33,9 +33,7 @@ describe('util/timestamp', () => {
       ${'202x0101000000'}                          | ${null}
     `('$input -> $expected', ({ input, expected }) => {
       expect(asTimestamp(input)).toBe(expected);
-      expect(TimestampSchema.nullable().catch(null).parse(input)).toBe(
-        expected,
-      );
+      expect(TimestampSchema.parse(input)).toBe(expected);
     });
   });
 });

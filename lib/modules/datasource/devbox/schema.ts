@@ -3,7 +3,7 @@ import { TimestampSchema } from '../../../util/timestamp';
 
 export const DevboxRelease = z.object({
   version: z.string(),
-  last_updated: TimestampSchema.nullable().catch(null),
+  last_updated: TimestampSchema,
 });
 
 export const DevboxResponse = z

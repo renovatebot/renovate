@@ -400,7 +400,7 @@ export class CrateDatasource extends Datasource {
     const url = `https://crates.io/api/v1/crates/${packageName}/${release.version}`;
     const { body: releaseTimestamp } = await this.http.getJson(
       url,
-      ReleaseTimestampSchema.nullable().catch(null),
+      ReleaseTimestampSchema,
     );
     release.releaseTimestamp = releaseTimestamp;
     return release;

@@ -16,7 +16,7 @@ export const ReleasesIndex = z
   .transform(({ 'releases-index': releasesIndex }) => releasesIndex);
 
 const ReleaseBase = z.object({
-  'release-date': TimestampSchema.nullable().catch(null),
+  'release-date': TimestampSchema,
   'release-notes': z.string(),
 });
 const ReleaseDetails = z.object({

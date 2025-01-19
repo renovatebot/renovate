@@ -45,7 +45,7 @@ export const ComposerRelease = z.object({
   version: z.string(),
   homepage: z.string().nullable().catch(null),
   source: z.object({ url: z.string() }).nullable().catch(null),
-  time: TimestampSchema.nullable().catch(null),
+  time: TimestampSchema,
   require: z.object({ php: z.string() }).nullable().catch(null),
 });
 export type ComposerRelease = z.infer<typeof ComposerRelease>;

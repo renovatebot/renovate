@@ -8,7 +8,7 @@ import type { Release } from '../types';
 
 const HelmReleaseSchema = z.object({
   version: z.string(),
-  created: TimestampSchema.nullable().catch(null),
+  created: TimestampSchema,
   digest: z.string().optional().catch(undefined),
   home: z.string().optional().catch(undefined),
   sources: z.array(z.string()).catch([]),

@@ -15,7 +15,7 @@ const MetaCpanApiFileSchema = z
       }),
     ),
     distribution: z.string(),
-    date: TimestampSchema.nullable().catch(null),
+    date: TimestampSchema,
     deprecated: z.boolean(),
     maturity: z.string(),
     status: z.union([

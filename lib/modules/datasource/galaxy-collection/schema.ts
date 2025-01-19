@@ -15,7 +15,7 @@ export const GalaxyV3Versions = z
     data: z.array(
       z.object({
         version: z.string(),
-        created_at: TimestampSchema.nullable().catch(null),
+        created_at: TimestampSchema,
       }),
     ),
   })

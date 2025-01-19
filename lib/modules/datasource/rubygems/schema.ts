@@ -37,7 +37,7 @@ export const GemVersions = LooseArray(
   z
     .object({
       number: z.string(),
-      created_at: TimestampSchema.nullable().catch(null),
+      created_at: TimestampSchema,
       platform: z.string().optional().catch(undefined),
       ruby_version: z.string().optional().catch(undefined),
       rubygems_version: z.string().optional().catch(undefined),

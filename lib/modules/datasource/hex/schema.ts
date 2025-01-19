@@ -30,7 +30,7 @@ export const HexRelease = z
     releases: LooseArray(
       z.object({
         version: z.string(),
-        inserted_at: TimestampSchema.nullable().catch(null),
+        inserted_at: TimestampSchema,
       }),
     ).refine((releases) => releases.length > 0, 'No releases found'),
     retirements: z
