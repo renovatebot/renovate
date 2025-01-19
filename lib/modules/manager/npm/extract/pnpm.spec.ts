@@ -385,5 +385,66 @@ describe('modules/manager/npm/extract/pnpm', () => {
         ],
       });
     });
+
+    it('finds relevant lockfile', async () => {
+      const lockfileContent = codeBlock`
+        lockfileVersion: '9.0'
+
+        catalogs:
+          default:
+            react:
+              specifier: 18.3.1
+              version: 18.3.1
+
+        importers:
+
+          .:
+            dependencies:
+              react:
+                specifier: 'catalog:'
+                version: 18.3.1
+
+        packages:
+
+          js-tokens@4.0.0:
+            resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
+
+          loose-envify@1.4.0:
+            resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
+            hasBin: true
+
+          react@18.3.1:
+            resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
+            engines: {node: '>=0.10.0'}
+
+        snapshots:
+
+          js-tokens@4.0.0: {}
+
+          loose-envify@1.4.0:
+            dependencies:
+              js-tokens: 4.0.0
+
+          react@18.3.1:
+            dependencies:
+              loose-envify: 1.4.0
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockfileContent);
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-lock.yaml');
+      expect(
+        await extractPnpmWorkspaceFile(
+          {
+            catalog: {
+              react: '18.3.1',
+            },
+          },
+          'pnpm-workspace.yaml',
+        ),
+      ).toMatchObject({
+        managerData: {
+          pnpmShrinkwrap: 'pnpm-lock.yaml',
+        },
+      });
+    });
   });
 });
