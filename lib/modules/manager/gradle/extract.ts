@@ -57,7 +57,7 @@ export function matchesContentDescriptor(
   let matchesInclude = false;
   let matchesExclude = false;
 
-  for (const content of contentDescriptors ?? []) {
+  for (const content of coerceArray(contentDescriptors)) {
     const {
       mode,
       matcher,
