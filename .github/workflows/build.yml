@@ -304,7 +304,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        uses: DavidAnson/markdownlint-cli2-action@a23dae216ce3fee4db69da41fed90d2a4af801cf # v19.0.0
+        uses: DavidAnson/markdownlint-cli2-action@05f32210e84442804257b2a6f20b273450ec8265 # v19.1.0
 
       - name: Lint fenced code blocks
         run: pnpm doc-fence-check
@@ -684,7 +684,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@c8f78cbc830d1883e695d06e3028136656e70f5b # v3.5.17
+        uses: containerbase/internal-tools@4453842226e67bc5d507c41b21184cc9220f4974 # v3.5.19
         with:
           command: docker-config
 

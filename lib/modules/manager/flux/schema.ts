@@ -38,6 +38,7 @@ export const HelmRelease = KubernetesResource.extend({
         namespace: z.string().optional(),
       })
       .optional(),
+    values: z.record(z.unknown()).optional(),
   }),
 });
 export type HelmRelease = z.infer<typeof HelmRelease>;

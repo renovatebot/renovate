@@ -120,7 +120,7 @@ export interface PackageDependency<T = Record<string, any>>
   depName?: string;
   depType?: string;
   fileReplacePosition?: number;
-  groupName?: string;
+  sharedVariableName?: string;
   lineNumber?: number;
   packageName?: string;
   target?: string;

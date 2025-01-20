@@ -329,37 +329,48 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     });
   }
 
-  async getYaml<ResT>(url: string, options?: Opts): Promise<HttpResponse<ResT>>;
-  async getYaml<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  /**
+   * @deprecated use `getYaml` instead
+   */
+  async getYamlUnchecked<ResT>(
+    url: string,
+    options?: Opts,
+  ): Promise<HttpResponse<ResT>> {
+    const res = await this.get(url, options);
+    const body = parseSingleYaml<ResT>(res.body);
+    return { ...res, body };
+  }
+
+  async getYaml<Schema extends ZodType<any, any, any>>(
     url: string,
     schema: Schema,
   ): Promise<HttpResponse<Infer<Schema>>>;
-  async getYaml<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  async getYaml<Schema extends ZodType<any, any, any>>(
     url: string,
     options: Opts,
     schema: Schema,
   ): Promise<HttpResponse<Infer<Schema>>>;
-  async getYaml<ResT = unknown, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  async getYaml<Schema extends ZodType<any, any, any>>(
     arg1: string,
     arg2?: Opts | Schema,
     arg3?: Schema,
-  ): Promise<HttpResponse<ResT>> {
-    const { url, httpOptions, schema } = this.resolveArgs<ResT>(
-      arg1,
-      arg2,
-      arg3,
-    );
+  ): Promise<HttpResponse<Infer<Schema>>> {
+    const url = arg1;
+    let schema: Schema;
+    let httpOptions: Opts | undefined;
+    if (arg3) {
+      schema = arg3;
+      httpOptions = arg2 as Opts;
+    } else {
+      schema = arg2 as Schema;
+    }
+
     const opts: InternalHttpOptions = {
       ...httpOptions,
       method: 'get',
     };
 
     const res = await this.get(url, opts);
-    if (!schema) {
-      const body = parseSingleYaml<ResT>(res.body);
-      return { ...res, body };
-    }
-
     const body = await schema.parseAsync(parseSingleYaml(res.body));
     return { ...res, body };
   }
@@ -396,49 +407,73 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     let res: AsyncResult<HttpResponse<ResT>, SafeJsonError>;
     if (httpOptions) {
-      res = Result.wrap(this.getYaml<ResT>(url, httpOptions, schema));
+      res = Result.wrap(this.getYaml(url, httpOptions, schema));
     } else {
-      res = Result.wrap(this.getYaml<ResT>(url, schema));
+      res = Result.wrap(this.getYaml(url, schema));
     }
 
     return res.transform((response) => Result.ok(response.body));
   }
 
-  getJson<ResT>(url: string, options?: Opts): Promise<HttpResponse<ResT>>;
-  getJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  /**
+   * Request JSON and return the response without any validation.
+   *
+   * The usage of this method is discouraged, please use `getJson` instead.
+   *
+   * If you're new to Zod schema validation library:
+   * - consult the [documentation of Zod library](https://github.com/colinhacks/zod?tab=readme-ov-file#basic-usage)
+   * - search the Renovate codebase for 'zod' module usage
+   * - take a look at the `schema-utils.ts` file for Renovate-specific schemas and utilities
+   */
+  getJsonUnchecked<ResT = unknown>(
+    url: string,
+    options?: Opts,
+  ): Promise<HttpResponse<ResT>> {
+    return this.requestJson<ResT>('get', { url, httpOptions: options });
+  }
+
+  /**
+   * Request JSON with a Zod schema for the response,
+   * throwing an error if the response is not valid.
+   *
+   * @param url
+   * @param schema Zod schema for the response
+   */
+  getJson<Schema extends ZodType<any, any, any>>(
     url: string,
     schema: Schema,
   ): Promise<HttpResponse<Infer<Schema>>>;
-  getJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  getJson<Schema extends ZodType<any, any, any>>(
     url: string,
     options: Opts,
     schema: Schema,
   ): Promise<HttpResponse<Infer<Schema>>>;
-  getJson<ResT = unknown, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  getJson<Schema extends ZodType<any, any, any>>(
     arg1: string,
     arg2?: Opts | Schema,
     arg3?: Schema,
-  ): Promise<HttpResponse<ResT>> {
-    const args = this.resolveArgs<ResT>(arg1, arg2, arg3);
-    return this.requestJson<ResT>('get', args);
+  ): Promise<HttpResponse<Infer<Schema>>> {
+    const args = this.resolveArgs<Infer<Schema>>(arg1, arg2, arg3);
+    return this.requestJson<Infer<Schema>>('get', args);
   }
 
-  getJsonSafe<
-    ResT extends NonNullable<unknown>,
-    Schema extends ZodType<ResT> = ZodType<ResT>,
-  >(url: string, schema: Schema): AsyncResult<Infer<Schema>, SafeJsonError>;
-  getJsonSafe<
-    ResT extends NonNullable<unknown>,
-    Schema extends ZodType<ResT> = ZodType<ResT>,
-  >(
+  /**
+   * Request JSON with a Zod schema for the response,
+   * wrapping response data in a `Result` class.
+   *
+   * @param url
+   * @param schema Zod schema for the response
+   */
+  getJsonSafe<ResT extends NonNullable<unknown>, Schema extends ZodType<ResT>>(
+    url: string,
+    schema: Schema,
+  ): AsyncResult<Infer<Schema>, SafeJsonError>;
+  getJsonSafe<ResT extends NonNullable<unknown>, Schema extends ZodType<ResT>>(
     url: string,
     options: Opts,
     schema: Schema,
   ): AsyncResult<Infer<Schema>, SafeJsonError>;
-  getJsonSafe<
-    ResT extends NonNullable<unknown>,
-    Schema extends ZodType<ResT> = ZodType<ResT>,
-  >(
+  getJsonSafe<ResT extends NonNullable<unknown>, Schema extends ZodType<ResT>>(
     arg1: string,
     arg2?: Opts | Schema,
     arg3?: Schema,

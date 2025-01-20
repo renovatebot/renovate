@@ -13,6 +13,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
+import { findDependencies } from '../helm-values/extract';
 import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import { extractImage } from '../kustomize/extract';
 import type {
@@ -198,6 +199,10 @@ function resolveResourceManifest(
         );
         resolveHelmRepository(dep, matchingRepositories, registryAliases);
         deps.push(dep);
+
+        if (resource.spec.values) {
+          deps.push(...findDependencies(resource.spec.values, registryAliases));
+        }
         break;
       }
 
