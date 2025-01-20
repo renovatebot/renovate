@@ -291,7 +291,7 @@ export function handleRegistryContent(ctx: Ctx): Ctx {
   let matcher: ContentDescriptorMatcher = 'simple';
   if (methodName.includes('Regex')) {
     matcher = 'regex';
-    groupId = groupId.replaceAll('\\\\', '\\');
+    groupId = `^${groupId}$`.replaceAll('\\\\', '\\');
     if (!isValidContentDescriptorRegex('group', groupId)) {
       return ctx;
     }
@@ -305,7 +305,7 @@ export function handleRegistryContent(ctx: Ctx): Ctx {
   if (methodName.includes('Module') || methodName.includes('Version')) {
     spec.artifactId = loadFromTokenMap(ctx, 'artifactId')[0].value;
     if (matcher === 'regex') {
-      spec.artifactId = spec.artifactId.replaceAll('\\\\', '\\');
+      spec.artifactId = `^${spec.artifactId}$`.replaceAll('\\\\', '\\');
       if (!isValidContentDescriptorRegex('module', spec.artifactId)) {
         return ctx;
       }
@@ -315,7 +315,7 @@ export function handleRegistryContent(ctx: Ctx): Ctx {
   if (methodName.includes('Version')) {
     spec.version = loadFromTokenMap(ctx, 'version')[0].value;
     if (matcher === 'regex') {
-      spec.version = spec.version.replaceAll('\\\\', '\\');
+      spec.version = `^${spec.version}$`.replaceAll('\\\\', '\\');
       if (!isValidContentDescriptorRegex('version', spec.version)) {
         return ctx;
       }
