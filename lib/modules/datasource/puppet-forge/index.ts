@@ -28,7 +28,7 @@ export class PuppetForgeDatasource extends Datasource {
     let module: PuppetModule;
 
     try {
-      const response = await this.http.getJson<PuppetModule>(url);
+      const response = await this.http.getJsonUnchecked<PuppetModule>(url);
       module = response.body;
     } catch (err) {
       this.handleGenericErrors(err);

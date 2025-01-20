@@ -164,7 +164,7 @@ export class GoProxyDatasource extends Datasource {
       '@v',
       `${version}.info`,
     );
-    const res = await this.http.getJson<VersionInfo>(url);
+    const res = await this.http.getJsonUnchecked<VersionInfo>(url);
 
     const result: Release = {
       version: res.body.Version,
@@ -187,7 +187,7 @@ export class GoProxyDatasource extends Datasource {
         this.encodeCase(packageName),
         '@latest',
       );
-      const res = await this.http.getJson<VersionInfo>(url);
+      const res = await this.http.getJsonUnchecked<VersionInfo>(url);
       return res.body.Version;
     } catch (err) {
       logger.trace({ err }, 'Failed to get latest version');
