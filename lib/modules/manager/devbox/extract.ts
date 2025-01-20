@@ -54,7 +54,7 @@ export function extractPackageFile(
 
 function getDep(
   packageName: string,
-  version?: string,
+  version: string | undefined,
 ): PackageDependency | null {
   const dep = {
     depName: packageName,
