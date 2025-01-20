@@ -49,9 +49,7 @@ You can set alternative feeds:
 {
   "packageRules": [
     {
-      "matchDatasources": [
-        "nuget"
-      ],
+      "matchDatasources": ["nuget"],
       "registryUrls": [
         "https://api.nuget.org/v3/index.json",
         "https://example1.com/nuget/",
@@ -100,12 +98,8 @@ If a `v3` feed URL does not end with `index.json`, you must specify the version 
   {
     "packageRules": [
       {
-        "matchDatasources": [
-          "nuget"
-        ],
-        "registryUrls": [
-          "https://example1.com/nuget/#protocolVersion=3"
-        ]
+        "matchDatasources": ["nuget"],
+        "registryUrls": ["https://example1.com/nuget/#protocolVersion=3"]
       }
     ]
   }
