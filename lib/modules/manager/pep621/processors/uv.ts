@@ -11,7 +11,7 @@ import { find } from '../../../../util/host-rules';
 import { Result } from '../../../../util/result';
 import { parseUrl } from '../../../../util/url';
 import { PypiDatasource } from '../../../datasource/pypi';
-import { getGoogleAuthTokenRaw } from '../../../datasource/util';
+import { getGoogleAuthHostRule } from '../../../datasource/util';
 import type {
   PackageDependency,
   UpdateArtifact,
@@ -265,12 +265,9 @@ async function getUsernamePassword(
   }
 
   if (url.hostname.endsWith('.pkg.dev')) {
-    const accessToken = await getGoogleAuthTokenRaw();
-    if (accessToken) {
-      return {
-        username: 'oauth2accesstoken',
-        password: accessToken,
-      };
+    const hostRule = await getGoogleAuthHostRule();
+    if (hostRule) {
+      return hostRule;
     } else {
       logger.once.debug({ url }, 'Could not get Google access token');
     }

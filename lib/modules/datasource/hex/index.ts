@@ -55,7 +55,10 @@ export class HexDatasource extends Datasource {
     const { val: result, err } = await this.http
       .getJsonSafe(hexUrl, HexRelease)
       .onError((err) => {
-        logger.warn({ datasource: 'hex', packageName, err }, `Error fetching ${hexUrl}`); // prettier-ignore
+        logger.warn(
+          { url: hexUrl, datasource: 'hex', packageName, err },
+          'Error fetching from url',
+        );
       })
       .unwrap();
 

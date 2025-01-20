@@ -459,6 +459,7 @@
     "prisma": "https://github.com/prisma/prisma",
     "prometheus-net": "https://github.com/prometheus-net/prometheus-net",
     "promster": "https://github.com/tdeekens/promster",
+    "protobuf": "https://github.com/protocolbuffers/protobuf",
     "quartznet": "https://github.com/quartznet/quartznet",
     "radix-ui-primitives": "https://github.com/radix-ui/primitives",
     "reach-ui": "https://github.com/reach/reach-ui",
@@ -505,7 +506,10 @@
     "shiki": "https://github.com/shikijs/shiki",
     "shopify-app-bridge": "https://github.com/Shopify/app-bridge",
     "sitecore-jss": "https://github.com/Sitecore/jss",
-    "skiasharp": "https://github.com/mono/SkiaSharp",
+    "skiasharp": [
+      "https://github.com/mono/SkiaSharp",
+      "https://go.microsoft.com/fwlink/?linkid=868515"
+    ],
     "slack-net": "https://github.com/soxtoby/SlackNet",
     "slf4j": "https://github.com/qos-ch/slf4j",
     "slim-message-bus": "https://github.com/zarusz/SlimMessageBus",
@@ -517,6 +521,7 @@
     "strapi": "https://github.com/strapi/strapi",
     "strum": "https://github.com/Peternator7/strum",
     "stryker-js": "https://github.com/stryker-mutator/stryker-js",
+    "stylex-swc": "https://github.com/Dwlad90/stylex-swc-plugin",
     "surveyjs": "https://github.com/surveyjs/surveyjs",
     "swashbuckle-aspnetcore": "https://github.com/domaindrivendev/Swashbuckle.AspNetCore",
     "system.io.abstractions": "https://github.com/System-IO-Abstractions/System.IO.Abstractions/",

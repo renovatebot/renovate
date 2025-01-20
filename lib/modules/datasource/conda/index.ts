@@ -52,7 +52,7 @@ export class CondaDatasource extends Datasource {
     let response: { body: CondaPackage };
 
     try {
-      response = await this.http.getJson(url);
+      response = await this.http.getJsonUnchecked(url);
 
       result.homepage = response.body.html_url;
       result.sourceUrl = response.body.dev_url;

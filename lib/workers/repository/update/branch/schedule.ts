@@ -108,7 +108,10 @@ export function cronMatches(
   const nextRun = parsedCron.nextRun();
   // istanbul ignore if: should not happen
   if (!nextRun) {
-    logger.warn(`Invalid cron schedule ${cron}. No next run is possible`);
+    logger.warn(
+      { schedule: cron },
+      'Invalid cron schedule. No next run is possible',
+    );
     return false;
   }
 
@@ -144,7 +147,8 @@ export function isScheduledNow(
   }
   if (!is.array(configSchedule)) {
     logger.warn(
-      `config schedule is not an array: ${JSON.stringify(configSchedule)}`,
+      { schedule: configSchedule },
+      'config schedule is not an array',
     );
     configSchedule = [configSchedule];
   }

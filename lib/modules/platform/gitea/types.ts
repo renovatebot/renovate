@@ -138,8 +138,8 @@ export interface CommitStatus {
   id: number;
   status: CommitStatusType;
   context: string;
-  description: string;
-  target_url: string;
+  description?: string;
+  target_url?: string;
   created_at: string;
 }
 
