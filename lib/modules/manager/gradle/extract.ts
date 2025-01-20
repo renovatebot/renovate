@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { getLocalFiles } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
