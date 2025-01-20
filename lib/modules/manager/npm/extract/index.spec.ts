@@ -1027,6 +1027,83 @@ describe('modules/manager/npm/extract/index', () => {
         ],
       });
     });
+
+    it.failing(
+      'extracts dependencies from pnpm.overrides, using @-ranges and the  syntax',
+      async () => {
+        // This tests different tricky combinations for the ">" sytax, such as
+        // greater-than version ranges, paired or unpaired with a descendant
+        const content = codeBlock`{
+        "pnpm": {
+          "overrides": {
+            "foo>bar": "2.0.0",
+            "foo@1.0.0": "2.0.0",
+            "foo@1.0.0>bar": "2.0.0",
+            "foo@>1.0.0": "2.0.0",
+            "foo@>=1.0.0": "2.0.0",
+            "foo@>1.0.0>bar": "2.0.0"
+          }
+        }
+      }`;
+        const res = await npmExtract.extractPackageFile(
+          content,
+          'package.json',
+          defaultExtractConfig,
+        );
+        expect(res).toMatchObject({
+          deps: [
+            {
+              currentValue: '2.0.0',
+              datasource: 'npm',
+              depName: 'foo>bar',
+              depType: 'pnpm.overrides',
+              packageName: 'bar',
+              prettyDepType: 'overrides',
+            },
+            {
+              currentValue: '2.0.0',
+              datasource: 'npm',
+              depName: 'foo@1.0.0',
+              depType: 'pnpm.overrides',
+              packageName: 'foo',
+              prettyDepType: 'overrides',
+            },
+            {
+              currentValue: '2.0.0',
+              datasource: 'npm',
+              depName: 'foo@1.0.0>bar',
+              depType: 'pnpm.overrides',
+              packageName: 'bar',
+              prettyDepType: 'overrides',
+            },
+            {
+              currentValue: '2.0.0',
+              datasource: 'npm',
+              depName: 'foo@>1.0.0',
+              depType: 'pnpm.overrides',
+              packageName: 'foo',
+              prettyDepType: 'overrides',
+            },
+            {
+              currentValue: '2.0.0',
+              datasource: 'npm',
+              depName: 'foo@>=1.0.0',
+              depType: 'pnpm.overrides',
+              packageName: 'foo',
+              prettyDepType: 'overrides',
+            },
+            {
+              currentValue: '2.0.0',
+              datasource: 'npm',
+              depName: 'foo@>1.0.0>bar',
+              depType: 'pnpm.overrides',
+              packageName: 'bar',
+              prettyDepType: 'overrides',
+            },
+          ],
+        });
+      },
+    );
   });
 
   describe('.extractAllPackageFiles()', () => {
