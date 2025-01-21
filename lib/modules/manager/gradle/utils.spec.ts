@@ -23,7 +23,6 @@ describe('modules/manager/gradle/utils', () => {
       expect(versionLikeSubstring(`${input}'`)).toEqual(input);
       expect(versionLikeSubstring(`${input}"`)).toEqual(input);
       expect(versionLikeSubstring(`${input}\n`)).toEqual(input);
-      expect(versionLikeSubstring(`${input}  `)).toEqual(input);
       expect(versionLikeSubstring(`${input}$`)).toEqual(input);
     });
     expect(versionLikeSubstring('')).toBeNull();
@@ -40,6 +39,9 @@ describe('modules/manager/gradle/utils', () => {
     expect(isDependencyString('foo.bar:baz:1.2.3')).toBeTrue();
     expect(isDependencyString('foo.bar:baz:1.2.3:linux-cpu-x86_64')).toBeTrue();
     expect(isDependencyString('foo.bar:baz:1.2.+')).toBeTrue();
+    expect(isDependencyString('foo.bar:baz:[1.6.0, ]')).toBeTrue();
+    expect(isDependencyString('foo.bar:baz:[, 1.6.0)')).toBeTrue();
+    expect(isDependencyString('foo.bar:baz:]1.6.0,]')).toBeTrue();
     expect(isDependencyString('foo:bar:baz:qux:quux')).toBeFalse();
     expect(isDependencyString("foo:bar:1.2.3'")).toBeFalse();
     expect(isDependencyString('foo:bar:1.2.3"')).toBeFalse();
@@ -64,6 +66,10 @@ describe('modules/manager/gradle/utils', () => {
     expect(parseDependencyString('foo:bar:1.2.+')).toMatchObject({
       depName: 'foo:bar',
       currentValue: '1.2.+',
+    });
+    expect(parseDependencyString('foo.bar:baz:[1.6.0, ]')).toMatchObject({
+      depName: 'foo.bar:baz',
+      currentValue: '[1.6.0, ]',
     });
     expect(parseDependencyString('foo:bar:baz:qux')).toBeNull();
     expect(parseDependencyString('foo:bar:baz:qux:quux')).toBeNull();

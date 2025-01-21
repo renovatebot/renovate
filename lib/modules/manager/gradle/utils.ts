@@ -11,7 +11,7 @@ const artifactRegex = regEx(
   '^[a-zA-Z][-_a-zA-Z0-9]*(?:\\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*$',
 );
 
-const versionLikeRegex = regEx('^(?<version>[-_.\\[\\](),a-zA-Z0-9+]+)');
+const versionLikeRegex = regEx('^(?<version>[-_.\\[\\](),a-zA-Z0-9+ ]+)');
 
 // Extracts version-like and range-like strings
 // from the beginning of input

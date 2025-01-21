@@ -65,7 +65,8 @@ dependencies {
         exclude module: "spring-boot-starter-tomcat"
     }
 
-    compile("org.springframework.boot:spring-boot-starter-jetty")
+    compile("org.springframework.boot:spring-boot-starter")
+    compile("org.springframework.boot:spring-boot-starter-jetty:[3.3.0, ]")
 
     //compile('org.codehaus.groovy:groovy:2.4.9')
     testCompile('org.springframework.boot:spring-boot-starter-test')

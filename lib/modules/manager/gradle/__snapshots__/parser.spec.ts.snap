@@ -52,10 +52,18 @@ exports[`modules/manager/gradle/parser calculations parses fixture from "gradle"
     },
   },
   {
+    "currentValue": "[3.3.0, ]",
+    "depName": "org.springframework.boot:spring-boot-starter-jetty",
+    "managerData": {
+      "fileReplacePosition": 1768,
+      "packageFile": "build.gradle",
+    },
+  },
+  {
     "currentValue": "6.0.9.RELEASE",
     "depName": "org.grails:gorm-hibernate5-spring-boot",
     "managerData": {
-      "fileReplacePosition": 1882,
+      "fileReplacePosition": 1952,
       "packageFile": "build.gradle",
     },
   },
@@ -63,7 +71,7 @@ exports[`modules/manager/gradle/parser calculations parses fixture from "gradle"
     "currentValue": "6.0.5",
     "depName": "mysql:mysql-connector-java",
     "managerData": {
-      "fileReplacePosition": 1938,
+      "fileReplacePosition": 2008,
       "packageFile": "build.gradle",
     },
   },
@@ -71,7 +79,7 @@ exports[`modules/manager/gradle/parser calculations parses fixture from "gradle"
     "currentValue": "1.0-groovy-2.4",
     "depName": "org.spockframework:spock-spring",
     "managerData": {
-      "fileReplacePosition": 1996,
+      "fileReplacePosition": 2066,
       "packageFile": "build.gradle",
     },
   },
@@ -79,7 +87,7 @@ exports[`modules/manager/gradle/parser calculations parses fixture from "gradle"
     "currentValue": "1.3",
     "depName": "org.hamcrest:hamcrest-core",
     "managerData": {
-      "fileReplacePosition": 2101,
+      "fileReplacePosition": 2171,
       "packageFile": "build.gradle",
     },
   },
@@ -87,7 +95,7 @@ exports[`modules/manager/gradle/parser calculations parses fixture from "gradle"
     "currentValue": "3.1",
     "depName": "cglib:cglib-nodep",
     "managerData": {
-      "fileReplacePosition": 2189,
+      "fileReplacePosition": 2259,
       "packageFile": "build.gradle",
     },
   },
@@ -95,7 +103,7 @@ exports[`modules/manager/gradle/parser calculations parses fixture from "gradle"
     "currentValue": "3.1.1",
     "depName": "org.apache.openjpa:openjpa",
     "managerData": {
-      "fileReplacePosition": 2295,
+      "fileReplacePosition": 2365,
       "packageFile": "build.gradle",
     },
   },
