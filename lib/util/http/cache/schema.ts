@@ -13,3 +13,4 @@ export const HttpCacheSchema = z
   )
   .nullable()
   .catch(null);
+export type HttpCache = z.infer<typeof HttpCacheSchema>;
