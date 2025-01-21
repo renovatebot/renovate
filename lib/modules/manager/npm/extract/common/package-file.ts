@@ -1,3 +1,4 @@
+import { parsePkgAndParentSelector } from '@pnpm/parse-overrides';
 import is from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../../../../../constants/error-messages';
 import { logger } from '../../../../../logger';
@@ -12,10 +13,6 @@ import {
 } from './dependency';
 import { setNodeCommitTopic } from './node';
 import { extractOverrideDepsRec } from './overrides';
-import {
-  parseOverrides,
-  parsePkgAndParentSelector,
-} from '@pnpm/parse-overrides';
 
 export function extractPackageJson(
   packageJson: NpmPackage,
