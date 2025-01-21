@@ -298,7 +298,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         matchDatasources: ['docker'],
-        matchPackageNames: ['ubuntu'],
+        matchDepNames: ['ubuntu'],
         versioning: 'ubuntu',
       },
     ],
