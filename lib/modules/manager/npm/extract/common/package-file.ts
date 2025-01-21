@@ -12,6 +12,10 @@ import {
 } from './dependency';
 import { setNodeCommitTopic } from './node';
 import { extractOverrideDepsRec } from './overrides';
+import {
+  parseOverrides,
+  parsePkgAndParentSelector,
+} from '@pnpm/parse-overrides';
 
 export function extractPackageJson(
   packageJson: NpmPackage,
@@ -91,7 +95,8 @@ export function extractPackageJson(
             )) {
               if (is.string(overridesVal)) {
                 // Newer flat syntax: `parent>parent>child`
-                const packageName = overridesKey.split('>').pop()!;
+                const packageName =
+                  parsePkgAndParentSelector(overridesKey).targetPkg.name;
                 dep = {
                   depName: overridesKey,
                   packageName,
