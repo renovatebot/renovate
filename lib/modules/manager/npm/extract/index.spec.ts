@@ -1028,16 +1028,17 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
-    it('extracts dependencies from pnpm.overrides, with both ranges and descendant syntax', async () => {
+    it('extracts dependencies from pnpm.overrides, with version ranges in flat syntax', async () => {
       const content = codeBlock`{
         "pnpm": {
           "overrides": {
             "foo>bar": "2.0.0",
             "foo@1.0.0": "2.0.0",
-            "foo@1.0.0>bar": "2.0.0",
             "foo@>1.0.0": "2.0.0",
             "foo@>=1.0.0": "2.0.0",
-            "foo@>1.0.0>bar": "2.0.0"
+            "foo@1.0.0>bar": "2.0.0",
+            "foo@>1.0.0>bar": "2.0.0",
+            "foo@>=1.0.0 <2.0.0": ">=2.0.0"
           }
         }
       }`;
@@ -1067,14 +1068,6 @@ describe('modules/manager/npm/extract/index', () => {
           {
             currentValue: '2.0.0',
             datasource: 'npm',
-            depName: 'foo@1.0.0>bar',
-            depType: 'pnpm.overrides',
-            packageName: 'bar',
-            prettyDepType: 'overrides',
-          },
-          {
-            currentValue: '2.0.0',
-            datasource: 'npm',
             depName: 'foo@>1.0.0',
             depType: 'pnpm.overrides',
             packageName: 'foo',
@@ -1091,9 +1084,25 @@ describe('modules/manager/npm/extract/index', () => {
           {
             currentValue: '2.0.0',
             datasource: 'npm',
+            depName: 'foo@1.0.0>bar',
+            depType: 'pnpm.overrides',
+            packageName: 'bar',
+            prettyDepType: 'overrides',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
             depName: 'foo@>1.0.0>bar',
             depType: 'pnpm.overrides',
             packageName: 'bar',
+            prettyDepType: 'overrides',
+          },
+          {
+            currentValue: '>=2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>=1.0.0 <2.0.0',
+            depType: 'pnpm.overrides',
+            packageName: 'foo',
             prettyDepType: 'overrides',
           },
         ],
