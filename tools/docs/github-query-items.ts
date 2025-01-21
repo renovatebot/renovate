@@ -1,3 +1,4 @@
+import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import { logger } from '../../lib/logger';
 import { getIssuesByIssueTypeQuery } from '../../lib/modules/platform/github/graphql';
@@ -45,7 +46,16 @@ async function getIssuesByIssueType(
 ): Promise<ItemsEntity[]> {
   const queryString = `type:${issueType}, repo:renovatebot/renovate, state:open`;
   const res = await githubApi.requestGraphql<{
-    search: { nodes: ItemsEntity[] };
+    search: {
+      nodes: {
+        number: number;
+        title: string;
+        url: string;
+        labels: {
+          nodes: { name: string }[];
+        };
+      }[];
+    };
   }>(getIssuesByIssueTypeQuery, {
     variables: {
       queryStr: queryString,
@@ -56,7 +66,12 @@ async function getIssuesByIssueType(
 
   return (
     res?.data?.search.nodes.map((issue) => {
-      return { ...issue, issueType };
+      return {
+        ...issue,
+        issueType,
+        labels: issue.labels.nodes,
+        html_url: issue.url,
+      };
     }) ?? []
   );
 }
@@ -75,15 +90,22 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
   }
 
   try {
-    const rawItems: ItemsEntity[] = [];
-    rawItems.concat(await getIssuesByIssueType('Bug'));
-    rawItems.concat(await getIssuesByIssueType('Feature'));
+    let rawItems: ItemsEntity[] = [];
+    const bugs = await getIssuesByIssueType('Bug');
+    const features = await getIssuesByIssueType('Feature');
+    // eslint-disable-next-line
+    console.log(bugs.length, features.length);
 
+    rawItems = rawItems.concat(bugs).concat(features);
+
+    // eslint-disable-next-line
+    console.log(rawItems.length);
     result.managers = extractIssues(rawItems, 'manager:');
     result.platforms = extractIssues(rawItems, 'platform:');
     result.datasources = extractIssues(rawItems, 'datasource:');
     result.versionings = extractIssues(rawItems, 'versioning:');
 
+    await fs.writeFile('openitems.json', JSON.stringify(result));
     return result;
   } catch (err) {
     logger.error({ err }, 'Error getting query results');
