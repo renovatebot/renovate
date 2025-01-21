@@ -204,8 +204,8 @@ importers:
         specifier: 4.7.8
         version: 4.7.8
       ignore:
-        specifier: 7.0.1
-        version: 7.0.1
+        specifier: 7.0.2
+        version: 7.0.2
       ini:
         specifier: 5.0.0
         version: 5.0.0
@@ -3801,8 +3801,8 @@ packages:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
     engines: {node: '>= 4'}
 
-  ignore@7.0.1:
-    resolution: {integrity: sha512-D1gVletsbVOoiXF963rgZnfobGAbq7Lb+dz3fcBmlOmZg6hHkpbycLqL8PLNB8f4GVv6dOVYwhPL/r7hwiH0Fw==}
+  ignore@7.0.2:
+    resolution: {integrity: sha512-Wx5VKTZatJNNa26J1dMfJF1bZu4Lw31EHwhFRcSjTvro8Mqsrd3rJanyW48W43Eyd+gpaiDNkveYd62DvXaZeQ==}
     engines: {node: '>= 4'}
 
   immediate@3.0.6:
@@ -10810,7 +10810,7 @@ snapshots:
 
   ignore@5.3.2: {}
 
-  ignore@7.0.1: {}
+  ignore@7.0.2: {}
 
   immediate@3.0.6: {}
 
