@@ -473,7 +473,8 @@ describe('modules/manager/pip-compile/extract', () => {
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
     expect(packageFiles?.map((p) => p.lockFiles)).toEqual([['2.txt']]);
     expect(logger.warn).toHaveBeenCalledWith(
-      'pip-compile: 1.in references reqs-no-headers.txt which does not appear to be a requirements file managed by pip-compile',
+      { packageFile: '1.in', requirementsFile: 'reqs-no-headers.txt' },
+      'pip-compile: Package file references a file which does not appear to be a requirements file managed by pip-compile',
     );
   });
 
@@ -494,7 +495,8 @@ describe('modules/manager/pip-compile/extract', () => {
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
     expect(packageFiles?.map((p) => p.lockFiles)).toEqual([['2.txt']]);
     expect(logger.warn).toHaveBeenCalledWith(
-      'pip-compile: 1.in references unmanaged-file.txt which does not appear to be a requirements file managed by pip-compile',
+      { packageFile: '1.in', requirementsFile: 'unmanaged-file.txt' },
+      'pip-compile: Package file references a file which does not appear to be a requirements file managed by pip-compile',
     );
   });
 

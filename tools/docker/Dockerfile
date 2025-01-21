@@ -1,27 +1,27 @@
-# syntax=docker/dockerfile:1.12.1@sha256:93bfd3b68c109427185cd78b4779fc82b484b0b7618e36d0f104d4d801e66d25
+# syntax=docker/dockerfile:1.13.0@sha256:426b85b823c113372f766a963f68cfd9cd4878e1bcc0fda58779127ee98a28eb
 
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.28.0@sha256:9d687b1dcb570c96c15c89b34709c819b76ec28bdc7d89eca3e9a73cca3db4a4 AS slim-base
+FROM ghcr.io/renovatebot/base-image:9.33.5@sha256:47de2daa1bb96e37da15d2b91f1f57d970db8322f271a8d2f2c3b6a8fd6f73a6 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.28.0-full@sha256:8158e260c0999da25fb404a50ffaf47b9a90b2550ae6d2112736c4b370a8f507 AS full-base
+FROM ghcr.io/renovatebot/base-image:9.33.5-full@sha256:60cf607b73eeeac22b9d75fbaf04062f0d3eece86a608e26fb8f2bac35626fe6 AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.28.0@sha256:9d687b1dcb570c96c15c89b34709c819b76ec28bdc7d89eca3e9a73cca3db4a4 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.33.5@sha256:47de2daa1bb96e37da15d2b91f1f57d970db8322f271a8d2f2c3b6a8fd6f73a6 AS build
 
 # We want a specific node version here
 # renovate: datasource=node-version
-RUN install-tool node 22.11.0
+RUN install-tool node 22.13.0
 
 WORKDIR /usr/local/renovate
 

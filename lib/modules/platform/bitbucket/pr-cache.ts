@@ -147,7 +147,7 @@ export class BitbucketPrCache {
       pagelen: 50,
       cacheProvider: repoCacheProvider,
     };
-    const res = await http.getJson<PagedResult<PrResponse>>(url, opts);
+    const res = await http.getJsonUnchecked<PagedResult<PrResponse>>(url, opts);
 
     const items = res.body.values;
     logger.debug(`Fetched ${items.length} PRs to sync with cache`);
