@@ -1,10 +1,9 @@
 import { DateTime } from 'luxon';
 import { logger } from '../../lib/logger';
+import { getIssuesByIssueTypeQuery } from '../../lib/modules/platform/github/graphql';
 import * as hostRules from '../../lib/util/host-rules';
 import { GithubHttp } from '../../lib/util/http/github';
-import { getQueryString } from '../../lib/util/url';
 
-const gitHubApiUrl = 'https://api.github.com/search/issues?';
 const githubApi = new GithubHttp();
 
 if (process.env.GITHUB_TOKEN) {
@@ -15,17 +14,12 @@ if (process.env.GITHUB_TOKEN) {
   });
 }
 
-type GithubApiQueryResponse = {
-  total_count: number;
-  incomplete_results: boolean;
-  items: ItemsEntity[];
-};
-
 export type ItemsEntity = {
   html_url: string;
   number: number;
   title: string;
   labels: LabelsEntity[];
+  issueType: 'Bug' | 'Feature';
 };
 
 export type LabelsEntity = {
@@ -46,6 +40,27 @@ export interface Items {
   features: ItemsEntity[];
 }
 
+async function getIssuesByIssueType(
+  issueType: 'Bug' | 'Feature',
+): Promise<ItemsEntity[]> {
+  const queryString = `type:${issueType}, repo:renovatebot/renovate, state:open`;
+  const res = await githubApi.requestGraphql<{
+    search: { nodes: ItemsEntity[] };
+  }>(getIssuesByIssueTypeQuery, {
+    variables: {
+      queryStr: queryString,
+    },
+    paginate: true,
+    readOnly: true,
+  });
+
+  return (
+    res?.data?.search.nodes.map((issue) => {
+      return { ...issue, issueType };
+    }) ?? []
+  );
+}
+
 export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
   const result: RenovateOpenItems = {
     managers: {},
@@ -59,18 +74,10 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
     return result;
   }
 
-  const q = `repo:renovatebot/renovate type:issue is:open`;
-  const per_page = 100;
   try {
-    const query = getQueryString({ q, per_page });
-    const res = await githubApi.getJson<GithubApiQueryResponse>(
-      gitHubApiUrl + query,
-      {
-        paginationField: 'items',
-        paginate: true,
-      },
-    );
-    const rawItems = res.body?.items ?? [];
+    const rawItems: ItemsEntity[] = [];
+    rawItems.concat(await getIssuesByIssueType('Bug'));
+    rawItems.concat(await getIssuesByIssueType('Feature'));
 
     result.managers = extractIssues(rawItems, 'manager:');
     result.platforms = extractIssues(rawItems, 'platform:');
@@ -91,9 +98,8 @@ function extractIssues(items: ItemsEntity[], labelPrefix: string): OpenItems {
   const issuesMap: OpenItems = {};
 
   for (const item of items) {
-    const type = item.labels
-      .find((l) => l.name.startsWith('type:'))
-      ?.name.split(':')[1];
+    const type = item.issueType;
+
     if (!type) {
       continue;
     }
@@ -107,10 +113,10 @@ function extractIssues(items: ItemsEntity[], labelPrefix: string): OpenItems {
       issuesMap[label] = { bugs: [], features: [] };
     }
     switch (type) {
-      case 'bug':
+      case 'Bug':
         issuesMap[label]?.bugs.push(item);
         break;
-      case 'feature':
+      case 'Feature':
         issuesMap[label]?.features.push(item);
         break;
       default:

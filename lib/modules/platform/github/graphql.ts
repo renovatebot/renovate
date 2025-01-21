@@ -85,3 +85,32 @@ mutation EnablePullRequestAutoMerge(
   }
 }
 `;
+
+export const getIssuesByIssueTypeQuery = `
+query(
+$queryStr: String!
+$count: Int,
+$cursor: String
+) {
+  search(
+    type: ISSUE
+    first: $count,
+    after: $cursor,
+    query: $queryStr
+  ) {
+    issueCount
+    nodes {
+      ... on Issue {
+        number
+        title
+        url
+        labels (first:5) {
+          nodes {
+            name
+          }
+        }
+      }
+    }
+  }
+}
+`;
