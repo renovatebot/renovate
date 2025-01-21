@@ -1,7 +1,6 @@
 import url from 'node:url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { z } from 'zod';
 import { GlobalConfig } from '../../../config/global';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -14,62 +13,10 @@ import { regEx } from '../../../util/regex';
 import { HttpCacheStats } from '../../../util/stats';
 import { joinUrlParts } from '../../../util/url';
 import type { Release, ReleaseResult } from '../types';
-import type { CachedReleaseResult, NpmResponse } from './types';
+import { NpmResponse } from './schema';
+import type { CachedReleaseResult } from './types';
 
 export const CACHE_REVISION = 1;
-
-const SHORT_REPO_REGEX = regEx(
-  /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/,
-);
-
-const platformMapping: Record<string, string> = {
-  bitbucket: 'https://bitbucket.org/',
-  github: 'https://github.com/',
-  gitlab: 'https://gitlab.com/',
-};
-
-interface PackageSource {
-  sourceUrl: string | null;
-  sourceDirectory: string | null;
-}
-
-const PackageSource = z
-  .union([
-    z
-      .string()
-      .nonempty()
-      .transform((repository): PackageSource => {
-        let sourceUrl: string | null = null;
-        const sourceDirectory = null;
-        const shortMatch = repository.match(SHORT_REPO_REGEX);
-        if (shortMatch?.groups) {
-          const { platform = 'github', shortRepo } = shortMatch.groups;
-          sourceUrl = platformMapping[platform] + shortRepo;
-        } else {
-          sourceUrl = repository;
-        }
-        return { sourceUrl, sourceDirectory };
-      }),
-    z
-      .object({
-        url: z.string().nonempty().nullish(),
-        directory: z.string().nonempty().nullish(),
-      })
-      .transform(({ url, directory }) => {
-        const res: PackageSource = { sourceUrl: null, sourceDirectory: null };
-
-        if (url) {
-          res.sourceUrl = url;
-        }
-
-        if (directory) {
-          res.sourceDirectory = directory;
-        }
-
-        return res;
-      }),
-  ])
-  .catch({ sourceUrl: null, sourceDirectory: null });
 
 export async function getDependency(
   http: Http,
@@ -144,7 +91,7 @@ export async function getDependency(
       });
     }
 
-    const raw = await http.getJsonUnchecked<NpmResponse>(packageUrl, options);
+    const raw = await http.getJson(packageUrl, options, NpmResponse);
     if (cachedResult?.cacheData && raw.statusCode === 304) {
       logger.trace(`Cached npm result for ${packageName} is revalidated`);
       HttpCacheStats.incRemoteHits(packageUrl);
@@ -167,26 +114,28 @@ export async function getDependency(
       return null;
     }
 
-    const latestVersion = res.versions[res['dist-tags']?.latest ?? ''];
-    res.repository ??= latestVersion?.repository;
-    res.homepage ??= latestVersion?.homepage;
-
-    const { sourceUrl, sourceDirectory } = PackageSource.parse(res.repository);
+    const { latestVersion, tags } = res;
 
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
-      homepage: res.homepage,
       releases: [],
-      tags: res['dist-tags'],
+      tags,
       registryUrl,
     };
 
-    if (sourceUrl) {
-      dep.sourceUrl = sourceUrl;
+    const homepage = res.homepage ?? latestVersion?.homepage;
+    if (homepage) {
+      res.homepage = homepage;
     }
 
-    if (sourceDirectory) {
-      dep.sourceDirectory = sourceDirectory;
+    const repo = res.repository ?? latestVersion?.repository;
+
+    if (repo?.url) {
+      dep.sourceUrl = repo.url;
+    }
+
+    if (repo?.directory) {
+      dep.sourceDirectory = repo.directory;
     }
 
     if (latestVersion?.deprecated) {
@@ -209,15 +158,14 @@ export async function getDependency(
       if (is.nonEmptyString(nodeConstraint)) {
         release.constraints = { node: [nodeConstraint] };
       }
-      const source = PackageSource.parse(res.versions?.[version].repository);
-      if (source.sourceUrl && source.sourceUrl !== dep.sourceUrl) {
-        release.sourceUrl = source.sourceUrl;
+      const repo = res.versions?.[version].repository;
+      const sourceUrl = repo?.url;
+      if (sourceUrl && sourceUrl !== dep.sourceUrl) {
+        release.sourceUrl = sourceUrl;
       }
-      if (
-        source.sourceDirectory &&
-        source.sourceDirectory !== dep.sourceDirectory
-      ) {
-        release.sourceDirectory = source.sourceDirectory;
+      const sourceDirectory = repo?.directory;
+      if (sourceDirectory && sourceDirectory !== dep.sourceDirectory) {
+        release.sourceDirectory = sourceDirectory;
       }
       if (dep.deprecationMessage) {
         release.isDeprecated = true;
