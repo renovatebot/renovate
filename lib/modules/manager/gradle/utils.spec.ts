@@ -23,6 +23,7 @@ describe('modules/manager/gradle/utils', () => {
       expect(versionLikeSubstring(`${input}'`)).toEqual(input);
       expect(versionLikeSubstring(`${input}"`)).toEqual(input);
       expect(versionLikeSubstring(`${input}\n`)).toEqual(input);
+      expect(versionLikeSubstring(`${input}  `)).toEqual(input);
       expect(versionLikeSubstring(`${input}$`)).toEqual(input);
     });
     expect(versionLikeSubstring('')).toBeNull();

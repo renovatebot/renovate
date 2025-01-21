@@ -23,7 +23,7 @@ export function versionLikeSubstring(
   }
 
   const match = versionLikeRegex.exec(input);
-  const version = match?.groups?.version;
+  const version = match?.groups?.version?.trim();
   if (!version || !regEx(/\d/).test(version)) {
     return null;
   }
