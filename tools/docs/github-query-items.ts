@@ -45,27 +45,25 @@ async function getIssuesByIssueType(
   issueType: 'Bug' | 'Feature',
 ): Promise<ItemsEntity[]> {
   const queryString = `type:${issueType}, repo:renovatebot/renovate, state:open`;
-  const res = await githubApi.requestGraphql<{
-    search: {
-      nodes: {
-        number: number;
-        title: string;
-        url: string;
-        labels: {
-          nodes: { name: string }[];
-        };
-      }[];
-    };
-  }>(getIssuesByIssueTypeQuery, {
-    variables: {
-      queryStr: queryString,
+  const res = (await githubApi.querySearchField<unknown>(
+    getIssuesByIssueTypeQuery,
+    'search',
+    {
+      variables: {
+        queryStr: queryString,
+      },
+      paginate: true,
+      readOnly: true,
     },
-    paginate: true,
-    readOnly: true,
-  });
+  )) as {
+    labels: { nodes: { name: string }[] };
+    number: number;
+    title: string;
+    url: string;
+  }[];
 
   return (
-    res?.data?.search.nodes.map((issue) => {
+    res.map((issue) => {
       return {
         ...issue,
         issueType,

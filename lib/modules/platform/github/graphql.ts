@@ -111,6 +111,10 @@ $cursor: String
         }
       }
     }
+    pageInfo {
+        endCursor
+        hasNextPage
+    }
   }
 }
 `;
