@@ -51,8 +51,8 @@ export const counts = new Map<CountName, number>();
 export function getCount(key: CountName): number {
   const count = counts.get(key);
   // istanbul ignore if: should not happen
-  if (!count) {
-    logger.warn(`Could not compute the count of ${key}, returning zero.`);
+  if (!is.integer(count)) {
+    logger.debug(`Could not compute the count of ${key}, returning zero.`);
     return 0;
   }
   return count;
