@@ -98,7 +98,6 @@ $cursor: String
     after: $cursor,
     query: $queryStr
   ) {
-    issueCount
     nodes {
       ... on Issue {
         number
