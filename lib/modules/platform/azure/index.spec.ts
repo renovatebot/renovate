@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
+import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
 import type { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import {
   GitPullRequestMergeStrategy,
@@ -1910,45 +1911,40 @@ describe('modules/platform/azure/index', () => {
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
       const bypassReasonMock = 'Bypassed by Renovate';
 
-      const updatePullRequestMock = jest.fn(() => ({
-        status: PullRequestStatus.Completed,
-      }));
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequestById: jest.fn(() => ({
-              lastMergeSourceCommit: lastMergeSourceCommitMock,
-              targetRefName: 'refs/heads/ding',
-              title: 'title',
-            })),
-            updatePullRequest: updatePullRequestMock,
-          }) as any,
+      const updatePullRequestMock = jest.fn().mockResolvedValueOnce({});
+
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: jest.fn().mockResolvedValue({
+            lastMergeSourceCommit: lastMergeSourceCommitMock,
+            targetRefName: 'refs/heads/ding',
+            title: 'title',
+          }),
+          updatePullRequest: updatePullRequestMock,
+        }),
       );
-      azureApi.policyApi.mockImplementationOnce(
-        () =>
-          ({
-            getPolicyEvaluations: jest.fn(
-              () =>
-                [
-                  {
-                    configuration: {
-                      settings: undefined,
-                      isEnabled: true,
-                      isBlocking: true,
-                      type: {
-                        id: AzurePolicyTypeId.MinimumNumberOfReviewers,
-                      },
-                    },
-                    status: PolicyEvaluationStatus.Queued,
-                  },
-                ] satisfies PolicyEvaluationRecord[],
-            ),
-          }) as any,
+
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyEvaluations: jest.fn().mockResolvedValue([
+            {
+              configuration: {
+                settings: undefined,
+                isEnabled: true,
+                isBlocking: true,
+                type: {
+                  id: AzurePolicyTypeId.MinimumNumberOfReviewers,
+                },
+              },
+              status: PolicyEvaluationStatus.Queued,
+            },
+          ] satisfies PolicyEvaluationRecord[]),
+        }),
       );
 
       azureHelper.getMergeMethod = jest
         .fn()
-        .mockReturnValue(GitPullRequestMergeStrategy.Squash);
+        .mockResolvedValueOnce(GitPullRequestMergeStrategy.Squash);
 
       const res = await azure.mergePr({
         branchName: branchNameMock,
@@ -1984,45 +1980,40 @@ describe('modules/platform/azure/index', () => {
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
 
-      const updatePullRequestMock = jest.fn(() => ({
-        status: PullRequestStatus.Completed,
-      }));
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequestById: jest.fn(() => ({
-              lastMergeSourceCommit: lastMergeSourceCommitMock,
-              targetRefName: 'refs/heads/ding',
-              title: 'title',
-            })),
-            updatePullRequest: updatePullRequestMock,
-          }) as any,
+      const updatePullRequestMock = jest.fn().mockResolvedValue({});
+
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: jest.fn().mockResolvedValue({
+            lastMergeSourceCommit: lastMergeSourceCommitMock,
+            targetRefName: 'refs/heads/ding',
+            title: 'title',
+          }),
+          updatePullRequest: updatePullRequestMock,
+        }),
       );
-      azureApi.policyApi.mockImplementationOnce(
-        () =>
-          ({
-            getPolicyEvaluations: jest.fn(
-              () =>
-                [
-                  {
-                    configuration: {
-                      settings: undefined,
-                      isEnabled: true,
-                      isBlocking: true,
-                      type: {
-                        id: AzurePolicyTypeId.MinimumNumberOfReviewers,
-                      },
-                    },
-                    status: PolicyEvaluationStatus.Queued,
-                  },
-                ] satisfies PolicyEvaluationRecord[],
-            ),
-          }) as any,
+
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyEvaluations: jest.fn().mockResolvedValue([
+            {
+              configuration: {
+                settings: undefined,
+                isEnabled: true,
+                isBlocking: true,
+                type: {
+                  id: AzurePolicyTypeId.Build,
+                },
+              },
+              status: PolicyEvaluationStatus.Queued,
+            },
+          ] satisfies PolicyEvaluationRecord[]),
+        }),
       );
 
       azureHelper.getMergeMethod = jest
         .fn()
-        .mockReturnValue(GitPullRequestMergeStrategy.Squash);
+        .mockResolvedValueOnce(GitPullRequestMergeStrategy.Squash);
 
       const res = await azure.mergePr({
         branchName: branchNameMock,
