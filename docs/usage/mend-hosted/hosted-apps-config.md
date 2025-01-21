@@ -1,6 +1,12 @@
 # Mend-hosted Apps Configuration
 
-The Mend-hosted apps ([Renovate App on GitHub](https://github.com/apps/renovate) and [Mend App on Bitbucket](https://marketplace.atlassian.com/apps/1232072/mend)) are popular ways to use Renovate on the cloud.
+The Mend-hosted apps are popular ways to use Renovate on the cloud.
+
+They are available for Git repositories hosted on the following cloud platforms:
+
+- GitHub ([Renovate App on GitHub](https://github.com/apps/renovate))
+- Bitbucket Cloud ([Mend App on Bitbucket](https://marketplace.atlassian.com/apps/1232072/mend))
+- Azure DevOps
 
 This page:
 
