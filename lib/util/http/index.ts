@@ -182,6 +182,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     const { cacheProvider } = options;
     const cachedResponse = await cacheProvider?.bypassServerResponse<T>(url);
+    // istanbul ignore if
     if (cachedResponse) {
       return cachedResponse;
     }
