@@ -2,8 +2,8 @@ import { logger } from '../../../logger';
 import { HttpCacheStats } from '../../stats';
 import type { GotOptions, HttpResponse } from '../types';
 import { copyResponse } from '../util';
-import { HttpCacheSchema } from './schema';
-import type { HttpCache, HttpCacheProvider } from './types';
+import { type HttpCache, HttpCacheSchema } from './schema';
+import type { HttpCacheProvider } from './types';
 
 export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
   protected abstract load(url: string): Promise<unknown>;
