@@ -21,7 +21,7 @@ FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.34.0@sha256:674e
 
 # We want a specific node version here
 # renovate: datasource=node-version
-RUN install-tool node 22.13.0
+RUN install-tool node 22.13.1
 
 WORKDIR /usr/local/renovate
 
