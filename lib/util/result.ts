@@ -1,5 +1,10 @@
-import type { SafeParseReturnType, ZodType, ZodTypeDef } from 'zod';
-import { ZodError, z } from 'zod';
+import type {
+  SafeParseReturnType,
+  input as ZodInput,
+  output as ZodOutput,
+  ZodType,
+} from 'zod';
+import { NEVER, ZodError, ZodIssueCode } from 'zod';
 import { logger } from '../logger';
 
 type Val = NonNullable<unknown>;
@@ -532,30 +537,26 @@ export class Result<T extends Val, E extends Val = Error> {
    * Given a `schema` and `input`, returns a `Result` with `val` being the parsed value.
    * Additionally, `null` and `undefined` values are converted into Zod error.
    */
-  static parse<
-    T,
-    Schema extends ZodType<T, ZodTypeDef, Input>,
-    Input = unknown,
-  >(
+  static parse<Schema extends ZodType<any, any, any>>(
     input: unknown,
     schema: Schema,
-  ): Result<NonNullable<z.infer<Schema>>, ZodError<Input>> {
+  ): Result<NonNullable<ZodOutput<Schema>>, ZodError<ZodInput<Schema>>> {
     const parseResult = schema
-      .transform((result, ctx): NonNullable<T> => {
+      .transform((result, ctx): NonNullable<ZodOutput<Schema>> => {
         if (result === undefined) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: ZodIssueCode.custom,
             message: `Result can't accept nullish values, but input was parsed by Zod schema to undefined`,
           });
-          return z.NEVER;
+          return NEVER;
         }
 
         if (result === null) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: ZodIssueCode.custom,
             message: `Result can't accept nullish values, but input was parsed by Zod schema to null`,
           });
-          return z.NEVER;
+          return NEVER;
         }
 
         return result;
@@ -569,9 +570,9 @@ export class Result<T extends Val, E extends Val = Error> {
    * Given a `schema`, returns a `Result` with `val` being the parsed value.
    * Additionally, `null` and `undefined` values are converted into Zod error.
    */
-  parse<T, Schema extends ZodType<T, ZodTypeDef, Input>, Input = unknown>(
+  parse<Schema extends ZodType<any, any, any>>(
     schema: Schema,
-  ): Result<NonNullable<z.infer<Schema>>, E | ZodError<Input>> {
+  ): Result<NonNullable<ZodOutput<Schema>>, E | ZodError<ZodInput<Schema>>> {
     if (this.res.ok) {
       return Result.parse(this.res.val, schema);
     }
@@ -862,9 +863,12 @@ export class AsyncResult<T extends Val, E extends Val>
    * Given a `schema`, returns a `Result` with `val` being the parsed value.
    * Additionally, `null` and `undefined` values are converted into Zod error.
    */
-  parse<T, Schema extends ZodType<T, ZodTypeDef, Input>, Input = unknown>(
+  parse<Schema extends ZodType<any, any, any>>(
     schema: Schema,
-  ): AsyncResult<NonNullable<z.infer<Schema>>, E | ZodError<Input>> {
+  ): AsyncResult<
+    NonNullable<ZodOutput<Schema>>,
+    E | ZodError<ZodInput<Schema>>
+  > {
     return new AsyncResult(
       this.asyncResult
         .then((oldResult) => oldResult.parse(schema))

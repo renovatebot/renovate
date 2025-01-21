@@ -573,7 +573,7 @@ export async function ensurePr(
       logger.debug('Passing error up');
       throw err;
     }
-    logger.error({ err }, 'Failed to ensure PR: ' + prTitle);
+    logger.warn({ err, prTitle }, 'Failed to ensure PR');
   }
   if (existingPr) {
     return { type: 'with-pr', pr: existingPr };

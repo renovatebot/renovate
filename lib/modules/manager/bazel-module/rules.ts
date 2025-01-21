@@ -242,3 +242,28 @@ export function toPackageDependencies(
 ): PackageDependency[] {
   return collectByModule(packageDeps).map(processModulePkgDeps).flat();
 }
+
+export const GitRepositoryToPackageDep = RecordFragmentSchema.extend({
+  children: z.object({
+    rule: StringFragmentSchema.extend({
+      value: z.literal('git_repository'),
+    }),
+    name: StringFragmentSchema,
+    remote: StringFragmentSchema,
+    commit: StringFragmentSchema,
+  }),
+}).transform(({ children: { rule, name, remote, commit } }): BasePackageDep => {
+  const gitRepo: BasePackageDep = {
+    depType: rule.value,
+    depName: name.value,
+    currentDigest: commit.value,
+  };
+  const ghPackageName = githubPackageName(remote.value);
+  if (is.nonEmptyString(ghPackageName)) {
+    gitRepo.datasource = GithubTagsDatasource.id;
+    gitRepo.packageName = ghPackageName;
+  } else {
+    gitRepo.skipReason = 'unsupported-datasource';
+  }
+  return gitRepo;
+});

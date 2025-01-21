@@ -360,6 +360,7 @@ describe('modules/datasource/conan/index', () => {
             version: '1.1.1',
           },
         ],
+        sourceUrl: 'https://fake.conan.url.com',
       });
     });
 

@@ -37,7 +37,7 @@ export class DartDatasource extends Datasource {
 
     let raw: HttpResponse<DartResult> | null = null;
     try {
-      raw = await this.http.getJson<DartResult>(pkgUrl);
+      raw = await this.http.getJsonUnchecked<DartResult>(pkgUrl);
     } catch (err) {
       this.handleGenericErrors(err);
     }
