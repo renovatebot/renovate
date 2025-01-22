@@ -139,7 +139,7 @@
     "pnpm": "^9.0.0"
   },
   "volta": {
-    "node": "22.13.0",
+    "node": "22.13.1",
     "pnpm": "9.15.4"
   },
   "dependencies": {
@@ -254,7 +254,7 @@
     "zod": "3.24.1"
   },
   "optionalDependencies": {
-    "better-sqlite3": "11.7.2",
+    "better-sqlite3": "11.8.0",
     "openpgp": "6.0.1",
     "re2": "1.21.4"
   },
@@ -322,7 +322,7 @@
     "eslint-formatter-gha": "1.5.2",
     "eslint-import-resolver-typescript": "3.7.0",
     "eslint-plugin-import": "2.31.0",
-    "eslint-plugin-jest": "28.10.0",
+    "eslint-plugin-jest": "28.11.0",
     "eslint-plugin-jest-formatting": "3.1.0",
     "eslint-plugin-promise": "7.2.1",
     "eslint-plugin-typescript-enum": "2.1.0",
