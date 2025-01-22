@@ -8,7 +8,7 @@ describe('modules/datasource/hackage/index', () => {
   describe('versionToRelease', () => {
     it('should make release with given version', () => {
       expect(
-        versionToRelease('3.1.0', 'base', 'http://localhost').version,
+        versionToRelease('3.1.0', 'base', 'http://localhost', false).version,
       ).toBe('3.1.0');
     });
   });
@@ -49,6 +49,7 @@ describe('modules/datasource/hackage/index', () => {
           {
             changelogUrl: baseUrl + 'package/base-4.20.0.1/changelog',
             version: '4.20.0.1',
+            isDeprecated: false,
           },
         ],
       });
