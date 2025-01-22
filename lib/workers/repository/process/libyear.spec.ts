@@ -1,5 +1,6 @@
 import { logger } from '../../../../test/util';
 import type { PackageFile } from '../../../modules/manager/types';
+import type { Timestamp } from '../../../util/timestamp';
 import { calculateLibYears } from './libyear';
 
 describe('workers/repository/process/libyear', () => {
@@ -30,15 +31,15 @@ describe('workers/repository/process/libyear', () => {
               {
                 depName: 'dep1',
                 currentVersion: '0.1.0',
-                currentVersionTimestamp: '2019-07-01T00:00:00Z',
+                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
                 updates: [
                   {
                     newVersion: '1.0.0',
-                    releaseTimestamp: '2020-01-01T00:00:00Z',
+                    releaseTimestamp: '2020-01-01T00:00:00Z' as Timestamp,
                   },
                   {
                     newVersion: '2.0.0',
-                    releaseTimestamp: '2020-07-01T00:00:00Z',
+                    releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
                   },
                   {
                     newVersion: '3.0.0',
@@ -55,11 +56,11 @@ describe('workers/repository/process/libyear', () => {
               {
                 depName: 'dep2',
                 currentVersion: '1.0.0',
-                currentVersionTimestamp: '2019-07-01T00:00:00Z',
+                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
                 updates: [
                   {
                     newVersion: '2.0.0',
-                    releaseTimestamp: '2020-01-01T00:00:00Z',
+                    releaseTimestamp: '2020-01-01T00:00:00Z' as Timestamp,
                   },
                 ],
               },
@@ -69,7 +70,7 @@ describe('workers/repository/process/libyear', () => {
                 updates: [
                   {
                     newVersion: '2.0.0',
-                    releaseTimestamp: '2020-01-01T00:00:00Z',
+                    releaseTimestamp: '2020-01-01T00:00:00Z' as Timestamp,
                   },
                 ],
               },
