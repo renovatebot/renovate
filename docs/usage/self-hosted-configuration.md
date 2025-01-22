@@ -456,14 +456,14 @@ This configuration will be applied after all other environment variables so you 
 
 If configuring secrets in to `customEnvVariables`, take this approach:
 
-```
+```js
 {
   secrets: {
-    SECRET_TOKEN: process.env.SECRET_TOKEN
+    SECRET_TOKEN: process.env.SECRET_TOKEN,
   },
   customEnvVariables: {
-    SECRET_TOKEN: '{{ secrets.SECRET_TOKEN }}'
-  }
+    SECRET_TOKEN: '{{ secrets.SECRET_TOKEN }}',
+  },
 }
 ```
 
