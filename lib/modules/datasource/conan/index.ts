@@ -53,10 +53,12 @@ export class ConanDatasource extends Datasource {
       return null;
     }
     const url = `https://api.github.com/repos/conan-io/conan-center-index/contents/recipes/${conanName}/config.yml`;
-    const res = await this.githubHttp.get(url, {
-      headers: { accept: 'application/vnd.github.v3.raw' },
-    });
-    return ConanCenterReleases.parse(res.body);
+    const { body: result } = await this.githubHttp.getYaml(
+      url,
+      { headers: { accept: 'application/vnd.github.v3.raw' } },
+      ConanCenterReleases,
+    );
+    return result;
   }
 
   @cache({
@@ -124,7 +126,7 @@ export class ConanDatasource extends Datasource {
       );
 
       try {
-        const rep = await this.http.getJson(lookupUrl);
+        const rep = await this.http.getJsonUnchecked(lookupUrl);
         const conanJson = ConanJSON.parse(rep.body);
         if (conanJson) {
           logger.trace({ lookupUrl }, 'Got conan api result');

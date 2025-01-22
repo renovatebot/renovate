@@ -64,6 +64,15 @@ export function asTimestamp(input: unknown): Timestamp | null {
       return numberLikeDate.toISO() as Timestamp;
     }
 
+    const numberLikeOffsetDate = DateTime.fromFormat(
+      input,
+      'yyyyMMddHHmmssZZZ',
+      { zone: 'UTC' },
+    );
+    if (isValid(numberLikeOffsetDate)) {
+      return numberLikeOffsetDate.toISO() as Timestamp;
+    }
+
     const fallbackDate = DateTime.fromMillis(
       Date.parse(input) - timezoneOffset,
       { zone: 'UTC' },

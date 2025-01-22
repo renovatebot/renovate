@@ -65,9 +65,12 @@ export class BitbucketTagsDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const url = `/2.0/repositories/${repo}/refs/tags`;
     const bitbucketTags = (
-      await this.bitbucketHttp.getJson<PagedResult<BitbucketTag>>(url, {
-        paginate: true,
-      })
+      await this.bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketTag>>(
+        url,
+        {
+          paginate: true,
+        },
+      )
     ).body.values;
 
     const dependency: ReleaseResult = {
@@ -96,8 +99,9 @@ export class BitbucketTagsDatasource extends Datasource {
   ): Promise<string | null> {
     const url = `/2.0/repositories/${repo}/refs/tags/${tag}`;
 
-    const bitbucketTag = (await this.bitbucketHttp.getJson<BitbucketTag>(url))
-      .body;
+    const bitbucketTag = (
+      await this.bitbucketHttp.getJsonUnchecked<BitbucketTag>(url)
+    ).body;
 
     return bitbucketTag.target?.hash ?? null;
   }
@@ -136,7 +140,9 @@ export class BitbucketTagsDatasource extends Datasource {
 
     const url = `/2.0/repositories/${repo}/commits/${mainBranch}`;
     const bitbucketCommits = (
-      await this.bitbucketHttp.getJson<PagedResult<BitbucketCommit>>(url)
+      await this.bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketCommit>>(
+        url,
+      )
     ).body;
 
     if (bitbucketCommits.values.length === 0) {
