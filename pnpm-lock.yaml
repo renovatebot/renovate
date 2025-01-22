@@ -174,8 +174,8 @@ importers:
         specifier: 5.0.0
         version: 5.0.0
       fs-extra:
-        specifier: 11.2.0
-        version: 11.2.0
+        specifier: 11.3.0
+        version: 11.3.0
       git-url-parse:
         specifier: 16.0.0
         version: 16.0.0
@@ -3464,6 +3464,10 @@ packages:
 
   fs-extra@11.2.0:
     resolution: {integrity: sha512-PmDi3uwK5nFuXh7XDTlVnS17xJS7vW36is2+w3xcv8SVxiB4NyATf4ctkVY5bkSjX0Y4nbvZCq1/EjtEyr9ktw==}
+    engines: {node: '>=14.14'}
+
+  fs-extra@11.3.0:
+    resolution: {integrity: sha512-Z4XaCL6dUDHfP/jT25jJKMmtxvuwbkrD1vNSMFlo9lNLY2c5FHYSQgHPRZUjAB26TpDEoW9HCOgplrdbaPV/ew==}
     engines: {node: '>=14.14'}
 
   fs-minipass@2.1.0:
@@ -8101,7 +8105,7 @@ snapshots:
 
   '@renovatebot/detect-tools@1.1.0':
     dependencies:
-      fs-extra: 11.2.0
+      fs-extra: 11.3.0
       toml-eslint-parser: 0.10.0
       upath: 2.0.1
       zod: 3.24.1
@@ -8132,7 +8136,7 @@ snapshots:
       '@octokit/rest': 20.1.1
       '@renovatebot/osv-offline-db': 1.7.0
       adm-zip: 0.5.16
-      fs-extra: 11.2.0
+      fs-extra: 11.3.0
       got: 11.8.6
       luxon: 3.5.0
       node-fetch: 2.7.0(encoding@0.1.13)
@@ -8212,7 +8216,7 @@ snapshots:
       '@semantic-release/error': 4.0.0
       aggregate-error: 5.0.0
       execa: 9.5.2
-      fs-extra: 11.2.0
+      fs-extra: 11.3.0
       lodash-es: 4.17.21
       nerf-dart: 1.0.0
       normalize-url: 8.0.1
@@ -10419,6 +10423,12 @@ snapshots:
     optional: true
 
   fs-extra@11.2.0:
+    dependencies:
+      graceful-fs: 4.2.11
+      jsonfile: 6.1.0
+      universalify: 2.0.1
+
+  fs-extra@11.3.0:
     dependencies:
       graceful-fs: 4.2.11
       jsonfile: 6.1.0
