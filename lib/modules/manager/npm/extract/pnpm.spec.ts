@@ -97,6 +97,10 @@ describe('modules/manager/npm/extract/pnpm', () => {
         realFs.findLocalSiblingOrParent,
       );
       fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
+
+      // Falls through to reading from the fixture path defined in GlobalConfig
+      // at the top of this file
+      fs.readLocalFile.mockImplementation(realFs.readLocalFile);
     });
 
     it('uses pnpm workspaces', async () => {
