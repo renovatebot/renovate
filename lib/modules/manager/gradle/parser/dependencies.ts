@@ -197,21 +197,20 @@ const qImplicitTestSuites = qDotOrBraceExpr(
     'suites',
     qDotOrBraceExpr(
       'test',
-      q.alt(
-        ...Object.keys(GRADLE_TEST_SUITES).map((implicitDepName) =>
-          q
-            .sym<Ctx>(implicitDepName, storeVarToken)
-            .handler((ctx) => storeInTokenMap(ctx, 'implicitDepName'))
-            .tree({
-              type: 'wrapped-tree',
-              maxDepth: 1,
-              maxMatches: 1,
-              startsWith: '(',
-              endsWith: ')',
-              search: q.begin<Ctx>().join(qVersion).end(),
-            }),
-        ),
-      ),
+      q
+        .sym(
+          regEx(`^(?:${Object.keys(GRADLE_TEST_SUITES).join('|')})$`),
+          storeVarToken,
+        )
+        .handler((ctx) => storeInTokenMap(ctx, 'implicitDepName'))
+        .tree({
+          type: 'wrapped-tree',
+          maxDepth: 1,
+          maxMatches: 1,
+          startsWith: '(',
+          endsWith: ')',
+          search: q.begin<Ctx>().join(qVersion).end(),
+        }),
     ),
   ),
 )
