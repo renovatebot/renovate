@@ -24,7 +24,7 @@ export async function fetchJSONFile(
   logger.trace({ url }, `Preset URL`);
   let res: { body: { content: string } };
   try {
-    res = await http.getJson(url);
+    res = await http.getJsonUnchecked(url);
   } catch (err) {
     // istanbul ignore if: not testable with nock
     if (err instanceof ExternalHostError) {

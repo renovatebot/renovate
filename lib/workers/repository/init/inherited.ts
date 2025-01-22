@@ -12,6 +12,9 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
+import * as hostRules from '../../../util/host-rules';
+import * as queue from '../../../util/http/queue';
+import * as throttle from '../../../util/http/throttle';
 import * as template from '../../../util/template';
 
 export async function mergeInheritedConfig(
@@ -102,6 +105,7 @@ export async function mergeInheritedConfig(
   }
 
   if (is.nullOrUndefined(filteredConfig.extends)) {
+    setInheritedHostRules(filteredConfig);
     return mergeChildConfig(config, filteredConfig);
   }
 
@@ -137,5 +141,27 @@ export async function mergeInheritedConfig(
     );
   }
 
+  setInheritedHostRules(filteredConfig);
   return mergeChildConfig(config, filteredConfig);
+}
+
+function setInheritedHostRules(config: RenovateConfig): void {
+  if (config.hostRules) {
+    logger.debug('Setting hostRules from config');
+    for (const rule of config.hostRules) {
+      try {
+        hostRules.add(rule);
+      } catch (err) {
+        // istanbul ignore next
+        logger.warn(
+          { err, config: rule },
+          'Error setting hostRule from config',
+        );
+      }
+    }
+    // host rules can change concurrency
+    queue.clear();
+    throttle.clear();
+    delete config.hostRules;
+  }
 }

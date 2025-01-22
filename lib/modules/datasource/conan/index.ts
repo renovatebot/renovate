@@ -3,7 +3,6 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
-import { parseSingleYaml } from '../../../util/yaml';
 import * as allVersioning from '../../versioning';
 import { Datasource } from '../datasource';
 import type {
@@ -13,19 +12,14 @@ import type {
   ReleaseResult,
 } from '../types';
 import { isArtifactoryServer } from '../util';
+import { datasource, defaultRegistryUrl, getConanPackage } from './common';
 import {
-  conanDatasourceRegex,
-  datasource,
-  defaultRegistryUrl,
-  getConanPackage,
-} from './common';
-import type {
+  ConanCenterReleases,
   ConanJSON,
+  ConanLatestRevision,
   ConanProperties,
   ConanRevisionJSON,
-  ConanRevisionsJSON,
-  ConanYAML,
-} from './types';
+} from './schema';
 
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
@@ -59,16 +53,12 @@ export class ConanDatasource extends Datasource {
       return null;
     }
     const url = `https://api.github.com/repos/conan-io/conan-center-index/contents/recipes/${conanName}/config.yml`;
-    const res = await this.githubHttp.get(url, {
-      headers: { accept: 'application/vnd.github.v3.raw' },
-    });
-    // TODO: use schema (#9610)
-    const doc = parseSingleYaml<ConanYAML>(res.body);
-    return {
-      releases: Object.keys(doc?.versions ?? {}).map((version) => ({
-        version,
-      })),
-    };
+    const { body: result } = await this.githubHttp.getYaml(
+      url,
+      { headers: { accept: 'application/vnd.github.v3.raw' } },
+      ConanCenterReleases,
+    );
+    return result;
   }
 
   @cache({
@@ -94,10 +84,11 @@ export class ConanDatasource extends Datasource {
       conanPackage.userAndChannel,
       '/revisions',
     );
-    const revisionRep =
-      await this.http.getJson<ConanRevisionsJSON>(revisionLookUp);
-    const revisions = revisionRep?.body.revisions;
-    return revisions?.[0].revision ?? null;
+    const { body: digest } = await this.http.getJson(
+      revisionLookUp,
+      ConanLatestRevision,
+    );
+    return digest;
   }
 
   @cache({
@@ -135,25 +126,16 @@ export class ConanDatasource extends Datasource {
       );
 
       try {
-        const rep = await this.http.getJson<ConanJSON>(lookupUrl);
-        const versions = rep?.body;
-        if (versions) {
+        const rep = await this.http.getJsonUnchecked(lookupUrl);
+        const conanJson = ConanJSON.parse(rep.body);
+        if (conanJson) {
           logger.trace({ lookupUrl }, 'Got conan api result');
           const dep: ReleaseResult = { releases: [] };
 
-          for (const resultString of Object.values(versions.results ?? {})) {
-            conanDatasourceRegex.lastIndex = 0;
-            const fromMatch = conanDatasourceRegex.exec(resultString);
-            if (fromMatch?.groups?.version && fromMatch?.groups?.userChannel) {
-              const version = fromMatch.groups.version;
-              if (fromMatch.groups.userChannel === userAndChannel) {
-                const result: Release = {
-                  version,
-                };
-                dep.releases.push(result);
-              }
-            }
-          }
+          const conanJsonReleases: Release[] = conanJson
+            .filter(({ userChannel }) => userChannel === userAndChannel)
+            .map(({ version }) => ({ version }));
+          dep.releases.push(...conanJsonReleases);
 
           try {
             if (isArtifactoryServer(rep)) {
@@ -182,25 +164,22 @@ export class ConanDatasource extends Datasource {
                 url,
                 `v2/conans/${conanPackage.conanName}/${latestVersion}/${conanPackage.userAndChannel}/latest`,
               );
-              const revResp =
-                await this.http.getJson<ConanRevisionJSON>(latestRevisionUrl);
-              const packageRev = revResp.body.revision;
+              const {
+                body: { revision: packageRev },
+              } = await this.http.getJson(latestRevisionUrl, ConanRevisionJSON);
 
               const [user, channel] = conanPackage.userAndChannel.split('/');
               const packageUrl = joinUrlParts(
                 `${groups.host}/artifactory/api/storage/${groups.repo}`,
                 `${user}/${conanPackage.conanName}/${latestVersion}/${channel}/${packageRev}/export/conanfile.py?properties=conan.package.url`,
               );
-              const packageUrlResp =
-                await this.http.getJson<ConanProperties>(packageUrl);
-
-              if (
-                packageUrlResp.body.properties &&
-                'conan.package.url' in packageUrlResp.body.properties
-              ) {
-                const conanPackageUrl =
-                  packageUrlResp.body.properties['conan.package.url'][0];
-                dep.sourceUrl = conanPackageUrl;
+              const { body: conanProperties } = await this.http.getJson(
+                packageUrl,
+                ConanProperties,
+              );
+              const { sourceUrl } = conanProperties;
+              if (sourceUrl) {
+                dep.sourceUrl = sourceUrl;
               }
             }
           } catch (err) {

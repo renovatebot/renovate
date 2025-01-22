@@ -48,7 +48,7 @@ export class GitlabTagsDatasource extends Datasource {
     );
 
     const gitlabTags = (
-      await this.http.getJson<GitlabTag[]>(url, {
+      await this.http.getJsonUnchecked<GitlabTag[]>(url, {
         paginate: true,
       })
     ).body;
@@ -94,7 +94,8 @@ export class GitlabTagsDatasource extends Datasource {
           `repository/commits/`,
           newValue,
         );
-        const gitlabCommits = await this.http.getJson<GitlabCommit>(url);
+        const gitlabCommits =
+          await this.http.getJsonUnchecked<GitlabCommit>(url);
         digest = gitlabCommits.body.id;
       } else {
         const url = joinUrlParts(
@@ -103,7 +104,8 @@ export class GitlabTagsDatasource extends Datasource {
           urlEncodedRepo,
           `repository/commits?per_page=1`,
         );
-        const gitlabCommits = await this.http.getJson<GitlabCommit[]>(url);
+        const gitlabCommits =
+          await this.http.getJsonUnchecked<GitlabCommit[]>(url);
         digest = gitlabCommits.body[0].id;
       }
     } catch (err) {

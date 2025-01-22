@@ -74,12 +74,12 @@ This change causes Renovate to create an Onboarding PR, even if Renovate does no
 
 ## Fork Processing
 
-If an Organization installs Renovate with the "All repositories" option, then `forkProcessing` will remain set to its default value `false`.
+If an Organization installs Renovate with the "All repositories" option, then `forkProcessing` will remain set to its default value `disabled`.
 This means forked repositories are _not_ onboarded, Renovate ignores them.
-To change this behavior, push a `renovate.json` file to the repository with `"forkProcessing": true`.
+To change this behavior, push a `renovate.json` file to the repository with `"forkProcessing": "enabled"`.
 
 If an Organization installs Renovate with "Selected repositories", we assume the organization wants to onboard _all_ of the selected repositories, even forked repositories.
-Therefore we set `forkProcessing` to `true`.
+Therefore we set `forkProcessing` to "enabled".
 
 ## Inherited config
 
