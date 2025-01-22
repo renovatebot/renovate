@@ -346,7 +346,7 @@ For example, to override the default TTL of 60 minutes for the `docker` datasour
 
 Valid codes for namespaces are as follows:
 
-- _test-namespace
+- \_test-namespace
 - changelog-bitbucket-notes@v2
 - changelog-bitbucket-release
 - changelog-gitea-notes@v2
