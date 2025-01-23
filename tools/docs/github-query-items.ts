@@ -1,18 +1,6 @@
 import { DateTime } from 'luxon';
 import { logger } from '../../lib/logger';
-import { getIssuesByIssueTypeQuery } from '../../lib/modules/platform/github/graphql';
-import * as hostRules from '../../lib/util/host-rules';
-import { GithubHttp } from '../../lib/util/http/github';
-
-const githubApi = new GithubHttp();
-
-if (process.env.GITHUB_TOKEN) {
-  logger.info('Using GITHUB_TOKEN from env');
-  hostRules.add({
-    matchHost: 'api.github.com',
-    token: process.env.GITHUB_TOKEN,
-  });
-}
+import { exec } from '../../lib/util/exec';
 
 export type ItemsEntity = {
   html_url: string;
@@ -40,37 +28,23 @@ export interface Items {
   features: ItemsEntity[];
 }
 
+interface GhIssueOutput {
+  title: string;
+  number: number;
+  url: string;
+  labels: { name: string; id: string; description: string }[];
+}
+
 async function getIssuesByIssueType(
   issueType: 'Bug' | 'Feature',
 ): Promise<ItemsEntity[]> {
-  const queryString = `type:${issueType}, repo:renovatebot/renovate, state:open`;
-  const res = (await githubApi.querySearchField<unknown>(
-    getIssuesByIssueTypeQuery,
-    'search',
-    {
-      variables: {
-        queryStr: queryString,
-      },
-      paginate: true,
-      readOnly: true,
-    },
-  )) as {
-    labels: { nodes: { name: string }[] };
-    number: number;
-    title: string;
-    url: string;
-  }[];
+  const command = `gh issue list --json "title,number,url,labels" --search "type:${issueType}" --limit 1000`;
+  const res = await exec(command);
+  const issues = JSON.parse(res.stdout) as GhIssueOutput[];
 
-  return (
-    res.map((issue) => {
-      return {
-        ...issue,
-        issueType,
-        labels: issue.labels.nodes,
-        html_url: issue.url,
-      };
-    }) ?? []
-  );
+  return issues.map((issue) => {
+    return { ...issue, html_url: issue.url, issueType };
+  });
 }
 
 export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
@@ -83,6 +57,13 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
 
   if (process.env.SKIP_GITHUB_ISSUES) {
     logger.warn('Skipping GitHub issues');
+    return result;
+  }
+
+  if (!process.env.GITHUB_TOKEN) {
+    logger.warn(
+      'No GITHUB_TOKEN found in env, cannot fetch Github issues. Skipping...',
+    );
     return result;
   }
 
