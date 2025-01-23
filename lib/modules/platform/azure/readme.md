@@ -51,6 +51,11 @@ steps:
       workingFile: .npmrc
 
   - bash: |
+      add-apt-repository ppa:git-core/ppa
+      apt update && apt install git -y
+    displayName: 'Install latest git version'
+
+  - bash: |
       git config --global user.email 'bot@renovateapp.com'
       git config --global user.name 'Renovate Bot'
       npx --userconfig .npmrc renovate
