@@ -62,7 +62,9 @@ steps:
     env:
       RENOVATE_PLATFORM: azure
       RENOVATE_ENDPOINT: $(System.CollectionUri)
+      RENOVATE_CONFIG_FILE: $(Build.SourcesDirectory)/renovate_bot_config.json
       RENOVATE_TOKEN: $(System.AccessToken)
+      LOG_LEVEL: debug
 ```
 
 ### Create a .npmrc file
