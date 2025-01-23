@@ -16,6 +16,7 @@ import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
 import * as template from '../../../util/template';
+import { applySecretsToConfig } from '../../../config/secrets';
 
 export async function mergeInheritedConfig(
   config: RenovateConfig,
@@ -105,6 +106,7 @@ export async function mergeInheritedConfig(
   }
 
   if (is.nullOrUndefined(filteredConfig.extends)) {
+    filteredConfig = applySecretsToConfig(filteredConfig, config.secrets ?? {});
     setInheritedHostRules(filteredConfig);
     return mergeChildConfig(config, filteredConfig);
   }
@@ -141,6 +143,7 @@ export async function mergeInheritedConfig(
     );
   }
 
+  filteredConfig = applySecretsToConfig(filteredConfig, config.secrets ?? {});
   setInheritedHostRules(filteredConfig);
   return mergeChildConfig(config, filteredConfig);
 }
