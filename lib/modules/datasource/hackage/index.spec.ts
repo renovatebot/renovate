@@ -33,11 +33,11 @@ describe('modules/datasource/hackage/index', () => {
       ).toBeNull();
     });
 
-    it('returns release for 200', async () => {
+    it('returns releases for 200', async () => {
       httpMock
         .scope(baseUrl)
         .get('/package/base.json')
-        .reply(200, { '4.20.0.1': 'normal' });
+        .reply(200, { '4.19.0.1': 'deprecated', '4.20.0.1': 'normal' });
       expect(
         await getPkgReleases({
           datasource: HackageDatasource.id,
@@ -46,6 +46,11 @@ describe('modules/datasource/hackage/index', () => {
       ).toEqual({
         registryUrl: baseUrl,
         releases: [
+          {
+            changelogUrl: baseUrl + 'package/base-4.19.0.1/changelog',
+            version: '4.19.0.1',
+            isDeprecated: true,
+          },
           {
             changelogUrl: baseUrl + 'package/base-4.20.0.1/changelog',
             version: '4.20.0.1',
