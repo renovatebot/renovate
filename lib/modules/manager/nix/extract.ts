@@ -61,8 +61,8 @@ export async function extractPackageFile(
     // istanbul ignore if: if we are not in a root node then original and locked always exist which cannot be easily expressed in the type
     if (flakeLocked === undefined || flakeOriginal === undefined) {
       logger.debug(
-        { packageLockFile },
-        `Found empty flake input '${JSON.stringify(flakeInput)}', skipping`,
+        { packageLockFile, flakeInput },
+        `Found empty flake input, skipping`,
       );
       continue;
     }
