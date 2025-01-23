@@ -188,7 +188,7 @@ describe('modules/manager/index', () => {
       });
       expect(
         manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' }),
-      ).not.toBeNull();
+      ).toBe('bump');
     });
 
     it('returns non-null', () => {
