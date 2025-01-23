@@ -1,8 +1,9 @@
 import { z } from 'zod';
+import { MaybeTimestamp } from '../../../util/timestamp';
 
 export const DevboxRelease = z.object({
   version: z.string(),
-  last_updated: z.string(),
+  last_updated: MaybeTimestamp,
 });
 
 export const DevboxResponse = z

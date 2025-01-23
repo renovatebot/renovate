@@ -36,6 +36,7 @@ import type {
 } from '../../../../util/git/types';
 import * as _mergeConfidence from '../../../../util/merge-confidence';
 import * as _sanitize from '../../../../util/sanitize';
+import type { Timestamp } from '../../../../util/timestamp';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import type { ResultWithPr } from '../pr';
@@ -183,11 +184,13 @@ describe('workers/repository/update/branch/index', () => {
       config.prCreation = 'not-pending';
       (config.upgrades as Partial<BranchUpgradeConfig>[]) = [
         {
-          releaseTimestamp: new Date('2019-01-01').getTime().toString(),
+          releaseTimestamp: new Date('2019-01-01')
+            .getTime()
+            .toString() as Timestamp,
           minimumReleaseAge: '1 day',
         },
         {
-          releaseTimestamp: new Date().toString(),
+          releaseTimestamp: new Date().toString() as Timestamp,
           minimumReleaseAge: '1 day',
         },
       ];
@@ -206,7 +209,7 @@ describe('workers/repository/update/branch/index', () => {
       config.prCreation = 'not-pending';
       config.upgrades = partial<BranchUpgradeConfig>([
         {
-          releaseTimestamp: '2099-12-31',
+          releaseTimestamp: '2099-12-31' as Timestamp,
           minimumReleaseAge: '1 day',
         },
       ]);
@@ -1092,7 +1095,7 @@ describe('workers/repository/update/branch/index', () => {
         pr: partial<Pr>(),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
-      config.releaseTimestamp = '2018-04-26T05:15:51.877Z';
+      config.releaseTimestamp = '2018-04-26T05:15:51.877Z' as Timestamp;
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
@@ -1117,7 +1120,7 @@ describe('workers/repository/update/branch/index', () => {
         pr: partial<Pr>(),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
-      config.releaseTimestamp = new Date().toISOString();
+      config.releaseTimestamp = new Date().toISOString() as Timestamp;
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
@@ -1142,7 +1145,7 @@ describe('workers/repository/update/branch/index', () => {
         pr: partial<Pr>(),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
-      config.releaseTimestamp = new Date().toISOString();
+      config.releaseTimestamp = new Date().toISOString() as Timestamp;
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
         Error(MANAGER_LOCKFILE_ERROR),
       );
