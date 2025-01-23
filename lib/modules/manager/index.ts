@@ -78,10 +78,13 @@ export function extractPackageFile(
 
 export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
   const { manager, rangeStrategy } = config;
-  if (!manager || !managers.has(manager)) {
+  if (!manager) {
     return null;
   }
-  const m = managers.get(manager)!;
+  const m = managers.get(manager)! ?? customManagers.get(manager)!;
+  if (!m) {
+    return null;
+  }
   if (m.getRangeStrategy) {
     // Use manager's own function if it exists
     const managerRangeStrategy = m.getRangeStrategy(config);

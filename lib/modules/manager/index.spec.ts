@@ -180,6 +180,17 @@ describe('modules/manager/index', () => {
       ).toBeNull();
     });
 
+    it('handles custom managers', () => {
+      customManager.getCustomManagers().set('dummy', {
+        'defaultConfig': {},
+        'supportedDatasources': [],
+        'getRangeStrategy': () => 'bump',
+      });
+      expect(
+        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' }),
+      ).not.toBeNull();
+    });
+
     it('returns non-null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
