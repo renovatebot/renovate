@@ -1,12 +1,5 @@
 import type { GotOptions, HttpResponse } from '../types';
 
-export interface HttpCache {
-  etag?: string;
-  lastModified?: string;
-  httpResponse: unknown;
-  timestamp: string;
-}
-
 export interface HttpCacheProvider {
   setCacheHeaders<T extends Pick<GotOptions, 'headers'>>(
     url: string,

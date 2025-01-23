@@ -26,6 +26,7 @@
     "arcus.observability": "https://github.com/arcus-azure/arcus.observability",
     "arcus.security": "https://github.com/arcus-azure/arcus.security",
     "arcus.webapi": "https://github.com/arcus-azure/arcus.webapi",
+    "arrow-kt": "https://github.com/arrow-kt/arrow",
     "aspire": "https://github.com/dotnet/aspire",
     "aspnet aspnetwebstack": "https://github.com/aspnet/AspNetWebStack",
     "aspnet extensions": "https://github.com/aspnet/Extensions",
@@ -325,6 +326,7 @@
     "happy-dom": "https://github.com/capricorn86/happy-dom",
     "Hangfire": "https://github.com/HangfireIO/Hangfire",
     "hickory-dns": "https://github.com/hickory-dns/hickory-dns",
+    "html-eslint": "https://github.com/yeonjuan/html-eslint",
     "infrastructure-ui": "https://github.com/instructure/instructure-ui",
     "ionic-native": "https://github.com/ionic-team/ionic-native",
     "istanbuljs": "https://github.com/istanbuljs/istanbuljs",
@@ -392,6 +394,7 @@
     "mstest": "https://github.com/microsoft/testfx",
     "mutation-testing-elements": "https://github.com/stryker-mutator/mutation-testing-elements",
     "nest": [
+      "https://github.com/nestjs/config",
       "https://github.com/nestjs/nest",
       "https://github.com/nestjs/nest-cli",
       "https://github.com/nestjs/passport",

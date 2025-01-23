@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -71,7 +72,7 @@ export class OrbDatasource extends Datasource {
       : `https://circleci.com/developer/orbs/orb/${packageName}`;
     const releases = orb.versions.map(({ version, createdAt }) => ({
       version,
-      releaseTimestamp: createdAt ?? null,
+      releaseTimestamp: asTimestamp(createdAt),
     }));
 
     const dep = { homepage, isPrivate: !!orb.isPrivate, releases };
