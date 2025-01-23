@@ -272,6 +272,24 @@ describe('workers/repository/update/pr/code-owners', () => {
       });
     });
 
+    it.failing('does not parse Gitea regex as Gitlab sections', async () => {
+      platform.extractRulesFromCodeOwnersFile = undefined;
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          # This is a regex, not a Gitlab section, so 002-file.md should be assigned to @reviewer-03
+          [0-3].*/*.md$ @reviewer-03
+          002-file.md
+
+          [4-9].*/*.md$ @reviewer-49
+        `,
+      );
+      git.getBranchFiles.mockResolvedValueOnce(['001-file.md', '002-file.md']);
+
+      const codeOwners = await codeOwnersForPr(pr);
+
+      expect(codeOwners).toEqual(['@reviewer-03']);
+    });
+
     it('does not require all files to match a single rule, regression test for #12611', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
