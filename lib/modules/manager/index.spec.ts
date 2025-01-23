@@ -182,9 +182,9 @@ describe('modules/manager/index', () => {
 
     it('handles custom managers', () => {
       customManager.getCustomManagers().set('dummy', {
-        'defaultConfig': {},
-        'supportedDatasources': [],
-        'getRangeStrategy': () => 'bump',
+        defaultConfig: {},
+        supportedDatasources: [],
+        getRangeStrategy: () => 'bump',
       });
       expect(
         manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' }),
