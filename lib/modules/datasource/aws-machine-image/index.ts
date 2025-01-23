@@ -50,7 +50,10 @@ export class AwsMachineImageDatasource extends Datasource {
     const { profile, region } = config;
     return new EC2Client({
       region,
-      credentials: fromNodeProviderChain({ profile }),
+      credentials: fromNodeProviderChain({
+        profile,
+        clientConfig: { region },
+      }),
     });
   }
 
