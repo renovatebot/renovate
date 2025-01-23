@@ -50,7 +50,7 @@ export async function extractPackageFile(
       continue;
     }
 
-    // skip all locked nodes which cannot be updated
+    // skip all locked and transitivie nodes as they cannot be updated by regular means
     if (!(depName in rootInputs)) {
       continue;
     }
