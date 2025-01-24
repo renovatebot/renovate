@@ -155,11 +155,6 @@ terraform {
   source = "git::ssh://git@mygit.com/hashicorp/example?depth=1&ref=v1.0.3"
 }
 
-# gittags_ssh_subdir
-terraform {
-  source = "git::ssh://git@mygit.com/hashicorp/example//subdir/test?depth=1&ref=v1.0.4"
-}
-
 # invalid, ignored by test since it does not have source on the next line
 terraform {
 }
