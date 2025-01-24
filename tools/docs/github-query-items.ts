@@ -1,9 +1,10 @@
 import { DateTime } from 'luxon';
+import { z } from 'zod';
 import { logger } from '../../lib/logger';
 import { exec } from '../../lib/util/exec';
 
 export type ItemsEntity = {
-  html_url: string;
+  url: string;
   number: number;
   title: string;
   labels: LabelsEntity[];
@@ -28,22 +29,31 @@ export interface Items {
   features: ItemsEntity[];
 }
 
-interface GhIssueOutput {
-  title: string;
-  number: number;
-  url: string;
-  labels: { name: string; id: string; description: string }[];
-}
+const GhOutputSchema = z.array(
+  z.object({
+    url: z.string(),
+    title: z.string(),
+    labels: z.array(
+      z.object({
+        name: z.string(),
+      }),
+    ),
+    number: z.number(),
+  }),
+);
 
 async function getIssuesByIssueType(
   issueType: 'Bug' | 'Feature',
 ): Promise<ItemsEntity[]> {
   const command = `gh issue list --json "title,number,url,labels" --search "type:${issueType}" --limit 1000`;
-  const res = await exec(command);
-  const issues = JSON.parse(res.stdout) as GhIssueOutput[];
+  const execRes = await exec(command);
+  const res = GhOutputSchema.safeParse(JSON.parse(execRes.stdout));
+  if (res.error) {
+    throw res.error;
+  }
 
-  return issues.map((issue) => {
-    return { ...issue, html_url: issue.url, issueType };
+  return res.data.map((issue) => {
+    return { ...issue, issueType };
   });
 }
 
@@ -64,6 +74,10 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
     logger.warn(
       'No GITHUB_TOKEN found in env, cannot fetch Github issues. Skipping...',
     );
+    return result;
+  }
+
+  if (process.env.CI) {
     return result;
   }
 
@@ -126,7 +140,7 @@ function stringifyIssues(items: ItemsEntity[] | undefined): string {
   }
   let list = '';
   for (const item of items) {
-    list += ` - ${item.title} [#${item.number}](${item.html_url})\n`;
+    list += ` - ${item.title} [#${item.number}](${item.url})\n`;
   }
   return list;
 }
