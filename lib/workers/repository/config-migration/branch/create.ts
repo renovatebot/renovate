@@ -50,7 +50,7 @@ export async function createConfigMigrationBranch(
     const pJson = parseJson(
       await readLocalFile('package.json', 'utf8'),
       'package.json',
-    ) as any;
+    ) as Record<string, unknown>;
     if (pJson?.renovate) {
       delete pJson.renovate;
     }
