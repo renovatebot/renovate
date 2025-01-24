@@ -562,9 +562,12 @@ jobs:
         run: pnpm build
 
       - name: Build docker
-        run: pnpm build:docker build --tries=3
+        run: pnpm build:docker build --tries=3 --args '--load'
         env:
           LOG_LEVEL: debug
+
+      - name: Test docker
+        run: docker run -e LOG_LEVEL=debug --rm renovate/renovate --version
 
       - name: Pack
         run: pnpm test-e2e:pack
