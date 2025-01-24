@@ -118,13 +118,9 @@ An example configuration file, in `.json` format this time, would be :
   "azure-pipelines": {
     "enabled": true
   },
-  "repositories": [
-    "PROJECT_NAME/REPO_NAME"
-  ],
+  "repositories": ["PROJECT_NAME/REPO_NAME"],
   "prHourlyLimit": 0,
-  "baseBranches": [
-    "main"
-  ],
+  "baseBranches": ["main"],
   "hostRules": [
     {
       "matchHost": "https://dev.azure.com/",
@@ -133,9 +129,7 @@ An example configuration file, in `.json` format this time, would be :
   ],
   "packageRules": [
     {
-      "matchDatasources": [
-        "azure-pipelines-tasks"
-      ],
+      "matchDatasources": ["azure-pipelines-tasks"],
       "extractVersion": "^(?<version>\\d+)"
     }
   ]
