@@ -25,6 +25,7 @@ describe('workers/repository/init/inherited', () => {
       inheritConfigFileName: 'config.json',
       inheritConfigStrict: false,
     };
+    hostRules.clear();
   });
 
   it('should return the same config if repository or inheritConfig is not defined', async () => {
@@ -107,6 +108,30 @@ describe('workers/repository/init/inherited', () => {
       {
         matchHost: 'some-host-url',
         token: 'some-token',
+      },
+    ]);
+    expect(res.hostRules).toBeUndefined();
+  });
+
+  it('should apply secrets to inherited config', async () => {
+    platform.getRawFile.mockResolvedValue(
+      `{
+        "hostRules": [
+          {
+            "matchHost": "some-host-url",
+            "token": "{{ secrets.SECRET_TOKEN }}"
+          }
+        ]
+      }`,
+    );
+    const res = await mergeInheritedConfig({
+      ...config,
+      secrets: { SECRET_TOKEN: 'some-secret-token' },
+    });
+    expect(hostRules.getAll()).toMatchObject([
+      {
+        matchHost: 'some-host-url',
+        token: 'some-secret-token',
       },
     ]);
     expect(res.hostRules).toBeUndefined();

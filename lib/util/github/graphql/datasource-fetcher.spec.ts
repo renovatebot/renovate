@@ -2,6 +2,7 @@ import AggregateError from 'aggregate-error';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked, partial } from '../../../../test/util';
 import * as _packageCache from '../../../util/cache/package';
+import type { Timestamp } from '../../../util/timestamp';
 import type { GithubGraphqlResponse } from '../../http/github';
 import { GithubHttp } from '../../http/github';
 import { range } from '../../range';
@@ -54,7 +55,7 @@ const adapter: GithubGraphqlDatasourceAdapter<
     version && releaseTimestamp && foo
       ? {
           version,
-          releaseTimestamp,
+          releaseTimestamp: releaseTimestamp as Timestamp,
           bar: foo,
         }
       : null,

@@ -4,6 +4,7 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
@@ -198,7 +199,7 @@ export class MavenDatasource extends Datasource {
     }
 
     if (is.date(res)) {
-      release.releaseTimestamp = res.toISOString();
+      release.releaseTimestamp = asTimestamp(res.toISOString());
     }
 
     return release;

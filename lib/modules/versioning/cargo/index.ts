@@ -106,6 +106,9 @@ function getNewValue({
     res += newVersion;
     return res;
   }
+  if (rangeStrategy === 'replace' && matches(newVersion, currentValue)) {
+    return currentValue;
+  }
   const newSemver = npm.getNewValue({
     currentValue: cargo2npm(currentValue),
     rangeStrategy,
@@ -142,6 +145,7 @@ function getNewValue({
     const components = currentValue.split('.').length;
     newCargo = withoutCaret.split('.').slice(0, components).join('.');
   }
+
   return newCargo;
 }
 
