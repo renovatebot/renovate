@@ -128,7 +128,7 @@ An example configuration file, in `.json` format this time, would be :
   "hostRules": [
     {
       "matchHost": "https://dev.azure.com/",
-      "hostType": "azure-pipelines-tasks",
+      "hostType": "azure-pipelines-tasks"
     }
   ],
   "packageRules": [
