@@ -345,6 +345,9 @@ jobs:
       - name: Test schema
         run: pnpm test-schema
 
+      - name: Lint other
+        run: pnpm lint-other
+
   test:
     needs: [setup, prefetch]
 
