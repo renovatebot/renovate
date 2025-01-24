@@ -115,7 +115,6 @@ An example configuration file, in `.json` format this time, would be :
 {
   "platform": "azure",
   "endpoint": "https://dev.azure.com/ORG_NAME",
-  "token": "process.env.RENOVATE_TOKEN",
   "azure-pipelines": {
     "enabled": true
   },
@@ -130,7 +129,6 @@ An example configuration file, in `.json` format this time, would be :
     {
       "matchHost": "https://dev.azure.com/",
       "hostType": "azure-pipelines-tasks",
-      "token": "process.env.RENOVATE_TOKEN"
     }
   ],
   "packageRules": [
