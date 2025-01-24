@@ -100,6 +100,7 @@ For the `repositories` key, replace `YOUR-PROJECT/YOUR-REPO` with your Azure Dev
 
 ### Using Azure DevOps internal API for pipeline tasks versions
 
+<!-- prettier-ignore -->
 !!! info
     Renovate bot is now using the set of APIs that azure provides to query the azure-pipelines tasks versions directly from the instance. ([PR #32966](https://github.com/renovatebot/renovate/pull/32966) and [Discussion #24820](https://github.com/renovatebot/renovate/discussions/24820))
 
