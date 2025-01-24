@@ -182,7 +182,7 @@
     "chalk": "4.1.2",
     "changelog-filename-regex": "2.0.1",
     "clean-git-ref": "2.0.1",
-    "commander": "12.1.0",
+    "commander": "13.0.0",
     "conventional-commits-detector": "1.0.3",
     "croner": "9.0.0",
     "cronstrue": "2.53.0",
