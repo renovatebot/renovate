@@ -108,15 +108,15 @@ describe('modules/versioning/aws-eks-addon/index', () => {
 
   describe('isGreaterThan(version1, version2)', () => {
     it.each`
-      version                 | other                   | expected
-      ${'v1.11.7-eksbuild.1'} | ${'v1.11.7-eksbuild.0'} | ${true}
+      version                  | other                   | expected
+      ${'v1.11.7-eksbuild.1'}  | ${'v1.11.7-eksbuild.0'} | ${true}
       ${'v1.11.7-eksbuild.11'} | ${'v1.11.7-eksbuild.1'} | ${true}
-      ${'v1.22.7-eksbuild.2'} | ${'v1.20.7-eksbuild.1'} | ${true}
-      ${'v1.22.7-eksbuild.2'} | ${'v1.22.7'}            | ${true}
-      ${'v1.20.7-eksbuild.1'} | ${'v2.0.0'}             | ${true}
-      ${'v1.20.7-eksbuild.1'} | ${'v1.20.7-eksbuild.2'} | ${false}
-      ${'v1.20.6-eksbuild.1'} | ${'v1.20.7-eksbuild.2'} | ${false}
-      ${'v1.20.7-eksbuild.1'} | ${'v2.0.0-eksbuild.1'}  | ${false}
+      ${'v1.22.7-eksbuild.2'}  | ${'v1.20.7-eksbuild.1'} | ${true}
+      ${'v1.22.7-eksbuild.2'}  | ${'v1.22.7'}            | ${true}
+      ${'v1.20.7-eksbuild.1'}  | ${'v2.0.0'}             | ${true}
+      ${'v1.20.7-eksbuild.1'}  | ${'v1.20.7-eksbuild.2'} | ${false}
+      ${'v1.20.6-eksbuild.1'}  | ${'v1.20.7-eksbuild.2'} | ${false}
+      ${'v1.20.7-eksbuild.1'}  | ${'v2.0.0-eksbuild.1'}  | ${false}
     `(
       'isGreaterThan($version, $other) === $expected',
       ({ version, other, expected }) => {
