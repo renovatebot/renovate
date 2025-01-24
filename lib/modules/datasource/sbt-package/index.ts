@@ -5,6 +5,8 @@ import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
+import type { Timestamp } from '../../../util/timestamp';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash, trimTrailingSlash } from '../../../util/url';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
@@ -30,7 +32,7 @@ interface ScalaDepCoordinate {
 interface PomInfo {
   homepage?: string;
   sourceUrl?: string;
-  releaseTimestamp?: string;
+  releaseTimestamp?: Timestamp;
 }
 
 export class SbtPackageDatasource extends MavenDatasource {
@@ -285,7 +287,7 @@ export class SbtPackageDatasource extends MavenDatasource {
 
         const result: PomInfo = {};
 
-        const releaseTimestamp = val.lastModified;
+        const releaseTimestamp = asTimestamp(val.lastModified);
         if (releaseTimestamp) {
           result.releaseTimestamp = releaseTimestamp;
         }
