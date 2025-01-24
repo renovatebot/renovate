@@ -170,13 +170,23 @@ describe('modules/manager/index', () => {
   });
 
   describe('getRangeStrategy', () => {
-    it('returns null', () => {
+    it('returns null for a unknown manager', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
         supportedDatasources: [],
       });
       expect(
         manager.getRangeStrategy({ manager: 'unknown', rangeStrategy: 'auto' }),
+      ).toBeNull();
+    });
+
+    it('returns null for a undefined manager', () => {
+      manager.getManagers().set('dummy', {
+        defaultConfig: {},
+        supportedDatasources: [],
+      });
+      expect(
+        manager.getRangeStrategy({ rangeStrategy: 'auto' }),
       ).toBeNull();
     });
 
