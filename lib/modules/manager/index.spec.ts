@@ -185,9 +185,7 @@ describe('modules/manager/index', () => {
         defaultConfig: {},
         supportedDatasources: [],
       });
-      expect(
-        manager.getRangeStrategy({ rangeStrategy: 'auto' }),
-      ).toBeNull();
+      expect(manager.getRangeStrategy({ rangeStrategy: 'auto' })).toBeNull();
     });
 
     it('handles custom managers', () => {
