@@ -10,7 +10,7 @@ export const supportsRanges = false;
 
 export class AwsEKSAddonVersioningApi extends RegExpVersioningApi {
   static versionRegex =
-    '^v?(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>-eksbuild\\.\\d+)$';
+    '^v?(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<compatibility>-eksbuild\\.)(?<build>\\d+)$';
 
   public constructor() {
     super(AwsEKSAddonVersioningApi.versionRegex);
