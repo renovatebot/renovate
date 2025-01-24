@@ -39,7 +39,11 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     }
   }
 
-  async wrapResponse<T>(
+  bypassServerResponse<T>(_url: string): Promise<HttpResponse<T> | null> {
+    return Promise.resolve(null);
+  }
+
+  async wrapServerResponse<T>(
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {

@@ -6,5 +6,10 @@ export interface HttpCacheProvider {
     opts: T,
   ): Promise<void>;
 
-  wrapResponse<T>(url: string, resp: HttpResponse<T>): Promise<HttpResponse<T>>;
+  bypassServerResponse<T>(url: string): Promise<HttpResponse<T> | null>;
+
+  wrapServerResponse<T>(
+    url: string,
+    resp: HttpResponse<T>,
+  ): Promise<HttpResponse<T>>;
 }

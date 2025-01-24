@@ -5,19 +5,19 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.34.1@sha256:29f6bf5ef45fdb516cb6c09987d2f3349aaa6edc60af4ac7b43f5a4f8a9c15e8 AS slim-base
+FROM ghcr.io/renovatebot/base-image:9.36.2@sha256:a5e4a57c857bdb25261de101ff566feae5ac22f85a53889ea13eaf897c84a375 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.34.0-full@sha256:9a4d5f592b9f4c6d0ae9a5e46987c2120660f7ccaa0ab38f9a773a8ba1bfd495 AS full-base
+FROM ghcr.io/renovatebot/base-image:9.36.2-full@sha256:fbabe4d232dcc9b11e7750479713090eb4294244c2803998af6ee6e6f430c2a6 AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.34.1@sha256:29f6bf5ef45fdb516cb6c09987d2f3349aaa6edc60af4ac7b43f5a4f8a9c15e8 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.36.2@sha256:a5e4a57c857bdb25261de101ff566feae5ac22f85a53889ea13eaf897c84a375 AS build
 
 # We want a specific node version here
 # renovate: datasource=node-version
@@ -59,9 +59,10 @@ COPY --link pnpm-lock.yaml ./
 
 # set `npm_config_arch` for `prebuild-install`
 # set `npm_config_platform_arch` for `install-artifact-from-github`
+ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
+
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN set -ex; \
-  export npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}; \
   corepack pnpm fetch --prod; \
   true
 
@@ -97,7 +98,7 @@ RUN ln -sf /usr/local/renovate/node /bin/node
 
 # ensure default base and cache directories exist.
 RUN mkdir -p /tmp/renovate/cache && \
-    chmod -R 777 /tmp/renovate
+  chmod -R 777 /tmp/renovate
 
 # test
 RUN set -ex; \
