@@ -6,6 +6,7 @@ import type { HostRule, SkipReason } from '../types';
 import type { StageName } from '../types/skip-reason';
 import type { GitNoVerifyOption } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
+import type { Timestamp } from '../util/timestamp';
 
 export type RenovateConfigStage =
   | 'global'
@@ -131,13 +132,13 @@ export interface GlobalOnlyConfig {
 // Config options used within the repository worker, but not user configurable
 // The below should contain config options where globalOnly=true
 export interface RepoGlobalConfig {
+  allowedCommands?: string[];
+  allowCommandTemplating?: boolean;
   allowCustomCrateRegistries?: boolean;
   allowPlugins?: boolean;
-  allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedEnv?: string[];
   allowedHeaders?: string[];
-  allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   cacheDir?: string;
   cacheHardTtlMinutes?: number;
@@ -271,6 +272,7 @@ export interface RenovateConfig
   packageFile?: string;
   packageRules?: PackageRule[];
   postUpdateOptions?: string[];
+  branchConcurrentLimit?: number | null;
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
   forkModeDisallowMaintainerEdits?: boolean;
@@ -551,7 +553,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
-  releaseTimestamp?: string | null;
+  releaseTimestamp?: Timestamp | null;
   repository?: string;
   currentVersionAgeInDays?: number;
   currentVersionTimestamp?: string;

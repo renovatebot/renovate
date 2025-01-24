@@ -3,11 +3,12 @@ import { detectPlatform } from '../../../util/common';
 import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import { LooseRecord } from '../../../util/schema-utils';
+import { MaybeTimestamp } from '../../../util/timestamp';
 import type { Release } from '../types';
 
 const HelmReleaseSchema = z.object({
   version: z.string(),
-  created: z.string().nullable().catch(null),
+  created: MaybeTimestamp,
   digest: z.string().optional().catch(undefined),
   home: z.string().optional().catch(undefined),
   sources: z.array(z.string()).catch([]),
