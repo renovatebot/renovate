@@ -1,18 +1,90 @@
 import { fs } from '../../../../test/util';
 import { GitRefsDatasource } from '../../datasource/git-refs';
+import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
 import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
 
-const flake1Lock = `{
-  "nodes": {
-    "root": {}
-  },
-  "root": "root",
-  "version": 7
-}`;
-
 describe('modules/manager/nix/extract', () => {
+  const flake1Lock = `{
+    "nodes": {
+      "root": {}
+    },
+    "root": "root",
+    "version": 7
+  }`;
+  const flake1Nix = `{
+    inputs = {};
+  }`;
+
+  it('returns null when no nixpkgs input exists', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(flake1Lock);
+    expect(await extractPackageFile(flake1Nix, 'flake.nix')).toBeNull();
+  });
+
+  const flake2Nix = `{
+    inputs = {
+      nixpkgs.url = "github:nixos/nixpkgs/nixos-21.11";
+    };
+  }`;
+
+  it('match nixpkgs input', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(flake1Lock);
+    expect(await extractPackageFile(flake2Nix, 'flake.nix')).toEqual({
+      deps: [
+        {
+          depName: 'nixpkgs',
+          currentValue: 'nixos-21.11',
+          datasource: GitRefsDatasource.id,
+          packageName: 'https://github.com/NixOS/nixpkgs',
+          versioning: nixpkgsVersioning,
+        },
+      ],
+    });
+  });
+
+  const flake3Nix = `{
+    inputs = {
+      nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.11";
+    };
+  }`;
+
+  it('match nixpkgs input case insensitive', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(flake1Lock);
+    expect(await extractPackageFile(flake3Nix, 'flake.nix')).toEqual({
+      deps: [
+        {
+          depName: 'nixpkgs',
+          currentValue: 'nixos-21.11',
+          datasource: GitRefsDatasource.id,
+          packageName: 'https://github.com/NixOS/nixpkgs',
+          versioning: nixpkgsVersioning,
+        },
+      ],
+    });
+  });
+
+  const flake4Nix = `{
+    inputs = {
+      nixpkgs.url = "github:NixOS/nixpkgs";
+    };
+  }`;
+
+  it('includes nixpkgs input with no explicit ref', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(flake1Lock);
+    expect(await extractPackageFile(flake4Nix, 'flake.nix')).toEqual({
+      deps: [
+        {
+          currentValue: undefined,
+          datasource: 'git-refs',
+          depName: 'nixpkgs',
+          packageName: 'https://github.com/NixOS/nixpkgs',
+          versioning: 'nixpkgs',
+        },
+      ],
+    });
+  });
+
   it('returns null when no inputs', async () => {
     fs.readLocalFile.mockResolvedValueOnce(flake1Lock);
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
