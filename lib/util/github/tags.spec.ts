@@ -1,3 +1,4 @@
+import type { Timestamp } from '../../util/timestamp';
 import { GithubHttp } from '../http/github';
 import * as githubGraphql from './graphql';
 import { findCommitOfTag } from './tags';
@@ -12,13 +13,13 @@ describe('util/github/tags', () => {
         {
           version: 'v1.0.0',
           gitRef: 'v1.0.0',
-          releaseTimestamp: '2021-01-01',
+          releaseTimestamp: '2021-01-01' as Timestamp,
           hash: '123',
         },
         {
           version: 'v2.0.0',
           gitRef: 'v2.0.0',
-          releaseTimestamp: '2022-01-01',
+          releaseTimestamp: '2022-01-01' as Timestamp,
           hash: 'abc',
         },
       ]);

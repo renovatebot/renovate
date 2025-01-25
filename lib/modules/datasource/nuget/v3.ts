@@ -13,6 +13,7 @@ import type { Http } from '../../../util/http';
 import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import { api as versioning } from '../../versioning/nuget';
 import type { Release, ReleaseResult } from '../types';
@@ -161,14 +162,9 @@ export class NugetV3Api {
     let latestStable: string | null = null;
     let nupkgUrl: string | null = null;
     const releases = catalogEntries.map(
-      ({
-        version,
-        published: releaseTimestamp,
-        projectUrl,
-        listed,
-        packageContent,
-      }) => {
+      ({ version, published, projectUrl, listed, packageContent }) => {
         const release: Release = { version: removeBuildMeta(version) };
+        const releaseTimestamp = asTimestamp(published);
         if (releaseTimestamp) {
           release.releaseTimestamp = releaseTimestamp;
         }

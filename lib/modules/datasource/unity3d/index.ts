@@ -2,6 +2,7 @@ import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { asTimestamp } from '../../../util/timestamp';
 import * as Unity3dVersioning from '../../versioning/unity3d';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -64,7 +65,7 @@ export class Unity3dDatasource extends Datasource {
         const versionWithoutHash = itemNode.childNamed('title')?.val;
         const release: Release = {
           version: withHash ? versionWithHash : versionWithoutHash!,
-          releaseTimestamp: itemNode.childNamed('pubDate')?.val,
+          releaseTimestamp: asTimestamp(itemNode.childNamed('pubDate')?.val),
           changelogUrl: itemNode.childNamed('link')?.val,
           isStable: registryUrl !== Unity3dDatasource.streams.beta,
           registryUrl,

@@ -1,12 +1,12 @@
 import fs from 'fs-extra';
 import { glob } from 'glob';
-import { getOptions } from '../lib/config/options';
-import { regEx } from '../lib/util/regex';
+import { getOptions } from '../../lib/config/options';
+import { regEx } from '../../lib/util/regex';
 
 const options = getOptions();
 const markdownGlob = '{docs,lib}/**/*.md';
 
-describe('documentation', () => {
+describe('docs/documentation', () => {
   it('has no invalid links', async () => {
     const markdownFiles = await glob(markdownGlob);
 
