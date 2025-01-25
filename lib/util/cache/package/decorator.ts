@@ -97,7 +97,7 @@ export function cache<T>({
       const hardTtl =
         methodName === 'getReleases' || methodName === 'getDigest'
           ? ttlValues.hardTtlMinutes
-          : // Skip two-tier caching for any intermediate data fetching
+          : // Skip two-tier TTL for any intermediate data fetching
             softTtl;
 
       let oldData: unknown;
