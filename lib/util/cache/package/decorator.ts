@@ -5,8 +5,8 @@ import { logger } from '../../../logger';
 import type { Decorator } from '../../decorator';
 import { decorate } from '../../decorator';
 import { acquireLock } from '../../mutex';
+import { resolveTtlValues } from './ttl';
 import type { DecoratorCachedRecord, PackageCacheNamespace } from './types';
-import { resolveTtlValues } from './util';
 import * as packageCache from '.';
 
 type HashFunction<T extends any[] = any[]> = (...args: T) => string;
@@ -93,11 +93,12 @@ export function cache<T>({
       );
 
       const ttlValues = resolveTtlValues(finalNamespace, ttlMinutes);
-      const softTtl = ttlValues.softTtl;
+      const softTtl = ttlValues.softTtlMinutes;
       const hardTtl =
         methodName === 'getReleases' || methodName === 'getDigest'
-          ? ttlValues.hardTtl
-          : softTtl;
+          ? ttlValues.hardTtlMinutes
+          : // Skip two-tier caching for any intermediate data fetching
+            softTtl;
 
       let oldData: unknown;
       if (oldRecord) {
