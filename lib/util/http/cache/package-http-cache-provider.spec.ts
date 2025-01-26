@@ -91,13 +91,10 @@ describe('util/http/cache/package-http-cache-provider', () => {
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
     });
-    httpMock
-      .scope(url)
-      .get('')
-      .reply(200, 'fetched response', {
-        etag: 'foobar',
-        'cache-control': 'max-age=180, public',
-      });
+    httpMock.scope(url).get('').reply(200, 'fetched response', {
+      etag: 'foobar',
+      'cache-control': 'max-age=180, public',
+    });
 
     const res = await http.get(url, { cacheProvider });
 
