@@ -63,6 +63,10 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
+    if (this.preventCaching(resp)) {
+      return resp;
+    }
+
     if (resp.statusCode === 200) {
       const etag = resp.headers?.['etag'];
       const lastModified = resp.headers?.['last-modified'];
@@ -70,9 +74,6 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       HttpCacheStats.incRemoteMisses(url);
 
       const httpResponse = copyResponse(resp, true);
-      if (this.preventCaching(httpResponse)) {
-        return httpResponse;
-      }
 
       const timestamp = new Date().toISOString();
 
