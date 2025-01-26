@@ -10,8 +10,6 @@ import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as memCache from '../cache/memory';
-import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
 import { type HttpRequestStatsDataPoint, HttpStats } from '../stats';
 import { resolveBaseUrl } from '../url';
@@ -187,58 +185,34 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       return cachedResponse;
     }
 
-    const memCacheKey =
-      options.memCache !== false &&
-      (options.method === 'get' || options.method === 'head')
-        ? hash(
-            `got-${JSON.stringify({
-              url,
-              headers: options.headers,
-              method: options.method,
-            })}`,
-          )
-        : null;
-
     let resPromise: Promise<HttpResponse<T>> | null = null;
 
-    // Cache GET requests unless memCache=false
-    if (memCacheKey) {
-      resPromise = memCache.get(memCacheKey);
+    if (cacheProvider) {
+      await cacheProvider.setCacheHeaders(url, options);
     }
 
-    // istanbul ignore else: no cache tests
-    if (!resPromise) {
-      if (cacheProvider) {
-        await cacheProvider.setCacheHeaders(url, options);
-      }
+    const startTime = Date.now();
+    const httpTask: GotTask<T> = () => {
+      const queueMs = Date.now() - startTime;
+      return gotTask(url, options, { queueMs });
+    };
 
-      const startTime = Date.now();
-      const httpTask: GotTask<T> = () => {
-        const queueMs = Date.now() - startTime;
-        return gotTask(url, options, { queueMs });
-      };
+    const throttle = getThrottle(url);
+    const throttledTask: GotTask<T> = throttle
+      ? () => throttle.add<HttpResponse<T>>(httpTask)
+      : httpTask;
 
-      const throttle = getThrottle(url);
-      const throttledTask: GotTask<T> = throttle
-        ? () => throttle.add<HttpResponse<T>>(httpTask)
-        : httpTask;
+    const queue = getQueue(url);
+    const queuedTask: GotTask<T> = queue
+      ? () => queue.add<HttpResponse<T>>(throttledTask)
+      : throttledTask;
 
-      const queue = getQueue(url);
-      const queuedTask: GotTask<T> = queue
-        ? () => queue.add<HttpResponse<T>>(throttledTask)
-        : throttledTask;
-
-      const { maxRetryAfter = 60 } = hostRule;
-      resPromise = wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
-
-      if (memCacheKey) {
-        memCache.set(memCacheKey, resPromise);
-      }
-    }
+    const { maxRetryAfter = 60 } = hostRule;
+    resPromise = wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
 
     try {
       const res = await resPromise;
-      const deepCopyNeeded = !!memCacheKey && res.statusCode !== 304;
+      const deepCopyNeeded = res.statusCode !== 304;
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 
