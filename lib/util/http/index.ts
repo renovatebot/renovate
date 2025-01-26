@@ -254,6 +254,10 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
       const staleResponse = await cacheProvider?.bypassServer<T>(url, true);
       if (staleResponse) {
+        logger.debug(
+          { err },
+          `Request error: returning stale cache instead for ${url}`,
+        );
         return staleResponse;
       }
 
