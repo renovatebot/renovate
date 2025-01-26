@@ -77,7 +77,10 @@ describe('util/http/cache/package-http-cache-provider', () => {
     expect(packageCache.set).not.toHaveBeenCalled();
 
     mockTime('2024-06-15T00:15:00.000Z');
-    httpMock.scope(url).get('').reply(200, 'new response', { etag: 'foobar' });
+    httpMock.scope(url).get('').reply(200, 'new response', {
+      etag: 'foobar',
+      'cache-control': 'max-age=180, public',
+    });
 
     const res2 = await http.get(url, { cacheProvider });
     expect(res2.body).toBe('new response');
@@ -91,7 +94,10 @@ describe('util/http/cache/package-http-cache-provider', () => {
     httpMock
       .scope(url)
       .get('')
-      .reply(200, 'fetched response', { etag: 'foobar' });
+      .reply(200, 'fetched response', {
+        etag: 'foobar',
+        'cache-control': 'max-age=180, public',
+      });
 
     const res = await http.get(url, { cacheProvider });
 
@@ -108,5 +114,22 @@ describe('util/http/cache/package-http-cache-provider', () => {
         timestamp: expect.any(String),
       },
     });
+  });
+
+  it('prevents caching when cache-control is private', async () => {
+    mockTime('2024-06-15T00:00:00.000Z');
+
+    const cacheProvider = new PackageHttpCacheProvider({
+      namespace: '_test-namespace',
+    });
+
+    httpMock.scope(url).get('').reply(200, 'private response', {
+      'cache-control': 'max-age=180, private',
+    });
+
+    const res = await http.get(url, { cacheProvider });
+
+    expect(res.body).toBe('private response');
+    expect(packageCache.set).not.toHaveBeenCalled();
   });
 });

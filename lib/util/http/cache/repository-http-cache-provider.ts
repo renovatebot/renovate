@@ -3,6 +3,8 @@ import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
 import type { HttpCache } from './schema';
 
 export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
+  protected override checkCacheControlPublic = false;
+
   override load(url: string): Promise<unknown> {
     const cache = getCache();
     cache.httpCache ??= {};

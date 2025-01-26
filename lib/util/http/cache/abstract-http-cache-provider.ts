@@ -1,4 +1,5 @@
 import { logger } from '../../../logger';
+import { regEx } from '../../regex';
 import { HttpCacheStats } from '../../stats';
 import type { GotOptions, HttpResponse } from '../types';
 import { copyResponse } from '../util';
@@ -6,6 +7,8 @@ import { type HttpCache, HttpCacheSchema } from './schema';
 import type { HttpCacheProvider } from './types';
 
 export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
+  protected checkCacheControlPublic = true;
+
   protected abstract load(url: string): Promise<unknown>;
   protected abstract persist(url: string, data: HttpCache): Promise<void>;
 
@@ -16,7 +19,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       return null;
     }
 
-    return httpCache as HttpCache;
+    return httpCache;
   }
 
   async setCacheHeaders<T extends Pick<GotOptions, 'headers'>>(
@@ -43,6 +46,19 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     return Promise.resolve(null);
   }
 
+  private preventCaching<T>(resp: HttpResponse<T>): boolean {
+    if (this.checkCacheControlPublic === false) {
+      return false;
+    }
+
+    const isPublic = resp.headers?.['cache-control']
+      ?.toLocaleLowerCase()
+      ?.split(regEx(/\s*,\s*/))
+      ?.includes('public');
+
+    return !isPublic;
+  }
+
   async wrapServerResponse<T>(
     url: string,
     resp: HttpResponse<T>,
@@ -54,6 +70,10 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       HttpCacheStats.incRemoteMisses(url);
 
       const httpResponse = copyResponse(resp, true);
+      if (this.preventCaching(httpResponse)) {
+        return httpResponse;
+      }
+
       const timestamp = new Date().toISOString();
 
       const newHttpCache = HttpCacheSchema.parse({
