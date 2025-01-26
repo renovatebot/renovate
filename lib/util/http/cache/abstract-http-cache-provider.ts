@@ -53,8 +53,8 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
 
     const isPublic = resp.headers?.['cache-control']
       ?.toLocaleLowerCase()
-      ?.split(regEx(/\s*,\s*/))
-      ?.includes('public');
+      .split(regEx(/\s*,\s*/))
+      .includes('public');
 
     return !isPublic;
   }
