@@ -5,7 +5,7 @@ import type { PackageCacheNamespace } from './types';
 export function getTtlOverride(
   namespace: PackageCacheNamespace,
 ): number | undefined {
-  const ttl: unknown = GlobalConfig.get('cacheTtlOverride', {})[namespace];
+  const ttl = GlobalConfig.get('cacheTtlOverride', {})[namespace];
   if (is.number(ttl)) {
     return ttl;
   }
