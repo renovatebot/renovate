@@ -74,7 +74,6 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       HttpCacheStats.incRemoteMisses(url);
 
       const httpResponse = copyResponse(resp, true);
-
       const timestamp = new Date().toISOString();
 
       const newHttpCache = HttpCacheSchema.parse({
