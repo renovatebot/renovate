@@ -63,11 +63,11 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
-    if (this.preventCaching(resp)) {
-      return resp;
-    }
-
     if (resp.statusCode === 200) {
+      if (this.preventCaching(resp)) {
+        return resp;
+      }
+
       const etag = resp.headers?.['etag'];
       const lastModified = resp.headers?.['last-modified'];
 
