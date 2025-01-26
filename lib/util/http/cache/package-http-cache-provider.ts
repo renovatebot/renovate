@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { get, set } from '../../cache/package'; // Import the package cache functions
 import { resolveTtlValues } from '../../cache/package/ttl';
 import type { PackageCacheNamespace } from '../../cache/package/types';
+import { HttpCacheStats } from '../../stats';
 import type { HttpResponse } from '../types';
 import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
 import type { HttpCache } from './schema';
@@ -48,9 +49,11 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     const deadline = cachedAt.plus({ minutes: this.softTtlMinutes });
     const now = DateTime.now();
     if (now >= deadline) {
+      HttpCacheStats.incLocalMisses(url);
       return null;
     }
 
+    HttpCacheStats.incLocalHits(url);
     return cached.httpResponse as HttpResponse<T>;
   }
 }
