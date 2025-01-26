@@ -43,10 +43,6 @@ export async function extractPackageFile(
       { packageLockFile, error: flakeLockParsed.error },
       `invalid flake.lock file`,
     );
-
-    if (deps.length) {
-      return { deps };
-    }
     return null;
   }
 
