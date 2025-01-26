@@ -7,7 +7,7 @@ import { type HttpCache, HttpCacheSchema } from './schema';
 import type { HttpCacheProvider } from './types';
 
 export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
-  protected checkCacheControlPublic = true;
+  protected checkCacheControlHeader = true;
 
   protected abstract load(url: string): Promise<unknown>;
   protected abstract persist(url: string, data: HttpCache): Promise<void>;
@@ -47,7 +47,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
   }
 
   private preventCaching<T>(resp: HttpResponse<T>): boolean {
-    if (this.checkCacheControlPublic === false) {
+    if (this.checkCacheControlHeader === false) {
       return false;
     }
 
