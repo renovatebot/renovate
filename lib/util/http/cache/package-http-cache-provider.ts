@@ -35,12 +35,17 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     await set(this.namespace, url, data, this.hardTtlMinutes);
   }
 
-  override async bypassServerResponse<T>(
+  override async bypassServer<T>(
     url: string,
+    ignoreSoftTtl = false,
   ): Promise<HttpResponse<T> | null> {
     const cached = await this.get(url);
     if (!cached) {
       return null;
+    }
+
+    if (ignoreSoftTtl) {
+      return cached.httpResponse as HttpResponse<T>;
     }
 
     const cachedAt = DateTime.fromISO(cached.timestamp);

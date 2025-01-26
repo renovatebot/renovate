@@ -181,8 +181,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     options.timeout ??= 60000;
 
     const { cacheProvider } = options;
-    const cachedResponse = await cacheProvider?.bypassServerResponse<T>(url);
-    // istanbul ignore if
+    const cachedResponse = await cacheProvider?.bypassServer<T>(url);
     if (cachedResponse) {
       return cachedResponse;
     }
@@ -252,6 +251,12 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
         throw new ExternalHostError(err);
       }
+
+      const staleResponse = await cacheProvider?.bypassServer<T>(url, true);
+      if (staleResponse) {
+        return staleResponse;
+      }
+
       throw err;
     }
   }

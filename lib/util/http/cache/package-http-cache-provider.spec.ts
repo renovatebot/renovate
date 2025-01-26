@@ -109,4 +109,23 @@ describe('util/http/cache/package-http-cache-provider', () => {
       },
     });
   });
+
+  it('serves stale response during revalidation error', async () => {
+    mockTime('2024-06-15T00:15:00.000Z');
+    cache[url] = {
+      etag: 'etag-value',
+      lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
+      httpResponse: { statusCode: 200, body: 'cached response' },
+      timestamp: '2024-06-15T00:00:00.000Z',
+    };
+    const cacheProvider = new PackageHttpCacheProvider({
+      namespace: '_test-namespace',
+    });
+    httpMock.scope(url).get('').reply(500);
+
+    const res = await http.get(url, { cacheProvider });
+
+    expect(res.body).toBe('cached response');
+    expect(packageCache.set).not.toHaveBeenCalled();
+  });
 });
