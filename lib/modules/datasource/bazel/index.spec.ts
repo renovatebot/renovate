@@ -77,7 +77,6 @@ describe('modules/datasource/bazel/index', () => {
           { version: '0.15.0', isDeprecated: true },
           { version: '0.16.0' },
         ],
-        sourceUrl: 'https://github.com/foo/bar',
       });
     });
   });
