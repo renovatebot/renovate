@@ -1,11 +1,11 @@
 import { partial } from '../../../test/util';
+import type { Timestamp } from '../../util/timestamp';
 import { HelmDatasource } from './helm';
 import { MavenDatasource } from './maven';
 import {
   addMetaData,
   massageGithubUrl,
   massageUrl,
-  normalizeDate,
   shouldDeleteHomepage,
 } from './metadata';
 import { NpmDatasource } from './npm';
@@ -16,13 +16,22 @@ describe('modules/datasource/metadata', () => {
   it('Should handle manualChangelogUrls', () => {
     const dep: ReleaseResult = {
       releases: [
-        { version: '2.0.0', releaseTimestamp: '2018-07-13T10:14:17.000Z' },
+        {
+          version: '2.0.0',
+          releaseTimestamp: '2018-07-13T10:14:17.000Z' as Timestamp,
+        },
         {
           version: '2.0.0.dev1',
-          releaseTimestamp: '2017-10-24T10:09:16.000Z',
+          releaseTimestamp: '2017-10-24T10:09:16.000Z' as Timestamp,
         },
-        { version: '2.1.0', releaseTimestamp: '2019-01-20T19:59:28.000Z' },
-        { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00.000Z' },
+        {
+          version: '2.1.0',
+          releaseTimestamp: '2019-01-20T19:59:28.000Z' as Timestamp,
+        },
+        {
+          version: '2.2.0',
+          releaseTimestamp: '2019-07-16T18:29:00.000Z' as Timestamp,
+        },
       ],
     };
 
@@ -39,13 +48,22 @@ describe('modules/datasource/metadata', () => {
   it('Should handle manualSourceUrls', () => {
     const dep: ReleaseResult = {
       releases: [
-        { version: '2.0.0', releaseTimestamp: '2018-07-13T10:14:17.000Z' },
+        {
+          version: '2.0.0',
+          releaseTimestamp: '2018-07-13T10:14:17.000Z' as Timestamp,
+        },
         {
           version: '2.0.0.dev1',
-          releaseTimestamp: '2017-10-24T10:09:16.000Z',
+          releaseTimestamp: '2017-10-24T10:09:16.000Z' as Timestamp,
         },
-        { version: '2.1.0', releaseTimestamp: '2019-01-20T19:59:28.000Z' },
-        { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00.000Z' },
+        {
+          version: '2.1.0',
+          releaseTimestamp: '2019-01-20T19:59:28.000Z' as Timestamp,
+        },
+        {
+          version: '2.2.0',
+          releaseTimestamp: '2019-07-16T18:29:00.000Z' as Timestamp,
+        },
       ],
     };
 
@@ -62,13 +80,22 @@ describe('modules/datasource/metadata', () => {
     const dep: ReleaseResult = {
       sourceUrl: 'https://github.com/carltongibson/django-filter/tree/master',
       releases: [
-        { version: '2.0.0', releaseTimestamp: '2018-07-13T10:14:17.000Z' },
+        {
+          version: '2.0.0',
+          releaseTimestamp: '2018-07-13T10:14:17.000Z' as Timestamp,
+        },
         {
           version: '2.0.0.dev1',
-          releaseTimestamp: '2017-10-24T10:09:16.000Z',
+          releaseTimestamp: '2017-10-24T10:09:16.000Z' as Timestamp,
         },
-        { version: '2.1.0', releaseTimestamp: '2019-01-20T19:59:28.000Z' },
-        { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00.000Z' },
+        {
+          version: '2.1.0',
+          releaseTimestamp: '2019-01-20T19:59:28.000Z' as Timestamp,
+        },
+        {
+          version: '2.2.0',
+          releaseTimestamp: '2019-07-16T18:29:00.000Z' as Timestamp,
+        },
       ],
     };
     const datasource = PypiDatasource.id;
@@ -143,13 +170,22 @@ describe('modules/datasource/metadata', () => {
     const dep: ReleaseResult = {
       sourceUrl: 'https://some.github.com/repo',
       releases: [
-        { version: '2.0.0', releaseTimestamp: '2018-07-13T10:14:17.000Z' },
+        {
+          version: '2.0.0',
+          releaseTimestamp: '2018-07-13T10:14:17.000Z' as Timestamp,
+        },
         {
           version: '2.0.0.dev1',
-          releaseTimestamp: '2017-10-24T10:09:16.000Z',
+          releaseTimestamp: '2017-10-24T10:09:16.000Z' as Timestamp,
         },
-        { version: '2.1.0', releaseTimestamp: '2019-01-20T19:59:28.000Z' },
-        { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00.000Z' },
+        {
+          version: '2.1.0',
+          releaseTimestamp: '2019-01-20T19:59:28.000Z' as Timestamp,
+        },
+        {
+          version: '2.2.0',
+          releaseTimestamp: '2019-07-16T18:29:00.000Z' as Timestamp,
+        },
       ],
     };
     const datasource = PypiDatasource.id;
@@ -165,10 +201,13 @@ describe('modules/datasource/metadata', () => {
     const dep: ReleaseResult = {
       sourceUrl: 'https://gitlab.com/meno/dropzone/tree/master',
       releases: [
-        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00.000Z' },
+        {
+          version: '5.7.0',
+          releaseTimestamp: '2020-02-14T13:12:00.000Z' as Timestamp,
+        },
         {
           version: '5.6.1',
-          releaseTimestamp: '2020-02-14T10:04:00.000Z',
+          releaseTimestamp: '2020-02-14T10:04:00.000Z' as Timestamp,
         },
       ],
     };
@@ -185,10 +224,13 @@ describe('modules/datasource/metadata', () => {
     const dep = {
       sourceUrl: 'https://gitlab-nope',
       releases: [
-        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00.000Z' },
+        {
+          version: '5.7.0',
+          releaseTimestamp: '2020-02-14T13:12:00.000Z' as Timestamp,
+        },
         {
           version: '5.6.1',
-          releaseTimestamp: '2020-02-14T10:04:00.000Z',
+          releaseTimestamp: '2020-02-14T10:04:00.000Z' as Timestamp,
         },
       ],
     };
@@ -205,10 +247,13 @@ describe('modules/datasource/metadata', () => {
     const dep = {
       sourceUrl: 'https://nope-nope-nope',
       releases: [
-        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00.000Z' },
+        {
+          version: '5.7.0',
+          releaseTimestamp: '2020-02-14T13:12:00.000Z' as Timestamp,
+        },
         {
           version: '5.6.1',
-          releaseTimestamp: '2020-02-14T10:04:00.000Z',
+          releaseTimestamp: '2020-02-14T10:04:00.000Z' as Timestamp,
         },
       ],
     };
@@ -225,10 +270,13 @@ describe('modules/datasource/metadata', () => {
     const dep = {
       sourceUrl: 'not-a-url',
       releases: [
-        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00.000Z' },
+        {
+          version: '5.7.0',
+          releaseTimestamp: '2020-02-14T13:12:00.000Z' as Timestamp,
+        },
         {
           version: '5.6.1',
-          releaseTimestamp: '2020-02-14T10:04:00.000Z',
+          releaseTimestamp: '2020-02-14T10:04:00.000Z' as Timestamp,
         },
       ],
     };
@@ -281,10 +329,19 @@ describe('modules/datasource/metadata', () => {
   it('Should normalize releaseTimestamp', () => {
     const dep = {
       releases: [
-        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
-        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
-        { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
-        { version: '1.0.4', releaseTimestamp: '20000103150210' },
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2000-01-01T12:34:56' as Timestamp,
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2000-01-02T12:34:56.000Z' as Timestamp,
+        },
+        {
+          version: '1.0.3',
+          releaseTimestamp: '2000-01-03T14:34:56.000+02:00' as Timestamp,
+        },
+        { version: '1.0.4', releaseTimestamp: '20000103150210' as Timestamp },
       ],
     };
     addMetaData(dep, MavenDatasource.id, 'foobar');
@@ -375,9 +432,18 @@ describe('modules/datasource/metadata', () => {
       homepage: 'https://github.com/foo/bar',
       sourceUrl: 'https://github.com/foo/bar',
       releases: [
-        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
-        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
-        { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2000-01-01T12:34:56' as Timestamp,
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2000-01-02T12:34:56.000Z' as Timestamp,
+        },
+        {
+          version: '1.0.3',
+          releaseTimestamp: '2000-01-03T14:34:56.000+02:00' as Timestamp,
+        },
       ],
     };
     addMetaData(dep, MavenDatasource.id, 'foobar');
@@ -405,9 +471,18 @@ describe('modules/datasource/metadata', () => {
       sourceUrl: 'https://gitlab.com/meno/repo',
       homepage: 'https://gitlab.com/meno/repo',
       releases: [
-        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
-        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
-        { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2000-01-01T12:34:56' as Timestamp,
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2000-01-02T12:34:56.000Z' as Timestamp,
+        },
+        {
+          version: '1.0.3',
+          releaseTimestamp: '2000-01-03T14:34:56.000+02:00' as Timestamp,
+        },
       ],
     };
     addMetaData(dep, MavenDatasource.id, 'foobar');
@@ -434,9 +509,18 @@ describe('modules/datasource/metadata', () => {
     const dep = {
       sourceUrl: 'https://gitlab.com/meno/repo',
       releases: [
-        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
-        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
-        { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2000-01-01T12:34:56' as Timestamp,
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2000-01-02T12:34:56.000Z' as Timestamp,
+        },
+        {
+          version: '1.0.3',
+          releaseTimestamp: '2000-01-03T14:34:56.000+02:00' as Timestamp,
+        },
       ],
     };
     addMetaData(dep, MavenDatasource.id, 'foobar');
@@ -463,9 +547,18 @@ describe('modules/datasource/metadata', () => {
     const dep = {
       homepage: 'https://somesource.com/',
       releases: [
-        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
-        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
-        { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+        {
+          version: '1.0.1',
+          releaseTimestamp: '2000-01-01T12:34:56' as Timestamp,
+        },
+        {
+          version: '1.0.2',
+          releaseTimestamp: '2000-01-02T12:34:56.000Z' as Timestamp,
+        },
+        {
+          version: '1.0.3',
+          releaseTimestamp: '2000-01-03T14:34:56.000+02:00' as Timestamp,
+        },
       ],
     };
     addMetaData(dep, MavenDatasource.id, 'foobar');
@@ -519,25 +612,6 @@ describe('modules/datasource/metadata', () => {
       changelogUrl:
         'https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt',
       sourceUrl: 'https://github.com/flyingcircusio/pycountry',
-    });
-  });
-
-  describe('normalizeDate()', () => {
-    it('works for number input', () => {
-      const now = Date.now();
-      expect(normalizeDate(now)).toBe(new Date(now).toISOString());
-    });
-
-    it('works for string input', () => {
-      expect(normalizeDate('2021-01-01')).toBe(
-        new Date('2021-01-01').toISOString(),
-      );
-    });
-
-    it('works for Date instance', () => {
-      expect(normalizeDate(new Date('2021-01-01'))).toBe(
-        new Date('2021-01-01').toISOString(),
-      );
     });
   });
 });

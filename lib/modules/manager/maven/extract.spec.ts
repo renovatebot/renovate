@@ -476,7 +476,7 @@ describe('modules/manager/maven/extract', () => {
               depType: 'compile',
               editFile: 'parent.pom.xml',
               fileReplacePosition: 470,
-              groupName: 'quuxVersion',
+              sharedVariableName: 'quuxVersion',
               registryUrls: [
                 'http://example.com/',
                 'http://example.com/nexus/xyz',
@@ -697,12 +697,12 @@ describe('modules/manager/maven/extract', () => {
             {
               depName: 'org.example:quux',
               currentValue: '1.2.3.4',
-              groupName: 'quuxVersion',
+              sharedVariableName: 'quuxVersion',
             },
             {
               depName: 'org.example:quux-test',
               currentValue: '1.2.3.4',
-              groupName: 'quuxVersion',
+              sharedVariableName: 'quuxVersion',
             },
             {
               depName: 'org.example:quuz',

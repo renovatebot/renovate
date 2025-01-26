@@ -1,4 +1,5 @@
 import { cache } from '../../../util/cache/package/decorator';
+import { asTimestamp } from '../../../util/timestamp';
 import * as Unity3dVersioning from '../../versioning/unity3d';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -74,7 +75,7 @@ export class Unity3dDatasource extends Datasource {
         version: withHash
           ? `${release.version} (${release.shortRevision})`
           : release.version,
-        releaseTimestamp: release.releaseDate,
+        releaseTimestamp: asTimestamp(release.releaseDate),
         changelogUrl: release.releaseNotes.url,
         isStable: translatedRegistryUrl === Unity3dDatasource.streams.lts,
         registryUrl: translatedRegistryUrl,

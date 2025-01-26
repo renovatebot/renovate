@@ -78,7 +78,9 @@ describe('util/http/bitbucket', () => {
         values: valuesPageThree,
         page: '3',
       });
-    const res = await api.getJson('/some-url?foo=bar', { paginate: true });
+    const res = await api.getJsonUnchecked('/some-url?foo=bar', {
+      paginate: true,
+    });
     expect(res.body).toEqual({
       page: '1',
       pagelen: 210,
@@ -112,7 +114,9 @@ describe('util/http/bitbucket', () => {
         values: valuesPageThree,
         page: '3',
       });
-    const res = await api.getJson('some-url?pagelen=10', { paginate: true });
+    const res = await api.getJsonUnchecked('some-url?pagelen=10', {
+      paginate: true,
+    });
     expect(res.body).toEqual({
       page: '1',
       pagelen: 21,
@@ -146,7 +150,7 @@ describe('util/http/bitbucket', () => {
         values: valuesPageThree,
         page: '3',
       });
-    const res = await api.getJson('some-url', {
+    const res = await api.getJsonUnchecked('some-url', {
       paginate: true,
       pagelen: 20,
     });

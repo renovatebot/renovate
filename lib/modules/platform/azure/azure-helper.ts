@@ -87,11 +87,11 @@ export async function getFile(
       const result = WrappedExceptionSchema.safeParse(fileContent);
       if (result.success) {
         if (result.data.typeKey === 'GitItemNotFoundException') {
-          logger.warn(`Unable to find file ${filePath}`);
+          logger.warn({ filePath }, 'Unable to find file');
           return null;
         }
         if (result.data.typeKey === 'GitUnresolvableToCommitException') {
-          logger.warn(`Unable to find branch ${branchName}`);
+          logger.warn({ branchName }, 'Unable to find branch');
           return null;
         }
       }

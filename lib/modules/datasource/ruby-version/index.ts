@@ -3,6 +3,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { parse } from '../../../util/html';
 import type { HttpError } from '../../../util/http';
+import { asTimestamp } from '../../../util/timestamp';
 import { isVersion, id as rubyVersioningId } from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -51,7 +52,7 @@ export class RubyVersionDatasource extends Datasource {
         if (columns.length) {
           const version = columns[0].replace('Ruby ', '');
           if (isVersion(version)) {
-            const releaseTimestamp = columns[1];
+            const releaseTimestamp = asTimestamp(columns[1]);
             const changelogUrl = columns[2]
               .replace('<a href="', 'https://www.ruby-lang.org')
               .replace('">more...</a>', '');
