@@ -558,6 +558,7 @@ const platform: Platform = {
                 getMergeMethod(platformPrOptions?.automergeStrategy) ??
                 config.mergeMethod,
               merge_when_checks_succeed: true,
+              delete_branch_after_merge: true, // older Gitea / Forgejo versions will ignore this, so no version check needed
             });
 
             logger.debug(
