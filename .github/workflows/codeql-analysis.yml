@@ -41,7 +41,7 @@ jobs:
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@4e83f6b818d7c9f52143570963b2c7f7f055decb # v3.28.6
+        uses: github/codeql-action/init@17a820bf2e43b47be2c72b39cc905417bc1ab6d0 # v3.28.6
         with:
           languages: javascript
 
@@ -51,7 +51,7 @@ jobs:
       # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
       # If this step fails, then you should remove it and run the build manually (see below)
       - name: Autobuild
-        uses: github/codeql-action/autobuild@4e83f6b818d7c9f52143570963b2c7f7f055decb # v3.28.6
+        uses: github/codeql-action/autobuild@17a820bf2e43b47be2c72b39cc905417bc1ab6d0 # v3.28.6
 
       # ℹ️ Command-line programs to run using the OS shell.
       # 📚 https://git.io/JvXDl
@@ -65,4 +65,4 @@ jobs:
       #   make release
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@4e83f6b818d7c9f52143570963b2c7f7f055decb # v3.28.6
+        uses: github/codeql-action/analyze@17a820bf2e43b47be2c72b39cc905417bc1ab6d0 # v3.28.6
