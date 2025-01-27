@@ -79,6 +79,7 @@ describe('modules/versioning/gradle/index', () => {
       ${'1.0-sp-2'}                | ${'1.0-sp-1'}                | ${1}
       ${''}                        | ${''}                        | ${0}
       ${'384.vf35b_f26814ec'}      | ${'400.v35420b_922dcb_'}     | ${-1}
+      ${'___'}                     | ${'...'}                     | ${0}
     `('compare("$a", "$b") === $expected', ({ a, b, expected }) => {
       expect(compare(a, b)).toEqual(expected);
     });

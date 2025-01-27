@@ -247,7 +247,9 @@ export function parsePrefixRange(input: string): PrefixRange | null {
   if (postfixRegex.test(input)) {
     const prefixValue = input.replace(regEx(/[-._]\+$/), '');
     const tokens = tokenize(prefixValue);
-    return tokens ? { tokens } : null;
+    if (tokens) {
+      return { tokens };
+    }
   }
 
   return null;
