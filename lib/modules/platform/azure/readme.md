@@ -102,7 +102,7 @@ For the `repositories` key, replace `YOUR-PROJECT/YOUR-REPO` with your Azure Dev
 
 <!-- prettier-ignore -->
 !!! info
-    Renovate now uses the set of APIs that Azure provides to query the azure-pipelines tasks versions directly from the instance. Read [pull request #32966](https://github.com/renovatebot/renovate/pull/32966) and [discussion #24820](https://github.com/renovatebot/renovate/discussions/24820) for more background information on this change.
+    Renovate now uses the set of APIs that Azure provides to query the azure-pipelines tasks versions directly from the instance. Read [pull request 32966](https://github.com/renovatebot/renovate/pull/32966) and [discussion 24820](https://github.com/renovatebot/renovate/discussions/24820) for more background information on this change.
 
 To let Renovate use the Azure DevOps internal API, you must set these variables in your config:
 
