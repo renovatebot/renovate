@@ -78,6 +78,8 @@ describe('modules/versioning/gradle/index', () => {
       ${'1.0-sp-1'}                | ${'1.0-release'}             | ${1}
       ${'1.0-sp-2'}                | ${'1.0-sp-1'}                | ${1}
       ${''}                        | ${''}                        | ${0}
+      ${'384.vf35b_f26814ec'}      | ${'400.v35420b_922dcb_'}     | ${-1}
+      ${'___'}                     | ${'...'}                     | ${0}
     `('compare("$a", "$b") === $expected', ({ a, b, expected }) => {
       expect(compare(a, b)).toEqual(expected);
     });
@@ -158,6 +160,14 @@ describe('modules/versioning/gradle/index', () => {
       ${'1++2'}                    | ${false}
       ${'1--2'}                    | ${false}
       ${'1__2'}                    | ${false}
+      ${'400.v35420b_922dcb_'}     | ${true}
+      ${'400.v35420b_922dcb'}      | ${true}
+      ${'__'}                      | ${false}
+      ${'_.'}                      | ${false}
+      ${'._'}                      | ${false}
+      ${'_+'}                      | ${false}
+      ${'+.'}                      | ${false}
+      ${'.+'}                      | ${false}
     `('isVersion("$input") === $expected', ({ input, expected }) => {
       expect(api.isVersion(input)).toBe(expected);
     });
