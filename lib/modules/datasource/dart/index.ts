@@ -1,4 +1,5 @@
 import type { HttpResponse } from '../../../util/http/types';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -49,7 +50,7 @@ export class DartDatasource extends Datasource {
         ?.filter(({ retracted }) => !retracted)
         ?.map(({ version, published }) => ({
           version,
-          releaseTimestamp: published,
+          releaseTimestamp: asTimestamp(published),
         }));
       if (releases && latest) {
         result = { releases };

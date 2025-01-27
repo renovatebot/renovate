@@ -1,6 +1,7 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
 import { isVersion, id as semverVersioningId } from '../../versioning/semver';
 import { Datasource } from '../datasource';
@@ -111,7 +112,9 @@ export class GolangVersionDatasource extends Datasource {
           const year = releaseDateMatch.groups.year.padStart(4, '0');
           const month = releaseDateMatch.groups.month.padStart(2, '0');
           const day = releaseDateMatch.groups.day.padStart(2, '0');
-          release.releaseTimestamp = `${year}-${month}-${day}T00:00:00.000Z`;
+          release.releaseTimestamp = asTimestamp(
+            `${year}-${month}-${day}T00:00:00.000Z`,
+          );
         }
         const releaseVersionMatch = releaseVersionRegex.exec(line);
         if (releaseVersionMatch?.groups) {

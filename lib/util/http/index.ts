@@ -180,6 +180,13 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     options = applyAuthorization(options);
     options.timeout ??= 60000;
 
+    const { cacheProvider } = options;
+    const cachedResponse = await cacheProvider?.bypassServerResponse<T>(url);
+    // istanbul ignore if
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
     const memCacheKey =
       options.memCache !== false &&
       (options.method === 'get' || options.method === 'head')
@@ -201,8 +208,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     // istanbul ignore else: no cache tests
     if (!resPromise) {
-      if (options.cacheProvider) {
-        await options.cacheProvider.setCacheHeaders(url, options);
+      if (cacheProvider) {
+        await cacheProvider.setCacheHeaders(url, options);
       }
 
       const startTime = Date.now();
@@ -235,8 +242,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 
-      if (options.cacheProvider) {
-        return await options.cacheProvider.wrapResponse(url, resCopy);
+      if (cacheProvider) {
+        return await cacheProvider.wrapServerResponse(url, resCopy);
       }
 
       return resCopy;

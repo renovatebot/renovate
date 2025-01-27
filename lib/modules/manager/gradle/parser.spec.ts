@@ -8,7 +8,11 @@ import {
   parseKotlinSource,
   parseProps,
 } from './parser';
-import { GRADLE_PLUGINS, REGISTRY_URLS } from './parser/common';
+import {
+  GRADLE_PLUGINS,
+  GRADLE_TEST_SUITES,
+  REGISTRY_URLS,
+} from './parser/common';
 
 jest.mock('../../../util/fs');
 
@@ -1216,6 +1220,21 @@ describe('modules/manager/gradle/parser', () => {
     `('$def | $input', ({ def, input, output }) => {
       const { deps } = parseGradle([def, input].join('\n'));
       expect(deps).toMatchObject([output].filter(is.truthy));
+    });
+  });
+
+  describe('implicit gradle test suite dependencies', () => {
+    it.each`
+      def                | input                                                   | output
+      ${''}              | ${'testing.suites.test { useJunit("1.2.3") } } }'}      | ${{ depName: 'useJunit', packageName: GRADLE_TEST_SUITES['useJunit'], currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'} | ${'testing.suites.test { useJUnitJupiter(baz) } } }'}   | ${{ depName: 'useJUnitJupiter', packageName: GRADLE_TEST_SUITES['useJUnitJupiter'], currentValue: '1.2.3' }}
+      ${''}              | ${'testing.suites.test { useKotlinTest("1.2.3") } } }'} | ${{ depName: 'useKotlinTest', packageName: GRADLE_TEST_SUITES['useKotlinTest'], currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'} | ${'testing { suites { test { useSpock(baz) } } }'}      | ${{ depName: 'useSpock', packageName: GRADLE_TEST_SUITES['useSpock'], currentValue: '1.2.3' }}
+      ${''}              | ${'testing.suites.test { useSpock("1.2.3") } } }'}      | ${{ depName: 'useSpock', packageName: GRADLE_TEST_SUITES['useSpock'], currentValue: '1.2.3' }}
+      ${''}              | ${'testing.suites.test { useTestNG("1.2.3") } } }'}     | ${{ depName: 'useTestNG', packageName: GRADLE_TEST_SUITES['useTestNG'], currentValue: '1.2.3' }}
+    `('$def | $input', ({ def, input, output }) => {
+      const { deps } = parseGradle([def, input].join('\n'));
+      expect(deps).toMatchObject([output]);
     });
   });
 
