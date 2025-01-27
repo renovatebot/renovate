@@ -53,7 +53,7 @@ steps:
   - bash: |
       add-apt-repository ppa:git-core/ppa
       apt update && apt install git -y
-    displayName: 'Install latest git version'
+    displayName: 'Install latest version of Git'
 
   - bash: |
       git config --global user.email 'bot@renovateapp.com'
@@ -102,18 +102,15 @@ For the `repositories` key, replace `YOUR-PROJECT/YOUR-REPO` with your Azure Dev
 
 <!-- prettier-ignore -->
 !!! info
-    Renovate bot is now using the set of APIs that azure provides to query the azure-pipelines tasks versions directly from the instance. ([PR #32966](https://github.com/renovatebot/renovate/pull/32966) and [Discussion #24820](https://github.com/renovatebot/renovate/discussions/24820))
+    Renovate now uses the set of APIs that Azure provides to query the azure-pipelines tasks versions directly from the instance. Read [pull request #32966](https://github.com/renovatebot/renovate/pull/32966) and [discussion #24820](https://github.com/renovatebot/renovate/discussions/24820) for more background information on this change.
 
-To use it, you need to have in your config :
+To let Renovate use the Azure DevOps internal API, you must set these variables in your config:
 
 - `platform` = `azure`
-- `endpoint` = `$(System.CollectionUri)` (an [azure predefined variable](https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml))
+- `endpoint` = `$(System.CollectionUri)`, this is an [Azure predefined variable](https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml)
 - `hostRules.hostType` = `azure-pipelines-tasks`
 
-An example configuration file, in `.json` format this time, would be :
-
-```json
-{
+```json title="Example config file in JSON format"
   "platform": "azure",
   "endpoint": "https://dev.azure.com/ORG_NAME",
   "azure-pipelines": {
