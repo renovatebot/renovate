@@ -49,10 +49,6 @@ export function tokenize(versionStr: string): Token[] | null {
   let currentVal = '';
 
   function yieldToken(): void {
-    if (currentVal === '') {
-      // We tried to yield an empty token, which means we're in a bad state.
-      result = null;
-    }
     if (result) {
       const val = currentVal;
       if (regEx(/^\d+$/).test(val)) {
@@ -73,8 +69,12 @@ export function tokenize(versionStr: string): Token[] | null {
     if (nextChar === null) {
       yieldToken();
     } else if (isSeparator(nextChar)) {
-      yieldToken();
-      currentVal = '';
+      if (prevChar && !isSeparator(prevChar)) {
+        yieldToken();
+        currentVal = '';
+      } else {
+        result = null;
+      }
     } else if (prevChar !== null && isTransition(prevChar, nextChar)) {
       yieldToken();
       currentVal = nextChar;
@@ -243,7 +243,7 @@ export function parsePrefixRange(input: string): PrefixRange | null {
     return { tokens: [] };
   }
 
-  const postfixRegex = regEx(/[-._]\+$/);
+  const postfixRegex = regEx(/[^-._+][-._]\+$/);
   if (postfixRegex.test(input)) {
     const prefixValue = input.replace(regEx(/[-._]\+$/), '');
     const tokens = tokenize(prefixValue);
