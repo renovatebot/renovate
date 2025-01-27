@@ -120,7 +120,7 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
 async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
   const scopedMatch = find({ hostType: PypiDatasource.id, url });
   const hostRule = is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
-  if (hostRule) {
+  if (hostRule && Object.keys(hostRule).length !== 0) {
     return hostRule;
   }
 
@@ -132,7 +132,7 @@ async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
 
   if (parsedUrl.hostname.endsWith('.pkg.dev')) {
     const hostRule = await getGoogleAuthHostRule();
-    if (hostRule) {
+    if (hostRule && Object.keys(hostRule).length !== 0) {
       return hostRule;
     }
     logger.once.debug(`Could not get Google access token (url=${url})`);
