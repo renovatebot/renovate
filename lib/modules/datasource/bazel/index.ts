@@ -57,6 +57,9 @@ export class BazelDatasource extends Datasource {
           }
           return release;
         });
+      if (metadata.homepage) {
+        result.homepage = metadata.homepage;
+      }
     } catch (err) {
       // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {
