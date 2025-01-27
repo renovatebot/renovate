@@ -721,7 +721,7 @@ You must capture/extract the following three fields _or_ configure its correspon
 
 We recommend you use only _one_ of these methods, or you'll get confused.
 
-We also recommend that you also tell Renovate what `versioning` to use.
+Also, we recommend you explicitly set which `versioning` Renovate should use.
 If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
 
 For more details and examples regarding custom managers, see our documentation for the [`regex` manager](modules/manager/regex/index.md) and the [`JSONata` manager](modules/manager/jsonata/index.md).
