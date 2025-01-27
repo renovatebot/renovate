@@ -161,6 +161,7 @@ describe('modules/versioning/gradle/index', () => {
       ${'1--2'}                    | ${false}
       ${'1__2'}                    | ${false}
       ${'400.v35420b_922dcb_'}     | ${true}
+      ${'400.v35420b_922dcb'}      | ${true}
       ${'__'}                      | ${false}
       ${'_.'}                      | ${false}
       ${'._'}                      | ${false}
