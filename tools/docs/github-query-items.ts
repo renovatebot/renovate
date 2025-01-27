@@ -82,7 +82,7 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
   }
 
   try {
-    const rawItems: ItemsEntity[] = (await getIssuesByIssueType('Bug')).concat(
+    const rawItems = (await getIssuesByIssueType('Bug')).concat(
       await getIssuesByIssueType('Feature'),
     );
 
