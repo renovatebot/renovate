@@ -81,7 +81,7 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
   if (!manager) {
     return null;
   }
-  const m = managers.get(manager)! ?? customManagers.get(manager)!;
+  const m = managers.get(manager) ?? customManagers.get(manager);
   if (!m) {
     return null;
   }
