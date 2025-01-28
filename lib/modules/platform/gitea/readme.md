@@ -31,7 +31,7 @@ If you use Gitea packages, add the `read:packages` scope.
 ## Unsupported platform features/concepts
 
 - **Adding reviewers to PRs not supported**: Gitea versions older than `v1.14.0` do not have the required API.
-- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Gitea versions older than v1.17.0 do not have the required API.
+- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Gitea versions older than v1.24.0 and Forgejo versions older than v10.0.0 don't support required branch autodelete for automerge.
 - **Git upload filters**: If you're using a Gitea version older than `v1.16.0` then you must enable [clone filters](https://docs.gitea.io/en-us/clone-filters/).
 
 ## Features awaiting implementation

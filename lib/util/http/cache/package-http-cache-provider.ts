@@ -1,30 +1,32 @@
 import { DateTime } from 'luxon';
 import { get, set } from '../../cache/package'; // Import the package cache functions
+import { resolveTtlValues } from '../../cache/package/ttl';
 import type { PackageCacheNamespace } from '../../cache/package/types';
+import { HttpCacheStats } from '../../stats';
 import type { HttpResponse } from '../types';
 import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
 import type { HttpCache } from './schema';
 
 export interface PackageHttpCacheProviderOptions {
   namespace: PackageCacheNamespace;
-  softTtlMinutes?: number;
-  hardTtlMinutes?: number;
+  ttlMinutes?: number;
 }
 
 export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   private namespace: PackageCacheNamespace;
-  private softTtlMinutes = 15;
-  private hardTtlMinutes = 24 * 60;
 
-  constructor({
-    namespace,
-    softTtlMinutes,
-    hardTtlMinutes,
-  }: PackageHttpCacheProviderOptions) {
+  private softTtlMinutes: number;
+  private hardTtlMinutes: number;
+
+  constructor({ namespace, ttlMinutes = 15 }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;
-    this.softTtlMinutes = softTtlMinutes ?? this.softTtlMinutes;
-    this.hardTtlMinutes = hardTtlMinutes ?? this.hardTtlMinutes;
+    const { softTtlMinutes, hardTtlMinutes } = resolveTtlValues(
+      this.namespace,
+      ttlMinutes,
+    );
+    this.softTtlMinutes = softTtlMinutes;
+    this.hardTtlMinutes = hardTtlMinutes;
   }
 
   async load(url: string): Promise<unknown> {
@@ -47,9 +49,11 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     const deadline = cachedAt.plus({ minutes: this.softTtlMinutes });
     const now = DateTime.now();
     if (now >= deadline) {
+      HttpCacheStats.incLocalMisses(url);
       return null;
     }
 
+    HttpCacheStats.incLocalHits(url);
     return cached.httpResponse as HttpResponse<T>;
   }
 }
