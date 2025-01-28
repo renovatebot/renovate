@@ -53,9 +53,7 @@ describe('modules/platform/github/index', () => {
       token: '123test',
     });
 
-    const repoCache = repository.getCache();
-    delete repoCache.platform;
-    delete process.env.RENOVATE_X_GITHUB_HOST_RULES;
+    repository.resetCache();
   });
 
   describe('initPlatform()', () => {
