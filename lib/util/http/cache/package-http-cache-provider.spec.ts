@@ -50,7 +50,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     };
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
-      softTtlMinutes: 0,
+      ttlMinutes: 0,
     });
     httpMock.scope(url).get('').reply(200, 'new response');
 
