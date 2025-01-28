@@ -79,7 +79,8 @@ If Renovate finds a newer version, it updates `0.15.0` to match that version.
 
 #### `git_override`
 
-If Renovate finds a [`git_override`](https://bazel.build/rules/lib/globals/module#git_override), it ignores the related `bazel_dep` entry and instead evaluates the `commit` value at the specified `remote`. When using `git_override`, the `version` parameter on the `bazel_dep` is optional.
+If Renovate finds a [`git_override`](https://bazel.build/rules/lib/globals/module#git_override), it ignores the related `bazel_dep` entry and instead evaluates the `commit` value at the specified `remote`.
+When using `git_override`, the `version` parameter on the `bazel_dep` is optional.
 
 ```python
 bazel_dep(name = "cgrindel_bazel_starlib", version = "0.15.0")

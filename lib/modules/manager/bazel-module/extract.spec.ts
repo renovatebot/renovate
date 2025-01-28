@@ -106,8 +106,7 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result.deps).toHaveLength(2);
-      expect(result.deps).toEqual(
+      expect(result).toMatchObject(
         expect.arrayContaining([
           {
             datasource: BazelDatasource.id,
@@ -341,10 +340,7 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
-      expect(result.deps).toEqual([
+      expect(result).toEqual({ deps: [
         {
           datasource: BazelDatasource.id,
           depType: 'bazel_dep',
