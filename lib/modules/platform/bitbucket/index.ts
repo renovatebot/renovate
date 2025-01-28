@@ -6,7 +6,9 @@ import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import type { BitbucketHttpOptions } from '../../../util/http/bitbucket';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
@@ -82,9 +84,7 @@ export async function initPlatform({
   }
   setBaseUrl(defaults.endpoint);
   renovateUserUuid = null;
-  const options: HttpOptions = {
-    memCache: false,
-  };
+  const options: HttpOptions = {};
   if (token) {
     options.token = token;
   } else {
@@ -166,7 +166,6 @@ export async function getRawFile(
     `/${path}`;
   const res = await bitbucketHttp.get(url, {
     cacheProvider: repoCacheProvider,
-    memCache: true,
   });
   return res.body;
 }
@@ -423,13 +422,14 @@ async function getStatus(
   memCache = true,
 ): Promise<BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
+  const opts: BitbucketHttpOptions = { paginate: true };
+  if (memCache) {
+    opts.cacheProvider = memCacheProvider;
+  }
   return (
     await bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketStatus>>(
       `/2.0/repositories/${config.repository}/commit/${sha!}/statuses`,
-      {
-        paginate: true,
-        memCache,
-      },
+      opts,
     )
   ).body.values;
 }
@@ -790,7 +790,7 @@ async function sanitizeReviewers(
           const reviewerUser = (
             await bitbucketHttp.getJsonUnchecked<Account>(
               `/2.0/users/${reviewer.uuid}`,
-              { memCache: true },
+              { cacheProvider: memCacheProvider },
             )
           ).body;
 
@@ -845,7 +845,7 @@ async function isAccountMemberOfWorkspace(
   try {
     await bitbucketHttp.get(
       `/2.0/workspaces/${workspace}/members/${reviewer.uuid}`,
-      { memCache: true },
+      { cacheProvider: memCacheProvider },
     );
 
     return true;

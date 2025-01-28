@@ -21,6 +21,8 @@ import { coerceArray } from '../../../util/array';
 import { noLeadingAtSymbol, parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
+import type { GitlabHttpOptions } from '../../../util/http/gitlab';
 import { setBaseUrl } from '../../../util/http/gitlab';
 import type { HttpResponse } from '../../../util/http/types';
 import { parseInteger } from '../../../util/number';
@@ -434,12 +436,13 @@ async function getStatus(
       config.repository
     }/repository/commits/${branchSha!}/statuses`;
 
-    return (
-      await gitlabApi.getJsonUnchecked<GitlabBranchStatus[]>(url, {
-        paginate: true,
-        memCache: useCache,
-      })
-    ).body;
+    const opts: GitlabHttpOptions = { paginate: true };
+    if (useCache) {
+      opts.cacheProvider = memCacheProvider;
+    }
+
+    return (await gitlabApi.getJsonUnchecked<GitlabBranchStatus[]>(url, opts))
+      .body;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error getting commit status');
     if (err.response?.statusCode === 404) {
@@ -666,9 +669,7 @@ async function tryPrAutomerge(
           pipeline: {
             status: string;
           };
-        }>(`projects/${config.repository}/merge_requests/${pr}`, {
-          memCache: false,
-        });
+        }>(`projects/${config.repository}/merge_requests/${pr}`);
         // detailed_merge_status is available with Gitlab >=15.6.0
         const use_detailed_merge_status = !!body.detailed_merge_status;
         const detailed_merge_status_check =
@@ -1061,10 +1062,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
     const query = getQueryString(searchParams);
     const res = await gitlabApi.getJsonUnchecked<
       { iid: number; title: string; labels: string[] }[]
-    >(`projects/${config.repository}/issues?${query}`, {
-      memCache: false,
-      paginate: true,
-    });
+    >(`projects/${config.repository}/issues?${query}`, { paginate: true });
     // istanbul ignore if
     if (!is.array(res.body)) {
       logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
@@ -1084,10 +1082,13 @@ export async function getIssue(
   useCache = true,
 ): Promise<Issue | null> {
   try {
+    const opts: GitlabHttpOptions = useCache
+      ? { cacheProvider: memCacheProvider }
+      : {};
     const issueBody = (
       await gitlabApi.getJsonUnchecked<{ description: string }>(
         `projects/${config.repository}/issues/${number}`,
-        { memCache: useCache },
+        opts,
       )
     ).body.description;
     return {

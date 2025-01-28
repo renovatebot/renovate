@@ -10,8 +10,6 @@ import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as memCache from '../cache/memory';
-import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
 import { type HttpRequestStatsDataPoint, HttpStats } from '../stats';
 import { resolveBaseUrl } from '../url';
@@ -186,24 +184,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       return cachedResponse;
     }
 
-    const memCacheKey =
-      options.memCache !== false &&
-      (options.method === 'get' || options.method === 'head')
-        ? hash(
-            `got-${JSON.stringify({
-              url,
-              headers: options.headers,
-              method: options.method,
-            })}`,
-          )
-        : null;
-
     let resPromise: Promise<HttpResponse<T>> | null = null;
-
-    // Cache GET requests unless memCache=false
-    if (memCacheKey) {
-      resPromise = memCache.get(memCacheKey);
-    }
 
     // istanbul ignore else: no cache tests
     if (!resPromise) {
@@ -229,15 +210,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
       const { maxRetryAfter = 60 } = hostRule;
       resPromise = wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
-
-      if (memCacheKey) {
-        memCache.set(memCacheKey, resPromise);
-      }
     }
 
     try {
       const res = await resPromise;
-      const deepCopyNeeded = !!memCacheKey && res.statusCode !== 304;
+      const deepCopyNeeded = res.statusCode !== 304;
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 

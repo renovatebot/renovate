@@ -13,7 +13,6 @@ async function matchingBranches(
 ): Promise<string[]> {
   const { body: branches } = await githubApi.getJson(
     `/repos/${repo}/git/matching-refs/heads/${branchName}`,
-    { memCache: false },
     MatchingRef,
   );
   return branches;

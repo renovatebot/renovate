@@ -33,6 +33,7 @@ import type {
   LongCommitSha,
 } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import * as githubHttp from '../../../util/http/github';
 import type { GithubHttpOptions } from '../../../util/http/github';
@@ -906,7 +907,7 @@ async function ensureBranchSha(
   const repository = config.repository!;
   try {
     const commitUrl = `/repos/${repository}/git/commits/${sha}`;
-    await githubApi.head(commitUrl, { memCache: false });
+    await githubApi.head(commitUrl);
   } catch (err) {
     logger.error({ err, sha, branchName }, 'Commit not found');
     throw err;
@@ -1001,7 +1002,6 @@ async function getStatus(
 
   const { body: status } =
     await githubApi.getJsonUnchecked<CombinedBranchStatus>(url, {
-      memCache: useCache,
       cacheProvider: repoCacheProvider,
     });
 
@@ -1119,11 +1119,11 @@ async function getStatusCheck(
 
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
 
-  return (
-    await githubApi.getJsonUnchecked<GhBranchStatus[]>(url, {
-      memCache: useCache,
-    })
-  ).body;
+  const opts: GithubHttpOptions = useCache
+    ? { cacheProvider: memCacheProvider }
+    : {};
+
+  return (await githubApi.getJsonUnchecked<GhBranchStatus[]>(url, opts)).body;
 }
 
 interface GithubToRenovateStatusMapping {

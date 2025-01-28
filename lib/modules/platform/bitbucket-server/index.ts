@@ -17,6 +17,7 @@ import {
   BitbucketServerHttp,
   setBaseUrl,
 } from '../../../util/http/bitbucket-server';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -136,9 +137,7 @@ export async function initPlatform({
 
   if (!gitAuthor && username) {
     logger.debug(`Attempting to confirm gitAuthor from username`);
-    const options: HttpOptions = {
-      memCache: false,
-    };
+    const options: HttpOptions = {};
 
     if (token) {
       options.token = token;
@@ -327,9 +326,14 @@ export async function getPr(
     return null;
   }
 
+  const opts: HttpOptions = {};
+  if (!refreshCache) {
+    opts.cacheProvider = memCacheProvider;
+  }
+
   const res = await bitbucketServerHttp.getJsonUnchecked<BbsRestPr>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
-    { memCache: !refreshCache },
+    opts,
   );
 
   const pr: BbsPr = {
@@ -457,11 +461,13 @@ async function getStatus(
 ): Promise<utils.BitbucketCommitStatus> {
   const branchCommit = git.getBranchCommit(branchName);
 
+  const opts: HttpOptions = memCache ? { cacheProvider: memCacheProvider } : {};
+
   return (
     await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketCommitStatus>(
       // TODO: types (#22198)
       `./rest/build-status/1.0/commits/stats/${branchCommit!}`,
-      { memCache },
+      opts,
     )
   ).body;
 }
@@ -503,11 +509,13 @@ function getStatusCheck(
 ): Promise<utils.BitbucketStatus[]> {
   const branchCommit = git.getBranchCommit(branchName);
 
+  const opts: HttpOptions = memCache ? { cacheProvider: memCacheProvider } : {};
+
   return utils.accumulateValues(
     // TODO: types (#22198)
     `./rest/build-status/1.0/commits/${branchCommit!}`,
     'get',
-    { memCache },
+    opts,
   );
 }
 
