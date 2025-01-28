@@ -23,10 +23,14 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     return httpCache as HttpCache;
   }
 
-  async setCacheHeaders<T extends Pick<GotOptions, 'headers'>>(
+  async setCacheHeaders<T extends Pick<GotOptions, 'headers' | 'method'>>(
     url: string,
     opts: T,
   ): Promise<void> {
+    if (opts.method?.toLowerCase() !== 'get') {
+      return;
+    }
+
     const httpCache = await this.get(url);
     if (!httpCache) {
       return;
