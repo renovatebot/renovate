@@ -1022,7 +1022,7 @@ export async function setBranchStatus({
   );
 
   try {
-    for (let attempt = 0; attempt <= retryTimes; attempt += 1) {
+    for (let attempt = 1; attempt <= retryTimes + 1; attempt += 1) {
       const commitUrl = `projects/${config.repository}/repository/commits/${branchSha}`;
       await gitlabApi
         .getJsonSafe(commitUrl, { memCache: false }, LastPipelineId)
@@ -1032,7 +1032,11 @@ export async function setBranchStatus({
       if (options.pipeline_id !== undefined) {
         break;
       }
-      logger.debug(`Pipeline not yet created. Retrying ${attempt}`);
+      if (attempt >= retryTimes + 1) {
+        logger.debug(`Pipeline not yet created after ${attempt} attempts`);
+      } else {
+        logger.debug(`Pipeline not yet created. Retrying ${attempt}`);
+      }
       // give gitlab some time to create pipelines for the sha
       await setTimeout(
         parseInteger(process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),

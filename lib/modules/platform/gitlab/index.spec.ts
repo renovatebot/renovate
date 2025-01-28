@@ -1248,6 +1248,15 @@ describe('modules/platform/gitlab/index', () => {
 
       expect(timers.setTimeout.mock.calls).toHaveLength(retry + 1);
       expect(timers.setTimeout.mock.calls[0][0]).toBe(delay);
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Pipeline not yet created. Retrying 1`,
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Pipeline not yet created. Retrying 2`,
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Pipeline not yet created after 3 attempts`,
+      );
     });
 
     it('do RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS attemps when set', async () => {
