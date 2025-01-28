@@ -6,7 +6,7 @@ Renovate can update a `project.toml` file if:
 - The file follows the [project descriptor specifications](https://github.com/buildpacks/spec/blob/main/extensions/project-descriptor.md)
 - The buildpack `uri` is an OCI image reference (references to a local file or buildpack registry are ignored)
 
-If you use buildpacks in the `io.buildpacks.group` array, then you _must_ configure the Docker reference (`uri`) for Renovate to work.
+**Note**: If you use buildpacks in the `io.buildpacks.group` array, then you _must_ configure the Docker reference (`uri`) for Renovate to work.
 
 ```toml title="Example of a project.toml file with Docker reference URIs"
 [_]
