@@ -9,6 +9,7 @@ import type { Ctx, GradleManagerData } from '../types';
 import { isDependencyString, parseDependencyString } from '../utils';
 import {
   GRADLE_PLUGINS,
+  GRADLE_TEST_SUITES,
   REGISTRY_URLS,
   findVariable,
   interpolateString,
@@ -401,22 +402,25 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
   return ctx;
 }
 
-export function handleImplicitGradlePlugin(ctx: Ctx): Ctx {
-  const pluginName = loadFromTokenMap(ctx, 'pluginName')[0].value;
+export function handleImplicitDep(ctx: Ctx): Ctx {
+  const implicitDepName = loadFromTokenMap(ctx, 'implicitDepName')[0].value;
   const versionTokens = loadFromTokenMap(ctx, 'version');
   const versionValue = interpolateString(versionTokens, ctx);
   if (!versionValue) {
     return ctx;
   }
 
-  const groupIdArtifactId =
-    GRADLE_PLUGINS[pluginName as keyof typeof GRADLE_PLUGINS][1];
+  const isImplicitGradlePlugin = implicitDepName in GRADLE_PLUGINS;
+  const groupIdArtifactId = isImplicitGradlePlugin
+    ? GRADLE_PLUGINS[implicitDepName as keyof typeof GRADLE_PLUGINS][1]
+    : GRADLE_TEST_SUITES[implicitDepName as keyof typeof GRADLE_TEST_SUITES];
+
   const dep = parseDependencyString(`${groupIdArtifactId}:${versionValue}`);
   if (!dep) {
     return ctx;
   }
 
-  dep.depName = pluginName;
+  dep.depName = implicitDepName;
   dep.packageName = groupIdArtifactId;
   dep.managerData = {
     fileReplacePosition: versionTokens[0].offset,

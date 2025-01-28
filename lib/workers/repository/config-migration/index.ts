@@ -27,14 +27,6 @@ export async function configMigration(
     return { result: 'no-migration' };
   }
 
-  if (migratedConfigData.filename === 'package.json') {
-    logger.debug(
-      ' Using package.json for Renovate config is deprecated - please use a dedicated configuration file instead. Skipping config migration.',
-    );
-    MigratedDataFactory.reset();
-    return { result: 'no-migration' };
-  }
-
   const res = await checkConfigMigrationBranch(config, migratedConfigData);
 
   // migration needed but not demanded by user
