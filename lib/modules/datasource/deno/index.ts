@@ -102,8 +102,8 @@ export class DenoDatasource extends Datasource {
           url,
           DenoAPIModuleVersionResponse.catch(({ error: err }) => {
             logger.warn(
-              { err },
-              `Deno: failed to get version details for ${version}`,
+              { err, version },
+              'Deno: failed to get version details',
             );
             return { version };
           }),

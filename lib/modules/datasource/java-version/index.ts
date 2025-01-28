@@ -31,7 +31,8 @@ export class JavaVersionDatasource extends Datasource {
   ): Promise<Release[] | null> {
     const pgUrl = `${url}&page=${page}`;
     try {
-      const pgRes = await this.http.getJson<AdoptiumJavaResponse>(pgUrl);
+      const pgRes =
+        await this.http.getJsonUnchecked<AdoptiumJavaResponse>(pgUrl);
       return (
         pgRes?.body?.versions?.map(({ semver }) => ({
           version: semver,

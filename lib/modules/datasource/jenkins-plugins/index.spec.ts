@@ -1,5 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
+import type { Timestamp } from '../../../util/timestamp';
 import * as versioning from '../../versioning/docker';
 import type {
   JenkinsPluginsInfoResponse,
@@ -31,7 +32,7 @@ const jenkinsPluginsVersions: JenkinsPluginsVersionsResponse = {
       '3.0.0': {
         version: '3.0.0',
         url: 'https://download.example.com',
-        releaseTimestamp: '2020-05-13T00:11:40.00Z',
+        releaseTimestamp: '2020-05-13T00:11:40.00Z' as Timestamp,
         requiredCore: '2.164.3',
       },
     },
@@ -87,12 +88,12 @@ describe('modules/datasource/jenkins-plugins/index', () => {
           },
           {
             downloadUrl: 'https://download.example.com',
-            releaseTimestamp: '2020-01-02T00:00:00.000Z',
+            releaseTimestamp: '2020-01-02T00:00:00.000Z' as Timestamp,
             version: '2.0.0',
           },
           {
             downloadUrl: 'https://download.example.com',
-            releaseTimestamp: '2020-05-13T00:11:40.000Z',
+            releaseTimestamp: '2020-05-13T00:11:40.000Z' as Timestamp,
             version: '3.0.0',
           },
         ],
@@ -155,12 +156,12 @@ describe('modules/datasource/jenkins-plugins/index', () => {
           },
           {
             downloadUrl: 'https://download.example.com',
-            releaseTimestamp: '2020-01-02T00:00:00.000Z',
+            releaseTimestamp: '2020-01-02T00:00:00.000Z' as Timestamp,
             version: '2.0.0',
           },
           {
             downloadUrl: 'https://download.example.com',
-            releaseTimestamp: '2020-05-13T00:11:40.000Z',
+            releaseTimestamp: '2020-05-13T00:11:40.000Z' as Timestamp,
             version: '3.0.0',
           },
         ],

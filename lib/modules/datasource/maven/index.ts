@@ -4,6 +4,7 @@ import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import { Result } from '../../../util/result';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
@@ -199,7 +200,7 @@ export class MavenDatasource extends Datasource {
     return fetchResult
       .transform((res): PostprocessReleaseResult => {
         if (res.lastModified) {
-          release.releaseTimestamp = res.lastModified;
+          release.releaseTimestamp = asTimestamp(res.lastModified);
         }
 
         return release;

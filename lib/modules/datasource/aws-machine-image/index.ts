@@ -2,6 +2,7 @@ import type { Filter, Image } from '@aws-sdk/client-ec2';
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { cache } from '../../../util/cache/package/decorator';
+import { asTimestamp } from '../../../util/timestamp';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -147,7 +148,7 @@ export class AwsMachineImageDatasource extends Datasource {
       releases: [
         {
           version: latestImage.ImageId,
-          releaseTimestamp: latestImage.CreationDate,
+          releaseTimestamp: asTimestamp(latestImage.CreationDate),
           isDeprecated:
             Date.parse(latestImage.DeprecationTime ?? this.now.toString()) <
             this.now,

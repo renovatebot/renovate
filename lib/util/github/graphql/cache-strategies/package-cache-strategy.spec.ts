@@ -1,10 +1,11 @@
 import { DateTime, Settings } from 'luxon';
+import type { Timestamp } from '../../../../util/timestamp';
 import * as packageCache from '../../../cache/package';
 import { clone } from '../../../clone';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
 import { GithubGraphqlPackageCacheStrategy } from './package-cache-strategy';
 
-const isoTs = (t: string) => t.replace(' ', 'T') + ':00.000Z';
+const isoTs = (t: string) => (t.replace(' ', 'T') + ':00.000Z') as Timestamp;
 
 const mockTime = (input: string): void => {
   const now = DateTime.fromISO(isoTs(input)).valueOf();

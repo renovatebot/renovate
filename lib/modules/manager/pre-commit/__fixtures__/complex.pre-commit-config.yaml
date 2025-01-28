@@ -13,11 +13,18 @@ repos:
     rev: 19.3b0
     hooks:
       - id: black
+        language: python
+        additional_dependencies:
+          - "request==1.1.1"
+          - "" # broken pypi package
   - repo: https://gitlab.com/psf/black
     # should also detect gitlab
     rev: 19.3b0
     hooks:
       - id: black
+        # missing language, not extracted
+        additional_dependencies:
+          - "urllib==24.9.0"
   - repo: http://gitlab.com/psf/black
     # should also detect http
     rev: 19.3b0
@@ -45,6 +52,15 @@ repos:
       - id: prettier
         exclude: ^notebooks
     rev: v2.1.2
+  - repo: ssh://git@github.com/pre-commit/pre-commit-hooks
+    # should allow explicit ssh protocol
+    hooks:
+    - id: check-merge-conflict
+    rev: v5.0.0
   - repo: some_invalid_url
     # case with invlalid url.
     rev: v1.0.0
+
+  # pre-commit meta hooks
+  - repo: meta
+    hooks: []

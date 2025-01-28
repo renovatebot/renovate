@@ -89,8 +89,9 @@ describe('workers/repository/update/pr/index', () => {
         const res = await ensurePr(config);
 
         expect(res).toEqual({ type: 'with-pr', pr });
-        expect(limits.incLimitedValue).toHaveBeenCalledOnce();
-        expect(limits.incLimitedValue).toHaveBeenCalledWith('PullRequests');
+        expect(limits.incCountValue).toHaveBeenCalledTimes(2);
+        expect(limits.incCountValue).toHaveBeenCalledWith('ConcurrentPRs');
+        expect(limits.incCountValue).toHaveBeenCalledWith('HourlyPRs');
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: pr.number, prTitle },
           'PR created',
@@ -730,9 +731,9 @@ describe('workers/repository/update/pr/index', () => {
           assignAutomerge: false,
         });
 
-        expect(logger.logger.error).toHaveBeenCalledWith(
-          { err },
-          'Failed to ensure PR: ' + prTitle,
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { err, prTitle },
+          'Failed to ensure PR',
         );
       });
 

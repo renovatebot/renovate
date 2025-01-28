@@ -11,6 +11,14 @@ exports[`modules/manager/pre-commit/extract extractPackageFile() extracts from c
       "packageName": "pre-commit/pre-commit-hooks",
     },
     {
+      "currentValue": "==1.1.1",
+      "currentVersion": "1.1.1",
+      "datasource": "pypi",
+      "depName": "request",
+      "depType": "pre-commit-python",
+      "packageName": "request",
+    },
+    {
       "currentValue": "19.3b0",
       "datasource": "github-tags",
       "depName": "psf/black",
@@ -64,6 +72,13 @@ exports[`modules/manager/pre-commit/extract extractPackageFile() extracts from c
       "depName": "prettier/pre-commit",
       "depType": "repository",
       "packageName": "prettier/pre-commit",
+    },
+    {
+      "currentValue": "v5.0.0",
+      "datasource": "github-tags",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "packageName": "pre-commit/pre-commit-hooks",
     },
     {
       "currentValue": "v1.0.0",

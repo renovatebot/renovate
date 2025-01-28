@@ -10,7 +10,12 @@ export interface MavenDependency {
 
 export type DependencyInfo = Pick<
   ReleaseResult,
-  'homepage' | 'sourceUrl' | 'packageScope'
+  | 'homepage'
+  | 'sourceUrl'
+  | 'packageScope'
+  | 'replacementName'
+  | 'replacementVersion'
+  | 'deprecationMessage'
 >;
 
 export interface MavenFetchSuccess<T = string> {

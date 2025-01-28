@@ -14,7 +14,7 @@ async function getDefaultBranchName(
   urlEncodedPkgName: string,
   endpoint: string,
 ): Promise<string> {
-  const res = await gitlabApi.getJson<GitlabProject>(
+  const res = await gitlabApi.getJsonUnchecked<GitlabProject>(
     `${endpoint}projects/${urlEncodedPkgName}`,
   );
   return res.body.default_branch ?? 'master'; // should never happen, but we keep this to ensure the current behavior

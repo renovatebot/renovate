@@ -17,12 +17,13 @@ import { generateBranchName } from './branch-name';
 const upper = (str: string): string =>
   str.charAt(0).toUpperCase() + str.substring(1);
 
-function sanitizeDepName(depName: string): string {
+export function sanitizeDepName(depName: string): string {
   return depName
     .replace('@types/', '')
     .replace('@', '')
     .replace(regEx(/\//g), '-')
     .replace(regEx(/\s+/g), '-')
+    .replace(regEx(/:/g), '-')
     .replace(regEx(/-+/), '-')
     .toLowerCase();
 }
