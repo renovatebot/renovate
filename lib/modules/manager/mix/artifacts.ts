@@ -135,7 +135,7 @@ export async function updateArtifacts({
     preCommands,
   };
 
-  let command;
+  let command: string;
   if (isLockFileMaintenance) {
     command = 'mix deps.get';
   } else {
