@@ -96,12 +96,14 @@ describe('modules/manager/helm-values/extract', () => {
           {
             currentValue: 'v0.13.10',
             depName: 'registry.internal/mirror/quay.io/metallb/controller',
+            packageName: 'registry.internal/mirror/quay.io/metallb/controller',
             datasource: 'docker',
             versioning: 'docker',
           },
           {
             currentValue: 'v0.13.10',
             depName: 'registry.internal/mirror/quay.io/metallb/speaker',
+            packageName: 'registry.internal/mirror/quay.io/metallb/speaker',
             datasource: 'docker',
             versioning: 'docker',
           },

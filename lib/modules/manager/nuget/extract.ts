@@ -54,9 +54,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
       if (is.nonEmptyStringAndNotWhitespace(depName)) {
         results.push({ ...dep, depName, depType: 'docker' });
       }
-    }
-
-    if (elemNames.has(name)) {
+    } else if (elemNames.has(name)) {
       const depName = attr?.Include || attr?.Update;
 
       if (!depName) {

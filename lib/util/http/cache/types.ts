@@ -6,7 +6,10 @@ export interface HttpCacheProvider {
     opts: T,
   ): Promise<void>;
 
-  bypassServerResponse<T>(url: string): Promise<HttpResponse<T> | null>;
+  bypassServer<T>(
+    url: string,
+    ignoreSoftTtl?: boolean,
+  ): Promise<HttpResponse<T> | null>;
 
   wrapServerResponse<T>(
     url: string,
