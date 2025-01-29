@@ -66,31 +66,31 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result.deps).toHaveLength(3);
-      expect(result.deps).toEqual(
-        expect.arrayContaining([
+
+      expect(result).toEqual({
+        deps: [
           {
-            datasource: BazelDatasource.id,
-            depType: 'bazel_dep',
-            depName: 'rules_bar',
-            currentValue: '1.0.0',
-          },
-          {
-            datasource: BazelDatasource.id,
+            datasource: 'bazel',
             depType: 'bazel_dep',
             depName: 'rules_foo',
             currentValue: '1.2.3',
             skipReason: 'git-dependency',
           },
           {
-            datasource: GithubTagsDatasource.id,
             depType: 'git_override',
             depName: 'rules_foo',
             currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
+            datasource: 'github-tags',
             packageName: 'example/rules_foo',
           },
-        ]),
-      );
+          {
+            datasource: 'bazel',
+            depType: 'bazel_dep',
+            depName: 'rules_bar',
+            currentValue: '1.0.0',
+          },
+        ],
+      });
     });
 
     it('returns bazel_dep with no version and git_override', async () => {
@@ -106,8 +106,8 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result).toMatchObject(
-        expect.arrayContaining([
+      expect(result).toMatchObject({
+        deps: [
           {
             datasource: BazelDatasource.id,
             depType: 'bazel_dep',
@@ -121,8 +121,8 @@ describe('modules/manager/bazel-module/extract', () => {
             currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
             packageName: 'example/rules_foo',
           },
-        ]),
-      );
+        ],
+      });
     });
 
     it('returns dependencies and custom registry URLs when specified in a bazelrc', async () => {
@@ -162,11 +162,11 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result.deps).toHaveLength(2);
-      expect(result.deps).toEqual(
-        expect.arrayContaining([
+
+      expect(result).toEqual({
+        deps: [
           {
-            datasource: BazelDatasource.id,
+            datasource: 'bazel',
             depType: 'bazel_dep',
             depName: 'rules_foo',
             currentValue: '1.2.3',
@@ -177,8 +177,8 @@ describe('modules/manager/bazel-module/extract', () => {
             depName: 'rules_foo',
             skipReason: 'unsupported-datasource',
           },
-        ]),
-      );
+        ],
+      });
     });
 
     it('returns bazel_dep with no version and archive_override dependencies', async () => {
@@ -195,11 +195,11 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result.deps).toHaveLength(2);
-      expect(result.deps).toEqual(
-        expect.arrayContaining([
+
+      expect(result).toEqual({
+        deps: [
           {
-            datasource: BazelDatasource.id,
+            datasource: 'bazel',
             depType: 'bazel_dep',
             depName: 'rules_foo',
             skipReason: 'file-dependency',
@@ -209,8 +209,8 @@ describe('modules/manager/bazel-module/extract', () => {
             depName: 'rules_foo',
             skipReason: 'unsupported-datasource',
           },
-        ]),
-      );
+        ],
+      });
     });
 
     it('returns bazel_dep and local_path_override dependencies', async () => {
@@ -225,11 +225,11 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result.deps).toHaveLength(2);
-      expect(result.deps).toEqual(
-        expect.arrayContaining([
+
+      expect(result).toEqual({
+        deps: [
           {
-            datasource: BazelDatasource.id,
+            datasource: 'bazel',
             depType: 'bazel_dep',
             depName: 'rules_foo',
             currentValue: '1.2.3',
@@ -240,8 +240,8 @@ describe('modules/manager/bazel-module/extract', () => {
             depName: 'rules_foo',
             skipReason: 'unsupported-datasource',
           },
-        ]),
-      );
+        ],
+      });
     });
 
     it('returns bazel_dep with no version and local_path_override dependencies', async () => {
@@ -256,11 +256,11 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result.deps).toHaveLength(2);
-      expect(result.deps).toEqual(
-        expect.arrayContaining([
+
+      expect(result).toEqual({
+        deps: [
           {
-            datasource: BazelDatasource.id,
+            datasource: 'bazel',
             depType: 'bazel_dep',
             depName: 'rules_foo',
             skipReason: 'local-dependency',
@@ -270,8 +270,43 @@ describe('modules/manager/bazel-module/extract', () => {
             depName: 'rules_foo',
             skipReason: 'unsupported-datasource',
           },
-        ]),
-      );
+        ],
+      });
+    });
+
+    it('returns bazel_dep and single_version_override dependencies if a version is specified', async () => {
+      const input = codeBlock`
+        bazel_dep(name = "rules_foo", version = "1.2.3")
+        single_version_override(
+          module_name = "rules_foo",
+          version = "1.2.5",
+          registry = "https://example.com/custom_registry",
+        )
+      `;
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+      if (!result) {
+        throw new Error('Expected a result.');
+      }
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: 'bazel',
+            depType: 'bazel_dep',
+            depName: 'rules_foo',
+            currentValue: '1.2.3',
+            skipReason: 'is-pinned',
+            registryUrls: ['https://example.com/custom_registry'],
+          },
+          {
+            depType: 'single_version_override',
+            depName: 'rules_foo',
+            skipReason: 'ignored',
+            currentValue: '1.2.5',
+            registryUrls: ['https://example.com/custom_registry'],
+          },
+        ],
+      });
     });
 
     it('returns bazel_dep with no version and single_version_override dependencies if a version is specified', async () => {
@@ -287,11 +322,11 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result.deps).toHaveLength(2);
-      expect(result.deps).toEqual(
-        expect.arrayContaining([
+
+      expect(result).toEqual({
+        deps: [
           {
-            datasource: BazelDatasource.id,
+            datasource: 'bazel',
             depType: 'bazel_dep',
             depName: 'rules_foo',
             skipReason: 'is-pinned',
@@ -300,12 +335,12 @@ describe('modules/manager/bazel-module/extract', () => {
           {
             depType: 'single_version_override',
             depName: 'rules_foo',
-            currentValue: '1.2.3',
             skipReason: 'ignored',
+            currentValue: '1.2.3',
             registryUrls: ['https://example.com/custom_registry'],
           },
-        ]),
-      );
+        ],
+      });
     });
 
     it('returns bazel_dep dependency if single_version_override does not have a version', async () => {
@@ -320,15 +355,18 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result.deps).toEqual([
-        {
-          datasource: BazelDatasource.id,
-          depType: 'bazel_dep',
-          depName: 'rules_foo',
-          currentValue: '1.2.3',
-          registryUrls: ['https://example.com/custom_registry'],
-        },
-      ]);
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: 'bazel',
+            depType: 'bazel_dep',
+            depName: 'rules_foo',
+            currentValue: '1.2.3',
+            registryUrls: ['https://example.com/custom_registry'],
+          },
+        ],
+      });
     });
 
     it('returns bazel_dep with no version dependency if single_version_override does not have a version', async () => {
@@ -340,15 +378,17 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      expect(result).toEqual({ deps: [
-        {
-          datasource: BazelDatasource.id,
-          depType: 'bazel_dep',
-          depName: 'rules_foo',
-          skipReason: 'unspecified-version',
-          registryUrls: ['https://example.com/custom_registry'],
-        },
-      ]);
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'rules_foo',
+            skipReason: 'unspecified-version',
+            registryUrls: ['https://example.com/custom_registry'],
+          },
+        ],
+      });
     });
 
     it('returns maven.install and maven.artifact dependencies', async () => {
@@ -376,32 +416,35 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result.deps).toEqual([
-        {
-          datasource: MavenDatasource.id,
-          depType: 'maven_install',
-          depName: 'junit:junit',
-          currentValue: '4.13.2',
-          registryUrls: ['https://repo1.maven.org/maven2/'],
-          versioning: 'gradle',
-        },
-        {
-          datasource: MavenDatasource.id,
-          depType: 'maven_install',
-          depName: 'com.google.guava:guava',
-          currentValue: '31.1-jre',
-          registryUrls: ['https://repo1.maven.org/maven2/'],
-          versioning: 'gradle',
-        },
-        {
-          datasource: MavenDatasource.id,
-          depType: 'maven_install',
-          depName: 'org.clojure:core.specs.alpha',
-          currentValue: '0.2.56',
-          registryUrls: ['https://repo1.maven.org/maven2/'],
-          versioning: 'gradle',
-        },
-      ]);
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: 'maven',
+            versioning: 'gradle',
+            depName: 'junit:junit',
+            currentValue: '4.13.2',
+            depType: 'maven_install',
+            registryUrls: ['https://repo1.maven.org/maven2/'],
+          },
+          {
+            datasource: 'maven',
+            versioning: 'gradle',
+            depName: 'com.google.guava:guava',
+            currentValue: '31.1-jre',
+            depType: 'maven_install',
+            registryUrls: ['https://repo1.maven.org/maven2/'],
+          },
+          {
+            datasource: 'maven',
+            versioning: 'gradle',
+            depName: 'org.clojure:core.specs.alpha',
+            currentValue: '0.2.56',
+            depType: 'maven_install',
+            registryUrls: ['https://repo1.maven.org/maven2/'],
+          },
+        ],
+      });
     });
 
     it('returns oci.pull dependencies', async () => {
@@ -419,17 +462,20 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result.deps).toEqual([
-        {
-          datasource: DockerDatasource.id,
-          depType: 'oci_pull',
-          depName: 'nginx_image',
-          packageName: 'index.docker.io/library/nginx',
-          currentValue: '1.27.1',
-          currentDigest:
-            'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
-        },
-      ]);
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: 'docker',
+            depType: 'oci_pull',
+            depName: 'nginx_image',
+            packageName: 'index.docker.io/library/nginx',
+            currentValue: '1.27.1',
+            currentDigest:
+              'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
+          },
+        ],
+      });
     });
 
     it('returns oci.pull dependencies without tags', async () => {
@@ -446,16 +492,19 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result.deps).toEqual([
-        {
-          datasource: DockerDatasource.id,
-          depType: 'oci_pull',
-          depName: 'nginx_image',
-          packageName: 'index.docker.io/library/nginx',
-          currentDigest:
-            'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
-        },
-      ]);
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: 'docker',
+            depType: 'oci_pull',
+            depName: 'nginx_image',
+            packageName: 'index.docker.io/library/nginx',
+            currentDigest:
+              'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
+          },
+        ],
+      });
     });
 
     it('returns maven.install and bazel_dep dependencies together', async () => {
@@ -480,30 +529,33 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result.deps).toEqual([
-        {
-          datasource: BazelDatasource.id,
-          depType: 'bazel_dep',
-          depName: 'bazel_jar_jar',
-          currentValue: '0.1.0',
-        },
-        {
-          datasource: MavenDatasource.id,
-          depType: 'maven_install',
-          depName: 'junit:junit',
-          currentValue: '4.13.2',
-          registryUrls: ['https://repo1.maven.org/maven2/'],
-          versioning: 'gradle',
-        },
-        {
-          datasource: MavenDatasource.id,
-          depType: 'maven_install',
-          depName: 'com.google.guava:guava',
-          currentValue: '31.1-jre',
-          registryUrls: ['https://repo1.maven.org/maven2/'],
-          versioning: 'gradle',
-        },
-      ]);
+
+      expect(result).toEqual({
+        deps: [
+          {
+            datasource: 'bazel',
+            depType: 'bazel_dep',
+            depName: 'bazel_jar_jar',
+            currentValue: '0.1.0',
+          },
+          {
+            datasource: 'maven',
+            versioning: 'gradle',
+            depName: 'junit:junit',
+            currentValue: '4.13.2',
+            depType: 'maven_install',
+            registryUrls: ['https://repo1.maven.org/maven2/'],
+          },
+          {
+            datasource: 'maven',
+            versioning: 'gradle',
+            depName: 'com.google.guava:guava',
+            currentValue: '31.1-jre',
+            depType: 'maven_install',
+            registryUrls: ['https://repo1.maven.org/maven2/'],
+          },
+        ],
+      });
     });
 
     it('returns git_repository dependencies', async () => {
@@ -518,18 +570,18 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result.deps).toHaveLength(1);
-      expect(result.deps).toEqual(
-        expect.arrayContaining([
+
+      expect(result).toEqual({
+        deps: [
           {
-            datasource: GithubTagsDatasource.id,
             depType: 'git_repository',
             depName: 'rules_foo',
             currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
+            datasource: 'github-tags',
             packageName: 'example/rules_foo',
           },
-        ]),
-      );
+        ],
+      });
     });
   });
 });

@@ -77,8 +77,7 @@ const BazelDepToPackageDep = RecordFragmentSchema.extend({
     depType: rule.value,
     depName: name.value,
     currentValue: version?.value,
-    ..
-(version && {skipReason : 'unspecified-version'}),
+    ...(version ? {} : { skipReason: 'unspecified-version' }),
   }),
 );
 
