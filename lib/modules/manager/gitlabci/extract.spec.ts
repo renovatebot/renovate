@@ -197,6 +197,7 @@ describe('modules/manager/gitlabci/extract', () => {
           currentValue: '31.65.1-slim',
           datasource: 'docker',
           depName: 'renovate/renovate',
+          packageName: 'renovate/renovate',
           depType: 'image-name',
           replaceString:
             '${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/renovate/renovate:31.65.1-slim',
@@ -209,6 +210,7 @@ describe('modules/manager/gitlabci/extract', () => {
           currentValue: '10.4.11',
           datasource: 'docker',
           depName: 'mariadb',
+          packageName: 'mariadb',
           depType: 'service-image',
           replaceString:
             '$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/mariadb:10.4.11',
@@ -221,6 +223,7 @@ describe('modules/manager/gitlabci/extract', () => {
           currentValue: '1.0.0',
           datasource: 'docker',
           depName: 'other/image1',
+          packageName: 'other/image1',
           depType: 'service-image',
           replaceString:
             '$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/other/image1:1.0.0',
@@ -306,6 +309,7 @@ describe('modules/manager/gitlabci/extract', () => {
         currentValue: 'test',
         datasource: 'docker',
         depName: 'image',
+        packageName: 'image',
         depType: 'image',
         replaceString: 'image:test',
       };
@@ -331,6 +335,7 @@ describe('modules/manager/gitlabci/extract', () => {
           currentValue: 'test',
           datasource: 'docker',
           depName: 'image',
+          packageName: 'image',
           depType: 'service-image',
           replaceString: 'image:test',
         },
@@ -341,6 +346,7 @@ describe('modules/manager/gitlabci/extract', () => {
           currentValue: 'test2',
           datasource: 'docker',
           depName: 'image2',
+          packageName: 'image2',
           depType: 'service-image',
           replaceString: 'image2:test2',
         },
@@ -362,6 +368,7 @@ describe('modules/manager/gitlabci/extract', () => {
           currentValue: 'test',
           datasource: 'docker',
           depName: 'image',
+          packageName: 'image',
           depType: 'image',
           replaceString: 'image:test',
         },

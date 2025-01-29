@@ -55,6 +55,7 @@ describe('modules/manager/droneci/extract', () => {
           currentValue: '1.8.1-alpine',
           datasource: 'docker',
           depName: 'quay.io/elixir',
+          packageName: 'quay.io/elixir',
           replaceString: 'quay.io/elixir:1.8.1-alpine',
           depType: 'docker',
         },
