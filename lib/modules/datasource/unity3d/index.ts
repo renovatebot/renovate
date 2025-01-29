@@ -78,7 +78,6 @@ export class Unity3dDatasource extends Datasource {
         releaseTimestamp: asTimestamp(release.releaseDate),
         changelogUrl: release.releaseNotes.url,
         isStable: translatedRegistryUrl === Unity3dDatasource.streams.lts,
-        registryUrl: translatedRegistryUrl,
       });
     }
 
