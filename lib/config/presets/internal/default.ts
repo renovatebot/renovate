@@ -145,7 +145,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         enabled: false,
-        matchDepTypes: ['devDependencies', 'dev'],
+        matchDepTypes: ['devDependencies', 'dev-dependencies', 'dev'],
       },
     ],
   },
@@ -411,7 +411,7 @@ export const presets: Record<string, Preset> = {
     description: 'Pin dependency versions for development dependencies.',
     packageRules: [
       {
-        matchDepTypes: ['devDependencies', 'dev'],
+        matchDepTypes: ['devDependencies', 'dev-dependencies', 'dev'],
         rangeStrategy: 'pin',
       },
     ],
@@ -429,7 +429,7 @@ export const presets: Record<string, Preset> = {
         rangeStrategy: 'replace',
       },
       {
-        matchDepTypes: ['devDependencies', 'dev'],
+        matchDepTypes: ['devDependencies', 'dev-dependencies', 'dev'],
         rangeStrategy: 'pin',
       },
       {
