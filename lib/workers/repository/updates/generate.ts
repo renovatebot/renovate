@@ -9,6 +9,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { safeStringify } from '../../../util/stringify';
 import * as template from '../../../util/template';
+import type { Timestamp } from '../../../util/timestamp';
 import { uniq } from '../../../util/uniq';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { CommitMessage } from '../model/commit-message';
@@ -245,7 +246,7 @@ export function generateBranchConfig(
   logger.trace(`groupEligible: ${groupEligible}`);
   const useGroupSettings = hasGroupName && groupEligible;
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
-  let releaseTimestamp: string;
+  let releaseTimestamp: Timestamp;
 
   if (depTypes.size) {
     config.depTypes = Array.from(depTypes).sort();

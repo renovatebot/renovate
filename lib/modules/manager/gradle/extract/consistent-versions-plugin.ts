@@ -102,7 +102,7 @@ export function parseGcv(
           currentValue: propVerAndPos.version,
           lockedVersion: lockVersionAndDepType.version,
           depType: lockVersionAndDepType.depType,
-          groupName: propDepGlob,
+          sharedVariableName: propDepGlob,
         } satisfies PackageDependency<GradleManagerData>;
         extractedDeps.push(newDep);
         // Remove from the lockfile map so the same lib will not be included in more generic globs later

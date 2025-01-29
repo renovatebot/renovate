@@ -1,7 +1,7 @@
 import { Http } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { logger } from '../../../../test/util';
-import { getCache, resetCache } from '../../cache/repository';
+import { resetCache } from '../../cache/repository';
 import { repoCacheProvider } from './repository-http-cache-provider';
 
 describe('util/http/cache/repository-http-cache-provider', () => {
@@ -17,7 +17,7 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     const scope = httpMock.scope('https://example.com');
 
     scope.get('/foo/bar').reply(200, { msg: 'Hello, world!' }, { etag: '123' });
-    const res1 = await http.getJson('https://example.com/foo/bar');
+    const res1 = await http.getJsonUnchecked('https://example.com/foo/bar');
     expect(res1).toMatchObject({
       statusCode: 200,
       body: { msg: 'Hello, world!' },
@@ -25,7 +25,7 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     });
 
     scope.get('/foo/bar').reply(304);
-    const res2 = await http.getJson('https://example.com/foo/bar');
+    const res2 = await http.getJsonUnchecked('https://example.com/foo/bar');
     expect(res2).toMatchObject({
       statusCode: 200,
       body: { msg: 'Hello, world!' },
@@ -43,7 +43,7 @@ describe('util/http/cache/repository-http-cache-provider', () => {
         { msg: 'Hello, world!' },
         { 'last-modified': 'Mon, 01 Jan 2000 00:00:00 GMT' },
       );
-    const res1 = await http.getJson('https://example.com/foo/bar');
+    const res1 = await http.getJsonUnchecked('https://example.com/foo/bar');
     expect(res1).toMatchObject({
       statusCode: 200,
       body: { msg: 'Hello, world!' },
@@ -51,29 +51,8 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     });
 
     scope.get('/foo/bar').reply(304);
-    const res2 = await http.getJson('https://example.com/foo/bar');
+    const res2 = await http.getJsonUnchecked('https://example.com/foo/bar');
     expect(res2).toMatchObject({
-      statusCode: 200,
-      body: { msg: 'Hello, world!' },
-      authorization: false,
-    });
-  });
-
-  it('uses older cache format', async () => {
-    const repoCache = getCache();
-    repoCache.httpCache = {
-      'https://example.com/foo/bar': {
-        etag: '123',
-        lastModified: 'Mon, 01 Jan 2000 00:00:00 GMT',
-        httpResponse: { statusCode: 200, body: { msg: 'Hello, world!' } },
-        timeStamp: new Date().toISOString(),
-      },
-    };
-    httpMock.scope('https://example.com').get('/foo/bar').reply(304);
-
-    const res = await http.getJson('https://example.com/foo/bar');
-
-    expect(res).toMatchObject({
       statusCode: 200,
       body: { msg: 'Hello, world!' },
       authorization: false,
@@ -86,7 +65,7 @@ describe('util/http/cache/repository-http-cache-provider', () => {
       .get('/foo/bar')
       .reply(200, { msg: 'Hello, world!' });
 
-    await http.getJson('https://example.com/foo/bar');
+    await http.getJsonUnchecked('https://example.com/foo/bar');
 
     expect(logger.logger.debug).toHaveBeenCalledWith(
       'http cache: failed to persist cache for https://example.com/foo/bar',
@@ -97,7 +76,7 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     const scope = httpMock.scope('https://example.com');
 
     scope.get('/foo/bar').reply(200, { msg: 'Hello, world!' }, { etag: '123' });
-    const res1 = await http.getJson('https://example.com/foo/bar');
+    const res1 = await http.getJsonUnchecked('https://example.com/foo/bar');
     expect(res1).toMatchObject({
       statusCode: 200,
       body: { msg: 'Hello, world!' },
@@ -107,7 +86,7 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     resetCache();
 
     scope.get('/foo/bar').reply(304);
-    const res2 = await http.getJson('https://example.com/foo/bar');
+    const res2 = await http.getJsonUnchecked('https://example.com/foo/bar');
     expect(res2).toMatchObject({
       statusCode: 304,
       authorization: false,
@@ -118,7 +97,7 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     const scope = httpMock.scope('https://example.com');
     scope.get('/foo/bar').reply(203);
 
-    const res = await http.getJson('https://example.com/foo/bar');
+    const res = await http.getJsonUnchecked('https://example.com/foo/bar');
 
     expect(res).toMatchObject({
       statusCode: 203,
@@ -130,7 +109,7 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     const scope = httpMock.scope('https://example.com');
 
     scope.get('/foo/bar').reply(200, { msg: 'Hello, world!' }, { etag: '123' });
-    const res1 = await http.getJson('https://example.com/foo/bar', {
+    const res1 = await http.getJsonUnchecked('https://example.com/foo/bar', {
       headers: { authorization: 'Bearer 123' },
     });
     expect(res1).toMatchObject({
@@ -140,7 +119,7 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     });
 
     scope.get('/foo/bar').reply(304);
-    const res2 = await http.getJson('https://example.com/foo/bar', {
+    const res2 = await http.getJsonUnchecked('https://example.com/foo/bar', {
       headers: { authorization: 'Bearer 123' },
     });
     expect(res2).toMatchObject({

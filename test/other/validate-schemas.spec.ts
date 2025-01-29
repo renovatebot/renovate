@@ -1,10 +1,10 @@
 import fs from 'fs-extra';
 import upath from 'upath';
-import { Json } from '../lib/util/schema-utils';
-import { capitalize } from '../tools/docs/utils';
-import * as Schemas from '../tools/schemas/schema';
+import { Json } from '../../lib/util/schema-utils';
+import { capitalize } from '../../tools/docs/utils';
+import * as Schemas from '../../tools/schemas/schema';
 
-describe('validate-schemas', () => {
+describe('other/validate-schemas', () => {
   it('validate json files in lib/data against their schemas', async () => {
     const dataFileDir = 'lib/data';
     const schemaDir = 'tools/schemas';

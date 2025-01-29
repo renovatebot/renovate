@@ -9,7 +9,7 @@ export async function getMR(
   logger.debug(`getMR(${iid})`);
 
   const url = `projects/${repository}/merge_requests/${iid}?include_diverged_commits_count=1`;
-  return (await gitlabApi.getJson<GitLabMergeRequest>(url)).body;
+  return (await gitlabApi.getJsonUnchecked<GitLabMergeRequest>(url)).body;
 }
 
 export async function updateMR(
