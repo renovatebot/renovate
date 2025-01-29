@@ -141,11 +141,11 @@ export const presets: Record<string, Preset> = {
     description: 'Disable Renovate Dependency Dashboard creation.',
   },
   disableDevDependencies: {
-    description: 'Do not update `devDependencies` versions/ranges.',
+    description: 'Do not update `devDependencies`/`dev` versions/ranges.',
     packageRules: [
       {
         enabled: false,
-        matchDepTypes: ['devDependencies'],
+        matchDepTypes: ['devDependencies', 'dev'],
       },
     ],
   },
@@ -408,10 +408,10 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDevDependencies: {
-    description: 'Pin dependency versions for `devDependencies`.',
+    description: 'Pin dependency versions for `devDependencies`/`dev`.',
     packageRules: [
       {
-        matchDepTypes: ['devDependencies'],
+        matchDepTypes: ['devDependencies', 'dev'],
         rangeStrategy: 'pin',
       },
     ],
@@ -422,14 +422,14 @@ export const presets: Record<string, Preset> = {
   },
   pinOnlyDevDependencies: {
     description:
-      'Pin dependency versions for `devDependencies` and retain SemVer ranges for others.',
+      'Pin dependency versions for `devDependencies`/`dev` and retain SemVer ranges for others.',
     packageRules: [
       {
         matchPackageNames: ['*'],
         rangeStrategy: 'replace',
       },
       {
-        matchDepTypes: ['devDependencies'],
+        matchDepTypes: ['devDependencies', 'dev'],
         rangeStrategy: 'pin',
       },
       {
