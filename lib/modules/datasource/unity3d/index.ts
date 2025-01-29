@@ -70,7 +70,7 @@ export class Unity3dDatasource extends Datasource {
       registryUrl: translatedRegistryUrl,
     };
 
-    response.body.results.forEach((release) => {
+    for (const release of response.body.results) {
       result.releases.push({
         version: withHash
           ? `${release.version} (${release.shortRevision})`
@@ -80,7 +80,7 @@ export class Unity3dDatasource extends Datasource {
         isStable: translatedRegistryUrl === Unity3dDatasource.streams.lts,
         registryUrl: translatedRegistryUrl,
       });
-    });
+    }
 
     return result;
   }

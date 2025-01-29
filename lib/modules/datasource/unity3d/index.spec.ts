@@ -18,7 +18,7 @@ describe('modules/datasource/unity3d/index', () => {
       const uri = new URL(url);
       httpMock
         .scope(uri.origin)
-        .get(uri.pathname + uri.search)
+        .get(`${uri.pathname}${uri.search}`)
         .reply(200, content);
     });
   };
