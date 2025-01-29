@@ -308,12 +308,41 @@ export function parseMavenBasedRange(input: string): MavenBasedRange | null {
   return null;
 }
 
+interface SingleVersionRange {
+  val: string;
+}
+
+const singleVersionRangeRegex = regEx(/^\[\s*(?<val>[-._+a-zA-Z0-9]*?)\s*\]$/);
+
+export function parseSingleVersionRange(
+  input: string,
+): SingleVersionRange | null {
+  if (!input) {
+    return null;
+  }
+
+  const matchGroups = singleVersionRangeRegex.exec(input)?.groups;
+  if (!matchGroups) {
+    return null;
+  }
+
+  const { val } = matchGroups;
+  if (!isVersion(val)) {
+    return null;
+  }
+
+  return { val };
+}
+
 export function isValid(str: string): boolean {
   if (!str) {
     return false;
   }
 
   return (
-    isVersion(str) || !!parsePrefixRange(str) || !!parseMavenBasedRange(str)
+    isVersion(str) ||
+    !!parsePrefixRange(str) ||
+    !!parseMavenBasedRange(str) ||
+    !!parseSingleVersionRange(str)
   );
 }
