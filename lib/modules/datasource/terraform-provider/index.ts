@@ -5,6 +5,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { TerraformDatasource } from '../terraform-module/base';
@@ -130,7 +131,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     );
     // istanbul ignore else
     if (latestVersion) {
-      latestVersion.releaseTimestamp = res.published_at;
+      latestVersion.releaseTimestamp = asTimestamp(res.published_at);
     }
     dep.homepage = `${registryUrl}/providers/${repository}`;
     return dep;

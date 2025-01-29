@@ -265,6 +265,21 @@
 
     The Renovate team
 
+'auto:no-merge-from-main':
+  comment: >
+    Hi there,
+
+
+    Please don't merge from `main` into your PR's branch unless you have a merge conflict or have a specific reason to do so.
+    Doing so consumes CI systems unnecessarily, and also resets CI approvals if this is your first PR to the repo.
+    This repo uses GitHub's Merge Queue, which will automatically test your PR against `main` before merging, so it's no longer necessary to always keep branches up-to-date.
+
+
+    Thanks,
+
+
+    The Renovate team
+
 'auto:discussion-first':
   comment: >
     **Please create a GitHub Discussion before continuing with this PR.**

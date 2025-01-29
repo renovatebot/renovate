@@ -37,6 +37,14 @@ export const GRADLE_PLUGINS = {
   spotbugs: ['toolVersion', 'com.github.spotbugs:spotbugs'],
 };
 
+export const GRADLE_TEST_SUITES = {
+  useJunit: 'junit:junit',
+  useJUnitJupiter: 'org.junit.jupiter:junit-jupiter',
+  useKotlinTest: 'org.jetbrains.kotlin:kotlin-test-junit',
+  useSpock: 'org.spockframework:spock-core',
+  useTestNG: 'org.testng:testng',
+};
+
 export function storeVarToken(ctx: Ctx, node: lexer.Token): Ctx {
   ctx.varTokens.push(node);
   return ctx;

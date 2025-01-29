@@ -177,6 +177,7 @@ If you're only working on the documentation files, you can use the `pnpm doc-fix
 ## Documentation
 
 We use [MkDocs](https://www.mkdocs.org) to generate the documentation.
+To install the required dependency, use `pdm install`.
 You can run `pnpm build:docs` to generate the docs.
 Then use `pnpm mkdocs serve` to preview the documentation locally.
 The docs will update automatically when you run `pnpm build:docs` again, no need to stop the `pnpm mkdocs serve` command.
