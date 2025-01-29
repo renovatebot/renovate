@@ -48,7 +48,9 @@ export async function updateArtifacts({
   }
 
   if (isLockFileMaintenance && isUmbrella) {
-    logger.debug('Cannot use lockFileMaintenance in an umbrella project, see https://docs.renovatebot.com/modules/manager/mix/#lockFileMaintenance');
+    logger.debug(
+      'Cannot use lockFileMaintenance in an umbrella project, see https://docs.renovatebot.com/modules/manager/mix/#lockFileMaintenance',
+    );
     return null;
   }
 
