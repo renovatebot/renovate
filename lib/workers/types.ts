@@ -136,6 +136,7 @@ export interface BranchConfig
   commitFingerprint?: string;
   skipBranchUpdate?: boolean;
   env?: UserEnv;
+  skipArtifactUpdating?: boolean;
 }
 
 export interface BranchMetadata {

@@ -481,12 +481,16 @@ export async function processBranch(
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     if (!(config.reuseExistingBranch && config.skipBranchUpdate)) {
       await scm.checkoutBranch(config.baseBranch);
-      const res = await getUpdatedPackageFiles(config);
-      // istanbul ignore if
-      if (res.artifactErrors && config.artifactErrors) {
-        res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
+
+      if (!config.skipArtifactUpdating) {
+        const res = await getUpdatedPackageFiles(config);
+        // istanbul ignore if
+        if (res.artifactErrors && config.artifactErrors) {
+          res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
+        }
+        config = { ...config, ...res };
       }
-      config = { ...config, ...res };
+
       if (config.updatedPackageFiles?.length) {
         logger.debug(
           `Updated ${config.updatedPackageFiles.length} package files`,
