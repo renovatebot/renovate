@@ -188,10 +188,22 @@ describe('modules/manager/index', () => {
       expect(manager.getRangeStrategy({ rangeStrategy: 'auto' })).toBeNull();
     });
 
+    it('returns non-null for a custom manager', () => {
+      customManager.getCustomManagers().set('dummy', {
+        defaultConfig: {},
+        supportedDatasources: [],
+      });
+      expect(
+        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' }),
+      ).not.toBeNull();
+    });
+
     it('handles custom managers', () => {
       customManager.getCustomManagers().set('dummy', {
         defaultConfig: {},
         supportedDatasources: [],
+        // For completeness. Custom managers are configured in json and can not
+        // provide a range strategy (yet) but the interface allows for it.
         getRangeStrategy: () => 'bump',
       });
       expect(
