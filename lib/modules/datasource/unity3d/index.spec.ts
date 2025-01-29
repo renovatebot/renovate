@@ -36,7 +36,6 @@ describe('modules/datasource/unity3d/index', () => {
     }))!;
 
     expect(responses).toEqual({
-      registryUrl: Unity3dDatasource.streams.lts,
       releases: [
         {
           changelogUrl:
@@ -54,6 +53,7 @@ describe('modules/datasource/unity3d/index', () => {
         },
       ],
       homepage: 'https://unity.com/',
+      registryUrl: Unity3dDatasource.streams.lts,
     });
   });
 
@@ -66,7 +66,6 @@ describe('modules/datasource/unity3d/index', () => {
     }))!;
 
     expect(responses).toEqual({
-      registryUrl: Unity3dDatasource.streams.tech,
       releases: [
         {
           changelogUrl:
@@ -84,6 +83,7 @@ describe('modules/datasource/unity3d/index', () => {
         },
       ],
       homepage: 'https://unity.com/',
+      registryUrl: Unity3dDatasource.streams.tech,
     });
   });
 
@@ -96,7 +96,6 @@ describe('modules/datasource/unity3d/index', () => {
     }))!;
 
     expect(responses).toEqual({
-      registryUrl: Unity3dDatasource.streams.alpha,
       releases: [
         {
           changelogUrl:
@@ -114,6 +113,7 @@ describe('modules/datasource/unity3d/index', () => {
         },
       ],
       homepage: 'https://unity.com/',
+      registryUrl: Unity3dDatasource.streams.alpha,
     });
   });
 
@@ -129,7 +129,6 @@ describe('modules/datasource/unity3d/index', () => {
     }))!;
 
     expect(responses).toEqual({
-      registryUrl: Unity3dDatasource.streams.beta,
       releases: [
         {
           changelogUrl:
@@ -147,6 +146,7 @@ describe('modules/datasource/unity3d/index', () => {
         },
       ],
       homepage: 'https://unity.com/',
+      registryUrl: Unity3dDatasource.streams.beta,
     });
   });
 
@@ -164,7 +164,6 @@ describe('modules/datasource/unity3d/index', () => {
             changelogUrl:
               'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/2022_3_55f1_e905b1c414/2022_3_55f1_e905b1c414.md',
             isStable: true,
-            registryUrl: Unity3dDatasource.streams.lts,
             releaseTimestamp: '2024-12-17T16:21:09.410Z',
             version: '2022.3.55f1',
           },
@@ -172,12 +171,12 @@ describe('modules/datasource/unity3d/index', () => {
             changelogUrl:
               'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_0_32f1_a564232097/6000_0_32f1_a564232097.md',
             isStable: true,
-            registryUrl: Unity3dDatasource.streams.lts,
             releaseTimestamp: '2024-12-19T15:34:00.072Z',
             version: '6000.0.32f1',
           },
         ],
         homepage: 'https://unity.com/',
+        registryUrl: Unity3dDatasource.streams.lts,
       }),
     );
 
@@ -186,14 +185,13 @@ describe('modules/datasource/unity3d/index', () => {
         releases: expect.not.arrayContaining([
           expect.objectContaining({
             version: expect.stringMatching(/\(b\)/),
-            registryUrl: Unity3dDatasource.streams.beta,
           }),
           expect.objectContaining({
             version: expect.stringMatching(/\(b\)/),
-            registryUrl: Unity3dDatasource.streams.beta,
           }),
         ]),
         homepage: 'https://unity.com/',
+        registryUrl: Unity3dDatasource.streams.lts,
       }),
     );
   });
@@ -252,14 +250,13 @@ describe('modules/datasource/unity3d/index', () => {
         releases: expect.arrayContaining([
           expect.objectContaining({
             version: expect.stringMatching(/[fp]/),
-            registryUrl: expect.stringMatching(/(releases|lts)/),
           }),
           expect.objectContaining({
             version: expect.stringMatching(/[fp]/),
-            registryUrl: expect.stringMatching(/(releases|lts)/),
           }),
         ]),
         homepage: 'https://unity.com/',
+        registryUrl: expect.stringMatching(/(releases|lts)/),
       }),
     );
   });
