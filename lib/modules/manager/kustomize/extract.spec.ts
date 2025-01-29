@@ -356,7 +356,7 @@ describe('modules/manager/kustomize/extract', () => {
         currentValue: 'v1.0.0',
         replaceString: 'v1.0.0',
         datasource: DockerDatasource.id,
-        depName: 'localhost:5000/repo/image/service',
+        depName: 'docker.io/image/service',
         packageName: 'docker.io/image/service',
       };
       const pkg = extractImage(
