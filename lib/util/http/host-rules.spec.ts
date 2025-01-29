@@ -549,7 +549,7 @@ describe('util/http/host-rules', () => {
     const hostRule = {
       matchHost: 'https://domain.com/all-versions',
       headers: {
-        'Accept': 'dummy',
+        'Accept': 'replacement',
       },
     };
     let options = {
@@ -559,7 +559,7 @@ describe('util/http/host-rules', () => {
     };
     expect(applyHostRule(url, options, hostRule)).toEqual({
       headers: {
-        'Accept': 'dummy',
+        'Accept': 'replacement',
       },
     });
   });
