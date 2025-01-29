@@ -42,7 +42,6 @@ describe('modules/datasource/unity3d/index', () => {
           changelogUrl:
             'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/2022_3_55f1_e905b1c414/2022_3_55f1_e905b1c414.md',
           isStable: true,
-          registryUrl: Unity3dDatasource.streams.lts,
           releaseTimestamp: '2024-12-17T16:21:09.410Z',
           version: '2022.3.55f1',
         },
@@ -50,7 +49,6 @@ describe('modules/datasource/unity3d/index', () => {
           changelogUrl:
             'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_0_32f1_a564232097/6000_0_32f1_a564232097.md',
           isStable: true,
-          registryUrl: Unity3dDatasource.streams.lts,
           releaseTimestamp: '2024-12-19T15:34:00.072Z',
           version: '6000.0.32f1',
         },
@@ -74,7 +72,6 @@ describe('modules/datasource/unity3d/index', () => {
           changelogUrl:
             'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_0_21f1_2b136c8c81/6000_0_21f1_2b136c8c81.md',
           isStable: false,
-          registryUrl: Unity3dDatasource.streams.tech,
           releaseTimestamp: '2024-09-24T16:11:20.586Z',
           version: '6000.0.21f1',
         },
@@ -82,7 +79,6 @@ describe('modules/datasource/unity3d/index', () => {
           changelogUrl:
             'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_0_22f1_bde815b68f/6000_0_22f1_bde815b68f.md',
           isStable: false,
-          registryUrl: Unity3dDatasource.streams.tech,
           releaseTimestamp: '2024-10-02T19:04:27.205Z',
           version: '6000.0.22f1',
         },
@@ -106,7 +102,6 @@ describe('modules/datasource/unity3d/index', () => {
           changelogUrl:
             'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_1_0a8_2d1304db16/6000_1_0a8_2d1304db16.md',
           isStable: false,
-          registryUrl: Unity3dDatasource.streams.alpha,
           releaseTimestamp: '2024-12-10T20:17:32.592Z',
           version: '6000.1.0a8',
         },
@@ -114,7 +109,6 @@ describe('modules/datasource/unity3d/index', () => {
           changelogUrl:
             'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_1_0a9_a19280e20b/6000_1_0a9_a19280e20b.md',
           isStable: false,
-          registryUrl: Unity3dDatasource.streams.alpha,
           releaseTimestamp: '2024-12-18T08:40:10.134Z',
           version: '6000.1.0a9',
         },
@@ -141,7 +135,6 @@ describe('modules/datasource/unity3d/index', () => {
           changelogUrl:
             'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_0_0b15_d7e1e209b0/6000_0_0b15_d7e1e209b0.md',
           isStable: false,
-          registryUrl: Unity3dDatasource.streams.beta,
           releaseTimestamp: '2024-04-13T00:46:31.309Z',
           version: '6000.0.0b15',
         },
@@ -149,7 +142,6 @@ describe('modules/datasource/unity3d/index', () => {
           changelogUrl:
             'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_0_0b16_c8ac27cff6/6000_0_0b16_c8ac27cff6.md',
           isStable: false,
-          registryUrl: Unity3dDatasource.streams.beta,
           releaseTimestamp: '2024-04-19T15:47:47.012Z',
           version: '6000.0.0b16',
         },
