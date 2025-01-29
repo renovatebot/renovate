@@ -43,7 +43,6 @@ describe('modules/manager/ansible/extract', () => {
             datasource: 'docker',
             depName: 'my-quay-mirror.registry.com/redis',
             replaceString: 'quay.io/redis:0.0.1',
-            versioning: 'docker',
           },
         ],
       });
@@ -73,7 +72,6 @@ describe('modules/manager/ansible/extract', () => {
             datasource: 'docker',
             depName: 'quay.io/redis',
             replaceString: 'quay.io/redis:0.0.1',
-            versioning: 'docker',
           },
         ],
       });
@@ -104,7 +102,6 @@ describe('modules/manager/ansible/extract', () => {
             datasource: 'docker',
             depName: 'my-quay-mirror.registry.com/redis',
             replaceString: 'quay.io/redis:0.0.1',
-            versioning: 'docker',
           },
         ],
       });

@@ -9,7 +9,6 @@ exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "busybox",
     "replaceString": "busybox",
-    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -18,7 +17,6 @@ exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "redis",
     "replaceString": "redis",
-    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -27,7 +25,6 @@ exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "someuser/appimage",
     "replaceString": "someuser/appimage",
-    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -36,7 +33,7 @@ exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "ubuntu",
     "replaceString": "ubuntu:14.04",
-    "versioning": "docker",
+    "versioning": "ubuntu",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -45,7 +42,6 @@ exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "someuser/anotherappimage",
     "replaceString": "someuser/anotherappimage",
-    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -54,7 +50,6 @@ exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "busybox",
     "replaceString": "busybox",
-    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -63,7 +58,6 @@ exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "postgres",
     "replaceString": "postgres:latest",
-    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -72,7 +66,7 @@ exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "ubuntu",
     "replaceString": "ubuntu:14.04",
-    "versioning": "docker",
+    "versioning": "ubuntu",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -81,7 +75,7 @@ exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "ubuntu",
     "replaceString": "ubuntu:14.04",
-    "versioning": "docker",
+    "versioning": "ubuntu",
   },
 ]
 `;
@@ -95,7 +89,6 @@ exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "sameersbn/gitlab",
     "replaceString": "sameersbn/gitlab:11.5.1",
-    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -104,7 +97,6 @@ exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "sameersbn/postgresql",
     "replaceString": "sameersbn/postgresql:10",
-    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -113,7 +105,6 @@ exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "sameersbn/redis",
     "replaceString": "sameersbn/redis:4.0.9-1",
-    "versioning": "docker",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -122,7 +113,6 @@ exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "registry",
     "replaceString": "registry:2.6.2",
-    "versioning": "docker",
   },
 ]
 `;
