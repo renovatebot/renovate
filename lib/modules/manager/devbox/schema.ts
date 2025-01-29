@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { Jsonc } from '../../../util/schema-utils';
-import { PackageDependency } from '../types';
-import { DevboxDatasource } from '../../datasource/devbox';
 import { logger } from '../../../logger';
+import { Jsonc } from '../../../util/schema-utils';
+import { DevboxDatasource } from '../../datasource/devbox';
 import * as devboxVersioning from '../../versioning/devbox';
+import type { PackageDependency } from '../types';
 
 export const DevboxSchema = z.object({
   packages: z
