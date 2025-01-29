@@ -32,7 +32,7 @@ export const BatectConfigSchema = Yaml.pipe(
 ).transform(({ containers, include }) => {
   const imageDependencies = containers.map((image) => ({
     ...getDep(image),
-    versioning: dockerVersioning,
+    versioning: dockerVersioning, // TODO: drop this
   }));
 
   const bundleDependencies: PackageDependency[] = [];
