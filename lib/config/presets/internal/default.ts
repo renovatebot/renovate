@@ -141,7 +141,7 @@ export const presets: Record<string, Preset> = {
     description: 'Disable Renovate Dependency Dashboard creation.',
   },
   disableDevDependencies: {
-    description: 'Do not update `devDependencies`/`dev` versions/ranges.',
+    description: 'Do not update development dependencies.',
     packageRules: [
       {
         enabled: false,
