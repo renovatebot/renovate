@@ -259,7 +259,7 @@ describe('modules/manager/devbox/extract', () => {
       const result = extractPackageFile(
         codeBlock`
         {
-          "packages": ["nodejs@20.1.8", "yarn@1.22.10", "invalid@invalid", "invalid"]
+          "packages": ["nodejs@20.1.8", "yarn@1.22.10", "invalid@invalid", "invalid2"]
         }
       `,
         'devbox.lock',
@@ -288,8 +288,8 @@ describe('modules/manager/devbox/extract', () => {
           {
             currentValue: undefined,
             datasource: 'devbox',
-            depName: 'invalid',
-            packageName: 'invalid',
+            depName: 'invalid2',
+            packageName: 'invalid2',
             skipReason: 'not-a-version',
           },
         ],

@@ -2,7 +2,7 @@ import { logger } from '../../../logger';
 import { DevboxDatasource } from '../../datasource/devbox';
 import * as devboxVersioning from '../../versioning/devbox';
 import type { PackageDependency, PackageFileContent } from '../types';
-import { DevboxFile } from './schema';
+import { DevboxFileSchema } from './schema';
 
 export function extractPackageFile(
   content: string,
@@ -10,7 +10,7 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   logger.trace('devbox.extractPackageFile()');
 
-  const parsedFile = DevboxFile.safeParse(content);
+  const parsedFile = DevboxFileSchema.safeParse(content);
   if (parsedFile.error) {
     logger.debug(
       { packageFile, error: parsedFile.error },
@@ -22,26 +22,10 @@ export function extractPackageFile(
   const file = parsedFile.data;
   const deps: PackageDependency[] = [];
 
-  if (Array.isArray(file.packages)) {
-    for (const pkgStr of file.packages) {
-      const [pkgName, pkgVer] = pkgStr.split('@') as [
-        string,
-        string | undefined,
-      ];
-      const pkgDep = getDep(pkgName, pkgVer);
-      if (pkgDep) {
-        deps.push(pkgDep);
-      }
-    }
-  } else {
-    for (const [pkgName, pkgVer] of Object.entries(file.packages)) {
-      const pkgDep = getDep(
-        pkgName,
-        typeof pkgVer === 'string' ? pkgVer : pkgVer.version,
-      );
-      if (pkgDep) {
-        deps.push(pkgDep);
-      }
+  for (const [pkgName, pkgVer] of Object.entries(file.packages)) {
+    const pkgDep = getDep(pkgName, pkgVer);
+    if (pkgDep) {
+      deps.push(pkgDep);
     }
   }
 
