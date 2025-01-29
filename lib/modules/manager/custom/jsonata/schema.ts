@@ -13,4 +13,8 @@ const DepObjectSchema = z.object({
   indentation: z.string().optional(),
 });
 
-export const QueryResultZodSchema = z.array(DepObjectSchema);
+export const QueryResultZodSchema = z
+  .union([z.array(DepObjectSchema), DepObjectSchema])
+  .transform((input) => {
+    return Array.isArray(input) ? input : [input];
+  });

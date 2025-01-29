@@ -8,7 +8,7 @@ The JSONata manager is unique in Renovate, because:
 
 - It can be used with any `datasource`
 - It can be configured via [JSONata](https://jsonata.org/) queries
-- you can create multiple "JSONata managers" the same repository, using the `customManagers` config
+- You can create multiple "JSONata managers" in the same repository
 
 ### Required Fields
 

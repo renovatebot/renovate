@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import jsonata from 'jsonata';
+import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration';
 import { logger } from '../../../../logger';
 import * as template from '../../../../util/template';
 import { parseUrl } from '../../../../util/url';
@@ -20,13 +21,11 @@ export async function handleMatching(
     // won't fail as this is verified during config validation
     const jsonataExpression = jsonata(query);
     // this does not throw error, just returns undefined if no matches
-    let queryResult = await jsonataExpression.evaluate(json);
+    const queryResult = await jsonataExpression.evaluate(json);
 
-    if (
-      !queryResult ||
-      is.emptyObject(queryResult) ||
-      is.emptyArray(queryResult)
-    ) {
+    // allows empty dep object cause templates can be used to configure the required fields
+    // if some issues arise then the isValidDependency call will catch them later on
+    if (!queryResult || is.emptyArray(queryResult)) {
       logger.debug(
         {
           jsonataQuery: query,
@@ -37,7 +36,6 @@ export async function handleMatching(
       return [];
     }
 
-    queryResult = is.array(queryResult) ? queryResult : [queryResult];
     const parsed = QueryResultZodSchema.safeParse(queryResult);
     if (parsed.success) {
       results = results.concat(parsed.data);
@@ -46,6 +44,7 @@ export async function handleMatching(
         { err: parsed.error, jsonataQuery: query, packageFile, queryResult },
         'Query results failed schema validation',
       );
+      return [];
     }
   }
 
@@ -99,6 +98,9 @@ function updateDependency(
       dependency.registryUrls = [url];
       break;
     }
+    case 'datasource':
+      dependency.datasource = migrateDatasource(value);
+      break;
     default:
       dependency[field] = value;
       break;
