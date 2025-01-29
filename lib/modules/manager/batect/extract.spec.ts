@@ -12,7 +12,7 @@ const fixturesDir = 'lib/modules/manager/batect/__fixtures__';
 function createDockerDependency(tag: string): PackageDependency {
   return {
     ...getDep(tag),
-    versioning: dockerVersioning, // TODO: drop this
+    versioning: dockerVersioning,
   };
 }
 

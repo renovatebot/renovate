@@ -29,7 +29,7 @@ export function extractPackageFile(
         },
         'Docker image inside ansible',
       );
-      dep.versioning = dockerVersioning.id; // TODO: drop this
+      dep.versioning = dockerVersioning.id;
       deps.push(dep);
     }
   }
