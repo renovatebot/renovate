@@ -408,7 +408,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDevDependencies: {
-    description: 'Pin dependency versions for `devDependencies`/`dev`.',
+    description: 'Pin dependency versions for development dependencies.',
     packageRules: [
       {
         matchDepTypes: ['devDependencies', 'dev'],
@@ -422,7 +422,7 @@ export const presets: Record<string, Preset> = {
   },
   pinOnlyDevDependencies: {
     description:
-      'Pin dependency versions for `devDependencies`/`dev` and retain SemVer ranges for others.',
+      'Pin dependency versions for development dependencies and retain SemVer ranges for others.',
     packageRules: [
       {
         matchPackageNames: ['*'],
