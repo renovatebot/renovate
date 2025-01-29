@@ -70,7 +70,7 @@ describe('modules/manager/bazel-module/extract', () => {
       expect(result).toEqual({
         deps: [
           {
-            datasource: 'bazel',
+            datasource: BazelDatasource.id,
             depType: 'bazel_dep',
             depName: 'rules_foo',
             currentValue: '1.2.3',
@@ -80,11 +80,11 @@ describe('modules/manager/bazel-module/extract', () => {
             depType: 'git_override',
             depName: 'rules_foo',
             currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
-            datasource: 'github-tags',
+            datasource: GithubTagsDatasource.id,
             packageName: 'example/rules_foo',
           },
           {
-            datasource: 'bazel',
+            datasource: BazelDatasource.id,
             depType: 'bazel_dep',
             depName: 'rules_bar',
             currentValue: '1.0.0',
@@ -106,7 +106,7 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result).toMatchObject({
+      expect(result).toEqual({
         deps: [
           {
             datasource: BazelDatasource.id,
@@ -166,7 +166,7 @@ describe('modules/manager/bazel-module/extract', () => {
       expect(result).toEqual({
         deps: [
           {
-            datasource: 'bazel',
+            datasource: BazelDatasource.id,
             depType: 'bazel_dep',
             depName: 'rules_foo',
             currentValue: '1.2.3',
@@ -199,7 +199,7 @@ describe('modules/manager/bazel-module/extract', () => {
       expect(result).toEqual({
         deps: [
           {
-            datasource: 'bazel',
+            datasource: BazelDatasource.id,
             depType: 'bazel_dep',
             depName: 'rules_foo',
             skipReason: 'file-dependency',
@@ -229,7 +229,7 @@ describe('modules/manager/bazel-module/extract', () => {
       expect(result).toEqual({
         deps: [
           {
-            datasource: 'bazel',
+            datasource: BazelDatasource.id,
             depType: 'bazel_dep',
             depName: 'rules_foo',
             currentValue: '1.2.3',
@@ -260,7 +260,7 @@ describe('modules/manager/bazel-module/extract', () => {
       expect(result).toEqual({
         deps: [
           {
-            datasource: 'bazel',
+            datasource: BazelDatasource.id,
             depType: 'bazel_dep',
             depName: 'rules_foo',
             skipReason: 'local-dependency',
@@ -291,7 +291,7 @@ describe('modules/manager/bazel-module/extract', () => {
       expect(result).toEqual({
         deps: [
           {
-            datasource: 'bazel',
+            datasource: BazelDatasource.id,
             depType: 'bazel_dep',
             depName: 'rules_foo',
             currentValue: '1.2.3',
@@ -326,7 +326,7 @@ describe('modules/manager/bazel-module/extract', () => {
       expect(result).toEqual({
         deps: [
           {
-            datasource: 'bazel',
+            datasource: BazelDatasource.id,
             depType: 'bazel_dep',
             depName: 'rules_foo',
             skipReason: 'is-pinned',
@@ -359,7 +359,7 @@ describe('modules/manager/bazel-module/extract', () => {
       expect(result).toEqual({
         deps: [
           {
-            datasource: 'bazel',
+            datasource: BazelDatasource.id,
             depType: 'bazel_dep',
             depName: 'rules_foo',
             currentValue: '1.2.3',
@@ -533,7 +533,7 @@ describe('modules/manager/bazel-module/extract', () => {
       expect(result).toEqual({
         deps: [
           {
-            datasource: 'bazel',
+            datasource: BazelDatasource.id,
             depType: 'bazel_dep',
             depName: 'bazel_jar_jar',
             currentValue: '0.1.0',
@@ -577,7 +577,7 @@ describe('modules/manager/bazel-module/extract', () => {
             depType: 'git_repository',
             depName: 'rules_foo',
             currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
-            datasource: 'github-tags',
+            datasource: GithubTagsDatasource.id,
             packageName: 'example/rules_foo',
           },
         ],
