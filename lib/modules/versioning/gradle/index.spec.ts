@@ -127,6 +127,7 @@ describe('modules/versioning/gradle/index', () => {
       input                | expected
       ${'1.0.0'}           | ${true}
       ${'[1.0.0]'}         | ${true}
+      ${'[1..2]'}          | ${false}
       ${'[1.12.6,1.18.6]'} | ${true}
       ${undefined}         | ${false}
     `('isValid("$input") === $expected', ({ input, expected }) => {

@@ -317,10 +317,6 @@ const singleVersionRangeRegex = regEx(/^\[\s*(?<val>[-._+a-zA-Z0-9]*?)\s*\]$/);
 export function parseSingleVersionRange(
   input: string,
 ): SingleVersionRange | null {
-  if (!input) {
-    return null;
-  }
-
   const matchGroups = singleVersionRangeRegex.exec(input)?.groups;
   if (!matchGroups) {
     return null;
