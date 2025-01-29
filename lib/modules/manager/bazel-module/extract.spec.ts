@@ -420,7 +420,7 @@ describe('modules/manager/bazel-module/extract', () => {
       expect(result).toEqual({
         deps: [
           {
-            datasource: 'maven',
+            datasource: MavenDatasource.id,
             versioning: 'gradle',
             depName: 'junit:junit',
             currentValue: '4.13.2',
@@ -428,7 +428,7 @@ describe('modules/manager/bazel-module/extract', () => {
             registryUrls: ['https://repo1.maven.org/maven2/'],
           },
           {
-            datasource: 'maven',
+            datasource: MavenDatasource.id,
             versioning: 'gradle',
             depName: 'com.google.guava:guava',
             currentValue: '31.1-jre',
@@ -436,7 +436,7 @@ describe('modules/manager/bazel-module/extract', () => {
             registryUrls: ['https://repo1.maven.org/maven2/'],
           },
           {
-            datasource: 'maven',
+            datasource: MavenDatasource.id,
             versioning: 'gradle',
             depName: 'org.clojure:core.specs.alpha',
             currentValue: '0.2.56',
@@ -466,7 +466,7 @@ describe('modules/manager/bazel-module/extract', () => {
       expect(result).toEqual({
         deps: [
           {
-            datasource: 'docker',
+            datasource: DockerDatasource.id,
             depType: 'oci_pull',
             depName: 'nginx_image',
             packageName: 'index.docker.io/library/nginx',
@@ -496,7 +496,7 @@ describe('modules/manager/bazel-module/extract', () => {
       expect(result).toEqual({
         deps: [
           {
-            datasource: 'docker',
+            datasource: DockerDatasource.id,
             depType: 'oci_pull',
             depName: 'nginx_image',
             packageName: 'index.docker.io/library/nginx',
@@ -539,7 +539,7 @@ describe('modules/manager/bazel-module/extract', () => {
             currentValue: '0.1.0',
           },
           {
-            datasource: 'maven',
+            datasource: MavenDatasource.id,
             versioning: 'gradle',
             depName: 'junit:junit',
             currentValue: '4.13.2',
@@ -547,7 +547,7 @@ describe('modules/manager/bazel-module/extract', () => {
             registryUrls: ['https://repo1.maven.org/maven2/'],
           },
           {
-            datasource: 'maven',
+            datasource: MavenDatasource.id,
             versioning: 'gradle',
             depName: 'com.google.guava:guava',
             currentValue: '31.1-jre',
