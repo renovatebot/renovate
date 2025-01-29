@@ -1329,6 +1329,33 @@ describe('modules/manager/dockerfile/extract', () => {
     });
   });
 
+  it('replaces registry alias from start only', () => {
+    const res = extractPackageFile(
+      'FROM index.docker.io/myName/myPackage:0.6.2\n',
+      'Dockerfile',
+      {
+        registryAliases: {
+          'docker.io': 'my-docker-mirror.registry.com',
+        },
+      },
+    );
+    expect(res).toEqual({
+      deps: [
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '0.6.2',
+          datasource: 'docker',
+          depName: 'index.docker.io/myName/myPackage',
+          packageName: 'index.docker.io/myName/myPackage',
+          depType: 'final',
+          replaceString: 'index.docker.io/myName/myPackage:0.6.2',
+        },
+      ],
+    });
+  });
+
   it('handles empty registry', () => {
     const res = extractPackageFile(
       'FROM myName/myPackage:0.6.2\n',
