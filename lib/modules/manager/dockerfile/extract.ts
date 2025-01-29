@@ -141,6 +141,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
   const dep: PackageDependency = {
     depName,
+    packageName: depName,
     currentValue,
     currentDigest,
   };
@@ -176,12 +177,12 @@ export function getDep(
   // Resolve registry aliases first so that we don't need special casing later on:
   for (const [name, value] of Object.entries(registryAliases ?? {})) {
     const escapedName = escapeRegExp(name);
-    const groups = regEx(`(?<prefix>${escapedName})/(?<depName>.+)`).exec(
+    const groups = regEx(`${escapedName}/(?<depName>.+)`).exec(
       currentFrom,
     )?.groups;
     if (groups) {
       const dep = {
-        ...getDep(`${value}/${groups.depName}`),
+        ...getDep(`${value}/${groups.depName}`, false),
         replaceString: currentFrom,
       };
       dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
@@ -204,7 +205,6 @@ export function getDep(
     const specialPrefixes = ['amd64', 'arm64', 'library'];
     for (const prefix of specialPrefixes) {
       if (dep.depName.startsWith(`${prefix}/`)) {
-        dep.packageName = dep.depName;
         dep.depName = dep.depName.replace(`${prefix}/`, '');
         if (specifyReplaceString) {
           dep.autoReplaceStringTemplate =
@@ -229,7 +229,6 @@ export function getDep(
   if (dep.depName && quayRegex.test(dep.depName)) {
     const depName = dep.depName.replace(quayRegex, 'quay.io');
     if (depName !== dep.depName) {
-      dep.packageName = dep.depName;
       dep.depName = depName;
       dep.autoReplaceStringTemplate =
         '{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';

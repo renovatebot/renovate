@@ -267,6 +267,7 @@ describe('modules/manager/kustomize/extract', () => {
         datasource: DockerDatasource.id,
         replaceString: 'v1.0.0',
         depName: 'node',
+        packageName: 'node',
       };
       const pkg = extractImage({
         name: sample.depName,
@@ -284,6 +285,7 @@ describe('modules/manager/kustomize/extract', () => {
         datasource: DockerDatasource.id,
         replaceString: 'v1.0.0',
         depName: 'test/node',
+        packageName: 'test/node',
       };
       const pkg = extractImage({
         name: sample.depName,
@@ -301,6 +303,7 @@ describe('modules/manager/kustomize/extract', () => {
         datasource: DockerDatasource.id,
         replaceString: 'v1.0.0',
         depName: 'quay.io/repo/image',
+        packageName: 'quay.io/repo/image',
       };
       const pkg = extractImage({
         name: sample.depName,
@@ -318,6 +321,7 @@ describe('modules/manager/kustomize/extract', () => {
         datasource: DockerDatasource.id,
         replaceString: 'v1.0.0',
         depName: 'localhost:5000/repo/image',
+        packageName: 'localhost:5000/repo/image',
       };
       const pkg = extractImage({
         name: sample.depName,
@@ -335,6 +339,7 @@ describe('modules/manager/kustomize/extract', () => {
         replaceString: 'v1.0.0',
         datasource: DockerDatasource.id,
         depName: 'localhost:5000/repo/image/service',
+        packageName: 'localhost:5000/repo/image/service',
       };
       const pkg = extractImage({
         name: sample.depName,
@@ -352,6 +357,7 @@ describe('modules/manager/kustomize/extract', () => {
         replaceString: 'v1.0.0',
         datasource: DockerDatasource.id,
         depName: 'docker.io/image/service',
+        packageName: 'docker.io/image/service',
       };
       const pkg = extractImage(
         {

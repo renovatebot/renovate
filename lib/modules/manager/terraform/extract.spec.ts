@@ -457,6 +457,7 @@ describe('modules/manager/terraform/extract', () => {
           currentValue: '1.24.0',
           datasource: 'docker',
           depName: 'index.docker.io/bitnami/nginx',
+          packageName: 'index.docker.io/bitnami/nginx',
           depType: 'docker_image',
           replaceString: 'hub.proxy.test/bitnami/nginx:1.24.0',
         },

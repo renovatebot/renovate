@@ -131,6 +131,7 @@ describe('modules/manager/bitbucket-pipelines/extract', () => {
             currentValue: '2.0.2',
             datasource: 'docker',
             depName: 'some.jfrog.mirror/jfrog-setup-cli',
+            packageName: 'some.jfrog.mirror/jfrog-setup-cli',
             depType: 'docker',
           },
           {
