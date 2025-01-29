@@ -294,7 +294,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   ubuntuDockerVersioning: {
-    description: 'Use ubuntu versioning for `node` docker images.',
+    description: 'Use ubuntu versioning for `ubuntu` docker images.',
     packageRules: [
       {
         matchDatasources: ['docker'],
