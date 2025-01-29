@@ -33,7 +33,7 @@ describe('modules/manager/devcontainer/extract', () => {
       {
         // hello
         "features": {
-          "devcontainer.registry.renovate.com/test/features/first:1.2.3": {}
+          "devcontainer.registry.renovate.com/test/features/first:1.2.3": {},
         }
       }`);
       const extractConfig = {};
