@@ -496,4 +496,25 @@ describe('modules/manager/mix/artifacts', () => {
       { artifactError: { lockFile: 'mix.lock', stderr: 'exec-error' } },
     ]);
   });
+
+  it('detects read errors', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.localPathExists.mockResolvedValueOnce(true);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [{ depName: 'plug' }],
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      {
+        artifactError: {
+          lockFile: 'mix.lock',
+          stderr: 'Error reading mix.lock',
+        },
+      },
+    ]);
+  });
 });

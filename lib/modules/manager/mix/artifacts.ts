@@ -8,6 +8,7 @@ import {
   deleteLocalFile,
   findLocalSiblingOrParent,
   getSiblingFileName,
+  localPathExists,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -40,11 +41,25 @@ export async function updateArtifacts({
 
   let existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
-    lockFileName =
+    const lockFileError = await lockFileReadError(lockFileName);
+    if (lockFileError) {
+      return lockFileError;
+    }
+
+    const parentLockFileName =
       (await findLocalSiblingOrParent(packageFileName, 'mix.lock')) ??
       'mix.lock';
-    existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-    isUmbrella = !!existingLockFileContent;
+    existingLockFileContent = await readLocalFile(parentLockFileName, 'utf8');
+
+    if (existingLockFileContent) {
+      lockFileName = parentLockFileName;
+      isUmbrella = true;
+    } else {
+      const lockFileError = await lockFileReadError(lockFileName);
+      if (lockFileError) {
+        return lockFileError;
+      }
+    }
   }
 
   if (isLockFileMaintenance && isUmbrella) {
@@ -189,4 +204,21 @@ export async function updateArtifacts({
       },
     },
   ];
+}
+
+async function lockFileReadError(
+  lockFileName: string,
+): Promise<UpdateArtifactsResult[] | null> {
+  if (await localPathExists(lockFileName)) {
+    logger.warn(`Could not read ${lockFileName}`);
+    return [
+      {
+        artifactError: {
+          lockFile: lockFileName,
+          stderr: `Error reading ${lockFileName}`,
+        },
+      },
+    ];
+  }
+  return null;
 }
