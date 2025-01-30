@@ -580,7 +580,7 @@ describe('modules/manager/flux/extract', () => {
               '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentValue: 'v1.8.2',
             currentDigest: undefined,
-            depName: 'ghcr.proxy.test/some/path/kyverno/manifests/kyverno',
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.proxy.test/some/path/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
             replaceString: 'v1.8.2',
