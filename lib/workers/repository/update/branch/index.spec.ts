@@ -1634,8 +1634,8 @@ describe('workers/repository/update/branch/index', () => {
 
       GlobalConfig.set({
         ...adminConfig,
-        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
-        allowPostUpgradeCommandTemplating: true,
+        allowedCommands: ['^echo {{{versioning}}}$'],
+        allowCommandTemplating: true,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1668,7 +1668,7 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: null,
       });
       const errorMessage = expect.stringContaining(
-        "Post-upgrade command 'disallowed task' has not been added to the allowed list in allowedPostUpgradeCommand",
+        "Post-upgrade command 'disallowed task' has not been added to the allowed list in allowedCommands",
       );
       expect(platform.ensureComment).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1732,8 +1732,8 @@ describe('workers/repository/update/branch/index', () => {
 
       GlobalConfig.set({
         ...adminConfig,
-        allowedPostUpgradeCommands: ['^exit 1$'],
-        allowPostUpgradeCommandTemplating: true,
+        allowedCommands: ['^exit 1$'],
+        allowCommandTemplating: true,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1817,8 +1817,8 @@ describe('workers/repository/update/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       GlobalConfig.set({
         ...adminConfig,
-        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
-        allowPostUpgradeCommandTemplating: false,
+        allowedCommands: ['^echo {{{versioning}}}$'],
+        allowCommandTemplating: false,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1919,8 +1919,8 @@ describe('workers/repository/update/branch/index', () => {
 
       GlobalConfig.set({
         ...adminConfig,
-        allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
-        allowPostUpgradeCommandTemplating: true,
+        allowedCommands: ['^echo {{{depName}}}$'],
+        allowCommandTemplating: true,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -2069,8 +2069,8 @@ describe('workers/repository/update/branch/index', () => {
 
       GlobalConfig.set({
         ...adminConfig,
-        allowedPostUpgradeCommands: ['^echo hardcoded-string$'],
-        allowPostUpgradeCommandTemplating: true,
+        allowedCommands: ['^echo hardcoded-string$'],
+        allowCommandTemplating: true,
         trustLevel: 'high',
         localDir: '/localDir',
       });

@@ -219,7 +219,7 @@ export const Json5 = z.string().transform((str, ctx): JsonValue => {
 
 export const Jsonc = z.string().transform((str, ctx): JsonValue => {
   const errors: JSONC.ParseError[] = [];
-  const value = JSONC.parse(str, errors);
+  const value = JSONC.parse(str, errors, { allowTrailingComma: true });
   if (errors.length === 0) {
     return value;
   }

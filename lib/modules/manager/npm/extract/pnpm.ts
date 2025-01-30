@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
 import upath from 'upath';
+import type { z } from 'zod';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import {
@@ -10,10 +11,17 @@ import {
   readLocalFile,
 } from '../../../../util/fs';
 import { parseSingleYaml } from '../../../../util/yaml';
-import type { PackageFile } from '../../types';
+import type {
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../../types';
 import type { PnpmDependencySchema, PnpmLockFile } from '../post-update/types';
+import type { PnpmCatalogsSchema } from '../schema';
+import { PnpmWorkspaceFileSchema } from '../schema';
 import type { NpmManagerData } from '../types';
-import type { LockFile, PnpmWorkspaceFile } from './types';
+import { extractDependency, parseDepName } from './common/dependency';
+import type { LockFile, PnpmCatalog, PnpmWorkspaceFile } from './types';
 
 function isPnpmLockfile(obj: any): obj is PnpmLockFile {
   return is.plainObject(obj) && 'lockfileVersion' in obj;
@@ -87,7 +95,7 @@ export async function detectPnpmWorkspaces(
 
   for (const p of packageFiles) {
     const { packageFile, managerData } = p;
-    const { pnpmShrinkwrap } = managerData as NpmManagerData;
+    const pnpmShrinkwrap = managerData?.pnpmShrinkwrap;
 
     // check if pnpmShrinkwrap-file has already been provided
     if (pnpmShrinkwrap) {
@@ -160,15 +168,37 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
       : parseFloat(lockParsed.lockfileVersion);
 
     const lockedVersions = getLockedVersions(lockParsed);
+    const lockedCatalogVersions = getLockedCatalogVersions(lockParsed);
 
     return {
       lockedVersionsWithPath: lockedVersions,
+      lockedVersionsWithCatalog: lockedCatalogVersions,
       lockfileVersion,
     };
   } catch (err) {
     logger.debug({ filePath, err }, 'Warning: Exception parsing pnpm lockfile');
     return { lockedVersions: {} };
   }
+}
+
+function getLockedCatalogVersions(
+  lockParsed: PnpmLockFile,
+): Record<string, Record<string, string>> {
+  const lockedVersions: Record<string, Record<string, string>> = {};
+
+  if (is.nonEmptyObject(lockParsed.catalogs)) {
+    for (const [catalog, dependencies] of Object.entries(lockParsed.catalogs)) {
+      const versions: Record<string, string> = {};
+
+      for (const [dep, versionCarrier] of Object.entries(dependencies)) {
+        versions[dep] = versionCarrier.version;
+      }
+
+      lockedVersions[catalog] = versions;
+    }
+  }
+
+  return lockedVersions;
 }
 
 function getLockedVersions(
@@ -221,4 +251,102 @@ function getLockedDependencyVersions(
   }
 
   return res;
+}
+
+export function tryParsePnpmWorkspaceYaml(content: string):
+  | {
+      success: true;
+      data: PnpmWorkspaceFile;
+    }
+  | { success: false; data?: never } {
+  try {
+    const data = parseSingleYaml(content, {
+      customSchema: PnpmWorkspaceFileSchema,
+    });
+    return { success: true, data };
+  } catch {
+    return { success: false };
+  }
+}
+
+type PnpmCatalogs = z.TypeOf<typeof PnpmCatalogsSchema>;
+
+export async function extractPnpmWorkspaceFile(
+  catalogs: PnpmCatalogs,
+  packageFile: string,
+): Promise<PackageFileContent<NpmManagerData> | null> {
+  logger.trace(`pnpm.extractPnpmWorkspaceFile(${packageFile})`);
+
+  const pnpmCatalogs = pnpmCatalogsToArray(catalogs);
+
+  const deps = extractPnpmCatalogDeps(pnpmCatalogs);
+
+  let pnpmShrinkwrap;
+  const filePath = getSiblingFileName(packageFile, 'pnpm-lock.yaml');
+
+  if (await readLocalFile(filePath, 'utf8')) {
+    pnpmShrinkwrap = filePath;
+  }
+
+  return {
+    deps,
+    managerData: {
+      pnpmShrinkwrap,
+    },
+  };
+}
+
+/**
+ * In order to facilitate matching on specific catalogs, we structure the
+ * depType as `pnpm.catalog.default`, `pnpm.catalog.react17`, and so on.
+ */
+function getCatalogDepType(name: string): string {
+  const CATALOG_DEPENDENCY = 'pnpm.catalog';
+  return `${CATALOG_DEPENDENCY}.${name}`;
+}
+
+function extractPnpmCatalogDeps(
+  catalogs: PnpmCatalog[],
+): PackageDependency<NpmManagerData>[] {
+  const deps: PackageDependency<NpmManagerData>[] = [];
+
+  for (const catalog of catalogs) {
+    for (const [key, val] of Object.entries(catalog.dependencies)) {
+      const depType = getCatalogDepType(catalog.name);
+      const depName = parseDepName(depType, key);
+      const dep: PackageDependency<NpmManagerData> = {
+        depType,
+        depName,
+        ...extractDependency(depType, depName, val!),
+        prettyDepType: depType,
+      };
+      deps.push(dep);
+    }
+  }
+
+  return deps;
+}
+
+function pnpmCatalogsToArray({
+  catalog: defaultCatalogDeps,
+  catalogs: namedCatalogs,
+}: PnpmCatalogs): PnpmCatalog[] {
+  const result: PnpmCatalog[] = [];
+
+  if (defaultCatalogDeps !== undefined) {
+    result.push({ name: 'default', dependencies: defaultCatalogDeps });
+  }
+
+  if (!namedCatalogs) {
+    return result;
+  }
+
+  for (const [name, dependencies] of Object.entries(namedCatalogs)) {
+    result.push({
+      name,
+      dependencies,
+    });
+  }
+
+  return result;
 }
