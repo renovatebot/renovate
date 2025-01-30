@@ -55,7 +55,7 @@ export async function updateArtifacts({
       lockFileName = parentLockFileName;
       isUmbrella = true;
     } else {
-      const lockFileError = await lockFileReadError(lockFileName);
+      const lockFileError = await lockFileReadError(parentLockFileName);
       if (lockFileError) {
         return lockFileError;
       }

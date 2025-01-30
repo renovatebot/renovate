@@ -517,4 +517,28 @@ describe('modules/manager/mix/artifacts', () => {
       },
     ]);
   });
+
+  it('detects read errors (umbrella)', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('apps/foo/mix.lock');
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.localPathExists.mockResolvedValueOnce(false);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.localPathExists.mockResolvedValueOnce(true);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'apps/foo/mix.exs',
+        updatedDeps: [{ depName: 'plug' }],
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      {
+        artifactError: {
+          lockFile: 'mix.lock',
+          stderr: 'Error reading mix.lock',
+        },
+      },
+    ]);
+  });
 });
