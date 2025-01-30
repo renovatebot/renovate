@@ -545,6 +545,7 @@
     "surveyjs": "https://github.com/surveyjs/surveyjs",
     "swashbuckle-aspnetcore": "https://github.com/domaindrivendev/Swashbuckle.AspNetCore",
     "system.io.abstractions": "https://github.com/System-IO-Abstractions/System.IO.Abstractions/",
+    "tailwindcss": "https://github.com/tailwindlabs/tailwindcss",
     "tamagui": "https://github.com/tamagui/tamagui",
     "tanstack-form": "https://github.com/TanStack/form",
     "tanstack-query": "https://github.com/TanStack/query",
