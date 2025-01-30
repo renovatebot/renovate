@@ -2,7 +2,7 @@ AWS versioning syntax is used for EKS Addon updates.
 
 It is based off [Semantic Versioning 2.0](https://semver.org) but with a subset of addon `build metadata` syntax.
 
-At the moment every ESK Addon that matches the regex `^[v]?(\d+(?:\.\d+)*)(-eksbuild\.\d+)$` is considered a valid "release".
+At the moment every ESK Addon that matches the regex `^v?\d+\.\d+\.\d+-eksbuild\.\d+$` is considered a valid "release".
 
 **Key Points about EKS Addon Versioning**
 
