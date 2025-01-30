@@ -427,7 +427,7 @@ describe('modules/datasource/crate/index', () => {
 
       expect(res).toEqual({
         version: '4.5.17',
-        releaseTimestamp: '2024-09-04T19:16:41.355243+00:00',
+        releaseTimestamp: '2024-09-04T19:16:41.355Z',
       });
     });
   });

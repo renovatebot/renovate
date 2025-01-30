@@ -2,6 +2,7 @@ import { mockDeep } from 'jest-mock-extended';
 import { Fixtures } from '../../../../test/fixtures';
 import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
+import { PypiDatasource } from '../../datasource/pypi';
 import { extractPackageFile } from '.';
 
 jest.mock('../../../util/host-rules', () => mockDeep());
@@ -81,6 +82,14 @@ describe('modules/manager/pre-commit/extract', () => {
       expect(result).toMatchSnapshot({
         deps: [
           { depName: 'pre-commit/pre-commit-hooks', currentValue: 'v3.3.0' },
+          {
+            currentValue: '==1.1.1',
+            currentVersion: '1.1.1',
+            datasource: PypiDatasource.id,
+            depName: 'request',
+            depType: 'pre-commit-python',
+            packageName: 'request',
+          },
           { depName: 'psf/black', currentValue: '19.3b0' },
           { depName: 'psf/black', currentValue: '19.3b0' },
           { depName: 'psf/black', currentValue: '19.3b0' },
@@ -96,6 +105,7 @@ describe('modules/manager/pre-commit/extract', () => {
           },
           { depName: 'prettier/pre-commit', currentValue: 'v2.1.2' },
           { depName: 'prettier/pre-commit', currentValue: 'v2.1.2' },
+          { depName: 'pre-commit/pre-commit-hooks', currentValue: 'v5.0.0' },
           { skipReason: 'invalid-url' },
         ],
       });

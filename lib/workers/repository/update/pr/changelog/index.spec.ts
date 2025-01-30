@@ -4,6 +4,7 @@ import { GlobalConfig } from '../../../../../config/global';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as githubGraphql from '../../../../../util/github/graphql';
 import * as hostRules from '../../../../../util/host-rules';
+import type { Timestamp } from '../../../../../util/timestamp';
 import type { BranchConfig } from '../../../../types';
 import * as releases from './releases';
 import { getChangeLogJSON } from '.';
@@ -29,10 +30,13 @@ const upgrade = partial<BranchConfig>({
     {
       version: '2.3.0',
       gitRef: 'npm_2.3.0',
-      releaseTimestamp: '2017-10-24T03:20:46.238Z',
+      releaseTimestamp: '2017-10-24T03:20:46.238Z' as Timestamp,
     },
     { version: '2.2.2', gitRef: 'npm_2.2.2' },
-    { version: '2.4.2', releaseTimestamp: '2017-12-24T03:20:46.238Z' },
+    {
+      version: '2.4.2',
+      releaseTimestamp: '2017-12-24T03:20:46.238Z' as Timestamp,
+    },
     { version: '2.5.2' },
   ],
 });

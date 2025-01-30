@@ -3,6 +3,7 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import type { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import type { ReleaseResult } from '../types';
 import { massageUrl, removeBuildMeta } from './common';
 
@@ -32,7 +33,9 @@ export class NugetV2Api {
 
       for (const pkgInfo of pkgInfoList) {
         const version = this.getPkgProp(pkgInfo, 'Version');
-        const releaseTimestamp = this.getPkgProp(pkgInfo, 'Published');
+        const releaseTimestamp = asTimestamp(
+          this.getPkgProp(pkgInfo, 'Published'),
+        );
         dep.releases.push({
           // TODO: types (#22198)
           version: removeBuildMeta(`${version}`),

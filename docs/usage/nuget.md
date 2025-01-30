@@ -47,13 +47,16 @@ You can set alternative feeds:
 
 ```json
 {
-  "nuget": {
-    "registryUrls": [
-      "https://api.nuget.org/v3/index.json",
-      "https://example1.com/nuget/",
-      "https://example2.com/nuget/v3/index.json"
-    ]
-  }
+  "packageRules": [
+    {
+      "matchDatasources": ["nuget"],
+      "registryUrls": [
+        "https://api.nuget.org/v3/index.json",
+        "https://example1.com/nuget/",
+        "https://example2.com/nuget/v3/index.json"
+      ]
+    }
+  ]
 }
 ```
 
@@ -93,9 +96,12 @@ If a `v3` feed URL does not end with `index.json`, you must specify the version 
 
   ```json
   {
-    "nuget": {
-      "registryUrls": ["http://myV3feed#protocolVersion=3"]
-    }
+    "packageRules": [
+      {
+        "matchDatasources": ["nuget"],
+        "registryUrls": ["https://example1.com/nuget/#protocolVersion=3"]
+      }
+    ]
   }
   ```
 

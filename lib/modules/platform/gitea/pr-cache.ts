@@ -1,5 +1,7 @@
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
+import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
 import type { GiteaHttp } from '../../../util/http/gitea';
@@ -11,6 +13,7 @@ import { API_PATH, toRenovatePR } from './utils';
 
 export class GiteaPrCache {
   private cache: GiteaPrCacheData;
+  private items: Pr[] = [];
 
   private constructor(
     private repo: string,
@@ -31,6 +34,7 @@ export class GiteaPrCache {
     }
     repoCache.platform.gitea.pullRequestsCache = pullRequestCache;
     this.cache = pullRequestCache;
+    this.updateItems();
   }
 
   static forceSync(): void {
@@ -54,7 +58,7 @@ export class GiteaPrCache {
   }
 
   private getPrs(): Pr[] {
-    return Object.values(this.cache.items);
+    return this.items;
   }
 
   static async getPrs(
@@ -68,6 +72,7 @@ export class GiteaPrCache {
 
   private setPr(item: Pr): void {
     this.cache.items[item.number] = item;
+    this.updateItems();
   }
 
   static async setPr(
@@ -80,7 +85,7 @@ export class GiteaPrCache {
     prCache.setPr(item);
   }
 
-  private reconcile(rawItems: PR[]): boolean {
+  private reconcile(rawItems: (PR | null)[]): boolean {
     const { items } = this.cache;
     let { updated_at } = this.cache;
     const cacheTime = updated_at ? DateTime.fromISO(updated_at) : null;
@@ -88,6 +93,12 @@ export class GiteaPrCache {
     let needNextPage = true;
 
     for (const rawItem of rawItems) {
+      if (!rawItem) {
+        logger.warn('Gitea PR is empty, throwing temporary error');
+        // Gitea API sometimes returns empty PRs, so we throw a temporary error
+        // https://github.com/go-gitea/gitea/blob/fcd096231ac2deaefbca10a7db1b9b01f1da93d7/services/convert/pull.go#L34-L52
+        throw new Error(TEMPORARY_ERROR);
+      }
       const id = rawItem.number;
 
       const newItem = toRenovatePR(rawItem, this.author);
@@ -124,10 +135,14 @@ export class GiteaPrCache {
       `${API_PATH}/repos/${this.repo}/pulls?${query}`;
 
     while (url) {
-      const res: HttpResponse<PR[]> = await http.getJson<PR[]>(url, {
-        memCache: false,
-        paginate: false,
-      });
+      // TODO: use zod, typescript can't infer the type of the response #22198
+      const res: HttpResponse<(PR | null)[]> = await http.getJsonUnchecked(
+        url,
+        {
+          memCache: false,
+          paginate: false,
+        },
+      );
 
       const needNextPage = this.reconcile(res.body);
       if (!needNextPage) {
@@ -137,6 +152,16 @@ export class GiteaPrCache {
       url = parseLinkHeader(res.headers.link)?.next?.url;
     }
 
+    this.updateItems();
+
     return this;
+  }
+
+  /**
+   * Ensure the pr cache starts with the most recent PRs.
+   * JavaScript ensures that the cache is sorted by PR number.
+   */
+  private updateItems(): void {
+    this.items = Object.values(this.cache.items).reverse();
   }
 }

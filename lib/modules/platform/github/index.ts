@@ -251,7 +251,7 @@ export async function initPlatform({
 async function fetchRepositories(): Promise<GhRestRepo[]> {
   try {
     if (isGHApp()) {
-      const res = await githubApi.getJson<{
+      const res = await githubApi.getJsonUnchecked<{
         repositories: GhRestRepo[];
       }>(`installation/repositories?per_page=100`, {
         paginationField: 'repositories',
@@ -259,7 +259,7 @@ async function fetchRepositories(): Promise<GhRestRepo[]> {
       });
       return res.body.repositories;
     } else {
-      const res = await githubApi.getJson<GhRestRepo[]>(
+      const res = await githubApi.getJsonUnchecked<GhRestRepo[]>(
         `user/repos?per_page=100`,
         { paginate: 'all' },
       );
@@ -313,7 +313,7 @@ async function getBranchProtection(
   if (config.parentRepo) {
     return {};
   }
-  const res = await githubApi.getJson<BranchProtection>(
+  const res = await githubApi.getJsonUnchecked<BranchProtection>(
     `repos/${config.repository}/branches/${escapeHash(branchName)}/protection`,
     { cacheProvider: repoCacheProvider },
   );
@@ -338,7 +338,10 @@ export async function getRawFile(
   if (branchOrTag) {
     url += `?ref=` + branchOrTag;
   }
-  const res = await githubApi.getJson<{ content: string }>(url, httpOptions);
+  const res = await githubApi.getJsonUnchecked<{ content: string }>(
+    url,
+    httpOptions,
+  );
   const buf = res.body.content;
   const str = fromBase64(buf);
   return str;
@@ -361,7 +364,7 @@ export async function listForks(
     // Get list of existing repos
     const url = `repos/${repository}/forks?per_page=100`;
     const repos = (
-      await githubApi.getJson<GhRestRepo[]>(url, {
+      await githubApi.getJsonUnchecked<GhRestRepo[]>(url, {
         token,
         paginate: true,
         pageLimit: 100,
@@ -792,7 +795,7 @@ function cachePr(pr?: GhPr | null): void {
 // Fetch fresh Pull Request and cache it when possible
 async function fetchPr(prNo: number): Promise<GhPr | null> {
   try {
-    const { body: ghRestPr } = await githubApi.getJson<GhRestPr>(
+    const { body: ghRestPr } = await githubApi.getJsonUnchecked<GhRestPr>(
       `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}`,
     );
     const result = coerceRestPr(ghRestPr);
@@ -855,9 +858,10 @@ export async function findPr({
 
   if (includeOtherAuthors) {
     const repo = config.parentRepo ?? config.repository;
+    const org = repo?.split('/')[0];
     // PR might have been created by anyone, so don't use the cached Renovate PR list
-    const { body: prList } = await githubApi.getJson<GhRestPr[]>(
-      `repos/${repo}/pulls?head=${repo}:${branchName}&state=open`,
+    const { body: prList } = await githubApi.getJsonUnchecked<GhRestPr[]>(
+      `repos/${repo}/pulls?head=${org}:${branchName}&state=open`,
       { cacheProvider: repoCacheProvider },
     );
 
@@ -995,10 +999,11 @@ async function getStatus(
   const branch = escapeHash(branchName);
   const url = `repos/${config.repository}/commits/${branch}/status`;
 
-  const { body: status } = await githubApi.getJson<CombinedBranchStatus>(url, {
-    memCache: useCache,
-    cacheProvider: repoCacheProvider,
-  });
+  const { body: status } =
+    await githubApi.getJsonUnchecked<CombinedBranchStatus>(url, {
+      memCache: useCache,
+      cacheProvider: repoCacheProvider,
+    });
 
   return status;
 }
@@ -1052,7 +1057,7 @@ export async function getBranchStatus(
       paginationField: 'check_runs',
     };
     const checkRunsRaw = (
-      await githubApi.getJson<{
+      await githubApi.getJsonUnchecked<{
         check_runs: { name: string; status: string; conclusion: string }[];
       }>(checkRunsUrl, opts)
     ).body;
@@ -1115,7 +1120,9 @@ async function getStatusCheck(
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
 
   return (
-    await githubApi.getJson<GhBranchStatus[]>(url, { memCache: useCache })
+    await githubApi.getJsonUnchecked<GhBranchStatus[]>(url, {
+      memCache: useCache,
+    })
   ).body;
 }
 
@@ -1230,7 +1237,6 @@ export async function getIssueList(): Promise<Issue[]> {
 }
 
 export async function getIssue(number: number): Promise<Issue | null> {
-  // istanbul ignore if
   if (config.hasIssuesEnabled === false) {
     return null;
   }
@@ -1245,8 +1251,12 @@ export async function getIssue(number: number): Promise<Issue | null> {
     );
     GithubIssueCache.updateIssue(issue);
     return issue;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     logger.debug({ err, number }, 'Error getting issue');
+    if (err.response?.statusCode === 410) {
+      logger.debug(`Issue #${number} has been deleted`);
+      GithubIssueCache.deleteIssue(number);
+    }
     return null;
   }
 }
@@ -1543,10 +1553,13 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   const repo = config.parentRepo ?? config.repository;
   const url = `repos/${repo}/issues/${issueNo}/comments?per_page=100`;
   try {
-    const { body: comments } = await githubApi.getJson<Comment[]>(url, {
-      paginate: true,
-      cacheProvider: repoCacheProvider,
-    });
+    const { body: comments } = await githubApi.getJsonUnchecked<Comment[]>(
+      url,
+      {
+        paginate: true,
+        cacheProvider: repoCacheProvider,
+      },
+    );
     logger.debug(`Found ${comments.length} comments`);
     return comments;
   } catch (err) /* istanbul ignore next */ {

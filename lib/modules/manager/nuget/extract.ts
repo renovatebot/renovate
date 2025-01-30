@@ -1,9 +1,8 @@
 import is from '@sindresorhus/is';
-import type { XmlElement, XmlNode } from 'xmldoc';
-import { XmlDocument } from 'xmldoc';
+import type { XmlNode } from 'xmldoc';
+import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
-import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
 import { getDep } from '../dockerfile/extract';
@@ -28,7 +27,7 @@ import { applyRegistries, findVersion, getConfiguredRegistries } from './util';
  * so we don't include it in the extracting regexp
  */
 const checkVersion = regEx(
-  `^\\s*(?:[[])?(?:(?<currentValue>[^"(,[\\]]+)\\s*(?:,\\s*[)\\]]|])?)\\s*$`,
+  /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/,
 );
 const elemNames = new Set([
   'PackageReference',
@@ -37,12 +36,13 @@ const elemNames = new Set([
   'GlobalPackageReference',
 ]);
 
-function isXmlElem(node: XmlNode): boolean {
-  return hasKey('name', node);
+function isXmlElem(node: XmlNode): node is XmlElement {
+  return node instanceof XmlElement;
 }
 
 function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
   const results: NugetPackageDependency[] = [];
+  const vars = new Map<string, string>();
   const todo: XmlElement[] = [xmlNode];
   while (todo.length) {
     const child = todo.pop()!;
@@ -54,27 +54,58 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
       if (is.nonEmptyStringAndNotWhitespace(depName)) {
         results.push({ ...dep, depName, depType: 'docker' });
       }
-    }
-
-    if (elemNames.has(name)) {
+    } else if (elemNames.has(name)) {
       const depName = attr?.Include || attr?.Update;
-      const version =
+
+      if (!depName) {
+        continue;
+      }
+
+      const dep: NugetPackageDependency = {
+        datasource: NugetDatasource.id,
+        depType: 'nuget',
+        depName,
+      };
+
+      let currentValue: string | undefined =
         attr?.Version ??
         attr?.version ??
         child.valueWithPath('Version') ??
         attr?.VersionOverride ??
         child.valueWithPath('VersionOverride');
-      const currentValue = is.nonEmptyStringAndNotWhitespace(version)
-        ? checkVersion.exec(version)?.groups?.currentValue?.trim()
-        : undefined;
-      if (depName && currentValue) {
-        results.push({
-          datasource: NugetDatasource.id,
-          depType: 'nuget',
-          depName,
-          currentValue,
-        });
+
+      if (!is.nonEmptyStringAndNotWhitespace(currentValue)) {
+        dep.skipReason = 'invalid-version';
       }
+
+      let sharedVariableName: string | undefined;
+
+      currentValue = currentValue
+        ?.trim()
+        ?.replace(/^\$\((\w+)\)$/, (match, key) => {
+          const val = vars.get(key);
+          if (val) {
+            sharedVariableName = key;
+            return val;
+          }
+          return match;
+        });
+
+      if (sharedVariableName) {
+        dep.sharedVariableName = sharedVariableName;
+      }
+
+      currentValue = checkVersion
+        .exec(currentValue)
+        ?.groups?.currentValue?.trim();
+
+      if (currentValue) {
+        dep.currentValue = currentValue;
+      } else {
+        dep.skipReason = 'invalid-version';
+      }
+
+      results.push(dep);
     } else if (name === 'Sdk') {
       const depName = attr?.Name;
       const version = attr?.Version;
@@ -101,8 +132,21 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
             });
           }
         }
+
+        const propertyGroup = child.childNamed('PropertyGroup');
+        if (propertyGroup) {
+          for (const propChild of propertyGroup.children) {
+            if (isXmlElem(propChild)) {
+              const { name, val } = propChild;
+              if (!['Version', 'TargetFramework'].includes(name)) {
+                vars.set(name, val);
+              }
+            }
+          }
+        }
       }
-      todo.push(...(child.children.filter(isXmlElem) as XmlElement[]));
+
+      todo.push(...child.children.filter(isXmlElem));
     }
   }
   return results;

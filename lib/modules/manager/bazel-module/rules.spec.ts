@@ -10,6 +10,7 @@ import type {
   OverridePackageDep,
 } from './rules';
 import {
+  GitRepositoryToPackageDep,
   RuleToBazelModulePackageDep,
   bazelModulePackageDepToPackageDependency,
   processModulePkgDeps,
@@ -23,6 +24,13 @@ const bazelDepPkgDep: BasePackageDep = {
   depType: 'bazel_dep',
   depName: 'rules_foo',
   currentValue: '1.2.3',
+};
+const bazelDepPkgDepNoVersion: BasePackageDep = {
+  datasource: BazelDatasource.id,
+  depType: 'bazel_dep',
+  depName: 'rules_foo',
+  currentValue: undefined,
+  skipReason: 'unspecified-version',
 };
 const gitOverrideForGithubPkgDep: OverridePackageDep = {
   datasource: GithubTagsDatasource.id,
@@ -72,6 +80,19 @@ const singleVersionOverrideWithoutVersionAndRegistryPkgDep: BasePackageDep = {
   depName: 'rules_foo',
   skipReason: 'ignored',
 };
+const gitRepositoryForGithubPkgDep: BasePackageDep = {
+  datasource: GithubTagsDatasource.id,
+  depType: 'git_repository',
+  depName: 'rules_foo',
+  packageName: 'example/rules_foo',
+  currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
+};
+const gitRepositoryForUnsupportedPkgDep: BasePackageDep = {
+  depType: 'git_repository',
+  depName: 'rules_foo',
+  currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
+  skipReason: 'unsupported-datasource',
+};
 
 describe('modules/manager/bazel-module/rules', () => {
   describe('RuleToBazelModulePackageDep', () => {
@@ -79,6 +100,10 @@ describe('modules/manager/bazel-module/rules', () => {
       rule: fragments.string('bazel_dep'),
       name: fragments.string('rules_foo'),
       version: fragments.string('1.2.3'),
+    });
+    const bazelDepWithoutDevDepNoVersion = fragments.record({
+      rule: fragments.string('bazel_dep'),
+      name: fragments.string('rules_foo'),
     });
     const gitOverrideWithGihubHost = fragments.record({
       rule: fragments.string('git_override'),
@@ -117,6 +142,7 @@ describe('modules/manager/bazel-module/rules', () => {
     it.each`
       msg                                                    | a                                    | exp
       ${'bazel_dep'}                                         | ${bazelDepWithoutDevDep}             | ${bazelDepPkgDep}
+      ${'bazel_dep, no version'}                             | ${bazelDepWithoutDevDepNoVersion}    | ${bazelDepPkgDepNoVersion}
       ${'git_override, GitHub host'}                         | ${gitOverrideWithGihubHost}          | ${gitOverrideForGithubPkgDep}
       ${'git_override, unsupported host'}                    | ${gitOverrideWithUnsupportedHost}    | ${gitOverrideForUnsupportedPkgDep}
       ${'archive_override'}                                  | ${archiveOverride}                   | ${archiveOverridePkgDep}
@@ -129,10 +155,41 @@ describe('modules/manager/bazel-module/rules', () => {
     });
   });
 
+  describe('GitRepositoryToPackageDep', () => {
+    const gitRepositoryWithGihubHost = fragments.record({
+      rule: fragments.string('git_repository'),
+      name: fragments.string('rules_foo'),
+      remote: fragments.string('https://github.com/example/rules_foo.git'),
+      commit: fragments.string('850cb49c8649e463b80ef7984e7c744279746170'),
+    });
+    const gitRepositoryWithUnsupportedHost = fragments.record({
+      rule: fragments.string('git_repository'),
+      name: fragments.string('rules_foo'),
+      remote: fragments.string('https://nobuenos.com/example/rules_foo.git'),
+      commit: fragments.string('850cb49c8649e463b80ef7984e7c744279746170'),
+    });
+
+    it.each`
+      msg                                   | a                                   | exp
+      ${'git_repository, GitHub host'}      | ${gitRepositoryWithGihubHost}       | ${gitRepositoryForGithubPkgDep}
+      ${'git_repository, unsupported host'} | ${gitRepositoryWithUnsupportedHost} | ${gitRepositoryForUnsupportedPkgDep}
+    `('.parse() with $msg', ({ a, exp }) => {
+      const pkgDep = GitRepositoryToPackageDep.parse(a);
+      expect(pkgDep).toEqual(exp);
+    });
+  });
+
   describe('.toPackageDependencies()', () => {
     const expectedBazelDepNoOverrides: PackageDependency[] = [bazelDepPkgDep];
+    const expectedBazelDepNoOverridesNoVersion: PackageDependency[] = [
+      bazelDepPkgDepNoVersion,
+    ];
     const expectedBazelDepAndGitOverride: PackageDependency[] = [
       deepmerge(bazelDepPkgDep, { skipReason: 'git-dependency' }),
+      bazelModulePackageDepToPackageDependency(gitOverrideForGithubPkgDep),
+    ];
+    const expectedBazelDepNoVersionAndGitOverride: PackageDependency[] = [
+      deepmerge(bazelDepPkgDepNoVersion, { skipReason: 'git-dependency' }),
       bazelModulePackageDepToPackageDependency(gitOverrideForGithubPkgDep),
     ];
     const expectedBazelDepAndSingleVersionOverride: PackageDependency[] = [
@@ -142,12 +199,28 @@ describe('modules/manager/bazel-module/rules', () => {
       }),
       bazelModulePackageDepToPackageDependency(singleVersionOverridePkgDep),
     ];
+    const expectedBazelDepNoVersionAndSingleVersionOverride: PackageDependency[] =
+      [
+        deepmerge(bazelDepPkgDepNoVersion, {
+          skipReason: 'is-pinned',
+          registryUrls: [customRegistryUrl],
+        }),
+        bazelModulePackageDepToPackageDependency(singleVersionOverridePkgDep),
+      ];
     const expectedBazelDepAndArchiveOverride: PackageDependency[] = [
       deepmerge(bazelDepPkgDep, { skipReason: 'file-dependency' }),
       bazelModulePackageDepToPackageDependency(archiveOverridePkgDep),
     ];
+    const expectedBazelDepNoVersionAndArchiveOverride: PackageDependency[] = [
+      deepmerge(bazelDepPkgDepNoVersion, { skipReason: 'file-dependency' }),
+      bazelModulePackageDepToPackageDependency(archiveOverridePkgDep),
+    ];
     const expectedBazelDepAndLocalPathOverride: PackageDependency[] = [
       deepmerge(bazelDepPkgDep, { skipReason: 'local-dependency' }),
+      bazelModulePackageDepToPackageDependency(localPathOverridePkgDep),
+    ];
+    const expectedBazelDepNoVersionAndLocalPathOverride: PackageDependency[] = [
+      deepmerge(bazelDepPkgDepNoVersion, { skipReason: 'local-dependency' }),
       bazelModulePackageDepToPackageDependency(localPathOverridePkgDep),
     ];
     // If a registry is specified and a version is not specified for a
@@ -155,17 +228,27 @@ describe('modules/manager/bazel-module/rules', () => {
     const expectedBazelDepWithRegistry: PackageDependency[] = [
       deepmerge(bazelDepPkgDep, { registryUrls: [customRegistryUrl] }),
     ];
+    const expectedBazelDepNoVersionWithRegistry: PackageDependency[] = [
+      deepmerge(bazelDepPkgDepNoVersion, { registryUrls: [customRegistryUrl] }),
+    ];
 
     it.each`
-      msg                                                        | a                                                                         | exp
-      ${'bazel_dep, no overrides'}                               | ${[bazelDepPkgDep]}                                                       | ${expectedBazelDepNoOverrides}
-      ${'bazel_dep & git_override'}                              | ${[bazelDepPkgDep, gitOverrideForGithubPkgDep]}                           | ${expectedBazelDepAndGitOverride}
-      ${'git_override, no bazel_dep'}                            | ${[gitOverrideForGithubPkgDep]}                                           | ${[]}
-      ${'bazel_dep & archive_override'}                          | ${[bazelDepPkgDep, archiveOverridePkgDep]}                                | ${expectedBazelDepAndArchiveOverride}
-      ${'bazel_dep & local_path_override'}                       | ${[bazelDepPkgDep, localPathOverridePkgDep]}                              | ${expectedBazelDepAndLocalPathOverride}
-      ${'single_version_override, with version and registry'}    | ${[bazelDepPkgDep, singleVersionOverridePkgDep]}                          | ${expectedBazelDepAndSingleVersionOverride}
-      ${'single_version_override, with registry'}                | ${[bazelDepPkgDep, singleVersionOverrideWithRegistryPkgDep]}              | ${expectedBazelDepWithRegistry}
-      ${'single_version_override, without version and registry'} | ${[bazelDepPkgDep, singleVersionOverrideWithoutVersionAndRegistryPkgDep]} | ${[bazelDepPkgDep]}
+      msg                                                                                | a                                                                                  | exp
+      ${'bazel_dep, no overrides'}                                                       | ${[bazelDepPkgDep]}                                                                | ${expectedBazelDepNoOverrides}
+      ${'bazel_dep, no overrides, no version'}                                           | ${[bazelDepPkgDepNoVersion]}                                                       | ${expectedBazelDepNoOverridesNoVersion}
+      ${'bazel_dep & git_override'}                                                      | ${[bazelDepPkgDep, gitOverrideForGithubPkgDep]}                                    | ${expectedBazelDepAndGitOverride}
+      ${'bazel_dep, no version & git_override'}                                          | ${[bazelDepPkgDepNoVersion, gitOverrideForGithubPkgDep]}                           | ${expectedBazelDepNoVersionAndGitOverride}
+      ${'git_override, no bazel_dep'}                                                    | ${[gitOverrideForGithubPkgDep]}                                                    | ${[]}
+      ${'bazel_dep & archive_override'}                                                  | ${[bazelDepPkgDep, archiveOverridePkgDep]}                                         | ${expectedBazelDepAndArchiveOverride}
+      ${'bazel_dep, no version & archive_override'}                                      | ${[bazelDepPkgDepNoVersion, archiveOverridePkgDep]}                                | ${expectedBazelDepNoVersionAndArchiveOverride}
+      ${'bazel_dep & local_path_override'}                                               | ${[bazelDepPkgDep, localPathOverridePkgDep]}                                       | ${expectedBazelDepAndLocalPathOverride}
+      ${'bazel_dep, no version & local_path_override'}                                   | ${[bazelDepPkgDepNoVersion, localPathOverridePkgDep]}                              | ${expectedBazelDepNoVersionAndLocalPathOverride}
+      ${'single_version_override, with version and registry'}                            | ${[bazelDepPkgDep, singleVersionOverridePkgDep]}                                   | ${expectedBazelDepAndSingleVersionOverride}
+      ${'bazel_dep, no version & single_version_override, with version and registry'}    | ${[bazelDepPkgDepNoVersion, singleVersionOverridePkgDep]}                          | ${expectedBazelDepNoVersionAndSingleVersionOverride}
+      ${'single_version_override, with registry'}                                        | ${[bazelDepPkgDep, singleVersionOverrideWithRegistryPkgDep]}                       | ${expectedBazelDepWithRegistry}
+      ${'bazel_dep, no version & single_version_override, with registry'}                | ${[bazelDepPkgDepNoVersion, singleVersionOverrideWithRegistryPkgDep]}              | ${expectedBazelDepNoVersionWithRegistry}
+      ${'single_version_override, without version and registry'}                         | ${[bazelDepPkgDep, singleVersionOverrideWithoutVersionAndRegistryPkgDep]}          | ${[bazelDepPkgDep]}
+      ${'bazel_dep, no version & single_version_override, without version and registry'} | ${[bazelDepPkgDepNoVersion, singleVersionOverrideWithoutVersionAndRegistryPkgDep]} | ${[bazelDepPkgDepNoVersion]}
     `('with $msg', ({ msg, a, exp }) => {
       const result = toPackageDependencies(a);
       expect(result).toEqual(exp);
