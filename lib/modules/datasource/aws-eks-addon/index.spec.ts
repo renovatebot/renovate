@@ -125,7 +125,6 @@ describe('modules/datasource/aws-eks-addon/index', () => {
         datasource,
         packageName: '{"addonName":"vpc-cni"}',
       });
-      expect(res?.releases).toHaveLength(3);
       expect(res).toEqual({
         releases: [
           {
@@ -179,7 +178,6 @@ describe('modules/datasource/aws-eks-addon/index', () => {
         addonName: 'vpc-cni',
         maxResults: 1,
       });
-      expect(res?.releases).toHaveLength(2);
       expect(res).toEqual({
         releases: [
           {

@@ -10,7 +10,7 @@ import {
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
-// import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon';
+import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { EksAddonsFilter } from './schema';
@@ -18,7 +18,7 @@ import { EksAddonsFilter } from './schema';
 export class AwsEKSAddonDataSource extends Datasource {
   static readonly id = 'aws-eks-addon';
 
-  // override readonly defaultVersioning = awsEksAddonVersioning.id;
+  override readonly defaultVersioning = awsEksAddonVersioning.id;
   override readonly caching = true;
   private readonly clients: Record<string, EKSClient> = {};
 
@@ -40,7 +40,7 @@ export class AwsEKSAddonDataSource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const res = EksAddonsFilter.safeParse(serializedFilter);
     if (!res.success) {
-      logger.error(
+      logger.warn(
         { err: res.error, serializedFilter },
         'Error parsing eks-addons config.',
       );
@@ -48,22 +48,21 @@ export class AwsEKSAddonDataSource extends Datasource {
     }
 
     const filter = res.data;
-    const input: DescribeAddonVersionsCommandInput = {
+
+    const cmd = new DescribeAddonVersionsCommand({
       kubernetesVersion: filter?.kubernetesVersion,
       addonName: filter?.addonName,
       maxResults: 1,
-    };
-
-    const cmd = new DescribeAddonVersionsCommand(input);
-    const response: DescribeAddonVersionsCommandOutput =
+    });
+    const response =
       await this.getClient(filter).send(cmd);
     const addons: AddonInfo[] = response.addons ?? [];
     return {
       releases: addons
-        .flatMap((addon: AddonInfo): AddonVersionInfo[] | undefined => {
+        .flatMap((addon) => {
           return addon.addonVersions;
         })
-        .map((versionInfo: AddonVersionInfo | undefined) => ({
+        .map((versionInfo) => ({
           version: versionInfo?.addonVersion ?? '',
           default:
             versionInfo?.compatibilities?.some(
@@ -74,7 +73,7 @@ export class AwsEKSAddonDataSource extends Datasource {
           ),
         }))
         .filter((release) => release.version && release.version !== '')
-        .filter((release): boolean => {
+        .filter((release) => {
           if (filter.default) {
             return release.default && release.default === filter.default;
           }
@@ -87,7 +86,7 @@ export class AwsEKSAddonDataSource extends Datasource {
     const cacheKey = `${region ?? 'default'}#${profile ?? 'default'}`;
     if (!(cacheKey in this.clients)) {
       this.clients[cacheKey] = new EKSClient({
-        region: region ?? undefined,
+        ...(region && { region } ),
         credentials: fromNodeProviderChain(profile ? { profile } : undefined),
       });
     }
