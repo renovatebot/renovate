@@ -1,16 +1,13 @@
 import {
   type AddonInfo,
-  type AddonVersionInfo,
   type Compatibility,
   DescribeAddonVersionsCommand,
-  type DescribeAddonVersionsCommandInput,
-  type DescribeAddonVersionsCommandOutput,
   EKSClient,
 } from '@aws-sdk/client-eks';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
-import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon';
+// import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { EksAddonsFilter } from './schema';
@@ -18,7 +15,7 @@ import { EksAddonsFilter } from './schema';
 export class AwsEKSAddonDataSource extends Datasource {
   static readonly id = 'aws-eks-addon';
 
-  override readonly defaultVersioning = awsEksAddonVersioning.id;
+  // override readonly defaultVersioning = awsEksAddonVersioning.id;
   override readonly caching = true;
   private readonly clients: Record<string, EKSClient> = {};
 
@@ -54,8 +51,7 @@ export class AwsEKSAddonDataSource extends Datasource {
       addonName: filter?.addonName,
       maxResults: 1,
     });
-    const response =
-      await this.getClient(filter).send(cmd);
+    const response = await this.getClient(filter).send(cmd);
     const addons: AddonInfo[] = response.addons ?? [];
     return {
       releases: addons
@@ -86,7 +82,7 @@ export class AwsEKSAddonDataSource extends Datasource {
     const cacheKey = `${region ?? 'default'}#${profile ?? 'default'}`;
     if (!(cacheKey in this.clients)) {
       this.clients[cacheKey] = new EKSClient({
-        ...(region && { region } ),
+        ...(region && { region }),
         credentials: fromNodeProviderChain(profile ? { profile } : undefined),
       });
     }

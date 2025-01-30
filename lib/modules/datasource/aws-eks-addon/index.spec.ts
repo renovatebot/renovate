@@ -116,7 +116,7 @@ describe('modules/datasource/aws-eks-addon/index', () => {
         packageName: '{"kubernetesVersion":"1.30"}',
       });
       expect(res).toBeNull();
-      expect(logger.logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.logger.warn).toHaveBeenCalledOnce();
     });
 
     it('with addonName only', async () => {
