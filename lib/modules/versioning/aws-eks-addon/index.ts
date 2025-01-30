@@ -3,7 +3,7 @@ import type { VersioningApi } from '../types';
 
 export const id = 'aws-eks-addon';
 export const displayName = 'aws-eks-addon';
-export const url = [];
+export const urls = [];
 export const supportsRanges = false;
 
 export class AwsEKSAddonVersioningApi extends RegExpVersioningApi {
