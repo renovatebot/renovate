@@ -516,14 +516,14 @@ describe('util/schema-utils', () => {
     it('logs trace message and returns fallback value', () => {
       const Schema = z
         .string()
-        .catch(withTraceMessage('default string', 'Debug message'));
+        .catch(withTraceMessage('default string', 'Trace message'));
 
       const result = Schema.parse(42);
 
       expect(result).toBe('default string');
       expect(logger.logger.trace).toHaveBeenCalledWith(
         { err: expect.any(z.ZodError) },
-        'Debug message',
+        'Trace message',
       );
     });
   });
