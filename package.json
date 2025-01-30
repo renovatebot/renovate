@@ -301,7 +301,7 @@
     "@types/mdast": "3.0.15",
     "@types/moo": "0.5.10",
     "@types/ms": "0.7.34",
-    "@types/node": "22.10.7",
+    "@types/node": "22.10.9",
     "@types/parse-link-header": "2.0.3",
     "@types/punycode": "2.1.4",
     "@types/semver": "7.5.8",

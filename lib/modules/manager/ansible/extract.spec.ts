@@ -41,10 +41,9 @@ describe('modules/manager/ansible/extract', () => {
             currentDigest: undefined,
             currentValue: '0.0.1',
             datasource: 'docker',
-            depName: 'my-quay-mirror.registry.com/redis',
+            depName: 'quay.io/redis',
             packageName: 'my-quay-mirror.registry.com/redis',
             replaceString: 'quay.io/redis:0.0.1',
-            versioning: 'docker',
           },
         ],
       });
@@ -75,7 +74,6 @@ describe('modules/manager/ansible/extract', () => {
             depName: 'quay.io/redis',
             packageName: 'quay.io/redis',
             replaceString: 'quay.io/redis:0.0.1',
-            versioning: 'docker',
           },
         ],
       });
@@ -104,10 +102,9 @@ describe('modules/manager/ansible/extract', () => {
             currentDigest: undefined,
             currentValue: '0.0.1',
             datasource: 'docker',
-            depName: 'my-quay-mirror.registry.com/redis',
+            depName: 'quay.io/redis',
             packageName: 'my-quay-mirror.registry.com/redis',
             replaceString: 'quay.io/redis:0.0.1',
-            versioning: 'docker',
           },
         ],
       });

@@ -185,6 +185,11 @@ export function getDep(
         ...getDep(`${value}/${depName}`, false),
         replaceString: currentFrom,
       };
+      // retain depName, not sure if condition is necessary
+      if (dep.depName?.startsWith(value)) {
+        dep.packageName = dep.depName;
+        dep.depName = `${name}/${dep.depName.substring(value.length + 1)}`;
+      }
       if (specifyReplaceString) {
         dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
       }
