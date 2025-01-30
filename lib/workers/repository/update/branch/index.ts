@@ -41,6 +41,7 @@ import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { setArtifactErrorStatus } from './artifacts';
 import { tryBranchAutomerge } from './automerge';
+import { bumpVersions } from './bump-versions';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
 import executePostUpgradeCommands from './execute-post-upgrade-commands';
@@ -520,13 +521,22 @@ export async function processBranch(
         await embedChangelogs(config.upgrades);
       }
 
+      config.updatedArtifacts ??= [];
+      config.artifactErrors ??= [];
+
       const postUpgradeCommandResults =
         await executePostUpgradeCommands(config);
 
       if (postUpgradeCommandResults !== null) {
         const { updatedArtifacts, artifactErrors } = postUpgradeCommandResults;
-        config.updatedArtifacts = updatedArtifacts;
-        config.artifactErrors = artifactErrors;
+        config.updatedArtifacts.push(...updatedArtifacts);
+        config.artifactErrors.push(...artifactErrors);
+      }
+
+      const bumpVersionsResult = await bumpVersions(config);
+      if (bumpVersionsResult) {
+        config.updatedArtifacts.push(...bumpVersionsResult.updatedArtifacts);
+        config.artifactErrors.push(...bumpVersionsResult.artifactErrors);
       }
 
       removeMeta(['dep']);

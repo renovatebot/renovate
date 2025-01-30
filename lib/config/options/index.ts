@@ -125,6 +125,25 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'bumpVersions',
+    description:
+      'A list of bumpVersion config options to bump generic version numbers.',
+    type: 'array',
+    subType: 'object',
+    default: [],
+    cli: false,
+    env: false,
+    experimental: true,
+  },
+  {
+    name: 'bumpType',
+    description:
+      'The semver level to use when bumping versions. This is used by the `bumpVersions` feature.',
+    type: 'string',
+    default: 'patch',
+    parents: ['bumpVersions'],
+  },
+  {
     name: 'postUpgradeTasks',
     description:
       'Post-upgrade tasks that are executed before a commit is made by Renovate.',
@@ -2743,11 +2762,11 @@ const options: RenovateOptions[] = [
   {
     name: 'matchStrings',
     description:
-      'Regex capture rule to use. Valid only within a `customManagers` object.',
+      'Regex capture rule to use. Valid only within a `bumpVersions` or `customManagers` object.',
     type: 'array',
     subType: 'string',
     format: 'regex',
-    parents: ['customManagers'],
+    parents: ['bumpVersions', 'customManagers'],
     cli: false,
     env: false,
   },
