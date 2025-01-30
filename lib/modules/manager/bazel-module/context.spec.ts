@@ -24,6 +24,24 @@ describe('modules/manager/bazel-module/context', () => {
       ]);
     });
 
+    it('construct simple bazel_dep with no version', () => {
+      const ctx = new Ctx()
+        .startRule('bazel_dep')
+        .startAttribute('name')
+        .addString('rules_foo')
+        .endRule();
+
+      expect(ctx.results).toEqual([
+        fragments.record(
+          {
+            rule: fragments.string('bazel_dep'),
+            name: fragments.string('rules_foo'),
+          },
+          true,
+        ),
+      ]);
+    });
+
     it('construct a rule with array arg', () => {
       const ctx = new Ctx()
         .startRule('foo_library')
