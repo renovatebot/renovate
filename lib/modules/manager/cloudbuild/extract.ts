@@ -1,4 +1,5 @@
 import { logger } from '../../../logger';
+import { getDep } from '../dockerfile/extract';
 import type { PackageFileContent } from '../types';
 import { CloudbuildSteps } from './schema';
 
@@ -12,7 +13,9 @@ export function extractPackageFile(
       'Cloud Build: error extracting Docker images from a configuration file.',
     );
     return [];
-  }).parse(content);
+  })
+    .transform((steps) => steps.map((step) => getDep(step)))
+    .parse(content);
 
   if (!deps.length) {
     return null;
