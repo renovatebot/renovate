@@ -1,6 +1,8 @@
 Due to limited functionality, the `pip-compile` manager should be considered in an "alpha" stage, which means it's not ready for production use for the majority of end users.
 We welcome feedback and bug reports!
 
+The `uv pip compile` command is also supported through this manager in the same fashion as `pip-compile`.
+
 The current implementation has some limitations.
 Read the full document before you start using the `pip-compile` manager.
 
