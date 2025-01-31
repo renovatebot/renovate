@@ -374,6 +374,7 @@
     "kotlin": "https://github.com/JetBrains/kotlin",
     "kotlinx-coroutines": "https://github.com/Kotlin/kotlinx.coroutines",
     "kroki": "https://github.com/yuzutech/kroki",
+    "ksp": "https://github.com/google/ksp",
     "ktor": "https://github.com/ktorio/ktor",
     "lamar": "https://github.com/JasperFx/lamar",
     "lerna": "https://github.com/lerna/lerna",
