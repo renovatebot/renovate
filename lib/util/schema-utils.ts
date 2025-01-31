@@ -3,6 +3,7 @@ import * as JSONC from 'jsonc-parser';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
 import { type ZodEffects, type ZodType, type ZodTypeDef, z } from 'zod';
+import { logger } from '../logger';
 import type { PackageDependency } from '../modules/manager/types';
 import { parse as parseToml } from './toml';
 import { parseSingleYaml, parseYaml } from './yaml';
@@ -277,4 +278,24 @@ export function withDepType<
     }
     return deps;
   });
+}
+
+export function withDebugMessage<Input, Output>(
+  value: Output,
+  msg: string,
+): (ctx: { error: z.ZodError; input: Input }) => Output {
+  return ({ error: err }) => {
+    logger.debug({ err }, msg);
+    return value;
+  };
+}
+
+export function withTraceMessage<Input, Output>(
+  value: Output,
+  msg: string,
+): (ctx: { error: z.ZodError; input: Input }) => Output {
+  return ({ error: err }) => {
+    logger.trace({ err }, msg);
+    return value;
+  };
 }
