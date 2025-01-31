@@ -12,11 +12,11 @@ import {
   replaceContent,
 } from './utils';
 
-type Versioning = {
+interface Versioning {
   id: string;
   displayName: string;
-  urls?: string[];
-  supportsRanges?: boolean;
+  urls: string[];
+  supportsRanges: boolean;
   supportedRangeStrategies?: string[];
 };
 
