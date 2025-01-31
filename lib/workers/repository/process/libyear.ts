@@ -16,8 +16,10 @@ export function calculateLibYears(
     for (const file of files) {
       let fileLibYears = 0;
       for (const dep of file.deps) {
-        const depKey = `${dep.depName}@${dep.currentVersion ?? dep.currentValue}`;
-        allDeps.add(depKey);
+        const depKey = `${dep.depName}@${dep.currentVersion ?? dep.currentValue}@@${dep.datasource}`;
+        if (!allDeps.has(depKey)) {
+          allDeps.add(depKey);
+        }
         if (!dep.currentVersionTimestamp) {
           logger.debug(`No currentVersionTimestamp for ${dep.depName}`);
           continue;
