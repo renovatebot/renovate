@@ -172,7 +172,7 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`poetry.updateArtifacts(${packageFileName})`);
-  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+  const { isLockFileMaintenance } = config;
 
   if (!is.nonEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated poetry deps - returning null');

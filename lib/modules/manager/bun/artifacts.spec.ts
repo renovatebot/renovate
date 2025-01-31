@@ -82,7 +82,7 @@ describe('modules/manager/bun/artifacts', () => {
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lockb'] },
         ];
-        updateArtifact.config.updateType = 'lockFileMaintenance';
+        updateArtifact.config.isLockFileMaintenance = true;
         const oldLock = Buffer.from('old');
         fs.readFile.mockResolvedValueOnce(oldLock as never);
         const newLock = Buffer.from('new');
@@ -176,7 +176,7 @@ describe('modules/manager/bun/artifacts', () => {
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lock'] },
         ];
-        updateArtifact.config.updateType = 'lockFileMaintenance';
+        updateArtifact.config.isLockFileMaintenance = true;
         const oldLock = Buffer.from('old');
         fs.readFile.mockResolvedValueOnce(oldLock as never);
         const newLock = Buffer.from('new');

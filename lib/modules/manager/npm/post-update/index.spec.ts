@@ -587,7 +587,7 @@ describe('modules/manager/npm/post-update/index', () => {
             ...baseConfig,
             upgrades: [{ isLockfileUpdate: false }],
             reuseExistingBranch: true,
-            updateType: 'lockFileMaintenance',
+            isLockFileMaintenance: true,
             updateLockFiles: true,
           },
           additionalFiles,
