@@ -126,6 +126,15 @@ export function removeMeta(fields: string[]): void {
   loggerInternal.removeMeta(fields);
 }
 
+export function withMeta<T>(obj: Record<string, unknown>, cb: () => T): T {
+  setMeta(obj);
+  try {
+    return cb();
+  } finally {
+    removeMeta(Object.keys(obj));
+  }
+}
+
 export /* istanbul ignore next */ function addStream(
   stream: bunyan.Stream,
 ): void {

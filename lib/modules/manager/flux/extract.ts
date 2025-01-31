@@ -123,7 +123,7 @@ function resolveHelmRepository(
             `${removeOCIPrefix(repo.spec.url)}/${dep.depName}`,
             false,
             registryAliases,
-          ).depName;
+          ).packageName;
           return null;
         } else {
           return repo.spec.url;
