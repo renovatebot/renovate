@@ -18,7 +18,7 @@ interface Versioning {
   urls: string[];
   supportsRanges: boolean;
   supportedRangeStrategies?: string[];
-};
+}
 
 export async function generateVersioning(
   dist: string,
