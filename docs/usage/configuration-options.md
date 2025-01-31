@@ -849,7 +849,8 @@ It will be compiled using Handlebars and the regex `groups` result.
 It specifies the syntax of the package file that's managed by the custom `jsonata` manager.
 This setting helps the system correctly parse and interpret the configuration file's contents.
 
-Only the `json` format is supported.
+Only the `json` and `yaml` format is supported.
+`yaml` files are parsed as multi document YAML files.
 
 ```json title="Parsing a JSON file with a custom manager"
 {
@@ -858,6 +859,21 @@ Only the `json` format is supported.
       "customType": "jsonata",
       "fileFormat": "json",
       "fileMatch": [".renovaterc"],
+      "matchStrings": [
+        "packages.{ \"depName\": package, \"currentValue\": version }"
+      ]
+    }
+  ]
+}
+```
+
+```json title="Parsing a YAML file with a custom manager"
+{
+  "customManagers": [
+    {
+      "customType": "jsonata",
+      "fileFormat": "yaml",
+      "fileMatch": ["file.yml"],
       "matchStrings": [
         "packages.{ \"depName\": package, \"currentValue\": version }"
       ]
