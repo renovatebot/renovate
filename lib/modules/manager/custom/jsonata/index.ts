@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import type { Category } from '../../../../constants';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
+import { parseYaml } from '../../../../util/yaml';
 import type { PackageFileContent } from '../../types';
 import type { JsonataExtractConfig } from './types';
 import { handleMatching } from './utils';
@@ -24,6 +25,9 @@ export async function extractPackageFile(
     switch (config.fileFormat) {
       case 'json':
         json = parseJson(content, packageFile);
+        break;
+      case 'yaml':
+        json = parseYaml(content);
         break;
     }
   } catch (err) {
