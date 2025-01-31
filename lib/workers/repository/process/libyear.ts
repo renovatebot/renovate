@@ -72,5 +72,13 @@ export function calculateLibYears(
   for (const [, depLibYear] of depsWithUpdates) {
     totalLibYears += depLibYear;
   }
-  logger.debug({ managerLibYears, totalLibYears }, 'Repository libYears');
+  logger.debug(
+    {
+      managerLibYears,
+      totalLibYears,
+      totalDepsCount: allDeps.size,
+      outdatedDepsCount: depsWithUpdates.size,
+    },
+    'Repository libYears',
+  );
 }
