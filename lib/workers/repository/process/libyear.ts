@@ -8,11 +8,16 @@ export function calculateLibYears(
   if (!packageFiles) {
     return;
   }
+  const allDeps = new Set<string>();
+  const depsWithUpdates = new Map<string, number>();
   const managerLibYears: Record<string, number> = {};
   for (const [manager, files] of Object.entries(packageFiles)) {
+    const managerDepsWithUpdates = new Set<string>();
     for (const file of files) {
       let fileLibYears = 0;
       for (const dep of file.deps) {
+        const depKey = `${dep.depName}@${dep.currentVersion ?? dep.currentValue}`;
+        allDeps.add(depKey);
         if (!dep.currentVersionTimestamp) {
           logger.debug(`No currentVersionTimestamp for ${dep.depName}`);
           continue;
@@ -23,6 +28,9 @@ export function calculateLibYears(
         );
 
         if (dep.updates?.length) {
+          if (managerDepsWithUpdates.has(depKey)) {
+            continue;
+          }
           for (const update of dep.updates) {
             if (!update.releaseTimestamp) {
               logger.debug(
@@ -44,7 +52,15 @@ export function calculateLibYears(
             ...dep.updates.map((update) => update.libYears ?? 0),
             0,
           );
-          fileLibYears += depLibYears;
+
+          if (!managerDepsWithUpdates.has(depKey)) {
+            managerDepsWithUpdates.add(depKey);
+            fileLibYears += depLibYears;
+          }
+
+          if (!depsWithUpdates.has(depKey)) {
+            depsWithUpdates.set(depKey, depLibYears);
+          }
         }
       }
       managerLibYears[manager] ??= 0;
@@ -53,8 +69,8 @@ export function calculateLibYears(
   }
   // Sum up the libYears for the repo
   let totalLibYears = 0;
-  for (const libYears of Object.values(managerLibYears)) {
-    totalLibYears += libYears;
+  for (const [, depLibYear] of depsWithUpdates) {
+    totalLibYears += depLibYear;
   }
   logger.debug({ managerLibYears, totalLibYears }, 'Repository libYears');
 }

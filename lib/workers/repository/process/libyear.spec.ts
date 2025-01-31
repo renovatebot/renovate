@@ -104,5 +104,80 @@ describe('workers/repository/process/libyear', () => {
         'Repository libYears',
       );
     });
+
+    it('de-duplicates if same dep found in different files', () => {
+      // three package files
+      // two managers
+      // all the files has the same dep and same version
+      // expected: in total libyears only one count should be taken
+      // in manager1->libyear one count
+      // in manager2->libcount one count (even though its duplicate but this manager counted it once hence we should keep it)
+      const packageFiles = {
+        manager1: [
+          {
+            packageFile: 'file1',
+            deps: [
+              {
+                depName: 'dep1',
+                currentVersion: '0.1.0',
+                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                updates: [
+                  {
+                    newVersion: '1.0.0',
+                    releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            packageFile: 'file2',
+            deps: [
+              {
+                depName: 'dep1',
+                currentVersion: '0.1.0',
+                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                updates: [
+                  {
+                    newVersion: '1.0.0',
+                    releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        manager2: [
+          {
+            packageFile: 'file3',
+            deps: [
+              {
+                depName: 'dep1',
+                currentVersion: '0.1.0',
+                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                updates: [
+                  {
+                    newVersion: '1.0.0',
+                    releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      calculateLibYears(packageFiles);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          managerLibYears: {
+            manager1: 1,
+            manager2: 1,
+          },
+          // eslint-disable-next-line no-loss-of-precision
+          totalLibYears: 1,
+        },
+        'Repository libYears',
+      );
+    });
   });
 });
