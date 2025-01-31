@@ -533,11 +533,8 @@ export async function processBranch(
         config.artifactErrors.push(...artifactErrors);
       }
 
-      const bumpVersionsResult = await bumpVersions(config);
-      if (bumpVersionsResult) {
-        config.updatedArtifacts.push(...bumpVersionsResult.updatedArtifacts);
-        config.artifactErrors.push(...bumpVersionsResult.artifactErrors);
-      }
+      // modifies the file changes in place to allow having a version bump in a packageFile or artifact
+      await bumpVersions(config);
 
       removeMeta(['dep']);
 
