@@ -13,6 +13,15 @@ export function calculateLibYears(
     for (const file of files) {
       let fileLibYears = 0;
       for (const dep of file.deps) {
+        if (!dep.currentVersionTimestamp) {
+          logger.debug(`No currentVersionTimestamp for ${dep.depName}`);
+          continue;
+        }
+        // timestamps are in ISO format
+        const currentVersionDate = DateTime.fromISO(
+          dep.currentVersionTimestamp,
+        );
+
         if (dep.updates?.length) {
           for (const update of dep.updates) {
             if (!update.releaseTimestamp) {
@@ -21,14 +30,6 @@ export function calculateLibYears(
               );
               continue;
             }
-            if (!dep.currentVersionTimestamp) {
-              logger.debug(`No currentVersionTimestamp for ${dep.depName}`);
-              continue;
-            }
-            // timestamps are in ISO format
-            const currentVersionDate = DateTime.fromISO(
-              dep.currentVersionTimestamp,
-            );
             const releaseDate = DateTime.fromISO(update.releaseTimestamp);
             const libYears = releaseDate.diff(
               currentVersionDate,

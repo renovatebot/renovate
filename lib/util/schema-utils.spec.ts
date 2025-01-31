@@ -11,6 +11,7 @@ import {
   Toml,
   UtcDate,
   Yaml,
+  multidocYaml,
   withDebugMessage,
   withTraceMessage,
 } from './schema-utils';
@@ -444,6 +445,26 @@ describe('util/schema-utils', () => {
         },
         success: false,
       });
+    });
+  });
+
+  describe('multidocYaml()', () => {
+    const Schema = multidocYaml().pipe(
+      z.array(
+        z.object({
+          foo: z.number(),
+        }),
+      ),
+    );
+
+    it('parses valid yaml', () => {
+      expect(
+        Schema.parse(codeBlock`
+          foo: 111
+          ---
+          foo: 222
+        `),
+      ).toEqual([{ foo: 111 }, { foo: 222 }]);
     });
   });
 

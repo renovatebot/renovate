@@ -83,6 +83,58 @@ describe('modules/manager/custom/jsonata/index', () => {
     });
   });
 
+  it('extracts yaml', async () => {
+    const json = codeBlock`
+    ---
+    packages:
+      -
+        "dep_name": "foo"
+        "package_name": "fii"
+        "current_value": "1.2.3"
+        "current_digest": "1234"
+        "data_source": "nuget"
+        "versioning": "maven"
+        "extract_version": "custom-extract-version"
+        "registry_url": "https://registry.npmjs.org"
+        "dep_type": "dev"
+    ---
+    some: true
+    `;
+    const config = {
+      fileFormat: 'yaml',
+      matchStrings: [
+        `packages.{
+            "depName": dep_name,
+            "packageName": package_name,
+            "currentValue": current_value,
+            "currentDigest": current_digest,
+            "datasource": data_source,
+            "versioning": versioning,
+            "extractVersion": extract_version,
+            "registryUrl": registry_url,
+            "depType": dep_type
+        }`,
+      ],
+    };
+    const res = await extractPackageFile(json, 'unused', config);
+
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'foo',
+          packageName: 'fii',
+          currentValue: '1.2.3',
+          currentDigest: '1234',
+          datasource: 'nuget',
+          versioning: 'maven',
+          extractVersion: 'custom-extract-version',
+          registryUrls: ['https://registry.npmjs.org/'],
+          depType: 'dev',
+        },
+      ],
+    });
+  });
+
   it('applies templates', async () => {
     const json = codeBlock`
     {
