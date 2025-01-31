@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { logger } from '../../../logger';
-import { Jsonc, LooseArray, LooseRecord } from '../../../util/schema-utils';
+import {
+  Jsonc,
+  LooseArray,
+  LooseRecord,
+  withDebugMessage,
+} from '../../../util/schema-utils';
 import { DevboxDatasource } from '../../datasource/devbox';
 import { api as devboxVersioning } from '../../versioning/devbox';
 import type { PackageDependency } from '../types';
@@ -26,7 +31,7 @@ const DevboxEntry = z
     dep.currentValue = currentValue;
 
     if (!devboxVersioning.isValid(currentValue)) {
-      logger.trace(
+      logger.debug(
         { depName },
         'Devbox: skipping invalid devbox dependency in devbox JSON file.',
       );
@@ -55,8 +60,4 @@ export const DevboxSchema = Jsonc.pipe(
   }),
 )
   .transform(({ packages }) => packages)
-  .nullable()
-  .catch(({ error: err }) => {
-    logger.debug({ err }, 'Devbox: error parsing file');
-    return null;
-  });
+  .catch(withDebugMessage([], 'Devbox: error parsing file'));
