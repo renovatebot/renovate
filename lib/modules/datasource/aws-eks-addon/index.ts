@@ -22,6 +22,7 @@ export class AwsEKSAddonDataSource extends Datasource {
   override readonly defaultConfig: Record<string, unknown> | undefined = {
     commitMessageTopic: '{{datasource}}',
     commitMessageExtra: '{{currentVersion}} to {{{newVersion}}}',
+    additionalBranchPrefix: '{{datasource}}-{{{newVersion}}}-',
   };
 
   constructor() {
