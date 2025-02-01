@@ -87,7 +87,7 @@ describe('modules/manager/nix/extract', () => {
 
   it('returns null when no inputs', async () => {
     fs.readLocalFile.mockResolvedValueOnce(flake1Lock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    expect(await extractPackageFile('', 'flake.lock')).toBeNull();
   });
 
   const flake2Lock = `{
@@ -120,12 +120,12 @@ describe('modules/manager/nix/extract', () => {
 
   it('returns nixpkgs input', async () => {
     fs.readLocalFile.mockResolvedValueOnce(flake2Lock);
-    expect(await extractPackageFile('', 'flake.nix')).toEqual({
+    expect(await extractPackageFile('', 'flake.lock')).toEqual({
       deps: [
         {
           depName: 'nixpkgs',
-          currentDigest: '9f4128e00b0ae8ec65918efeba59db998750ead6',
           currentValue: 'nixos-unstable',
+          currentDigest: '9f4128e00b0ae8ec65918efeba59db998750ead6',
           datasource: GitRefsDatasource.id,
           packageName: 'https://github.com/NixOS/nixpkgs',
         },
@@ -162,7 +162,7 @@ describe('modules/manager/nix/extract', () => {
 
   it('includes nixpkgs with no explicit ref', async () => {
     fs.readLocalFile.mockResolvedValueOnce(flake3Lock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    expect(await extractPackageFile('', 'flake.lock')).toMatchObject({
       deps: [
         {
           currentDigest: '612ee628421ba2c1abca4c99684862f76cb3b089',
@@ -221,7 +221,7 @@ describe('modules/manager/nix/extract', () => {
 
   it('includes patchelf from HEAD', async () => {
     fs.readLocalFile.mockResolvedValueOnce(flake4Lock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    expect(await extractPackageFile('', 'flake.lock')).toMatchObject({
       deps: [
         {
           currentDigest: 'a0f54334df36770b335c051e540ba40afcbf8378',
@@ -263,7 +263,7 @@ describe('modules/manager/nix/extract', () => {
 
   it('includes ijq from sourcehut without a flake', async () => {
     fs.readLocalFile.mockResolvedValueOnce(flake5Lock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    expect(await extractPackageFile('', 'flake.lock')).toMatchObject({
       deps: [
         {
           currentDigest: '88f0d9ae98942bf49cba302c42b2a0f6e05f9b58',
@@ -305,7 +305,7 @@ describe('modules/manager/nix/extract', () => {
 
   it('includes home-manager from gitlab', async () => {
     fs.readLocalFile.mockResolvedValueOnce(flake6Lock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    expect(await extractPackageFile('', 'flake.lock')).toMatchObject({
       deps: [
         {
           currentDigest: '65ae9c147349829d3df0222151f53f79821c5134',
@@ -327,7 +327,7 @@ describe('modules/manager/nix/extract', () => {
 
   it('test other version', async () => {
     fs.readLocalFile.mockResolvedValueOnce(flake7Lock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    expect(await extractPackageFile('', 'flake.lock')).toBeNull();
   });
 
   const flake8Lock = `{
@@ -361,7 +361,7 @@ describe('modules/manager/nix/extract', () => {
 
   it('includes nixpkgs with ref and shallow arguments', async () => {
     fs.readLocalFile.mockResolvedValueOnce(flake8Lock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    expect(await extractPackageFile('', 'flake.lock')).toMatchObject({
       deps: [
         {
           currentDigest: '5633bcff0c6162b9e4b5f1264264611e950c8ec7',
@@ -401,7 +401,7 @@ describe('modules/manager/nix/extract', () => {
 
   it('includes nixpkgs but using indirect type that cannot be updated', async () => {
     fs.readLocalFile.mockResolvedValueOnce(flake9Lock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    expect(await extractPackageFile('', 'flake.lock')).toBeNull();
   });
 
   const flake10Lock = `{
@@ -488,7 +488,7 @@ describe('modules/manager/nix/extract', () => {
 
   it('includes flake from GitHub Enterprise', async () => {
     fs.readLocalFile.mockResolvedValueOnce(flake10Lock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    expect(await extractPackageFile('', 'flake.lock')).toMatchObject({
       deps: [
         {
           currentDigest: '6bf2706348447df6f8b86b1c3e54f87b0afda84f',
@@ -591,7 +591,7 @@ describe('modules/manager/nix/extract', () => {
 
   it('includes flake with tarball type', async () => {
     fs.readLocalFile.mockResolvedValueOnce(flake11Lock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    expect(await extractPackageFile('', 'flake.lock')).toMatchObject({
       deps: [
         {
           currentDigest: 'c7e39452affcc0f89e023091524e38b3aaf109e9',

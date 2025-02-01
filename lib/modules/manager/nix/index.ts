@@ -8,7 +8,7 @@ export const supportsLockFileMaintenance = true;
 export const url = 'https://nix.dev';
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)flake\\.nix$'],
+  fileMatch: ['(^|/)flake\\.(nix|lock)$'],
   commitMessageTopic: 'nix',
   commitMessageExtra: 'to {{newValue}}',
   enabled: false,
