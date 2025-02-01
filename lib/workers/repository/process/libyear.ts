@@ -50,7 +50,6 @@ export function calculateLibYears(
             logger.debug(
               `No releaseTimestamp for ${dep.depName} update to ${update.newVersion}`,
             );
-            allDeps.push(depInfo);
             continue;
           }
           const releaseDate = DateTime.fromISO(update.releaseTimestamp);
