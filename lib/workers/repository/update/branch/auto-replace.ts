@@ -264,7 +264,7 @@ export async function doAutoReplace(
         );
       }
       if (currentDigest && newDigest && currentDigest !== newDigest) {
-        if (!newString.includes(currentDigest) {
+        if (!newString.includes(currentDigest)) {
           logger.debug(
             { stringToReplace: newString, currentDigest },
             'currentDigest not found in string to replace',
