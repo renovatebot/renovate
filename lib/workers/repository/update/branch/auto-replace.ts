@@ -240,7 +240,7 @@ export async function doAutoReplace(
 
       const autoReplaceRegExpFlag = autoReplaceGlobalMatch ? 'g' : '';
       if (currentValue && newValue && currentValue !== newValue) {
-        if (newString.indexOf(currentValue) === -1) {
+        if (!newString.includes(currentValue)) {
           logger.debug(
             { stringToReplace: newString, currentValue, currentValueTemplate },
             'currentValue not found in string to replace',
@@ -252,7 +252,7 @@ export async function doAutoReplace(
         );
       }
       if (depName && newName && depName !== newName) {
-        if (newString.indexOf(depName) === -1) {
+        if (!newString.includes(depName)) {
           logger.debug(
             { stringToReplace: newString, depName, depNameTemplate },
             'depName not found in string to replace',
@@ -264,7 +264,7 @@ export async function doAutoReplace(
         );
       }
       if (currentDigest && newDigest && currentDigest !== newDigest) {
-        if (newString.indexOf(currentDigest) === -1) {
+        if (!newString.includes(currentDigest) {
           logger.debug(
             { stringToReplace: newString, currentDigest },
             'currentDigest not found in string to replace',
@@ -279,7 +279,7 @@ export async function doAutoReplace(
         newDigest &&
         currentDigestShort !== newDigest
       ) {
-        if (newString.indexOf(currentDigestShort) === -1) {
+        if (!newString.includes(currentDigestShort)) {
           logger.debug(
             { stringToReplace: newString, currentDigestShort },
             'currentDigestShort not found in string to replace',
