@@ -2,26 +2,42 @@ import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 
+interface DepInfo {
+  depName: string;
+  manager: string;
+  datasource: string;
+  version: string;
+  file: string;
+  outdated?: boolean;
+  libYear?: number;
+}
 export function calculateLibYears(
   packageFiles?: Record<string, PackageFile[]>,
 ): void {
   if (!packageFiles) {
     return;
   }
-  const allDeps = new Set<string>();
-  const depsWithUpdates = new Map<string, number>();
-  const managerLibYears: Record<string, number> = {};
+  const allDeps: DepInfo[] = [];
   for (const [manager, files] of Object.entries(packageFiles)) {
-    const managerDepsWithUpdates = new Set<string>();
     for (const file of files) {
-      let fileLibYears = 0;
       for (const dep of file.deps) {
-        const depKey = `${dep.depName}@${dep.currentVersion ?? dep.currentValue}@@${dep.datasource}`;
-        if (!allDeps.has(depKey)) {
-          allDeps.add(depKey);
+        const depInfo: DepInfo = {
+          depName: dep.depName!,
+          manager,
+          file: file.packageFile,
+          datasource: dep.datasource!,
+          version: (dep.currentVersion ?? dep.currentValue)!,
+        };
+
+        if (!dep.updates?.length) {
+          allDeps.push(depInfo);
+          continue;
         }
+
+        depInfo.outdated = true;
         if (!dep.currentVersionTimestamp) {
           logger.debug(`No currentVersionTimestamp for ${dep.depName}`);
+          allDeps.push(depInfo);
           continue;
         }
         // timestamps are in ISO format
@@ -29,58 +45,87 @@ export function calculateLibYears(
           dep.currentVersionTimestamp,
         );
 
-        if (dep.updates?.length) {
-          if (managerDepsWithUpdates.has(depKey)) {
+        for (const update of dep.updates) {
+          if (!update.releaseTimestamp) {
+            logger.debug(
+              `No releaseTimestamp for ${dep.depName} update to ${update.newVersion}`,
+            );
+            allDeps.push(depInfo);
             continue;
           }
-          for (const update of dep.updates) {
-            if (!update.releaseTimestamp) {
-              logger.debug(
-                `No releaseTimestamp for ${dep.depName} update to ${update.newVersion}`,
-              );
-              continue;
-            }
-            const releaseDate = DateTime.fromISO(update.releaseTimestamp);
-            const libYears = releaseDate.diff(
-              currentVersionDate,
-              'years',
-            ).years;
-            if (libYears >= 0) {
-              update.libYears = libYears;
-            }
-          }
-          // Set the highest libYears for the dep
-          const depLibYears = Math.max(
-            ...dep.updates.map((update) => update.libYears ?? 0),
-            0,
-          );
-
-          if (!managerDepsWithUpdates.has(depKey)) {
-            managerDepsWithUpdates.add(depKey);
-            fileLibYears += depLibYears;
-          }
-
-          if (!depsWithUpdates.has(depKey)) {
-            depsWithUpdates.set(depKey, depLibYears);
+          const releaseDate = DateTime.fromISO(update.releaseTimestamp);
+          const libYears = releaseDate.diff(currentVersionDate, 'years').years;
+          if (libYears >= 0) {
+            update.libYears = libYears;
           }
         }
+        // Set the highest libYears for the dep
+        const depLibYears = Math.max(
+          ...dep.updates.map((update) => update.libYears ?? 0),
+          0,
+        );
+        depInfo.libYear = depLibYears;
+        allDeps.push(depInfo);
       }
-      managerLibYears[manager] ??= 0;
-      managerLibYears[manager] += fileLibYears;
     }
   }
-  // Sum up the libYears for the repo
-  let totalLibYears = 0;
-  for (const [, depLibYear] of depsWithUpdates) {
-    totalLibYears += depLibYear;
-  }
+
+  const [totalDepsCount, outdatedDepsCount, totalLibYears] = getCounts(allDeps);
   logger.debug(
     {
-      managerLibYears,
+      managerLibYears: getManagerLibYears(allDeps),
       totalLibYears,
-      totalDepsCount: allDeps.size,
-      outdatedDepsCount: depsWithUpdates.size,
+      totalDepsCount,
+      outdatedDepsCount,
     },
     'Repository libYears',
   );
+}
+
+function getManagerLibYears(deps: DepInfo[]): Record<string, number> {
+  /** {manager : {depKey: libYear }} */
+  const managerLibYears: Record<string, Record<string, number>> = {};
+  for (const dep of deps) {
+    const depKey = `${dep.depName}@${dep.version}@${dep.datasource}`;
+    const manager = dep.manager;
+    managerLibYears[manager] ??= {};
+    if (dep.libYear) {
+      if (!managerLibYears[manager][depKey]) {
+        managerLibYears[manager][depKey] = dep.libYear;
+      }
+    }
+  }
+
+  const res: Record<string, number> = {};
+  for (const [manager, deps] of Object.entries(managerLibYears)) {
+    const managerLibYear = Object.values(deps).reduce((sum, curr) => {
+      return sum + curr;
+    }, 0);
+    res[manager] = managerLibYear;
+  }
+
+  return res;
+}
+
+function getCounts(deps: DepInfo[]): [number, number, number] {
+  const distinctDeps = new Set<string>();
+  let totalDepsCount = 0,
+    outdatedDepsCount = 0,
+    totalLibYears = 0;
+  for (const dep of deps) {
+    const depKey = `${dep.depName}@${dep.version}@${dep.datasource}@${dep.manager}`;
+    if (!distinctDeps.has(depKey)) {
+      if (dep.outdated) {
+        outdatedDepsCount++;
+      }
+      if (dep.libYear) {
+        totalLibYears += dep.libYear;
+      }
+
+      totalDepsCount++;
+      distinctDeps.add(depKey);
+    }
+  }
+
+  return [totalDepsCount, outdatedDepsCount, totalLibYears];
 }

@@ -98,9 +98,6 @@ describe('workers/repository/process/libyear', () => {
         'No currentVersionTimestamp for dep3',
       );
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'No currentVersionTimestamp for dep4',
-      );
-      expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           managerLibYears: {
             bundler: 0.5027322404371585,
@@ -110,86 +107,85 @@ describe('workers/repository/process/libyear', () => {
           // eslint-disable-next-line no-loss-of-precision
           totalLibYears: 1.5027322404371585,
           totalDepsCount: 5,
+          outdatedDepsCount: 4,
+        },
+        'Repository libYears',
+      );
+    });
+
+    it('de-duplicates if same dep found in different files', () => {
+      // there are three package files with the same dependency + version but mixed datasources
+      const packageFiles = {
+        npm: [
+          {
+            packageFile: 'folder1/package.json',
+            deps: [
+              {
+                depName: 'dep1',
+                currentVersion: '0.1.0',
+                datasource: 'npm',
+                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                updates: [
+                  {
+                    newVersion: '1.0.0',
+                    releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            packageFile: 'folder2/package.json',
+            deps: [
+              {
+                depName: 'dep1',
+                currentVersion: '0.1.0',
+                datasource: 'npm',
+                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                updates: [
+                  {
+                    newVersion: '1.0.0',
+                    releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        regex: [
+          {
+            packageFile: 'folder3/package.json',
+            deps: [
+              {
+                depName: 'dep1',
+                currentVersion: '0.1.0',
+                datsource: 'docker',
+                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                updates: [
+                  {
+                    newVersion: '1.0.0',
+                    releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      calculateLibYears(packageFiles);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          managerLibYears: {
+            npm: 1,
+            regex: 1,
+          },
+          // eslint-disable-next-line no-loss-of-precision
+          totalLibYears: 2,
+          totalDepsCount: 2,
           outdatedDepsCount: 2,
         },
         'Repository libYears',
       );
     });
-  });
-
-  // npm manager contains same dep twice in diff files with same version and same datasource
-  // regex manager contains the same dep with same version but different datasource
-  it('de-duplicates if same dep found in different files', () => {
-    const packageFiles = {
-      npm: [
-        {
-          packageFile: 'folder1/package.json',
-          deps: [
-            {
-              depName: 'dep1',
-              currentVersion: '0.1.0',
-              datasource: 'npm',
-              currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
-              updates: [
-                {
-                  newVersion: '1.0.0',
-                  releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
-                },
-              ],
-            },
-          ],
-        },
-        {
-          packageFile: 'folder2/package.json',
-          deps: [
-            {
-              depName: 'dep1',
-              currentVersion: '0.1.0',
-              datasource: 'npm',
-              currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
-              updates: [
-                {
-                  newVersion: '1.0.0',
-                  releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      regex: [
-        {
-          packageFile: 'folder3/package.json',
-          deps: [
-            {
-              depName: 'dep1',
-              currentVersion: '0.1.0',
-              datsource: 'docker',
-              currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
-              updates: [
-                {
-                  newVersion: '1.0.0',
-                  releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    };
-    calculateLibYears(packageFiles);
-    expect(logger.logger.debug).toHaveBeenCalledWith(
-      {
-        managerLibYears: {
-          npm: 1,
-          regex: 1,
-        },
-        // eslint-disable-next-line no-loss-of-precision
-        totalLibYears: 2,
-        totalDepsCount: 2,
-        outdatedDepsCount: 2,
-      },
-      'Repository libYears',
-    );
   });
 });
