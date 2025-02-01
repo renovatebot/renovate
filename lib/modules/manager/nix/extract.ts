@@ -33,7 +33,26 @@ export async function extractPackageFile(
 
   const deps: PackageDependency[] = [];
 
-  const flakeLockParsed = NixFlakeLock.safeParse(flakeLockContents);
+  if (packageFile.match(regEx(/\.nix$/))) {
+    const nixpkgsMatch = nixpkgsRegex.exec(content);
+    if (nixpkgsMatch?.groups) {
+      const { ref } = nixpkgsMatch.groups;
+      deps.push({
+        depName: 'nixpkgs',
+        currentValue: ref,
+        datasource: GitRefsDatasource.id,
+        packageName: 'https://github.com/NixOS/nixpkgs',
+        versioning: nixpkgsVersioning,
+      });
+    }
+
+    if (deps.length) {
+      return { deps };
+    }
+    return null;
+  }
+
+  const flakeLockParsed = NixFlakeLock.safeParse(lockContents);
   if (!flakeLockParsed.success) {
     logger.debug(
       { flakeLockFile, error: flakeLockParsed.error },
@@ -50,6 +69,7 @@ export async function extractPackageFile(
       { flakeLockFile, error: flakeLockParsed.error },
       `flake.lock is missing "root" node`,
     );
+
     return null;
   }
 
