@@ -112,7 +112,7 @@ function getCounts(deps: DepInfo[]): [number, number, number] {
     outdatedDepsCount = 0,
     totalLibYears = 0;
   for (const dep of deps) {
-    const depKey = `${dep.depName}@${dep.version}@${dep.datasource}@${dep.manager}`;
+    const depKey = `${dep.depName}@${dep.version}@${dep.datasource}`;
     if (!distinctDeps.has(depKey)) {
       if (dep.outdated) {
         outdatedDepsCount++;
