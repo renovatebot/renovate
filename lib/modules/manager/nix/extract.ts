@@ -95,6 +95,7 @@ export async function extractPackageFile(
           depName,
           currentValue: flakeOriginal.ref,
           currentDigest: flakeLocked.rev,
+          replaceString: flakeLocked.rev, // hack because renovate cannot check flake.lock file
           datasource: GitRefsDatasource.id,
           packageName: `https://${flakeOriginal.host ?? 'github.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
         });
@@ -104,6 +105,7 @@ export async function extractPackageFile(
           depName,
           currentValue: flakeOriginal.ref,
           currentDigest: flakeLocked.rev,
+          replaceString: flakeLocked.rev, // hack because renovate cannot check flake.lock file
           datasource: GitRefsDatasource.id,
           packageName: `https://${flakeOriginal.host ?? 'gitlab.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
         });
@@ -113,6 +115,7 @@ export async function extractPackageFile(
           depName,
           currentValue: flakeOriginal.ref,
           currentDigest: flakeLocked.rev,
+          replaceString: flakeLocked.rev, // hack because renovate cannot check flake.lock file
           datasource: GitRefsDatasource.id,
           packageName: flakeOriginal.url,
         });
@@ -122,6 +125,7 @@ export async function extractPackageFile(
           depName,
           currentValue: flakeOriginal.ref,
           currentDigest: flakeLocked.rev,
+          replaceString: flakeLocked.rev, // hack because renovate cannot check flake.lock file
           datasource: GitRefsDatasource.id,
           packageName: `https://${flakeOriginal.host ?? 'git.sr.ht'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
         });
@@ -131,6 +135,7 @@ export async function extractPackageFile(
           depName,
           currentValue: flakeLocked.ref,
           currentDigest: flakeLocked.rev,
+          replaceString: flakeLocked.rev, // hack because renovate cannot check flake.lock file
           datasource: GitRefsDatasource.id,
           // type tarball always contains this link
           packageName: flakeOriginal.url!.replace(
