@@ -81,7 +81,7 @@ describe('workers/repository/process/libyear', () => {
               {
                 depName: 'dep4',
                 datasource: 'rubygems',
-                currentVersion: '1.0.0',
+                currentValue: '1.0.0', // coverage
               },
             ],
           },
