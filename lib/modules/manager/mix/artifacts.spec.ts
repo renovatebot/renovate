@@ -26,6 +26,10 @@ const adminConfig: RepoGlobalConfig = {
 process.env.CONTAINERBASE = 'true';
 
 const config: UpdateArtifactsConfig = {};
+const constraints: Record<string, string> = {
+  erlang: '25.0.0.0',
+  elixir: 'v1.13.4',
+};
 
 describe('modules/manager/mix/artifacts', () => {
   beforeEach(() => {
@@ -322,22 +326,13 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
 
-    // erlang
-    getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '25.0.0.0' }],
-    });
-    // elixir
-    getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: 'v1.13.4' }],
-    });
-
     const execSnapshots = mockExecAll();
     expect(
       await updateArtifacts({
         packageFileName: 'subdir/mix.exs',
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
-        config,
+        config: { ...config, constraints },
       }),
     ).toEqual([
       {
@@ -367,22 +362,13 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
 
-    // erlang
-    getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '25.0.0.0' }],
-    });
-    // elixir
-    getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: 'v1.13.4' }],
-    });
-
     const execSnapshots = mockExecAll();
     expect(
       await updateArtifacts({
         packageFileName: 'apps/foo/mix.exs',
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
-        config,
+        config: { ...config, constraints },
       }),
     ).toEqual([
       {
@@ -410,22 +396,17 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
 
-    // erlang
-    getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '25.0.0.0' }],
-    });
-    // elixir
-    getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: 'v1.13.4' }],
-    });
-
     const execSnapshots = mockExecAll();
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: { ...config, updateType: 'lockFileMaintenance' },
+        config: {
+          ...config,
+          constraints,
+          updateType: 'lockFileMaintenance',
+        },
       }),
     ).toEqual([
       {
