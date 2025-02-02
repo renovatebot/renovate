@@ -6,12 +6,12 @@ exports[`modules/datasource/go/releases-direct getReleases support bitbucket tag
   "releases": [
     {
       "gitRef": "v1.0.0",
-      "releaseTimestamp": undefined,
+      "releaseTimestamp": null,
       "version": "v1.0.0",
     },
     {
       "gitRef": "v2.0.0",
-      "releaseTimestamp": undefined,
+      "releaseTimestamp": null,
       "version": "v2.0.0",
     },
   ],
@@ -40,12 +40,12 @@ exports[`modules/datasource/go/releases-direct getReleases support gitlab 1`] = 
   "releases": [
     {
       "gitRef": "v1.0.0",
-      "releaseTimestamp": undefined,
+      "releaseTimestamp": null,
       "version": "v1.0.0",
     },
     {
       "gitRef": "v2.0.0",
-      "releaseTimestamp": undefined,
+      "releaseTimestamp": null,
       "version": "v2.0.0",
     },
   ],
@@ -58,12 +58,12 @@ exports[`modules/datasource/go/releases-direct getReleases support gitlab subgro
   "releases": [
     {
       "gitRef": "v1.0.0",
-      "releaseTimestamp": undefined,
+      "releaseTimestamp": null,
       "version": "v1.0.0",
     },
     {
       "gitRef": "v2.0.0",
-      "releaseTimestamp": undefined,
+      "releaseTimestamp": null,
       "version": "v2.0.0",
     },
   ],
@@ -76,12 +76,12 @@ exports[`modules/datasource/go/releases-direct getReleases support self hosted g
   "releases": [
     {
       "gitRef": "v1.0.0",
-      "releaseTimestamp": undefined,
+      "releaseTimestamp": null,
       "version": "v1.0.0",
     },
     {
       "gitRef": "v2.0.0",
-      "releaseTimestamp": undefined,
+      "releaseTimestamp": null,
       "version": "v2.0.0",
     },
   ],

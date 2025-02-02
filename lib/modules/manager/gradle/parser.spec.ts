@@ -8,7 +8,11 @@ import {
   parseKotlinSource,
   parseProps,
 } from './parser';
-import { GRADLE_PLUGINS, REGISTRY_URLS } from './parser/common';
+import {
+  GRADLE_PLUGINS,
+  GRADLE_TEST_SUITES,
+  REGISTRY_URLS,
+} from './parser/common';
 
 jest.mock('../../../util/fs');
 
@@ -179,32 +183,32 @@ describe('modules/manager/gradle/parser', () => {
         expect(deps).toMatchObject([
           {
             depName: 'org.slf4j:jcl-over-slf4j',
-            groupName: 'slfj4Version',
+            sharedVariableName: 'slfj4Version',
             currentValue: '2.0.0',
           },
           {
             depName: 'org.jetbrains.kotlinx:kotlinx-coroutines-core',
-            groupName: 'libraries.releaseCoroutines',
+            sharedVariableName: 'libraries.releaseCoroutines',
             currentValue: '0.26.1-eap13',
           },
           {
             depName: 'org.slf4j:slf4j-api',
-            groupName: 'slfj4Version',
+            sharedVariableName: 'slfj4Version',
             currentValue: '2.0.0',
           },
           {
             depName: 'androidx.lifecycle:lifecycle-runtime-ktx',
-            groupName: 'lifecycle_version',
+            sharedVariableName: 'lifecycle_version',
             currentValue: '2.5.1',
           },
           {
             depName: 'androidx.lifecycle:lifecycle-viewmodel-ktx',
-            groupName: 'lifecycle_version',
+            sharedVariableName: 'lifecycle_version',
             currentValue: '2.5.1',
           },
           {
             depName: 'org.slf4j:slf4j-ext',
-            groupName: 'slfj4Version',
+            sharedVariableName: 'slfj4Version',
             currentValue: '2.0.0',
           },
         ]);
@@ -333,17 +337,17 @@ describe('modules/manager/gradle/parser', () => {
         expect(deps).toMatchObject([
           {
             depName: 'org.slf4j:jcl-over-slf4j',
-            groupName: 'slfj4Version',
+            sharedVariableName: 'slfj4Version',
             currentValue: '2.0.0',
           },
           {
             depName: 'org.jetbrains.kotlinx:kotlinx-coroutines-core',
-            groupName: 'libraries.releaseCoroutines',
+            sharedVariableName: 'libraries.releaseCoroutines',
             currentValue: '0.26.1-eap13',
           },
           {
             depName: 'org.slf4j:slf4j-api',
-            groupName: 'slfj4Version',
+            sharedVariableName: 'slfj4Version',
             currentValue: '2.0.0',
           },
         ]);
@@ -372,18 +376,18 @@ describe('modules/manager/gradle/parser', () => {
         ${'foo = "1.2.3"'}                   | ${'"foo:bar:$foo@@@"'}                 | ${null}
         ${''}                                | ${'"foo:bar:$baz"'}                    | ${null}
         ${'foo = "1"; bar = "2"; baz = "3"'} | ${'"foo:bar:$foo.$bar.$baz"'}          | ${{ depName: 'foo:bar', currentValue: '1.2.3', skipReason: 'contains-variable' }}
-        ${'baz = "1.2.3"'}                   | ${'"foo:bar:$baz"'}                    | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
-        ${'foo.bar = "1.2.3"'}               | ${'"foo:bar:$foo.bar"'}                | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'foo.bar' }}
+        ${'baz = "1.2.3"'}                   | ${'"foo:bar:$baz"'}                    | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'baz' }}
+        ${'foo.bar = "1.2.3"'}               | ${'"foo:bar:$foo.bar"'}                | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'foo.bar' }}
         ${'foo = "1.2.3"'}                   | ${'"foo:bar_$foo:4.5.6"'}              | ${{ depName: 'foo:bar_1.2.3', managerData: { fileReplacePosition: 28 } }}
         ${'foo = "bar"'}                     | ${'"foo:${foo}1:1"'}                   | ${{ depName: 'foo:bar1', currentValue: '1', managerData: { fileReplacePosition: 25 } }}
         ${'bar = "bar:1.2.3"'}               | ${'"foo:$bar"'}                        | ${{ depName: 'foo:bar', currentValue: '1.2.3', skipReason: 'contains-variable' }}
-        ${'baz = "1.2.3"'}                   | ${'foobar = "foo:bar:$baz"'}           | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'baz = "1.2.3"'}                   | ${'foobar = "foo:bar:$baz"'}           | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'baz' }}
         ${'foo = "${bar}"; baz = "1.2.3"'}   | ${'"foo:bar:${baz}"'}                  | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-        ${'baz = "1.2.3"'}                   | ${'"foo:bar:${ext[\'baz\']}"'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
-        ${'baz = "1.2.3"'}                   | ${'"foo:bar:${ext.baz}"'}              | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
-        ${'baz = "1.2.3"'}                   | ${'"foo:bar:${project.ext[\'baz\']}"'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
-        ${'a = "foo"; b = "bar"; c="1.2.3"'} | ${'"${a}:${b}:${property("c")}"'}      | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'c' }}
-        ${'a = "foo"; b = "bar"; c="1.2.3"'} | ${'"${a}:${b}:${properties["c"]}"'}    | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'c' }}
+        ${'baz = "1.2.3"'}                   | ${'"foo:bar:${ext[\'baz\']}"'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'baz' }}
+        ${'baz = "1.2.3"'}                   | ${'"foo:bar:${ext.baz}"'}              | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'baz' }}
+        ${'baz = "1.2.3"'}                   | ${'"foo:bar:${project.ext[\'baz\']}"'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'baz' }}
+        ${'a = "foo"; b = "bar"; c="1.2.3"'} | ${'"${a}:${b}:${property("c")}"'}      | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'c' }}
+        ${'a = "foo"; b = "bar"; c="1.2.3"'} | ${'"${a}:${b}:${properties["c"]}"'}    | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'c' }}
       `('$def | $str', ({ def, str, output }) => {
         const { deps } = parseGradle([def, str].join('\n'));
         expect(deps).toMatchObject([output].filter(is.truthy));
@@ -434,7 +438,11 @@ describe('modules/manager/gradle/parser', () => {
         `;
         const { deps } = parseGradle(input);
         expect(deps).toMatchObject([
-          { depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' },
+          {
+            depName: 'foo:bar',
+            currentValue: '1.2.3',
+            sharedVariableName: 'baz',
+          },
         ]);
       });
     });
@@ -452,7 +460,7 @@ describe('modules/manager/gradle/parser', () => {
         ${''}              | ${'kotlin("foo", version = "1.2.3")'} | ${output}
         ${'some = "foo"'}  | ${'kotlin(some, version = "1.2.3")'}  | ${output}
         ${'some = "foo"'}  | ${'kotlin("${some}", "1.2.3")'}       | ${output}
-        ${'baz = "1.2.3"'} | ${'kotlin("foo", baz)'}               | ${{ ...output, groupName: 'baz' }}
+        ${'baz = "1.2.3"'} | ${'kotlin("foo", baz)'}               | ${{ ...output, sharedVariableName: 'baz' }}
         ${'baz = "1.2.3"'} | ${'kotlin("foo", version = baz)'}     | ${output}
         ${'baz = "1.2.3"'} | ${'kotlin("foo", property("baz"))'}   | ${output}
         ${'baz = "1.2.3"'} | ${'kotlin("foo", "${baz}456")'}       | ${{ skipReason: 'unspecified-version' }}
@@ -473,21 +481,21 @@ describe('modules/manager/gradle/parser', () => {
         ${''}              | ${'group: "foo", name: "bar", version: "1.2.3"'}                                  | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${''}              | ${'group: "foo", name: "bar", version: baz'}                                      | ${null}
         ${''}              | ${'group: "foo", name: "bar", version: "1.2.3@@@"'}                               | ${null}
-        ${'baz = "1.2.3"'} | ${'group: "foo", name: "bar", version: baz'}                                      | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'baz = "1.2.3"'} | ${'group: "foo", name: "bar", version: baz'}                                      | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'baz' }}
         ${'some = "foo"'}  | ${'group: property("some"), name: property("some"), version: "1.2.3"'}            | ${{ depName: 'foo:foo', currentValue: '1.2.3' }}
         ${'some = "foo"'}  | ${'group: some, name: some, version: "1.2.3"'}                                    | ${{ depName: 'foo:foo', currentValue: '1.2.3' }}
         ${'some = "foo"'}  | ${'group: "${some}", name: "${some}", version: "1.2.3"'}                          | ${{ depName: 'foo:foo', currentValue: '1.2.3' }}
-        ${'baz = "1.2.3"'} | ${'group: "foo", name: "bar", version: "${baz}"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'baz = "1.2.3"'} | ${'group: "foo", name: "bar", version: "${baz}"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'baz' }}
         ${'baz = "1.2.3"'} | ${'group: "foo", name: "bar", version: "${baz}456"'}                              | ${{ depName: 'foo:bar', skipReason: 'unspecified-version' }}
         ${''}              | ${'(group: "foo", name: "bar", version: "1.2.3", classifier: "sources")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${''}              | ${'(group: "foo", name: "bar", version: "1.2.3") {exclude module: "spring-jcl"}'} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${''}              | ${"implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${''}              | ${'(group = "foo", name = "bar", version = "1.2.3")'}                             | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-        ${'baz = "1.2.3"'} | ${'(group = "foo", name = "bar", version = baz)'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'baz = "1.2.3"'} | ${'(group = "foo", name = "bar", version = baz)'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'baz' }}
         ${'some = "foo"'}  | ${'(group = some, name = some, version = "1.2.3")'}                               | ${{ depName: 'foo:foo', currentValue: '1.2.3' }}
         ${'some = "foo"'}  | ${'(group = "${some}", name = "${some}", version = "1.2.3")'}                     | ${{ depName: 'foo:foo', currentValue: '1.2.3' }}
         ${'some = "foo"'}  | ${'(group = "${some}" + some, name = some + "bar" + some, version = "1.2.3")'}    | ${{ depName: 'foofoo:foobarfoo', currentValue: '1.2.3' }}
-        ${'baz = "1.2.3"'} | ${'(group = "foo", name = "bar", version = "${baz}")'}                            | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'baz = "1.2.3"'} | ${'(group = "foo", name = "bar", version = "${baz}")'}                            | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'baz' }}
         ${'baz = "1.2.3"'} | ${'(group = "foo", name = "bar", version = "${baz}456")'}                         | ${{ depName: 'foo:bar', currentValue: '1.2.3456', skipReason: 'unspecified-version' }}
         ${'baz = "1.2.3"'} | ${'(group = "foo", name = "bar", version = baz + "456")'}                         | ${{ depName: 'foo:bar', currentValue: '1.2.3456', skipReason: 'unspecified-version' }}
         ${''}              | ${'(group = "foo", name = "bar", version = "1.2.3", changing: true)'}             | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
@@ -515,17 +523,17 @@ describe('modules/manager/gradle/parser', () => {
           {
             depName: 'org.apache.activemq:activemq-broker',
             currentValue: '5.8.0',
-            groupName: 'activemq_version',
+            sharedVariableName: 'activemq_version',
           },
           {
             depName: 'org.apache.activemq:activemq-kahadb-store',
             currentValue: '5.8.0',
-            groupName: 'activemq_version',
+            sharedVariableName: 'activemq_version',
           },
           {
             depName: 'org.apache.activemq:activemq-stomp',
             currentValue: '5.8.0',
-            groupName: 'activemq_version',
+            sharedVariableName: 'activemq_version',
           },
         ]);
       });
@@ -535,16 +543,16 @@ describe('modules/manager/gradle/parser', () => {
           {
             depName: 'foo:bar1',
             currentValue: '1.2.3',
-            groupName: 'foo:1.2.3',
+            sharedVariableName: 'foo:1.2.3',
           },
           {
             depName: 'foo:bar2',
             currentValue: '1.2.3',
-            groupName: 'foo:1.2.3',
+            sharedVariableName: 'foo:1.2.3',
           },
         ];
         const validOutput1 = validOutput.map((dep) => {
-          return { ...dep, groupName: 'baz' };
+          return { ...dep, sharedVariableName: 'baz' };
         });
 
         it.each`
@@ -584,7 +592,7 @@ describe('modules/manager/gradle/parser', () => {
         ${''}               | ${'id("foo.bar") version("1.2.3")'}        | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id("foo.bar") version "1.2.3"'}         | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id "foo.bar" version "$baz"'}           | ${{ depName: 'foo.bar', skipReason: 'unspecified-version', currentValue: 'baz' }}
-        ${'baz = "1.2.3"'}  | ${'id "foo.bar" version "$baz"'}           | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'baz = "1.2.3"'}  | ${'id "foo.bar" version "$baz"'}           | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3', sharedVariableName: 'baz' }}
         ${'baz = "1.2.3"'}  | ${'id("foo.bar") version "$baz"'}          | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id "foo.bar" version "x${ab}cd"'}       | ${{ depName: 'foo.bar', skipReason: 'unspecified-version' }}
         ${''}               | ${'id("foo.bar") version "$baz"'}          | ${{ depName: 'foo.bar', skipReason: 'unspecified-version', currentValue: 'baz' }}
@@ -597,7 +605,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'baz = "1.2.3"'}  | ${'id("foo.bar") version baz'}             | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${'baz = "1.2.3"'}  | ${'id("foo.bar").version(baz)'}            | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'kotlin("jvm") version "1.3.71"'}        | ${{ depName: 'org.jetbrains.kotlin.jvm', packageName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71' }}
-        ${'baz = "1.3.71"'} | ${'kotlin("jvm") version baz'}             | ${{ depName: 'org.jetbrains.kotlin.jvm', packageName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71', groupName: 'baz' }}
+        ${'baz = "1.3.71"'} | ${'kotlin("jvm") version baz'}             | ${{ depName: 'org.jetbrains.kotlin.jvm', packageName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71', sharedVariableName: 'baz' }}
       `('$def | $input', ({ def, input, output }) => {
         const { deps } = parseGradle([def, input].join('\n'));
         expect(deps).toMatchObject([output].filter(is.truthy));
@@ -735,7 +743,7 @@ describe('modules/manager/gradle/parser', () => {
       ${'f = "foo"; b = "bar"'}                     | ${'library("foo.bar", "${f}", "${b}").version("1.2.3")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'library("foo.bar", property("f"), "${b}").version(v)'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'f = "foo"; b = "bar"'}                     | ${'library("foo.bar", "${f}" + f, "${b}").version("1.2.3")'}    | ${{ depName: 'foofoo:bar', currentValue: '1.2.3' }}
-      ${'version("baz", "1.2.3")'}                  | ${'library("foo.bar", "foo", "bar").versionRef("baz")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+      ${'version("baz", "1.2.3")'}                  | ${'library("foo.bar", "foo", "bar").versionRef("baz")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'baz' }}
       ${'library("foo-bar_baz-qux", "foo", "bar")'} | ${'"${libs.foo.bar.baz.qux}:1.2.3"'}                            | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${''}                                         | ${'library(["foo.bar", "foo", "bar"]).version("1.2.3")'}        | ${null}
       ${''}                                         | ${'library("foo", "bar", "baz", "qux").version("1.2.3")'}       | ${null}
@@ -759,15 +767,27 @@ describe('modules/manager/gradle/parser', () => {
 
   describe('heuristic dependency matching', () => {
     it.each`
-      input                                  | output
-      ${'("foo", "bar", "1.2.3")'}           | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'("foo", "bar", "1.2.3", "4.5.6")'}  | ${null}
-      ${'(["foo", "bar", "1.2.3"])'}         | ${null}
-      ${'someMethod("foo", "bar", "1.2.3")'} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'listOf("foo", "bar", "baz")'}       | ${null}
+      input                                                                    | output
+      ${'("foo", "bar", "1.2.3")'}                                             | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'("foo", "bar", "1.2.3", "4.5.6")'}                                    | ${null}
+      ${'(["foo", "bar", "1.2.3"])'}                                           | ${null}
+      ${'someMethod("foo", "bar", "1.2.3")'}                                   | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'listOf("foo", "bar", "baz")'}                                         | ${null}
+      ${'java { registerFeature(foo) { capability("foo", "bar", "1.2.3") } }'} | ${null}
     `('$input', ({ input, output }) => {
       const { deps } = parseGradle(input);
       expect(deps).toMatchObject([output].filter(is.truthy));
+    });
+
+    it('handles 3 independent dependencies mismatched as groupId, artifactId, version', () => {
+      const { deps } = parseGradle(
+        'someConfig("foo:bar:1.2.3", "foo:baz:4.5.6", "foo:qux:7.8.9")',
+      );
+      expect(deps).toMatchObject([
+        { depName: 'foo:bar', currentValue: '1.2.3' },
+        { depName: 'foo:baz', currentValue: '4.5.6' },
+        { depName: 'foo:qux', currentValue: '7.8.9' },
+      ]);
     });
   });
 
@@ -791,7 +811,106 @@ describe('modules/manager/gradle/parser', () => {
         content.slice(managerData!.fileReplacePosition).indexOf(currentValue!),
       );
       expect(replacementIndices.every((idx) => idx === 0)).toBeTrue();
-      expect(deps).toMatchSnapshot();
+      expect(deps).toMatchObject([
+        {
+          currentValue: '1.5.2.RELEASE',
+          depName: 'org.springframework.boot:spring-boot-gradle-plugin',
+          sharedVariableName: 'springBootVersion',
+          managerData: {
+            fileReplacePosition: 53,
+            packageFile: 'build.gradle',
+          },
+        },
+        {
+          currentValue: '1.2.3',
+          depName: 'com.github.jengelman.gradle.plugins:shadow',
+          managerData: {
+            fileReplacePosition: 417,
+            packageFile: 'build.gradle',
+          },
+        },
+        {
+          currentValue: '0.1',
+          depName: 'com.fkorotkov:gradle-libraries-plugin',
+          managerData: {
+            fileReplacePosition: 481,
+            packageFile: 'build.gradle',
+          },
+        },
+        {
+          currentValue: '0.2.3',
+          depName:
+            'gradle.plugin.se.patrikerdes:gradle-use-latest-versions-plugin',
+          managerData: {
+            fileReplacePosition: 568,
+            packageFile: 'build.gradle',
+          },
+        },
+        {
+          currentValue: '3.1.1',
+          depName: 'org.apache.openjpa:openjpa',
+          managerData: {
+            fileReplacePosition: 621,
+            packageFile: 'build.gradle',
+          },
+        },
+        {
+          currentValue: '0.13.0',
+          depName: 'com.gradle.publish:plugin-publish-plugin',
+          managerData: {
+            fileReplacePosition: 688,
+            packageFile: 'build.gradle',
+          },
+        },
+        {
+          currentValue: '6.0.9.RELEASE',
+          depName: 'org.grails:gorm-hibernate5-spring-boot',
+          managerData: {
+            fileReplacePosition: 1882,
+            packageFile: 'build.gradle',
+          },
+        },
+        {
+          currentValue: '6.0.5',
+          depName: 'mysql:mysql-connector-java',
+          managerData: {
+            fileReplacePosition: 1938,
+            packageFile: 'build.gradle',
+          },
+        },
+        {
+          currentValue: '1.0-groovy-2.4',
+          depName: 'org.spockframework:spock-spring',
+          managerData: {
+            fileReplacePosition: 1996,
+            packageFile: 'build.gradle',
+          },
+        },
+        {
+          currentValue: '1.3',
+          depName: 'org.hamcrest:hamcrest-core',
+          managerData: {
+            fileReplacePosition: 2101,
+            packageFile: 'build.gradle',
+          },
+        },
+        {
+          currentValue: '3.1',
+          depName: 'cglib:cglib-nodep',
+          managerData: {
+            fileReplacePosition: 2189,
+            packageFile: 'build.gradle',
+          },
+        },
+        {
+          currentValue: '3.1.1',
+          depName: 'org.apache.openjpa:openjpa',
+          managerData: {
+            fileReplacePosition: 2295,
+            packageFile: 'build.gradle',
+          },
+        },
+      ]);
     });
   });
 
@@ -928,7 +1047,7 @@ describe('modules/manager/gradle/parser', () => {
       ${''}              | ${'detekt { toolVersion = "1.2.3" }'}                            | ${{ depName: 'detekt', packageName: GRADLE_PLUGINS['detekt'][1], currentValue: '1.2.3' }}
       ${''}              | ${'findbugs { toolVersion = "1.2.3" }'}                          | ${{ depName: 'findbugs', packageName: GRADLE_PLUGINS['findbugs'][1], currentValue: '1.2.3' }}
       ${''}              | ${'googleJavaFormat { toolVersion = "1.2.3" }'}                  | ${{ depName: 'googleJavaFormat', packageName: GRADLE_PLUGINS['googleJavaFormat'][1], currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'} | ${'jacoco { toolVersion = baz }'}                                | ${{ depName: 'jacoco', packageName: GRADLE_PLUGINS['jacoco'][1], currentValue: '1.2.3', groupName: 'baz' }}
+      ${'baz = "1.2.3"'} | ${'jacoco { toolVersion = baz }'}                                | ${{ depName: 'jacoco', packageName: GRADLE_PLUGINS['jacoco'][1], currentValue: '1.2.3', sharedVariableName: 'baz' }}
       ${'baz = "1.2.3"'} | ${'jacoco { toolVersion = property("baz") }'}                    | ${{ depName: 'jacoco', packageName: GRADLE_PLUGINS['jacoco'][1], currentValue: '1.2.3' }}
       ${''}              | ${'lombok { version = "1.2.3" }'}                                | ${{ depName: 'lombok', packageName: GRADLE_PLUGINS['lombok'][1], currentValue: '1.2.3' }}
       ${''}              | ${'lombok { version.set("1.2.3") }'}                             | ${{ depName: 'lombok', packageName: GRADLE_PLUGINS['lombok'][1], currentValue: '1.2.3' }}
@@ -950,6 +1069,21 @@ describe('modules/manager/gradle/parser', () => {
     `('$def | $input', ({ def, input, output }) => {
       const { deps } = parseGradle([def, input].join('\n'));
       expect(deps).toMatchObject([output].filter(is.truthy));
+    });
+  });
+
+  describe('implicit gradle test suite dependencies', () => {
+    it.each`
+      def                | input                                                   | output
+      ${''}              | ${'testing.suites.test { useJunit("1.2.3") } } }'}      | ${{ depName: 'useJunit', packageName: GRADLE_TEST_SUITES['useJunit'], currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'} | ${'testing.suites.test { useJUnitJupiter(baz) } } }'}   | ${{ depName: 'useJUnitJupiter', packageName: GRADLE_TEST_SUITES['useJUnitJupiter'], currentValue: '1.2.3' }}
+      ${''}              | ${'testing.suites.test { useKotlinTest("1.2.3") } } }'} | ${{ depName: 'useKotlinTest', packageName: GRADLE_TEST_SUITES['useKotlinTest'], currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'} | ${'testing { suites { test { useSpock(baz) } } }'}      | ${{ depName: 'useSpock', packageName: GRADLE_TEST_SUITES['useSpock'], currentValue: '1.2.3' }}
+      ${''}              | ${'testing.suites.test { useSpock("1.2.3") } } }'}      | ${{ depName: 'useSpock', packageName: GRADLE_TEST_SUITES['useSpock'], currentValue: '1.2.3' }}
+      ${''}              | ${'testing.suites.test { useTestNG("1.2.3") } } }'}     | ${{ depName: 'useTestNG', packageName: GRADLE_TEST_SUITES['useTestNG'], currentValue: '1.2.3' }}
+    `('$def | $input', ({ def, input, output }) => {
+      const { deps } = parseGradle([def, input].join('\n'));
+      expect(deps).toMatchObject([output]);
     });
   });
 
@@ -982,7 +1116,7 @@ describe('modules/manager/gradle/parser', () => {
         deps: [
           {
             depName: 'org.slf4j:slf4j-api',
-            groupName: 'Versions.baz',
+            sharedVariableName: 'Versions.baz',
             currentValue: '1.2.3',
           },
           {
@@ -991,17 +1125,17 @@ describe('modules/manager/gradle/parser', () => {
           },
           {
             depName: 'androidx.core:core-ktx',
-            groupName: 'Versions.baz',
+            sharedVariableName: 'Versions.baz',
             currentValue: '1.2.3',
           },
           {
             depName: 'androidx.webkit:webkit',
-            groupName: 'Versions.baz',
+            sharedVariableName: 'Versions.baz',
             currentValue: '1.2.3',
           },
           {
             depName: 'foo:bar',
-            groupName: 'Versions.baz',
+            sharedVariableName: 'Versions.baz',
             currentValue: '1.2.3',
           },
         ],
@@ -1055,22 +1189,22 @@ describe('modules/manager/gradle/parser', () => {
           {
             depName: 'org.jetbrains.kotlin:kotlin-stdlib-jdk7',
             currentValue: '1.5.31',
-            groupName: 'Deps.kotlinVersion',
+            sharedVariableName: 'Deps.kotlinVersion',
           },
           {
             depName: 'androidx.test:core',
             currentValue: '1.3.0-rc01',
-            groupName: 'Deps.Test.version',
+            sharedVariableName: 'Deps.Test.version',
           },
           {
             depName: 'androidx.test.espresso:espresso-core',
             currentValue: '3.3.0-rc01',
-            groupName: 'Deps.Test.Espresso.Release.version',
+            sharedVariableName: 'Deps.Test.Espresso.Release.version',
           },
           {
             depName: 'androidx.test:core-ktx',
             currentValue: '1.3.0-rc01',
-            groupName: 'Deps.Test.version',
+            sharedVariableName: 'Deps.Test.version',
           },
         ],
       });
@@ -1107,7 +1241,7 @@ describe('modules/manager/gradle/parser', () => {
           {
             depName: 'com.h2database:h2',
             currentValue: '2.0.206',
-            groupName: 'ModuleConfiguration.Build.Database.h2Version',
+            sharedVariableName: 'ModuleConfiguration.Build.Database.h2Version',
           },
         ],
       });
