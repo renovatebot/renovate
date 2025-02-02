@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
-import { flattenUpdates } from './flatten';
+import { flattenUpdates, sanitizeDepName } from './flatten';
 
 jest.mock('../../../util/git/semantic');
 
@@ -14,6 +14,14 @@ beforeEach(() => {
 });
 
 describe('workers/repository/updates/flatten', () => {
+  describe('sanitizeDepName()', () => {
+    it('sanitizes urls', () => {
+      expect(sanitizeDepName('https://some.host.name/a/path/to.git')).toBe(
+        'https-some.host.name-a-path-to.git',
+      );
+    });
+  });
+
   describe('flattenUpdates()', () => {
     it('flattens', async () => {
       // TODO #22198

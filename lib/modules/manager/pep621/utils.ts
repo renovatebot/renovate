@@ -43,8 +43,16 @@ export function parsePEP508(
     packageName: regExpExec.groups.packageName,
   };
   if (is.nonEmptyString(regExpExec.groups.currentValue)) {
-    result.currentValue = regExpExec.groups.currentValue;
+    if (
+      regExpExec.groups.currentValue.startsWith('(') &&
+      regExpExec.groups.currentValue.endsWith(')')
+    ) {
+      result.currentValue = regExpExec.groups.currentValue.slice(1, -1).trim();
+    } else {
+      result.currentValue = regExpExec.groups.currentValue;
+    }
   }
+
   if (is.nonEmptyString(regExpExec.groups.marker)) {
     result.marker = regExpExec.groups.marker;
   }

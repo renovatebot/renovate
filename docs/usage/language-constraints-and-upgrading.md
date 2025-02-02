@@ -68,7 +68,7 @@ In short, users who set `constraintsFiltering=strict` often do not understand ho
 
 ## Transitive constraint limitations
 
-Often a library sets language constraints (like the `engines` examples above), and then depend on libraries with _narrower_ contraints, like `"node": "^20.0.0"`.
+Often a library sets language constraints (like the `engines` examples above), and then depend on libraries with _narrower_ constraints, like `"node": "^20.0.0"`.
 In cases like these, Renovate "trusts" the declaration of the library and may create a update, even _with_ strict constraints filtering.
 
 For some package managers, like `npm`, this incompatibility will _not_ be detected or warned about (even during lock file generation), but this may not be a problem for your application.

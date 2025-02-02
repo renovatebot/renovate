@@ -2,6 +2,7 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { coerceString } from '../../../util/string';
+import { asTimestamp } from '../../../util/timestamp';
 import { isHttpUrl } from '../../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -103,7 +104,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
         serviceDiscovery,
         repository,
       );
-      res = (await this.http.getJson<TerraformRelease>(pkgUrl)).body;
+      res = (await this.http.getJsonUnchecked<TerraformRelease>(pkgUrl)).body;
       const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
       if (returnedName !== repository) {
         logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
@@ -128,7 +129,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       (release) => res.version === release.version,
     );
     if (latestVersion) {
-      latestVersion.releaseTimestamp = res.published_at;
+      latestVersion.releaseTimestamp = asTimestamp(res.published_at);
     }
     return dep;
   }
@@ -152,7 +153,8 @@ export class TerraformModuleDatasource extends TerraformDatasource {
         serviceDiscovery,
         `${repository}/versions`,
       );
-      res = (await this.http.getJson<TerraformModuleVersions>(pkgUrl)).body;
+      res = (await this.http.getJsonUnchecked<TerraformModuleVersions>(pkgUrl))
+        .body;
       if (res.modules.length < 1) {
         logger.warn({ pkgUrl }, 'Terraform registry result mismatch');
         return null;

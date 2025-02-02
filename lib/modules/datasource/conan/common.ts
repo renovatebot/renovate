@@ -6,7 +6,7 @@ export const defaultRegistryUrl = 'https://center2.conan.io/';
 export const datasource = 'conan';
 
 export const conanDatasourceRegex = regEx(
-  /(?<name>[a-zA-Z\-_0-9]+)\/(?<version>[^@/\n]+)(?<userChannel>@\S+\/\S+)/gim,
+  /^(?<name>[a-zA-Z\-_0-9]+)\/(?<version>[^@/\n]+)(?<userChannel>@\S+\/\S+)$/im,
 );
 
 export function getConanPackage(packageName: string): ConanPackage {

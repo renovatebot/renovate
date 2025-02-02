@@ -1,5 +1,5 @@
 import { cache } from '../../../util/cache/package/decorator';
-import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import * as gradleVersioning from '../../versioning/gradle';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -27,10 +27,6 @@ export class GradleVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/gradle/gradle.';
 
-  private static readonly buildTimeRegex = regEx(
-    '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$',
-  );
-
   @cache({
     namespace: `datasource-${GradleVersionDatasource.id}`,
     // TODO: types (#22198)
@@ -46,7 +42,8 @@ export class GradleVersionDatasource extends Datasource {
 
     let releases: Release[];
     try {
-      const response = await this.http.getJson<GradleRelease[]>(registryUrl);
+      const response =
+        await this.http.getJsonUnchecked<GradleRelease[]>(registryUrl);
       releases = response.body
         .filter((release) => !release.snapshot && !release.nightly)
         .map((release) => {
@@ -54,8 +51,7 @@ export class GradleVersionDatasource extends Datasource {
 
           const gitRef = GradleVersionDatasource.getGitRef(release.version);
 
-          const releaseTimestamp =
-            GradleVersionDatasource.formatBuildTime(buildTime);
+          const releaseTimestamp = asTimestamp(buildTime);
 
           const result: Release = { version, gitRef, releaseTimestamp };
 
@@ -76,19 +72,6 @@ export class GradleVersionDatasource extends Datasource {
     };
     if (res.releases.length) {
       return res;
-    }
-    return null;
-  }
-
-  private static formatBuildTime(timeStr: string): string | null {
-    if (!timeStr) {
-      return null;
-    }
-    if (GradleVersionDatasource.buildTimeRegex.test(timeStr)) {
-      return timeStr.replace(
-        GradleVersionDatasource.buildTimeRegex,
-        '$1-$2-$3T$4:$5:$6$7',
-      );
     }
     return null;
   }

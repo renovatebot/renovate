@@ -14,6 +14,7 @@ import type {
 } from '../../types';
 import type { FileChange } from '../../util/git/types';
 import type { MergeConfidence } from '../../util/merge-confidence/types';
+import type { Timestamp } from '../../util/timestamp';
 import type { CustomExtractConfig } from './custom/types';
 
 export type MaybePromise<T> = T | Promise<T>;
@@ -103,9 +104,10 @@ export interface LookupUpdate {
   userStrings?: Record<string, string>;
   checksumUrl?: string;
   downloadUrl?: string;
-  releaseTimestamp?: any;
+  releaseTimestamp?: Timestamp;
   newVersionAgeInDays?: number;
   registryUrl?: string;
+  libYears?: number;
 }
 
 /**
@@ -119,7 +121,7 @@ export interface PackageDependency<T = Record<string, any>>
   depName?: string;
   depType?: string;
   fileReplacePosition?: number;
-  groupName?: string;
+  sharedVariableName?: string;
   lineNumber?: number;
   packageName?: string;
   target?: string;
@@ -144,6 +146,7 @@ export interface PackageDependency<T = Record<string, any>>
   digestOneAndOnly?: boolean;
   fixedVersion?: string;
   currentVersion?: string;
+  currentVersionTimestamp?: string;
   lockedVersion?: string;
   propSource?: string;
   registryUrls?: string[] | null;

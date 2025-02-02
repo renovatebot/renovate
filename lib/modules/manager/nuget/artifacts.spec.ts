@@ -15,7 +15,7 @@ jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/git');
 jest.mock('./util');
 
-const { getDefaultRegistries } = mocked(util);
+const { getDefaultRegistries, findGlobalJson } = mocked(util);
 
 process.env.CONTAINERBASE = 'true';
 
@@ -230,12 +230,14 @@ describe('modules/manager/nuget/artifacts', () => {
     fs.getLocalFiles.mockResolvedValueOnce({
       'packages.lock.json': 'New packages.lock.json',
     });
+
+    findGlobalJson.mockResolvedValueOnce({ sdk: { version: '7.0.100' } });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
-        config: { ...config, constraints: { dotnet: '7.0.100' } },
+        config,
       }),
     ).toEqual([
       {
