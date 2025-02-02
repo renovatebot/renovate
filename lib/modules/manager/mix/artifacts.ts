@@ -210,7 +210,6 @@ async function lockFileReadError(
   lockFileName: string,
 ): Promise<UpdateArtifactsResult[] | null> {
   if (await localPathExists(lockFileName)) {
-    logger.warn(`Could not read ${lockFileName}`);
     return [
       {
         artifactError: {
