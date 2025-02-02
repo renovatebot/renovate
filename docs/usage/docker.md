@@ -501,7 +501,7 @@ hostRules: [
 One way to give Renovate the short-lived Google Access Token is to:
 
 1. Write a script that generates a `config.js` file, with the token, in your `gitlab-ci.yml` file
-1. Run the `config.js` creation scrip just before you start Renovate
+1. Run the `config.js` creation script just before you start Renovate
 
 For example:
 
