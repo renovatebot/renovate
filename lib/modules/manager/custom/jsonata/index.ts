@@ -43,28 +43,25 @@ export async function extractPackageFile(
     return null;
   }
 
-  let deps = await handleMatching(json, packageFile, config);
-
-  // filter all null values
-  deps = deps.filter(is.truthy);
-  if (deps.length) {
-    const res: PackageFileContent & JSONataManagerTemplates = {
-      deps,
-      matchStrings: config.matchStrings,
-      fileFormat: config.fileFormat,
-    };
-
-    // copy over templates for autoreplace
-    for (const field of validMatchFields.map(
-      (f) => `${f}Template` as keyof JSONataManagerTemplates,
-    )) {
-      if (config[field]) {
-        res[field] = config[field];
-      }
-    }
-
-    return res;
+  const deps = await handleMatching(json, packageFile, config);
+  if (!deps.length) {
+    return null;
   }
 
-  return null;
+  const res: PackageFileContent & JSONataManagerTemplates = {
+    deps,
+    matchStrings: config.matchStrings,
+    fileFormat: config.fileFormat,
+  };
+
+  // copy over templates for autoreplace
+  for (const field of validMatchFields.map(
+    (f) => `${f}Template` as keyof JSONataManagerTemplates,
+  )) {
+    if (config[field]) {
+      res[field] = config[field];
+    }
+  }
+
+  return res;
 }
