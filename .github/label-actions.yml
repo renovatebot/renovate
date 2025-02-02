@@ -541,6 +541,16 @@
 
     Thanks, the Renovate team
 
+'auto:inactive-pr':
+  comment: >
+    Hi there,
+
+
+    This PR appears to have been inactive for a while. Please let us know if you are still working on it, or if we can close it for now.
+
+
+    Thanks, the Renovate team
+
 'auto:close-inactive-pr':
   comment: >
     Hi there,
