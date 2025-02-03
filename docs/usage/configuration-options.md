@@ -454,6 +454,48 @@ Make sure that version is a pinned version of course, as otherwise it won't be v
 
 For `sbt` note that Renovate will update the version string only for packages that have the version string in their project's `built.sbt` file.
 
+## bumpVersions
+
+Use this option to configure Renovate to increase a semantic version in your code when it updates dependencies.
+This is useful if Renovate does not support bumping the version in a package file which Renovate does not support, or the version is not in a package file.
+
+For example, if you have a file `.release-version` with the version in it, you can configure Renovate to bump the version in that file to next minor release.
+
+`fileMatch` is a regex pattern to match the file name and follow the same rules.
+
+`matchStrings` is an array of regex patterns to match the version string in the file.
+It must contain a named capture group `version` to capture the version string.
+
+```json title="renovate.json with bumpVersions"
+{
+  "bumpVersions": [
+    {
+      "fileMatch": ["\\.release-version"],
+      "bumpType": "minor",
+      "matchStrings": ["^(?<version>.+)$"]
+    }
+  ]
+}
+```
+
+### bumpType
+
+The `bumpType` field can be one of:
+
+- `prerelease`
+- `patch`
+- `minor`
+- `major`
+
+As this is a template field you can conditionally set the step to upgrade.
+E.g. this will use `patch` if the upgrade has been of type `patch` else it will return `minor`.
+
+```json title="bumpType example with template"
+{
+  "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
+}
+```
+
 ## cloneSubmodules
 
 Enabling this option will mean that detected Git submodules will be cloned at time of repository clone.
