@@ -18,6 +18,7 @@ describe('workers/repository/process/libyear', () => {
             deps: [
               {
                 depName: 'some/image',
+                datasource: 'docker',
                 currentVersion: '1.0.0',
                 updates: [{ newVersion: '2.0.0' }],
               },
@@ -30,6 +31,7 @@ describe('workers/repository/process/libyear', () => {
             deps: [
               {
                 depName: 'dep1',
+                datasource: 'npm',
                 currentVersion: '0.1.0',
                 currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
                 updates: [
@@ -56,6 +58,7 @@ describe('workers/repository/process/libyear', () => {
               {
                 depName: 'dep2',
                 currentVersion: '1.0.0',
+                datasource: 'rubygems',
                 currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
                 updates: [
                   {
@@ -67,6 +70,7 @@ describe('workers/repository/process/libyear', () => {
               {
                 depName: 'dep3',
                 currentVersion: '1.0.0',
+                datasource: 'rubygems',
                 updates: [
                   {
                     newVersion: '2.0.0',
@@ -76,6 +80,8 @@ describe('workers/repository/process/libyear', () => {
               },
               {
                 depName: 'dep4',
+                datasource: 'rubygems',
+                currentValue: '1.0.0', // coverage
               },
             ],
           },
@@ -100,6 +106,83 @@ describe('workers/repository/process/libyear', () => {
           },
           // eslint-disable-next-line no-loss-of-precision
           totalLibYears: 1.5027322404371585,
+          totalDepsCount: 5,
+          outdatedDepsCount: 4,
+        },
+        'Repository libYears',
+      );
+    });
+
+    it('de-duplicates if same dep found in different files', () => {
+      // there are three package files with the same dependency + version but mixed datasources
+      const packageFiles = {
+        npm: [
+          {
+            packageFile: 'folder1/package.json',
+            deps: [
+              {
+                depName: 'dep1',
+                currentVersion: '0.1.0',
+                datasource: 'npm',
+                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                updates: [
+                  {
+                    newVersion: '1.0.0',
+                    releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            packageFile: 'folder2/package.json',
+            deps: [
+              {
+                depName: 'dep1',
+                currentVersion: '0.1.0',
+                datasource: 'npm',
+                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                updates: [
+                  {
+                    newVersion: '1.0.0',
+                    releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        regex: [
+          {
+            packageFile: 'folder3/package.json',
+            deps: [
+              {
+                depName: 'dep1',
+                currentVersion: '0.1.0',
+                datsource: 'docker',
+                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                updates: [
+                  {
+                    newVersion: '1.0.0',
+                    releaseTimestamp: '2020-07-01T00:00:00Z' as Timestamp,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      calculateLibYears(packageFiles);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          managerLibYears: {
+            npm: 1,
+            regex: 1,
+          },
+          // eslint-disable-next-line no-loss-of-precision
+          totalLibYears: 2,
+          totalDepsCount: 2,
+          outdatedDepsCount: 2,
         },
         'Repository libYears',
       );

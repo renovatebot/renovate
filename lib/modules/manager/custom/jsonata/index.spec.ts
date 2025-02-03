@@ -67,6 +67,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     const res = await extractPackageFile(json, 'unused', config);
 
     expect(res).toMatchObject({
+      ...config,
       deps: [
         {
           depName: 'foo',
@@ -119,6 +120,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     const res = await extractPackageFile(json, 'unused', config);
 
     expect(res).toMatchObject({
+      ...config,
       deps: [
         {
           depName: 'foo',
@@ -190,6 +192,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     const res = await extractPackageFile(json, 'unused', config);
 
     expect(res).toMatchObject({
+      ...config,
       deps: [
         {
           depName: 'foo',
@@ -313,6 +316,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     };
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res).toMatchObject({
+      ...config,
       deps: [
         {
           depName: 'foo',
@@ -325,6 +329,37 @@ describe('modules/manager/custom/jsonata/index', () => {
           datasource: 'npm',
         },
       ],
+    });
+  });
+
+  it('populates manager config and jsonata manager template fields in extract result', async () => {
+    const config = {
+      fileFormat: 'json',
+      matchStrings: [`{"depName": "foo"}`, `{"depName": "bar"}`],
+      currentValueTemplate: '1.0.0',
+      datasourceTemplate: 'npm',
+      // should be included present extract result as it is not valid jsonata manager template
+      // adding here for testing
+      autoReplaceStringTemplate: `{{{depName}}}:{{{newValue}}}`,
+    };
+    const res = await extractPackageFile('{}', 'unused', config);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'foo',
+          currentValue: '1.0.0',
+          datasource: 'npm',
+        },
+        {
+          depName: 'bar',
+          currentValue: '1.0.0',
+          datasource: 'npm',
+        },
+      ],
+      fileFormat: 'json',
+      matchStrings: [`{"depName": "foo"}`, `{"depName": "bar"}`],
+      currentValueTemplate: '1.0.0',
+      datasourceTemplate: 'npm',
     });
   });
 });

@@ -724,7 +724,7 @@ The `matchStrings` must capture/extract the following three fields:
 - `depName` and / or `packageName`
 - `currentValue`
 
-Alteratively, you could also use corresponding templates (e.g. `depNameTemplate`) for these fields.
+Alternatively, you could also use corresponding templates (e.g. `depNameTemplate`) for these fields.
 But, we recommend you use only _one_ of these methods, or you'll get confused.
 
 Also, we recommend you explicitly set which `versioning` Renovate should use.
@@ -849,7 +849,7 @@ It will be compiled using Handlebars and the regex `groups` result.
 It specifies the syntax of the package file that's managed by the custom `jsonata` manager.
 This setting helps the system correctly parse and interpret the configuration file's contents.
 
-Only the `json` and `yaml` format is supported.
+Only the `json` and `yaml` formats are supported.
 `yaml` files are parsed as multi document YAML files.
 
 ```json title="Parsing a JSON file with a custom manager"
@@ -2487,7 +2487,7 @@ When in `silent` mode Renovate will:
 
 - _not_ create or update any Issue: even the Dependency Dashboard or Config Warning Issues will stay as-is
 - _not_ prune or close any existing Issues
-- _not_ create any Config Migration PRs, even if you explictly enabled Config Migration PRs in your Renovate config
+- _not_ create any Config Migration PRs, even if you explicitly enabled Config Migration PRs in your Renovate config
 
 ## npmToken
 
