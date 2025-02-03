@@ -2771,7 +2771,8 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'matchStrings',
-    description: 'Queries to use. Valid only within `bumpVersions` or `customManagers` object.',
+    description:
+      'Queries to use. Valid only within `bumpVersions` or `customManagers` object.',
     type: 'array',
     subType: 'string',
     parents: ['bumpVersions', 'customManagers'],
