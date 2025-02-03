@@ -161,25 +161,38 @@ export function updateDependency({
     }
 
     // TODO #22198
-    let newFileContent = replaceAsString(
-      parsedContents,
-      fileContent,
-      depType as NpmDepType,
-      depName,
-      oldVersion!,
-      newValue!,
-      overrideDepParents,
-    );
-    if (upgrade.newName) {
+    let newFileContent = fileContent;
+    if (upgrade.newName && upgrade.replacementApproach === 'alias') {
       newFileContent = replaceAsString(
         parsedContents,
-        newFileContent,
+        fileContent,
         depType as NpmDepType,
         depName,
-        depName,
-        upgrade.newName,
+        oldVersion!,
+        `npm:${upgrade.newName}@${newValue}`,
         overrideDepParents,
       );
+    } else {
+      newFileContent = replaceAsString(
+        parsedContents,
+        fileContent,
+        depType as NpmDepType,
+        depName,
+        oldVersion!,
+        newValue!,
+        overrideDepParents,
+      );
+      if (upgrade.newName) {
+        newFileContent = replaceAsString(
+          parsedContents,
+          newFileContent,
+          depType as NpmDepType,
+          depName,
+          depName,
+          upgrade.newName,
+          overrideDepParents,
+        );
+      }
     }
     // istanbul ignore if
     if (!newFileContent) {

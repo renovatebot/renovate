@@ -1466,6 +1466,14 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'replacementApproach',
+    description: 'Alter the behavior of how package renames are handled.',
+    type: 'string',
+    stage: 'branch',
+    allowedValues: ['replace', 'alias'],
+    default: 'replace',
+  },
+  {
     name: 'matchConfidence',
     description:
       'Merge confidence levels to match against (`low`, `neutral`, `high`, `very high`). Valid only within `packageRules` object.',

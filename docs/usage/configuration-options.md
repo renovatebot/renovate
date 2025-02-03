@@ -3341,6 +3341,16 @@ For example to replace the npm package `jade` with version `2.0.0` of the packag
 }
 ```
 
+### replacementApproach
+
+For `npm` manager when `replacementApproach=alias` then instead of replacing `"foo": "1.2.3"` with `"@my/foo": "1.2.4"` we would instead replace it with `"foo": "npm:@my/foo@1.2.4"`.
+
+```json
+{
+  "replacementApproach": "alias"
+}
+```
+
 ### sourceDirectory
 
 Use this field to set the directory in which the package is present at the source of the package.
