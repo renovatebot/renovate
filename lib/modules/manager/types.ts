@@ -71,6 +71,7 @@ export interface PackageFileContent<T = Record<string, any>>
   skipInstalls?: boolean | null;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
+  fileFormat?: string;
 }
 
 export interface PackageFile<T = Record<string, any>>

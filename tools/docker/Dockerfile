@@ -23,6 +23,10 @@ FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.38.3@sha256:e4d3
 # renovate: datasource=node-version
 RUN install-tool node 22.13.1
 
+# corepack is too buggy 😞
+# renovate: datasource=npm
+RUN install-tool pnpm 9.15.4
+
 WORKDIR /usr/local/renovate
 
 ARG TARGETPLATFORM
@@ -63,14 +67,14 @@ ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN set -ex; \
-  corepack pnpm fetch --prod; \
+  pnpm fetch --prod; \
   true
 
 COPY --link . ./
 
 # install npm packages
 RUN set -ex; \
-  corepack pnpm install --prod --offline --ignore-scripts; \
+  pnpm install --prod --offline --ignore-scripts; \
   true
 
 # --------------------------------------
