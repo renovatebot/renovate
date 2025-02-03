@@ -245,6 +245,8 @@ export function extractPythonVersion(
   content: string,
   fileName: string,
 ): string | undefined {
+  // uv's headers do not include the Python version
+  // https://github.com/astral-sh/uv/issues/3588
   if (commandType === 'uv') {
     return;
   }
