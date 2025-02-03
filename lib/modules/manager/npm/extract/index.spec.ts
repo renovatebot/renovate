@@ -1159,6 +1159,36 @@ describe('modules/manager/npm/extract/index', () => {
         },
       ]);
     });
+
+    it('extracts pnpm workspace yaml files', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        packages:
+          - pkg-a
+
+        catalog:
+          is-positive: 1.0.0
+      `);
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        'pnpm-workspace.yaml',
+      ]);
+      expect(res).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '1.0.0',
+              datasource: 'npm',
+              depName: 'is-positive',
+              depType: 'pnpm.catalog.default',
+              prettyDepType: 'pnpm.catalog.default',
+            },
+          ],
+          managerData: {
+            pnpmShrinkwrap: undefined,
+          },
+          packageFile: 'pnpm-workspace.yaml',
+        },
+      ]);
+    });
   });
 
   describe('.postExtract()', () => {

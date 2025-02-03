@@ -37,6 +37,7 @@ import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers'
 import {
   getParentName,
   isFalseGlobal,
+  validateJSONataManagerFields,
   validateNumber,
   validatePlainObject,
   validateRegexManagerFields,
@@ -490,6 +491,7 @@ export async function validateConfig(
               const allowedKeys = [
                 'customType',
                 'description',
+                'fileFormat',
                 'fileMatch',
                 'matchStrings',
                 'matchStringsStrategy',
@@ -526,6 +528,13 @@ export async function validateConfig(
                     switch (customManager.customType) {
                       case 'regex':
                         validateRegexManagerFields(
+                          customManager,
+                          currentPath,
+                          errors,
+                        );
+                        break;
+                      case 'jsonata':
+                        validateJSONataManagerFields(
                           customManager,
                           currentPath,
                           errors,

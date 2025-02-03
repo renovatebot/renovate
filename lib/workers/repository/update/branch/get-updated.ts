@@ -241,7 +241,7 @@ export async function getUpdatedPackageFiles(
         );
         firstUpdate = false;
         if (res) {
-          res = await bumpPackageVersion(res, upgrade);
+          res = await applyManagerBumpPackageVersion(res, upgrade);
           if (res === packageFileContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
           } else {
@@ -263,7 +263,7 @@ export async function getUpdatedPackageFiles(
         fileContent: packageFileContent!,
         upgrade,
       });
-      newContent = await bumpPackageVersion(newContent, upgrade);
+      newContent = await applyManagerBumpPackageVersion(newContent, upgrade);
       if (!newContent) {
         if (reuseExistingBranch) {
           logger.debug(
@@ -505,7 +505,7 @@ function processUpdateArtifactResults(
   }
 }
 
-async function bumpPackageVersion(
+async function applyManagerBumpPackageVersion(
   packageFileContent: string | null,
   upgrade: BranchUpgradeConfig,
 ): Promise<string | null> {

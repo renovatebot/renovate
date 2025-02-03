@@ -994,9 +994,12 @@ export async function setBranchStatus({
 }: BranchStatusConfig): Promise<void> {
   // First, get the branch commit SHA
   const branchSha = git.getBranchCommit(branchName);
+  if (!branchSha) {
+    logger.warn('Failed to get the branch commit SHA');
+    return;
+  }
   // Now, check the statuses for that commit
-  // TODO: types (#22198)
-  const url = `projects/${config.repository}/statuses/${branchSha!}`;
+  const url = `projects/${config.repository}/statuses/${branchSha}`;
   let state = 'success';
   if (renovateState === 'yellow') {
     state = 'pending';
@@ -1013,21 +1016,38 @@ export async function setBranchStatus({
     options.target_url = targetUrl;
   }
 
-  if (branchSha) {
-    const commitUrl = `projects/${config.repository}/repository/commits/${branchSha}`;
-    await gitlabApi
-      .getJsonSafe(commitUrl, LastPipelineId)
-      .onValue((pipelineId) => {
-        options.pipeline_id = pipelineId;
-      });
+  const retryTimes = parseInteger(
+    process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS,
+    2,
+  );
+
+  try {
+    for (let attempt = 1; attempt <= retryTimes + 1; attempt += 1) {
+      const commitUrl = `projects/${config.repository}/repository/commits/${branchSha}`;
+      await gitlabApi
+        .getJsonSafe(commitUrl, { memCache: false }, LastPipelineId)
+        .onValue((pipelineId) => {
+          options.pipeline_id = pipelineId;
+        });
+      if (options.pipeline_id !== undefined) {
+        break;
+      }
+      if (attempt >= retryTimes + 1) {
+        logger.debug(`Pipeline not yet created after ${attempt} attempts`);
+      } else {
+        logger.debug(`Pipeline not yet created. Retrying ${attempt}`);
+      }
+      // give gitlab some time to create pipelines for the sha
+      await setTimeout(
+        parseInteger(process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
+      );
+    }
+  } catch (err) {
+    logger.debug({ err });
+    logger.warn('Failed to retrieve commit pipeline');
   }
 
   try {
-    // give gitlab some time to create pipelines for the sha
-    await setTimeout(
-      parseInteger(process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
-    );
-
     await gitlabApi.postJson(url, { body: options });
 
     // update status cache
