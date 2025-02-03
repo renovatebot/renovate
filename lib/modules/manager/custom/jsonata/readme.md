@@ -1,6 +1,6 @@
-With `customManagers` using `JSONata` queries you can configure Renovate so it finds dependencies in JSON files, that are not detected by its other built-in package managers.
+With `customManagers` using `JSONata` queries you can configure Renovate so it finds dependencies in JSON or YAML files, that are not detected by its other built-in package managers.
 
-Renovate uses the `jsonata` package to process the `json` file content using the queries.
+Renovate uses the `jsonata` package to process the `json` or `yaml` file content using the queries.
 
 For more on the jsonata query language, read the [jsonata query language site](https://docs.jsonata.org/overview.html).
 
@@ -86,6 +86,8 @@ We recommend you follow these steps:
 3. You're ready to make your own config
 
 Alternatively you can "try and error" to a working config, by adjusting our examples.
+
+YAML files are parsed as multi document files.
 
 #### Example queries
 
@@ -200,4 +202,32 @@ $map($map(packages, function ($v) { $split($v, "@") }), function ($v) { { "depNa
   ],
   "datasourceTemplate": "npm"
 }
+```
+
+```yaml title="Dependencies in a single node, and we want to extract all of them"
+packages:
+  - version: 1.2.3
+    package: foo
+```
+
+Query:
+
+```
+packages.{ "depName": package, "currentValue": version }
+```
+
+```yaml title="Dependencies in a single node in a multi document yaml, and we want to extract all of them"
+packages:
+  - version: 1.2.3
+    package: foo
+---
+packages:
+  - version: 1.2.5
+    package: bar
+```
+
+Query:
+
+```
+packages.{ "depName": package, "currentValue": version }
 ```
