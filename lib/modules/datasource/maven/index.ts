@@ -1,9 +1,9 @@
-import is from '@sindresorhus/is';
 import type { XmlDocument } from 'xmldoc';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
+import { Result } from '../../../util/result';
 import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import mavenVersion from '../../versioning/maven';
@@ -19,10 +19,10 @@ import type {
   ReleaseResult,
 } from '../types';
 import { MAVEN_REPO } from './common';
-import type { MavenDependency } from './types';
+import type { MavenDependency, MavenFetchError } from './types';
 import {
-  checkResource,
   createUrlForDependencyPom,
+  downloadMaven,
   downloadMavenXml,
   getDependencyInfo,
   getDependencyParts,
@@ -94,24 +94,29 @@ export class MavenDatasource extends Datasource {
       return cachedVersions;
     }
 
-    const { isCacheable, xml: mavenMetadata } = await downloadMavenXml(
-      this.http,
-      metadataUrl,
-    );
-    if (!mavenMetadata) {
-      return [];
-    }
+    const metadataXmlResult = await downloadMavenXml(this.http, metadataUrl);
+    return metadataXmlResult
+      .transform(
+        async ({ isCacheable, data: mavenMetadata }): Promise<string[]> => {
+          const versions = extractVersions(mavenMetadata);
+          const cachePrivatePackages = GlobalConfig.get(
+            'cachePrivatePackages',
+            false,
+          );
 
-    const versions = extractVersions(mavenMetadata);
-    const cachePrivatePackages = GlobalConfig.get(
-      'cachePrivatePackages',
-      false,
-    );
-    if (cachePrivatePackages || isCacheable) {
-      await packageCache.set(cacheNamespace, cacheKey, versions, 30);
-    }
+          if (cachePrivatePackages || isCacheable) {
+            await packageCache.set(cacheNamespace, cacheKey, versions, 30);
+          }
 
-    return versions;
+          return versions;
+        },
+      )
+      .onError((err) => {
+        logger.debug(
+          `Maven: error fetching versions for "${dependency.display}": ${err.type}`,
+        );
+      })
+      .unwrapOr([]);
   }
 
   async getReleases({
@@ -191,17 +196,22 @@ export class MavenDatasource extends Datasource {
     );
 
     const artifactUrl = getMavenUrl(dependency, registryUrl, pomUrl);
+    const fetchResult = await downloadMaven(this.http, artifactUrl);
+    return fetchResult
+      .transform((res): PostprocessReleaseResult => {
+        if (res.lastModified) {
+          release.releaseTimestamp = asTimestamp(res.lastModified);
+        }
 
-    const res = await checkResource(this.http, artifactUrl);
+        return release;
+      })
+      .catch((err): Result<PostprocessReleaseResult, MavenFetchError> => {
+        if (err.type === 'not-found') {
+          return Result.ok('reject');
+        }
 
-    if (res === 'not-found' || res === 'error') {
-      return 'reject';
-    }
-
-    if (is.date(res)) {
-      release.releaseTimestamp = asTimestamp(res.toISOString());
-    }
-
-    return release;
+        return Result.ok(release);
+      })
+      .unwrapOr(release);
   }
 }
