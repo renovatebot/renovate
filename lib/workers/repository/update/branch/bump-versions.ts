@@ -13,7 +13,7 @@ export async function bumpVersions(
   config: BranchConfig,
 ): Promise<void> {
   const bumpVersions = config.bumpVersions;
-  if (!bumpVersions) {
+  if (!bumpVersions?.length) {
     return;
   }
 
