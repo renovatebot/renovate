@@ -23,6 +23,10 @@ FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.38.3@sha256:e4d3
 # renovate: datasource=node-version
 RUN install-tool node 22.13.1
 
+# temporary: install corepack via npm until upgrading to a newer version of node where
+# https://github.com/nodejs/corepack/issues/612#issuecomment-2616588603
+RUN npm install -g corepack@v0.31.0
+
 WORKDIR /usr/local/renovate
 
 ARG TARGETPLATFORM
