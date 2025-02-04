@@ -1467,7 +1467,8 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'replacementApproach',
-    description: 'Select whether to perform a direct replacement or alias replacement.',
+    description:
+      'Select whether to perform a direct replacement or alias replacement.',
     type: 'string',
     stage: 'branch',
     allowedValues: ['replace', 'alias'],
