@@ -38,7 +38,7 @@ The following files are currently supported:
 |       `setup.py` | `pip_setup`        |
 |      `setup.cfg` | `setup-cfg`        |
 | `pyproject.toml` | `pep621`           |
-|           `*.in` | `pip_requirements` |
+| `*.in` / `*.txt` | `pip_requirements` |
 
 Example header:
 
