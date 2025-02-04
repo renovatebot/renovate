@@ -212,10 +212,18 @@ const platform: Platform = {
       gitAuthor = `${user.full_name ?? user.username} <${user.email}>`;
       botUserID = user.id;
       botUserName = user.username;
-      defaults.version = await helper.getVersion({ token });
+      // istanbul ignore if: experimental feature
+      if (semver.valid(process.env.RENOVATE_X_PLATFORM_VERSION)) {
+        defaults.version = process.env.RENOVATE_X_PLATFORM_VERSION!;
+      } else {
+        defaults.version = await helper.getVersion({ token });
+      }
       if (defaults.version?.includes('gitea-')) {
         defaults.isForgejo = true;
       }
+      logger.debug(
+        `${defaults.isForgejo ? 'Forgejo' : 'Gitea'} version: ${defaults.version}`,
+      );
     } catch (err) {
       logger.debug(
         { err },
