@@ -2,6 +2,7 @@ import { type ReleaseType, inc } from 'semver';
 import type { BumpVersionConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
+import { coerceArray } from '../../../../util/array';
 import { readLocalFile } from '../../../../util/fs';
 import type {
   FileAddition,
@@ -27,8 +28,8 @@ export async function bumpVersions(config: BranchConfig): Promise<void> {
   const allFiles = await scm.getFileList();
   const fileList = getFilteredFileList(config, allFiles);
 
-  const packageFileChanges = fileChangeListToMap(config.updatedPackageFiles!);
-  const artifactFileChanges = fileChangeListToMap(config.updatedArtifacts!);
+  const packageFileChanges = fileChangeListToMap(config.updatedPackageFiles);
+  const artifactFileChanges = fileChangeListToMap(config.updatedArtifacts);
 
   for (const bumpVersionConfig of bumpVersions) {
     await bumpVersion(
@@ -98,7 +99,6 @@ async function bumpVersion(
       // extracting the version from the file
       const regexResult = matchStringRegex.exec(fileContents);
       if (!regexResult) {
-        logger.trace({ file }, `bumpVersions: No match found`);
         continue;
       }
       const version = regexResult.groups?.version;
@@ -186,13 +186,13 @@ function getMatchedFiles(
   return files;
 }
 
-function fileChangeListToMap(list: FileChange[]): {
+function fileChangeListToMap(list: FileChange[] | undefined): {
   additions: Record<string, FileAddition>;
   deletions: Record<string, FileDeletion>;
 } {
   const additions: Record<string, FileAddition> = {};
   const deletions: Record<string, FileDeletion> = {};
-  for (const fileChange of list) {
+  for (const fileChange of coerceArray(list)) {
     if (fileChange.type === 'addition') {
       additions[fileChange.path] = fileChange;
     } else {

@@ -466,6 +466,11 @@ For example, if you have a file `.release-version` with the version in it, you c
 `matchStrings` is an array of regex patterns to match the version string in the file.
 It must contain a named capture group `version` to capture the version string.
 
+<!-- prettier-ignore -->
+!!! tip
+    You can use templates in `fileMatch`, `bumpType`, and `matchStrings`.
+    This way you can leverage the power of Renovate's templating engine to change based on the context of the upgrade.
+
 ```json title="renovate.json with bumpVersions"
 {
   "bumpVersions": [
