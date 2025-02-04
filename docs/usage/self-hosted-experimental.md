@@ -61,6 +61,15 @@ The formula for the delay between attempts is `RENOVATE_X_GITLAB_MERGE_REQUEST_D
 
 Default value: `5` (attempts results in max. 13.75 seconds timeout).
 
+## `RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS`
+
+If set to a positive integer, Renovate will use this as the number of attempts to check branch status before trying to add a status check.
+The delay between attempts is `RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY` milliseconds.
+
+Default value: `2` (attempts results in maximum 2 seconds timeout).
+
+!!! warning Increasing this value too much penalizes projects that do not have defined pipelines, Renovate will systematically wait `RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS * RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY` milliseconds on these projects and slow down the Renovate analyzes.
+
 ## `RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY`
 
 Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.
@@ -90,7 +99,7 @@ If set to any value, Renovate will download `nupkg` files for determining packag
 
 ## `RENOVATE_X_PLATFORM_VERSION`
 
-Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
+Specify this string for Renovate to skip API checks and provide GitLab/Gitea and Forgejo/Bitbucket server version directly.
 Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to reduce API calls for Bitbucket.
 
 Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
