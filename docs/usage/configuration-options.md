@@ -3252,6 +3252,16 @@ Here's an example of how you would define PR priority so that `devDependencies` 
 }
 ```
 
+### replacementApproach
+
+For `npm` manager when `replacementApproach=alias` then instead of replacing `"foo": "1.2.3"` with `"@my/foo": "1.2.4"` we would instead replace it with `"foo": "npm:@my/foo@1.2.4"`.
+
+```json
+{
+  "replacementApproach": "alias"
+}
+```
+
 ### replacementName
 
 This config option only works with some managers.
@@ -3338,16 +3348,6 @@ For example to replace the npm package `jade` with version `2.0.0` of the packag
       "replacementVersion": "2.0.0"
     }
   ]
-}
-```
-
-### replacementApproach
-
-For `npm` manager when `replacementApproach=alias` then instead of replacing `"foo": "1.2.3"` with `"@my/foo": "1.2.4"` we would instead replace it with `"foo": "npm:@my/foo@1.2.4"`.
-
-```json
-{
-  "replacementApproach": "alias"
 }
 ```
 
