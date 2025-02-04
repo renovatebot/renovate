@@ -44,6 +44,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: 'v0.13.4',
             datasource: DockerDatasource.id,
             depName: 'k8s.gcr.io/external-dns/external-dns',
+            packageName: 'k8s.gcr.io/external-dns/external-dns',
             replaceString: 'v0.13.4',
             versioning: DockerDatasource.id,
           },
@@ -61,6 +62,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: 'v1.8.2',
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
             replaceString: 'v1.8.2',
           },
         ],
@@ -738,6 +740,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: undefined,
             datasource: 'docker',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
             skipReason: 'unversioned-reference',
           },
         ],
@@ -771,7 +774,8 @@ describe('modules/manager/flux/extract', () => {
               '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentValue: 'v1.8.2',
             currentDigest: undefined,
-            depName: 'ghcr.proxy.test/some/path/kyverno/manifests/kyverno',
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.proxy.test/some/path/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
             replaceString: 'v1.8.2',
           },
@@ -800,6 +804,7 @@ describe('modules/manager/flux/extract', () => {
             currentDigest:
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
           },
         ],
@@ -830,6 +835,7 @@ describe('modules/manager/flux/extract', () => {
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
             currentValue: 'v1.8.2',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
             replaceString:
               'v1.8.2@sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
@@ -861,6 +867,7 @@ describe('modules/manager/flux/extract', () => {
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
           },
         ],
       });
@@ -897,6 +904,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: 'v1',
             datasource: 'docker',
             depName: 'my-registry/podinfo',
+            packageName: 'my-registry/podinfo',
             replaceString: 'v1',
           },
           {
@@ -906,6 +914,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '1.8.0',
             datasource: 'docker',
             depName: 'podinfo',
+            packageName: 'podinfo',
             replaceString: '1.8.0',
           },
           {
@@ -913,6 +922,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: undefined,
             datasource: 'docker',
             depName: 'my-podinfo',
+            packageName: 'my-podinfo',
             replaceString: 'my-podinfo',
           },
           {
@@ -921,6 +931,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: undefined,
             datasource: 'docker',
             depName: 'podinfo',
+            packageName: 'podinfo',
             replaceString:
               'sha256:24a0c4b4a4c0eb97a1aabb8e29f18e917d05abfe1b7a7c07857230879ce7d3d3',
           },
@@ -1000,6 +1011,7 @@ describe('modules/manager/flux/extract', () => {
               currentDigest: undefined,
               currentValue: 'v1.8.2',
               depName: 'ghcr.io/kyverno/manifests/kyverno',
+              packageName: 'ghcr.io/kyverno/manifests/kyverno',
               datasource: DockerDatasource.id,
               replaceString: 'v1.8.2',
             },
