@@ -521,16 +521,13 @@ export async function processBranch(
         await embedChangelogs(config.upgrades);
       }
 
-      config.updatedArtifacts ??= [];
-      config.artifactErrors ??= [];
-
       const postUpgradeCommandResults =
         await executePostUpgradeCommands(config);
 
       if (postUpgradeCommandResults !== null) {
         const { updatedArtifacts, artifactErrors } = postUpgradeCommandResults;
-        config.updatedArtifacts.push(...updatedArtifacts);
-        config.artifactErrors.push(...artifactErrors);
+        config.updatedArtifacts = updatedArtifacts;
+        config.artifactErrors = artifactErrors;
       }
 
       // modifies the file changes in place to allow having a version bump in a packageFile or artifact

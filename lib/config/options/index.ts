@@ -2775,7 +2775,7 @@ const options: RenovateOptions[] = [
       'Queries to use. Valid only within `bumpVersions` or `customManagers` object.',
     type: 'array',
     subType: 'string',
-    parents: ['bumpVersions', 'customManagers'],
+    parents: ['customManagers', 'bumpVersions'],
     cli: false,
     env: false,
   },
