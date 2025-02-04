@@ -415,6 +415,7 @@ describe('modules/manager/flux/extract', () => {
             currentDigest: undefined,
             currentValue: 'v1.8.2',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
             replaceString: 'v1.8.2',
           },
