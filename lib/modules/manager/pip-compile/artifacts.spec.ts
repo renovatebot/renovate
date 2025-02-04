@@ -343,6 +343,47 @@ describe('modules/manager/pip-compile/artifacts', () => {
     ]);
   });
 
+  it('install uv tools without constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    // python
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '3.12.0' }],
+    });
+    // uv
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '0.5.27' }],
+    });
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['requirements.txt'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce(
+      getCommandInUvHeader('uv pip compile requirements.in'),
+    );
+    expect(
+      await updateArtifacts({
+        packageFileName: 'requirements.in',
+        updatedDeps: [],
+        newPackageFileContent: 'some new content',
+        config: {
+          ...config,
+          lockFiles: ['requirements.txt'],
+        },
+      }),
+    ).not.toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool python 3.12.0' },
+      { cmd: 'install-tool uv 0.5.27' },
+      {
+        cmd: 'uv pip compile requirements.in',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
   it('installs latest Python version if no constraints and not in header', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     datasource.getPkgReleases.mockResolvedValueOnce({
