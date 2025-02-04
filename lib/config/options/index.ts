@@ -1467,10 +1467,11 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'replacementApproach',
-    description: 'Alter the behavior of how package renames are handled.',
+    description: 'Select whether to perform a direct replacement or alias replacement.',
     type: 'string',
     stage: 'branch',
     allowedValues: ['replace', 'alias'],
+    supportedManagers: ['npm'],
     default: 'replace',
   },
   {

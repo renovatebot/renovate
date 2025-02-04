@@ -161,7 +161,7 @@ export function updateDependency({
     }
 
     // TODO #22198
-    let newFileContent = fileContent;
+    let newFileContent: string;
     if (upgrade.newName && upgrade.replacementApproach === 'alias') {
       newFileContent = replaceAsString(
         parsedContents,
