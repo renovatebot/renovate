@@ -6,7 +6,7 @@ import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
 import type { GiteaHttp } from '../../../util/http/gitea';
 import type { HttpResponse } from '../../../util/http/types';
-import { getQueryString, parseLinkHeader } from '../../../util/url';
+import { getQueryString, parseLinkHeader, parseUrl } from '../../../util/url';
 import type { Pr } from '../types';
 import type { GiteaPrCacheData, PR } from './types';
 import { API_PATH, toRenovatePR } from './utils';
@@ -149,7 +149,8 @@ export class GiteaPrCache {
         break;
       }
 
-      url = parseLinkHeader(res.headers.link)?.next?.url;
+      const uri = parseUrl(parseLinkHeader(res.headers.link)?.next?.url);
+      url = uri ? `${uri?.pathname}${uri?.search}` : undefined;
     }
 
     this.updateItems();

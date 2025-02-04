@@ -1222,7 +1222,13 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
         .query({ state: 'all', sort: 'recentupdate' })
-        .reply(200, mockPRs);
+        .reply(200, mockPRs.slice(0, 2), {
+          // test correct pagination handling, domain should be ignored
+          link: '<https://domain.test/api/v1/repos/some/repo/pulls?state=all&sort=recentupdate&page=2>; rel="next",<https://domain.test/api/v1/repos/some/repo/pulls?state=all&sort=recentupdate&page=4512>; rel="last"',
+        })
+        .get('/repos/some/repo/pulls')
+        .query({ state: 'all', sort: 'recentupdate', page: 2 })
+        .reply(200, mockPRs.slice(2));
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
