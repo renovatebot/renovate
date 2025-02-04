@@ -150,7 +150,7 @@ export class GiteaPrCache {
       }
 
       const uri = parseUrl(parseLinkHeader(res.headers.link)?.next?.url);
-      url = uri ? `${uri?.pathname}${uri?.search}` : undefined;
+      url = uri ? `${uri.pathname}${uri.search}` : undefined;
     }
 
     this.updateItems();
