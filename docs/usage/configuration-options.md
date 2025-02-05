@@ -3849,6 +3849,16 @@ The field supports multiple URLs but it is datasource-dependent on whether only 
 
 Add to this object if you wish to define rules that apply only to PRs that replace dependencies.
 
+## replacementApproach
+
+For `npm` manager when `replacementApproach=alias` then instead of replacing `"foo": "1.2.3"` with `"@my/foo": "1.2.4"` we would instead replace it with `"foo": "npm:@my/foo@1.2.4"`.
+
+```json
+{
+  "replacementApproach": "alias"
+}
+```
+
 ## respectLatest
 
 Similar to `ignoreUnstable`, this option controls whether to update to versions that are greater than the version tagged as `latest` in the repository.

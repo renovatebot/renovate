@@ -1466,6 +1466,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'replacementApproach',
+    description:
+      'Select whether to perform a direct replacement or alias replacement.',
+    type: 'string',
+    stage: 'branch',
+    allowedValues: ['replace', 'alias'],
+    supportedManagers: ['npm'],
+    default: 'replace',
+  },
+  {
     name: 'matchConfidence',
     description:
       'Merge confidence levels to match against (`low`, `neutral`, `high`, `very high`). Valid only within `packageRules` object.',
