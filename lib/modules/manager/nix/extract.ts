@@ -37,17 +37,20 @@ export async function extractPackageFile(
     const nixpkgsMatch = nixpkgsRegex.exec(content);
     if (nixpkgsMatch?.groups) {
       const { ref } = nixpkgsMatch.groups;
-      deps.push({
-        depName: 'nixpkgs',
-        currentValue: ref,
-        datasource: GitRefsDatasource.id,
-        packageName: 'https://github.com/NixOS/nixpkgs',
-        versioning: nixpkgsVersioning,
-      });
-    }
+      // only add when we matched a ref
+      if (ref !== undefined) {
+        deps.push({
+          depName: 'nixpkgs',
+          currentValue: ref,
+          datasource: GitRefsDatasource.id,
+          packageName: 'https://github.com/NixOS/nixpkgs',
+          versioning: nixpkgsVersioning,
+        });
 
-    if (deps.length) {
-      return { deps };
+        if (deps.length) {
+          return { deps };
+        }
+      }
     }
     return null;
   }
@@ -105,64 +108,9 @@ export async function extractPackageFile(
       continue;
     }
 
-    // indirect inputs cannot be reliably updated because they depend on the flake registry
-    if (flakeOriginal.type === 'indirect' || flakeLocked.type === 'indirect') {
-      logger.debug(
-        { flakeLockFile, flakeInput },
-        `input is type indirect, skipping`,
-      );
-      continue;
-    }
-
-    // cannot update local path inputs
-    if (flakeOriginal.type === 'path' || flakeLocked.type === 'path') {
-      logger.debug(
-        { flakeLockFile, flakeInput },
-        `input is type path, skipping`,
-      );
-      continue;
-    }
-
     // if no rev is being tracked, we cannot update this input
     if (flakeLocked.rev === undefined) {
-      logger.debug(
-        { flakeLockFile, flakeInput },
-        `locked input is not tracking a rev, skipping`,
-      );
       continue;
-    }
-
-    // if there's a new digest, set the corresponding digest in the lockfile so confirmations pass
-    const currentDigest = config?.currentDigest;
-    const newDigest = config?.newDigest;
-    if (
-      currentDigest &&
-      newDigest &&
-      flakeOriginal.rev &&
-      flakeOriginal.rev === currentDigest && // currentDigest is the old digest
-      content.includes(newDigest) // flake.nix contains the new digest
-    ) {
-      logger.debug(
-        { flakeLockFile, flakeInput },
-        `overriding rev ${flakeOriginal.rev} with new digest ${newDigest}`,
-      );
-      flakeOriginal.rev = newDigest;
-    }
-
-    const dep: PackageDependency = {
-      depName,
-      datasource: GitRefsDatasource.id,
-      versioning: gitRefVersioning,
-    };
-
-    // if rev is set, the flake contains a digest and can be updated directly
-    // otherwise set lockedVersion so it is updated during lock file maintenance
-    if (flakeOriginal.rev) {
-      dep.currentValue = flakeOriginal.ref;
-      dep.currentDigest = flakeOriginal.rev;
-      dep.replaceString = flakeOriginal.rev;
-    } else {
-      dep.lockedVersion = flakeLocked.rev;
     }
 
     switch (flakeLocked.type) {
