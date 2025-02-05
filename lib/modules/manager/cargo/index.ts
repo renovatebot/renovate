@@ -11,12 +11,13 @@ export const supportsLockFileMaintenance = true;
 
 export { extractPackageFile, updateArtifacts };
 
+export const url = 'https://doc.rust-lang.org/cargo';
+export const categories: Category[] = ['rust'];
+
 export const defaultConfig = {
   commitMessageTopic: 'Rust crate {{depName}}',
   fileMatch: ['(^|/)Cargo\\.toml$'],
   versioning: cargoVersioning.id,
 };
-
-export const categories: Category[] = ['rust'];
 
 export const supportedDatasources = [CrateDatasource.id];

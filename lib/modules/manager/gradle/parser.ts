@@ -6,6 +6,7 @@ import { qAssignments } from './parser/assignments';
 import { qKotlinImport } from './parser/common';
 import { qDependencies, qLongFormDep } from './parser/dependencies';
 import { setParseGradleFunc } from './parser/handlers';
+import { qToolchainVersion } from './parser/language-version';
 import { qKotlinMultiObjectVarAssignment } from './parser/objects';
 import { qPlugins } from './parser/plugins';
 import { qRegistryUrls } from './parser/registry-urls';
@@ -17,7 +18,7 @@ import type {
   PackageVariables,
   ParseGradleResult,
 } from './types';
-import { isDependencyString, parseDependencyString } from './utils';
+import { parseDependencyString } from './utils';
 
 const groovy = lang.createLang('groovy');
 const ctx: Ctx = {
@@ -32,6 +33,7 @@ const ctx: Ctx = {
   varTokens: [],
   tmpKotlinImportStore: [],
   tmpNestingDepth: [],
+  tmpRegistryContent: [],
   tmpTokenStore: {},
   tokenMap: {},
 };
@@ -51,7 +53,6 @@ export function parseGradle(
 
   const query = q.tree<Ctx>({
     type: 'root-tree',
-    maxDepth: 32,
     search: q.alt<Ctx>(
       qKotlinImport,
       qAssignments,
@@ -109,6 +110,13 @@ export function parseKotlinSource(
   return { deps, vars };
 }
 
+export function parseJavaToolchainVersion(input: string): string | null {
+  const ctx: Partial<Ctx> = {};
+  const parsedResult = groovy.query(input, qToolchainVersion, ctx);
+
+  return parsedResult?.javaLanguageVersion ?? null;
+}
+
 const propWord = '[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*';
 const propRegex = regEx(
   `^(?<leftPart>\\s*(?<key>${propWord})\\s*[= :]\\s*['"]?)(?<value>[^\\s'"]+)['"]?\\s*$`,
@@ -120,28 +128,27 @@ export function parseProps(
 ): { vars: PackageVariables; deps: PackageDependency<GradleManagerData>[] } {
   let offset = 0;
   const vars: PackageVariables = {};
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<GradleManagerData>[] = [];
+
   for (const line of input.split(newlineRegex)) {
     const lineMatch = propRegex.exec(line);
     if (lineMatch?.groups) {
       const { key, value, leftPart } = lineMatch.groups;
-      if (isDependencyString(value)) {
-        const dep = parseDependencyString(value);
-        if (dep) {
-          deps.push({
-            ...dep,
-            managerData: {
-              fileReplacePosition:
-                offset + leftPart.length + dep.depName!.length + 1,
-              packageFile,
-            },
-          });
-        }
+      const replacePosition = offset + leftPart.length;
+      const dep = parseDependencyString(value);
+      if (dep) {
+        deps.push({
+          ...dep,
+          managerData: {
+            fileReplacePosition: replacePosition + dep.depName!.length + 1,
+            packageFile,
+          },
+        });
       } else {
         vars[key] = {
           key,
           value,
-          fileReplacePosition: offset + leftPart.length,
+          fileReplacePosition: replacePosition,
           packageFile,
         };
       }

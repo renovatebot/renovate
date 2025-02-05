@@ -25,7 +25,7 @@ import type {
   Job,
   Services,
 } from './types';
-import { getGitlabDep, replaceReferenceTags } from './utils';
+import { getGitlabDep } from './utils';
 
 // See https://docs.gitlab.com/ee/ci/components/index.html#use-a-component
 const componentReferenceRegex = regEx(
@@ -170,8 +170,8 @@ export function extractPackageFile(
   let deps: PackageDependency[] = [];
   try {
     // TODO: use schema (#9610)
-    const docs = parseYaml<GitlabPipeline>(replaceReferenceTags(content), {
-      json: true,
+    const docs = parseYaml<GitlabPipeline>(content, {
+      uniqueKeys: false,
     });
     for (const doc of docs) {
       if (is.object(doc)) {
@@ -259,8 +259,8 @@ export async function extractAllPackageFiles(
     let docs: GitlabPipeline[];
     try {
       // TODO: use schema (#9610)
-      docs = parseYaml(replaceReferenceTags(content), {
-        json: true,
+      docs = parseYaml(content, {
+        uniqueKeys: false,
       });
     } catch (err) {
       logger.debug(

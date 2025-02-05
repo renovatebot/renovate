@@ -21,12 +21,17 @@ import {
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import {
+  ATTR_SERVICE_NAME,
+  ATTR_SERVICE_VERSION,
+} from '@opentelemetry/semantic-conventions';
+import { ATTR_SERVICE_NAMESPACE } from '@opentelemetry/semantic-conventions/incubating';
 import { pkg } from '../expose.cjs';
 import {
   isTraceDebuggingEnabled,
   isTraceSendingEnabled,
   isTracingEnabled,
+  massageThrowable,
 } from './utils';
 
 let instrumentations: Instrumentation[] = [];
@@ -41,12 +46,10 @@ export function init(): void {
   const traceProvider = new NodeTracerProvider({
     resource: new Resource({
       // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value
-      [SemanticResourceAttributes.SERVICE_NAME]:
-        process.env.OTEL_SERVICE_NAME ?? 'renovate',
-      [SemanticResourceAttributes.SERVICE_NAMESPACE]:
+      [ATTR_SERVICE_NAME]: process.env.OTEL_SERVICE_NAME ?? 'renovate',
+      [ATTR_SERVICE_NAMESPACE]:
         process.env.OTEL_SERVICE_NAMESPACE ?? 'renovatebot.com',
-      [SemanticResourceAttributes.SERVICE_VERSION]:
-        process.env.OTEL_SERVICE_VERSION ?? pkg.version,
+      [ATTR_SERVICE_VERSION]: process.env.OTEL_SERVICE_VERSION ?? pkg.version,
     }),
   });
 
@@ -144,9 +147,10 @@ export function instrument<F extends () => ReturnType<F>>(
       if (ret instanceof Promise) {
         return ret
           .catch((e) => {
+            span.recordException(e);
             span.setStatus({
               code: SpanStatusCode.ERROR,
-              message: e,
+              message: massageThrowable(e),
             });
             throw e;
           })
@@ -155,9 +159,10 @@ export function instrument<F extends () => ReturnType<F>>(
       span.end();
       return ret;
     } catch (e) {
+      span.recordException(e);
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: e,
+        message: massageThrowable(e),
       });
       span.end();
       throw e;

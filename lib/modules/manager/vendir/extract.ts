@@ -21,7 +21,7 @@ import { Vendir } from './schema';
 
 export function extractHelmChart(
   helmChart: HelmChartDefinition,
-  aliases?: Record<string, string> | undefined,
+  aliases?: Record<string, string>,
 ): PackageDependency | null {
   if (isOCIRegistry(helmChart.repository.url)) {
     const dep = getDep(
@@ -32,7 +32,6 @@ export function extractHelmChart(
     return {
       ...dep,
       depName: helmChart.name,
-      packageName: dep.depName,
       depType: 'HelmChart',
       // https://github.com/helm/helm/issues/10312
       // https://github.com/helm/helm/issues/10678

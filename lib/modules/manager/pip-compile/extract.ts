@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { readLocalFile } from '../../../util/fs';
 import { ensureLocalPath } from '../../../util/fs/util';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
@@ -66,11 +67,14 @@ export async function extractAllPackageFiles(
       compileArgs = extractHeaderCommand(fileContent, fileMatch);
       compileDir = inferCommandExecDir(fileMatch, compileArgs.outputFile);
     } catch (error) {
-      logger.warn({ fileMatch }, `pip-compile: ${error.message}`);
+      logger.warn(
+        { fileMatch, errorMessage: error.message },
+        'pip-compile error',
+      );
       continue;
     }
     lockFileArgs.set(fileMatch, compileArgs);
-    for (const constraint in compileArgs.constraintsFiles) {
+    for (const constraint of coerceArray(compileArgs.constraintsFiles)) {
       depsBetweenFiles.push({
         sourceFile: constraint,
         outputFile: fileMatch,
@@ -212,7 +216,8 @@ export async function extractAllPackageFiles(
       }
       if (!sourceFiles) {
         logger.warn(
-          `pip-compile: ${packageFile.packageFile} references ${reqFile} which does not appear to be a requirements file managed by pip-compile`,
+          { packageFile: packageFile.packageFile, requirementsFile: reqFile },
+          'pip-compile: Package file references a file which does not appear to be a requirements file managed by pip-compile',
         );
         continue;
       }

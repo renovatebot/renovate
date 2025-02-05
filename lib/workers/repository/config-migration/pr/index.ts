@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
+import type { Pr } from '../../../../modules/platform';
 import { platform } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
@@ -19,7 +20,7 @@ import { getMigrationBranchName } from '../common';
 export async function ensureConfigMigrationPr(
   config: RenovateConfig,
   migratedConfigData: MigratedData,
-): Promise<void> {
+): Promise<Pr | null> {
   logger.debug('ensureConfigMigrationPr()');
   const docsLink = joinUrlParts(
     coerceString(config.productLinks?.documentation),
@@ -74,7 +75,7 @@ ${
       existingPr.title === prTitle
     ) {
       logger.debug(`Pr does not need updating, PrNo: ${existingPr.number}`);
-      return;
+      return existingPr;
     }
     // PR must need updating
     if (GlobalConfig.get('dryRun')) {
@@ -87,7 +88,7 @@ ${
       });
       logger.info({ pr: existingPr.number }, 'Migration PR updated');
     }
-    return;
+    return existingPr;
   }
   logger.debug('Creating migration PR');
   const labels = prepareLabels(config);
@@ -111,6 +112,8 @@ ${
       if (pr) {
         await addParticipants(config, pr);
       }
+
+      return pr;
     }
   } catch (err) {
     if (
@@ -124,8 +127,10 @@ ${
         'Migration PR already exists but cannot find it. It was probably created by a different user.',
       );
       await scm.deleteBranch(branchName);
-      return;
+      return null;
     }
     throw err;
   }
+
+  return null;
 }

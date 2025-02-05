@@ -5,7 +5,7 @@
 Read the [Security and Permissions](../security-and-permissions.md) page to learn more about:
 
 - Renovate's security stance
-- What do if you need to use certificed software
+- What do if you need to use certified software
 - The security/disclosure process
 - Permissions
 - Privacy
@@ -66,6 +66,10 @@ You can also set the line endings in your repository by adding `* text=auto eol=
 Once you have enabled Renovate on a repository, you will get a "Configure Renovate" Pull Request looking something like this:
 
 ![Onboarding PR from Renovate](../assets/images/onboarding.png){ loading=lazy }
+
+<!-- prettier-ignore -->
+!!! note
+    If you self-host Renovate, and want to add the rebase/retry checkbox to Renovate's onboarding PRs: enable the [`onboardingRebaseCheckbox` config option](../self-hosted-configuration.md#onboardingrebasecheckbox) first.
 
 ### No risk onboarding
 

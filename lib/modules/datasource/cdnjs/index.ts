@@ -34,7 +34,10 @@ export class CdnjsDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${CdnjsDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName.split('/')[0],
+    key: ({ packageName }: GetReleasesConfig) => {
+      const library = packageName.split('/')[0];
+      return `getReleases:${library}`;
+    },
   })
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const result = Result.parse(config, ReleasesConfig)
@@ -76,9 +79,9 @@ export class CdnjsDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${CdnjsDatasource.id}-digest`,
+    namespace: `datasource-${CdnjsDatasource.id}`,
     key: ({ registryUrl, packageName }: DigestConfig, newValue: string) =>
-      `${registryUrl}:${packageName}:${newValue}}`,
+      `getDigest:${registryUrl}:${packageName}:${newValue}}`,
   })
   override async getDigest(
     config: DigestConfig,

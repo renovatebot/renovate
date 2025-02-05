@@ -9,6 +9,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { safeStringify } from '../../../util/stringify';
 import * as template from '../../../util/template';
+import type { Timestamp } from '../../../util/timestamp';
 import { uniq } from '../../../util/uniq';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { CommitMessage } from '../model/commit-message';
@@ -159,6 +160,9 @@ function compilePrTitle(
   logger.trace(`prTitle: ` + JSON.stringify(upgrade.prTitle));
 }
 
+// Sorted by priority, from low to high
+const semanticCommitTypeByPriority = ['chore', 'ci', 'build', 'fix', 'feat'];
+
 export function generateBranchConfig(
   upgrades: BranchUpgradeConfig[],
 ): BranchConfig {
@@ -242,7 +246,7 @@ export function generateBranchConfig(
   logger.trace(`groupEligible: ${groupEligible}`);
   const useGroupSettings = hasGroupName && groupEligible;
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
-  let releaseTimestamp: string;
+  let releaseTimestamp: Timestamp;
 
   if (depTypes.size) {
     config.depTypes = Array.from(depTypes).sort();
@@ -354,6 +358,30 @@ export function generateBranchConfig(
     ...config.upgrades[0],
     releaseTimestamp: releaseTimestamp!,
   }; // TODO: fixme (#9666)
+
+  // Enable `semanticCommits` if one of the branches has it enabled
+  if (
+    config.upgrades.some((upgrade) => upgrade.semanticCommits === 'enabled')
+  ) {
+    config.semanticCommits = 'enabled';
+    // Calculate the highest priority `semanticCommitType`
+    let highestIndex = -1;
+    for (const upgrade of config.upgrades) {
+      if (upgrade.semanticCommits === 'enabled' && upgrade.semanticCommitType) {
+        const priorityIndex = semanticCommitTypeByPriority.indexOf(
+          upgrade.semanticCommitType,
+        );
+
+        if (priorityIndex > highestIndex) {
+          highestIndex = priorityIndex;
+        }
+      }
+    }
+
+    if (highestIndex > -1) {
+      config.semanticCommitType = semanticCommitTypeByPriority[highestIndex];
+    }
+  }
 
   // Use templates to generate strings
   const commitMessage = compileCommitMessage(config);

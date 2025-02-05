@@ -163,6 +163,7 @@ export async function updateArtifacts({
         // TODO #22198
         ['provider', 'required_provider'].includes(dep.depType!),
       );
+      logger.debug(`Found ${providerDeps.length} provider deps`);
       for (const dep of providerDeps) {
         massageProviderLookupName(dep);
         const { registryUrls, newVersion, packageName } = dep;
@@ -172,6 +173,7 @@ export async function updateArtifacts({
         );
         // istanbul ignore if: needs test
         if (!updateLock) {
+          logger.debug(`Skipping. No lock found for "${packageName}"`);
           continue;
         }
         if (dep.isLockfileUpdate) {
@@ -213,9 +215,10 @@ export async function updateArtifacts({
       updates.length === 0 ||
       updates.some((value) => !value.newHashes?.length)
     ) {
+      logger.debug('No updates found or hash creation failed');
       return null;
     }
-
+    logger.debug(`Writing updates to ${lockFilePath}`);
     const res = writeLockUpdates(updates, lockFilePath, lockFileContent);
     return [res];
   } catch (err) {

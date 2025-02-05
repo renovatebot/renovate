@@ -16,6 +16,10 @@ export const presets: Record<string, Preset> = {
     description: 'All packages published by Apollo GraphQL.',
     matchSourceUrls: ['https://github.com/apollographql/**'],
   },
+  atlaskit: {
+    description: 'All @atlaskit packages published by Atlassian.',
+    matchPackageNames: ['@atlaskit/**'],
+  },
   emberTemplateLint: {
     description: 'All ember-template-lint packages.',
     matchPackageNames: ['ember-template-lint**'],
@@ -76,9 +80,9 @@ export const presets: Record<string, Preset> = {
       'ts-auto-mock',
       'ts-jest',
       'vitest',
-      '@testing-library**',
+      '@testing-library/**',
       '@types/testing-library__**',
-      '@vitest**',
+      '@vitest/**',
       'chai**',
       'jest**',
       'mocha**',
@@ -131,7 +135,8 @@ export const presets: Record<string, Preset> = {
   },
   react: {
     description: 'All React packages.',
-    matchPackageNames: ['@types/react', 'react**'],
+    matchDatasources: ['npm'],
+    matchPackageNames: ['@types/react**', 'react**'],
   },
   stylelint: {
     description: 'All Stylelint packages.',

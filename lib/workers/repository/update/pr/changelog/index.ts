@@ -17,8 +17,8 @@ export async function getChangeLogJSON(
     if (!(sourceUrl && currentVersion && newVersion)) {
       return null;
     }
-    const version = allVersioning.get(versioning);
-    if (version.equals(currentVersion, newVersion)) {
+    const versioningApi = allVersioning.get(versioning);
+    if (versioningApi.equals(currentVersion, newVersion)) {
       return null;
     }
     logger.debug(

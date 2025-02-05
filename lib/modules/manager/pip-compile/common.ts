@@ -9,7 +9,7 @@ import { ensureLocalPath } from '../../../util/fs/util';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types';
-import type { PipCompileArgs, SupportedManagers } from './types';
+import type { CommandType, PipCompileArgs, SupportedManagers } from './types';
 
 export function getPythonVersionConstraint(
   config: UpdateArtifactsConfig,
@@ -83,24 +83,45 @@ export const constraintLineRegex = regEx(
 export const disallowedPipOptions = [
   '--no-header', // header is required by this manager
 ];
-export const optionsWithArguments = [
+const commonOptionsWithArguments = [
   '--output-file',
   '--extra',
   '--extra-index-url',
+];
+const pipOptionsWithArguments = [
   '--resolver',
   '--constraint',
+  ...commonOptionsWithArguments,
 ];
-export const allowedPipOptions = [
+const uvOptionsWithArguments = ['--constraints', ...commonOptionsWithArguments];
+export const optionsWithArguments = [
+  ...pipOptionsWithArguments,
+  ...uvOptionsWithArguments,
+];
+const allowedCommonOptions = [
   '-v',
-  '--all-extras',
-  '--allow-unsafe',
   '--generate-hashes',
-  '--no-emit-index-url',
   '--emit-index-url',
-  '--strip-extras',
   '--index-url',
-  ...optionsWithArguments,
 ];
+export const allowedOptions: Record<CommandType, string[]> = {
+  'pip-compile': [
+    '--all-extras',
+    '--allow-unsafe',
+    '--generate-hashes',
+    '--no-emit-index-url',
+    '--strip-extras',
+    ...allowedCommonOptions,
+    ...pipOptionsWithArguments,
+  ],
+  uv: [
+    '--no-strip-extras',
+    '--universal',
+    ...allowedCommonOptions,
+    ...uvOptionsWithArguments,
+  ],
+  custom: [],
+};
 
 // TODO(not7cd): test on all correct headers, even with CUSTOM_COMPILE_COMMAND
 export function extractHeaderCommand(
@@ -118,23 +139,33 @@ export function extractHeaderCommand(
   );
   const command = compileCommand.groups.command;
   const argv = [command];
-  const isCustomCommand = command !== 'pip-compile';
+  let commandType: CommandType;
+  if (command === 'pip-compile') {
+    commandType = 'pip-compile';
+  } else if (command === 'uv') {
+    commandType = 'uv';
+  } else {
+    commandType = 'custom';
+  }
   if (compileCommand.groups.arguments) {
     argv.push(...split(compileCommand.groups.arguments));
   }
   logger.debug(
-    { fileName, argv, isCustomCommand },
+    { fileName, argv, commandType },
     `pip-compile: extracted command from header`,
   );
 
   const result: PipCompileArgs = {
     argv,
     command,
-    isCustomCommand,
+    commandType,
     outputFile: '',
     sourceFiles: [],
   };
   for (const arg of argv.slice(1)) {
+    if (commandType === 'uv' && ['pip', 'compile'].includes(arg)) {
+      continue;
+    }
     // TODO(not7cd): check for "--option -- argument" case
     if (!arg.startsWith('-')) {
       result.sourceFiles.push(arg);
@@ -142,7 +173,7 @@ export function extractHeaderCommand(
     }
     throwForDisallowedOption(arg);
     throwForNoEqualSignInOptionWithArgument(arg);
-    throwForUnknownOption(arg);
+    throwForUnknownOption(commandType, arg);
 
     if (arg.includes('=')) {
       const [option, value] = arg.split('=');
@@ -153,7 +184,7 @@ export function extractHeaderCommand(
         result.extraIndexUrl = result.extraIndexUrl ?? [];
         result.extraIndexUrl.push(value);
         // TODO: add to secrets? next PR
-      } else if (option === '--constraint') {
+      } else if (['--constraint', '--constraints'].includes(option)) {
         result.constraintsFiles = result.constraintsFiles ?? [];
         result.constraintsFiles.push(value);
       } else if (option === '--output-file') {
@@ -210,13 +241,20 @@ const pythonVersionRegex = regEx(
 );
 
 export function extractPythonVersion(
+  commandType: CommandType,
   content: string,
   fileName: string,
 ): string | undefined {
+  // uv's headers do not include the Python version
+  // https://github.com/astral-sh/uv/issues/3588
+  if (commandType === 'uv') {
+    return;
+  }
   const match = pythonVersionRegex.exec(content);
   if (match?.groups === undefined) {
     logger.warn(
-      `pip-compile: failed to extract Python version from header in ${fileName} ${content}`,
+      { fileName, content },
+      'pip-compile: failed to extract Python version from header in file',
     );
     return undefined;
   }
@@ -243,14 +281,14 @@ function throwForNoEqualSignInOptionWithArgument(arg: string): void {
     );
   }
 }
-function throwForUnknownOption(arg: string): void {
+function throwForUnknownOption(commandType: CommandType, arg: string): void {
   if (arg.includes('=')) {
     const [option] = arg.split('=');
-    if (allowedPipOptions.includes(option)) {
+    if (allowedOptions[commandType].includes(option)) {
       return;
     }
   }
-  if (allowedPipOptions.includes(arg)) {
+  if (allowedOptions[commandType].includes(arg)) {
     return;
   }
   throw new Error(`Option ${arg} not supported (yet)`);

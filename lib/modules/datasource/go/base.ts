@@ -12,6 +12,7 @@ import {
 } from '../../../util/url';
 import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { GitTagsDatasource } from '../git-tags';
+import { GiteaTagsDatasource } from '../gitea-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { DataSource } from './types';
@@ -20,6 +21,9 @@ import type { DataSource } from './types';
 export class BaseGoDatasource {
   private static readonly gitlabHttpsRegExp = regEx(
     /^(?<httpsRegExpUrl>https:\/\/[^/]*gitlab\.[^/]*)\/(?<httpsRegExpName>.+?)(?:\/v\d+)?[/]?$/,
+  );
+  private static readonly gitlabRegExp = regEx(
+    /^(?<regExpUrl>gitlab\.[^/]*)\/(?<regExpPath>.+?)(?:\/v\d+)?[/]?$/,
   );
   private static readonly gitVcsRegexp = regEx(
     /^(?:[^/]+)\/(?<module>.*)\.git(?:$|\/)/,
@@ -91,13 +95,45 @@ export class BaseGoDatasource {
       }
     }
 
+    //#region known gitea compatible hosts
+    if (goModule.startsWith('gitea.com/')) {
+      const split = goModule.split('/');
+      const packageName = `${split[1]}/${split[2]}`;
+      return {
+        datasource: GiteaTagsDatasource.id,
+        packageName,
+        registryUrl: 'https://gitea.com',
+      };
+    }
+
+    if (goModule.startsWith('code.forgejo.org/')) {
+      const split = goModule.split('/');
+      const packageName = `${split[1]}/${split[2]}`;
+      return {
+        datasource: GiteaTagsDatasource.id,
+        packageName,
+        registryUrl: 'https://code.forgejo.org',
+      };
+    }
+
+    if (goModule.startsWith('codeberg.org/')) {
+      const split = goModule.split('/');
+      const packageName = `${split[1]}/${split[2]}`;
+      return {
+        datasource: GiteaTagsDatasource.id,
+        packageName,
+        registryUrl: 'https://codeberg.org',
+      };
+    }
+    //#endregion
+
     return await BaseGoDatasource.goGetDatasource(goModule);
   }
 
   private static async goGetDatasource(
     goModule: string,
   ): Promise<DataSource | null> {
-    const goModuleUrl = goModule.replace(/\.git\/v2$/, '');
+    const goModuleUrl = goModule.replace(/\.git(\/[a-z0-9/]*)?$/, '');
     const pkgUrl = `https://${goModuleUrl}?go-get=1`;
     const { body: html } = await BaseGoDatasource.http.get(pkgUrl);
 
@@ -151,6 +187,8 @@ export class BaseGoDatasource {
       };
     }
 
+    const gitlabModuleName =
+      BaseGoDatasource.gitlabRegExp.exec(goModule)?.groups?.regExpPath;
     const vcsIndicatedModule =
       BaseGoDatasource.gitVcsRegexp.exec(goModule)?.groups?.module;
 
@@ -158,7 +196,8 @@ export class BaseGoDatasource {
       BaseGoDatasource.gitlabHttpsRegExp.exec(metadataUrl)?.groups;
     if (metadataUrlMatchGroups) {
       const { httpsRegExpUrl, httpsRegExpName } = metadataUrlMatchGroups;
-      const packageName = vcsIndicatedModule ?? httpsRegExpName;
+      const packageName =
+        vcsIndicatedModule ?? gitlabModuleName ?? httpsRegExpName;
       return {
         datasource: GitlabTagsDatasource.id,
         registryUrl: httpsRegExpUrl,

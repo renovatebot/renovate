@@ -9,4 +9,17 @@ export const GleamToml = Toml.pipe(
   }),
 );
 
+const Package = z.object({
+  name: z.string(),
+  version: z.string(),
+  requirements: z.array(z.string()).optional(),
+});
+
+export const ManifestToml = Toml.pipe(
+  z.object({
+    packages: z.array(Package).optional(),
+  }),
+);
+
 export type GleamToml = z.infer<typeof GleamToml>;
+export type ManifestToml = z.infer<typeof ManifestToml>;

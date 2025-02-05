@@ -20,7 +20,6 @@ function parseResources(
   packageFile: string,
 ): GlasskubeResources {
   const resources: GlasskubeResource[] = parseYaml(content, {
-    json: true,
     customSchema: GlasskubeResource,
     failureBehaviour: 'filter',
   });

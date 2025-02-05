@@ -306,7 +306,7 @@ export function massageMarkdown(input: string): string {
   return input
     .replace(
       'you tick the rebase/retry checkbox',
-      'rename PR to start with "rebase!"',
+      'PR is renamed to start with "rebase!"',
     )
     .replace(
       'checking the rebase/retry box above',

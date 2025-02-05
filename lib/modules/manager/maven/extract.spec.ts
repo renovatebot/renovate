@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
+import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,
   extractExtensions,
@@ -234,6 +235,17 @@ describe('modules/manager/maven/extract', () => {
       });
     });
 
+    it('extract dependencies with windows line endings', () => {
+      const logSpy = jest.spyOn(logger, 'warn');
+      extractPackage(
+        '<?xml version="1.0" encoding="UTF-8"?> \r\n',
+        'some-file',
+      );
+      expect(logSpy).toHaveBeenCalledWith(
+        'Your pom.xml contains windows line endings. This is not supported and may result in parsing issues.',
+      );
+    });
+
     it('tries minimum manifests', () => {
       const res = extractPackage(Fixtures.get('minimum.pom.xml'), 'some-file');
       expect(res).toEqual({
@@ -464,7 +476,7 @@ describe('modules/manager/maven/extract', () => {
               depType: 'compile',
               editFile: 'parent.pom.xml',
               fileReplacePosition: 470,
-              groupName: 'quuxVersion',
+              sharedVariableName: 'quuxVersion',
               registryUrls: [
                 'http://example.com/',
                 'http://example.com/nexus/xyz',
@@ -685,12 +697,12 @@ describe('modules/manager/maven/extract', () => {
             {
               depName: 'org.example:quux',
               currentValue: '1.2.3.4',
-              groupName: 'quuxVersion',
+              sharedVariableName: 'quuxVersion',
             },
             {
               depName: 'org.example:quux-test',
               currentValue: '1.2.3.4',
-              groupName: 'quuxVersion',
+              sharedVariableName: 'quuxVersion',
             },
             {
               depName: 'org.example:quuz',

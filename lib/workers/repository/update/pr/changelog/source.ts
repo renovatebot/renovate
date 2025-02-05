@@ -76,7 +76,7 @@ export abstract class ChangeLogSource {
     const packageName = config.packageName!;
     const depName = config.depName!;
     const sourceDirectory = config.sourceDirectory;
-    const version = allVersioning.get(versioning);
+    const versioningApi = allVersioning.get(versioning);
 
     if (this.shouldSkipPackage(config)) {
       return null;
@@ -108,8 +108,8 @@ export abstract class ChangeLogSource {
     }
     // This extra filter/sort should not be necessary, but better safe than sorry
     const validReleases = [...releases]
-      .filter((release) => version.isVersion(release.version))
-      .sort((a, b) => version.sortVersions(a.version, b.version));
+      .filter((release) => versioningApi.isVersion(release.version))
+      .sort((a, b) => versioningApi.sortVersions(a.version, b.version));
 
     if (validReleases.length < 2) {
       logger.debug(
@@ -122,8 +122,8 @@ export abstract class ChangeLogSource {
 
     // Check if `v` belongs to the range (currentVersion, newVersion]
     const inRange = (v: string): boolean =>
-      version.isGreaterThan(v, currentVersion) &&
-      !version.isGreaterThan(v, newVersion);
+      versioningApi.isGreaterThan(v, currentVersion) &&
+      !versioningApi.isGreaterThan(v, newVersion);
 
     const getTags = memoize(() => this.getAllTags(apiBaseUrl, repository));
     for (let i = 1; i < validReleases.length; i += 1) {
@@ -146,8 +146,20 @@ export abstract class ChangeLogSource {
           compare: {},
         };
         const tags = await getTags();
-        const prevHead = this.getRef(version, packageName, depName, prev, tags);
-        const nextHead = this.getRef(version, packageName, depName, next, tags);
+        const prevHead = this.getRef(
+          versioningApi,
+          packageName,
+          depName,
+          prev,
+          tags,
+        );
+        const nextHead = this.getRef(
+          versioningApi,
+          packageName,
+          depName,
+          next,
+          tags,
+        );
         if (is.nonEmptyString(prevHead) && is.nonEmptyString(nextHead)) {
           release.compare.url = this.getCompareURL(
             baseUrl,
@@ -186,7 +198,7 @@ export abstract class ChangeLogSource {
   }
 
   private findTagOfRelease(
-    version: allVersioning.VersioningApi,
+    versioningApi: allVersioning.VersioningApi,
     packageName: string,
     depName: string,
     depNewVersion: string,
@@ -200,19 +212,21 @@ export abstract class ChangeLogSource {
     });
     const tagList = exactTagsList.length ? exactTagsList : tags;
     return tagList
-      .filter((tag) => version.isVersion(tag.replace(regex, '')))
-      .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
+      .filter((tag) => versioningApi.isVersion(tag.replace(regex, '')))
+      .find((tag) =>
+        versioningApi.equals(tag.replace(regex, ''), depNewVersion),
+      );
   }
 
   private getRef(
-    version: allVersioning.VersioningApi,
+    versioningApi: allVersioning.VersioningApi,
     packageName: string,
     depName: string,
     release: Release,
     tags: string[],
   ): string | null {
     const tagName = this.findTagOfRelease(
-      version,
+      versioningApi,
       packageName,
       depName,
       release.version,

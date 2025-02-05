@@ -188,7 +188,10 @@ export async function updateArtifacts({
           toolName: 'java',
           constraint:
             config.constraints?.java ??
-            getJavaConstraint(await getGradleVersion(gradlewFile)),
+            (await getJavaConstraint(
+              await getGradleVersion(gradlewFile),
+              gradlewFile,
+            )),
         },
       ],
     };

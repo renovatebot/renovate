@@ -35,11 +35,13 @@ export interface GitLabMergeRequest {
   sha: LongCommitSha;
   head_pipeline?: {
     status: string;
+    sha: string;
   };
 }
 
 export interface GitlabPr extends Pr {
   headPipelineStatus?: string;
+  headPipelineSha?: string;
 }
 
 export interface UpdateMergeRequest {

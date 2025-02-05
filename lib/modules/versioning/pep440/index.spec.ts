@@ -41,6 +41,7 @@ describe('modules/versioning/pep440/index', () => {
   it.each`
     a          | b             | expected
     ${'1.0'}   | ${'>=1.0.0'}  | ${true}
+    ${'3.0.0'} | ${'3.0.0'}    | ${true}
     ${'1.6.2'} | ${'<2.2.1.0'} | ${true}
     ${'>=3.8'} | ${'>=3.9'}    | ${false}
   `('matches($a, $b) === $expected', ({ a, b, expected }) => {

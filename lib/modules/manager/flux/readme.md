@@ -1,8 +1,8 @@
 This manager parses [Flux](https://fluxcd.io/) YAML manifests and supports:
 
 1. [`HelmRelease`](https://fluxcd.io/docs/components/helm/helmreleases/) resources
-1. ['GitRepository'](https://fluxcd.io/flux/components/source/gitrepositories/) resources
-1. ['OCIRepository'](https://fluxcd.io/flux/components/source/ocirepositories/) resources
+1. [`GitRepository`](https://fluxcd.io/flux/components/source/gitrepositories/) resources
+1. [`OCIRepository`](https://fluxcd.io/flux/components/source/ocirepositories/) resources
 1. Flux [system](https://fluxcd.io/docs/installation) manifests
 
 ### HelmRelease support
@@ -21,6 +21,8 @@ In addition, for the `flux` manager to properly link `HelmRelease` and `HelmRepo
 Namespaces will not be inferred from the context (e.g. from the parent `Kustomization`).
 
 Renovate updates `HelmRelease` resources coming from `GitRepository` by updating the `GitRepository` resource.
+
+Renovate updates Docker dependencies inside `HelmRelease` `values` like the [`helm-values`](../helm-values/index.md) manager.
 
 ### GitRepository support
 

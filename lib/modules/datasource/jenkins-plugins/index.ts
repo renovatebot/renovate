@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { clone } from '../../../util/clone';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -96,8 +97,7 @@ export class JenkinsPluginsDatasource extends Datasource {
         const downloadUrl = plugins[name][version]?.url;
         const buildDate = plugins[name][version]?.buildDate;
         const releaseTimestamp =
-          plugins[name][version]?.releaseTimestamp ??
-          (buildDate ? new Date(`${buildDate} UTC`).toISOString() : null);
+          plugins[name][version]?.releaseTimestamp ?? asTimestamp(buildDate);
         const jenkins = plugins[name][version]?.requiredCore;
         const constraints = jenkins ? { jenkins: [`>=${jenkins}`] } : undefined;
         return {
@@ -117,7 +117,7 @@ export class JenkinsPluginsDatasource extends Datasource {
     try {
       logger.debug(`jenkins-plugins: Fetching Jenkins plugins from ${url}`);
       const startTime = Date.now();
-      response = (await this.http.getJson<T>(url)).body;
+      response = (await this.http.getJsonUnchecked<T>(url)).body;
       const durationMs = Math.round(Date.now() - startTime);
       logger.debug(
         { durationMs },

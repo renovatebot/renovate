@@ -30,52 +30,57 @@ function renameKeys(packageRule: PackageRule): PackageRule {
 function mergeMatchers(packageRule: PackageRule): PackageRule {
   const newPackageRule: PackageRule = { ...packageRule };
   for (const [key, val] of Object.entries(packageRule)) {
+    const patterns = is.string(val) ? [val] : val;
+
     // depName
     if (key === 'matchDepPrefixes') {
-      if (is.array(val, is.string)) {
+      if (is.array(patterns, is.string)) {
         newPackageRule.matchDepNames ??= [];
-        newPackageRule.matchDepNames.push(...val.map((v) => `${v}{/,}**`));
+        newPackageRule.matchDepNames.push(...patterns.map((v) => `${v}{/,}**`));
       }
       delete newPackageRule.matchDepPrefixes;
     }
     if (key === 'matchDepPatterns') {
-      if (is.array(val, is.string)) {
+      if (is.array(patterns, is.string)) {
         newPackageRule.matchDepNames ??= [];
-        newPackageRule.matchDepNames.push(...val.map((v) => `/${v}/`));
+        newPackageRule.matchDepNames.push(...patterns.map((v) => `/${v}/`));
       }
       delete newPackageRule.matchDepPatterns;
     }
     if (key === 'excludeDepNames') {
-      if (is.array(val, is.string)) {
+      if (is.array(patterns, is.string)) {
         newPackageRule.matchDepNames ??= [];
-        newPackageRule.matchDepNames.push(...val.map((v) => `!${v}`));
+        newPackageRule.matchDepNames.push(...patterns.map((v) => `!${v}`));
       }
       delete newPackageRule.excludeDepNames;
     }
     if (key === 'excludeDepPrefixes') {
-      if (is.array(val, is.string)) {
+      if (is.array(patterns, is.string)) {
         newPackageRule.matchDepNames ??= [];
-        newPackageRule.matchDepNames.push(...val.map((v) => `!${v}{/,}**`));
+        newPackageRule.matchDepNames.push(
+          ...patterns.map((v) => `!${v}{/,}**`),
+        );
       }
       delete newPackageRule.excludeDepPrefixes;
     }
     if (key === 'excludeDepPatterns') {
-      if (is.array(val, is.string)) {
+      if (is.array(patterns, is.string)) {
         newPackageRule.matchDepNames ??= [];
-        newPackageRule.matchDepNames.push(...val.map((v) => `!/${v}/`));
+        newPackageRule.matchDepNames.push(...patterns.map((v) => `!/${v}/`));
       }
       delete newPackageRule.excludeDepPatterns;
     }
     // packageName
     if (key === 'matchPackagePrefixes') {
-      if (is.array(val, is.string)) {
+      if (is.array(patterns, is.string)) {
         newPackageRule.matchPackageNames ??= [];
-        newPackageRule.matchPackageNames.push(...val.map((v) => `${v}{/,}**`));
+        newPackageRule.matchPackageNames.push(
+          ...patterns.map((v) => `${v}{/,}**`),
+        );
       }
       delete newPackageRule.matchPackagePrefixes;
     }
     if (key === 'matchPackagePatterns') {
-      const patterns = is.string(val) ? [val] : val;
       if (is.array(patterns, is.string)) {
         newPackageRule.matchPackageNames ??= [];
         newPackageRule.matchPackageNames.push(
@@ -90,39 +95,45 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       delete newPackageRule.matchPackagePatterns;
     }
     if (key === 'excludePackageNames') {
-      if (is.array(val, is.string)) {
+      if (is.array(patterns, is.string)) {
         newPackageRule.matchPackageNames ??= [];
-        newPackageRule.matchPackageNames.push(...val.map((v) => `!${v}`));
+        newPackageRule.matchPackageNames.push(...patterns.map((v) => `!${v}`));
       }
       delete newPackageRule.excludePackageNames;
     }
     if (key === 'excludePackagePrefixes') {
-      if (is.array(val, is.string)) {
+      if (is.array(patterns, is.string)) {
         newPackageRule.matchPackageNames ??= [];
-        newPackageRule.matchPackageNames.push(...val.map((v) => `!${v}{/,}**`));
+        newPackageRule.matchPackageNames.push(
+          ...patterns.map((v) => `!${v}{/,}**`),
+        );
       }
       delete newPackageRule.excludePackagePrefixes;
     }
     if (key === 'excludePackagePatterns') {
-      if (is.array(val, is.string)) {
+      if (is.array(patterns, is.string)) {
         newPackageRule.matchPackageNames ??= [];
-        newPackageRule.matchPackageNames.push(...val.map((v) => `!/${v}/`));
+        newPackageRule.matchPackageNames.push(
+          ...patterns.map((v) => `!/${v}/`),
+        );
       }
       delete newPackageRule.excludePackagePatterns;
     }
     // sourceUrl
     if (key === 'matchSourceUrlPrefixes') {
-      if (is.array(val, is.string)) {
+      if (is.array(patterns, is.string)) {
         newPackageRule.matchSourceUrls ??= [];
-        newPackageRule.matchSourceUrls.push(...val.map((v) => `${v}{/,}**`));
+        newPackageRule.matchSourceUrls.push(
+          ...patterns.map((v) => `${v}{/,}**`),
+        );
       }
       delete newPackageRule.matchSourceUrlPrefixes;
     }
     // repository
     if (key === 'excludeRepositories') {
-      if (is.array(val, is.string)) {
+      if (is.array(patterns, is.string)) {
         newPackageRule.matchRepositories ??= [];
-        newPackageRule.matchRepositories.push(...val.map((v) => `!${v}`));
+        newPackageRule.matchRepositories.push(...patterns.map((v) => `!${v}`));
       }
       delete newPackageRule.excludeRepositories;
     }

@@ -50,8 +50,10 @@ export type SkipReason =
 export type StageName =
   | 'current-timestamp'
   | 'datasource-merge'
+  | 'extract'
   | 'lock-file-maintenance-merge'
   | 'lock-file-maintenance-merge-2'
+  | 'lookup'
   | 'pre-lookup'
   | 'source-url'
   | 'update-type'

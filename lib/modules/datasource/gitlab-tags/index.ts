@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GitlabHttp } from '../../../util/http/gitlab';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
@@ -29,7 +30,7 @@ export class GitlabTagsDatasource extends Datasource {
   @cache({
     namespace: `datasource-${GitlabTagsDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${getDepHost(registryUrl)}:${packageName}`,
+      `getReleases:${getDepHost(registryUrl)}:${packageName}`,
   })
   async getReleases({
     registryUrl,
@@ -48,7 +49,7 @@ export class GitlabTagsDatasource extends Datasource {
     );
 
     const gitlabTags = (
-      await this.http.getJson<GitlabTag[]>(url, {
+      await this.http.getJsonUnchecked<GitlabTag[]>(url, {
         paginate: true,
       })
     ).body;
@@ -60,7 +61,7 @@ export class GitlabTagsDatasource extends Datasource {
     dependency.releases = gitlabTags.map(({ name, commit }) => ({
       version: name,
       gitRef: name,
-      releaseTimestamp: commit?.created_at,
+      releaseTimestamp: asTimestamp(commit?.created_at),
     }));
 
     return dependency;
@@ -72,17 +73,17 @@ export class GitlabTagsDatasource extends Datasource {
    * Returs the latest commit hash of the repository.
    */
   @cache({
-    namespace: `datasource-${GitlabTagsDatasource.id}-commit`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${getDepHost(registryUrl)}:${packageName}`,
+    namespace: `datasource-${GitlabTagsDatasource.id}`,
+    key: ({ registryUrl, packageName }: DigestConfig) =>
+      `getDigest:${getDepHost(registryUrl)}:${packageName}`,
   })
   override async getDigest(
-    { packageName: repo, registryUrl }: Partial<DigestConfig>,
+    { packageName: repo, registryUrl }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
     const depHost = getDepHost(registryUrl);
 
-    const urlEncodedRepo = encodeURIComponent(repo!);
+    const urlEncodedRepo = encodeURIComponent(repo);
     let digest: string | null = null;
 
     try {
@@ -94,7 +95,8 @@ export class GitlabTagsDatasource extends Datasource {
           `repository/commits/`,
           newValue,
         );
-        const gitlabCommits = await this.http.getJson<GitlabCommit>(url);
+        const gitlabCommits =
+          await this.http.getJsonUnchecked<GitlabCommit>(url);
         digest = gitlabCommits.body.id;
       } else {
         const url = joinUrlParts(
@@ -103,7 +105,8 @@ export class GitlabTagsDatasource extends Datasource {
           urlEncodedRepo,
           `repository/commits?per_page=1`,
         );
-        const gitlabCommits = await this.http.getJson<GitlabCommit[]>(url);
+        const gitlabCommits =
+          await this.http.getJsonUnchecked<GitlabCommit[]>(url);
         digest = gitlabCommits.body[0].id;
       }
     } catch (err) {

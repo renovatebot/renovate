@@ -35,6 +35,7 @@ export class Vulnerabilities {
   > = {
     crate: 'crates.io',
     go: 'Go',
+    hackage: 'Hackage',
     hex: 'Hex',
     maven: 'Maven',
     npm: 'npm',
@@ -248,8 +249,8 @@ export class Vulnerabilities {
       return { vulnerabilities, versioningApi };
     } catch (err) {
       logger.warn(
-        { err },
-        `Error fetching vulnerability information for ${packageName}`,
+        { err, packageName },
+        'Error fetching vulnerability information for package',
       );
       return null;
     }
@@ -426,11 +427,8 @@ export class Vulnerabilities {
     fixedVersion: string,
     ecosystem: Ecosystem,
   ): string {
-    if (ecosystem === 'Maven') {
+    if (ecosystem === 'Maven' || ecosystem === 'NuGet') {
       return `[${fixedVersion},)`;
-    } else if (ecosystem === 'NuGet') {
-      // TODO: add support for nuget version ranges when #26150 is merged
-      return fixedVersion;
     }
 
     // crates.io, Go, Hex, npm, RubyGems, PyPI
@@ -485,7 +483,7 @@ export class Vulnerabilities {
       packageFileConfig,
     } = vul;
     if (is.nullOrUndefined(fixedVersion)) {
-      logger.info(
+      logger.debug(
         `No fixed version available for vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`,
       );
       return null;

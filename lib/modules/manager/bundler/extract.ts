@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { RubygemsDatasource } from '../../datasource/rubygems';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -11,6 +12,20 @@ import { extractLockFileEntries } from './locked-version';
 function formatContent(input: string): string {
   return input.replace(regEx(/^ {2}/), '') + '\n'; //remove leading whitespace and add a new line at the end
 }
+
+const variableMatchRegex = regEx(
+  `^(?<key>\\w+)\\s*=\\s*['"](?<value>[^'"]+)['"]`,
+);
+const gemMatchRegex = regEx(
+  `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?`,
+);
+const sourceMatchRegex = regEx(
+  `source:\\s*((?:['"](?<registryUrl>[^'"]+)['"])|(?<sourceName>\\w+))?`,
+);
+const gitRefsMatchRegex = regEx(
+  `((git:\\s*['"](?<gitUrl>[^'"]+)['"])|(\\s*,\\s*github:\\s*['"](?<repoName>[^'"]+)['"]))(\\s*,\\s*branch:\\s*['"](?<branchName>[^'"]+)['"])?(\\s*,\\s*ref:\\s*['"](?<refName>[^'"]+)['"])?(\\s*,\\s*tag:\\s*['"](?<tagName>[^'"]+)['"])?`,
+);
+const pathMatchRegex = regEx(`path:\\s*['"](?<path>[^'"]+)['"]`);
 
 export async function extractPackageFile(
   content: string,
@@ -78,6 +93,9 @@ export async function extractPackageFile(
     registryUrls: [],
     deps: [],
   };
+
+  const variables: Record<string, string> = {};
+
   const lines = content.split(newlineRegex);
   for (lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     const line = lines[lineNumber];
@@ -85,12 +103,20 @@ export async function extractPackageFile(
     for (const delimiter of delimiters) {
       sourceMatch =
         sourceMatch ??
-        regEx(`^source ${delimiter}([^${delimiter}]+)${delimiter}\\s*$`).exec(
-          line,
-        );
+        regEx(
+          `^source ((${delimiter}(?<registryUrl>[^${delimiter}]+)${delimiter})|(?<sourceName>\\w+))\\s*$`,
+        ).exec(line);
     }
     if (sourceMatch) {
-      res.registryUrls?.push(sourceMatch[1]);
+      if (sourceMatch.groups?.registryUrl) {
+        res.registryUrls?.push(sourceMatch.groups.registryUrl);
+      }
+      if (sourceMatch.groups?.sourceName) {
+        const registryUrl = variables[sourceMatch.groups.sourceName];
+        if (registryUrl) {
+          res.registryUrls?.push(registryUrl);
+        }
+      }
     }
 
     const rubyMatch = extractRubyVersion(line);
@@ -103,20 +129,63 @@ export async function extractPackageFile(
       });
     }
 
-    const gemMatchRegex = regEx(
-      `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?`,
-    );
-    const gemMatch = gemMatchRegex.exec(line);
+    const variableMatch = variableMatchRegex.exec(line);
+    if (variableMatch) {
+      if (variableMatch.groups?.key) {
+        variables[variableMatch.groups?.key] = variableMatch.groups?.value;
+      }
+    }
+
+    const gemMatch = gemMatchRegex.exec(line)?.groups;
+
     if (gemMatch) {
       const dep: PackageDependency = {
-        depName: gemMatch.groups?.depName,
+        depName: gemMatch.depName,
         managerData: { lineNumber },
+        datasource: RubygemsDatasource.id,
       };
-      if (gemMatch.groups?.currentValue) {
-        const currentValue = gemMatch.groups.currentValue;
+
+      if (gemMatch.currentValue) {
+        const currentValue = gemMatch.currentValue;
         dep.currentValue = currentValue;
       }
-      dep.datasource = RubygemsDatasource.id;
+
+      const pathMatch = pathMatchRegex.exec(line)?.groups;
+      if (pathMatch) {
+        dep.skipReason = 'internal-package';
+      }
+
+      const sourceMatch = sourceMatchRegex.exec(line)?.groups;
+      if (sourceMatch) {
+        if (sourceMatch.registryUrl) {
+          dep.registryUrls = [sourceMatch.registryUrl];
+        } else if (sourceMatch.sourceName) {
+          dep.registryUrls = [variables[sourceMatch.sourceName]];
+        }
+      }
+
+      const gitRefsMatch = gitRefsMatchRegex.exec(line)?.groups;
+      if (gitRefsMatch) {
+        if (gitRefsMatch.gitUrl) {
+          const gitUrl = gitRefsMatch.gitUrl;
+          dep.packageName = gitUrl;
+
+          if (gitUrl.startsWith('https://')) {
+            dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+          }
+        } else if (gitRefsMatch.repoName) {
+          dep.packageName = `https://github.com/${gitRefsMatch.repoName}`;
+          dep.sourceUrl = dep.packageName;
+        }
+        if (gitRefsMatch.refName) {
+          dep.currentDigest = gitRefsMatch.refName;
+        } else if (gitRefsMatch.branchName) {
+          dep.currentValue = gitRefsMatch.branchName;
+        } else if (gitRefsMatch.tagName) {
+          dep.currentValue = gitRefsMatch.tagName;
+        }
+        dep.datasource = GitRefsDatasource.id;
+      }
       res.deps.push(dep);
     }
 
@@ -124,10 +193,18 @@ export async function extractPackageFile(
 
     for (const delimiter of delimiters) {
       const sourceBlockMatch = regEx(
-        `^source\\s+${delimiter}(.*?)${delimiter}\\s+do`,
+        `^source\\s+((${delimiter}(?<registryUrl>[^${delimiter}]+)${delimiter})|(?<sourceName>\\w+))\\s+do`,
       ).exec(line);
       if (sourceBlockMatch) {
-        const repositoryUrl = sourceBlockMatch[1];
+        let repositoryUrl = '';
+        if (sourceBlockMatch.groups?.registryUrl) {
+          repositoryUrl = sourceBlockMatch.groups.registryUrl;
+        }
+        if (sourceBlockMatch.groups?.sourceName) {
+          if (variables[sourceBlockMatch.groups.sourceName]) {
+            repositoryUrl = variables[sourceBlockMatch.groups.sourceName];
+          }
+        }
         const sourceLineNumber = lineNumber;
         let sourceContent = '';
         let sourceLine = '';

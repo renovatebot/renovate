@@ -24,7 +24,7 @@ export const supportsRanges = true;
 export const supportedRangeStrategies = ['pin', 'bump'];
 
 class NugetVersioningApi implements VersioningApi {
-  isCompatible(version: string, _current?: string | undefined): boolean {
+  isCompatible(version: string, _current?: string): boolean {
     return this.isValid(version);
   }
 

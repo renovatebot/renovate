@@ -10,7 +10,7 @@ function trimQuotes(str: string): string {
 }
 
 const requireRegex = regEx(
-  /^(?<keyword>require)?\s+(?<module>[^\s]+\/[^\s]+)\s+(?<version>[^\s]+)(?:\s*\/\/\s*(?<comment>[^\s]+)\s*)?$/,
+  /^(?<keyword>require)?\s+(?<module>[^\s]+\/?[^\s]+)\s+(?<version>[^\s]+)(?:\s*\/\/\s*(?<comment>[^\s]+)\s*)?$/,
 );
 
 const replaceRegex = regEx(

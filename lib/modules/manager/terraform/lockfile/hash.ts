@@ -107,8 +107,8 @@ export class TerraformProviderHash {
   }
 
   @cache({
-    namespace: `datasource-terraform-provider-hash`,
-    key: (build: TerraformBuild) => build.url,
+    namespace: `terraform-provider-hash`,
+    key: (build: TerraformBuild) => `calculateSingleHash:${build.url}`,
     ttlMinutes: TerraformProviderHash.hashCacheTTL,
   })
   static async calculateSingleHash(
@@ -120,6 +120,7 @@ export class TerraformProviderHash {
     logger.trace(
       `Downloading archive and generating hash for ${build.name}-${build.version}...`,
     );
+    const startTime = Date.now();
     const readStream = TerraformProviderHash.http.stream(build.url);
     const writeStream = fs.createCacheWriteStream(downloadFileName);
 
@@ -127,9 +128,8 @@ export class TerraformProviderHash {
       await fs.pipeline(readStream, writeStream);
 
       const hash = await this.hashOfZipContent(downloadFileName, extractPath);
-      logger.trace(
-        { hash },
-        `Generated hash for ${build.name}-${build.version}`,
+      logger.debug(
+        `Hash generation for ${build.url} took ${Date.now() - startTime}ms for ${build.name}-${build.version}`,
       );
       return hash;
     } finally {
@@ -141,6 +141,7 @@ export class TerraformProviderHash {
   static async calculateHashScheme1Hashes(
     builds: TerraformBuild[],
   ): Promise<string[]> {
+    logger.debug(`Calculating hashes for ${builds.length} builds`);
     const cacheDir = await ensureCacheDir('./others/terraform');
 
     // for each build download ZIP, extract content and generate hash for all containing files
@@ -154,6 +155,9 @@ export class TerraformProviderHash {
     repository: string,
     version: string,
   ): Promise<string[] | null> {
+    logger.debug(
+      `Creating hashes for ${repository}@${version} (${registryURL})`,
+    );
     const builds = await TerraformProviderHash.terraformDatasource.getBuilds(
       registryURL,
       repository,
@@ -169,6 +173,10 @@ export class TerraformProviderHash {
       builds.map((build) => build.shasums_url).filter(isNotNullOrUndefined),
     );
 
+    logger.debug(
+      `Getting zip hashes for ${shaUrls.length} shasum URL(s) for ${repository}@${version}`,
+    );
+
     const zhHashes: string[] = [];
     for (const shaUrl of shaUrls) {
       const hashes =
@@ -176,6 +184,10 @@ export class TerraformProviderHash {
 
       zhHashes.push(...coerceArray(hashes));
     }
+
+    logger.debug(
+      `Got ${zhHashes.length} zip hashes for ${repository}@${version}`,
+    );
 
     const h1Hashes =
       await TerraformProviderHash.calculateHashScheme1Hashes(builds);
