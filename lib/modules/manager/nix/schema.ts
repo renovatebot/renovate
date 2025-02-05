@@ -12,7 +12,7 @@ const InputType = z.enum([
 
 const LockedInput = z.object({
   ref: z.string().optional(),
-  rev: z.string(),
+  rev: z.string().optional(),
   type: InputType,
 });
 

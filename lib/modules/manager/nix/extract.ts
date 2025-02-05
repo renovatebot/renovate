@@ -29,17 +29,20 @@ export async function extractPackageFile(
     const nixpkgsMatch = nixpkgsRegex.exec(content);
     if (nixpkgsMatch?.groups) {
       const { ref } = nixpkgsMatch.groups;
-      deps.push({
-        depName: 'nixpkgs',
-        currentValue: ref,
-        datasource: GitRefsDatasource.id,
-        packageName: 'https://github.com/NixOS/nixpkgs',
-        versioning: nixpkgsVersioning,
-      });
-    }
+      // only add when we matched a ref
+      if (ref !== undefined) {
+        deps.push({
+          depName: 'nixpkgs',
+          currentValue: ref,
+          datasource: GitRefsDatasource.id,
+          packageName: 'https://github.com/NixOS/nixpkgs',
+          versioning: nixpkgsVersioning,
+        });
 
-    if (deps.length) {
-      return { deps };
+        if (deps.length) {
+          return { deps };
+        }
+      }
     }
     return null;
   }
@@ -90,6 +93,11 @@ export async function extractPackageFile(
 
     // indirect inputs cannot be reliable updated because they depend on the flake registry
     if (flakeOriginal.type === 'indirect') {
+      continue;
+    }
+
+    // if no rev is being tracked, we cannot update this input
+    if (flakeLocked.rev === undefined) {
       continue;
     }
 
