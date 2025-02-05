@@ -16,11 +16,14 @@ import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
-  Upgrade,
 } from '../../types';
 import { applyGitSource } from '../../util';
 import { type PyProject, UvLockfileSchema } from '../schema';
-import { depTypes, parseDependencyList } from '../utils';
+import {
+  depTypes,
+  parseDependencyGroupRecord,
+  parseDependencyList,
+} from '../utils';
 import type { PyProjectProcessor } from './types';
 
 const uvUpdateCMD = 'uv lock';
@@ -141,12 +144,51 @@ export class UvProcessor implements PyProjectProcessor {
     return Promise.resolve(deps);
   }
 
+  async extractDeps(
+    def: PyProject,
+    packageFile: string,
+  ): Promise<PackageDependency[]> {
+    const deps: PackageDependency[] = [];
+    // pyProject standard definitions
+    deps.push(
+      ...parseDependencyList(depTypes.dependencies, def.project?.dependencies),
+    );
+    deps.push(
+      ...parseDependencyGroupRecord(
+        depTypes.dependencyGroups,
+        def['dependency-groups'],
+      ),
+    );
+    deps.push(
+      ...parseDependencyGroupRecord(
+        depTypes.optionalDependencies,
+        def.project?.['optional-dependencies'],
+      ),
+    );
+    deps.push(
+      ...parseDependencyList(
+        depTypes.buildSystemRequires,
+        def['build-system']?.requires,
+      ),
+    );
+
+    // process specific tool sets
+    let processedDeps = deps;
+    processedDeps = this.process(def, processedDeps);
+    processedDeps = await this.extractLockedVersions(
+      def,
+      processedDeps,
+      packageFile,
+    );
+
+    return processedDeps;
+  }
+
   async updateArtifacts(
     updateArtifact: UpdateArtifact,
     project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null> {
-    const { config, updatedDeps, packageFileName } = updateArtifact;
-
+    const { config, packageFileName } = updateArtifact;
     const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
 
     // abort if no lockfile is defined
@@ -168,9 +210,13 @@ export class UvProcessor implements PyProjectProcessor {
         constraint: config.constraints?.uv,
       };
 
+      const updatedDeps = isLockFileMaintenance
+        ? await this.extractDeps(project, packageFileName)
+        : updateArtifact.updatedDeps;
+
       const extraEnv = {
         ...getGitEnvironmentVariables(['pep621']),
-        ...(await getUvExtraIndexUrl(project, updateArtifact.updatedDeps)),
+        ...(await getUvExtraIndexUrl(project, updatedDeps)),
         ...(await getUvIndexCredentials(project)),
       };
       const execOptions: ExecOptions = {
@@ -226,7 +272,7 @@ export class UvProcessor implements PyProjectProcessor {
   }
 }
 
-function generateCMD(updatedDeps: Upgrade[]): string {
+function generateCMD(updatedDeps: PackageDependency[]): string {
   const deps: string[] = [];
 
   for (const dep of updatedDeps) {
@@ -278,7 +324,7 @@ async function getUsernamePassword(
 
 async function getUvExtraIndexUrl(
   project: PyProject,
-  deps: Upgrade[],
+  deps: PackageDependency[],
 ): Promise<NodeJS.ProcessEnv> {
   const pyPiRegistryUrls = deps
     .filter((dep) => dep.datasource === PypiDatasource.id)
