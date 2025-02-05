@@ -192,6 +192,7 @@ export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   registryUrls?: string[] | null;
   currentVersion?: string;
   replaceString?: string;
+  replacementApproach?: 'replace' | 'alias';
 }
 
 export interface ArtifactNotice {
