@@ -5,23 +5,27 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.34.1@sha256:29f6bf5ef45fdb516cb6c09987d2f3349aaa6edc60af4ac7b43f5a4f8a9c15e8 AS slim-base
+FROM ghcr.io/renovatebot/base-image:9.38.6@sha256:a3714418e1979ad8e1ae0098422a9a94cad47e3df044c0aaa22f4e839698ff72 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.34.0-full@sha256:9a4d5f592b9f4c6d0ae9a5e46987c2120660f7ccaa0ab38f9a773a8ba1bfd495 AS full-base
+FROM ghcr.io/renovatebot/base-image:9.38.6-full@sha256:0d6e6c2a057c73dcfe28aea1bde81c708a9c308a235b6eb8c09614eb8d6f9533 AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.34.1@sha256:29f6bf5ef45fdb516cb6c09987d2f3349aaa6edc60af4ac7b43f5a4f8a9c15e8 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.38.6@sha256:a3714418e1979ad8e1ae0098422a9a94cad47e3df044c0aaa22f4e839698ff72 AS build
 
 # We want a specific node version here
 # renovate: datasource=node-version
 RUN install-tool node 22.13.1
+
+# corepack is too buggy 😞
+# renovate: datasource=npm
+RUN install-tool pnpm 9.15.4
 
 WORKDIR /usr/local/renovate
 
@@ -59,17 +63,18 @@ COPY --link pnpm-lock.yaml ./
 
 # set `npm_config_arch` for `prebuild-install`
 # set `npm_config_platform_arch` for `install-artifact-from-github`
+ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
+
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN set -ex; \
-  export npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}; \
-  corepack pnpm fetch --prod; \
+  pnpm fetch --prod; \
   true
 
 COPY --link . ./
 
 # install npm packages
 RUN set -ex; \
-  corepack pnpm install --prod --offline --ignore-scripts; \
+  pnpm install --prod --offline --ignore-scripts; \
   true
 
 # --------------------------------------
@@ -97,7 +102,7 @@ RUN ln -sf /usr/local/renovate/node /bin/node
 
 # ensure default base and cache directories exist.
 RUN mkdir -p /tmp/renovate/cache && \
-    chmod -R 777 /tmp/renovate
+  chmod -R 777 /tmp/renovate
 
 # test
 RUN set -ex; \

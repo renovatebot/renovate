@@ -96,7 +96,7 @@ export async function initRepo({
   repository,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
-  logger.debug(`initRepo(${repository}, ${gitUrl!})`);
+  logger.debug(`initRepo(${repository}, ${gitUrl})`);
   const projectInfo = await client.getProjectInfo(repository);
   const branchInfo = await client.getBranchInfo(repository);
 

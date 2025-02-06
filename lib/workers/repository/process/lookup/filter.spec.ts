@@ -1,6 +1,7 @@
 import { partial } from '../../../../../test/util';
 import type { Release } from '../../../../modules/datasource/types';
 import * as allVersioning from '../../../../modules/versioning';
+import type { Timestamp } from '../../../../util/timestamp';
 import { filterVersions } from './filter';
 import type { FilterConfig } from './types';
 
@@ -12,24 +13,24 @@ describe('workers/repository/process/lookup/filter', () => {
       const releases = [
         {
           version: '1.0.1',
-          releaseTimestamp: '2021-01-01T00:00:01.000Z',
+          releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
         },
         {
           version: '1.2.0',
-          releaseTimestamp: '2021-01-03T00:00:00.000Z',
+          releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
         },
         {
           version: '2.0.0',
-          releaseTimestamp: '2021-01-05T00:00:00.000Z',
+          releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
         },
         {
           version: '2.1.0',
-          releaseTimestamp: '2021-01-07T00:00:00.000Z',
+          releaseTimestamp: '2021-01-07T00:00:00.000Z' as Timestamp,
         },
         // for coverage
         {
           version: 'invalid.version',
-          releaseTimestamp: '2021-01-07T00:00:00.000Z',
+          releaseTimestamp: '2021-01-07T00:00:00.000Z' as Timestamp,
         },
       ] satisfies Release[];
 

@@ -423,7 +423,7 @@ export async function createFork(
       await githubApi.postJson<GhRestRepo>(`repos/${repository}/forks`, {
         token,
         body: {
-          organization: forkOrg ? forkOrg : undefined,
+          organization: forkOrg ?? undefined,
           name: config.parentRepo!.replace('/', '-_-'),
           default_branch_only: true, // no baseBranches support yet
         },

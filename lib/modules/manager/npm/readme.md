@@ -7,6 +7,10 @@ The following `depTypes` are currently supported by the npm manager :
 - `engines` : Renovate will update any `node`, `npm` and `yarn` version specified under `engines`.
 - `volta` : Renovate will update any `node`, `npm`, `pnpm` and `yarn` version specified under `volta`.
 - `packageManager`
+- `overrides`
+- `resolutions`
+- `pnpm.overrides`
+- `pnpm.catalog.<name>`, such as `pnpm.catalog.default` and `pnpm.catalog.myCatalog`. [Matches any default and named pnpm catalogs](https://pnpm.io/catalogs#defining-catalogs).
 
 ### Yarn
 

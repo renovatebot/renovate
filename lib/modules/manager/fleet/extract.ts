@@ -61,8 +61,6 @@ function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
     return {
       ...dockerDep,
       depType: 'fleet',
-      depName: dockerDep.depName,
-      packageName: dockerDep.depName,
       // https://github.com/helm/helm/issues/10312
       // https://github.com/helm/helm/issues/10678
       pinDigests: false,
