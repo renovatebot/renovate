@@ -42,10 +42,11 @@ export function extractPackageFile(
     for (const [name, toolData] of Object.entries(tools)) {
       const version = parseVersion(toolData);
       // Parse the tool options in the tool name
-      const { name: depName, options: optionsInName } =
-        optionInToolNameRegex.exec(name.trim())?.groups ?? {
-          name: name.trim(),
-        };
+      const toolNameMatchResult = optionInToolNameRegex.exec(name.trim())?.groups;
+      if (!toolNameMatchResult) {
+        throw new Error(`Failed to parse tool name: ${name}`);
+      }
+      const { name: depName, options: optionsInName } = toolNameMatchResult;
       const delimiterIndex = name.indexOf(':');
       const backend = depName.substring(0, delimiterIndex);
       const toolName = depName.substring(delimiterIndex + 1);
