@@ -42,7 +42,9 @@ export function extractPackageFile(
     for (const [name, toolData] of Object.entries(tools)) {
       const version = parseVersion(toolData);
       // Parse the tool options in the tool name
-      const toolNameMatchResult = optionInToolNameRegex.exec(name.trim())?.groups;
+      const toolNameMatchResult = optionInToolNameRegex.exec(
+        name.trim(),
+      )?.groups;
       if (!toolNameMatchResult) {
         throw new Error(`Failed to parse tool name: ${name}`);
       }
