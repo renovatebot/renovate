@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { regEx } from '../../../util/regex';
+import { api as gradleVersioning } from '../../versioning/gradle/index';
 import type { PackageDependency } from '../types';
 import type {
   GradleManagerData,
@@ -24,6 +25,10 @@ export function versionLikeSubstring(
   const match = versionLikeRegex.exec(input);
   const version = match?.groups?.version?.trim();
   if (!version || !regEx(/\d/).test(version)) {
+    return null;
+  }
+
+  if (!gradleVersioning.isValid(version)) {
     return null;
   }
 
