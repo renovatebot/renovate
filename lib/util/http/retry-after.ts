@@ -76,7 +76,7 @@ export function getRetryAfter(err: unknown): number | null {
   }
 
   if (err.response.statusCode < 400 || err.response.statusCode >= 500) {
-    logger.warn(
+    logger.debug(
       { url: err.response.url },
       `Retry-After: unexpected status code ${err.response.statusCode}`,
     );
@@ -103,7 +103,7 @@ export function getRetryAfter(err: unknown): number | null {
   }
 
   const seconds = parseInt(retryAfter, 10);
-  if (!Number.isNaN(seconds) && seconds > 0) {
+  if (!Number.isNaN(seconds) && seconds >= 0) {
     return seconds;
   }
 

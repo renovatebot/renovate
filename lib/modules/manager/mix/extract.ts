@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { findLocalSiblingOrParent, localPathExists } from '../../../util/fs';
+import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -16,13 +16,19 @@ const refRegexp = regEx(/ref:\s*"(?<value>[^"]+)"/);
 const branchOrTagRegexp = regEx(/(?:branch|tag):\s*"(?<value>[^"]+)"/);
 const organizationRegexp = regEx(/organization:\s*"(?<value>[^"]+)"/);
 const commentMatchRegExp = regEx(/#.*$/);
+const lockedVersionRegExp = regEx(
+  /^\s+"(?<app>\w+)".*?"(?<lockedVersion>\d+\.\d+\.\d+)"/,
+);
+const hexRegexp = regEx(/hex:\s*(?:"(?<strValue>[^"]+)"|:(?<atomValue>\w+))/);
+const onlyValueRegexp = regEx(/only:\s*(?<only>\[[^\]]*\]|:\w+)/);
+const onlyEnvironmentsRegexp = regEx(/:(\w+)/gm);
 
 export async function extractPackageFile(
   content: string,
   packageFile: string,
 ): Promise<PackageFileContent | null> {
   logger.trace(`mix.extractPackageFile(${packageFile})`);
-  const deps: PackageDependency[] = [];
+  const deps = new Map<string, PackageDependency>();
   const contentArr = content
     .split(newlineRegex)
     .map((line) => line.replace(commentMatchRegExp, ''));
@@ -41,40 +47,79 @@ export async function extractPackageFile(
         const ref = refRegexp.exec(opts)?.groups?.value;
         const branchOrTag = branchOrTagRegexp.exec(opts)?.groups?.value;
         const organization = organizationRegexp.exec(opts)?.groups?.value;
+        const hexGroups = hexRegexp.exec(opts)?.groups;
+        const hex = hexGroups?.strValue ?? hexGroups?.atomValue;
 
-        let dep: PackageDependency;
+        const onlyValue = onlyValueRegexp.exec(opts)?.groups?.only;
+        const onlyEnvironments = [];
+        let match;
+        if (onlyValue) {
+          while ((match = onlyEnvironmentsRegexp.exec(onlyValue)) !== null) {
+            onlyEnvironments.push(match[1]);
+          }
+        }
+
+        const dep: PackageDependency = {
+          depName: app,
+          depType: 'prod',
+        };
 
         if (git ?? github) {
-          dep = {
-            depName: app,
-            currentDigest: ref,
-            currentValue: branchOrTag,
-            datasource: git ? GitTagsDatasource.id : GithubTagsDatasource.id,
-            packageName: git ?? github,
-          };
+          dep.currentDigest = ref;
+          dep.currentValue = branchOrTag;
+          dep.datasource = git ? GitTagsDatasource.id : GithubTagsDatasource.id;
+          dep.packageName = git ?? github;
         } else {
-          dep = {
-            depName: app,
-            currentValue: requirement,
-            datasource: HexDatasource.id,
-            packageName: organization ? `${app}:${organization}` : app,
-          };
+          dep.currentValue = requirement;
+          dep.datasource = HexDatasource.id;
+          if (organization) {
+            dep.packageName = `${app}:${organization}`;
+          } else if (hex) {
+            dep.packageName = hex;
+          } else {
+            dep.packageName = app;
+          }
+
           if (requirement?.startsWith('==')) {
             dep.currentVersion = requirement.replace(regEx(/^==\s*/), '');
           }
         }
 
-        deps.push(dep);
+        if (onlyValue !== undefined && !onlyEnvironments.includes('prod')) {
+          dep.depType = 'dev';
+        }
+
+        deps.set(app, dep);
+        logger.trace({ dep }, `setting ${app}`);
         depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
       }
     }
   }
-  const res: PackageFileContent = { deps };
   const lockFileName =
     (await findLocalSiblingOrParent(packageFile, 'mix.lock')) ?? 'mix.lock';
-  // istanbul ignore if
-  if (await localPathExists(lockFileName)) {
-    res.lockFiles = [lockFileName];
+  const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+
+  if (lockFileContent) {
+    const lockFileLines = lockFileContent.split(newlineRegex).slice(1, -1);
+
+    for (const line of lockFileLines) {
+      const groups = lockedVersionRegExp.exec(line)?.groups;
+      if (groups?.app && groups?.lockedVersion) {
+        const dep = deps.get(groups.app);
+        if (!dep) {
+          continue;
+        }
+        dep.lockedVersion = groups.lockedVersion;
+        logger.trace(`Found ${groups.lockedVersion} for ${groups.app}`);
+      }
+    }
   }
-  return res;
+  const depsArray = Array.from(deps.values());
+  if (depsArray.length === 0) {
+    return null;
+  }
+  return {
+    deps: depsArray,
+    lockFiles: lockFileContent ? [lockFileName] : undefined,
+  };
 }

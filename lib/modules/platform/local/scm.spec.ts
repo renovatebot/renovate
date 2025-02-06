@@ -21,7 +21,7 @@ describe('modules/platform/local/scm', () => {
     });
 
     it('isBranchModified', async () => {
-      expect(await localFs.isBranchModified('')).toBe(false);
+      expect(await localFs.isBranchModified('', '')).toBe(false);
     });
 
     it('isBranchConflicted', async () => {

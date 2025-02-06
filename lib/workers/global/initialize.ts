@@ -10,6 +10,7 @@ import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
 import { validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
+import { setHttpRateLimits } from '../../util/http/rate-limits';
 import { initMergeConfidence } from '../../util/merge-confidence';
 import { setMaxLimit } from './limits';
 
@@ -79,6 +80,7 @@ export async function globalInitialize(
   config_: AllConfig,
 ): Promise<RenovateConfig> {
   let config = config_;
+  setHttpRateLimits();
   await checkVersions();
   setGlobalHostRules(config);
   config = await initPlatform(config);
@@ -88,7 +90,7 @@ export async function globalInitialize(
   setEmojiConfig(config);
   setGlobalHostRules(config);
   configureThirdPartyLibraries(config);
-  await initMergeConfidence();
+  await initMergeConfidence(config);
   return config;
 }
 

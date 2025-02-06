@@ -1,4 +1,5 @@
-import { StaticTooling, upgradeableTooling } from './upgradeable-tooling';
+import type { StaticTooling } from './upgradeable-tooling';
+import { upgradeableTooling } from './upgradeable-tooling';
 import { extractPackageFile, supportedDatasources } from '.';
 
 describe('modules/manager/asdf/index', () => {

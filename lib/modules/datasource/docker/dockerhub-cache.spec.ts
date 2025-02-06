@@ -1,6 +1,7 @@
 import { mocked } from '../../../../test/util';
 import * as _packageCache from '../../../util/cache/package';
-import { DockerHubCache, DockerHubCacheData } from './dockerhub-cache';
+import type { DockerHubCacheData } from './dockerhub-cache';
+import { DockerHubCache } from './dockerhub-cache';
 import type { DockerHubTag } from './schema';
 
 jest.mock('../../../util/cache/package');
@@ -76,6 +77,7 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
         updatedAt: null,
       },
       isChanged: false,
+      reconciledIds: new Set(),
     });
   });
 
@@ -89,6 +91,7 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
       dockerRepository,
       cache: oldCache,
       isChanged: false,
+      reconciledIds: new Set(),
     });
   });
 
@@ -100,13 +103,14 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
     const cache = await DockerHubCache.init(dockerRepository);
     const newItems: DockerHubTag[] = [newItem()];
 
-    const needNextPage = cache.reconcile(newItems);
+    const needNextPage = cache.reconcile(newItems, 4);
 
     expect(needNextPage).toBe(true);
     expect(cache).toEqual({
       cache: newCache,
       dockerRepository: 'foo/bar',
       isChanged: true,
+      reconciledIds: new Set([4]),
     });
 
     const res = cache.getItems();
@@ -128,13 +132,14 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
     const cache = await DockerHubCache.init(dockerRepository);
     const items: DockerHubTag[] = Object.values(oldCache.items);
 
-    const needNextPage = cache.reconcile(items);
+    const needNextPage = cache.reconcile(items, 3);
 
     expect(needNextPage).toBe(false);
     expect(cache).toEqual({
       cache: oldCache,
       dockerRepository: 'foo/bar',
       isChanged: false,
+      reconciledIds: new Set([1, 2, 3]),
     });
 
     const res = cache.getItems();
@@ -142,6 +147,48 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
 
     await cache.save();
     expect(packageCache.set).not.toHaveBeenCalled();
+  });
+
+  it('asks for the next page if the expected count does not match cached items', async () => {
+    const oldCache = oldCacheData();
+
+    packageCache.get.mockResolvedValue(oldCache);
+    const cache = await DockerHubCache.init(dockerRepository);
+    const items: DockerHubTag[] = Object.values(oldCache.items);
+
+    const needNextPage = cache.reconcile(items, 0);
+
+    expect(needNextPage).toBe(true);
+    expect(cache).toEqual({
+      cache: oldCache,
+      dockerRepository: 'foo/bar',
+      isChanged: false,
+      reconciledIds: new Set([1, 2, 3]),
+    });
+
+    const res = cache.getItems();
+    expect(res).toEqual(items);
+
+    await cache.save();
+    expect(packageCache.set).not.toHaveBeenCalled();
+  });
+
+  it('reconciles deleted items', async () => {
+    const oldCache = oldCacheData();
+
+    packageCache.get.mockResolvedValue(oldCache);
+    const cache = await DockerHubCache.init(dockerRepository);
+    const items: DockerHubTag[] = [oldCache.items[1], oldCache.items[3]];
+
+    const needNextPage = cache.reconcile(items, 2);
+
+    expect(needNextPage).toBe(false);
+
+    const res = cache.getItems();
+    expect(res).toEqual(items);
+
+    await cache.save();
+    expect(packageCache.set).toHaveBeenCalled();
   });
 
   it('reconciles from empty cache', async () => {
@@ -154,12 +201,13 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
     };
     const cache = await DockerHubCache.init(dockerRepository);
 
-    const needNextPage = cache.reconcile([item]);
+    const needNextPage = cache.reconcile([item], 1);
     expect(needNextPage).toBe(true);
     expect(cache).toEqual({
       cache: expectedCache,
       dockerRepository: 'foo/bar',
       isChanged: true,
+      reconciledIds: new Set([4]),
     });
 
     const res = cache.getItems();

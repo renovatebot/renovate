@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { createGlobalProxyAgent } from 'global-agent';
+import { logger } from './logger';
 
 const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'];
 
@@ -16,6 +17,7 @@ export function bootstrap(): void {
     }
 
     if (process.env[envVar]) {
+      logger.debug(`Detected ${envVar} value in env`);
       process.env[envVar.toLowerCase()] = process.env[envVar];
     }
   });

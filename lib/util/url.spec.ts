@@ -5,6 +5,7 @@ import {
   getQueryString,
   isHttpUrl,
   joinUrlParts,
+  massageHostUrl,
   parseLinkHeader,
   parseUrl,
   replaceUrlPath,
@@ -115,6 +116,7 @@ describe('util/url', () => {
     expect(url?.protocol).toBe('https:');
     expect(url?.host).toBe('github.com');
     expect(url?.pathname).toBe('/renovatebot/renovate');
+    expect(parseUrl(url)).toBe(url);
   });
 
   it('trimTrailingSlash', () => {
@@ -213,5 +215,14 @@ describe('util/url', () => {
         url: 'https://api.github.com/user/9287/repos?page=5&per_page=100',
       },
     });
+  });
+
+  it('massageHostUrl', () => {
+    expect(massageHostUrl('domain.com')).toBe('domain.com');
+    expect(massageHostUrl('domain.com:8080')).toBe('https://domain.com:8080');
+    expect(massageHostUrl('domain.com/some/path')).toBe(
+      'https://domain.com/some/path',
+    );
+    expect(massageHostUrl('https://domain.com')).toBe('https://domain.com');
   });
 });

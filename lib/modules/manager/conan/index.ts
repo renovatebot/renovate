@@ -6,6 +6,8 @@ import { ConanDatasource } from '../../datasource/conan';
 import * as conan from '../../versioning/conan';
 
 export const supportsLockFileMaintenance = true;
+export const url = 'https://docs.conan.io';
+export const categories: Category[] = ['c'];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)conanfile\\.(txt|py)$'],
@@ -13,7 +15,5 @@ export const defaultConfig = {
   versioning: conan.id,
   enabled: false, // See https://github.com/renovatebot/renovate/issues/14170
 };
-
-export const categories: Category[] = ['c'];
 
 export const supportedDatasources = [ConanDatasource.id];

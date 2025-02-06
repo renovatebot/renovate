@@ -15,11 +15,11 @@ describe('modules/manager/cargo/range', () => {
     expect(getRangeStrategy(config)).toBe('widen');
   });
 
-  it('defaults to bump', () => {
+  it('defaults to update-lockfile', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
       currentValue: '1.0.0',
     };
-    expect(getRangeStrategy(config)).toBe('bump');
+    expect(getRangeStrategy(config)).toBe('update-lockfile');
   });
 });

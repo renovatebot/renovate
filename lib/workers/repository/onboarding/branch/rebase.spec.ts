@@ -1,4 +1,5 @@
-import { RenovateConfig, mocked, scm } from '../../../../../test/util';
+import type { RenovateConfig } from '../../../../../test/util';
+import { mocked, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import * as memCache from '../../../../util/cache/memory';

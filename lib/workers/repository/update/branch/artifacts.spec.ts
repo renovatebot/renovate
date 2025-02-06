@@ -1,4 +1,5 @@
-import { RenovateConfig, partial, platform } from '../../../../../test/util';
+import type { RenovateConfig } from '../../../../../test/util';
+import { partial, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { BranchConfig } from '../../../types';

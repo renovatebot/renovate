@@ -1,7 +1,13 @@
-import type { VariableRegistry } from './types';
+import type { PackageVariables, VariableRegistry } from './types';
 import {
   getVars,
   isDependencyString,
+  isGradleBuildFile,
+  isGradleScriptFile,
+  isGradleVersionsFile,
+  isKotlinSourceFile,
+  isPropsFile,
+  isTOMLFile,
   parseDependencyString,
   reorderFiles,
   toAbsolutePath,
@@ -10,66 +16,83 @@ import {
 } from './utils';
 
 describe('modules/manager/gradle/utils', () => {
-  it('versionLikeSubstring', () => {
-    [
-      '1.2.3',
-      '[1.0,2.0]',
-      '(,2.0[',
-      '2.1.1.RELEASE',
-      '1.0.+',
-      '2022-05-10_55',
-    ].forEach((input) => {
-      expect(versionLikeSubstring(input)).toEqual(input);
-      expect(versionLikeSubstring(`${input}'`)).toEqual(input);
-      expect(versionLikeSubstring(`${input}"`)).toEqual(input);
-      expect(versionLikeSubstring(`${input}\n`)).toEqual(input);
-      expect(versionLikeSubstring(`${input}  `)).toEqual(input);
-      expect(versionLikeSubstring(`${input}$`)).toEqual(input);
+  describe('versionLikeSubstring', () => {
+    it('extracts the actual version', () => {
+      const inputs = [
+        '1.2.3',
+        '[1.0,2.0]',
+        '(,2.0[',
+        '2.1.1.RELEASE',
+        '1.0.+',
+        '2022-05-10_55',
+      ];
+      const suffixes = ['', "'", '"', '\n', '  ', '$'];
+
+      for (const input of inputs) {
+        for (const suffix of suffixes) {
+          expect(versionLikeSubstring(`${input}${suffix}`)).toEqual(input);
+        }
+      }
     });
-    expect(versionLikeSubstring('')).toBeNull();
-    expect(versionLikeSubstring(undefined)).toBeNull();
-    expect(versionLikeSubstring(null)).toBeNull();
-    expect(versionLikeSubstring('foobar')).toBeNull();
-    expect(versionLikeSubstring('latest')).toBeNull();
+
+    it('returns null for invalid inputs', () => {
+      const inputs = ['', undefined, null, 'foobar', 'latest'];
+      for (const input of inputs) {
+        expect(versionLikeSubstring(input)).toBeNull();
+      }
+    });
   });
 
-  it('isDependencyString', () => {
-    expect(isDependencyString('foo:bar:1.2.3')).toBeTrue();
-    expect(isDependencyString('foo.foo:bar.bar:1.2.3')).toBeTrue();
-    expect(isDependencyString('foo:bar:baz:qux')).toBeFalse();
-    expect(isDependencyString('foo.bar:baz:1.2.3')).toBeTrue();
-    expect(isDependencyString('foo.bar:baz:1.2.3:linux-cpu-x86_64')).toBeTrue();
-    expect(isDependencyString('foo.bar:baz:1.2.+')).toBeTrue();
-    expect(isDependencyString('foo:bar:baz:qux:quux')).toBeFalse();
-    expect(isDependencyString("foo:bar:1.2.3'")).toBeFalse();
-    expect(isDependencyString('foo:bar:1.2.3"')).toBeFalse();
-    expect(isDependencyString('-Xep:ParameterName:OFF')).toBeFalse();
-    expect(isDependencyString('foo$bar:baz:1.2.+')).toBeFalse();
-    expect(isDependencyString('scm:git:https://some.git')).toBeFalse();
+  describe('isDependencyString', () => {
+    it.each`
+      input                                    | output
+      ${'foo:bar:1.2.3'}                       | ${true}
+      ${'foo.foo:bar.bar:1.2.3'}               | ${true}
+      ${'foo.bar:baz:1.2.3'}                   | ${true}
+      ${'foo.bar:baz:1.2.3:linux-cpu-x86_64'}  | ${true}
+      ${'foo:bar:1.2.3@zip'}                   | ${true}
+      ${'foo:bar:x86@x86'}                     | ${true}
+      ${'foo.bar:baz:1.2.+'}                   | ${true}
+      ${'foo:bar:baz:qux'}                     | ${false}
+      ${'foo:bar:baz:qux:quux'}                | ${false}
+      ${"foo:bar:1.2.3'"}                      | ${false}
+      ${'foo:bar:1.2.3"'}                      | ${false}
+      ${'-Xep:ParameterName:OFF'}              | ${false}
+      ${'foo$bar:baz:1.2.+'}                   | ${false}
+      ${'scm:git:https://some.git'}            | ${false}
+      ${'foo.bar:baz:1.2.3:linux-cpu$-x86_64'} | ${false}
+      ${'foo:bar:1.2.3@zip@foo'}               | ${false}
+    `('$input', ({ input, output }) => {
+      expect(isDependencyString(input)).toBe(output);
+    });
   });
 
-  it('parseDependencyString', () => {
-    expect(parseDependencyString('foo:bar:1.2.3')).toMatchObject({
-      depName: 'foo:bar',
-      currentValue: '1.2.3',
+  describe('parseDependencyString', () => {
+    it.each`
+      input                       | output
+      ${'foo:bar:1.2.3'}          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'foo.foo:bar.bar:1.2.3'}  | ${{ depName: 'foo.foo:bar.bar', currentValue: '1.2.3' }}
+      ${'foo.bar:baz:1.2.3'}      | ${{ depName: 'foo.bar:baz', currentValue: '1.2.3' }}
+      ${'foo:bar:1.2.+'}          | ${{ depName: 'foo:bar', currentValue: '1.2.+' }}
+      ${'foo:bar:1.2.3@zip'}      | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
+      ${'foo:bar:baz:qux'}        | ${null}
+      ${'foo:bar:baz:qux:quux'}   | ${null}
+      ${"foo:bar:1.2.3'"}         | ${null}
+      ${'foo:bar:1.2.3"'}         | ${null}
+      ${'-Xep:ParameterName:OFF'} | ${null}
+    `('$input', ({ input, output }) => {
+      expect(parseDependencyString(input)).toEqual(output);
     });
-    expect(parseDependencyString('foo.foo:bar.bar:1.2.3')).toMatchObject({
-      depName: 'foo.foo:bar.bar',
-      currentValue: '1.2.3',
-    });
-    expect(parseDependencyString('foo.bar:baz:1.2.3')).toMatchObject({
-      depName: 'foo.bar:baz',
-      currentValue: '1.2.3',
-    });
-    expect(parseDependencyString('foo:bar:1.2.+')).toMatchObject({
-      depName: 'foo:bar',
-      currentValue: '1.2.+',
-    });
-    expect(parseDependencyString('foo:bar:baz:qux')).toBeNull();
-    expect(parseDependencyString('foo:bar:baz:qux:quux')).toBeNull();
-    expect(parseDependencyString("foo:bar:1.2.3'")).toBeNull();
-    expect(parseDependencyString('foo:bar:1.2.3"')).toBeNull();
-    expect(parseDependencyString('-Xep:ParameterName:OFF')).toBeNull();
+  });
+
+  it('filetype checks', () => {
+    expect(isGradleScriptFile('/a/Somefile.gradle.kts')).toBeTrue();
+    expect(isGradleScriptFile('/a/Somefile.gradle')).toBeTrue();
+    expect(isGradleVersionsFile('/a/versions.gradle.kts')).toBeTrue();
+    expect(isGradleBuildFile('/a/build.gradle')).toBeTrue();
+    expect(isPropsFile('/a/gradle.properties')).toBeTrue();
+    expect(isKotlinSourceFile('/a/Somefile.kt')).toBeTrue();
+    expect(isTOMLFile('/a/Somefile.toml')).toBeTrue();
   });
 
   it('reorderFiles', () => {
@@ -175,20 +198,33 @@ describe('modules/manager/gradle/utils', () => {
     });
   });
 
-  it('updateVars', () => {
-    const registry: VariableRegistry = {
-      [toAbsolutePath('/foo/bar/baz')]: {
+  describe('updateVars', () => {
+    it('empty registry', () => {
+      const registry: VariableRegistry = {};
+      const newVars: PackageVariables = {
+        qux: { key: 'qux', value: 'qux' },
+      };
+      updateVars(registry, '/foo/bar/baz', newVars);
+      expect(registry).toStrictEqual({ '/foo/bar/baz': newVars });
+    });
+
+    it('updates the registry', () => {
+      const registry: VariableRegistry = {
+        [toAbsolutePath('/foo/bar/baz')]: {
+          bar: { key: 'bar', value: 'bar' },
+          baz: { key: 'baz', value: 'baz' },
+        },
+      };
+
+      updateVars(registry, '/foo/bar/baz', {
+        qux: { key: 'qux', value: 'qux' },
+      });
+      const res = getVars(registry, '/foo/bar/baz/build.gradle');
+      expect(res).toStrictEqual({
         bar: { key: 'bar', value: 'bar' },
         baz: { key: 'baz', value: 'baz' },
-      },
-    };
-
-    updateVars(registry, '/foo/bar/baz', { qux: { key: 'qux', value: 'qux' } });
-    const res = getVars(registry, '/foo/bar/baz/build.gradle');
-    expect(res).toStrictEqual({
-      bar: { key: 'bar', value: 'bar' },
-      baz: { key: 'baz', value: 'baz' },
-      qux: { key: 'qux', value: 'qux' },
+        qux: { key: 'qux', value: 'qux' },
+      });
     });
   });
 });

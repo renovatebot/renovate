@@ -53,7 +53,7 @@ describe('modules/manager/cargo/update-locked', () => {
     expect(updateLockedDependency(config).status).toBe('unsupported');
   });
 
-  it('returns update-failed incase of errors', () => {
+  it('returns update-failed in case of errors', () => {
     const config: UpdateLockedConfig = {
       packageFile: 'Cargo.toml',
       lockFile: 'Cargo.lock',

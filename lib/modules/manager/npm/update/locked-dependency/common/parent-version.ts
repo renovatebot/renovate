@@ -1,9 +1,9 @@
 import { logger } from '../../../../../../logger';
-import {
+import type {
   GetPkgReleasesConfig,
   ReleaseResult,
-  getPkgReleases,
 } from '../../../../../datasource';
+import { getPkgReleases } from '../../../../../datasource';
 import { api as semver } from '../../../../../versioning/npm';
 
 const pkgCache = new Map<string, Promise<ReleaseResult | null>>();

@@ -1,4 +1,5 @@
-import { RenovateConfig, partial } from '../../../test/util';
+import type { RenovateConfig } from '../../../test/util';
+import { partial } from '../../../test/util';
 import type { PackageFile } from '../../modules/manager/types';
 import {
   getDepWarningsDashboard,
@@ -85,7 +86,7 @@ describe('workers/repository/errors-warnings', () => {
         "
         ---
 
-        > ⚠ **Warning**
+        > ⚠️ **Warning**
         > 
         > Some dependencies could not be looked up. Check the Dependency Dashboard for more information.
 
@@ -133,7 +134,7 @@ describe('workers/repository/errors-warnings', () => {
         "
         ---
 
-        > ⚠ **Warning**
+        > ⚠️ **Warning**
         > 
         > Some dependencies could not be looked up. Check the warning logs for more information.
 
@@ -197,7 +198,7 @@ describe('workers/repository/errors-warnings', () => {
         "
         ---
 
-        > ⚠ **Warning**
+        > ⚠️ **Warning**
         > 
         > Renovate failed to look up the following dependencies: \`dependency-1\`, \`dependency-2\`.
         > 
@@ -305,7 +306,7 @@ describe('workers/repository/errors-warnings', () => {
         "
         ---
         > 
-        > ⚠ **Warning**
+        > ⚠️ **Warning**
         > 
         > Please correct - or verify that you can safely ignore - these dependency lookup failures before you merge this PR.
         > 

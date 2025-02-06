@@ -493,4 +493,41 @@ export class GithubHttp extends Http<GithubHttpOptions> {
 
     return result;
   }
+
+  /**
+   * Get the raw text file from a URL.
+   * Only use this method to fetch text files.
+   *
+   * @param url Full API URL, contents path or path inside the repository to the file
+   * @param options
+   *
+   * @example url = 'https://api.github.com/repos/renovatebot/renovate/contents/package.json'
+   * @example url = 'renovatebot/renovate/contents/package.json'
+   * @example url = 'package.json' & options.repository = 'renovatebot/renovate'
+   */
+  public async getRawTextFile(
+    url: string,
+    options: InternalHttpOptions & GithubHttpOptions = {},
+  ): Promise<HttpResponse> {
+    const newOptions: InternalHttpOptions & GithubHttpOptions = {
+      ...options,
+      headers: {
+        accept: 'application/vnd.github.raw+json',
+      },
+    };
+
+    let newURL = url;
+    const httpRegex = regEx(/^https?:\/\//);
+    if (options.repository && !httpRegex.test(options.repository)) {
+      newURL = joinUrlParts(options.repository, 'contents', url);
+    }
+
+    const result = await this.get(newURL, newOptions);
+    if (!is.string(result.body)) {
+      throw new Error(
+        `Expected raw text file but received ${typeof result.body}`,
+      );
+    }
+    return result;
+  }
 }

@@ -29,7 +29,7 @@ export type PresetFetcher = (
   repo: string,
   fileName: string,
   endpoint: string,
-  tag?: string | undefined,
+  tag?: string,
 ) => Promise<Preset | null | undefined>;
 
 export type FetchPresetConfig = {

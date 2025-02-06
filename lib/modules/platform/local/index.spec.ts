@@ -65,6 +65,10 @@ describe('modules/platform/local/index', () => {
       expect(platform.massageMarkdown('foo')).toBe('foo');
     });
 
+    it('maxBodyLength', () => {
+      expect(platform.maxBodyLength()).toBe(Infinity);
+    });
+
     it('updatePr', async () => {
       expect(await platform.updatePr()).toBeUndefined();
     });

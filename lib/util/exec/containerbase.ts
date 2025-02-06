@@ -38,10 +38,20 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'composer/composer',
     versioning: composerVersioningId,
   },
+  copier: {
+    datasource: 'pypi',
+    packageName: 'copier',
+    versioning: pep440VersioningId,
+  },
   corepack: {
     datasource: 'npm',
     packageName: 'corepack',
     versioning: npmVersioningId,
+  },
+  devbox: {
+    datasource: 'github-releases',
+    packageName: 'jetify-com/devbox',
+    versioning: semverVersioningId,
   },
   dotnet: {
     datasource: 'dotnet-version',
@@ -61,6 +71,11 @@ const allToolConfig: Record<string, ToolConfig> = {
   flux: {
     datasource: 'github-releases',
     packageName: 'fluxcd/flux2',
+    versioning: semverVersioningId,
+  },
+  gleam: {
+    datasource: 'github-releases',
+    packageName: 'gleam-lang/gleam',
     versioning: semverVersioningId,
   },
   golang: {
@@ -176,6 +191,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'rust',
     versioning: semverVersioningId,
   },
+  uv: {
+    datasource: 'pypi',
+    packageName: 'uv',
+    versioning: pep440VersioningId,
+  },
   yarn: {
     datasource: 'npm',
     packageName: 'yarn',
@@ -244,14 +264,14 @@ export function isDynamicInstall(
 
 function isStable(
   version: string,
-  versioning: allVersioning.VersioningApi,
+  versioningApi: allVersioning.VersioningApi,
   latest?: string,
 ): boolean {
-  if (!versioning.isStable(version)) {
+  if (!versioningApi.isStable(version)) {
     return false;
   }
   if (is.string(latest)) {
-    if (versioning.isGreaterThan(version, latest)) {
+    if (versioningApi.isGreaterThan(version, latest)) {
       return false;
     }
   }

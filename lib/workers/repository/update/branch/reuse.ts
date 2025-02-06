@@ -4,12 +4,6 @@ import { scm } from '../../../../modules/platform/scm';
 import type { RangeStrategy } from '../../../../types';
 import type { BranchConfig } from '../../../types';
 
-type ParentBranch = {
-  reuseExistingBranch: boolean;
-  isModified?: boolean;
-  isConflicted?: boolean;
-};
-
 async function shouldKeepUpdated(
   config: BranchConfig,
   baseBranch: string,
@@ -34,26 +28,25 @@ async function shouldKeepUpdated(
 
 export async function shouldReuseExistingBranch(
   config: BranchConfig,
-): Promise<ParentBranch> {
+): Promise<BranchConfig> {
   const { baseBranch, branchName } = config;
-  const result: ParentBranch = { reuseExistingBranch: false };
+  const result: BranchConfig = { ...config, reuseExistingBranch: false };
+
+  const keepUpdated = await shouldKeepUpdated(result, baseBranch, branchName);
+  await determineRebaseWhenValue(result, keepUpdated);
+
   // Check if branch exists
   if (!(await scm.branchExists(branchName))) {
     logger.debug(`Branch needs creating`);
     return result;
   }
   logger.debug(`Branch already exists`);
-  if (
-    config.rebaseWhen === 'behind-base-branch' ||
-    (await shouldKeepUpdated(config, baseBranch, branchName)) ||
-    (config.rebaseWhen === 'auto' &&
-      (config.automerge === true ||
-        (await platform.getBranchForceRebase?.(config.baseBranch))))
-  ) {
+
+  if (result.rebaseWhen === 'behind-base-branch' || keepUpdated) {
     if (await scm.isBranchBehindBase(branchName, baseBranch)) {
       logger.debug(`Branch is behind base branch and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
-      if (await scm.isBranchModified(branchName)) {
+      if (await scm.isBranchModified(branchName, baseBranch)) {
         logger.debug('Cannot rebase branch as it has been modified');
         result.reuseExistingBranch = true;
         result.isModified = true;
@@ -65,7 +58,7 @@ export async function shouldReuseExistingBranch(
     logger.debug('Branch is up-to-date');
   } else {
     logger.debug(
-      `Skipping behind base branch check due to rebaseWhen=${config.rebaseWhen!}`,
+      `Skipping behind base branch check due to rebaseWhen=${result.rebaseWhen!}`,
     );
   }
 
@@ -74,12 +67,9 @@ export async function shouldReuseExistingBranch(
   if (result.isConflicted) {
     logger.debug('Branch is conflicted');
 
-    if ((await scm.isBranchModified(branchName)) === false) {
+    if ((await scm.isBranchModified(branchName, baseBranch)) === false) {
       logger.debug(`Branch is not mergeable and needs rebasing`);
-      if (
-        config.rebaseWhen === 'never' &&
-        !(await shouldKeepUpdated(config, baseBranch, branchName))
-      ) {
+      if (result.rebaseWhen === 'never' && !keepUpdated) {
         logger.debug('Rebasing disabled by config');
         result.reuseExistingBranch = true;
         result.isModified = false;
@@ -99,7 +89,7 @@ export async function shouldReuseExistingBranch(
   // along with the changes to the package.json. Thus ending up with an incomplete branch update
   // This is why we are skipping branch reuse in this case (#10050)
   const groupedByPackageFile: Record<string, Set<RangeStrategy>> = {};
-  for (const upgrade of config.upgrades) {
+  for (const upgrade of result.upgrades) {
     const packageFile = upgrade.packageFile!;
     groupedByPackageFile[packageFile] ??= new Set();
     groupedByPackageFile[packageFile].add(upgrade.rangeStrategy!);
@@ -120,4 +110,38 @@ export async function shouldReuseExistingBranch(
   result.reuseExistingBranch = true;
   result.isModified = false;
   return result;
+}
+
+/**
+ * This method updates rebaseWhen value when it's set to auto(default) or automerging
+ *
+ * @param result BranchConfig
+ * @param keepUpdated boolean
+ */
+async function determineRebaseWhenValue(
+  result: BranchConfig,
+  keepUpdated: boolean,
+): Promise<void> {
+  if (result.rebaseWhen === 'auto' || result.rebaseWhen === 'automerging') {
+    let reason;
+    let newValue = 'behind-base-branch';
+    if (result.automerge === true) {
+      reason = 'automerge=true';
+    } else if (keepUpdated) {
+      reason = 'keep-updated label is set';
+    } else if (result.rebaseWhen === 'automerging') {
+      newValue = 'never';
+      reason = 'no keep-updated label and automerging is set';
+    } else if (await platform.getBranchForceRebase?.(result.baseBranch)) {
+      reason = 'platform is configured to require up-to-date branches';
+    } else {
+      newValue = 'conflicted';
+      reason = 'no rule for behind-base-branch applies';
+    }
+
+    logger.debug(
+      `Converting rebaseWhen=${result.rebaseWhen} to rebaseWhen=${newValue} because ${reason}`,
+    );
+    result.rebaseWhen = newValue;
+  }
 }

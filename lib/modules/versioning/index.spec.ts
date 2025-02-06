@@ -1,7 +1,8 @@
 import { getOptions } from '../../config/options';
 import { loadModules } from '../../util/modules';
 import { isVersioningApiConstructor } from './common';
-import { GenericVersion, GenericVersioningApi } from './generic';
+import type { GenericVersion } from './generic';
+import { GenericVersioningApi } from './generic';
 import * as semverVersioning from './semver';
 import * as semverCoercedVersioning from './semver-coerced';
 import type { VersioningApi, VersioningApiConstructor } from './types';
@@ -85,6 +86,7 @@ describe('modules/versioning/index', () => {
       'toString',
       'valueOf',
       'subset',
+      'isSame',
     ];
     const npmApi = Object.keys(allVersioning.get(semverVersioning.id))
       .filter((val) => !optionalFunctions.includes(val))

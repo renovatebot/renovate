@@ -76,7 +76,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
 
   it('update single dependency with exact constraint and depType provider', async () => {
     fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-      provider "registry.terraform.io/hashicorp/aws" {
+      provider "registry.opentofu.org/hashicorp/aws" {
         version     = "3.0.0"
         constraints = "3.0.0"
         hashes = [
@@ -111,7 +111,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       {
         file: {
           contents: codeBlock`
-            provider "registry.terraform.io/hashicorp/aws" {
+            provider "registry.opentofu.org/hashicorp/aws" {
               version     = "3.36.0"
               constraints = "3.36.0"
               hashes = [
@@ -126,7 +126,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       },
     ]);
     expect(mockHash.mock.calls).toEqual([
-      ['https://registry.terraform.io', 'hashicorp/aws', '3.36.0'],
+      ['https://registry.opentofu.org', 'hashicorp/aws', '3.36.0'],
     ]);
   });
 

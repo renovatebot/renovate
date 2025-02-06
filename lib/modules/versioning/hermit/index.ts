@@ -1,5 +1,6 @@
 import { satisfies } from 'semver';
-import { RegExpVersion, RegExpVersioningApi } from '../regex';
+import type { RegExpVersion } from '../regex';
+import { RegExpVersioningApi } from '../regex';
 import type { VersioningApiConstructor } from '../types';
 
 export const id = 'hermit';

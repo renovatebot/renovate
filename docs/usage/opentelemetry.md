@@ -30,6 +30,11 @@ This means that Renovate sends traces via [OTLP/HTTP](https://opentelemetry.io/d
 To activate the instrumentation, you must set the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable.
 This variable controls the endpoint for the telemetry data.
 Once this endpoint is set, you can use all environment variables listed in the [OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/configuration/sdk-environment-variables.md).
+You can also set the following environment variables:
+
+- `OTEL_SERVICE_NAME`: to control the service name that will be emitted in traces, defaults to `renovate`
+- `OTEL_SERVICE_NAMESPACE`: to control the service namespace that will be emitted in traces, defaults to `renovatebot.com`
+- `OTEL_SERVICE_VERSION`: to control the service version that will be emitted in traces, defaults to using the release version of Renovate
 
 ## Debugging
 

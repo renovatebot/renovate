@@ -41,7 +41,7 @@ export const getIssuesQuery = `
 query(
   $owner: String!,
   $name: String!,
-  $user: String!,
+  $user: String,
   $count: Int,
   $cursor: String
 ) {
@@ -62,34 +62,6 @@ query(
         title
         body
         updatedAt
-      }
-    }
-  }
-}
-`;
-
-export const vulnerabilityAlertsQuery = (filterByState: boolean): string => `
-query($owner: String!, $name: String!) {
-  repository(owner: $owner, name: $name) {
-    vulnerabilityAlerts(last: 100, ${filterByState ? 'states: [OPEN]' : ''}) {
-      edges {
-        node {
-          dismissReason
-          vulnerableManifestFilename
-          vulnerableManifestPath
-          vulnerableRequirements
-          securityAdvisory {
-            description
-            identifiers { type value }
-            references { url }
-            severity
-          }
-          securityVulnerability {
-            package { name ecosystem }
-            firstPatchedVersion { identifier }
-            vulnerableVersionRange
-          }
-        }
       }
     }
   }

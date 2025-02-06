@@ -1,12 +1,14 @@
+import { codeBlock } from 'common-tags';
 import type { Indent } from 'detect-indent';
 import { Fixtures } from '../../../../../test/fixtures';
-import { RenovateConfig, partial } from '../../../../../test/util';
+import type { RenovateConfig } from '../../../../../test/util';
+import { fs, partial, scm } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
-import { scm } from '../../../../modules/platform/scm';
 import { createConfigMigrationBranch } from './create';
 import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 
+jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
 
 describe('workers/repository/config-migration/branch/create', () => {
@@ -49,7 +51,8 @@ describe('workers/repository/config-migration/branch/create', () => {
           },
         ],
         message: 'Migrate config renovate.json',
-        platformCommit: false,
+        platformCommit: 'auto',
+        force: true,
       });
     });
 
@@ -72,7 +75,44 @@ describe('workers/repository/config-migration/branch/create', () => {
           },
         ],
         message,
-        platformCommit: false,
+        platformCommit: 'auto',
+        force: true,
+      });
+    });
+
+    it('migrates renovate config in package.json', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        {
+          "dependencies": {
+            "xmldoc": "1.0.0"
+          },
+          "renovate": ${renovateConfig}
+        }
+      `);
+      scm.getFileList.mockResolvedValueOnce([]);
+      await createConfigMigrationBranch(config, {
+        ...migratedConfigData,
+        filename: 'package.json',
+      });
+      expect(scm.checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
+      expect(scm.commitAndPush).toHaveBeenCalledWith({
+        branchName: 'renovate/migrate-config',
+        baseBranch: 'dev',
+        files: [
+          {
+            type: 'addition',
+            path: 'renovate.json',
+            contents: renovateConfig,
+          },
+          {
+            type: 'addition',
+            path: 'package.json',
+            contents: '{"dependencies":{"xmldoc":"1.0.0"}}',
+          },
+        ],
+        message: 'Migrate config renovate.json',
+        platformCommit: 'auto',
+        force: true,
       });
     });
 
@@ -96,7 +136,8 @@ describe('workers/repository/config-migration/branch/create', () => {
             },
           ],
           message,
-          platformCommit: false,
+          platformCommit: 'auto',
+          force: true,
         });
       });
     });
@@ -121,7 +162,8 @@ describe('workers/repository/config-migration/branch/create', () => {
             },
           ],
           message,
-          platformCommit: false,
+          platformCommit: 'auto',
+          force: true,
         });
       });
     });
@@ -147,7 +189,8 @@ describe('workers/repository/config-migration/branch/create', () => {
             },
           ],
           message,
-          platformCommit: false,
+          platformCommit: 'auto',
+          force: true,
         });
       });
 
@@ -172,7 +215,8 @@ describe('workers/repository/config-migration/branch/create', () => {
             },
           ],
           message,
-          platformCommit: false,
+          platformCommit: 'auto',
+          force: true,
         });
       });
     });

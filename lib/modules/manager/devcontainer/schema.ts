@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { Json } from '../../../util/schema-utils';
+import { Jsonc } from '../../../util/schema-utils';
 
-export const DevContainerFile = Json.pipe(
+export const DevContainerFile = Jsonc.pipe(
   z.object({
     image: z.string().optional(),
     features: z.record(z.unknown()).optional(),

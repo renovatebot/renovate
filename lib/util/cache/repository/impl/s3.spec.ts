@@ -1,10 +1,12 @@
 import { Readable } from 'node:stream';
-import {
-  GetObjectCommand,
+import type {
   GetObjectCommandInput,
-  PutObjectCommand,
   PutObjectCommandInput,
   PutObjectCommandOutput,
+} from '@aws-sdk/client-s3';
+import {
+  GetObjectCommand,
+  PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -127,7 +129,8 @@ describe('util/cache/repository/impl/s3', () => {
     s3Mock.on(GetObjectCommand, getObjectCommandInput).resolvesOnce({});
     await expect(s3Cache.read()).resolves.toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(
-      "RepoCacheS3.read() - failure - expecting Readable return type got 'undefined' type instead",
+      { returnType: 'undefined' },
+      'RepoCacheS3.read() - failure - got unexpected return type',
     );
   });
 

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "repoGroups": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9. -]+$": {
+          "oneOf": [
+            { "type": "string", "format": "uri" },
+            {
+              "type": "array",
+              "items": { "type": "string", "format": "uri" }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "orgGroups": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9. -]+$": {
+          "oneOf": [
+            { "type": "string", "format": "uri" },
+            {
+              "type": "array",
+              "items": { "type": "string", "format": "uri" }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "patternGroups": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9. -]+$": {
+          "oneOf": [
+            { "type": "string", "pattern": "^/.+/$" },
+            {
+              "type": "array",
+              "items": { "type": "string", "pattern": "^/.+/$" }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["repoGroups", "orgGroups", "patternGroups"],
+  "additionalProperties": false
+}

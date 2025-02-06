@@ -1,4 +1,5 @@
-import { GetPkgReleasesConfig, GetReleasesConfig, getPkgReleases } from '..';
+import type { GetPkgReleasesConfig, GetReleasesConfig } from '..';
+import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { partial } from '../../../../test/util';

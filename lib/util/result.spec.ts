@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
+/* eslint-disable @typescript-eslint/only-throw-error */
+// TODO: fix, should only allow `Error` type
+
 import { z } from 'zod';
 import { logger } from '../../test/util';
 import { AsyncResult, Result } from './result';
@@ -27,16 +31,27 @@ describe('util/result', () => {
     });
 
     describe('Wrapping', () => {
-      it('wraps callback', () => {
+      it('wraps callback returning value', () => {
         const res = Result.wrap(() => 42);
         expect(res).toEqual(Result.ok(42));
       });
 
-      it('handles callback error', () => {
+      it('handles throw in callback', () => {
         const res = Result.wrap(() => {
           throw 'oops';
         });
         expect(res).toEqual(Result.err('oops'));
+      });
+
+      it('wraps callback returning promise', () => {
+        const res = Result.wrap(() => Promise.resolve(42));
+        expect(res).toEqual(AsyncResult.ok(42));
+      });
+
+      it('wraps callback returning failed promise', () => {
+        const err = new Error('unknown');
+        const res = Result.wrap(() => Promise.reject(err));
+        expect(res).toEqual(AsyncResult.err(err));
       });
 
       it('wraps nullable callback', () => {
@@ -120,22 +135,22 @@ describe('util/result', () => {
 
       it('skips fallback for successful value', () => {
         const res: Result<number> = Result.ok(42);
-        expect(res.unwrapOrElse(-1)).toBe(42);
+        expect(res.unwrapOr(-1)).toBe(42);
       });
 
       it('uses fallback for error value', () => {
         const res: Result<number, string> = Result.err('oops');
-        expect(res.unwrapOrElse(42)).toBe(42);
+        expect(res.unwrapOr(42)).toBe(42);
       });
 
-      it('unwrapOrElse throws uncaught transform error', () => {
+      it('unwrapOr throws uncaught transform error', () => {
         const res = Result.ok(42);
         expect(() =>
           res
             .transform(() => {
               throw 'oops';
             })
-            .unwrapOrElse(0),
+            .unwrapOr(0),
         ).toThrow('oops');
       });
 
@@ -236,9 +251,8 @@ describe('util/result', () => {
       });
 
       it('converts error to Result', () => {
-        const result = Result.err<string>('oops').catch(() =>
-          Result.ok<number>(42),
-        );
+        const error: Result<number, string> = Result.err<string>('oops');
+        const result = error.catch((_err) => Result.ok<number>(42));
         expect(result).toEqual(Result.ok(42));
       });
 
@@ -405,12 +419,12 @@ describe('util/result', () => {
 
       it('skips fallback for successful AsyncResult', async () => {
         const res = Result.wrap(Promise.resolve(42));
-        await expect(res.unwrapOrElse(0)).resolves.toBe(42);
+        await expect(res.unwrapOr(0)).resolves.toBe(42);
       });
 
       it('uses fallback for error AsyncResult', async () => {
         const res = Result.wrap(Promise.reject('oops'));
-        await expect(res.unwrapOrElse(42)).resolves.toBe(42);
+        await expect(res.unwrapOr(42)).resolves.toBe(42);
       });
 
       it('returns ok-value for unwrapOrThrow', async () => {
@@ -596,15 +610,15 @@ describe('util/result', () => {
 
     describe('Catch', () => {
       it('converts error to AsyncResult', async () => {
-        const result = await Result.err<string>('oops').catch(() =>
-          AsyncResult.ok(42),
-        );
+        const error: Result<number, string> = Result.err<string>('oops');
+        const result = await error.catch(() => AsyncResult.ok(42));
         expect(result).toEqual(Result.ok(42));
       });
 
       it('converts error to Promise', async () => {
         const fallback = Promise.resolve(Result.ok(42));
-        const result = await Result.err<string>('oops').catch(() => fallback);
+        const error: Result<number, string> = Result.err<string>('oops');
+        const result = await error.catch(() => fallback);
         expect(result).toEqual(Result.ok(42));
       });
 
@@ -615,9 +629,9 @@ describe('util/result', () => {
       });
 
       it('converts AsyncResult error to Result', async () => {
-        const result = await AsyncResult.err<string>('oops').catch(() =>
-          AsyncResult.ok<number>(42),
-        );
+        const error: AsyncResult<number, string> =
+          AsyncResult.err<string>('oops');
+        const result = await error.catch(() => AsyncResult.ok<number>(42));
         expect(result).toEqual(Result.ok(42));
       });
     });

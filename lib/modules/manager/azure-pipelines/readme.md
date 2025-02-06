@@ -42,9 +42,9 @@ resources:
       ref: refs/tags/v0.5.1
   containers:
     - container: linux
-      image: ubuntu:16.04
+      image: ubuntu:24.04
     - container: python
-      image: python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077
+      image: python:3.13@sha256:7be9b757ea8fa90b43efd604dd5ef2923364230f00564b2ea7f0982d24b374c9
 
 stages:
   - stage: StageOne

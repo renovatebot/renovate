@@ -9,5 +9,5 @@ export interface MigrationConstructor {
 export interface Migration {
   readonly deprecated: boolean;
   readonly propertyName: string | RegExp;
-  run(value: unknown, key: string): void;
+  run(value: unknown, key: string, parentKey?: string): void;
 }

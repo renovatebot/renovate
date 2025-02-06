@@ -28,3 +28,4 @@ dev-package = "==0.1.0"
 
 [requires]
 python_version = "3.6"
+python_full_version = "3.6.2"

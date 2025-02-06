@@ -7,17 +7,17 @@ import { generateDatasources } from './datasources';
 import { getOpenGitHubItems } from './github-query-items';
 import { generateManagers } from './manager';
 import { generateManagerAsdfSupportedPlugins } from './manager-asdf-supported-plugins';
+import { generateManagerMiseSupportedPlugins } from './manager-mise-supported-plugins';
 import { generatePlatforms } from './platforms';
 import { generatePresets } from './presets';
 import { generateSchema } from './schema';
 import { generateTemplates } from './templates';
 import { generateVersioning } from './versioning';
 
-export async function generateDocs(): Promise<void> {
+export async function generateDocs(root = 'tmp', pack = true): Promise<void> {
   try {
-    const dist = 'tmp/docs';
-
-    logger.info('generating docs');
+    const dist = `${root}/docs`;
+    logger.info(`generating docs to '${dist}'`);
 
     await fs.mkdir(`${dist}/`, { recursive: true });
 
@@ -46,6 +46,10 @@ export async function generateDocs(): Promise<void> {
     logger.info('* managers/asdf/supported-plugins');
     await generateManagerAsdfSupportedPlugins(dist);
 
+    // managers/mise supported plugins
+    logger.info('* managers/mise/supported-plugins');
+    await generateManagerMiseSupportedPlugins(dist);
+
     // presets
     logger.info('* presets');
     await generatePresets(dist);
@@ -66,10 +70,11 @@ export async function generateDocs(): Promise<void> {
     logger.info('* json-schema');
     await generateSchema(dist);
 
-    await tar.create(
-      { file: './tmp/docs.tgz', cwd: './tmp/docs', gzip: true },
-      ['.'],
-    );
+    if (pack) {
+      await tar.create({ file: `${root}/docs.tgz`, cwd: dist, gzip: true }, [
+        '.',
+      ]);
+    }
   } catch (err) {
     logger.error({ err }, 'Unexpected error');
   } finally {

@@ -5,6 +5,33 @@ Renovate string matching syntax for some configuration options allows you, as us
 - [`minimatch`](https://github.com/isaacs/minimatch) glob patterns, including exact strings matches
 - regular expression (regex) patterns
 
+In cases where there are potentially multiple _inputs_, e.g. managers can have multiple categories, then the matcher will return `true` if _any_ of them match.
+
+## Special case: Match everything
+
+The value `*` is a special case which means "match everything".
+It is not valid to combine `*` with any other positive or negative match.
+
+```json title="Example of valid wildcard use"
+{
+  "allowedEnv": ["*"]
+}
+```
+
+```json title="Example of invalid wildcard use with additional match"
+{
+  "allowedEnv": ["*", "ABC"]
+}
+```
+
+```json title="Example of invalid wildcard use with negation"
+{
+  "allowedEnv": ["*", "!ABC"]
+}
+```
+
+In the latter case, the `*` can be omitted and achieve the same thing.
+
 ## Regex matching
 
 A valid regex pattern:
@@ -20,7 +47,7 @@ To ignore case sensitivity you must set the `i` flag, see the regex patterns tab
 ### Renovate uses re2 syntax
 
 Renovate uses the [`re2` library](https://github.com/google/re2) for regex matching.
-`re2` is different from the full regex specification, because `re2` has a different sytax/support.
+`re2` is different from the full regex specification, because `re2` has a different syntax/support.
 
 For the full `re2` syntax, read [the `re2` syntax wiki page](https://github.com/google/re2/wiki/Syntax).
 
@@ -54,10 +81,15 @@ If you need a case-sensitive pattern you must use a regex pattern.
 
 ### Example glob patterns
 
-| Pattern  | Glob pattern explanation                |
-| -------- | --------------------------------------- |
-| `abc123` | matches `abc123` exactly, or `AbC123`   |
-| `abc*`   | matches `abc`, `abc123`, `ABCabc`, etc. |
+| Pattern     | Glob pattern explanation                                     |
+| ----------- | ------------------------------------------------------------ |
+| `abc123`    | matches `abc123` exactly, or `AbC123`                        |
+| `abc*`      | matches `abc`, `abc123`, `ABCabc`, but not `abc/def`         |
+| `abc**/*`   | matches `abc/def` but not `abc`, `abcd`, or `abc/def/ghi`,   |
+| `abc**/**`  | matches `abc/def` and `abc/def/ghi`, but not `abc` or `abcd` |
+| `abc{/,}**` | matches `abc`, `abcd`, `abc/def`, and `abc/def/ghi`          |
+
+All matches above are case-insensitive, even if not shown.
 
 ## Negative matching
 
@@ -75,6 +107,13 @@ For example, the pattern `["/^abc/", "!/^abcd/", "!/abce/"]`:
 
 - matches `"abc"` and `"abcf"`
 - does _not_ match `"foo"`, `"abcd"`, `"abce"`, or `"abcdef"`
+
+If you find yourself in a situation where you need to positive-match a string which starts with `!`, then you need to do so using a regular expression pattern.
+For example, `["/^!abc$/"]` will positively match against the string `"!abc"`.
+
+One limitation of negative matching is when there may be multiple inputs to match against.
+For example, a manager may have multiple categories, such as `java` and `docker`.
+If you have a rule such as `"matchCategories": ["!docker"]` then this will return `true` because the `java` category satisfies this rule.
 
 ## Usage in Renovate configuration options
 

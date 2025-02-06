@@ -29,7 +29,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
   "upgrades": [
     {
       "branchName": "some-branch",
-      "commitMessage": "",
       "depName": "some-dep",
       "depTypes": undefined,
       "displayFrom": "",
@@ -48,7 +47,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
     {
       "branchName": "some-branch",
       "commitBodyTable": true,
-      "commitMessage": "",
       "datasource": "npm",
       "depName": "some-dep",
       "depTypes": undefined,
@@ -67,7 +65,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
     },
     {
       "branchName": "some-branch",
-      "commitMessage": "",
       "depName": "@types/some-dep",
       "depTypes": undefined,
       "displayFrom": "",
@@ -116,7 +113,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
     {
       "branchName": "some-branch",
       "commitBodyTable": true,
-      "commitMessage": "",
       "datasource": "npm",
       "depName": "some-dep",
       "depTypes": undefined,
@@ -133,7 +129,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
     {
       "branchName": "some-branch",
       "commitBodyTable": true,
-      "commitMessage": "",
       "datasource": "npm",
       "depName": "some-dep",
       "depTypes": undefined,
@@ -150,7 +145,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
     {
       "branchName": "some-branch",
       "commitBodyTable": true,
-      "commitMessage": "",
       "currentValue": "0.5.7",
       "currentVersion": "0.5.7",
       "datasource": "npm",
@@ -196,7 +190,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
   "upgrades": [
     {
       "branchName": "some-branch",
-      "commitMessage": "",
       "depTypes": undefined,
       "displayFrom": "",
       "displayPending": "",
@@ -242,7 +235,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
   "upgrades": [
     {
       "branchName": "some-branch",
-      "commitMessage": "",
       "currentValue": "^1.0.0",
       "currentVersion": "1.0.0",
       "depTypes": undefined,
@@ -263,5 +255,3 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
   ],
 }
 `;
-
-exports[`workers/repository/updates/generate generateBranchConfig() handles upgrades: some-title (patch) 1`] = `"some-title (patch)"`;

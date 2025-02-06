@@ -1,6 +1,7 @@
 # It would be nice to remove this file and use .gitignore instead however we need to add package.json and __fixtures__
 
 /node_modules
+/.pnpm-store
 /config.js
 /coverage
 /dist
@@ -19,3 +20,20 @@ package.json
 /tools/dist
 /patches
 **/tmp/
+/.venv/
+
+pdm.lock
+pnpm-lock.yaml
+
+# Ignore the mkdocs.yml file, as Prettier moves some comments around
+/tools/mkdocs/mkdocs.yml
+
+# Ignore the list of abbreviations, as Prettier messes up the syntax
+/tools/mkdocs/includes/abbreviations.md
+
+# Ignore overrides/main.html because Prettier messes up the formatting
+/tools/mkdocs/overrides/main.html
+
+# mkdocs generated files
+/tools/mkdocs/docs
+/tools/mkdocs/site

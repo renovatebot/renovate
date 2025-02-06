@@ -1,5 +1,6 @@
 import URL from 'node:url';
-import Git, { SimpleGit } from 'simple-git';
+import type { SimpleGit } from 'simple-git';
+import Git from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
@@ -8,6 +9,7 @@ import { simpleGitConfig } from '../../../util/git/config';
 import { getHttpUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
+import * as semVerVersioning from '../../versioning/semver';
 import type { ExtractConfig, PackageFileContent } from '../types';
 import type { GitModule } from './types';
 
@@ -121,7 +123,9 @@ export default async function extractPackageFile(
   const deps = [];
   for (const { name, path } of depNames) {
     try {
-      const [currentDigest] = (await git.subModule(['status', path]))
+      const [currentDigest] = (
+        await git.subModule(['status', '--cached', path])
+      )
         .trim()
         .replace(regEx(/^[-+]/), '')
         .split(regEx(/\s/));
@@ -138,6 +142,9 @@ export default async function extractPackageFile(
         packageName: httpSubModuleUrl,
         currentValue,
         currentDigest,
+        ...(semVerVersioning.api.isVersion(currentValue)
+          ? { versioning: semVerVersioning.id }
+          : {}),
       });
     } catch (err) /* istanbul ignore next */ {
       logger.warn(

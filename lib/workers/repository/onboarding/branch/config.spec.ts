@@ -1,4 +1,5 @@
-import { RenovateConfig, partial } from '../../../../../test/util';
+import type { RenovateConfig } from '../../../../../test/util';
+import { partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import * as presets from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';

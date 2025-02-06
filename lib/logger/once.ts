@@ -24,7 +24,7 @@ function getCallSite(omitFn: OmitFn): string | null {
     if (callsite) {
       result = callsite.toString();
     }
-  } catch (_err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     // no-op
   } finally {
     Error.stackTraceLimit = stackTraceLimitOrig;

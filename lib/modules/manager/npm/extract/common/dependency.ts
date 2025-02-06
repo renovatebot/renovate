@@ -181,8 +181,22 @@ export function extractDependency(
     dep.versioning = npmVersioningId;
     dep.packageName = githubOwnerRepo;
   } else {
-    dep.skipReason = 'unversioned-reference';
-    return dep;
+    // <protocol>://[<user>[:<password>]@]<hostname>[:<port>][:][/]<path>[#<commit-ish> | #semver:<semver>]
+    // https://docs.npmjs.com/cli/v10/configuring-npm/package-json#git-urls-as-dependencies
+    const len = 7; // length of 'semver:'
+    const maybeVersion = depRefPart.substring(len);
+
+    if (depRefPart.startsWith('semver:') && isValid(maybeVersion)) {
+      dep.currentRawValue = dep.currentValue;
+      dep.currentValue = maybeVersion;
+      dep.datasource = GithubTagsDatasource.id;
+      dep.versioning = npmVersioningId;
+      dep.packageName = githubOwnerRepo;
+      dep.pinDigests = false;
+    } else {
+      dep.skipReason = 'unversioned-reference';
+      return dep;
+    }
   }
   dep.sourceUrl = `https://github.com/${githubOwnerRepo}`;
   dep.gitRef = true;

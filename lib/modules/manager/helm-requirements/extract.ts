@@ -17,8 +17,8 @@ export function extractPackageFile(
   // TODO: fix type
   let doc: any;
   try {
-    doc = parseSingleYaml(content, { json: true }); // TODO #9610
-  } catch (err) {
+    doc = parseSingleYaml(content); // TODO #9610
+  } catch {
     logger.debug({ packageFile }, `Failed to parse helm requirements.yaml`);
     return null;
   }

@@ -190,6 +190,7 @@ some-package==0.3.1`;
             currentVersion: '20.3.0',
             datasource: 'pypi',
             depName: 'attrs',
+            packageName: 'attrs',
           },
         ],
       });
@@ -237,6 +238,44 @@ some-package==0.3.1`;
             datasource: 'git-tags',
           },
         ],
+      });
+    });
+
+    it('extracts a file with only --index-url flags', () => {
+      const res = extractPackageFile('--index-url https://example.com/pypi');
+      expect(res).toMatchObject({
+        deps: [],
+        registryUrls: ['https://example.com/pypi'],
+      });
+    });
+
+    it('extracts a file with only --extra-index-url flags', () => {
+      const res = extractPackageFile(
+        '--extra-index-url https://example.com/pypi',
+      );
+      expect(res).toMatchObject({
+        deps: [],
+        additionalRegistryUrls: ['https://example.com/pypi'],
+      });
+    });
+
+    it('extracts a file with only -r flags', () => {
+      const res = extractPackageFile('-r requirements-other.txt');
+      expect(res).toMatchObject({
+        deps: [],
+        managerData: {
+          requirementsFiles: ['requirements-other.txt'],
+        },
+      });
+    });
+
+    it('extracts a file with only -c flags', () => {
+      const res = extractPackageFile('-c constraints.txt');
+      expect(res).toMatchObject({
+        deps: [],
+        managerData: {
+          constraintsFiles: ['constraints.txt'],
+        },
       });
     });
   });

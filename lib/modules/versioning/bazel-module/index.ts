@@ -144,7 +144,7 @@ function isStable(version: string): boolean {
 function isValid(input: string): boolean {
   try {
     new BzlmodVersion(input);
-  } catch (e) {
+  } catch {
     return false;
   }
   return true;

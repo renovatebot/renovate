@@ -11,7 +11,7 @@ const MIN_HASH_LENGTH = 6;
 
 const RE_MULTIPLE_DASH = regEx(/--+/g);
 
-const RE_SPECIAL_CHARS_STRICT = regEx(/[`~!@#$%^&*()_=+[\]\\|{};':",.<>?]/g);
+const RE_SPECIAL_CHARS_STRICT = regEx(/[`~!@#$%^&*()_=+[\]\\|{};':",.<>?/]/g);
 
 /**
  * Clean git branch name
@@ -26,12 +26,20 @@ const RE_SPECIAL_CHARS_STRICT = regEx(/[`~!@#$%^&*()_=+[\]\\|{};':",.<>?]/g);
  */
 function cleanBranchName(
   branchName: string,
+  branchPrefix: string,
   branchNameStrict?: boolean,
 ): string {
   let cleanedBranchName = branchName;
 
+  let existingBranchPrefix = '';
   if (branchNameStrict) {
-    cleanedBranchName = cleanedBranchName.replace(RE_SPECIAL_CHARS_STRICT, '-'); // massage out all special characters that slip through slugify
+    if (cleanedBranchName.startsWith(branchPrefix)) {
+      existingBranchPrefix = branchPrefix;
+      cleanedBranchName = cleanedBranchName.slice(branchPrefix.length);
+    }
+    cleanedBranchName =
+      existingBranchPrefix +
+      cleanedBranchName.replace(RE_SPECIAL_CHARS_STRICT, '-'); // massage out all special characters that slip through slugify
   }
 
   return cleanGitRef
@@ -49,6 +57,12 @@ export function generateBranchName(update: RenovateConfig): void {
   // Check whether to use a group name
   const newMajor = String(update.newMajor);
   const newMinor = String(update.newMinor);
+  if (!update.groupName && update.sharedVariableName) {
+    logger.debug(
+      `Using sharedVariableName=${update.sharedVariableName} as groupName for depName=${update.depName}`,
+    );
+    update.groupName = update.sharedVariableName;
+  }
   if (update.groupName) {
     update.groupName = template.compile(update.groupName, update);
     logger.trace('Using group branchName template');
@@ -125,6 +139,7 @@ export function generateBranchName(update: RenovateConfig): void {
   }
   update.branchName = cleanBranchName(
     update.branchName,
+    update.branchPrefix!,
     update.branchNameStrict,
   );
 }

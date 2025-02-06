@@ -434,4 +434,27 @@ describe('modules/platform/azure/azure-helper', () => {
       ).toEqual(GitPullRequestMergeStrategy.Rebase);
     });
   });
+
+  describe('getAllProjectTeams', () => {
+    it('should get all teams ', async () => {
+      const team1 = Array.from({ length: 100 }, (_, index) => ({
+        description: `team1 ${index + 1}`,
+      }));
+      const team2 = Array.from({ length: 3 }, (_, index) => ({
+        description: `team2 ${index + 1}`,
+      }));
+      const allTeams = team1.concat(team2);
+      azureApi.coreApi.mockImplementationOnce(
+        () =>
+          ({
+            getTeams: jest
+              .fn()
+              .mockResolvedValueOnce(team1)
+              .mockResolvedValueOnce(team2),
+          }) as any,
+      );
+      const res = await azureHelper.getAllProjectTeams('projectId');
+      expect(res).toEqual(allTeams);
+    });
+  });
 });

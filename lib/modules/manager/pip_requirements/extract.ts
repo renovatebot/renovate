@@ -1,13 +1,14 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
 import { RANGE_PATTERN } from '@renovatebot/pep440';
 import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { isSkipComment } from '../../../util/ignore';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
+import { normalizePythonDepName } from '../../datasource/pypi/common';
 import type { PackageDependency, PackageFileContent } from '../types';
+import { extractPackageFileFlags } from './common';
 import type { PipRequirementsManagerData } from './types';
 
 export const packagePattern =
@@ -25,51 +26,10 @@ const specifierPartPattern = `\\s*${rangePattern.replace(
 const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
 export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
 
-export function cleanRegistryUrls(registryUrls: string[]): string[] {
-  return registryUrls.map((url) => {
-    // handle the optional quotes in eg. `--extra-index-url "https://foo.bar"`
-    const cleaned = url.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
-    if (!GlobalConfig.get('exposeAllEnv')) {
-      return cleaned;
-    }
-    // interpolate any environment variables
-    return cleaned.replace(
-      regEx(/(\$[A-Za-z\d_]+)|(\${[A-Za-z\d_]+})/g),
-      (match) => {
-        const envvar = match
-          .substring(1)
-          .replace(regEx(/^{/), '')
-          .replace(regEx(/}$/), '');
-        const sub = process.env[envvar];
-        return sub ?? match;
-      },
-    );
-  });
-}
-
 export function extractPackageFile(
   content: string,
 ): PackageFileContent<PipRequirementsManagerData> | null {
   logger.trace('pip_requirements.extractPackageFile()');
-
-  let registryUrls: string[] = [];
-  const additionalRegistryUrls: string[] = [];
-  const additionalRequirementsFiles: string[] = [];
-  const additionalConstraintsFiles: string[] = [];
-  content.split(newlineRegex).forEach((line) => {
-    if (line.startsWith('-i ') || line.startsWith('--index-url ')) {
-      registryUrls = [line.split(' ')[1]];
-    } else if (line.startsWith('--extra-index-url ')) {
-      const extraUrl = line
-        .substring('--extra-index-url '.length)
-        .split(' ')[0];
-      additionalRegistryUrls.push(extraUrl);
-    } else if (line.startsWith('-r ')) {
-      additionalRequirementsFiles.push(line.split(' ')[1]);
-    } else if (line.startsWith('-c ')) {
-      additionalConstraintsFiles.push(line.split(' ')[1]);
-    }
-  });
 
   const pkgRegex = regEx(`^(${packagePattern})$`);
   const pkgValRegex = regEx(`^${dependencyPattern}$`);
@@ -122,6 +82,7 @@ export function extractPackageFile(
       dep = {
         ...dep,
         depName,
+        packageName: normalizePythonDepName(depName),
         currentValue,
         datasource: PypiDatasource.id,
       };
@@ -131,27 +92,18 @@ export function extractPackageFile(
       return dep;
     })
     .filter(is.truthy);
-  if (!deps.length) {
+
+  const res = extractPackageFileFlags(content);
+  res.deps = deps;
+
+  if (
+    !res.deps.length &&
+    !res.registryUrls?.length &&
+    !res.additionalRegistryUrls?.length &&
+    !res.managerData?.requirementsFiles?.length &&
+    !res.managerData?.constraintsFiles?.length
+  ) {
     return null;
-  }
-  const res: PackageFileContent = { deps };
-  if (registryUrls.length > 0) {
-    res.registryUrls = cleanRegistryUrls(registryUrls);
-  }
-  if (additionalRegistryUrls.length) {
-    res.additionalRegistryUrls = cleanRegistryUrls(additionalRegistryUrls);
-  }
-  if (additionalRequirementsFiles.length) {
-    if (!res.managerData) {
-      res.managerData = {};
-    }
-    res.managerData.requirementsFiles = additionalRequirementsFiles;
-  }
-  if (additionalConstraintsFiles.length) {
-    if (!res.managerData) {
-      res.managerData = {};
-    }
-    res.managerData.constraintsFiles = additionalConstraintsFiles;
   }
   return res;
 }

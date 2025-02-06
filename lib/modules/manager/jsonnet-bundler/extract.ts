@@ -20,7 +20,7 @@ export function extractPackageFile(
   let jsonnetFile: JsonnetFile;
   try {
     jsonnetFile = JSON.parse(content) as JsonnetFile;
-  } catch (err) {
+  } catch {
     logger.debug({ packageFile }, `Invalid JSON`);
     return null;
   }

@@ -1,16 +1,18 @@
 // istanbul ignore next
-const Categories = [
+export const Categories = [
   'ansible',
   'batect',
   'bazel',
   'c',
   'cd',
   'ci',
+  'custom',
   'dart',
   'docker',
   'dotnet',
   'elixir',
   'golang',
+  'haskell',
   'helm',
   'iac',
   'java',

@@ -1,22 +1,23 @@
-import {
-  DescribeImagesCommand,
-  EC2Client,
-  Filter,
-  Image,
-} from '@aws-sdk/client-ec2';
+import type { Filter, Image } from '@aws-sdk/client-ec2';
+import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { cache } from '../../../util/cache/package/decorator';
+import { asTimestamp } from '../../../util/timestamp';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { AwsClientConfig, ParsedConfig } from './types';
 
-export class AwsMachineImageDataSource extends Datasource {
+export class AwsMachineImageDatasource extends Datasource {
   static readonly id = 'aws-machine-image';
 
   override readonly defaultVersioning = amazonMachineImageVersioning.id;
 
   override readonly caching = true;
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `CreationDate` field in the results.';
 
   override readonly defaultConfig = {
     // Because AMIs don't follow any versioning scheme, we override commitMessageExtra to remove the 'v'
@@ -38,7 +39,7 @@ export class AwsMachineImageDataSource extends Datasource {
   private readonly now: number;
 
   constructor() {
-    super(AwsMachineImageDataSource.id);
+    super(AwsMachineImageDatasource.id);
     this.now = Date.now();
   }
 
@@ -77,7 +78,7 @@ export class AwsMachineImageDataSource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AwsMachineImageDataSource.id}`,
+    namespace: `datasource-${AwsMachineImageDatasource.id}`,
     key: (serializedAmiFilter: string) =>
       `getSortedAwsMachineImages:${serializedAmiFilter}`,
   })
@@ -102,7 +103,7 @@ export class AwsMachineImageDataSource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AwsMachineImageDataSource.id}`,
+    namespace: `datasource-${AwsMachineImageDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig, newValue: string) =>
       `getDigest:${packageName}:${newValue ?? ''}`,
   })
@@ -132,7 +133,7 @@ export class AwsMachineImageDataSource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AwsMachineImageDataSource.id}`,
+    namespace: `datasource-${AwsMachineImageDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
   })
   async getReleases({
@@ -147,7 +148,7 @@ export class AwsMachineImageDataSource extends Datasource {
       releases: [
         {
           version: latestImage.ImageId,
-          releaseTimestamp: latestImage.CreationDate,
+          releaseTimestamp: asTimestamp(latestImage.CreationDate),
           isDeprecated:
             Date.parse(latestImage.DeprecationTime ?? this.now.toString()) <
             this.now,

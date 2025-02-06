@@ -3,7 +3,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { HttpError } from '../../../util/http';
-import { CdnJsDatasource } from '.';
+import { CdnjsDatasource } from '.';
 
 const baseUrl = 'https://api.cdnjs.com/';
 
@@ -19,7 +19,7 @@ describe('modules/datasource/cdnjs/index', () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(200, '}');
       await expect(
         getPkgReleases({
-          datasource: CdnJsDatasource.id,
+          datasource: CdnjsDatasource.id,
           packageName: 'foo/bar',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -29,7 +29,7 @@ describe('modules/datasource/cdnjs/index', () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).replyWithError('error');
       await expect(
         getPkgReleases({
-          datasource: CdnJsDatasource.id,
+          datasource: CdnjsDatasource.id,
           packageName: 'foo/bar',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -39,7 +39,7 @@ describe('modules/datasource/cdnjs/index', () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(404);
       expect(
         await getPkgReleases({
-          datasource: CdnJsDatasource.id,
+          datasource: CdnjsDatasource.id,
           packageName: 'foo/bar',
         }),
       ).toBeNull();
@@ -52,7 +52,7 @@ describe('modules/datasource/cdnjs/index', () => {
         .reply(200, {});
       expect(
         await getPkgReleases({
-          datasource: CdnJsDatasource.id,
+          datasource: CdnjsDatasource.id,
           packageName: 'doesnotexist/doesnotexist',
         }),
       ).toBeNull();
@@ -62,7 +62,7 @@ describe('modules/datasource/cdnjs/index', () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(401);
       await expect(
         getPkgReleases({
-          datasource: CdnJsDatasource.id,
+          datasource: CdnjsDatasource.id,
           packageName: 'foo/bar',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -72,7 +72,7 @@ describe('modules/datasource/cdnjs/index', () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(429);
       await expect(
         getPkgReleases({
-          datasource: CdnJsDatasource.id,
+          datasource: CdnjsDatasource.id,
           packageName: 'foo/bar',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -82,7 +82,7 @@ describe('modules/datasource/cdnjs/index', () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(502);
       await expect(
         getPkgReleases({
-          datasource: CdnJsDatasource.id,
+          datasource: CdnjsDatasource.id,
           packageName: 'foo/bar',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -92,7 +92,7 @@ describe('modules/datasource/cdnjs/index', () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).replyWithError('error');
       await expect(
         getPkgReleases({
-          datasource: CdnJsDatasource.id,
+          datasource: CdnjsDatasource.id,
           packageName: 'foo/bar',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -104,7 +104,7 @@ describe('modules/datasource/cdnjs/index', () => {
         .get(pathFor('d3-force/d3-force.js'))
         .reply(200, Fixtures.get('d3-force.json'));
       const res = await getPkgReleases({
-        datasource: CdnJsDatasource.id,
+        datasource: CdnjsDatasource.id,
         packageName: 'd3-force/d3-force.js',
       });
       expect(res).toMatchSnapshot();
@@ -120,7 +120,7 @@ describe('modules/datasource/cdnjs/index', () => {
 
       const res = await getDigest(
         {
-          datasource: CdnJsDatasource.id,
+          datasource: CdnjsDatasource.id,
           packageName: 'foo/bar',
         },
         '1.2.0',
@@ -136,7 +136,7 @@ describe('modules/datasource/cdnjs/index', () => {
 
       const res = await getDigest(
         {
-          datasource: CdnJsDatasource.id,
+          datasource: CdnjsDatasource.id,
           packageName: 'foo/bar',
         },
         '1.2.0',
@@ -152,7 +152,7 @@ describe('modules/datasource/cdnjs/index', () => {
 
       const res = await getDigest(
         {
-          datasource: CdnJsDatasource.id,
+          datasource: CdnjsDatasource.id,
           packageName: 'foo/bar',
         },
         '1.2.0',
@@ -165,7 +165,7 @@ describe('modules/datasource/cdnjs/index', () => {
       await expect(
         getDigest(
           {
-            datasource: CdnJsDatasource.id,
+            datasource: CdnjsDatasource.id,
             packageName: 'foo/bar',
           },
           '1.2.0',
@@ -181,7 +181,7 @@ describe('modules/datasource/cdnjs/index', () => {
 
       const res = await getDigest(
         {
-          datasource: CdnJsDatasource.id,
+          datasource: CdnjsDatasource.id,
           packageName: 'bootstrap/js/bootstrap.min.js',
         },
         '5.2.3',

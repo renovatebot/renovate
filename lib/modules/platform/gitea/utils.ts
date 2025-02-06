@@ -124,7 +124,7 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
   return {
     labels,
     number: data.number,
-    state: data.state,
+    state: data.merged ? 'merged' : data.state,
     title,
     isDraft,
     bodyStruct: getPrBodyStruct(data.body),

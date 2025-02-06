@@ -3,6 +3,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { parse } from '../../../util/html';
 import { HttpError } from '../../../util/http';
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -20,6 +21,10 @@ export class ArtifactoryDatasource extends Datasource {
   override readonly caching = true;
 
   override readonly registryStrategy = 'merge';
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the date-like text, next to the version hyperlink tag in the results.';
 
   @cache({
     namespace: `datasource-${datasource}`,
@@ -68,13 +73,13 @@ export class ArtifactoryDatasource extends Datasource {
                 ? node.innerHTML.slice(0, -1)
                 : node.innerHTML;
 
-            const published = ArtifactoryDatasource.parseReleaseTimestamp(
-              node.nextSibling!.text, // TODO: can be null (#22198)
+            const releaseTimestamp = asTimestamp(
+              node.nextSibling?.text?.trimStart()?.split(regEx(/\s{2,}/))?.[0],
             );
 
             const thisRelease: Release = {
               version,
-              releaseTimestamp: published,
+              releaseTimestamp,
             };
 
             result.releases.push(thisRelease);
@@ -107,9 +112,5 @@ export class ArtifactoryDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
-  }
-
-  private static parseReleaseTimestamp(rawText: string): string {
-    return rawText.trim().replace(regEx(/ ?-$/), '') + 'Z';
   }
 }

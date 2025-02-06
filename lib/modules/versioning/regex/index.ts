@@ -1,6 +1,7 @@
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { regEx } from '../../../util/regex';
-import { GenericVersion, GenericVersioningApi } from '../generic';
+import type { GenericVersion } from '../generic';
+import { GenericVersioningApi } from '../generic';
 import type { VersioningApiConstructor } from '../types';
 
 export const id = 'regex';

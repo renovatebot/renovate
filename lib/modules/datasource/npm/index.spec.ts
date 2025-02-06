@@ -40,10 +40,6 @@ describe('modules/datasource/npm/index', () => {
     };
   });
 
-  afterEach(() => {
-    delete process.env.RENOVATE_CACHE_NPM_MINUTES;
-  });
-
   it('should return null for no versions', async () => {
     const missingVersions = { ...npmResponse };
     missingVersions.versions = {};
@@ -329,7 +325,6 @@ describe('modules/datasource/npm/index', () => {
       .get('/foobar')
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
-    process.env.RENOVATE_CACHE_NPM_MINUTES = '15';
     GlobalConfig.set({ exposeAllEnv: true });
 
     const npmrc = 'registry=${REGISTRY}';

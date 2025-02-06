@@ -1,5 +1,5 @@
 import type { LongCommitSha } from '../../../util/git/types';
-import type { Pr } from '../types';
+import type { Pr, RepoSortMethod, SortMethod } from '../types';
 
 export interface PrReviewersParams {
   reviewers?: string[];
@@ -27,6 +27,7 @@ export interface PR {
   title: string;
   body: string;
   mergeable: boolean;
+  merged?: boolean;
   created_at: string;
   updated_at: string;
   closed_at: string;
@@ -137,8 +138,8 @@ export interface CommitStatus {
   id: number;
   status: CommitStatusType;
   context: string;
-  description: string;
-  target_url: string;
+  description?: string;
+  target_url?: string;
   created_at: string;
 }
 
@@ -146,10 +147,6 @@ export interface CombinedCommitStatus {
   worstStatus: CommitStatusType;
   statuses: CommitStatus[];
 }
-
-export type RepoSortMethod = 'alpha' | 'created' | 'updated' | 'size' | 'id';
-
-export type SortMethod = 'asc' | 'desc';
 
 export interface RepoSearchParams {
   uid?: number;
@@ -202,6 +199,7 @@ export interface PRUpdateParams {
 export interface PRMergeParams {
   Do: PRMergeMethod;
   merge_when_checks_succeed?: boolean;
+  delete_branch_after_merge?: boolean;
 }
 
 export type CommentCreateParams = CommentUpdateParams;

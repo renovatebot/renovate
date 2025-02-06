@@ -42,6 +42,10 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['docker'],
         pinDigests: true,
       },
+      {
+        matchManagers: ['argocd', 'devcontainer', 'helmv3', 'pyenv'],
+        pinDigests: false,
+      },
     ],
   },
 };

@@ -67,6 +67,29 @@ describe('util/cache/package/decorator', () => {
     expect(setCache).not.toHaveBeenCalled();
   });
 
+  it('forces cache if cachePrivatePackages=true', async () => {
+    GlobalConfig.set({ cachePrivatePackages: true });
+
+    class Class {
+      @cache({
+        namespace: '_test-namespace',
+        key: 'key',
+        cacheable: () => false,
+      })
+      public fn(): Promise<string | null> {
+        return getValue();
+      }
+    }
+    const obj = new Class();
+
+    expect(await obj.fn()).toBe('111');
+    expect(await obj.fn()).toBe('111');
+    expect(await obj.fn()).toBe('111');
+
+    expect(getValue).toHaveBeenCalledTimes(1);
+    expect(setCache).toHaveBeenCalledOnce();
+  });
+
   it('caches null values', async () => {
     class Class {
       @cache({ namespace: '_test-namespace', key: 'key' })

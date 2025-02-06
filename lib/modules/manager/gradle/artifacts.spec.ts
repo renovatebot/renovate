@@ -592,7 +592,7 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 help',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
@@ -662,7 +662,7 @@ describe('modules/manager/gradle/artifacts', () => {
           },
         },
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 help',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
@@ -705,7 +705,7 @@ describe('modules/manager/gradle/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 help',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
@@ -747,7 +747,7 @@ describe('modules/manager/gradle/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256,pgp help',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256,pgp dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],

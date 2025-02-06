@@ -1,13 +1,16 @@
 import is from '@sindresorhus/is';
+import type { Category } from '../../../../constants';
 import type {
   ExtractConfig,
+  MaybePromise,
   PackageDependency,
   PackageFileContent,
-  Result,
 } from '../../types';
+import { validMatchFields } from '../utils';
 import { handleAny, handleCombination, handleRecursive } from './strategies';
 import type { RegexManagerConfig, RegexManagerTemplates } from './types';
-import { validMatchFields } from './utils';
+
+export const categories: Category[] = ['custom'];
 
 export const defaultConfig = {
   pinDigests: false,
@@ -19,7 +22,7 @@ export function extractPackageFile(
   content: string,
   packageFile: string,
   config: ExtractConfig,
-): Result<PackageFileContent | null> {
+): MaybePromise<PackageFileContent | null> {
   let deps: PackageDependency[];
   switch (config.matchStringsStrategy) {
     default:

@@ -1,7 +1,8 @@
 import type { Indent } from 'detect-indent';
 import JSON5 from 'json5';
 import { Fixtures } from '../../../../../test/fixtures';
-import { RenovateConfig, git, partial, scm } from '../../../../../test/util';
+import type { RenovateConfig } from '../../../../../test/util';
+import { git, partial, scm } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { MigratedDataFactory } from './migrated-data';
@@ -47,15 +48,6 @@ describe('workers/repository/config-migration/branch/rebase', () => {
         baseBranch: 'dev',
         defaultBranch: 'master',
       };
-    });
-
-    it('does not rebase modified branch', async () => {
-      scm.isBranchModified.mockResolvedValueOnce(true);
-
-      await rebaseMigrationBranch(config, migratedConfigData);
-
-      expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
-      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
     });
 
     it.each([
@@ -117,7 +109,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
             },
           ],
           message: `Migrate config ${filename}`,
-          platformCommit: false,
+          platformCommit: 'auto',
           baseBranch: 'dev',
         });
       },

@@ -1,0 +1,53 @@
+{
+  "$schema": "../../tools/schemas/changelog-urls-schema.json",
+  "npm": {
+    "babel-preset-react-app": "https://github.com/facebook/create-react-app/releases",
+    "firebase": "https://firebase.google.com/support/release-notes/js",
+    "flow-bin": "https://github.com/facebook/flow/blob/master/Changelog.md",
+    "gatsby": "https://github.com/gatsbyjs/gatsby/blob/master/packages/gatsby/CHANGELOG.md",
+    "react-native": "https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md",
+    "sharp": "https://github.com/lovell/sharp/blob/main/docs/changelog.md",
+    "tailwindcss-classnames": "https://github.com/muhammadsammy/tailwindcss-classnames/blob/master/CHANGELOG.md",
+    "zone.js": "https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md"
+  },
+  "pypi": {
+    "beautifulsoup4": "https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/view/head:/CHANGELOG",
+    "flake8": "https://flake8.pycqa.org/en/latest/release-notes/index.html",
+    "django-storages": "https://github.com/jschneier/django-storages/blob/master/CHANGELOG.rst",
+    "lxml": "https://git.launchpad.net/lxml/plain/CHANGES.txt",
+    "mypy": "https://mypy.readthedocs.io/en/latest/changelog.html",
+    "phonenumbers": "https://github.com/daviddrysdale/python-phonenumbers/blob/dev/python/HISTORY.md",
+    "pycountry": "https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt",
+    "django-debug-toolbar": "https://django-debug-toolbar.readthedocs.io/en/latest/changes.html",
+    "requests": "https://github.com/psf/requests/blob/master/HISTORY.md",
+    "sqlalchemy": "https://docs.sqlalchemy.org/en/latest/changelog/",
+    "uwsgi": "https://uwsgi-docs.readthedocs.io/en/latest/#release-notes"
+  },
+  "docker": {
+    "gitlab/gitlab-ce": "https://gitlab.com/gitlab-org/gitlab-foss/-/blob/master/CHANGELOG.md",
+    "gitlab/gitlab-runner": "https://gitlab.com/gitlab-org/gitlab-runner/-/blob/master/CHANGELOG.md",
+    "google/cloud-sdk": "https://cloud.google.com/sdk/docs/release-notes",
+    "neo4j": "https://neo4j.com/release-notes/",
+    "whitesource/renovate": "https://github.com/whitesource/renovate-on-prem"
+  },
+  "maven": {
+    "ch.qos.logback:logback-access": "https://logback.qos.ch/news.html",
+    "ch.qos.logback:logback-classic": "https://logback.qos.ch/news.html",
+    "ch.qos.logback:logback-core": "https://logback.qos.ch/news.html",
+    "org.slf4j:jcl-over-slf4j": "https://www.slf4j.org/news.html",
+    "org.slf4j:jul-over-slf4j": "https://www.slf4j.org/news.html",
+    "org.slf4j:jul-to-slf4j": "https://www.slf4j.org/news.html",
+    "org.slf4j:log4j-over-slf4j": "https://www.slf4j.org/news.html",
+    "org.slf4j:slf4j": "https://www.slf4j.org/news.html",
+    "org.slf4j:slf4j-android": "https://www.slf4j.org/news.html",
+    "org.slf4j:slf4j-api": "https://www.slf4j.org/news.html",
+    "org.slf4j:slf4j-bom": "https://www.slf4j.org/news.html",
+    "org.slf4j:slf4j-ext": "https://www.slf4j.org/news.html",
+    "org.slf4j:slf4j-jcl": "https://www.slf4j.org/news.html",
+    "org.slf4j:slf4j-jdk-platform-logging": "https://www.slf4j.org/news.html",
+    "org.slf4j:slf4j-migrator": "https://www.slf4j.org/news.html",
+    "org.slf4j:slf4j-nop": "https://www.slf4j.org/news.html",
+    "org.slf4j:slf4j-reload4j": "https://www.slf4j.org/news.html",
+    "org.slf4j:slf4j-simple": "https://www.slf4j.org/news.html"
+  }
+}

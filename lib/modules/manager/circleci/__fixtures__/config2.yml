@@ -9,7 +9,7 @@ orbs:
   no-version: abc/def
 
   # Comments help me understand my work.
-  volatile: zzz/zzz@volatile # Comments help me understand my work.
+  volatile: "zzz/zzz@volatile" # Comments help me understand my work.
 
 test_plan: &test_plan
   steps:

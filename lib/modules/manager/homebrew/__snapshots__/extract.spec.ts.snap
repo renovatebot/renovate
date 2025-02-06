@@ -11,7 +11,7 @@ exports[`modules/manager/homebrew/extract extractPackageFile() extracts "archive
         "ownerName": "bazelbuild",
         "repoName": "bazel-watcher",
         "sha256": "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4",
-        "url": "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz",
+        "url": "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz",
       },
     },
   ],
@@ -37,6 +37,24 @@ exports[`modules/manager/homebrew/extract extractPackageFile() extracts "release
 `;
 
 exports[`modules/manager/homebrew/extract extractPackageFile() handles no space before class header 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "v0.8.2",
+      "datasource": "github-tags",
+      "depName": "bazelbuild/bazel-watcher",
+      "managerData": {
+        "ownerName": "bazelbuild",
+        "repoName": "bazel-watcher",
+        "sha256": "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4",
+        "url": "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz",
+      },
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/homebrew/extract extractPackageFile() handles old "archive" github url format 1`] = `
 {
   "deps": [
     {
@@ -122,7 +140,7 @@ exports[`modules/manager/homebrew/extract extractPackageFile() skips if sha256 f
         "ownerName": "bazelbuild",
         "repoName": "bazel-watcher",
         "sha256": "26f5125218fad2741d3caf937b0229",
-        "url": "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz",
+        "url": "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz",
       },
       "skipReason": "invalid-sha256",
     },
@@ -141,7 +159,7 @@ exports[`modules/manager/homebrew/extract extractPackageFile() skips if there is
         "ownerName": "bazelbuild",
         "repoName": "bazel-watcher",
         "sha256": null,
-        "url": "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz",
+        "url": "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz",
       },
       "skipReason": "invalid-sha256",
     },

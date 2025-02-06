@@ -52,13 +52,13 @@ describe('workers/repository/extract/manager-files', () => {
       fileMatch.getMatchingFiles.mockReturnValue(['Dockerfile']);
       fs.readLocalFile.mockResolvedValueOnce('some content');
       html.extractPackageFile = jest.fn(() => ({
-        deps: [{}, { replaceString: 'abc' }],
+        deps: [{}, { replaceString: 'abc', packageName: 'p' }],
       })) as never;
       const res = await getManagerPackageFiles(managerConfig);
       expect(res).toEqual([
         {
           packageFile: 'Dockerfile',
-          deps: [{}, { replaceString: 'abc' }],
+          deps: [{}, { replaceString: 'abc', packageName: 'p', depName: 'p' }],
         },
       ]);
     });

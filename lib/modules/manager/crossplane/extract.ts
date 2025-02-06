@@ -6,7 +6,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { type XPKG, XPKGSchema } from './schema';
+import { XPKGSchema } from './schema';
 
 export function extractPackageFile(
   content: string,
@@ -19,19 +19,11 @@ export function extractPackageFile(
     return null;
   }
 
-  let list: XPKG[] = [];
-  try {
-    list = parseYaml(content, null, {
-      customSchema: XPKGSchema,
-      failureBehaviour: 'filter',
-    });
-  } catch (err) {
-    logger.debug(
-      { err, packageFile },
-      'Failed to parse Crossplane package file.',
-    );
-    return null;
-  }
+  // not try and catching this as failureBehaviour is set to filter and therefore it will not throw
+  const list = parseYaml(content, {
+    customSchema: XPKGSchema,
+    failureBehaviour: 'filter',
+  });
 
   const deps: PackageDependency[] = [];
   for (const xpkg of list) {

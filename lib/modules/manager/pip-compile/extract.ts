@@ -1,8 +1,8 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { readLocalFile } from '../../../util/fs';
 import { ensureLocalPath } from '../../../util/fs/util';
-import { normalizePythonDepName } from '../../datasource/pypi/common';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 import type {
@@ -11,34 +11,13 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types';
-import { extractHeaderCommand } from './common';
-import type {
-  DependencyBetweenFiles,
-  PipCompileArgs,
-  SupportedManagers,
-} from './types';
+import { extractHeaderCommand, matchManager } from './common';
+import type { DependencyBetweenFiles, PipCompileArgs } from './types';
 import {
   generateMermaidGraph,
   inferCommandExecDir,
   sortPackageFiles,
 } from './utils';
-
-function matchManager(filename: string): SupportedManagers | 'unknown' {
-  if (filename.endsWith('setup.py')) {
-    return 'pip_setup';
-  }
-  if (filename.endsWith('setup.cfg')) {
-    return 'setup-cfg';
-  }
-  if (filename.endsWith('pyproject.toml')) {
-    return 'pep621';
-  }
-  // naive, could be improved, maybe use pip_requirements.fileMatch
-  if (filename.endsWith('.in')) {
-    return 'pip_requirements';
-  }
-  return 'unknown';
-}
 
 export function extractPackageFile(
   content: string,
@@ -88,11 +67,14 @@ export async function extractAllPackageFiles(
       compileArgs = extractHeaderCommand(fileContent, fileMatch);
       compileDir = inferCommandExecDir(fileMatch, compileArgs.outputFile);
     } catch (error) {
-      logger.warn({ fileMatch }, `pip-compile: ${error.message}`);
+      logger.warn(
+        { fileMatch, errorMessage: error.message },
+        'pip-compile error',
+      );
       continue;
     }
     lockFileArgs.set(fileMatch, compileArgs);
-    for (const constraint in compileArgs.constraintsFiles) {
+    for (const constraint of coerceArray(compileArgs.constraintsFiles)) {
       depsBetweenFiles.push({
         sourceFile: constraint,
         outputFile: fileMatch,
@@ -114,7 +96,7 @@ export async function extractAllPackageFiles(
       );
       try {
         ensureLocalPath(packageFile);
-      } catch (error) {
+      } catch {
         logger.warn(
           { fileMatch, packageFile },
           'pip-compile: Source file path outside of repository',
@@ -159,6 +141,10 @@ export async function extractAllPackageFiles(
       );
       if (packageFileContent) {
         if (packageFileContent.managerData?.requirementsFiles) {
+          packageFileContent.managerData.requirementsFiles =
+            packageFileContent.managerData.requirementsFiles.map(
+              (file: string) => upath.normalize(upath.join(compileDir, file)),
+            );
           for (const file of packageFileContent.managerData.requirementsFiles) {
             depsBetweenFiles.push({
               sourceFile: file,
@@ -168,6 +154,10 @@ export async function extractAllPackageFiles(
           }
         }
         if (packageFileContent.managerData?.constraintsFiles) {
+          packageFileContent.managerData.constraintsFiles =
+            packageFileContent.managerData.constraintsFiles.map(
+              (file: string) => upath.normalize(upath.join(compileDir, file)),
+            );
           for (const file of packageFileContent.managerData.constraintsFiles) {
             depsBetweenFiles.push({
               sourceFile: file,
@@ -178,9 +168,7 @@ export async function extractAllPackageFiles(
         }
         for (const dep of packageFileContent.deps) {
           const lockedVersion = lockedDeps?.find(
-            (lockedDep) =>
-              normalizePythonDepName(lockedDep.depName!) ===
-              normalizePythonDepName(dep.depName!),
+            (lockedDep) => lockedDep.packageName! === dep.packageName!,
           )?.currentVersion;
           if (lockedVersion) {
             dep.lockedVersion = lockedVersion;
@@ -228,7 +216,8 @@ export async function extractAllPackageFiles(
       }
       if (!sourceFiles) {
         logger.warn(
-          `pip-compile: ${packageFile.packageFile} references ${reqFile} which does not appear to be a requirements file managed by pip-compile`,
+          { packageFile: packageFile.packageFile, requirementsFile: reqFile },
+          'pip-compile: Package file references a file which does not appear to be a requirements file managed by pip-compile',
         );
         continue;
       }
@@ -259,9 +248,7 @@ function extendWithIndirectDeps(
   for (const lockedDep of lockedDeps) {
     if (
       !packageFileContent.deps.find(
-        (dep) =>
-          normalizePythonDepName(lockedDep.depName!) ===
-          normalizePythonDepName(dep.depName!),
+        (dep) => lockedDep.packageName! === dep.packageName!,
       )
     ) {
       packageFileContent.deps.push(indirectDep(lockedDep));

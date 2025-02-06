@@ -103,7 +103,10 @@ describe('modules/datasource/common', () => {
       };
       const res = applyExtractVersion(releaseResult, '^v(?<version>.+)$');
       expect(res).toEqual({
-        releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
+        releases: [
+          { version: '1.0.0', versionOrig: 'v1.0.0' },
+          { version: '2.0.0', versionOrig: 'v2.0.0' },
+        ],
       });
     });
 
@@ -113,7 +116,7 @@ describe('modules/datasource/common', () => {
       };
       const result = applyExtractVersion(releaseResult, '^v(?<version>.+)$');
       expect(result).toEqual({
-        releases: [{ version: '1.0.0' }],
+        releases: [{ version: '1.0.0', versionOrig: 'v1.0.0' }],
       });
     });
   });
@@ -224,6 +227,25 @@ describe('modules/datasource/common', () => {
       };
       expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
+      });
+    });
+
+    it('should match exact constraints', () => {
+      const config = {
+        datasource: 'pypi',
+        packageName: 'bar',
+        versioning: 'pep440',
+        constraintsFiltering: 'strict' as const,
+        constraints: { python: '>=3.8' },
+      };
+      const releaseResult = {
+        releases: [
+          { version: '1.0.0', constraints: { python: ['^1.0.0'] } },
+          { version: '2.0.0', constraints: { python: ['>=3.8'] } },
+        ],
+      };
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '2.0.0' }],
       });
     });
   });

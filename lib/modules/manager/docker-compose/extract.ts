@@ -37,8 +37,8 @@ export function extractPackageFile(
   let config: DockerComposeFile;
   try {
     config = parseSingleYaml(content, {
-      json: true,
       customSchema: DockerComposeFile,
+      removeTemplates: true,
     });
   } catch (err) {
     logger.debug(

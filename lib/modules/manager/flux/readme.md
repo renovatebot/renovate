@@ -1,8 +1,8 @@
 This manager parses [Flux](https://fluxcd.io/) YAML manifests and supports:
 
 1. [`HelmRelease`](https://fluxcd.io/docs/components/helm/helmreleases/) resources
-1. ['GitRepository'](https://fluxcd.io/flux/components/source/gitrepositories/) resources
-1. ['OCIRepository'](https://fluxcd.io/flux/components/source/ocirepositories/) resources
+1. [`GitRepository`](https://fluxcd.io/flux/components/source/gitrepositories/) resources
+1. [`OCIRepository`](https://fluxcd.io/flux/components/source/ocirepositories/) resources
 1. Flux [system](https://fluxcd.io/docs/installation) manifests
 
 ### HelmRelease support
@@ -22,11 +22,17 @@ Namespaces will not be inferred from the context (e.g. from the parent `Kustomiz
 
 Renovate updates `HelmRelease` resources coming from `GitRepository` by updating the `GitRepository` resource.
 
+Renovate updates Docker dependencies inside `HelmRelease` `values` like the [`helm-values`](../helm-values/index.md) manager.
+
 ### GitRepository support
 
 Renovate can update `git` references from `GitRepository` resources.
 
 The `flux` manager only updates `GitRepository` fields that have a `tag` or `commit` key.
+
+### Kustomization support
+
+Renovate can update `image`[^1] references from `Kustomization` resources.
 
 ### OCIRepository support
 
@@ -81,3 +87,5 @@ If instead you have all your Flux manifests inside a `flux/` directory, you woul
 ### Versioning
 
 If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.
+
+[^1]: <https://fluxcd.io/flux/components/kustomize/kustomizations/#images>

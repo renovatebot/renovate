@@ -30,12 +30,14 @@ concurrency:
 
 env:
   DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-  NODE_VERSION: 18
+  NODE_VERSION: 22
+  PDM_VERSION: 2.22.3 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
     .github/actions/
     data/
+    patches/
     tools/
     package.json
     pnpm-lock.yaml
@@ -93,7 +95,7 @@ jobs:
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_OUTPUT"
 
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
@@ -107,7 +109,7 @@ jobs:
           token: ${{ github.token }}
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Prefetch modules for `ubuntu-latest`
+      - name: Prefetch test modules for `ubuntu-latest`
         id: setup-node
         uses: ./.github/actions/setup-node
         with:
@@ -123,6 +125,27 @@ jobs:
           CHANGED_FILES: ${{ steps.changed-files.outputs.changed-files }}
         run: |
           echo "$(pnpm -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
+
+  setup-build:
+    runs-on: ubuntu-latest
+
+    outputs:
+      node-version: ${{ env.NODE_VERSION }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          filter: blob:none # we don't need all blobs
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          show-progress: false
+
+      - name: Prefetch build modules for `ubuntu-latest`
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+          save-cache: true
 
   prefetch:
     needs: [setup]
@@ -142,7 +165,6 @@ jobs:
     strategy:
       matrix:
         os: ${{ fromJSON(needs.setup.outputs.os-matrix-prefetch) }}
-        node-version: [18]
 
     runs-on: ${{ matrix.os }}
 
@@ -151,7 +173,7 @@ jobs:
     steps:
       - name: Checkout code
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
@@ -166,7 +188,8 @@ jobs:
           save-cache: true
 
   lint-eslint:
-    needs: [setup]
+    needs:
+      - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -175,18 +198,18 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           show-progress: false
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Restore eslint cache
-        uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: .cache/eslint
           key: eslint-main-cache
@@ -205,13 +228,14 @@ jobs:
 
       - name: Save eslint cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: .cache/eslint
           key: eslint-main-cache
 
   lint-prettier:
-    needs: [setup]
+    needs:
+      - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 7
 
@@ -220,24 +244,30 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           show-progress: false
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: .cache/prettier
           key: prettier-main-cache
 
       - name: Lint
-        run: pnpm prettier --cache-location .cache/prettier
+        run: |
+          pnpm prettier --write --cache-location .cache/prettier
+          git diff --quiet || {
+            echo "[ERROR] Please apply the changes prettier suggests:"
+            git diff --color=always
+            exit 1
+          }
 
       - name: Remove cache
         if: github.event_name == 'push'
@@ -250,30 +280,31 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: .cache/prettier
           key: prettier-main-cache
 
   lint-docs:
-    needs: [setup]
+    needs:
+      - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 7
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           show-progress: false
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        uses: DavidAnson/markdownlint-cli2-action@b4c9feab76d8025d1e83c653fa3990936df0e6c8 # v16.0.0
+        uses: DavidAnson/markdownlint-cli2-action@05f32210e84442804257b2a6f20b273450ec8265 # v19.1.0
 
       - name: Lint fenced code blocks
         run: pnpm doc-fence-check
@@ -285,20 +316,21 @@ jobs:
         run: pnpm markdown-lint
 
   lint-other:
-    needs: [setup]
+    needs:
+      - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 7
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           show-progress: false
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Type check
@@ -312,6 +344,9 @@ jobs:
 
       - name: Test schema
         run: pnpm test-schema
+
+      - name: Lint other
+        run: pnpm lint-other
 
   test:
     needs: [setup, prefetch]
@@ -330,7 +365,7 @@ jobs:
         include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
 
     steps:
-      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           show-progress: false
 
@@ -341,7 +376,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Cache jest
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: .cache/jest
           key: |
@@ -379,7 +414,7 @@ jobs:
 
       - name: Save coverage artifacts
         if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
@@ -393,20 +428,20 @@ jobs:
     if: (success() || failure()) && github.event_name != 'merge_group' && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           filter: blob:none # we don't need all blobs
           show-progress: false
 
       - name: Download coverage reports
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           pattern: coverage-*
           path: coverage
           merge-multiple: true
 
       - name: Codecov
-        uses: codecov/codecov-action@84508663e988701840491b86de86b666e8a86bed # v4.3.0
+        uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5.3.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: coverage/lcov
@@ -416,12 +451,13 @@ jobs:
   coverage-threshold:
     needs:
       - test
+      - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 3
     if: (success() || failure()) && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
@@ -430,11 +466,11 @@ jobs:
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           pattern: coverage-*
           path: coverage
@@ -505,64 +541,89 @@ jobs:
         run: exit 1
 
   build:
-    needs: setup
+    needs:
+      - setup-build
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           show-progress: false
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Build
         run: pnpm build
 
       - name: Build docker
-        run: pnpm build:docker build --tries=3
+        run: pnpm build:docker build --tries=3 --args '--load'
         env:
           LOG_LEVEL: debug
+
+      - name: Test docker
+        run: docker run -e LOG_LEVEL=debug --rm renovate/renovate --version
 
       - name: Pack
         run: pnpm test-e2e:pack
 
       - name: Upload
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
           name: renovate-package
           path: renovate-0.0.0-semantic-release.tgz
 
   build-docs:
-    needs: [lint-docs]
+    needs:
+      - lint-docs
+      - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 5
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           show-progress: false
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@b2472ca4258a9ea3aee813980a0100a2261a42fc # v4.2
+        with:
+          python-version-file: .python-version
+          version: ${{ env.PDM_VERSION }}
+          cache: true
+
+      - name: Install pdm dependencies
+        run: pdm install
 
       - name: Build
         run: pnpm build:docs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SKIP_GITHUB_ISSUES: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && 'true' || '' }}
+
+      - name: Test docs
+        run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
           name: docs
           path: tmp/docs/
+
+      - name: Build mkdocs
+        run: pnpm mkdocs build --no-build
 
   test-e2e:
     needs: [build]
@@ -573,22 +634,22 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           show-progress: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
         with:
           standalone: true
 
       - name: Setup Node.js
-        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Download package
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           name: renovate-package
 
@@ -600,7 +661,7 @@ jobs:
 
   release:
     needs:
-      - setup
+      - setup-build
       - lint-eslint
       - lint-prettier
       - lint-docs
@@ -622,24 +683,24 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
           filter: blob:none # we don't need all blobs, only the full tree
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@75d68da3c8cd3d622cf6d4b8d2dfe7e4dc33dfed # v3.0.78
+        uses: containerbase/internal-tools@e49daccce71d5506c63fa4b00540248bb18add27 # v3.8.2
         with:
           command: docker-config
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
+      - uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e # v3.8.0
 
       - name: Docker registry login
         run: |

@@ -16,7 +16,7 @@ export async function detectGlobalConfig(): Promise<GlobalManagerConfig> {
       res.npmrcMerge = true;
       logger.debug(`Detected ${npmrcFileName} and adding it to global config`);
     }
-  } catch (err) {
+  } catch {
     logger.warn({ npmrcFileName }, 'Error reading .npmrc file');
   }
   return res;

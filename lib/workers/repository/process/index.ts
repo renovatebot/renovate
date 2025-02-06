@@ -15,7 +15,8 @@ import { addSplit } from '../../../util/split';
 import { getRegexPredicate } from '../../../util/string-match';
 import type { BranchConfig } from '../../types';
 import { readDashboardBody } from '../dependency-dashboard';
-import { ExtractResult, extract, lookup, update } from './extract-update';
+import type { ExtractResult } from './extract-update';
+import { extract, lookup, update } from './extract-update';
 import type { WriteUpdateResult } from './write';
 
 async function getBaseBranchConfig(
@@ -47,7 +48,7 @@ async function getBaseBranchConfig(
         baseBranch,
       );
       logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
-    } catch (err) {
+    } catch {
       logger.error(
         { configFileName, baseBranch },
         `Error fetching config file from base branch - possible config name mismatch between branches?`,
@@ -118,7 +119,7 @@ export async function extractDependencies(
   let res: ExtractResult = {
     branches: [],
     branchList: [],
-    packageFiles: null!,
+    packageFiles: {},
   };
   if (GlobalConfig.get('platform') !== 'local' && config.baseBranches?.length) {
     config.baseBranches = unfoldBaseBranches(
@@ -145,7 +146,10 @@ export async function extractDependencies(
         const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
         res.branches = res.branches.concat(baseBranchRes?.branches);
         res.branchList = res.branchList.concat(baseBranchRes?.branchList);
-        res.packageFiles = res.packageFiles || baseBranchRes?.packageFiles; // Use the first branch
+        if (!res.packageFiles || !Object.keys(res.packageFiles).length) {
+          // Use the first branch
+          res.packageFiles = baseBranchRes?.packageFiles;
+        }
       }
     }
     removeMeta(['baseBranch']);

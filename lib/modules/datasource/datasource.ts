@@ -4,8 +4,12 @@ import type {
   DatasourceApi,
   DigestConfig,
   GetReleasesConfig,
+  PostprocessReleaseConfig,
+  PostprocessReleaseResult,
   RegistryStrategy,
+  Release,
   ReleaseResult,
+  SourceUrlSupport,
 } from './types';
 
 export abstract class Datasource implements DatasourceApi {
@@ -24,6 +28,12 @@ export abstract class Datasource implements DatasourceApi {
   defaultVersioning?: string | undefined;
 
   registryStrategy: RegistryStrategy | undefined = 'first';
+
+  releaseTimestampSupport = false;
+  releaseTimestampNote?: string | undefined;
+
+  sourceUrlSupport: SourceUrlSupport = 'none';
+  sourceUrlNote?: string | undefined;
 
   protected http: Http;
 
@@ -53,5 +63,13 @@ export abstract class Datasource implements DatasourceApi {
     }
 
     throw err;
+  }
+
+  // istanbul ignore next: no-op implementation, never called
+  postprocessRelease(
+    _config: PostprocessReleaseConfig,
+    release: Release,
+  ): Promise<PostprocessReleaseResult> {
+    return Promise.resolve(release);
   }
 }

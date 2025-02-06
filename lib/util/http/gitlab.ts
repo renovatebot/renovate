@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import type { RetryObject } from 'got';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { parseLinkHeader, parseUrl } from '../url';
@@ -82,5 +83,20 @@ export class GitlabHttp extends Http<GitlabHttpOptions> {
       }
       throw err;
     }
+  }
+
+  protected override calculateRetryDelay(retryObject: RetryObject): number {
+    const { error, attemptCount, retryOptions } = retryObject;
+    if (
+      attemptCount <= retryOptions.limit &&
+      error.options.method === 'POST' &&
+      error.response?.statusCode === 409 &&
+      error.response.rawBody.toString().includes('Resource lock')
+    ) {
+      const noise = Math.random() * 100;
+      return 2 ** (attemptCount - 1) * 1000 + noise;
+    }
+
+    return super.calculateRetryDelay(retryObject);
   }
 }

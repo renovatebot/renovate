@@ -9,12 +9,16 @@ function jsUcfirst(string: string): string {
 function getEditUrl(name: string): string {
   const url =
     'https://github.com/renovatebot/renovate/edit/main/lib/config/presets/internal/';
-
+  const dataUrl = 'https://github.com/renovatebot/renovate/edit/main/lib/data/';
   switch (name) {
-    case 'regexManagers':
-      return `${url}regex-managers.ts`;
+    case 'customManagers':
+      return `${url}custom-managers.ts`;
     case 'mergeConfidence':
       return `${url}merge-confidence.ts`;
+    case 'monorepo':
+      return `${dataUrl}${name}.json`;
+    case 'replacements':
+      return `${dataUrl}${name}.json`;
     default:
       return `${url}${name}.ts`;
   }
@@ -66,7 +70,10 @@ export async function generatePresets(dist: string): Promise<void> {
       if (presetDescription) {
         body += `\n\n${presetDescription}\n`;
       } else {
-        logger.warn(`Preset ${name}:${preset} has no description`);
+        logger.warn(
+          { preset: `${name}:${preset}` },
+          'Preset has no description',
+        );
       }
       body += '\n```json\n';
       body += JSON.stringify(value, null, 2);

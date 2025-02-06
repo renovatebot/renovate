@@ -36,7 +36,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
 function equals(a: string, b: string): boolean {
   try {
     return npm.equals(padZeroes(a), padZeroes(b));
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     return pep440.equals(a, b);
   }
 }
@@ -44,7 +44,7 @@ function equals(a: string, b: string): boolean {
 function getMajor(version: string): number | null {
   try {
     return npm.getMajor(padZeroes(version));
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     return pep440.getMajor(version);
   }
 }
@@ -52,7 +52,7 @@ function getMajor(version: string): number | null {
 function getMinor(version: string): number | null {
   try {
     return npm.getMinor(padZeroes(version));
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     return pep440.getMinor(version);
   }
 }
@@ -60,7 +60,7 @@ function getMinor(version: string): number | null {
 function getPatch(version: string): number | null {
   try {
     return npm.getPatch(padZeroes(version));
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     return pep440.getPatch(version);
   }
 }
@@ -68,7 +68,7 @@ function getPatch(version: string): number | null {
 function isGreaterThan(a: string, b: string): boolean {
   try {
     return npm.isGreaterThan(padZeroes(a), padZeroes(b));
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     return pep440.isGreaterThan(a, b);
   }
 }

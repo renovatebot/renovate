@@ -2,7 +2,6 @@
   "extends": "./tsconfig",
   "compilerOptions": {
     "declaration": true,
-    "resolveJsonModule": false,
     "sourceMap": true,
     "inlineSources": true,
     "importHelpers": true,

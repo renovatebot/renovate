@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { parseYaml } from '../../../util/yaml';
@@ -12,14 +13,20 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
+import { findDependencies } from '../helm-values/extract';
 import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
+import { extractImage } from '../kustomize/extract';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFile,
   PackageFileContent,
 } from '../types';
-import { isSystemManifest, systemManifestHeaderRegex } from './common';
+import {
+  collectHelmRepos,
+  isSystemManifest,
+  systemManifestHeaderRegex,
+} from './common';
 import { FluxResource, type HelmRepository } from './schema';
 import type {
   FluxManagerData,
@@ -45,21 +52,14 @@ function readManifest(
     };
   }
 
-  try {
-    const manifest: FluxManifest = {
-      kind: 'resource',
-      file: packageFile,
-      resources: parseYaml(content, null, {
-        json: true,
-        customSchema: FluxResource,
-        failureBehaviour: 'filter',
-      }),
-    };
-    return manifest;
-  } catch (err) {
-    logger.debug({ err, packageFile }, 'Failed to parse Flux manifest');
-    return null;
-  }
+  return {
+    kind: 'resource',
+    file: packageFile,
+    resources: parseYaml(content, {
+      customSchema: FluxResource,
+      failureBehaviour: 'filter',
+    }),
+  };
 }
 
 const githubUrlRegex = regEx(
@@ -107,6 +107,39 @@ function resolveGitRepositoryPerSourceTag(
   }
 }
 
+function resolveHelmRepository(
+  dep: PackageDependency,
+  matchingRepositories: HelmRepository[],
+  registryAliases: Record<string, string> | undefined,
+): void {
+  if (matchingRepositories.length) {
+    dep.registryUrls = matchingRepositories
+      .map((repo) => {
+        if (repo.spec.type === 'oci' || isOCIRegistry(repo.spec.url)) {
+          // Change datasource to Docker
+          dep.datasource = DockerDatasource.id;
+          // Ensure the URL is a valid OCI path
+          dep.packageName = getDep(
+            `${removeOCIPrefix(repo.spec.url)}/${dep.depName}`,
+            false,
+            registryAliases,
+          ).packageName;
+          return null;
+        } else {
+          return repo.spec.url;
+        }
+      })
+      .filter(is.string);
+
+    // if registryUrls is empty, delete it from dep
+    if (!dep.registryUrls?.length) {
+      delete dep.registryUrls;
+    }
+  } else {
+    dep.skipReason = 'unknown-registry';
+  }
+}
+
 function resolveSystemManifest(
   manifest: SystemFluxManifest,
 ): PackageDependency<FluxManagerData>[] {
@@ -125,50 +158,40 @@ function resolveSystemManifest(
 function resolveResourceManifest(
   manifest: ResourceFluxManifest,
   helmRepositories: HelmRepository[],
+  registryAliases: Record<string, string> | undefined,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
   for (const resource of manifest.resources) {
     switch (resource.kind) {
       case 'HelmRelease': {
+        const chartSpec = resource.spec.chart.spec;
+        const depName = chartSpec.chart;
         const dep: PackageDependency = {
-          depName: resource.spec.chart.spec.chart,
+          depName,
           currentValue: resource.spec.chart.spec.version,
           datasource: HelmDatasource.id,
         };
 
+        if (depName.startsWith('./')) {
+          dep.skipReason = 'local-chart';
+          delete dep.datasource;
+          deps.push(dep);
+          continue;
+        }
+
         const matchingRepositories = helmRepositories.filter(
           (rep) =>
-            rep.kind === resource.spec.chart.spec.sourceRef?.kind &&
-            rep.metadata.name === resource.spec.chart.spec.sourceRef.name &&
+            rep.kind === chartSpec.sourceRef?.kind &&
+            rep.metadata.name === chartSpec.sourceRef.name &&
             rep.metadata.namespace ===
-              (resource.spec.chart.spec.sourceRef.namespace ??
-                resource.metadata?.namespace),
+              (chartSpec.sourceRef.namespace ?? resource.metadata?.namespace),
         );
-        if (matchingRepositories.length) {
-          dep.registryUrls = matchingRepositories
-            .map((repo) => {
-              if (repo.spec.type === 'oci' || isOCIRegistry(repo.spec.url)) {
-                // Change datasource to Docker
-                dep.datasource = DockerDatasource.id;
-                // Ensure the URL is a valid OCI path
-                dep.packageName = `${removeOCIPrefix(repo.spec.url)}/${
-                  resource.spec.chart.spec.chart
-                }`;
-                return null;
-              } else {
-                return repo.spec.url;
-              }
-            })
-            .filter(is.string);
-
-          // if registryUrls is empty, delete it from dep
-          if (!dep.registryUrls?.length) {
-            delete dep.registryUrls;
-          }
-        } else {
-          dep.skipReason = 'unknown-registry';
-        }
+        resolveHelmRepository(dep, matchingRepositories, registryAliases);
         deps.push(dep);
+
+        if (resource.spec.values) {
+          deps.push(...findDependencies(resource.spec.values, registryAliases));
+        }
         break;
       }
       case 'GitRepository': {
@@ -196,16 +219,22 @@ function resolveResourceManifest(
       }
       case 'OCIRepository': {
         const container = removeOCIPrefix(resource.spec.url);
-        let dep: PackageDependency = {
-          depName: container,
-        };
+        let dep = getDep(container, false, registryAliases);
         if (resource.spec.ref?.digest) {
-          dep = getDep(`${container}@${resource.spec.ref.digest}`, false);
+          dep = getDep(
+            `${container}@${resource.spec.ref.digest}`,
+            false,
+            registryAliases,
+          );
           if (resource.spec.ref?.tag) {
             logger.debug('A digest and tag was found, ignoring tag');
           }
         } else if (resource.spec.ref?.tag) {
-          dep = getDep(`${container}:${resource.spec.ref.tag}`, false);
+          dep = getDep(
+            `${container}:${resource.spec.ref.tag}`,
+            false,
+            registryAliases,
+          );
           dep.autoReplaceStringTemplate =
             '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
           dep.replaceString = resource.spec.ref.tag;
@@ -215,6 +244,15 @@ function resolveResourceManifest(
         deps.push(dep);
         break;
       }
+
+      case 'Kustomization': {
+        for (const image of coerceArray(resource.spec.images)) {
+          const dep = extractImage(image, registryAliases);
+          if (dep) {
+            deps.push(dep);
+          }
+        }
+      }
     }
   }
   return deps;
@@ -223,26 +261,24 @@ function resolveResourceManifest(
 export function extractPackageFile(
   content: string,
   packageFile: string,
+  config?: ExtractConfig,
 ): PackageFileContent<FluxManagerData> | null {
   const manifest = readManifest(content, packageFile);
   if (!manifest) {
     return null;
   }
-  const helmRepositories: HelmRepository[] = [];
-  if (manifest.kind === 'resource') {
-    for (const resource of manifest.resources) {
-      if (resource.kind === 'HelmRepository') {
-        helmRepositories.push(resource);
-      }
-    }
-  }
+  const helmRepositories = collectHelmRepos([manifest]);
   let deps: PackageDependency[] | null = null;
   switch (manifest.kind) {
     case 'system':
       deps = resolveSystemManifest(manifest);
       break;
     case 'resource': {
-      deps = resolveResourceManifest(manifest, helmRepositories);
+      deps = resolveResourceManifest(
+        manifest,
+        helmRepositories,
+        config?.registryAliases,
+      );
       break;
     }
   }
@@ -250,7 +286,7 @@ export function extractPackageFile(
 }
 
 export async function extractAllPackageFiles(
-  _config: ExtractConfig,
+  config: ExtractConfig,
   packageFiles: string[],
 ): Promise<PackageFile<FluxManagerData>[] | null> {
   const manifests: FluxManifest[] = [];
@@ -265,16 +301,7 @@ export async function extractAllPackageFiles(
     }
   }
 
-  const helmRepositories: HelmRepository[] = [];
-  for (const manifest of manifests) {
-    if (manifest.kind === 'resource') {
-      for (const resource of manifest.resources) {
-        if (resource.kind === 'HelmRepository') {
-          helmRepositories.push(resource);
-        }
-      }
-    }
-  }
+  const helmRepositories = collectHelmRepos(manifests);
 
   for (const manifest of manifests) {
     let deps: PackageDependency[] | null = null;
@@ -283,7 +310,11 @@ export async function extractAllPackageFiles(
         deps = resolveSystemManifest(manifest);
         break;
       case 'resource': {
-        deps = resolveResourceManifest(manifest, helmRepositories);
+        deps = resolveResourceManifest(
+          manifest,
+          helmRepositories,
+          config.registryAliases,
+        );
         break;
       }
     }

@@ -223,6 +223,22 @@ describe('modules/manager/terragrunt/extract', () => {
             registryUrls: ['https://gitlab.com'],
           },
           {
+            currentValue: 'v1.0.1',
+            datasource: 'gitlab-tags',
+            depName: 'gitlab.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'hashicorp/example',
+            registryUrls: ['https://gitlab.com:4321'],
+          },
+          {
+            currentValue: 'v1.0.2',
+            datasource: 'gitlab-tags',
+            depName: 'gitlab.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'hashicorp/example',
+            registryUrls: ['https://gitlab.com'],
+          },
+          {
             currentValue: 'v1.0.0',
             datasource: 'gitea-tags',
             depName: 'gitea.com/hashicorp/example',
@@ -230,9 +246,16 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'hashicorp/example',
             registryUrls: ['https://gitea.com'],
           },
+          {
+            currentValue: 'v1.0.0',
+            datasource: 'git-tags',
+            depName: 'bitbucket.example.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'https://bitbucket.example.com/hashicorp/example',
+          },
         ],
       });
-      expect(res?.deps).toHaveLength(33);
+      expect(res?.deps).toHaveLength(36);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
@@ -396,6 +419,13 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'ssh://git@mygit.com/hashicorp/example',
           },
           {
+            currentValue: 'v1.0.4',
+            datasource: 'git-tags',
+            depName: 'mygit.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'ssh://git@mygit.com/hashicorp/example',
+          },
+          {
             skipReason: 'no-source',
           },
           {
@@ -418,6 +448,22 @@ describe('modules/manager/terragrunt/extract', () => {
             registryUrls: ['https://gitlab.com'],
           },
           {
+            currentValue: 'v1.0.1',
+            datasource: 'gitlab-tags',
+            depName: 'gitlab.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'hashicorp/example',
+            registryUrls: ['https://gitlab.com:4321'],
+          },
+          {
+            currentValue: 'v1.0.2',
+            datasource: 'gitlab-tags',
+            depName: 'gitlab.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'hashicorp/example',
+            registryUrls: ['https://gitlab.com'],
+          },
+          {
             currentValue: 'v1.0.0',
             datasource: 'gitea-tags',
             depName: 'gitea.com/hashicorp/example',
@@ -427,7 +473,7 @@ describe('modules/manager/terragrunt/extract', () => {
           },
         ],
       });
-      expect(res?.deps).toHaveLength(33);
+      expect(res?.deps).toHaveLength(36);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
@@ -613,6 +659,22 @@ describe('modules/manager/terragrunt/extract', () => {
             registryUrls: ['https://gitlab.com'],
           },
           {
+            currentValue: 'v1.0.1',
+            datasource: 'gitlab-tags',
+            depName: 'gitlab.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'hashicorp/example',
+            registryUrls: ['https://gitlab.com:4321'],
+          },
+          {
+            currentValue: 'v1.0.2',
+            datasource: 'gitlab-tags',
+            depName: 'gitlab.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'hashicorp/example',
+            registryUrls: ['https://gitlab.com'],
+          },
+          {
             currentValue: 'v1.0.0',
             datasource: 'gitea-tags',
             depName: 'gitea.com/hashicorp/example',
@@ -622,7 +684,7 @@ describe('modules/manager/terragrunt/extract', () => {
           },
         ],
       });
-      expect(res?.deps).toHaveLength(33);
+      expect(res?.deps).toHaveLength(35);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 

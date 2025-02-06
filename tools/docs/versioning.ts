@@ -12,13 +12,13 @@ import {
   replaceContent,
 } from './utils';
 
-type Versioning = {
+interface Versioning {
   id: string;
   displayName: string;
-  urls?: string[];
-  supportsRanges?: boolean;
+  urls: string[];
+  supportsRanges: boolean;
   supportedRangeStrategies?: string[];
-};
+}
 
 export async function generateVersioning(
   dist: string,
@@ -45,9 +45,9 @@ export async function generateVersioning(
     # ${displayName} Versioning
     `;
     md += '\n\n';
-    md += `**Identifier**: \`${id}\`\n\n`;
+    md += `## Identifier\n\n \`${id}\` \n\n`;
     md += formatUrls(urls);
-    md += `**Ranges/Constraints:**\n\n`;
+    md += `## Ranges/Constraints\n\n`;
     if (supportsRanges) {
       md += `✅ Ranges are supported.\n\nValid \`rangeStrategy\` values are: ${(
         supportedRangeStrategies ?? []

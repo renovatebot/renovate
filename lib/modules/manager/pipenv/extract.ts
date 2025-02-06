@@ -1,11 +1,14 @@
+import { pipenv as pipenvDetect } from '@renovatebot/detect-tools';
 import { RANGE_PATTERN } from '@renovatebot/pep440';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
-import { localPathExists } from '../../../util/fs';
+import { getParentDir, localPathExists } from '../../../util/fs';
+import { ensureLocalPath } from '../../../util/fs/util';
 import { regEx } from '../../../util/regex';
 import { parse as parseToml } from '../../../util/toml';
 import { PypiDatasource } from '../../datasource/pypi';
+import { normalizePythonDepName } from '../../datasource/pypi/common';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { PipFile, PipRequirement, PipSource } from './types';
 
@@ -76,6 +79,7 @@ function extractFromSection(
       const dep: PackageDependency = {
         depType: sectionName,
         depName,
+        packageName: normalizePythonDepName(depName),
         managerData: {},
       };
       if (currentValue) {
@@ -140,8 +144,6 @@ export async function extractPackageFile(
     res.registryUrls = sources.map((source) => source.url);
   }
 
-  let pipenv_constraint: PipRequirement | undefined;
-
   res.deps = Object.entries(pipfile)
     .map(([category, section]) => {
       if (
@@ -150,10 +152,6 @@ export async function extractPackageFile(
         !isPipRequirements(section)
       ) {
         return [];
-      }
-
-      if (section.pipenv && !pipenv_constraint) {
-        pipenv_constraint = section.pipenv;
       }
 
       return extractFromSection(category, section, sources);
@@ -166,14 +164,16 @@ export async function extractPackageFile(
 
   const extractedConstraints: Record<string, any> = {};
 
-  if (is.nonEmptyString(pipfile.requires?.python_version)) {
-    extractedConstraints.python = `== ${pipfile.requires.python_version}.*`;
-  } else if (is.nonEmptyString(pipfile.requires?.python_full_version)) {
-    extractedConstraints.python = `== ${pipfile.requires.python_full_version}`;
+  const pipfileDir = getParentDir(ensureLocalPath(packageFile));
+
+  const pythonConstraint = await pipenvDetect.getPythonConstraint(pipfileDir);
+  if (pythonConstraint) {
+    extractedConstraints.python = pythonConstraint;
   }
 
-  if (pipenv_constraint) {
-    extractedConstraints.pipenv = pipenv_constraint;
+  const pipenvConstraint = await pipenvDetect.getPipenvConstraint(pipfileDir);
+  if (pipenvConstraint) {
+    extractedConstraints.pipenv = pipenvConstraint;
   }
 
   const lockFileName = `${packageFile}.lock`;

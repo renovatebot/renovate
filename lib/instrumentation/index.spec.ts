@@ -59,7 +59,15 @@ describe('instrumentation/index', () => {
       _registeredSpanProcessors: [
         {
           _exporter: {
-            url: 'https://collector.example.com/v1/traces',
+            _delegate: {
+              _transport: {
+                _transport: {
+                  _parameters: {
+                    url: 'https://collector.example.com/v1/traces',
+                  },
+                },
+              },
+            },
           },
         },
       ],
@@ -82,7 +90,15 @@ describe('instrumentation/index', () => {
         { _exporter: {} },
         {
           _exporter: {
-            url: 'https://collector.example.com/v1/traces',
+            _delegate: {
+              _transport: {
+                _transport: {
+                  _parameters: {
+                    url: 'https://collector.example.com/v1/traces',
+                  },
+                },
+              },
+            },
           },
         },
       ],

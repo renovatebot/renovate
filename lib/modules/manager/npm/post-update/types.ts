@@ -35,12 +35,20 @@ export type PnpmDependencySchema = Record<string, { version: string } | string>;
 
 export interface PnpmLockFile {
   lockfileVersion: number | string;
+  catalogs?: Record<string, Record<string, { version: string }>>;
   importers?: Record<string, Record<string, PnpmDependencySchema>>;
   dependencies: PnpmDependencySchema;
   devDependencies: PnpmDependencySchema;
   optionalDependencies: PnpmDependencySchema;
 }
 
+export interface YarnRcNpmRegistry {
+  npmAlwaysAuth?: boolean;
+  npmAuthIdent?: string;
+  npmAuthToken?: string;
+}
+
 export interface YarnRcYmlFile {
   yarnPath?: string | null;
+  npmRegistries: Record<string, YarnRcNpmRegistry>;
 }

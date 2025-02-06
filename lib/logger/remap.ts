@@ -1,8 +1,6 @@
 import type { LogLevelString } from 'bunyan';
-import {
-  StringMatchPredicate,
-  getRegexOrGlobPredicate,
-} from '../util/string-match';
+import type { StringMatchPredicate } from '../util/string-match';
+import { getRegexOrGlobPredicate } from '../util/string-match';
 import type { LogLevelRemap } from './types';
 
 let globalRemaps: LogLevelRemap[] | undefined;

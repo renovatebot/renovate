@@ -1,5 +1,4 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../test/fixtures';
 import { linkify, sanitizeMarkdown } from './markdown';
 
 describe('util/markdown', () => {
@@ -37,27 +36,47 @@ describe('util/markdown', () => {
     });
 
     it('sanitizeMarkdown check massaged release notes', () => {
-      const input =
-        '#### Our Gold Sponsors\n' +
-        '\n' +
-        '<table>\n' +
-        '</table>\n' +
-        '#### Our Silver Sponsors\n' +
-        '\n' +
-        '<table>\n' +
-        '</table>\n' +
-        "#### What's Changed\n" +
-        '* pnpm rebuild accepts --store-dir by @user in https://github.com/foo/foo/pull/1\n' +
-        '\n' +
-        '#### New Contributors\n' +
-        '* @user made their first contribution in https://github.com/foo/foo/pull/2\n' +
-        '#### [Heading With Markdown Link](https://github.com/foo/foo/blob/HEAD/CHANGELOG.md#1234-2023-07-03)' +
-        '\n' +
-        '* link to GH issue [#1234](https://github.com/some/repo/issues/1234)' +
-        '\n';
+      const input = codeBlock`
+          #### Our Gold Sponsors
 
-      const expected = Fixtures.get('release-notes.txt');
-      expect(sanitizeMarkdown(input)).toEqual(expected);
+          <table>
+          </table>
+
+          #### Our Silver Sponsors
+
+          <table>
+          </table>
+
+          #### What's Changed
+          * pnpm rebuild accepts --store-dir by @user in https://github.com/foo/foo/pull/1
+
+          #### New Contributors
+          * @user made their first contribution in https://github.com/foo/foo/pull/2
+
+          #### [Heading With Markdown Link](https://github.com/foo/foo/blob/HEAD/CHANGELOG.md#1234-2023-07-03)
+          * link to GH issue [#1234](https://github.com/some/repo/issues/1234)
+        `;
+
+      expect(sanitizeMarkdown(input)).toEqual(codeBlock`
+        #### Our Gold Sponsors
+
+        <table>
+        </table>
+
+        #### Our Silver Sponsors
+
+        <table>
+        </table>
+
+        #### What's Changed
+        * pnpm rebuild accepts --store-dir by @&#8203;user in https://github.com/foo/foo/pull/1
+
+        #### New Contributors
+        * @&#8203;user made their first contribution in https://github.com/foo/foo/pull/2
+
+        #### [Heading With Markdown Link](https://github.com/foo/foo/blob/HEAD/CHANGELOG.md#1234-2023-07-03)
+        * link to GH issue [#&#8203;1234](https://github.com/some/repo/issues/1234)
+      `);
     });
   });
 });

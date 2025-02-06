@@ -1,5 +1,9 @@
 # don't ever lint node_modules
 node_modules
+
+# don't lint pnpm store
+.pnpm-store
+
 # don't lint build output (make sure it's set to your correct build folder name)
 dist
 # don't lint nyc coverage output
@@ -18,3 +22,8 @@ coverage
 /tools/dist
 /patches
 tmp/
+.venv/
+
+# generated mkdocs files
+tools/mkdocs/docs
+tools/mkdocs/site

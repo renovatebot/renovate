@@ -9,22 +9,27 @@ import { getOnboardingConfigContents } from './config';
 
 const defaultConfigFile = configFileNames[0];
 
+export function getDefaultConfigFileName(
+  config: Partial<RenovateConfig>,
+): string {
+  // TODO #22198
+  return configFileNames.includes(config.onboardingConfigFileName!)
+    ? config.onboardingConfigFileName!
+    : defaultConfigFile;
+}
+
 export async function createOnboardingBranch(
   config: Partial<RenovateConfig>,
 ): Promise<string | null> {
-  // TODO #22198
-  const configFile = configFileNames.includes(config.onboardingConfigFileName!)
-    ? config.onboardingConfigFileName
-    : defaultConfigFile;
-
   logger.debug('createOnboardingBranch()');
+  const configFile = getDefaultConfigFileName(config);
   // TODO #22198
-  const contents = await getOnboardingConfigContents(config, configFile!);
+  const contents = await getOnboardingConfigContents(config, configFile);
   logger.debug('Creating onboarding branch');
 
   const commitMessageFactory = new OnboardingCommitMessageFactory(
     config,
-    configFile!,
+    configFile,
   );
   let commitMessage = commitMessageFactory.create().toString();
 
@@ -51,12 +56,12 @@ export async function createOnboardingBranch(
       {
         type: 'addition',
         // TODO #22198
-        path: configFile!,
+        path: configFile,
         contents,
       },
     ],
     message: commitMessage,
-    platformCommit: !!config.platformCommit,
+    platformCommit: config.platformCommit,
     force: true,
   });
 }

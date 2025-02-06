@@ -1,0 +1,11 @@
+[project]
+dependencies = [
+  "mkdocs-material==9.6.2",
+  "mkdocs-awesome-pages-plugin==2.10.1",
+]
+requires-python = ">=3.11"
+
+
+[tool.pdm]
+distribution = false
+

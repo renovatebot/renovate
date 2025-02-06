@@ -17,7 +17,7 @@ export function tryDecryptPublicKeyPKCS1(
         Buffer.from(encryptedStr, 'base64'),
       )
       .toString();
-  } catch (err) {
+  } catch {
     logger.debug('Could not decrypt using PKCS1 padding');
   }
   return decryptedStr;
@@ -33,7 +33,7 @@ export function tryDecryptPublicKeyDefault(
       .privateDecrypt(privateKey, Buffer.from(encryptedStr, 'base64'))
       .toString();
     logger.debug('Decrypted config using default padding');
-  } catch (err) {
+  } catch {
     logger.debug('Could not decrypt using default padding');
   }
   return decryptedStr;

@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import fsExtra from 'fs-extra';
-import { DirectoryResult, dir } from 'tmp-promise';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { logger } from '../../../../logger';
 import customConfig from './__fixtures__/config';
@@ -75,7 +76,6 @@ describe('workers/global/config/parse/file', () => {
         `module.exports = {
         "platform": "github",
         "token":"abcdef",
-        "logFileLevel": "warn",
         "onboarding": false,
         "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"
         "onboardingConfig": {
@@ -142,34 +142,16 @@ describe('workers/global/config/parse/file', () => {
       expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
       fs.unlinkSync(configFile);
     });
-
-    it('removes the config file if RENOVATE_CONFIG_FILE & RENOVATE_X_DELETE_CONFIG_FILE are set', async () => {
-      fsRemoveSpy.mockImplementationOnce(() => {
-        // no-op
-      });
-      fsPathExistsSpy
-        .mockResolvedValueOnce(true as never)
-        .mockResolvedValueOnce(true as never);
-      const configFile = upath.resolve(tmp.path, './config.json');
-      fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
-
-      await file.getConfig({
-        RENOVATE_CONFIG_FILE: configFile,
-        RENOVATE_X_DELETE_CONFIG_FILE: 'true',
-      });
-
-      expect(processExitSpy).not.toHaveBeenCalled();
-      expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
-      expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
-      fs.unlinkSync(configFile);
-    });
   });
 
   describe('deleteConfigFile()', () => {
     it.each([[undefined], [' ']])(
       'skip when RENOVATE_CONFIG_FILE is not set ("%s")',
       async (configFile) => {
-        await file.deleteNonDefaultConfig({ RENOVATE_CONFIG_FILE: configFile });
+        await file.deleteNonDefaultConfig(
+          { RENOVATE_CONFIG_FILE: configFile },
+          true,
+        );
 
         expect(fsRemoveSpy).toHaveBeenCalledTimes(0);
       },
@@ -178,23 +160,27 @@ describe('workers/global/config/parse/file', () => {
     it('skip when config file does not exist', async () => {
       fsPathExistsSpy.mockResolvedValueOnce(false as never);
 
-      await file.deleteNonDefaultConfig({
-        RENOVATE_CONFIG_FILE: 'path',
-        RENOVATE_X_DELETE_CONFIG_FILE: 'true',
-      });
+      await file.deleteNonDefaultConfig(
+        {
+          RENOVATE_CONFIG_FILE: 'path',
+        },
+        true,
+      );
 
       expect(fsRemoveSpy).toHaveBeenCalledTimes(0);
     });
 
     it.each([['false'], [' ']])(
-      'skip if RENOVATE_X_DELETE_CONFIG_FILE is not set ("%s")',
+      'skip if deleteConfigFile is not set ("%s")',
       async (deleteConfig) => {
         fsPathExistsSpy.mockResolvedValueOnce(true as never);
 
-        await file.deleteNonDefaultConfig({
-          RENOVATE_X_DELETE_CONFIG_FILE: deleteConfig,
-          RENOVATE_CONFIG_FILE: '/path/to/config.js',
-        });
+        await file.deleteNonDefaultConfig(
+          {
+            RENOVATE_CONFIG_FILE: '/path/to/config.js',
+          },
+          deleteConfig === 'true',
+        );
 
         expect(fsRemoveSpy).toHaveBeenCalledTimes(0);
       },
@@ -207,10 +193,12 @@ describe('workers/global/config/parse/file', () => {
       fsPathExistsSpy.mockResolvedValueOnce(true as never);
       const configFile = '/path/to/config.js';
 
-      await file.deleteNonDefaultConfig({
-        RENOVATE_CONFIG_FILE: configFile,
-        RENOVATE_X_DELETE_CONFIG_FILE: 'true',
-      });
+      await file.deleteNonDefaultConfig(
+        {
+          RENOVATE_CONFIG_FILE: configFile,
+        },
+        true,
+      );
 
       expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
       expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
@@ -227,10 +215,12 @@ describe('workers/global/config/parse/file', () => {
       fsPathExistsSpy.mockResolvedValueOnce(true as never);
       const configFile = '/path/to/config.js';
 
-      await file.deleteNonDefaultConfig({
-        RENOVATE_CONFIG_FILE: configFile,
-        RENOVATE_X_DELETE_CONFIG_FILE: 'true',
-      });
+      await file.deleteNonDefaultConfig(
+        {
+          RENOVATE_CONFIG_FILE: configFile,
+        },
+        true,
+      );
 
       expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
       expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);

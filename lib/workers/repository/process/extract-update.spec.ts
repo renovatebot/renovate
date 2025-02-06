@@ -6,7 +6,13 @@ import { fingerprint } from '../../../util/fingerprint';
 import type { LongCommitSha } from '../../../util/git/types';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
 import * as _branchify from '../updates/branchify';
-import { extract, isCacheExtractValid, lookup, update } from './extract-update';
+import {
+  EXTRACT_CACHE_REVISION,
+  extract,
+  isCacheExtractValid,
+  lookup,
+  update,
+} from './extract-update';
 
 const createVulnerabilitiesMock = jest.fn();
 
@@ -50,7 +56,6 @@ describe('workers/repository/process/extract-update', () => {
     it('runs with no baseBranches', async () => {
       const config = {
         repoIsOnboarded: true,
-        suppressNotifications: ['deprecationWarningIssues'],
       };
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
@@ -75,7 +80,6 @@ describe('workers/repository/process/extract-update', () => {
       const config = {
         baseBranches: ['master', 'dev'],
         repoIsOnboarded: true,
-        suppressNotifications: ['deprecationWarningIssues'],
         enabledManagers: ['npm'],
         javascript: {
           labels: ['js'],
@@ -94,12 +98,12 @@ describe('workers/repository/process/extract-update', () => {
       const packageFiles: Record<string, PackageFile[]> = {};
       const config = {
         repoIsOnboarded: true,
-        suppressNotifications: ['deprecationWarningIssues'],
         baseBranch: 'master',
       };
       repositoryCache.getCache.mockReturnValueOnce({
         scan: {
           master: {
+            revision: EXTRACT_CACHE_REVISION,
             sha: '123test',
             configHash: fingerprint(generateFingerprintConfig(config)),
             extractionFingerprints: {},
@@ -116,7 +120,6 @@ describe('workers/repository/process/extract-update', () => {
     it('fetches vulnerabilities', async () => {
       const config = {
         repoIsOnboarded: true,
-        suppressNotifications: ['deprecationWarningIssues'],
         osvVulnerabilityAlerts: true,
       };
       const appendVulnerabilityPackageRulesMock = jest.fn();
@@ -136,7 +139,6 @@ describe('workers/repository/process/extract-update', () => {
     it('handles exception when fetching vulnerabilities', async () => {
       const config = {
         repoIsOnboarded: true,
-        suppressNotifications: ['deprecationWarningIssues'],
         osvVulnerabilityAlerts: true,
       };
       createVulnerabilitiesMock.mockRejectedValueOnce(new Error());
@@ -155,6 +157,7 @@ describe('workers/repository/process/extract-update', () => {
 
     beforeEach(() => {
       cachedExtract = {
+        revision: EXTRACT_CACHE_REVISION,
         sha: 'sha',
         configHash: undefined as never,
         extractionFingerprints: {},
@@ -165,6 +168,18 @@ describe('workers/repository/process/extract-update', () => {
     it('undefined cache', () => {
       expect(isCacheExtractValid('sha', 'hash', undefined)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledTimes(0);
+    });
+
+    it('returns false if no revision', () => {
+      delete cachedExtract.revision;
+      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns false if revision mismatch', () => {
+      cachedExtract.revision = -1;
+      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
 
     it('partial cache', () => {

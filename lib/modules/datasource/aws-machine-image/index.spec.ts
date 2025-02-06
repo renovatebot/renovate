@@ -1,14 +1,10 @@
-import {
-  DescribeImagesCommand,
-  DescribeImagesResult,
-  EC2Client,
-  Image,
-} from '@aws-sdk/client-ec2';
+import type { DescribeImagesResult, Image } from '@aws-sdk/client-ec2';
+import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getDigest, getPkgReleases } from '..';
-import { AwsMachineImageDataSource } from '.';
+import { AwsMachineImageDatasource } from '.';
 
-const datasource = AwsMachineImageDataSource.id;
+const datasource = AwsMachineImageDatasource.id;
 const ec2Mock = mockClient(EC2Client);
 
 /**
@@ -140,7 +136,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
   describe('getSortedAwsMachineImages()', () => {
     it('with 3 returned images', async () => {
       mockDescribeImagesCommand(mock3Images);
-      const ec2DataSource = new AwsMachineImageDataSource();
+      const ec2DataSource = new AwsMachineImageDatasource();
       const res = await ec2DataSource.getSortedAwsMachineImages(
         '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["3images"]}]',
       );
@@ -151,7 +147,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
 
     it('with 1 returned image', async () => {
       mockDescribeImagesCommand(mock1Image);
-      const ec2DataSource = new AwsMachineImageDataSource();
+      const ec2DataSource = new AwsMachineImageDatasource();
       const res = await ec2DataSource.getSortedAwsMachineImages(
         '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["1image"]}]',
       );
@@ -162,7 +158,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
 
     it('without returned images', async () => {
       mockDescribeImagesCommand(mockEmpty);
-      const ec2DataSource = new AwsMachineImageDataSource();
+      const ec2DataSource = new AwsMachineImageDatasource();
       const res = await ec2DataSource.getSortedAwsMachineImages(
         '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["noiamge"]}]',
       );
@@ -300,7 +296,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
   });
 
   describe('loadConfig()', () => {
-    const ec2DataSource = new AwsMachineImageDataSource();
+    const ec2DataSource = new AwsMachineImageDatasource();
 
     it('loads filters without aws config', () => {
       const res = ec2DataSource.loadConfig(

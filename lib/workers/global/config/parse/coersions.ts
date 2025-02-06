@@ -21,7 +21,7 @@ export const coersions: Record<string, (arg: string) => unknown> = {
     }
     try {
       return JSON5.parse(val);
-    } catch (err) {
+    } catch {
       return val
         .split(',')
         .map((el) => el.trim())
@@ -34,7 +34,7 @@ export const coersions: Record<string, (arg: string) => unknown> = {
     }
     try {
       return JSON5.parse(val);
-    } catch (err) {
+    } catch {
       throw new Error("Invalid JSON value: '" + val + "'");
     }
   },

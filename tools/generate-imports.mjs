@@ -73,7 +73,7 @@ async function getFileHash(filePath) {
   try {
     const hash = await hashFile(filePath, 'sha256');
     return hash;
-  } catch (err) {
+  } catch {
     throw new Error(`ERROR: Unable to generate hash for ${filePath}`);
   }
 }

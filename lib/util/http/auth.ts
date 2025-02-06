@@ -40,7 +40,9 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
       options.hostType &&
       GITEA_API_USING_HOST_TYPES.includes(options.hostType)
     ) {
-      options.headers.authorization = `token ${options.token}`;
+      // Gitea v1.8.0 and later support `Bearer` as alternate to `token`
+      // https://github.com/go-gitea/gitea/pull/5378
+      options.headers.authorization = `Bearer ${options.token}`;
     } else if (
       options.hostType &&
       GITHUB_API_USING_HOST_TYPES.includes(options.hostType)

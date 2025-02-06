@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import { getElapsedMinutes } from '../../../util/date';
-import { Http, HttpError } from '../../../util/http';
+import type { Http } from '../../../util/http';
+import { HttpError } from '../../../util/http';
 import type { HttpOptions } from '../../../util/http/types';
 import { newlineRegex } from '../../../util/regex';
 import { Result } from '../../../util/result';

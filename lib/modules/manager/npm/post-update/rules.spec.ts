@@ -91,6 +91,12 @@ describe('modules/manager/npm/post-update/rules', () => {
 
           additionalYarnRcYml: {
             npmRegistries: {
+              '//https://registry.npmjs.org/': {
+                npmAuthToken: 'token123',
+              },
+              '//https://registry.other.org/': {
+                npmAuthIdent: 'basictoken123',
+              },
               '//registry.company.com/': {
                 npmAuthIdent: 'user123:pass123',
               },
@@ -115,6 +121,12 @@ describe('modules/manager/npm/post-update/rules', () => {
           ],
           "additionalYarnRcYml": {
             "npmRegistries": {
+              "//https://registry.npmjs.org/": {
+                "npmAuthToken": "token123",
+              },
+              "//https://registry.other.org/": {
+                "npmAuthIdent": "basictoken123",
+              },
               "//registry.company.com/": {
                 "npmAuthIdent": "user123:pass123",
               },

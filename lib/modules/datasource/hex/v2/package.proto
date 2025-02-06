@@ -1,0 +1,55 @@
+// https://github.com/hexpm/specifications/blob/9c411dbe96c87ccee438d40838d02b5fa6abb60b/registry/package.proto
+
+syntax = "proto2";
+
+message Package {
+  // All releases of the package
+  repeated Release releases = 1;
+  // Name of package
+  required string name = 2;
+  // Name of repository
+  required string repository = 3;
+}
+
+message Release {
+  // Release version
+  required string version = 1;
+  // sha256 checksum of "inner" package tarball
+  // deprecated in favor of outer_checksum
+  required bytes inner_checksum = 2;
+  // All dependencies of the release
+  repeated Dependency dependencies = 3;
+  // If set the release is retired, a retired release should only be
+  // resolved if it has already been locked in a project
+  optional RetirementStatus retired = 4;
+  // sha256 checksum of outer package tarball
+  // required when encoding but optional when decoding
+  optional bytes outer_checksum = 5;
+}
+
+message RetirementStatus {
+  required RetirementReason reason = 1;
+  optional string message = 2;
+}
+
+enum RetirementReason {
+  RETIRED_OTHER = 0;
+  RETIRED_INVALID = 1;
+  RETIRED_SECURITY = 2;
+  RETIRED_DEPRECATED = 3;
+  RETIRED_RENAMED = 4;
+}
+
+message Dependency {
+  // Package name of dependency
+  required string package = 1;
+  // Version requirement of dependency
+  required string requirement = 2;
+  // If set and true the package is optional (see dependency resolution)
+  optional bool optional = 3;
+  // If set is the OTP application name of the dependency, if not set the
+  // application name is the same as the package name
+  optional string app = 4;
+  // If set, the repository where the dependency is located
+  optional string repository = 5;
+}

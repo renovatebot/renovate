@@ -20,7 +20,7 @@ describe('util/package-rules/current-version', () => {
     });
 
     it('return false on version exception', () => {
-      const spy = jest.spyOn(pep440, 'matches').mockImplementationOnce(() => {
+      const spy = jest.spyOn(pep440, 'isValid').mockImplementationOnce(() => {
         throw new Error();
       });
       const result = matcher.matches(
@@ -34,6 +34,19 @@ describe('util/package-rules/current-version', () => {
       );
       expect(result).toBeFalse();
       expect(spy.mock.calls).toHaveLength(1);
+    });
+
+    it('return true for a valid match', () => {
+      const result = matcher.matches(
+        {
+          versioning: 'pep440',
+          currentValue: '1.2.3',
+        },
+        {
+          matchCurrentVersion: '<1.2.3.5',
+        },
+      );
+      expect(result).toBeTrue();
     });
 
     it('return false if no version could be found', () => {
@@ -99,6 +112,32 @@ describe('util/package-rules/current-version', () => {
         },
         {
           matchCurrentVersion: '/^v?[~ -]?0/',
+        },
+      );
+      expect(result).toBeFalse();
+    });
+
+    it('return true for same-major verisioning if version lies in expected range', () => {
+      const result = matcher.matches(
+        {
+          versioning: 'same-major',
+          currentValue: '6.0.300',
+        },
+        {
+          matchCurrentVersion: '6.0.400',
+        },
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('return false for same-major verisioning if version lies outside of expected range', () => {
+      const result = matcher.matches(
+        {
+          versioning: 'same-major',
+          currentValue: '6.0.300',
+        },
+        {
+          matchCurrentVersion: '6.0.100',
         },
       );
       expect(result).toBeFalse();

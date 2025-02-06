@@ -1,5 +1,5 @@
 import { regEx } from '../../../util/regex';
-import { CdnJsDatasource } from '../../datasource/cdnjs';
+import { CdnjsDatasource } from '../../datasource/cdnjs';
 import { cloudflareUrlRegex } from '../cdnurl/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 
@@ -16,7 +16,7 @@ export function extractDep(tag: string): PackageDependency | null {
   }
   const { depName, currentValue, asset } = match.groups;
   const dep: PackageDependency = {
-    datasource: CdnJsDatasource.id,
+    datasource: CdnjsDatasource.id,
     depName,
     packageName: `${depName}/${asset}`,
     currentValue,

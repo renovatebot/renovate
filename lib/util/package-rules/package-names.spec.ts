@@ -1,14 +1,13 @@
-import { logger } from '../../../test/util';
 import { PackageNameMatcher } from './package-names';
 
 describe('util/package-rules/package-names', () => {
   const packageNameMatcher = new PackageNameMatcher();
 
   describe('match', () => {
-    it('should return false if packageFile is not defined', () => {
+    it('should return false if packageName is not defined', () => {
       const result = packageNameMatcher.matches(
         {
-          depName: undefined,
+          packageName: undefined,
         },
         {
           matchPackageNames: ['@opentelemetry/http'],
@@ -33,7 +32,6 @@ describe('util/package-rules/package-names', () => {
     it('should matchPackageName', () => {
       const result = packageNameMatcher.matches(
         {
-          depName: 'abc',
           packageName: 'def',
         },
         {
@@ -43,72 +41,16 @@ describe('util/package-rules/package-names', () => {
       expect(result).toBeTrue();
     });
 
-    it('should fall back to matching depName', () => {
+    it('should match pattern', () => {
       const result = packageNameMatcher.matches(
         {
-          depName: 'abc',
-          packageName: 'def',
+          packageName: 'b',
         },
         {
-          matchPackageNames: ['ghi', 'abc'],
+          matchPackageNames: ['/b/'],
         },
       );
       expect(result).toBeTrue();
-      expect(logger.logger.once.warn).toHaveBeenCalled();
-    });
-  });
-
-  describe('exclude', () => {
-    it('should return false if packageName is not defined', () => {
-      const result = packageNameMatcher.excludes(
-        {
-          depName: undefined,
-        },
-        {
-          excludePackageNames: ['@opentelemetry/http'],
-        },
-      );
-      expect(result).toBeFalse();
-    });
-
-    it('should return false if not matching', () => {
-      const result = packageNameMatcher.excludes(
-        {
-          depName: 'abc',
-          packageName: 'def',
-        },
-        {
-          excludePackageNames: ['ghi'],
-        },
-      );
-      expect(result).toBeFalse();
-    });
-
-    it('should excludePackageName', () => {
-      const result = packageNameMatcher.excludes(
-        {
-          depName: 'abc',
-          packageName: 'def',
-        },
-        {
-          excludePackageNames: ['def', 'ghi'],
-        },
-      );
-      expect(result).toBeTrue();
-    });
-
-    it('should fall back to depName excludePackageName', () => {
-      const result = packageNameMatcher.excludes(
-        {
-          depName: 'abc',
-          packageName: 'def',
-        },
-        {
-          excludePackageNames: ['abc', 'ghi'],
-        },
-      );
-      expect(result).toBeTrue();
-      expect(logger.logger.once.warn).toHaveBeenCalled();
     });
   });
 });

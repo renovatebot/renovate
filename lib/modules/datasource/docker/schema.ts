@@ -19,7 +19,7 @@ export const ManifestObject = z.object({
 export const Descriptor = z.object({
   mediaType: z.string(),
   digest: z.string(),
-  size: z.number().int().gt(0).nullish(),
+  size: z.number().int().gte(0).nullish(),
 });
 /**
  * OCI platform properties
@@ -67,6 +67,9 @@ export const OciImageManifest = ManifestObject.extend({
     mediaType: z.enum([
       'application/vnd.oci.image.config.v1+json',
       'application/vnd.cncf.helm.config.v1+json',
+      'application/vnd.devcontainers',
+      'application/vnd.oci.empty.v1+json',
+      'application/vnd.cncf.flux.config.v1+json',
     ]),
   }),
   annotations: z.record(z.string()).nullish(),
@@ -164,6 +167,7 @@ export const DockerHubTag = z.object({
 export type DockerHubTag = z.infer<typeof DockerHubTag>;
 
 export const DockerHubTagsPage = z.object({
+  count: z.number(),
   next: z.string().nullable().catch(null),
   results: LooseArray(DockerHubTag, {
     onError: /* istanbul ignore next */ ({ error }) => {

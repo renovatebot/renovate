@@ -34,17 +34,24 @@ export async function getRubyConstraint(
       logger.debug('Using ruby version from gemfile');
       return rubyMatch;
     }
-    const rubyVersionFile = getSiblingFileName(
-      packageFileName,
-      '.ruby-version',
-    );
-    const rubyVersionFileContent = await readLocalFile(rubyVersionFile, 'utf8');
-    if (rubyVersionFileContent) {
-      logger.debug('Using ruby version specified in .ruby-version');
-      return rubyVersionFileContent
-        .replace(regEx(/^ruby-/), '')
-        .replace(regEx(/\n/g), '')
-        .trim();
+    for (const file of ['.ruby-version', '.tool-versions']) {
+      const rubyVersion = (
+        await readLocalFile(getSiblingFileName(packageFileName, file), 'utf8')
+      )?.match(regEx(/^(?:ruby(?:-|\s+))?(\d[\d.]*)/m))?.[1];
+      if (rubyVersion) {
+        logger.debug(`Using ruby version specified in ${file}`);
+        return rubyVersion;
+      }
+    }
+    const lockFile = await getLockFilePath(packageFileName);
+    if (lockFile) {
+      const rubyVersion = (await readLocalFile(lockFile, 'utf8'))?.match(
+        regEx(/^ {3}ruby (\d[\d.]*)(?:[a-z]|\s|$)/m),
+      )?.[1];
+      if (rubyVersion) {
+        logger.debug(`Using ruby version specified in lock file`);
+        return rubyVersion;
+      }
     }
   }
   return null;

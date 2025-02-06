@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
-import semver, { SemVer } from 'semver';
+import type { SemVer } from 'semver';
+import semver from 'semver';
 import stable from 'semver-stable';
 import { regEx } from '../../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';

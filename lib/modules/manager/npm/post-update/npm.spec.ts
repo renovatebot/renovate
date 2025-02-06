@@ -515,6 +515,17 @@ describe('modules/manager/npm/post-update/npm', () => {
         },
       },
       {
+        packageFile: 'some-dir/docs/dir.has.period/package.json',
+        packageName: 'hello',
+        depType: 'dependencies',
+        newVersion: '1.1.1',
+        newValue: '^1.0.0',
+        isLockfileUpdate: true,
+        managerData: {
+          workspacesPackages: ['docs/*', 'web/*'],
+        },
+      },
+      {
         packageFile: 'some-missing-dir/docs/a/package.json',
         packageName: 'hello',
         depType: 'dependencies',
@@ -548,6 +559,9 @@ describe('modules/manager/npm/post-update/npm', () => {
         },
         {
           cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=web/b xmldoc@2.2.0 hello@1.1.1',
+        },
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/dir.has.period hello@1.1.1',
         },
 
         {
@@ -583,6 +597,9 @@ describe('modules/manager/npm/post-update/npm', () => {
         },
         {
           cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=web/b xmldoc@2.2.0 hello@1.1.1',
+        },
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/dir.has.period hello@1.1.1',
         },
 
         {
@@ -689,8 +706,20 @@ describe('modules/manager/npm/post-update/npm', () => {
             },
             workspace: 'docs/a',
           },
+          {
+            packageFile: 'docs/dir.has.period/package.json',
+            packageName: 'hello',
+            depType: 'dependencies',
+            newVersion: '1.1.1',
+            newValue: '^1.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+            workspace: 'docs/dir.has.period',
+          },
         ],
-        workspaces: new Set(['docs/a', 'web/b']),
+        workspaces: new Set(['docs/a', 'web/b', 'docs/dir.has.period']),
         rootDeps: new Set(['chalk@9.4.8', 'postcss@8.4.8']),
       });
     });

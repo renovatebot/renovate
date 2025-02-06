@@ -155,6 +155,11 @@ terraform {
   source = "git::ssh://git@mygit.com/hashicorp/example?ref=v1.0.3&depth=1"
 }
 
+# gittags_ssh_subdir
+terraform {
+  source = "git::ssh://git@mygit.com/hashicorp/example//subdir/test?ref=v1.0.4&depth=1"
+}
+
 # invalid, ignored by test since it does not have source on the next line
 terraform {
 }
@@ -173,6 +178,16 @@ terraform {
 # gitlab-tags
 terraform {
   source = "git::https://gitlab.com/hashicorp/example?ref=v1.0.0"
+}
+
+# gitlab-tags https with custom port
+terraform {
+  source = "git::https://gitlab.com:4321/hashicorp/example?ref=v1.0.1"
+}
+
+# gitlab-tags ssh with custom port
+terraform {
+  source = "git::ssh://gitlab.com:1234/hashicorp/example.git//foo/bar?ref=v1.0.2"
 }
 
 # gitea-tags

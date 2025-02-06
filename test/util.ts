@@ -1,10 +1,12 @@
 import crypto from 'node:crypto';
 import { expect, jest } from '@jest/globals';
+import type { DeepMockProxy } from 'jest-mock-extended';
 import type { Plugin } from 'pretty-format';
 import upath from 'upath';
 import type { RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
-import { Platform, platform as _platform } from '../lib/modules/platform';
+import type { Platform } from '../lib/modules/platform';
+import { platform as _platform } from '../lib/modules/platform';
 import { scm as _scm } from '../lib/modules/platform/scm';
 import * as _env from '../lib/util/exec/env';
 import * as _fs from '../lib/util/fs';
@@ -18,6 +20,14 @@ import { regEx } from '../lib/util/regex';
  */
 export function mocked<T extends object>(module: T): jest.Mocked<T> {
   return jest.mocked(module);
+}
+
+/**
+ * Simple wrapper for getting mocked version of a module
+ * @param module module which is mocked by `jest-mock-extended.mockDeep`
+ */
+export function mockedExtended<T extends object>(module: T): DeepMockProxy<T> {
+  return module as DeepMockProxy<T>;
 }
 
 /**
@@ -77,7 +87,7 @@ function getCallerFileName(): string | null {
         break;
       }
     }
-  } catch (e) {
+  } catch {
     // no-op
   }
 

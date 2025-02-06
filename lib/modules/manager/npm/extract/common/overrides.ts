@@ -20,7 +20,7 @@ export function extractOverrideDepsRec(
   }
   for (const [overrideName, versionValue] of Object.entries(child)) {
     if (is.string(versionValue)) {
-      // special handling for "." override depenency name
+      // special handling for "." override dependency name
       // "." means the constraint is applied to the parent dep
       const currDepName =
         overrideName === '.' ? parents[parents.length - 1] : overrideName;

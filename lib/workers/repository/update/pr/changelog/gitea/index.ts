@@ -1,9 +1,9 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
 import { ReleasesSchema } from '../../../../../../modules/datasource/gitea-releases/schema';
+import type { ContentsResponse } from '../../../../../../modules/platform/gitea/schema';
 import {
   ContentsListResponseSchema,
-  ContentsResponse,
   ContentsResponseSchema,
 } from '../../../../../../modules/platform/gitea/schema';
 import { GiteaHttp } from '../../../../../../util/http/gitea';
