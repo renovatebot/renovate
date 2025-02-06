@@ -76,12 +76,19 @@ async function lookup(
   }
 
   return LookupStats.wrap(depConfig.datasource, async () => {
+    const { packageFile, manager } = packageFileConfig;
     return await Result.wrap(lookupUpdates(depConfig as LookupUpdateConfig))
       .onValue((dep) => {
-        logger.trace({ dep }, 'Dependency lookup success');
+        logger.trace(
+          { dep, packageFile, manager },
+          'Dependency lookup success',
+        );
       })
       .onError((err) => {
-        logger.trace({ err, depName }, 'Dependency lookup error');
+        logger.trace(
+          { err, depName, packageFile, manager },
+          'Dependency lookup error',
+        );
       })
       .catch((err): Result<UpdateResult, Error> => {
         if (
@@ -126,13 +133,16 @@ async function fetchManagerPackagerFileUpdates(
       return updates.unwrapOrThrow();
     },
   );
-  logger.trace(
+  logger.debug(
     { manager, packageFile, queueLength: queue.length },
     'fetchManagerPackagerFileUpdates starting with concurrency',
   );
 
   pFile.deps = await p.all(queue);
-  logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
+  logger.debug(
+    { manager, packageFile },
+    'fetchManagerPackagerFileUpdates finished',
+  );
 }
 
 async function fetchManagerUpdates(
@@ -145,12 +155,12 @@ async function fetchManagerUpdates(
     (pFile) => (): Promise<void> =>
       fetchManagerPackagerFileUpdates(config, managerConfig, pFile),
   );
-  logger.trace(
+  logger.debug(
     { manager, queueLength: queue.length },
     'fetchManagerUpdates starting',
   );
   await p.all(queue);
-  logger.trace({ manager }, 'fetchManagerUpdates finished');
+  logger.debug({ manager }, 'fetchManagerUpdates finished');
 }
 
 export async function fetchUpdates(
