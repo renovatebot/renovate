@@ -43,7 +43,7 @@ export function extractPackageFile(
       const version = parseVersion(toolData);
       // Parse the tool options in the tool name
       const { name: depName, options: optionsInName } =
-      // istanbul ignore next: groups is always defined
+        // istanbul ignore next: groups is always defined
         optionInToolNameRegex.exec(name.trim())?.groups ?? {
           name: name.trim(),
         };
