@@ -2,6 +2,7 @@ import { spawn as _spawn } from 'node:child_process';
 import type { SendHandle, Serializable } from 'node:child_process';
 import { Readable } from 'node:stream';
 import { mockedFunction, partial } from '../../../test/util';
+import type { DataListener } from './common';
 import { exec } from './common';
 import type { RawExecOptions } from './types';
 
@@ -147,6 +148,10 @@ function getSpawnStub(args: StubArgs): any {
   };
 }
 
+function stringify(list: Buffer[]): string {
+  return Buffer.concat(list).toString('utf8');
+}
+
 describe('util/exec/common', () => {
   const cmd = 'ls -l';
   const stdout = 'out message';
@@ -172,6 +177,42 @@ describe('util/exec/common', () => {
         stderr,
         stdout,
       });
+    });
+
+    it('should invoke the output listeners', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      spawn.mockImplementationOnce((cmd, opts) => stub);
+
+      const stdoutListenerBuffer: Buffer[] = [];
+      const stdoutListener: DataListener = (chunk: Buffer) => {
+        stdoutListenerBuffer.push(chunk);
+      };
+
+      const stderrListenerBuffer: Buffer[] = [];
+      const stderrListener: DataListener = (chunk: Buffer) => {
+        stderrListenerBuffer.push(chunk);
+      };
+
+      await expect(
+        exec(
+          cmd,
+          partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' }),
+          { stdout: [stdoutListener], stderr: [stderrListener] },
+        ),
+      ).resolves.toEqual({
+        stderr,
+        stdout,
+      });
+
+      expect(stringify(stdoutListenerBuffer)).toEqual(stdout);
+      expect(stringify(stderrListenerBuffer)).toEqual(stderr);
     });
 
     it('command exits with code 1', async () => {
