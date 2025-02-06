@@ -4,7 +4,7 @@ import type { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { ExecErrorData } from './exec-error';
 import { ExecError } from './exec-error';
-import type { ExecResult, RawExecOptions } from './types';
+import type { DataListener, ExecResult, RawExecOptions } from './types';
 
 // https://man7.org/linux/man-pages/man7/signal.7.html#NAME
 // Non TERM/CORE signals
@@ -27,35 +27,17 @@ function stringify(list: Buffer[]): string {
   return Buffer.concat(list).toString(encoding);
 }
 
-export type DataListener = (chunk: any) => void;
-
-function registerDataListeners(
-  readable: Readable | null,
-  dataListeners: DataListener[] | undefined,
-): void {
-  if (is.nullOrUndefined(readable) || is.nullOrUndefined(dataListeners)) {
-    return;
-  }
-
-  for (const listener of dataListeners) {
-    readable.on('data', listener);
-  }
-}
-
-type OutputListeners = { stdout?: DataListener[]; stderr?: DataListener[] };
-
 function initStreamListeners(
   cp: ChildProcess,
   opts: RawExecOptions & { maxBuffer: number },
-  outputListeners?: OutputListeners,
 ): [Buffer[], Buffer[]] {
   const stdout: Buffer[] = [];
   const stderr: Buffer[] = [];
   let stdoutLen = 0;
   let stderrLen = 0;
 
-  registerDataListeners(cp.stdout, outputListeners?.stdout);
-  registerDataListeners(cp.stderr, outputListeners?.stderr);
+  registerDataListeners(cp.stdout, opts.outputListeners?.stdout);
+  registerDataListeners(cp.stderr, opts.outputListeners?.stderr);
 
   cp.stdout?.on('data', (chunk: Buffer) => {
     // process.stdout.write(data.toString());
@@ -81,11 +63,20 @@ function initStreamListeners(
   return [stdout, stderr];
 }
 
-export function exec(
-  cmd: string,
-  opts: RawExecOptions,
-  outputListeners?: OutputListeners,
-): Promise<ExecResult> {
+function registerDataListeners(
+  readable: Readable | null,
+  dataListeners: DataListener[] | undefined,
+): void {
+  if (is.nullOrUndefined(readable) || is.nullOrUndefined(dataListeners)) {
+    return;
+  }
+
+  for (const listener of dataListeners) {
+    readable.on('data', listener);
+  }
+}
+
+export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
   return new Promise((resolve, reject) => {
     const maxBuffer = opts.maxBuffer ?? 10 * 1024 * 1024; // Set default max buffer size to 10MB
     const cp = spawn(cmd, {
@@ -97,12 +88,10 @@ export function exec(
     });
 
     // handle streams
-    const streamOpts = { ...opts, maxBuffer };
-    const [stdout, stderr] = initStreamListeners(
-      cp,
-      streamOpts,
-      outputListeners,
-    );
+    const [stdout, stderr] = initStreamListeners(cp, {
+      ...opts,
+      maxBuffer,
+    });
 
     // handle process events
     cp.on('error', (error) => {

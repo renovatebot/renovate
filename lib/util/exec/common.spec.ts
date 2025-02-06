@@ -2,9 +2,8 @@ import { spawn as _spawn } from 'node:child_process';
 import type { SendHandle, Serializable } from 'node:child_process';
 import { Readable } from 'node:stream';
 import { mockedFunction, partial } from '../../../test/util';
-import type { DataListener } from './common';
 import { exec } from './common';
-import type { RawExecOptions } from './types';
+import type { DataListener, RawExecOptions } from './types';
 
 jest.mock('node:child_process');
 const spawn = mockedFunction(_spawn);
@@ -203,8 +202,14 @@ describe('util/exec/common', () => {
       await expect(
         exec(
           cmd,
-          partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' }),
-          { stdout: [stdoutListener], stderr: [stderrListener] },
+          partial<RawExecOptions>({
+            encoding: 'utf8',
+            shell: 'bin/bash',
+            outputListeners: {
+              stdout: [stdoutListener],
+              stderr: [stderrListener],
+            },
+          }),
         ),
       ).resolves.toEqual({
         stderr,
