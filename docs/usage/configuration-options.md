@@ -849,7 +849,7 @@ It will be compiled using Handlebars and the regex `groups` result.
 It specifies the syntax of the package file that's managed by the custom `jsonata` manager.
 This setting helps the system correctly parse and interpret the configuration file's contents.
 
-Only the `json` and `yaml` format is supported.
+Only the `json` and `yaml` formats are supported.
 `yaml` files are parsed as multi document YAML files.
 
 ```json title="Parsing a JSON file with a custom manager"
@@ -3848,6 +3848,16 @@ The field supports multiple URLs but it is datasource-dependent on whether only 
 ## replacement
 
 Add to this object if you wish to define rules that apply only to PRs that replace dependencies.
+
+## replacementApproach
+
+For `npm` manager when `replacementApproach=alias` then instead of replacing `"foo": "1.2.3"` with `"@my/foo": "1.2.4"` we would instead replace it with `"foo": "npm:@my/foo@1.2.4"`.
+
+```json
+{
+  "replacementApproach": "alias"
+}
+```
 
 ## respectLatest
 

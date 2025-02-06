@@ -5,23 +5,27 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.38.3@sha256:e4d31148559728ffb11e0b8e1ff4d52ebc35b9e1e0dc2be5f01075dae939012b AS slim-base
+FROM ghcr.io/renovatebot/base-image:9.38.6@sha256:a3714418e1979ad8e1ae0098422a9a94cad47e3df044c0aaa22f4e839698ff72 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.38.3-full@sha256:27675cad452fda603cecbac9662bed944d707bd93457393ae263a7876807c58b AS full-base
+FROM ghcr.io/renovatebot/base-image:9.38.6-full@sha256:0d6e6c2a057c73dcfe28aea1bde81c708a9c308a235b6eb8c09614eb8d6f9533 AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.38.3@sha256:e4d31148559728ffb11e0b8e1ff4d52ebc35b9e1e0dc2be5f01075dae939012b AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.38.6@sha256:a3714418e1979ad8e1ae0098422a9a94cad47e3df044c0aaa22f4e839698ff72 AS build
 
 # We want a specific node version here
 # renovate: datasource=node-version
 RUN install-tool node 22.13.1
+
+# corepack is too buggy 😞
+# renovate: datasource=npm
+RUN install-tool pnpm 9.15.4
 
 WORKDIR /usr/local/renovate
 
@@ -63,14 +67,14 @@ ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN set -ex; \
-  corepack pnpm fetch --prod; \
+  pnpm fetch --prod; \
   true
 
 COPY --link . ./
 
 # install npm packages
 RUN set -ex; \
-  corepack pnpm install --prod --offline --ignore-scripts; \
+  pnpm install --prod --offline --ignore-scripts; \
   true
 
 # --------------------------------------
