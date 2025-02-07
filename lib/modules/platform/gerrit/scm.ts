@@ -73,7 +73,8 @@ export class GerritScm extends DefaultGitScm {
       return !mergeInfo.mergeable;
     } else {
       logger.warn(
-        `There is no open change with branch=${branch} and baseBranch=${baseBranch}`,
+        { branch, baseBranch },
+        'There is no open change with this branch',
       );
       return true;
     }
@@ -105,10 +106,18 @@ export class GerritScm extends DefaultGitScm {
       .then((res) => res.pop());
 
     let hasChanges = true;
-    const origMsg =
+    const message =
       typeof commit.message === 'string' ? [commit.message] : commit.message;
+
+    // In Gerrit, the change subject/title is the first line of the commit message
+    if (commit.prTitle) {
+      const firstMessageLines = message[0].split('\n');
+      firstMessageLines[0] = commit.prTitle;
+      message[0] = firstMessageLines.join('\n');
+    }
+
     commit.message = [
-      ...origMsg,
+      ...message,
       `Renovate-Branch: ${commit.branchName}\nChange-Id: ${existingChange?.change_id ?? generateChangeId()}`,
     ];
     const commitResult = await git.prepareCommit({ ...commit, force: true });
@@ -123,7 +132,7 @@ export class GerritScm extends DefaultGitScm {
       if (hasChanges || commit.force) {
         const pushResult = await git.pushCommit({
           sourceRef: commit.branchName,
-          targetRef: `refs/for/${commit.baseBranch!}`,
+          targetRef: `refs/for/${commit.baseBranch!}%notify=NONE`,
           files: commit.files,
         });
         if (pushResult) {

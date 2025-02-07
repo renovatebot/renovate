@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import { getConfig } from '../../../config/defaults';
 import type { UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
+import type { Timestamp } from '../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
 
@@ -34,7 +35,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'some-dep',
           groupName: 'some-group',
           prTitle: 'some-title',
-          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
           foo: 1,
           group: {
             foo: 2,
@@ -161,7 +162,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
           automerge: true,
           constraints: {
             foo: '1.0.0',
@@ -181,7 +182,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-          releaseTimestamp: '2017-02-06T20:01:41+00:00',
+          releaseTimestamp: '2017-02-06T20:01:41+00:00' as Timestamp,
           automerge: false,
           constraints: {
             foo: '1.0.0',
@@ -202,7 +203,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-          releaseTimestamp: '2017-02-06T20:01:41+00:00',
+          releaseTimestamp: '2017-02-06T20:01:41+00:00' as Timestamp,
           automerge: false,
         },
       ];
@@ -400,7 +401,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
           updateType: 'minor',
           separateMinorPatch: true,
           prTitleStrict: true,
@@ -420,7 +421,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-          releaseTimestamp: '2017-02-08T20:01:41+00:00',
+          releaseTimestamp: '2017-02-08T20:01:41+00:00' as Timestamp,
           updateType: 'minor',
           separateMinorPatch: true,
           prTitleStrict: true,
@@ -455,7 +456,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
           updateType: 'minor',
           separateMinorPatch: true,
         },
@@ -474,7 +475,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-          releaseTimestamp: '2017-02-08T20:01:41+00:00',
+          releaseTimestamp: '2017-02-08T20:01:41+00:00' as Timestamp,
           updateType: 'minor',
           separateMinorPatch: true,
         },
@@ -507,7 +508,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
         },
         {
           manager: 'some-manager',
@@ -523,7 +524,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-          releaseTimestamp: '2017-02-08T20:01:41+00:00',
+          releaseTimestamp: '2017-02-08T20:01:41+00:00' as Timestamp,
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
@@ -550,7 +551,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
         },
         {
           manager: 'some-manager',
@@ -566,7 +567,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-          releaseTimestamp: '2017-02-08T20:01:41+00:00',
+          releaseTimestamp: '2017-02-08T20:01:41+00:00' as Timestamp,
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
@@ -651,7 +652,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
         },
         {
           manager: 'some-manager',
@@ -667,7 +668,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
-          releaseTimestamp: '2017-02-08T20:01:41+00:00',
+          releaseTimestamp: '2017-02-08T20:01:41+00:00' as Timestamp,
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
@@ -700,6 +701,54 @@ describe('workers/repository/updates/generate', () => {
       );
       expect(res.commitMessage).toBe(
         'chore(package): update dependency some-dep to v1.2.0',
+      );
+    });
+
+    it('calculates the highest priority semanticCommitType', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'chore',
+          semanticCommitScope: 'package',
+          newValue: '1.2.0',
+          isSingleVersion: true,
+          newVersion: '1.2.0',
+          branchName: 'some-branch',
+        },
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'feat',
+          semanticCommitScope: 'package',
+          newValue: '1.2.0',
+          isSingleVersion: true,
+          newVersion: '1.2.0',
+          branchName: 'some-branch',
+        },
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'fix',
+          semanticCommitScope: 'package',
+          newValue: '1.2.0',
+          isSingleVersion: true,
+          newVersion: '1.2.0',
+          branchName: 'some-branch',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe(
+        'feat(package): update dependency some-dep to v1.2.0',
+      );
+      expect(res.commitMessage).toBe(
+        'feat(package): update dependency some-dep to v1.2.0',
       );
     });
 

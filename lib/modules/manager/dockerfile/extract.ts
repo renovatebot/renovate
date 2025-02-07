@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { escapeRegExp, newlineRegex, regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import * as debianVersioning from '../../versioning/debian';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
@@ -141,6 +141,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
   const dep: PackageDependency = {
     depName,
+    packageName: depName,
     currentValue,
     currentDigest,
   };
@@ -167,7 +168,10 @@ export function getDep(
   specifyReplaceString = true,
   registryAliases?: Record<string, string>,
 ): PackageDependency {
-  if (!is.string(currentFrom) || is.emptyStringOrWhitespace(currentFrom)) {
+  if (
+    !is.string(currentFrom) ||
+    !is.nonEmptyStringAndNotWhitespace(currentFrom)
+  ) {
     return {
       skipReason: 'invalid-value',
     };
@@ -175,16 +179,20 @@ export function getDep(
 
   // Resolve registry aliases first so that we don't need special casing later on:
   for (const [name, value] of Object.entries(registryAliases ?? {})) {
-    const escapedName = escapeRegExp(name);
-    const groups = regEx(`(?<prefix>${escapedName})/(?<depName>.+)`).exec(
-      currentFrom,
-    )?.groups;
-    if (groups) {
+    if (currentFrom.startsWith(`${name}/`)) {
+      const depName = currentFrom.substring(name.length + 1);
       const dep = {
-        ...getDep(`${value}/${groups.depName}`),
+        ...getDep(`${value}/${depName}`, false),
         replaceString: currentFrom,
       };
-      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
+      // retain depName, not sure if condition is necessary
+      if (dep.depName?.startsWith(value)) {
+        dep.packageName = dep.depName;
+        dep.depName = `${name}/${dep.depName.substring(value.length + 1)}`;
+      }
+      if (specifyReplaceString) {
+        dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
+      }
       return dep;
     }
   }
@@ -204,7 +212,6 @@ export function getDep(
     const specialPrefixes = ['amd64', 'arm64', 'library'];
     for (const prefix of specialPrefixes) {
       if (dep.depName.startsWith(`${prefix}/`)) {
-        dep.packageName = dep.depName;
         dep.depName = dep.depName.replace(`${prefix}/`, '');
         if (specifyReplaceString) {
           dep.autoReplaceStringTemplate =
@@ -229,7 +236,6 @@ export function getDep(
   if (dep.depName && quayRegex.test(dep.depName)) {
     const depName = dep.depName.replace(quayRegex, 'quay.io');
     if (depName !== dep.depName) {
-      dep.packageName = dep.depName;
       dep.depName = depName;
       dep.autoReplaceStringTemplate =
         '{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
@@ -419,6 +425,41 @@ export function extractPackageFile(
           { image: copyFromMatch.groups.image },
           'Skipping index reference COPY --from',
         );
+      }
+    }
+
+    const runMountFromRegex = regEx(
+      '^[ \\t]*RUN(?:' +
+        escapeChar +
+        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--mount=(?:\\S*=\\S*,)*from=(?<image>[^, ]+)',
+      'im',
+    );
+    const runMountFromMatch = instruction.match(runMountFromRegex);
+    if (runMountFromMatch?.groups?.image) {
+      if (stageNames.includes(runMountFromMatch.groups.image)) {
+        logger.debug(
+          { image: runMountFromMatch.groups.image },
+          'Skipping alias RUN --mount=from',
+        );
+      } else {
+        const dep = getDep(
+          runMountFromMatch.groups.image,
+          true,
+          config.registryAliases,
+        );
+        const lineNumberRanges: number[][] = [
+          [lineNumberInstrStart, lineNumber],
+        ];
+        processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
+        logger.debug(
+          {
+            depName: dep.depName,
+            currentValue: dep.currentValue,
+            currentDigest: dep.currentDigest,
+          },
+          'Dockerfile RUN --mount=from',
+        );
+        deps.push(dep);
       }
     }
 

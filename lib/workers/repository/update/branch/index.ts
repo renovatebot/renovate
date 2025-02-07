@@ -34,7 +34,7 @@ import {
 import { coerceNumber } from '../../../../util/number';
 import { toMs } from '../../../../util/pretty-time';
 import * as template from '../../../../util/template';
-import { isLimitReached } from '../../../global/limits';
+import { getCount, isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelogs } from '../../changelog';
 import { ensurePr, getPlatformPrOptions } from '../pr';
@@ -181,6 +181,9 @@ export async function processBranch(
       branchConfig.pendingChecks &&
       !dependencyDashboardCheck
     ) {
+      logger.debug(
+        `Branch ${config.branchName} creation is disabled because internalChecksFilter was not met`,
+      );
       return {
         branchExists: false,
         prNo: branchPr?.number,
@@ -209,9 +212,14 @@ export async function processBranch(
         };
       }
     }
+
+    logger.debug(
+      `Open PR Count: ${getCount('ConcurrentPRs')}, Existing Branch Count: ${getCount('Branches')}, Hourly PR Count: ${getCount('HourlyPRs')}`,
+    );
+
     if (
       !branchExists &&
-      isLimitReached('Branches') &&
+      isLimitReached('Branches', branchConfig) &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {

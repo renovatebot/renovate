@@ -3,26 +3,23 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { HostRule } from '../../../../types';
-import { detectPlatform } from '../../../../util/common';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
-import { parseGitUrl } from '../../../../util/git/url';
+import { getGitEnvironmentVariables } from '../../../../util/git/auth';
 import { find } from '../../../../util/host-rules';
 import { Result } from '../../../../util/result';
 import { parseUrl } from '../../../../util/url';
-import { GitRefsDatasource } from '../../../datasource/git-refs';
-import { GitTagsDatasource } from '../../../datasource/git-tags';
-import { GithubTagsDatasource } from '../../../datasource/github-tags';
-import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags';
 import { PypiDatasource } from '../../../datasource/pypi';
+import { getGoogleAuthHostRule } from '../../../datasource/util';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types';
-import { type PyProject, type UvGitSource, UvLockfileSchema } from '../schema';
+import { applyGitSource } from '../../util';
+import { type PyProject, UvLockfileSchema } from '../schema';
 import { depTypes, parseDependencyList } from '../utils';
 import type { PyProjectProcessor } from './types';
 
@@ -35,6 +32,16 @@ export class UvProcessor implements PyProjectProcessor {
       return deps;
     }
 
+    const hasExplicitDefault = uv.index?.some(
+      (index) => index.default && index.explicit,
+    );
+    const defaultIndex = uv.index?.find(
+      (index) => index.default && !index.explicit,
+    );
+    const implicitIndexUrls = uv.index
+      ?.filter((index) => !index.explicit && index.name !== defaultIndex?.name)
+      ?.map(({ url }) => url);
+
     deps.push(
       ...parseDependencyList(
         depTypes.uvDevDependencies,
@@ -44,23 +51,60 @@ export class UvProcessor implements PyProjectProcessor {
 
     // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
     // Skip sources that do not make sense to handle (e.g. path).
-    if (uv.sources) {
+    if (uv.sources || defaultIndex || implicitIndexUrls) {
       for (const dep of deps) {
-        if (!dep.depName) {
+        // istanbul ignore if
+        if (!dep.packageName) {
           continue;
         }
 
-        const depSource = uv.sources[dep.depName];
+        // Using `packageName` as it applies PEP 508 normalization, which is
+        // also applied by uv when matching a source to a dependency.
+        const depSource = uv.sources?.[dep.packageName];
         if (depSource) {
+          // Dependency is pinned to a specific source.
           dep.depType = depTypes.uvSources;
-          if ('url' in depSource) {
+          if ('index' in depSource) {
+            const index = uv.index?.find(
+              ({ name }) => name === depSource.index,
+            );
+            if (index) {
+              dep.registryUrls = [index.url];
+            }
+          } else if ('git' in depSource) {
+            applyGitSource(
+              dep,
+              depSource.git,
+              depSource.rev,
+              depSource.tag,
+              depSource.branch,
+            );
+          } else if ('url' in depSource) {
             dep.skipReason = 'unsupported-url';
           } else if ('path' in depSource) {
             dep.skipReason = 'path-dependency';
           } else if ('workspace' in depSource) {
             dep.skipReason = 'inherited-dependency';
           } else {
-            applyGitSource(dep, depSource);
+            dep.skipReason = 'unknown-registry';
+          }
+        } else {
+          // Dependency is not pinned to a specific source, so we need to
+          // determine the source based on the index configuration.
+          if (hasExplicitDefault) {
+            // don't fall back to pypi if there is an explicit default index
+            dep.registryUrls = [];
+          } else if (defaultIndex) {
+            // There is a default index configured, so use it.
+            dep.registryUrls = [defaultIndex.url];
+          }
+
+          if (implicitIndexUrls?.length) {
+            // If there are implicit indexes, check them first and fall back
+            // to the default.
+            dep.registryUrls = implicitIndexUrls.concat(
+              dep.registryUrls ?? PypiDatasource.defaultURL,
+            );
           }
         }
       }
@@ -125,7 +169,9 @@ export class UvProcessor implements PyProjectProcessor {
       };
 
       const extraEnv = {
-        ...getUvExtraIndexUrl(updateArtifact.updatedDeps),
+        ...getGitEnvironmentVariables(['pep621']),
+        ...(await getUvExtraIndexUrl(project, updateArtifact.updatedDeps)),
+        ...(await getUvIndexCredentials(project)),
       };
       const execOptions: ExecOptions = {
         cwdFile: packageFileName,
@@ -180,38 +226,6 @@ export class UvProcessor implements PyProjectProcessor {
   }
 }
 
-function applyGitSource(dep: PackageDependency, depSource: UvGitSource): void {
-  const { git, rev, tag, branch } = depSource;
-  if (tag) {
-    const platform = detectPlatform(git);
-    if (platform === 'github' || platform === 'gitlab') {
-      dep.datasource =
-        platform === 'github'
-          ? GithubTagsDatasource.id
-          : GitlabTagsDatasource.id;
-      const { protocol, source, full_name } = parseGitUrl(git);
-      dep.registryUrls = [`${protocol}://${source}`];
-      dep.packageName = full_name;
-    } else {
-      dep.datasource = GitTagsDatasource.id;
-      dep.packageName = git;
-    }
-    dep.currentValue = tag;
-    dep.skipReason = undefined;
-  } else if (rev) {
-    dep.datasource = GitRefsDatasource.id;
-    dep.packageName = git;
-    dep.currentDigest = rev;
-    dep.replaceString = rev;
-    dep.skipReason = undefined;
-  } else {
-    dep.datasource = GitRefsDatasource.id;
-    dep.packageName = git;
-    dep.currentValue = branch;
-    dep.skipReason = branch ? 'git-dependency' : 'unspecified-version';
-  }
-}
-
 function generateCMD(updatedDeps: Upgrade[]): string {
   const deps: string[] = [];
 
@@ -242,11 +256,49 @@ function getMatchingHostRule(url: string | undefined): HostRule {
   return find({ hostType: PypiDatasource.id, url });
 }
 
-function getUvExtraIndexUrl(deps: Upgrade[]): NodeJS.ProcessEnv {
+async function getUsernamePassword(
+  url: URL,
+): Promise<{ username?: string; password?: string }> {
+  const rule = getMatchingHostRule(url.toString());
+  if (rule.username || rule.password) {
+    return rule;
+  }
+
+  if (url.hostname.endsWith('.pkg.dev')) {
+    const hostRule = await getGoogleAuthHostRule();
+    if (hostRule) {
+      return hostRule;
+    } else {
+      logger.once.debug({ url }, 'Could not get Google access token');
+    }
+  }
+
+  return {};
+}
+
+async function getUvExtraIndexUrl(
+  project: PyProject,
+  deps: Upgrade[],
+): Promise<NodeJS.ProcessEnv> {
   const pyPiRegistryUrls = deps
     .filter((dep) => dep.datasource === PypiDatasource.id)
-    .map((dep) => dep.registryUrls)
-    .flat();
+    .filter((dep) => {
+      // Remove dependencies that are pinned to a specific index
+      const sources = project.tool?.uv?.sources;
+      return !sources || !(dep.packageName! in sources);
+    })
+    .flatMap((dep) => dep.registryUrls)
+    .filter(is.string)
+    .filter((registryUrl) => {
+      // Check if the registry URL is not the default one and not already configured
+      const configuredIndexUrls =
+        project.tool?.uv?.index?.map(({ url }) => url) ?? [];
+      return (
+        registryUrl !== PypiDatasource.defaultURL &&
+        !configuredIndexUrls.includes(registryUrl)
+      );
+    });
+
   const registryUrls = new Set(pyPiRegistryUrls);
   const extraIndexUrls: string[] = [];
 
@@ -256,12 +308,14 @@ function getUvExtraIndexUrl(deps: Upgrade[]): NodeJS.ProcessEnv {
       continue;
     }
 
-    const rule = getMatchingHostRule(parsedUrl.toString());
-    if (rule.username) {
-      parsedUrl.username = rule.username;
-    }
-    if (rule.password) {
-      parsedUrl.password = rule.password;
+    const { username, password } = await getUsernamePassword(parsedUrl);
+    if (username || password) {
+      if (username) {
+        parsedUrl.username = username;
+      }
+      if (password) {
+        parsedUrl.password = password;
+      }
     }
 
     extraIndexUrls.push(parsedUrl.toString());
@@ -270,4 +324,38 @@ function getUvExtraIndexUrl(deps: Upgrade[]): NodeJS.ProcessEnv {
   return {
     UV_EXTRA_INDEX_URL: extraIndexUrls.join(' '),
   };
+}
+
+async function getUvIndexCredentials(
+  project: PyProject,
+): Promise<NodeJS.ProcessEnv> {
+  const uv_indexes = project.tool?.uv?.index;
+
+  if (is.nullOrUndefined(uv_indexes)) {
+    return {};
+  }
+
+  const entries = [];
+
+  for (const { name, url } of uv_indexes) {
+    const parsedUrl = parseUrl(url);
+    // istanbul ignore if
+    if (!parsedUrl) {
+      continue;
+    }
+
+    const { username, password } = await getUsernamePassword(parsedUrl);
+
+    const NAME = name.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+
+    if (username) {
+      entries.push([`UV_INDEX_${NAME}_USERNAME`, username]);
+    }
+
+    if (password) {
+      entries.push([`UV_INDEX_${NAME}_PASSWORD`, password]);
+    }
+  }
+
+  return Object.fromEntries(entries);
 }

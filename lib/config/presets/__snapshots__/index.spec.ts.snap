@@ -34,7 +34,7 @@ exports[`config/presets/index resolvePreset migrates automerge in presets 1`] = 
     "Add the \`renovate/\` prefix to all branch names.",
     "Use semantic commit type \`fix\` for dependencies and \`chore\` for all others if semantic commits are in use.",
     "Require all status checks to pass before any automerging.",
-    "Pin dependency versions for \`devDependencies\` and retain SemVer ranges for others.",
+    "Pin dependency versions for development dependencies and retain SemVer ranges for others.",
   ],
   "ignoreTests": false,
   "ignoreUnstable": true,
@@ -93,6 +93,16 @@ exports[`config/presets/index resolvePreset migrates automerge in presets 1`] = 
       "semanticCommitType": "fix",
     },
     {
+      "matchDepTypes": [
+        "dependencies",
+        "extras",
+      ],
+      "matchManagers": [
+        "poetry",
+      ],
+      "semanticCommitType": "fix",
+    },
+    {
       "matchPackageNames": [
         "*",
       ],
@@ -101,6 +111,8 @@ exports[`config/presets/index resolvePreset migrates automerge in presets 1`] = 
     {
       "matchDepTypes": [
         "devDependencies",
+        "dev-dependencies",
+        "dev",
       ],
       "rangeStrategy": "pin",
     },

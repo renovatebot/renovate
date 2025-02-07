@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
-import { flattenUpdates } from './flatten';
+import { flattenUpdates, sanitizeDepName } from './flatten';
 
 jest.mock('../../../util/git/semantic');
 
@@ -14,6 +14,14 @@ beforeEach(() => {
 });
 
 describe('workers/repository/updates/flatten', () => {
+  describe('sanitizeDepName()', () => {
+    it('sanitizes urls', () => {
+      expect(sanitizeDepName('https://some.host.name/a/path/to.git')).toBe(
+        'https-some.host.name-a-path-to.git',
+      );
+    });
+  });
+
   describe('flattenUpdates()', () => {
     it('flattens', async () => {
       // TODO #22198
@@ -28,6 +36,11 @@ describe('workers/repository/updates/flatten', () => {
           lockFileMaintenance: {
             enabled: false,
           },
+        },
+        {
+          matchPackageNames: ['@monorepo/package'],
+          sourceUrl: 'https://github.com/some/monorepo',
+          sourceDirectory: "subfolder/{{ lookup (split packageName '/') 1 }}",
         },
       ];
       config.remediations = {
@@ -62,6 +75,17 @@ describe('workers/repository/updates/flatten', () => {
                   {
                     newValue: '2.0.0',
                     sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+              },
+              {
+                depName: '@monorepo/package',
+                updates: [
+                  {
+                    newValue: '2.0.0',
+                    sourceUrl: 'https://github.com/some/monorepo',
+                    sourceDirectory:
+                      "subfolder/{{ lookup (split depName '/') 1 }}",
                   },
                 ],
               },
@@ -144,7 +168,7 @@ describe('workers/repository/updates/flatten', () => {
         ],
       };
       const res = await flattenUpdates(config, packageFiles);
-      expect(res).toHaveLength(14);
+      expect(res).toHaveLength(15);
       expect(
         res.every(
           (upgrade) =>
@@ -178,16 +202,29 @@ describe('workers/repository/updates/flatten', () => {
         res.filter((update) => update.sourceRepoName)[1].sourceRepoName,
       ).toBe('repo');
       expect(
-        res.filter((update) => update.sourceRepoSlug)[2].sourceRepoSlug,
+        res.filter((update) => update.depName === '@monorepo/package')[0],
+      ).toEqual(
+        expect.objectContaining({
+          depName: '@monorepo/package',
+          sourceRepoOrg: 'some',
+          sourceRepoName: 'monorepo',
+          sourceRepo: 'some/monorepo',
+          sourceRepoSlug: 'some-monorepo',
+          sourceUrl: 'https://github.com/some/monorepo',
+          sourceDirectory: 'subfolder/package',
+        }),
+      );
+      expect(
+        res.filter((update) => update.sourceRepoSlug)[3].sourceRepoSlug,
       ).toBe('nodejs-node');
-      expect(res.filter((update) => update.sourceRepo)[2].sourceRepo).toBe(
+      expect(res.filter((update) => update.sourceRepo)[3].sourceRepo).toBe(
         'nodejs/node',
       );
       expect(
-        res.filter((update) => update.sourceRepoOrg)[2].sourceRepoOrg,
+        res.filter((update) => update.sourceRepoOrg)[3].sourceRepoOrg,
       ).toBe('nodejs');
       expect(
-        res.filter((update) => update.sourceRepoName)[2].sourceRepoName,
+        res.filter((update) => update.sourceRepoName)[3].sourceRepoName,
       ).toBe('node');
       expect(
         res.filter(

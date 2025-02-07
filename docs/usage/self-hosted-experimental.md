@@ -23,6 +23,13 @@ For more information see [the OpenTelemetry docs](opentelemetry.md).
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
+## `RENOVATE_STATIC_REPO_CONFIG`
+
+If set to a _valid_ `JSON` string containing a _valid_ Renovate configuration, it will be applied to the repository config before resolving the actual configuration file within the repository.
+
+> [!warning]
+> An invalid value will result in the scan being aborted.
+
 ## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
 
 If set to any value, Renovate will skip attempting to get release labels (e.g. gitRef, sourceUrl) from manifest annotations for `https://index.docker.io`.
@@ -39,6 +46,10 @@ This includes the following:
 
 If set to any value, Renovate will stop using the Docker Hub API (`https://hub.docker.com`) to fetch tags and instead use the normal Docker API for images pulled from `https://index.docker.io`.
 
+## `RENOVATE_X_ENCRYPTED_STRICT`
+
+If set to `"true"`, a config error Issue will be raised in case repository config contains `encrypted` objects without any `privateKey` defined.
+
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
@@ -49,6 +60,15 @@ If set to an positive integer, Renovate will use this as the number of attempts 
 The formula for the delay between attempts is `RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY * attempt * attempt` milliseconds.
 
 Default value: `5` (attempts results in max. 13.75 seconds timeout).
+
+## `RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS`
+
+If set to a positive integer, Renovate will use this as the number of attempts to check branch status before trying to add a status check.
+The delay between attempts is `RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY` milliseconds.
+
+Default value: `2` (attempts results in maximum 2 seconds timeout).
+
+!!! warning Increasing this value too much penalizes projects that do not have defined pipelines, Renovate will systematically wait `RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS * RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY` milliseconds on these projects and slow down the Renovate analyzes.
 
 ## `RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY`
 
@@ -79,7 +99,7 @@ If set to any value, Renovate will download `nupkg` files for determining packag
 
 ## `RENOVATE_X_PLATFORM_VERSION`
 
-Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
+Specify this string for Renovate to skip API checks and provide GitLab/Gitea and Forgejo/Bitbucket server version directly.
 Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to reduce API calls for Bitbucket.
 
 Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.

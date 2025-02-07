@@ -23,7 +23,7 @@ describe('modules/manager/gradle/update', () => {
         upgrade: {
           currentValue: '1.2.3',
           newValue: '1.2.5',
-          groupName: 'group',
+          sharedVariableName: 'group',
           managerData: {
             fileReplacePosition: 3,
           },

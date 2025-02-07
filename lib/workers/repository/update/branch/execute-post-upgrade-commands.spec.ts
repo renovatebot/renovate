@@ -47,7 +47,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       );
       GlobalConfig.set({
         localDir: __dirname,
-        allowedPostUpgradeCommands: ['some-command'],
+        allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
         .mockResolvedValueOnce(true)
@@ -97,7 +97,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       );
       GlobalConfig.set({
         localDir: __dirname,
-        allowedPostUpgradeCommands: ['some-command'],
+        allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
         .mockResolvedValueOnce(true)
@@ -146,7 +146,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       );
       GlobalConfig.set({
         localDir: __dirname,
-        allowedPostUpgradeCommands: ['some-command'],
+        allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
         .mockResolvedValueOnce(true)

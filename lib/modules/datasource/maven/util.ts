@@ -12,14 +12,16 @@ import { Result } from '../../../util/result';
 import type { S3UrlParts } from '../../../util/s3';
 import { getS3Client, parseS3Url } from '../../../util/s3';
 import { streamToString } from '../../../util/streams';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url';
-import { normalizeDate } from '../metadata';
-import type { ReleaseResult } from '../types';
 import { getGoogleAuthToken } from '../util';
 import { MAVEN_REPO } from './common';
 import type {
+  DependencyInfo,
   HttpResourceCheckResult,
   MavenDependency,
+  MavenFetchResult,
+  MavenFetchSuccess,
   MavenXml,
 } from './types';
 
@@ -69,121 +71,183 @@ export async function downloadHttpProtocol(
   http: Http,
   pkgUrl: URL | string,
   opts: HttpOptions = {},
-): Promise<HttpResponse | null> {
+): Promise<MavenFetchResult> {
   const url = pkgUrl.toString();
-  const res = await Result.wrap(http.get(url, opts))
-    .onError((err) => {
+  const fetchResult = await Result.wrap<HttpResponse, Error>(
+    http.get(url, opts),
+  )
+    .transform((res): MavenFetchSuccess => {
+      const result: MavenFetchSuccess = { data: res.body };
+
+      if (!res.authorization) {
+        result.isCacheable = true;
+      }
+
+      const lastModified = asTimestamp(res?.headers?.['last-modified']);
+      if (lastModified) {
+        result.lastModified = lastModified;
+      }
+
+      return result;
+    })
+    .catch((err): MavenFetchResult => {
       // istanbul ignore next: never happens, needs for type narrowing
       if (!(err instanceof HttpError)) {
-        return;
+        return Result.err({ type: 'unknown', err });
       }
 
       const failedUrl = url;
       if (err.message === HOST_DISABLED) {
         logger.trace({ failedUrl }, 'Host disabled');
-        return;
+        return Result.err({ type: 'host-disabled' });
       }
 
       if (isNotFoundError(err)) {
         logger.trace({ failedUrl }, `Url not found`);
-        return;
+        return Result.err({ type: 'not-found' });
       }
 
       if (isHostError(err)) {
         logger.debug(`Cannot connect to host ${failedUrl}`);
-        return;
+        return Result.err({ type: 'host-error' });
       }
 
       if (isPermissionsIssue(err)) {
         logger.debug(
           `Dependency lookup unauthorized. Please add authentication with a hostRule for ${failedUrl}`,
         );
-        return;
+        return Result.err({ type: 'permission-issue' });
       }
 
       if (isTemporaryError(err)) {
         logger.debug({ failedUrl, err }, 'Temporary error');
-        return;
+        if (getHost(url) === getHost(MAVEN_REPO)) {
+          return Result.err({ type: 'maven-central-temporary-error', err });
+        } else {
+          return Result.err({ type: 'temporary-error' });
+        }
       }
 
       if (isConnectionError(err)) {
         logger.debug(`Connection refused to maven registry ${failedUrl}`);
-        return;
+        return Result.err({ type: 'connection-error' });
       }
 
       if (isUnsupportedHostError(err)) {
         logger.debug(`Unsupported host ${failedUrl}`);
-        return;
+        return Result.err({ type: 'unsupported-host' });
       }
 
       logger.info({ failedUrl, err }, 'Unknown HTTP download error');
-    })
-    .catch((err): Result<HttpResponse | 'silent-error', ExternalHostError> => {
-      if (
-        err instanceof HttpError &&
-        isTemporaryError(err) &&
-        getHost(url) === getHost(MAVEN_REPO)
-      ) {
-        return Result.err(new ExternalHostError(err));
-      }
+      return Result.err({ type: 'unknown', err });
+    });
 
-      return Result.ok('silent-error');
-    })
-    .unwrapOrThrow();
-
-  if (res === 'silent-error') {
-    return null;
+  const { err } = fetchResult.unwrap();
+  if (err?.type === 'maven-central-temporary-error') {
+    throw new ExternalHostError(err.err);
   }
 
-  return res;
+  return fetchResult;
+}
+
+export async function downloadHttpContent(
+  http: Http,
+  pkgUrl: URL | string,
+  opts: HttpOptions = {},
+): Promise<string | null> {
+  const fetchResult = await downloadHttpProtocol(http, pkgUrl, opts);
+  return fetchResult.transform(({ data }) => data).unwrapOrNull();
 }
 
 function isS3NotFound(err: Error): boolean {
   return err.message === 'NotFound' || err.message === 'NoSuchKey';
 }
 
-export async function downloadS3Protocol(pkgUrl: URL): Promise<string | null> {
+export async function downloadS3Protocol(
+  pkgUrl: URL,
+): Promise<MavenFetchResult> {
   logger.trace({ url: pkgUrl.toString() }, `Attempting to load S3 dependency`);
-  try {
-    const s3Url = parseS3Url(pkgUrl);
-    if (s3Url === null) {
-      return null;
-    }
-    const { Body: res } = await getS3Client().send(new GetObjectCommand(s3Url));
-    if (res instanceof Readable) {
-      return streamToString(res);
-    }
-    logger.debug(
-      `Expecting Readable response type got '${typeof res}' type instead`,
-    );
-  } catch (err) {
-    const failedUrl = pkgUrl.toString();
-    if (err.name === 'CredentialsProviderError') {
-      logger.debug(
-        { failedUrl },
-        'Dependency lookup authorization failed. Please correct AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars',
-      );
-    } else if (err.message === 'Region is missing') {
-      logger.debug(
-        { failedUrl },
-        'Dependency lookup failed. Please a correct AWS_REGION env var',
-      );
-    } else if (isS3NotFound(err)) {
-      logger.trace({ failedUrl }, `S3 url not found`);
-    } else {
-      logger.debug(
-        { failedUrl, message: err.message },
-        'Unknown S3 download error',
-      );
-    }
+
+  const s3Url = parseS3Url(pkgUrl);
+  if (!s3Url) {
+    return Result.err({ type: 'invalid-url' });
   }
-  return null;
+
+  return await Result.wrap(() => {
+    const command = new GetObjectCommand(s3Url);
+    const client = getS3Client();
+    return client.send(command);
+  })
+    .transform(
+      async ({
+        Body,
+        LastModified,
+        DeleteMarker,
+      }): Promise<MavenFetchResult> => {
+        if (DeleteMarker) {
+          logger.trace(
+            { failedUrl: pkgUrl.toString() },
+            'Maven S3 lookup error: DeleteMarker encountered',
+          );
+          return Result.err({ type: 'not-found' });
+        }
+
+        if (!(Body instanceof Readable)) {
+          logger.debug(
+            { failedUrl: pkgUrl.toString() },
+            'Maven S3 lookup error: unsupported Body type',
+          );
+          return Result.err({ type: 'unsupported-format' });
+        }
+
+        const data = await streamToString(Body);
+        const result: MavenFetchSuccess = { data };
+
+        const lastModified = asTimestamp(LastModified);
+        if (lastModified) {
+          result.lastModified = lastModified;
+        }
+
+        return Result.ok(result);
+      },
+    )
+    .catch((err): MavenFetchResult => {
+      if (!(err instanceof Error)) {
+        return Result.err(err);
+      }
+
+      const failedUrl = pkgUrl.toString();
+
+      if (err.name === 'CredentialsProviderError') {
+        logger.debug(
+          { failedUrl },
+          'Maven S3 lookup error: credentials provider error, check "AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY" variables',
+        );
+        return Result.err({ type: 'credentials-error' });
+      }
+
+      if (err.message === 'Region is missing') {
+        logger.debug(
+          { failedUrl },
+          'Maven S3 lookup error: missing region, check "AWS_REGION" variable',
+        );
+        return Result.err({ type: 'missing-aws-region' });
+      }
+
+      if (isS3NotFound(err)) {
+        logger.trace({ failedUrl }, 'Maven S3 lookup error: object not found');
+        return Result.err({ type: 'not-found' });
+      }
+
+      logger.debug({ failedUrl, err }, 'Maven S3 lookup error: unknown error');
+      return Result.err({ type: 'unknown', err });
+    });
 }
 
 export async function downloadArtifactRegistryProtocol(
   http: Http,
   pkgUrl: URL,
-): Promise<HttpResponse | null> {
+): Promise<MavenFetchResult> {
   const opts: HttpOptions = {};
   const host = pkgUrl.host;
   const path = pkgUrl.pathname;
@@ -212,7 +276,7 @@ async function checkHttpResource(
     const res = await http.head(pkgUrl.toString());
     const timestamp = res?.headers?.['last-modified'];
     if (timestamp) {
-      const isoTimestamp = normalizeDate(timestamp);
+      const isoTimestamp = asTimestamp(timestamp);
       if (isoTimestamp) {
         const releaseDate = DateTime.fromISO(isoTimestamp, {
           zone: 'UTC',
@@ -307,41 +371,35 @@ export function getMavenUrl(
 
 export async function downloadMavenXml(
   http: Http,
-  pkgUrl: URL | null,
+  pkgUrl: URL,
 ): Promise<MavenXml> {
-  if (!pkgUrl) {
-    return {};
-  }
-
   const protocol = pkgUrl.protocol;
 
   if (protocol === 'http:' || protocol === 'https:') {
-    const res = await downloadHttpProtocol(http, pkgUrl);
-    const body = res?.body;
-    if (body) {
-      return {
-        xml: new XmlDocument(body),
-        isCacheable: !res.authorization,
-      };
-    }
+    const rawResult = await downloadHttpProtocol(http, pkgUrl);
+    const xmlResult = rawResult.transform(({ isCacheable, data }): MavenXml => {
+      const xml = new XmlDocument(data);
+      return { isCacheable, xml };
+    });
+    return xmlResult.unwrapOr({});
   }
 
   if (protocol === 'artifactregistry:') {
-    const res = await downloadArtifactRegistryProtocol(http, pkgUrl);
-    const body = res?.body;
-    if (body) {
-      return {
-        xml: new XmlDocument(body),
-        isCacheable: !res.authorization,
-      };
-    }
+    const rawResult = await downloadArtifactRegistryProtocol(http, pkgUrl);
+    const xmlResult = rawResult.transform(({ isCacheable, data }): MavenXml => {
+      const xml = new XmlDocument(data);
+      return { isCacheable, xml };
+    });
+    return xmlResult.unwrapOr({});
   }
 
   if (protocol === 's3:') {
-    const res = await downloadS3Protocol(pkgUrl);
-    if (res) {
-      return { xml: new XmlDocument(res) };
-    }
+    const rawResult = await downloadS3Protocol(pkgUrl);
+    const xmlResult = rawResult.transform(({ isCacheable, data }): MavenXml => {
+      const xml = new XmlDocument(data);
+      return { xml };
+    });
+    return xmlResult.unwrapOr({});
   }
 
   logger.debug(
@@ -449,8 +507,8 @@ export async function getDependencyInfo(
   repoUrl: string,
   version: string,
   recursionLimit = 5,
-): Promise<Partial<ReleaseResult>> {
-  const result: Partial<ReleaseResult> = {};
+): Promise<DependencyInfo> {
+  const result: DependencyInfo = {};
   const path = await createUrlForDependencyPom(
     http,
     version,
@@ -482,6 +540,23 @@ export async function getDependencyInfo(
       // most likely the result of us stripping scm:, git: etc
       // going with prepending https: here which should result in potential information retrival
       result.sourceUrl = `https:${result.sourceUrl}`;
+    }
+  }
+
+  const relocation = pomContent.descendantWithPath(
+    'distributionManagement.relocation',
+  );
+  if (relocation) {
+    const relocationGroup =
+      relocation.valueWithPath('groupId') ?? dependency.group;
+    const relocationName =
+      relocation.valueWithPath('artifactId') ?? dependency.name;
+    result.replacementName = `${relocationGroup}:${relocationName}`;
+    const relocationVersion = relocation.valueWithPath('version');
+    result.replacementVersion = relocationVersion ?? version;
+    const relocationMessage = relocation.valueWithPath('message');
+    if (relocationMessage) {
+      result.deprecationMessage = relocationMessage;
     }
   }
 

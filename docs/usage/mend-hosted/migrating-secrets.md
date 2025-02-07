@@ -1,6 +1,6 @@
 # Migrating Secrets from Repo Config to App Settings
 
-On 01-Oct-2024 the Mend Renovate cloud apps will stop reading any encrypted secrets from the Renovate configuration file on your repository.
+Use of encrypted secrets in the Mend Renovate cloud apps has been deprecated and soon the apps will stop reading any encrypted secrets from the Renovate configuration file on your repository.
 Previously, you could encrypt a secret with the [Renovate encryption tool](https://app.renovatebot.com/encrypt) and then put it in your Renovate config file.
 
 Going forward, all secrets must be stored in the App settings on the cloud.
@@ -8,7 +8,7 @@ They can be referenced from the Renovate config files inside the repo using `{{ 
 
 ## Old method
 
-This method will stop working on 01-Oct-2024:
+This method is deprecated:
 
 ```json title="Put encrypted secret in Renovate config"
 {
@@ -25,7 +25,7 @@ This method will stop working on 01-Oct-2024:
 
 ## New method
 
-This is the new method, that you should start using:
+This is the new method that you should start using:
 
 ```json title="Reference the app secret in the Renovate config"
 {
@@ -102,4 +102,4 @@ If you were expecting to import a secret originally encrypted by Renovate:
 
 ## Related links
 
-- [Using Secrets with Mend Cloud Apps](app-secrets.md)
+- [Using Secrets with Mend Cloud Apps](credentials.md)

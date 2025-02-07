@@ -209,6 +209,20 @@ describe('util/yaml', () => {
       });
     });
 
+    it('should parse invalid content using strict=false', () => {
+      expect(
+        parseSingleYaml(codeBlock`
+version: '2.1'
+
+services:
+  rtl_433:
+    image: ubuntu:oracular-20240918
+    # inserting a space before the hash on the next line makes Renovate work.
+    command: "echo some text"# a comment
+      `),
+      ).not.toBeNull();
+    });
+
     it('should parse content with single document with schema', () => {
       expect(
         parseSingleYaml(

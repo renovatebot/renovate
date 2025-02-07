@@ -1,5 +1,6 @@
 import type {
   CreateNodeOptions,
+  Document,
   DocumentOptions,
   ParseOptions,
   SchemaOptions,
@@ -10,7 +11,7 @@ import type { ZodType } from 'zod';
 import { logger } from '../logger';
 import { regEx } from './regex';
 
-interface YamlOptions<
+export interface YamlOptions<
   ResT = unknown,
   Schema extends ZodType<ResT> = ZodType<ResT>,
 > extends ParseOptions,
@@ -20,7 +21,14 @@ interface YamlOptions<
   removeTemplates?: boolean;
 }
 
-interface YamlOptionsMultiple<
+interface YamlParseDocumentOptions
+  extends ParseOptions,
+    DocumentOptions,
+    SchemaOptions {
+  removeTemplates?: boolean;
+}
+
+export interface YamlOptionsMultiple<
   ResT = unknown,
   Schema extends ZodType<ResT> = ZodType<ResT>,
 > extends YamlOptions<ResT, Schema> {
@@ -117,6 +125,29 @@ export function parseSingleYaml<ResT = unknown>(
   content: string,
   options?: YamlOptions<ResT>,
 ): ResT {
+  const rawDocument = parseSingleYamlDocument(content, options);
+
+  const document = rawDocument.toJS({ maxAliasCount: 10000 });
+  const schema = options?.customSchema;
+  if (!schema) {
+    return document as ResT;
+  }
+
+  return schema.parse(document);
+}
+
+/**
+ * Parse a YAML string into a Document representation.
+ *
+ * Only a single document is supported.
+ *
+ * @param content
+ * @param options
+ */
+export function parseSingleYamlDocument(
+  content: string,
+  options?: YamlParseDocumentOptions,
+): Document {
   const massagedContent = massageContent(content, options);
   const rawDocument = parseDocument(
     massagedContent,
@@ -127,13 +158,7 @@ export function parseSingleYaml<ResT = unknown>(
     throw new AggregateError(rawDocument.errors, 'Failed to parse YAML file');
   }
 
-  const document = rawDocument.toJS({ maxAliasCount: 10000 });
-  const schema = options?.customSchema;
-  if (!schema) {
-    return document as ResT;
-  }
-
-  return schema.parse(document);
+  return rawDocument;
 }
 
 export function dump(obj: any, opts?: DumpOptions): string {
@@ -158,6 +183,7 @@ function prepareParseOption(options: YamlOptions | undefined): YamlOptions {
     prettyErrors: true,
     // if we're removing templates, we can run into the situation where we have duplicate keys
     uniqueKeys: !options?.removeTemplates,
+    strict: false,
     ...options,
   };
 }

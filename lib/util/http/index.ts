@@ -15,6 +15,7 @@ import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
 import { type HttpRequestStatsDataPoint, HttpStats } from '../stats';
 import { resolveBaseUrl } from '../url';
+import { parseSingleYaml } from '../yaml';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRule, findMatchingRule } from './host-rules';
@@ -38,7 +39,7 @@ export { RequestError as HttpError };
 export class EmptyResultError extends Error {}
 export type SafeJsonError = RequestError | ZodError | EmptyResultError;
 
-type JsonArgs<
+type HttpFnArgs<
   Opts extends HttpOptions,
   ResT = unknown,
   Schema extends ZodType<ResT> = ZodType<ResT>,
@@ -179,6 +180,12 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     options = applyAuthorization(options);
     options.timeout ??= 60000;
 
+    const { cacheProvider } = options;
+    const cachedResponse = await cacheProvider?.bypassServer<T>(url);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
     const memCacheKey =
       options.memCache !== false &&
       (options.method === 'get' || options.method === 'head')
@@ -200,8 +207,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     // istanbul ignore else: no cache tests
     if (!resPromise) {
-      if (options.cacheProvider) {
-        await options.cacheProvider.setCacheHeaders(url, options);
+      if (cacheProvider) {
+        await cacheProvider.setCacheHeaders(url, options);
       }
 
       const startTime = Date.now();
@@ -234,8 +241,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 
-      if (options.cacheProvider) {
-        return await options.cacheProvider.wrapResponse(url, resCopy);
+      if (cacheProvider) {
+        return await cacheProvider.wrapServerResponse(url, resCopy);
       }
 
       return resCopy;
@@ -244,6 +251,16 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
         throw new ExternalHostError(err);
       }
+
+      const staleResponse = await cacheProvider?.bypassServer<T>(url, true);
+      if (staleResponse) {
+        logger.debug(
+          { err },
+          `Request error: returning stale cache instead for ${url}`,
+        );
+        return staleResponse;
+      }
+
       throw err;
     }
   }
@@ -272,7 +289,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
   private async requestJson<ResT = unknown>(
     method: InternalHttpOptions['method'],
-    { url, httpOptions: requestOptions, schema }: JsonArgs<Opts, ResT>,
+    { url, httpOptions: requestOptions, schema }: HttpFnArgs<Opts, ResT>,
   ): Promise<HttpResponse<ResT>> {
     const { body, ...httpOptions } = { ...requestOptions };
     const opts: InternalHttpOptions = {
@@ -302,8 +319,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     arg1: string,
     arg2: Opts | ZodType<ResT> | undefined,
     arg3: ZodType<ResT> | undefined,
-  ): JsonArgs<Opts, ResT> {
-    const res: JsonArgs<Opts, ResT> = { url: arg1 };
+  ): HttpFnArgs<Opts, ResT> {
+    const res: HttpFnArgs<Opts, ResT> = { url: arg1 };
 
     if (arg2 instanceof ZodType) {
       res.schema = arg2;
@@ -328,30 +345,57 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     });
   }
 
-  getJson<ResT>(url: string, options?: Opts): Promise<HttpResponse<ResT>>;
-  getJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  /**
+   * @deprecated use `getYaml` instead
+   */
+  async getYamlUnchecked<ResT>(
+    url: string,
+    options?: Opts,
+  ): Promise<HttpResponse<ResT>> {
+    const res = await this.get(url, options);
+    const body = parseSingleYaml<ResT>(res.body);
+    return { ...res, body };
+  }
+
+  async getYaml<Schema extends ZodType<any, any, any>>(
     url: string,
     schema: Schema,
   ): Promise<HttpResponse<Infer<Schema>>>;
-  getJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  async getYaml<Schema extends ZodType<any, any, any>>(
     url: string,
     options: Opts,
     schema: Schema,
   ): Promise<HttpResponse<Infer<Schema>>>;
-  getJson<ResT = unknown, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  async getYaml<Schema extends ZodType<any, any, any>>(
     arg1: string,
     arg2?: Opts | Schema,
     arg3?: Schema,
-  ): Promise<HttpResponse<ResT>> {
-    const args = this.resolveArgs<ResT>(arg1, arg2, arg3);
-    return this.requestJson<ResT>('get', args);
+  ): Promise<HttpResponse<Infer<Schema>>> {
+    const url = arg1;
+    let schema: Schema;
+    let httpOptions: Opts | undefined;
+    if (arg3) {
+      schema = arg3;
+      httpOptions = arg2 as Opts;
+    } else {
+      schema = arg2 as Schema;
+    }
+
+    const opts: InternalHttpOptions = {
+      ...httpOptions,
+      method: 'get',
+    };
+
+    const res = await this.get(url, opts);
+    const body = await schema.parseAsync(parseSingleYaml(res.body));
+    return { ...res, body };
   }
 
-  getJsonSafe<
+  getYamlSafe<
     ResT extends NonNullable<unknown>,
     Schema extends ZodType<ResT> = ZodType<ResT>,
   >(url: string, schema: Schema): AsyncResult<Infer<Schema>, SafeJsonError>;
-  getJsonSafe<
+  getYamlSafe<
     ResT extends NonNullable<unknown>,
     Schema extends ZodType<ResT> = ZodType<ResT>,
   >(
@@ -359,10 +403,93 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     options: Opts,
     schema: Schema,
   ): AsyncResult<Infer<Schema>, SafeJsonError>;
-  getJsonSafe<
+  getYamlSafe<
     ResT extends NonNullable<unknown>,
     Schema extends ZodType<ResT> = ZodType<ResT>,
   >(
+    arg1: string,
+    arg2: Opts | Schema,
+    arg3?: Schema,
+  ): AsyncResult<ResT, SafeJsonError> {
+    const url = arg1;
+    let schema: Schema;
+    let httpOptions: Opts | undefined;
+    if (arg3) {
+      schema = arg3;
+      httpOptions = arg2 as Opts;
+    } else {
+      schema = arg2 as Schema;
+    }
+
+    let res: AsyncResult<HttpResponse<ResT>, SafeJsonError>;
+    if (httpOptions) {
+      res = Result.wrap(this.getYaml(url, httpOptions, schema));
+    } else {
+      res = Result.wrap(this.getYaml(url, schema));
+    }
+
+    return res.transform((response) => Result.ok(response.body));
+  }
+
+  /**
+   * Request JSON and return the response without any validation.
+   *
+   * The usage of this method is discouraged, please use `getJson` instead.
+   *
+   * If you're new to Zod schema validation library:
+   * - consult the [documentation of Zod library](https://github.com/colinhacks/zod?tab=readme-ov-file#basic-usage)
+   * - search the Renovate codebase for 'zod' module usage
+   * - take a look at the `schema-utils.ts` file for Renovate-specific schemas and utilities
+   */
+  getJsonUnchecked<ResT = unknown>(
+    url: string,
+    options?: Opts,
+  ): Promise<HttpResponse<ResT>> {
+    return this.requestJson<ResT>('get', { url, httpOptions: options });
+  }
+
+  /**
+   * Request JSON with a Zod schema for the response,
+   * throwing an error if the response is not valid.
+   *
+   * @param url
+   * @param schema Zod schema for the response
+   */
+  getJson<Schema extends ZodType<any, any, any>>(
+    url: string,
+    schema: Schema,
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  getJson<Schema extends ZodType<any, any, any>>(
+    url: string,
+    options: Opts,
+    schema: Schema,
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  getJson<Schema extends ZodType<any, any, any>>(
+    arg1: string,
+    arg2?: Opts | Schema,
+    arg3?: Schema,
+  ): Promise<HttpResponse<Infer<Schema>>> {
+    const args = this.resolveArgs<Infer<Schema>>(arg1, arg2, arg3);
+    return this.requestJson<Infer<Schema>>('get', args);
+  }
+
+  /**
+   * Request JSON with a Zod schema for the response,
+   * wrapping response data in a `Result` class.
+   *
+   * @param url
+   * @param schema Zod schema for the response
+   */
+  getJsonSafe<ResT extends NonNullable<unknown>, Schema extends ZodType<ResT>>(
+    url: string,
+    schema: Schema,
+  ): AsyncResult<Infer<Schema>, SafeJsonError>;
+  getJsonSafe<ResT extends NonNullable<unknown>, Schema extends ZodType<ResT>>(
+    url: string,
+    options: Opts,
+    schema: Schema,
+  ): AsyncResult<Infer<Schema>, SafeJsonError>;
+  getJsonSafe<ResT extends NonNullable<unknown>, Schema extends ZodType<ResT>>(
     arg1: string,
     arg2?: Opts | Schema,
     arg3?: Schema,
