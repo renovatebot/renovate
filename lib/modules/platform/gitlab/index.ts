@@ -658,6 +658,8 @@ async function tryPrAutomerge(
         250,
       );
 
+      let diffHeadSha = '';
+
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         const { body } = await gitlabApi.getJsonUnchecked<{
@@ -666,9 +668,13 @@ async function tryPrAutomerge(
           pipeline: {
             status: string;
           };
+          sha: string;
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
           memCache: false,
         });
+
+        diffHeadSha = body.sha;
+
         // detailed_merge_status is available with Gitlab >=15.6.0
         const use_detailed_merge_status = !!body.detailed_merge_status;
         const detailed_merge_status_check =
@@ -690,28 +696,15 @@ async function tryPrAutomerge(
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
       }
 
-      // Even if Gitlab returns a "merge-able" merge request status, enabling auto-merge sometimes
-      // returns a 405 Method Not Allowed. It seems to be a timing issue within Gitlab.
-      for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
-        try {
-          await gitlabApi.putJson(
-            `projects/${config.repository}/merge_requests/${pr}/merge`,
-            {
-              body: {
-                should_remove_source_branch: true,
-                merge_when_pipeline_succeeds: true,
-              },
-            },
-          );
-          break;
-        } catch (err) {
-          logger.debug(
-            { err },
-            `Automerge on PR creation failed. Retrying ${attempt}`,
-          );
-        }
-        await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
-      }
+      await gitlabApi.postJson(
+        `projects/${config.repository}/merge_requests/${pr}/notes`,
+        {
+          body: {
+            body: '/merge',
+            merge_request_diff_head_sha: diffHeadSha,
+          },
+        },
+      );
     }
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Automerge on PR creation failed');
