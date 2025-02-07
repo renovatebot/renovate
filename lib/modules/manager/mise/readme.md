@@ -92,10 +92,6 @@ Renovate's `mise` manager does not support the following tool syntax:
   The `tag_regex` option is used as `extractVersion`, but the regex engines are not the same between mise and Renovate.
   If the version is not updated or updated incorrectly, override `extractVersion` manually in the renovate config.
 
-- Versions with `v` prefix.
-  mise automatically strips the `v` prefix from versions, but Renovate does not.
-  If the version is not updated or updated incorrectly, set `extractVersion` to `v(?<version>.+)` in the Renovate config.
-
 ### Supported default registry tool short names
 
 Renovate's `mise` manager can only version these tool short names:
