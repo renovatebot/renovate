@@ -24,7 +24,7 @@
     "lint-other": "jest --coverage false test/other/**.spec.ts",
     "eslint": "eslint . --cache --cache-location .cache/eslint --report-unused-disable-directives",
     "eslint-fix": "eslint --cache --cache-location .cache/eslint --fix . --report-unused-disable-directives",
-    "eslint-ci": "eslint . --cache --cache-strategy content --cache-location .cache/eslint --format gha",
+    "eslint-ci": "eslint . --cache --cache-strategy content --cache-location .cache/eslint --format gha  --report-unused-disable-directives",
     "generate": "run-s 'generate:*'",
     "generate:imports": "node tools/generate-imports.mjs",
     "git-check": "node tools/check-git-version.mjs",
