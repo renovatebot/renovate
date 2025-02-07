@@ -1,5 +1,7 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { asTimestamp } from '../../../util/timestamp';
+import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { OrbResponse } from './types';
@@ -27,9 +29,10 @@ export class OrbDatasource extends Datasource {
     super(OrbDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
 
   override readonly defaultRegistryUrls = ['https://circleci.com/'];
+  override readonly registryStrategy = 'hunt';
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -47,7 +50,7 @@ export class OrbDatasource extends Datasource {
     if (!registryUrl) {
       return null;
     }
-    const url = `${registryUrl}graphql-unstable`;
+    const url = joinUrlParts(registryUrl, 'graphql-unstable');
     const body = {
       query,
       variables: { packageName, maxVersions: MAX_VERSIONS },
@@ -69,7 +72,7 @@ export class OrbDatasource extends Datasource {
       : `https://circleci.com/developer/orbs/orb/${packageName}`;
     const releases = orb.versions.map(({ version, createdAt }) => ({
       version,
-      releaseTimestamp: createdAt ?? null,
+      releaseTimestamp: asTimestamp(createdAt),
     }));
 
     const dep = { homepage, isPrivate: !!orb.isPrivate, releases };

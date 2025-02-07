@@ -24,6 +24,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:k3sKubernetesVersioning',
       'workarounds:rke2KubernetesVersioning',
       'workarounds:libericaJdkDockerVersioning',
+      'workarounds:ubuntuDockerVersioning',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
@@ -235,7 +236,13 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         matchDatasources: ['docker'],
-        matchDepNames: ['node'],
+        // copied from https://github.com/renovatebot/renovate/blob/a471762e137619c06e73a678d6b63ca984da7dba/lib/config/presets/internal/group.ts#L351
+        matchPackageNames: [
+          '/(?:^|/)node$/', // node or ends with "/node, except those below"
+          '!calico/node',
+          '!docker.io/calico/node',
+          '!kindest/node',
+        ],
         versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
         versioning: 'node',
       },
@@ -283,6 +290,16 @@ export const presets: Record<string, Preset> = {
         matchManagers: ['npm'],
         matchPackageNames: ['@types/node'],
         versioning: `node`,
+      },
+    ],
+  },
+  ubuntuDockerVersioning: {
+    description: 'Use ubuntu versioning for `ubuntu` docker images.',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchDepNames: ['ubuntu'],
+        versioning: 'ubuntu',
       },
     ],
   },

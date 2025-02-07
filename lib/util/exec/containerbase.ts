@@ -48,6 +48,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'corepack',
     versioning: npmVersioningId,
   },
+  devbox: {
+    datasource: 'github-releases',
+    packageName: 'jetify-com/devbox',
+    versioning: semverVersioningId,
+  },
   dotnet: {
     datasource: 'dotnet-version',
     packageName: 'dotnet-sdk',
@@ -259,14 +264,14 @@ export function isDynamicInstall(
 
 function isStable(
   version: string,
-  versioning: allVersioning.VersioningApi,
+  versioningApi: allVersioning.VersioningApi,
   latest?: string,
 ): boolean {
-  if (!versioning.isStable(version)) {
+  if (!versioningApi.isStable(version)) {
     return false;
   }
   if (is.string(latest)) {
-    if (versioning.isGreaterThan(version, latest)) {
+    if (versioningApi.isGreaterThan(version, latest)) {
       return false;
     }
   }

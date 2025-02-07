@@ -50,15 +50,6 @@ describe('workers/repository/config-migration/branch/rebase', () => {
       };
     });
 
-    it('does not rebase modified branch', async () => {
-      scm.isBranchModified.mockResolvedValueOnce(true);
-
-      await rebaseMigrationBranch(config, migratedConfigData);
-
-      expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
-      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
-    });
-
     it.each([
       ['renovate.json', renovateConfigJson],
       ['renovate.json5', renovateConfigJson5],

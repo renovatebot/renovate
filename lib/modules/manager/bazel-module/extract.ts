@@ -7,7 +7,11 @@ import * as bazelrc from './bazelrc';
 import type { RecordFragment } from './fragments';
 import { parse } from './parser';
 import { RuleToMavenPackageDep, fillRegistryUrls } from './parser/maven';
-import { RuleToBazelModulePackageDep } from './rules';
+import { RuleToDockerPackageDep } from './parser/oci';
+import {
+  GitRepositoryToPackageDep,
+  RuleToBazelModulePackageDep,
+} from './rules';
 import * as rules from './rules';
 
 export async function extractPackageFile(
@@ -17,10 +21,20 @@ export async function extractPackageFile(
   try {
     const records = parse(content);
     const pfc = await extractBazelPfc(records, packageFile);
+    const gitRepositoryDeps = extractGitRepositoryDeps(records);
     const mavenDeps = extractMavenDeps(records);
+    const dockerDeps = LooseArray(RuleToDockerPackageDep).parse(records);
+
+    if (gitRepositoryDeps.length) {
+      pfc.deps.push(...gitRepositoryDeps);
+    }
 
     if (mavenDeps.length) {
       pfc.deps.push(...mavenDeps);
+    }
+
+    if (dockerDeps.length) {
+      pfc.deps.push(...dockerDeps);
     }
 
     return pfc.deps.length ? pfc : null;
@@ -49,6 +63,12 @@ async function extractBazelPfc(
   }
 
   return pfc;
+}
+
+function extractGitRepositoryDeps(
+  records: RecordFragment[],
+): PackageDependency[] {
+  return LooseArray(GitRepositoryToPackageDep).parse(records);
 }
 
 function extractMavenDeps(records: RecordFragment[]): PackageDependency[] {

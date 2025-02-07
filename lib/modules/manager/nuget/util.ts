@@ -2,10 +2,15 @@ import upath from 'upath';
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
-import { findUpLocal, readLocalFile } from '../../../util/fs';
+import {
+  findLocalSiblingOrParent,
+  findUpLocal,
+  readLocalFile,
+} from '../../../util/fs';
 import { minimatch } from '../../../util/minimatch';
 import { regEx } from '../../../util/regex';
 import { nugetOrg } from '../../datasource/nuget';
+import { GlobalJson } from './schema';
 import type { NugetPackageDependency, Registry } from './types';
 
 export async function readFileAsXmlDocument(
@@ -52,13 +57,19 @@ export async function getConfiguredRegistries(
   }
 
   const packageSources = nuGetConfig.childNamed('packageSources');
+
   if (!packageSources) {
+    // If there are no packageSources, don't even look for any
+    // disabledPackageSources
+    // Even if NuGet default source (nuget.org) was among the
+    // disabledPackageSources, Renovate will default to the default source
+    // (nuget.org) anyway
     return undefined;
   }
 
   const packageSourceMapping = nuGetConfig.childNamed('packageSourceMapping');
 
-  const registries = getDefaultRegistries();
+  let registries = getDefaultRegistries();
 
   // Map optional source mapped package patterns to default registries
   for (const registry of registries) {
@@ -111,6 +122,25 @@ export async function getConfiguredRegistries(
       // child.name === 'remove' not supported
     }
   }
+
+  const disabledPackageSources = nuGetConfig.childNamed(
+    'disabledPackageSources',
+  );
+
+  if (disabledPackageSources) {
+    for (const child of disabledPackageSources.children) {
+      if (
+        child.type === 'element' &&
+        child.name === 'add' &&
+        child.attr.value === 'true'
+      ) {
+        const disabledRegistryKey = child.attr.key;
+        registries = registries.filter((o) => o.name !== disabledRegistryKey);
+        logger.debug(`Disabled registry with key: ${disabledRegistryKey}`);
+      }
+    }
+  }
+
   return registries;
 }
 
@@ -181,4 +211,32 @@ function sortPatterns(
   }
 
   return a[0].localeCompare(b[0]) * -1;
+}
+
+export async function findGlobalJson(
+  packageFile: string,
+): Promise<GlobalJson | null> {
+  const globalJsonPath = await findLocalSiblingOrParent(
+    packageFile,
+    'global.json',
+  );
+  if (!globalJsonPath) {
+    return null;
+  }
+
+  const content = await readLocalFile(globalJsonPath, 'utf8');
+  if (!content) {
+    logger.debug({ packageFile, globalJsonPath }, 'Failed to read global.json');
+    return null;
+  }
+
+  const result = await GlobalJson.safeParseAsync(content);
+  if (!result.success) {
+    logger.debug(
+      { packageFile, globalJsonPath, err: result.error },
+      'Failed to parse global.json',
+    );
+    return null;
+  }
+  return result.data;
 }

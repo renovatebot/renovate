@@ -1,79 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/platform/gitlab/index createPr(branchName, title, body) raises with squash enabled when repository squash option is always 1`] = `
-{
-  "id": 1,
-  "iid": 12345,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-  "title": "some title",
-}
-`;
-
-exports[`modules/platform/gitlab/index createPr(branchName, title, body) raises with squash enabled when repository squash option is default_on 1`] = `
-{
-  "id": 1,
-  "iid": 12345,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-  "title": "some title",
-}
-`;
-
-exports[`modules/platform/gitlab/index createPr(branchName, title, body) returns the PR 1`] = `
-{
-  "id": 1,
-  "iid": 12345,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-  "title": "some title",
-}
-`;
-
-exports[`modules/platform/gitlab/index createPr(branchName, title, body) supports draftPR on < 13.2 1`] = `
-{
-  "id": 1,
-  "iid": 12345,
-  "isDraft": true,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-  "title": "some title",
-}
-`;
-
-exports[`modules/platform/gitlab/index createPr(branchName, title, body) supports draftPR on >= 13.2 1`] = `
-{
-  "id": 1,
-  "iid": 12345,
-  "isDraft": true,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-  "title": "some title",
-}
-`;
-
-exports[`modules/platform/gitlab/index createPr(branchName, title, body) uses default branch 1`] = `
-{
-  "id": 1,
-  "iid": 12345,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-  "title": "some title",
-}
-`;
-
 exports[`modules/platform/gitlab/index getBranchPr(branchName) should return the PR object 1`] = `
 {
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "hasAssignees": false,
-  "headPipelineSha": undefined,
-  "headPipelineStatus": undefined,
-  "labels": undefined,
   "number": 91,
-  "reviewers": undefined,
-  "sha": undefined,
   "sourceBranch": "some-branch",
   "state": "open",
   "targetBranch": "master",
@@ -87,13 +20,8 @@ exports[`modules/platform/gitlab/index getBranchPr(branchName) should strip depr
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "hasAssignees": false,
-  "headPipelineSha": undefined,
-  "headPipelineStatus": undefined,
   "isDraft": true,
-  "labels": undefined,
   "number": 91,
-  "reviewers": undefined,
-  "sha": undefined,
   "sourceBranch": "some-branch",
   "state": "open",
   "targetBranch": "master",
@@ -107,13 +35,8 @@ exports[`modules/platform/gitlab/index getBranchPr(branchName) should strip draf
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "hasAssignees": false,
-  "headPipelineSha": undefined,
-  "headPipelineStatus": undefined,
   "isDraft": true,
-  "labels": undefined,
   "number": 91,
-  "reviewers": undefined,
-  "sha": undefined,
   "sourceBranch": "some-branch",
   "state": "open",
   "targetBranch": "master",
@@ -127,13 +50,8 @@ exports[`modules/platform/gitlab/index getPr(prNo) removes deprecated draft pref
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
   },
   "hasAssignees": false,
-  "headPipelineSha": undefined,
-  "headPipelineStatus": undefined,
   "isDraft": true,
-  "labels": undefined,
   "number": 12345,
-  "reviewers": undefined,
-  "sha": undefined,
   "sourceBranch": "some-branch",
   "state": "merged",
   "targetBranch": "master",
@@ -147,13 +65,8 @@ exports[`modules/platform/gitlab/index getPr(prNo) removes draft prefix from ret
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
   },
   "hasAssignees": false,
-  "headPipelineSha": undefined,
-  "headPipelineStatus": undefined,
   "isDraft": true,
-  "labels": undefined,
   "number": 12345,
-  "reviewers": undefined,
-  "sha": undefined,
   "sourceBranch": "some-branch",
   "state": "merged",
   "targetBranch": "master",
@@ -167,12 +80,7 @@ exports[`modules/platform/gitlab/index getPr(prNo) returns the PR 1`] = `
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
   },
   "hasAssignees": false,
-  "headPipelineSha": undefined,
-  "headPipelineStatus": undefined,
-  "labels": undefined,
   "number": 12345,
-  "reviewers": undefined,
-  "sha": undefined,
   "sourceBranch": "some-branch",
   "state": "merged",
   "targetBranch": "master",
@@ -186,12 +94,7 @@ exports[`modules/platform/gitlab/index getPr(prNo) returns the PR with nonexisti
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
   },
   "hasAssignees": true,
-  "headPipelineSha": undefined,
-  "headPipelineStatus": undefined,
-  "labels": undefined,
   "number": 12345,
-  "reviewers": undefined,
-  "sha": undefined,
   "sourceBranch": "some-branch",
   "state": "open",
   "targetBranch": "master",
@@ -205,12 +108,7 @@ exports[`modules/platform/gitlab/index getPr(prNo) returns the mergeable PR 1`] 
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
   },
   "hasAssignees": true,
-  "headPipelineSha": undefined,
-  "headPipelineStatus": undefined,
-  "labels": undefined,
   "number": 12345,
-  "reviewers": undefined,
-  "sha": undefined,
   "sourceBranch": "some-branch",
   "state": "open",
   "targetBranch": "master",
@@ -237,6 +135,7 @@ exports[`modules/platform/gitlab/index initRepo should fall back respecting when
   [
     {
       "cloneSubmodules": undefined,
+      "cloneSubmodulesFilter": undefined,
       "defaultBranch": "master",
       "ignorePrAuthor": undefined,
       "mergeMethod": "merge",
@@ -252,6 +151,7 @@ exports[`modules/platform/gitlab/index initRepo should use ssh_url_to_repo if gi
   [
     {
       "cloneSubmodules": undefined,
+      "cloneSubmodulesFilter": undefined,
       "defaultBranch": "master",
       "ignorePrAuthor": undefined,
       "mergeMethod": "merge",

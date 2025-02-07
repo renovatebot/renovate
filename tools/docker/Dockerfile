@@ -1,25 +1,31 @@
-# syntax=docker/dockerfile:1.10.0@sha256:865e5dd094beca432e8c0a1d5e1c465db5f998dca4e439981029b3b81fb39ed5
+# syntax=docker/dockerfile:1.13.0@sha256:426b85b823c113372f766a963f68cfd9cd4878e1bcc0fda58779127ee98a28eb
 
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:7.34.1@sha256:8daa1b05ce0d72ed13b81a96110d3b0e77b49dc3347dc0b27ea8a9056a5e6296 AS slim-base
+FROM ghcr.io/renovatebot/base-image:9.38.7@sha256:4cc510a6664160f5e84468f6df280cd796dcea49711a43d964dd4638388a1773 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:7.34.1-full@sha256:860a309fe1db445182afc500c0828bed91c509fd3356460657de1e59ad3b93af AS full-base
+FROM ghcr.io/renovatebot/base-image:9.38.7-full@sha256:83bea1766e925b7674dcc012bcac02b2347810471134e9ca17a83b1a75850fc8 AS full-base
+
+ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:7.34.1@sha256:8daa1b05ce0d72ed13b81a96110d3b0e77b49dc3347dc0b27ea8a9056a5e6296 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.38.7@sha256:4cc510a6664160f5e84468f6df280cd796dcea49711a43d964dd4638388a1773 AS build
 
 # We want a specific node version here
 # renovate: datasource=node-version
-RUN install-tool node 20.18.0
+RUN install-tool node 22.13.1
+
+# corepack is too buggy 😞
+# renovate: datasource=npm
+RUN install-tool pnpm 9.15.4
 
 WORKDIR /usr/local/renovate
 
@@ -57,17 +63,18 @@ COPY --link pnpm-lock.yaml ./
 
 # set `npm_config_arch` for `prebuild-install`
 # set `npm_config_platform_arch` for `install-artifact-from-github`
+ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
+
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN set -ex; \
-  export npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}; \
-  corepack pnpm fetch --prod; \
+  pnpm fetch --prod; \
   true
 
 COPY --link . ./
 
 # install npm packages
 RUN set -ex; \
-  corepack pnpm install --prod --offline --ignore-scripts; \
+  pnpm install --prod --offline --ignore-scripts; \
   true
 
 # --------------------------------------
@@ -90,11 +97,18 @@ ARG RENOVATE_VERSION
 
 COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
+# make our node binary available as last in path
+RUN ln -sf /usr/local/renovate/node /bin/node
+
+# ensure default base and cache directories exist.
+RUN mkdir -p /tmp/renovate/cache && \
+  chmod -R 777 /tmp/renovate
+
 # test
 RUN set -ex; \
   renovate --version; \
   pushd /usr/local/renovate/; \
-  ./node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
+  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
   true
 
 LABEL \
@@ -102,4 +116,4 @@ LABEL \
   org.label-schema.version="${RENOVATE_VERSION}"
 
 # Numeric user ID for the ubuntu user. Used to indicate a non-root user to OpenShift
-USER 1000
+USER 12021

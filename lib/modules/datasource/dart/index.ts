@@ -1,4 +1,5 @@
 import type { HttpResponse } from '../../../util/http/types';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -37,7 +38,7 @@ export class DartDatasource extends Datasource {
 
     let raw: HttpResponse<DartResult> | null = null;
     try {
-      raw = await this.http.getJson<DartResult>(pkgUrl);
+      raw = await this.http.getJsonUnchecked<DartResult>(pkgUrl);
     } catch (err) {
       this.handleGenericErrors(err);
     }
@@ -49,7 +50,7 @@ export class DartDatasource extends Datasource {
         ?.filter(({ retracted }) => !retracted)
         ?.map(({ version, published }) => ({
           version,
-          releaseTimestamp: published,
+          releaseTimestamp: asTimestamp(published),
         }));
       if (releases && latest) {
         result = { releases };

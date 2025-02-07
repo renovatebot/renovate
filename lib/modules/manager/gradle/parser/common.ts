@@ -37,6 +37,14 @@ export const GRADLE_PLUGINS = {
   spotbugs: ['toolVersion', 'com.github.spotbugs:spotbugs'],
 };
 
+export const GRADLE_TEST_SUITES = {
+  useJunit: 'junit:junit',
+  useJUnitJupiter: 'org.junit.jupiter:junit-jupiter',
+  useKotlinTest: 'org.jetbrains.kotlin:kotlin-test-junit',
+  useSpock: 'org.spockframework:spock-core',
+  useTestNG: 'org.testng:testng',
+};
+
 export function storeVarToken(ctx: Ctx, node: lexer.Token): Ctx {
   ctx.varTokens.push(node);
   return ctx;
@@ -267,23 +275,13 @@ export const qTemplateString = q
       ctx.tmpTokenStore.templateTokens = [];
       return ctx;
     },
-    search: q.alt(
-      qStringValue.handler((ctx) => {
+    search: q
+      .alt(qStringValue, qPropertyAccessIdentifier, qVariableAccessIdentifier)
+      .handler((ctx) => {
         ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
         ctx.varTokens = [];
         return ctx;
       }),
-      qPropertyAccessIdentifier.handler((ctx) => {
-        ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
-        ctx.varTokens = [];
-        return ctx;
-      }),
-      qVariableAccessIdentifier.handler((ctx) => {
-        ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
-        ctx.varTokens = [];
-        return ctx;
-      }),
-    ),
   })
   .handler((ctx) => {
     ctx.varTokens = ctx.tmpTokenStore.templateTokens!;
@@ -313,3 +311,32 @@ export const qKotlinImport = q
     return ctx;
   })
   .handler(cleanupTempVars);
+
+// foo { bar { baz } }
+// foo.bar { baz }
+export const qDotOrBraceExpr = (
+  symValue: q.SymMatcherValue,
+  matcher: q.QueryBuilder<Ctx, parser.Node>,
+): q.QueryBuilder<Ctx, parser.Node> =>
+  q.sym<Ctx>(symValue).alt(
+    q.op<Ctx>('.').join(matcher),
+    q.tree({
+      type: 'wrapped-tree',
+      maxDepth: 1,
+      startsWith: '{',
+      endsWith: '}',
+      search: matcher,
+    }),
+  );
+
+export const qGroupId = qValueMatcher.handler((ctx) =>
+  storeInTokenMap(ctx, 'groupId'),
+);
+
+export const qArtifactId = qValueMatcher.handler((ctx) =>
+  storeInTokenMap(ctx, 'artifactId'),
+);
+
+export const qVersion = qValueMatcher.handler((ctx) =>
+  storeInTokenMap(ctx, 'version'),
+);

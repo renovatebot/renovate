@@ -79,6 +79,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  atmos: {
+    asdfPluginUrl: 'https://github.com/cloudposse/asdf-atmos',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'cloudposse/atmos',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   awscli: {
     asdfPluginUrl: 'https://github.com/MetricMike/asdf-awscli',
     config: {
@@ -114,6 +122,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubTagsDatasource.id,
       packageName: 'clojure/brew-install',
       versioning: `${regexVersioning.id}:^(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+)\\.(?<build>\\d+)$`,
+    },
+  },
+  conftest: {
+    asdfPluginUrl: 'https://github.com/looztra/asdf-conftest',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'open-policy-agent/conftest',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   cookiecutter: {
@@ -183,6 +199,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  'editorconfig-checker': {
+    asdfPluginUrl: 'https://github.com/gabitchov/asdf-editorconfig-checker',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'editorconfig-checker/editorconfig-checker',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   elixir: {
     asdfPluginUrl: 'https://github.com/asdf-vm/asdf-elixir',
     config: {
@@ -233,6 +257,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'cli/cli',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  gitleaks: {
+    asdfPluginUrl: 'https://github.com/jmcvetta/asdf-gitleaks',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'gitleaks/gitleaks',
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -341,26 +373,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: adoptOpenJreMatches.version,
         };
       }
-      const semeruJdkMatches = version.match(
-        /^semeru-openj9-(?<version>\d\S+)_openj9-(?<openj9>\d\S+)/,
-      )?.groups;
-      if (semeruJdkMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jdk',
-          currentValue: semeruJdkMatches.version,
-        };
-      }
-      const semeruJreMatches = version.match(
-        /^semeru-jre-openj9-(?<version>\d\S+)_openj9-\d\S+/,
-      )?.groups;
-      if (semeruJreMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jre',
-          currentValue: semeruJreMatches.version,
-        };
-      }
       const temurinJdkMatches = version.match(
         /^temurin-(?<version>\d\S+)/,
       )?.groups;
@@ -400,6 +412,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'casey/just',
     },
   },
+  k3s: {
+    asdfPluginUrl: 'https://github.com/dmpe/asdf-k3s',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'k3s-io/k3s',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   kind: {
     asdfPluginUrl: 'https://github.com/johnlayton/asdf-kind',
     config: {
@@ -437,6 +457,15 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'lua/lua',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  'markdownlint-cli2': {
+    asdfPluginUrl:
+      'https://github.com/paulo-ferraz-oliveira/asdf-markdownlint-cli2',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'DavidAnson/markdownlint-cli2',
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -485,11 +514,27 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'ocaml/ocaml',
     },
   },
+  oci: {
+    asdfPluginUrl: 'https://github.com/yasn77/asdf-oci',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'oracle/oci-cli',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   opentofu: {
     asdfPluginUrl: 'https://github.com/virtualroot/asdf-opentofu',
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'opentofu/opentofu',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  packer: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-hashicorp',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'hashicorp/packer',
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -530,6 +575,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubTagsDatasource.id,
       packageName: 'pre-commit/pre-commit',
       extractVersion: '^v(?<version>.+)',
+    },
+  },
+  protoc: {
+    asdfPluginUrl: 'https://github.com/paxosglobal/asdf-protoc.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'protocolbuffers/protobuf',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   pulumi: {
@@ -686,6 +739,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  yamllint: {
+    asdfPluginUrl: 'https://github.com/ericcornelissen/asdf-yamllint',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'adrienverge/yamllint',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   yq: {
     asdfPluginUrl: 'https://github.com/sudermanjr/asdf-yq',
     config: {
@@ -745,6 +806,13 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
       packageName: 'crate-ci/typos',
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  uv: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-uv',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'astral-sh/uv',
     },
   },
 };

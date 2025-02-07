@@ -3,6 +3,7 @@ import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
+import { parseJson } from '../../../../util/common';
 import { coersions } from './coersions';
 import type { ParseConfigOptions } from './types';
 import { migrateAndValidateConfig } from './util';
@@ -41,6 +42,8 @@ const renameKeys = {
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
   mergeConfidenceApiBaseUrl: 'mergeConfidenceEndpoint',
   mergeConfidenceSupportedDatasources: 'mergeConfidenceDatasources',
+  allowPostUpgradeCommandTemplating: 'allowCommandTemplating',
+  allowedPostUpgradeCommands: 'allowedCommands',
 };
 
 function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
@@ -118,102 +121,86 @@ function massageConvertedExperimentalVars(
 
 export async function getConfig(
   inputEnv: NodeJS.ProcessEnv,
+  configEnvKey = 'RENOVATE_CONFIG',
 ): Promise<AllConfig> {
-  let env = inputEnv;
-  env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
-  env = massageConvertedExperimentalVars(env);
-  env = renameEnvKeys(env);
-  // massage the values of migrated configuration keys
-  env = massageEnvKeyValues(env);
+  const env = prepareEnv(inputEnv);
+  const config = await parseAndValidateOrExit(env, configEnvKey);
 
   const options = getOptions();
+  config.hostRules ??= [];
 
-  let config: AllConfig = {};
-
-  if (env.RENOVATE_CONFIG) {
-    try {
-      config = JSON5.parse(env.RENOVATE_CONFIG);
-      logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
-
-      config = await migrateAndValidateConfig(config, 'RENOVATE_CONFIG');
-    } catch (err) {
-      logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
-      process.exit(1);
+  for (const option of options) {
+    if (option.env === false) {
+      continue;
     }
-  }
 
-  config.hostRules ||= [];
+    const envName = getEnvName(option);
+    const envVal = env[envName];
+    if (!envVal) {
+      continue;
+    }
 
-  options.forEach((option) => {
-    if (option.env !== false) {
-      const envName = getEnvName(option);
-      const envVal = env[envName];
-      if (envVal) {
-        if (option.type === 'array' && option.subType === 'object') {
-          try {
-            const parsed = JSON5.parse(envVal);
-            if (is.array(parsed)) {
-              config[option.name] = parsed;
-            } else {
-              logger.debug(
-                { val: envVal, envName },
-                'Could not parse object array',
-              );
-            }
-          } catch {
-            logger.debug(
-              { val: envVal, envName },
-              'Could not parse environment variable',
-            );
-          }
+    if (option.type === 'array' && option.subType === 'object') {
+      try {
+        const parsed = JSON5.parse(envVal);
+        if (is.array(parsed)) {
+          config[option.name] = parsed;
         } else {
-          const coerce = coersions[option.type];
-          config[option.name] = coerce(envVal);
-          if (option.name === 'dryRun') {
-            if ((config[option.name] as string) === 'true') {
-              logger.warn(
-                'env config dryRun property has been changed to full',
-              );
-              config[option.name] = 'full';
-            } else if ((config[option.name] as string) === 'false') {
-              logger.warn(
-                'env config dryRun property has been changed to null',
-              );
-              delete config[option.name];
-            } else if ((config[option.name] as string) === 'null') {
-              delete config[option.name];
-            }
-          }
-          if (option.name === 'requireConfig') {
-            if ((config[option.name] as string) === 'true') {
-              logger.warn(
-                'env config requireConfig property has been changed to required',
-              );
-              config[option.name] = 'required';
-            } else if ((config[option.name] as string) === 'false') {
-              logger.warn(
-                'env config requireConfig property has been changed to optional',
-              );
-              config[option.name] = 'optional';
-            }
-          }
-          if (option.name === 'platformCommit') {
-            if ((config[option.name] as string) === 'true') {
-              logger.warn(
-                'env config platformCommit property has been changed to enabled',
-              );
-              config[option.name] = 'enabled';
-            } else if ((config[option.name] as string) === 'false') {
-              logger.warn(
-                'env config platformCommit property has been changed to disabled',
-              );
-              config[option.name] = 'disabled';
-            }
-          }
+          logger.debug(
+            { val: envVal, envName },
+            'Could not parse object array',
+          );
+        }
+      } catch {
+        logger.debug(
+          { val: envVal, envName },
+          'Could not parse environment variable',
+        );
+      }
+    } else {
+      const coerce = coersions[option.type];
+      config[option.name] = coerce(envVal);
+      if (option.name === 'dryRun') {
+        if ((config[option.name] as string) === 'true') {
+          logger.warn('env config dryRun property has been changed to full');
+          config[option.name] = 'full';
+        } else if ((config[option.name] as string) === 'false') {
+          logger.warn('env config dryRun property has been changed to null');
+          delete config[option.name];
+        } else if ((config[option.name] as string) === 'null') {
+          delete config[option.name];
+        }
+      }
+
+      if (option.name === 'requireConfig') {
+        if ((config[option.name] as string) === 'true') {
+          logger.warn(
+            'env config requireConfig property has been changed to required',
+          );
+          config[option.name] = 'required';
+        } else if ((config[option.name] as string) === 'false') {
+          logger.warn(
+            'env config requireConfig property has been changed to optional',
+          );
+          config[option.name] = 'optional';
+        }
+      }
+
+      if (option.name === 'platformCommit') {
+        if ((config[option.name] as string) === 'true') {
+          logger.warn(
+            'env config platformCommit property has been changed to enabled',
+          );
+          config[option.name] = 'enabled';
+        } else if ((config[option.name] as string) === 'false') {
+          logger.warn(
+            'env config platformCommit property has been changed to disabled',
+          );
+          config[option.name] = 'disabled';
         }
       }
     }
-  });
+  }
 
   if (env.GITHUB_COM_TOKEN) {
     logger.debug(`Converting GITHUB_COM_TOKEN into a global host rule`);
@@ -237,7 +224,39 @@ export async function getConfig(
     'VSTS_TOKEN',
   ];
 
-  unsupportedEnv.forEach((val) => delete env[val]);
+  for (const val of unsupportedEnv) {
+    delete env[val];
+  }
 
   return config;
+}
+
+export function prepareEnv(inputEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  let env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
+  env = massageConvertedExperimentalVars(env);
+  env = renameEnvKeys(env);
+  // massage the values of migrated configuration keys
+  return massageEnvKeyValues(env);
+}
+
+export async function parseAndValidateOrExit(
+  env: NodeJS.ProcessEnv,
+  configEnvKey: string,
+): Promise<AllConfig> {
+  if (!env[configEnvKey]) {
+    return {};
+  }
+
+  try {
+    const config = parseJson(
+      env[configEnvKey],
+      `${configEnvKey}.env.json5`,
+    ) as AllConfig;
+    logger.debug({ config }, `Detected config in env ${configEnvKey}`);
+
+    return await migrateAndValidateConfig(config, `${configEnvKey}`);
+  } catch (err) {
+    logger.fatal({ err }, `Could not parse ${configEnvKey}`);
+    process.exit(1);
+  }
 }

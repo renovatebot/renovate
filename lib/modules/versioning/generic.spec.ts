@@ -68,6 +68,7 @@ describe('modules/versioning/generic', () => {
         'getPatch',
         'isCompatible',
         'isGreaterThan',
+        'isSame',
         'isSingleVersion',
         'isStable',
         'isValid',
@@ -182,6 +183,15 @@ describe('modules/versioning/generic', () => {
       expect(
         api.getSatisfyingVersion(['1.1.1', '2.2.2', '3.3.3'], '1.2.3'),
       ).toBeNull();
+    });
+
+    it('isSame', () => {
+      expect(api.isSame('major', '4.5.6', '4.6.0')).toBe(true);
+      expect(api.isSame('major', '4.5.6', '5.0.0')).toBe(false);
+      expect(api.isSame('minor', '4.5.6', '5.5.0')).toBe(true);
+      expect(api.isSame('minor', '4.5.6', '4.6.0')).toBe(false);
+      expect(api.isSame('patch', '4.5.6', '5.5.6')).toBe(true);
+      expect(api.isSame('patch', '4.5.6', '4.6.0')).toBe(false);
     });
   });
 });

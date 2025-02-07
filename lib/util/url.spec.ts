@@ -116,6 +116,7 @@ describe('util/url', () => {
     expect(url?.protocol).toBe('https:');
     expect(url?.host).toBe('github.com');
     expect(url?.pathname).toBe('/renovatebot/renovate');
+    expect(parseUrl(url)).toBe(url);
   });
 
   it('trimTrailingSlash', () => {

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
+import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { logger } from '../logger';
-import { maskToken } from '../util/mask';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
 import { ensureTrailingSlash } from '../util/url';
@@ -166,38 +166,29 @@ export async function decryptConfig(
           logger.debug(`Decrypted ${eKey}`);
           if (eKey === 'npmToken') {
             const token = decryptedStr.replace(regEx(/\n$/), '');
+            decryptedConfig[eKey] = token;
             addSecretForSanitizing(token);
-            logger.debug(
-              { decryptedToken: maskToken(token) },
-              'Migrating npmToken to npmrc',
-            );
-            if (is.string(decryptedConfig.npmrc)) {
-              /* eslint-disable no-template-curly-in-string */
-              if (decryptedConfig.npmrc.includes('${NPM_TOKEN}')) {
-                logger.debug('Replacing ${NPM_TOKEN} with decrypted token');
-                decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
-                  regEx(/\${NPM_TOKEN}/g),
-                  token,
-                );
-              } else {
-                logger.debug('Appending _authToken= to end of existing npmrc');
-                decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
-                  regEx(/\n?$/),
-                  `\n_authToken=${token}\n`,
-                );
-              }
-              /* eslint-enable no-template-curly-in-string */
-            } else {
-              logger.debug('Adding npmrc to config');
-              decryptedConfig.npmrc = `//registry.npmjs.org/:_authToken=${token}\n`;
-            }
           } else {
             decryptedConfig[eKey] = decryptedStr;
             addSecretForSanitizing(decryptedStr);
           }
         }
       } else {
-        logger.error('Found encrypted data but no privateKey');
+        if (process.env.RENOVATE_X_ENCRYPTED_STRICT === 'true') {
+          const error = new Error(CONFIG_VALIDATION);
+          error.validationSource = 'config';
+          error.validationError = 'Encrypted config unsupported';
+          error.validationMessage = `This config contains an encrypted object at location \`$.${key}\` but no privateKey is configured. To support encrypted config, the Renovate administrator must configure a \`privateKey\` in Global Configuration.`;
+          if (process.env.MEND_HOSTED === 'true') {
+            error.validationMessage = `Mend-hosted Renovate Apps no longer support the use of encrypted secrets in Renovate file config (e.g. renovate.json).
+Please migrate all secrets to the Developer Portal using the web UI available at https://developer.mend.io/
+
+Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migrating-secrets/`;
+          }
+          throw error;
+        } else {
+          logger.error('Found encrypted data but no privateKey');
+        }
       }
       delete decryptedConfig.encrypted;
     } else if (is.array(val)) {

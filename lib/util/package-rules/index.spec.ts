@@ -1174,4 +1174,64 @@ describe('util/package-rules/index', () => {
 
     expect(res.x).toBe(1);
   });
+
+  it('overrides', async () => {
+    const config: TestConfig = {
+      datasource: 'npm',
+      depName: 'foo',
+      packageName: 'bar',
+      packageRules: [
+        {
+          matchDatasources: ['npm'],
+          matchDepNames: ['foo'],
+          overridePackageName: 'baz',
+        },
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['baz'],
+          overrideDepName: 'f',
+        },
+        {
+          matchDepNames: ['f'],
+          overrideDatasource: 'composer',
+        },
+        {
+          matchDatasources: ['composer'],
+          matchDepNames: ['f'],
+          matchPackageNames: ['baz'],
+          enabled: false,
+        },
+      ],
+    };
+    let res = await applyPackageRules(config);
+    expect(res.packageName).toBe('baz');
+    res = await applyPackageRules(res);
+    expect(res.depName).toBe('f');
+    res = await applyPackageRules(res);
+    expect(res.datasource).toBe('composer');
+    res = await applyPackageRules(res);
+    expect(res).toMatchObject({
+      datasource: 'composer',
+      depName: 'f',
+      packageName: 'baz',
+      enabled: false,
+    });
+  });
+
+  it('overrides with templates', async () => {
+    const config: TestConfig = {
+      datasource: 'docker',
+      depName: 'docker.io/library/node',
+      packageName: 'docker.io/library/node',
+      packageRules: [
+        {
+          matchDatasources: ['docker'],
+          overrideDepName: '{{replace "docker.io/library/" "" depName}}',
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res.depName).toBe('node');
+    expect(res.packageName).toBe('docker.io/library/node');
+  });
 });
