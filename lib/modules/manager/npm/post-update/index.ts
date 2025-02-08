@@ -258,7 +258,7 @@ export async function writeUpdatedPackageFiles(
 // istanbul ignore next
 async function updateYarnOffline(
   lockFileDir: string,
-  updatedArtifacts: FileChange[],
+  updatedArtifacts: Record<string, FileChange>,
 ): Promise<void> {
   try {
     const resolvedPaths: string[] = [];
@@ -289,16 +289,16 @@ async function updateYarnOffline(
       const status = await getRepoStatus();
       for (const f of status.modified.concat(status.not_added)) {
         if (resolvedPaths.some((p) => f.startsWith(p))) {
-          updatedArtifacts.push({
+          updatedArtifacts[f] = {
             type: 'addition',
             path: f,
             contents: await readLocalFile(f),
-          });
+          };
         }
       }
       for (const f of status.deleted || []) {
         if (resolvedPaths.some((p) => f.startsWith(p))) {
-          updatedArtifacts.push({ type: 'deletion', path: f });
+          updatedArtifacts[f] = { type: 'deletion', path: f };
         }
       }
     }
@@ -311,7 +311,7 @@ async function updateYarnOffline(
 // exported for testing
 export async function updateYarnBinary(
   lockFileDir: string,
-  updatedArtifacts: FileChange[],
+  updatedArtifacts: Record<string, FileChange>,
   existingYarnrcYmlContent: string | undefined | null,
 ): Promise<string | undefined | null> {
   let yarnrcYml = existingYarnrcYmlContent;
@@ -338,23 +338,21 @@ export async function updateYarnBinary(
     logger.debug({ oldYarnPath, newYarnPath }, 'Found updated Yarn binary');
 
     yarnrcYml = yarnrcYml.replace(oldYarnPath, newYarnPath);
-    updatedArtifacts.push(
-      {
-        type: 'addition',
-        path: yarnrcYmlFilename,
-        contents: yarnrcYml,
-      },
-      {
-        type: 'deletion',
-        path: oldYarnFullPath,
-      },
-      {
-        type: 'addition',
-        path: newYarnFullPath,
-        contents: await readLocalFile(newYarnFullPath, 'utf8'),
-        isExecutable: true,
-      },
-    );
+    updatedArtifacts[yarnrcYmlFilename] = {
+      type: 'addition',
+      path: yarnrcYmlFilename,
+      contents: yarnrcYml,
+    };
+    updatedArtifacts[oldYarnFullPath] = {
+      type: 'deletion',
+      path: oldYarnFullPath,
+    };
+    updatedArtifacts[newYarnFullPath] = {
+      type: 'addition',
+      path: newYarnFullPath,
+      contents: await readLocalFile(newYarnFullPath, 'utf8'),
+      isExecutable: true,
+    };
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, 'Error updating Yarn binary');
   }
@@ -367,7 +365,7 @@ export async function getAdditionalFiles(
 ): Promise<WriteExistingFilesResult> {
   logger.trace({ config }, 'getAdditionalFiles');
   const artifactErrors: ArtifactError[] = [];
-  const updatedArtifacts: FileChange[] = [];
+  const updatedArtifacts: Record<string, FileChange> = {};
   if (!packageFiles.npm?.length) {
     return { artifactErrors, updatedArtifacts };
   }
@@ -460,13 +458,13 @@ export async function getAdditionalFiles(
         logger.debug(`${npmLock} hasn't changed`);
       } else {
         logger.debug(`${npmLock} needs updating`);
-        updatedArtifacts.push({
+        updatedArtifacts[npmLock] = {
           type: 'addition',
           path: npmLock,
           // TODO: can this be undefined? (#22198)
 
           contents: res.lockFile.replace(tokenRe, ''),
-        });
+        };
       }
     }
     await resetNpmrcContent(lockFileDir, npmrcContent);
@@ -547,12 +545,12 @@ export async function getAdditionalFiles(
         logger.debug("yarn.lock hasn't changed");
       } else {
         logger.debug('yarn.lock needs updating');
-        updatedArtifacts.push({
+        updatedArtifacts[lockFileName] = {
           type: 'addition',
           path: lockFileName,
           // TODO #22198
           contents: res.lockFile!,
-        });
+        };
         await updateYarnOffline(lockFileDir, updatedArtifacts);
       }
 
@@ -618,12 +616,12 @@ export async function getAdditionalFiles(
         logger.debug("pnpm-lock.yaml hasn't changed");
       } else {
         logger.debug('pnpm-lock.yaml needs updating');
-        updatedArtifacts.push({
+        updatedArtifacts[pnpmShrinkwrap] = {
           type: 'addition',
           path: pnpmShrinkwrap,
           // TODO: can be undefined? (#22198)
           contents: res.lockFile!,
-        });
+        };
       }
     }
     await resetNpmrcContent(lockFileDir, npmrcContent);

@@ -14,13 +14,14 @@ import {
 import { getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
 import { minimatch } from '../../../../util/minimatch';
+import { filterEntries } from '../../../../util/records';
 import { regEx } from '../../../../util/regex';
 import { sanitize } from '../../../../util/sanitize';
 import { compile } from '../../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 
 export interface PostUpgradeCommandsExecutionResult {
-  updatedArtifacts: FileChange[];
+  updatedArtifacts: Record<string, FileChange>;
   artifactErrors: ArtifactError[];
 }
 
@@ -28,7 +29,9 @@ export async function postUpgradeCommandsExecutor(
   filteredUpgradeCommands: BranchUpgradeConfig[],
   config: BranchConfig,
 ): Promise<PostUpgradeCommandsExecutionResult> {
-  let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
+  let updatedArtifacts = {
+    ...config.updatedArtifacts,
+  };
   const artifactErrors = [...(config.artifactErrors ?? [])];
   const allowedCommands = GlobalConfig.get('allowedCommands');
   const allowCommandTemplating = GlobalConfig.get('allowCommandTemplating');
@@ -46,7 +49,9 @@ export async function postUpgradeCommandsExecutor(
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? ['**/*'];
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
-      for (const file of config.updatedPackageFiles!.concat(updatedArtifacts)) {
+      for (const file of config.updatedPackageFiles!.concat(
+        Object.values(updatedArtifacts),
+      )) {
         const canWriteFile = await localPathIsFile(file.path);
         if (file.type === 'addition' && !file.isSymlink && canWriteFile) {
           let contents: Buffer | null;
@@ -132,21 +137,21 @@ export async function postUpgradeCommandsExecutor(
               'Post-upgrade file saved',
             );
             const existingContent = await readLocalFile(relativePath);
-            const existingUpdatedArtifacts = updatedArtifacts.find(
-              (ua) => ua.path === relativePath,
-            );
+            const existingUpdatedArtifacts = updatedArtifacts[relativePath];
             if (existingUpdatedArtifacts?.type === 'addition') {
               existingUpdatedArtifacts.contents = existingContent;
             } else {
-              updatedArtifacts.push({
+              updatedArtifacts[relativePath] = {
                 type: 'addition',
                 path: relativePath,
                 contents: existingContent,
-              });
+              };
             }
             // If the file is deleted by a previous post-update command, remove the deletion from updatedArtifacts
-            updatedArtifacts = updatedArtifacts.filter(
-              (ua) => !(ua.type === 'deletion' && ua.path === relativePath),
+            // remove all entries with the type 'deletion'
+            updatedArtifacts = filterEntries(
+              updatedArtifacts,
+              ([, value]) => value.type !== 'deletion',
             );
           }
         }
@@ -165,13 +170,14 @@ export async function postUpgradeCommandsExecutor(
               { file: relativePath, pattern },
               'Post-upgrade file removed',
             );
-            updatedArtifacts.push({
+            updatedArtifacts[relativePath] = {
               type: 'deletion',
               path: relativePath,
-            });
+            };
             // If the file is created or modified by a previous post-update command, remove the modification from updatedArtifacts
-            updatedArtifacts = updatedArtifacts.filter(
-              (ua) => !(ua.type === 'addition' && ua.path === relativePath),
+            updatedArtifacts = filterEntries(
+              updatedArtifacts,
+              ([, value]) => value.type !== 'addition',
             );
           }
         }

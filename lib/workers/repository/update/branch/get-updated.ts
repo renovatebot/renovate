@@ -21,7 +21,7 @@ export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
   reuseExistingBranch?: boolean;
   updatedPackageFiles: FileChange[];
-  updatedArtifacts: FileChange[];
+  updatedArtifacts: Record<string, FileChange>;
   artifactNotices: ArtifactNotice[];
 }
 
@@ -314,7 +314,7 @@ export async function getUpdatedPackageFiles(
     path: name,
     contents: updatedFileContents[name],
   }));
-  const updatedArtifacts: FileChange[] = [];
+  const updatedArtifacts: Record<string, FileChange> = {};
   const artifactErrors: ArtifactError[] = [];
   const artifactNotices: ArtifactNotice[] = [];
   if (is.nonEmptyArray(updatedPackageFiles)) {
@@ -483,7 +483,7 @@ async function managerUpdateArtifacts(
 
 function processUpdateArtifactResults(
   results: UpdateArtifactsResult[] | null,
-  updatedArtifacts: FileChange[],
+  updatedArtifacts: Record<string, FileChange>,
   artifactErrors: ArtifactError[],
   artifactNotices: ArtifactNotice[],
 ): void {
@@ -491,7 +491,7 @@ function processUpdateArtifactResults(
     for (const res of results) {
       const { file, notice, artifactError } = res;
       if (file) {
-        updatedArtifacts.push(file);
+        updatedArtifacts[file.path] = file;
       }
 
       if (artifactError) {

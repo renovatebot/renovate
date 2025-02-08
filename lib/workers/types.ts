@@ -74,7 +74,7 @@ export interface BranchUpgradeConfig
   sourceDirectory?: string;
 
   updatedPackageFiles?: FileChange[];
-  updatedArtifacts?: FileChange[];
+  updatedArtifacts?: Record<string, FileChange>;
 
   logJSON?: ChangeLogResult | null;
 

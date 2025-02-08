@@ -501,17 +501,18 @@ export async function processBranch(
       config.artifactErrors = (config.artifactErrors ?? []).concat(
         additionalFiles.artifactErrors,
       );
-      config.updatedArtifacts = (config.updatedArtifacts ?? []).concat(
-        additionalFiles.updatedArtifacts,
-      );
+      config.updatedArtifacts = {
+        ...config.updatedArtifacts,
+        ...additionalFiles.updatedArtifacts,
+      };
       if (config.updatedArtifacts?.length) {
         logger.debug(
           {
-            updatedArtifacts: config.updatedArtifacts.map((f) =>
+            updatedArtifacts: Object.values(config.updatedArtifacts).map((f) =>
               f.type === 'deletion' ? `${f.path} (delete)` : f.path,
             ),
           },
-          `Updated ${config.updatedArtifacts.length} lock files`,
+          `Updated ${Object.entries(config.updatedArtifacts).length} lock files`,
         );
       } else {
         logger.debug('No updated lock files in branch');

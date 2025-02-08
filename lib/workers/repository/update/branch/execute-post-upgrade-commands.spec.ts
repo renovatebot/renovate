@@ -23,16 +23,24 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       const config: BranchConfig = {
         manager: 'some-manager',
         updatedPackageFiles: [],
-        updatedArtifacts: [
-          { type: 'addition', path: 'some-existing-dir', contents: '' },
-          { type: 'addition', path: 'artifact', contents: '' },
-          {
+        updatedArtifacts: {
+          'some-existing-dir': {
+            type: 'addition',
+            path: 'some-existing-dir',
+            contents: '',
+          },
+          artifact: {
+            type: 'addition',
+            path: 'artifact',
+            contents: '',
+          },
+          symlink: {
             type: 'addition',
             path: 'symlink',
             contents: 'dest',
             isSymlink: true,
           },
-        ],
+        },
         artifactErrors: [],
         upgrades: [],
         branchName: 'main',

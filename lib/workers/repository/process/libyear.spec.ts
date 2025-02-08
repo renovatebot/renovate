@@ -179,7 +179,7 @@ describe('workers/repository/process/libyear', () => {
             npm: 1,
             regex: 1,
           },
-          // eslint-disable-next-line no-loss-of-precision
+
           totalLibYears: 2,
           totalDepsCount: 2,
           outdatedDepsCount: 2,

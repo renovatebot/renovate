@@ -5,7 +5,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() b
   "artifactErrors": [],
   "artifactNotices": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": [],
+  "updatedArtifacts": {},
   "updatedPackageFiles": [
     {
       "contents": "version: 0.0.2",
@@ -21,7 +21,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() b
   "artifactErrors": [],
   "artifactNotices": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": [],
+  "updatedArtifacts": {},
   "updatedPackageFiles": [
     {
       "contents": "new version",
@@ -37,7 +37,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
   "artifactErrors": [],
   "artifactNotices": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": [],
+  "updatedArtifacts": {},
   "updatedPackageFiles": [
     {
       "contents": "updated-file",
@@ -53,7 +53,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
   "artifactErrors": [],
   "artifactNotices": [],
   "reuseExistingBranch": false,
-  "updatedArtifacts": [],
+  "updatedArtifacts": {},
   "updatedPackageFiles": [
     {
       "contents": "updated-file",
@@ -69,7 +69,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
   "artifactErrors": [],
   "artifactNotices": [],
   "reuseExistingBranch": false,
-  "updatedArtifacts": [],
+  "updatedArtifacts": {},
   "updatedPackageFiles": [
     {
       "contents": "some new content",
@@ -85,7 +85,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
   "artifactErrors": [],
   "artifactNotices": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": [],
+  "updatedArtifacts": {},
   "updatedPackageFiles": [
     {
       "contents": "existing content",
@@ -101,7 +101,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
   "artifactErrors": [],
   "artifactNotices": [],
   "reuseExistingBranch": false,
-  "updatedArtifacts": [],
+  "updatedArtifacts": {},
   "updatedPackageFiles": [
     {
       "contents": "new contents",
@@ -117,7 +117,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
   "artifactErrors": [],
   "artifactNotices": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": [],
+  "updatedArtifacts": {},
   "updatedPackageFiles": [
     {
       "contents": "new contents",
@@ -138,7 +138,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
   ],
   "artifactNotices": [],
   "reuseExistingBranch": true,
-  "updatedArtifacts": [],
+  "updatedArtifacts": {},
   "updatedPackageFiles": [
     {
       "contents": "some new content",
@@ -197,7 +197,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
   ],
   "artifactNotices": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": [],
+  "updatedArtifacts": {},
   "updatedPackageFiles": [],
 }
 `;
