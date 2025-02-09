@@ -12,7 +12,7 @@ You need the following dependencies for local development:
 
 - Git `>=2.45.1`
 - Node.js `^20.15.1`
-- pnpm `^9.0.0` (use corepack)
+- pnpm `^9.0.0`
 - C++ compiler
 
 We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Volta](https://volta.sh/) to manage your tool versions.
@@ -26,12 +26,12 @@ You can use the following commands on Ubuntu.
 curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get update
 sudo apt-get install -y git build-essential nodejs
-corepack enable
+npm install -g pnpm@latest-10
 ```
 
 #### Nix
 
-To enter a development shell with the necessary packages, run `nix-shell --packages gcc gitFull nodejs` and then `corepack enable`.
+To enter a development shell with the necessary packages, run `nix-shell --packages gcc gitFull nodejs` and then `npm install -global pnpm@latest-10`.
 
 #### Windows
 
@@ -41,7 +41,7 @@ If you already installed a part, skip the corresponding step.
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
 - In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --debug install --global windows-build-tools`
-- Enable corepack with: `corepack enable`
+- Install pnpm with: `npm install -global pnpm@latest-10`
 
   You can see what versions you're using like this:
 
@@ -177,6 +177,7 @@ If you're only working on the documentation files, you can use the `pnpm doc-fix
 ## Documentation
 
 We use [MkDocs](https://www.mkdocs.org) to generate the documentation.
+To install the required dependency, use `pdm install`.
 You can run `pnpm build:docs` to generate the docs.
 Then use `pnpm mkdocs serve` to preview the documentation locally.
 The docs will update automatically when you run `pnpm build:docs` again, no need to stop the `pnpm mkdocs serve` command.

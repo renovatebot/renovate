@@ -10,6 +10,8 @@
 		"channels/beta/release/2.19.0-255.2.beta/",
 		"channels/beta/release/2.19.0-374.1.beta/",
 		"channels/beta/release/2.19.0-374.2.beta/",
+    "channels/dev/release/30039/",
+    "channels/dev/release/30104/",
 		"channels/beta/release/latest/"
 	]
 }

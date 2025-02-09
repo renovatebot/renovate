@@ -64,7 +64,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       expect(release).toEqual({
         version: 'v0.5.0',
-        releaseTimestamp: '2017-06-08T17:28:36Z',
+        releaseTimestamp: '2017-06-08T17:28:36.000Z',
       });
     });
   });
@@ -155,15 +155,15 @@ describe('modules/datasource/go/releases-goproxy', () => {
         releases: [
           {
             version: 'v1.0.0',
-            releaseTimestamp: '2018-08-13T15:31:12Z',
+            releaseTimestamp: '2018-08-13T15:31:12.000Z',
           },
           {
             version: 'v1.0.1',
-            releaseTimestamp: '2019-10-16T16:15:28Z',
+            releaseTimestamp: '2019-10-16T16:15:28.000Z',
           },
           {
             version: 'v1.28.1-20230721020619-4464c06fa399.4',
-            releaseTimestamp: '2023-07-21T02:06:19Z',
+            releaseTimestamp: '2023-07-21T02:06:19.000Z',
             newDigest: '4464c06fa399',
           },
         ],
@@ -245,8 +245,8 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
         expect(res).toEqual({
           releases: [
-            { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
-            { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
+            { releaseTimestamp: '2018-08-13T15:31:12.000Z', version: 'v1.0.0' },
+            { releaseTimestamp: '2019-10-16T16:15:28.000Z', version: 'v1.0.1' },
           ],
           sourceUrl: 'https://github.com/google/btree',
           tags: { latest: 'v1.0.1' },
@@ -296,8 +296,8 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       expect(res).toEqual({
         releases: [
-          { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
-          { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
+          { releaseTimestamp: '2018-08-13T15:31:12.000Z', version: 'v1.0.0' },
+          { releaseTimestamp: '2019-10-16T16:15:28.000Z', version: 'v1.0.1' },
         ],
         sourceUrl: 'https://github.com/google/btree',
         tags: { latest: 'v1.0.1' },
@@ -399,7 +399,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       httpMock
         .scope(`${baseUrl}/custom.com/lib/btree`)
         .get('/@v/list')
-        .reply(200, ['v1.0.0 2018-08-13T15:31:12Z', 'v1.0.1'].join('\n'))
+        .reply(200, ['v1.0.0 2018-08-13T15:31:12.000Z', 'v1.0.1'].join('\n'))
         .get('/@v/v1.0.1.info')
         .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' })
         .get('/@latest')
@@ -417,8 +417,8 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       expect(res).toEqual({
         releases: [
-          { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
-          { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
+          { releaseTimestamp: '2018-08-13T15:31:12.000Z', version: 'v1.0.0' },
+          { releaseTimestamp: '2019-10-16T16:15:28.000Z', version: 'v1.0.1' },
         ],
         tags: { latest: 'v1.0.1' },
       });
@@ -470,9 +470,9 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
         expect(res).toEqual({
           releases: [
-            { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
-            { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
-            { releaseTimestamp: '2020-10-16T16:15:28Z', version: 'v2.0.0' },
+            { releaseTimestamp: '2018-08-13T15:31:12.000Z', version: 'v1.0.0' },
+            { releaseTimestamp: '2019-10-16T16:15:28.000Z', version: 'v1.0.1' },
+            { releaseTimestamp: '2020-10-16T16:15:28.000Z', version: 'v2.0.0' },
           ],
           sourceUrl: 'https://github.com/google/btree',
           tags: { latest: 'v2.0.0' },
@@ -513,10 +513,10 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       expect(res).toEqual({
         releases: [
-          { releaseTimestamp: '2020-05-06T23:08:38Z', version: 'v2.3.0' },
-          { releaseTimestamp: '2020-11-17T15:46:20Z', version: 'v2.4.0' },
-          { releaseTimestamp: '2022-05-21T10:33:21Z', version: 'v3.0.0' },
-          { releaseTimestamp: '2022-05-27T08:35:30Z', version: 'v3.0.1' },
+          { releaseTimestamp: '2020-05-06T23:08:38.000Z', version: 'v2.3.0' },
+          { releaseTimestamp: '2020-11-17T15:46:20.000Z', version: 'v2.4.0' },
+          { releaseTimestamp: '2022-05-21T10:33:21.000Z', version: 'v3.0.0' },
+          { releaseTimestamp: '2022-05-27T08:35:30.000Z', version: 'v3.0.1' },
         ],
         sourceUrl: 'https://github.com/go-yaml/yaml',
         tags: { latest: 'v3.0.1' },
@@ -551,9 +551,9 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       expect(res).toEqual({
         releases: [
-          { releaseTimestamp: '2017-01-01T00:00:00Z', version: 'v0.1.0' },
-          { releaseTimestamp: '2017-02-01T00:00:00Z', version: 'v0.2.0' },
-          { releaseTimestamp: '2018-01-01T00:00:00Z', version: 'v1.0.0' },
+          { releaseTimestamp: '2017-01-01T00:00:00.000Z', version: 'v0.1.0' },
+          { releaseTimestamp: '2017-02-01T00:00:00.000Z', version: 'v0.2.0' },
+          { releaseTimestamp: '2018-01-01T00:00:00.000Z', version: 'v1.0.0' },
         ],
         sourceUrl: 'https://github.com/go-foo/foo',
         tags: { latest: 'v1.0.0' },
@@ -588,9 +588,9 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       expect(res).toEqual({
         releases: [
-          { releaseTimestamp: '2017-01-01T00:00:00Z', version: 'v0.1.0' },
-          { releaseTimestamp: '2017-02-01T00:00:00Z', version: 'v0.2.0' },
-          { releaseTimestamp: '2018-01-01T00:00:00Z', version: 'v1.0.0' },
+          { releaseTimestamp: '2017-01-01T00:00:00.000Z', version: 'v0.1.0' },
+          { releaseTimestamp: '2017-02-01T00:00:00.000Z', version: 'v0.2.0' },
+          { releaseTimestamp: '2018-01-01T00:00:00.000Z', version: 'v1.0.0' },
         ],
         sourceUrl: 'https://github.com/go-foo/foo',
         tags: { latest: 'v1.0.0' },
@@ -632,7 +632,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         releases: [
           {
             newDigest: '921286631fa9',
-            releaseTimestamp: '2023-09-05T20:02:55Z',
+            releaseTimestamp: '2023-09-05T20:02:55.000Z',
             version: 'v0.0.0-20230905200255-921286631fa9',
           },
         ],
