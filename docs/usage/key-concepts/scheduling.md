@@ -93,46 +93,46 @@ Also read the [`timezone` config option docs](../configuration-options.md#timezo
 
 After you've set your local timezone, you can set "days of the week" or "hours of the day" in which Renovate is allowed to make changes.
 
-#### Recommended syntax
+#### Recommended cron syntax
 
 We recommend you use the `cron` syntax in your Renovate schedules.
 
-```title="Examples of the kind of schedules you can create (cron syntax)"
-every weekend (needs to be converted to cron)
-before 5:00am (needs to be converted to cron)
-[after 10pm, before 5:00am] (needs to be converted to cron)
-[after 10pm every weekday, before 5am every weekday] (needs to be converted to cron)
-on friday and saturday (needs to be converted to cron)
-```
+| Description                                  | Cron syntax           |
+| -------------------------------------------- | --------------------- |
+| every weekend                                | `* * * * 0,6`         |
+| before 5:00am                                | `* 0-4 * * *`         |
+| after 10pm and before 5am every weekday      | `* 22-23,0-4 * * 1-5` |
+| on friday and saturday                       | `* * * * 5,6`         |
+| every 3 months on the first day of the month | `* * 1 */3 *`         |
 
 <!-- prettier-ignore -->
-!!! warning
-    Renovate does _not_ support scheduled minutes or "at an exact time" granularity.
-    Granularity must be at least one hour.
+!!! note
+    For Cron schedules, you _must_ use the `*` wildcard for the minutes value, as Renovate doesn't support minute granularity.
+    And the cron schedule must have five comma separated parts.
 
-#### Deprecated syntax
+#### Deprecated breejs/later syntax
 
 This section explains the deprecated `@breejs/later` syntax.
 We plan to remove the `@breejs/later` library in a future major Renovate release.
 Due to this upcoming change, we strongly recommend you use `cron` schedules.
 
-```title="Examples of the kind of schedules you can create (deprecated syntax)"
-every weekend
-before 5:00am
-[after 10pm, before 5:00am]
-[after 10pm every weekday, before 5am every weekday]
-on friday and saturday
-```
+Renovate uses the [`@breejs/later` library](https://github.com/breejs/later) to parse the text.
+For Renovate to understand the schedule, you must use valid `@breejs/later` syntax.
+Read the [@breejs/later parses docs at breejs.github.io](https://breejs.github.io/later/parsers.html#text) for more details.
+The `@breejs/later` library also controls the interpretation of "days", time_before", and "time_after" keywords.
+
+| Valid, but deprecated later syntax           | Cron syntax           |
+| -------------------------------------------- | --------------------- |
+| every weekend                                | `* * * * 0,6`         |
+| before 5:00am                                | `* 0-4 * * *`         |
+| after 10pm and before 5am every weekday      | `* 22-23,0-4 * * 1-5` |
+| on friday and saturday                       | `* * * * 5,6`         |
+| every 3 months on the first day of the month | `* * 1 */3 *`         |
 
 <!-- prettier-ignore -->
 !!! warning
     Renovate does _not_ support scheduled minutes or "at an exact time" granularity.
     Granularity must be at least one hour.
-
-Renovate uses the [`@breejs/later` library](https://github.com/breejs/later) to parse the text.
-For Renovate to understand the schedule, you must use valid `@breejs/later` syntax.
-Read the [@breejs/later parses docs at breejs.github.io](https://breejs.github.io/later/parsers.html#text) for more details.
-The `@breejs/later` library also controls the interpretation of "days", time_before", and "time_after" keywords.
 
 ### In-repository schedule configuration
 
