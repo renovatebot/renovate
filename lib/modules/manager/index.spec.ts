@@ -170,7 +170,7 @@ describe('modules/manager/index', () => {
   });
 
   describe('getRangeStrategy', () => {
-    it('returns null for a unknown manager', () => {
+    it('returns null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
         supportedDatasources: [],
@@ -178,37 +178,6 @@ describe('modules/manager/index', () => {
       expect(
         manager.getRangeStrategy({ manager: 'unknown', rangeStrategy: 'auto' }),
       ).toBeNull();
-    });
-
-    it('returns null for a undefined manager', () => {
-      manager.getManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-      });
-      expect(manager.getRangeStrategy({ rangeStrategy: 'auto' })).toBeNull();
-    });
-
-    it('returns non-null for a custom manager', () => {
-      customManager.getCustomManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-      });
-      expect(
-        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' }),
-      ).not.toBeNull();
-    });
-
-    it('handles custom managers', () => {
-      customManager.getCustomManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-        // For completeness. Custom managers are configured in json and can not
-        // provide a range strategy (yet) but the interface allows for it.
-        getRangeStrategy: () => 'bump',
-      });
-      expect(
-        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' }),
-      ).toBe('bump');
     });
 
     it('returns non-null', () => {

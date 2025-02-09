@@ -639,7 +639,7 @@ jobs:
           show-progress: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           standalone: true
 
@@ -690,7 +690,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@bbbf98bb61968071a4052c89fccd25a292d69c73 # v3.5.22
+        uses: containerbase/internal-tools@8d9ec52e6593ae2ed5888f4305821a742456dce4 # v3.8.4
         with:
           command: docker-config
 

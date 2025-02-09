@@ -161,15 +161,14 @@ The preset schedules only decide when Renovate bot looks for updates, and do _no
 
 ### Schedule when to update specific dependencies
 
-You can limit updates to "noisy packages" that are updated frequently, such as `aws-sdk`.
-For example:
+The scheduling feature can be very useful for "noisy" packages that are updated frequently, such as the AWS SDK.
 
-```json title="Restrict aws-sdk to weekly updates"
+```json title="Restrict AWS SDK to weekly updates"
 {
   "packageRules": [
     {
-      "description": "Schedule aws-sdk updates on Sunday nights (9 PM - 12 AM)",
-      "matchPackageNames": ["aws-sdk"],
+      "description": "Schedule AWS SDK updates on Sunday nights (9 PM - 12 AM)",
+      "matchPackageNames": ["@aws-sdk/*"],
       "schedule": ["* 21-23 * * 0"]
     }
   ]
