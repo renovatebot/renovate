@@ -108,7 +108,7 @@ This section explains the deprecated `@breejs/later` syntax.
 We plan to remove the `@breejs/later` library in a future major Renovate release.
 Due to this upcoming change, we strongly recommend you use `cron` schedules.
 
-```title="Examples of the kind of schedules you can create (deprecated `@breejs/later` syntax)"
+```title="Examples of the kind of schedules you can create (deprecated syntax)"
 every weekend
 before 5:00am
 [after 10pm, before 5:00am]
@@ -121,7 +121,7 @@ on friday and saturday
     Renovate does _not_ support scheduled minutes or "at an exact time" granularity.
     Granularity must be at least one hour.
 
-Renovate uses the [@breejs/later](https://github.com/breejs/later) library to parse the text.
+Renovate uses the [`@breejs/later` library](https://github.com/breejs/later) to parse the text.
 For Renovate to understand the schedule, it must use valid `@breejs/later` syntax.
 Read the [@breejs/later parses docs at breejs.github.io](https://breejs.github.io/later/parsers.html#text) for more details.
 The _@breejs/later_ library also controls the interpretation of "days", time_before", and "time_after" keywords.
@@ -131,7 +131,7 @@ The _@breejs/later_ library also controls the interpretation of "days", time_bef
 Important: _when_ the Renovate process runs is usually controlled by the bot admin, using tools such as `cron`.
 If you use the Mend Renovate App, the default is that Renovate will always be allowed to run.
 
-If you control the hardware that Renovate runs on:
+If you control the hardware that Renovate runs on, then you should:
 
 - Schedule enough time on the hardware for Renovate to process your repositories
 - Avoid schedules like "Run Renovate for an hour each Sunday" as you _will_ run into problems
