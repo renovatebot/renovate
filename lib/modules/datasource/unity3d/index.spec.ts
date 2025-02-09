@@ -7,7 +7,7 @@ describe('modules/datasource/unity3d/index', () => {
   const fixtures = Object.fromEntries(
     [...Object.keys(Unity3dDatasource.streams)].map((fixture) => [
       fixture,
-      Fixtures.get(fixture + '.json'),
+      Fixtures.get(`${fixture}.json`),
     ]),
   );
 
