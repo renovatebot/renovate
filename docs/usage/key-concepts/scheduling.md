@@ -34,7 +34,7 @@ When we talk about scheduling Renovate, there are two ways in which you can sche
 | Global                   | Decides when Renovate runs.                                                                              | This schedule is usually controlled by your organization's bot administor. For the Mend Renovate app, Mend decides when Renovate runs. |
 | Specific                 | When Renovate runs it checks the schedule to see if it should look for updates to a specific dependency. | Usually set in the `renovate.json` config file, or similar config file.                                                                |
 
- Renovate can only update a dependency if _both_ of these conditions are true:
+Renovate can only update a dependency if _both_ of these conditions are true:
 
 - The Renovate program is running (on your hardware, or on Mend's hardware)
 - The schedule set in the Renovate config file(s) allows Renovate to look for updates for that dependency
