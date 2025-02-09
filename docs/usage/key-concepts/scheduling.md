@@ -13,21 +13,29 @@ For example, the administrator may allow Renovate to run hourly, daily, or outsi
 ### Default timezone
 
 By default, Renovate schedules use the UTC timezone.
-You can override the default timezone by setting your own `timezone` config option.
+But you can set your own timezone with the `timezone` config option.
 
 ### How long Renovate takes to run when scheduled
 
 How often Renovate processes individual repositories depends on:
 
 - How often Renovate runs
-- How many repositories Renovate is onboarded to in your organization/user account
-- How much work Renovate must do in each repository.
+- How many repositories Renovate is onboarded to, in your organization or user account
+- How much work Renovate must do in each repository
 
-For example, Renovate takes longer if a commonly used dependency released a update, which in turn causes Renovate to create a lot of PRs.
+The table below shows how the number of dependencies and repositories affect Renovate run times.
+
+| Dependencies to update | Repositories with the dependencies | Run time  |
+| ---------------------- | ---------------------------------- | --------- |
+| 1                      | 1                                  | Very fast |
+| 1                      | 10                                 | Fast      |
+| 1                      | 100                                | Slow      |
+| 50                     | 1                                  | Slow      |
+| 100                    | 100                                | Very slow |
 
 ## Global schedule vs specific schedule
 
-When we talk about scheduling Renovate, there are two ways in which you can schedule Renovate:
+At a high level, you have two ways to schedule Renovate, a "global way" and a "specific way":
 
 | Way to schedule Renovate | What this does                                                                                           | Notes                                                                                                                                  |
 | ------------------------ | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
@@ -51,7 +59,7 @@ Use the schedule to control when Renovate looks for updates, for example:
 
 You can use the scheduling tools to:
 
-- Run Renovate outside office hours to free up continous integration resources for your developers
+- Run Renovate outside office hours, to free up continous integration resources for your developers
 - Get updates for certain packages on a regular interval, instead of right away
 - Reduce Renovate bot PR notifications during the day
 
@@ -122,16 +130,16 @@ on friday and saturday
     Granularity must be at least one hour.
 
 Renovate uses the [`@breejs/later` library](https://github.com/breejs/later) to parse the text.
-For Renovate to understand the schedule, it must use valid `@breejs/later` syntax.
+For Renovate to understand the schedule, you must use valid `@breejs/later` syntax.
 Read the [@breejs/later parses docs at breejs.github.io](https://breejs.github.io/later/parsers.html#text) for more details.
-The _@breejs/later_ library also controls the interpretation of "days", time_before", and "time_after" keywords.
+The `@breejs/later` library also controls the interpretation of "days", time_before", and "time_after" keywords.
 
 ### In-repository schedule configuration
 
 Important: _when_ the Renovate process runs is usually controlled by the bot admin, using tools such as `cron`.
-If you use the Mend Renovate App, the default is that Renovate will always be allowed to run.
+For the Mend Renovate App, the Mend maintainers control when the Renovate process runs, usually hourly.
 
-If you control the hardware that Renovate runs on, then you should:
+If you control the hardware that Renovate runs on, we recommend you:
 
 - Schedule enough time on the hardware for Renovate to process your repositories
 - Avoid schedules like "Run Renovate for an hour each Sunday" as you _will_ run into problems
@@ -155,13 +163,13 @@ Some config examples:
 #### Schedule presets
 
 Renovate has built-in presets for common schedules, like "once a week", "outside office hours" and so on.
-Before you create your own custom schedule, check if the [Schedule Presets](../presets-schedule.md).
+Before you create your own custom schedule, check if the [Schedule Presets](../presets-schedule.md) has what you need.
 
-The preset schedules only decide when Renovate bot looks for updates, and do _not_ affect any specific dependencies/packages.
+The preset schedules only decide when Renovate looks for updates, and do _not_ affect any specific dependencies/packages.
 
 ### Schedule when to update specific dependencies
 
-The scheduling feature can be very useful for "noisy" packages that are updated frequently, such as the AWS SDK.
+With Renovate's scheduling features you can "limit the noise" from frequently updating dependencies, like the AWS SDK:
 
 ```json title="Restrict AWS SDK to weekly updates"
 {
@@ -175,10 +183,10 @@ The scheduling feature can be very useful for "noisy" packages that are updated 
 }
 ```
 
-Important:
+Important tips for the `"schedule"` property:
 
-- The `"schedule"` property _must_ use the array syntax: `[]`. Even if you only set a single schedule, you must still use the array syntax.
-- Multiple entries in the `"schedule"` must be separated by a comma.
-- If the `"schedule"` array has multiple entries, they are interpreted with the Boolean OR logic.
+- Always use the array syntax `[]`, even if you only set a single schedule
+- Separate entries with a comma, like this: `["cron for schedule 1", "cron for schedule 2]"`
+- Multiple entries in the `"schedule"` array are interpreted with the Boolean OR logic
 
 Read the [schedule config option](../configuration-options.md#schedule) documentation to learn more.
