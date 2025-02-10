@@ -42,6 +42,8 @@ export interface BranchUpgradeConfig
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
+
+  currentValueTemplate?: string;
   depIndex?: number;
   depTypes?: string[];
 

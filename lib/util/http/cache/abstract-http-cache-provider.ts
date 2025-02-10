@@ -42,7 +42,10 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     }
   }
 
-  bypassServerResponse<T>(_url: string): Promise<HttpResponse<T> | null> {
+  bypassServer<T>(
+    _url: string,
+    _ignoreSoftTtl: boolean,
+  ): Promise<HttpResponse<T> | null> {
     return Promise.resolve(null);
   }
 

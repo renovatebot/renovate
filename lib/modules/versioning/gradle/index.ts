@@ -10,6 +10,7 @@ import {
   parse,
   parseMavenBasedRange,
   parsePrefixRange,
+  parseSingleVersionRange,
 } from './compare';
 
 export const id = 'gradle';
@@ -112,6 +113,12 @@ const matches = (a: string, b: string): boolean => {
   }
   if (isVersion(b)) {
     return equals(a, b);
+  }
+
+  const singleVersionRange = parseSingleVersionRange(b);
+  if (singleVersionRange) {
+    const { val } = singleVersionRange;
+    return equals(a, val);
   }
 
   const prefixRange = parsePrefixRange(b);
