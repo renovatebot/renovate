@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import { HttpCacheStats } from '../../stats';
 import type { GotOptions, HttpResponse } from '../types';
@@ -6,6 +7,9 @@ import { type HttpCache, HttpCacheSchema } from './schema';
 import type { HttpCacheProvider } from './types';
 
 export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
+  protected abstract softTtlMinutes: number;
+  protected abstract hardTtlMinutes: number;
+
   protected abstract load(url: string): Promise<unknown>;
   protected abstract persist(url: string, data: HttpCache): Promise<void>;
 
@@ -19,10 +23,14 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     return httpCache as HttpCache;
   }
 
-  async setCacheHeaders<T extends Pick<GotOptions, 'headers'>>(
+  async setCacheHeaders<T extends Pick<GotOptions, 'headers' | 'method'>>(
     url: string,
     opts: T,
   ): Promise<void> {
+    if (opts.method?.toLowerCase() !== 'get') {
+      return;
+    }
+
     const httpCache = await this.get(url);
     if (!httpCache) {
       return;
@@ -39,11 +47,29 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     }
   }
 
-  bypassServer<T>(
-    _url: string,
-    _ignoreSoftTtl: boolean,
+  async bypassServer<T>(
+    url: string,
+    ignoreSoftTtl: boolean,
   ): Promise<HttpResponse<T> | null> {
-    return Promise.resolve(null);
+    const cached = await this.get(url);
+    if (!cached) {
+      return null;
+    }
+
+    if (ignoreSoftTtl) {
+      return cached.httpResponse as HttpResponse<T>;
+    }
+
+    const cachedAt = DateTime.fromISO(cached.timestamp);
+    const deadline = cachedAt.plus({ minutes: this.softTtlMinutes });
+    const now = DateTime.now();
+    if (now >= deadline) {
+      HttpCacheStats.incLocalMisses(url);
+      return null;
+    }
+
+    HttpCacheStats.incLocalHits(url);
+    return cached.httpResponse as HttpResponse<T>;
   }
 
   async wrapServerResponse<T>(
@@ -65,6 +91,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
         httpResponse,
         timestamp,
       });
+      /* istanbul ignore else */
       if (newHttpCache) {
         logger.debug(
           `http cache: saving ${url} (etag=${etag}, lastModified=${lastModified})`,
