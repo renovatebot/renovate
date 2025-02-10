@@ -50,6 +50,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -84,6 +85,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -107,6 +109,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -183,6 +186,7 @@ describe('modules/manager/cargo/artifacts', () => {
         packageName: 'dep1',
         lockedVersion: '1.0.0',
         newVersion: '1.0.1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -364,6 +368,7 @@ describe('modules/manager/cargo/artifacts', () => {
       {
         depName: 'renamedDep1',
         packageName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -393,6 +398,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -433,6 +439,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -498,6 +505,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -603,6 +611,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -679,6 +688,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -738,6 +748,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -796,6 +807,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
@@ -847,6 +859,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const updatedDeps = [
       {
         depName: 'dep1',
+        datasource: CrateDatasource.id,
       },
     ];
     expect(
