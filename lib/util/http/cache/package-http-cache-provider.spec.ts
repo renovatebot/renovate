@@ -3,6 +3,7 @@ import { DateTime, Settings } from 'luxon';
 import { Http } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import * as _packageCache from '../../cache/package';
 import { PackageHttpCacheProvider } from './package-http-cache-provider';
 import type { HttpCache } from './schema';
@@ -30,14 +31,14 @@ describe('util/http/cache/package-http-cache-provider', () => {
       cache[k] = v as HttpCache;
       return Promise.resolve(null as never);
     });
+
+    GlobalConfig.reset();
   });
 
   const mockTime = (time: string) => {
     const value = DateTime.fromISO(time).valueOf();
     Settings.now = () => value;
   };
-
-  beforeAll(() => {});
 
   it('loads cache correctly', async () => {
     mockTime('2024-06-15T00:00:00.000Z');
@@ -128,6 +129,46 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     expect(res.body).toBe('private response');
     expect(packageCache.set).not.toHaveBeenCalled();
+  });
+
+  it('allows caching when cache-control is private but cachePrivatePackages=true', async () => {
+    GlobalConfig.set({ cachePrivatePackages: true });
+
+    mockTime('2024-06-15T00:00:00.000Z');
+
+    const cacheProvider = new PackageHttpCacheProvider({
+      namespace: '_test-namespace',
+      checkCacheControl: false,
+    });
+
+    httpMock.scope(url).get('').reply(200, 'private response', {
+      etag: 'foobar',
+      'cache-control': 'max-age=180, private',
+    });
+
+    const res = await http.get(url, { cacheProvider });
+
+    expect(res.body).toBe('private response');
+    expect(packageCache.set).toHaveBeenCalled();
+  });
+
+  it('allows caching when cache-control is private but checkCacheControl=false', async () => {
+    mockTime('2024-06-15T00:00:00.000Z');
+
+    const cacheProvider = new PackageHttpCacheProvider({
+      namespace: '_test-namespace',
+      checkCacheControl: false,
+    });
+
+    httpMock.scope(url).get('').reply(200, 'private response', {
+      etag: 'foobar',
+      'cache-control': 'max-age=180, private',
+    });
+
+    const res = await http.get(url, { cacheProvider });
+
+    expect(res.body).toBe('private response');
+    expect(packageCache.set).toHaveBeenCalled();
   });
 
   it('serves stale response during revalidation error', async () => {

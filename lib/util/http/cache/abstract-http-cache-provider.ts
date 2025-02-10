@@ -1,5 +1,4 @@
 import { logger } from '../../../logger';
-import { regEx } from '../../regex';
 import { HttpCacheStats } from '../../stats';
 import type { GotOptions, HttpResponse } from '../types';
 import { copyResponse } from '../util';
@@ -7,8 +6,6 @@ import { type HttpCache, HttpCacheSchema } from './schema';
 import type { HttpCacheProvider } from './types';
 
 export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
-  protected checkCacheControlHeader = true;
-
   protected abstract load(url: string): Promise<unknown>;
   protected abstract persist(url: string, data: HttpCache): Promise<void>;
 
@@ -49,28 +46,11 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     return Promise.resolve(null);
   }
 
-  private preventCaching<T>(resp: HttpResponse<T>): boolean {
-    if (this.checkCacheControlHeader === false) {
-      return false;
-    }
-
-    const isPublic = resp.headers?.['cache-control']
-      ?.toLocaleLowerCase()
-      .split(regEx(/\s*,\s*/))
-      .includes('public');
-
-    return !isPublic;
-  }
-
   async wrapServerResponse<T>(
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
     if (resp.statusCode === 200) {
-      if (this.preventCaching(resp)) {
-        return resp;
-      }
-
       const etag = resp.headers?.['etag'];
       const lastModified = resp.headers?.['last-modified'];
 
