@@ -19,11 +19,7 @@ import type {
 } from '../../types';
 import { applyGitSource } from '../../util';
 import { type PyProject, UvLockfileSchema } from '../schema';
-import {
-  depTypes,
-  parseDependencyGroupRecord,
-  parseDependencyList,
-} from '../utils';
+import { depTypes, parseDependencyList } from '../utils';
 import type { PyProjectProcessor } from './types';
 
 const uvUpdateCMD = 'uv lock';
@@ -148,7 +144,7 @@ export class UvProcessor implements PyProjectProcessor {
     updateArtifact: UpdateArtifact,
     project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null> {
-    const { config, packageFileName } = updateArtifact;
+    const { config, packageFileName, updatedDeps } = updateArtifact;
     const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
 
     // abort if no lockfile is defined
@@ -172,7 +168,7 @@ export class UvProcessor implements PyProjectProcessor {
 
       const extraEnv = {
         ...getGitEnvironmentVariables(['pep621']),
-        ...(await getUvExtraIndexUrl(project, updateArtifact.updatedDeps)),
+        ...(await getUvExtraIndexUrl(project, updatedDeps)),
         ...(await getUvIndexCredentials(project)),
       };
       const execOptions: ExecOptions = {
