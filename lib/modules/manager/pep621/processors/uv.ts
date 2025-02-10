@@ -144,46 +144,6 @@ export class UvProcessor implements PyProjectProcessor {
     return Promise.resolve(deps);
   }
 
-  async extractDeps(
-    def: PyProject,
-    packageFile: string,
-  ): Promise<PackageDependency[]> {
-    const deps: PackageDependency[] = [];
-    // pyProject standard definitions
-    deps.push(
-      ...parseDependencyList(depTypes.dependencies, def.project?.dependencies),
-    );
-    deps.push(
-      ...parseDependencyGroupRecord(
-        depTypes.dependencyGroups,
-        def['dependency-groups'],
-      ),
-    );
-    deps.push(
-      ...parseDependencyGroupRecord(
-        depTypes.optionalDependencies,
-        def.project?.['optional-dependencies'],
-      ),
-    );
-    deps.push(
-      ...parseDependencyList(
-        depTypes.buildSystemRequires,
-        def['build-system']?.requires,
-      ),
-    );
-
-    // process specific tool sets
-    let processedDeps = deps;
-    processedDeps = this.process(def, processedDeps);
-    processedDeps = await this.extractLockedVersions(
-      def,
-      processedDeps,
-      packageFile,
-    );
-
-    return processedDeps;
-  }
-
   async updateArtifacts(
     updateArtifact: UpdateArtifact,
     project: PyProject,
@@ -210,13 +170,9 @@ export class UvProcessor implements PyProjectProcessor {
         constraint: config.constraints?.uv,
       };
 
-      const updatedDeps = isLockFileMaintenance
-        ? await this.extractDeps(project, packageFileName)
-        : updateArtifact.updatedDeps;
-
       const extraEnv = {
         ...getGitEnvironmentVariables(['pep621']),
-        ...(await getUvExtraIndexUrl(project, updatedDeps)),
+        ...(await getUvExtraIndexUrl(project, updateArtifact.updatedDeps)),
         ...(await getUvIndexCredentials(project)),
       };
       const execOptions: ExecOptions = {

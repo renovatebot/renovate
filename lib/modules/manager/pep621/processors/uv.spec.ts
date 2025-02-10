@@ -361,7 +361,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config,
           updatedDeps,
         },
         {},
@@ -406,7 +406,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config,
           updatedDeps,
         },
         {},
@@ -445,7 +445,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config,
           updatedDeps,
         },
         {},
@@ -540,7 +540,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config,
           updatedDeps,
         },
         {
@@ -584,90 +584,6 @@ describe('modules/manager/pep621/processors/uv', () => {
               GIT_CONFIG_VALUE_2: 'https://example.com/',
               UV_EXTRA_INDEX_URL:
                 'https://foobar.com/ https://user:pass@example.com/ https://oauth2accesstoken:some-token@someregion-python.pkg.dev/some-project/some-repo/',
-              UV_INDEX_PINNED_INDEX_USERNAME: 'user',
-              UV_INDEX_PINNED_INDEX_PASSWORD: 'pass',
-            },
-          },
-        },
-      ]);
-    });
-
-    it('UV_EXTRA_INDEX_URL is propagated when updated dependencies are empty', async () => {
-      const execSnapshots = mockExecAll();
-      GlobalConfig.set(adminConfig);
-      hostRules.add({
-        matchHost: 'https://example.com',
-        username: 'user',
-        password: 'pass',
-      });
-      hostRules.add({
-        matchHost: 'https://pinned.com/simple',
-        username: 'user',
-        password: 'pass',
-      });
-      googleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
-        })),
-      );
-      fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
-      fs.readLocalFile.mockResolvedValueOnce('test content');
-      fs.readLocalFile.mockResolvedValueOnce('changed test content');
-      // python
-      getPkgReleases.mockResolvedValueOnce({
-        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
-      });
-      // uv
-      getPkgReleases.mockResolvedValueOnce({
-        releases: [{ version: '0.2.35' }, { version: '0.2.28' }],
-      });
-      const result = await processor.updateArtifacts(
-        {
-          packageFileName: 'pyproject.toml',
-          newPackageFileContent: '',
-          config: {},
-          updatedDeps: [],
-        },
-        {
-          tool: {
-            uv: {
-              sources: {
-                dep6: { index: 'pinned-index' },
-              },
-              index: [
-                {
-                  name: 'pinned-index',
-                  url: 'https://pinned.com/simple',
-                  default: false,
-                  explicit: true,
-                },
-              ],
-            },
-          },
-        },
-      );
-      expect(result).toEqual([
-        {
-          file: {
-            contents: 'changed test content',
-            path: 'uv.lock',
-            type: 'addition',
-          },
-        },
-      ]);
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4 --upgrade-package dep5 --upgrade-package dep6',
-          options: {
-            env: {
-              GIT_CONFIG_COUNT: '6',
-              GIT_CONFIG_KEY_0: 'url.https://user:pass@example.com/.insteadOf',
-              GIT_CONFIG_KEY_1: 'url.https://user:pass@example.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://user:pass@example.com/.insteadOf',
-              GIT_CONFIG_VALUE_0: 'ssh://git@example.com/',
-              GIT_CONFIG_VALUE_1: 'git@example.com:',
-              GIT_CONFIG_VALUE_2: 'https://example.com/',
-              UV_EXTRA_INDEX_URL: 'https://user:pass@example.com/',
               UV_INDEX_PINNED_INDEX_USERNAME: 'user',
               UV_INDEX_PINNED_INDEX_PASSWORD: 'pass',
             },
@@ -738,7 +654,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config,
           updatedDeps,
         },
         {
@@ -824,7 +740,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config,
           updatedDeps,
         },
         {},
