@@ -364,6 +364,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   const pr = (
     await bitbucketHttp.getJsonUnchecked<PrResponse>(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+      { cacheProvider: memCacheProvider },
     )
   ).body;
 
@@ -398,6 +399,7 @@ async function getBranchCommit(
         `/2.0/repositories/${config.repository}/refs/branches/${escapeHash(
           branchName,
         )}`,
+        { cacheProvider: memCacheProvider },
       )
     ).body;
     return branch.target.hash;
