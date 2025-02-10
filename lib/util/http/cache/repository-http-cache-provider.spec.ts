@@ -1,6 +1,5 @@
 import { Http } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import { logger } from '../../../../test/util';
 import { resetCache } from '../../cache/repository';
 import { repoCacheProvider } from './repository-http-cache-provider';
 
