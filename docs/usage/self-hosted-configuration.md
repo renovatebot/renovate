@@ -1154,7 +1154,6 @@ Used as an alternative to `privateKeyOld`, if you want the key to be read from d
 ## processEnv
 
 Used to set environment variables through the configuration file instead of using actual environment variables.
-This object accepts key-value pairs where both keys and values must be strings.
 
 Example:
 

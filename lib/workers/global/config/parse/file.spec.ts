@@ -166,12 +166,13 @@ describe('workers/global/config/parse/file', () => {
       delete process.env.SOME_KEY;
     });
 
-    it('does not export env variables to environment from processEnv object if value is not string', async () => {
+    it('does not export env variables to environment from processEnv object if key/value is invalid', async () => {
       const configFile = upath.resolve(tmp.path, 'config3.js');
       const fileContent1 = `module.exports = {
         "processEnv": {
         "SOME_KEY": "SOME_VALUE",
-        "SOME_OTHER_KEY": true
+        "SOME_OTHER_KEY": true,
+        "invalid-key": "valid-value"
         },
         "labels": ["renovate"]
       }`;
@@ -187,6 +188,7 @@ describe('workers/global/config/parse/file', () => {
       expect(fileConfig.processEnv).toBeUndefined();
       expect(process.env.SOME_KEY).toBe('SOME_VALUE');
       expect(process.env.SOME_OTHER_KEY).toBeUndefined();
+      expect(process.env['invalid-key']).toBeUndefined();
       fs.unlinkSync(configFile);
       delete process.env.SOME_KEY;
     });

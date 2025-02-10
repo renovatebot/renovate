@@ -6,6 +6,7 @@ import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
 import { readSystemFile } from '../../../../util/fs';
+import { regEx } from '../../../../util/regex';
 import { parseSingleYaml } from '../../../../util/yaml';
 import { migrateAndValidateConfig } from './util';
 
@@ -79,15 +80,15 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   }
 
   if (is.nonEmptyObject(config.processEnv)) {
+    // should begin and end with capital alphabets + use underscore as separator
+    const keyRegex = regEx(/^[A-Z]+(_[A-Z]+)*$/);
     const exportedKeys = [];
     for (const [key, value] of Object.entries(config.processEnv)) {
-      if (is.nonEmptyString(value)) {
+      if (keyRegex.test(key) && is.nonEmptyString(value)) {
         exportedKeys.push(key);
         process.env[key] = value;
       } else {
-        logger.debug(
-          `Could not export ${key} to environment. Expected string value got ${typeof value}`,
-        );
+        logger.debug({ key, value }, 'Could not export key to environment');
       }
     }
     logger.debug({ keys: exportedKeys }, 'Following keys were exported to env');
