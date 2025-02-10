@@ -1026,7 +1026,7 @@ export async function setBranchStatus({
     for (let attempt = 1; attempt <= retryTimes + 1; attempt += 1) {
       const commitUrl = `projects/${config.repository}/repository/commits/${branchSha}`;
       await gitlabApi
-        .getJsonSafe(commitUrl, { memCache: false }, LastPipelineId)
+        .getJsonSafe(commitUrl, LastPipelineId)
         .onValue((pipelineId) => {
           options.pipeline_id = pipelineId;
         });
