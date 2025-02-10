@@ -71,7 +71,24 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         config,
       );
 
-      expect(res.updatedArtifacts).toHaveLength(3);
+      expect(res.updatedArtifacts).toEqual({
+        artifact: {
+          contents: '',
+          path: 'artifact',
+          type: 'addition',
+        },
+        'some-existing-dir': {
+          contents: '',
+          path: 'some-existing-dir',
+          type: 'addition',
+        },
+        symlink: {
+          contents: 'dest',
+          isSymlink: true,
+          path: 'symlink',
+          type: 'addition',
+        },
+      });
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
     });
 
@@ -119,7 +136,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         config,
       );
 
-      expect(res.updatedArtifacts).toHaveLength(0);
+      expect(res.updatedArtifacts).toEqual({});
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
     });
 
@@ -168,7 +185,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         config,
       );
 
-      expect(res.updatedArtifacts).toHaveLength(0);
+      expect(res.updatedArtifacts).toEqual({});
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { file: 'not-a-txt-file' },

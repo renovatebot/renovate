@@ -367,7 +367,7 @@ describe('modules/manager/npm/post-update/index', () => {
         '',
       );
       expect(yarnrcYmlContent).toBe('');
-      expect(updatedArtifacts).toEqual([]);
+      expect(updatedArtifacts).toEqual({});
       expect(logger.logger.debug).not.toHaveBeenCalled();
       expect(logger.logger.error).not.toHaveBeenCalled();
     });
@@ -397,7 +397,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
-        updatedArtifacts: [],
+        updatedArtifacts: {},
       });
     });
 
@@ -417,13 +417,13 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
-        updatedArtifacts: [
-          {
+        updatedArtifacts: {
+          'package-lock.json': {
             type: 'addition',
             path: 'package-lock.json',
             contents: '{}',
           },
-        ],
+        },
       });
 
       expect(fs.readLocalFile).toHaveBeenCalledWith('.npmrc', 'utf8');
@@ -501,13 +501,13 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
-        updatedArtifacts: [
-          {
+        updatedArtifacts: {
+          'yarn.lock': {
             type: 'addition',
             path: 'yarn.lock',
             contents: '{}',
           },
-        ],
+        },
       });
       expect(fs.deleteLocalFile).toHaveBeenCalled();
     });
@@ -534,13 +534,13 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
-        updatedArtifacts: [
-          {
+        updatedArtifacts: {
+          'packages/pnpm/pnpm-lock.yaml': {
             type: 'addition',
             path: 'packages/pnpm/pnpm-lock.yaml',
             contents: 'some-contents:',
           },
-        ],
+        },
       });
       expect(fs.deleteLocalFile).toHaveBeenCalled();
     });
@@ -548,7 +548,7 @@ describe('modules/manager/npm/post-update/index', () => {
     it('no npm files', async () => {
       expect(await getAdditionalFiles(baseConfig, {})).toStrictEqual({
         artifactErrors: [],
-        updatedArtifacts: [],
+        updatedArtifacts: {},
       });
     });
 
@@ -557,7 +557,7 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles(baseConfig, additionalFiles),
       ).toStrictEqual({
         artifactErrors: [],
-        updatedArtifacts: [],
+        updatedArtifacts: {},
       });
     });
 
@@ -574,7 +574,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
-        updatedArtifacts: [],
+        updatedArtifacts: {},
       });
     });
 
@@ -594,7 +594,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
-        updatedArtifacts: [],
+        updatedArtifacts: {},
       });
     });
 
@@ -609,7 +609,7 @@ describe('modules/manager/npm/post-update/index', () => {
         artifactErrors: [
           { lockFile: 'package-lock.json', stderr: 'some-error' },
         ],
-        updatedArtifacts: [],
+        updatedArtifacts: {},
       });
     });
 
@@ -622,7 +622,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [{ lockFile: 'yarn.lock', stderr: 'some-error' }],
-        updatedArtifacts: [],
+        updatedArtifacts: {},
       });
     });
 
@@ -646,7 +646,7 @@ describe('modules/manager/npm/post-update/index', () => {
         artifactErrors: [
           { lockFile: 'packages/pnpm/pnpm-lock.yaml', stderr: 'some-error' },
         ],
-        updatedArtifacts: [],
+        updatedArtifacts: {},
       });
     });
 

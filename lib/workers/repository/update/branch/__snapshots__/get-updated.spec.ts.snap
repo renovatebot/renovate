@@ -154,13 +154,13 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
   "artifactErrors": [],
   "artifactNotices": [],
   "reuseExistingBranch": true,
-  "updatedArtifacts": [
-    {
+  "updatedArtifacts": {
+    "composer.json": {
       "contents": "some contents",
       "path": "composer.json",
       "type": "addition",
     },
-  ],
+  },
   "updatedPackageFiles": [
     {
       "contents": "some new content",
@@ -176,13 +176,13 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
   "artifactErrors": [],
   "artifactNotices": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": [
-    {
+  "updatedArtifacts": {
+    "composer.json": {
       "contents": "some contents",
       "path": "composer.json",
       "type": "addition",
     },
-  ],
+  },
   "updatedPackageFiles": [],
 }
 `;
@@ -207,13 +207,13 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() u
   "artifactErrors": [],
   "artifactNotices": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": [
-    {
+  "updatedArtifacts": {
+    "composer.lock": {
       "contents": "some contents",
       "path": "composer.lock",
       "type": "addition",
     },
-  ],
+  },
   "updatedPackageFiles": [
     {
       "contents": "existing content",
@@ -229,13 +229,13 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() u
   "artifactErrors": [],
   "artifactNotices": [],
   "reuseExistingBranch": undefined,
-  "updatedArtifacts": [
-    {
+  "updatedArtifacts": {
+    "terraform.lock": {
       "contents": "some contents",
       "path": "terraform.lock",
       "type": "addition",
     },
-  ],
+  },
   "updatedPackageFiles": [
     {
       "contents": "existing content",

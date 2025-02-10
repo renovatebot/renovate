@@ -14,7 +14,6 @@ import {
 import { getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
 import { minimatch } from '../../../../util/minimatch';
-import { filterEntries } from '../../../../util/records';
 import { regEx } from '../../../../util/regex';
 import { sanitize } from '../../../../util/sanitize';
 import { compile } from '../../../../util/template';
@@ -29,7 +28,7 @@ export async function postUpgradeCommandsExecutor(
   filteredUpgradeCommands: BranchUpgradeConfig[],
   config: BranchConfig,
 ): Promise<PostUpgradeCommandsExecutionResult> {
-  let updatedArtifacts = {
+  const updatedArtifacts = {
     ...config.updatedArtifacts,
   };
   const artifactErrors = [...(config.artifactErrors ?? [])];
@@ -147,12 +146,6 @@ export async function postUpgradeCommandsExecutor(
                 contents: existingContent,
               };
             }
-            // If the file is deleted by a previous post-update command, remove the deletion from updatedArtifacts
-            // remove all entries with the type 'deletion'
-            updatedArtifacts = filterEntries(
-              updatedArtifacts,
-              ([, value]) => value.type !== 'deletion',
-            );
           }
         }
         if (!fileMatched) {
@@ -174,11 +167,6 @@ export async function postUpgradeCommandsExecutor(
               type: 'deletion',
               path: relativePath,
             };
-            // If the file is created or modified by a previous post-update command, remove the modification from updatedArtifacts
-            updatedArtifacts = filterEntries(
-              updatedArtifacts,
-              ([, value]) => value.type !== 'addition',
-            );
           }
         }
       }
@@ -193,7 +181,7 @@ export default async function executePostUpgradeCommands(
   const hasChangedFiles =
     (is.array(config.updatedPackageFiles) &&
       config.updatedPackageFiles.length > 0) ||
-    (is.array(config.updatedArtifacts) && config.updatedArtifacts.length > 0);
+    Object.keys(config.updatedArtifacts ?? {}).length > 0;
 
   if (!hasChangedFiles) {
     /* Only run post-upgrade tasks if there are changes to package files... */

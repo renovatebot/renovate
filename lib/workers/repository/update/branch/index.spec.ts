@@ -2070,7 +2070,6 @@ describe('workers/repository/update/branch/index', () => {
         findFileContent(updatedArtifacts, 'deleted_then_created_file'),
       ).toBe('this file was once deleted');
       expect(updatedArtifacts?.['deleted_then_created_file']).toBeDefined();
-      expect(updatedArtifacts?.['deleted_then_created_file']).toBeUndefined();
     });
 
     it('executes post-upgrade tasks once when set to branch mode', async () => {
