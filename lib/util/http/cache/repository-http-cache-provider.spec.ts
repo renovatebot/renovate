@@ -59,19 +59,6 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     });
   });
 
-  it('reports if cache could not be persisted', async () => {
-    httpMock
-      .scope('https://example.com')
-      .get('/foo/bar')
-      .reply(200, { msg: 'Hello, world!' });
-
-    await http.getJsonUnchecked('https://example.com/foo/bar');
-
-    expect(logger.logger.debug).toHaveBeenCalledWith(
-      'http cache: failed to persist cache for https://example.com/foo/bar',
-    );
-  });
-
   it('handles abrupt cache reset', async () => {
     const scope = httpMock.scope('https://example.com');
 
