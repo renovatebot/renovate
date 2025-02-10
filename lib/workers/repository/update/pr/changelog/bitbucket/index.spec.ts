@@ -79,7 +79,7 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
   it('handles release notes', async () => {
     httpMock
       .scope(apiBaseUrl)
-      .get('/2.0/repositories/some-org/some-repo/src?pagelen=100')
+      .get('/2.0/repositories/some-org/some-repo/src/HEAD?pagelen=100')
       .reply(200, bitbucketTreeResponse)
       .get('/2.0/repositories/some-org/some-repo/src/abcd/CHANGELOG.md')
       .reply(200, changelogMd);
@@ -94,7 +94,7 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
   it('handles missing release notes', async () => {
     httpMock
       .scope(apiBaseUrl)
-      .get('/2.0/repositories/some-org/some-repo/src?pagelen=100')
+      .get('/2.0/repositories/some-org/some-repo/src/HEAD?pagelen=100')
       .reply(200, bitbucketTreeResponseNoChangelogFiles);
     const res = await getReleaseNotesMdFile(bitbucketProject);
     expect(res).toBeNull();

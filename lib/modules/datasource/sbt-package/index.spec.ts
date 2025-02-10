@@ -70,13 +70,11 @@ describe('modules/datasource/sbt-package/index', () => {
             <a href="empty_but_invalid/">???</a>
           `,
         )
-        .get('/maven2/com/example/empty/')
-        .reply(200, '')
         .get('/maven2/com/example/empty_but_invalid/')
         .reply(404, '')
         .get('/maven2/com/example/empty/maven-metadata.xml')
         .reply(404)
-        .get('/maven2/com/example/empty/index.html')
+        .get('/maven2/com/example/empty/')
         .reply(404);
 
       const res = await getPkgReleases({
@@ -151,9 +149,9 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/org/example/example_2.12/')
         .reply(200, `<a href='1.2.3/'>1.2.3/</a>`)
         .get('/org/example/example_2.12/1.2.3/example-1.2.3.pom')
-        .reply(200, ``)
+        .reply(404)
         .get('/org/example/example_2.12/1.2.3/example_2.12-1.2.3.pom')
-        .reply(200, ``);
+        .reply(404);
 
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
@@ -269,7 +267,7 @@ describe('modules/datasource/sbt-package/index', () => {
           `,
         )
         .get('/org/example/example_2.13/1.2.3/example_2.13-1.2.3.pom')
-        .reply(200);
+        .reply(404);
 
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,

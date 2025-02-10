@@ -1,5 +1,6 @@
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
 import { JavaVersionDatasource } from '../../datasource/java-version';
 import { NodeVersionDatasource } from '../../datasource/node-version';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
@@ -30,6 +31,12 @@ export const miseTooling: Record<string, ToolingDefinition> = {
       packageName: 'denoland/deno',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  elixir: {
+    misePluginUrl: 'https://mise.jdx.dev/lang/elixir.html',
+    config: {
+      datasource: HexpmBobDatasource.id,
     },
   },
   erlang: {
@@ -144,6 +151,28 @@ export const miseTooling: Record<string, ToolingDefinition> = {
       packageName: 'ruby-version',
       datasource: RubyVersionDatasource.id,
       versioning: semverVersioning.id,
+    },
+  },
+  rust: {
+    misePluginUrl: 'https://mise.jdx.dev/lang/rust.html',
+    config: {
+      packageName: 'rust-lang/rust',
+      datasource: GithubTagsDatasource.id,
+    },
+  },
+  swift: {
+    misePluginUrl: 'https://mise.jdx.dev/lang/swift.html',
+    config: {
+      packageName: 'swift-lang/swift',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^swift-(?<version>\\S+)',
+    },
+  },
+  zig: {
+    misePluginUrl: 'https://mise.jdx.dev/lang/zig.html',
+    config: {
+      packageName: 'ziglang/zig',
+      datasource: GithubTagsDatasource.id,
     },
   },
 };

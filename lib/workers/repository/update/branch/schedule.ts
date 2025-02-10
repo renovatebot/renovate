@@ -1,32 +1,22 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
-import type {
-  CronExpression,
-  DayOfTheMonthRange,
-  DayOfTheWeekRange,
-  HourRange,
-  MonthRange,
-} from 'cron-parser';
-import { parseExpression } from 'cron-parser';
+import { Cron, CronPattern } from 'croner';
 import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 
-const minutesChar = '*';
-
 const scheduleMappings: Record<string, string> = {
   'every month': 'before 5am on the first day of the month',
   monthly: 'before 5am on the first day of the month',
 };
 
-function parseCron(
-  scheduleText: string,
-  timezone?: string,
-): CronExpression | undefined {
+const minutesChar = '*';
+
+function parseCron(scheduleText: string): CronPattern | undefined {
   try {
-    return parseExpression(scheduleText, { tz: timezone });
+    return new CronPattern(scheduleText);
   } catch {
     return undefined;
   }
@@ -55,7 +45,7 @@ export function hasValidSchedule(
     const parsedCron = parseCron(scheduleText);
     if (parsedCron !== undefined) {
       if (
-        parsedCron.fields.minute.length !== 60 ||
+        parsedCron.minute.filter((v) => v !== 1).length !== 0 ||
         scheduleText.indexOf(minutesChar) !== 0
       ) {
         message = `Invalid schedule: "${scheduleText}" has cron syntax, but doesn't have * as minutes`;
@@ -99,43 +89,42 @@ export function hasValidSchedule(
   return [true];
 }
 
-function cronMatches(cron: string, now: DateTime, timezone?: string): boolean {
-  const parsedCron = parseCron(cron, timezone);
-
+export function cronMatches(
+  cron: string,
+  now: DateTime,
+  timezone?: string,
+): boolean {
+  const parsedCron: Cron = new Cron(cron, {
+    ...(timezone && { timezone }),
+    legacyMode: false,
+  });
   // it will always parse because it is checked beforehand
   // istanbul ignore if
   if (!parsedCron) {
     return false;
   }
 
-  if (parsedCron.fields.hour.indexOf(now.hour as HourRange) === -1) {
-    // Hours mismatch
+  // return the next date which matches the cron schedule
+  const nextRun = parsedCron.nextRun();
+  // istanbul ignore if: should not happen
+  if (!nextRun) {
+    logger.warn(
+      { schedule: cron },
+      'Invalid cron schedule. No next run is possible',
+    );
     return false;
   }
 
-  if (
-    parsedCron.fields.dayOfMonth.indexOf(now.day as DayOfTheMonthRange) === -1
-  ) {
-    // Days mismatch
-    return false;
+  let nextDate = DateTime.fromJSDate(nextRun);
+  if (timezone) {
+    nextDate = nextDate.setZone(timezone);
   }
 
-  if (
-    !parsedCron.fields.dayOfWeek.includes(
-      (now.weekday % 7) as DayOfTheWeekRange,
-    )
-  ) {
-    // Weekdays mismatch
-    return false;
-  }
-
-  if (parsedCron.fields.month.indexOf(now.month as MonthRange) === -1) {
-    // Months mismatch
-    return false;
-  }
-
-  // Match
-  return true;
+  return (
+    nextDate.hour === now.hour &&
+    nextDate.day === now.day &&
+    nextDate.month === now.month
+  );
 }
 
 export function isScheduledNow(
@@ -158,7 +147,8 @@ export function isScheduledNow(
   }
   if (!is.array(configSchedule)) {
     logger.warn(
-      `config schedule is not an array: ${JSON.stringify(configSchedule)}`,
+      { schedule: configSchedule },
+      'config schedule is not an array',
     );
     configSchedule = [configSchedule];
   }

@@ -41,7 +41,8 @@ export class RepoCacheS3 extends RepoCacheBase {
         return await streamToString(res);
       }
       logger.warn(
-        `RepoCacheS3.read() - failure - expecting Readable return type got '${typeof res}' type instead`,
+        { returnType: typeof res },
+        'RepoCacheS3.read() - failure - got unexpected return type',
       );
     } catch (err) {
       // https://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html

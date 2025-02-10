@@ -12,6 +12,8 @@ describe('config/decrypt', () => {
     beforeEach(() => {
       config = {};
       GlobalConfig.reset();
+      delete process.env.MEND_HOSTED;
+      delete process.env.RENOVATE_X_ENCRYPTED_STRICT;
     });
 
     it('returns empty with no privateKey', async () => {
@@ -29,6 +31,26 @@ describe('config/decrypt', () => {
       expect(logger.logger.once.warn).toHaveBeenCalledWith('text');
       expect(res.encrypted).toBeUndefined();
       expect(res.a).toBeUndefined();
+    });
+
+    it('throws exception if encrypted found but no privateKey', async () => {
+      config.encrypted = { a: '1' };
+
+      process.env.RENOVATE_X_ENCRYPTED_STRICT = 'true';
+      await expect(decryptConfig(config, repository)).rejects.toThrow(
+        'config-validation',
+      );
+    });
+
+    // coverage
+    it('throws exception if encrypted found but no privateKey- Mend Hosted', async () => {
+      config.encrypted = { a: '1' };
+
+      process.env.MEND_HOSTED = 'true';
+      process.env.RENOVATE_X_ENCRYPTED_STRICT = 'true';
+      await expect(decryptConfig(config, repository)).rejects.toThrow(
+        'config-validation',
+      );
     });
   });
 });

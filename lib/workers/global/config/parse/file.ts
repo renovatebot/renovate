@@ -59,7 +59,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     config = await getParsedContent(configFile);
   } catch (err) {
     if (err instanceof SyntaxError || err instanceof TypeError) {
-      logger.fatal(`Could not parse config file \n ${err.stack!}`);
+      logger.fatal({ error: err.stack }, 'Could not parse config file');
       process.exit(1);
     } else if (err instanceof ReferenceError) {
       logger.fatal(
@@ -70,6 +70,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       logger.fatal(err.message);
       process.exit(1);
     } else if (env.RENOVATE_CONFIG_FILE) {
+      logger.debug({ err }, 'Parse error');
       logger.fatal('Error parsing config file');
       process.exit(1);
     }

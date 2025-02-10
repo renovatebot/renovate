@@ -19,6 +19,9 @@ const commentMatchRegExp = regEx(/#.*$/);
 const lockedVersionRegExp = regEx(
   /^\s+"(?<app>\w+)".*?"(?<lockedVersion>\d+\.\d+\.\d+)"/,
 );
+const hexRegexp = regEx(/hex:\s*(?:"(?<strValue>[^"]+)"|:(?<atomValue>\w+))/);
+const onlyValueRegexp = regEx(/only:\s*(?<only>\[[^\]]*\]|:\w+)/);
+const onlyEnvironmentsRegexp = regEx(/:(\w+)/gm);
 
 export async function extractPackageFile(
   content: string,
@@ -44,27 +47,46 @@ export async function extractPackageFile(
         const ref = refRegexp.exec(opts)?.groups?.value;
         const branchOrTag = branchOrTagRegexp.exec(opts)?.groups?.value;
         const organization = organizationRegexp.exec(opts)?.groups?.value;
+        const hexGroups = hexRegexp.exec(opts)?.groups;
+        const hex = hexGroups?.strValue ?? hexGroups?.atomValue;
 
-        let dep: PackageDependency;
+        const onlyValue = onlyValueRegexp.exec(opts)?.groups?.only;
+        const onlyEnvironments = [];
+        let match;
+        if (onlyValue) {
+          while ((match = onlyEnvironmentsRegexp.exec(onlyValue)) !== null) {
+            onlyEnvironments.push(match[1]);
+          }
+        }
+
+        const dep: PackageDependency = {
+          depName: app,
+          depType: 'prod',
+        };
 
         if (git ?? github) {
-          dep = {
-            depName: app,
-            currentDigest: ref,
-            currentValue: branchOrTag,
-            datasource: git ? GitTagsDatasource.id : GithubTagsDatasource.id,
-            packageName: git ?? github,
-          };
+          dep.currentDigest = ref;
+          dep.currentValue = branchOrTag;
+          dep.datasource = git ? GitTagsDatasource.id : GithubTagsDatasource.id;
+          dep.packageName = git ?? github;
         } else {
-          dep = {
-            depName: app,
-            currentValue: requirement,
-            datasource: HexDatasource.id,
-            packageName: organization ? `${app}:${organization}` : app,
-          };
+          dep.currentValue = requirement;
+          dep.datasource = HexDatasource.id;
+          if (organization) {
+            dep.packageName = `${app}:${organization}`;
+          } else if (hex) {
+            dep.packageName = hex;
+          } else {
+            dep.packageName = app;
+          }
+
           if (requirement?.startsWith('==')) {
             dep.currentVersion = requirement.replace(regEx(/^==\s*/), '');
           }
+        }
+
+        if (onlyValue !== undefined && !onlyEnvironments.includes('prod')) {
+          dep.depType = 'dev';
         }
 
         deps.set(app, dep);

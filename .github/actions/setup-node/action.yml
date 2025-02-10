@@ -34,7 +34,7 @@ runs:
 
     - name: Restore `node_modules`
       id: node-modules-restore
-      uses: actions/cache/restore@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+      uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}
@@ -48,12 +48,12 @@ runs:
         }}' >> "$GITHUB_ENV"
 
     - name: Setup pnpm
-      uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+      uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
       with:
         standalone: true
 
     - name: Setup Node
-      uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+      uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
       with:
         node-version: ${{ inputs.node-version }}
 
@@ -64,7 +64,7 @@ runs:
 
     - name: Cache and restore `pnpm store`
       if: env.CACHE_HIT != 'true'
-      uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+      uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
       with:
         path: ${{ env.PNPM_STORE }}
         key: |
@@ -87,7 +87,7 @@ runs:
 
     - name: Write `node_modules` cache
       if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
-      uses: actions/cache/save@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+      uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}

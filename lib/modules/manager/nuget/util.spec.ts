@@ -3,7 +3,12 @@ import { XmlDocument } from 'xmldoc';
 import { fs } from '../../../../test/util';
 import type { Registry } from './types';
 import { bumpPackageVersion } from './update';
-import { applyRegistries, findVersion, getConfiguredRegistries } from './util';
+import {
+  applyRegistries,
+  findGlobalJson,
+  findVersion,
+  getConfiguredRegistries,
+} from './util';
 
 jest.mock('../../../util/fs');
 
@@ -34,9 +39,7 @@ describe('modules/manager/nuget/util', () => {
 
   describe('getConfiguredRegistries', () => {
     it('reads nuget config file', async () => {
-      fs.findUpLocal.mockReturnValue(
-        Promise.resolve<string | null>('NuGet.config'),
-      );
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
           <configuration>
@@ -58,23 +61,22 @@ describe('modules/manager/nuget/util', () => {
       );
 
       const registries = await getConfiguredRegistries('NuGet.config');
-      expect(registries?.length).toBe(2);
-      expect(registries![0].name).toBe('nuget.org');
-      expect(registries![0].url).toBe('https://api.nuget.org/v3/index.json');
-      expect(registries![0].sourceMappedPackagePatterns).toEqual(['*']);
-
-      expect(registries![1].name).toBe('contoso.com');
-      expect(registries![1].url).toBe('https://contoso.com/packages/');
-      expect(registries![1].sourceMappedPackagePatterns).toEqual([
-        'Contoso.*',
-        'NuGet.Common',
+      expect(registries).toEqual([
+        {
+          name: 'nuget.org',
+          url: 'https://api.nuget.org/v3/index.json',
+          sourceMappedPackagePatterns: ['*'],
+        },
+        {
+          name: 'contoso.com',
+          url: 'https://contoso.com/packages/',
+          sourceMappedPackagePatterns: ['Contoso.*', 'NuGet.Common'],
+        },
       ]);
     });
 
     it('reads nuget config file with default registry', async () => {
-      fs.findUpLocal.mockReturnValue(
-        Promise.resolve<string | null>('NuGet.config'),
-      );
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
         <configuration>
@@ -94,17 +96,136 @@ describe('modules/manager/nuget/util', () => {
       );
 
       const registries = await getConfiguredRegistries('NuGet.config');
-      expect(registries?.length).toBe(2);
-      expect(registries![0].name).toBe('nuget.org');
-      expect(registries![0].url).toBe('https://api.nuget.org/v3/index.json');
-      expect(registries![0].sourceMappedPackagePatterns).toEqual(['*']);
-
-      expect(registries![1].name).toBe('contoso.com');
-      expect(registries![1].url).toBe('https://contoso.com/packages/');
-      expect(registries![1].sourceMappedPackagePatterns).toEqual([
-        'Contoso.*',
-        'NuGet.Common',
+      expect(registries).toEqual([
+        {
+          name: 'nuget.org',
+          url: 'https://api.nuget.org/v3/index.json',
+          sourceMappedPackagePatterns: ['*'],
+        },
+        {
+          name: 'contoso.com',
+          url: 'https://contoso.com/packages/',
+          sourceMappedPackagePatterns: ['Contoso.*', 'NuGet.Common'],
+        },
       ]);
+    });
+
+    it('reads nuget config file with default registry disabled and added sources', async () => {
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          <configuration>
+            <packageSources>
+              <add key="contoso.com" value="https://contoso.com/packages/"/>
+            </packageSources>
+            <disabledPackageSources>
+              <add key="nuget.org" value="true" />
+            </disabledPackageSources>
+          </configuration>`,
+      );
+
+      const registries = await getConfiguredRegistries('NuGet.config');
+      expect(registries).toEqual([
+        {
+          name: 'contoso.com',
+          url: 'https://contoso.com/packages/',
+        },
+      ]);
+    });
+
+    it('reads nuget config file with default registry disabled given default registry added', async () => {
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          <configuration>
+            <packageSources>
+              <add key="nuget.org" value="https://api.nuget.org/v3/index.json"/>
+              <add key="contoso.com" value="https://contoso.com/packages/"/>
+            </packageSources>
+            <disabledPackageSources>
+              <add key="nuget.org" value="true" />
+            </disabledPackageSources>
+          </configuration>`,
+      );
+
+      const registries = await getConfiguredRegistries('NuGet.config');
+      expect(registries).toEqual([
+        {
+          name: 'contoso.com',
+          url: 'https://contoso.com/packages/',
+        },
+      ]);
+    });
+
+    it('reads nuget config file with unknown disabled source', async () => {
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          <configuration>
+            <packageSources>
+              <add key="contoso.com" value="https://contoso.com/packages/"/>
+            </packageSources>
+            <disabledPackageSources>
+              <add key="unknown" value="true" />
+            </disabledPackageSources>
+          </configuration>`,
+      );
+
+      const registries = await getConfiguredRegistries('NuGet.config');
+      expect(registries).toEqual([
+        {
+          name: 'nuget.org',
+          url: 'https://api.nuget.org/v3/index.json',
+        },
+        {
+          name: 'contoso.com',
+          url: 'https://contoso.com/packages/',
+        },
+      ]);
+    });
+
+    it('reads nuget config file with disabled source with value false', async () => {
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          <configuration>
+            <packageSources>
+              <clear />
+              <add key="nuget.org" value="https://api.nuget.org/v3/index.json"/>
+              <add key="contoso.com" value="https://contoso.com/packages/"/>
+            </packageSources>
+            <disabledPackageSources>
+              <add key="contoso.com" value="false" />
+            </disabledPackageSources>
+          </configuration>`,
+      );
+
+      const registries = await getConfiguredRegistries('NuGet.config');
+      expect(registries).toEqual([
+        {
+          name: 'nuget.org',
+          url: 'https://api.nuget.org/v3/index.json',
+        },
+        {
+          name: 'contoso.com',
+          url: 'https://contoso.com/packages/',
+        },
+      ]);
+    });
+
+    it('reads nuget config file without packageSources and ignores disabledPackageSources', async () => {
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          <configuration>
+            <disabledPackageSources>
+              <add key="contoso.com" value="true" />
+            </disabledPackageSources>
+          </configuration>`,
+      );
+
+      const registries = await getConfiguredRegistries('NuGet.config');
+      expect(registries).toBeUndefined();
     });
   });
 
@@ -222,6 +343,36 @@ describe('modules/manager/nuget/util', () => {
       ).toEqual({
         depName: 'Newtonsoft.Json',
       });
+    });
+  });
+
+  describe('findGlobalJson', () => {
+    it('not found', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      const globalJson = await findGlobalJson('project.csproj');
+      expect(globalJson).toBeNull();
+    });
+
+    it('no content', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('global.json');
+      const globalJson = await findGlobalJson('project.csproj');
+      expect(globalJson).toBeNull();
+    });
+
+    it('fails to parse', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('global.json');
+      fs.readLocalFile.mockResolvedValueOnce('{');
+      const globalJson = await findGlobalJson('project.csproj');
+      expect(globalJson).toBeNull();
+    });
+
+    it('parses', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('global.json');
+      fs.readLocalFile.mockResolvedValueOnce(
+        '{   /* This is comment */ "sdk": { "version": "5.0.100" }, "some": true }',
+      );
+      const globalJson = await findGlobalJson('project.csproj');
+      expect(globalJson).toEqual({ sdk: { version: '5.0.100' } });
     });
   });
 });

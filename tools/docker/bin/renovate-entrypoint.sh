@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if [[ -f "/usr/local/etc/env" && -z "${CONTAINERBASE_ENV+x}" ]]; then
-    # shellcheck source=/dev/null
-  . /usr/local/etc/env
-fi
-
 if [[ "${1:0:1}" = '-' ]]; then
   # assume $1 is renovate flag
   set -- renovate "$@"
@@ -15,4 +10,5 @@ if [[ ! -x "$(command -v "${1}")" ]]; then
   set -- renovate "$@"
 fi
 
-exec dumb-init -- "$@"
+# call the original entrypoint
+exec docker-entrypoint.sh "$@"

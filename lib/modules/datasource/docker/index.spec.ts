@@ -98,10 +98,13 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, { token: 'some-token' });
 
       hostRules.find.mockReturnValue({});
-      const res = await getDigest({
-        datasource: 'docker',
-        packageName: 'some-dep',
-      });
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'some-dep',
+        },
+        '',
+      );
       expect(res).toBe('some-digest');
     });
 
@@ -237,6 +240,9 @@ describe('modules/datasource/docker/index', () => {
       const ecr = ecrMock.call(0).thisValue as ECRClient;
       expect(await ecr.config.region()).toBe('us-east-1');
       expect(await ecr.config.credentials()).toEqual({
+        $source: {
+          CREDENTIALS_CODE: 'e',
+        },
         accessKeyId: 'some-username',
         secretAccessKey: 'some-password',
       });
@@ -276,6 +282,9 @@ describe('modules/datasource/docker/index', () => {
       const ecr = ecrMock.call(0).thisValue as ECRClient;
       expect(await ecr.config.region()).toBe('us-east-1');
       expect(await ecr.config.credentials()).toEqual({
+        $source: {
+          CREDENTIALS_CODE: 'e',
+        },
         accessKeyId: 'some-username',
         secretAccessKey: 'some-password',
         sessionToken: 'some-session-token',

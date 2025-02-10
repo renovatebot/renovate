@@ -2,8 +2,8 @@ import { logger } from '../../../logger';
 import { HttpCacheStats } from '../../stats';
 import type { GotOptions, HttpResponse } from '../types';
 import { copyResponse } from '../util';
-import { HttpCacheSchema } from './schema';
-import type { HttpCache, HttpCacheProvider } from './types';
+import { type HttpCache, HttpCacheSchema } from './schema';
+import type { HttpCacheProvider } from './types';
 
 export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
   protected abstract load(url: string): Promise<unknown>;
@@ -39,7 +39,14 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     }
   }
 
-  async wrapResponse<T>(
+  bypassServer<T>(
+    _url: string,
+    _ignoreSoftTtl: boolean,
+  ): Promise<HttpResponse<T> | null> {
+    return Promise.resolve(null);
+  }
+
+  async wrapServerResponse<T>(
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
@@ -58,15 +65,17 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
         httpResponse,
         timestamp,
       });
-      if (newHttpCache) {
-        logger.debug(
-          `http cache: saving ${url} (etag=${etag}, lastModified=${lastModified})`,
-        );
-        await this.persist(url, newHttpCache as HttpCache);
-      } else {
+
+      // istanbul ignore if: should never happen
+      if (!newHttpCache) {
         logger.debug(`http cache: failed to persist cache for ${url}`);
+        return resp;
       }
 
+      logger.debug(
+        `http cache: saving ${url} (etag=${etag}, lastModified=${lastModified})`,
+      );
+      await this.persist(url, newHttpCache as HttpCache);
       return resp;
     }
 

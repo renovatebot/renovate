@@ -12,8 +12,8 @@ export async function migrateAndValidateConfig(
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
     logger.warn(
-      { originalConfig: config, migratedConfig },
-      `${configType} needs migrating`,
+      { configType, originalConfig: config, migratedConfig },
+      'Config needs migrating',
     );
   }
   const massagedConfig = massageConfig(migratedConfig);
@@ -25,13 +25,10 @@ export async function migrateAndValidateConfig(
   const { warnings, errors } = await validateConfig('global', massagedConfig);
 
   if (warnings.length) {
-    logger.warn(
-      { warnings },
-      `Config validation warnings found in ${configType}`,
-    );
+    logger.warn({ configType, warnings }, 'Config validation warnings found');
   }
   if (errors.length) {
-    logger.warn({ errors }, `Config validation errors found in ${configType}`);
+    logger.warn({ configType, errors }, 'Config validation errors found');
   }
 
   return massagedConfig;

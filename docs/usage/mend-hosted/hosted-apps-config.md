@@ -1,7 +1,5 @@
 # Mend-hosted Apps Configuration
 
-The Mend-hosted apps ([Renovate App on GitHub](https://github.com/apps/renovate) and [Mend App on Bitbucket](https://marketplace.atlassian.com/apps/1232072/mend)) are popular ways to use Renovate on the cloud.
-
 This page:
 
 - covers all non-default Renovate behavior of these Mend-hosted apps
@@ -16,6 +14,36 @@ This page:
 The Renovate logs for the Mend-hosted apps are on the [Mend Developer Portal](https://developer.mend.io).
 
 Reading the logs can help you understand the configuration that Renovate used.
+
+## Renovate Version
+
+The Renovate version used by the Mend-hosted apps is updated manually by the maintainers of the app.
+The maintainers don't follow any release schedule or release cadence, but try to update at least once a week.
+This means the Mend Renovate App can lag a few hours to a week behind the open source version.
+
+Major releases of Renovate are held back until the maintainers are reasonably certain it works for most users.
+
+### Which version is the Mend Renovate app using?
+
+Follow these steps to see which version the Mend Renovate app used for a specific job:
+
+1. Sign in to the [Mend Developer Portal](https://developer.mend.io/) with your GitHub or Bitbucket account
+1. Select your organization
+1. Select a installed repository
+1. Select a job from the _Recent jobs_ overview
+1. Select the _Info_ Log Level from the dropdown menu
+1. You should see something like this:
+
+   ```
+   INFO: Repository started
+   {
+     "renovateVersion": "39.11.5"
+   }
+   ```
+
+<!-- prettier-ignore -->
+!!! tip
+    The PRs that Renovate creates have a link to the "repository job log" in the footer of the PR body text.
 
 ## Onboarding behavior
 
@@ -44,12 +72,12 @@ This change causes Renovate to create an Onboarding PR, even if Renovate does no
 
 ## Fork Processing
 
-If an Organization installs Renovate with the "All repositories" option, then `forkProcessing` will remain set to its default value `false`.
+If an Organization installs Renovate with the "All repositories" option, then `forkProcessing` will remain set to its default value `disabled`.
 This means forked repositories are _not_ onboarded, Renovate ignores them.
-To change this behavior, push a `renovate.json` file to the repository with `"forkProcessing": true`.
+To change this behavior, push a `renovate.json` file to the repository with `"forkProcessing": "enabled"`.
 
 If an Organization installs Renovate with "Selected repositories", we assume the organization wants to onboard _all_ of the selected repositories, even forked repositories.
-Therefore we set `forkProcessing` to `true`.
+Therefore we set `forkProcessing` to "enabled".
 
 ## Inherited config
 

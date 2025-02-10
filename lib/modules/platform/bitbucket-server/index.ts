@@ -116,7 +116,7 @@ export async function initPlatform({
       bitbucketServerVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
     } else {
       const { version } = (
-        await bitbucketServerHttp.getJson<{ version: string }>(
+        await bitbucketServerHttp.getJsonUnchecked<{ version: string }>(
           `./rest/api/1.0/application-properties`,
         )
       ).body;
@@ -199,14 +199,13 @@ export async function getRawFile(
   const fileUrl =
     `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000` +
     (branchOrTag ? '&at=' + branchOrTag : '');
-  const res = await bitbucketServerHttp.getJson<FileData>(fileUrl);
+  const res = await bitbucketServerHttp.getJsonUnchecked<FileData>(fileUrl);
   const { isLastPage, lines, size } = res.body;
   if (isLastPage) {
     return lines.map(({ text }) => text).join('\n');
   }
-  const msg = `The file is too big (${size}B)`;
-  logger.warn({ size }, msg);
-  throw new Error(msg);
+  logger.warn({ size }, 'The file is too big');
+  throw new Error(`The file is too big (${size}B)`);
 }
 
 export async function getJsonFile(
@@ -223,6 +222,7 @@ export async function getJsonFile(
 export async function initRepo({
   repository,
   cloneSubmodules,
+  cloneSubmodulesFilter,
   ignorePrAuthor,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
@@ -245,13 +245,13 @@ export async function initRepo({
 
   try {
     const info = (
-      await bitbucketServerHttp.getJson<BbsRestRepo>(
+      await bitbucketServerHttp.getJsonUnchecked<BbsRestRepo>(
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`,
       )
     ).body;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
-    const branchRes = await bitbucketServerHttp.getJson<BbsRestBranch>(
+    const branchRes = await bitbucketServerHttp.getJsonUnchecked<BbsRestBranch>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`,
     );
 
@@ -274,6 +274,7 @@ export async function initRepo({
       url,
       extraCloneOpts: getExtraCloneOpts(opts),
       cloneSubmodules,
+      cloneSubmodulesFilter,
       fullClone: semver.lte(defaults.version, '8.0.0'),
     });
 
@@ -302,7 +303,7 @@ export async function getBranchForceRebase(
   _branchName: string,
 ): Promise<boolean> {
   // https://docs.atlassian.com/bitbucket-server/rest/7.0.1/bitbucket-rest.html#idp342
-  const res = await bitbucketServerHttp.getJson<{
+  const res = await bitbucketServerHttp.getJsonUnchecked<{
     mergeConfig: { defaultStrategy: { id: string } };
   }>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/settings/pull-requests`,
@@ -326,7 +327,7 @@ export async function getPr(
     return null;
   }
 
-  const res = await bitbucketServerHttp.getJson<BbsRestPr>(
+  const res = await bitbucketServerHttp.getJsonUnchecked<BbsRestPr>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
     { memCache: !refreshCache },
   );
@@ -457,7 +458,7 @@ async function getStatus(
   const branchCommit = git.getBranchCommit(branchName);
 
   return (
-    await bitbucketServerHttp.getJson<utils.BitbucketCommitStatus>(
+    await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketCommitStatus>(
       // TODO: types (#22198)
       `./rest/build-status/1.0/commits/stats/${branchCommit!}`,
       { memCache },
@@ -776,7 +777,7 @@ async function getCommentVersion(
 ): Promise<number> {
   // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments/{commentId}
   const { version } = (
-    await bitbucketServerHttp.getJson<{ version: number }>(
+    await bitbucketServerHttp.getJsonUnchecked<{ version: number }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}`,
     )
   ).body;
@@ -912,13 +913,13 @@ export async function createPr({
   if (platformPrOptions?.bbUseDefaultReviewers) {
     logger.debug(`fetching default reviewers`);
     const { id } = (
-      await bitbucketServerHttp.getJson<{ id: number }>(
+      await bitbucketServerHttp.getJsonUnchecked<{ id: number }>(
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`,
       )
     ).body;
 
     const defReviewers = (
-      await bitbucketServerHttp.getJson<{ name: string }[]>(
+      await bitbucketServerHttp.getJsonUnchecked<{ name: string }[]>(
         `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
           config.repositorySlug
         }/reviewers?sourceRefId=refs/heads/${escapeHash(
@@ -1011,10 +1012,11 @@ export async function updatePr({
       };
     }
 
-    const { body: updatedPr } = await bitbucketServerHttp.putJson<{
-      version: number;
-      state: string;
-    }>(
+    const { body: updatedPr } = await bitbucketServerHttp.putJson<
+      BbsRestPr & {
+        version: number;
+      }
+    >(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
       { body },
     );
@@ -1028,6 +1030,9 @@ export async function updatePr({
       ['closed']: 'DECLINED',
     }[state!];
 
+    let finalState: 'open' | 'closed' =
+      currentState === 'OPEN' ? 'open' : 'closed';
+
     if (
       newState &&
       ['OPEN', 'DECLINED'].includes(currentState) &&
@@ -1040,7 +1045,26 @@ export async function updatePr({
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/${command}?version=${updatedPr.version}`,
       );
 
+      finalState = state!;
+
       updatePrVersion(pr.number, updatedStatePr.version);
+    }
+
+    if (config.prList) {
+      const bbsPr = utils.prInfo(updatedPr);
+      const existingIndex = config.prList.findIndex(
+        (item) => item.number === prNo,
+      );
+      // istanbul ignore if: should never happen
+      if (existingIndex === -1) {
+        logger.warn(
+          { pr: bbsPr },
+          'Possible error: Updated PR was not found in the PRs that were returned from getPrList().',
+        );
+        config.prList.push({ ...bbsPr, state: finalState });
+      } else {
+        config.prList[existingIndex] = { ...bbsPr, state: finalState };
+      }
     }
   } catch (err) {
     logger.debug({ err, prNo }, `Failed to update PR`);

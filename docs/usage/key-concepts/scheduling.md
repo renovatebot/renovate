@@ -93,17 +93,15 @@ Some config examples:
 
 ```json title="Renovate should run each day before 4 am"
 {
-  "schedule": ["before 4am"]
+  "description": "Schedule daily before 4 AM",
+  "schedule": ["* 0-3 * * *"]
 }
 ```
 
 ```json title="Renovate should run outside of common office hours"
 {
-  "schedule": [
-    "after 10pm every weekday",
-    "before 5am every weekday",
-    "every weekend"
-  ]
+  "description": "Schedule during typical non-office hours on weekdays (i.e., 10 PM - 5 AM) and anytime on weekends",
+  "schedule": ["* 0-4,22-23 * * 1-5", "* * * * 0,6"]
 }
 ```
 
@@ -115,14 +113,15 @@ These preset schedules only affect when Renovate bot checks for updates, and do 
 
 ### Schedule when to update specific dependencies
 
-The scheduling feature can be very useful for "noisy" packages that are updated frequently, such as `aws-sdk`.
+The scheduling feature can be very useful for "noisy" packages that are updated frequently, such as the AWS SDK.
 
-```json title="Restrict aws-sdk to weekly updates"
+```json title="Restrict AWS SDK to weekly updates"
 {
   "packageRules": [
     {
-      "matchPackageNames": ["aws-sdk"],
-      "schedule": ["after 9pm on sunday"]
+      "description": "Schedule AWS SDK updates on Sunday nights (9 PM - 12 AM)",
+      "matchPackageNames": ["@aws-sdk/*"],
+      "schedule": ["* 21-23 * * 0"]
     }
   ]
 }

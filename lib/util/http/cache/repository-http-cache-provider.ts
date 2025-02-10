@@ -1,6 +1,6 @@
 import { getCache } from '../../cache/repository';
 import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
-import type { HttpCache } from './types';
+import type { HttpCache } from './schema';
 
 export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
   override load(url: string): Promise<unknown> {

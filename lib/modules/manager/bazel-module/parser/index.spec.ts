@@ -66,6 +66,10 @@ describe('modules/manager/bazel-module/parser/index', () => {
           {
             rule: fragments.string('git_override'),
             module_name: fragments.string('rules_foo'),
+            patches: fragments.array(
+              [fragments.string('//:rules_foo.patch')],
+              true,
+            ),
             commit: fragments.string(
               '6a2c2e22849b3e6b33d5ea9aa72222d4803a986a',
             ),
@@ -102,6 +106,10 @@ describe('modules/manager/bazel-module/parser/index', () => {
           {
             rule: fragments.string('archive_override'),
             module_name: fragments.string('rules_foo'),
+            urls: fragments.array(
+              [fragments.string('https://example.com/archive.tar.gz')],
+              true,
+            ),
           },
           true,
         ),
@@ -273,6 +281,67 @@ describe('modules/manager/bazel-module/parser/index', () => {
             group: fragments.string('org.clojure'),
             artifact: fragments.string('core.specs.alpha'),
             version: fragments.string('0.2.56'),
+          },
+          true,
+        ),
+      ]);
+    });
+
+    it('finds oci.pull', () => {
+      const input = codeBlock`
+        oci.pull(
+          name = "nginx_image",
+          digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+          image = "index.docker.io/library/nginx",
+          platforms = ["linux/amd64"],
+          tag = "1.27.1",
+        )
+      `;
+
+      const res = parse(input);
+      expect(res).toEqual([
+        fragments.record(
+          {
+            rule: fragments.string('oci_pull'),
+            name: fragments.string('nginx_image'),
+            digest: fragments.string(
+              'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
+            ),
+            image: fragments.string('index.docker.io/library/nginx'),
+            platforms: fragments.array([fragments.string('linux/amd64')], true),
+            tag: fragments.string('1.27.1'),
+          },
+          true,
+        ),
+      ]);
+    });
+
+    it('finds the git_repository', () => {
+      const input = codeBlock`
+        git_repository(
+          name = "rules_foo",
+          remote = "https://github.com/example/rules_foo.git",
+          commit = "6a2c2e22849b3e6b33d5ea9aa72222d4803a986a",
+          patches = ["//:rules_foo.patch"],
+          patch_strip = 1,
+        )
+      `;
+      const res = parse(input);
+      expect(res).toEqual([
+        fragments.record(
+          {
+            rule: fragments.string('git_repository'),
+            name: fragments.string('rules_foo'),
+            patches: fragments.array(
+              [fragments.string('//:rules_foo.patch')],
+              true,
+            ),
+            commit: fragments.string(
+              '6a2c2e22849b3e6b33d5ea9aa72222d4803a986a',
+            ),
+            remote: fragments.string(
+              'https://github.com/example/rules_foo.git',
+            ),
           },
           true,
         ),

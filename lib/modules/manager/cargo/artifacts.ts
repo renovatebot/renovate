@@ -145,7 +145,8 @@ async function updateArtifactsImpl(
           // Only warn when a crate dependency has no locked version, as this is
           // not an expected situation.
           logger.warn(
-            `Missing locked version for dependency \`${crateDepWithoutLockedVersion.depName}\``,
+            { dependency: crateDepWithoutLockedVersion.depName },
+            'Missing locked version for dependency',
           );
         }
         await cargoUpdate(

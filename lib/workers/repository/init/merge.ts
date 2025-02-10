@@ -23,6 +23,8 @@ import { readLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
+import { maskToken } from '../../../util/mask';
+import { regEx } from '../../../util/regex';
 import { getOnboardingConfig } from '../onboarding/branch/config';
 import { getDefaultConfigFileName } from '../onboarding/branch/create';
 import {
@@ -216,6 +218,7 @@ export async function mergeRenovateConfig(
   const repository = config.repository!;
   // Decrypt before resolving in case we need npm authentication for any presets
   const decryptedConfig = await decryptConfig(migratedConfig, repository);
+  setNpmTokenInNpmrc(decryptedConfig);
   // istanbul ignore if
   if (is.string(decryptedConfig.npmrc)) {
     logger.debug('Found npmrc in decrypted config - setting');
@@ -237,6 +240,7 @@ export async function mergeRenovateConfig(
     logger.trace({ config: resolvedConfig }, 'resolved config after migrating');
     resolvedConfig = migrationResult.migratedConfig;
   }
+  setNpmTokenInNpmrc(resolvedConfig);
   // istanbul ignore if
   if (is.string(resolvedConfig.npmrc)) {
     logger.debug(
@@ -277,4 +281,34 @@ export async function mergeRenovateConfig(
     );
   }
   return returnConfig;
+}
+
+/** needed when using portal secrets for npmToken */
+export function setNpmTokenInNpmrc(config: RenovateConfig): void {
+  if (!is.string(config.npmToken)) {
+    return;
+  }
+
+  const token = config.npmToken;
+  logger.debug({ npmToken: maskToken(token) }, 'Migrating npmToken to npmrc');
+
+  if (!is.string(config.npmrc)) {
+    logger.debug('Adding npmrc to config');
+    config.npmrc = `//registry.npmjs.org/:_authToken=${token}\n`;
+    delete config.npmToken;
+    return;
+  }
+
+  if (config.npmrc.includes(`\${NPM_TOKEN}`)) {
+    logger.debug(`Replacing \${NPM_TOKEN} with npmToken`);
+    config.npmrc = config.npmrc.replace(regEx(/\${NPM_TOKEN}/g), token);
+  } else {
+    logger.debug('Appending _authToken= to end of existing npmrc');
+    config.npmrc = config.npmrc.replace(
+      regEx(/\n?$/),
+      `\n_authToken=${token}\n`,
+    );
+  }
+
+  delete config.npmToken;
 }

@@ -18,6 +18,7 @@ import type * as _git from '../../../util/git';
 import type { LongCommitSha } from '../../../util/git/types';
 import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
+import { getPrBodyStruct } from '../pr-body';
 
 jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/git');
@@ -50,6 +51,7 @@ describe('modules/platform/gitlab/index', () => {
       token: '123test',
     });
     delete process.env.GITLAB_IGNORE_REPO_URL;
+    delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS;
     delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY;
     delete process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS;
     delete process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY;
@@ -1057,6 +1059,51 @@ describe('modules/platform/gitlab/index', () => {
   describe('setBranchStatus', () => {
     const states: BranchStatus[] = ['green', 'yellow', 'red'];
 
+    it('should log message that branch commit SHA not found', async () => {
+      git.getBranchCommit.mockReturnValue(null);
+      await gitlab.setBranchStatus({
+        branchName: 'some-branch',
+        context: 'some-context',
+        description: 'some-description',
+        state: 'green',
+        url: 'some-url',
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to get the branch commit SHA',
+      );
+    });
+
+    it('should log message that failed to retrieve commit pipeline', async () => {
+      const scope = await initRepo();
+      scope
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(200, {})
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+        )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(200, {});
+
+      timers.setTimeout.mockImplementation(() => {
+        throw new Error();
+      });
+      await gitlab.setBranchStatus({
+        branchName: 'some-branch',
+        context: 'some-context',
+        description: 'some-description',
+        state: 'green',
+        url: 'some-url',
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to retrieve commit pipeline',
+      );
+    });
+
     it.each(states)('sets branch status %s', async (state) => {
       const scope = await initRepo();
       scope
@@ -1071,7 +1118,8 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
-        .reply(200, []);
+        .times(3)
+        .reply(200, {});
 
       await expect(
         gitlab.setBranchStatus({
@@ -1098,7 +1146,8 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
-        .reply(200, []);
+        .times(3)
+        .reply(200, {});
 
       await gitlab.setBranchStatus({
         branchName: 'some-branch',
@@ -1108,7 +1157,7 @@ describe('modules/platform/gitlab/index', () => {
         url: 'some-url',
       });
 
-      expect(timers.setTimeout.mock.calls).toHaveLength(1);
+      expect(timers.setTimeout.mock.calls).toHaveLength(3);
       expect(timers.setTimeout.mock.calls[0][0]).toBe(1000);
     });
 
@@ -1130,6 +1179,10 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
+        .reply(200, {})
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
         .reply(200, { last_pipeline: { id: 123 } });
 
       await expect(
@@ -1145,6 +1198,7 @@ describe('modules/platform/gitlab/index', () => {
 
     it('waits for RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY ms when set', async () => {
       const delay = 5000;
+      const retry = 2;
       process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY = String(delay);
 
       const scope = await initRepo();
@@ -1160,7 +1214,8 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
-        .reply(200, []);
+        .times(3)
+        .reply(200, {});
 
       await gitlab.setBranchStatus({
         branchName: 'some-branch',
@@ -1170,7 +1225,49 @@ describe('modules/platform/gitlab/index', () => {
         url: 'some-url',
       });
 
-      expect(timers.setTimeout.mock.calls).toHaveLength(1);
+      expect(timers.setTimeout.mock.calls).toHaveLength(retry + 1);
+      expect(timers.setTimeout.mock.calls[0][0]).toBe(delay);
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Pipeline not yet created. Retrying 1`,
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Pipeline not yet created. Retrying 2`,
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Pipeline not yet created after 3 attempts`,
+      );
+    });
+
+    it('do RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS attemps when set', async () => {
+      const delay = 1000;
+      const retry = 5;
+      process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS = `${retry}`;
+
+      const scope = await initRepo();
+      scope
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(200, {})
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+        )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .times(retry + 1)
+        .reply(200, {});
+
+      await gitlab.setBranchStatus({
+        branchName: 'some-branch',
+        context: 'some-context',
+        description: 'some-description',
+        state: 'green',
+        url: 'some-url',
+      });
+
+      expect(timers.setTimeout.mock.calls).toHaveLength(retry + 1);
       expect(timers.setTimeout.mock.calls[0][0]).toBe(delay);
     });
   });
@@ -1926,6 +2023,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -1934,7 +2034,12 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: null,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        title: 'some title',
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+      });
     });
 
     it('uses default branch', async () => {
@@ -1946,6 +2051,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -1954,7 +2062,12 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: [],
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        title: 'some title',
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+      });
     });
 
     it('supports draftPR on < 13.2', async () => {
@@ -1966,6 +2079,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'WIP: some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -1974,7 +2090,12 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         draftPR: true,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        title: 'some title',
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+      });
     });
 
     it('supports draftPR on >= 13.2', async () => {
@@ -1986,6 +2107,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'Draft: some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -1994,7 +2118,12 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         draftPR: true,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        title: 'some title',
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+      });
     });
 
     it('auto-accepts the MR when requested', async () => {
@@ -2006,6 +2135,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
@@ -2024,9 +2156,7 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
           },
         }),
-      ).toEqual({
-        id: 1,
-        iid: 12345,
+      ).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2047,6 +2177,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, reply_body)
@@ -2068,9 +2201,7 @@ describe('modules/platform/gitlab/index', () => {
           usePlatformAutomerge: true,
         },
       });
-      expect(pr).toEqual({
-        id: 1,
-        iid: 12345,
+      expect(pr).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2104,6 +2235,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, reply_body)
@@ -2123,9 +2257,7 @@ describe('modules/platform/gitlab/index', () => {
           usePlatformAutomerge: true,
         },
       });
-      expect(pr).toEqual({
-        id: 1,
-        iid: 12345,
+      expect(pr).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2154,6 +2286,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, reply_body)
@@ -2177,9 +2312,7 @@ describe('modules/platform/gitlab/index', () => {
           usePlatformAutomerge: true,
         },
       });
-      expect(pr).toEqual({
-        id: 1,
-        iid: 12345,
+      expect(pr).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2225,6 +2358,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, reply_body)
@@ -2239,9 +2375,7 @@ describe('modules/platform/gitlab/index', () => {
           usePlatformAutomerge: true,
         },
       });
-      expect(pr).toEqual({
-        id: 1,
-        iid: 12345,
+      expect(pr).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2270,6 +2404,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -2278,7 +2415,11 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: null,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
     });
 
     it('raises with squash enabled when repository squash option is always', async () => {
@@ -2302,6 +2443,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -2310,7 +2454,11 @@ describe('modules/platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: null,
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
     });
 
     it('adds approval rule to ignore all approvals', async () => {
@@ -2322,6 +2470,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
@@ -2353,15 +2504,11 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchInlineSnapshot(`
-        {
-          "id": 1,
-          "iid": 12345,
-          "number": 12345,
-          "sourceBranch": "some-branch",
-          "title": "some title",
-        }
-      `);
+      ).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
     });
 
     it('adds approval rule to ignore all approvals when platformAutomerge is false', async () => {
@@ -2373,6 +2520,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200, [
@@ -2398,9 +2548,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toEqual({
-        id: 1,
-        iid: 12345,
+      ).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2416,6 +2564,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
@@ -2455,9 +2606,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toStrictEqual({
-        id: 1,
-        iid: 12345,
+      ).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2473,6 +2622,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
@@ -2523,9 +2675,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toStrictEqual({
-        id: 1,
-        iid: 12345,
+      ).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2541,6 +2691,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
@@ -2601,9 +2754,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toStrictEqual({
-        id: 1,
-        iid: 12345,
+      ).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2619,6 +2770,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
@@ -2650,15 +2804,11 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchInlineSnapshot(`
-        {
-          "id": 1,
-          "iid": 12345,
-          "number": 12345,
-          "sourceBranch": "some-branch",
-          "title": "some title",
-        }
-      `);
+      ).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
     });
 
     it('silently ignores approval rules adding errors', async () => {
@@ -2670,6 +2820,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
@@ -2701,15 +2854,11 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchInlineSnapshot(`
-        {
-          "id": 1,
-          "iid": 12345,
-          "number": 12345,
-          "sourceBranch": "some-branch",
-          "title": "some title",
-        }
-      `);
+      ).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
     });
 
     it('auto-approves when enabled', async () => {
@@ -2721,6 +2870,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .post('/api/v4/projects/undefined/merge_requests/12345/approve')
         .reply(200);
@@ -2735,9 +2887,7 @@ describe('modules/platform/gitlab/index', () => {
             autoApprove: true,
           },
         }),
-      ).toStrictEqual({
-        id: 1,
-        iid: 12345,
+      ).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2753,6 +2903,9 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
           iid: 12345,
           title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
         })
         .post('/api/v4/projects/undefined/merge_requests/12345/approve')
         .replyWithError('some error');
@@ -2947,11 +3100,18 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
-            state: 'open',
+            description: 'a merge request',
+            state: 'opened',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200);
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'title',
+          description: 'body',
+          state: 'opened',
+        });
       await expect(
         gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' }),
       ).toResolve();
@@ -2969,11 +3129,18 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'Draft: foo',
-            state: 'open',
+            description: 'a merge request',
+            state: 'opened',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200);
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'Draft: title',
+          description: 'body',
+          state: 'opened',
+        });
       await expect(
         gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' }),
       ).toResolve();
@@ -2991,11 +3158,18 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'WIP: foo',
-            state: 'open',
+            description: 'a merge request',
+            state: 'opened',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200);
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'WIP: title',
+          description: 'body',
+          state: 'opened',
+        });
       await expect(
         gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' }),
       ).toResolve();
@@ -3013,19 +3187,26 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
-            state: 'open',
+            description: 'a merge request',
+            state: 'opened',
             target_branch: 'branch-b',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200);
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'branch a pr',
+          description: 'body',
+          state: 'opened',
+          target_branch: 'branch-new',
+        });
       await expect(
         gitlab.updatePr({
           number: 1,
           prTitle: 'title',
           prBody: 'body',
-          state: 'closed',
-          targetBranch: 'branch-b',
+          targetBranch: 'branch-new',
         }),
       ).toResolve();
     });
@@ -3042,11 +3223,18 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
-            state: 'open',
+            description: 'a merge request',
+            state: 'opened',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200)
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'title',
+          description: 'body',
+          state: 'opened',
+        })
         .post('/api/v4/projects/undefined/merge_requests/1/approve')
         .reply(200);
       await expect(
@@ -3073,11 +3261,18 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
-            state: 'open',
+            description: 'a merge request',
+            state: 'opened',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200);
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'title',
+          description: 'a merge requbody',
+          state: 'closed',
+        });
       await expect(
         gitlab.updatePr({
           number: 1,
@@ -3100,21 +3295,63 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
-            state: 'open',
+            description: 'a merge request',
+            state: 'opened',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200);
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'title',
+          description: 'body',
+          state: 'opened',
+        });
       await expect(
         gitlab.updatePr({
           number: 1,
           prTitle: 'title',
           prBody: 'body',
-          state: 'closed',
+          state: 'open',
           addLabels: ['new_label'],
           removeLabels: ['old_label'],
         }),
       ).toResolve();
+    });
+
+    it('updates runtime pr list when pr is updated', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch-a',
+            title: 'branch a pr',
+            description: 'a merge request',
+            state: 'opened',
+          },
+        ])
+        .put('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200, {
+          iid: 1,
+          source_branch: 'branch-a',
+          title: 'new_title',
+          description: 'body',
+          state: 'opened',
+        });
+      await gitlab.updatePr({
+        number: 1,
+        prTitle: 'new_title',
+        prBody: 'body',
+      });
+      const prList = await gitlab.getPrList();
+      const updatedPr = prList.find((pr) => pr.number === 1);
+      expect(updatedPr?.title).toBe('new_title');
+      expect(updatedPr?.bodyStruct).toMatchObject(getPrBodyStruct('body'));
     });
   });
 

@@ -27,6 +27,35 @@
 
     The Renovate team
 
+'auto:not-minimal-reproduction':
+  comment: >
+    Hi there,
+
+
+    We appreciate the effort you put into creating a reproduction. But your reproduction is not minimal yet, or is missing fields we ask for in our template.
+
+
+    Please re-read the steps and documentation given in the previous message, and try again to create a minimal reproduction.
+
+
+    Thanks, the Renovate team
+
+'auto:environment':
+  comment: >
+    Hi there,
+
+
+    We need more information about your environment.
+
+
+    Please explain in detail how you are running Renovate. For example:
+      - Are you running via an official Renovate image, or using the Renovate npm package?
+      - Which exact image tag are you running?
+      - Which config/parameters are you using when running the image?
+      - Which config are you using in your CI/CD pipeline, if relevant?
+
+    Thanks, the Renovate team
+
 'auto:logs':
   comment: >
     Hi there,
@@ -71,16 +100,6 @@
     </details>
 
 
-    ### Insufficient logs
-
-    <details><summary>Select me to read instructions</summary>
-
-
-    If you already gave us a log, and the Renovate team said it's not enough, then follow the instructions from the **No logs at all** section.
-
-    </details>
-
-
     ### Formatting your logs
 
     <details><summary>Select me to read instructions</summary>
@@ -108,12 +127,31 @@
 
     The Renovate team
 
+'auto:logs-insufficient':
+  comment: >
+    Hi there,
+
+
+    The logs you provided are insufficient to help you.
+
+
+    Please provide more logs, or more detailed logs, so we can help you. Be sure to include _DEBUG_ logs, and don't excessively redact or truncate them.
+
+
+    If you feel the logs are too large to paste here, please use a service like [GitHub Gist](https://gist.github.com/) and paste the link here.
+
+
+    Read the [Renovate docs, Troubleshooting](https://docs.renovatebot.com/troubleshooting/) to learn more about getting the correct logs.
+
+
+    Thanks, the Renovate team
+
 'auto:logs-packages':
   comment: >
     Hi there,
 
 
-    A maintainer wants you to find and share a specific log message (`packageFiles with updates`) from your repository or environment.
+    Please locate the debug message `packageFiles with updates` in your logs and paste the contents here. Depending on your question, we may need the full list of packages or only one.
 
 
     If you self-host Renovate: make sure you run Renovate with `LOG_LEVEL=debug` to get the debug log messages! Next, open the debug-level logs and search for `packageFiles with updates`. This text marks the start of a structured log message that shows every package file, dependency, and update that Renovate found.
@@ -139,6 +177,19 @@
 
 
     If you're not sure, it's acceptable to paste the full logs, including into a gist. Please try to explain the problem in enough detail to give us starting points to debug. If you only paste the full log, and do nothing else, it is likely that we will take longer to help you, or we may not start to help you at all.
+
+
+    Thanks, the Renovate team
+
+'auto:too-much-redacting':
+  comment: >
+    Hi there,
+
+
+    You redacted too much information from your config or logs. This makes it hard for us to pinpoint the problem.
+
+
+    Please only redact truly sensitive information. Or consider an enterprise support contract, if Open Source support does not suit you.
 
 
     Thanks, the Renovate team
@@ -219,6 +270,21 @@
 
 
     Good luck,
+
+
+    The Renovate team
+
+'auto:no-merge-from-main':
+  comment: >
+    Hi there,
+
+
+    Please don't merge from `main` into your PR's branch unless you have a merge conflict or have a specific reason to do so.
+    Doing so consumes CI systems unnecessarily, and also resets CI approvals if this is your first PR to the repo.
+    This repo uses GitHub's Merge Queue, which will automatically test your PR against `main` before merging, so it's no longer necessary to always keep branches up-to-date.
+
+
+    Thanks,
 
 
     The Renovate team
@@ -376,6 +442,19 @@
 
     Thanks, the Renovate team
 
+'auto:meaningful-title':
+  comment: >
+    Hi there,
+
+
+    Please give your discussion a meaningful title. This helps others understand what your discussion is about, and increases the chances of getting help.
+
+
+    Do not use titles like "Need config help", "Renovate is not working", etc. Try to summarize the specifics of your problem or question in the title.
+
+
+    Thanks, the Renovate team
+
 'auto:idea-rewrite':
   comment: >
     Hi there,
@@ -461,3 +540,25 @@
 
 
     Thanks, the Renovate team
+
+'auto:inactive-pr':
+  comment: >
+    Hi there,
+
+
+    This PR appears to have been inactive for a while. Please let us know if you are still working on it, or if we can close it for now.
+
+
+    Thanks, the Renovate team
+
+'auto:close-inactive-pr':
+  comment: >
+    Hi there,
+
+
+    We're closing this PR due to inactivity, but we are happy for you, or others, to finish the PR if time allows.
+
+
+    Thanks, the Renovate team
+
+  close: true
