@@ -721,9 +721,10 @@ const platform: Platform = {
       return null;
     }
     try {
-      const opts: GiteaHttpOptions = memCache
-        ? { cacheProvider: memCacheProvider }
-        : {};
+      const opts: GiteaHttpOptions = {};
+      if (memCache) {
+        opts.cacheProvider = memCacheProvider;
+      }
       const body = (await helper.getIssue(config.repository, number, opts))
         .body;
       return {
