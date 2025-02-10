@@ -1160,9 +1160,9 @@ Example:
 ```json
 {
   "processEnv": {
-    "RENOVATE_X_PLATFORM_VERSION": "1.0.0",
-    "RENOVATE_X_ENCRYPTED_STRICT": "true",
-    "RENOVATE_CONFIG_FILE": "/path/to/config.js"
+    "AWS_ACCESS_KEY_ID": "AKIAIOSFODNN7EXAMPLE",
+    "AWS_SECRET_ACCESS_KEY": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "AWS_DEFAULT_REGION": "us-west-2"
   }
 }
 ```
@@ -1171,7 +1171,6 @@ Example:
 !!! note
 
 - All values must be provided as strings, e.g., `"true"` instead of `true`
-- Key names must be in the exact format used for environment variables, e.g., `RENOVATE_LABELS` instead of `LABELS` or `labels`
 - Only supported in file configuration (not via CLI or environment).
 
 ## productLinks

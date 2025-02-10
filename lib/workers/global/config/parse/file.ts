@@ -80,16 +80,27 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   }
 
   if (is.nonEmptyObject(config.processEnv)) {
-    // should begin and end with capital alphabets + use underscore as separator
-    const keyRegex = regEx(/^[A-Z]+(_[A-Z]+)*$/);
+    // should begin and end with capital alphabets + use underscore as separator like env names of config options
+    const keyRegex = regEx(/^[a-zA-Z]+(_[a-zA-Z]+)*$/);
     const exportedKeys = [];
     for (const [key, value] of Object.entries(config.processEnv)) {
-      if (keyRegex.test(key) && is.nonEmptyString(value)) {
-        exportedKeys.push(key);
-        process.env[key] = value;
-      } else {
-        logger.debug({ key, value }, 'Could not export key to environment');
+      if (!keyRegex.test(key)) {
+        logger.debug(
+          { key },
+          'Key cloud not be exported to environment because it is not correctly named.',
+        );
+        continue;
       }
+      if (!is.nonEmptyString(value)) {
+        logger.debug(
+          { key },
+          'Key could not be exported to environment because the value is not of type string.',
+        );
+        continue;
+      }
+
+      exportedKeys.push(key);
+      process.env[key] = value;
     }
     logger.debug({ keys: exportedKeys }, 'Following keys were exported to env');
     delete config.processEnv;

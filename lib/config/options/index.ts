@@ -1885,6 +1885,9 @@ const options: RenovateOptions[] = [
     default: {},
     globalOnly: true,
     stage: 'global',
+    additionalProperties: {
+      type: 'string',
+    },
   },
   {
     name: 'prCreation',
