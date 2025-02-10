@@ -80,7 +80,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     if (cachePrivatePackages) {
       return false;
     }
-    
+
     if (!this.checkCacheControl) {
       return false;
     }
