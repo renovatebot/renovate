@@ -64,7 +64,7 @@ Read the [GitHub Docs, Signature verification for rebase and merge](https://docs
 
 #### Why we change branch names with multiple slashes
 
-Branches with mutiple slashes (`/`) are not wanted, this was a bug.
+Branches with multiple slashes (`/`) are not wanted, this was a bug.
 We are changing it in a major release out of politeness to all our users.
 If you enabled `branchNameStrict`, you can expect some branch names to change.
 

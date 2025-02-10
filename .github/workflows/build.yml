@@ -639,7 +639,7 @@ jobs:
           show-progress: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           standalone: true
 
@@ -690,7 +690,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@1d0c5b3aabe4a10a264d309f65ecbbd83d0e672e # v3.5.21
+        uses: containerbase/internal-tools@8d9ec52e6593ae2ed5888f4305821a742456dce4 # v3.8.4
         with:
           command: docker-config
 
@@ -700,7 +700,7 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
+      - uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e # v3.8.0
 
       - name: Docker registry login
         run: |
