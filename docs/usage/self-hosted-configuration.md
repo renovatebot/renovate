@@ -1153,28 +1153,6 @@ Used as an alternative to `privateKeyOld`, if you want the key to be read from d
 
 ## processEnv
 
-Used to pass key/value pairs to the global config, which will then be set in the environment and used.
-Make sure to supply all the values in string form.
-i.e. `SOME_KEY: "true"` instead of `SOME_KEY: true`
-
-The key names must be in the exact format used while setting environment variables for the bot.
-i.e. if you want to pass the labels then use `RENOVATE_LABELS` key instead of only `LABELS` or `labels`
-
-Example:
-
-```json
-{
-  "processEnv": {
-    "RENOVATE_X_PLATFORM_VERSION": "1.0.0",
-    "RENOVATE_X_ENCRYPTED_STRICT": "true",
-    "RENOVATE_CONFIG_FILE": "/path/to/config.js",
-    ""
-  }
-}
-```
-
-## processEnv
-
 Used to set environment variables through the configuration file instead of using actual environment variables.
 This object accepts key-value pairs where both keys and values must be strings.
 
