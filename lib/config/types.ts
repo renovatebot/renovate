@@ -127,6 +127,7 @@ export interface GlobalOnlyConfig {
   repositories?: RenovateRepository[];
   useCloudMetadataServices?: boolean;
   deleteConfigFile?: boolean;
+  processEnv?: Record<string, string>;
 }
 
 // Config options used within the repository worker, but not user configurable

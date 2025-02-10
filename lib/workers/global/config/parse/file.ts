@@ -78,6 +78,22 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     logger.debug('No config file found on disk - skipping');
   }
 
+  if (is.nonEmptyObject(config.processEnv)) {
+    const exportedKeys = [];
+    for (const [key, value] of Object.entries(config.processEnv)) {
+      if (is.nonEmptyString(value)) {
+        exportedKeys.push(key);
+        process.env[key] = value;
+      } else {
+        logger.debug(
+          `Could not export ${key} to environment. Expected string value got ${typeof value}`,
+        );
+      }
+    }
+    logger.debug({ keys: exportedKeys }, 'Following keys were exported to env');
+    delete config.processEnv;
+  }
+
   return migrateAndValidateConfig(config, configFile);
 }
 

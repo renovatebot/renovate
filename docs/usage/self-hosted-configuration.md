@@ -1151,6 +1151,52 @@ Used as an alternative to `privateKey`, if you want the key to be read from disk
 
 Used as an alternative to `privateKeyOld`, if you want the key to be read from disk instead.
 
+## processEnv
+
+Used to pass key/value pairs to the global config, which will then be set in the environment and used.
+Make sure to supply all the values in string form.
+i.e. `SOME_KEY: "true"` instead of `SOME_KEY: true`
+
+The key names must be in the exact format used while setting environment variables for the bot.
+i.e. if you want to pass the labels then use `RENOVATE_LABELS` key instead of only `LABELS` or `labels`
+
+Example:
+
+```json
+{
+  "processEnv": {
+    "RENOVATE_X_PLATFORM_VERSION": "1.0.0",
+    "RENOVATE_X_ENCRYPTED_STRICT": "true",
+    "RENOVATE_CONFIG_FILE": "/path/to/config.js",
+    ""
+  }
+}
+```
+
+## processEnv
+
+Used to set environment variables through the configuration file instead of using actual environment variables.
+This object accepts key-value pairs where both keys and values must be strings.
+
+Example:
+
+```json
+{
+  "processEnv": {
+    "RENOVATE_X_PLATFORM_VERSION": "1.0.0",
+    "RENOVATE_X_ENCRYPTED_STRICT": "true",
+    "RENOVATE_CONFIG_FILE": "/path/to/config.js"
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+
+- All values must be provided as strings, e.g., `"true"` instead of `true`
+- Key names must be in the exact format used for environment variables, e.g., `RENOVATE_LABELS` instead of `LABELS` or `labels`
+- Only supported in file configuration (not via CLI or environment).
+
 ## productLinks
 
 Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
