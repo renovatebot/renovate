@@ -61,13 +61,11 @@ if (process.env.FILTER_SHARDS === 'true' && process.env.CHANGED_FILES) {
     const changedFiles: string[] = JSON.parse(process.env.CHANGED_FILES);
     const matchingShards = getMatchingShards(changedFiles);
     if (matchingShards.length === 0) {
-      // eslint-disable-next-line no-console
       console.log(`test-matrix-empty=true`);
       process.exit(0);
     }
     shardKeys = shardKeys.filter((key) => matchingShards.includes(key));
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error(err);
     process.exit(1);
   }
@@ -141,5 +139,5 @@ for (const [os, groups] of Object.entries(shardGrouping)) {
 /**
  * Output will be consumed by `setup` CI job.
  */
-// eslint-disable-next-line no-console
+
 console.log(`test-shard-matrix=${JSON.stringify(shardGroups)}`);
