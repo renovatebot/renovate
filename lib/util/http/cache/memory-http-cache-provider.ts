@@ -1,5 +1,5 @@
 import * as memCache from '../../cache/memory';
-import { HttpResponse } from '../types';
+import type { HttpResponse } from '../types';
 import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
 import type { HttpCache } from './schema';
 
