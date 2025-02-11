@@ -21,9 +21,7 @@ export function handleAny(
     .map((matchResult) =>
       createDependency(
         {
-          groups:
-            matchResult.groups ??
-            /* istanbul ignore next: can this happen? */ {},
+          groups: { packageFile, ...matchResult.groups },
           replaceString: matchResult[0],
         },
         config,
@@ -50,9 +48,9 @@ export function handleCombination(
 
   const extraction = matches
     .map((match) => ({
-      groups: match.groups ?? /* istanbul ignore next: can this happen? */ {},
+      groups: { packageFile, ...match.groups } as Record<string, string>,
       replaceString:
-        (match?.groups?.currentValue ?? match?.groups?.currentDigest)
+        match?.groups?.currentValue ?? match?.groups?.currentDigest
           ? match[0]
           : undefined,
     }))
@@ -78,7 +76,7 @@ export function handleRecursive(
     packageFile,
     config,
     index: 0,
-    combinedGroups: {},
+    combinedGroups: { packageFile },
     regexes,
   })
     .filter(is.truthy)

@@ -8,6 +8,7 @@ const dockerfileContent = Fixtures.get(`Dockerfile`);
 const ansibleYamlContent = Fixtures.get(`ansible.yml`);
 const exampleJsonContent = Fixtures.get(`example.json`);
 const exampleGitlabCiYml = Fixtures.get(`gitlab-ci.yml`);
+const componentTxtContent = Fixtures.get(`component.txt`);
 
 describe('modules/manager/custom/regex/index', () => {
   it('has default config', () => {
@@ -680,4 +681,32 @@ describe('modules/manager/custom/regex/index', () => {
       });
     },
   );
+
+  for (const strategy of ['any', 'combination', 'recursive'] as const) {
+    it(`replaces packageFile in templates for ${strategy} strategy`, async () => {
+      const config = {
+        matchStringsStrategy: strategy,
+        matchStrings: ['(?<currentValue>v.*)'],
+        packageNameTemplate: "{{{replace '(.+?)\\.txt' '$1' packageFile}}}",
+        depNameTemplate: "{{{replace '(.+?)\\.txt' '$1' packageFile}}}",
+        datasourceTemplate: 'custom.datasource',
+      };
+
+      const res = await extractPackageFile(
+        componentTxtContent,
+        'component.txt',
+        config,
+      );
+
+      expect(res).toMatchObject({
+        deps: [
+          {
+            depName: 'component',
+            packageName: 'component',
+            datasource: 'custom.datasource',
+          },
+        ],
+      });
+    });
+  }
 });
