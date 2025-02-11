@@ -11,8 +11,13 @@ import {
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
-async function conanUpdate(conanFilePath: string): Promise<void> {
-  const command = `conan lock create ${quote(conanFilePath)} --lockfile=""`;
+async function conanLockUpdate(
+  conanFilePath: string,
+  isLockFileMaintenance: boolean,
+): Promise<void> {
+  const command =
+    `conan lock create ${quote(conanFilePath)}` +
+    (isLockFileMaintenance ? ' --lockfile=""' : '');
 
   const execOptions: ExecOptions = {
     extraEnv: { ...getGitEnvironmentVariables(['conan']) },
@@ -58,7 +63,7 @@ export async function updateArtifacts(
     await writeLocalFile(packageFileName, newPackageFileContent);
 
     logger.debug('Updating ' + lockFileName);
-    await conanUpdate(packageFileName);
+    await conanLockUpdate(packageFileName, isLockFileMaintenance);
 
     const newLockFileContent = await readLocalFile(lockFileName);
     if (!newLockFileContent) {

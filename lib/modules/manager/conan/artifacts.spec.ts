@@ -105,7 +105,7 @@ describe('modules/manager/conan/artifacts', () => {
     ];
     const expectedInSnapshot = [
       {
-        cmd: 'conan lock create conanfile.py --lockfile=""',
+        cmd: 'conan lock create conanfile.py',
       },
     ];
 
@@ -137,7 +137,7 @@ describe('modules/manager/conan/artifacts', () => {
     ];
     const expectedInSnapshot = [
       {
-        cmd: 'conan lock create conanfile.py --lockfile=""',
+        cmd: 'conan lock create conanfile.py',
       },
     ];
 
@@ -167,7 +167,7 @@ describe('modules/manager/conan/artifacts', () => {
     ];
     const expectedInSnapshot = [
       {
-        cmd: 'conan lock create conanfile.txt --lockfile=""',
+        cmd: 'conan lock create conanfile.txt',
       },
     ];
 
@@ -204,7 +204,7 @@ describe('modules/manager/conan/artifacts', () => {
     ];
     const expectedInSnapshot = [
       {
-        cmd: 'conan lock create conanfile.py --lockfile=""',
+        cmd: 'conan lock create conanfile.py',
       },
     ];
 
