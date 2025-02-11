@@ -173,7 +173,6 @@ describe('workers/global/config/parse/file', () => {
         "SOME_KEY": "SOME_VALUE",
         "SOME_OTHER_KEY": true,
         "valid_Key": "true",
-        "invalid-key": "valid-value"
         },
         "labels": ["renovate"]
       }`;
@@ -190,7 +189,6 @@ describe('workers/global/config/parse/file', () => {
       expect(process.env.SOME_KEY).toBe('SOME_VALUE');
       expect(process.env['valid_Key']).toBe('true');
       expect(process.env.SOME_OTHER_KEY).toBeUndefined();
-      expect(process.env['invalid-key']).toBeUndefined();
       fs.unlinkSync(configFile);
       delete process.env.SOME_KEY;
       delete process.env['valid_Key'];

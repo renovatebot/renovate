@@ -6,7 +6,6 @@ import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
 import { readSystemFile } from '../../../../util/fs';
-import { regEx } from '../../../../util/regex';
 import { parseSingleYaml } from '../../../../util/yaml';
 import { migrateAndValidateConfig } from './util';
 
@@ -80,17 +79,8 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   }
 
   if (is.nonEmptyObject(config.processEnv)) {
-    // should begin and end with capital alphabets + use underscore as separator like env names of config options
-    const keyRegex = regEx(/^[a-zA-Z]+(_[a-zA-Z]+)*$/);
     const exportedKeys = [];
     for (const [key, value] of Object.entries(config.processEnv)) {
-      if (!keyRegex.test(key)) {
-        logger.debug(
-          { key },
-          'Key cloud not be exported to environment because it is not correctly named.',
-        );
-        continue;
-      }
       if (!is.nonEmptyString(value)) {
         logger.debug(
           { key },
