@@ -33,14 +33,14 @@ export async function updateArtifacts(
   const { packageFileName, updatedDeps, newPackageFileContent, config } =
     updateArtifact;
 
-  logger.debug(`conan.updateArtifacts(${packageFileName})`);
+  logger.trace(`conan.updateArtifacts(${packageFileName})`);
 
   const isLockFileMaintenance =
     config.updateType === 'lockFileMaintenance' ||
     config.isLockFileMaintenance === true;
 
   if (updatedDeps.length === 0 && !isLockFileMaintenance) {
-    logger.debug('No conan.lock dependencies to update');
+    logger.trace('No conan.lock dependencies to update');
     return null;
   }
 
@@ -49,7 +49,7 @@ export async function updateArtifacts(
     'conan.lock',
   );
   if (!lockFileName) {
-    logger.debug('No conan.lock found');
+    logger.trace('No conan.lock found');
     return null;
   }
 
@@ -62,7 +62,7 @@ export async function updateArtifacts(
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    logger.debug('Updating ' + lockFileName);
+    logger.trace('Updating ' + lockFileName);
     await conanLockUpdate(packageFileName, isLockFileMaintenance);
 
     const newLockFileContent = await readLocalFile(lockFileName);
@@ -72,11 +72,11 @@ export async function updateArtifacts(
     }
 
     if (existingLockFileContent === newLockFileContent) {
-      logger.debug(lockFileName + ' is unchanged');
+      logger.trace(lockFileName + ' is unchanged');
       return null;
     }
 
-    logger.debug('Returning updated' + lockFileName);
+    logger.trace('Returning updated' + lockFileName);
     return [
       {
         file: {

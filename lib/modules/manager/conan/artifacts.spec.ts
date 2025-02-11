@@ -49,7 +49,7 @@ describe('modules/manager/conan/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(logger.debug).toHaveBeenCalledWith(
+    expect(logger.trace).toHaveBeenCalledWith(
       'No conan.lock dependencies to update',
     );
   });
@@ -71,7 +71,7 @@ describe('modules/manager/conan/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(logger.debug).toHaveBeenCalledWith('No conan.lock found');
+    expect(logger.trace).toHaveBeenCalledWith('No conan.lock found');
   });
 
   it('returns null if conan.lock read operation failed', async () => {
@@ -156,7 +156,7 @@ describe('modules/manager/conan/artifacts', () => {
       }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject(expectedInSnapshot);
-    expect(logger.debug).toHaveBeenCalledWith('conan.lock is unchanged');
+    expect(logger.trace).toHaveBeenCalledWith('conan.lock is unchanged');
   });
 
   it('returns updated conan.lock for conanfile.txt', async () => {
