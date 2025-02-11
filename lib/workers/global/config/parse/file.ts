@@ -82,17 +82,17 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     const exportedKeys = [];
     for (const [key, value] of Object.entries(config.processEnv)) {
       if (!is.nonEmptyString(value)) {
-        logger.debug(
-          { key },
-          'Key could not be exported to environment because the value is not of type string.',
-        );
+        logger.error({ key }, 'processEnv value is not a string.');
         continue;
       }
 
       exportedKeys.push(key);
       process.env[key] = value;
     }
-    logger.debug({ keys: exportedKeys }, 'Following keys were exported to env');
+    logger.debug(
+      { keys: exportedKeys },
+      'processEnv keys were exported to env',
+    );
     delete config.processEnv;
   }
 
