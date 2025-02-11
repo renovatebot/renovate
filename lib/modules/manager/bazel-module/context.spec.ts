@@ -95,6 +95,32 @@ describe('modules/manager/bazel-module/context', () => {
       ]);
     });
 
+    describe('extension tag failure cases', () => {
+      it('throws if there is no current', () => {
+        expect(() => new Ctx().startExtensionTag('install')).toThrow(
+          new Error('Requested current, but no value.'),
+        );
+      });
+
+      it('throws if the current is not a prepared extension tag', () => {
+        expect(() =>
+          new Ctx().startRule('foo').startExtensionTag('install'),
+        ).toThrow(
+          new Error(
+            'Requested current prepared extension tag, but does not exist.',
+          ),
+        );
+      });
+
+      it('throws if the current is not an extension tag', () => {
+        expect(() =>
+          new Ctx().startRule('foo').endExtensionTag('install'),
+        ).toThrow(
+          new Error('Requested current extension tag, but does not exist.'),
+        );
+      });
+    });
+
     describe('.currentRule', () => {
       it('returns the record fragment if it is current', () => {
         const ctx = new Ctx().startRule('dummy');
