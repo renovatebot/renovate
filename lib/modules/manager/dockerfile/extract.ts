@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { escapeRegExp, newlineRegex, regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import * as debianVersioning from '../../versioning/debian';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
@@ -168,7 +168,10 @@ export function getDep(
   specifyReplaceString = true,
   registryAliases?: Record<string, string>,
 ): PackageDependency {
-  if (!is.string(currentFrom) || is.emptyStringOrWhitespace(currentFrom)) {
+  if (
+    !is.string(currentFrom) ||
+    !is.nonEmptyStringAndNotWhitespace(currentFrom)
+  ) {
     return {
       skipReason: 'invalid-value',
     };
@@ -176,13 +179,10 @@ export function getDep(
 
   // Resolve registry aliases first so that we don't need special casing later on:
   for (const [name, value] of Object.entries(registryAliases ?? {})) {
-    const escapedName = escapeRegExp(name);
-    const groups = regEx(`${escapedName}/(?<depName>.+)`).exec(
-      currentFrom,
-    )?.groups;
-    if (groups) {
+    if (currentFrom.startsWith(`${name}/`)) {
+      const depName = currentFrom.substring(name.length + 1);
       const dep = {
-        ...getDep(`${value}/${groups.depName}`, false),
+        ...getDep(`${value}/${depName}`, false),
         replaceString: currentFrom,
       };
       // retain depName, not sure if condition is necessary
@@ -190,7 +190,9 @@ export function getDep(
         dep.packageName = dep.depName;
         dep.depName = `${name}/${dep.depName.substring(value.length + 1)}`;
       }
-      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
+      if (specifyReplaceString) {
+        dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
+      }
       return dep;
     }
   }

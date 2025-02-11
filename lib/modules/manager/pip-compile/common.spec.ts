@@ -2,7 +2,7 @@ import { mockDeep } from 'jest-mock-extended';
 import { hostRules } from '../../../../test/util';
 import { logger } from '../../../logger';
 import {
-  allowedPipOptions,
+  allowedOptions,
   extractHeaderCommand,
   extractPythonVersion,
   getRegistryCredVarsFromPackageFiles,
@@ -137,11 +137,23 @@ describe('modules/manager/pip-compile/common', () => {
       ).toEqual(exampleSourceFiles);
     });
 
-    it.each(allowedPipOptions)(
-      'returned sourceFiles must not contain options',
+    it.each(allowedOptions['pip-compile'])(
+      'returned sourceFiles must not contain options (pip-compile)',
       (argument: string) => {
         const sourceFiles = extractHeaderCommand(
           getCommandInHeader(`pip-compile ${argument}=reqs.txt reqs.in`),
+          'reqs.txt',
+        ).sourceFiles;
+        expect(sourceFiles).not.toContainEqual(argument);
+        expect(sourceFiles).toEqual(['reqs.in']);
+      },
+    );
+
+    it.each(allowedOptions['uv'])(
+      'returned sourceFiles must not contain options (uv)',
+      (argument: string) => {
+        const sourceFiles = extractHeaderCommand(
+          getCommandInHeader(`uv pip compile ${argument}=reqs.txt reqs.in`),
           'reqs.txt',
         ).sourceFiles;
         expect(sourceFiles).not.toContainEqual(argument);
@@ -155,7 +167,7 @@ describe('modules/manager/pip-compile/common', () => {
           getCommandInHeader(`./pip-compile-wrapper reqs.in`),
           'reqs.txt',
         ),
-      ).toHaveProperty('isCustomCommand', true);
+      ).toHaveProperty('commandType', 'custom');
     });
 
     it.each([
@@ -176,6 +188,7 @@ describe('modules/manager/pip-compile/common', () => {
     it('extracts Python version from valid header', () => {
       expect(
         extractPythonVersion(
+          'pip-compile',
           getCommandInHeader('pip-compile reqs.in'),
           'reqs.txt',
         ),
@@ -183,7 +196,13 @@ describe('modules/manager/pip-compile/common', () => {
     });
 
     it('returns undefined if version cannot be extracted', () => {
-      expect(extractPythonVersion('', 'reqs.txt')).toBeUndefined();
+      expect(
+        extractPythonVersion('pip-compile', '', 'reqs.txt'),
+      ).toBeUndefined();
+    });
+
+    it('returns undefined if the command type is uv', () => {
+      expect(extractPythonVersion('uv', '', 'reqs.txt')).toBeUndefined();
     });
   });
 
