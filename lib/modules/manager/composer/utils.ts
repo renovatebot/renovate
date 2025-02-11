@@ -46,6 +46,20 @@ export function getComposerArguments(
   return args;
 }
 
+export function getComposerUpdateArguments(
+  config: UpdateArtifactsConfig,
+  toolConstraint: ToolConstraint,
+): string {
+  let args = getComposerArguments(config, toolConstraint);
+
+  // TODO: toolConstraint.constraint can be null or undefined? (#22198)
+  if (api.intersects!(toolConstraint.constraint!, '^2.7')) {
+    args += ' --minimal-changes';
+  }
+
+  return args;
+}
+
 export function getPhpConstraint(
   constraints: Record<string, string>,
 ): string | null {

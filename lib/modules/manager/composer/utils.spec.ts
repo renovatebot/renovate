@@ -5,6 +5,7 @@ import { Lockfile, PackageFile } from './schema';
 import {
   extractConstraints,
   getComposerArguments,
+  getComposerUpdateArguments,
   requireComposerDependencyInstallation,
 } from './utils';
 
@@ -273,6 +274,56 @@ describe('modules/manager/composer/utils', () => {
         ),
       ).toBe(
         ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+      );
+    });
+  });
+
+  describe('getComposerUpdateArguments', () => {
+    it('does not request an update with minimal changes with 2.6.0', () => {
+      expect(
+        getComposerUpdateArguments({}, { toolName: 'composer', constraint: '2.6.0' }),
+      ).toBe(
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+      );
+    });
+
+    it('requests an update with minimal changes with 2.7.0', () => {
+      expect(
+        getComposerUpdateArguments({}, { toolName: 'composer', constraint: '2.7.0' }),
+      ).toBe(
+        " --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes",
+      );
+    });
+
+    it('requests an update with minimal changes with 2.8.0', () => {
+      expect(
+        getComposerUpdateArguments({}, { toolName: 'composer', constraint: '2.8.0' }),
+      ).toBe(
+        " --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes",
+      );
+    });
+
+    it('requests an update with minimal changes with ^2.6', () => {
+      expect(
+        getComposerUpdateArguments({}, { toolName: 'composer', constraint: '^2.6' }),
+      ).toBe(
+        " --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes",
+      );
+    });
+
+    it('requests an update with minimal changes with ^2.7', () => {
+      expect(
+        getComposerUpdateArguments({}, { toolName: 'composer', constraint: '^2.7' }),
+      ).toBe(
+        " --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes",
+      );
+    });
+
+    it('requests an update with minimal changes with ^2.8', () => {
+      expect(
+        getComposerUpdateArguments({}, { toolName: 'composer', constraint: '^2.8' }),
+      ).toBe(
+        " --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes",
       );
     });
   });
