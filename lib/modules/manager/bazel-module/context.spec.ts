@@ -114,7 +114,7 @@ describe('modules/manager/bazel-module/context', () => {
 
       it('throws if the current is not an extension tag', () => {
         expect(() =>
-          new Ctx().startRule('foo').endExtensionTag('install'),
+          new Ctx().startRule('foo').endExtensionTag(),
         ).toThrow(
           new Error('Requested current extension tag, but does not exist.'),
         );
