@@ -42,6 +42,7 @@ export const PreparedExtensionTagFragmentSchema = z.object({
   // See ExtensionTagFragmentSchema for documentation of the fields.
   extension: z.string(),
   rawExtension: z.string(),
+  offset: z.number(), // start offset in the source string
   isComplete: z.literal(false), // never complete, parser internal type.
 });
 export const ExtensionTagFragmentSchema = z.object({
@@ -53,6 +54,8 @@ export const ExtensionTagFragmentSchema = z.object({
   tag: z.string(),
   children: LooseRecord(ValueFragmentsSchema),
   isComplete: z.boolean(),
+  offset: z.number(), // start offset in the source string
+  rawString: z.string().optional(), // raw source string
 });
 export const AttributeFragmentSchema = z.object({
   type: z.literal('attribute'),
@@ -117,11 +120,13 @@ export function rule(
 export function preparedExtensionTag(
   extension: string,
   rawExtension: string,
+  offset: number,
 ): PreparedExtensionTagFragment {
   return {
     type: 'preparedExtensionTag',
     extension,
     rawExtension,
+    offset,
     isComplete: false, // never complete
   };
 }
@@ -130,7 +135,9 @@ export function extensionTag(
   extension: string,
   rawExtension: string,
   tag: string,
+  offset: number,
   children: ChildFragments = {},
+  rawString?: string,
   isComplete = false,
 ): ExtensionTagFragment {
   return {
@@ -138,6 +145,8 @@ export function extensionTag(
     extension,
     rawExtension,
     tag,
+    offset,
+    rawString,
     isComplete,
     children,
   };

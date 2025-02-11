@@ -34,7 +34,7 @@ export const extensionTags = q
     const rawExtension = token.value;
     const match = rawExtension.match(supportedExtensionRegex)!;
     const extension = match[1];
-    return ctx.prepareExtensionTag(extension, rawExtension);
+    return ctx.prepareExtensionTag(extension, rawExtension, token.offset);
   })
   .op('.')
   .sym(supportedExtensionTagsRegex, (ctx, token) => {
@@ -45,6 +45,14 @@ export const extensionTags = q
       type: 'wrapped-tree',
       maxDepth: 1,
       search: kvParams,
-      postHandler: (ctx) => ctx.endExtensionTag(),
+      postHandler: (ctx, tree) => {
+        if (tree.type !== 'wrapped-tree') {
+          // istanbul ignore next
+          throw new Error(`Unexpected tree in postHandler: ${tree.type}`);
+        }
+	const { endsWith } = tree;
+        const endOffset = endsWith.offset + endsWith.value.length;
+        return ctx.endExtensionTag(endOffset);
+      },
     }),
   );
