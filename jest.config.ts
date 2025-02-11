@@ -121,6 +121,7 @@ const config: JestConfig = {
   ],
   reporters: ci ? ['default', 'github-actions'] : ['default'],
   resetMocks: true,
+  globalSetup: '<rootDir>/test/global-setup.ts',
   setupFilesAfterEnv: [
     'jest-extended/all',
     'expect-more-jest',
