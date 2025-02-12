@@ -278,7 +278,10 @@
       "https://github.com/dotnet/roslyn",
       "https://github.com/dotnet/runtime",
       "https://github.com/dotnet/scaffolding",
-      "https://github.com/dotnet/sdk"
+      "https://github.com/dotnet/sdk",
+      "https://github.com/dotnet/windowsdesktop",
+      "https://github.com/dotnet/winforms",
+      "https://github.com/dotnet/wpf"
     ],
     "dotnet-azure-ad-identitymodel-extensions": "https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet",
     "dotnet-azure-ad-microsoft-identity-web": "https://github.com/AzureAD/microsoft-identity-web",
