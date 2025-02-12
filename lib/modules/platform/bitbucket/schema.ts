@@ -30,7 +30,9 @@ export const RepoInfo = z
       name: z.string(),
     }),
     has_issues: z.boolean().catch(() => {
-      logger.once.warn('Bitbucket: "has_issues" field missing from repo info');
+      logger.once.debug(
+        'Bitbucket: "has_issues" field missing from repo info. Issues are not available for this repository.',
+      );
       return false;
     }),
     uuid: z.string(),
