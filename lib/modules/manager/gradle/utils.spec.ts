@@ -36,7 +36,14 @@ describe('modules/manager/gradle/utils', () => {
     });
 
     it('returns null for invalid inputs', () => {
-      const inputs = ['', undefined, null, 'foobar', 'latest', '[1.6.0, ]  ,  abc'];
+      const inputs = [
+        '',
+        undefined,
+        null,
+        'foobar',
+        'latest',
+        '[1.6.0, ]  ,  abc',
+      ];
       for (const input of inputs) {
         expect(versionLikeSubstring(input)).toBeNull();
       }
