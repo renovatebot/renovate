@@ -55,6 +55,7 @@ bun 0.2.2
 cargo-make 0.36.2
 checkov 2.3.3
 clojure 1.11.1.1182
+conftest 0.56.0
 cosign 2.2.4
 crystal 1.6.1
 dart 2.19.3
@@ -211,6 +212,13 @@ dummy 1.2.3
             versioning:
               'regex:^(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+)\\.(?<build>\\d+)$',
             depName: 'clojure',
+          },
+          {
+            currentValue: '0.56.0',
+            datasource: 'github-releases',
+            packageName: 'open-policy-agent/conftest',
+            depName: 'conftest',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '2.2.4',

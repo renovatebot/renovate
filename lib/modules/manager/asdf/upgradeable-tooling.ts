@@ -124,6 +124,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       versioning: `${regexVersioning.id}:^(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+)\\.(?<build>\\d+)$`,
     },
   },
+  conftest: {
+    asdfPluginUrl: 'https://github.com/looztra/asdf-conftest',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'open-policy-agent/conftest',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   cookiecutter: {
     asdfPluginUrl: 'https://github.com/shawon-crosen/asdf-cookiecutter',
     config: {
