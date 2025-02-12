@@ -1,6 +1,6 @@
 import upath from 'upath';
 import { regEx } from '../../../util/regex';
-import { api as gradleVersioning } from '../../versioning/gradle/index';
+import { api as gradleVersioning } from '../../versioning/gradle';
 import type { PackageDependency } from '../types';
 import type {
   GradleManagerData,
