@@ -119,39 +119,25 @@ describe('modules/manager/bazel-module/context', () => {
       });
     });
 
-    describe('.currentRule', () => {
-      it('returns the record fragment if it is current', () => {
-        const ctx = new Ctx().startRule('dummy');
-        expect(ctx.currentRule).toEqual(fragments.rule('dummy'));
-      });
-
-      it('throws if there is no current', () => {
-        const ctx = new Ctx();
-        expect(() => ctx.currentRule).toThrow(
-          new Error('Requested current, but no value.'),
-        );
-      });
-
-      it('throws if the current is not a rule fragment', () => {
-        const ctx = new Ctx().startArray();
-        expect(() => ctx.currentRule).toThrow(
-          new Error('Requested current rule, but does not exist.'),
-        );
-      });
+    it('throws on missing current', () => {
+      const ctx = new Ctx();
+      expect(() => ctx.endRule()).toThrow(
+        new Error('Requested current, but no value.'),
+      );
     });
 
-    describe('.currentArray', () => {
-      it('returns the array fragment if it is current', () => {
-        const ctx = new Ctx().startArray();
-        expect(ctx.currentArray).toEqual(fragments.array());
-      });
+    it('throws on unbalanced endRule', () => {
+      const ctx = new Ctx().startRule('foo').startArray();
+      expect(() => ctx.endRule()).toThrow(
+        new Error('Requested current rule, but does not exist.'),
+      );
+    });
 
-      it('throws if the current is not an array fragment', () => {
-        const ctx = new Ctx().startRule('dummy');
-        expect(() => ctx.currentArray).toThrow(
-          new Error('Requested current array, but does not exist.'),
-        );
-      });
+    it('throws on unbalanced endArray', () => {
+      const ctx = new Ctx().startArray().startRule('dummy');
+      expect(() => ctx.endArray()).toThrow(
+        new Error('Requested current array, but does not exist.'),
+      );
     });
 
     it('throws if add an attribute without a parent', () => {
