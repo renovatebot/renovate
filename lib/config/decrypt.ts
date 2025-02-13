@@ -238,7 +238,7 @@ function getAzureCollection(): string | undefined {
 
   const azureCollection = endpointUrl.pathname
     ?.split('/')
-    .filter(Boolean)
+    .filter(is.nonEmptyString)
     .join('/');
   if (!is.nonEmptyString(azureCollection)) {
     logger.warn({ endpoint }, 'Unable to find azure collection name from URL');
