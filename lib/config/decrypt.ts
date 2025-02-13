@@ -3,7 +3,7 @@ import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { logger } from '../logger';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
-import { ensureTrailingSlash } from '../util/url';
+import { ensureTrailingSlash, parseUrl } from '../util/url';
 import { tryDecryptKbPgp } from './decrypt/kbpgp';
 import {
   tryDecryptPublicKeyDefault,
@@ -77,6 +77,12 @@ function validateDecryptedValue(
       throw error;
     }
 
+    const repositories =  [repository];
+    const azCollection = getAzureCollection();
+    if (azCollection && is.nonEmptyString(azCollection)) {
+      repositories.push(azCollection + '/' + repository);
+    }
+
     const orgPrefixes = org
       .split(',')
       .map((o) => o.trim())
@@ -87,9 +93,12 @@ function validateDecryptedValue(
       const scopedRepos = orgPrefixes.map((orgPrefix) =>
         `${orgPrefix}${repo}`.toUpperCase(),
       );
-      if (scopedRepos.some((r) => r === repository.toUpperCase())) {
-        return value;
+      for (const rp in repositories) {
+        if (scopedRepos.some((r) => r === rp.toUpperCase())) {
+          return value;
+        }
       }
+
       logger.debug(
         { scopedRepos },
         'Secret is scoped to a different repository',
@@ -208,4 +217,30 @@ Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migr
   delete decryptedConfig.encrypted;
   logger.trace({ config: decryptedConfig }, 'decryptedConfig');
   return decryptedConfig;
+}
+
+function getAzureCollection(): string | undefined {
+  const platform = GlobalConfig.get('platform');
+  if (platform !== 'azure') {
+    return undefined;
+  }
+
+  const endpoint = GlobalConfig.get('endpoint');
+  const endpointUrl = parseUrl(endpoint);
+  if (endpointUrl === null) {
+    // should not happen
+    logger.warn({ endpoint }, 'Unable to parse endpoint for token decryption');
+    return undefined;
+  }
+
+  const azureCollection = endpointUrl.pathname
+    ?.split('/')
+    .filter(Boolean)
+    .join('/');
+  if (is.nullOrUndefined(azureCollection)) {
+    logger.warn({ endpoint }, 'Unable to find azure collection name from URL');
+    return undefined;
+  }
+
+  return azureCollection;
 }
