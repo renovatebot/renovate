@@ -38,7 +38,7 @@ describe('config/decrypt', () => {
 
       process.env.RENOVATE_X_ENCRYPTED_STRICT = 'true';
       await expect(decryptConfig(config, repository)).rejects.toThrow(
-        'config-validation'
+        'config-validation',
       );
     });
 
@@ -49,7 +49,7 @@ describe('config/decrypt', () => {
       process.env.MEND_HOSTED = 'true';
       process.env.RENOVATE_X_ENCRYPTED_STRICT = 'true';
       await expect(decryptConfig(config, repository)).rejects.toThrow(
-        'config-validation'
+        'config-validation',
       );
     });
   });
@@ -86,63 +86,103 @@ describe('config/decrypt', () => {
     describe('azure only platform', () => {
       describe('general tests', () => {
         it.each`
-        str                                                    | repo         | expected
-        ${'{"o":"any",           "r":"",     "v":"wrong-123#'} | ${'fgh/rp1'} | ${null}
-        ${'{"o":"any",           "r":"",     "v":""}'}         | ${'fgh/rp1'} | ${null}
-        ${'{"o":"",              "r":"",     "v":"any"}'}      | ${'fgh/rp1'} | ${null}
-        ${'{"o":"fgh",           "r":"rp1",  "v":"zv-1"}'}     | ${'fgh/rp1'} | ${'zv-1'}
-        ${'{"o":"fgh",           "r":"",     "v":"zv-2"}'}     | ${'fgh/rp1'} | ${'zv-2'}
-        ${'{"o":"az123/fgh",     "r":"rp1",  "v":"zv-3"}'}     | ${'fgh/rp1'} | ${'zv-3'}
-        ${'{"o":"az123/fgh",     "r":"",     "v":"zv-4"}'}     | ${'fgh/rp1'} | ${'zv-4'}
-        ${'{"o":"az123/*",       "r":"",     "v":"zv-5"}'}     | ${'fgh/rp1'} | ${'zv-5'}
-        ${'{"o":"az123/",        "r":"",     "v":"zv-6"}'}     | ${'fgh/rp1'} | ${'zv-6'}
-        ${'{"o":"az123",         "r":"",     "v":"zv-7"}'}     | ${'fgh/rp1'} | ${'zv-7'}
-        ${'{"o":"az1",           "r":"",     "v":"zv-8"}'}     | ${'fgh/rp1'} | ${null}
-        ${'{"o":"az123/any",     "r":"rp1",  "v":"zv-9"}'}     | ${'fgh/rp1'} | ${null}
-        ${'{"o":"az123/any",     "r":"",     "v":"zv-10"}'}    | ${'fgh/rp1'} | ${null}
-        ${'{"o":"any/*",         "r":"",     "v":"zv-11"}'}    | ${'fgh/rp1'} | ${null}
-        ${'{"o":"az123/*,any/*", "r":"",     "v":"zv-12"}'}    | ${'fgh/rp1'} | ${'zv-12'}
-        ${'{"o":"fgh,any/*",     "r":"",     "v":"zv-13"}'}    | ${'fgh/rp1'} | ${'zv-13'}
-        ${'{"o":"az123/,any/*",  "r":"",     "v":"zv-14"}'}    | ${'fgh/rp1'} | ${'zv-14'}
-        ${'{"o":"any/*,fgh/",    "r":"",     "v":"zv-15"}'}    | ${'fgh/rp1'} | ${'zv-15'}
-        ${'{"o":"any/*,az123",   "r":"",     "v":"zv-16"}'}    | ${'fgh/rp1'} | ${'zv-16'}
-        ${'{"o":"any/*,az12",    "r":"",     "v":"zv-17"}'}    | ${'fgh/rp1'} | ${null}
-        ${'{"o":"az12,any/*",    "r":"",     "v":"zv-18"}'}    | ${'fgh/rp1'} | ${null}
-      `('equals("$str", "$repo") === $expected', ({ str, repo, expected }) => {
-          GlobalConfig.set({
-            platform: 'azure',
-            endpoint: 'https://dev.azure.com/az123'
-          });
-          expect(validateDecryptedValue(str, repo)).toBe(expected);
-        });
+          str                                                    | repo         | expected
+          ${'{"o":"any",           "r":"",     "v":"wrong-123#'} | ${'fgh/rp1'} | ${null}
+          ${'{"o":"any",           "r":"",     "v":""}'}         | ${'fgh/rp1'} | ${null}
+          ${'{"o":"",              "r":"",     "v":"any"}'}      | ${'fgh/rp1'} | ${null}
+          ${'{"o":"fgh",           "r":"rp1",  "v":"zv-1"}'}     | ${'fgh/rp1'} | ${'zv-1'}
+          ${'{"o":"fgh",           "r":"",     "v":"zv-2"}'}     | ${'fgh/rp1'} | ${'zv-2'}
+          ${'{"o":"az123/fgh",     "r":"rp1",  "v":"zv-3"}'}     | ${'fgh/rp1'} | ${'zv-3'}
+          ${'{"o":"az123/fgh",     "r":"",     "v":"zv-4"}'}     | ${'fgh/rp1'} | ${'zv-4'}
+          ${'{"o":"az123/*",       "r":"",     "v":"zv-5"}'}     | ${'fgh/rp1'} | ${'zv-5'}
+          ${'{"o":"az123/",        "r":"",     "v":"zv-6"}'}     | ${'fgh/rp1'} | ${'zv-6'}
+          ${'{"o":"az123",         "r":"",     "v":"zv-7"}'}     | ${'fgh/rp1'} | ${'zv-7'}
+          ${'{"o":"az1",           "r":"",     "v":"zv-8"}'}     | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az123/any",     "r":"rp1",  "v":"zv-9"}'}     | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az123/any",     "r":"",     "v":"zv-10"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"any/*",         "r":"",     "v":"zv-11"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az123/*,any/*", "r":"",     "v":"zv-12"}'}    | ${'fgh/rp1'} | ${'zv-12'}
+          ${'{"o":"fgh,any/*",     "r":"",     "v":"zv-13"}'}    | ${'fgh/rp1'} | ${'zv-13'}
+          ${'{"o":"az123/,any/*",  "r":"",     "v":"zv-14"}'}    | ${'fgh/rp1'} | ${'zv-14'}
+          ${'{"o":"any/*,fgh/",    "r":"",     "v":"zv-15"}'}    | ${'fgh/rp1'} | ${'zv-15'}
+          ${'{"o":"any/*,az123",   "r":"",     "v":"zv-16"}'}    | ${'fgh/rp1'} | ${'zv-16'}
+          ${'{"o":"any/*,az12",    "r":"",     "v":"zv-17"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az12,any/*",    "r":"",     "v":"zv-18"}'}    | ${'fgh/rp1'} | ${null}
+        `(
+          'equals("$str", "$repo") === $expected',
+          ({ str, repo, expected }) => {
+            GlobalConfig.set({
+              platform: 'azure',
+              endpoint: 'https://dev.azure.com/az123',
+            });
+            expect(validateDecryptedValue(str, repo)).toBe(expected);
+          },
+        );
       });
 
-
-        it('endpoint URL invalid', () => {
-          GlobalConfig.set({
-            platform: 'azure',
-            endpoint: 'httttps://dev.azure.com/az123'
-          });
-          expect(validateDecryptedValue('{"o":"proj", "r":"repo", "v":"any-1"}', 'proj/repo')).toBe('any-1');
-          expect(validateDecryptedValue('{"o":"proj", "r":"",     "v":"any-2"}', 'proj/repo')).toBe('any-2');
-
-          expect(validateDecryptedValue('{"o":"col/proj","r":"", "v":"any"}', 'proj/repo')).toBeNull();
-          expect(validateDecryptedValue('{"o":"col/*",   "r":"", "v":"any"}', 'proj/repo')).toBeNull();
+      it('endpoint URL invalid', () => {
+        GlobalConfig.set({
+          platform: 'azure',
+          endpoint: 'httttps://dev.azure.com/az123',
         });
+        expect(
+          validateDecryptedValue(
+            '{"o":"proj", "r":"repo", "v":"any-1"}',
+            'proj/repo',
+          ),
+        ).toBe('any-1');
+        expect(
+          validateDecryptedValue(
+            '{"o":"proj", "r":"", "v":"any-2"}',
+            'proj/repo',
+          ),
+        ).toBe('any-2');
 
-        it('endpoint URL without collection', () => {
-          GlobalConfig.set({
-            platform: 'azure',
-            endpoint: 'https://dev.azure.com/'
-          });
-          expect(validateDecryptedValue('{"o":"proj", "r":"repo", "v":"any-3"}', 'proj/repo')).toBe('any-3');
-          expect(validateDecryptedValue('{"o":"proj", "r":"",     "v":"any-4"}', 'proj/repo')).toBe('any-4');
+        expect(
+          validateDecryptedValue(
+            '{"o":"col/proj", "r":"", "v":"any"}',
+            'proj/repo',
+          ),
+        ).toBeNull();
+        expect(
+          validateDecryptedValue(
+            '{"o":"col/*", "r":"", "v":"any"}',
+            'proj/repo',
+          ),
+        ).toBeNull();
+      });
 
-          expect(validateDecryptedValue('{"o":"col/proj","r":"", "v":"any"}', 'proj/repo')).toBeNull();
-          expect(validateDecryptedValue('{"o":"col/*",   "r":"", "v":"any"}', 'proj/repo')).toBeNull();
+      it('endpoint URL without collection', () => {
+        GlobalConfig.set({
+          platform: 'azure',
+          endpoint: 'https://dev.azure.com/',
         });
+        expect(
+          validateDecryptedValue(
+            '{"o":"proj", "r":"repo", "v":"any-3"}',
+            'proj/repo',
+          ),
+        ).toBe('any-3');
+        expect(
+          validateDecryptedValue(
+            '{"o":"proj", "r":"", "v":"any-4"}',
+            'proj/repo',
+          ),
+        ).toBe('any-4');
 
-
+        expect(
+          validateDecryptedValue(
+            '{"o":"col/proj", "r":"", "v":"any"}',
+            'proj/repo',
+          ),
+        ).toBeNull();
+        expect(
+          validateDecryptedValue(
+            '{"o":"col/*", "r":"", "v":"any"}',
+            'proj/repo',
+          ),
+        ).toBeNull();
       });
     });
   });
+});
