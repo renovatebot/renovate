@@ -7,8 +7,10 @@ This document describes Renovate's scheduling.
 
 ## Default behavior
 
-By default, Renovate bot runs as often as its administrator has configured Renovate to run.
-For example, the administrator may allow Renovate to run hourly, daily, or outside office hours only.
+On the backend side, Renovate bot runs as often as its administrator has configured Renovate to run.
+For example, the administrator configure Renovate to begin its runs hourly, daily, or outside office hours only.
+How often Renovate runs per-repository subsequently depends on how many repositories there are to check, and how many updates are pending for each repository at the time.
+If the backend configuration for Renovate means it runs scheduled jobs per-repo approximately every X hours, it is not possible for _repository configuration_ to reduce that to less than X, or to force Renovate to run at exact times on specific repos.
 
 ### Default timezone
 
