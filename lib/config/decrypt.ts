@@ -77,7 +77,7 @@ function validateDecryptedValue(
       throw error;
     }
 
-    const repositories =  [repository];
+    const repositories = [repository];
     const azCollection = getAzureCollection();
     if (azCollection && is.nonEmptyString(azCollection)) {
       repositories.push(azCollection + '/' + repository);
@@ -93,7 +93,7 @@ function validateDecryptedValue(
       const scopedRepos = orgPrefixes.map((orgPrefix) =>
         `${orgPrefix}${repo}`.toUpperCase(),
       );
-      for (const rp in repositories) {
+      for (const rp of repositories) {
         if (scopedRepos.some((r) => r === rp.toUpperCase())) {
           return value;
         }
@@ -110,12 +110,10 @@ function validateDecryptedValue(
     }
 
     // no scoped repos, only org
-    if (
-      orgPrefixes.some((orgPrefix) =>
-        repository.toUpperCase().startsWith(orgPrefix),
-      )
-    ) {
-      return value;
+    for (const rp of repositories) {
+      if (orgPrefixes.some((orgPrefix) => rp.startsWith(orgPrefix))) {
+        return value;
+      }
     }
     logger.debug({ orgPrefixes }, 'Secret is scoped to a different org');
     const error = new Error('config-validation');
