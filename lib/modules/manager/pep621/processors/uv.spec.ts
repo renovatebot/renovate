@@ -9,13 +9,13 @@ import {
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
+import type { BranchConfig } from '../../../../workers/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import { GitRefsDatasource } from '../../../datasource/git-refs';
 import { GitTagsDatasource } from '../../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags';
 import { PypiDatasource } from '../../../datasource/pypi';
-import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
 import { UvProcessor } from './uv';
 
@@ -26,7 +26,12 @@ jest.mock('../../../datasource');
 const googleAuth = mocked(_googleAuth);
 const getPkgReleases = mockedFunction(_getPkgReleases);
 
-const config: UpdateArtifactsConfig = {};
+const config: BranchConfig = {
+  branchName: 'renovate/dep',
+  baseBranch: '',
+  upgrades: [],
+  manager: 'pep621',
+};
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
@@ -787,6 +792,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
           config: {
+            ...config,
             updateType: 'lockFileMaintenance',
           },
           updatedDeps: [],

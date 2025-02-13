@@ -419,9 +419,7 @@ export async function getUpdatedPackageFiles(
             (await getFile(packageFile.path, config.baseBranch));
           const results = await managerUpdateArtifacts(manager, {
             packageFileName: packageFile.path,
-            updatedDeps: config.packageFiles![manager].flatMap(
-              (pkg) => pkg.deps,
-            ),
+            updatedDeps: [],
             newPackageFileContent: contents!,
             config: patchConfigForArtifactsUpdate(
               config,

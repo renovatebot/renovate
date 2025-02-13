@@ -123,6 +123,7 @@ export interface BranchConfig
   automergedPreviously?: boolean;
   baseBranch: string;
   errors?: ValidationMessage[];
+  goGetDirs?: string[];
   hasTypes?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
   releaseTimestamp?: Timestamp;

@@ -15,6 +15,7 @@ import type {
 import type { FileChange } from '../../util/git/types';
 import type { MergeConfidence } from '../../util/merge-confidence/types';
 import type { Timestamp } from '../../util/timestamp';
+import type { BranchConfig } from '../../workers/types';
 import type { CustomExtractConfig } from './custom/types';
 
 export type MaybePromise<T> = T | Promise<T>;
@@ -150,6 +151,7 @@ export interface PackageDependency<T = Record<string, any>>
   currentVersionTimestamp?: string;
   lockedVersion?: string;
   propSource?: string;
+  registryUrl?: string;
   registryUrls?: string[] | null;
   rangeStrategy?: RangeStrategy;
   skipReason?: SkipReason;
@@ -222,7 +224,7 @@ export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;
   updatedDeps: Upgrade<T>[];
   newPackageFileContent: string;
-  config: UpdateArtifactsConfig;
+  config: BranchConfig;
 }
 
 export interface UpdateDependencyConfig<T = Record<string, any>> {

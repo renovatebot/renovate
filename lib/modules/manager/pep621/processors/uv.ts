@@ -144,9 +144,8 @@ export class UvProcessor implements PyProjectProcessor {
     updateArtifact: UpdateArtifact,
     project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null> {
-    const { config, packageFileName, updatedDeps } = updateArtifact;
+    const { config, packageFileName } = updateArtifact;
     const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
-
     // abort if no lockfile is defined
     const lockFileName = getSiblingFileName(packageFileName, 'uv.lock');
     try {
@@ -155,6 +154,10 @@ export class UvProcessor implements PyProjectProcessor {
         logger.debug('No uv.lock found');
         return null;
       }
+
+      const updatedDeps = isLockFileMaintenance
+        ? config.packageFiles![config.manager].flatMap((pkg) => pkg.deps)
+        : updateArtifact.updatedDeps;
 
       const pythonConstraint: ToolConstraint = {
         toolName: 'python',
@@ -285,7 +288,7 @@ async function getUvExtraIndexUrl(
       const sources = project.tool?.uv?.sources;
       return !sources || !(dep.packageName! in sources);
     })
-    .flatMap((dep) => dep.registryUrls)
+    .flatMap((dep) => dep.registryUrls ?? dep.registryUrl)
     .filter(is.string)
     .filter((registryUrl) => {
       // Check if the registry URL is not the default one and not already configured

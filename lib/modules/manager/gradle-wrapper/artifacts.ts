@@ -16,12 +16,9 @@ import type { StatusResult } from '../../../util/git/types';
 import { Http } from '../../../util/http';
 import { newlineRegex } from '../../../util/regex';
 import { replaceAt } from '../../../util/string';
+import type { BranchConfig } from '../../../workers/types';
 import { updateArtifacts as gradleUpdateArtifacts } from '../gradle';
-import type {
-  UpdateArtifact,
-  UpdateArtifactsConfig,
-  UpdateArtifactsResult,
-} from '../types';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   extraEnv,
   getJavaConstraint,
@@ -114,7 +111,7 @@ export async function updateBuildFile(
 
 export async function updateLockFiles(
   buildFileName: string,
-  config: UpdateArtifactsConfig,
+  config: BranchConfig,
 ): Promise<UpdateArtifactsResult[] | null> {
   const buildFileContent = await readLocalFile(buildFileName, 'utf8');
   if (!buildFileContent) {

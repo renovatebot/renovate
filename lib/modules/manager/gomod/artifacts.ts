@@ -19,11 +19,11 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { regEx } from '../../../util/regex';
+import type { BranchConfig } from '../../../workers/types';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
   UpdateArtifact,
-  UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
 import { getExtraDepsNotice } from './artifacts-extra';
@@ -32,7 +32,7 @@ const { major, valid } = semver;
 
 function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
-  { constraints }: UpdateArtifactsConfig,
+  { constraints }: BranchConfig,
 ): string[] {
   // Check if we fail to parse any major versions and log that they're skipped
   const invalidMajorDeps = updatedDeps.filter(
