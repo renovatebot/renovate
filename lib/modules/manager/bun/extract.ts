@@ -17,16 +17,15 @@ export async function extractAllPackageFiles(
   matchedFiles: string[],
 ): Promise<PackageFile[]> {
   const packageFiles: PackageFile<NpmManagerData>[] = [];
-  for (const matchedFile of matchedFiles) {
-    if (
-      !(
-        matchesFileName(matchedFile, 'bun.lockb') ||
-        matchesFileName(matchedFile, 'bun.lock')
-      )
-    ) {
-      logger.warn({ matchedFile }, 'Invalid bun lockfile match');
-      continue;
-    }
+  const matchedLockFiles = matchedFiles.filter(
+    (file) =>
+      matchesFileName(file, 'bun.lock') || matchesFileName(file, 'bun.lockb'),
+  );
+  if (matchedLockFiles.length === 0) {
+    logger.debug('No bun lockfiles found');
+    return packageFiles;
+  }
+  for (const matchedFile of matchedLockFiles) {
     const packageFile = getSiblingFileName(matchedFile, 'package.json');
     const packageFileContent = await readLocalFile(packageFile, 'utf8');
     if (!packageFileContent) {
