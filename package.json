@@ -140,7 +140,7 @@
     "pnpm": "^9.0.0"
   },
   "volta": {
-    "node": "22.13.1",
+    "node": "22.14.0",
     "pnpm": "9.15.5"
   },
   "dependencies": {
@@ -301,7 +301,7 @@
     "@types/mdast": "3.0.15",
     "@types/moo": "0.5.10",
     "@types/ms": "0.7.34",
-    "@types/node": "22.10.9",
+    "@types/node": "22.13.1",
     "@types/parse-link-header": "2.0.3",
     "@types/punycode": "2.1.4",
     "@types/semver": "7.5.8",
