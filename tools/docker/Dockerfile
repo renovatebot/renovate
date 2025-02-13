@@ -20,7 +20,7 @@ ENV RENOVATE_BINARY_SOURCE=global
 FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.40.3@sha256:eaf620ddbebdbb187070eb89fcf7dc0b4b212a23cbd930d36fb540ed2bb5653a AS build
 
 # We want a specific node version here
-# renovate: datasource=node-version
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
 RUN install-tool node 22.13.1
 
 # corepack is too buggy 😞
