@@ -82,10 +82,10 @@ export function validateDecryptedValue(
     const azureCollection = getAzureCollection();
     if (is.nonEmptyString(azureCollection)) {
       // used for full 'org/project/repo' matching
-      repositories.push((azureCollection + '/' + repository).toUpperCase());
+      repositories.push(`${azureCollection}/${repository}`.toUpperCase());
       // used for org prefix matching without repo
-      repositories.push((azureCollection).toUpperCase());
-      repositories.push((azureCollection + '/*/').toUpperCase());
+      repositories.push(azureCollection.toUpperCase());
+      repositories.push(`${azureCollection}/*/`.toUpperCase());
     }
 
     const orgPrefixes = org
