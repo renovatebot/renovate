@@ -350,7 +350,7 @@ describe('util/fs/index', () => {
       });
 
       await new Promise((resolve, reject) => {
-        stream.on('end', resolve);
+        stream.on('end', () => resolve());
         stream.on('error', reject);
       });
 
