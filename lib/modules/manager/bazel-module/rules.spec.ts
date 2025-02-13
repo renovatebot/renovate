@@ -96,48 +96,43 @@ const gitRepositoryForUnsupportedPkgDep: BasePackageDep = {
 
 describe('modules/manager/bazel-module/rules', () => {
   describe('RuleToBazelModulePackageDep', () => {
-    const bazelDepWithoutDevDep = fragments.record({
-      rule: fragments.string('bazel_dep'),
+    const bazelDepWithoutDevDep = fragments.rule('bazel_dep', {
       name: fragments.string('rules_foo'),
       version: fragments.string('1.2.3'),
     });
-    const bazelDepWithoutDevDepNoVersion = fragments.record({
-      rule: fragments.string('bazel_dep'),
+    const bazelDepWithoutDevDepNoVersion = fragments.rule('bazel_dep', {
       name: fragments.string('rules_foo'),
     });
-    const gitOverrideWithGihubHost = fragments.record({
-      rule: fragments.string('git_override'),
+    const gitOverrideWithGihubHost = fragments.rule('git_override', {
       module_name: fragments.string('rules_foo'),
       remote: fragments.string('https://github.com/example/rules_foo.git'),
       commit: fragments.string('850cb49c8649e463b80ef7984e7c744279746170'),
     });
-    const gitOverrideWithUnsupportedHost = fragments.record({
-      rule: fragments.string('git_override'),
+    const gitOverrideWithUnsupportedHost = fragments.rule('git_override', {
       module_name: fragments.string('rules_foo'),
       remote: fragments.string('https://nobuenos.com/example/rules_foo.git'),
       commit: fragments.string('850cb49c8649e463b80ef7984e7c744279746170'),
     });
-    const archiveOverride = fragments.record({
-      rule: fragments.string('archive_override'),
+    const archiveOverride = fragments.rule('archive_override', {
       module_name: fragments.string('rules_foo'),
       urls: fragments.string('https://example.com/rules_foo.tar.gz'),
     });
-    const localPathOverride = fragments.record({
-      rule: fragments.string('local_path_override'),
+    const localPathOverride = fragments.rule('local_path_override', {
       module_name: fragments.string('rules_foo'),
       path: fragments.string('/path/to/module'),
     });
-    const singleVersionOverride = fragments.record({
-      rule: fragments.string('single_version_override'),
+    const singleVersionOverride = fragments.rule('single_version_override', {
       module_name: fragments.string('rules_foo'),
       version: fragments.string('1.2.3'),
       registry: fragments.string(customRegistryUrl),
     });
-    const singleVersionOverrideWithRegistry = fragments.record({
-      rule: fragments.string('single_version_override'),
-      module_name: fragments.string('rules_foo'),
-      registry: fragments.string(customRegistryUrl),
-    });
+    const singleVersionOverrideWithRegistry = fragments.rule(
+      'single_version_override',
+      {
+        module_name: fragments.string('rules_foo'),
+        registry: fragments.string(customRegistryUrl),
+      },
+    );
 
     it.each`
       msg                                                    | a                                    | exp
@@ -156,14 +151,12 @@ describe('modules/manager/bazel-module/rules', () => {
   });
 
   describe('GitRepositoryToPackageDep', () => {
-    const gitRepositoryWithGihubHost = fragments.record({
-      rule: fragments.string('git_repository'),
+    const gitRepositoryWithGihubHost = fragments.rule('git_repository', {
       name: fragments.string('rules_foo'),
       remote: fragments.string('https://github.com/example/rules_foo.git'),
       commit: fragments.string('850cb49c8649e463b80ef7984e7c744279746170'),
     });
-    const gitRepositoryWithUnsupportedHost = fragments.record({
-      rule: fragments.string('git_repository'),
+    const gitRepositoryWithUnsupportedHost = fragments.rule('git_repository', {
       name: fragments.string('rules_foo'),
       remote: fragments.string('https://nobuenos.com/example/rules_foo.git'),
       commit: fragments.string('850cb49c8649e463b80ef7984e7c744279746170'),
