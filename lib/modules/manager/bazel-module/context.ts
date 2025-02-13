@@ -48,7 +48,8 @@ export class Ctx implements CtxCompatible {
     }
     return c;
   }
-  get currentRule(): RuleFragment {
+
+  private get currentRule(): RuleFragment {
     const current = this.current;
     if (current.type === 'rule') {
       return current;
@@ -56,7 +57,7 @@ export class Ctx implements CtxCompatible {
     throw new Error('Requested current rule, but does not exist.');
   }
 
-  get currentExtensionTag(): ExtensionTagFragment {
+  private get currentExtensionTag(): ExtensionTagFragment {
     const current = this.current;
     if (current.type === 'extensionTag') {
       return current;
@@ -64,7 +65,7 @@ export class Ctx implements CtxCompatible {
     throw new Error('Requested current extension tag, but does not exist.');
   }
 
-  get currentArray(): ArrayFragment {
+  private get currentArray(): ArrayFragment {
     const current = this.current;
     if (current.type === 'array') {
       return current;
