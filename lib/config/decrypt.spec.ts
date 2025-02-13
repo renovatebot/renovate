@@ -123,7 +123,7 @@ describe('config/decrypt', () => {
       it('endpoint URL invalid', () => {
         GlobalConfig.set({
           platform: 'azure',
-          endpoint: 'httttps://dev.azure.com/az123',
+          endpoint: 'ht tps://dev.az ure.com/az123',
         });
         expect(
           validateDecryptedValue(

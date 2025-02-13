@@ -240,7 +240,7 @@ function getAzureCollection(): string | undefined {
     ?.split('/')
     .filter(Boolean)
     .join('/');
-  if (is.nullOrUndefined(azureCollection)) {
+  if (!is.nonEmptyString(azureCollection)) {
     logger.warn({ endpoint }, 'Unable to find azure collection name from URL');
     return undefined;
   }
