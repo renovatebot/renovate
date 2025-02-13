@@ -3,7 +3,7 @@ import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { logger } from '../logger';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
-import { ensureTrailingSlash } from '../util/url';
+import { ensureTrailingSlash, parseUrl } from '../util/url';
 import { tryDecryptKbPgp } from './decrypt/kbpgp';
 import {
   tryDecryptPublicKeyDefault,
@@ -50,7 +50,7 @@ export async function tryDecrypt(
   return decryptedStr;
 }
 
-function validateDecryptedValue(
+export function validateDecryptedValue(
   decryptedObjStr: string,
   repository: string,
 ): string | null {
@@ -77,6 +77,17 @@ function validateDecryptedValue(
       throw error;
     }
 
+    const repositories = [repository.toUpperCase()];
+
+    const azureCollection = getAzureCollection();
+    if (is.nonEmptyString(azureCollection)) {
+      // used for full 'org/project/repo' matching
+      repositories.push(`${azureCollection}/${repository}`.toUpperCase());
+      // used for org prefix matching without repo
+      repositories.push(azureCollection.toUpperCase());
+      repositories.push(`${azureCollection}/*/`.toUpperCase());
+    }
+
     const orgPrefixes = org
       .split(',')
       .map((o) => o.trim())
@@ -87,9 +98,12 @@ function validateDecryptedValue(
       const scopedRepos = orgPrefixes.map((orgPrefix) =>
         `${orgPrefix}${repo}`.toUpperCase(),
       );
-      if (scopedRepos.some((r) => r === repository.toUpperCase())) {
-        return value;
+      for (const rp of repositories) {
+        if (scopedRepos.some((r) => r === rp)) {
+          return value;
+        }
       }
+
       logger.debug(
         { scopedRepos },
         'Secret is scoped to a different repository',
@@ -101,12 +115,10 @@ function validateDecryptedValue(
     }
 
     // no scoped repos, only org
-    if (
-      orgPrefixes.some((orgPrefix) =>
-        repository.toUpperCase().startsWith(orgPrefix),
-      )
-    ) {
-      return value;
+    for (const rp of repositories) {
+      if (orgPrefixes.some((orgPrefix) => rp.startsWith(orgPrefix))) {
+        return value;
+      }
     }
     logger.debug({ orgPrefixes }, 'Secret is scoped to a different org');
     const error = new Error('config-validation');
@@ -208,4 +220,30 @@ Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migr
   delete decryptedConfig.encrypted;
   logger.trace({ config: decryptedConfig }, 'decryptedConfig');
   return decryptedConfig;
+}
+
+function getAzureCollection(): string | undefined {
+  const platform = GlobalConfig.get('platform');
+  if (platform !== 'azure') {
+    return undefined;
+  }
+
+  const endpoint = GlobalConfig.get('endpoint');
+  const endpointUrl = parseUrl(endpoint);
+  if (endpointUrl === null) {
+    // should not happen
+    logger.warn({ endpoint }, 'Unable to parse endpoint for token decryption');
+    return undefined;
+  }
+
+  const azureCollection = endpointUrl.pathname
+    ?.split('/')
+    .filter(is.nonEmptyString)
+    .join('/');
+  if (!is.nonEmptyString(azureCollection)) {
+    logger.warn({ endpoint }, 'Unable to find azure collection name from URL');
+    return undefined;
+  }
+
+  return azureCollection;
 }
