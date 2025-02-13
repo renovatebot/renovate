@@ -50,7 +50,7 @@ export async function tryDecrypt(
   return decryptedStr;
 }
 
-function validateDecryptedValue(
+export function validateDecryptedValue(
   decryptedObjStr: string,
   repository: string,
 ): string | null {
@@ -77,10 +77,15 @@ function validateDecryptedValue(
       throw error;
     }
 
-    const repositories = [repository];
-    const azCollection = getAzureCollection();
-    if (azCollection && is.nonEmptyString(azCollection)) {
-      repositories.push(azCollection + '/' + repository);
+    const repositories = [repository.toUpperCase()];
+
+    const azureCollection = getAzureCollection();
+    if (is.nonEmptyString(azureCollection)) {
+      // used for full 'org/project/repo' matching
+      repositories.push((azureCollection + '/' + repository).toUpperCase());
+      // used for org prefix matching without repo
+      repositories.push((azureCollection).toUpperCase());
+      repositories.push((azureCollection + '/*/').toUpperCase());
     }
 
     const orgPrefixes = org
@@ -94,7 +99,7 @@ function validateDecryptedValue(
         `${orgPrefix}${repo}`.toUpperCase(),
       );
       for (const rp of repositories) {
-        if (scopedRepos.some((r) => r === rp.toUpperCase())) {
+        if (scopedRepos.some((r) => r === rp)) {
           return value;
         }
       }
