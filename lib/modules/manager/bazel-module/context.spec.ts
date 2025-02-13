@@ -120,7 +120,7 @@ describe('modules/manager/bazel-module/context', () => {
     });
 
     it('throws on missing current', () => {
-      const ctx = new Ctx()
+      const ctx = new Ctx();
       expect(() => ctx.endRule()).toThrow(
         new Error('Requested current, but no value.'),
       );
