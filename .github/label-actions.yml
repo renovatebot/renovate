@@ -40,6 +40,19 @@
 
     Thanks, the Renovate team
 
+'auto:reproduction-still-needed':
+  comment: >
+    Hi there,
+
+
+    This Discussion has been flagged previously as needing a minimal reproduction, but one does not yet exist. No further support will be provided until such a reproduction is created.
+
+
+    If you have provided a minimal reproduction which satisfies our guide above, but it went unnoticed, please reply to this message to help us find it.
+
+
+    Thanks, the Renovate team
+
 'auto:environment':
   comment: >
     Hi there,
