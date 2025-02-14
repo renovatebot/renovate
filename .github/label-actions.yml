@@ -568,7 +568,7 @@
     Hi there,
 
 
-    This is a semi-automated message to let you know that maintainers do not believe that this discussion can progress any further.
+    This is a semi-automated message to let you know that maintainers do not believe that they cannot help further with this Discussion.
 
 
     This may be because the discussion is missing information, or because the discussion is too complex, or because the discussion is not actionable. It might also be because you've indicated that you don't have the time or willingness to provide information or perform steps requested of you.
@@ -584,10 +584,10 @@
     Hi there,
 
 
-    A maintainer has flagged this discussion as needing a detailed investigation. That may mean them forking and running locally, debugging, or other time-consuming tasks. Such things are done by maintainers for free, on a best-effort basis - but with no guarantees.
+    A maintainer has flagged this Discussion as needing a detailed investigation. That may mean them forking and running locally, debugging, or other time-consuming tasks. Such things are done by maintainers for free, on a best-effort basis - but with no guarantees.
 
 
-    The purpose of this automated message is therefore to let you know that a maintainer _intends_ to investigate, but it may take some time (potentially even weeks). Please do not chase them, hassle them, or ask for updates. They will update you when they have something to share.
+    The purpose of this automated message is therefore to let you know that a maintainer _intends_ to investigate, but it may take some time (potentially even weeks). Please do not chase them, hassle them, ask for updates - just wait. They will update you when they have something to share.
 
 
     Thanks, the Renovate team
@@ -603,7 +603,7 @@
     In this project, we use Discussions as a triaging for Issues. This policy is displayed when attempting to create Issues or Discussions, and we also have a [pinned Issue](https://github.com/renovatebot/renovate/issues/32830) explaining the policy.
 
 
-    If despite that you have created this Issue, it is either out of stubbornness (rejecting the policy) or carelessness (not reading the policy). It's almost always an attempt to get more attention, or to get a faster response.
+    If despite that you have created this Issue, it is either out of stubbornness (rejecting the policy) or carelessness (not paying attention). Either way, it's almost always an attempt to get more attention, or to get a faster response, which are unwelcome behaviors in Open Source.
 
 
     This issue will be closed, locked, and later deleted. Violators of policy will be given a 7 day block from the repo to alert them. See our policy on [Blocking and unblocking](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#blocking-and-unblocking) for more information.
