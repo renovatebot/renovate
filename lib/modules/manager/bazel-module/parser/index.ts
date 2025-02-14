@@ -1,6 +1,6 @@
 import { lang, query as q } from 'good-enough-parser';
-import { Ctx } from '../context';
-import type { ResultFragment } from '../fragments';
+import { Ctx } from './context';
+import type { ResultFragment } from './fragments';
 import { extensionTags } from './extension-tags';
 import { rules } from './rules';
 

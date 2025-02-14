@@ -1,6 +1,6 @@
 import { query as q } from 'good-enough-parser';
 import { regEx } from '../../../../util/regex';
-import type { Ctx } from '../context';
+import type { Ctx } from './context';
 import { kvParams } from './common';
 
 // For the purpose of parsing bazel module files in Renovate, we consider a rule
