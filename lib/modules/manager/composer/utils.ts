@@ -8,6 +8,7 @@ import { coerceNumber } from '../../../util/number';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { Lockfile, PackageFile } from './schema';
+import is from '@sindresorhus/is';
 
 export { composerVersioningId };
 
@@ -21,12 +22,16 @@ export function getComposerArguments(
 
   if (config.composerIgnorePlatformReqs) {
     if (config.composerIgnorePlatformReqs.length === 0) {
-      // TODO: toolConstraint.constraint can be null or undefined? (#22198)
-      const major = api.getMajor(toolConstraint.constraint!);
-      const minor = api.getMinor(toolConstraint.constraint!);
-      args += api.matches(`${major}.${minor}`, '^2.2')
-        ? " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'"
-        : ' --ignore-platform-reqs';
+      if (is.string(toolConstraint.constraint)) {
+        const major = api.getMajor(toolConstraint.constraint);
+        const minor = api.getMinor(toolConstraint.constraint);
+
+        args += api.matches(`${major}.${minor}`, '^2.2')
+          ? " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'"
+          : ' --ignore-platform-reqs';
+      } else {
+        args += ' --ignore-platform-reqs';
+      }
     } else {
       config.composerIgnorePlatformReqs.forEach((req) => {
         args += ' --ignore-platform-req ' + quote(req);
@@ -52,9 +57,11 @@ export function getComposerUpdateArguments(
 ): string {
   let args = getComposerArguments(config, toolConstraint);
 
-  // TODO: toolConstraint.constraint can be null or undefined? (#22198)
-  if (api.intersects!(toolConstraint.constraint!, '^2.7')) {
-    args += ' --minimal-changes';
+  if (
+    is.string(toolConstraint.constraint) &&
+    api.intersects!(toolConstraint.constraint, '^2.7')
+  ) {
+      args += ' --minimal-changes';
   }
 
   return args;
