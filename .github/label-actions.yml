@@ -415,8 +415,7 @@
 
     If you want to get the discussion back on track, we would like you to:
      - Remove, or edit, the bad vibes parts of your comments
-     - Say that you understand the problem (we don't need a lengthy apology)
-     - Stop giving off more bad vibes
+     - Give a thumbs-up to this message, to show you understand and agree to the above
 
 
     Thanks, the Renovate team
@@ -640,3 +639,19 @@
 
 
     Thanks, the Renovate
+
+'auto:help-yourself':
+  comment: >
+    Hi there,
+
+
+    This semi-automated message is from the maintainers to ask you to try a little harder to help yourself, and not just do the "minimum effort". We've helped thousands of users and become pretty good at recognizing when users aren't really putting in their best effort to help themselves. Sorry if you find this message a bit harsh, but this happens often and we need to address it.
+
+
+    If you're here in this repo getting help then you should be mindful you're getting help for free and that we have many people like you to help every day with limited time available. Your time here is not as valuable as a maintainer's time, so you should be doing the heavy lifting whenever possible.
+
+
+    If you're the type of person who's busy and not got time to figure things out yourself or spend much time trying, or you consider your time too valuable, then you should be investigating an Enterprise support contract or hiring a consultant - such options are easily available.
+
+
+    Thanks, the Renovate team
