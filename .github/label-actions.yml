@@ -48,7 +48,7 @@
     This Discussion has been flagged previously as needing a minimal reproduction, but one does not yet exist. No further support will be provided until such a reproduction is created.
 
 
-    If you have provided a minimal reproduction which satisfies our guide above, but it went unnoticed, please reply to this message to help us find it.
+    If you have provided a minimal reproduction which satisfies our definitions above, but it went unnoticed, please reply to this message to help us find it.
 
 
     Thanks, the Renovate team
@@ -627,3 +627,16 @@
   close: true
   close-reason: 'not planned'
   lock: true
+
+'auto:docs-improvements':
+  comment: >
+    Hi there,
+
+
+    You are seeing this message because someone - maybe you - has suggested that the documentation should be improved.
+
+
+    The good news is that essentially all Renovate documentation is Open Source in this repository and can be improved by you too! If you have a suggestion for improvement, please consider opening a PR to improve the documentation, instead of just complaining about it (however subtlely or politely you intended it). Even if English isn't your first language or you're not _sure_ what to write, take a shot at it and we will guide you during the PR review. Documentation updates can be done easily in your browser on GitHub.com and do not require you to clone any code.
+
+
+    Thanks, the Renovate
