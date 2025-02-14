@@ -110,12 +110,12 @@ We recommend you use the `cron` syntax in your Renovate schedules.
 <!-- prettier-ignore -->
 !!! note
     For Cron schedules, you _must_ use the `*` wildcard for the minutes value, as Renovate doesn't support minute granularity.
-    And the cron schedule must have five comma separated parts.
+    And the cron schedule must have five parts.
 
 #### Deprecated breejs/later syntax
 
 This section explains the deprecated `@breejs/later` syntax.
-We plan to remove the `@breejs/later` library in a future major Renovate release.
+We plan to remove the `@breejs/later` library in a future major Renovate release if we can find a way to migrate all valid schedules to cron syntax.
 Due to this upcoming change, we strongly recommend you use `cron` schedules.
 
 Renovate uses the [`@breejs/later` library](https://github.com/breejs/later) to parse the text.
