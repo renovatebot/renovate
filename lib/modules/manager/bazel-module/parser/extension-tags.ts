@@ -50,7 +50,7 @@ export const extensionTags = q
           // istanbul ignore next
           throw new Error(`Unexpected tree in postHandler: ${tree.type}`);
         }
-	const { endsWith } = tree;
+        const { endsWith } = tree;
         const endOffset = endsWith.offset + endsWith.value.length;
         return ctx.endExtensionTag(endOffset);
       },
