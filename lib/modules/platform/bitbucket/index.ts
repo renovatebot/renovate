@@ -304,7 +304,7 @@ export async function findPr({
     const prs = (
       await bitbucketHttp.getJsonUnchecked<PagedResult<PrResponse>>(
         `/2.0/repositories/${config.repository}/pullrequests?q=source.branch.name="${branchName}"&state=open`,
-        // PR might have been created by anyone, so don't use the short-term memory cache only
+        // PR might have been created by anyone and the long-term caching could be harmful, so we use the short-term cache
         { cacheProvider: memCacheProvider },
       )
     ).body.values;
