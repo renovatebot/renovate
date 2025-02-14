@@ -2,6 +2,7 @@ import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 
 import { extractPackageJson } from '../npm/extract/common/package-file';
+import { readNpmrc } from '../npm/extract/common/read-npmrc';
 import type { NpmPackage } from '../npm/extract/types';
 import type { NpmManagerData } from '../npm/types';
 import type { ExtractConfig, PackageFile } from '../types';
@@ -51,6 +52,7 @@ export async function extractAllPackageFiles(
     const res: PackageFile = {
       ...extracted,
       packageFile,
+      npmrc: await readNpmrc(packageFile, config),
       lockFiles: [matchedFile],
     };
     packageFiles.push(res);
