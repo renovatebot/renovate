@@ -46,13 +46,14 @@ export const extensionTags = q
       maxDepth: 1,
       search: kvParams,
       postHandler: (ctx, tree) => {
-        if (tree.type !== 'wrapped-tree') {
-          // istanbul ignore next
-          throw new Error(`Unexpected tree in postHandler: ${tree.type}`);
+        if (tree.type === 'wrapped-tree') {
+          const { endsWith } = tree;
+          const endOffset = endsWith.offset + endsWith.value.length;
+          return ctx.endExtensionTag(endOffset);
         }
-        const { endsWith } = tree;
-        const endOffset = endsWith.offset + endsWith.value.length;
-        return ctx.endExtensionTag(endOffset);
+
+        // istanbul ignore next
+        throw new Error(`Unexpected tree in postHandler: ${tree.type}`);
       },
     }),
   );
