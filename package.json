@@ -237,6 +237,7 @@
     "redis": "4.7.0",
     "remark": "13.0.0",
     "remark-github": "10.1.0",
+    "renovate": "file:",
     "safe-stable-stringify": "2.5.0",
     "semver": "7.7.1",
     "semver-stable": "3.0.0",
