@@ -5,7 +5,12 @@ import { getSiblingFileName } from '../../../../util/fs';
 import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type { parseGradle as parseGradleCallback } from '../parser';
-import type { Ctx, GradleManagerData } from '../types';
+import type {
+  ContentDescriptorMatcher,
+  ContentDescriptorSpec,
+  Ctx,
+  GradleManagerData,
+} from '../types';
 import { isDependencyString, parseDependencyString } from '../utils';
 import {
   GRADLE_PLUGINS,
@@ -264,6 +269,65 @@ export function handlePlugin(ctx: Ctx): Ctx {
   return ctx;
 }
 
+function isValidContentDescriptorRegex(
+  fieldName: string,
+  pattern: string,
+): boolean {
+  try {
+    regEx(pattern);
+  } catch {
+    logger.debug(
+      `Skipping content descriptor with unsupported regExp pattern for ${fieldName}: ${pattern}`,
+    );
+    return false;
+  }
+
+  return true;
+}
+
+export function handleRegistryContent(ctx: Ctx): Ctx {
+  const methodName = loadFromTokenMap(ctx, 'methodName')[0].value;
+  let groupId = loadFromTokenMap(ctx, 'groupId')[0].value;
+
+  let matcher: ContentDescriptorMatcher = 'simple';
+  if (methodName.includes('Regex')) {
+    matcher = 'regex';
+    groupId = `^${groupId}$`.replaceAll('\\\\', '\\');
+    if (!isValidContentDescriptorRegex('group', groupId)) {
+      return ctx;
+    }
+  } else if (methodName.includes('AndSubgroups')) {
+    matcher = 'subgroup';
+  }
+
+  const mode = methodName.startsWith('include') ? 'include' : 'exclude';
+  const spec: ContentDescriptorSpec = { mode, matcher, groupId };
+
+  if (methodName.includes('Module') || methodName.includes('Version')) {
+    spec.artifactId = loadFromTokenMap(ctx, 'artifactId')[0].value;
+    if (matcher === 'regex') {
+      spec.artifactId = `^${spec.artifactId}$`.replaceAll('\\\\', '\\');
+      if (!isValidContentDescriptorRegex('module', spec.artifactId)) {
+        return ctx;
+      }
+    }
+  }
+
+  if (methodName.includes('Version')) {
+    spec.version = loadFromTokenMap(ctx, 'version')[0].value;
+    if (matcher === 'regex') {
+      spec.version = `^${spec.version}$`.replaceAll('\\\\', '\\');
+      if (!isValidContentDescriptorRegex('version', spec.version)) {
+        return ctx;
+      }
+    }
+  }
+
+  ctx.tmpRegistryContent.push(spec);
+
+  return ctx;
+}
+
 function isPluginRegistry(ctx: Ctx): boolean {
   if (ctx.tokenMap.registryScope) {
     const registryScope = loadFromTokenMap(ctx, 'registryScope')[0].value;
@@ -279,6 +343,7 @@ export function handlePredefinedRegistryUrl(ctx: Ctx): Ctx {
   ctx.registryUrls.push({
     registryUrl: REGISTRY_URLS[registryName as keyof typeof REGISTRY_URLS],
     scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
+    content: ctx.tmpRegistryContent,
   });
 
   return ctx;
@@ -314,6 +379,7 @@ export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
         ctx.registryUrls.push({
           registryUrl,
           scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
+          content: ctx.tmpRegistryContent,
         });
       }
     } catch {

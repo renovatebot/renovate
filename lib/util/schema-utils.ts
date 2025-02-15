@@ -2,10 +2,17 @@ import JSON5 from 'json5';
 import * as JSONC from 'jsonc-parser';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
-import { type ZodEffects, type ZodType, type ZodTypeDef, z } from 'zod';
+import {
+  type ZodEffects,
+  type ZodString,
+  type ZodType,
+  type ZodTypeDef,
+  z,
+} from 'zod';
 import { logger } from '../logger';
 import type { PackageDependency } from '../modules/manager/types';
 import { parse as parseToml } from './toml';
+import type { YamlOptions } from './yaml';
 import { parseSingleYaml, parseYaml } from './yaml';
 
 interface ErrorContext<T> {
@@ -256,6 +263,19 @@ export const MultidocYaml = z.string().transform((str, ctx): JsonArray => {
     return z.NEVER;
   }
 });
+
+export function multidocYaml(
+  opts?: Omit<YamlOptions, 'customSchema'>,
+): ZodEffects<ZodString, JsonArray, string> {
+  return z.string().transform((str, ctx): JsonArray => {
+    try {
+      return parseYaml(str, opts) as JsonArray;
+    } catch {
+      ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
+      return z.NEVER;
+    }
+  });
+}
 
 export const Toml = z.string().transform((str, ctx) => {
   try {

@@ -1,7 +1,8 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger, partial } from '../../../../test/util';
-import type { ExtractConfig } from '../types';
+import type { ExtractConfig, PackageDependency } from '../types';
+import { matchesContentDescriptor } from './extract';
 import * as parser from './parser';
 import { extractAllPackageFiles } from '.';
 
@@ -493,6 +494,215 @@ describe('modules/manager/gradle/extract', () => {
           ],
         },
       ]);
+    });
+
+    describe('content descriptors', () => {
+      describe('simple descriptor matches', () => {
+        it.each`
+          input                      | output   | descriptor
+          ${'foo:bar:1.2.3'}         | ${true}  | ${undefined}
+          ${'foo:bar:1.2.3'}         | ${true}  | ${[{ mode: 'include', matcher: 'simple', groupId: 'foo' }]}
+          ${'foo:bar:1.2.3'}         | ${false} | ${[{ mode: 'exclude', matcher: 'simple', groupId: 'foo' }]}
+          ${'foo:bar:1.2.3'}         | ${false} | ${[{ mode: 'include', matcher: 'simple', groupId: 'bar' }]}
+          ${'foo:bar:1.2.3'}         | ${true}  | ${[{ mode: 'include', matcher: 'simple', groupId: 'foo', artifactId: 'bar' }]}
+          ${'foo:bar:1.2.3'}         | ${false} | ${[{ mode: 'exclude', matcher: 'simple', groupId: 'foo', artifactId: 'bar' }]}
+          ${'foo:bar:1.2.3'}         | ${false} | ${[{ mode: 'include', matcher: 'simple', groupId: 'foo', artifactId: 'baz' }]}
+          ${'foo:bar:1.2.3'}         | ${true}  | ${[{ mode: 'include', matcher: 'simple', groupId: 'foo', artifactId: 'bar', version: '1.2.3' }]}
+          ${'foo:bar:1.2.3'}         | ${false} | ${[{ mode: 'exclude', matcher: 'simple', groupId: 'foo', artifactId: 'bar', version: '1.2.3' }]}
+          ${'foo:bar:1.2.3'}         | ${true}  | ${[{ mode: 'include', matcher: 'simple', groupId: 'foo', artifactId: 'bar', version: '1.2.+' }]}
+          ${'foo:bar:1.2.3'}         | ${false} | ${[{ mode: 'include', matcher: 'simple', groupId: 'foo', artifactId: 'baz', version: '4.5.6' }]}
+          ${'foo:bar:1.2.3'}         | ${true}  | ${[{ mode: 'include', matcher: 'subgroup', groupId: 'foo' }]}
+          ${'foo.bar.baz:qux:1.2.3'} | ${true}  | ${[{ mode: 'include', matcher: 'subgroup', groupId: 'foo.bar.baz' }]}
+          ${'foo.bar.baz:qux:1.2.3'} | ${true}  | ${[{ mode: 'include', matcher: 'subgroup', groupId: 'foo.bar' }]}
+          ${'foo.bar.baz:qux:1.2.3'} | ${false} | ${[{ mode: 'include', matcher: 'subgroup', groupId: 'foo.barbaz' }]}
+          ${'foobarbaz:qux:1.2.3'}   | ${true}  | ${[{ mode: 'include', matcher: 'regex', groupId: '.*bar.*' }]}
+          ${'foobarbaz:qux:1.2.3'}   | ${true}  | ${[{ mode: 'include', matcher: 'regex', groupId: '.*bar.*', artifactId: 'qux' }]}
+          ${'foobar:foobar:1.2.3'}   | ${true}  | ${[{ mode: 'include', matcher: 'regex', groupId: '.*bar.*', artifactId: 'foo.*' }]}
+          ${'foobar:foobar:1.2.3'}   | ${false} | ${[{ mode: 'include', matcher: 'regex', groupId: 'foobar', artifactId: '^bar' }]}
+          ${'foobar:foobar:1.2.3'}   | ${true}  | ${[{ mode: 'include', matcher: 'regex', groupId: 'foobar', artifactId: '^foo.*', version: '1\\.*' }]}
+          ${'foobar:foobar:1.2.3'}   | ${false} | ${[{ mode: 'include', matcher: 'regex', groupId: 'foobar', artifactId: '^foo', version: '3.+' }]}
+          ${'foobar:foobar:1.2.3'}   | ${false} | ${[{ mode: 'include', matcher: 'regex', groupId: 'foobar', artifactId: 'qux', version: '1\\.*' }]}
+        `('$input | $output', ({ input, output, descriptor }) => {
+          const [groupId, artifactId, currentValue] = input.split(':');
+          const dep: PackageDependency = {
+            depName: `${groupId}:${artifactId}`,
+            currentValue,
+          };
+
+          expect(matchesContentDescriptor(dep, descriptor)).toBe(output);
+        });
+      });
+
+      describe('multiple descriptors', () => {
+        const dep: PackageDependency = {
+          depName: `foo:bar`,
+          currentValue: '1.2.3',
+        };
+
+        it('if both includes and excludes exist, dep must match include and not match exclude', () => {
+          expect(
+            matchesContentDescriptor(dep, [
+              { mode: 'include', matcher: 'simple', groupId: 'foo' },
+              {
+                mode: 'exclude',
+                matcher: 'simple',
+                groupId: 'foo',
+                artifactId: 'baz',
+              },
+            ]),
+          ).toBe(true);
+
+          expect(
+            matchesContentDescriptor(dep, [
+              { mode: 'include', matcher: 'simple', groupId: 'foo' },
+              {
+                mode: 'exclude',
+                matcher: 'simple',
+                groupId: 'foo',
+                artifactId: 'bar',
+              },
+            ]),
+          ).toBe(false);
+        });
+
+        it('if only includes exist, dep must match at least one include', () => {
+          expect(
+            matchesContentDescriptor(dep, [
+              { mode: 'include', matcher: 'simple', groupId: 'some' },
+              { mode: 'include', matcher: 'simple', groupId: 'foo' },
+              { mode: 'include', matcher: 'simple', groupId: 'bar' },
+            ]),
+          ).toBe(true);
+
+          expect(
+            matchesContentDescriptor(dep, [
+              { mode: 'include', matcher: 'simple', groupId: 'some' },
+              { mode: 'include', matcher: 'simple', groupId: 'other' },
+              { mode: 'include', matcher: 'simple', groupId: 'bar' },
+            ]),
+          ).toBe(false);
+        });
+
+        it('if only excludes exist, dep must match not match any exclude', () => {
+          expect(
+            matchesContentDescriptor(dep, [
+              { mode: 'exclude', matcher: 'simple', groupId: 'some' },
+              { mode: 'exclude', matcher: 'simple', groupId: 'foo' },
+              { mode: 'exclude', matcher: 'simple', groupId: 'bar' },
+            ]),
+          ).toBe(false);
+
+          expect(
+            matchesContentDescriptor(dep, [
+              { mode: 'exclude', matcher: 'simple', groupId: 'some' },
+              { mode: 'exclude', matcher: 'simple', groupId: 'other' },
+              { mode: 'exclude', matcher: 'simple', groupId: 'bar' },
+            ]),
+          ).toBe(true);
+        });
+      });
+
+      it('extracts content descriptors', async () => {
+        const fsMock = {
+          'build.gradle': codeBlock`
+            pluginManagement {
+              repositories {
+                maven {
+                  url = "https://foo.bar/baz"
+                  content {
+                    includeModule("com.diffplug.spotless", "com.diffplug.spotless.gradle.plugin")
+                  }
+                }
+              }
+            }
+            repositories {
+              mavenCentral()
+              google {
+                content {
+                  includeGroupAndSubgroups("foo.bar")
+                  includeModuleByRegex("com\\\\.(google|android).*", "protobuf.*")
+                  includeGroupByRegex("(?!(unsupported|pattern).*)")
+                  includeGroupByRegex "org\\\\.jetbrains\\\\.kotlin.*"
+                  excludeModule("foo.bar.group", "simple.module")
+                }
+              }
+              maven {
+                name = "some"
+                url = "https://foo.bar/\${name}"
+                content {
+                  includeModule("foo.bar.group", "simple.module")
+                  includeVersion("com.google.protobuf", "protobuf-java", "2.17.+")
+                }
+              }
+            }
+
+            plugins {
+              id("com.diffplug.spotless") version "6.10.0"
+            }
+
+            dependencies {
+              implementation "com.google.protobuf:protobuf-java:2.17.1"
+              implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.21"
+              implementation "foo.bar:protobuf-java:2.17.0"
+              implementation "foo.bar.group:simple.module:2.17.0"
+            }
+          `,
+        };
+        mockFs(fsMock);
+
+        const res = await extractAllPackageFiles(
+          partial<ExtractConfig>(),
+          Object.keys(fsMock),
+        );
+
+        expect(res).toMatchObject([
+          {
+            deps: [
+              {
+                depName: 'com.diffplug.spotless',
+                currentValue: '6.10.0',
+                depType: 'plugin',
+                packageName:
+                  'com.diffplug.spotless:com.diffplug.spotless.gradle.plugin',
+                registryUrls: ['https://foo.bar/baz'],
+              },
+              {
+                depName: 'com.google.protobuf:protobuf-java',
+                currentValue: '2.17.1',
+                registryUrls: [
+                  'https://repo.maven.apache.org/maven2',
+                  'https://dl.google.com/android/maven2/',
+                  'https://foo.bar/some',
+                ],
+              },
+              {
+                depName: 'org.jetbrains.kotlin:kotlin-stdlib-jdk8',
+                currentValue: '1.4.21',
+                registryUrls: [
+                  'https://repo.maven.apache.org/maven2',
+                  'https://dl.google.com/android/maven2/',
+                ],
+              },
+              {
+                depName: 'foo.bar:protobuf-java',
+                currentValue: '2.17.0',
+                registryUrls: [
+                  'https://repo.maven.apache.org/maven2',
+                  'https://dl.google.com/android/maven2/',
+                ],
+              },
+              {
+                depName: 'foo.bar.group:simple.module',
+                currentValue: '2.17.0',
+                registryUrls: [
+                  'https://repo.maven.apache.org/maven2',
+                  'https://foo.bar/some',
+                ],
+              },
+            ],
+          },
+        ]);
+      });
     });
   });
 

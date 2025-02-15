@@ -40,7 +40,6 @@ done
 if [ "$HAS_ISSUES_MISSING_LABELS" = false ]; then
   echo "All checked issues have labels. Exiting the action."
   ISSUE_BODY="$ISSUE_BODY All checked issues are correctly labeled.\n"
-  exit 0
 fi
 
 LABEL_CHECK_ISSUE_EXISTS=$(gh search issues --repo $REPO --json "number,author,title" | jq --arg title "$ISSUE_TITLE" 'map(select(.title == $title and .author.type == "Bot"))') || { echo "Failed to fetch existing label check issue"; exit 1; }

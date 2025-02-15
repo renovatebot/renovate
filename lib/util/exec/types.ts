@@ -25,6 +25,12 @@ export interface DockerOptions {
   cwd?: Opt<string>;
 }
 
+export type DataListener = (chunk: any) => void;
+export type OutputListeners = {
+  stdout?: DataListener[];
+  stderr?: DataListener[];
+};
+
 export interface RawExecOptions extends ChildProcessSpawnOptions {
   // TODO: to be removed in #16655
   /**
@@ -33,6 +39,7 @@ export interface RawExecOptions extends ChildProcessSpawnOptions {
   encoding: string;
   maxBuffer?: number | undefined;
   cwd?: string;
+  outputListeners?: OutputListeners;
 }
 
 export interface ExecResult {

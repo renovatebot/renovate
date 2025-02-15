@@ -11,7 +11,7 @@ import type { ZodType } from 'zod';
 import { logger } from '../logger';
 import { regEx } from './regex';
 
-interface YamlOptions<
+export interface YamlOptions<
   ResT = unknown,
   Schema extends ZodType<ResT> = ZodType<ResT>,
 > extends ParseOptions,
@@ -28,7 +28,7 @@ interface YamlParseDocumentOptions
   removeTemplates?: boolean;
 }
 
-interface YamlOptionsMultiple<
+export interface YamlOptionsMultiple<
   ResT = unknown,
   Schema extends ZodType<ResT> = ZodType<ResT>,
 > extends YamlOptions<ResT, Schema> {

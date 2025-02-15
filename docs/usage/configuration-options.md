@@ -724,7 +724,7 @@ The `matchStrings` must capture/extract the following three fields:
 - `depName` and / or `packageName`
 - `currentValue`
 
-Alteratively, you could also use corresponding templates (e.g. `depNameTemplate`) for these fields.
+Alternatively, you could also use corresponding templates (e.g. `depNameTemplate`) for these fields.
 But, we recommend you use only _one_ of these methods, or you'll get confused.
 
 Also, we recommend you explicitly set which `versioning` Renovate should use.
@@ -849,7 +849,8 @@ It will be compiled using Handlebars and the regex `groups` result.
 It specifies the syntax of the package file that's managed by the custom `jsonata` manager.
 This setting helps the system correctly parse and interpret the configuration file's contents.
 
-Only the `json` format is supported.
+Only the `json` and `yaml` formats are supported.
+`yaml` files are parsed as multi document YAML files.
 
 ```json title="Parsing a JSON file with a custom manager"
 {
@@ -858,6 +859,21 @@ Only the `json` format is supported.
       "customType": "jsonata",
       "fileFormat": "json",
       "fileMatch": [".renovaterc"],
+      "matchStrings": [
+        "packages.{ \"depName\": package, \"currentValue\": version }"
+      ]
+    }
+  ]
+}
+```
+
+```json title="Parsing a YAML file with a custom manager"
+{
+  "customManagers": [
+    {
+      "customType": "jsonata",
+      "fileFormat": "yaml",
+      "fileMatch": ["file.yml"],
       "matchStrings": [
         "packages.{ \"depName\": package, \"currentValue\": version }"
       ]
@@ -2471,7 +2487,7 @@ When in `silent` mode Renovate will:
 
 - _not_ create or update any Issue: even the Dependency Dashboard or Config Warning Issues will stay as-is
 - _not_ prune or close any existing Issues
-- _not_ create any Config Migration PRs, even if you explictly enabled Config Migration PRs in your Renovate config
+- _not_ create any Config Migration PRs, even if you explicitly enabled Config Migration PRs in your Renovate config
 
 ## npmToken
 
@@ -2543,14 +2559,14 @@ Here is an example if you want to group together all packages starting with `esl
 
 Note how the above uses `matchPackageNames` with a prefix pattern.
 
-Here's an example config to limit the "noisy" `aws-sdk` package to weekly updates:
+Here's an example config to limit the "noisy" AWS SDK packages to weekly updates:
 
 ```json
 {
   "packageRules": [
     {
-      "description": "Schedule aws-sdk updates on Sunday nights (9 PM - 12 AM)",
-      "matchPackageNames": ["aws-sdk"],
+      "description": "Schedule AWS SDK updates on Sunday nights (9 PM - 12 AM)",
+      "matchPackageNames": ["@aws-sdk/*"],
       "schedule": ["* 21-23 * * 0"]
     }
   ]
@@ -3832,6 +3848,16 @@ The field supports multiple URLs but it is datasource-dependent on whether only 
 ## replacement
 
 Add to this object if you wish to define rules that apply only to PRs that replace dependencies.
+
+## replacementApproach
+
+For `npm` manager when `replacementApproach=alias` then instead of replacing `"foo": "1.2.3"` with `"@my/foo": "1.2.4"` we would instead replace it with `"foo": "npm:@my/foo@1.2.4"`.
+
+```json
+{
+  "replacementApproach": "alias"
+}
+```
 
 ## respectLatest
 
