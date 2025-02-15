@@ -346,6 +346,7 @@
     "happy-dom": "https://github.com/capricorn86/happy-dom",
     "Hangfire": "https://github.com/HangfireIO/Hangfire",
     "hickory-dns": "https://github.com/hickory-dns/hickory-dns",
+    "houdini-graphql": "https://github.com/HoudiniGraphQL/houdini",
     "html-eslint": "https://github.com/yeonjuan/html-eslint",
     "infrastructure-ui": "https://github.com/instructure/instructure-ui",
     "ionic-native": "https://github.com/ionic-team/ionic-native",
