@@ -189,7 +189,7 @@ describe('modules/manager/nuget/artifacts', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          isLockFileMaintenance: true,
+          updateType: 'lockFileMaintenance',
         },
       }),
     ).toEqual([
