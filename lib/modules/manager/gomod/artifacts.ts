@@ -21,7 +21,7 @@ import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { regEx } from '../../../util/regex';
 import { isValid } from '../../versioning/semver';
 import type {
-  PackageDependency,
+  Upgrade,
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
@@ -31,7 +31,7 @@ import { getExtraDepsNotice } from './artifacts-extra';
 const { major, valid } = semver;
 
 function getUpdateImportPathCmds(
-  updatedDeps: PackageDependency[],
+  updatedDeps: Upgrade[],
   { constraints }: UpdateArtifactsConfig,
 ): string[] {
   // Check if we fail to parse any major versions and log that they're skipped
@@ -52,8 +52,8 @@ function getUpdateImportPathCmds(
       ({ newVersion }) =>
         valid(newVersion) && !newVersion!.endsWith('+incompatible'),
     )
-    .map(({ depName, newVersion }) => ({
-      depName: depName!,
+    .map(({ depName, newVersion, newName }) => ({
+      depName: newName || depName!,
       newMajor: major(newVersion!),
     }))
     // Skip path updates going from v0 to v1
@@ -247,10 +247,10 @@ export async function updateArtifacts({
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
-    // Update import paths on major updates
+    // Update import paths on major updates, or when performing replacements
     const isImportPathUpdateRequired =
       config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
-      config.updateType === 'major';
+      (config.updateType === 'major' || config.updateType == 'replacement');
 
     if (isImportPathUpdateRequired) {
       const updateImportCmds = getUpdateImportPathCmds(updatedDeps, config);
