@@ -1222,7 +1222,13 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
         .query({ state: 'all', sort: 'recentupdate' })
-        .reply(200, mockPRs);
+        .reply(200, mockPRs.slice(0, 2), {
+          // test correct pagination handling, domain should be ignored
+          link: '<https://domain.test/api/v1/repos/some/repo/pulls?state=all&sort=recentupdate&page=2>; rel="next",<https://domain.test/api/v1/repos/some/repo/pulls?state=all&sort=recentupdate&page=4512>; rel="last"',
+        })
+        .get('/repos/some/repo/pulls')
+        .query({ state: 'all', sort: 'recentupdate', page: 2 })
+        .reply(200, mockPRs.slice(2));
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -1679,7 +1685,7 @@ describe('modules/platform/gitea/index', () => {
         .reply(200, mockNewPR)
         .post('/repos/some/repo/pulls/42/merge')
         .reply(200);
-      await initFakePlatform(scope, '1.17.0');
+      await initFakePlatform(scope, '1.24.0');
       await initFakeRepo(scope);
 
       const res = await gitea.createPr({
@@ -1697,16 +1703,14 @@ describe('modules/platform/gitea/index', () => {
       expect(mergePR).toHaveBeenCalled();
     });
 
-    it('should use platform automerge on forgejo v7', async () => {
+    it('should not use platform automerge on forgejo v7', async () => {
       memCache.set('gitea-pr-cache-synced', true);
       const helper = await import('./gitea-helper');
       const mergePR = jest.spyOn(helper, 'mergePR');
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
-        .reply(200, mockNewPR)
-        .post('/repos/some/repo/pulls/42/merge')
-        .reply(200);
+        .reply(200, mockNewPR);
       await initFakePlatform(scope, '7.0.0-dev-2136-f075579c95+gitea-1.22.0');
       await initFakeRepo(scope);
 
@@ -1722,19 +1726,17 @@ describe('modules/platform/gitea/index', () => {
         number: 42,
         title: 'pr-title',
       });
-      expect(mergePR).toHaveBeenCalled();
+      expect(mergePR).not.toHaveBeenCalled();
     });
 
-    it('should use platform automerge on forgejo v7 LTS', async () => {
+    it('should not use platform automerge on forgejo v7 LTS', async () => {
       memCache.set('gitea-pr-cache-synced', true);
       const helper = await import('./gitea-helper');
       const mergePR = jest.spyOn(helper, 'mergePR');
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
-        .reply(200, mockNewPR)
-        .post('/repos/some/repo/pulls/42/merge')
-        .reply(200);
+        .reply(200, mockNewPR);
       await initFakePlatform(scope, '7.0.0+LTS-gitea-1.22.0');
       await initFakeRepo(scope);
 
@@ -1750,7 +1752,7 @@ describe('modules/platform/gitea/index', () => {
         number: 42,
         title: 'pr-title',
       });
-      expect(mergePR).toHaveBeenCalled();
+      expect(mergePR).not.toHaveBeenCalled();
     });
 
     it('continues on platform automerge error', async () => {
@@ -1761,7 +1763,7 @@ describe('modules/platform/gitea/index', () => {
         .reply(200, mockNewPR)
         .post('/repos/some/repo/pulls/42/merge')
         .replyWithError('unknown error');
-      await initFakePlatform(scope, '1.17.0');
+      await initFakePlatform(scope, '1.24.0');
       await initFakeRepo(scope);
 
       const res = await gitea.createPr({
@@ -1805,7 +1807,7 @@ describe('modules/platform/gitea/index', () => {
       });
       expect(logger.debug).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
-        'Gitea-native automerge: not supported on this version of Gitea. Use 1.17.0 or newer.',
+        'Gitea-native automerge: not supported on this version of Gitea. Use 1.24.0 or newer.',
       );
     });
 
@@ -1817,7 +1819,7 @@ describe('modules/platform/gitea/index', () => {
         .reply(200, mockNewPR)
         .post('/repos/some/repo/pulls/42/merge')
         .reply(200);
-      await initFakePlatform(scope, '1.17.0');
+      await initFakePlatform(scope, '10.0.0+gitea-1.22.0');
       await initFakeRepo(scope);
 
       const res = await gitea.createPr({
@@ -1856,7 +1858,7 @@ describe('modules/platform/gitea/index', () => {
             Do: prMergeStrategy,
             merge_when_checks_succeed: true,
           });
-        await initFakePlatform(scope, '1.17.0');
+        await initFakePlatform(scope, '1.24.0');
         await initFakeRepo(scope);
 
         const res = await gitea.createPr({

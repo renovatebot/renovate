@@ -71,7 +71,7 @@ export function analyseTerragruntModule(
     dep.datasource = GithubTagsDatasource.id;
   } else if (gitTagsRefMatch?.groups) {
     const { url, tag } = gitTagsRefMatch.groups;
-    const { hostname, host, origin, pathname, protocol } = new URL(url);
+    const { hostname, host, pathname, protocol } = new URL(url);
     const containsSubDirectory = pathname.includes('//');
     if (containsSubDirectory) {
       logger.debug('Terragrunt module contains subdirectory');
@@ -87,7 +87,8 @@ export function analyseTerragruntModule(
     dep.datasource = detectGitTagDatasource(url);
     if (dep.datasource === GitTagsDatasource.id) {
       if (containsSubDirectory) {
-        dep.packageName = `${origin}${pathname.split('//')[0]}`;
+        const tempLookupName = url.split('//');
+        dep.packageName = tempLookupName[0] + '//' + tempLookupName[1];
       } else {
         dep.packageName = url;
       }

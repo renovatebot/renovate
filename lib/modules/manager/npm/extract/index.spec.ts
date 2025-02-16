@@ -1027,6 +1027,87 @@ describe('modules/manager/npm/extract/index', () => {
         ],
       });
     });
+
+    it('extracts dependencies from pnpm.overrides, with version ranges in flat syntax', async () => {
+      const content = codeBlock`{
+        "pnpm": {
+          "overrides": {
+            "foo>bar": "2.0.0",
+            "foo@1.0.0": "2.0.0",
+            "foo@>1.0.0": "2.0.0",
+            "foo@>=1.0.0": "2.0.0",
+            "foo@1.0.0>bar": "2.0.0",
+            "foo@>1.0.0>bar": "2.0.0",
+            "foo@>=1.0.0 <2.0.0": ">=2.0.0"
+          }
+        }
+      }`;
+      const res = await npmExtract.extractPackageFile(
+        content,
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo>bar',
+            depType: 'pnpm.overrides',
+            packageName: 'bar',
+            prettyDepType: 'overrides',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@1.0.0',
+            depType: 'pnpm.overrides',
+            packageName: 'foo',
+            prettyDepType: 'overrides',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>1.0.0',
+            depType: 'pnpm.overrides',
+            packageName: 'foo',
+            prettyDepType: 'overrides',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>=1.0.0',
+            depType: 'pnpm.overrides',
+            packageName: 'foo',
+            prettyDepType: 'overrides',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@1.0.0>bar',
+            depType: 'pnpm.overrides',
+            packageName: 'bar',
+            prettyDepType: 'overrides',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>1.0.0>bar',
+            depType: 'pnpm.overrides',
+            packageName: 'bar',
+            prettyDepType: 'overrides',
+          },
+          {
+            currentValue: '>=2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>=1.0.0 <2.0.0',
+            depType: 'pnpm.overrides',
+            packageName: 'foo',
+            prettyDepType: 'overrides',
+          },
+        ],
+      });
+    });
   });
 
   describe('.extractAllPackageFiles()', () => {
@@ -1075,6 +1156,36 @@ describe('modules/manager/npm/extract/index', () => {
           packageFile: 'package.json',
           packageFileVersion: '1.0.0',
           skipInstalls: true,
+        },
+      ]);
+    });
+
+    it('extracts pnpm workspace yaml files', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        packages:
+          - pkg-a
+
+        catalog:
+          is-positive: 1.0.0
+      `);
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        'pnpm-workspace.yaml',
+      ]);
+      expect(res).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '1.0.0',
+              datasource: 'npm',
+              depName: 'is-positive',
+              depType: 'pnpm.catalog.default',
+              prettyDepType: 'pnpm.catalog.default',
+            },
+          ],
+          managerData: {
+            pnpmShrinkwrap: undefined,
+          },
+          packageFile: 'pnpm-workspace.yaml',
         },
       ]);
     });

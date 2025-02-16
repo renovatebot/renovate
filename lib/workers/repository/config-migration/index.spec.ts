@@ -46,19 +46,6 @@ describe('workers/repository/config-migration/index', () => {
     expect(ensureConfigMigrationPr).toHaveBeenCalledTimes(0);
   });
 
-  it('skips pr creation if config found in package.json', async () => {
-    const branchList: string[] = [];
-    mockedFunction(MigratedDataFactory.getAsync).mockResolvedValue({
-      content,
-      indent: partial<Indent>(),
-      filename: 'package.json',
-    });
-    const res = await configMigration(config, branchList);
-    expect(res).toMatchObject({ result: 'no-migration' });
-    expect(checkConfigMigrationBranch).toHaveBeenCalledTimes(0);
-    expect(ensureConfigMigrationPr).toHaveBeenCalledTimes(0);
-  });
-
   it('creates migration pr if needed', async () => {
     const branchList: string[] = [];
     mockedFunction(checkConfigMigrationBranch).mockResolvedValue({

@@ -175,6 +175,7 @@ describe('modules/manager/nuget/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             depName: 'mcr.microsoft.com/dotnet/runtime',
+            packageName: 'mcr.microsoft.com/dotnet/runtime',
             depType: 'docker',
             datasource: 'docker',
             currentValue: '7.0.10',
@@ -200,6 +201,7 @@ describe('modules/manager/nuget/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             depName: 'mcr.microsoft.com/dotnet/runtime',
+            packageName: 'mcr.microsoft.com/dotnet/runtime',
             depType: 'docker',
             datasource: 'docker',
             currentValue: '7.0.10',

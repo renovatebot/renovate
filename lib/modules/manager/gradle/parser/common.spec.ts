@@ -32,6 +32,7 @@ describe('modules/manager/gradle/parser/common', () => {
       varTokens: [],
       tmpKotlinImportStore: [],
       tmpNestingDepth: [],
+      tmpRegistryContent: [],
       tmpTokenStore: {},
       tokenMap: {},
     };

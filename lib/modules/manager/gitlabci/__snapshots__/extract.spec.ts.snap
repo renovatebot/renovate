@@ -11,6 +11,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "ruby",
         "depType": "image",
+        "packageName": "ruby",
         "replaceString": "ruby:2.5.0",
       },
       {
@@ -20,6 +21,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "hadolint/hadolint",
         "depType": "image",
+        "packageName": "hadolint/hadolint",
         "replaceString": "hadolint/hadolint:latest",
       },
       {
@@ -29,6 +31,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "docker",
         "depType": "image",
+        "packageName": "docker",
         "replaceString": "docker:latest",
       },
       {
@@ -38,6 +41,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "docker",
         "depType": "service-image",
+        "packageName": "docker",
         "replaceString": "docker:dind",
       },
       {
@@ -47,6 +51,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "docker",
         "depType": "image",
+        "packageName": "docker",
         "replaceString": "docker:latest",
       },
       {
@@ -56,6 +61,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "docker",
         "depType": "service-image",
+        "packageName": "docker",
         "replaceString": "docker:dind",
       },
       {
@@ -65,6 +71,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "image-name-test",
         "depType": "image-name",
+        "packageName": "image-name-test",
         "replaceString": "image-name-test:1.15",
       },
       {
@@ -74,6 +81,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "image-name-test",
         "depType": "image-name",
+        "packageName": "image-name-test",
         "replaceString": "image-name-test:1.15",
       },
     ],
@@ -93,6 +101,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "renovate/renovate",
         "depType": "image-name",
+        "packageName": "renovate/renovate",
         "replaceString": "renovate/renovate:19.70.8-slim",
       },
       {
@@ -102,6 +111,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "mariadb",
         "depType": "service-image",
+        "packageName": "mariadb",
         "replaceString": "mariadb:10.4.11",
       },
       {
@@ -111,6 +121,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "other/image",
         "depType": "service-image",
+        "packageName": "other/image",
         "replaceString": "other/image:1.0.0",
       },
     ],
@@ -130,6 +141,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "renovate/renovate",
         "depType": "image-name",
+        "packageName": "renovate/renovate",
         "replaceString": "renovate/renovate:19.70.8-slim",
       },
       {
@@ -139,6 +151,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "mariadb",
         "depType": "service-image",
+        "packageName": "mariadb",
         "replaceString": "mariadb:10.4.11",
       },
       {
@@ -148,6 +161,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "other/image",
         "depType": "service-image",
+        "packageName": "other/image",
         "replaceString": "other/image:1.0.0",
       },
     ],
@@ -162,6 +176,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "node",
         "depType": "image",
+        "packageName": "node",
         "replaceString": "node:12",
       },
     ],
@@ -176,6 +191,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "alpine",
         "depType": "image",
+        "packageName": "alpine",
         "replaceString": "alpine:3.11",
       },
     ],
@@ -195,6 +211,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "renovate/renovate",
         "depType": "image-name",
+        "packageName": "renovate/renovate",
         "replaceString": "renovate/renovate:19.70.8-slim",
       },
       {
@@ -204,6 +221,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "other/image1",
         "depType": "service-image",
+        "packageName": "other/image1",
         "replaceString": "other/image1:1.0.0",
       },
       {
@@ -213,6 +231,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "other/image2",
         "depType": "service-image",
+        "packageName": "other/image2",
         "replaceString": "other/image2:1.0.0",
       },
       {
@@ -222,6 +241,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "mooseagency/postgresql",
         "depType": "service-image",
+        "packageName": "mooseagency/postgresql",
         "replaceString": "mooseagency/postgresql:12.3-1@sha256:a5a65569456f221ee1f8a0b3b4e2d440eb5830772d9440c9b30b1dbfd454c778",
       },
       {
@@ -231,6 +251,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "mariadb",
         "depType": "service-image",
+        "packageName": "mariadb",
         "replaceString": "mariadb:10.4.11",
       },
       {
@@ -240,6 +261,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "postgres",
         "depType": "service-image",
+        "packageName": "postgres",
         "replaceString": "postgres:11.7",
       },
       {
@@ -249,6 +271,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "redis",
         "depType": "service-image",
+        "packageName": "redis",
         "replaceString": "redis:latest",
       },
       {
@@ -258,6 +281,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "registry.example.com/myimage",
         "depType": "service-image",
+        "packageName": "registry.example.com/myimage",
         "replaceString": "registry.example.com/myimage:latest",
       },
       {
@@ -267,6 +291,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "myimage",
         "depType": "service-image",
+        "packageName": "myimage",
         "replaceString": "myimage@sha256:0ecb2ad60",
       },
       {
@@ -276,6 +301,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
         "datasource": "docker",
         "depName": "tomcat",
         "depType": "service-image",
+        "packageName": "tomcat",
         "replaceString": "tomcat:7-jre8",
       },
     ],
@@ -295,6 +321,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts name
         "datasource": "docker",
         "depName": "renovate/renovate",
         "depType": "image-name",
+        "packageName": "renovate/renovate",
         "replaceString": "renovate/renovate:19.70.8-slim",
       },
       {
@@ -304,6 +331,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts name
         "datasource": "docker",
         "depName": "mariadb",
         "depType": "service-image",
+        "packageName": "mariadb",
         "replaceString": "mariadb:10.4.11",
       },
       {
@@ -313,6 +341,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts name
         "datasource": "docker",
         "depName": "other/image",
         "depType": "service-image",
+        "packageName": "other/image",
         "replaceString": "other/image:1.0.0",
       },
     ],

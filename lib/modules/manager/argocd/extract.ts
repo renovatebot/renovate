@@ -2,8 +2,8 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
+import { withDebugMessage } from '../../../util/schema-utils';
 import { trimTrailingSlash } from '../../../util/url';
-import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
@@ -15,7 +15,8 @@ import type {
   PackageFileContent,
 } from '../types';
 import {
-  ApplicationDefinition,
+  type ApplicationDefinition,
+  ApplicationDefinitionSchema,
   type ApplicationSource,
   type ApplicationSpec,
 } from './schema';
@@ -36,11 +37,9 @@ export function extractPackageFile(
     return null;
   }
 
-  const definitions = parseYaml(content, {
-    customSchema: ApplicationDefinition,
-    failureBehaviour: 'filter',
-    removeTemplates: true,
-  });
+  const definitions = ApplicationDefinitionSchema.catch(
+    withDebugMessage([], `error parsing ${packageFile}`),
+  ).parse(content);
 
   const deps = definitions.flatMap(processAppSpec);
 

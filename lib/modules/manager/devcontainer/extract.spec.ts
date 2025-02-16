@@ -33,7 +33,7 @@ describe('modules/manager/devcontainer/extract', () => {
       {
         // hello
         "features": {
-          "devcontainer.registry.renovate.com/test/features/first:1.2.3": {}
+          "devcontainer.registry.renovate.com/test/features/first:1.2.3": {},
         }
       }`);
       const extractConfig = {};
@@ -54,6 +54,8 @@ describe('modules/manager/devcontainer/extract', () => {
             currentValue: '1.2.3',
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/features/first',
+            packageName:
+              'devcontainer.registry.renovate.com/test/features/first',
             depType: 'feature',
             pinDigests: false,
             replaceString:
@@ -90,6 +92,8 @@ describe('modules/manager/devcontainer/extract', () => {
             currentValue: '1.2.3',
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/features/first',
+            packageName:
+              'devcontainer.registry.renovate.com/test/features/first',
             depType: 'feature',
             pinDigests: false,
             replaceString:
@@ -102,6 +106,8 @@ describe('modules/manager/devcontainer/extract', () => {
             currentValue: '4.5.6',
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/features/second',
+            packageName:
+              'devcontainer.registry.renovate.com/test/features/second',
             depType: 'feature',
             pinDigests: false,
             replaceString:
@@ -139,6 +145,7 @@ describe('modules/manager/devcontainer/extract', () => {
             currentValue: '1.2.3',
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/image',
+            packageName: 'devcontainer.registry.renovate.com/test/image',
             depType: 'image',
             replaceString:
               'devcontainer.registry.renovate.com/test/image:1.2.3',
@@ -150,6 +157,7 @@ describe('modules/manager/devcontainer/extract', () => {
             currentValue: '4.5.6',
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/feature',
+            packageName: 'devcontainer.registry.renovate.com/test/feature',
             depType: 'feature',
             pinDigests: false,
             replaceString:
@@ -183,6 +191,7 @@ describe('modules/manager/devcontainer/extract', () => {
             currentValue: '1.2.3',
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/image',
+            packageName: 'devcontainer.registry.renovate.com/test/image',
             depType: 'image',
             replaceString:
               'devcontainer.registry.renovate.com/test/image:1.2.3',
@@ -346,6 +355,7 @@ describe('modules/manager/devcontainer/extract', () => {
             currentValue: '1.2.3',
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/feature',
+            packageName: 'devcontainer.registry.renovate.com/test/feature',
             depType: 'feature',
             pinDigests: false,
             replaceString:

@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { LooseArray, LooseRecord, Yaml } from '../../../util/schema-utils';
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import { id as dockerVersioning } from '../../versioning/docker';
 import { id as semverVersioning } from '../../versioning/semver';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
@@ -30,10 +29,8 @@ export const BatectConfigSchema = Yaml.pipe(
     ).catch([]),
   }),
 ).transform(({ containers, include }) => {
-  const imageDependencies = containers.map((image) => ({
-    ...getDep(image),
-    versioning: dockerVersioning,
-  }));
+  // TODO: @zharinov How to pass `registryAliases` to `getDep`?
+  const imageDependencies = containers.map((image) => getDep(image));
 
   const bundleDependencies: PackageDependency[] = [];
   const fileIncludes: string[] = [];

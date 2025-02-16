@@ -8,6 +8,7 @@ exports[`modules/manager/cloudbuild/extract extractPackageFile() extracts multip
     "currentValue": "19.03.8",
     "datasource": "docker",
     "depName": "gcr.io/cloud-builders/docker",
+    "packageName": "gcr.io/cloud-builders/docker",
     "replaceString": "gcr.io/cloud-builders/docker:19.03.8",
   },
   {
@@ -16,6 +17,7 @@ exports[`modules/manager/cloudbuild/extract extractPackageFile() extracts multip
     "currentValue": "12",
     "datasource": "docker",
     "depName": "node",
+    "packageName": "node",
     "replaceString": "node:12",
   },
   {
@@ -24,6 +26,7 @@ exports[`modules/manager/cloudbuild/extract extractPackageFile() extracts multip
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "gcr.io/cloud-builders/kubectl",
+    "packageName": "gcr.io/cloud-builders/kubectl",
     "replaceString": "gcr.io/cloud-builders/kubectl",
   },
 ]

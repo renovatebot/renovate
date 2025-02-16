@@ -32,7 +32,6 @@ export function extractHelmChart(
     return {
       ...dep,
       depName: helmChart.name,
-      packageName: dep.depName,
       depType: 'HelmChart',
       // https://github.com/helm/helm/issues/10312
       // https://github.com/helm/helm/issues/10678

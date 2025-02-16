@@ -17,17 +17,13 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 !!! note
     Config options with `type=string` are always non-mergeable, so `mergeable=false`.
 
-## allowCustomCrateRegistries
-
-## allowPlugins
-
-## allowPostUpgradeCommandTemplating
+## allowCommandTemplating
 
 Let's look at an example of configuring packages with existing Angular migrations.
 
 ```javascript
 module.exports = {
-  allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
+  allowedCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
 };
 ```
 
@@ -58,10 +54,31 @@ npm ci --ignore-scripts
 npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
 ```
 
-If you wish to disable templating because of any security or performance concern, you may set `allowPostUpgradeCommandTemplating` to `false`.
-But before you disable templating completely, try the `allowedPostUpgradeCommands` config option to limit what commands are allowed to run.
+If you wish to disable templating because of any security or performance concern, you may set `allowCommandTemplating` to `false`.
+But before you disable templating completely, try the `allowedCommands` config option to limit what commands are allowed to run.
+
+This configuration option was previously named `allowPostUpgradeCommandTemplating`.
+
+## allowCustomCrateRegistries
+
+## allowPlugins
 
 ## allowScripts
+
+## allowedCommands
+
+A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
+If this list is empty then no tasks will be executed.
+
+For example:
+
+```json
+{
+  "allowedCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
+}
+```
+
+This configuration option was formerly known as `allowedPostUpgradeCommands`.
 
 ## allowedEnv
 
@@ -127,19 +144,6 @@ Or with custom `allowedHeaders`:
 module.exports = {
   allowedHeaders: ['custom-header'],
 };
-```
-
-## allowedPostUpgradeCommands
-
-A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
-If this list is empty then no tasks will be executed.
-
-For example:
-
-```json
-{
-  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
-}
 ```
 
 ## autodiscover
@@ -766,7 +770,6 @@ To handle the case where the underlying Git processes appear to hang, configure 
 ## gitUrl
 
 Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
-Currently works for Bitbucket Server and GitLab only.
 
 Possible values:
 

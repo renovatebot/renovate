@@ -1,9 +1,8 @@
 import is from '@sindresorhus/is';
+import jsonata from 'jsonata';
 import { logger } from '../../logger';
-import type {
-  RegexManagerConfig,
-  RegexManagerTemplates,
-} from '../../modules/manager/custom/regex/types';
+import type { RegexManagerTemplates } from '../../modules/manager/custom/regex/types';
+import type { CustomManager } from '../../modules/manager/custom/types';
 import { regEx } from '../../util/regex';
 import type { ValidationMessage } from '../types';
 
@@ -78,21 +77,20 @@ export function isFalseGlobal(
   return false;
 }
 
-function hasField(
-  customManager: Partial<RegexManagerConfig>,
-  field: string,
-): boolean {
+function hasField(customManager: CustomManager, field: string): boolean {
   const templateField = `${field}Template` as keyof RegexManagerTemplates;
+  const fieldStr =
+    customManager.customType === 'regex' ? `(?<${field}>` : field;
   return !!(
     customManager[templateField] ??
     customManager.matchStrings?.some((matchString) =>
-      matchString.includes(`(?<${field}>`),
+      matchString.includes(fieldStr),
     )
   );
 }
 
 export function validateRegexManagerFields(
-  customManager: Partial<RegexManagerConfig>,
+  customManager: CustomManager,
   currentPath: string,
   errors: ValidationMessage[],
 ): void {
@@ -114,7 +112,8 @@ export function validateRegexManagerFields(
   } else {
     errors.push({
       topic: 'Configuration Error',
-      message: `Each Custom Manager must contain a non-empty matchStrings array`,
+      message:
+        'Each Custom Manager `matchStrings` array must have at least one item.',
     });
   }
 
@@ -133,6 +132,59 @@ export function validateRegexManagerFields(
     errors.push({
       topic: 'Configuration Error',
       message: `Regex Managers must contain depName or packageName regex groups or templates`,
+    });
+  }
+}
+
+export function validateJSONataManagerFields(
+  customManager: CustomManager,
+  currentPath: string,
+  errors: ValidationMessage[],
+): void {
+  if (!is.nonEmptyString(customManager.fileFormat)) {
+    errors.push({
+      topic: 'Configuration Error',
+      message: 'Each JSONata manager must contain a fileFormat field.',
+    });
+  }
+
+  if (is.nonEmptyArray(customManager.matchStrings)) {
+    for (const matchString of customManager.matchStrings) {
+      try {
+        jsonata(matchString);
+      } catch (err) {
+        logger.debug(
+          { err },
+          'customManager.matchStrings JSONata query validation error',
+        );
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid JSONata query for ${currentPath}: \`${matchString}\``,
+        });
+      }
+    }
+  } else {
+    errors.push({
+      topic: 'Configuration Error',
+      message: `Each Custom Manager must contain a non-empty matchStrings array`,
+    });
+  }
+
+  const mandatoryFields = ['currentValue', 'datasource'];
+  for (const field of mandatoryFields) {
+    if (!hasField(customManager, field)) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `JSONata Managers must contain ${field}Template configuration or ${field} in the query `,
+      });
+    }
+  }
+
+  const nameFields = ['depName', 'packageName'];
+  if (!nameFields.some((field) => hasField(customManager, field))) {
+    errors.push({
+      topic: 'Configuration Error',
+      message: `JSONata Managers must contain depName or packageName in the query or their templates`,
     });
   }
 }

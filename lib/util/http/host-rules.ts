@@ -176,8 +176,8 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
     }
 
     options.headers = {
-      ...filteredHeaders,
       ...options.headers,
+      ...filteredHeaders,
     };
   }
 

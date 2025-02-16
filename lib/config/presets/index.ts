@@ -7,7 +7,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
-import { getTtlOverride } from '../../util/cache/package/decorator';
+import { getTtlOverride } from '../../util/cache/package/ttl';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';

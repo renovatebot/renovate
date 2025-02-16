@@ -7,6 +7,8 @@
 		"channels/stable/release/2.18.0/",
 		"channels/stable/release/2.18.4/",
 		"channels/stable/release/2.18.5/",
+    "channels/stable/release/30036/",
+    "channels/stable/release/30107/",
 		"channels/stable/release/latest/"
 	]
 }

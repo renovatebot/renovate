@@ -30,7 +30,7 @@ It is not valid to combine `*` with any other positive or negative match.
 }
 ```
 
-In the latter case, the `*` can be ommitted and achieve the same thing.
+In the latter case, the `*` can be omitted and achieve the same thing.
 
 ## Regex matching
 
@@ -47,7 +47,7 @@ To ignore case sensitivity you must set the `i` flag, see the regex patterns tab
 ### Renovate uses re2 syntax
 
 Renovate uses the [`re2` library](https://github.com/google/re2) for regex matching.
-`re2` is different from the full regex specification, because `re2` has a different sytax/support.
+`re2` is different from the full regex specification, because `re2` has a different syntax/support.
 
 For the full `re2` syntax, read [the `re2` syntax wiki page](https://github.com/google/re2/wiki/Syntax).
 

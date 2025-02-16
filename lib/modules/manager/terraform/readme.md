@@ -1,7 +1,7 @@
 ### Terraform vs OpenTofu
 
 Renovate can not know if you want to use the Terraform or OpenTofu registry.
-By default, Renovate uses the Terraform registry (`registry.terraform.io`) for providers _without_ a registry definition.
+By default, Renovate uses the Terraform registry (`registry.terraform.io`) for providers and modules _without_ a registry definition.
 
 You can override this default with your own `packageRules`, for example:
 
@@ -9,7 +9,7 @@ You can override this default with your own `packageRules`, for example:
 {
   "packageRules": [
     {
-      "matchDatasources": ["terraform-provider"],
+      "matchDatasources": ["terraform-provider", "terraform-module"],
       "registryUrls": ["https://registry.opentofu.org"]
     }
   ]

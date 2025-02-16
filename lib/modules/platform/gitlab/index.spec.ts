@@ -51,6 +51,7 @@ describe('modules/platform/gitlab/index', () => {
       token: '123test',
     });
     delete process.env.GITLAB_IGNORE_REPO_URL;
+    delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS;
     delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY;
     delete process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS;
     delete process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY;
@@ -1058,6 +1059,51 @@ describe('modules/platform/gitlab/index', () => {
   describe('setBranchStatus', () => {
     const states: BranchStatus[] = ['green', 'yellow', 'red'];
 
+    it('should log message that branch commit SHA not found', async () => {
+      git.getBranchCommit.mockReturnValue(null);
+      await gitlab.setBranchStatus({
+        branchName: 'some-branch',
+        context: 'some-context',
+        description: 'some-description',
+        state: 'green',
+        url: 'some-url',
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to get the branch commit SHA',
+      );
+    });
+
+    it('should log message that failed to retrieve commit pipeline', async () => {
+      const scope = await initRepo();
+      scope
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(200, {})
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+        )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(200, {});
+
+      timers.setTimeout.mockImplementation(() => {
+        throw new Error();
+      });
+      await gitlab.setBranchStatus({
+        branchName: 'some-branch',
+        context: 'some-context',
+        description: 'some-description',
+        state: 'green',
+        url: 'some-url',
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to retrieve commit pipeline',
+      );
+    });
+
     it.each(states)('sets branch status %s', async (state) => {
       const scope = await initRepo();
       scope
@@ -1072,7 +1118,8 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
-        .reply(200, []);
+        .times(3)
+        .reply(200, {});
 
       await expect(
         gitlab.setBranchStatus({
@@ -1099,7 +1146,8 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
-        .reply(200, []);
+        .times(3)
+        .reply(200, {});
 
       await gitlab.setBranchStatus({
         branchName: 'some-branch',
@@ -1109,7 +1157,7 @@ describe('modules/platform/gitlab/index', () => {
         url: 'some-url',
       });
 
-      expect(timers.setTimeout.mock.calls).toHaveLength(1);
+      expect(timers.setTimeout.mock.calls).toHaveLength(3);
       expect(timers.setTimeout.mock.calls[0][0]).toBe(1000);
     });
 
@@ -1131,6 +1179,10 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
+        .reply(200, {})
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
         .reply(200, { last_pipeline: { id: 123 } });
 
       await expect(
@@ -1146,6 +1198,7 @@ describe('modules/platform/gitlab/index', () => {
 
     it('waits for RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY ms when set', async () => {
       const delay = 5000;
+      const retry = 2;
       process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY = String(delay);
 
       const scope = await initRepo();
@@ -1161,7 +1214,8 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
-        .reply(200, []);
+        .times(3)
+        .reply(200, {});
 
       await gitlab.setBranchStatus({
         branchName: 'some-branch',
@@ -1171,7 +1225,49 @@ describe('modules/platform/gitlab/index', () => {
         url: 'some-url',
       });
 
-      expect(timers.setTimeout.mock.calls).toHaveLength(1);
+      expect(timers.setTimeout.mock.calls).toHaveLength(retry + 1);
+      expect(timers.setTimeout.mock.calls[0][0]).toBe(delay);
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Pipeline not yet created. Retrying 1`,
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Pipeline not yet created. Retrying 2`,
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Pipeline not yet created after 3 attempts`,
+      );
+    });
+
+    it('do RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS attemps when set', async () => {
+      const delay = 1000;
+      const retry = 5;
+      process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS = `${retry}`;
+
+      const scope = await initRepo();
+      scope
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(200, {})
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+        )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .times(retry + 1)
+        .reply(200, {});
+
+      await gitlab.setBranchStatus({
+        branchName: 'some-branch',
+        context: 'some-context',
+        description: 'some-description',
+        state: 'green',
+        url: 'some-url',
+      });
+
+      expect(timers.setTimeout.mock.calls).toHaveLength(retry + 1);
       expect(timers.setTimeout.mock.calls[0][0]).toBe(delay);
     });
   });

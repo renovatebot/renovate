@@ -1,5 +1,6 @@
 import * as npmUpdater from '../..';
 import { Fixtures } from '../../../../../../test/fixtures';
+import { type Upgrade } from '../../../types';
 
 const readFixture = (x: string): string => Fixtures.get(x, '../..');
 
@@ -252,6 +253,23 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       expect(JSON.parse(testContent!).dependencies.config).toBeUndefined();
       expect(JSON.parse(testContent!).dependencies.abc).toBe('2.0.0');
+    });
+
+    it('supports alias-based replacement', () => {
+      const upgrade: Upgrade = {
+        depType: 'dependencies',
+        depName: 'config',
+        newName: 'abc',
+        replacementApproach: 'alias',
+        newValue: '2.0.0',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01Content,
+        upgrade,
+      });
+      expect(JSON.parse(testContent!).dependencies.config).toBe(
+        'npm:abc@2.0.0',
+      );
     });
 
     it('replaces glob package resolutions', () => {

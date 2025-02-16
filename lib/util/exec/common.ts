@@ -1,8 +1,10 @@
 import type { ChildProcess } from 'node:child_process';
 import { spawn } from 'node:child_process';
+import type { Readable } from 'node:stream';
+import is from '@sindresorhus/is';
 import type { ExecErrorData } from './exec-error';
 import { ExecError } from './exec-error';
-import type { ExecResult, RawExecOptions } from './types';
+import type { DataListener, ExecResult, RawExecOptions } from './types';
 
 // https://man7.org/linux/man-pages/man7/signal.7.html#NAME
 // Non TERM/CORE signals
@@ -34,6 +36,9 @@ function initStreamListeners(
   let stdoutLen = 0;
   let stderrLen = 0;
 
+  registerDataListeners(cp.stdout, opts.outputListeners?.stdout);
+  registerDataListeners(cp.stderr, opts.outputListeners?.stderr);
+
   cp.stdout?.on('data', (chunk: Buffer) => {
     // process.stdout.write(data.toString());
     const len = Buffer.byteLength(chunk, encoding);
@@ -56,6 +61,19 @@ function initStreamListeners(
     }
   });
   return [stdout, stderr];
+}
+
+function registerDataListeners(
+  readable: Readable | null,
+  dataListeners: DataListener[] | undefined,
+): void {
+  if (is.nullOrUndefined(readable) || is.nullOrUndefined(dataListeners)) {
+    return;
+  }
+
+  for (const listener of dataListeners) {
+    readable.on('data', listener);
+  }
 }
 
 export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {

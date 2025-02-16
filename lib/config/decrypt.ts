@@ -64,59 +64,55 @@ function validateDecryptedValue(
     }
 
     const { o: org, r: repo, v: value } = decryptedObj.data;
-    if (is.nonEmptyString(value)) {
-      if (is.nonEmptyString(org)) {
-        const orgPrefixes = org
-          .split(',')
-          .map((o) => o.trim())
-          .map((o) => o.toUpperCase())
-          .map((o) => ensureTrailingSlash(o));
-        if (is.nonEmptyString(repo)) {
-          const scopedRepos = orgPrefixes.map((orgPrefix) =>
-            `${orgPrefix}${repo}`.toUpperCase(),
-          );
-          if (scopedRepos.some((r) => r === repository.toUpperCase())) {
-            return value;
-          } else {
-            logger.debug(
-              { scopedRepos },
-              'Secret is scoped to a different repository',
-            );
-            const error = new Error('config-validation');
-            error.validationError = `Encrypted secret is scoped to a different repository: "${scopedRepos.join(
-              ',',
-            )}".`;
-            throw error;
-          }
-        } else {
-          if (
-            orgPrefixes.some((orgPrefix) =>
-              repository.toUpperCase().startsWith(orgPrefix),
-            )
-          ) {
-            return value;
-          } else {
-            logger.debug(
-              { orgPrefixes },
-              'Secret is scoped to a different org',
-            );
-            const error = new Error('config-validation');
-            error.validationError = `Encrypted secret is scoped to a different org: "${orgPrefixes.join(
-              ',',
-            )}".`;
-            throw error;
-          }
-        }
-      } else {
-        const error = new Error('config-validation');
-        error.validationError = `Encrypted value in config is missing a scope.`;
-        throw error;
-      }
-    } else {
+
+    if (!is.nonEmptyString(value)) {
       const error = new Error('config-validation');
       error.validationError = `Encrypted value in config is missing a value.`;
       throw error;
     }
+
+    if (!is.nonEmptyString(org)) {
+      const error = new Error('config-validation');
+      error.validationError = `Encrypted value in config is missing a scope.`;
+      throw error;
+    }
+
+    const orgPrefixes = org
+      .split(',')
+      .map((o) => o.trim())
+      .map((o) => o.toUpperCase())
+      .map((o) => ensureTrailingSlash(o));
+
+    if (is.nonEmptyString(repo)) {
+      const scopedRepos = orgPrefixes.map((orgPrefix) =>
+        `${orgPrefix}${repo}`.toUpperCase(),
+      );
+      if (scopedRepos.some((r) => r === repository.toUpperCase())) {
+        return value;
+      }
+      logger.debug(
+        { scopedRepos },
+        'Secret is scoped to a different repository',
+      );
+      const error = new Error('config-validation');
+      const scopeString = scopedRepos.join(',');
+      error.validationError = `Encrypted secret is scoped to a different repository: "${scopeString}".`;
+      throw error;
+    }
+
+    // no scoped repos, only org
+    if (
+      orgPrefixes.some((orgPrefix) =>
+        repository.toUpperCase().startsWith(orgPrefix),
+      )
+    ) {
+      return value;
+    }
+    logger.debug({ orgPrefixes }, 'Secret is scoped to a different org');
+    const error = new Error('config-validation');
+    const scopeString = orgPrefixes.join(',');
+    error.validationError = `Encrypted secret is scoped to a different org: "${scopeString}".`;
+    throw error;
   } catch (err) {
     logger.warn({ err }, 'Could not parse decrypted string');
   }

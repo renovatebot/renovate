@@ -9,6 +9,7 @@ exports[`modules/manager/droneci/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "elixir",
     "depType": "docker",
+    "packageName": "elixir",
     "replaceString": "elixir:1.8.1-alpine",
   },
   {
@@ -28,6 +29,7 @@ exports[`modules/manager/droneci/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "mysql",
     "depType": "docker",
+    "packageName": "mysql",
     "replaceString": "mysql:5.7.24",
   },
   {
@@ -37,6 +39,7 @@ exports[`modules/manager/droneci/extract extractPackageFile() extracts multiple 
     "datasource": "docker",
     "depName": "redis",
     "depType": "docker",
+    "packageName": "redis",
     "replaceString": "redis:alpine",
   },
   {

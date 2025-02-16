@@ -543,4 +543,24 @@ describe('util/http/host-rules', () => {
       },
     });
   });
+
+  it('should replace existing headers with host rule headers', () => {
+    GlobalConfig.set({ allowedHeaders: ['Accept'] });
+    const hostRule = {
+      matchHost: 'https://domain.com/all-versions',
+      headers: {
+        Accept: 'replacement',
+      },
+    };
+    const options = {
+      headers: {
+        Accept: 'default',
+      },
+    };
+    expect(applyHostRule(url, options, hostRule)).toEqual({
+      headers: {
+        Accept: 'replacement',
+      },
+    });
+  });
 });

@@ -17,6 +17,7 @@ import {
   removeMeta,
   setContext,
   setMeta,
+  withMeta,
 } from '.';
 
 const initialContext = 'initial_context';
@@ -120,6 +121,43 @@ describe('logger/index', () => {
         '',
       );
       expect(bunyanDebugSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('withMeta adds and removes metadata correctly', () => {
+      const logMeta = { foo: 'foo' };
+      const tempMeta = { bar: 'bar' };
+
+      withMeta(tempMeta, () => {
+        logger.debug(logMeta, '');
+        expect(bunyanDebugSpy).toHaveBeenCalledWith(
+          { logContext: initialContext, ...tempMeta, ...logMeta },
+          '',
+        );
+      });
+
+      logger.debug(logMeta, '');
+      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+        { logContext: initialContext, ...logMeta },
+        '',
+      );
+    });
+
+    it('withMeta handles cleanup when callback throws', () => {
+      const logMeta = { foo: 'foo' };
+      const tempMeta = { bar: 'bar' };
+
+      expect(() =>
+        withMeta(tempMeta, () => {
+          logger.debug(logMeta, '');
+          throw new Error('test error');
+        }),
+      ).toThrow('test error');
+
+      logger.debug(logMeta, '');
+      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+        { logContext: initialContext, ...logMeta },
+        '',
+      );
     });
   });
 

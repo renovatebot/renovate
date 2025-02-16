@@ -1,6 +1,17 @@
 import { z } from 'zod';
 import { Json, LooseRecord } from '../../../util/schema-utils';
 
+export const PnpmCatalogsSchema = z.object({
+  catalog: z.optional(z.record(z.string())),
+  catalogs: z.optional(z.record(z.record(z.string()))),
+});
+
+export const PnpmWorkspaceFileSchema = z
+  .object({
+    packages: z.array(z.string()),
+  })
+  .and(PnpmCatalogsSchema);
+
 export const PackageManagerSchema = z
   .string()
   .transform((val) => val.split('@'))

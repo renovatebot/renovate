@@ -13,4 +13,8 @@ jest.mock('../lib/modules/platform/scm', () => ({
   scm: mockDeep<PlatformScm>(),
 }));
 
-jest.mock('../lib/logger', () => mockDeep());
+jest.mock('../lib/logger', () => {
+  return mockDeep({
+    withMeta: <T>(_: Record<string, unknown>, cb: () => T): T => cb(),
+  });
+});

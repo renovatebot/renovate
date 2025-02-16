@@ -105,6 +105,7 @@ describe('modules/manager/pre-commit/extract', () => {
           },
           { depName: 'prettier/pre-commit', currentValue: 'v2.1.2' },
           { depName: 'prettier/pre-commit', currentValue: 'v2.1.2' },
+          { depName: 'pre-commit/pre-commit-hooks', currentValue: 'v5.0.0' },
           { skipReason: 'invalid-url' },
         ],
       });

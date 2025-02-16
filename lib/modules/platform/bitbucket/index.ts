@@ -600,7 +600,7 @@ export async function ensureIssue({
   logger.debug(`ensureIssue()`);
   /* istanbul ignore if */
   if (!config.has_issues) {
-    logger.warn('Issues are disabled - cannot ensureIssue');
+    logger.debug('Issues are disabled - cannot ensureIssue');
     logger.debug(`Failed to ensure Issue with title:${title}`);
     return null;
   }

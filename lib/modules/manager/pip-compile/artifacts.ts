@@ -57,7 +57,7 @@ export function constructPipCompileCmd(
   compileArgs: PipCompileArgs,
   upgradePackages: Upgrade[] = [],
 ): string {
-  if (compileArgs.isCustomCommand) {
+  if (compileArgs.commandType === 'custom') {
     throw new Error(
       'Detected custom command, header modified or set by CUSTOM_COMPILE_COMMAND',
     );
@@ -68,6 +68,7 @@ export function constructPipCompileCmd(
   }
   // safeguard against index url leak if not explicitly set by an option
   if (
+    compileArgs.commandType === 'pip-compile' &&
     !compileArgs.noEmitIndexUrl &&
     !compileArgs.emitIndexUrl &&
     haveCredentialsInPipEnvironmentVariables()
@@ -115,6 +116,7 @@ export async function updateArtifacts({
       }
       const compileArgs = extractHeaderCommand(existingOutput, outputFileName);
       const pythonVersion = extractPythonVersion(
+        compileArgs.commandType,
         existingOutput,
         outputFileName,
       );

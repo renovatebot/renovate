@@ -41,18 +41,18 @@ describe('modules/manager/docker-compose/extract', () => {
 
     it('extracts default variable values for version 3', () => {
       const res = extractPackageFile(yamlFile3DefaultValue, '', {});
-      expect(res?.deps).toMatchInlineSnapshot(`
-        [
-          {
-            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-            "currentDigest": "sha256:abcd",
-            "currentValue": "5.0.0",
-            "datasource": "docker",
-            "depName": "redis",
-            "replaceString": "redis:5.0.0@sha256:abcd",
-          },
-        ]
-      `);
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: 'sha256:abcd',
+          currentValue: '5.0.0',
+          datasource: 'docker',
+          depName: 'redis',
+          packageName: 'redis',
+          replaceString: 'redis:5.0.0@sha256:abcd',
+        },
+      ]);
       expect(res?.deps).toHaveLength(1);
     });
 
@@ -72,6 +72,7 @@ describe('modules/manager/docker-compose/extract', () => {
         deps: [
           {
             depName: 'node',
+            packageName: 'node',
             currentValue: '20.0.0',
             currentDigest: undefined,
             replaceString: 'node:20.0.0',
@@ -103,7 +104,8 @@ describe('modules/manager/docker-compose/extract', () => {
             currentDigest: undefined,
             currentValue: '0.0.1',
             datasource: 'docker',
-            depName: 'my-quay-mirror.registry.com/nginx',
+            depName: 'quay.io/nginx',
+            packageName: 'my-quay-mirror.registry.com/nginx',
             replaceString: 'quay.io/nginx:0.0.1',
           },
         ],
@@ -131,6 +133,7 @@ describe('modules/manager/docker-compose/extract', () => {
             currentValue: '0.0.1',
             datasource: 'docker',
             depName: 'quay.io/nginx',
+            packageName: 'quay.io/nginx',
             replaceString: 'quay.io/nginx:0.0.1',
           },
         ],
@@ -158,7 +161,8 @@ describe('modules/manager/docker-compose/extract', () => {
             currentDigest: undefined,
             currentValue: '0.0.1',
             datasource: 'docker',
-            depName: 'my-quay-mirror.registry.com/nginx',
+            depName: 'quay.io/nginx',
+            packageName: 'my-quay-mirror.registry.com/nginx',
             replaceString: 'quay.io/nginx:0.0.1',
           },
         ],
@@ -184,6 +188,7 @@ describe('modules/manager/docker-compose/extract', () => {
             currentValue: '0.0.1',
             datasource: 'docker',
             depName: 'quay.io/nginx',
+            packageName: 'quay.io/nginx',
             replaceString: 'quay.io/nginx:0.0.1',
           },
         ],

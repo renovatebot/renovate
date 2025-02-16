@@ -2,7 +2,9 @@ import {
   ArrayFragmentSchema,
   AttributeFragmentSchema,
   BooleanFragmentSchema,
-  RecordFragmentSchema,
+  ExtensionTagFragmentSchema,
+  PreparedExtensionTagFragmentSchema,
+  RuleFragmentSchema,
   StringFragmentSchema,
 } from './fragments';
 import * as fragments from './fragments';
@@ -20,11 +22,44 @@ describe('modules/manager/bazel-module/fragments', () => {
     expect(result.value).toBe(true);
   });
 
-  it('.record()', () => {
-    const result = fragments.record({ name: fragments.string('foo') }, true);
-    expect(() => RecordFragmentSchema.parse(result)).not.toThrow();
-    expect(result.children).toEqual({ name: fragments.string('foo') });
+  it('.rule()', () => {
+    const result = fragments.rule(
+      'foo',
+      { name: fragments.string('bar') },
+      true,
+    );
+    expect(() => RuleFragmentSchema.parse(result)).not.toThrow();
+    expect(result.rule).toBe('foo');
+    expect(result.children).toEqual({ name: fragments.string('bar') });
     expect(result.isComplete).toBe(true);
+  });
+
+  it('.extensionTag()', () => {
+    const result = fragments.extensionTag(
+      'ext',
+      'ext_01',
+      'tag',
+      { name: fragments.string('bar') },
+      true,
+    );
+
+    expect(() => ExtensionTagFragmentSchema.parse(result)).not.toThrow();
+    expect(result.extension).toBe('ext');
+    expect(result.rawExtension).toBe('ext_01');
+    expect(result.tag).toBe('tag');
+    expect(result.children).toEqual({ name: fragments.string('bar') });
+    expect(result.isComplete).toBe(true);
+  });
+
+  it('.preparedExtensionTag()', () => {
+    const result = fragments.preparedExtensionTag('ext', 'ext_01');
+
+    expect(() =>
+      PreparedExtensionTagFragmentSchema.parse(result),
+    ).not.toThrow();
+    expect(result.extension).toBe('ext');
+    expect(result.rawExtension).toBe('ext_01');
+    expect(result.isComplete).toBe(false);
   });
 
   it('.attribute()', () => {
@@ -43,22 +78,26 @@ describe('modules/manager/bazel-module/fragments', () => {
   });
 
   it.each`
-    a                            | exp
-    ${fragments.string('hello')} | ${true}
-    ${fragments.boolean(true)}   | ${true}
-    ${fragments.array()}         | ${true}
-    ${fragments.record()}        | ${false}
+    a                                                  | exp
+    ${fragments.string('hello')}                       | ${true}
+    ${fragments.boolean(true)}                         | ${true}
+    ${fragments.array()}                               | ${true}
+    ${fragments.rule('dummy')}                         | ${false}
+    ${fragments.extensionTag('ext', 'ext_01', 'tag')}  | ${false}
+    ${fragments.preparedExtensionTag('ext', 'ext_01')} | ${false}
   `('.isValue($a)', ({ a, exp }) => {
     expect(fragments.isValue(a)).toBe(exp);
   });
 
   it.each`
-    a                            | exp
-    ${fragments.string('hello')} | ${true}
-    ${fragments.boolean(true)}   | ${true}
-    ${fragments.array()}         | ${false}
-    ${fragments.record()}        | ${false}
-  `('.isValue($a)', ({ a, exp }) => {
+    a                                                  | exp
+    ${fragments.string('hello')}                       | ${true}
+    ${fragments.boolean(true)}                         | ${true}
+    ${fragments.array()}                               | ${false}
+    ${fragments.rule('dummy')}                         | ${false}
+    ${fragments.extensionTag('ext', 'ext_01', 'tag')}  | ${false}
+    ${fragments.preparedExtensionTag('ext', 'ext_01')} | ${false}
+  `('.isPrimitive($a)', ({ a, exp }) => {
     expect(fragments.isPrimitive(a)).toBe(exp);
   });
 });

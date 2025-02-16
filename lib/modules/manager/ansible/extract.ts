@@ -1,6 +1,5 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
-import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -29,7 +28,6 @@ export function extractPackageFile(
         },
         'Docker image inside ansible',
       );
-      dep.versioning = dockerVersioning.id;
       deps.push(dep);
     }
   }

@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { z } from 'zod';
+import { logger } from '../../test/util';
 import {
   Json,
   Json5,
@@ -10,6 +11,9 @@ import {
   Toml,
   UtcDate,
   Yaml,
+  multidocYaml,
+  withDebugMessage,
+  withTraceMessage,
 } from './schema-utils';
 
 describe('util/schema-utils', () => {
@@ -444,6 +448,26 @@ describe('util/schema-utils', () => {
     });
   });
 
+  describe('multidocYaml()', () => {
+    const Schema = multidocYaml().pipe(
+      z.array(
+        z.object({
+          foo: z.number(),
+        }),
+      ),
+    );
+
+    it('parses valid yaml', () => {
+      expect(
+        Schema.parse(codeBlock`
+          foo: 111
+          ---
+          foo: 222
+        `),
+      ).toEqual([{ foo: 111 }, { foo: 222 }]);
+    });
+  });
+
   describe('Toml', () => {
     const Schema = Toml.pipe(
       z.object({ foo: z.object({ bar: z.literal('baz') }) }),
@@ -492,6 +516,36 @@ describe('util/schema-utils', () => {
         },
         success: false,
       });
+    });
+  });
+
+  describe('logging utils', () => {
+    it('logs debug message and returns fallback value', () => {
+      const Schema = z
+        .string()
+        .catch(withDebugMessage('default string', 'Debug message'));
+
+      const result = Schema.parse(42);
+
+      expect(result).toBe('default string');
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { err: expect.any(z.ZodError) },
+        'Debug message',
+      );
+    });
+
+    it('logs trace message and returns fallback value', () => {
+      const Schema = z
+        .string()
+        .catch(withTraceMessage('default string', 'Trace message'));
+
+      const result = Schema.parse(42);
+
+      expect(result).toBe('default string');
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        { err: expect.any(z.ZodError) },
+        'Trace message',
+      );
     });
   });
 });

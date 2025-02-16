@@ -1,14 +1,16 @@
 import type {
   AllFragments,
   ArrayFragment,
-  ChildFragments,
-  RecordFragment,
+  ExtensionTagFragment,
+  PreparedExtensionTagFragment,
+  ResultFragment,
+  RuleFragment,
 } from './fragments';
 import * as fragments from './fragments';
 
 // Represents the fields that the context must have.
 export interface CtxCompatible {
-  results: RecordFragment[];
+  results: ResultFragment[];
   stack: AllFragments[];
 }
 
@@ -27,12 +29,12 @@ export class CtxProcessingError extends Error {
 }
 
 export class Ctx implements CtxCompatible {
-  results: RecordFragment[];
+  results: ResultFragment[];
   stack: AllFragments[];
 
-  constructor(results: RecordFragment[] = [], stack: AllFragments[] = []) {
-    this.results = results;
-    this.stack = stack;
+  constructor() {
+    this.results = [];
+    this.stack = [];
   }
 
   private get safeCurrent(): AllFragments | undefined {
@@ -46,20 +48,42 @@ export class Ctx implements CtxCompatible {
     }
     return c;
   }
-  get currentRecord(): RecordFragment {
+
+  private get currentRule(): RuleFragment {
     const current = this.current;
-    if (current.type === 'record') {
+    if (current.type === 'rule') {
       return current;
     }
-    throw new Error('Requested current record, but does not exist.');
+    throw new Error('Requested current rule, but does not exist.');
   }
 
-  get currentArray(): ArrayFragment {
+  private get currentExtensionTag(): ExtensionTagFragment {
+    const current = this.current;
+    if (current.type === 'extensionTag') {
+      return current;
+    }
+    throw new Error('Requested current extension tag, but does not exist.');
+  }
+
+  private get currentArray(): ArrayFragment {
     const current = this.current;
     if (current.type === 'array') {
       return current;
     }
     throw new Error('Requested current array, but does not exist.');
+  }
+
+  private popPreparedExtensionTag(): PreparedExtensionTagFragment {
+    const c = this.stack.pop();
+    if (c === undefined) {
+      throw new Error('Requested current, but no value.');
+    }
+    if (c.type === 'preparedExtensionTag') {
+      return c;
+    }
+    throw new Error(
+      'Requested current prepared extension tag, but does not exist.',
+    );
   }
 
   private popStack(): boolean {
@@ -84,14 +108,14 @@ export class Ctx implements CtxCompatible {
         return true;
       }
       if (
-        parent.type === 'record' &&
+        (parent.type === 'rule' || parent.type === 'extensionTag') &&
         current.type === 'attribute' &&
         current.value !== undefined
       ) {
         parent.children[current.name] = current.value;
         return true;
       }
-    } else if (current.type === 'record') {
+    } else if (current.type === 'rule' || current.type === 'extensionTag') {
       this.results.push(current);
       return true;
     }
@@ -116,24 +140,36 @@ export class Ctx implements CtxCompatible {
     return this.processStack();
   }
 
-  startRecord(children: ChildFragments = {}): Ctx {
-    const record = fragments.record(children);
-    this.stack.push(record);
+  startRule(name: string): Ctx {
+    const rule = fragments.rule(name);
+    this.stack.push(rule);
     return this;
   }
 
-  endRecord(): Ctx {
-    const record = this.currentRecord;
-    record.isComplete = true;
+  endRule(): Ctx {
+    const rule = this.currentRule;
+    rule.isComplete = true;
     return this.processStack();
   }
 
-  startRule(name: string): Ctx {
-    return this.startRecord({ rule: fragments.string(name) });
+  prepareExtensionTag(extension: string, rawExtension: string): Ctx {
+    const preppedTag = fragments.preparedExtensionTag(extension, rawExtension);
+    this.stack.push(preppedTag);
+    return this;
   }
 
-  endRule(): Ctx {
-    return this.endRecord();
+  startExtensionTag(tag: string): Ctx {
+    const { extension, rawExtension } = this.popPreparedExtensionTag();
+
+    const extensionTag = fragments.extensionTag(extension, rawExtension, tag);
+    this.stack.push(extensionTag);
+    return this;
+  }
+
+  endExtensionTag(): Ctx {
+    const tag = this.currentExtensionTag;
+    tag.isComplete = true;
+    return this.processStack();
   }
 
   startAttribute(name: string): Ctx {

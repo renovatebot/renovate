@@ -9,6 +9,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts from di
       "datasource": "docker",
       "depName": "postgres",
       "depType": "Kustomization",
+      "packageName": "postgres",
       "replaceString": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
     },
     {
@@ -17,6 +18,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts from di
       "datasource": "docker",
       "depName": "postgres",
       "depType": "Kustomization",
+      "packageName": "postgres",
       "replaceString": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
     },
     {
@@ -52,6 +54,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts from ne
       "datasource": "docker",
       "depName": "postgres",
       "depType": "Kustomization",
+      "packageName": "postgres",
       "replaceString": "11",
     },
     {
@@ -61,6 +64,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts from ne
       "datasource": "docker",
       "depName": "postgres",
       "depType": "Kustomization",
+      "packageName": "postgres",
       "replaceString": "11@sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
     },
     {
@@ -118,6 +122,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts newName
       "datasource": "docker",
       "depName": "awesome/postgres",
       "depType": "Kustomization",
+      "packageName": "awesome/postgres",
       "replaceString": "awesome/postgres:11@sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
     },
     {
@@ -126,6 +131,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts newName
       "datasource": "docker",
       "depName": "awesome/postgres",
       "depType": "Kustomization",
+      "packageName": "awesome/postgres",
       "replaceString": "awesome/postgres:11",
     },
     {
@@ -134,6 +140,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts newName
       "datasource": "docker",
       "depName": "awesome/postgres",
       "depType": "Kustomization",
+      "packageName": "awesome/postgres",
       "replaceString": "awesome/postgres@sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
     },
   ],
@@ -231,6 +238,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() should extract d
     "datasource": "docker",
     "depName": "node",
     "depType": "Component",
+    "packageName": "node",
     "replaceString": "v0.1.0",
   },
 ]
@@ -245,6 +253,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() should extract o
     "datasource": "docker",
     "depName": "node",
     "depType": "Kustomization",
+    "packageName": "node",
     "replaceString": "v0.1.0",
   },
   {
@@ -254,6 +263,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() should extract o
     "datasource": "docker",
     "depName": "group/instance",
     "depType": "Kustomization",
+    "packageName": "group/instance",
     "replaceString": "v0.0.1",
   },
   {
@@ -263,6 +273,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() should extract o
     "datasource": "docker",
     "depName": "quay.io/test/repo",
     "depType": "Kustomization",
+    "packageName": "quay.io/test/repo",
     "replaceString": "v0.0.2",
   },
   {
@@ -272,6 +283,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() should extract o
     "datasource": "docker",
     "depName": "gitlab.com/org/suborg/image",
     "depType": "Kustomization",
+    "packageName": "gitlab.com/org/suborg/image",
     "replaceString": "v0.0.3",
   },
   {
@@ -281,6 +293,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() should extract o
     "datasource": "docker",
     "depName": "but.this.lives.on.local/private-registry",
     "depType": "Kustomization",
+    "packageName": "but.this.lives.on.local/private-registry",
     "replaceString": "v0.0.4",
   },
   {

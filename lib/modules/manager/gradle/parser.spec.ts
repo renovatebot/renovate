@@ -8,7 +8,11 @@ import {
   parseKotlinSource,
   parseProps,
 } from './parser';
-import { GRADLE_PLUGINS, REGISTRY_URLS } from './parser/common';
+import {
+  GRADLE_PLUGINS,
+  GRADLE_TEST_SUITES,
+  REGISTRY_URLS,
+} from './parser/common';
 
 jest.mock('../../../util/fs');
 
@@ -724,6 +728,157 @@ describe('modules/manager/gradle/parser', () => {
         },
       ]);
     });
+
+    describe('content descriptors', () => {
+      it('valid combinations', () => {
+        const input = codeBlock`
+          maven(url = "https://foo.bar/baz") {
+            content {
+              excludeGroup("baz.qux")
+            }
+          }
+          mavenCentral().content {
+            includeGroup("foo.bar")
+          }
+          maven {
+            url = "https://foo.bar/deps"
+            content {
+              includeGroupAndSubgroups("foo.bar")
+            }
+          }
+          maven {
+            url = "https://some.foo"
+            content {
+              includeModule("foo", "bar")
+              excludeModule("baz", "qux")
+              includeVersion("foo", "bar", "1.2.3")
+              excludeVersion("baz", "qux", "4.5.6")
+              includeGroupByRegex("org\\\\.jetbrains\\\\.kotlin.*")
+              excludeGroupByRegex(".*google.*")
+              includeModuleByRegex(".*foo.*", ".*bar.*")
+              excludeModuleByRegex(".*baz.*", ".*qux.*")
+              includeVersionByRegex(".*foo.*", ".*bar.*", "1.2.3")
+              excludeVersionByRegex(".*baz.*", ".*qux.*", ".*4.5.*")
+            }
+          }
+        `;
+
+        const { urls } = parseGradle(input);
+        expect(urls).toStrictEqual([
+          {
+            registryUrl: 'https://foo.bar/baz',
+            scope: 'dep',
+            content: [
+              { mode: 'exclude', matcher: 'simple', groupId: 'baz.qux' },
+            ],
+          },
+          {
+            registryUrl: REGISTRY_URLS.mavenCentral,
+            scope: 'dep',
+            content: [
+              { mode: 'include', matcher: 'simple', groupId: 'foo.bar' },
+            ],
+          },
+          {
+            registryUrl: 'https://foo.bar/deps',
+            scope: 'dep',
+            content: [
+              { mode: 'include', matcher: 'subgroup', groupId: 'foo.bar' },
+            ],
+          },
+          {
+            registryUrl: 'https://some.foo',
+            scope: 'dep',
+            content: [
+              {
+                mode: 'include',
+                matcher: 'simple',
+                groupId: 'foo',
+                artifactId: 'bar',
+              },
+              {
+                mode: 'exclude',
+                matcher: 'simple',
+                groupId: 'baz',
+                artifactId: 'qux',
+              },
+              {
+                mode: 'include',
+                matcher: 'simple',
+                groupId: 'foo',
+                artifactId: 'bar',
+                version: '1.2.3',
+              },
+              {
+                mode: 'exclude',
+                matcher: 'simple',
+                groupId: 'baz',
+                artifactId: 'qux',
+                version: '4.5.6',
+              },
+              {
+                mode: 'include',
+                matcher: 'regex',
+                groupId: '^org\\.jetbrains\\.kotlin.*$',
+              },
+              { mode: 'exclude', matcher: 'regex', groupId: '^.*google.*$' },
+              {
+                mode: 'include',
+                matcher: 'regex',
+                groupId: '^.*foo.*$',
+                artifactId: '^.*bar.*$',
+              },
+              {
+                mode: 'exclude',
+                matcher: 'regex',
+                groupId: '^.*baz.*$',
+                artifactId: '^.*qux.*$',
+              },
+              {
+                mode: 'include',
+                matcher: 'regex',
+                groupId: '^.*foo.*$',
+                artifactId: '^.*bar.*$',
+                version: '^1.2.3$',
+              },
+              {
+                mode: 'exclude',
+                matcher: 'regex',
+                groupId: '^.*baz.*$',
+                artifactId: '^.*qux.*$',
+                version: '^.*4.5.*$',
+              },
+            ],
+          },
+        ]);
+      });
+
+      describe('invalid or unsupported regEx patterns', () => {
+        it.each`
+          fieldName    | pattern
+          ${'group'}   | ${'includeGroupByRegex(".*so\\me.invalid.pattern.*")'}
+          ${'group'}   | ${'includeModuleByRegex(".*so\\me.invalid.pattern.*", ".*bar.*")'}
+          ${'module'}  | ${'includeModuleByRegex(".*foo.*", ".*so\\me.invalid.pattern.*")'}
+          ${'module'}  | ${'excludeModuleByRegex(".*baz.*", "(?!(foo|bar).*)")'}
+          ${'version'} | ${'includeVersionByRegex(".*foo.*", ".*bar.*", "(?!(foo|bar).*)")'}
+          ${'version'} | ${'excludeVersionByRegex(".*baz.*", ".*qux.*", "(?!(foo|bar).*)")'}
+        `('$pattern', ({ fieldName, pattern }) => {
+          const input = codeBlock`
+            mavenCentral {
+              content {
+                ${pattern}
+              }
+            }
+          `;
+          parseGradle(input);
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            expect.stringContaining(
+              `Skipping content descriptor with unsupported regExp pattern for ${fieldName}`,
+            ),
+          );
+        });
+      });
+    });
   });
 
   describe('version catalog', () => {
@@ -1065,6 +1220,21 @@ describe('modules/manager/gradle/parser', () => {
     `('$def | $input', ({ def, input, output }) => {
       const { deps } = parseGradle([def, input].join('\n'));
       expect(deps).toMatchObject([output].filter(is.truthy));
+    });
+  });
+
+  describe('implicit gradle test suite dependencies', () => {
+    it.each`
+      def                | input                                                   | output
+      ${''}              | ${'testing.suites.test { useJunit("1.2.3") } } }'}      | ${{ depName: 'useJunit', packageName: GRADLE_TEST_SUITES['useJunit'], currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'} | ${'testing.suites.test { useJUnitJupiter(baz) } } }'}   | ${{ depName: 'useJUnitJupiter', packageName: GRADLE_TEST_SUITES['useJUnitJupiter'], currentValue: '1.2.3' }}
+      ${''}              | ${'testing.suites.test { useKotlinTest("1.2.3") } } }'} | ${{ depName: 'useKotlinTest', packageName: GRADLE_TEST_SUITES['useKotlinTest'], currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'} | ${'testing { suites { test { useSpock(baz) } } }'}      | ${{ depName: 'useSpock', packageName: GRADLE_TEST_SUITES['useSpock'], currentValue: '1.2.3' }}
+      ${''}              | ${'testing.suites.test { useSpock("1.2.3") } } }'}      | ${{ depName: 'useSpock', packageName: GRADLE_TEST_SUITES['useSpock'], currentValue: '1.2.3' }}
+      ${''}              | ${'testing.suites.test { useTestNG("1.2.3") } } }'}     | ${{ depName: 'useTestNG', packageName: GRADLE_TEST_SUITES['useTestNG'], currentValue: '1.2.3' }}
+    `('$def | $input', ({ def, input, output }) => {
+      const { deps } = parseGradle([def, input].join('\n'));
+      expect(deps).toMatchObject([output]);
     });
   });
 

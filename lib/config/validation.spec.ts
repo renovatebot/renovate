@@ -706,7 +706,8 @@ describe('config/validation', () => {
             currentValueTemplate: 'baz',
           },
           {
-            customType: 'regex',
+            customType: 'jsonata',
+            fileFormat: 'json',
             fileMatch: ['foo'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
@@ -724,7 +725,7 @@ describe('config/validation', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Each Custom Manager must contain a non-empty matchStrings array",
+            "message": "Each Custom Manager \`matchStrings\` array must have at least one item.",
             "topic": "Configuration Error",
           },
           {
@@ -776,6 +777,60 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
     });
 
+    it('error if no fileFormat in custom JSONata manager', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
+          {
+            customType: 'jsonata',
+            fileMatch: ['package.json'],
+            matchStrings: [
+              'packages.{"depName": name, "currentValue": version, "datasource": "npm"}',
+            ],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message: 'Each JSONata manager must contain a fileFormat field.',
+        },
+      ]);
+    });
+
+    it('validates JSONata query for each matchStrings', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
+          {
+            customType: 'jsonata',
+            fileFormat: 'json',
+            fileMatch: ['package.json'],
+            matchStrings: ['packages.{'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message: `Invalid JSONata query for customManagers: \`packages.{\``,
+        },
+      ]);
+    });
+
     // testing if we get all errors at once or not (possible), this does not include customType or fileMatch
     // since they are common to all custom managers
     it('validates all possible regex manager options', async () => {
@@ -811,14 +866,12 @@ describe('config/validation', () => {
             depTypeTemplate: 'apple',
           },
           {
-            customType: 'regex',
-            fileMatch: ['Dockerfile'],
-            matchStrings: ['ENV (?<currentValue>.*?)\\s'],
-            packageNameTemplate: 'foo',
-            datasourceTemplate: 'bar',
-            registryUrlTemplate: 'foobar',
-            extractVersionTemplate: '^(?<version>v\\d+\\.\\d+)',
-            depTypeTemplate: 'apple',
+            customType: 'jsonata',
+            fileFormat: 'json',
+            fileMatch: ['package.json'],
+            matchStrings: [
+              'packages.{"depName": depName, "currentValue": version, "datasource": "npm"}',
+            ],
           },
         ],
       };
@@ -874,6 +927,39 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(1);
+    });
+
+    it('errors if customManager fields are missing: JSONataManager', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
+          {
+            customType: 'jsonata',
+            fileFormat: 'json',
+            fileMatch: ['package.json'],
+            matchStrings: ['packages'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message: `JSONata Managers must contain currentValueTemplate configuration or currentValue in the query `,
+        },
+        {
+          topic: 'Configuration Error',
+          message: `JSONata Managers must contain datasourceTemplate configuration or datasource in the query `,
+        },
+        {
+          topic: 'Configuration Error',
+          message: `JSONata Managers must contain depName or packageName in the query or their templates`,
+        },
+      ]);
     });
 
     it('ignore keys', async () => {
@@ -1764,7 +1850,7 @@ describe('config/validation', () => {
 
     it('validates array type options', async () => {
       const config = {
-        allowedPostUpgradeCommands: ['cmd'],
+        allowedCommands: ['cmd'],
         checkedBranches: 'invalid-type',
         gitNoVerify: ['invalid'],
         mergeConfidenceDatasources: [1],

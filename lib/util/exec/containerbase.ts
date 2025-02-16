@@ -48,6 +48,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'corepack',
     versioning: npmVersioningId,
   },
+  devbox: {
+    datasource: 'github-releases',
+    packageName: 'jetify-com/devbox',
+    versioning: semverVersioningId,
+  },
   dotnet: {
     datasource: 'dotnet-version',
     packageName: 'dotnet-sdk',

@@ -40,6 +40,19 @@
 
     Thanks, the Renovate team
 
+'auto:reproduction-still-needed':
+  comment: >
+    Hi there,
+
+
+    This Discussion has been flagged previously as needing a minimal reproduction, but one does not yet exist. This is a reminder that the reproduction is still needed in order to progress to next steps.
+
+
+    If you have provided a minimal reproduction which satisfies our definitions above, but it went unnoticed, please reply to this message to help us find it.
+
+
+    Thanks, the Renovate team
+
 'auto:environment':
   comment: >
     Hi there,
@@ -100,16 +113,6 @@
     </details>
 
 
-    ### Insufficient logs
-
-    <details><summary>Select me to read instructions</summary>
-
-
-    If you already gave us a log, and the Renovate team said it's not enough, then follow the instructions from the **No logs at all** section.
-
-    </details>
-
-
     ### Formatting your logs
 
     <details><summary>Select me to read instructions</summary>
@@ -137,12 +140,31 @@
 
     The Renovate team
 
+'auto:logs-insufficient':
+  comment: >
+    Hi there,
+
+
+    The logs you provided are insufficient to help you.
+
+
+    Please provide more logs, or more detailed logs, so we can help you. Be sure to include _DEBUG_ logs, and don't excessively redact or truncate them.
+
+
+    If you feel the logs are too large to paste here, please use a service like [GitHub Gist](https://gist.github.com/) and paste the link here.
+
+
+    Read the [Renovate docs, Troubleshooting](https://docs.renovatebot.com/troubleshooting/) to learn more about getting the correct logs.
+
+
+    Thanks, the Renovate team
+
 'auto:logs-packages':
   comment: >
     Hi there,
 
 
-    A maintainer wants you to find and share a specific log message (`packageFiles with updates`) from your repository or environment.
+    Please locate the debug message `packageFiles with updates` in your logs and paste the contents here. Depending on your question, we may need the full list of packages or only one.
 
 
     If you self-host Renovate: make sure you run Renovate with `LOG_LEVEL=debug` to get the debug log messages! Next, open the debug-level logs and search for `packageFiles with updates`. This text marks the start of a structured log message that shows every package file, dependency, and update that Renovate found.
@@ -265,6 +287,21 @@
 
     The Renovate team
 
+'auto:no-merge-from-main':
+  comment: >
+    Hi there,
+
+
+    Please don't merge from `main` into your PR's branch unless you have a merge conflict or have a specific reason to do so.
+    Doing so consumes CI systems unnecessarily, and also resets CI approvals if this is your first PR to the repo.
+    This repo uses GitHub's Merge Queue, which will automatically test your PR against `main` before merging, so it's no longer necessary to always keep branches up-to-date.
+
+
+    Thanks,
+
+
+    The Renovate team
+
 'auto:discussion-first':
   comment: >
     **Please create a GitHub Discussion before continuing with this PR.**
@@ -378,8 +415,7 @@
 
     If you want to get the discussion back on track, we would like you to:
      - Remove, or edit, the bad vibes parts of your comments
-     - Say that you understand the problem (we don't need a lengthy apology)
-     - Stop giving off more bad vibes
+     - Give a thumbs-up to this message, to show you understand and agree to the above
 
 
     Thanks, the Renovate team
@@ -513,6 +549,109 @@
 
     If you choose to wait, then this discussion can remain open indefinitely.
     But please be patient, do not nudge or bump this discussion just to get attention.
+
+
+    Thanks, the Renovate team
+
+'auto:inactive-pr':
+  comment: >
+    Hi there,
+
+
+    This PR appears to have been inactive for a while. Please let us know if you are still working on it, or if we can close it for now.
+
+
+    Thanks, the Renovate team
+
+'auto:close-inactive-pr':
+  comment: >
+    Hi there,
+
+
+    We're closing this PR due to inactivity, but we are happy for you, or others, to finish the PR if time allows.
+
+
+    Thanks, the Renovate team
+
+  close: true
+
+'auto:discussion-halted':
+  comment: >
+    Hi there,
+
+
+    This is a semi-automated message to let you know that maintainers do not believe that they can help further with this Discussion.
+
+
+    This may be because the discussion is missing information, or because the discussion is too complex, or because the discussion is not actionable. It might also be because you've indicated that you don't have the time or willingness to provide information or perform steps requested of you.
+
+
+    Please do not chase maintainers for updates or ask for more information. If you have new information, or are willing to provide more information, please reply to this message with that information. Actively or passively aggressive responses to this message will result in blocking.
+
+
+    Thanks, the Renovate team
+
+'auto:investigation-needed':
+  comment: >
+    Hi there,
+
+
+    A maintainer has flagged this Discussion as needing a detailed investigation. That may mean them forking and running locally, debugging, or other time-consuming tasks. Such things are done by maintainers for free, on a best-effort basis - but with no guarantees.
+
+
+    The purpose of this automated message is therefore to let you know that a maintainer _intends_ to investigate, but it may take some time (potentially even weeks). Please do not chase them, hassle them, ask for updates - just wait. They will update you when they have something to share.
+
+
+    Thanks, the Renovate team
+
+'auto:unwelcome-issue':
+  comment: >
+    Hi there,
+
+
+    If you are seeing this, it's because you have bypassed this project's guidelines and converted a Discussion into this Issue.
+
+
+    In this project, we use Discussions as a triaging for Issues. This policy is displayed when attempting to create Issues or Discussions, and we also have a [pinned Issue](https://github.com/renovatebot/renovate/issues/32830) explaining the policy.
+
+
+    If despite that you have created this Issue, it is either out of stubbornness (rejecting the policy) or carelessness (not paying attention). Either way, it's almost always an attempt to get more attention, or to get a faster response, which are unwelcome behaviors in Open Source.
+
+
+    This issue will be closed, locked, and later deleted. Violators of policy will be given a 7 day block from the repo to alert them. See our policy on [Blocking and unblocking](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#blocking-and-unblocking) for more information.
+
+
+    Thanks, the Renovate team
+
+  close: true
+  close-reason: 'not planned'
+  lock: true
+
+'auto:docs-improvements':
+  comment: >
+    Hi there,
+
+
+    You are seeing this message because someone - maybe you - has suggested that the documentation should be improved.
+
+
+    The good news is that essentially all Renovate documentation is Open Source in this repository and can be improved by you too! If you have a suggestion for improvement, please consider opening a PR to improve the documentation, instead of just complaining about it (however subtlely or politely you intended it). Even if English isn't your first language or you're not _sure_ what to write, take a shot at it and we will guide you during the PR review. Documentation updates can be done easily in your browser on GitHub.com and do not require you to clone any code.
+
+
+    Thanks, the Renovate
+
+'auto:help-yourself':
+  comment: >
+    Hi there,
+
+
+    This semi-automated message is from the maintainers to ask you to try a little harder to help yourself, and not just do the "minimum effort". We've helped thousands of users and become pretty good at recognizing when users aren't really putting in their best effort to help themselves. Sorry if you find this message a bit harsh, but this happens often and we need to address it.
+
+
+    If you're here in this repo getting help then you should be mindful you're getting help for free and that we have many people like you to help every day with limited time available. Your time here is not as valuable as a maintainer's time, so you should be doing the heavy lifting whenever possible.
+
+
+    If you're the type of person who's busy and not got time to figure things out yourself or spend much time trying, or you consider your time too valuable, then you should be investigating an Enterprise support contract or hiring a consultant - such options are easily available.
 
 
     Thanks, the Renovate team

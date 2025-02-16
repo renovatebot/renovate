@@ -135,6 +135,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "datasource": "docker",
     "depName": "replicated/dockerfilelint",
     "depType": "docker",
+    "packageName": "replicated/dockerfilelint",
     "replaceString": "replicated/dockerfilelint",
   },
   {
@@ -154,6 +155,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "datasource": "docker",
     "depName": "node",
     "depType": "docker",
+    "packageName": "node",
     "replaceString": "node:6@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896",
   },
   {
@@ -199,6 +201,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "datasource": "docker",
     "depName": "node",
     "depType": "container",
+    "packageName": "node",
     "replaceString": "node:16-bullseye",
   },
   {
@@ -208,6 +211,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "datasource": "docker",
     "depName": "redis",
     "depType": "service",
+    "packageName": "redis",
     "replaceString": "redis:5",
   },
   {
@@ -217,6 +221,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "datasource": "docker",
     "depName": "postgres",
     "depType": "service",
+    "packageName": "postgres",
     "replaceString": "postgres:10",
   },
   {
@@ -235,6 +240,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "datasource": "docker",
     "depName": "node",
     "depType": "container",
+    "packageName": "node",
     "replaceString": "node:16-bullseye",
   },
   {

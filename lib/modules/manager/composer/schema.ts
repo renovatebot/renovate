@@ -2,7 +2,12 @@ import { z } from 'zod';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
-import { Json, LooseArray, LooseRecord } from '../../../util/schema-utils';
+import {
+  Json,
+  LooseArray,
+  LooseRecord,
+  withDebugMessage,
+} from '../../../util/schema-utils';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -126,10 +131,7 @@ export type ReposArray = z.infer<typeof ReposArray>;
 export const Repos = z
   .union([ReposRecord, ReposArray])
   .default([]) // Prevents warnings for packages without repositories field
-  .catch(({ error: err }) => {
-    logger.debug({ err }, 'Composer: invalid "repositories" field');
-    return [];
-  })
+  .catch(withDebugMessage([], 'Composer: invalid "repositories" field'))
   .transform((repos) => {
     let packagist = true;
     const repoUrls: string[] = [];
@@ -242,10 +244,9 @@ export const ComposerExtract = z
               .pipe(Json)
               .pipe(Lockfile)
               .nullable()
-              .catch(({ error: err }) => {
-                logger.debug({ err }, 'Composer: lockfile parsing error');
-                return null;
-              }),
+              .catch(
+                withDebugMessage(null, 'Composer: lockfile parsing error'),
+              ),
           ]),
         ),
     }),

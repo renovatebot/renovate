@@ -24,6 +24,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:k3sKubernetesVersioning',
       'workarounds:rke2KubernetesVersioning',
       'workarounds:libericaJdkDockerVersioning',
+      'workarounds:ubuntuDockerVersioning',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
@@ -289,6 +290,16 @@ export const presets: Record<string, Preset> = {
         matchManagers: ['npm'],
         matchPackageNames: ['@types/node'],
         versioning: `node`,
+      },
+    ],
+  },
+  ubuntuDockerVersioning: {
+    description: 'Use ubuntu versioning for `ubuntu` docker images.',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchDepNames: ['ubuntu'],
+        versioning: 'ubuntu',
       },
     ],
   },

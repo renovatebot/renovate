@@ -16,6 +16,7 @@ program
     'delay between tries for docker build (eg. 5s, 10m, 1h)',
     '30s',
   )
+  .option('--args <args...>', 'additional arguments to pass to docker build')
   .action(async (opts) => {
     logger.info('Building docker images ...');
     await bake('build', opts);
