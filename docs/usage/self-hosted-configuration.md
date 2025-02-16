@@ -1151,6 +1151,28 @@ Used as an alternative to `privateKey`, if you want the key to be read from disk
 
 Used as an alternative to `privateKeyOld`, if you want the key to be read from disk instead.
 
+## processEnv
+
+Used to set environment variables through the configuration file instead of using actual environment variables.
+
+Example:
+
+```json
+{
+  "processEnv": {
+    "AWS_ACCESS_KEY_ID": "AKIAIOSFODNN7EXAMPLE",
+    "AWS_SECRET_ACCESS_KEY": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "AWS_DEFAULT_REGION": "us-west-2"
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+
+- All values must be provided as strings, e.g., `"true"` instead of `true`
+- Only supported in file configuration (not via CLI or environment).
+
 ## productLinks
 
 Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
