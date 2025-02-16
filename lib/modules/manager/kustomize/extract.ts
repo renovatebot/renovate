@@ -200,6 +200,9 @@ export function parseKustomize(
 
   pkg.kind ??= 'Kustomization';
 
+  pkg.helmGlobals ??= { chartHome: 'charts' };
+  pkg.helmGlobals.chartHome ??= 'charts';
+
   if (!['Kustomization', 'Component'].includes(pkg.kind)) {
     return null;
   }
