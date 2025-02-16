@@ -3,7 +3,10 @@ import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
-export { extractPackageFile } from './extract';
+import { updateArtifacts } from './artifacts';
+import { extractPackageFile } from './extract';
+
+export { extractPackageFile, updateArtifacts };
 
 export const url = 'https://kubectl.docs.kubernetes.io/references/kustomize';
 export const categories: Category[] = ['kubernetes'];
