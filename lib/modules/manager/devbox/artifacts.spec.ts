@@ -64,7 +64,13 @@ describe('modules/manager/devbox/artifacts', () => {
         await updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
-          updatedDeps: [{ manager: 'devbox', lockFiles: ['devbox.lock'] }],
+          updatedDeps: [
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+              depName: 'nodejs',
+            },
+          ],
           config: {},
         }),
       ).toEqual([
@@ -78,7 +84,7 @@ describe('modules/manager/devbox/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'devbox install',
+          cmd: 'devbox update nodejs --no-install',
           options: {
             cwd: '.',
             encoding: 'utf-8',
@@ -88,6 +94,94 @@ describe('modules/manager/devbox/artifacts', () => {
           },
         },
       ]);
+    });
+
+    it('returns installed devbox.lock with multiple updated deps', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
+      const execSnapshots = mockExecAll();
+      const oldLockFileContent = Buffer.from('Old devbox.lock');
+      const newLockFileContent = Buffer.from('New devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'devbox.json',
+          newPackageFileContent: devboxJson,
+          updatedDeps: [
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+              depName: 'nodejs',
+            },
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+              depName: 'ruby',
+            },
+          ],
+          config: {},
+        }),
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'devbox.lock',
+            contents: newLockFileContent,
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'devbox update nodejs --no-install; devbox update ruby --no-install',
+          options: {
+            cwd: '.',
+            encoding: 'utf-8',
+            env: {},
+            maxBuffer: 10485760,
+            timeout: 900000,
+          },
+        },
+      ]);
+    });
+
+    it('returns null if no updatedDeps are passed', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
+      const oldLockFileContent = Buffer.from('Old devbox.lock');
+      const newLockFileContent = Buffer.from('New devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'devbox.json',
+          newPackageFileContent: devboxJson,
+          updatedDeps: [{}],
+          config: {},
+        }),
+      ).toBeNull();
+    });
+
+    it('returns null if no updatedDeps have depNames', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
+      const oldLockFileContent = Buffer.from('Old devbox.lock');
+      const newLockFileContent = Buffer.from('New devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'devbox.json',
+          newPackageFileContent: devboxJson,
+          updatedDeps: [
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+            },
+          ],
+          config: {},
+        }),
+      ).toBeNull();
     });
 
     it('returns updated devbox.lock', async () => {
@@ -123,7 +217,7 @@ describe('modules/manager/devbox/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'devbox update',
+          cmd: 'devbox update --no-install',
           options: {
             cwd: '.',
             encoding: 'utf-8',
@@ -169,7 +263,13 @@ describe('modules/manager/devbox/artifacts', () => {
         await updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
-          updatedDeps: [{}],
+          updatedDeps: [
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+              depName: 'nodejs',
+            },
+          ],
           config: {},
         }),
       ).toBeNull();
@@ -189,7 +289,13 @@ describe('modules/manager/devbox/artifacts', () => {
         await updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
-          updatedDeps: [{}],
+          updatedDeps: [
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+              depName: 'nodejs',
+            },
+          ],
           config: {},
         }),
       ).toBeNull();
@@ -211,7 +317,13 @@ describe('modules/manager/devbox/artifacts', () => {
         await updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
-          updatedDeps: [{}],
+          updatedDeps: [
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+              depName: 'nodejs',
+            },
+          ],
           config: {},
         }),
       ).toBeNull();
@@ -227,7 +339,13 @@ describe('modules/manager/devbox/artifacts', () => {
         await updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
-          updatedDeps: [{}],
+          updatedDeps: [
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+              depName: 'nodejs',
+            },
+          ],
           config: {},
         }),
       ).toEqual([
