@@ -22,16 +22,12 @@ export function getComposerArguments(
 
   if (config.composerIgnorePlatformReqs) {
     if (config.composerIgnorePlatformReqs.length === 0) {
-      if (is.string(toolConstraint.constraint)) {
-        const major = api.getMajor(toolConstraint.constraint);
-        const minor = api.getMinor(toolConstraint.constraint);
-
-        args += api.matches(`${major}.${minor}`, '^2.2')
-          ? " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'"
-          : ' --ignore-platform-reqs';
-      } else {
-        args += ' --ignore-platform-reqs';
-      }
+      // TODO: toolConstraint.constraint can be null or undefined? (#22198)
+      const major = api.getMajor(toolConstraint.constraint!);
+      const minor = api.getMinor(toolConstraint.constraint!);
+      args += api.matches(`${major}.${minor}`, '^2.2')
+        ? " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'"
+        : ' --ignore-platform-reqs';
     } else {
       config.composerIgnorePlatformReqs.forEach((req) => {
         args += ' --ignore-platform-req ' + quote(req);
