@@ -182,6 +182,9 @@ You can run `pnpm build:docs` to generate the docs.
 Then use `pnpm mkdocs serve` to preview the documentation locally.
 The docs will update automatically when you run `pnpm build:docs` again, no need to stop the `pnpm mkdocs serve` command.
 
+Also, make sure to set the `GITHUB_TOKEN` in your environment as we use [gh cli](https://cli.github.com/manual/gh_issue_list) to fetch the issues.
+If you wish to skip fetching the issues, then set `SKIP_GITHUB_ISSUES` to `true` before building the docs.
+
 ## Keeping your Renovate fork up to date
 
 First of all, never commit to the `main` branch of your fork - always use a "feature" branch like `feat/1234-add-yarn-parsing`.
