@@ -188,7 +188,6 @@ describe('modules/manager/pip-compile/common', () => {
     it('extracts Python version from valid header', () => {
       expect(
         extractPythonVersion(
-          'pip-compile',
           getCommandInHeader('pip-compile reqs.in'),
           'reqs.txt',
         ),
@@ -196,13 +195,7 @@ describe('modules/manager/pip-compile/common', () => {
     });
 
     it('returns undefined if version cannot be extracted', () => {
-      expect(
-        extractPythonVersion('pip-compile', '', 'reqs.txt'),
-      ).toBeUndefined();
-    });
-
-    it('returns undefined if the command type is uv', () => {
-      expect(extractPythonVersion('uv', '', 'reqs.txt')).toBeUndefined();
+      expect(extractPythonVersion('', 'reqs.txt')).toBeUndefined();
     });
   });
 
