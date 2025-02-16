@@ -16,7 +16,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       return null;
     }
 
-    return httpCache as HttpCache;
+    return httpCache;
   }
 
   async setCacheHeaders<T extends Pick<GotOptions, 'headers'>>(
