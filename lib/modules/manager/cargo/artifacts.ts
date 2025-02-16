@@ -104,7 +104,7 @@ async function updateArtifactsImpl(
     return null;
   }
 
-  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+  const { isLockFileMaintenance } = config;
   if (!isLockFileMaintenance && !updatedDeps?.length) {
     logger.debug('No more dependencies to update');
     return [

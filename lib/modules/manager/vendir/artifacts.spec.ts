@@ -139,7 +139,7 @@ describe('modules/manager/vendir/artifacts', () => {
         packageFileName: 'vendir.yml',
         updatedDeps: [],
         newPackageFileContent: vendirFile,
-        config: { ...config, updateType: 'lockFileMaintenance' },
+        config: { ...config, isLockFileMaintenance: true },
       }),
     ).toEqual([
       {

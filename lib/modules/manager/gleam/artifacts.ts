@@ -17,7 +17,7 @@ export async function updateArtifacts(
   const { packageFileName, updatedDeps, newPackageFileContent, config } =
     updateArtifact;
   logger.debug(`gleam.updateArtifacts(${packageFileName})`);
-  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+  const { isLockFileMaintenance } = config;
 
   if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated gleam deps - returning null');

@@ -155,7 +155,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         packageFileName: 'Chart.yaml',
         updatedDeps: [],
         newPackageFileContent: chartFile,
-        config: { ...config, updateType: 'lockFileMaintenance' },
+        config: { ...config, isLockFileMaintenance: true },
       }),
     ).toMatchObject([
       {
@@ -589,7 +589,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: { stable: 'the stable_url', repo1: 'the_repo1_url' },
         },
       }),
@@ -630,7 +630,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
         },
       }),
@@ -676,7 +676,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {
             stable: 'the_stable_url',
             oci: 'oci://registry.example.com/organization',
@@ -726,7 +726,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {},
         },
       }),
@@ -774,7 +774,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFileECR,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {},
         },
       }),
@@ -840,7 +840,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFileECR,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {},
         },
       }),
@@ -895,7 +895,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFileECR,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {},
         },
       }),
@@ -954,7 +954,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFileECR,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {},
         },
       }),
@@ -1009,7 +1009,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {
             repo1:
               'https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
@@ -1057,7 +1057,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFileAlias,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {
             jetstack: 'https://charts.jetstack.io',
           },

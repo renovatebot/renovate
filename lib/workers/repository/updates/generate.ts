@@ -436,9 +436,23 @@ export function generateBranchConfig(
         .reduce((a, b) => a.concat(b), []),
     ),
   ];
+
   if (config.upgrades.some((upgrade) => upgrade.updateType === 'major')) {
     config.updateType = 'major';
   }
+
+  // explicit set `isLockFileMaintenance` for the branch for groups
+  if (config.upgrades.some((upgrade) => upgrade.isLockFileMaintenance)) {
+    config.isLockFileMaintenance = true;
+    // istanbul ignore if: not worth testing
+    if (config.upgrades.some((upgrade) => !upgrade.isLockFileMaintenance)) {
+      // TODO: warn?
+      logger.debug(
+        'Grouping lockfile maintenance with other update types is not supported',
+      );
+    }
+  }
+
   config.constraints = {};
   for (const upgrade of config.upgrades) {
     if (upgrade.constraints) {

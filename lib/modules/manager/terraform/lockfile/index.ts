@@ -154,7 +154,7 @@ export async function updateArtifacts({
     }
 
     const updates: ProviderLockUpdate[] = [];
-    if (config.updateType === 'lockFileMaintenance') {
+    if (config.isLockFileMaintenance) {
       // update all locks in the file during maintenance --> only update version in constraints
       const maintenanceUpdates = await updateAllLocks(locks);
       updates.push(...maintenanceUpdates);

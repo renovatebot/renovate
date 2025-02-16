@@ -412,7 +412,7 @@ describe('modules/manager/cargo/artifacts', () => {
         packageFileName: 'Cargo.toml',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: { ...config, updateType: 'lockFileMaintenance' },
+        config: { ...config, isLockFileMaintenance: true },
       }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
