@@ -84,7 +84,6 @@ export function validateDecryptedValue(
       // used for full 'org/project/repo' matching
       repositories.push(`${azureCollection}/${repository}`.toUpperCase());
       // used for org prefix matching without repo
-      repositories.push(azureCollection.toUpperCase());
       repositories.push(`${azureCollection}/*/`.toUpperCase());
     }
 
@@ -115,8 +114,16 @@ export function validateDecryptedValue(
     }
 
     // no scoped repos, only org
+    const azcol =
+      azureCollection === undefined
+        ? undefined
+        : ensureTrailingSlash(azureCollection).toUpperCase();
     for (const rp of repositories) {
-      if (orgPrefixes.some((orgPrefix) => rp.startsWith(orgPrefix))) {
+      if (
+        orgPrefixes.some(
+          (orgPrefix) => rp.startsWith(orgPrefix) && orgPrefix !== azcol,
+        )
+      ) {
         return value;
       }
     }
