@@ -6,7 +6,9 @@ import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import type { BitbucketHttpOptions } from '../../../util/http/bitbucket';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
@@ -82,9 +84,7 @@ export async function initPlatform({
   }
   setBaseUrl(defaults.endpoint);
   renovateUserUuid = null;
-  const options: HttpOptions = {
-    memCache: false,
-  };
+  const options: HttpOptions = {};
   if (token) {
     options.token = token;
   } else {
@@ -166,7 +166,6 @@ export async function getRawFile(
     `/${path}`;
   const res = await bitbucketHttp.get(url, {
     cacheProvider: repoCacheProvider,
-    memCache: true,
   });
   return res.body;
 }
@@ -302,10 +301,11 @@ export async function findPr({
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
 
   if (includeOtherAuthors) {
-    // PR might have been created by anyone, so don't use the cached Renovate PR list
     const prs = (
       await bitbucketHttp.getJsonUnchecked<PagedResult<PrResponse>>(
         `/2.0/repositories/${config.repository}/pullrequests?q=source.branch.name="${branchName}"&state=open`,
+        // PR might have been created by anyone and the long-term caching could be harmful, so we use the short-term cache
+        { cacheProvider: memCacheProvider },
       )
     ).body.values;
 
@@ -365,6 +365,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   const pr = (
     await bitbucketHttp.getJsonUnchecked<PrResponse>(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+      { cacheProvider: memCacheProvider },
     )
   ).body;
 
@@ -399,6 +400,7 @@ async function getBranchCommit(
         `/2.0/repositories/${config.repository}/refs/branches/${escapeHash(
           branchName,
         )}`,
+        { cacheProvider: memCacheProvider },
       )
     ).body;
     return branch.target.hash;
@@ -423,13 +425,14 @@ async function getStatus(
   memCache = true,
 ): Promise<BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
+  const opts: BitbucketHttpOptions = { paginate: true };
+  if (memCache) {
+    opts.cacheProvider = memCacheProvider;
+  }
   return (
     await bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketStatus>>(
       `/2.0/repositories/${config.repository}/commit/${sha!}/statuses`,
-      {
-        paginate: true,
-        memCache,
-      },
+      opts,
     )
   ).body.values;
 }
@@ -519,7 +522,7 @@ export async function setBranchStatus({
 
 type BbIssue = { id: number; title: string; content?: { raw: string } };
 
-async function findOpenIssues(title: string): Promise<BbIssue[]> {
+async function findOpenIssues(title: string, cache = true): Promise<BbIssue[]> {
   try {
     const filters = [
       `title=${JSON.stringify(title)}`,
@@ -529,10 +532,15 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
       filters.push(`reporter.uuid="${renovateUserUuid}"`);
     }
     const filter = encodeURIComponent(filters.join(' AND '));
+    const opts: HttpOptions = {};
+    if (cache) {
+      opts.cacheProvider = memCacheProvider;
+    }
     return (
       (
         await bitbucketHttp.getJsonUnchecked<{ values: BbIssue[] }>(
           `/2.0/repositories/${config.repository}/issues?q=${filter}`,
+          opts,
         )
       ).body.values || /* istanbul ignore next */ []
     );
@@ -693,7 +701,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
     logger.debug('Issues are disabled - cannot ensureIssueClosing');
     return;
   }
-  const issues = await findOpenIssues(title);
+  const issues = await findOpenIssues(title, false);
   for (const issue of issues) {
     await closeIssue(issue.id);
   }
@@ -790,7 +798,7 @@ async function sanitizeReviewers(
           const reviewerUser = (
             await bitbucketHttp.getJsonUnchecked<Account>(
               `/2.0/users/${reviewer.uuid}`,
-              { memCache: true },
+              { cacheProvider: memCacheProvider },
             )
           ).body;
 
@@ -845,7 +853,7 @@ async function isAccountMemberOfWorkspace(
   try {
     await bitbucketHttp.get(
       `/2.0/workspaces/${workspace}/members/${reviewer.uuid}`,
-      { memCache: true },
+      { cacheProvider: memCacheProvider },
     );
 
     return true;
@@ -885,6 +893,7 @@ export async function createPr({
         `/2.0/repositories/${config.repository}/effective-default-reviewers`,
         {
           paginate: true,
+          cacheProvider: memCacheProvider,
         },
       )
     ).body;

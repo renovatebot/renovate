@@ -276,23 +276,15 @@ export async function getIssue(
   return res.body;
 }
 
-export async function getRepoLabels(
-  repoPath: string,
-  options?: GiteaHttpOptions,
-): Promise<Label[]> {
+export async function getRepoLabels(repoPath: string): Promise<Label[]> {
   const url = `${API_PATH}/repos/${repoPath}/labels`;
-  const res = await giteaHttp.getJsonUnchecked<Label[]>(url, options);
-
+  const res = await giteaHttp.getJsonUnchecked<Label[]>(url);
   return res.body;
 }
 
-export async function getOrgLabels(
-  orgName: string,
-  options?: GiteaHttpOptions,
-): Promise<Label[]> {
+export async function getOrgLabels(orgName: string): Promise<Label[]> {
   const url = `${API_PATH}/orgs/${orgName}/labels`;
-  const res = await giteaHttp.getJsonUnchecked<Label[]>(url, options);
-
+  const res = await giteaHttp.getJsonUnchecked<Label[]>(url);
   return res.body;
 }
 
