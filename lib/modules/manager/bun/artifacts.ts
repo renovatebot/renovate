@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -9,6 +10,12 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
+import { processHostRules } from '../npm/post-update/rules';
+import {
+  getNpmrcContent,
+  resetNpmrcContent,
+  updateNpmrcContent,
+} from '../npm/utils';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export async function updateArtifacts(
@@ -39,6 +46,11 @@ export async function updateArtifacts(
     return null;
   }
 
+  const pkgFileDir = upath.dirname(packageFileName);
+  const npmrcContent = await getNpmrcContent(pkgFileDir);
+  const { additionalNpmrcContent } = processHostRules();
+  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     if (isLockFileMaintenance) {
@@ -64,6 +76,8 @@ export async function updateArtifacts(
     };
 
     await exec(cmd, execOptions);
+    await resetNpmrcContent(pkgFileDir, npmrcContent);
+
     const newLockFileContent = await readLocalFile(lockFileName);
     if (
       !newLockFileContent ||
