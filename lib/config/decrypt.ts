@@ -229,7 +229,7 @@ Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migr
   return decryptedConfig;
 }
 
-function getAzureCollection(): string | undefined {
+export function getAzureCollection(): string | undefined {
   const platform = GlobalConfig.get('platform');
   if (platform !== 'azure') {
     return undefined;
@@ -248,7 +248,7 @@ function getAzureCollection(): string | undefined {
     .filter(is.nonEmptyString)
     .join('/');
   if (!is.nonEmptyString(azureCollection)) {
-    logger.warn({ endpoint }, 'Unable to find azure collection name from URL');
+    logger.debug({ endpoint }, 'Unable to find azure collection name from URL');
     return undefined;
   }
 

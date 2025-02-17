@@ -1,5 +1,9 @@
 import { logger } from '../../test/util';
-import { decryptConfig, validateDecryptedValue } from './decrypt';
+import {
+  decryptConfig,
+  getAzureCollection,
+  validateDecryptedValue,
+} from './decrypt';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 
@@ -183,6 +187,60 @@ describe('config/decrypt', () => {
           ),
         ).toBeNull();
       });
+    });
+  });
+
+  describe('getAzureCollection()', () => {
+    beforeEach(() => {
+      GlobalConfig.reset();
+    });
+
+    it('no pathname and url ends with slash', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com/',
+      });
+      expect(getAzureCollection()).toBeUndefined();
+    });
+
+    it('no pathname and no slash at end of URL ', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com',
+      });
+      expect(getAzureCollection()).toBeUndefined();
+    });
+
+    it('pathname no slash at end', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com/aaa',
+      });
+      expect(getAzureCollection()).toBe('aaa');
+    });
+
+    it('pathname with slash at end', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com/aaa/',
+      });
+      expect(getAzureCollection()).toBe('aaa');
+    });
+
+    it('pathname 2 levels no slash at end', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com/aaa/bbb',
+      });
+      expect(getAzureCollection()).toBe('aaa/bbb');
+    });
+
+    it('pathname 2 levels with slash at end', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com/aaa/bbb/',
+      });
+      expect(getAzureCollection()).toBe('aaa/bbb');
     });
   });
 });
