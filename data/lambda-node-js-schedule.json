@@ -21,7 +21,7 @@
     "cycle": "nodejs14.x",
     "releaseLabel": "Node.js 14",
     "releaseDate": "2021-02-03",
-    "eol": "2025-02-28",
+    "eol": "2025-11-01",
     "link": "https://aws.amazon.com/blogs/compute/node-js-14-x-runtime-now-available-in-aws-lambda/",
     "lts": false,
     "support": "2023-12-04"
@@ -30,7 +30,7 @@
     "cycle": "nodejs16.x",
     "releaseLabel": "Node.js 16",
     "releaseDate": "2022-05-12",
-    "eol": "2025-03-31",
+    "eol": "2025-11-01",
     "link": "https://aws.amazon.com/blogs/compute/node-js-16-x-runtime-now-available-in-aws-lambda/",
     "lts": false,
     "support": "2024-06-12"
@@ -39,18 +39,27 @@
     "cycle": "nodejs18.x",
     "releaseLabel": "Node.js 18",
     "releaseDate": "2022-11-18",
-    "eol": "2025-10-01",
+    "eol": "2025-11-01",
     "link": "https://aws.amazon.com/blogs/compute/node-js-18-x-runtime-now-available-in-aws-lambda/",
     "lts": false,
-    "support": "2025-07-31"
+    "support": "2025-09-01"
   },
   "20": {
     "cycle": "nodejs20.x",
     "releaseLabel": "Node.js 20",
     "releaseDate": "2023-11-15",
-    "eol": false,
+    "eol": "2026-07-01",
     "link": "https://aws.amazon.com/blogs/compute/node-js-20-x-runtime-now-available-in-aws-lambda/",
     "lts": false,
-    "support": true
+    "support": "2026-04-30"
+  },
+  "22": {
+    "cycle": "nodejs22.x",
+    "releaseLabel": "Node.js 22",
+    "releaseDate": "2024-11-22",
+    "eol": "2027-07-01",
+    "link": "https://aws.amazon.com/about-aws/whats-new/2024/11/aws-lambda-support-nodejs-22/",
+    "lts": false,
+    "support": "2027-04-30"
   }
 }

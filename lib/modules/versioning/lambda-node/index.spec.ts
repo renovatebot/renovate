@@ -1,15 +1,37 @@
-import { DateTime } from 'luxon';
+import { DateTime, Settings } from 'luxon';
+import dataFiles from '../../../data-files.generated';
+import type { LambdaData } from './schedule';
+
+const lambdaSchedule: LambdaData = JSON.parse(
+  dataFiles.get('data/lambda-node-js-schedule.json')!,
+);
+
+//For this test fixture we're setting `support` to `true` for a specific version to simulate the fact that our datasource
+//doesn't consistently return a date for support date. Likewise, we're removing a known stable node version from the lambda
+//schedule to simulate the time period where there's a released LTS version that AWS hasn't released as a Lambda Runtime
+//yet.
+const scheduleWithSupportTrue = JSON.stringify({
+  ...lambdaSchedule,
+  '20': {
+    ...lambdaSchedule['20'],
+    support: true,
+  },
+  '22': undefined,
+});
+
+const mockDataFiles = new Map(dataFiles);
+mockDataFiles.set('data/lambda-node-js-schedule.json', scheduleWithSupportTrue);
+
+jest.spyOn(dataFiles, 'get').mockImplementation((fileName) => {
+  return mockDataFiles.get(fileName);
+});
+
 import { api as lambdaVer } from '.';
 
 describe('modules/versioning/lambda-node/index', () => {
-  let dtLocal: any;
-
-  beforeEach(() => {
-    dtLocal = DateTime.local;
-  });
-
-  afterEach(() => {
-    DateTime.local = dtLocal;
+  beforeAll(() => {
+    const dt = DateTime.fromISO('2021-03-20');
+    jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
   });
 
   it.each`
@@ -34,11 +56,13 @@ describe('modules/versioning/lambda-node/index', () => {
     },
   );
 
-  const t1 = DateTime.fromISO('2024-09-01');
+  const t1 = DateTime.fromISO('2025-03-01');
   const t2 = DateTime.fromISO('2024-03-01');
 
   it.each`
     version       | time  | expected
+    ${`v22.0.0`}  | ${t1} | ${false}
+    ${`v20.0.0`}  | ${t1} | ${true}
     ${'v18.0.3'}  | ${t1} | ${true}
     ${'v18.0.0'}  | ${t1} | ${true}
     ${'18.0.0'}   | ${t1} | ${true}
@@ -58,8 +82,8 @@ describe('modules/versioning/lambda-node/index', () => {
     ${'10.0.0a'}  | ${t1} | ${false}
     ${'9.0.0'}    | ${t1} | ${false}
   `('isStable("$version") === $expected', ({ version, time, expected }) => {
-    DateTime.local = (...args: any[]) =>
-      args.length ? dtLocal.apply(DateTime, args) : time;
+    jest.spyOn(Settings, 'now').mockReturnValue(time.valueOf());
+
     expect(lambdaVer.isStable(version as string)).toBe(expected);
   });
 
