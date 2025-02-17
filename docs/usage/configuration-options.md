@@ -205,10 +205,6 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
     Branches creation follows [`schedule`](#schedule) and the automerge follows [`automergeSchedule`](#automergeschedule).
 
 <!-- prettier-ignore -->
-!!! warning "Negative reviews on GitHub block Renovate automerge"
-    Renovate won't automerge on GitHub if a PR has a negative review.
-
-<!-- prettier-ignore -->
 !!! note
     On Azure there can be a delay between a PR being set as completed by Renovate, and Azure merging the PR / finishing its tasks.
     Renovate tries to delay until Azure is in the expected state, but it will continue if it takes too long.

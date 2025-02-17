@@ -262,7 +262,11 @@ export async function getPrList(): Promise<AzurePr[]> {
     do {
       fetchedPrs = await azureApiGit.getPullRequests(
         config.repoId,
-        { status: 4 },
+        {
+          status: 4,
+          // fetch only prs directly created on the repo and not by forks
+          sourceRepositoryId: config.project,
+        },
         config.project,
         0,
         skip,
