@@ -359,6 +359,14 @@
     "renovate-schema.json"
   ],
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "@swc/core",
+      "better-sqlite3",
+      "core-js-pure",
+      "protobufjs",
+      "re2"
+    ],
+    "strict-dep-build": true,
     "ignoredOptionalDependencies": [
       "dtrace-provider",
       "moment",
