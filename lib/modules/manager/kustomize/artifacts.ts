@@ -48,7 +48,7 @@ async function inflateHelmChart(
   dependency: Upgrade,
   flagEnabled: boolean,
 ): Promise<void> {
-  if (!dependency.depName) {
+  if (!is.nonEmptyString(dependency.depName)) {
     return;
   }
 
@@ -56,7 +56,7 @@ async function inflateHelmChart(
     return;
   }
 
-  if (!dependency.registryUrls || dependency.registryUrls.length === 0) {
+  if (!is.nonEmptyArray(dependency.registryUrls)) {
     return;
   }
 
@@ -83,7 +83,7 @@ async function inflateHelmChart(
 
   const versionToPull = dependency.newVersion ?? dependency.currentVersion;
 
-  if (!versionToPull) {
+  if (!is.nonEmptyString(versionToPull)) {
     return;
   }
 
