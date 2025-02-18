@@ -22,10 +22,11 @@ export function getComposerArguments(
 
   if (config.composerIgnorePlatformReqs) {
     if (config.composerIgnorePlatformReqs.length === 0) {
-      if (is.string(toolConstraint.constraint)) {
-        args += api.intersects!(toolConstraint.constraint, '^2.2')
-          ? " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'"
-          : ' --ignore-platform-reqs';
+      if (
+        is.string(toolConstraint.constraint) &&
+        api.intersects!(toolConstraint.constraint, '^2.2')
+      ) {
+        args += " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'"
       } else {
         args += ' --ignore-platform-reqs';
       }
