@@ -202,6 +202,37 @@ describe('modules/manager/kustomize/artifacts', () => {
     expect(execSnapshots).toMatchObject([]);
   });
 
+  it('returns null if newVersion and currentVersion is the same', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    const execSnapshots = mockExecAll();
+
+    fs.localPathExists.mockResolvedValueOnce(false);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        not_added: [],
+        deleted: [],
+      }),
+    );
+    const updatedDeps = [
+      {
+        depType: 'HelmChart',
+        depName: 'example',
+        newVersion: '1.0.0',
+        currentVersion: '1.0.0',
+        registryUrls: ['https://github.com.com/example/example'],
+      },
+    ];
+    expect(
+      await kustomize.updateArtifacts({
+        packageFileName,
+        updatedDeps,
+        newPackageFileContent,
+        config,
+      }),
+    ).toBeNull();
+    expect(execSnapshots).toMatchObject([]);
+  });
+
   it('inflates new version if old version is inflated and kustomizeInflateHelmCharts is not enabled', async () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
