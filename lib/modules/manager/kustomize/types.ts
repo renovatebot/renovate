@@ -12,7 +12,7 @@ export interface HelmChart {
 }
 
 export interface HelmGlobals {
-  chartHome: string;
+  chartHome?: string;
 }
 
 export interface Kustomize {
@@ -22,5 +22,5 @@ export interface Kustomize {
   components?: string[];
   images?: Image[];
   helmCharts?: HelmChart[];
-  helmGlobals: HelmGlobals;
+  helmGlobals?: HelmGlobals;
 }
