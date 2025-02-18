@@ -53,7 +53,7 @@ export class BitbucketServerHttp extends Http<BitbucketServerHttpOptions> {
     );
 
     if (opts.paginate && isPagedResult(result.body)) {
-      const collectedValues: T[] = [...result.body.values];
+      const collectedValues = [...result.body.values];
       let nextPageStart = result.body.nextPageStart;
 
       while (nextPageStart) {
