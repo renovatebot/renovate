@@ -81,8 +81,8 @@ importers:
         specifier: 1.5.12
         version: 1.5.12(encoding@0.1.13)
       '@renovatebot/pep440':
-        specifier: 4.0.1
-        version: 4.0.1
+        specifier: 4.1.0
+        version: 4.1.0
       '@renovatebot/ruby-semver':
         specifier: 4.0.0
         version: 4.0.0
@@ -1175,6 +1175,7 @@ packages:
 
   '@ls-lint/ls-lint@2.2.3':
     resolution: {integrity: sha512-ekM12jNm/7O2I/hsRv9HvYkRdfrHpiV1epVuI2NP+eTIcEgdIdKkKCs9KgQydu/8R5YXTov9aHdOgplmCHLupw==}
+    cpu: [x64, arm64, s390x]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -1572,8 +1573,8 @@ packages:
   '@renovatebot/osv-offline@1.5.12':
     resolution: {integrity: sha512-gmPsOjHoCsaIsahv+T373WDc28GZ5WTzcA6Usxd1lDGvEF/t7JdBe3lx1ZBLurbundnGmKJ3zYBsqmr54lBR7A==}
 
-  '@renovatebot/pep440@4.0.1':
-    resolution: {integrity: sha512-jKodfnFIIGjK9PcoB7+2JkDQ+prjv3LHFMUS21F3+IEaiGomrvpiH27+gjyQRRwtSkkRnrxkqjEPdkj2IxC2qA==}
+  '@renovatebot/pep440@4.1.0':
+    resolution: {integrity: sha512-mo2RxnOSp78Njt1HmgMwjl6FapP4OyIS8HypJlymCvN7AIV2Xf5PmZfl/E3O1WWZ6IjKrfsEAaPWFMi8tnkq3g==}
     engines: {node: ^20.9.0 || ^22.11.0, pnpm: ^9.0.0}
 
   '@renovatebot/ruby-semver@4.0.0':
@@ -8159,7 +8160,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@renovatebot/pep440@4.0.1': {}
+  '@renovatebot/pep440@4.1.0': {}
 
   '@renovatebot/ruby-semver@4.0.0': {}
 
