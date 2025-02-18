@@ -170,7 +170,6 @@ export async function updateArtifacts({
     const chartsDeletion = status?.deleted ?? [];
 
     const fileChanges: UpdateArtifactsResult[] = [];
-    await writeLocalFile(packageFileName, newPackageFileContent);
 
     for (const file of chartsAddition) {
       // only add artifacts in the chartHome path
