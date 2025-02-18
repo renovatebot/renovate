@@ -341,16 +341,6 @@ importers:
       zod:
         specifier: 3.24.1
         version: 3.24.1
-    optionalDependencies:
-      better-sqlite3:
-        specifier: 11.8.1
-        version: 11.8.1
-      openpgp:
-        specifier: 6.1.0
-        version: 6.1.0
-      re2:
-        specifier: 1.21.4
-        version: 1.21.4
     devDependencies:
       '@hyrious/marshal':
         specifier: 0.3.3
@@ -625,6 +615,16 @@ importers:
       unified:
         specifier: 9.2.2
         version: 9.2.2
+    optionalDependencies:
+      better-sqlite3:
+        specifier: 11.8.1
+        version: 11.8.1
+      openpgp:
+        specifier: 6.1.0
+        version: 6.1.0
+      re2:
+        specifier: 1.21.4
+        version: 1.21.4
 
 packages:
 
