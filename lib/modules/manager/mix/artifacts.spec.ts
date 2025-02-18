@@ -114,7 +114,7 @@ describe('modules/manager/mix/artifacts', () => {
         packageFileName: 'apps/foo/mix.exs',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: { ...config, updateType: 'lockFileMaintenance' },
+        config: { ...config, isLockFileMaintenance: true },
       }),
     ).toBeNull();
   });
@@ -405,7 +405,7 @@ describe('modules/manager/mix/artifacts', () => {
         config: {
           ...config,
           constraints,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
         },
       }),
     ).toEqual([
@@ -439,7 +439,7 @@ describe('modules/manager/mix/artifacts', () => {
         packageFileName: 'mix.exs',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: { ...config, updateType: 'lockFileMaintenance' },
+        config: { ...config, isLockFileMaintenance: true },
       }),
     ).toBeNull();
   });
