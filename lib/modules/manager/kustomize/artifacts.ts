@@ -102,7 +102,7 @@ async function inflateHelmChart(
 
   const folderName = `${dependency.depName}-${versionToPull}`;
   const untarDir = upath.join(chartHome, folderName);
-  const registryUrl = dependency?.registryUrls[0];
+  const registryUrl = dependency.registryUrls[0];
   logger.debug(
     `Pulling helm chart ${dependency.depName} version ${versionToPull} to ${untarDir}`,
   );
