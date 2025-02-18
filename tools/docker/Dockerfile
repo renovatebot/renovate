@@ -59,7 +59,7 @@ ENV CI=1 npm_config_modules_cache_max_age=0 \
 # replace `amd64` with `x64` for `node`
 ENV ARCH=${TARGETARCH/amd64/x64}
 
-COPY --link pnpm-lock.yaml ./
+COPY --link package.json pnpm-lock.yaml ./
 
 # set `npm_config_arch` for `prebuild-install`
 # set `npm_config_platform_arch` for `install-artifact-from-github`
