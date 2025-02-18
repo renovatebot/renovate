@@ -4,7 +4,11 @@ import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
+import type {
+  ExecOptions,
+  ExtraEnv,
+  ToolConstraint,
+} from '../../../util/exec/types';
 import {
   deleteLocalFile,
   getSiblingFileName,
@@ -17,7 +21,7 @@ import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
 import { parseKustomize } from './extract';
 
-export function generateHelmEnvs(): ExtraEnv {
+function generateHelmEnvs(): ExtraEnv {
   return {
     HELM_EXPERIMENTAL_OCI: '1',
     // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
