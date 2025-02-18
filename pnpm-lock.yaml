@@ -372,9 +372,6 @@ importers:
       '@semantic-release/exec':
         specifier: 6.0.3
         version: 6.0.3(semantic-release@24.2.2(typescript@5.7.3))
-      '@swc/core':
-        specifier: 1.10.15
-        version: 1.10.15
       '@types/auth-header':
         specifier: 1.0.6
         version: 1.0.6
@@ -1178,7 +1175,6 @@ packages:
 
   '@ls-lint/ls-lint@2.2.3':
     resolution: {integrity: sha512-ekM12jNm/7O2I/hsRv9HvYkRdfrHpiV1epVuI2NP+eTIcEgdIdKkKCs9KgQydu/8R5YXTov9aHdOgplmCHLupw==}
-    cpu: [x64, arm64, s390x]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -8666,12 +8662,15 @@ snapshots:
       '@swc/core-win32-arm64-msvc': 1.10.15
       '@swc/core-win32-ia32-msvc': 1.10.15
       '@swc/core-win32-x64-msvc': 1.10.15
+    optional: true
 
-  '@swc/counter@0.1.3': {}
+  '@swc/counter@0.1.3':
+    optional: true
 
   '@swc/types@0.1.17':
     dependencies:
       '@swc/counter': 0.1.3
+    optional: true
 
   '@szmarczak/http-timer@4.0.6':
     dependencies:
