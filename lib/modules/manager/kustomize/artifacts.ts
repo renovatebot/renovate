@@ -114,7 +114,7 @@ async function inflateHelmChart(
     `helm pull --untar --untardir ${quote(untarDir)} ` +
     `--version ${quote(versionToPull)} --repo ${quote(registryUrl)} ${dependency.depName}`;
 
-  await exec([cmd], execOptions);
+  await exec(cmd, execOptions);
 }
 
 export async function updateArtifacts({
