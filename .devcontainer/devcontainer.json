@@ -6,7 +6,7 @@
   "init": true,
   "hostRequirements": {
     "cpus": 4,
-    "memory": "7gb",
+    "memory": "8gb",
     "storage": "32gb"
   },
   "customizations": {
