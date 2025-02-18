@@ -1,4 +1,6 @@
 import { DateTime } from 'luxon';
+import type { RenovateConfig } from '../../../config/types';
+import { addLibYears } from '../../../instrumentation/reporting';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 
@@ -12,6 +14,7 @@ interface DepInfo {
   libYear?: number;
 }
 export function calculateLibYears(
+  config: RenovateConfig,
   packageFiles?: Record<string, PackageFile[]>,
 ): void {
   if (!packageFiles) {
@@ -70,14 +73,23 @@ export function calculateLibYears(
   }
 
   const [totalDepsCount, outdatedDepsCount, totalLibYears] = getCounts(allDeps);
+  const managerLibYears = getManagerLibYears(allDeps);
   logger.debug(
     {
-      managerLibYears: getManagerLibYears(allDeps),
+      managerLibYears,
       totalLibYears,
       totalDepsCount,
       outdatedDepsCount,
     },
     'Repository libYears',
+  );
+
+  addLibYears(
+    config,
+    managerLibYears,
+    totalLibYears,
+    totalDepsCount,
+    outdatedDepsCount,
   );
 }
 
