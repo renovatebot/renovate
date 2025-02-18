@@ -74,11 +74,6 @@ async function inflateHelmChart(
   }
 
   const versionToPull = dependency.newVersion ?? dependency.currentVersion;
-
-  if (!is.nonEmptyString(versionToPull)) {
-    return;
-  }
-
   const versionToPullExistingPath = await localExistingChartPath(
     chartHome,
     dependency.depName,
@@ -154,6 +149,10 @@ export async function updateArtifacts({
       }
 
       if (!is.nonEmptyArray(dependency.registryUrls)) {
+        continue;
+      }
+
+      if (dependency.newVersion === dependency.currentVersion) {
         continue;
       }
 
