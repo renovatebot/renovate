@@ -15,7 +15,6 @@ import {
   localPathExists,
   privateCacheDir,
   readLocalFile,
-  writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
