@@ -1,5 +1,6 @@
 // TODO: types (#22198)
 import { quote } from 'shlex';
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import type { CombinedHostRule } from '../../../types';
@@ -8,7 +9,6 @@ import { coerceNumber } from '../../../util/number';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { Lockfile, PackageFile } from './schema';
-import is from '@sindresorhus/is';
 
 export { composerVersioningId };
 
