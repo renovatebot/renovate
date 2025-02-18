@@ -61,7 +61,7 @@ describe('modules/manager/kustomize/extract', () => {
         chartHome: customPathToCharts
     `);
     expect(file).not.toBeNull();
-    expect(file?.helmGlobals.chartHome).toBe('customPathToCharts');
+    expect(file?.helmGlobals?.chartHome).toBe('customPathToCharts');
   });
 
   it('should fall back to default chartHome', () => {
@@ -69,7 +69,7 @@ describe('modules/manager/kustomize/extract', () => {
       kind: Kustomization
     `);
     expect(file).not.toBeNull();
-    expect(file?.helmGlobals.chartHome).toBe('charts');
+    expect(file?.helmGlobals?.chartHome).toBe('charts');
   });
 
   describe('extractBase', () => {
