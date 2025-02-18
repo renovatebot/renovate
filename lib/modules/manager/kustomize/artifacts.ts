@@ -106,7 +106,9 @@ async function inflateHelmChart(
   logger.debug(
     `Pulling helm chart ${dependency.depName} version ${versionToPull} to ${untarDir}`,
   );
-  const cmd = `helm pull --untar --untardir ${quote(untarDir)} --version ${quote(versionToPull)} --repo ${quote(registryUrl)} ${dependency.depName}`;
+  const cmd =
+    `helm pull --untar --untardir ${quote(untarDir)} ` +
+    `--version ${quote(versionToPull)} --repo ${quote(registryUrl)} ${dependency.depName}`;
 
   await exec([cmd], execOptions);
 }
