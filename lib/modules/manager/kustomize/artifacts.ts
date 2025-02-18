@@ -52,18 +52,6 @@ async function inflateHelmChart(
   dependency: Upgrade,
   flagEnabled: boolean,
 ): Promise<void> {
-  if (!is.nonEmptyString(dependency.depName)) {
-    return;
-  }
-
-  if (dependency.depType !== 'HelmChart') {
-    return;
-  }
-
-  if (!is.nonEmptyArray(dependency.registryUrls)) {
-    return;
-  }
-
   const currentChartExistingPath = await localExistingChartPath(
     chartHome,
     dependency.depName,
@@ -157,6 +145,18 @@ export async function updateArtifacts({
     };
 
     for (const dependency of updatedDeps) {
+      if (!is.nonEmptyString(dependency.depName)) {
+        continue;
+      }
+
+      if (dependency.depType !== 'HelmChart') {
+        continue;
+      }
+
+      if (!is.nonEmptyArray(dependency.registryUrls)) {
+        continue;
+      }
+
       await inflateHelmChart(
         execOptions,
         chartHome,
