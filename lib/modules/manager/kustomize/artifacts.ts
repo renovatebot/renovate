@@ -17,7 +17,7 @@ import {
   readLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
-import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { parseKustomize } from './extract';
 
 function generateHelmEnvs(): ExtraEnv {
@@ -46,55 +46,57 @@ async function localExistingChartPath(
 }
 
 async function inflateHelmChart(
+  flagEnabled: boolean,
   execOptions: ExecOptions,
   chartHome: string,
-  dependency: Upgrade,
-  flagEnabled: boolean,
+  depName: string,
+  registryUrl: string,
+  currentVersion: string,
+  newVersion?: string,
 ): Promise<void> {
   const currentChartExistingPath = await localExistingChartPath(
     chartHome,
-    dependency.depName,
-    dependency.currentVersion,
+    depName,
+    currentVersion,
   );
 
   if (!flagEnabled && is.nullOrUndefined(currentChartExistingPath)) {
     logger.debug(
-      `Not inflating Helm chart for ${dependency.depName} as kustomizeInflateHelmCharts is not enabled and the current version isn't inflated`,
+      `Not inflating Helm chart for ${depName} as kustomizeInflateHelmCharts is not enabled and the current version isn't inflated`,
     );
     return;
   }
 
   if (
     is.nonEmptyString(currentChartExistingPath) &&
-    is.nonEmptyString(dependency.newVersion)
+    is.nonEmptyString(newVersion)
   ) {
     logger.debug(`Deleting previous helm chart: ${currentChartExistingPath}`);
     await deleteLocalFile(currentChartExistingPath);
   }
 
-  const versionToPull = dependency.newVersion ?? dependency.currentVersion;
+  const versionToPull = newVersion ?? currentVersion;
   const versionToPullExistingPath = await localExistingChartPath(
     chartHome,
-    dependency.depName,
+    depName,
     versionToPull,
   );
 
   if (is.nonEmptyString(versionToPullExistingPath)) {
     logger.debug(
-      `Helm chart ${dependency.depName} version ${versionToPull} already exists at ${versionToPullExistingPath}`,
+      `Helm chart ${depName} version ${versionToPull} already exists at ${versionToPullExistingPath}`,
     );
     return;
   }
 
-  const folderName = `${dependency.depName}-${versionToPull}`;
+  const folderName = `${depName}-${versionToPull}`;
   const untarDir = upath.join(chartHome, folderName);
-  const registryUrl = dependency.registryUrls[0];
   logger.debug(
-    `Pulling helm chart ${dependency.depName} version ${versionToPull} to ${untarDir}`,
+    `Pulling helm chart ${depName} version ${versionToPull} to ${untarDir}`,
   );
   const cmd =
     `helm pull --untar --untardir ${quote(untarDir)} ` +
-    `--version ${quote(versionToPull)} --repo ${quote(registryUrl)} ${dependency.depName}`;
+    `--version ${quote(versionToPull)} --repo ${quote(registryUrl)} ${depName}`;
 
   await exec(cmd, execOptions);
 }
@@ -109,7 +111,6 @@ export async function updateArtifacts({
   const project = parseKustomize(newPackageFileContent);
   const isUpdateOptionInflateChartArchives =
     config.postUpdateOptions?.includes('kustomizeInflateHelmCharts') === true;
-
   if (is.nullOrUndefined(project)) {
     return [
       {
@@ -122,7 +123,7 @@ export async function updateArtifacts({
 
   const chartHome = getSiblingFileName(
     packageFileName,
-    project.helmGlobals.chartHome,
+    project?.helmGlobals?.chartHome as string,
   );
 
   try {
@@ -139,6 +140,14 @@ export async function updateArtifacts({
     };
 
     for (const dependency of updatedDeps) {
+      if (!dependency.currentVersion) {
+        continue;
+      }
+
+      if (dependency.newVersion === dependency.currentVersion) {
+        continue;
+      }
+
       if (!is.nonEmptyString(dependency.depName)) {
         continue;
       }
@@ -151,15 +160,14 @@ export async function updateArtifacts({
         continue;
       }
 
-      if (dependency.newVersion === dependency.currentVersion) {
-        continue;
-      }
-
       await inflateHelmChart(
+        isUpdateOptionInflateChartArchives,
         execOptions,
         chartHome,
-        dependency,
-        isUpdateOptionInflateChartArchives,
+        dependency.depName,
+        dependency.registryUrls[0],
+        dependency.currentVersion,
+        dependency.newVersion,
       );
     }
 
