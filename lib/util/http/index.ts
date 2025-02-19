@@ -17,6 +17,7 @@ import { type HttpRequestStatsDataPoint, HttpStats } from '../stats';
 import { resolveBaseUrl } from '../url';
 import { parseSingleYaml } from '../yaml';
 import { applyAuthorization, removeAuthorization } from './auth';
+import { memCacheProvider } from './cache/memory-http-cache-provider';
 import { hooks } from './hooks';
 import { applyHostRule, findMatchingRule } from './host-rules';
 import { getQueue } from './queue';
@@ -188,6 +189,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     const memCacheKey =
       options.memCache !== false &&
+      options.cacheProvider !== memCacheProvider &&
       (options.method === 'get' || options.method === 'head')
         ? hash(
             `got-${JSON.stringify({
@@ -202,6 +204,10 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     // Cache GET requests unless memCache=false
     if (memCacheKey) {
+      if (options.cacheProvider !== memCacheProvider) {
+        logger.debug({ url }, 'Falling back to an obsolete memCache option');
+      }
+
       resPromise = memCache.get(memCacheKey);
     }
 
