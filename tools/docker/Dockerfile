@@ -102,7 +102,7 @@ RUN ln -sf /usr/local/renovate/node /bin/node
 
 # ensure default base and cache directories exist.
 # /runner/cache is an alternative cache directory used in both Docker and microVMs.
-RUN mkdir -p /tmp/renovate/cache /runner/cache && \
+RUN mkdir -p /tmp/renovate/cache/renovate/repository /runner/cache/renovate/repository && \
   chmod -R 777 /tmp/renovate /runner
 
 # test
