@@ -204,11 +204,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     // Cache GET requests unless memCache=false
     if (memCacheKey) {
-      if (options.cacheProvider !== memCacheProvider) {
-        logger.trace({ url }, 'Falling back to an obsolete memCache option');
-      }
-
       resPromise = memCache.get(memCacheKey);
+
+      if (resPromise && options.cacheProvider !== memCacheProvider) {
+        logger.trace({ url }, 'Cache hit on the obsolete memCache option');
+      }
     }
 
     // istanbul ignore else: no cache tests
