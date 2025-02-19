@@ -6,6 +6,8 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
+import { DockerDatasource } from '../../datasource/docker';
+import { HelmDatasource } from '../../datasource/helm';
 import type { UpdateArtifactsConfig } from '../types';
 import * as kustomize from '.';
 
@@ -51,6 +53,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         newVersion: '2.0.0',
         currentVersion: '1.0.0',
         registryUrls: ['https://github.com.com/example/example'],
+        datasource: HelmDatasource.id,
       },
     ];
     expect(
@@ -73,6 +76,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         newVersion: '2.0.0',
         currentVersion: '1.0.0',
         registryUrls: ['https://github.com.com/example/example'],
+        datasource: HelmDatasource.id,
       },
     ];
     expect(
@@ -93,6 +97,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         newVersion: '2.0.0',
         currentVersion: '1.0.0',
         registryUrls: ['https://github.com.com/example/example'],
+        datasource: HelmDatasource.id,
       },
     ];
     expect(
@@ -113,6 +118,28 @@ describe('modules/manager/kustomize/artifacts', () => {
         newVersion: '2.0.0',
         currentVersion: '1.0.0',
         registryUrls: [],
+        datasource: HelmDatasource.id,
+      },
+    ];
+    expect(
+      await kustomize.updateArtifacts({
+        packageFileName,
+        updatedDeps,
+        newPackageFileContent,
+        config,
+      }),
+    ).toBeNull();
+  });
+
+  it('returns null if no packageName is found', async () => {
+    const updatedDeps = [
+      {
+        depType: 'HelmChart',
+        depName: 'example',
+        newVersion: '2.0.0',
+        currentVersion: '1.0.0',
+        packageName: undefined,
+        datasource: DockerDatasource.id,
       },
     ];
     expect(
@@ -133,6 +160,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         newVersion: undefined,
         currentVersion: undefined,
         registryUrls: ['https://github.com.com/example/example'],
+        datasource: HelmDatasource.id,
       },
     ];
     expect(
@@ -156,6 +184,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         newVersion: undefined,
         currentVersion: '1.0.0',
         registryUrls: ['https://github.com.com/example/example'],
+        datasource: HelmDatasource.id,
       },
     ];
     expect(
@@ -186,6 +215,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         newVersion: '2.0.0',
         currentVersion: '1.0.0',
         registryUrls: ['https://github.com.com/example/example'],
+        datasource: HelmDatasource.id,
       },
     ];
     expect(
@@ -220,6 +250,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         newVersion: '1.0.0',
         currentVersion: '1.0.0',
         registryUrls: ['https://github.com.com/example/example'],
+        datasource: HelmDatasource.id,
       },
     ];
     expect(
@@ -257,6 +288,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         newVersion: '2.0.0',
         currentVersion: '1.0.0',
         registryUrls: ['https://github.com.com/example/example'],
+        datasource: HelmDatasource.id,
       },
     ];
 
@@ -311,6 +343,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         newVersion: '2.0.0',
         currentVersion: '1.0.0',
         registryUrls: ['https://github.com.com/example/example'],
+        datasource: HelmDatasource.id,
       },
     ];
 
@@ -356,6 +389,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         newVersion: undefined,
         currentVersion: '1.0.0',
         registryUrls: ['https://github.com.com/example/example'],
+        datasource: HelmDatasource.id,
       },
     ];
 
@@ -383,6 +417,52 @@ describe('modules/manager/kustomize/artifacts', () => {
     ]);
   });
 
+  it('handles OCI repositories', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    const execSnapshots = mockExecAll();
+
+    fs.localPathExists.mockResolvedValueOnce(false);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        not_added: ['charts/example-1.0.0/example/Chart.yaml'],
+        deleted: [],
+      }),
+    );
+    const updatedDeps = [
+      {
+        depType: 'HelmChart',
+        depName: 'example',
+        newVersion: undefined,
+        currentVersion: '1.0.0',
+        packageName: 'github.com/example/example/example',
+        datasource: DockerDatasource.id,
+      },
+    ];
+
+    expect(
+      await kustomize.updateArtifacts({
+        packageFileName,
+        updatedDeps,
+        newPackageFileContent,
+        config,
+      }),
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'charts/example-1.0.0/example/Chart.yaml',
+          contents: null,
+        },
+      },
+    ]);
+    expect(fs.deleteLocalFile).not.toHaveBeenCalled();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm pull --untar --untardir charts/example-1.0.0 --version 1.0.0 oci://github.com/example/example/example',
+      },
+    ]);
+  });
+
   it('does not inflate current version if kustomizeInflateHelmCharts is not enabled', async () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
@@ -401,6 +481,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         newVersion: undefined,
         currentVersion: '1.0.0',
         registryUrls: ['https://github.com.com/example/example'],
+        datasource: HelmDatasource.id,
       },
     ];
 
@@ -439,6 +520,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         newVersion: undefined,
         currentVersion: '1.0.0',
         registryUrls: ['https://github.com.com/example/example'],
+        datasource: HelmDatasource.id,
       },
     ];
 

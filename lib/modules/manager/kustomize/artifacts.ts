@@ -17,6 +17,8 @@ import {
   readLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
+import { DockerDatasource } from '../../datasource/docker';
+import { HelmDatasource } from '../../datasource/helm';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { parseKustomize } from './extract';
 
@@ -45,14 +47,31 @@ async function localExistingChartPath(
   return pathExists ? path : null;
 }
 
+function helmRepositoryArgs(
+  repository: string,
+  depName: string,
+  datasource?: string,
+): string {
+  switch (datasource) {
+    case HelmDatasource.id:
+      return `--repo ${quote(repository)} ${depName}`;
+    case DockerDatasource.id:
+      return quote(`oci://${repository}`);
+    // istanbul ignore next: should never happen
+    default:
+      throw new Error(`Unknown datasource: ${datasource}`);
+  }
+}
+
 async function inflateHelmChart(
   flagEnabled: boolean,
   execOptions: ExecOptions,
   chartHome: string,
   depName: string,
-  registryUrl: string,
+  repository: string,
   currentVersion: string,
   newVersion?: string,
+  datasource?: string,
 ): Promise<void> {
   const currentChartExistingPath = await localExistingChartPath(
     chartHome,
@@ -94,9 +113,10 @@ async function inflateHelmChart(
   logger.debug(
     `Pulling helm chart ${depName} version ${versionToPull} to ${untarDir}`,
   );
+
   const cmd =
     `helm pull --untar --untardir ${quote(untarDir)} ` +
-    `--version ${quote(versionToPull)} --repo ${quote(registryUrl)} ${depName}`;
+    `--version ${quote(versionToPull)} ${helmRepositoryArgs(repository, depName, datasource)}`;
 
   await exec(cmd, execOptions);
 }
@@ -156,7 +176,18 @@ export async function updateArtifacts({
         continue;
       }
 
-      if (!is.nonEmptyArray(dependency.registryUrls)) {
+      let repository = null;
+
+      switch (dependency.datasource) {
+        case HelmDatasource.id:
+          repository = dependency.registryUrls?.[0];
+          break;
+        case DockerDatasource.id:
+          repository = dependency.packageName;
+          break;
+      }
+
+      if (is.nullOrUndefined(repository)) {
         continue;
       }
 
@@ -165,9 +196,10 @@ export async function updateArtifacts({
         execOptions,
         chartHome,
         dependency.depName,
-        dependency.registryUrls[0],
+        repository,
         dependency.currentVersion,
         dependency.newVersion,
+        dependency.datasource,
       );
     }
 
