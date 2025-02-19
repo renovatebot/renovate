@@ -1122,7 +1122,7 @@ async function getStatusCheck(
 
   const opts: GithubHttpOptions = useCache
     ? { cacheProvider: memCacheProvider }
-    : { memCache: false};
+    : { memCache: false };
 
   return (await githubApi.getJsonUnchecked<GhBranchStatus[]>(url, opts)).body;
 }
