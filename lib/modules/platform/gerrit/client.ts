@@ -110,7 +110,7 @@ class GerritClient {
   async getMessages(changeNumber: number): Promise<GerritChangeMessageInfo[]> {
     const messages = await this.gerritHttp.getJsonUnchecked<
       GerritChangeMessageInfo[]
-    >(`a/changes/${changeNumber}/messages`);
+    >(`a/changes/${changeNumber}/messages`, { memCache: false });
     return messages.body;
   }
 

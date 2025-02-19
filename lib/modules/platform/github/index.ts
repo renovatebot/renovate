@@ -907,7 +907,7 @@ async function ensureBranchSha(
   const repository = config.repository!;
   try {
     const commitUrl = `/repos/${repository}/git/commits/${sha}`;
-    await githubApi.head(commitUrl);
+    await githubApi.head(commitUrl, { memCache: false });
   } catch (err) {
     logger.error({ err, sha, branchName }, 'Commit not found');
     throw err;
@@ -1002,6 +1002,7 @@ async function getStatus(
 
   const { body: status } =
     await githubApi.getJsonUnchecked<CombinedBranchStatus>(url, {
+      memCache: useCache,
       cacheProvider: repoCacheProvider,
     });
 
@@ -1121,7 +1122,7 @@ async function getStatusCheck(
 
   const opts: GithubHttpOptions = useCache
     ? { cacheProvider: memCacheProvider }
-    : {};
+    : { memCache: false};
 
   return (await githubApi.getJsonUnchecked<GhBranchStatus[]>(url, opts)).body;
 }

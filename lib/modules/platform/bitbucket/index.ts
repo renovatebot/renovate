@@ -84,7 +84,7 @@ export async function initPlatform({
   }
   setBaseUrl(defaults.endpoint);
   renovateUserUuid = null;
-  const options: HttpOptions = {};
+  const options: HttpOptions = { memCache: false };
   if (token) {
     options.token = token;
   } else {
@@ -301,10 +301,10 @@ export async function findPr({
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
 
   if (includeOtherAuthors) {
+    // PR might have been created by anyone, so don't use the cached Renovate PR list
     const prs = (
       await bitbucketHttp.getJsonUnchecked<PagedResult<PrResponse>>(
         `/2.0/repositories/${config.repository}/pullrequests?q=source.branch.name="${branchName}"&state=open`,
-        // PR might have been created by anyone and the long-term caching could be harmful, so we use the short-term cache
         { cacheProvider: memCacheProvider },
       )
     ).body.values;
@@ -522,7 +522,7 @@ export async function setBranchStatus({
 
 type BbIssue = { id: number; title: string; content?: { raw: string } };
 
-async function findOpenIssues(title: string, cache = true): Promise<BbIssue[]> {
+async function findOpenIssues(title: string): Promise<BbIssue[]> {
   try {
     const filters = [
       `title=${JSON.stringify(title)}`,
@@ -532,15 +532,11 @@ async function findOpenIssues(title: string, cache = true): Promise<BbIssue[]> {
       filters.push(`reporter.uuid="${renovateUserUuid}"`);
     }
     const filter = encodeURIComponent(filters.join(' AND '));
-    const opts: HttpOptions = {};
-    if (cache) {
-      opts.cacheProvider = memCacheProvider;
-    }
     return (
       (
         await bitbucketHttp.getJsonUnchecked<{ values: BbIssue[] }>(
           `/2.0/repositories/${config.repository}/issues?q=${filter}`,
-          opts,
+          { cacheProvider: memCacheProvider },
         )
       ).body.values || /* istanbul ignore next */ []
     );
@@ -701,7 +697,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
     logger.debug('Issues are disabled - cannot ensureIssueClosing');
     return;
   }
-  const issues = await findOpenIssues(title, false);
+  const issues = await findOpenIssues(title);
   for (const issue of issues) {
     await closeIssue(issue.id);
   }

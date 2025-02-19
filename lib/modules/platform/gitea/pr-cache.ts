@@ -138,7 +138,10 @@ export class GiteaPrCache {
       // TODO: use zod, typescript can't infer the type of the response #22198
       const res: HttpResponse<(PR | null)[]> = await http.getJsonUnchecked(
         url,
-        { paginate: false },
+        {
+          memCache: false,
+          paginate: false,
+        },
       );
 
       const needNextPage = this.reconcile(res.body);

@@ -439,6 +439,8 @@ async function getStatus(
     const opts: GitlabHttpOptions = { paginate: true };
     if (useCache) {
       opts.cacheProvider = memCacheProvider;
+    } else {
+      opts.memCache = false;
     }
 
     return (await gitlabApi.getJsonUnchecked<GitlabBranchStatus[]>(url, opts))
@@ -669,7 +671,9 @@ async function tryPrAutomerge(
           pipeline: {
             status: string;
           };
-        }>(`projects/${config.repository}/merge_requests/${pr}`);
+        }>(`projects/${config.repository}/merge_requests/${pr}`, {
+          memCache: false,
+        });
         // detailed_merge_status is available with Gitlab >=15.6.0
         const use_detailed_merge_status = !!body.detailed_merge_status;
         const detailed_merge_status_check =
@@ -1026,7 +1030,7 @@ export async function setBranchStatus({
     for (let attempt = 1; attempt <= retryTimes + 1; attempt += 1) {
       const commitUrl = `projects/${config.repository}/repository/commits/${branchSha}`;
       await gitlabApi
-        .getJsonSafe(commitUrl, LastPipelineId)
+        .getJsonSafe(commitUrl, { memCache: false }, LastPipelineId)
         .onValue((pipelineId) => {
           options.pipeline_id = pipelineId;
         });
@@ -1082,7 +1086,10 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
     const query = getQueryString(searchParams);
     const res = await gitlabApi.getJsonUnchecked<
       { iid: number; title: string; labels: string[] }[]
-    >(`projects/${config.repository}/issues?${query}`, { paginate: true });
+    >(`projects/${config.repository}/issues?${query}`, {
+      memCache: false,
+      paginate: true,
+    });
     // istanbul ignore if
     if (!is.array(res.body)) {
       logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
@@ -1105,6 +1112,8 @@ export async function getIssue(
     const opts: GitlabHttpOptions = {};
     if (useCache) {
       opts.cacheProvider = memCacheProvider;
+    } else {
+      opts.memCache = false;
     }
     const issueBody = (
       await gitlabApi.getJsonUnchecked<{ description: string }>(

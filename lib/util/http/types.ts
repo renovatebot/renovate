@@ -67,6 +67,8 @@ export interface HttpOptions {
   token?: string;
   cacheProvider?: HttpCacheProvider;
   readOnly?: boolean;
+
+  memCache?: boolean;
 }
 
 export interface InternalHttpOptions extends HttpOptions {

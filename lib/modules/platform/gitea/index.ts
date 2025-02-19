@@ -13,8 +13,6 @@ import type { BranchStatus } from '../../../types';
 import { deduplicateArray } from '../../../util/array';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
-import type { GiteaHttpOptions } from '../../../util/http/gitea';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { map } from '../../../util/promises';
 import { sanitize } from '../../../util/sanitize';
@@ -126,14 +124,18 @@ function findCommentByContent(
 function getLabelList(): Promise<Label[]> {
   if (config.labelList === null) {
     const repoLabels = helper
-      .getRepoLabels(config.repository)
+      .getRepoLabels(config.repository, {
+        memCache: false,
+      })
       .then((labels) => {
         logger.debug(`Retrieved ${labels.length} repo labels`);
         return labels;
       });
 
     const orgLabels = helper
-      .getOrgLabels(config.repository.split('/')[0])
+      .getOrgLabels(config.repository.split('/')[0], {
+        memCache: false,
+      })
       .then((labels) => {
         logger.debug(`Retrieved ${labels.length} org labels`);
         return labels;
@@ -404,7 +406,9 @@ const platform: Platform = {
       });
 
       // Refresh caches by re-fetching commit status for branch
-      await helper.getCombinedCommitStatus(config.repository, branchName);
+      await helper.getCombinedCommitStatus(config.repository, branchName, {
+        memCache: false,
+      });
     } catch (err) {
       logger.warn({ err }, 'Failed to set branch status');
     }
@@ -705,7 +709,7 @@ const platform: Platform = {
     }
     if (config.issueList === null) {
       config.issueList = helper
-        .searchIssues(config.repository, { state: 'all' })
+        .searchIssues(config.repository, { state: 'all' }, { memCache: false })
         .then((issues) => {
           const issueList = issues.map(toRenovateIssue);
           logger.debug(`Retrieved ${issueList.length} Issues`);
@@ -721,12 +725,9 @@ const platform: Platform = {
       return null;
     }
     try {
-      const opts: GiteaHttpOptions = {};
-      if (memCache) {
-        opts.cacheProvider = memCacheProvider;
-      }
-      const body = (await helper.getIssue(config.repository, number, opts))
-        .body;
+      const body = (
+        await helper.getIssue(config.repository, number, { memCache })
+      ).body;
       return {
         number,
         body,
