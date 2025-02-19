@@ -370,8 +370,8 @@ importers:
         specifier: file:tools/eslint
         version: '@renovatebot/eslint-plugin@file:tools/eslint'
       '@semantic-release/exec':
-        specifier: 7.0.3
-        version: 7.0.3(semantic-release@24.2.2(typescript@5.7.3))
+        specifier: 6.0.3
+        version: 6.0.3(semantic-release@24.2.2(typescript@5.7.3))
       '@types/auth-header':
         specifier: 1.0.6
         version: 1.0.6
@@ -1558,15 +1558,19 @@ packages:
     peerDependencies:
       semantic-release: '>=20.1.0'
 
+  '@semantic-release/error@3.0.0':
+    resolution: {integrity: sha512-5hiM4Un+tpl4cKw3lV4UgzJj+SmfNIDCLLw0TepzQxz9ZGV5ixnqkzIVF+3tp0ZHgcMKE+VNGHJjEeyFG2dcSw==}
+    engines: {node: '>=14.17'}
+
   '@semantic-release/error@4.0.0':
     resolution: {integrity: sha512-mgdxrHTLOjOddRVYIYDo0fR3/v61GNN1YGkfbrjuIKg/uMgCd+Qzo3UAXJ+woLQQpos4pl5Esuw5A7AoNlzjUQ==}
     engines: {node: '>=18'}
 
-  '@semantic-release/exec@7.0.3':
-    resolution: {integrity: sha512-uNWwPNtWi3WTcTm3fWfFQEuj8otOvwoS5m9yo2jSVHuvqdZNsOWmuL0/FqcVyZnCI32fxyYV0G7PPb/TzCH6jw==}
-    engines: {node: '>=20.8.1'}
+  '@semantic-release/exec@6.0.3':
+    resolution: {integrity: sha512-bxAq8vLOw76aV89vxxICecEa8jfaWwYITw6X74zzlO0mc/Bgieqx9kBRz9z96pHectiTAtsCwsQcUyLYWnp3VQ==}
+    engines: {node: '>=14.17'}
     peerDependencies:
-      semantic-release: '>=24.1.0'
+      semantic-release: '>=18.0.0'
 
   '@semantic-release/github@11.0.1':
     resolution: {integrity: sha512-Z9cr0LgU/zgucbT9cksH0/pX9zmVda9hkDPcgIE0uvjMQ8w/mElDivGjx1w1pEQ+MuQJ5CBq3VCF16S6G4VH3A==}
@@ -8026,16 +8030,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@semantic-release/error@3.0.0': {}
+
   '@semantic-release/error@4.0.0': {}
 
-  '@semantic-release/exec@7.0.3(semantic-release@24.2.2(typescript@5.7.3))':
+  '@semantic-release/exec@6.0.3(semantic-release@24.2.2(typescript@5.7.3))':
     dependencies:
-      '@semantic-release/error': 4.0.0
+      '@semantic-release/error': 3.0.0
       aggregate-error: 3.1.0
       debug: 4.4.0
-      execa: 9.5.2
-      lodash-es: 4.17.21
-      parse-json: 8.1.0
+      execa: 5.1.1
+      lodash: 4.17.21
+      parse-json: 5.2.0
       semantic-release: 24.2.2(typescript@5.7.3)
     transitivePeerDependencies:
       - supports-color
