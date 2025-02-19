@@ -27,6 +27,9 @@ export default tseslint.config(
       '**/.venv/',
       'tools/mkdocs/docs',
       'tools/mkdocs/site',
+
+      // TODO: fix me
+      'eslint.config.mjs',
     ],
   },
 

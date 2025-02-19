@@ -5,8 +5,7 @@
     "sourceMap": true,
     "inlineSources": true,
     "importHelpers": true,
-    "types": ["node"],
-    "module": "CommonJS"
+    "types": ["node"]
   },
   "files": ["lib/renovate.ts", "lib/config-validator.ts"],
   "include": ["lib/**/*.d.ts"]
