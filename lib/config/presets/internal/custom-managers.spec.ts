@@ -455,8 +455,7 @@ describe('config/presets/internal/custom-managers', () => {
   });
 
   describe('Update `appVersion` value in Helm chart Chart.yaml', () => {
-    const customManager =
-      presets.helmChartYamlAppVersions.customManagers?.[0];
+    const customManager = presets.helmChartYamlAppVersions.customManagers?.[0];
 
     it(`find dependencies in file`, async () => {
       const fileContent = codeBlock`

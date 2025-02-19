@@ -11,7 +11,11 @@ const datasource = RepologyDatasource.id;
 
 const repologyHost = 'https://repology.org/';
 
-interface ResponseMock { status?: number; body?: string; code?: string }
+interface ResponseMock {
+  status?: number;
+  body?: string;
+  code?: string;
+}
 
 const mockApiCall = (name: string, response: ResponseMock) => {
   const interceptor = httpMock

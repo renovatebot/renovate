@@ -155,7 +155,9 @@ export class CrateDatasource extends Datasource {
     );
 
     try {
-      interface Response { crate: CrateMetadata }
+      interface Response {
+        crate: CrateMetadata;
+      }
       const response = await this.http.getJsonUnchecked<Response>(crateUrl);
       return response.body.crate;
     } catch (err) {

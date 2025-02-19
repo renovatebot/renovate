@@ -329,10 +329,7 @@ export function extractPackageFile(
       argsLines[argMatch.groups.name] = [lineNumberInstrStart, lineNumber];
       let argMatchValue = argMatch.groups?.value;
 
-      if (
-        argMatchValue.startsWith('"') &&
-        argMatchValue.endsWith('"')
-      ) {
+      if (argMatchValue.startsWith('"') && argMatchValue.endsWith('"')) {
         argMatchValue = argMatchValue.slice(1, -1);
       }
 

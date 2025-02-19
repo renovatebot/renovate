@@ -10,7 +10,10 @@ export interface TerraformBlock {
   required_version?: string;
 }
 
-export type TerraformRequiredProviderBlock = Record<string, TerraformRequiredProvider | string>;
+export type TerraformRequiredProviderBlock = Record<
+  string,
+  TerraformRequiredProvider | string
+>;
 
 export interface TerraformRequiredProvider {
   source?: string;

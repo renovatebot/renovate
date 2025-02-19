@@ -34,9 +34,7 @@ describe('modules/manager/nuget/config-formatter', () => {
         'myRegistry',
       );
       expect(myRegistry?.name).toBe('add');
-      expect(myRegistry?.attr.value).toBe(
-        'https://my-registry.example.org/',
-      );
+      expect(myRegistry?.attr.value).toBe('https://my-registry.example.org/');
       expect(myRegistry?.attr.protocolVersion).toBe('2');
 
       const myRegistry2 = packageSources?.childWithAttribute(
@@ -102,7 +100,8 @@ describe('modules/manager/nuget/config-formatter', () => {
         'packageSourceCredentials.myRegistry',
       );
       expect(
-        myRegistryCredentials?.childWithAttribute('key', 'Username')?.attr.value,
+        myRegistryCredentials?.childWithAttribute('key', 'Username')?.attr
+          .value,
       ).toBe('some-username');
 
       expect(
@@ -196,9 +195,7 @@ describe('modules/manager/nuget/config-formatter', () => {
         'key',
         'myRegistry',
       );
-      expect(myRegistry?.attr.value).toBe(
-        'https://my-registry.example.org/',
-      );
+      expect(myRegistry?.attr.value).toBe('https://my-registry.example.org/');
       expect(myRegistry?.attr.protocolVersion).toBe('3');
     });
 
