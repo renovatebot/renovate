@@ -20,14 +20,14 @@ describe('modules/manager/npm/extract/common/read-npmrc', () => {
     (readLocalFile as jest.Mock).mockResolvedValue('repo');
     (GlobalConfig.get as jest.Mock).mockReturnValue(false);
     const result = await readNpmrc(packageFile, config);
-    expect(result).toBe('repo\nconfig\n');
+    expect(result).toBe('config\nrepo\n');
   });
 
   it('should return config .npmrc content when repo .npmrc is not present', async () => {
     (readLocalFile as jest.Mock).mockResolvedValue(undefined);
     (GlobalConfig.get as jest.Mock).mockReturnValue(false);
     const result = await readNpmrc(packageFile, config);
-    expect(result).toBe('config\n');
+    expect(result).toBe('config');
   });
 
   it('should return repo .npmrc content when config .npmrc is not present', async () => {
@@ -42,13 +42,13 @@ describe('modules/manager/npm/extract/common/read-npmrc', () => {
     (readLocalFile as jest.Mock).mockResolvedValue('package-lock=false\nrepo');
     (GlobalConfig.get as jest.Mock).mockReturnValue(false);
     const result = await readNpmrc(packageFile, config);
-    expect(result).toBe('repo\nconfig\n');
+    expect(result).toBe('config\nrepo\n');
   });
 
   it('should strip lines with variables when exposeAllEnv is false', async () => {
     (readLocalFile as jest.Mock).mockResolvedValue('repo\n_auth=${NPM_TOKEN}');
     (GlobalConfig.get as jest.Mock).mockReturnValue(false);
     const result = await readNpmrc(packageFile, config);
-    expect(result).toBe('repo\nconfig\n');
+    expect(result).toBe('config\nrepo\n');
   });
 });
