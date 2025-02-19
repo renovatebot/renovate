@@ -205,7 +205,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     // Cache GET requests unless memCache=false
     if (memCacheKey) {
       if (options.cacheProvider !== memCacheProvider) {
-        logger.debug({ url }, 'Falling back to an obsolete memCache option');
+        logger.trace({ url }, 'Falling back to an obsolete memCache option');
       }
 
       resPromise = memCache.get(memCacheKey);
