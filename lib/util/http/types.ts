@@ -21,6 +21,7 @@ export type GotExtraOptions = {
   token?: string;
   hostType?: string;
   enabled?: boolean;
+  memCache?: boolean;
   noAuth?: boolean;
   context?: GotContextOptions;
 };
@@ -65,10 +66,9 @@ export interface HttpOptions {
   throwHttpErrors?: boolean;
 
   token?: string;
+  memCache?: boolean;
   cacheProvider?: HttpCacheProvider;
   readOnly?: boolean;
-
-  memCache?: boolean;
 }
 
 export interface InternalHttpOptions extends HttpOptions {
