@@ -696,6 +696,11 @@ async function tryPrAutomerge(
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
       }
 
+      // Use the /merge "quick action" to automerge, which will work for
+      // both merge trains or non-train merges
+      // Associated docs:
+      //  - https://docs.gitlab.com/api/notes/#create-new-merge-request-note
+      //  - https://docs.gitlab.com/user/project/quick_actions/
       await gitlabApi.postJson(
         `projects/${config.repository}/merge_requests/${pr}/notes`,
         {
