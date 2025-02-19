@@ -1,7 +1,7 @@
 import { Ctx, CtxProcessingError } from './context';
 import * as fragments from './fragments';
 
-describe('modules/manager/bazel-module/context', () => {
+describe('modules/manager/bazel-module/parser/context', () => {
   describe('Ctx (failures cases)', () => {
     describe('extension tag', () => {
       it('throws if there is no current', () => {

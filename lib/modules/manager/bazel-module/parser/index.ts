@@ -1,7 +1,7 @@
 import { lang, query as q } from 'good-enough-parser';
 import { Ctx } from './context';
-import type { ResultFragment } from './fragments';
 import { extensionTags } from './extension-tags';
+import type { ResultFragment } from './fragments';
 import { rules } from './rules';
 
 const rule = q.alt<Ctx>(rules, extensionTags);
