@@ -209,7 +209,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore eslint cache
-        uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        uses: actions/cache/restore@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
         with:
           path: .cache/eslint
           key: eslint-main-cache
@@ -228,7 +228,7 @@ jobs:
 
       - name: Save eslint cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        uses: actions/cache/save@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
         with:
           path: .cache/eslint
           key: eslint-main-cache
@@ -255,7 +255,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        uses: actions/cache/restore@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
         with:
           path: .cache/prettier
           key: prettier-main-cache
@@ -280,7 +280,7 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        uses: actions/cache/save@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
         with:
           path: .cache/prettier
           key: prettier-main-cache
@@ -376,7 +376,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Cache jest
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
         with:
           path: .cache/jest
           key: |
@@ -690,7 +690,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@d005037f4b778e5c456510a397b91f8ac19078e6 # v3.9.0
+        uses: containerbase/internal-tools@13682cd9a4824f96814c0b3ca545f0adaefdb202 # v3.10.2
         with:
           command: docker-config
 
