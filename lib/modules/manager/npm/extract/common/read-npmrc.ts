@@ -33,7 +33,7 @@ export async function readNpmrc(
           );
           return false;
         }
-        return true;
+        return Boolean(line.trim());
       });
 
     if (!lines.length) {

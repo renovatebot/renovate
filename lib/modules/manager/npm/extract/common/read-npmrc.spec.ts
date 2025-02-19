@@ -51,4 +51,12 @@ describe('modules/manager/npm/extract/common/read-npmrc', () => {
     const result = await readNpmrc(packageFile, config);
     expect(result).toBe('config\nrepo\n');
   });
+
+  it('should return undefined if no lines in the config or repo .npmrc', async () => {
+    const emptyConfig = { npmrc: '', npmrcMerge: true };
+    (readLocalFile as jest.Mock).mockResolvedValue('');
+    (GlobalConfig.get as jest.Mock).mockReturnValue(false);
+    const result = await readNpmrc(packageFile, emptyConfig);
+    expect(result).toBeUndefined();
+  });
 });
