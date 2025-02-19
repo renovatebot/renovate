@@ -30,7 +30,7 @@ describe('config/options/index', () => {
 
   it('supportedPlatforms should have valid names', () => {
     const opts = getOptions();
-    const platformList = Array.from(platform.getPlatforms().keys());
+    const platformList = Array.from(platform.getPlatformList());
 
     opts
       .filter((option) => option.supportedPlatforms)

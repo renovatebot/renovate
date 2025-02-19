@@ -2,6 +2,7 @@ import * as httpMock from '../../../test/http-mock';
 import type { PlatformId } from '../../constants';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
 import { loadModules } from '../../util/modules';
+import api from './api';
 import type { Platform } from './types';
 import * as platform from '.';
 
@@ -22,7 +23,7 @@ describe('modules/platform/index', () => {
       }
       return true;
     }
-    const platforms = platform.getPlatforms();
+    const platforms = api;
 
     const loadedMgr = loadModules(
       __dirname,
