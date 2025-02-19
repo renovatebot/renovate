@@ -326,7 +326,7 @@ describe('util/fs/index', () => {
       const stream = createCacheWriteStream('file.txt');
       expect(stream).toBeInstanceOf(fs.WriteStream);
 
-      const write = new Promise((resolve, reject) => {
+      const write = new Promise((resolve) => {
         stream.write('bar');
         stream.close(resolve);
       });
@@ -349,7 +349,7 @@ describe('util/fs/index', () => {
         data += chunk.toString();
       });
 
-      await new Promise((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         stream.on('end', resolve);
         stream.on('error', reject);
       });
