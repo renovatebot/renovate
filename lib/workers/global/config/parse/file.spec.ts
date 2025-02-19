@@ -187,11 +187,11 @@ describe('workers/global/config/parse/file', () => {
       });
       expect(fileConfig.processEnv).toBeUndefined();
       expect(process.env.SOME_KEY).toBe('SOME_VALUE');
-      expect(process.env['valid_Key']).toBe('true');
+      expect(process.env.valid_Key).toBe('true');
       expect(process.env.SOME_OTHER_KEY).toBeUndefined();
       fs.unlinkSync(configFile);
       delete process.env.SOME_KEY;
-      delete process.env['valid_Key'];
+      delete process.env.valid_Key;
     });
   });
 

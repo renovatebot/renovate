@@ -9,8 +9,8 @@ import type {
   PrResponse,
 } from './types';
 
-const bitbucketMergeStrategies: Map<MergeStrategy, BitbucketMergeStrategy> =
-  new Map([
+const bitbucketMergeStrategies =
+  new Map<MergeStrategy, BitbucketMergeStrategy>([
     ['squash', 'squash'],
     ['merge-commit', 'merge_commit'],
     ['fast-forward', 'fast_forward'],

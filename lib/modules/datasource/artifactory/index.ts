@@ -69,7 +69,7 @@ export class ArtifactoryDatasource extends Datasource {
           // extract version and published time for each node
           (node) => {
             const version: string =
-              node.innerHTML.slice(-1) === '/'
+              node.innerHTML.endsWith('/')
                 ? node.innerHTML.slice(0, -1)
                 : node.innerHTML;
 

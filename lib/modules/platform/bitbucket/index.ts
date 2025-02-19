@@ -517,7 +517,7 @@ export async function setBranchStatus({
   await getStatus(branchName, false);
 }
 
-type BbIssue = { id: number; title: string; content?: { raw: string } };
+interface BbIssue { id: number; title: string; content?: { raw: string } }
 
 async function findOpenIssues(title: string): Promise<BbIssue[]> {
   try {

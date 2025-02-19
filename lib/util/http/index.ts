@@ -39,15 +39,15 @@ export { RequestError as HttpError };
 export class EmptyResultError extends Error {}
 export type SafeJsonError = RequestError | ZodError | EmptyResultError;
 
-type HttpFnArgs<
+interface HttpFnArgs<
   Opts extends HttpOptions,
   ResT = unknown,
   Schema extends ZodType<ResT> = ZodType<ResT>,
-> = {
+> {
   url: string;
   httpOptions?: Opts;
   schema?: Schema;
-};
+}
 
 function applyDefaultHeaders(options: Options): void {
   const renovateVersion = pkg.version;

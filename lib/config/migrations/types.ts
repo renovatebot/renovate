@@ -1,10 +1,8 @@
 import type { RenovateConfig } from './../types';
-export interface MigrationConstructor {
-  new (
+export type MigrationConstructor = new (
     originalConfig: RenovateConfig,
     migratedConfig: RenovateConfig,
-  ): Migration;
-}
+  ) => Migration;
 
 export interface Migration {
   readonly deprecated: boolean;

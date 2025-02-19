@@ -3,12 +3,12 @@ import { mergeStaticRepoEnvConfig } from './config';
 
 describe('workers/repository/init/config', () => {
   describe('mergeRepoEnvConfig()', () => {
-    type MergeRepoEnvTestCase = {
+    interface MergeRepoEnvTestCase {
       name: string;
       env: NodeJS.ProcessEnv;
       currentConfig: AllConfig;
       wantConfig: AllConfig;
-    };
+    }
 
     const testCases: MergeRepoEnvTestCase[] = [
       {

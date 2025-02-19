@@ -50,7 +50,7 @@ export function resolveAlias(
     return repository;
   }
 
-  const repoWithPrefixRemoved = repository.slice(repository[0] === '@' ? 1 : 6);
+  const repoWithPrefixRemoved = repository.slice(repository.startsWith('@') ? 1 : 6);
   const alias = registryAliases[repoWithPrefixRemoved];
   if (alias) {
     return alias;
