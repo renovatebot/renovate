@@ -78,8 +78,8 @@ importers:
         specifier: 4.0.1
         version: 4.0.1
       '@renovatebot/osv-offline':
-        specifier: 1.6.1
-        version: 1.6.1
+        specifier: 1.6.2
+        version: 1.6.2
       '@renovatebot/pep440':
         specifier: 4.1.0
         version: 4.1.0
@@ -1521,12 +1521,12 @@ packages:
     resolution: {integrity: sha512-Uj52QvCuIr9qwvbPR3fymQFMwn0MIKItZrEKywNoSF7K4UVfrtBW3DGVQ9KZ2D5tFR3LgrlPdhNSYEkEVAQ4OA==}
     engines: {node: ^20.9.0 || ^22.11.0, pnpm: ^9.0.0}
 
-  '@renovatebot/osv-offline-db@1.7.1':
-    resolution: {integrity: sha512-w9i0sOdMxGKb1lIeWk71cQ/AkgpWrd39WMV0vaNgoMYjGFo+4Sgsth2Zb+n/oNlFoRqL4s/EfkhRj/7RSNd7hQ==}
+  '@renovatebot/osv-offline-db@1.7.2':
+    resolution: {integrity: sha512-wYD/0K/cNX1iyYBfp4EXBA5yjMA0Bjp2Np71iIUnUZyinMTm5io57ZbCl6ZEIXOB/PYmlN7to6xGGlg3JrtrqQ==}
     engines: {node: '>=18.12.0'}
 
-  '@renovatebot/osv-offline@1.6.1':
-    resolution: {integrity: sha512-6uf0CD6gQHwfYV26OAGepkedfXVc8qBPfB5EXmOKtN0lMyblBg0tWkH9jWQQVcAcmgSnChVdtcspEYGnn+EQFA==}
+  '@renovatebot/osv-offline@1.6.2':
+    resolution: {integrity: sha512-N7jEqJkYTykCe6DdBLnUN/v0rR1QWHMHW2jiAgiaVV9OEVLHE1OWNIhC5habKXDJZ2DHwyl8UvBi+yj6Ki6MMg==}
     engines: {node: '>=18.12.0'}
 
   '@renovatebot/pep440@4.1.0':
@@ -8034,13 +8034,13 @@ snapshots:
       triplesec: 4.0.3
       tweetnacl: 1.0.3
 
-  '@renovatebot/osv-offline-db@1.7.1':
+  '@renovatebot/osv-offline-db@1.7.2':
     dependencies:
       '@seald-io/nedb': 4.0.4
 
-  '@renovatebot/osv-offline@1.6.1':
+  '@renovatebot/osv-offline@1.6.2':
     dependencies:
-      '@renovatebot/osv-offline-db': 1.7.1
+      '@renovatebot/osv-offline-db': 1.7.2
       adm-zip: 0.5.16
       fs-extra: 11.3.0
       got: 11.8.6
