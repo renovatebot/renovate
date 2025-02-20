@@ -47,10 +47,13 @@ jest.mock('../../../config/migration');
 jest.mock('../../../config/migrate-validate');
 
 describe('workers/repository/init/merge', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   describe('detectRepoFileConfig()', () => {
     beforeEach(async () => {
       await initRepoCache({ repoFingerprint: '0123456789abcdef' });
-      jest.restoreAllMocks();
     });
 
     it('returns config if not found', async () => {
@@ -476,8 +479,6 @@ describe('workers/repository/init/merge', () => {
     const repoStaticConfigKey = 'RENOVATE_STATIC_REPO_CONFIG';
 
     beforeEach(() => {
-      jest.restoreAllMocks();
-
       migrate.migrateConfig.mockImplementation((c) => ({
         isMigrated: true,
         migratedConfig: c,
