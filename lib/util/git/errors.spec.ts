@@ -3,8 +3,8 @@ import { bulkChangesDisallowed } from './error';
 
 const errorMsg = codeBlock`
   To https://github.com/the-org/st-mono.git
-  !\t:refs/renovate/branches/renovate/foo\t[remote failure] (remote failed to report status)
-  !\t:refs/renovate/branches/renovate/bar\t[remote failure] (remote failed to report status)
+  !\t:refs/renovate/tmp/branches/renovate/foo\t[remote failure] (remote failed to report status)
+  !\t:refs/renovate/tmp/branches/renovate/bar\t[remote failure] (remote failed to report status)
   Done
   Pushing to https://github.com/foo/bar.git
   POST git-receive-pack (1234 bytes)

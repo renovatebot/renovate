@@ -1067,7 +1067,13 @@ describe('util/git/index', () => {
 
   describe('Renovate non-branch refs', () => {
     const lsRenovateRefs = async (): Promise<string[]> =>
-      (await Git(tmpDir.path).raw(['ls-remote', 'origin', 'refs/renovate/*']))
+      (
+        await Git(tmpDir.path).raw([
+          'ls-remote',
+          'origin',
+          'refs/renovate/tmp/*',
+        ])
+      )
         .split(newlineRegex)
         .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
         .filter(Boolean);
@@ -1078,7 +1084,7 @@ describe('util/git/index', () => {
       await git.pushCommitToRenovateRef(commit, 'foo/bar');
 
       const renovateRefs = await lsRenovateRefs();
-      expect(renovateRefs).toContain('refs/renovate/branches/foo/bar');
+      expect(renovateRefs).toContain('refs/renovate/tmp/branches/foo/bar');
     });
 
     it('creates custom section for renovate ref', async () => {
@@ -1087,7 +1093,7 @@ describe('util/git/index', () => {
       await git.pushCommitToRenovateRef(commit, 'bar/baz', 'foo');
 
       const renovateRefs = await lsRenovateRefs();
-      expect(renovateRefs).toContain('refs/renovate/foo/bar/baz');
+      expect(renovateRefs).toContain('refs/renovate/tmp/foo/bar/baz');
     });
 
     it('clears pushed Renovate refs', async () => {
@@ -1104,8 +1110,8 @@ describe('util/git/index', () => {
     it('clears remote Renovate refs', async () => {
       const commit = git.getBranchCommit('develop')!;
       const tmpGit = Git(tmpDir.path);
-      await tmpGit.raw(['update-ref', 'refs/renovate/aaa', commit]);
-      await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/aaa']);
+      await tmpGit.raw(['update-ref', 'refs/renovate/tmp/aaa', commit]);
+      await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/tmp/aaa']);
 
       await git.pushCommitToRenovateRef(commit, 'bbb');
       await git.pushCommitToRenovateRef(commit, 'ccc', 'branches');
@@ -1121,10 +1127,15 @@ describe('util/git/index', () => {
     it('preserves unknown sections by default', async () => {
       const commit = git.getBranchCommit('develop')!;
       const tmpGit = Git(tmpDir.path);
-      await tmpGit.raw(['update-ref', 'refs/renovate/foo/bar', commit]);
-      await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/foo/bar']);
+      await tmpGit.raw(['update-ref', 'refs/renovate/tmp/foo/bar', commit]);
+      await tmpGit.raw([
+        'push',
+        '--force',
+        'origin',
+        'refs/renovate/tmp/foo/bar',
+      ]);
       await git.clearRenovateRefs();
-      expect(await lsRenovateRefs()).toEqual(['refs/renovate/foo/bar']);
+      expect(await lsRenovateRefs()).toEqual(['refs/renovate/tmp/foo/bar']);
     });
 
     it('falls back to sequential ref deletion if bulk changes are disallowed', async () => {

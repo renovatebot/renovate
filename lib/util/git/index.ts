@@ -1250,7 +1250,7 @@ export async function pushCommitToRenovateRef(
   refName: string,
   section = 'branches',
 ): Promise<void> {
-  const fullRefName = `refs/renovate/${section}/${refName}`;
+  const fullRefName = `refs/renovate/tmp/${section}/${refName}`;
   await git.raw(['update-ref', fullRefName, commitSha]);
   await git.push(['--force', 'origin', fullRefName]);
   remoteRefsExist = true;
@@ -1258,54 +1258,54 @@ export async function pushCommitToRenovateRef(
 
 /**
  *
- * Removes all remote "refs/renovate/*" refs in two steps:
+ * Removes all remote "refs/renovate/tmp/*" refs in two steps:
  *
  * Step 1: list refs
  *
- *   $ git ls-remote origin "refs/renovate/*"
+ *   $ git ls-remote origin "refs/renovate/tmp/*"
  *
- *   > cca38e9ea6d10946bdb2d0ca5a52c205783897aa        refs/renovate/foo
- *   > 29ac154936c880068994e17eb7f12da7fdca70e5        refs/renovate/bar
- *   > 3fafaddc339894b6d4f97595940fd91af71d0355        refs/renovate/baz
+ *   > cca38e9ea6d10946bdb2d0ca5a52c205783897aa        refs/renovate/tmp/foo
+ *   > 29ac154936c880068994e17eb7f12da7fdca70e5        refs/renovate/tmp/bar
+ *   > 3fafaddc339894b6d4f97595940fd91af71d0355        refs/renovate/tmp/baz
  *   > ...
  *
  * Step 2:
  *
- *   $ git push --delete origin refs/renovate/foo refs/renovate/bar refs/renovate/baz
+ *   $ git push --delete origin refs/renovate/tmp/foo refs/renovate/tmp/bar refs/renovate/tmp/baz
  *
  * If Step 2 fails because the repo doesn't allow bulk changes, we'll remove them one by one instead:
  *
- *   $ git push --delete origin refs/renovate/foo
- *   $ git push --delete origin refs/renovate/bar
- *   $ git push --delete origin refs/renovate/baz
+ *   $ git push --delete origin refs/renovate/tmp/foo
+ *   $ git push --delete origin refs/renovate/tmp/bar
+ *   $ git push --delete origin refs/renovate/tmp/baz
  */
 export async function clearRenovateRefs(): Promise<void> {
   if (!gitInitialized || !remoteRefsExist) {
     return;
   }
 
-  logger.debug(`Cleaning up Renovate refs: refs/renovate/*`);
+  logger.debug(`Cleaning up Renovate refs: refs/renovate/tmp/*`);
   const renovateRefs: string[] = [];
   const obsoleteRefs: string[] = [];
 
   try {
-    const rawOutput = await git.listRemote([config.url, 'refs/renovate/*']);
+    const rawOutput = await git.listRemote([config.url, 'refs/renovate/tmp/*']);
     const refs = rawOutput
       .split(newlineRegex)
       .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), '').trim())
-      .filter((line) => line.startsWith('refs/renovate/'));
+      .filter((line) => line.startsWith('refs/renovate/tmp/'));
     renovateRefs.push(...refs);
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, `Renovate refs cleanup error`);
   }
 
   const nonSectionedRefs = renovateRefs.filter((ref) => {
-    return ref.split('/').length === 3;
+    return ref.split('/').length === 4;
   });
   obsoleteRefs.push(...nonSectionedRefs);
 
   const renovateBranchRefs = renovateRefs.filter((ref) =>
-    ref.startsWith('refs/renovate/branches/'),
+    ref.startsWith('refs/renovate/tmp/branches/'),
   );
   obsoleteRefs.push(...renovateBranchRefs);
 
