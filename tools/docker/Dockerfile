@@ -71,7 +71,7 @@ RUN set -ex; \
 COPY --link . ./
 
 # disable prepare script
-RUN sed -i -e "s/run-s 'prepare:*'//" package.json
+RUN sed -i -e "s/run-s 'prepare:\*'/true/" package.json
 
 # install npm packages
 RUN set -ex; \
