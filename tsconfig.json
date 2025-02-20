@@ -35,6 +35,7 @@
   ],
   "ts-node": {
     "transpileOnly": true,
-    "esm": false
+    "esm": false,
+    "swc": false
   }
 }
