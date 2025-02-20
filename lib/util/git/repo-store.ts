@@ -151,7 +151,7 @@ export async function set(
   }
   logger.debug(`Git commit created: ${commitSha}`);
 
-  const refName = `refs/renovate-data/${key}`;
+  const refName = `refs/renovate/data/${key}`;
   await createRef(refName, commitSha);
   logger.debug(`Git ref created: ${refName}`);
 
@@ -215,12 +215,12 @@ export async function get(
   await syncGit();
 
   try {
-    const ref = `refs/renovate-data/${key}`;
+    const ref = `refs/renovate/data/${key}`;
 
     await execGit([
       'fetch',
       'origin',
-      'refs/renovate-data/*:refs/renovate-data/*',
+      'refs/renovate/data/*:refs/renovate/data/*',
     ]);
 
     const commitSha = await getRefCommit(ref);
