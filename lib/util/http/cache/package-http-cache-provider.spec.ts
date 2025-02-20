@@ -37,8 +37,6 @@ describe('util/http/cache/package-http-cache-provider', () => {
     Settings.now = () => value;
   };
 
-  beforeAll(() => {});
-
   it('loads cache correctly', async () => {
     mockTime('2024-06-15T00:00:00.000Z');
 

@@ -169,13 +169,13 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     archived: false,
   };
   if (config?.topics?.length) {
-    queryParams['topic'] = config.topics.join(',');
+    queryParams.topic = config.topics.join(',');
   }
 
   const urls = [];
   if (config?.namespaces?.length) {
-    queryParams['with_shared'] = false;
-    queryParams['include_subgroups'] = true;
+    queryParams.with_shared = false;
+    queryParams.include_subgroups = true;
     urls.push(
       ...config.namespaces.map(
         (namespace) =>

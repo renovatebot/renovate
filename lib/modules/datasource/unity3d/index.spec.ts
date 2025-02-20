@@ -13,7 +13,7 @@ describe('modules/datasource/unity3d/index', () => {
     ].map((fixture) => [fixture, Fixtures.get(fixture + '.xml')]),
   );
 
-  const mockRSSFeeds = (streams: { [keys: string]: string }) => {
+  const mockRSSFeeds = (streams: Record<string, string>) => {
     Object.entries(streams).map(([stream, url]) => {
       const content = fixtures[stream];
 
@@ -242,7 +242,7 @@ describe('modules/datasource/unity3d/index', () => {
 
   it('returns different versions for each stream', async () => {
     mockRSSFeeds(Unity3dDatasource.streams);
-    const responses: { [keys: string]: string[] } = Object.fromEntries(
+    const responses: Record<string, string[]> = Object.fromEntries(
       await Promise.all(
         Object.keys(Unity3dDatasource.streams).map(async (stream) => [
           stream,

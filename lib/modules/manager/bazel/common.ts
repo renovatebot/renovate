@@ -13,12 +13,10 @@ export function findCodeFragment(
 
   const [ruleIndex, ...restPath] = path;
   let fragment: Fragment | undefined = parsed[ruleIndex];
-  for (let pathIndex = 0; pathIndex < restPath.length; pathIndex += 1) {
+  for (const key of restPath) {
     if (!fragment) {
       break;
     }
-
-    const key = restPath[pathIndex];
 
     if (fragment.type === 'array' && is.number(key)) {
       fragment = fragment.children[key];
