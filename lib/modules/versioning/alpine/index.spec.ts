@@ -740,6 +740,7 @@ describe('modules/versioning/alpine/index', () => {
     ${'6.1_p1'}                     | ${'6.1'}                        | ${true}
     ${'8.2.0'}                      | ${'8.2.001'}                    | ${false}
     ${'1.0~1234'}                   | ${'1.0~2345'}                   | ${false}
+    ${'1.0~2345'}                   | ${'1.0~1234'}                   | ${true}
     ${'1.0~1234-r1'}                | ${'1.0~2345-r0'}                | ${false}
     ${'1.0~1234-r1'}                | ${'1.0~1234-r0'}                | ${true}
   `('isGreaterThan($a, $b) === $expected', ({ a, b, expected }) => {

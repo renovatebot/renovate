@@ -1,5 +1,5 @@
 import { regEx } from '../../../util/regex';
-import { AlpineVersion } from '../alpine';
+import type { AlpineVersion } from '../alpine';
 import { AlpineVersioningApi } from '../alpine';
 import type { VersioningApi } from '../types';
 

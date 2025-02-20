@@ -57,12 +57,6 @@ export class AlpineVersioningApi extends GenericVersioningApi<AlpineVersion> {
       return -1;
     }
 
-    if ((left.letter ?? '') > (right.letter ?? '')) {
-      return 1;
-    } else if ((left.letter ?? '') < (right.letter ?? '')) {
-      return -1;
-    }
-
     // TODO: Implement correct comparison of suffix
     if ((left.suffixNumber ?? 0) > (right.suffixNumber ?? 0)) {
       return 1;
