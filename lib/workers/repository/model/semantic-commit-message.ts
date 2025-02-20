@@ -25,7 +25,7 @@ export class SemanticCommitMessage extends CommitMessage {
   }
 
   static fromString(value: string): SemanticCommitMessage | undefined {
-    const match = value.match(SemanticCommitMessage.REGEXP);
+    const match = SemanticCommitMessage.REGEXP.exec(value);
 
     if (!match?.groups) {
       return undefined;

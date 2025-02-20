@@ -27,7 +27,7 @@ const pseudoVersionRegex = regEx(
 );
 
 export function pseudoVersionToRelease(pseudoVersion: string): Release | null {
-  const match = pseudoVersion.match(pseudoVersionRegex)?.groups;
+  const match = pseudoVersionRegex.exec(pseudoVersion)?.groups;
   if (!match) {
     return null;
   }
@@ -201,7 +201,7 @@ export class GoProxyDatasource extends Datasource {
   ): Promise<ReleaseResult> {
     const isGopkgin = packageName.startsWith('gopkg.in/');
     const majorSuffixSeparator = isGopkgin ? '.' : '/';
-    const modParts = packageName.match(modRegex)?.groups;
+    const modParts = modRegex.exec(packageName)?.groups;
     const baseMod = modParts?.baseMod ?? /* istanbul ignore next */ packageName;
     const packageMajor = parseInt(modParts?.majorVersion ?? '0');
 

@@ -42,7 +42,7 @@ const PackageSource = z
       .transform((repository): PackageSource => {
         let sourceUrl: string | null = null;
         const sourceDirectory = null;
-        const shortMatch = repository.match(SHORT_REPO_REGEX);
+        const shortMatch = SHORT_REPO_REGEX.exec(repository);
         if (shortMatch?.groups) {
           const { platform = 'github', shortRepo } = shortMatch.groups;
           sourceUrl = platformMapping[platform] + shortRepo;

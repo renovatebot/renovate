@@ -64,7 +64,7 @@ async function getSubProjectList(
   const subprojectsRegex = regEx(/^[ \t]*subprojects: \[(?<subprojects>.+)\]/m);
 
   const gradleProperties = await exec(`${cmd} properties`, execOptions);
-  const subprojectsMatch = gradleProperties.stdout.match(subprojectsRegex);
+  const subprojectsMatch = subprojectsRegex.exec(gradleProperties.stdout);
   if (subprojectsMatch?.groups?.subprojects) {
     const projectRegex = regEx(/project '(?<name>.+?)'/g);
     const matches = subprojectsMatch.groups.subprojects.matchAll(projectRegex);

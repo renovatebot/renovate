@@ -121,7 +121,7 @@ function escapeName(name: string): string {
   let escapedName = '';
   for (let i = 0; i < name.length; i++) {
     const char = name[i];
-    if (char.match(charactersToEscape)) {
+    if (charactersToEscape.test(char)) {
       escapedName += `__x${char
         .codePointAt(0)!
         .toString(16)

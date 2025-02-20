@@ -21,7 +21,7 @@ export const ConanJSON = z
       .string()
       .array()
       .transform((array) =>
-        array.map((val) => val.match(conanDatasourceRegex)?.groups),
+        array.map((val) => conanDatasourceRegex.exec(val)?.groups),
       )
       .pipe(
         LooseArray(

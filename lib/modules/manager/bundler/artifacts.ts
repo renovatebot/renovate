@@ -55,7 +55,7 @@ function getResolvedPackages(input: string): string[] {
   const lines = input.split(newlineRegex);
   const result: string[] = [];
   for (const line of lines) {
-    const resolveMatchGroups = line.match(resolvedPkgRegex)?.groups;
+    const resolveMatchGroups = resolvedPkgRegex.exec(line)?.groups;
     if (resolveMatchGroups) {
       const { pkg } = resolveMatchGroups;
       result.push(pkg);

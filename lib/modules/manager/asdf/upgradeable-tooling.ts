@@ -353,8 +353,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   java: {
     asdfPluginUrl: 'https://github.com/halcyon/asdf-java',
     config: (version) => {
-      const adoptOpenJdkMatches = version.match(
-        /^adoptopenjdk-(?<version>\d\S+)/,
+      const adoptOpenJdkMatches = regEx(/^adoptopenjdk-(?<version>\d\S+)/).exec(
+        version,
       )?.groups;
       if (adoptOpenJdkMatches) {
         return {
@@ -363,9 +363,9 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: adoptOpenJdkMatches.version,
         };
       }
-      const adoptOpenJreMatches = version.match(
+      const adoptOpenJreMatches = regEx(
         /^adoptopenjdk-jre-(?<version>\d\S+)/,
-      )?.groups;
+      ).exec(version)?.groups;
       if (adoptOpenJreMatches) {
         return {
           datasource: JavaVersionDatasource.id,
@@ -373,8 +373,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: adoptOpenJreMatches.version,
         };
       }
-      const temurinJdkMatches = version.match(
-        /^temurin-(?<version>\d\S+)/,
+      const temurinJdkMatches = regEx(/^temurin-(?<version>\d\S+)/).exec(
+        version,
       )?.groups;
       if (temurinJdkMatches) {
         return {
@@ -383,8 +383,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: temurinJdkMatches.version,
         };
       }
-      const temurinJreMatches = version.match(
-        /^temurin-jre-(?<version>\d\S+)/,
+      const temurinJreMatches = regEx(/^temurin-jre-(?<version>\d\S+)/).exec(
+        version,
       )?.groups;
       if (temurinJreMatches) {
         return {

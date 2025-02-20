@@ -9,6 +9,7 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
 import type { PackageType } from './types';
+import { regEx } from '../../../util/regex';
 
 export class HexpmBobDatasource extends Datasource {
   static readonly id = datasource;
@@ -109,7 +110,7 @@ export class HexpmBobDatasource extends Datasource {
   private static isStable(version: string, packageType: PackageType): boolean {
     switch (packageType) {
       case 'elixir':
-        return version.match(/^v\d+\.\d+\.\d+($|-otp)/) !== null;
+        return regEx(/^v\d+\.\d+\.\d+($|-otp)/).test(version);
       case 'erlang':
         return version.startsWith('OTP-');
     }

@@ -145,7 +145,7 @@ function extractLeinRepos(content: string): string[] {
     }
     const repoSectionContent = repoContent.slice(0, endIdx);
     const matches = coerceArray(
-      repoSectionContent.match(regEx(/"https?:\/\/[^"]*"/g)),
+      regEx(/"https?:\/\/[^"]*"/g).exec(repoSectionContent),
     );
     const urls = matches.map((x) =>
       x.replace(regEx(/^"/), '').replace(regEx(/"$/), ''),
