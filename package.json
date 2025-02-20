@@ -360,6 +360,7 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "better-sqlite3",
+      "protobufjs",
       "re2"
     ],
     "strict-dep-build": true,
