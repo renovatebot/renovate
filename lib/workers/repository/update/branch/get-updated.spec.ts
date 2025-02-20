@@ -82,7 +82,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(res).toEqual({
         artifactErrors: [],
         reuseExistingBranch: undefined,
-        updatedArtifacts: [],
+        updatedArtifacts: {},
         updatedPackageFiles: [],
         artifactNotices: [],
       });
@@ -116,7 +116,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(res).toEqual({
         artifactErrors: [],
         reuseExistingBranch: undefined,
-        updatedArtifacts: [],
+        updatedArtifacts: {},
         updatedPackageFiles: [],
         artifactNotices: [],
       });
@@ -170,13 +170,13 @@ describe('workers/repository/update/branch/get-updated', () => {
       ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
-        updatedArtifacts: [
-          {
+        updatedArtifacts: {
+          'composer.json': {
             type: 'addition',
             path: 'composer.json',
             contents: 'some contents',
           },
-        ],
+        },
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -218,13 +218,13 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
         reuseExistingBranch: false,
-        updatedArtifacts: [
-          {
+        updatedArtifacts: {
+          'go.mod': {
             contents: 'some content',
             path: 'go.mod',
             type: 'addition',
           },
-        ],
+        },
         updatedPackageFiles: [
           {
             contents: 'some new content',
@@ -252,13 +252,13 @@ describe('workers/repository/update/branch/get-updated', () => {
       ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
-        updatedArtifacts: [
-          {
+        updatedArtifacts: {
+          'composer.json': {
             type: 'addition',
             path: 'composer.json',
             contents: 'some contents',
           },
-        ],
+        },
       });
     });
 
@@ -407,15 +407,13 @@ describe('workers/repository/update/branch/get-updated', () => {
         status: 'unsupported',
       });
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchInlineSnapshot(`
-        {
-          "artifactErrors": [],
-          "artifactNotices": [],
-          "reuseExistingBranch": undefined,
-          "updatedArtifacts": [],
-          "updatedPackageFiles": [],
-        }
-      `);
+      expect(res).toMatchObject({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: undefined,
+        updatedArtifacts: {},
+        updatedPackageFiles: [],
+      });
     });
 
     it('handles isRemediation rebase', async () => {
@@ -525,13 +523,13 @@ describe('workers/repository/update/branch/get-updated', () => {
       ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
-        updatedArtifacts: [
-          {
+        updatedArtifacts: {
+          'composer.lock': {
             type: 'addition',
             path: 'composer.lock',
             contents: 'some contents',
           },
-        ],
+        },
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -560,13 +558,13 @@ describe('workers/repository/update/branch/get-updated', () => {
       ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
-        updatedArtifacts: [
-          {
+        updatedArtifacts: {
+          'terraform.lock': {
             type: 'addition',
             path: 'terraform.lock',
             contents: 'some contents',
           },
-        ],
+        },
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -589,15 +587,13 @@ describe('workers/repository/update/branch/get-updated', () => {
         status: 'unsupported',
       });
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchInlineSnapshot(`
-        {
-          "artifactErrors": [],
-          "artifactNotices": [],
-          "reuseExistingBranch": undefined,
-          "updatedArtifacts": [],
-          "updatedPackageFiles": [],
-        }
-      `);
+      expect(res).toMatchObject({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: undefined,
+        updatedArtifacts: {},
+        updatedPackageFiles: [],
+      });
     });
 
     it('attempts updateLockedDependency and handles already-updated', async () => {
@@ -613,15 +609,13 @@ describe('workers/repository/update/branch/get-updated', () => {
         status: 'already-updated',
       });
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchInlineSnapshot(`
-        {
-          "artifactErrors": [],
-          "artifactNotices": [],
-          "reuseExistingBranch": false,
-          "updatedArtifacts": [],
-          "updatedPackageFiles": [],
-        }
-      `);
+      expect(res).toMatchObject({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: false,
+        updatedArtifacts: {},
+        updatedPackageFiles: [],
+      });
     });
 
     it('attempts updateLockedDependency and handles updated files with reuse branch', async () => {
@@ -639,15 +633,13 @@ describe('workers/repository/update/branch/get-updated', () => {
         files: {},
       });
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchInlineSnapshot(`
-        {
-          "artifactErrors": [],
-          "artifactNotices": [],
-          "reuseExistingBranch": false,
-          "updatedArtifacts": [],
-          "updatedPackageFiles": [],
-        }
-      `);
+      expect(res).toMatchObject({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: false,
+        updatedArtifacts: {},
+        updatedPackageFiles: [],
+      });
     });
 
     it('bumps versions in updateDependency managers', async () => {

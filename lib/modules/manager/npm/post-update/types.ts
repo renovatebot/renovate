@@ -19,7 +19,7 @@ export interface ArtifactError {
 
 export interface WriteExistingFilesResult {
   artifactErrors: ArtifactError[];
-  updatedArtifacts: FileChange[];
+  updatedArtifacts: Record<string, FileChange>;
 }
 
 export interface GenerateLockFileResult {

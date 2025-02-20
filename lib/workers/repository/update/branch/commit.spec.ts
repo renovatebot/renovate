@@ -18,7 +18,7 @@ describe('workers/repository/update/branch/commit', () => {
         semanticCommitType: 'a',
         semanticCommitScope: 'b',
         updatedPackageFiles: [],
-        updatedArtifacts: [],
+        updatedArtifacts: {},
         upgrades: [],
         platformCommit: 'auto',
       } satisfies BranchConfig;
