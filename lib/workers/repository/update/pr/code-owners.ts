@@ -1,16 +1,15 @@
 import is from '@sindresorhus/is';
 import ignore from 'ignore';
 import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
+import type { FileOwnerRule, Pr } from '../../../../modules/platform';
+import { platform } from '../../../../modules/platform';
 import { readLocalFile } from '../../../../util/fs';
 import { getBranchFiles } from '../../../../util/git';
 import { newlineRegex, regEx } from '../../../../util/regex';
 
-interface FileOwnerRule {
-  usernames: string[];
-  pattern: string;
-  score: number;
-  match: (path: string) => boolean;
+interface FileOwnersScore {
+  file: string;
+  userScoreMap: Map<string, number>;
 }
 
 function extractOwnersFromLine(line: string): FileOwnerRule {
@@ -22,11 +21,6 @@ function extractOwnersFromLine(line: string): FileOwnerRule {
     score: pattern.length,
     match: (path: string) => matchPattern.ignores(path),
   };
-}
-
-interface FileOwnersScore {
-  file: string;
-  userScoreMap: Map<string, number>;
 }
 
 function matchFileToOwners(
@@ -75,6 +69,22 @@ function getOwnerList(filesWithOwners: FileOwnersScore[]): OwnerFileScore[] {
   }));
 }
 
+function extractRulesFromCodeOwnersFile(
+  codeOwnersFile: string,
+): FileOwnerRule[] {
+  return (
+    codeOwnersFile
+      .split(newlineRegex)
+      // Remove comments
+      .map((line) => line.split('#')[0])
+      // Remove empty lines
+      .map((line) => line.trim())
+      .filter(is.nonEmptyString)
+      // Extract pattern & usernames
+      .map(extractOwnersFromLine)
+  );
+}
+
 export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
   logger.debug('Searching for CODEOWNERS file');
   try {
@@ -102,15 +112,9 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     }
 
     // Convert CODEOWNERS file into list of matching rules
-    const fileOwnerRules = codeOwnersFile
-      .split(newlineRegex)
-      // Remove comments
-      .map((line) => line.split('#')[0])
-      // Remove empty lines
-      .map((line) => line.trim())
-      .filter(is.nonEmptyString)
-      // Extract pattern & usernames
-      .map(extractOwnersFromLine);
+    const fileOwnerRules = platform.extractRulesFromCodeOwnersFile
+      ? platform.extractRulesFromCodeOwnersFile(codeOwnersFile)
+      : extractRulesFromCodeOwnersFile(codeOwnersFile);
 
     logger.debug(
       { prFiles, fileOwnerRules },
